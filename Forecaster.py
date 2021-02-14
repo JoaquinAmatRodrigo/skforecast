@@ -1,4 +1,33 @@
 ################################################################################
+#                               skforecast                                     #
+#                                                                              #
+# This work by Joaquín Amat Rodrigo is licensed under a Creative Commons       #
+# Attribution 4.0 International License.                                       #
+################################################################################
+# coding=utf-8
+
+
+import numpy as np
+import pandas as pd
+import logging
+import matplotlib.pyplot as plt
+import tqdm
+from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import Lasso
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import mean_absolute_percentage_error
+from sklearn.model_selection import ParameterGrid
+
+
+logging.basicConfig(
+    format = '%(asctime)-5s %(name)-10s %(levelname)-5s %(message)s', 
+    level  = logging.INFO,
+)
+
+
+################################################################################
 #                               Forecaster                                     #
 ################################################################################
 
@@ -12,8 +41,8 @@ class Forecaster():
         Modelo de regresión de scikitlearn.
         
     fun_predictors: function, default `None`
-        Función que recibe una serie temporal y devuelve una matriz de predictores
-        y el valor de la serie temporal asociado.
+        Función que recibe una ventana temporal de una serie temporal y devuelve
+        un np.array con los predictores asociados a esa ventana.
         
     window_size: int
         Tamaño de la ventana temporal a pasado que necesita `fun_predictors`
@@ -73,23 +102,34 @@ class Forecaster():
         
         '''
         
-        # Comprobaciones
         self._check_y(y=y)
         y = self._preproces_y(y=y)
         
         if exog is not None:
             self._check_exog(exog=exog)
             exog = self._preproces_exog(exog=exog)
+            
+            
+        X_train  = []
+        y_train  = []
+
+        for i in range(len(y) - self.window_size):
+
+            train_index = np.arange(i, self.window_size + i)
+            test_index  = [self.window_size + i]
+
+            X_train.append(self.create_predictors(y=y[train_index]))
+            y_train.append(y[test_index])
         
-        
-        X_train, y_train = self.create_predictors(y=y)
+        X_train = np.vstack(X_train)
+        y_train = np.array(y_train)
         
         if exog is not None:
             self.included_exog = True
             self.regressor.fit(
-                # Se tiene que eliminar de exog las primeras self.n_lags
+                # Se tiene que eliminar de exog las primeras self.window_size
                 # posiciones ya que son están en X_train.
-                X = np.column_stack((X_train, exog[self.n_lags:])),
+                X = np.column_stack((X_train, exog[self.window_size:])),
                 y = y_train
             )
             
@@ -100,6 +140,7 @@ class Forecaster():
         # predictores en la primera iteración del predict().
         self.last_window = y[-self.window_size:].copy()
         
+            
             
     def predict(self, steps, y=None, exog=None):
         '''
@@ -131,14 +172,17 @@ class Forecaster():
             
         '''
         
+        if y is None:
+            y = self.last_window
+            
+        self._check_y(y=y)
+        y = self._preproces_y(y=y)
+        
         if exog is None and self.included_exog:
             raise Exception(
                 "Forecaster entrenado con variable exogena. Se tiene " \
                 + "que aportar esta misma variable en el predict()."
             )
-                
-        if y is None:
-            y = self.last_window
         
         if exog is not None:
             self._check_exog(exog=exog)
@@ -148,21 +192,22 @@ class Forecaster():
         predicciones = np.full(shape=steps, fill_value=np.nan)
 
         for i in range(steps):
+            
+            X = self.create_predictors(y=y)
+            
             if exog is None:
                 prediccion = self.regressor.predict(X=X)
             else:
                 prediccion = self.regressor.predict(X=np.column_stack((X, exog[i])))
-                
+            
             predicciones[i] = prediccion.ravel()[0]
 
-            # Actualizar valores de X. Se descarta la primera posición y se
+            # Actualizar valores de `y`. Se descarta la primera posición y se
             # añade la nueva predicción al final.
-            X = X.flatten()
-            X = np.append(X[1:], prediccion)
-            X = X.reshape(1, -1)
+            y = np.append(y[1:], prediccion)
 
-
-        return predicciones
+        return np.array(predicciones)
+    
     
     
     def _check_y(self, y):
@@ -298,4 +343,3 @@ class Forecaster():
         self.n_lags = n_lags
         
         
-
