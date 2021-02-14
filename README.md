@@ -28,3 +28,8 @@ en un matriz en la que, cada valor, está asociado a la ventana temporal (lags) 
 <p><img src="./images/transform_timeseries.gif" alt="forecasting-python" title="forecasting-python"></p>
 
 <center><font size="2.5"> <i>Tranformación de una serie temporal en una matriz de 5 lags y un vector con el valor de la serie que sigue a cada fila de la matriz.</i></font></center>
+
+##Instalación
+<br>
+
+<code> pip install git+https://github.com/JoaquinAmatRodrigo/skforecast#master </code>
