@@ -1,4 +1,4 @@
-# skforecast: Forecasting series temporales con y Scikitlearn
+# skforecast: Forecasting series temporales con Scikitlearn
 
 ## Introducción
 <br>
