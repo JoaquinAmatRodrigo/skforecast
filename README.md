@@ -26,3 +26,5 @@ La principal adaptación que se necesita hacer para aplicar modelos de [scikit l
 en un matriz en la que, cada valor, está asociado a la ventana temporal (lags) que le preceden.
 
 <p><img src="./images/transform_timeseries.gif" alt="forecasting-python" title="forecasting-python"></p>
+
+<center><font size="2.5"> <i>Tranformación de una serie temporal en una matriz de lags y un vector con el valor de la serie que sigue a cada fila de la matriz.</i></font></center>
