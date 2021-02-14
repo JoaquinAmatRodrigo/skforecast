@@ -1,5 +1,5 @@
 ################################################################################
-#                                skforecast                                    #
+#                               skforecast                                     #
 #                                                                              #
 # This work by Joaquín Amat Rodrigo is licensed under a Creative Commons       #
 # Attribution 4.0 International License.                                       #
@@ -33,7 +33,8 @@ logging.basicConfig(
 
 class ForecasterAutoreg():
     '''
-    Convierte un regresor de scikitlearn en un forecaster recursivo (multi-step).
+    Convierte un regresor de scikitlearn en un forecaster autoregresivo 
+    recursivo (multi-step).
     
     Parameters
     ----------
@@ -356,8 +357,9 @@ class ForecasterAutoreg():
         
         
 
-# Funciones auxiliares para validación de modelos y selección de hiperparámetros
-# ==============================================================================  
+################################################################################
+#      time_series_spliter,  ts_cv_forecaster,   grid_search_forecaster        #
+################################################################################
 
 def time_series_spliter(y, initial_train_size, steps, allow_incomplete_fold=True):
     '''
