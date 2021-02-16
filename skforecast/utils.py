@@ -1,3 +1,26 @@
+################################################################################
+#                               skforecast.utils                               #
+#                                                                              #
+# This work by Joaquín Amat Rodrigo is licensed under a Creative Commons       #
+# Attribution 4.0 International License.                                       #
+################################################################################
+# coding=utf-8
+
+
+import typing
+from typing import Union, Dict
+import numpy as np
+import pandas as pd
+import logging
+import matplotlib.pyplot as plt
+import tqdm
+
+logging.basicConfig(
+    format = '%(asctime)-5s %(name)-10s %(levelname)-5s %(message)s', 
+    level  = logging.INFO,
+)
+
+
 def time_series_spliter(y: Union[np.ndarray, pd.Series],
                         initial_train_size: int, steps: int,
                         allow_incomplete_fold: bool=True) -> Dict[np.ndarray, np.ndarray]:
