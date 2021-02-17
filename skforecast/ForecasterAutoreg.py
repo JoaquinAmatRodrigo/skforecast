@@ -84,7 +84,7 @@ class ForecasterAutoreg():
                     + "\n" \
                     + "Parameters: " + str(self.regressor.get_params())
      
-            return(info)
+            return info 
 
     
     
