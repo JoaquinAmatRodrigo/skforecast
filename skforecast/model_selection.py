@@ -1,5 +1,5 @@
 ################################################################################
-#                               skforecast.utils                               #
+#                        skforecast.model_selection                            #
 #                                                                              #
 # This work by Joaquín Amat Rodrigo is licensed under a Creative Commons       #
 # Attribution 4.0 International License.                                       #
@@ -89,43 +89,39 @@ def time_series_spliter(y: Union[np.ndarray, pd.Series],
         yield train_indices, test_indices
         
 
-def ts_cv_forecaster(forecaster, y, initial_train_size, steps, metric, exog=None,
-                     allow_incomplete_fold=True):
+def ts_cv_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
+                     initial_train_size: int, steps: int,
+                     metric: str, exog: Union[np.ndarray, pd.Series]=None,
+                     allow_incomplete_fold: bool=True):
     '''
-    Validación cruzada de un objeto Forecaster, manteniendo el orden temporal de
-    los datos e incrementando en cada iteración el conjunto de entrenamiento.
+    Cross-validation of ForecasterAutoreg object. The order of is maintained and 
+    the training set increases in each iteration.
     
     Parameters
     ----------
-    forecaster : object 
-        Objeto de clase Forecaster.
+    forecaster : ForecasterAutoreg 
+        ForecasterAutoreg object.
         
     y : 1D np.ndarray, pd.Series
-        Serie temporal de entrenamiento.
-            
-    exog : 1D np.ndarray, pd.Series, default `None`
-        Variable exógena a la serie temporal que se incluye como
-        predictor.
+        Training time series values. 
     
     initial_train_size: int 
-        Número de observaciones de entrenamiento utilizadas en la primera iteración
-        de validación.
+        Number of samples in the initial train split.
         
     steps : int
-        Número de pasos a futuro que se predicen.
+        Number of steps to predict.
         
-    allow_incomplete_fold : bool, default `False`
-        Se permite que el último conjunto de test esté incompleto si este
-        no alcanza `steps` observaciones. De lo contrario, se descartan las
-        últimas observaciones.
+    allow_incomplete_fold : bool, default `True`
+        The last test set is allowed to be incomplete if it does not reach `steps`
+        observations. Otherwise, the latest observations are discarded.
         
     metric : {'neg_mean_squared_error', 'neg_mean_absolute_error', 'neg_mean_absolute_percentage_error'}
-        Métrica utilizada para cuantificar la bondad de ajuste del modelo.
+        Metric used to quantify the goodness of fit of the model.
 
     Returns 
     -------
-    ts_cv_results: 
-        Valor de la métrica obtenido en cada partición.
+    ts_cv_results: 1D np.ndarray
+        Value of the metric for each partition.
 
     '''
     
@@ -175,53 +171,53 @@ def ts_cv_forecaster(forecaster, y, initial_train_size, steps, metric, exog=None
     return np.array(ts_cv_results)
 
 
-def grid_search_forecaster(forecaster, y, param_grid, initial_train_size, steps,
-                           metric, exog=None, n_lags_grid=None,
-                           allow_incomplete_fold=False, return_best=True):
+def grid_search_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
+                           param_grid: dict, initial_train_size: int, steps: int,
+                           metric: str, exog: Union[np.ndarray, pd.Series]=None,
+                           n_lags_grid: list=None, allow_incomplete_fold: bool=True,
+                           return_best: bool=True):
     '''
-    Búsqueda exhaustiva sobre los hiperparámetros de un Forecaster mediante
-    validación cruzada.
+    Exhaustive search over specified parameter values for a ForecasterAutoreg object.
     
     Parameters
     ----------
-    forecaster : object 
-        Objeto de clase Forecaster.
+    
+    forecaster : ForecasterAutoreg 
+        ForecasterAutoreg object.
         
     y : 1D np.ndarray, pd.Series
-        Serie temporal de entrenamiento.
-            
-    exog : 1D np.ndarray, pd.Series, default `None`
-        Variable exógena a la serie temporal que se incluye como
-        predictor.
-    
+        Training time series values. 
+        
     param_grid : dict
-        Valores de hiperparámetros sobre los que hacer la búsqueda
+        Dictionary with parameters names (`str`) as keys and lists of parameter
+        settings to try as values.
     
     initial_train_size: int 
-        Número de observaciones de entrenamiento utilizadas en la primera iteración
-        de validación.
+        Number of samples in the initial train split.
         
     steps : int
-        Número de pasos a futuro que se predicen.
+        Number of steps to predict.
         
-    metric : {'neg_mean_squared_error'}
-        Métrica utilizada para cuantificar la bondad de ajuste del modelo.
+    metric : {'neg_mean_squared_error', 'neg_mean_absolute_error', 'neg_mean_absolute_percentage_error'}
+        Metric used to quantify the goodness of fit of the model.
+        
+    exog : 1D np.ndarray, pd.Series, default `None`
+            Exogenous variable that is included as predictor.
         
     n_lags_grid : array-like
-        Valores de `n_lags` sobre los que hacer la búsqueda.
+        Lists of `n_lags` to try.
         
-    allow_incomplete_fold : bool, default `False`
-        Se permite que el último conjunto de test esté incompleto si este
-        no alcanza `steps` observaciones. De lo contrario, se descartan las
-        últimas observaciones.
+    allow_incomplete_fold : bool, default `True`
+        The last test set is allowed to be incomplete if it does not reach `steps`
+        observations. Otherwise, the latest observations are discarded.
         
-    return_best : devuelve modifica el Forecaster y lo entrena con los mejores
-                  hiperparámetros encontrados.
+    return_best : bool
+        Refit the `forecaster` using the best found parameters on the whole data.
 
     Returns 
     -------
     results: pandas.DataFrame
-        Valor de la métrica obtenido en cada combinación de hiperparámetros.
+        Metric value estimated for each combination of parameters.
 
     '''
     
@@ -262,21 +258,21 @@ def grid_search_forecaster(forecaster, y, param_grid, initial_train_size, steps,
             params_list.append(params)
             metric_list.append(cv_metrics.mean())
             
-    resultados = pd.DataFrame({
-                    'n_lags': n_lags_list,
-                    'params': params_list,
-                    'metric': metric_list})
+    results = pd.DataFrame({
+                'n_lags': n_lags_list,
+                'params': params_list,
+                'metric': metric_list})
     
-    resultados = resultados.sort_values(by='metric', ascending=True)
+    results = results.sort_values(by='metric', ascending=True)
     
     if return_best:
         
-        best_n_lags = resultados['n_lags'].iloc[0]
-        best_params = resultados['params'].iloc[0]
-        logging.info("Entrenando Forecaster con los mejores parámetros encontrados:")
+        best_n_lags = results['n_lags'].iloc[0]
+        best_params = results['params'].iloc[0]
+        logging.info("Refitting `forecaster` using the best found parameters:")
         logging.info(f"n_lags: {best_n_lags}, params: {best_params}")
         forecaster.set_n_lags(best_n_lags)
         forecaster.set_params(**best_params)
         forecaster.fit(y=y, exog=exog)
             
-    return resultados 
+    return results 

@@ -14,6 +14,7 @@ import logging
 import matplotlib.pyplot as plt
 import tqdm
 
+
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import mean_absolute_percentage_error
@@ -84,7 +85,7 @@ class ForecasterAutoreg():
                     + "\n" \
                     + "Parameters: " + str(self.regressor.get_params())
      
-            return info 
+            return info
 
     
     
@@ -278,7 +279,7 @@ class ForecasterAutoreg():
             
             raise Exception('`exog` must be `1D np.ndarray` o `pd.Series`.')
             
-        elif isinstance(exog, np.ndarray) and y.ndim != 1:
+        elif isinstance(exog, np.ndarray) and exog.ndim != 1:
             
             raise Exception(
                 f"`exog` must be `1D np.ndarray` o `pd.Series`, "
