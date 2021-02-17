@@ -12,8 +12,8 @@ from typing import Union, Dict
 import numpy as np
 import pandas as pd
 import logging
-import matplotlib.pyplot as plt
 import tqdm
+from sklearn.model_selection import ParameterGrid
 
 logging.basicConfig(
     format = '%(asctime)-5s %(name)-10s %(levelname)-5s %(message)s', 
