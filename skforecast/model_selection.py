@@ -13,6 +13,9 @@ import numpy as np
 import pandas as pd
 import logging
 import tqdm
+from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import mean_absolute_percentage_error
 from sklearn.model_selection import ParameterGrid
 
 logging.basicConfig(
