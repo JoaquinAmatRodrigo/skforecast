@@ -12,7 +12,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="skforecast",
-    version="0.0.2",
+    version="0.1.0",
     author="Joaquin Amat Rodrigo",
     author_email="j.amatrodrigo@gmail.com",
     description="Forecasting time series with scikitlearn regressors",
