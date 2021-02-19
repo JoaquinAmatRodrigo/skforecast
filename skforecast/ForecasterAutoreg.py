@@ -88,10 +88,7 @@ class ForecasterAutoreg():
     
     
     def create_lags(self, y: Union[np.ndarray, pd.Series]) -> Dict[np.ndarray, np.ndarray]:
-        '''
-        Convierte una serie temporal en una matriz donde, cada valor de `y`,
-        está asociado a los lags temporales que le preceden.
-        
+        '''        
         Transforms a time series into a 2D array and a 1D array where each value
         of `y` is associated with the lags that precede it.
         
