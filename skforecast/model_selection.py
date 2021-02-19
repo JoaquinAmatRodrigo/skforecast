@@ -177,7 +177,7 @@ def ts_cv_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
 def grid_search_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
                            param_grid: dict, initial_train_size: int, steps: int,
                            metric: str, exog: Union[np.ndarray, pd.Series]=None,
-                           n_lags_grid: list=None, allow_incomplete_fold: bool=True,
+                           lags_grid: list=None, allow_incomplete_fold: bool=True,
                            return_best: bool=True):
     '''
     Exhaustive search over specified parameter values for a ForecasterAutoreg object.
@@ -205,10 +205,13 @@ def grid_search_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
         Metric used to quantify the goodness of fit of the model.
         
     exog : 1D np.ndarray, pd.Series, default `None`
-            Exogenous variable that is included as predictor.
+        Exogenous variable that is included as predictor. Must have the same
+        number of observations as `y` and should be aligned so that y[i] is
+        regressed on exog[i].
+           
         
-    n_lags_grid : array-like
-        Lists of `n_lags` to try.
+    lags_grid : list of int, lists, np.narray or range. 
+        Lists of `lags` to try.
         
     allow_incomplete_fold : bool, default `True`
         The last test set is allowed to be incomplete if it does not reach `steps`
@@ -231,18 +234,18 @@ def grid_search_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
         forecaster._check_exog(exog=exog)
         exog = forecaster._preproces_exog(exog=exog)
         
-    if n_lags_grid is None:
-        n_lags_grid = [forecaster.n_lags]
+    if lags_grid is None:
+        lags_grid = [forecaster.lags]
         
-    n_lags_list = []
+    lags_list = []
     params_list = []
     metric_list = []
     
     param_grid =  list(ParameterGrid(param_grid))
     
-    for n_lags in tqdm.tqdm(n_lags_grid, desc='loop n_lags_grid', position=0):
+    for lags in tqdm.tqdm(lags_grid, desc='loop lags_grid', position=0):
         
-        forecaster.set_n_lags(n_lags)
+        forecaster.set_lags(lags)
         
         for params in tqdm.tqdm(param_grid, desc='loop param_grid', position=1, leave=False):
 
@@ -257,12 +260,12 @@ def grid_search_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
                             metric = metric
                          )
             
-            n_lags_list.append(n_lags)
+            lags_list.append(forecaster.lags + 1)
             params_list.append(params)
             metric_list.append(cv_metrics.mean())
             
     results = pd.DataFrame({
-                'n_lags': n_lags_list,
+                'lags'  : lags_list,
                 'params': params_list,
                 'metric': metric_list})
     
@@ -270,11 +273,14 @@ def grid_search_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
     
     if return_best:
         
-        best_n_lags = results['n_lags'].iloc[0]
+        best_lags = results['lags'].iloc[0]
         best_params = results['params'].iloc[0]
-        logging.info("Refitting `forecaster` using the best found parameters:")
-        logging.info(f"n_lags: {best_n_lags}, params: {best_params}")
-        forecaster.set_n_lags(best_n_lags)
+        logging.info(
+            f"Refitting `forecaster` using the best found parameters: \n"
+            f"lags: {best_lags} \n"
+            f"params: {best_params}\n"
+        )
+        forecaster.set_lags(best_lags)
         forecaster.set_params(**best_params)
         forecaster.fit(y=y, exog=exog)
             

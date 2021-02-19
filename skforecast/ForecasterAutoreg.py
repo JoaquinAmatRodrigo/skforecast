@@ -39,8 +39,10 @@ class ForecasterAutoreg():
     regressor : scikit-learn regressor
         An instance of a scikit-learn regressor.
         
-    n_lags : int
-        Number of lags used as predictors.
+    lags : int, list, 1D np.array, range
+        Lags used as predictors. Index starts at 1, so lag 1 is equal to t-1.
+            `int`: include lags from 1 to `lags`.
+            `list` or `np.array`: include only lags present in `lags`.
 
     
     Attributes
@@ -48,22 +50,42 @@ class ForecasterAutoreg():
     regressor : scikit-learn regressor
         An instance of a scikit-learn regressor.
         
-    last_window : 1D np.ndarray, shape (1, n_lags)
+    lags : 1D np.array
+        Lags used as predictors.
+        
+    max_lag : int
+        Maximum value of lag included in lags.
+        
+    last_window : 1D np.ndarray, shape (1, max(self.lags))
         Last time window the Forecaster has seen when being trained. It contains
-        the value of the lags needed to predict the next `step` after the
-        training data.
+        the values needed to calculate the lags used to predict the next `step`
+        after the training data.
         
     included_exog: bool, default `False`.
         If the Forecaster has been trained using exogenous variable.
      
     '''
     
-    def __init__(self, regressor, n_lags: int) -> None:
+    def __init__(self, regressor, lags: Union[int, np.ndarray, list]) -> None:
         
         self.regressor     = regressor
-        self.n_lags        = n_lags
         self.last_window   = None
         self.included_exog = False
+        
+        if isinstance(lags, int):
+            self.lags = np.arange(lags)
+        elif isinstance(lags, (list, range)):
+            self.lags = np.array(lags) -1
+        elif isinstance(lags, np.ndarray):
+            self.lags = lags
+        else:
+            raise Exception(
+                f"`lags` must be `int`, `1D np.ndarray`, `range` or `list`. "
+                f"Got {type(lags)}"
+            )
+            
+        self.max_lag  = max(self.lags) + 1
+                
         
     def __repr__(self) -> str:
             """
@@ -77,7 +99,7 @@ class ForecasterAutoreg():
                     + "\n" \
                     + "Regressor: " + str(self.regressor) \
                     + "\n" \
-                    + "Number of lags: " + str(self.n_lags) \
+                    + "Lags: " + str(self.lags) \
                     + "\n" \
                     + "Exogenous variable: " + str(self.included_exog) \
                     + "\n" \
@@ -88,7 +110,7 @@ class ForecasterAutoreg():
     
     
     def create_lags(self, y: Union[np.ndarray, pd.Series]) -> Dict[np.ndarray, np.ndarray]:
-        '''        
+        '''       
         Transforms a time series into a 2D array and a 1D array where each value
         of `y` is associated with the lags that precede it.
         
@@ -99,31 +121,34 @@ class ForecasterAutoreg():
 
         Returns 
         -------
-        X_data : 2D np.ndarray, shape (samples, n_lags)
+        X_data : 2D np.ndarray, shape (samples, len(lags))
             2D array with the lag values (predictors).
         
-        y_data : 1D np.ndarray, shape (nº observaciones - n_lags,)
+        y_data : 1D np.ndarray, shape (nº observaciones - max(lags),)
             Response variable Value of the time series fore each row of `X_data`.
             
         '''
         
         self._check_y(y=y)
         y = self._preproces_y(y=y)        
-            
-        n_splits = len(y) - self.n_lags
+        
+        n_splits = len(y) - self.max_lag
 
-        X_data  = np.full(shape=(n_splits, self.n_lags), fill_value=np.nan, dtype= float)
+        X_data  = np.full(shape=(n_splits, self.max_lag), fill_value=np.nan, dtype= float)
         y_data  = np.full(shape=(n_splits, 1), fill_value=np.nan, dtype= float)
 
         for i in range(n_splits):
 
-            train_index = np.arange(i, self.n_lags + i)
-            test_index  = [self.n_lags + i]
+            train_index = np.arange(i, self.max_lag + i)
+            test_index  = [self.max_lag + i]
 
             X_data[i, :] = y[train_index]
             y_data[i]    = y[test_index]
-
-        return X_data, y_data.ravel()
+            
+        X_data = X_data[:, self.lags]
+        y_data = y_data.ravel()
+            
+        return X_data, y_data
 
         
     def fit(self, y: Union[np.ndarray, pd.Series], exog: Union[np.ndarray, pd.Series]=None) -> None:
@@ -136,7 +161,9 @@ class ForecasterAutoreg():
             Training time series.
             
         exog : 1D np.ndarray, pd.Series, default `None`
-            Exogenous variable that is included as predictor.
+            Exogenous variable that is included as predictor. Must have the same
+            number of observations as `y` and should be aligned so that y[i] is
+            regressed on exog[i].
 
 
         Returns 
@@ -158,18 +185,18 @@ class ForecasterAutoreg():
         if exog is not None:
             self.included_exog = True
             self.regressor.fit(
-                # The first `self.n_lags` positions have to be removed from exog
+                # The first `self.max_lag` positions have to be removed from exog
                 # since they are not in X_train.
-                X = np.column_stack((X_train, exog[self.n_lags:])),
+                X = np.column_stack((X_train, exog[self.max_lag:])),
                 y = y_train
             )
             
         else:
             self.regressor.fit(X=X_train, y=y_train)
         
-        # The last time window of training lags is saved so that they can be used
-        # as predictors in the first iteration of `predict()`.
-        self.last_window = np.hstack((X_train[-1, 1:], y_train[-1])).reshape(1, -1)
+        # The last time window of training data is saved so that lags needed as
+        # predictors in the first iteration of `predict()` can be calculated.
+        self.last_window = y_train[-self.max_lag:]
         
             
     def predict(self, steps: int, X: np.ndarray=None, exog: np.ndarray=None) -> np.ndarray:
@@ -183,12 +210,13 @@ class ForecasterAutoreg():
         steps : int
             Number of future steps predicted.
             
-        X : 2D np.ndarray, shape (1, n_lags), default `None`
+        X : 2D np.ndarray, shape (1, len(lags)), default `None`
             Value of the predictors to start the prediction process. That is,
             the value of the lags at t + 1.
     
-            If `X = None`, the values stored in` self.last_window` are used as
-            initial predictors, and the predictions start after training data.
+            If `X = None`, the values stored in` self.last_window` are used to
+            calculate the initial predictors, and the predictions start after
+            training data.
             
         exog : 1D np.ndarray, pd.Series, default `None`
             Exogenous variable that is included as predictor.
@@ -207,7 +235,7 @@ class ForecasterAutoreg():
             )
                 
         if X is None:
-            X = self.last_window
+            X = self.last_window[self.lags].reshape(1, -1)
         
         if exog is not None:
             self._check_exog(exog=exog)
@@ -246,7 +274,7 @@ class ForecasterAutoreg():
         
         if not isinstance(y, (np.ndarray, pd.Series)):
             
-            raise Exception('`y` must be `1D np.ndarray` o `pd.Series`.')
+            raise Exception('`y` must be `1D np.ndarray` or `pd.Series`.')
             
         elif isinstance(y, np.ndarray) and y.ndim != 1:
             
@@ -272,12 +300,12 @@ class ForecasterAutoreg():
             
         if not isinstance(exog, (np.ndarray, pd.Series)):
             
-            raise Exception('`exog` must be `1D np.ndarray` o `pd.Series`.')
+            raise Exception('`exog` must be `1D np.ndarray` or `pd.Series`.')
             
         elif isinstance(exog, np.ndarray) and exog.ndim != 1:
             
             raise Exception(
-                f"`exog` must be `1D np.ndarray` o `pd.Series`, "
+                f"`exog` must be `1D np.ndarray` or `pd.Series`, "
                 f"got `np.ndarray` with {y.ndim} dimensions."
             )
         else:
@@ -343,15 +371,17 @@ class ForecasterAutoreg():
         self.regressor.set_params(**params)
         
         
-    def set_n_lags(self, n_lags: int) -> None:
+    def set_lags(self, lags: int) -> None:
         '''      
-        Set new value to the attribute `n_lags`.
-        
+        Set new value to the attribute `lags`.
+        Attribute `max_lag` is also updated.
         
         Parameters
         ----------
-        n_lags : int
-            Number of lags used as predictors.
+        lags : int, list, 1D np.array, range
+        Lags used as predictors. Index starts at 1, so lag 1 is equal to t-1.
+            `int`: include lags from 1 to `lags`.
+            `list` or `np.array`: include only lags present in `lags`.
 
         Returns 
         -------
@@ -359,4 +389,16 @@ class ForecasterAutoreg():
         
         '''
         
-        self.n_lags = n_lags
+        if isinstance(lags, int):
+            self.lags = np.arange(lags)
+        elif isinstance(lags, (list, range)):
+            self.lags = np.array(lags) -1
+        elif isinstance(lags, np.ndarray):
+            self.lags = lags
+        else:
+            raise Exception(
+                f"`lags` must be `int`, `1D np.ndarray`, `range` or `list`. "
+                f"Got {type(lags)}"
+            )
+            
+        self.max_lag  = max(self.lags) + 1
