@@ -131,19 +131,91 @@ print(f"Test error (mse): {error_mse}")
 ```
 
 ```python
+# Grid search hiperparameters and lags
+# ==============================================================================
+forecaster = ForecasterAutoreg(
+                regressor=RandomForestRegressor(random_state=123),
+                lags=12
+             )
+
+# Regressor hiperparameters
+param_grid = {'n_estimators': [50, 100],
+              'max_depth': [5, 10]}
+
+# lags used as predictors
+lags_grid = [3, 10, [1,2,3,20]]
+
+results_grid = grid_search_forecaster(
+                        forecaster  = forecaster,
+                        y           = datos_train,
+                        param_grid  = param_grid,
+                        lags_grid   = lags_grid,
+                        steps       = 10,
+                        metric      = 'neg_mean_squared_error',
+                        initial_train_size    = int(len(datos_train)*0.5),
+                        allow_incomplete_fold = False,
+                        return_best = True
+                    )
+
+# Results grid search
+# ==============================================================================
+results_grid
+```
+
+### Autoregressive + 1 exogenous predictor
+
+```python
+# Download data
+# ==============================================================================
+url = 'https://raw.githubusercontent.com/JoaquinAmatRodrigo/' \
+      + 'Estadistica-machine-learning-python/master/data/h2o.csv'
+datos = pd.read_csv(url, sep=',')
+
+# Data preprocessing
+# ==============================================================================
+datos['fecha'] = pd.to_datetime(datos['fecha'], format='%Y/%m/%d')
+datos = datos.set_index('fecha')
+datos = datos.rename(columns={'x': 'y'})
+datos = datos.asfreq('MS')
+datos = datos['y']
+datos = datos.sort_index()
+
+# Exogenous variable
+# ==============================================================================
+datos_exog = datos.rolling(window=10, closed='right').mean() + 0.5
+datos_exog = datos_exog[10:]
+datos = datos[10:]
+
+fig, ax=plt.subplots(figsize=(9, 4))
+datos.plot(ax=ax, label='y')
+datos_exog.plot(ax=ax, label='exogenous variable')
+ax.legend();
+
+
+# Split train-test
+# ==============================================================================
+steps = 36
+datos_train = datos[:-steps]
+datos_test  = datos[-steps:]
+
+datos_exog_train = datos_exog[:-steps]
+datos_exog_test  = datos_exog[-steps:]
+```
+
+```python
 # Create and fit forecaster
 # ==============================================================================
 forecaster = ForecasterAutoreg(
-                    regressor=LinearRegression(),
-                    lags=15
-                )
+                    regressor = LinearRegression(),
+                    lags      = 8
+             )
 
-forecaster.fit(y=datos_train)
+forecaster.fit(y=datos_train, exog=datos_exog_train)
 
 # Predict
 # ==============================================================================
 steps = 36
-predictions = forecaster.predict(steps=steps)
+predictions = forecaster.predict(steps=steps, exog=datos_exog_test)
 # Add datetime index to predictions
 predictions = pd.Series(data=predictions, index=datos_test.index)
 
@@ -152,10 +224,10 @@ predictions = pd.Series(data=predictions, index=datos_test.index)
 fig, ax=plt.subplots(figsize=(9, 4))
 datos_train.plot(ax=ax, label='train')
 datos_test.plot(ax=ax, label='test')
-predictions.plot(ax=ax, label='predicciones')
+predictions.plot(ax=ax, label='predictions')
 ax.legend();
 
-# Prediction error
+# Error prediction
 # ==============================================================================
 error_mse = mean_squared_error(
                 y_true = datos_test,
@@ -163,6 +235,42 @@ error_mse = mean_squared_error(
             )
 print(f"Test error (mse): {error_mse}")
 ```
+
+```python
+# Grid search hiperparameters and lags
+# ==============================================================================
+forecaster = ForecasterAutoreg(
+                regressor=RandomForestRegressor(random_state=123),
+                lags=12
+             )
+
+# Regressor hiperparameters
+param_grid = {'n_estimators': [50, 100],
+              'max_depth': [5, 10]}
+
+# lags used as predictors
+lags_grid = [3, 10, [1,2,3,20]]
+
+results_grid = grid_search_forecaster(
+                        forecaster  = forecaster,
+                        y           = datos_train,
+                        exog        = datos_exog_train,
+                        param_grid  = param_grid,
+                        lags_grid   = lags_grid,
+                        steps       = 10,
+                        metric      = 'neg_mean_squared_error',
+                        initial_train_size    = int(len(datos_train)*0.5),
+                        allow_incomplete_fold = False,
+                        return_best = True
+                    )
+
+# Results grid Search
+# ==============================================================================
+results_grid
+```
+
+### Autoregressive + n exogenous predictors
+<br>
 
 ```python
 ```
