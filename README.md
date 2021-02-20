@@ -54,7 +54,121 @@ The main challenge when using scikit learn models for forecasting is transformin
 
 ## Examples
 
+### Autoregressive forecaster
 
+```python
+# Libraries
+# ==============================================================================
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import Lasso
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_squared_error
+```
+
+```python
+# Download data
+# ==============================================================================
+url = 'https://raw.githubusercontent.com/JoaquinAmatRodrigo/' \
+      + 'Estadistica-machine-learning-python/master/data/h2o.csv'
+datos = pd.read_csv(url, sep=',')
+
+# Data preprocessing
+# ==============================================================================
+datos['fecha'] = pd.to_datetime(datos['fecha'], format='%Y/%m/%d')
+datos = datos.set_index('fecha')
+datos = datos.rename(columns={'x': 'y'})
+datos = datos.asfreq('MS')
+datos = datos['y']
+datos = datos.sort_index()
+
+# Split train-test
+# ==============================================================================
+steps = 36
+datos_train = datos[:-steps]
+datos_test  = datos[-steps:]
+
+
+fig, ax=plt.subplots(figsize=(9, 4))
+datos.plot(ax=ax, label='y')
+ax.legend();
+```
+
+```python
+# Create and fit forecaster
+# ==============================================================================
+forecaster = ForecasterAutoreg(
+                    regressor=LinearRegression(),
+                    lags=15
+                )
+
+forecaster.fit(y=datos_train)
+
+# Predict
+# ==============================================================================
+steps = 36
+predictions = forecaster.predict(steps=steps)
+# Add datetime index to predictions
+predictions = pd.Series(data=predictions, index=datos_test.index)
+
+# Plot
+# ==============================================================================
+fig, ax=plt.subplots(figsize=(9, 4))
+datos_train.plot(ax=ax, label='train')
+datos_test.plot(ax=ax, label='test')
+predictions.plot(ax=ax, label='predicciones')
+ax.legend();
+
+# Prediction error
+# ==============================================================================
+error_mse = mean_squared_error(
+                y_true = datos_test,
+                y_pred = predicciones
+            )
+print(f"Test error (mse): {error_mse}")
+```
+
+```python
+# Create and fit forecaster
+# ==============================================================================
+forecaster = ForecasterAutoreg(
+                    regressor=LinearRegression(),
+                    lags=15
+                )
+
+forecaster.fit(y=datos_train)
+
+# Predict
+# ==============================================================================
+steps = 36
+predictions = forecaster.predict(steps=steps)
+# Add datetime index to predictions
+predictions = pd.Series(data=predictions, index=datos_test.index)
+
+# Plot
+# ==============================================================================
+fig, ax=plt.subplots(figsize=(9, 4))
+datos_train.plot(ax=ax, label='train')
+datos_test.plot(ax=ax, label='test')
+predictions.plot(ax=ax, label='predicciones')
+ax.legend();
+
+# Prediction error
+# ==============================================================================
+error_mse = mean_squared_error(
+                y_true = datos_test,
+                y_pred = predicciones
+            )
+print(f"Test error (mse): {error_mse}")
+```
+
+```python
+```
+
+```python
+```
 
 ## Author
 
