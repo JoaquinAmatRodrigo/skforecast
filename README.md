@@ -118,14 +118,14 @@ predictions = pd.Series(data=predictions, index=datos_test.index)
 fig, ax=plt.subplots(figsize=(9, 4))
 datos_train.plot(ax=ax, label='train')
 datos_test.plot(ax=ax, label='test')
-predictions.plot(ax=ax, label='predicciones')
+predictions.plot(ax=ax, label='predictions')
 ax.legend();
 
 # Prediction error
 # ==============================================================================
 error_mse = mean_squared_error(
                 y_true = datos_test,
-                y_pred = predicciones
+                y_pred = predictions
             )
 print(f"Test error (mse): {error_mse}")
 ```
