@@ -114,12 +114,17 @@ def ts_cv_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
     steps : int
         Number of steps to predict.
         
+    metric : {'neg_mean_squared_error', 'neg_mean_absolute_error', 'neg_mean_absolute_percentage_error'}
+        Metric used to quantify the goodness of fit of the model.
+        
+    exog : np.ndarray, pd.Series, default `None`
+            Exogenous variable/s included as predictor/s. Must have the same
+            number of observations as `y` and should be aligned so that y[i] is
+            regressed on exog[i].
+            
     allow_incomplete_fold : bool, default `True`
         The last test set is allowed to be incomplete if it does not reach `steps`
         observations. Otherwise, the latest observations are discarded.
-        
-    metric : {'neg_mean_squared_error', 'neg_mean_absolute_error', 'neg_mean_absolute_percentage_error'}
-        Metric used to quantify the goodness of fit of the model.
 
     Returns 
     -------
@@ -204,12 +209,11 @@ def grid_search_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
     metric : {'neg_mean_squared_error', 'neg_mean_absolute_error', 'neg_mean_absolute_percentage_error'}
         Metric used to quantify the goodness of fit of the model.
         
-    exog : 1D np.ndarray, pd.Series, default `None`
-        Exogenous variable that is included as predictor. Must have the same
-        number of observations as `y` and should be aligned so that y[i] is
-        regressed on exog[i].
+    exog : np.ndarray, pd.Series, default `None`
+            Exogenous variable/s included as predictor/s. Must have the same
+            number of observations as `y` and should be aligned so that y[i] is
+            regressed on exog[i].
            
-        
     lags_grid : list of int, lists, np.narray or range. 
         Lists of `lags` to try.
         
