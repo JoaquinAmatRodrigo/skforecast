@@ -40,6 +40,8 @@ Since the value of $`t + 1`$ is required to predict the point $`t + 2`$, and $`t
 
 <p><img src="./images/forecasting_multi-step.gif" alt="forecasting-python" title="forecasting-python"></p>
 
+<br>
+
 The main challenge when using scikit learn models for forecasting is transforming the time series in an matrix where, each value of the series, is related to the time window (lags) that precede it.
 
 <p><img src="./images/transform_timeseries.gif" alt="forecasting-python" title="forecasting-python"></p>
