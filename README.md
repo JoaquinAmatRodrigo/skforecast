@@ -2,16 +2,13 @@
 
 **Time series forecasting with scikit-learn regressors.**
 
-Python package that eases using scikit-learn regressors as multi-step forecaster.
-
-<br>
 
 ## Installation
 
 ```bash
 $ pip install git+https://github.com/JoaquinAmatRodrigo/skforecast#master
 ```
-<br>
+
 
 ## Dependencies
 
@@ -21,7 +18,7 @@ $ pip install git+https://github.com/JoaquinAmatRodrigo/skforecast#master
 + tqdm>=4.57.0
 + scikit-learn>=0.24
 
-<br>
+
 
 ## Features
 
@@ -30,10 +27,10 @@ $ pip install git+https://github.com/JoaquinAmatRodrigo/skforecast#master
 + Grid search to find optimal lags (predictors).
 + Include exogenous variables as predictors.
 
-<br>
+
 
 ## Introducción
-<br>
+
 
 A time series is a sequence of data arranged chronologically, in principle, equally spaced in time. Time series forecasting is the use of a model to predict future values based on previously observed values, with the option of also including other external variables.
 
@@ -49,7 +46,7 @@ The main challenge when using scikit learn models for forecasting is transformin
 
 <center><font size="2.5"> <i>Time series  transformation into a matrix of 5 lags and a vector with the value of the series that follows each row of the matrix.</i></font></center>
 
-<br>
+<br><br>
 
 **Skforecast** is a python library that eases using scikit-learn regressors as multi-step forecasters.
 
