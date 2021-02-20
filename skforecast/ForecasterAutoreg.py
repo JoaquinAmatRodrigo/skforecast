@@ -61,8 +61,11 @@ class ForecasterAutoreg():
         the values needed to calculate the lags used to predict the next `step`
         after the training data.
         
-    included_exog: bool, default `False`.
-        If the Forecaster has been trained using exogenous variable.
+    included_exog: bool
+        If the Forecaster has been trained using exogenous variable/s.
+        
+    exog_shape: tuple
+        Shape of exog used in training.
      
     '''
     
@@ -71,6 +74,7 @@ class ForecasterAutoreg():
         self.regressor     = regressor
         self.last_window   = None
         self.included_exog = False
+        self.exog_shape    = None
         
         if isinstance(lags, int):
             self.lags = np.arange(lags)
@@ -132,6 +136,13 @@ class ForecasterAutoreg():
         self._check_y(y=y)
         y = self._preproces_y(y=y)        
         
+        if self.max_lag > len(y):
+            raise Exception(
+                f"Maximum lag can't be higer than `y` length. "
+                f"Got maximum lag={self.max_lag} and `y` length={len(y)}."
+            )
+            
+        
         n_splits = len(y) - self.max_lag
 
         X_data  = np.full(shape=(n_splits, self.max_lag), fill_value=np.nan, dtype= float)
@@ -160,8 +171,8 @@ class ForecasterAutoreg():
         y : 1D np.ndarray, pd.Series
             Training time series.
             
-        exog : 1D np.ndarray, pd.Series, default `None`
-            Exogenous variable that is included as predictor. Must have the same
+        exog : np.ndarray, pd.Series, default `None`
+            Exogenous variable/s included as predictor/s. Must have the same
             number of observations as `y` and should be aligned so that y[i] is
             regressed on exog[i].
 
@@ -173,21 +184,29 @@ class ForecasterAutoreg():
         
         '''
         
+        # Reset values in case the forecaster has already been fitted before
+        self.included_exog = False
+        self.exog_shape    = None
+        
         self._check_y(y=y)
         y = self._preproces_y(y=y)
         
+        
         if exog is not None:
+            
             self._check_exog(exog=exog)
             exog = self._preproces_exog(exog=exog)
+            self.included_exog = True
+            self.exog_shape    = exog.shape
         
         X_train, y_train = self.create_lags(y=y)
         
         if exog is not None:
-            self.included_exog = True
+            
             self.regressor.fit(
                 # The first `self.max_lag` positions have to be removed from exog
                 # since they are not in X_train.
-                X = np.column_stack((X_train, exog[self.max_lag:])),
+                X = np.column_stack((X_train, exog[self.max_lag:,])),
                 y = y_train
             )
             
@@ -218,8 +237,8 @@ class ForecasterAutoreg():
             calculate the initial predictors, and the predictions start after
             training data.
             
-        exog : 1D np.ndarray, pd.Series, default `None`
-            Exogenous variable that is included as predictor.
+        exog : np.ndarray, pd.Series, default `None`
+            Exogenous variable/s included as predictor/s.
 
         Returns 
         -------
@@ -229,25 +248,41 @@ class ForecasterAutoreg():
         '''
         
         if exog is None and self.included_exog:
+            
             raise Exception(
-                "Forecaster trained with exogenous variable. This same " \
-                + "variable must be provided in the `predict()`."
+                f"Forecaster trained with exogenous variable/s. "
+                f"Same variable/s must be provided in `predict()`."
             )
+            
+        if exog is not None and not self.included_exog:
+            
+            raise Exception(
+                f"Forecaster trained without exogenous variable/s. "
+                f"`exog` must be `None` in `predict()`."
+            )
+        
+        if exog is not None:
+            
+            self._check_exog(exog=exog, ref_shape=self.exog_shape)
+            exog = self._preproces_exog(exog=exog)
+
                 
         if X is None:
             X = self.last_window[self.lags].reshape(1, -1)
-        
-        if exog is not None:
-            self._check_exog(exog=exog)
-            exog = self._preproces_exog(exog=exog)
             
         predictions = np.full(shape=steps, fill_value=np.nan)
 
         for i in range(steps):
+            
             if exog is None:
+                
                 prediction = self.regressor.predict(X=X)
+                
             else:
-                prediction = self.regressor.predict(X=np.column_stack((X, exog[i])))
+
+                prediction = self.regressor.predict(
+                                X = np.column_stack((X, exog[i,].reshape(1, -1)))
+                             )
                 
             predictions[i] = prediction.ravel()[0]
 
@@ -283,13 +318,15 @@ class ForecasterAutoreg():
                 f"got `np.ndarray` with {y.ndim} dimensions."
             )
             
-        else:
-            return
+        return
         
         
-    def _check_exog(self, exog: Union[np.ndarray, pd.Series]) -> None:
+    def _check_exog(self, exog: Union[np.ndarray, pd.Series], 
+                    ref_shape: tuple=None) -> None:
         '''
-        Raise Exception if `exog` is not 1D `np.ndarray` or `pd.Series`.
+        Raise Exception if `exog` is not `np.ndarray` or `pd.Series`.
+        If `ref_shape` is provided, raise Exception if `ref_shape[1]` do not match
+        `exog.shape[1]` (number of columns).
         
         Parameters
         ----------        
@@ -300,16 +337,44 @@ class ForecasterAutoreg():
             
         if not isinstance(exog, (np.ndarray, pd.Series)):
             
-            raise Exception('`exog` must be `1D np.ndarray` or `pd.Series`.')
+            raise Exception('`exog` must be `np.ndarray` or `pd.Series`.')
             
-        elif isinstance(exog, np.ndarray) and exog.ndim != 1:
+        if isinstance(exog, np.ndarray) and exog.ndim > 2:
             
             raise Exception(
-                f"`exog` must be `1D np.ndarray` or `pd.Series`, "
-                f"got `np.ndarray` with {y.ndim} dimensions."
-            )
-        else:
-            return
+                    f" If `exog` is `np.ndarray`, maximum allowed dim=2. "
+                    f"Got {exog.ndim}."
+                ) 
+            
+        if ref_shape is not None:
+            
+            if isinstance(exog, np.ndarray) and ref_shape[1] == 1 and exog.ndim ==1:
+                
+                return
+            
+            if ref_shape[1] > 1 and isinstance(exog, pd.Series):
+                
+                raise Exception(
+                    f"`exog` must be `np.ndarray` with {ref_shape[1]} columns. "
+                    f"Got `pd.Series`."
+                ) 
+                
+            if isinstance(exog, np.ndarray) and ref_shape[1] > 1 and exog.ndim ==1:
+                
+                raise Exception(
+                    f"`exog` must have {ref_shape[1]} columns. "
+                    f"Got `np.ndarray` with {exog.ndim} dimension."
+                )
+            
+            elif isinstance(exog, np.ndarray) and ref_shape[1] != exog.shape[1]:
+                
+                raise Exception(
+                    f"If `np.ndarray`, `exog` must have {ref_shape[1]} columns. "
+                    f"Got `np.ndarray` with {exog.shape[1]} columns."
+                )
+     
+        return
+    
         
     def _preproces_y(self, y) -> np.ndarray:
         
@@ -331,25 +396,32 @@ class ForecasterAutoreg():
         else:
             return y
         
+        
     def _preproces_exog(self, exog) -> np.ndarray:
         
         '''
-        Transforms `exog` to 1D `np.ndarray` it is `pd.Series`.
+        Transforms `exog` to `np.ndarray` it is `pd.Series`.
+        If 1D `np.ndarray` reshape it to (n_samples, 1)
         
         Parameters
         ----------        
-        exog : 1D np.ndarray, pd.Series
+        exog : np.ndarray, pd.Series
             Time series values
 
         Returns 
         -------
-        exog: 1D np.ndarray, shape(samples,)
+        exog: np.ndarray, shape(samples,)
         '''
         
         if isinstance(exog, pd.Series):
-            return exog.to_numpy()
-        else:
-            return exog
+            
+            exog = exog.to_numpy().reshape(-1, 1)
+        
+        elif isinstance(exog, np.ndarray) and exog.ndim == 1:
+            
+            exog = exog.reshape(-1, 1)
+            
+        return exog
     
     
     def set_params(self, **params: dict) -> None:
