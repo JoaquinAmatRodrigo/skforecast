@@ -7,12 +7,14 @@
 
 import setuptools
 
-with open("README.md", "r") as fh:
-    long_description = fh.read()
+import skforecast
 
+VERSION = skforecast.__version__
+        
+        
 setuptools.setup(
     name="skforecast",
-    version="0.1.3",
+    version=VERSION,
     author="Joaquin Amat Rodrigo",
     author_email="j.amatrodrigo@gmail.com",
     description="Forecasting time series with scikitlearn regressors",
