@@ -27,7 +27,12 @@ $ pip install git+https://github.com/JoaquinAmatRodrigo/skforecast#master
 + Grid search to find optimal lags (predictors).
 + Include exogenous variables as predictors.
 
+## TODO
 
+- [ ] Get predictor importance
+- [ ] Parallel grid search
+- [ ] Speed lag creation with numba
+- [ ] Custom predictors
 
 ## Introduction
 
@@ -379,7 +384,6 @@ results_grid = grid_search_forecaster(
 # ==============================================================================
 results_grid
 ```
-
 
 ## Author
 
