@@ -80,6 +80,12 @@ class ForecasterAutoreg():
         self.exog_type     = False
         self.exog_shape    = None
         
+        if isinstance(lags, int) and lags < 1:
+            raise Exception('min value of lags allowed is 1')
+            
+        if isinstance(lags, (list, range, np.ndarray)) and min(lags) < 1:
+            raise Exception('min value of lags allowed is 1')
+            
         if isinstance(lags, int):
             self.lags = np.arange(lags)
         elif isinstance(lags, (list, range)):
