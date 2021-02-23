@@ -85,7 +85,7 @@ class ForecasterAutoreg():
         elif isinstance(lags, (list, range)):
             self.lags = np.array(lags) -1
         elif isinstance(lags, np.ndarray):
-            self.lags = lags
+            self.lags = lags - 1
         else:
             raise Exception(
                 f"`lags` argument must be `int`, `1D np.ndarray`, `range` or `list`. "
