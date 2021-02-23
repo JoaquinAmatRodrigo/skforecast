@@ -495,7 +495,7 @@ class ForecasterAutoreg():
         
         '''
         
-        if not isinstance(forecaster.regressor, sklearn.linear_model._base.LinearRegression):
+        if not isinstance(self.regressor, sklearn.linear_model._base.LinearRegression):
             warnings.warn(
                 'Only forecasters with `regressor = LinearRegression()` have coef.'
             )
