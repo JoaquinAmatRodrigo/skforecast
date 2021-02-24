@@ -114,7 +114,7 @@ class ForecasterAutoreg():
                 + "\n" \
                 + "Regressor: " + str(self.regressor) \
                 + "\n" \
-                + "Lags: " + str(self.lags) \
+                + "Lags: " + str(self.lags + 1) \
                 + "\n" \
                 + "Exogenous variable: " + str(self.included_exog) \
                 + "\n" \
@@ -492,15 +492,19 @@ class ForecasterAutoreg():
         -------
         coef : 1D np.ndarray
             Value of the coefficients associated with each predictor (lag).
+            Coefficients are aligned so that `coef[i]` is the value associated
+            with `self.lags[i]`.
         
         '''
         
         if not isinstance(self.regressor, sklearn.linear_model._base.LinearRegression):
             warnings.warn(
-                'Only forecasters with `regressor = LinearRegression()` have coef.'
+                'Only forecasters with `regressor=LinearRegression()` have coef.'
             )
             return
         else:
             coef = self.regressor.coef_
+            # Reverse order to match self.lags
+            coef = np.flip(coef)
             
         return coef
