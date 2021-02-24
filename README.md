@@ -33,6 +33,8 @@ $ pip install git+https://github.com/JoaquinAmatRodrigo/skforecast#master
 - [ ] Parallel grid search
 - [ ] Speed lag creation with numba
 - [ ] Custom predictors
+- [ ] Testing
+
 
 ## Introduction
 
