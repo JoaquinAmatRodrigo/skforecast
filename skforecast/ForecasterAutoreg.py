@@ -510,12 +510,12 @@ class ForecasterAutoreg():
         return coef
 		
 		
-	def get_feature_importances(self) -> np.ndarray:
+    def get_feature_importances(self) -> np.ndarray:
         '''      
         Return impurity-based feature importances of the model stored in the
         forecaster. Only valid when the forecaster has been trained using
         `regressor=GradientBoostingRegressor()` or `regressor=RandomForestRegressor`.
-        
+
         Parameters
         ----------
         self
@@ -523,22 +523,22 @@ class ForecasterAutoreg():
         Returns 
         -------
         feature_importances : 1D np.ndarray
-            Impurity-based feature importances associated with each predictor (lag).
-            Values are aligned so that `feature_importances[i]` is the value
-            associated with `self.lags[i]`.
+        Impurity-based feature importances associated with each predictor (lag).
+        Values are aligned so that `feature_importances[i]` is the value
+        associated with `self.lags[i]`.
         '''
-        
+
         if not isinstance(self.regressor,
-                          (sklearn.ensemble._forest.RandomForestRegressor,
-                          sklearn.ensemble._gb.GradientBoostingRegressor)):
+                        (sklearn.ensemble._forest.RandomForestRegressor,
+                        sklearn.ensemble._gb.GradientBoostingRegressor)):
             warnings.warn(
                 ('Only forecasters with `regressor=GradientBoostingRegressor()` '
-                 'or `regressor=RandomForestRegressor`.')
+                    'or `regressor=RandomForestRegressor`.')
             )
             return
         else:
             feature_importances = self.regressor.feature_importances_
             # Reverse order to match self.lags
             feature_importances = np.flip(feature_importances)
-            
+
         return feature_importances
