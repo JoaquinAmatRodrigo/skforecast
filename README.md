@@ -150,6 +150,10 @@ error_mse = mean_squared_error(
 print(f"Test error (mse): {error_mse}")
 ```
 
+```
+Test error (mse): 0.011051937043503587
+```
+
 <p><img src="./images/prediction.png"</p>
 
 ```python
@@ -302,6 +306,10 @@ error_mse = mean_squared_error(
                 y_pred = predictions
             )
 print(f"Test error (mse): {error_mse}")
+```
+
+```
+Test error (mse): 0.020306077140235308
 ```
 
 <p><img src="./images/prediction_with_exog.png"</p>
