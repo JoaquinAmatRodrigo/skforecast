@@ -255,8 +255,11 @@ fig, ax=plt.subplots(figsize=(9, 4))
 datos.plot(ax=ax, label='y')
 datos_exog.plot(ax=ax, label='exogenous variable')
 ax.legend();
+```
 
+<p><img src="./images/data_with_exogenous.png"</p>
 
+```python
 # Split train-test
 # ==============================================================================
 steps = 36
@@ -300,6 +303,9 @@ error_mse = mean_squared_error(
             )
 print(f"Test error (mse): {error_mse}")
 ```
+
+<p><img src="./images/prediction_with_exog.png"</p>
+
 
 ```python
 # Grid search hiperparameters and lags
