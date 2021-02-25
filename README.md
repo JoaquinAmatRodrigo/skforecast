@@ -103,6 +103,8 @@ datos.plot(ax=ax, label='y')
 ax.legend();
 ```
 
+<p><img src="./images/data.png"</p>
+
 ```python
 # Create and fit forecaster
 # ==============================================================================
@@ -112,7 +114,18 @@ forecaster = ForecasterAutoreg(
                 )
 
 forecaster.fit(y=datos_train)
+forecaster
+```
 
+```
+=======================ForecasterAutoreg=======================
+Regressor: LinearRegression()
+Lags: [ 1  2  3  4  5  6  7  8  9 10 11 12 13 14 15]
+Exogenous variable: False
+Parameters: {'copy_X': True, 'fit_intercept': True, 'n_jobs': None, 'normalize': False, 'positive': False}
+```
+
+```python
 # Predict
 # ==============================================================================
 steps = 36
@@ -136,6 +149,8 @@ error_mse = mean_squared_error(
             )
 print(f"Test error (mse): {error_mse}")
 ```
+
+<p><img src="./images/prediction.png"</p>
 
 ```python
 # Grid search hiperparameters and lags
@@ -168,6 +183,49 @@ results_grid = grid_search_forecaster(
 # ==============================================================================
 results_grid
 ```
+
+```
+loop lags_grid:   0%|          | 0/3 [00:00<?, ?it/s]
+loop param_grid:   0%|          | 0/4 [00:00<?, ?it/s]
+loop param_grid:  25%|██▌       | 1/4 [00:00<00:02,  1.40it/s]
+loop param_grid:  50%|█████     | 2/4 [00:02<00:02,  1.11s/it]
+loop param_grid:  75%|███████▌  | 3/4 [00:02<00:00,  1.06it/s]
+loop param_grid: 100%|██████████| 4/4 [00:04<00:00,  1.13s/it]
+loop lags_grid:  33%|███▎      | 1/3 [00:04<00:08,  4.28s/it] 
+loop param_grid:   0%|          | 0/4 [00:00<?, ?it/s]
+loop param_grid:  25%|██▌       | 1/4 [00:00<00:02,  1.29it/s]
+loop param_grid:  50%|█████     | 2/4 [00:02<00:02,  1.20s/it]
+loop param_grid:  75%|███████▌  | 3/4 [00:03<00:01,  1.03s/it]
+loop param_grid: 100%|██████████| 4/4 [00:04<00:00,  1.25s/it]
+loop lags_grid:  67%|██████▋   | 2/3 [00:08<00:04,  4.52s/it] 
+loop param_grid:   0%|          | 0/4 [00:00<?, ?it/s]
+loop param_grid:  25%|██▌       | 1/4 [00:00<00:02,  1.38it/s]
+loop param_grid:  50%|█████     | 2/4 [00:02<00:02,  1.12s/it]
+loop param_grid:  75%|███████▌  | 3/4 [00:02<00:00,  1.06it/s]
+loop param_grid: 100%|██████████| 4/4 [00:04<00:00,  1.14s/it]
+loop lags_grid: 100%|██████████| 3/3 [00:13<00:00,  4.42s/it] 
+2021-02-25 09:51:43,075 root       INFO  Refitting `forecaster` using the best found parameters: 
+lags: [ 1  2  3  4  5  6  7  8  9 10] 
+params: {'max_depth': 10, 'n_estimators': 50}
+```
+
+
+```
+      lags	params	metric
+6	[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]	{'max_depth': 10, 'n_estimators': 50}	0.023449
+4	[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]	{'max_depth': 5, 'n_estimators': 50}	0.025417
+7	[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]	{'max_depth': 10, 'n_estimators': 100}	0.025954
+5	[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]	{'max_depth': 5, 'n_estimators': 100}	0.026003
+1	[1, 2, 3]	{'max_depth': 5, 'n_estimators': 100}	0.028223
+0	[1, 2, 3]	{'max_depth': 5, 'n_estimators': 50}	0.030685
+3	[1, 2, 3]	{'max_depth': 10, 'n_estimators': 100}	0.031385
+2	[1, 2, 3]	{'max_depth': 10, 'n_estimators': 50}	0.038591
+8	[1, 2, 3, 20]	{'max_depth': 5, 'n_estimators': 50}	0.048428
+9	[1, 2, 3, 20]	{'max_depth': 5, 'n_estimators': 100}	0.049842
+10	[1, 2, 3, 20]	{'max_depth': 10, 'n_estimators': 50}	0.051059
+11	[1, 2, 3, 20]	{'max_depth': 10, 'n_estimators': 100}	0.052205
+```
+
 
 ### Autoregressive + 1 exogenous predictor
 
