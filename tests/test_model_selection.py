@@ -1,3 +1,4 @@
+import numpy as np
 from skforecast.model_selection import grid_search_forecaster
 from skforecast.model_selection import time_series_spliter
 from skforecast.model_selection import ts_cv_forecaster
