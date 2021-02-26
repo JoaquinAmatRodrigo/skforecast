@@ -29,7 +29,7 @@ $ pip install git+https://github.com/JoaquinAmatRodrigo/skforecast@v0.1.4
 
 ## TODO
 
-- [ ] Get predictor importance
+- [x] Get predictor importance
 - [ ] Parallel grid search
 - [ ] Speed lag creation with numba
 - [ ] Custom predictors
@@ -69,17 +69,22 @@ The main challenge when using scikit learn models for forecasting is transformin
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+
+from skforecast.ForecasterAutoreg import ForecasterAutoreg
+from skforecast.model_selection import grid_search_forecaster
+from skforecast.model_selection import time_series_spliter
+from skforecast.model_selection import ts_cv_forecaster
+
 from sklearn.linear_model import LinearRegression
-from sklearn.linear_model import Lasso
 from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.metrics import mean_squared_error
 ```
 
 ```python
 # Download data
 # ==============================================================================
-url = 'https://raw.githubusercontent.com/JoaquinAmatRodrigo/' \
-      + 'Estadistica-machine-learning-python/master/data/h2o.csv'
+url = ('https://raw.githubusercontent.com/JoaquinAmatRodrigo/skforecast/master/data/h2o.csv')
 datos = pd.read_csv(url, sep=',')
 
 # Data preprocessing
@@ -97,7 +102,8 @@ steps = 36
 datos_train = datos[:-steps]
 datos_test  = datos[-steps:]
 
-
+# Plot
+# ==============================================================================
 fig, ax=plt.subplots(figsize=(9, 4))
 datos.plot(ax=ax, label='y')
 ax.legend();
@@ -133,14 +139,6 @@ predictions = forecaster.predict(steps=steps)
 # Add datetime index to predictions
 predictions = pd.Series(data=predictions, index=datos_test.index)
 
-# Plot
-# ==============================================================================
-fig, ax=plt.subplots(figsize=(9, 4))
-datos_train.plot(ax=ax, label='train')
-datos_test.plot(ax=ax, label='test')
-predictions.plot(ax=ax, label='predictions')
-ax.legend();
-
 # Prediction error
 # ==============================================================================
 error_mse = mean_squared_error(
@@ -148,6 +146,14 @@ error_mse = mean_squared_error(
                 y_pred = predictions
             )
 print(f"Test error (mse): {error_mse}")
+
+# Plot
+# ==============================================================================
+fig, ax=plt.subplots(figsize=(9, 4))
+datos_train.plot(ax=ax, label='train')
+datos_test.plot(ax=ax, label='test')
+predictions.plot(ax=ax, label='predictions')
+ax.legend();
 ```
 
 ```
@@ -230,14 +236,23 @@ params: {'max_depth': 10, 'n_estimators': 50}
 11	[1, 2, 3, 20]	{'max_depth': 10, 'n_estimators': 100}	0.052205
 ```
 
+```python
+# Predictors importance
+# ==============================================================================
+forecaster.get_feature_importances()
+```
+
+```
+[0.58116139 0.12777451 0.04191822 0.03095527 0.02517231 0.02482571
+ 0.04065757 0.01652861 0.02619182 0.08481458]
+```
 
 ### Autoregressive + 1 exogenous predictor
 
 ```python
 # Download data
 # ==============================================================================
-url = 'https://raw.githubusercontent.com/JoaquinAmatRodrigo/' \
-      + 'Estadistica-machine-learning-python/master/data/h2o.csv'
+url = ('https://raw.githubusercontent.com/JoaquinAmatRodrigo/skforecast/master/data/h2o.csv')
 datos = pd.read_csv(url, sep=',')
 
 # Data preprocessing
@@ -255,6 +270,8 @@ datos_exog = datos.rolling(window=10, closed='right').mean() + 0.5
 datos_exog = datos_exog[10:]
 datos = datos[10:]
 
+# Plot
+# ==============================================================================
 fig, ax=plt.subplots(figsize=(9, 4))
 datos.plot(ax=ax, label='y')
 datos_exog.plot(ax=ax, label='exogenous variable')
@@ -291,14 +308,6 @@ predictions = forecaster.predict(steps=steps, exog=datos_exog_test)
 # Add datetime index to predictions
 predictions = pd.Series(data=predictions, index=datos_test.index)
 
-# Plot
-# ==============================================================================
-fig, ax=plt.subplots(figsize=(9, 4))
-datos_train.plot(ax=ax, label='train')
-datos_test.plot(ax=ax, label='test')
-predictions.plot(ax=ax, label='predictions')
-ax.legend();
-
 # Error prediction
 # ==============================================================================
 error_mse = mean_squared_error(
@@ -306,6 +315,14 @@ error_mse = mean_squared_error(
                 y_pred = predictions
             )
 print(f"Test error (mse): {error_mse}")
+
+# Plot
+# ==============================================================================
+fig, ax=plt.subplots(figsize=(9, 4))
+datos_train.plot(ax=ax, label='train')
+datos_test.plot(ax=ax, label='test')
+predictions.plot(ax=ax, label='predictions')
+ax.legend();
 ```
 
 ```
@@ -354,8 +371,7 @@ results_grid
 ```python
 # Download data
 # ==============================================================================
-url = 'https://raw.githubusercontent.com/JoaquinAmatRodrigo/' \
-      + 'Estadistica-machine-learning-python/master/data/h2o.csv'
+url = ('https://raw.githubusercontent.com/JoaquinAmatRodrigo/skforecast/master/data/h2o.csv')
 datos = pd.read_csv(url, sep=',')
 
 # Data preprocessing
@@ -375,12 +391,18 @@ datos_exog_1 = datos_exog_1[10:]
 datos_exog_2 = datos_exog_2[10:]
 datos = datos[10:]
 
+# Plot
+# ==============================================================================
 fig, ax=plt.subplots(figsize=(9, 4))
 datos.plot(ax=ax, label='y')
-datos_exog_1.plot(ax=ax, label='exogenous variable 1')
-datos_exog_2.plot(ax=ax, label='exogenous variable 2')
+datos_exog_1.plot(ax=ax, label='exogenous 1')
+datos_exog_2.plot(ax=ax, label='exogenous 2')
 ax.legend();
+```
 
+<p><img src="./images/data_with_multiple_exog.png"</p>
+
+```python
 # Split train-test
 # ==============================================================================
 steps = 36
@@ -409,14 +431,6 @@ predictions = forecaster.predict(steps=steps, exog=datos_exog_test)
 # Add datetime index
 predictions = pd.Series(data=predictions, index=datos_test.index)
 
-# Plot
-# ==============================================================================
-fig, ax=plt.subplots(figsize=(9, 4))
-datos_train.plot(ax=ax, label='train')
-datos_test.plot(ax=ax, label='test')
-predictions.plot(ax=ax, label='predictions')
-ax.legend();
-
 # Error
 # ==============================================================================
 error_mse = mean_squared_error(
@@ -424,40 +438,22 @@ error_mse = mean_squared_error(
                 y_pred = predictions
             )
 print(f"Test error (mse): {error_mse}")
+
+# Plot
+# ==============================================================================
+fig, ax=plt.subplots(figsize=(9, 4))
+datos_train.plot(ax=ax, label='train')
+datos_test.plot(ax=ax, label='test')
+predictions.plot(ax=ax, label='predictions')
+ax.legend();
 ```
 
-```python
-# Grid search hiperparameters and lags
-# ==============================================================================
-forecaster = ForecasterAutoreg(
-                regressor=RandomForestRegressor(random_state=123),
-                lags=12
-             )
-
-# Regressor hiperparameters
-param_grid = {'n_estimators': [50, 100],
-              'max_depth': [5, 10]}
-
-# Lags used as predictors
-lags_grid = [3, 10, [1,2,3,20]]
-
-results_grid = grid_search_forecaster(
-                        forecaster  = forecaster,
-                        y           = datos_train,
-                        exog        = datos_exog_train,
-                        param_grid  = param_grid,
-                        lags_grid   = lags_grid,
-                        steps       = 10,
-                        metric      = 'neg_mean_squared_error',
-                        initial_train_size    = int(len(datos_train)*0.5),
-                        allow_incomplete_fold = False,
-                        return_best = True
-                    )
-
-# Results grid Search
-# ==============================================================================
-results_grid
 ```
+Test error (mse): 0.020306077140235298
+```
+
+<p><img src="./images/prediction_with_multiple_exog.png"</p>
+
 
 ## Author
 
