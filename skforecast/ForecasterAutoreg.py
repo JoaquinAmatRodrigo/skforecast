@@ -384,7 +384,7 @@ class ForecasterAutoreg():
     def _preproces_y(self, y) -> np.ndarray:
         
         '''
-        Transforms `y` to 1D `np.ndarray` it is `pd.Series`.
+        Transforms `y` to 1D `np.ndarray` if it is `pd.Series`.
         
         Parameters
         ----------        
@@ -405,7 +405,7 @@ class ForecasterAutoreg():
     def _preproces_exog(self, exog) -> np.ndarray:
         
         '''
-        Transforms `exog` to `np.ndarray` it is `pd.Series`.
+        Transforms `exog` to `np.ndarray` if it is `pd.Series`.
         If 1D `np.ndarray` reshape it to (n_samples, 1)
         
         Parameters
@@ -463,15 +463,21 @@ class ForecasterAutoreg():
         
         '''
         
+        if isinstance(lags, int) and lags < 1:
+            raise Exception('min value of lags allowed is 1')
+            
+        if isinstance(lags, (list, range, np.ndarray)) and min(lags) < 1:
+            raise Exception('min value of lags allowed is 1')
+            
         if isinstance(lags, int):
             self.lags = np.arange(lags)
         elif isinstance(lags, (list, range)):
-            self.lags = np.array(lags) -1
+            self.lags = np.array(lags) - 1
         elif isinstance(lags, np.ndarray):
-            self.lags = lags
+            self.lags = lags - 1
         else:
             raise Exception(
-                f"`lags` must be `int`, `1D np.ndarray`, `range` or `list`."
+                f"`lags` argument must be `int`, `1D np.ndarray`, `range` or `list`. "
                 f"Got {type(lags)}"
             )
             
