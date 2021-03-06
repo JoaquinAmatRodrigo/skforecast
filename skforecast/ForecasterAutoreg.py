@@ -89,18 +89,18 @@ class ForecasterAutoreg():
             raise Exception('min value of lags allowed is 1')
             
         if isinstance(lags, int):
-            self.lags = np.arange(lags)
+            self.lags = np.arange(lags) + 1
         elif isinstance(lags, (list, range)):
-            self.lags = np.array(lags) -1
+            self.lags = np.array(lags)
         elif isinstance(lags, np.ndarray):
-            self.lags = lags - 1
+            self.lags = lags
         else:
             raise Exception(
                 f"`lags` argument must be `int`, `1D np.ndarray`, `range` or `list`. "
                 f"Got {type(lags)}"
             )
             
-        self.max_lag  = max(self.lags) + 1
+        self.max_lag  = max(self.lags)
                 
         
     def __repr__(self) -> str:
@@ -114,7 +114,7 @@ class ForecasterAutoreg():
                 + "\n" \
                 + "Regressor: " + str(self.regressor) \
                 + "\n" \
-                + "Lags: " + str(self.lags + 1) \
+                + "Lags: " + str(self.lags) \
                 + "\n" \
                 + "Exogenous variable: " + str(self.included_exog) \
                 + "\n" \
@@ -128,6 +128,9 @@ class ForecasterAutoreg():
         '''       
         Transforms a time series into a 2D array and a 1D array where each value
         of `y` is associated with the lags that precede it.
+        
+        Notice that the returned matrix X_data, contains the lag 1 in the
+        first column, the lag 2 in the second column and so on.
         
         Parameters
         ----------        
@@ -164,7 +167,7 @@ class ForecasterAutoreg():
             X_data[i, :] = y[train_index]
             y_data[i]    = y[test_index]
             
-        X_data = X_data[:, self.lags]
+        X_data = X_data[:, -self.lags]
         y_data = y_data.ravel()
             
         return X_data, y_data
@@ -230,7 +233,8 @@ class ForecasterAutoreg():
         self.last_window = y_train[-self.max_lag:]
         
             
-    def predict(self, steps: int, X: np.ndarray=None, exog: np.ndarray=None) -> np.ndarray:
+    def predict(self, steps: int, last_window: Union[np.ndarray, pd.Series]=None,
+                exog: np.ndarray=None) -> np.ndarray:
         '''
         Iterative process in which, each prediction, is used as a predictor
         for the next step.
@@ -241,13 +245,13 @@ class ForecasterAutoreg():
         steps : int
             Number of future steps predicted.
             
-        X : 2D np.ndarray, shape (1, len(lags)), default `None`
-            Value of predictors to start the prediction process. That is, the
-            value of the lags at t + 1.
+        last_window : 1D np.ndarray, pd.Series, shape (, max_lag), default `None`
+            Values of the series used to create the predictors (lags) need in the 
+            first iteration of predictiont (t + 1).
     
-            If `X = None`, the values stored in` self.last_window` are used to
-            calculate the initial predictors, and the predictions start after
-            training data.
+            If `last_window = None`, the values stored in` self.last_window` are
+            used to calculate the initial predictors, and the predictions start
+            right after training data.
             
         exog : np.ndarray, pd.Series, default `None`
             Exogenous variable/s included as predictor/s.
@@ -281,12 +285,17 @@ class ForecasterAutoreg():
                     f"`exog` must have as many values as `steps` predicted."
                 )
      
-        if X is None:
-            X = self.last_window[self.lags].reshape(1, -1)
+        if last_window is not None:
+            self._check_y(y=last_window)
+            last_window = self._preproces_y(y=last_window)
+        else:
+            last_window = self.last_window
+        
             
         predictions = np.full(shape=steps, fill_value=np.nan)
 
         for i in range(steps):
+            X = last_window[-self.lags].reshape(1, -1)
             if exog is None:
                 prediction = self.regressor.predict(X=X)
             else:
@@ -295,11 +304,9 @@ class ForecasterAutoreg():
                              )
             predictions[i] = prediction.ravel()[0]
 
-            # Update `X` values. The first position is discarded and the new
-            # prediction is added at the end.
-            X = X.flatten()
-            X = np.append(X[1:], prediction)
-            X = X.reshape(1, -1)
+            # Update `last_window` values. The first position is discarded and 
+            # the new prediction is added at the end.
+            last_window = np.append(last_window[1:], prediction)
 
         return predictions
     
@@ -470,18 +477,18 @@ class ForecasterAutoreg():
             raise Exception('min value of lags allowed is 1')
             
         if isinstance(lags, int):
-            self.lags = np.arange(lags)
+            self.lags = np.arange(lags) + 1
         elif isinstance(lags, (list, range)):
-            self.lags = np.array(lags) - 1
+            self.lags = np.array(lags)
         elif isinstance(lags, np.ndarray):
-            self.lags = lags - 1
+            self.lags = lags
         else:
             raise Exception(
                 f"`lags` argument must be `int`, `1D np.ndarray`, `range` or `list`. "
                 f"Got {type(lags)}"
             )
             
-        self.max_lag  = max(self.lags) + 1
+        self.max_lag  = max(self.lags)
         
 
     def get_coef(self) -> np.ndarray:
@@ -510,8 +517,6 @@ class ForecasterAutoreg():
             return
         else:
             coef = self.regressor.coef_
-            # Reverse order to match self.lags
-            coef = np.flip(coef)
             
         return coef
 		
@@ -544,7 +549,5 @@ class ForecasterAutoreg():
             return
         else:
             feature_importances = self.regressor.feature_importances_
-            # Reverse order to match self.lags
-            feature_importances = np.flip(feature_importances)
 
         return feature_importances

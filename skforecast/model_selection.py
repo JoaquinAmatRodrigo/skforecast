@@ -264,7 +264,7 @@ def grid_search_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
                             metric = metric
                          )
             
-            lags_list.append(forecaster.lags + 1)
+            lags_list.append(forecaster.lags)
             params_list.append(params)
             metric_list.append(cv_metrics.mean())
             
