@@ -286,8 +286,13 @@ class ForecasterAutoreg():
                 )
      
         if last_window is not None:
-            self._check_y(y=last_window)
-            last_window = self._preproces_y(y=last_window)
+            self._check_last_window(last_window=last_window)
+            last_window = self._preproces_last_window(last_window=last_window)
+            if last_window.shape[0] < self.max_lag:
+                raise Exception(
+                    f"`last_window` must have as many values as as needed to "
+                    f"calculate the maximum lag ({self.max_lag})."
+                )
         else:
             last_window = self.last_window
         
@@ -328,6 +333,28 @@ class ForecasterAutoreg():
             raise Exception(
                 f"`y` must be `1D np.ndarray` o `pd.Series`, "
                 f"got `np.ndarray` with {y.ndim} dimensions."
+            )
+            
+        return
+    
+    
+    def _check_last_window(self, last_window: Union[np.ndarray, pd.Series]) -> None:
+        '''
+        Raise Exception if `last_window` is not 1D `np.ndarray` or `pd.Series`.
+        
+        Parameters
+        ----------        
+        last_window : np.ndarray, pd.Series
+            Time series values
+
+        '''
+        
+        if not isinstance(last_window, (np.ndarray, pd.Series)):
+            raise Exception('`last_window` must be `1D np.ndarray` or `pd.Series`.')
+        elif isinstance(last_window, np.ndarray) and last_window.ndim != 1:
+            raise Exception(
+                f"`last_window` must be `1D np.ndarray` o `pd.Series`, "
+                f"got `np.ndarray` with {last_window.ndim} dimensions."
             )
             
         return
@@ -407,6 +434,26 @@ class ForecasterAutoreg():
             return y.to_numpy()
         else:
             return y
+        
+    def _preproces_last_window(self, last_window) -> np.ndarray:
+        
+        '''
+        Transforms `last_window` to 1D `np.ndarray` if it is `pd.Series`.
+        
+        Parameters
+        ----------        
+        last_window :1D np.ndarray, pd.Series
+            Time series values
+
+        Returns 
+        -------
+        last_window: 1D np.ndarray, shape(samples,)
+        '''
+        
+        if isinstance(last_window, pd.Series):
+            return last_window.to_numpy()
+        else:
+            return last_window
         
         
     def _preproces_exog(self, exog) -> np.ndarray:
