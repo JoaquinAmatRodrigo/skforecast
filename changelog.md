@@ -9,6 +9,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 
 - Method `get_feature_importances()` to `skforecast.ForecasterAutoreg`.
+- Added backtesting strategy in `grid_search_forecaster()`.
  
 ### Changed
 
