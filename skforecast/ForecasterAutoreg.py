@@ -542,7 +542,7 @@ class ForecasterAutoreg():
         '''      
         Return estimated coefficients for the linear regression model stored in
         the forecaster. Only valid when the forecaster has been trained using
-        `regressor = LinearRegression()`.
+        as `regressor: `LinearRegression()`, `Lasso()` or `Ridge()`.
         
         Parameters
         ----------
@@ -557,9 +557,15 @@ class ForecasterAutoreg():
         
         '''
         
-        if not isinstance(self.regressor, sklearn.linear_model._base.LinearRegression):
+        valid_instances = (sklearn.linear_model._base.LinearRegression,
+                          sklearn.linear_model._coordinate_descent.Lasso,
+                          sklearn.linear_model._ridge.Ridge
+                          )
+        
+        if not isinstance(self.regressor, valid_instances):
             warnings.warn(
-                'Only forecasters with `regressor=LinearRegression()` have coef.'
+                ('Only forecasters with `regressor` `LinearRegression()`, ' +
+                 ' `Lasso()` or `Ridge()` have coef.')
             )
             return
         else:
