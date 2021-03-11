@@ -215,7 +215,7 @@ def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
 
     Returns 
     -------
-    backtesting_predictions: 1D np.ndarray
+    backtest_predictions: 1D np.ndarray
         Value of predictions.
         
     metric_value: np.ndarray shape (1,)
@@ -230,7 +230,7 @@ def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
         forecaster._check_exog(exog=exog)
         exog = forecaster._preproces_exog(exog=exog)
     
-    backtesting_predictions = []
+    backtest_predictions = []
     
     metrics = {
         'neg_mean_squared_error': mean_squared_error,
@@ -283,15 +283,15 @@ def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
         else:
             continue
         
-        backtesting_predictions.append(pred)
+        backtest_predictions.append(pred)
     
-    backtesting_predictions = np.concatenate(backtesting_predictions)
+    backtest_predictions = np.concatenate(backtest_predictions)
     metric_value = metric(
                         y_true = y[initial_train_size:],
-                        y_pred = backtesting_predictions
+                        y_pred = backtest_predictions
                    )
 
-    return np.array([metric_value]), backtesting_predictions
+    return np.array([metric_value]), backtest_predictions
 
 
 
@@ -422,4 +422,4 @@ def grid_search_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
         forecaster.set_params(**best_params)
         forecaster.fit(y=y, exog=exog)
             
-    return results
+    return results 
