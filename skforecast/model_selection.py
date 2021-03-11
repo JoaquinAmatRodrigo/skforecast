@@ -128,7 +128,7 @@ def cv_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
 
     Returns 
     -------
-    ts_cv_results: 1D np.ndarray
+    cv_results: 1D np.ndarray
         Value of the metric for each partition.
 
     '''
@@ -140,7 +140,7 @@ def cv_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
         forecaster._check_exog(exog=exog)
         exog = forecaster._preproces_exog(exog=exog)
     
-    ts_cv_results = []
+    cv_results = []
     
     metrics = {
         'neg_mean_squared_error': mean_squared_error,
@@ -174,9 +174,9 @@ def cv_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
                             y_pred = pred
                        )
         
-        ts_cv_results.append(metric_value)
+        cv_results.append(metric_value)
                           
-    return np.array(ts_cv_results)
+    return np.array(cv_results)
 
 
 
@@ -184,9 +184,9 @@ def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
                            initial_train_size: int, steps: int,
                            metric: str, exog: Union[np.ndarray, pd.Series]=None):
     '''
-    Simple backtesting (validation) of ForecasterAutoreg object. The model is 
-    trained only once using the `initial_train_size` first observations. In each
-    iteration, a number of `steps` predictions are evaluated.
+    Backtesting (validation) of ForecasterAutoreg object. The model is trained
+    only once using the `initial_train_size` first observations. In each iteration,
+    a number of `steps` predictions are evaluated.
     
     This evaluation is much faster than `ts_cv_forecaster()` since the model is
     trained only once.
@@ -215,8 +215,11 @@ def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
 
     Returns 
     -------
-    ts_cv_results: 1D np.ndarray
-        Value of the metric for each iteration.
+    backtesting_predictions: 1D np.ndarray
+        Value of predictions.
+        
+    metric_value: np.ndarray shape (1,)
+        Value of the metric.
 
     '''
     
@@ -227,7 +230,7 @@ def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
         forecaster._check_exog(exog=exog)
         exog = forecaster._preproces_exog(exog=exog)
     
-    backtesting_results = []
+    backtesting_predictions = []
     
     metrics = {
         'neg_mean_squared_error': mean_squared_error,
@@ -243,7 +246,7 @@ def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
         forecaster.fit(y=y[:initial_train_size], exog=exog[:initial_train_size])     
     
     
-    folds     = (len(y) - initial_train_size) // steps
+    folds     = (len(y) - initial_train_size) // steps + 1
     remainder = (len(y) - initial_train_size) % steps
     
     for i in range(folds):
@@ -251,7 +254,7 @@ def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
         last_window_end   = initial_train_size + i * steps
         last_window_start = (initial_train_size + i * steps) - forecaster.max_lag 
         last_window       = y[last_window_start:last_window_end]
-          
+                
         if i < folds - 1:
             if exog is None:
                 pred = forecaster.predict(
@@ -264,8 +267,8 @@ def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
                             last_window = last_window,
                             exog        = exog[last_window_end:last_window_end + steps]
                         )
-        else:
-            steps = steps + remainder 
+        elif remainder != 0:
+            steps = remainder 
             if exog is None:
                 pred = forecaster.predict(
                             steps       = steps,
@@ -277,15 +280,18 @@ def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
                             last_window = last_window,
                             exog        = exog[last_window_end:last_window_end + steps]
                         )
+        else:
+            continue
         
-        metric_value = metric(
-                            y_true = y[last_window_end:last_window_end + steps],
-                            y_pred = pred
-                       )
-        
-        backtesting_results.append(metric_value)
-                          
-    return np.array(backtesting_results)
+        backtesting_predictions.append(pred)
+    
+    backtesting_predictions = np.concatenate(backtesting_predictions)
+    metric_value = metric(
+                        y_true = y[initial_train_size:],
+                        y_pred = backtesting_predictions
+                   )
+
+    return np.array([metric_value]), backtesting_predictions
 
 
 
@@ -296,6 +302,7 @@ def grid_search_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
                            allow_incomplete_fold: bool=True, return_best: bool=True):
     '''
     Exhaustive search over specified parameter values for a ForecasterAutoreg object.
+    Validation is done using time series cross-validation or backtesting.
     
     Parameters
     ----------
@@ -389,8 +396,8 @@ def grid_search_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
                                 initial_train_size = initial_train_size,
                                 steps  = steps,
                                 metric = metric
-                             )
-            
+                             )[0]
+
             lags_list.append(forecaster.lags)
             params_list.append(params)
             metric_list.append(metrics.mean())
