@@ -422,4 +422,4 @@ def grid_search_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
         forecaster.set_params(**best_params)
         forecaster.fit(y=y, exog=exog)
             
-    return results 
+    return results
