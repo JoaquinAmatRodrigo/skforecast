@@ -6,7 +6,7 @@
 ## Installation
 
 ```bash
-$ pip install git+https://github.com/JoaquinAmatRodrigo/skforecast@v0.1.5
+$ pip install git+https://github.com/JoaquinAmatRodrigo/skforecast@v0.1.6
 ```
 
 
@@ -73,7 +73,7 @@ import matplotlib.pyplot as plt
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
 from skforecast.model_selection import grid_search_forecaster
 from skforecast.model_selection import time_series_spliter
-from skforecast.model_selection import ts_cv_forecaster
+from skforecast.model_selection import cv_forecaster
 
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
@@ -183,6 +183,7 @@ results_grid = grid_search_forecaster(
                         param_grid  = param_grid,
                         lags_grid   = lags_grid,
                         steps       = 10,
+                        method      = 'cv',
                         metric      = 'neg_mean_squared_error',
                         initial_train_size    = int(len(datos_train)*0.5),
                         allow_incomplete_fold = False,
@@ -354,6 +355,7 @@ results_grid = grid_search_forecaster(
                         param_grid  = param_grid,
                         lags_grid   = lags_grid,
                         steps       = 10,
+                        method      = 'cv',
                         metric      = 'neg_mean_squared_error',
                         initial_train_size    = int(len(datos_train)*0.5),
                         allow_incomplete_fold = False,
