@@ -97,13 +97,13 @@ def cv_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
                   metric: str, exog: Union[np.ndarray, pd.Series]=None,
                   allow_incomplete_fold: bool=True):
     '''
-    Cross-validation of ForecasterAutoreg object. The order of is maintained and 
-    the training set increases in each iteration.
+    Cross-validation of `ForecasterAutoreg` or `ForecasterCustom` object.
+    The order of is maintained and the training set increases in each iteration.
     
     Parameters
     ----------
-    forecaster : ForecasterAutoreg 
-        ForecasterAutoreg object.
+    forecaster : ForecasterAutoreg, ForecasterCustom
+        `ForecasterAutoreg` or `ForecasterCustom` object.
         
     y : 1D np.ndarray, pd.Series
         Training time series values. 
@@ -160,7 +160,6 @@ def cv_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
     for train_index, test_index in splits:
         
         if exog is None:
-            
             forecaster.fit(y=y[train_index])      
             pred = forecaster.predict(steps=len(test_index))
             
@@ -179,22 +178,21 @@ def cv_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
     return np.array(cv_results)
 
 
-
 def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
                            initial_train_size: int, steps: int,
                            metric: str, exog: Union[np.ndarray, pd.Series]=None):
     '''
-    Backtesting (validation) of ForecasterAutoreg object. The model is trained
-    only once using the `initial_train_size` first observations. In each iteration,
-    a number of `steps` predictions are evaluated.
+    Backtesting (validation) of `ForecasterAutoreg` or `ForecasterCustom` object.
+    The model is trained only once using the `initial_train_size` first observations.
+    In each iteration, a number of `steps` predictions are evaluated.
     
     This evaluation is much faster than `ts_cv_forecaster()` since the model is
     trained only once.
     
     Parameters
     ----------
-    forecaster : ForecasterAutoreg 
-        ForecasterAutoreg object.
+    forecaster : ForecasterAutoreg, ForecasterCustom
+        `ForecasterAutoreg` or `ForecasterCustom` object.
         
     y : 1D np.ndarray, pd.Series
         Training time series values. 
@@ -248,11 +246,12 @@ def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
     
     folds     = (len(y) - initial_train_size) // steps + 1
     remainder = (len(y) - initial_train_size) % steps
+    window_size = len(forecaster.last_window)
     
     for i in range(folds):
         
         last_window_end   = initial_train_size + i * steps
-        last_window_start = (initial_train_size + i * steps) - forecaster.max_lag 
+        last_window_start = (initial_train_size + i * steps) - window_size 
         last_window       = y[last_window_start:last_window_end]
                 
         if i < folds - 1:
@@ -301,14 +300,14 @@ def grid_search_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
                            lags_grid: list=None, method: str='cv',
                            allow_incomplete_fold: bool=True, return_best: bool=True):
     '''
-    Exhaustive search over specified parameter values for a ForecasterAutoreg object.
+    Exhaustive search over specified parameter values for a Forecaster object.
     Validation is done using time series cross-validation or backtesting.
     
     Parameters
     ----------
     
-    forecaster : ForecasterAutoreg 
-        ForecasterAutoreg object.
+    forecaster : ForecasterAutoreg, ForecasterCustom
+        ForecasterAutoreg or ForecasterCustom object.
         
     y : 1D np.ndarray, pd.Series
         Training time series values. 
@@ -332,7 +331,8 @@ def grid_search_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
             regressed on exog[i].
            
     lags_grid : list of int, lists, np.narray or range. 
-        Lists of `lags` to try.
+        Lists of `lags` to try. Only used if forecaster is an instance of 
+        `ForecasterCustom`.
         
     method : {'cv', 'backtesting'}
         Method used to estimate the metric for each parameter combination.
@@ -360,8 +360,14 @@ def grid_search_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
     if exog is not None:
         forecaster._check_exog(exog=exog)
         exog = forecaster._preproces_exog(exog=exog)
-        
-    if lags_grid is None:
+    
+    if isinstance(forecaster, ForecasterCustom):
+        if lags_grid is not None:
+            logging.warning(
+                '`lags_grid` ignored if forecaster is an instance of `ForecasterCustom`.'
+            )
+        lags_grid = ['custom predictors']
+    elif lags_grid is None:
         lags_grid = [forecaster.lags]
         
     lags_list = []
@@ -372,7 +378,8 @@ def grid_search_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
     
     for lags in tqdm.tqdm(lags_grid, desc='loop lags_grid', position=0):
         
-        forecaster.set_lags(lags)
+        if isinstance(forecaster, ForecasterAutoreg):
+            forecaster.set_lags(lags)
         
         for params in tqdm.tqdm(param_grid, desc='loop param_grid', position=1, leave=False):
 
@@ -398,7 +405,7 @@ def grid_search_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
                                 metric = metric
                              )[0]
 
-            lags_list.append(forecaster.lags)
+            lags_list.append(lags)
             params_list.append(params)
             metric_list.append(metrics.mean())
             
@@ -418,8 +425,11 @@ def grid_search_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
             f"lags: {best_lags} \n"
             f"params: {best_params}\n"
         )
-        forecaster.set_lags(best_lags)
+        
+        if isinstance(forecaster, ForecasterAutoreg):
+            forecaster.set_lags(best_lags)
+            
         forecaster.set_params(**best_params)
         forecaster.fit(y=y, exog=exog)
             
-    return results 
+    return results
