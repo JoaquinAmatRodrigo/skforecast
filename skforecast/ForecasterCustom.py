@@ -102,7 +102,7 @@ class ForecasterCustom():
                 + "\n" \
                 + "Regressor: " + str(self.regressor) \
                 + "\n" \
-                + "Predictors: " + str(self.create_predictors.__name__) \
+                + "Predictors created with: " + str(self.create_predictors.__name__) \
                 + "\n" \
                 + "Window size: " + str(self.window_size) \
                 + "\n" \
@@ -162,7 +162,7 @@ class ForecasterCustom():
         for i in range(len(y) - self.window_size):
 
             train_index = np.arange(i, self.window_size + i)
-            test_index  = [self.window_size + i]
+            test_index  = self.window_size + i
 
             X_train.append(self.create_predictors(y=y[train_index]))
             y_train.append(y[test_index])
@@ -180,9 +180,9 @@ class ForecasterCustom():
         else:
             self.regressor.fit(X=X_train, y=y_train)
         
-        # The last time window of training data is stored so that predictors can
-        # be created in the first iteration of `predict()` can be calculated.
-        self.last_window = y_train[-self.window_size:].copy()
+        # The last time window of training data is stored so that predictors in
+        # the first iteration of `predict()` can be calculated.
+        self.last_window = y_train.flatten()[-self.window_size:]
         
             
     def predict(self, steps: int, last_window: Union[np.ndarray, pd.Series]=None,
@@ -198,8 +198,8 @@ class ForecasterCustom():
             Number of future steps predicted.
             
         last_window : 1D np.ndarray, pd.Series, default `None`
-            Values of the series used to create the predictors (lags) need in the 
-            first iteration of predictiont (t + 1).
+            Values of the series used to create the predictors need in the first
+            iteration of predictiont (t + 1).
     
             If `last_window = None`, the values stored in` self.last_window` are
             used to calculate the initial predictors, and the predictions start
@@ -251,7 +251,7 @@ class ForecasterCustom():
         predictions = np.full(shape=steps, fill_value=np.nan)
 
         for i in range(steps):
-            X = self.create_predictors(y=last_window.ravel())
+            X = self.create_predictors(y=last_window)
             if exog is None:
                 prediction = self.regressor.predict(X=X)
             else:
@@ -463,9 +463,9 @@ class ForecasterCustom():
         Returns 
         -------
         coef : 1D np.ndarray
-            Value of the coefficients associated with each predictor (lag).
+            Value of the coefficients associated with each predictor.
             Coefficients are aligned so that `coef[i]` is the value associated
-            with `self.lags[i]`.
+            with predictor i returned by `self.create_predictors`.
         
         '''
         
@@ -484,8 +484,8 @@ class ForecasterCustom():
             coef = self.regressor.coef_
             
         return coef
-		
-		
+
+    
     def get_feature_importances(self) -> np.ndarray:
         '''      
         Return impurity-based feature importances of the model stored in the
@@ -499,9 +499,9 @@ class ForecasterCustom():
         Returns 
         -------
         feature_importances : 1D np.ndarray
-        Impurity-based feature importances associated with each predictor (lag).
+        Impurity-based feature importances associated with each predictor.
         Values are aligned so that `feature_importances[i]` is the value
-        associated with `self.lags[i]`.
+        associated with predictor i returned by `self.create_predictors`.
         '''
 
         if not isinstance(self.regressor,
