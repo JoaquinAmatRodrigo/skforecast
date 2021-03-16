@@ -230,7 +230,7 @@ class ForecasterAutoreg():
         
         # The last time window of training data is stored so that lags needed as
         # predictors in the first iteration of `predict()` can be calculated.
-        self.last_window = y_train[-self.max_lag:]
+        self.last_window = y_train[-self.max_lag:].copy()
         
             
     def predict(self, steps: int, last_window: Union[np.ndarray, pd.Series]=None,
@@ -572,8 +572,8 @@ class ForecasterAutoreg():
             coef = self.regressor.coef_
             
         return coef
-		
-		
+
+    
     def get_feature_importances(self) -> np.ndarray:
         '''      
         Return impurity-based feature importances of the model stored in the
