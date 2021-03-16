@@ -9,6 +9,11 @@
 $ pip install git+https://github.com/JoaquinAmatRodrigo/skforecast@v0.1.6
 ```
 
+Latest (unstable):
+
+```bash
+$ pip install git+https://github.com/JoaquinAmatRodrigo/skforecast#master
+```
 
 ## Dependencies
 
@@ -32,7 +37,7 @@ $ pip install git+https://github.com/JoaquinAmatRodrigo/skforecast@v0.1.6
 - [x] Get predictor importance
 - [ ] Parallel grid search
 - [ ] Speed lag creation with numba
-- [ ] Custom predictors
+- [x ] Custom predictors
 - [ ] Testing
 
 
