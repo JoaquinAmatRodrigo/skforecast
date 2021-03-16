@@ -1,11 +1,22 @@
 
 # Change Log
 All notable changes to this project will be documented in this file.
+
+## [0.1.7] - unreleased
+
+### Added
+
+- Class `ForecasterCustom`: same functionalities as `ForecasterAutoreg` but allows custom definition of predictors.
+ 
+### Changed
+
+- `grid_search forecaster()` adapted to work with objects `ForecasterCustom` in addition to `ForecasterAutoreg`.
+ 
+### Fixed
  
  
 ## [0.1.6] - 2021-03-14
- 
- 
+
 ### Added
 
 - Method `get_feature_importances()` to `skforecast.ForecasterAutoreg`.
