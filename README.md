@@ -37,7 +37,7 @@ $ pip install git+https://github.com/JoaquinAmatRodrigo/skforecast#master
 - [x] Get predictor importance
 - [ ] Parallel grid search
 - [ ] Speed lag creation with numba
-- [x ] Custom predictors
+- [x] Custom predictors
 - [ ] Testing
 
 
