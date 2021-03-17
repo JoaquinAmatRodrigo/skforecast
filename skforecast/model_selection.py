@@ -384,7 +384,7 @@ def grid_search_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
         
         if isinstance(forecaster, ForecasterAutoreg):
             forecaster.set_lags(lags)
-            lags = forecaster.lags
+            lags = forecaster.lags.copy()
         
         for params in tqdm.tqdm(param_grid, desc='loop param_grid', position=1, leave=False):
 
