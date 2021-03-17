@@ -370,6 +370,7 @@ def grid_search_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
                 '`lags_grid` ignored if forecaster is an instance of `ForecasterCustom`.'
             )
         lags_grid = ['custom predictors']
+        
     elif lags_grid is None:
         lags_grid = [forecaster.lags]
         
@@ -383,6 +384,7 @@ def grid_search_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
         
         if isinstance(forecaster, ForecasterAutoreg):
             forecaster.set_lags(lags)
+            lags = forecaster.lags
         
         for params in tqdm.tqdm(param_grid, desc='loop param_grid', position=1, leave=False):
 
