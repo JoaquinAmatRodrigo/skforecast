@@ -543,7 +543,7 @@ results_grid = grid_search_forecaster(
                         allow_incomplete_fold = False,
                         return_best = True
                     )
-
+```
 
 ## Author
 
