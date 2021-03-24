@@ -333,7 +333,8 @@ class ForecasterAutoreg():
     
     
     def predict_interval(self, steps: int, last_window: Union[np.ndarray, pd.Series]=None,
-                         exog: np.ndarray=None, interval=[5, 95], n_boot=500) -> np.ndarray:
+                         exog: np.ndarray=None, interval: list=[5, 95],
+                         n_boot: int=500, insample_residuals: bool=True):
         '''
         Iterative process in which, each prediction, is used as a predictor
         for the next step. Bootstrapping is used to estimate prediction intervals.
@@ -422,9 +423,14 @@ class ForecasterAutoreg():
                 exog_boot = exog.copy()
             else:
                 exog_boot = None
+                
+            if insample_residuals:
+                residuals = self.insample_residuals
+            else:
+                residuals = self.outsample_residuals
 
             sample_residuals = np.random.choice(
-                                    a       = self.insample_residuals,
+                                    a       = residuals,
                                     size    = steps,
                                     replace = True
                                )
