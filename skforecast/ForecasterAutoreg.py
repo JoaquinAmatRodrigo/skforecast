@@ -339,7 +339,7 @@ class ForecasterAutoreg():
             last_window = np.append(last_window[1:], prediction)
             
         if interval is not None:
-            predictions_interval = forecaster.predict_interval(
+            predictions_interval = self.predict_interval(
                                         steps       = steps,
                                         last_window = last_window,
                                         exog        = exog,
