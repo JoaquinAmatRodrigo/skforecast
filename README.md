@@ -33,6 +33,7 @@ $ pip install git+https://github.com/JoaquinAmatRodrigo/skforecast#master
 + Grid search to find optimal hyperparameters.
 + Grid search to find optimal lags (predictors).
 + Include exogenous variables as predictors.
++ Include custom predictors (rolling mean, rolling variance ...)
 
 ## TODO
 
@@ -41,6 +42,7 @@ $ pip install git+https://github.com/JoaquinAmatRodrigo/skforecast#master
 - [ ] Speed lag creation with numba
 - [x] Custom predictors
 - [ ] Add more testing
+- [ ] Prediction interval
 
 
 ## Introduction
