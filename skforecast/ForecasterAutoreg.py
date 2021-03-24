@@ -247,7 +247,7 @@ class ForecasterAutoreg():
         
             
     def predict(self, steps: int, last_window: Union[np.ndarray, pd.Series]=None,
-                exog: np.ndarray=None) -> np.ndarray:
+                exog: np.ndarray=None, interval: list=None, n_boot: int=500):
         '''
         Iterative process in which, each prediction, is used as a predictor
         for the next step.
@@ -268,6 +268,13 @@ class ForecasterAutoreg():
             
         exog : np.ndarray, pd.Series, default `None`
             Exogenous variable/s included as predictor/s.
+            
+        interval: list, tuple, default `None`
+            Confidence of the prediction interval estimated.
+            
+        n_boot: int, default `500`
+            Number of bootstrapping iterations used to estimate prediction
+            intervals.
 
         Returns 
         -------
@@ -330,6 +337,17 @@ class ForecasterAutoreg():
             # Update `last_window` values. The first position is discarded and 
             # the new prediction is added at the end.
             last_window = np.append(last_window[1:], prediction)
+            
+        if interval is not None:
+            predictions_interval = forecaster.predict_interval(
+                                        steps       = steps,
+                                        last_window = last_window,
+                                        exog        = exog,
+                                        interval    = interval,
+                                        n_boot      = n_boot,
+                                        insample_residuals = True
+                                    )
+            predictions = np.column_stack((predictions, predictions_interval))
 
         return predictions
     
