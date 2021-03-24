@@ -233,15 +233,17 @@ class ForecasterAutoreg():
                 X = np.column_stack((X_train, exog[self.max_lag:,])),
                 y = y_train
             )
+            self.insample_residuals = \
+                y_train - self.regressor.predict(
+                                np.column_stack((X_train, exog[self.max_lag:,]))
+                          )
         else:
             self.regressor.fit(X=X_train, y=y_train)
+            self.insample_residuals = y_train - self.regressor.predict(X_train)
         
         # The last time window of training data is stored so that lags needed as
         # predictors in the first iteration of `predict()` can be calculated.
         self.last_window = y_train[-self.max_lag:].copy()
-        
-        # In sample errors of predictions
-        self.insample_residuals = y_train - self.regressor.predict(X_train)
         
             
     def predict(self, steps: int, last_window: Union[np.ndarray, pd.Series]=None,
