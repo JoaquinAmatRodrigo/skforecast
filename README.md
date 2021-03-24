@@ -34,6 +34,7 @@ $ pip install git+https://github.com/JoaquinAmatRodrigo/skforecast#master
 + Grid search to find optimal lags (predictors).
 + Include exogenous variables as predictors.
 + Include custom predictors (rolling mean, rolling variance ...)
++ Backtesting
 
 ## TODO
 
