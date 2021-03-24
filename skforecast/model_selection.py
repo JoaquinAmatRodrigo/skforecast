@@ -189,7 +189,7 @@ def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
     The model is trained only once using the `initial_train_size` first observations.
     In each iteration, a number of `steps` predictions are evaluated.
     
-    This evaluation is much faster than `ts_cv_forecaster()` since the model is
+    This evaluation is much faster than `cv_forecaster()` since the model is
     trained only once.
     
     Parameters
