@@ -71,6 +71,12 @@ class ForecasterAutoreg():
             
     exog_shape : tuple
         Shape of exog used in training.
+        
+    insample_residuals: np.ndarray
+        Residuals of the model when predicting training data.
+        
+    outsample_residuals: np.ndarray
+        Residuals of the model when predicting non training data.
      
     '''
     
@@ -81,6 +87,8 @@ class ForecasterAutoreg():
         self.included_exog = False
         self.exog_type     = False
         self.exog_shape    = None
+        self.insample_residuals = None
+        self.outsample_residuals = None
         
         if isinstance(lags, int) and lags < 1:
             raise Exception('min value of lags allowed is 1')
@@ -232,6 +240,9 @@ class ForecasterAutoreg():
         # predictors in the first iteration of `predict()` can be calculated.
         self.last_window = y_train[-self.max_lag:].copy()
         
+        # In sample errors of predictions
+        self.insample_residuals = y_train - self.regressor.predict(X_train)
+        
             
     def predict(self, steps: int, last_window: Union[np.ndarray, pd.Series]=None,
                 exog: np.ndarray=None) -> np.ndarray:
@@ -258,10 +269,15 @@ class ForecasterAutoreg():
 
         Returns 
         -------
-        predicciones : 1D np.array, shape (steps,)
+        predictions : 1D np.array, shape (steps,)
             Values predicted by the forecaster.
             
         '''
+        
+        if steps < 1:
+            raise Exception(
+                f"`steps` must be integer greater than 0. Got {steps}."
+            )
         
         if exog is None and self.included_exog:
             raise Exception(
@@ -315,6 +331,128 @@ class ForecasterAutoreg():
 
         return predictions
     
+    
+    def predict_interval(self, steps: int, last_window: Union[np.ndarray, pd.Series]=None,
+                         exog: np.ndarray=None, interval=[5, 95], n_boot=500) -> np.ndarray:
+        '''
+        Iterative process in which, each prediction, is used as a predictor
+        for the next step. Bootstrapping is used to estimate prediction intervals.
+        
+        Parameters
+        ----------
+               
+        steps : int
+            Number of future steps predicted.
+            
+        last_window : 1D np.ndarray, pd.Series, shape (, max_lag), default `None`
+            Values of the series used to create the predictors (lags) need in the 
+            first iteration of predictiont (t + 1).
+    
+            If `last_window = None`, the values stored in` self.last_window` are
+            used to calculate the initial predictors, and the predictions start
+            right after training data.
+            
+        exog : np.ndarray, pd.Series, default `None`
+            Exogenous variable/s included as predictor/s.
+            
+        n_boot: int, default `100`
+            Number of bootstrapping iterations used to estimate prediction
+            intervals.
+            
+        interval: list, tuple, default `[5, 95]`
+            Confidence of the prediction interval estimated.
+
+        Returns 
+        -------
+        predicction_interval : np.array, shape (steps, n_boot)
+            Prediction interval estimated by bootstrapping.
+            
+        '''
+        
+        if steps < 1:
+            raise Exception(
+                f"`steps` must be integer greater than 0. Got {steps}."
+            )
+
+        if exog is None and self.included_exog:
+            raise Exception(
+                f"Forecaster trained with exogenous variable/s. "
+                f"Same variable/s must be provided in `predict()`."
+            )
+
+        if exog is not None and not self.included_exog:
+            raise Exception(
+                f"Forecaster trained without exogenous variable/s. "
+                f"`exog` must be `None` in `predict()`."
+            )
+
+        if exog is not None:
+            self._check_exog(
+                exog=exog, ref_type = self.exog_type, ref_shape=self.exog_shape
+            )
+            exog = self._preproces_exog(exog=exog)
+            if exog.shape[0] != steps:
+                raise Exception(
+                    f"`exog` must have as many values as `steps` predicted."
+                )
+
+        if last_window is not None:
+            self._check_last_window(last_window=last_window)
+            last_window = self._preproces_last_window(last_window=last_window)
+            if last_window.shape[0] < self.max_lag:
+                raise Exception(
+                    f"`last_window` must have as many values as as needed to "
+                    f"calculate the maximum lag ({self.max_lag})."
+                )
+        else:
+            last_window = self.last_window
+
+        boot_predictions = np.full(
+                                shape      = (steps, n_boot),
+                                fill_value = np.nan,
+                                dtype      = float
+                           )
+
+        for i in range(n_boot):
+
+            # In each bootstraping iteration the initial last_window and exog 
+            # need to be restored.
+            last_window_boot = last_window.copy()
+            if exog is not None:
+                exog_boot = exog.copy()
+            else:
+                exog_boot = None
+
+            sample_residuals = np.random.choice(
+                                    a       = self.insample_residuals,
+                                    size    = steps,
+                                    replace = True
+                               )
+
+            for step in range(steps):  
+                
+                prediction = self.predict(
+                                steps       = 1,
+                                last_window = last_window_boot,
+                                exog        = exog_boot
+                             )
+                
+                prediction_with_residual  = prediction + sample_residuals[step]
+                boot_predictions[step, i] = prediction_with_residual
+
+                last_window_boot = np.append(
+                                    last_window_boot[1:],
+                                    prediction_with_residual
+                                   )
+                
+                if exog is not None:
+                    exog_boot = exog_boot[1:]
+
+        prediction_interval = np.percentile(boot_predictions, q=interval, axis=1)
+        prediction_interval = prediction_interval.transpose()
+        
+        return prediction_interval
+
     
     def _check_y(self, y: Union[np.ndarray, pd.Series]) -> None:
         '''
@@ -597,7 +735,7 @@ class ForecasterAutoreg():
                         sklearn.ensemble._gb.GradientBoostingRegressor)):
             warnings.warn(
                 ('Only forecasters with `regressor=GradientBoostingRegressor()` '
-                    'or `regressor=RandomForestRegressor`.')
+                 'or `regressor=RandomForestRegressor`.')
             )
             return
         else:
