@@ -232,9 +232,9 @@ class ForecasterCustom():
                 exog=exog, ref_type = self.exog_type, ref_shape=self.exog_shape
             )
             exog = self._preproces_exog(exog=exog)
-            if exog.shape[0] != steps:
+            if exog.shape[0] < steps:
                 raise Exception(
-                    f"`exog` must have as many values as `steps` predicted."
+                    f"`exog` must have at least as many values as `steps` predicted."
                 )
      
         if last_window is not None:
