@@ -72,10 +72,10 @@ class ForecasterAutoreg():
     exog_shape : tuple
         Shape of exog used in training.
         
-    insample_residuals: np.ndarray
+    in_sample_residuals: np.ndarray
         Residuals of the model when predicting training data.
         
-    outsample_residuals: np.ndarray
+    out_sample_residuals: np.ndarray
         Residuals of the model when predicting non training data.
      
     '''
@@ -87,8 +87,8 @@ class ForecasterAutoreg():
         self.included_exog = False
         self.exog_type     = False
         self.exog_shape    = None
-        self.insample_residuals = None
-        self.outsample_residuals = None
+        self.in_sample_residuals  = None
+        self.out_sample_residuals = None
         
         if isinstance(lags, int) and lags < 1:
             raise Exception('min value of lags allowed is 1')
@@ -233,13 +233,13 @@ class ForecasterAutoreg():
                 X = np.column_stack((X_train, exog[self.max_lag:,])),
                 y = y_train
             )
-            self.insample_residuals = \
+            self.in_sample_residuals = \
                 y_train - self.regressor.predict(
                                 np.column_stack((X_train, exog[self.max_lag:,]))
                           )
         else:
             self.regressor.fit(X=X_train, y=y_train)
-            self.insample_residuals = y_train - self.regressor.predict(X_train)
+            self.in_sample_residuals = y_train - self.regressor.predict(X_train)
         
         # The last time window of training data is stored so that lags needed as
         # predictors in the first iteration of `predict()` can be calculated.
@@ -336,7 +336,7 @@ class ForecasterAutoreg():
     def _estimate_boot_interval(self, steps: int,
                                 last_window: Union[np.ndarray, pd.Series]=None,
                                 exog: np.ndarray=None, interval: list=[5, 95],
-                                n_boot: int=500, insample_residuals: bool=True):
+                                n_boot: int=500, in_sample_residuals: bool=True):
         '''
         Iterative process in which, each prediction, is used as a predictor
         for the next step and bootstrapping is used to estimate prediction
@@ -364,11 +364,11 @@ class ForecasterAutoreg():
             Number of bootstrapping iterations used to estimate prediction
             intervals.
             
-        interval: list, tuple, default `[5, 100]`
+        interval: list, default `[5, 100]`
             Confidence of the prediction interval estimated. Sequence of percentiles
             to compute, which must be between 0 and 100 inclusive.
             
-        insample_residuals: bool, default `True`
+        in_sample_residuals: bool, default `True`
             If `True`, residuals from the training data are used as proxy of
             prediction error to create prediction intervals.
             
@@ -434,10 +434,10 @@ class ForecasterAutoreg():
             else:
                 exog_boot = None
                 
-            if insample_residuals:
-                residuals = self.insample_residuals
+            if in_sample_residuals:
+                residuals = self.in_sample_residuals
             else:
-                residuals = self.outsample_residuals
+                residuals = self.out_sample_residuals
 
             sample_residuals = np.random.choice(
                                     a       = residuals,
@@ -472,7 +472,7 @@ class ForecasterAutoreg():
     
     def predict_interval(self, steps: int, last_window: Union[np.ndarray, pd.Series]=None,
                          exog: np.ndarray=None, interval: list=[5, 95],
-                         n_boot: int=500, insample_residuals: bool=True):
+                         n_boot: int=500, in_sample_residuals: bool=True):
         '''
         Iterative process in which, each prediction, is used as a predictor
         for the next step and bootstrapping is used to estimate prediction
@@ -495,7 +495,7 @@ class ForecasterAutoreg():
         exog : np.ndarray, pd.Series, default `None`
             Exogenous variable/s included as predictor/s.
             
-        interval: list, tuple, default `[5, 100]`
+        interval: list, default `[5, 100]`
             Confidence of the prediction interval estimated. Sequence of percentiles
             to compute, which must be between 0 and 100 inclusive.
             
@@ -503,7 +503,7 @@ class ForecasterAutoreg():
             Number of bootstrapping iterations used to estimate prediction
             intervals.
             
-        insample_residuals: bool, default `True`
+        in_sample_residuals: bool, default `True`
             If `True`, residuals from the training data are used as proxy of
             prediction error to create prediction intervals.
 
@@ -575,7 +575,7 @@ class ForecasterAutoreg():
                                     exog        = exog_original,
                                     interval    = interval,
                                     n_boot      = n_boot,
-                                    insample_residuals = True
+                                    in_sample_residuals = True
                                 )
         
         predictions = np.column_stack((predictions, predictions_interval))

@@ -444,7 +444,7 @@ def backtesting_forecaster_intervals(forecaster, y: Union[np.ndarray, pd.Series]
                            initial_train_size: int, steps: int,
                            metric: str, exog: Union[np.ndarray, pd.Series]=None,
                            interval: list=[5, 95], n_boot: int=500,
-                           insample_residuals: bool=True):
+                           in_sample_residuals: bool=True):
     '''
     Backtesting (validation) of `ForecasterAutoreg` or `ForecasterCustom` object.
     The model is trained only once using the `initial_train_size` first observations.
@@ -476,7 +476,7 @@ def backtesting_forecaster_intervals(forecaster, y: Union[np.ndarray, pd.Series]
             number of observations as `y` and should be aligned so that y[i] is
             regressed on exog[i].
         
-    interval: list, tuple, default `[5, 100]`
+    interval: list, default `[5, 100]`
             Confidence of the prediction interval estimated. Sequence of percentiles
             to compute, which must be between 0 and 100 inclusive.
             
@@ -484,7 +484,7 @@ def backtesting_forecaster_intervals(forecaster, y: Union[np.ndarray, pd.Series]
         Number of bootstrapping iterations used to estimate prediction
         intervals.
 
-    insample_residuals: bool, default `True`
+    in_sample_residuals: bool, default `True`
         If `True`, residuals from the training data are used as proxy of
         prediction error to create prediction intervals.
 
@@ -542,7 +542,7 @@ def backtesting_forecaster_intervals(forecaster, y: Union[np.ndarray, pd.Series]
                             last_window = last_window,
                             interval    = interval,
                             n_boot      = n_boot,
-                            insample_residuals = insample_residuals
+                            in_sample_residuals = in_sample_residuals
                         )
             else:
                 pred = forecaster.predict_interval(
@@ -551,7 +551,7 @@ def backtesting_forecaster_intervals(forecaster, y: Union[np.ndarray, pd.Series]
                             exog        = exog[last_window_end:last_window_end + steps],
                             interval    = interval,
                             n_boot      = n_boot,
-                            insample_residuals = insample_residuals
+                            in_sample_residuals = in_sample_residuals
                         )
         elif remainder != 0:
             steps = remainder 
@@ -561,7 +561,7 @@ def backtesting_forecaster_intervals(forecaster, y: Union[np.ndarray, pd.Series]
                             last_window = last_window,
                             interval    = interval,
                             n_boot      = n_boot,
-                            insample_residuals = insample_residuals
+                            in_sample_residuals = in_sample_residuals
                         )
             else:
                 pred = forecaster.predict_interval(
@@ -570,7 +570,7 @@ def backtesting_forecaster_intervals(forecaster, y: Union[np.ndarray, pd.Series]
                             exog        = exog[last_window_end:last_window_end + steps],
                             interval    = interval,
                             n_boot      = n_boot,
-                            insample_residuals = insample_residuals
+                            in_sample_residuals = in_sample_residuals
                         )
         else:
             continue
