@@ -520,7 +520,7 @@ def backtesting_forecaster_intervals(forecaster, y: Union[np.ndarray, pd.Series]
     metric = metrics[metric]
         
     if exog is None:
-        forecaster.fit(y=y[:initial_train_size])      
+        forecaster.fit(y=y[:initial_train_size])   
     else:
         forecaster.fit(y=y[:initial_train_size], exog=exog[:initial_train_size])     
     
