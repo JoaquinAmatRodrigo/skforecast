@@ -300,7 +300,7 @@ class ForecasterAutoreg():
             exog = self._preproces_exog(exog=exog)
             if exog.shape[0] < steps:
                 raise Exception(
-                    f"`exog` must have at least as many values as `steps` predicted."
+                    f"`exog` must have as many values as `steps` predicted."
                 )
      
         if last_window is not None:
@@ -404,7 +404,7 @@ class ForecasterAutoreg():
             exog = self._preproces_exog(exog=exog)
             if exog.shape[0] < steps:
                 raise Exception(
-                    f"`exog` must have at least as many values as `steps` predicted."
+                    f"`exog` must have as many values as `steps` predicted."
                 )
 
         if last_window is not None:
@@ -446,7 +446,6 @@ class ForecasterAutoreg():
                                )
 
             for step in range(steps):  
-                
                 prediction = self.predict(
                                 steps       = 1,
                                 last_window = last_window_boot,
@@ -463,13 +462,13 @@ class ForecasterAutoreg():
                 
                 if exog is not None:
                     exog_boot = exog_boot[1:]
-
+                            
         prediction_interval = np.percentile(boot_predictions, q=interval, axis=1)
         prediction_interval = prediction_interval.transpose()
         
         return prediction_interval
     
-    
+        
     def predict_interval(self, steps: int, last_window: Union[np.ndarray, pd.Series]=None,
                          exog: np.ndarray=None, interval: list=[5, 95],
                          n_boot: int=500, in_sample_residuals: bool=True):
@@ -539,7 +538,7 @@ class ForecasterAutoreg():
                 exog=exog, ref_type = self.exog_type, ref_shape=self.exog_shape
             )
             exog = self._preproces_exog(exog=exog)
-            if exog.shape[0] != steps:
+            if exog.shape[0] < steps:
                 raise Exception(
                     f"`exog` must have as many values as `steps` predicted."
                 )
