@@ -43,7 +43,7 @@ $ pip install git+https://github.com/JoaquinAmatRodrigo/skforecast#master
 - [ ] Speed lag creation with numba
 - [x] Custom predictors
 - [ ] Add more testing
-- [ ] Prediction interval
+- [ ] Prediction interval estimated by bootstrapping
 
 
 ## Introduction

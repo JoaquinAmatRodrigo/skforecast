@@ -2,6 +2,18 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [0.1.8] - Unreleased
+
+### Added
+
+- Method `predict_interval()` estimate prediction interval using bootstrapping.
+ 
+### Changed
+
+ 
+### Fixed
+
+
 ## [0.1.7] - 2021-03-19
 
 ### Added
