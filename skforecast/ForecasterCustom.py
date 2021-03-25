@@ -74,6 +74,12 @@ class ForecasterCustom():
             
     exog_shape : tuple
         Shape of exog used in training.
+        
+    in_sample_residuals: np.ndarray
+        Residuals of the model when predicting training data.
+        
+    out_sample_residuals: np.ndarray
+        Residuals of the model when predicting non training data.
      
     '''
     
@@ -86,6 +92,8 @@ class ForecasterCustom():
         self.included_exog     = False
         self.exog_type         = False
         self.exog_shape        = None
+        self.in_sample_residuals  = None
+        self.out_sample_residuals = None
         
         if not isinstance(window_size, int):
             raise Exception(f'`window_size` must be int, got {type(window_size)}')
@@ -177,8 +185,14 @@ class ForecasterCustom():
                 X = np.column_stack((X_train, exog[self.window_size:,])),
                 y = y_train
             )
+            self.in_sample_residuals = \
+                y_train - self.regressor.predict(
+                                np.column_stack((X_train, exog[self.window_size:,]))
+                          )
+            
         else:
             self.regressor.fit(X=X_train, y=y_train)
+            self.in_sample_residuals = y_train - self.regressor.predict(X_train)
         
         # The last time window of training data is stored so that predictors in
         # the first iteration of `predict()` can be calculated.
@@ -211,10 +225,15 @@ class ForecasterCustom():
         Returns 
         -------
         predicciones : 1D np.array, shape (steps,)
-            Values predicted by the forecaster.
+            Values predicted.
             
         '''
         
+        if steps < 1:
+            raise Exception(
+                f"`steps` must be integer greater than 0. Got {steps}."
+            )
+            
         if exog is None and self.included_exog:
             raise Exception(
                 f"Forecaster trained with exogenous variable/s. "
@@ -246,7 +265,7 @@ class ForecasterCustom():
                     f"calculate the predictors ({self.window_size})."
                 )
         else:
-            last_window = self.last_window
+            last_window = self.last_window.copy()
             
         predictions = np.full(shape=steps, fill_value=np.nan)
 
@@ -263,6 +282,256 @@ class ForecasterCustom():
             # Update `last_window` values. The first position is discarded and 
             # the new prediction is added at the end.
             last_window = np.append(last_window[1:], prediction)
+
+        return predictions
+    
+    
+    def _estimate_boot_interval(self, steps: int,
+                                last_window: Union[np.ndarray, pd.Series]=None,
+                                exog: np.ndarray=None, interval: list=[5, 95],
+                                n_boot: int=500, in_sample_residuals: bool=True):
+        '''
+        Iterative process in which, each prediction, is used as a predictor
+        for the next step and bootstrapping is used to estimate prediction
+        intervals. This method only returns prediction intervals.
+        See predict_intervals() to calculate both, predictions and intervals.
+        
+        Parameters
+        ----------
+               
+        steps : int
+            Number of future steps predicted.
+            
+        last_window : 1D np.ndarray, pd.Series, default `None`
+            Values of the series used to create the predictors need in the first
+            iteration of predictiont (t + 1).
+    
+            If `last_window = None`, the values stored in` self.last_window` are
+            used to calculate the initial predictors, and the predictions start
+            right after training data.
+            
+        exog : np.ndarray, pd.Series, default `None`
+            Exogenous variable/s included as predictor/s.
+            
+        n_boot: int, default `100`
+            Number of bootstrapping iterations used to estimate prediction
+            intervals.
+            
+        interval: list, default `[5, 100]`
+            Confidence of the prediction interval estimated. Sequence of percentiles
+            to compute, which must be between 0 and 100 inclusive.
+            
+        in_sample_residuals: bool, default `True`
+            If `True`, residuals from the training data are used as proxy of
+            prediction error to create prediction intervals.
+            
+
+        Returns 
+        -------
+        predicction_interval : np.array, shape (steps, 2)
+            Interval estimated for each prediction by bootstrapping.
+            
+        '''
+        
+        if steps < 1:
+            raise Exception(
+                f"`steps` must be integer greater than 0. Got {steps}."
+            )
+            
+        if exog is None and self.included_exog:
+            raise Exception(
+                f"Forecaster trained with exogenous variable/s. "
+                f"Same variable/s must be provided in `predict()`."
+            )
+            
+        if exog is not None and not self.included_exog:
+            raise Exception(
+                f"Forecaster trained without exogenous variable/s. "
+                f"`exog` must be `None` in `predict()`."
+            )
+        
+        if exog is not None:
+            self._check_exog(
+                exog=exog, ref_type = self.exog_type, ref_shape=self.exog_shape
+            )
+            exog = self._preproces_exog(exog=exog)
+            if exog.shape[0] < steps:
+                raise Exception(
+                    f"`exog` must have at least as many values as `steps` predicted."
+                )
+     
+        if last_window is not None:
+            self._check_last_window(last_window=last_window)
+            last_window = self._preproces_last_window(last_window=last_window)
+            if last_window.shape[0] < self.window_size:
+                raise Exception(
+                    f"`last_window` must have as many values as as needed to "
+                    f"calculate the predictors ({self.window_size})."
+                )
+        else:
+            last_window = self.last_window.copy()
+
+        boot_predictions = np.full(
+                                shape      = (steps, n_boot),
+                                fill_value = np.nan,
+                                dtype      = float
+                           )
+
+        for i in range(n_boot):
+
+            # In each bootstraping iteration the initial last_window and exog 
+            # need to be restored.
+            last_window_boot = last_window.copy()
+            if exog is not None:
+                exog_boot = exog.copy()
+            else:
+                exog_boot = None
+                
+            if in_sample_residuals:
+                residuals = self.in_sample_residuals
+            else:
+                residuals = self.out_sample_residuals
+
+            sample_residuals = np.random.choice(
+                                    a       = residuals,
+                                    size    = steps,
+                                    replace = True
+                               )
+
+            for step in range(steps):  
+                
+                prediction = self.predict(
+                                steps       = 1,
+                                last_window = last_window_boot,
+                                exog        = exog_boot
+                             )
+                
+                prediction_with_residual  = prediction + sample_residuals[step]
+                boot_predictions[step, i] = prediction_with_residual
+
+                last_window_boot = np.append(
+                                    last_window_boot[1:],
+                                    prediction_with_residual
+                                   )
+                
+                if exog is not None:
+                    exog_boot = exog_boot[1:]
+
+        prediction_interval = np.percentile(boot_predictions, q=interval, axis=1)
+        prediction_interval = prediction_interval.transpose()
+        
+        return prediction_interval
+    
+    
+    def predict_interval(self, steps: int, last_window: Union[np.ndarray, pd.Series]=None,
+                         exog: np.ndarray=None, interval: list=[5, 95],
+                         n_boot: int=500, in_sample_residuals: bool=True):
+        '''
+        Iterative process in which, each prediction, is used as a predictor
+        for the next step and bootstrapping is used to estimate prediction
+        intervals. Both, predictions and intervals, are returned.
+        
+        Parameters
+        ----------
+               
+        steps : int
+            Number of future steps predicted.
+            
+        last_window : 1D np.ndarray, pd.Series, default `None`
+            Values of the series used to create the predictors need in the first
+            iteration of predictiont (t + 1).
+    
+            If `last_window = None`, the values stored in` self.last_window` are
+            used to calculate the initial predictors, and the predictions start
+            right after training data.
+            
+        exog : np.ndarray, pd.Series, default `None`
+            Exogenous variable/s included as predictor/s.
+            
+        interval: list, default `[5, 100]`
+            Confidence of the prediction interval estimated. Sequence of percentiles
+            to compute, which must be between 0 and 100 inclusive.
+            
+        n_boot: int, default `500`
+            Number of bootstrapping iterations used to estimate prediction
+            intervals.
+            
+        in_sample_residuals: bool, default `True`
+            If `True`, residuals from the training data are used as proxy of
+            prediction error to create prediction intervals.
+
+        Returns 
+        -------
+        predictions : np.array, shape (steps, 3)
+            Values predicted by the forecaster and their estimated interval.
+            Column 0 = predictions
+            Column 1 = lower bound interval
+            Column 2 = upper bound interval
+            
+        '''
+        
+        if steps < 1:
+            raise Exception(
+                f"`steps` must be integer greater than 0. Got {steps}."
+            )
+            
+        if exog is None and self.included_exog:
+            raise Exception(
+                f"Forecaster trained with exogenous variable/s. "
+                f"Same variable/s must be provided in `predict()`."
+            )
+            
+        if exog is not None and not self.included_exog:
+            raise Exception(
+                f"Forecaster trained without exogenous variable/s. "
+                f"`exog` must be `None` in `predict()`."
+            )
+        
+        if exog is not None:
+            self._check_exog(
+                exog=exog, ref_type = self.exog_type, ref_shape=self.exog_shape
+            )
+            exog = self._preproces_exog(exog=exog)
+            if exog.shape[0] < steps:
+                raise Exception(
+                    f"`exog` must have at least as many values as `steps` predicted."
+                )
+     
+        if last_window is not None:
+            self._check_last_window(last_window=last_window)
+            last_window = self._preproces_last_window(last_window=last_window)
+            if last_window.shape[0] < self.window_size:
+                raise Exception(
+                    f"`last_window` must have as many values as as needed to "
+                    f"calculate the predictors ({self.window_size})."
+                )
+        else:
+            last_window = self.last_window.copy()
+        
+        # Since during predict() `last_window` and `exog` are modified, the
+        # originals are stored to be used later
+        last_window_original = last_window.copy()
+        if exog is not None:
+            exog_original = exog.copy()
+        else:
+            exog_original = exog
+            
+        predictions = self.predict(
+                            steps       = steps,
+                            last_window = last_window,
+                            exog        = exog
+                      )
+
+        predictions_interval = self._estimate_boot_interval(
+                                    steps       = steps,
+                                    last_window = last_window_original,
+                                    exog        = exog_original,
+                                    interval    = interval,
+                                    n_boot      = n_boot,
+                                    in_sample_residuals = True
+                                )
+        
+        predictions = np.column_stack((predictions, predictions_interval))
 
         return predictions
     
