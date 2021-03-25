@@ -247,7 +247,7 @@ class ForecasterAutoreg():
         
             
     def predict(self, steps: int, last_window: Union[np.ndarray, pd.Series]=None,
-                exog: np.ndarray=None, interval: list=None, n_boot: int=500):
+                exog: np.ndarray=None):
         '''
         Iterative process in which, each prediction, is used as a predictor
         for the next step.
@@ -268,18 +268,11 @@ class ForecasterAutoreg():
             
         exog : np.ndarray, pd.Series, default `None`
             Exogenous variable/s included as predictor/s.
-            
-        interval: list, tuple, default `None`
-            Confidence of the prediction interval estimated.
-            
-        n_boot: int, default `500`
-            Number of bootstrapping iterations used to estimate prediction
-            intervals.
 
         Returns 
         -------
         predictions : 1D np.array, shape (steps,)
-            Values predicted by the forecaster.
+            Values predicted.
             
         '''
         
@@ -319,8 +312,7 @@ class ForecasterAutoreg():
                     f"calculate the maximum lag ({self.max_lag})."
                 )
         else:
-            last_window = self.last_window
-        
+            last_window = self.last_window.copy()
             
         predictions = np.full(shape=steps, fill_value=np.nan)
 
@@ -337,27 +329,19 @@ class ForecasterAutoreg():
             # Update `last_window` values. The first position is discarded and 
             # the new prediction is added at the end.
             last_window = np.append(last_window[1:], prediction)
-            
-        if interval is not None:
-            predictions_interval = self.predict_interval(
-                                        steps       = steps,
-                                        last_window = last_window,
-                                        exog        = exog,
-                                        interval    = interval,
-                                        n_boot      = n_boot,
-                                        insample_residuals = True
-                                    )
-            predictions = np.column_stack((predictions, predictions_interval))
 
         return predictions
     
     
-    def predict_interval(self, steps: int, last_window: Union[np.ndarray, pd.Series]=None,
-                         exog: np.ndarray=None, interval: list=[5, 95],
-                         n_boot: int=500, insample_residuals: bool=True):
+    def _estimate_boot_interval(self, steps: int,
+                                last_window: Union[np.ndarray, pd.Series]=None,
+                                exog: np.ndarray=None, interval: list=[5, 95],
+                                n_boot: int=500, insample_residuals: bool=True):
         '''
         Iterative process in which, each prediction, is used as a predictor
-        for the next step. Bootstrapping is used to estimate prediction intervals.
+        for the next step and bootstrapping is used to estimate prediction
+        intervals. This method only returns prediction intervals.
+        See predict_intervals() to calculate both, predictions and intervals.
         
         Parameters
         ----------
@@ -380,13 +364,19 @@ class ForecasterAutoreg():
             Number of bootstrapping iterations used to estimate prediction
             intervals.
             
-        interval: list, tuple, default `[5, 95]`
-            Confidence of the prediction interval estimated.
+        interval: list, tuple, default `[5, 100]`
+            Confidence of the prediction interval estimated. Sequence of percentiles
+            to compute, which must be between 0 and 100 inclusive.
+            
+        insample_residuals: bool, default `True`
+            If `True`, residuals from the training data are used as proxy of
+            prediction error to create prediction intervals.
+            
 
         Returns 
         -------
-        predicction_interval : np.array, shape (steps, n_boot)
-            Prediction interval estimated by bootstrapping.
+        predicction_interval : np.array, shape (steps, 2)
+            Interval estimated for each prediction by bootstrapping.
             
         '''
         
@@ -426,7 +416,7 @@ class ForecasterAutoreg():
                     f"calculate the maximum lag ({self.max_lag})."
                 )
         else:
-            last_window = self.last_window
+            last_window = self.last_window.copy()
 
         boot_predictions = np.full(
                                 shape      = (steps, n_boot),
@@ -478,6 +468,119 @@ class ForecasterAutoreg():
         prediction_interval = prediction_interval.transpose()
         
         return prediction_interval
+    
+    
+    def predict_interval(self, steps: int, last_window: Union[np.ndarray, pd.Series]=None,
+                         exog: np.ndarray=None, interval: list=[5, 95],
+                         n_boot: int=500, insample_residuals: bool=True):
+        '''
+        Iterative process in which, each prediction, is used as a predictor
+        for the next step and bootstrapping is used to estimate prediction
+        intervals. Both, predictions and intervals, are returned.
+        
+        Parameters
+        ----------
+               
+        steps : int
+            Number of future steps predicted.
+            
+        last_window : 1D np.ndarray, pd.Series, shape (, max_lag), default `None`
+            Values of the series used to create the predictors (lags) need in the 
+            first iteration of predictiont (t + 1).
+    
+            If `last_window = None`, the values stored in` self.last_window` are
+            used to calculate the initial predictors, and the predictions start
+            right after training data.
+            
+        exog : np.ndarray, pd.Series, default `None`
+            Exogenous variable/s included as predictor/s.
+            
+        interval: list, tuple, default `[5, 100]`
+            Confidence of the prediction interval estimated. Sequence of percentiles
+            to compute, which must be between 0 and 100 inclusive.
+            
+        n_boot: int, default `500`
+            Number of bootstrapping iterations used to estimate prediction
+            intervals.
+            
+        insample_residuals: bool, default `True`
+            If `True`, residuals from the training data are used as proxy of
+            prediction error to create prediction intervals.
+
+        Returns 
+        -------
+        predictions : np.array, shape (steps, 3)
+            Values predicted by the forecaster and their estimated interval.
+            Column 0 = predictions
+            Column 1 = lower bound interval
+            Column 2 = upper bound interval
+            
+        '''
+        
+        if steps < 1:
+            raise Exception(
+                f"`steps` must be integer greater than 0. Got {steps}."
+            )
+        
+        if exog is None and self.included_exog:
+            raise Exception(
+                f"Forecaster trained with exogenous variable/s. "
+                f"Same variable/s must be provided in `predict()`."
+            )
+            
+        if exog is not None and not self.included_exog:
+            raise Exception(
+                f"Forecaster trained without exogenous variable/s. "
+                f"`exog` must be `None` in `predict()`."
+            )
+        
+        if exog is not None:
+            self._check_exog(
+                exog=exog, ref_type = self.exog_type, ref_shape=self.exog_shape
+            )
+            exog = self._preproces_exog(exog=exog)
+            if exog.shape[0] != steps:
+                raise Exception(
+                    f"`exog` must have as many values as `steps` predicted."
+                )
+     
+        if last_window is not None:
+            self._check_last_window(last_window=last_window)
+            last_window = self._preproces_last_window(last_window=last_window)
+            if last_window.shape[0] < self.max_lag:
+                raise Exception(
+                    f"`last_window` must have as many values as as needed to "
+                    f"calculate the maximum lag ({self.max_lag})."
+                )
+        else:
+            last_window = self.last_window.copy()
+        
+        # Since during predict() `last_window` and `exog` are modified, the
+        # originals are stored to be used later
+        last_window_original = last_window.copy()
+        if exog is not None:
+            exog_original = exog.copy()
+        else:
+            exog_original = exog
+            
+        predictions = self.predict(
+                            steps       = steps,
+                            last_window = last_window,
+                            exog        = exog
+                      )
+
+        predictions_interval = self._estimate_boot_interval(
+                                    steps       = steps,
+                                    last_window = last_window_original,
+                                    exog        = exog_original,
+                                    interval    = interval,
+                                    n_boot      = n_boot,
+                                    insample_residuals = True
+                                )
+        
+        predictions = np.column_stack((predictions, predictions_interval))
+
+        return predictions
 
     
     def _check_y(self, y: Union[np.ndarray, pd.Series]) -> None:

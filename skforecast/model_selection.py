@@ -18,8 +18,8 @@ from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import mean_absolute_percentage_error
 from sklearn.model_selection import ParameterGrid
 
-from .ForecasterAutoreg import ForecasterAutoreg
-from .ForecasterCustom import ForecasterCustom
+# from .ForecasterAutoreg import ForecasterAutoreg
+# from .ForecasterCustom import ForecasterCustom
 
 logging.basicConfig(
     format = '%(asctime)-5s %(name)-10s %(levelname)-5s %(message)s', 
@@ -438,3 +438,149 @@ def grid_search_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
         forecaster.fit(y=y, exog=exog)
             
     return results
+
+
+def backtesting_forecaster_intervals(forecaster, y: Union[np.ndarray, pd.Series],
+                           initial_train_size: int, steps: int,
+                           metric: str, exog: Union[np.ndarray, pd.Series]=None,
+                           interval: list=[5, 95], n_boot: int=500,
+                           insample_residuals: bool=True):
+    '''
+    Backtesting (validation) of `ForecasterAutoreg` or `ForecasterCustom` object.
+    The model is trained only once using the `initial_train_size` first observations.
+    In each iteration, a number of `steps` predictions are evaluated. Both, 
+    predictions and intervals, are calculated.
+    
+    This evaluation is much faster than `cv_forecaster()` since the model is
+    trained only once.
+    
+    Parameters
+    ----------
+    forecaster : ForecasterAutoreg, ForecasterCustom
+        `ForecasterAutoreg` or `ForecasterCustom` object.
+        
+    y : 1D np.ndarray, pd.Series
+        Training time series values. 
+    
+    initial_train_size: int 
+        Number of samples in the initial train split.
+        
+    steps : int
+        Number of steps to predict.
+        
+    metric : {'neg_mean_squared_error', 'neg_mean_absolute_error', 'neg_mean_absolute_percentage_error'}
+        Metric used to quantify the goodness of fit of the model.
+        
+    exog : np.ndarray, pd.Series, default `None`
+            Exogenous variable/s included as predictor/s. Must have the same
+            number of observations as `y` and should be aligned so that y[i] is
+            regressed on exog[i].
+        
+    interval: list, tuple, default `[5, 100]`
+            Confidence of the prediction interval estimated. Sequence of percentiles
+            to compute, which must be between 0 and 100 inclusive.
+            
+    n_boot: int, default `500`
+        Number of bootstrapping iterations used to estimate prediction
+        intervals.
+
+    insample_residuals: bool, default `True`
+        If `True`, residuals from the training data are used as proxy of
+        prediction error to create prediction intervals.
+
+    Returns 
+    -------
+    backtest_predictions: np.ndarray
+        If `include_intervals=True`, 2D np.ndarray shape(steps, 3) with predicted
+        value and their estimated interval.
+            Column 0 = predictions
+            Column 1 = lower bound interval
+            Column 2 = upper bound interval
+        
+    metric_value: np.ndarray shape (1,)
+        Value of the metric.
+
+    '''
+    
+    forecaster._check_y(y=y)
+    y = forecaster._preproces_y(y=y)
+    
+    if exog is not None:
+        forecaster._check_exog(exog=exog)
+        exog = forecaster._preproces_exog(exog=exog)
+    
+    backtest_predictions = []
+    
+    metrics = {
+        'neg_mean_squared_error': mean_squared_error,
+        'neg_mean_absolute_error': mean_absolute_error,
+        'neg_mean_absolute_percentage_error': mean_absolute_percentage_error
+    }
+    
+    metric = metrics[metric]
+        
+    if exog is None:
+        forecaster.fit(y=y[:initial_train_size])      
+    else:
+        forecaster.fit(y=y[:initial_train_size], exog=exog[:initial_train_size])     
+    
+    
+    folds     = (len(y) - initial_train_size) // steps + 1
+    remainder = (len(y) - initial_train_size) % steps
+    window_size = len(forecaster.last_window)
+    
+    for i in range(folds):
+        
+        last_window_end   = initial_train_size + i * steps
+        last_window_start = (initial_train_size + i * steps) - window_size 
+        last_window       = y[last_window_start:last_window_end]
+                
+        if i < folds - 1:
+            if exog is None:
+                pred = forecaster.predict_interval(
+                            steps       = steps,
+                            last_window = last_window,
+                            interval    = interval,
+                            n_boot      = n_boot,
+                            insample_residuals = insample_residuals
+                        )
+            else:
+                pred = forecaster.predict_interval(
+                            steps       = steps,
+                            last_window = last_window,
+                            exog        = exog[last_window_end:last_window_end + steps],
+                            interval    = interval,
+                            n_boot      = n_boot,
+                            insample_residuals = insample_residuals
+                        )
+        elif remainder != 0:
+            steps = remainder 
+            if exog is None:
+                pred = forecaster.predict_interval(
+                            steps       = steps,
+                            last_window = last_window,
+                            interval    = interval,
+                            n_boot      = n_boot,
+                            insample_residuals = insample_residuals
+                        )
+            else:
+                pred = forecaster.predict_interval(
+                            steps       = steps,
+                            last_window = last_window,
+                            exog        = exog[last_window_end:last_window_end + steps],
+                            interval    = interval,
+                            n_boot      = n_boot,
+                            insample_residuals = insample_residuals
+                        )
+        else:
+            continue
+        
+        backtest_predictions.append(pred)
+    
+    backtest_predictions = np.concatenate(backtest_predictions)
+    metric_value = metric(
+                        y_true = y[initial_train_size:],
+                        y_pred = backtest_predictions[:, 0]
+                   )
+
+    return np.array([metric_value]), backtest_predictions
