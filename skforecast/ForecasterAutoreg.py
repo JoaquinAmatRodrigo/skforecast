@@ -377,6 +377,13 @@ class ForecasterAutoreg():
         -------
         predicction_interval : np.array, shape (steps, 2)
             Interval estimated for each prediction by bootstrapping.
+
+        Notes
+        -----
+        More information about prediction intervals in forecasting:
+        https://otexts.com/fpp2/prediction-intervals.html
+        Forecasting: Principles and Practice (2nd ed) Rob J Hyndman and
+        George Athanasopoulos.
             
         '''
         
@@ -513,6 +520,13 @@ class ForecasterAutoreg():
             Column 0 = predictions
             Column 1 = lower bound interval
             Column 2 = upper bound interval
+
+        Notes
+        -----
+        More information about prediction intervals in forecasting:
+        https://otexts.com/fpp2/prediction-intervals.html
+        Forecasting: Principles and Practice (2nd ed) Rob J Hyndman and
+        George Athanasopoulos.
             
         '''
         

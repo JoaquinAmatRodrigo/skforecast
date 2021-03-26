@@ -500,6 +500,13 @@ def backtesting_forecaster_intervals(forecaster, y: Union[np.ndarray, pd.Series]
     metric_value: np.ndarray shape (1,)
         Value of the metric.
 
+    Notes
+    -----
+    More information about prediction intervals in forecasting:
+    https://otexts.com/fpp2/prediction-intervals.html
+    Forecasting: Principles and Practice (2nd ed) Rob J Hyndman and
+    George Athanasopoulos.
+
     '''
     
     forecaster._check_y(y=y)
