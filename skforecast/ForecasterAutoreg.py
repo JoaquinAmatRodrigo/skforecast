@@ -160,7 +160,7 @@ class ForecasterAutoreg():
         
         if self.max_lag > len(y):
             raise Exception(
-                f"Maximum lag can't be higer than `y` length. "
+                f"Maximum lag can't be higher than `y` length. "
                 f"Got maximum lag={self.max_lag} and `y` length={len(y)}."
             )
             
