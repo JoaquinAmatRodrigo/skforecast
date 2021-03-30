@@ -28,13 +28,14 @@ logging.basicConfig(
 
 
 ################################################################################
-#                         ForecasterAutoregMultistep                           #
+#                         ForecasterAutoregMultiOutput                         #
 ################################################################################
 
-class ForecasterAutoregMultistep():
+class ForecasterAutoregMultiOutput():
     '''
-    This class turns a scikit-learn regressor into a multi-step autoregressive
-    forecaster. A separate model is created for each forecast time step.
+    This class turns a scikit-learn regressor into a autoregressive multi-output
+    forecaster. A separate model is created for each forecast time step. See Notes
+    for more details.
     
     Parameters
     ----------
@@ -86,6 +87,15 @@ class ForecasterAutoregMultistep():
         
     out_sample_residuals: np.ndarray
         Residuals of the model when predicting non training data.
+        
+        
+    Notes
+    -----
+    A separate model is created for each forecast time step using
+    `sklearn.multioutput.MultiOutputRegressor`. This scikit learn class
+    is a wrapper that automize fitting one regressor per target. It is important
+    to note that all models share the same configuration of parameters and 
+    hiperparameters.
      
     '''
     
@@ -132,9 +142,9 @@ class ForecasterAutoregMultistep():
         Information displayed when a ForecasterAutoreg object is printed.
         '''
 
-        info =    "==========================" \
-                + "ForecasterAutoregMultistep" \
-                + "==========================" \
+        info =    "============================" \
+                + "ForecasterAutoregMultiOutput" \
+                + "============================" \
                 + "\n" \
                 + "Regressor: " + str(self.regressor) \
                 + "\n" \
@@ -199,7 +209,7 @@ class ForecasterAutoregMultistep():
     def fit(self, y: Union[np.ndarray, pd.Series],
             exog: Union[np.ndarray, pd.Series]=None) -> None:
         '''
-        Training ForecasterAutoregMultistep
+        Training ForecasterAutoregMultiOutput
         
         Parameters
         ----------        
@@ -214,8 +224,8 @@ class ForecasterAutoregMultistep():
 
         Returns 
         -------
-        self : ForecasterAutoregMultistep
-            Trained ForecasterAutoregMultistep
+        self : ForecasterAutoregMultiOutput
+            Trained ForecasterAutoregMultiOutput
         
         '''
         
@@ -239,6 +249,8 @@ class ForecasterAutoregMultistep():
                     f"`exog` must have same number of samples as `y`"
                 )
                 
+            # Trasform exog to match multi output format
+            exog = self._exog_to_multi_output(exog=exog)               
         
         X_train, y_train = self.create_lags(y=y)
         
@@ -266,7 +278,7 @@ class ForecasterAutoregMultistep():
         
             
     def predict(self, last_window: Union[np.ndarray, pd.Series]=None,
-                exog: np.ndarray=None):
+                exog: np.ndarray=None, steps=None):
         '''
         Multi-step prediction with a MultiOutputRegressor. The number of future
         steps predicted is defined when ininitializing the forecaster.
@@ -284,6 +296,9 @@ class ForecasterAutoregMultistep():
             
         exog : np.ndarray, pd.Series, default `None`
             Exogenous variable/s included as predictor/s.
+            
+        steps : Ignored
+            Not used, present here for API consistency by convention.
 
         Returns 
         -------
@@ -291,11 +306,6 @@ class ForecasterAutoregMultistep():
             Values predicted.
             
         '''
-        
-        if steps < 1:
-            raise Exception(
-                f"`steps` must be integer greater than 0. Got {steps}."
-            )
         
         if exog is None and self.included_exog:
             raise Exception(
@@ -314,10 +324,11 @@ class ForecasterAutoregMultistep():
                 exog=exog, ref_type = self.exog_type, ref_shape=self.exog_shape
             )
             exog = self._preproces_exog(exog=exog)
-            if exog.shape[0] < steps:
+            if exog.shape[0] < self.steps:
                 raise Exception(
                     f"`exog` must have at least as many values as `steps` predicted."
                 )
+            exog = self._exog_to_multi_output(exog=exog)
      
         if last_window is not None:
             self._check_last_window(last_window=last_window)
@@ -334,16 +345,15 @@ class ForecasterAutoregMultistep():
         if exog is None:
             predictions = self.regressor.predict(X=X)
         else:
+            X = np.hstack([X, exog[:self.steps]])
             predictions = self.regressor.predict(
-                            X = np.column_stack((X, exog[i,].reshape(1, -1)))
+                            X = X
                           )
             
         predictions = predictions.reshape(-1)
             
         return predictions
     
-    
-
     
     def _check_y(self, y: Union[np.ndarray, pd.Series]) -> None:
         '''
@@ -508,11 +518,52 @@ class ForecasterAutoregMultistep():
             
         return exog
     
+    def _exog_to_multi_output(self, exog):
+        
+        '''
+        Transforms `exog` to `np.ndarray` with the shape needed for multioutput
+        regresors.
+        
+        Parameters
+        ----------        
+        exog : np.ndarray, shape(samples,)
+            Time series values
+
+        Returns 
+        -------
+        exog_transformed: np.ndarray, shape(samples - self.max_lag, self.steps)
+        '''
+
+        exog_transformed = []
+
+        for column in range(exog.shape[1]):
+            exog_column_transformed = []
+            for i in range(exog.shape[0] - (self.steps -1)):
+                exog_column_transformed.append(exog[i:i + self.steps, column])
+
+            if exog.shape[0] - (self.steps -1) > 1:
+                exog_column_transformed = np.vstack(exog_column_transformed)
+            else:
+                exog_column_transformed = exog_column_transformed
+
+            exog_transformed.append(exog_column_transformed)
+
+        if exog.shape[1] > 1:
+            exog_transformed = np.hstack(exog_transformed)
+        else:
+            exog_transformed = exog_column_transformed
+
+        return exog_transformed
+    
     
     def set_params(self, **params: dict) -> None:
         '''
         Set new values to the parameters of the scikit learn model stored in the
-        ForecasterAutoreg.
+        forecaster. A separate model is created for each forecast time step using
+        `sklearn.multioutput.MultiOutputRegressor`. This scikit learn class is a
+        wrapper that automize fitting one regressor per target. It is important
+        to note that all models share the same configuration of parameters and 
+        hiperparameters.
         
         Parameters
         ----------
@@ -567,15 +618,21 @@ class ForecasterAutoregMultistep():
         self.max_lag  = max(self.lags)
         
 
-    def get_coef(self) -> np.ndarray:
+    def get_coef(self, step) -> np.ndarray:
         '''      
         Return estimated coefficients for the linear regression model stored in
-        the forecaster. Only valid when the forecaster has been trained using
-        as `regressor: `LinearRegression()`, `Lasso()` or `Ridge()`.
+        the forecaster for a specific step. Since a separate model is created for
+        each forecast time step, it is necessary to select the model from which
+        retireve information.
+        
+        Only valid when the forecaster has been trained using as `regressor:
+        `LinearRegression()`, `Lasso()` or `Ridge()`.
         
         Parameters
         ----------
-        self
+        step : int
+            Model from which retireve information (a separate model is created for
+            each forecast time step).
 
         Returns 
         -------
@@ -586,32 +643,44 @@ class ForecasterAutoregMultistep():
         
         '''
         
-        valid_instances = (sklearn.linear_model._base.LinearRegression,
-                          sklearn.linear_model._coordinate_descent.Lasso,
-                          sklearn.linear_model._ridge.Ridge
-                          )
+        if step > self.steps:
+            raise Exception(
+                f"Forecaster traied for {self.steps} steps. Got step={step}."
+            )
+            
         
-        if not isinstance(self.regressor, valid_instances):
+        valid_instances = (sklearn.linear_model._base.LinearRegression,
+                           sklearn.linear_model._coordinate_descent.Lasso,
+                           sklearn.linear_model._ridge.Ridge
+                           )
+        
+        if not isinstance(self.regressor.estimator, valid_instances):
             warnings.warn(
                 ('Only forecasters with `regressor` `LinearRegression()`, ' +
                  ' `Lasso()` or `Ridge()` have coef.')
             )
             return
         else:
-            coef = self.regressor.coef_
+            coef = self.regressor.estimators_[step-1].coef_
             
         return coef
 
     
-    def get_feature_importances(self) -> np.ndarray:
+    def get_feature_importances(self, step) -> np.ndarray:
         '''      
-        Return impurity-based feature importances of the model stored in the
-        forecaster. Only valid when the forecaster has been trained using
+        Return impurity-based feature importances of the model stored in
+        the forecaster for a specific step. Since a separate model is created for
+        each forecast time step, it is necessary to select the model from which
+        retireve information.
+        
+        Only valid when the forecaster has been trained using
         `regressor=GradientBoostingRegressor()` or `regressor=RandomForestRegressor`.
 
         Parameters
         ----------
-        self
+        step : int
+            Model from which retireve information (a separate model is created for
+            each forecast time step).
 
         Returns 
         -------
@@ -620,16 +689,22 @@ class ForecasterAutoregMultistep():
         Values are aligned so that `feature_importances[i]` is the value
         associated with `self.lags[i]`.
         '''
+        
+        if step > self.steps:
+            raise Exception(
+                f"Forecaster traied for {self.steps} steps. Got step={step}."
+            )
+        
+        valid_instances = (sklearn.ensemble._forest.RandomForestRegressor,
+                           sklearn.ensemble._gb.GradientBoostingRegressor)
 
-        if not isinstance(self.regressor,
-                        (sklearn.ensemble._forest.RandomForestRegressor,
-                        sklearn.ensemble._gb.GradientBoostingRegressor)):
+        if not isinstance(self.regressor.estimator, valid_instances):
             warnings.warn(
                 ('Only forecasters with `regressor=GradientBoostingRegressor()` '
                  'or `regressor=RandomForestRegressor`.')
             )
             return
         else:
-            feature_importances = self.regressor.feature_importances_
+            feature_importances = self.regressor.estimators_[step-1].feature_importances_
 
         return feature_importances
