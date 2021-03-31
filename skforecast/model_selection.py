@@ -208,7 +208,7 @@ def cv_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
 def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
                            initial_train_size: int, steps: int,
                            metric: str, exog: Union[np.ndarray, pd.Series]=None,
-                           verbose: bool=True):
+                           verbose: bool=False):
     '''
     Backtesting (validation) of `ForecasterAutoreg` or `ForecasterCustom` object.
     The model is trained only once using the `initial_train_size` first observations.
@@ -239,7 +239,7 @@ def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
             number of observations as `y` and should be aligned so that y[i] is
             regressed on exog[i].
             
-    verbose : bool, default `True`
+    verbose : bool, default `False`
         Print number of folds used for backtesting.
 
     Returns 
