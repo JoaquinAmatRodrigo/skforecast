@@ -18,8 +18,9 @@ from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import mean_absolute_percentage_error
 from sklearn.model_selection import ParameterGrid
 
-# from .ForecasterAutoreg import ForecasterAutoreg
-# from .ForecasterCustom import ForecasterCustom
+from .ForecasterAutoreg import ForecasterAutoreg
+from .ForecasterCustom import ForecasterCustom
+from .ForecasterCustom import ForecasterAutoregMultiOutput
 
 logging.basicConfig(
     format = '%(asctime)-5s %(name)-10s %(levelname)-5s %(message)s', 
@@ -251,8 +252,12 @@ def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
     remainder = (len(y) - initial_train_size) % steps
     window_size = len(forecaster.last_window)
     
+    if isinstance(forecaster, ForecasterAutoregMultiOutput):
+        # In ForecasterAutoregMultiOutput predictions are not iterative,
+        # therefore no remainder is allowed.
+        remainder=0
+    
     for i in range(folds):
-        
         last_window_end   = initial_train_size + i * steps
         last_window_start = (initial_train_size + i * steps) - window_size 
         last_window       = y[last_window_start:last_window_end]
@@ -289,7 +294,7 @@ def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
     
     backtest_predictions = np.concatenate(backtest_predictions)
     metric_value = metric(
-                        y_true = y[initial_train_size:],
+                        y_true = y[initial_train_size: initial_train_size + len(backtest_predictions)],
                         y_pred = backtest_predictions
                    )
 
@@ -373,6 +378,10 @@ def grid_search_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
         
     elif lags_grid is None:
         lags_grid = [forecaster.lags]
+        
+    if isinstance(forecaster, ForecasterAutoregMultiOutput):
+        param_grid_renamed = {'estimator__'+key: value for key, value in param_grid.items()}
+        param_grid = param_grid_renamed
         
     lags_list = []
     params_list = []

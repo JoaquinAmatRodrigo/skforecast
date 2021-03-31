@@ -470,9 +470,9 @@ class ForecasterAutoregMultiOutput():
         '''
         
         if isinstance(y, pd.Series):
-            return y.to_numpy()
+            return y.to_numpy().copy()
         else:
-            return y
+            return y.copy()
         
     def _preproces_last_window(self, last_window) -> np.ndarray:
         
@@ -490,9 +490,9 @@ class ForecasterAutoregMultiOutput():
         '''
         
         if isinstance(last_window, pd.Series):
-            return last_window.to_numpy()
+            return last_window.to_numpy().copy()
         else:
-            return last_window
+            return last_window.copy()
         
         
     def _preproces_exog(self, exog) -> np.ndarray:
@@ -512,11 +512,13 @@ class ForecasterAutoregMultiOutput():
         '''
         
         if isinstance(exog, pd.Series):
-            exog = exog.to_numpy().reshape(-1, 1)
+            exog_prep = exog.to_numpy().reshape(-1, 1).copy()
         elif isinstance(exog, np.ndarray) and exog.ndim == 1:
-            exog = exog.reshape(-1, 1)
+            exog_prep = exog.reshape(-1, 1).copy()
+        else:
+            exog_prep = exog.copy()
             
-        return exog
+        return exog_prep
     
     def _exog_to_multi_output(self, exog):
         
@@ -537,18 +539,18 @@ class ForecasterAutoregMultiOutput():
         exog_transformed = []
 
         for column in range(exog.shape[1]):
+
             exog_column_transformed = []
+
             for i in range(exog.shape[0] - (self.steps -1)):
                 exog_column_transformed.append(exog[i:i + self.steps, column])
 
-            if exog.shape[0] - (self.steps -1) > 1:
+            if len(exog_column_transformed) > 1:
                 exog_column_transformed = np.vstack(exog_column_transformed)
-            else:
-                exog_column_transformed = exog_column_transformed
 
             exog_transformed.append(exog_column_transformed)
 
-        if exog.shape[1] > 1:
+        if len(exog_transformed) > 1:
             exog_transformed = np.hstack(exog_transformed)
         else:
             exog_transformed = exog_column_transformed
