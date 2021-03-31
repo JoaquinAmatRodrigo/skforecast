@@ -492,7 +492,7 @@ def backtesting_forecaster_intervals(forecaster, y: Union[np.ndarray, pd.Series]
                            initial_train_size: int, steps: int,
                            metric: str, exog: Union[np.ndarray, pd.Series]=None,
                            interval: list=[5, 95], n_boot: int=500,
-                           in_sample_residuals: bool=True):
+                           in_sample_residuals: bool=True, verbose: bool=False):
     '''
     Backtesting (validation) of `ForecasterAutoreg` or `ForecasterCustom` object.
     The model is trained only once using the `initial_train_size` first observations.
@@ -535,6 +535,9 @@ def backtesting_forecaster_intervals(forecaster, y: Union[np.ndarray, pd.Series]
     in_sample_residuals: bool, default `True`
         If `True`, residuals from the training data are used as proxy of
         prediction error to create prediction intervals.
+        
+    verbose : bool, default `True`
+        Print number of folds used for backtesting.
 
     Returns 
     -------
@@ -583,6 +586,12 @@ def backtesting_forecaster_intervals(forecaster, y: Union[np.ndarray, pd.Series]
     folds     = (len(y) - initial_train_size) // steps + 1
     remainder = (len(y) - initial_train_size) % steps
     window_size = len(forecaster.last_window)
+    
+    if verbose:
+        print(f"Number of observations used for training: {initial_train_size}")
+        print(f"Number of folds: {folds}")
+        if remainder != 0:
+            print(f"Last fold only includes {remainder} observations.")
     
     for i in range(folds):
         
