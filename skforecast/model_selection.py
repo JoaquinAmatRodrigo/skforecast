@@ -20,7 +20,7 @@ from sklearn.model_selection import ParameterGrid
 
 from .ForecasterAutoreg import ForecasterAutoreg
 from .ForecasterCustom import ForecasterCustom
-from .ForecasterCustom import ForecasterAutoregMultiOutput
+from .ForecasterAutoregMultiOutput import ForecasterAutoregMultiOutput
 
 logging.basicConfig(
     format = '%(asctime)-5s %(name)-10s %(levelname)-5s %(message)s', 
