@@ -178,10 +178,10 @@ class ForecasterCustom():
         X_train = np.vstack(X_train)
         y_train = np.array(y_train)
         
-		if np.isnan(X_train).any():
-			raise Exception(
-				f"`create_predictors()` is returning `NaN` values."
-			)
+        if np.isnan(X_train).any():
+            raise Exception(
+                f"`create_predictors()` is returning `NaN` values."
+            )
         
         if exog is not None:
             self.regressor.fit(
@@ -277,9 +277,9 @@ class ForecasterCustom():
         for i in range(steps):
             X = self.create_predictors(y=last_window)
             if np.isnan(X).any():
-				raise Exception(
-					f"`create_predictors()` is returning `NaN` values."
-				)
+                raise Exception(
+                    f"`create_predictors()` is returning `NaN` values."
+                )
             if exog is None:
                 prediction = self.regressor.predict(X=X)
             else:
