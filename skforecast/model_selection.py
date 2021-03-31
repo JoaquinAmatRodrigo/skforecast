@@ -27,9 +27,11 @@ logging.basicConfig(
     level  = logging.INFO,
 )
 
+
 def time_series_spliter(y: Union[np.ndarray, pd.Series],
                         initial_train_size: int, steps: int,
-                        allow_incomplete_fold: bool=True) -> Dict[np.ndarray, np.ndarray]:
+                        allow_incomplete_fold: bool=True,
+                        verbose: bool=True):
     '''
     
     Split indices of a time series into multiple train-test pairs. The order of
@@ -49,6 +51,9 @@ def time_series_spliter(y: Union[np.ndarray, pd.Series],
     allow_incomplete_fold : bool, default `True`
         The last test set is allowed to be incomplete if it does not reach `steps`
         observations. Otherwise, the latest observations are discarded.
+        
+    verbose : bool, default `True`
+        Print number of splits created.
 
     Yields
     ------
@@ -76,7 +81,21 @@ def time_series_spliter(y: Union[np.ndarray, pd.Series],
     
   
     folds     = (len(y) - initial_train_size) // steps  + 1
-    remainder = (len(y) - initial_train_size) % steps    
+    remainder = (len(y) - initial_train_size) % steps   
+    
+    if verbose:
+        print(f"Number of folds: {folds}")
+        if remainder != 0 and allow_incomplete_fold:
+            print(
+                f"Since `allow_incomplete_fold=True`, "
+                f"last fold includes {remainder} extra observations."
+            )
+        elif remainder != 0 and not allow_incomplete_fold:
+            print(
+                f"Since `allow_incomplete_fold=False`, "
+                f"last {remainder} observations are descarted."
+            )
+        
     
     for i in range(folds):
           
@@ -99,7 +118,7 @@ def time_series_spliter(y: Union[np.ndarray, pd.Series],
 def cv_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
                   initial_train_size: int, steps: int,
                   metric: str, exog: Union[np.ndarray, pd.Series]=None,
-                  allow_incomplete_fold: bool=True):
+                  allow_incomplete_fold: bool=True, verbose: bool=True):
     '''
     Cross-validation of `ForecasterAutoreg` or `ForecasterCustom` object.
     The order of is maintained and the training set increases in each iteration.
@@ -129,6 +148,9 @@ def cv_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
     allow_incomplete_fold : bool, default `True`
         The last test set is allowed to be incomplete if it does not reach `steps`
         observations. Otherwise, the latest observations are discarded.
+        
+    verbose : bool, default `True`
+        Print number of folds used for cross validation.
 
     Returns 
     -------
@@ -158,7 +180,8 @@ def cv_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
                 y                     = y,
                 initial_train_size    = initial_train_size,
                 steps                 = steps,
-                allow_incomplete_fold = allow_incomplete_fold
+                allow_incomplete_fold = allow_incomplete_fold,
+                verbose               = verbose
              )
     
     for train_index, test_index in splits:
@@ -184,7 +207,8 @@ def cv_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
 
 def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
                            initial_train_size: int, steps: int,
-                           metric: str, exog: Union[np.ndarray, pd.Series]=None):
+                           metric: str, exog: Union[np.ndarray, pd.Series]=None,
+                           verbose: bool=True):
     '''
     Backtesting (validation) of `ForecasterAutoreg` or `ForecasterCustom` object.
     The model is trained only once using the `initial_train_size` first observations.
@@ -214,6 +238,9 @@ def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
             Exogenous variable/s included as predictor/s. Must have the same
             number of observations as `y` and should be aligned so that y[i] is
             regressed on exog[i].
+            
+    verbose : bool, default `True`
+        Print number of folds used for backtesting.
 
     Returns 
     -------
@@ -251,6 +278,12 @@ def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
     folds     = (len(y) - initial_train_size) // steps + 1
     remainder = (len(y) - initial_train_size) % steps
     window_size = len(forecaster.last_window)
+    
+    if verbose:
+        print(f"Number of observations used for training: {initial_train_size}")
+        print(f"Number of folds: {folds}")
+        if remainder != 0:
+            print(f"Last fold only includes {remainder} observations.")
     
     if isinstance(forecaster, ForecasterAutoregMultiOutput):
         # In ForecasterAutoregMultiOutput predictions are not iterative,
@@ -306,7 +339,8 @@ def grid_search_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
                            param_grid: dict, initial_train_size: int, steps: int,
                            metric: str, exog: Union[np.ndarray, pd.Series]=None,
                            lags_grid: list=None, method: str='cv',
-                           allow_incomplete_fold: bool=True, return_best: bool=True):
+                           allow_incomplete_fold: bool=True, return_best: bool=True,
+                           verbose: bool=True):
     '''
     Exhaustive search over specified parameter values for a Forecaster object.
     Validation is done using time series cross-validation or backtesting.
@@ -354,6 +388,9 @@ def grid_search_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
         
     return_best : bool
         Refit the `forecaster` using the best found parameters on the whole data.
+        
+    verbose : bool, default `True`
+        Print number of folds used for cv or backtesting.
 
     Returns 
     -------
@@ -407,7 +444,8 @@ def grid_search_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
                                 initial_train_size = initial_train_size,
                                 steps  = steps,
                                 metric = metric,
-                                allow_incomplete_fold = allow_incomplete_fold
+                                allow_incomplete_fold = allow_incomplete_fold,
+                                verbose = verbose
                              )
             else:
                 metrics = backtesting_forecaster(
@@ -416,7 +454,8 @@ def grid_search_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
                                 exog       = exog,
                                 initial_train_size = initial_train_size,
                                 steps  = steps,
-                                metric = metric
+                                metric = metric,
+                                verbose = verbose
                              )[0]
 
             lags_list.append(lags)
