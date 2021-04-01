@@ -278,18 +278,22 @@ def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
     folds     = (len(y) - initial_train_size) // steps + 1
     remainder = (len(y) - initial_train_size) % steps
     window_size = len(forecaster.last_window)
+
+    if isinstance(forecaster, ForecasterAutoregMultiOutput) and remainder != 0:
+        # In ForecasterAutoregMultiOutput predictions are not iterative,
+        # therefore no remainder is allowed.
+        remainder=0
+        logging.warning(
+                f"Backtesting `ForecasterAutoregMultiOutput` only allow completed "
+                f"folds. Last {remainder} observations are excluded."
+        )
     
     if verbose:
         print(f"Number of observations used for training: {initial_train_size}")
         print(f"Number of folds: {folds}")
         if remainder != 0:
             print(f"Last fold only includes {remainder} observations.")
-    
-    if isinstance(forecaster, ForecasterAutoregMultiOutput):
-        # In ForecasterAutoregMultiOutput predictions are not iterative,
-        # therefore no remainder is allowed.
-        remainder=0
-    
+      
     for i in range(folds):
         last_window_end   = initial_train_size + i * steps
         last_window_start = (initial_train_size + i * steps) - window_size 
