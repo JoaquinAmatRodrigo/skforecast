@@ -2,11 +2,13 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-## [0.1.8] - Unreleased
+## [0.1.8] - 2021-04-02
 
 ### Added
 
-- Method `predict_interval()` estimate prediction interval using bootstrapping.
+- Class `ForecasterAutoregMultiOutput.py`: forecaster with direct multi-step predictions.
+- Method `ForecasterCustom.predict_interval()` and  `ForecasterAutoreg.predict_interval()`: estimate prediction interval using bootstrapping.
+- `skforecast.model_selection.backtesting_forecaster_intervals()` perform backtesting and return prediction intervals.
  
 ### Changed
 
