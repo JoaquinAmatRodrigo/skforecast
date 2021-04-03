@@ -1,3 +1,5 @@
+[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/Naereen/StrapDown.js/graphs/commit-activity)
+
 # skforecast
 
 **Time series forecasting with scikit-learn regressors.**
@@ -36,17 +38,14 @@ $ pip install git+https://github.com/JoaquinAmatRodrigo/skforecast#master
 + Include exogenous variables as predictors.
 + Include custom predictors (rolling mean, rolling variance ...)
 + Backtesting
++ Prediction interval estimated by bootstrapping
++ Get predictor importance
 
 ## TODO
 
-- [x] Get predictor importance
 - [ ] Parallel grid search
 - [ ] Speed lag creation with numba
-- [x] Custom predictors
 - [ ] Add more unit testing
-- [x] Functional testing
-- [x] Prediction interval estimated by bootstrapping
-- [x] Direct multi-output forecasters
 
 
 ## Introduction
