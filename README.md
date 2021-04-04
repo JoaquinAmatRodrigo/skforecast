@@ -201,8 +201,6 @@ results_grid = grid_search_forecaster(
                         verbose     = False
                     )
 
-# Results grid search
-# ==============================================================================
 results_grid
 ```
 
@@ -260,16 +258,7 @@ forecaster.get_feature_importances()
 ```
 
 ```python
-# Create and fit forecaster
-# ==============================================================================
-forecaster = ForecasterAutoreg(
-                    regressor = LinearRegression(),
-                    lags      = 15
-                )
-
-forecaster.fit(y=datos_train)
-
-# Predict intervals
+# Prediction intervals
 # ==============================================================================
 predictions = forecaster.predict_interval(
                     steps    = steps,
@@ -277,8 +266,6 @@ predictions = forecaster.predict_interval(
                     n_boot   = 1000
               )
 
-# Plot
-# ==============================================================================
 # Add datetime index to predictions
 predictions = pd.DataFrame(data=predictions, index=datos_test.index)
 fig, ax=plt.subplots(figsize=(9, 4))
@@ -313,7 +300,15 @@ metric, predictions_backtest = backtesting_forecaster(
     metric     = 'neg_mean_squared_error',
     verbose    = True
 )
-metric
+print(metric)
+
+# Add datetime index to predictions
+predictions_backtest = pd.Series(data=predictions_backtest, index=datos_test.index)
+fig, ax = plt.subplots(figsize=(9, 4))
+#datos_train.plot(ax=ax, label='train')
+datos_test.plot(ax=ax, label='test')
+predictions_backtest.plot(ax=ax, label='predictions')
+ax.legend();
 ```
 
 ```
@@ -323,18 +318,6 @@ Last fold only includes 1 observations.
 [0.02150972]
 ```
 
-
-```python
-# Plot
-# ==============================================================================
-# Add datetime index to predictions
-predictions_backtest = pd.Series(data=predictions_backtest, index=datos_test.index)
-fig, ax = plt.subplots(figsize=(9, 4))
-#datos_train.plot(ax=ax, label='train')
-datos_test.plot(ax=ax, label='test')
-predictions_backtest.plot(ax=ax, label='predictions')
-ax.legend();
-```
 <p><img src="./images/backtesting_forecaster.png"</p>
 
 
