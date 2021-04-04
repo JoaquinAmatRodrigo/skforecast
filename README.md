@@ -125,8 +125,8 @@ ax.legend();
 # Create and fit forecaster
 # ==============================================================================
 forecaster = ForecasterAutoreg(
-                    regressor=LinearRegression(),
-                    lags=15
+                    regressor = LinearRegression(),
+                    lags      = 15
                 )
 
 forecaster.fit(y=datos_train)
@@ -176,8 +176,8 @@ Test error (mse): 0.011051937043503587
 # Grid search hiperparameters and lags
 # ==============================================================================
 forecaster = ForecasterAutoreg(
-                regressor=RandomForestRegressor(random_state=123),
-                lags=12
+                regressor = RandomForestRegressor(random_state=123),
+                lags      = 12
              )
 
 # Regressor hiperparameters
@@ -197,7 +197,8 @@ results_grid = grid_search_forecaster(
                         metric      = 'neg_mean_squared_error',
                         initial_train_size    = int(len(datos_train)*0.5),
                         allow_incomplete_fold = False,
-                        return_best = True
+                        return_best = True,
+                        verbose     = False
                     )
 
 # Results grid search
@@ -257,6 +258,85 @@ forecaster.get_feature_importances()
 [0.58116139 0.12777451 0.04191822 0.03095527 0.02517231 0.02482571
  0.04065757 0.01652861 0.02619182 0.08481458]
 ```
+
+```python
+# Create and fit forecaster
+# ==============================================================================
+forecaster = ForecasterAutoreg(
+                    regressor = LinearRegression(),
+                    lags      = 15
+                )
+
+forecaster.fit(y=datos_train)
+
+# Predict intervals
+# ==============================================================================
+predictions = forecaster.predict_interval(
+                    steps    = steps,
+                    interval = [5, 95],
+                    n_boot   = 1000
+              )
+
+# Plot
+# ==============================================================================
+# Add datetime index to predictions
+predictions = pd.DataFrame(data=predictions, index=datos_test.index)
+fig, ax=plt.subplots(figsize=(9, 4))
+#datos_train.plot(ax=ax, label='train')
+datos_test.plot(ax=ax, label='test')
+predictions.iloc[:, 0].plot(ax=ax, label='predictions')
+ax.fill_between(predictions.index,
+                predictions.iloc[:, 1],
+                predictions.iloc[:, 2],
+                alpha=0.5)
+ax.legend();
+```
+
+<p><img src="./images/prediction_interval.png"</p>
+
+```python
+# Backtesting
+# ==============================================================================
+n_test = 36*3 + 1
+datos_train = datos[:-n_test]
+datos_test  = datos[-n_test:]
+
+steps = 36
+regressor = LinearRegression()
+forecaster = ForecasterAutoreg(regressor=regressor, lags=15)
+
+metric, predictions_backtest = backtesting_forecaster(
+    forecaster = forecaster,
+    y          = datos,
+    initial_train_size = len(datos_train),
+    steps      = steps,
+    metric     = 'neg_mean_squared_error',
+    verbose    = True
+)
+metric
+```
+
+```
+Number of observations used for training: 95
+Number of folds: 4
+Last fold only includes 1 observations.
+[0.02150972]
+```
+
+
+```python
+# Plot
+# ==============================================================================
+# Add datetime index to predictions
+predictions_backtest = pd.Series(data=predictions_backtest, index=datos_test.index)
+fig, ax = plt.subplots(figsize=(9, 4))
+#datos_train.plot(ax=ax, label='train')
+datos_test.plot(ax=ax, label='test')
+predictions_backtest.plot(ax=ax, label='predictions')
+ax.legend();
+```
+<p><img src="./images/backtesting_forecaster.png"</p>
+
 
 ### Autoregressive + 1 exogenous predictor
 
@@ -369,8 +449,9 @@ results_grid = grid_search_forecaster(
                         metric      = 'neg_mean_squared_error',
                         initial_train_size    = int(len(datos_train)*0.5),
                         allow_incomplete_fold = False,
-                        return_best = True
-                    )
+                        return_best = True,
+                        verbose     = False
+                )
 
 # Results grid Search
 # ==============================================================================
@@ -546,7 +627,8 @@ results_grid = grid_search_forecaster(
                         method      = 'cv',
                         initial_train_size    = int(len(datos_train)*0.5),
                         allow_incomplete_fold = False,
-                        return_best = True
+                        return_best = True,
+                        verbose     = False
                     )
 ```
 
