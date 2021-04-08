@@ -282,11 +282,11 @@ def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
     if isinstance(forecaster, ForecasterAutoregMultiOutput) and remainder != 0:
         # In ForecasterAutoregMultiOutput predictions are not iterative,
         # therefore no remainder is allowed.
-        remainder=0
         logging.warning(
                 f"Backtesting `ForecasterAutoregMultiOutput` only allow completed "
                 f"folds. Last {remainder} observations are excluded."
         )
+        remainder=0
     
     if verbose:
         print(f"Number of observations used for training: {initial_train_size}")
