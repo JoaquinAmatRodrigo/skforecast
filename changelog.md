@@ -9,6 +9,8 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
++ `backtesting_forecaster_intervals` and `backtesting_forecaster` print number of steps per fold.
+
  
 ### Fixed
 

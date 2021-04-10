@@ -291,6 +291,7 @@ def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
     if verbose:
         print(f"Number of observations used for training: {initial_train_size}")
         print(f"Number of folds: {folds}")
+        print(f"Number of steps per fold: {steps}")
         if remainder != 0:
             print(f"Last fold only includes {remainder} observations.")
       
@@ -594,6 +595,7 @@ def backtesting_forecaster_intervals(forecaster, y: Union[np.ndarray, pd.Series]
     if verbose:
         print(f"Number of observations used for training: {initial_train_size}")
         print(f"Number of folds: {folds}")
+        print(f"Number of steps per fold: {steps}")
         if remainder != 0:
             print(f"Last fold only includes {remainder} observations.")
     
