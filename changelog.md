@@ -2,6 +2,19 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [0.1.8.1] - unreleased
+
+### Added
+
+
+### Changed
+
+ 
+### Fixed
+
++ Warning of inclompleted folds when using `backtesting_forecast()` with a  `ForecasterAutoregMultiOutput`.
+
+
 ## [0.1.8] - 2021-04-02
 
 ### Added
