@@ -345,7 +345,7 @@ class ForecasterAutoregMultiOutput():
         if exog is None:
             predictions = self.regressor.predict(X=X)
         else:
-            X = np.hstack([X, exog[:self.steps]])
+            X = np.hstack([X, exog[0].reshape(1, -1)])
             predictions = self.regressor.predict(
                             X = X
                           )
