@@ -16,6 +16,8 @@ All notable changes to this project will be documented in this file.
 
 + Warning of inclompleted folds when using `backtesting_forecast()` with a  `ForecasterAutoregMultiOutput`.
 
++ `ForecasterAutoregMultiOutput.predict()` allow exog data longer than needed (steps).
+
 
 ## [0.1.8] - 2021-04-02
 
