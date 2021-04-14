@@ -31,11 +31,11 @@ $ pip install git+https://github.com/JoaquinAmatRodrigo/skforecast#master
 
 ## Features
 
-+ Create recursive autoregressive forecasters from any scikit-learn regressor.
-+ Create multi-output autoregressive forecasters from any scikit-learn regressor.
-+ Grid search to find optimal hyperparameters.
-+ Grid search to find optimal lags (predictors).
-+ Include exogenous variables as predictors.
++ Create recursive autoregressive forecasters from any scikit-learn regressor
++ Create multi-output autoregressive forecasters from any scikit-learn regressor
++ Grid search to find optimal hyperparameters
++ Grid search to find optimal lags (predictors)
++ Include exogenous variables as predictors
 + Include custom predictors (rolling mean, rolling variance ...)
 + Backtesting
 + Prediction interval estimated by bootstrapping
