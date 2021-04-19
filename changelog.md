@@ -6,12 +6,14 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
++ `set_out_sample_residuals()` method to store or update out of sample residuals used by `predict_interval()`.
 
 ### Changed
 
 + `backtesting_forecaster_intervals` and `backtesting_forecaster` print number of steps per fold.
 
- 
++ Only stored up to 1000 residuals.
+
 ### Fixed
 
 + Warning of inclompleted folds when using `backtesting_forecast()` with a  `ForecasterAutoregMultiOutput`.
