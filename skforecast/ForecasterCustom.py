@@ -76,10 +76,12 @@ class ForecasterCustom():
         Shape of exog used in training.
         
     in_sample_residuals: np.ndarray
-        Residuals of the model when predicting training data.
+        Residuals of the model when predicting training data. Only stored up to
+        1000 values.
         
     out_sample_residuals: np.ndarray
-        Residuals of the model when predicting non training data.
+        Residuals of the model when predicting non training data. Only stored
+        up to 1000 values.
      
     '''
     
@@ -190,14 +192,19 @@ class ForecasterCustom():
                 X = np.column_stack((X_train, exog[self.window_size:,])),
                 y = y_train
             )
-            self.in_sample_residuals = \
-                y_train - self.regressor.predict(
+            
+            residuals = y_train - self.regressor.predict(
                                 np.column_stack((X_train, exog[self.window_size:,]))
                           )
             
         else:
             self.regressor.fit(X=X_train, y=y_train)
-            self.in_sample_residuals = y_train - self.regressor.predict(X_train)
+            residuals = y_train - self.regressor.predict(X_train)
+            
+        if len(residuals) > 1000:
+            # Only up to 1000 residuals are stored
+            residuals = np.random.choice(a=residuals, size=1000, replace=False)                                              
+        self.in_sample_residuals = residuals
         
         # The last time window of training data is stored so that predictors in
         # the first iteration of `predict()` can be calculated.
@@ -332,7 +339,10 @@ class ForecasterCustom():
             
         in_sample_residuals: bool, default `True`
             If `True`, residuals from the training data are used as proxy of
-            prediction error to create prediction intervals.
+            prediction error to create prediction intervals. If `False`, out of
+            sample residuals are used. In the latter case, the user shoud have
+            calculated and stored the residuals within the forecaster (see
+            `set_out_sample_residuals()`).
             
 
         Returns 
@@ -352,6 +362,14 @@ class ForecasterCustom():
         if steps < 1:
             raise Exception(
                 f"`steps` must be integer greater than 0. Got {steps}."
+            )
+            
+        if not in_sample_residuals and self.out_sample_residuals is None:
+            raise Exception(
+                ('out_sample_residuals is empty. In order to estimate prediction '
+                'intervals using out of sample residuals, the user shoud have '
+                'calculated and stored the residuals within the forecaster (see'
+                '`set_out_sample_residuals()`.')
             )
             
         if exog is None and self.included_exog:
@@ -474,7 +492,10 @@ class ForecasterCustom():
             
         in_sample_residuals: bool, default `True`
             If `True`, residuals from the training data are used as proxy of
-            prediction error to create prediction intervals.
+            prediction error to create prediction intervals. If `False`, out of
+            sample residuals are used. In the latter case, the user shoud have
+            calculated and stored the residuals within the forecaster (see
+            `set_out_sample_residuals()`).
 
         Returns 
         -------
@@ -496,6 +517,14 @@ class ForecasterCustom():
         if steps < 1:
             raise Exception(
                 f"`steps` must be integer greater than 0. Got {steps}."
+            )
+            
+        if not in_sample_residuals and self.out_sample_residuals is None:
+            raise Exception(
+                ('out_sample_residuals is empty. In order to estimate prediction '
+                'intervals using out of sample residuals, the user shoud have '
+                'calculated and stored the residuals within the forecaster (see'
+                '`set_out_sample_residuals()`.')
             )
             
         if exog is None and self.included_exog:
@@ -551,7 +580,7 @@ class ForecasterCustom():
                                     exog        = exog_original,
                                     interval    = interval,
                                     n_boot      = n_boot,
-                                    in_sample_residuals = True
+                                    in_sample_residuals = in_sample_residuals
                                 )
         
         predictions = np.column_stack((predictions, predictions_interval))
@@ -740,6 +769,33 @@ class ForecasterCustom():
         '''
         
         self.regressor.set_params(**params)
+        
+    
+    def set_out_sample_residuals(self, residuals: np.ndarray) -> None:
+        '''
+        Set new values to the attribute `out_sample_residuals`. Out of sample
+        residuals are meant to be calculated using observations that did not
+        participate in the training process.
+        
+        Parameters
+        ----------
+        params : 1D np.ndarray
+            Values of residuals. If len(residuals) > 1000, only a random sample
+            of 1000 values are stored.
+        Returns 
+        -------
+        self
+        
+        '''
+        if not isinstance(residuals, np.ndarray):
+            raise Exception(
+                f"`residuals` argument must be `1D np.ndarray`. Got {type(lags)}"
+            )
+            
+        if len(residuals) > 1000:
+            residuals = np.random.choice(a=residuals, size=1000, replace=False)
+            
+        self.out_sample_residuals = residuals
                 
 
     def get_coef(self) -> np.ndarray:
