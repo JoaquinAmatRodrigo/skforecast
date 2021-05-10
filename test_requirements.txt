@@ -1,0 +1,7 @@
+pytest==6.2.2
+pytest-cov==2.11.1    
+numpy>=1.20.1
+pandas>=1.2.2
+tqdm>=4.57.0
+scikit-learn>=0.24
+git+https://github.com/JoaquinAmatRodrigo/skforecast@v0.1.8
