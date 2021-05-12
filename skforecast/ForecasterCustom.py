@@ -288,10 +288,10 @@ class ForecasterCustom():
                     f"`create_predictors()` is returning `NaN` values."
                 )
             if exog is None:
-                prediction = self.regressor.predict(X=X)
+                prediction = self.regressor.predict(X)
             else:
                 prediction = self.regressor.predict(
-                                X = np.column_stack((X, exog[i,].reshape(1, -1)))
+                                np.column_stack((X, exog[i,].reshape(1, -1)))
                              )
             predictions[i] = prediction.ravel()[0]
 

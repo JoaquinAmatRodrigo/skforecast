@@ -343,12 +343,10 @@ class ForecasterAutoregMultiOutput():
             
         X = last_window[-self.lags].reshape(1, -1)
         if exog is None:
-            predictions = self.regressor.predict(X=X)
+            predictions = self.regressor.predict(X)
         else:
             X = np.hstack([X, exog[0].reshape(1, -1)])
-            predictions = self.regressor.predict(
-                            X = X
-                          )
+            predictions = self.regressor.predict(X)
             
         predictions = predictions.reshape(-1)
             
