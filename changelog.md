@@ -20,6 +20,8 @@ All notable changes to this project will be documented in this file.
 
 + `ForecasterAutoregMultiOutput.predict()` allow exog data longer than needed (steps).
 
++ `backtesting_forecast()` prints correctly the number of folds when remainder observations are cero.
+
 
 ## [0.1.8] - 2021-04-02
 
