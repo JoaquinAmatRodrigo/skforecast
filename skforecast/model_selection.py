@@ -84,18 +84,21 @@ def time_series_spliter(y: Union[np.ndarray, pd.Series],
     remainder = (len(y) - initial_train_size) % steps   
     
     if verbose:
-        print(f"Number of folds: {folds}")
-        if remainder != 0 and allow_incomplete_fold:
-            print(
-                f"Since `allow_incomplete_fold=True`, "
-                f"last fold includes {remainder} extra observations."
-            )
-        elif remainder != 0 and not allow_incomplete_fold:
-            print(
-                f"Since `allow_incomplete_fold=False`, "
-                f"last {remainder} observations are descarted."
-            )
-        
+		if remainder == 0:
+			print(f"Number of folds: {folds - 1}")
+		if remainder != 0 and allow_incomplete_fold:
+			print(f"Number of folds: {folds}")
+			print(
+				f"Since `allow_incomplete_fold=True`, "
+				f"last fold includes {remainder} extra observations."
+			)
+		elif remainder != 0 and not allow_incomplete_fold:
+			print(f"Number of folds: {folds - 1}")
+			print(
+				f"Since `allow_incomplete_fold=False`, "
+				f"last {remainder} observations are descarted."
+			)
+
     
     for i in range(folds):
           
@@ -290,7 +293,7 @@ def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
     
     if verbose:
         print(f"Number of observations used for training: {initial_train_size}")
-        print(f"Number of folds: {folds}")
+        print(f"Number of folds: {folds - 1 * (remainder == 0)}")
         print(f"Number of steps per fold: {steps}")
         if remainder != 0:
             print(f"Last fold only includes {remainder} observations.")
@@ -594,7 +597,7 @@ def backtesting_forecaster_intervals(forecaster, y: Union[np.ndarray, pd.Series]
     
     if verbose:
         print(f"Number of observations used for training: {initial_train_size}")
-        print(f"Number of folds: {folds}")
+        print(f"Number of folds: {folds - 1 * (remainder == 0)}")
         print(f"Number of steps per fold: {steps}")
         if remainder != 0:
             print(f"Last fold only includes {remainder} observations.")
