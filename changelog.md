@@ -22,6 +22,8 @@ All notable changes to this project will be documented in this file.
 
 + `backtesting_forecast()` prints correctly the number of folds when remainder observations are cero.
 
++ Removed named argument X in `self.regressor.predict(X)` to allow using XGBoost regressor.
+
 
 ## [0.1.8] - 2021-04-02
 
