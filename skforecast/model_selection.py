@@ -483,7 +483,7 @@ def grid_search_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
         best_lags = results['lags'].iloc[0]
         best_params = results['params'].iloc[0]
         logging.info(
-            f"Refitting `forecaster` using the best found parameters: \n"
+            f"Refitting `forecaster` using the best found parameters and the whole data set: \n"
             f"lags: {best_lags} \n"
             f"params: {best_params}\n"
         )
