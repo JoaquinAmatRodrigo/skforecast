@@ -13,7 +13,7 @@ import numpy as np
 import pandas as pd
 import logging
 import tqdm
-from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mean_squared_error 
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import mean_absolute_percentage_error
 from sklearn.model_selection import ParameterGrid
@@ -84,20 +84,20 @@ def time_series_spliter(y: Union[np.ndarray, pd.Series],
     remainder = (len(y) - initial_train_size) % steps   
     
     if verbose:
-		if remainder == 0:
-			print(f"Number of folds: {folds - 1}")
-		if remainder != 0 and allow_incomplete_fold:
-			print(f"Number of folds: {folds}")
-			print(
-				f"Since `allow_incomplete_fold=True`, "
-				f"last fold includes {remainder} extra observations."
-			)
-		elif remainder != 0 and not allow_incomplete_fold:
-			print(f"Number of folds: {folds - 1}")
-			print(
-				f"Since `allow_incomplete_fold=False`, "
-				f"last {remainder} observations are descarted."
-			)
+        if remainder == 0:
+            print(f"Number of folds: {folds - 1}")
+        if remainder != 0 and allow_incomplete_fold:
+            print(f"Number of folds: {folds}")
+            print(
+                f"Since `allow_incomplete_fold=True`, "
+                f"last fold includes {remainder} extra observations."
+            )
+        elif remainder != 0 and not allow_incomplete_fold:
+            print(f"Number of folds: {folds - 1}")
+            print(
+                f"Since `allow_incomplete_fold=False`, "
+                f"last {remainder} observations are descarted."
+            )
 
     
     for i in range(folds):
