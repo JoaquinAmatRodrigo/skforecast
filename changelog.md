@@ -14,6 +14,8 @@ All notable changes to this project will be documented in this file.
 
 + Only stored up to 1000 residuals.
 
++ Improved verbose in `backtesting_forecaster_intervals`.
+
 ### Fixed
 
 + Warning of inclompleted folds when using `backtesting_forecast()` with a  `ForecasterAutoregMultiOutput`.
