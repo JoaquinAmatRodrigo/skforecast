@@ -297,7 +297,7 @@ def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
         print(f"    Number of folds: {folds - 1 * (remainder == 0)}")
         print(f"    Number of steps per fold: {steps}")
         if remainder != 0:
-            print(f"    Last fold only includes {remainder} observations.")
+            print(f"    Last fold only includes {remainder} observations")
       
     for i in range(folds):
         last_window_end   = initial_train_size + i * steps
@@ -602,7 +602,7 @@ def backtesting_forecaster_intervals(forecaster, y: Union[np.ndarray, pd.Series]
         print(f"    Number of folds: {folds - 1 * (remainder == 0)}")
         print(f"    Number of steps per fold: {steps}")
         if remainder != 0:
-            print(f"    Last fold only includes {remainder} observations.")
+            print(f"    Last fold only includes {remainder} observations")
     
     for i in range(folds):
         
