@@ -26,6 +26,8 @@ All notable changes to this project will be documented in this file.
 
 + Removed named argument X in `self.regressor.predict(X)` to allow using XGBoost regressor.
 
++ Values stored in `self.last_window` when training `ForecasterAutoregMultiOutput`. 
+
 
 ## [0.1.8] - 2021-04-02
 
