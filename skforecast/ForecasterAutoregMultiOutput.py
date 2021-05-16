@@ -271,7 +271,13 @@ class ForecasterAutoregMultiOutput():
         
         # The last time window of training data is stored so that lags needed as
         # predictors in the first iteration of `predict()` can be calculated.
-        self.last_window = y_train[-1][-self.max_lag:]
+        if self.steps >= self.max_lag:
+            last_window = y[-1, -self.max_lag:]
+        else:
+            last_window = np.hstack((
+                            y[-(self.max_lag-self.steps + 1):-1, 0],
+                            y[-1, :]
+                          ))
         
             
     def predict(self, last_window: Union[np.ndarray, pd.Series]=None,
