@@ -140,7 +140,7 @@ def cv_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
     steps : int
         Number of steps to predict.
         
-    metric : {'neg_mean_squared_error', 'neg_mean_absolute_error', 'neg_mean_absolute_percentage_error'}
+    metric : {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
         Metric used to quantify the goodness of fit of the model.
         
     exog : np.ndarray, pd.Series, default `None`
@@ -172,9 +172,9 @@ def cv_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
     cv_results = []
     
     metrics = {
-        'neg_mean_squared_error': mean_squared_error,
-        'neg_mean_absolute_error': mean_absolute_error,
-        'neg_mean_absolute_percentage_error': mean_absolute_percentage_error
+        'mean_squared_error': mean_squared_error,
+        'mean_absolute_error': mean_absolute_error,
+        'mean_absolute_percentage_error': mean_absolute_percentage_error
     }
     
     metric = metrics[metric]
@@ -234,7 +234,7 @@ def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
     steps : int
         Number of steps to predict.
         
-    metric : {'neg_mean_squared_error', 'neg_mean_absolute_error', 'neg_mean_absolute_percentage_error'}
+    metric : {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
         Metric used to quantify the goodness of fit of the model.
         
     exog : np.ndarray, pd.Series, default `None`
@@ -265,9 +265,9 @@ def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
     backtest_predictions = []
     
     metrics = {
-        'neg_mean_squared_error': mean_squared_error,
-        'neg_mean_absolute_error': mean_absolute_error,
-        'neg_mean_absolute_percentage_error': mean_absolute_percentage_error
+        'mean_squared_error': mean_squared_error,
+        'mean_absolute_error': mean_absolute_error,
+        'mean_absolute_percentage_error': mean_absolute_percentage_error
     }
     
     metric = metrics[metric]
@@ -373,7 +373,7 @@ def grid_search_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
     steps : int
         Number of steps to predict.
         
-    metric : {'neg_mean_squared_error', 'neg_mean_absolute_error', 'neg_mean_absolute_percentage_error'}
+    metric : {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
         Metric used to quantify the goodness of fit of the model.
         
     exog : np.ndarray, pd.Series, default `None`
@@ -525,7 +525,7 @@ def backtesting_forecaster_intervals(forecaster, y: Union[np.ndarray, pd.Series]
     steps : int
         Number of steps to predict.
         
-    metric : {'neg_mean_squared_error', 'neg_mean_absolute_error', 'neg_mean_absolute_percentage_error'}
+    metric : {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
         Metric used to quantify the goodness of fit of the model.
         
     exog : np.ndarray, pd.Series, default `None`
@@ -579,9 +579,9 @@ def backtesting_forecaster_intervals(forecaster, y: Union[np.ndarray, pd.Series]
     backtest_predictions = []
     
     metrics = {
-        'neg_mean_squared_error': mean_squared_error,
-        'neg_mean_absolute_error': mean_absolute_error,
-        'neg_mean_absolute_percentage_error': mean_absolute_percentage_error
+        'mean_squared_error': mean_squared_error,
+        'mean_absolute_error': mean_absolute_error,
+        'mean_absolute_percentage_error': mean_absolute_percentage_error
     }
     
     metric = metrics[metric]
