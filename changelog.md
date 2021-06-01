@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
++ Logging total number of models to fit in `grid_search_forecaster()`.
 
 ### Changed
 
