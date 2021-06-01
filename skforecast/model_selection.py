@@ -123,13 +123,13 @@ def cv_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
                   metric: str, exog: Union[np.ndarray, pd.Series]=None,
                   allow_incomplete_fold: bool=True, verbose: bool=True):
     '''
-    Cross-validation of `ForecasterAutoreg` or `ForecasterCustom` object.
-    The order of is maintained and the training set increases in each iteration.
+    Cross-validation of `ForecasterAutoreg`, `ForecasterCustom` or `ForecasterAutoregMultiOutput`
+    object. The order of is maintained and the training set increases in each iteration.
     
     Parameters
     ----------
-    forecaster : ForecasterAutoreg, ForecasterCustom
-        `ForecasterAutoreg` or `ForecasterCustom` object.
+    forecaster : ForecasterAutoreg, ForecasterCustom, ForecasterAutoregMultiOutput
+        `ForecasterAutoreg`, `ForecasterCustom` or `ForecasterAutoregMultiOutput` object.
         
     y : 1D np.ndarray, pd.Series
         Training time series values. 
@@ -168,6 +168,13 @@ def cv_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
     if exog is not None:
         forecaster._check_exog(exog=exog)
         exog = forecaster._preproces_exog(exog=exog)
+
+    if metric not in ['mean_squared_error', 'mean_absolute_error',
+                      'mean_absolute_percentage_error']:
+        raise Exception(
+            f"Allowed metrics are: 'mean_squared_error', 'mean_absolute_error' and "
+            f"'mean_absolute_percentage_error'. Got {metric}."
+        )
     
     cv_results = []
     
@@ -213,7 +220,8 @@ def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
                            metric: str, exog: Union[np.ndarray, pd.Series]=None,
                            verbose: bool=False):
     '''
-    Backtesting (validation) of `ForecasterAutoreg` or `ForecasterCustom` object.
+    Backtesting (validation) of `ForecasterAutoreg`, `ForecasterCustom` or
+    `ForecasterAutoregMultiOutput` object.
     The model is trained only once using the `initial_train_size` first observations.
     In each iteration, a number of `steps` predictions are evaluated.
     
@@ -222,8 +230,8 @@ def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
     
     Parameters
     ----------
-    forecaster : ForecasterAutoreg, ForecasterCustom
-        `ForecasterAutoreg` or `ForecasterCustom` object.
+    forecaster : ForecasterAutoreg, ForecasterCustom, ForecasterAutoregMultiOutput
+        `ForecasterAutoreg`, `ForecasterCustom` or `ForecasterAutoregMultiOutput` object.
         
     y : 1D np.ndarray, pd.Series
         Training time series values. 
@@ -261,6 +269,13 @@ def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
     if exog is not None:
         forecaster._check_exog(exog=exog)
         exog = forecaster._preproces_exog(exog=exog)
+
+    if metric not in ['mean_squared_error', 'mean_absolute_error',
+                      'mean_absolute_percentage_error']:
+        raise Exception(
+            f"Allowed metrics are: 'mean_squared_error', 'mean_absolute_error' and "
+            f"'mean_absolute_percentage_error'. Got {metric}."
+        )
     
     backtest_predictions = []
     
@@ -357,8 +372,8 @@ def grid_search_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
     Parameters
     ----------
     
-    forecaster : ForecasterAutoreg, ForecasterCustom
-        ForecasterAutoreg or ForecasterCustom object.
+    forecaster : ForecasterAutoreg, ForecasterCustom, ForecasterAutoregMultiOutput
+        ForecasterAutoreg, ForecasterCustom or ForecasterAutoregMultiOutput object.
         
     y : 1D np.ndarray, pd.Series
         Training time series values. 
@@ -575,6 +590,13 @@ def backtesting_forecaster_intervals(forecaster, y: Union[np.ndarray, pd.Series]
     if exog is not None:
         forecaster._check_exog(exog=exog)
         exog = forecaster._preproces_exog(exog=exog)
+
+    if metric not in ['mean_squared_error', 'mean_absolute_error',
+                      'mean_absolute_percentage_error']:
+        raise Exception(
+            f"Allowed metrics are: 'mean_squared_error', 'mean_absolute_error' and "
+            f"'mean_absolute_percentage_error'. Got {metric}."
+        )
     
     backtest_predictions = []
     
