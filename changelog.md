@@ -10,7 +10,9 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
-+ Argument metric in `cv_forecaster`, `backtesting_forecaster`, `grid_search_forecaster` and `backtesting_forecaster_intervals` changed from 'neg_mean_squared_error', 'neg_mean_absolute_error', 'neg_mean_absolute_percentage_error' to 'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'.
++ Argument `metric` in `cv_forecaster()`, `backtesting_forecaster()`, `grid_search_forecaster()` and `backtesting_forecaster_intervals()` changed from 'neg_mean_squared_error', 'neg_mean_absolute_error', 'neg_mean_absolute_percentage_error' to 'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'.
+
++ Check if srgument `metric` in `cv_forecaster()`, `backtesting_forecaster()`, `grid_search_forecaster()` and `backtesting_forecaster_intervals()` is one of 'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'.
 
 ### Fixed
 
