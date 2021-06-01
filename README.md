@@ -11,7 +11,7 @@
 ## Installation
 
 ```bash
-$ pip install git+https://github.com/JoaquinAmatRodrigo/skforecast@v0.1.8
+$ pip install git+https://github.com/JoaquinAmatRodrigo/skforecast@v0.1.8.1
 ```
 
 Latest (unstable):
