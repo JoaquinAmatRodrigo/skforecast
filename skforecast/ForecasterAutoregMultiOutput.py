@@ -247,7 +247,10 @@ class ForecasterAutoregMultiOutput():
             if exog.shape[0] != len(y):
                 raise Exception(
                     f"`exog` must have same number of samples as `y`"
-                )            
+                )
+                
+            # Trasform exog to match multi output format
+            exog = self._exog_to_multi_output(exog=exog)               
         
         X_train, y_train = self.create_lags(y=y)
         
@@ -255,12 +258,12 @@ class ForecasterAutoregMultiOutput():
             self.regressor.fit(
                 # The first `self.max_lag` positions have to be removed from exog
                 # since they are not in X_train.
-                X = np.column_stack((X_train, exog[self.max_lag + self.steps - 1:,])),
+                X = np.column_stack((X_train, exog[self.max_lag:,])),
                 y = y_train
             )
             self.in_sample_residuals = \
                 y_train - self.regressor.predict(
-                                np.column_stack((X_train, exog[self.max_lag + self.steps - 1:,]))
+                                np.column_stack((X_train, exog[self.max_lag:,]))
                           )
         else:
             self.regressor.fit(X=X_train, y=y_train)
@@ -328,6 +331,7 @@ class ForecasterAutoregMultiOutput():
                 raise Exception(
                     f"`exog` must have at least as many values as `steps` predicted."
                 )
+            exog = self._exog_to_multi_output(exog=exog)
      
         if last_window is not None:
             self._check_last_window(last_window=last_window)
@@ -520,7 +524,6 @@ class ForecasterAutoregMultiOutput():
     def _exog_to_multi_output(self, exog):
         
         '''
-        DEPRECATED
         Transforms `exog` to `np.ndarray` with the shape needed for multioutput
         regresors.
         
