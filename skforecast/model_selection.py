@@ -456,7 +456,7 @@ def grid_search_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
     
     for lags in tqdm.tqdm(lags_grid, desc='loop lags_grid', position=0):
         
-        if isinstance(forecaster, ForecasterAutoreg):
+        if isinstance(forecaster, (ForecasterAutoreg, ForecasterAutoregMultiOutput)):
             forecaster.set_lags(lags)
             lags = forecaster.lags.copy()
         
@@ -507,7 +507,7 @@ def grid_search_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
             f"params: {best_params}\n"
         )
         
-        if isinstance(forecaster, ForecasterAutoreg):
+        if isinstance(forecaster, (ForecasterAutoreg, ForecasterAutoregMultiOutput)):
             forecaster.set_lags(best_lags)
             
         forecaster.set_params(**best_params)

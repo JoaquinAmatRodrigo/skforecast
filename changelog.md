@@ -17,6 +17,8 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
++ Update lags of  `ForecasterAutoregMultiOutput` after `grid_search_forecaster()`.
+
 
 ## [0.1.8.1] - 2021-05-17
 
