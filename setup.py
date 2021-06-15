@@ -20,5 +20,12 @@ setuptools.setup(
     description="Forecasting time series with scikitlearn regressors",
     url="https://github.com/JoaquinAmatRodrigo/skforecast",
     packages=setuptools.find_packages(),
-    classifiers=[]
+    classifiers=[],
+    install_requires=[
+          'python>=3.7.1',
+          'numpy>=1.20.1',
+          'pandas>=1.2.2',
+          'tqdm>=4.57.0',
+          'scikit-learn>=0.24'
+    ]
 )
