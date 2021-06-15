@@ -171,11 +171,11 @@ class ForecasterAutoreg():
         y_data  = np.full(shape=(n_splits, 1), fill_value=np.nan, dtype= float)
 
         for i in range(n_splits):
-            train_index = np.arange(i, self.max_lag + i)
-            test_index  = [self.max_lag + i]
+            X_index = np.arange(i, self.max_lag + i)
+            y_index = [self.max_lag + i]
 
-            X_data[i, :] = y[train_index]
-            y_data[i]    = y[test_index]
+            X_data[i, :] = y[X_index]
+            y_data[i]    = y[y_index]
             
         X_data = X_data[:, -self.lags]
         y_data = y_data.ravel()
