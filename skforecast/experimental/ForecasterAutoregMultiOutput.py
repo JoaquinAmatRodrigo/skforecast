@@ -264,7 +264,7 @@ class ForecasterAutoregMultiOutput():
                             # The first `self.max_lag` positions have to be removed from exog
                             # since they are not in X_train. Only columns related with the current
                             # step are selected.
-                            X_exog[-X_lags.shape[0]:, step::forecaster.steps]
+                            X_exog[-X_lags.shape[0]:, step::self.steps]
                           ))
 
             self.regressors_[step].fit(X_train, y_train[:, step])
@@ -586,7 +586,7 @@ class ForecasterAutoregMultiOutput():
         '''
         
         self.regressor.set_params(**params)
-        self.regressors_ = {step: clone(self.regressor) for step in range(steps)}
+        self.regressors_ = {step: clone(self.regressor) for step in range(self.steps)}
         
         
         
