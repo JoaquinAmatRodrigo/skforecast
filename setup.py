@@ -22,7 +22,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     classifiers=[],
     install_requires=[
-          'python>=3.7.1',
+          'python>=3.7',
           'numpy>=1.20.1',
           'pandas>=1.2.2',
           'tqdm>=4.57.0',
