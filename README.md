@@ -8,6 +8,19 @@
 
 <p><img src="./images/logo_skforecast_no_background.png" alt="logo-skforecast" title="logo-skforecast" width="200"></p>
 
+## Table of contents
+
++ [Installation](#installation)
++ [Dependencies](#dependencies)
++ [Features](#features)
++ [Introduction](#introduction)
++ [Examples](#examples)
+  + [Autoregressive forecaster](#autoregressive-forecaster)
+  + [Autoregressive forecaster with 1 exogenous predictor](#autoregressive-forecaster-with-1-exogenous-predictor)
+  + [Autoregressive forecaster with n exogenous predictors](#autoregressive-forecaster-with-n-exogenous-predictors)
+  + [Autoregressive forecaster with custom predictors](#autoregressive-forecaster-with-custom-predictors)
+  + [Tutorials](#tutorials)
+
 ## Installation
 
 ```bash
@@ -330,7 +343,7 @@ Last fold only includes 1 observations.
 <p><img src="./images/backtesting_forecaster.png"</p>
 
 
-### Autoregressive + 1 exogenous predictor
+### Autoregressive forecaster with 1 exogenous predictor
 
 ```python
 # Download data
@@ -450,7 +463,7 @@ results_grid = grid_search_forecaster(
 results_grid
 ```
 
-### Autoregressive + n exogenous predictors
+### Autoregressive forecaster with n exogenous predictors
 <br>
 
 ```python
