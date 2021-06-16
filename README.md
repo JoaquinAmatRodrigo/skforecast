@@ -19,7 +19,7 @@
   + [Autoregressive forecaster with 1 exogenous predictor](#autoregressive-forecaster-with-1-exogenous-predictor)
   + [Autoregressive forecaster with n exogenous predictors](#autoregressive-forecaster-with-n-exogenous-predictors)
   + [Autoregressive forecaster with custom predictors](#autoregressive-forecaster-with-custom-predictors)
-  + [Tutorials](#tutorials)
+  + [Tutorials (spanish)](#tutorials-(spanish))
 
 ## Installation
 
