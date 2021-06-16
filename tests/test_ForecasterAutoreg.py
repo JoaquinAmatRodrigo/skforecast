@@ -110,7 +110,9 @@ def test_in_sample_residuals_stored_when_fit_forecaster():
     
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
     forecaster.fit(y=np.arange(5))
-    assert (forecaster.in_sample_residuals == np.array([0., 0.])).all()
+    expected = np.array([0, 0])
+    results = forecaster.in_sample_residuals  
+    assert results == approx(expected)
 
 
 # Test method predict()
