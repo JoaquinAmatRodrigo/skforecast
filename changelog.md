@@ -9,11 +9,13 @@ All notable changes to this project will be documented in this file.
 
 + Logging total number of models to fit in `grid_search_forecaster()`.
 
++ Increased more coverage of unit test.
+
 ### Changed
 
 + Argument `metric` in `cv_forecaster()`, `backtesting_forecaster()`, `grid_search_forecaster()` and `backtesting_forecaster_intervals()` changed from 'neg_mean_squared_error', 'neg_mean_absolute_error', 'neg_mean_absolute_percentage_error' to 'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'.
 
-+ Check if srgument `metric` in `cv_forecaster()`, `backtesting_forecaster()`, `grid_search_forecaster()` and `backtesting_forecaster_intervals()` is one of 'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'.
++ Check if argument `metric` in `cv_forecaster()`, `backtesting_forecaster()`, `grid_search_forecaster()` and `backtesting_forecaster_intervals()` is one of 'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'.
 
 ### Fixed
 
