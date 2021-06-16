@@ -9,7 +9,7 @@ All notable changes to this project will be documented in this file.
 
 + Logging total number of models to fit in `grid_search_forecaster()`.
 
-+ Increased more coverage of unit test.
++ Increased coverage of unit test.
 
 ### Changed
 
