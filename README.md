@@ -19,7 +19,7 @@
   + [Autoregressive forecaster with 1 exogenous predictor](#autoregressive-forecaster-with-1-exogenous-predictor)
   + [Autoregressive forecaster with n exogenous predictors](#autoregressive-forecaster-with-n-exogenous-predictors)
   + [Autoregressive forecaster with custom predictors](#autoregressive-forecaster-with-custom-predictors)
-  + [Tutorials (spanish)](#tutorials-(spanish))
+  + [Tutorials (spanish)](#tutorials)
 
 ## Installation
 
@@ -637,7 +637,8 @@ results_grid = grid_search_forecaster(
                     )
 ```
 
-## Tutorials (spanish)
+## Tutorials 
+**(spanish)**
 
 + [Forecasting series temporales con Python y Scikit Learn](https://www.cienciadedatos.net/documentos/py27-forecasting-series-temporales-python-scikitlearn.html)
 
