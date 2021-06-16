@@ -704,7 +704,7 @@ class ForecasterAutoreg():
                     return
                 else:
                     raise Exception(
-                        f"`exog` must be: `pd.Series`, `np.ndarray` with 1 dimension"
+                        f"`exog` must be: `pd.Series`, `np.ndarray` with 1 dimension "
                         f"or `np.ndarray` with 1 column in the second dimension. "
                         f"Got `np.ndarray` with {exog.shape[1]} columns."
                     )
@@ -867,7 +867,7 @@ class ForecasterAutoreg():
         '''
         if not isinstance(residuals, np.ndarray):
             raise Exception(
-                f"`residuals` argument must be `1D np.ndarray`. Got {type(lags)}"
+                f"`residuals` argument must be `1D np.ndarray`. Got {type(residuals)}"
             )
             
         if len(residuals) > 1000:
