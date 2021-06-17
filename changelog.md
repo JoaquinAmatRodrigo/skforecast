@@ -11,7 +11,11 @@ All notable changes to this project will be documented in this file.
 
 + Increased coverage of unit test.
 
++ Class `ForecasterAutoregCustom`.
+
 ### Changed
+
++ Class `ForecasterCustom` has been renamed to `ForecasterAutoregCustom`. However, `ForecasterCustom` will still remain to keep backward compatibility.
 
 + Argument `metric` in `cv_forecaster()`, `backtesting_forecaster()`, `grid_search_forecaster()` and `backtesting_forecaster_intervals()` changed from 'neg_mean_squared_error', 'neg_mean_absolute_error', 'neg_mean_absolute_percentage_error' to 'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'.
 

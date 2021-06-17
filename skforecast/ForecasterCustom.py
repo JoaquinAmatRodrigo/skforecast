@@ -6,6 +6,7 @@
 ################################################################################
 # coding=utf-8
 
+import warnings
 from .ForecasterAutoregCustom import ForecasterAutoregCustom
 
 
@@ -15,6 +16,15 @@ from .ForecasterAutoregCustom import ForecasterAutoregCustom
 
 class ForecasterCustom(ForecasterAutoregCustom):
     '''
-    This class is equialent to ForecasterAutoregCustom. It exists for backward
+    Deprecated. This class is equialent to ForecasterAutoregCustom. It exists for backward
     compatibility. Please use ForecasterAutoregCustom.     
     '''
+
+    def __init__(self, regressor, fun_predictors, window_size):
+        warnings.warn(
+            'Deprecated. This class is equialent to ForecasterAutoregCustom. It exists for backward compatibility. Use ForecasterAutoregCustom instead.',
+            DeprecationWarning
+        )
+        super().__init__(regressor, fun_predictors, window_size)
+
+    
