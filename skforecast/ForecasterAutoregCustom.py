@@ -99,6 +99,9 @@ class ForecasterAutoregCustom():
         
         if not isinstance(window_size, int):
             raise Exception(f'`window_size` must be int, got {type(window_size)}')
+
+        if not callable(fun_predictors):
+            raise Exception(f'`fun_predictors` must be callable, got {type(fun_predictors)}')
                 
         
     def __repr__(self) -> str:
@@ -165,6 +168,11 @@ class ForecasterAutoregCustom():
                     f"`exog` must have same number of samples as `y`"
                 )
                 
+        if len(y) - self.window_size < 1:
+            raise Exception(
+                f'`y` must have as many values as the windows_size needed by {self.create_predictors.__name__}.'
+                f'For this Forecaster the minimum lenght is {self.window_size + 1}'
+            )
         
         X_train  = []
         y_train  = []
@@ -666,7 +674,7 @@ class ForecasterAutoregCustom():
                     return
                 else:
                     raise Exception(
-                        f"`exog` must be: `pd.Series`, `np.ndarray` with 1 dimension"
+                        f"`exog` must be: `pd.Series`, `np.ndarray` with 1 dimension "
                         f"or `np.ndarray` with 1 column in the second dimension. "
                         f"Got `np.ndarray` with {exog.shape[1]} columns."
                     )
@@ -789,7 +797,7 @@ class ForecasterAutoregCustom():
         '''
         if not isinstance(residuals, np.ndarray):
             raise Exception(
-                f"`residuals` argument must be `1D np.ndarray`. Got {type(lags)}"
+                f"`residuals` argument must be `1D np.ndarray`. Got {type(residuals)}"
             )
             
         if len(residuals) > 1000:
