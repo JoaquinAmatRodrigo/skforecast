@@ -15,11 +15,14 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+
 + Class `ForecasterCustom` has been renamed to `ForecasterAutoregCustom`. However, `ForecasterCustom` will still remain to keep backward compatibility.
 
 + Argument `metric` in `cv_forecaster()`, `backtesting_forecaster()`, `grid_search_forecaster()` and `backtesting_forecaster_intervals()` changed from 'neg_mean_squared_error', 'neg_mean_absolute_error', 'neg_mean_absolute_percentage_error' to 'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'.
 
 + Check if argument `metric` in `cv_forecaster()`, `backtesting_forecaster()`, `grid_search_forecaster()` and `backtesting_forecaster_intervals()` is one of 'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'.
+
++ `time_series_spliter` doesn't include the remaining observations in the last complete fold but in a new one when `allow_incomplete_fold=True`. Take in consideration that incomplete folds with few observations could overestimate or underestimate the validation metric.
 
 ### Fixed
 
