@@ -80,17 +80,27 @@ def time_series_spliter(y: Union[np.ndarray, pd.Series],
         y = y.to_numpy().copy()
     
   
-    folds     = (len(y) - initial_train_size) // steps  + 1
+    folds = (len(y) - initial_train_size) // steps  + 1
+    # +1 fold is needed to allow including the remainder in the last iteration.
     remainder = (len(y) - initial_train_size) % steps   
     
     if verbose:
-        if remainder == 0:
+        if folds == 1:
             print(f"Number of folds: {folds - 1}")
-        if remainder != 0 and allow_incomplete_fold:
+            print("Not enought observations in `y` to create to create even a complete fold.")
+
+        elif remainder == 0:
+            print(f"Number of folds: {folds - 1}")
+
+        elif remainder != 0 and allow_incomplete_fold:
             print(f"Number of folds: {folds}")
             print(
                 f"Since `allow_incomplete_fold=True`, "
-                f"last fold includes {remainder} extra observations."
+                f"last fold only includes {remainder} observations instead of {steps}."
+            )
+            print(
+                'Incomplete folds with few observations could overestimate or ',
+                'underestimate validation metrics.'
             )
         elif remainder != 0 and not allow_incomplete_fold:
             print(f"Number of folds: {folds - 1}")
@@ -99,6 +109,9 @@ def time_series_spliter(y: Union[np.ndarray, pd.Series],
                 f"last {remainder} observations are descarted."
             )
 
+    if folds == 1:
+        # There are no observations to create even a complete fold
+        return []
     
     for i in range(folds):
           
@@ -111,11 +124,12 @@ def time_series_spliter(y: Union[np.ndarray, pd.Series],
             if remainder != 0 and allow_incomplete_fold:
                 train_end     = initial_train_size + i * steps  
                 train_indices = range(train_end)
-                test_indices  = range(train_end, train_end + remainder)
+                test_indices  = range(train_end, len(y))
             else:
                 break
         
         yield train_indices, test_indices
+        
         
 
 def cv_forecaster(forecaster, y: Union[np.ndarray, pd.Series],

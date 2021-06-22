@@ -96,11 +96,11 @@ def time_series_spliter(y: Union[np.ndarray, pd.Series],
             print(f"Number of folds: {folds}")
             print(
                 f"Since `allow_incomplete_fold=True`, "
-                f"last fold  only includes {remainder} observations."
+                f"last fold only includes {remainder} observations instead of {steps}."
             )
             print(
-                'Take in consideration that incomplete folds with few observations ',
-                'could overestimate or underestimate validation metrics.'
+                'Incomplete folds with few observations could overestimate or ',
+                'underestimate validation metrics.'
             )
         elif remainder != 0 and not allow_incomplete_fold:
             print(f"Number of folds: {folds - 1}")
