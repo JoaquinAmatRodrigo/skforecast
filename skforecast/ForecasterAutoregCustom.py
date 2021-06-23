@@ -7,7 +7,7 @@
 # coding=utf-8
 
 import typing
-from typing import Union, Dict
+from typing import Union, Dict, List, Tuple
 import warnings
 import logging
 import numpy as np
@@ -125,6 +125,80 @@ class ForecasterAutoregCustom():
 
         return info
 
+    
+    def create_train_X_y(self, y: Union[np.ndarray, pd.Series],
+                     exog: Union[np.ndarray, pd.Series]=None) -> Tuple[np.array, np.array]:
+        '''
+        Create training matrices X, y
+        
+        Parameters
+        ----------        
+        y : 1D np.ndarray, pd.Series
+            Training time series.
+            
+        exog : np.ndarray, pd.Series, default `None`
+            Exogenous variable/s included as predictor/s. Must have the same
+            number of observations as `y` and should be aligned so that y[i] is
+            regressed on exog[i].
+
+
+        Returns 
+        -------
+        X_train : 2D np.ndarray, shape (samples, len(self.lags))
+            2D array with the training values (predictors).
+            
+        y_train : 1D np.ndarray, shape (nº observaciones - max(seld.lags),)
+            Values (target) of the time series related to each row of `X_train`.
+        
+        '''
+        
+        self._check_y(y=y)
+        y = self._preproces_y(y=y)
+        
+        if exog is not None:
+            self._check_exog(exog=exog)
+            self.exog_type = type(exog)
+            exog = self._preproces_exog(exog=exog)
+            self.included_exog = True
+            self.exog_shape = exog.shape
+            
+            if exog.shape[0] != len(y):
+                raise Exception(
+                    f"`exog` must have same number of samples as `y`"
+                )
+                
+        if len(y) - self.window_size < 1:
+            raise Exception(
+                f'`y` must have as many values as the windows_size needed by {self.create_predictors.__name__}.'
+                f'For this Forecaster the minimum lenght is {self.window_size + 1}'
+            )
+        
+        X_train  = []
+        y_train  = []
+
+        for i in range(len(y) - self.window_size):
+
+            train_index = np.arange(i, self.window_size + i)
+            test_index  = self.window_size + i
+
+            X_train.append(self.create_predictors(y=y[train_index]))
+            y_train.append(y[test_index])
+        
+        X_train = np.vstack(X_train)
+        y_train = np.array(y_train)
+        
+        if np.isnan(X_train).any():
+            raise Exception(
+                f"`create_predictors()` is returning `NaN` values."
+            )
+        
+        if exog is not None:
+            # The first `self.window_size` positions have to be removed from
+            # exog since they are not in X_train.
+            X_train = np.column_stack((X_train, exog[self.window_size:,]))
+
+        return X_train, y_train
+
         
     def fit(self, y: Union[np.ndarray, pd.Series], exog: Union[np.ndarray, pd.Series]=None) -> None:
         '''
@@ -174,40 +248,10 @@ class ForecasterAutoregCustom():
                 f'For this Forecaster the minimum lenght is {self.window_size + 1}'
             )
         
-        X_train  = []
-        y_train  = []
+        X_train, y_train = self.create_train_X_y(y=y, exog=exog)
 
-        for i in range(len(y) - self.window_size):
-
-            train_index = np.arange(i, self.window_size + i)
-            test_index  = self.window_size + i
-
-            X_train.append(self.create_predictors(y=y[train_index]))
-            y_train.append(y[test_index])
-        
-        X_train = np.vstack(X_train)
-        y_train = np.array(y_train)
-        
-        if np.isnan(X_train).any():
-            raise Exception(
-                f"`create_predictors()` is returning `NaN` values."
-            )
-        
-        if exog is not None:
-            self.regressor.fit(
-                # The first `self.window_size` positions have to be removed from
-                # exog since they are not in X_train.
-                X = np.column_stack((X_train, exog[self.window_size:,])),
-                y = y_train
-            )
-            
-            residuals = y_train - self.regressor.predict(
-                                np.column_stack((X_train, exog[self.window_size:,]))
-                          )
-            
-        else:
-            self.regressor.fit(X=X_train, y=y_train)
-            residuals = y_train - self.regressor.predict(X_train)
+        self.regressor.fit(X=X_train, y=y_train)
+        residuals = y_train - self.regressor.predict(X_train)
             
         if len(residuals) > 1000:
             # Only up to 1000 residuals are stored
@@ -313,7 +357,8 @@ class ForecasterAutoregCustom():
     def _estimate_boot_interval(self, steps: int,
                                 last_window: Union[np.ndarray, pd.Series]=None,
                                 exog: np.ndarray=None, interval: list=[5, 95],
-                                n_boot: int=500, in_sample_residuals: bool=True):
+                                n_boot: int=500,
+                                in_sample_residuals: bool=True) -> np.ndarray:
         '''
         Iterative process in which, each prediction, is used as a predictor
         for the next step and bootstrapping is used to estimate prediction
@@ -467,7 +512,8 @@ class ForecasterAutoregCustom():
     
     def predict_interval(self, steps: int, last_window: Union[np.ndarray, pd.Series]=None,
                          exog: np.ndarray=None, interval: list=[5, 95],
-                         n_boot: int=500, in_sample_residuals: bool=True):
+                         n_boot: int=500,
+                         in_sample_residuals: bool=True) -> np.ndarray:
         '''
         Iterative process in which, each prediction, is used as a predictor
         for the next step and bootstrapping is used to estimate prediction
