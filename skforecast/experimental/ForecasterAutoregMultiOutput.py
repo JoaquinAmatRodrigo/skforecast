@@ -7,7 +7,7 @@
 # coding=utf-8
 
 import typing
-from typing import Union, Dict
+from typing import Union, Dict, List, Tuple
 import warnings
 import logging
 import numpy as np
@@ -16,7 +16,6 @@ import sklearn
 import tqdm
 
 from sklearn.base import clone
-from sklearn.multioutput import MultiOutputRegressor
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import mean_absolute_percentage_error
@@ -157,7 +156,7 @@ class ForecasterAutoregMultiOutput():
     
 
     
-    def create_lags(self, y: Union[np.ndarray, pd.Series]) -> Dict[np.ndarray, np.ndarray]:
+    def create_lags(self, y: Union[np.ndarray, pd.Series]) -> Tuple[np.ndarray, np.ndarray]:
         '''
         Transforms a time series into two 2D arrays of pairs predictor-response.
         
@@ -202,7 +201,114 @@ class ForecasterAutoregMultiOutput():
         X_data = X_data[:, -self.lags]
                     
         return X_data, y_data
+
+
+    def create_train_X_y(self, y: Union[np.ndarray, pd.Series],
+                         exog: Union[np.ndarray, pd.Series]=None) -> Tuple[np.array, np.array]:
+        '''
+        Create training matrices X, y. The created matrices contain the target
+        variable and predictors needed to train all the forecaster (one per step).         
+        
+        Parameters
+        ----------        
+        y : 1D np.ndarray, pd.Series
+            Training time series.
+            
+        exog : np.ndarray, pd.Series, default `None`
+            Exogenous variable/s included as predictor/s. Must have the same
+            number of observations as `y` and should be aligned so that y[i] is
+            regressed on exog[i].
+
+
+        Returns 
+        -------
+        X_train : 2D np.ndarray, shape (len(y) - self.max_lag, len(self.lags) + exog.shape[1]*steps)
+            2D array with the training values (predictors).
+            
+        y_train : 1D np.ndarray, shape (len(y) - self.max_lag)
+            Values (target) of the time series related to each row of `X_train`.
+        
+        '''
+
+        self._check_y(y=y)
+        y = self._preproces_y(y=y)
+
+        if exog is not None:
+            self._check_exog(exog=exog)
+            self.exog_type = type(exog)
+            exog = self._preproces_exog(exog=exog)
+            self.included_exog = True
+            self.exog_shape = exog.shape
+
+            if exog.shape[0] != len(y):
+                raise Exception(
+                    f"`exog` must have same number of samples as `y`"
+                )
+
+                   
+        X_lags, y_train = self.create_lags(y=y)
+
+        if exog is None:
+            X_train = X_lags
+        else:
+            # Trasform exog to match multi output format
+            X_exog = self._exog_to_multi_output(exog=exog)
+
+            # The first `self.max_lag` positions have to be removed from X_exog
+            # since they are not in X_lags.
+            X_exog = X_exog[-X_lags.shape[0]:, ]
+
+            X_train = np.column_stack((X_lags, X_exog))
+
+        return X_train, y_train
+
     
+    def filter_train_X_y_for_step(self, step: int,
+                              X_train: np.ndarray,
+                              y_train: np.ndarray) -> Tuple[np.array, np.array]:
+
+        '''
+        Select columns needed to train a forcaster for a specific step. The imput matrices
+        should be created with created with `create_train_X_y()`.         
+
+        Parameters
+        ----------
+        step : int
+            step for which columns must be selected selected. Starts at 0.
+
+        X_train : 2D np.ndarray
+            2D array with the training values (predictors).
+            
+        y_train : 1D np.ndarray
+            Values (target) of the time series related to each row of `X_train`.
+
+
+        Returns 
+        -------
+        X_train_step : 2D np.ndarray
+            2D array with the training values (predictors) for step.
+            
+        y_train_step : 1D np.ndarray, shape (len(y) - self.max_lag)
+            Values (target) of the time series related to each row of `X_train`.
+
+        '''
+
+        if step > self.steps - 1:
+            raise Exception(
+                f"Invalid value `step`. For this forecaster, the maximum step is {self.steps-1}."
+            )
+
+        y_train_step = y_train[:, step]
+
+        if not self.included_exog:
+            X_train_step = X_train
+        else:
+            idx_columns_lags = np.arange(0, self.max_lag)
+            idx_columns_exog = np.arange(X_train.shape[1])[self.max_lag + step::self.steps]
+            idx_columns = np.hstack((idx_columns_lags, idx_columns_exog))
+            X_train_step = X_train[:, idx_columns]
+
+        return  X_train_step, y_train_step
     
     
     def fit(self, y: Union[np.ndarray, pd.Series],
@@ -248,25 +354,16 @@ class ForecasterAutoregMultiOutput():
                     f"`exog` must have same number of samples as `y`"
                 )
 
-            # Trasform exog to match multi output format
-            X_exog = self._exog_to_multi_output(exog=exog)               
-
-        X_lags, y_train = self.create_lags(y=y)
+        X_train, y_train = self.create_train_X_y(y=y, exog=exog)
 
         # Train one regressor for each step 
         for step in range(self.steps):
 
-            if exog is None:
-                X_train = X_lags
-            else:
-                X_train = np.column_stack((
-                            X_lags,
-                            # The first `self.max_lag` positions have to be removed from exog
-                            # since they are not in X_train. Only columns related with the current
-                            # step are selected.
-                            X_exog[-X_lags.shape[0]:, step::self.steps]
-                          ))
-
+            X_train_step, y_train_step = self.filter_train_X_y_for_step(
+                                            step    = step,
+                                            X_train = X_train,
+                                            y_train = y_train
+                                         ) 
             self.regressors_[step].fit(X_train, y_train[:, step])
 
         # The last time window of training data is stored so that lags needed as
@@ -279,7 +376,7 @@ class ForecasterAutoregMultiOutput():
                                     y_train[-1, :]
                                ))
 
-
+    
     def predict(self, last_window: Union[np.ndarray, pd.Series]=None,
                 exog: np.ndarray=None, steps=None):
         '''
@@ -529,8 +626,7 @@ class ForecasterAutoregMultiOutput():
         return exog_prep
     
 
-    def _exog_to_multi_output(self, exog
-                             ):
+    def _exog_to_multi_output(self, exog)-> np.ndarray:
         
         '''
         Transforms `exog` to `np.ndarray` with the shape needed for multioutput

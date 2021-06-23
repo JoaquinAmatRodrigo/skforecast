@@ -144,10 +144,10 @@ class ForecasterAutoregCustom():
 
         Returns 
         -------
-        X_train : 2D np.ndarray, shape (samples, len(self.lags))
+        X_train : 2D np.ndarray, shape (len(y) - self.max_lag, len(self.lags))
             2D array with the training values (predictors).
             
-        y_train : 1D np.ndarray, shape (nº observaciones - max(seld.lags),)
+        y_train : 1D np.ndarray, shape (len(y) - self.max_lag,)
             Values (target) of the time series related to each row of `X_train`.
         
         '''
