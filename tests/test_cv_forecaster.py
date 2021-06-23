@@ -6,7 +6,7 @@ from skforecast.ForecasterAutoreg import ForecasterAutoreg
 from sklearn.linear_model import LinearRegression
 
 
-# Test cv_forecaster
+# Test cv_forecaster for ForecasterAutoreg
 #-------------------------------------------------------------------------------
 def test_cv_forecaster_output_when_y_is_nparange_20_initial_train_size_10_steps_5_allow_incomplete_fold_True():
 
