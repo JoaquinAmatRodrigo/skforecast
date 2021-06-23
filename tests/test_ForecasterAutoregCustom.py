@@ -43,7 +43,66 @@ def test_init_exception_when_fun_predictors_argument_is_string():
                         fun_predictors = 'create_predictors',
                         window_size    = 5
                     )
-                         
+
+# Test method create_train_X_y()
+#-------------------------------------------------------------------------------
+def test_create_train_X_y_output_when_y_is_range_10_and_exog_is_None():
+
+    forecaster = ForecasterAutoregCustom(
+                    regressor      = LinearRegression(),
+                    fun_predictors = create_predictors,
+                    window_size    = 5
+                )
+    results = forecaster.create_train_X_y(y=np.arange(10))
+    expected = (np.array([[4., 3., 2., 1., 0.],
+                        [5., 4., 3., 2., 1.],
+                        [6., 5., 4., 3., 2.],
+                        [7., 6., 5., 4., 3.],
+                        [8., 7., 6., 5., 4.]]),
+                np.array([5, 6, 7, 8, 9]))     
+
+    assert (results[0] == expected[0]).all()
+    assert (results[1] == expected[1]).all()
+
+
+def test_create_train_X_y_output_when_y_is_range_10_and_exog_is_1d_array():
+
+    forecaster = ForecasterAutoregCustom(
+                    regressor      = LinearRegression(),
+                    fun_predictors = create_predictors,
+                    window_size    = 5
+                )
+    results = forecaster.create_train_X_y(y=np.arange(10), exog=np.arange(100, 110))
+    expected = (np.array([[4.,   3.,   2.,   1.,   0., 105.],
+                        [5.,   4.,   3.,   2.,   1., 106.],
+                        [6.,   5.,   4.,   3.,   2., 107.],
+                        [7.,   6.,   5.,   4.,   3., 108.],
+                        [8.,   7.,   6.,   5.,   4., 109.]]),
+                np.array([5, 6, 7, 8, 9]))     
+
+    assert (results[0] == expected[0]).all()
+    assert (results[1] == expected[1]).all()
+
+def test_create_train_X_y_output_when_y_is_range_10_and_exog_is_2d_array():
+
+    forecaster = ForecasterAutoregCustom(
+                    regressor      = LinearRegression(),
+                    fun_predictors = create_predictors,
+                    window_size    = 5
+                )
+    results = forecaster.create_train_X_y(
+            y=np.arange(10),
+            exog=np.column_stack([np.arange(100, 110), np.arange(1000, 1010)])
+          )
+    expected = (np.array([[4,    3,    2,    1,    0,  105, 1005],
+                        [5,    4,    3,    2,    1,  106, 1006],
+                        [6,    5,    4,    3,    2,  107, 1007],
+                        [7,    6,    5,    4,    3,  108, 1008],
+                        [8,    7,    6,    5,    4,  109, 1009]]),
+                np.array([5, 6, 7, 8, 9]))     
+
+    assert (results[0] == expected[0]).all()
+    assert (results[1] == expected[1]).all()
                 
 # Test method fit()
 #-------------------------------------------------------------------------------

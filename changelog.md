@@ -13,6 +13,8 @@ All notable changes to this project will be documented in this file.
 
 + Class `ForecasterAutoregCustom`.
 
++ Method `create_train_X_y()` to facilitate access to the training data matrix.
+
 ### Changed
 
 
