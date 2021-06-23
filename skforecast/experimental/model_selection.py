@@ -8,7 +8,7 @@
 
 
 import typing
-from typing import Union, Dict
+from typing import Union, Dict, List, Tuple
 import numpy as np
 import pandas as pd
 import logging
@@ -135,7 +135,7 @@ def time_series_spliter(y: Union[np.ndarray, pd.Series],
 def cv_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
                   initial_train_size: int, steps: int,
                   metric: str, exog: Union[np.ndarray, pd.Series]=None,
-                  allow_incomplete_fold: bool=True, verbose: bool=True):
+                  allow_incomplete_fold: bool=True, verbose: bool=True) -> np.array:
     '''
     Cross-validation of `ForecasterAutoreg`, `ForecasterCustom` or `ForecasterAutoregMultiOutput`
     object. The order of is maintained and the training set increases in each iteration.
@@ -232,7 +232,7 @@ def cv_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
 def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
                            initial_train_size: int, steps: int,
                            metric: str, exog: Union[np.ndarray, pd.Series]=None,
-                           verbose: bool=False):
+                           verbose: bool=False) -> Tuple[np.array, np.array]:
     '''
     Backtesting (validation) of `ForecasterAutoreg`, `ForecasterCustom` or
     `ForecasterAutoregMultiOutput` object.
@@ -378,7 +378,7 @@ def grid_search_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
                            metric: str, exog: Union[np.ndarray, pd.Series]=None,
                            lags_grid: list=None, method: str='cv',
                            allow_incomplete_fold: bool=True, return_best: bool=True,
-                           verbose: bool=True):
+                           verbose: bool=True) -> pd.DataFrame:
     '''
     Exhaustive search over specified parameter values for a Forecaster object.
     Validation is done using time series cross-validation or backtesting.
@@ -531,7 +531,8 @@ def backtesting_forecaster_intervals(forecaster, y: Union[np.ndarray, pd.Series]
                            initial_train_size: int, steps: int,
                            metric: str, exog: Union[np.ndarray, pd.Series]=None,
                            interval: list=[5, 95], n_boot: int=500,
-                           in_sample_residuals: bool=True, verbose: bool=False):
+                           in_sample_residuals: bool=True,
+                           verbose: bool=False) -> Tuple[np.array, np.array]:
     '''
     Backtesting (validation) of `ForecasterAutoreg` or `ForecasterCustom` object.
     The model is trained only once using the `initial_train_size` first observations.
