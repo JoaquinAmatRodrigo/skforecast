@@ -19,6 +19,7 @@ from sklearn.metrics import mean_absolute_percentage_error
 from sklearn.model_selection import ParameterGrid
 
 from ..ForecasterAutoreg import ForecasterAutoreg
+from ..ForecasterAutoregCustom import ForecasterAutoregCustom
 from ..ForecasterCustom import ForecasterCustom
 from .ForecasterAutoregMultiOutput import ForecasterAutoregMultiOutput
 
@@ -137,13 +138,16 @@ def cv_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
                   metric: str, exog: Union[np.ndarray, pd.Series]=None,
                   allow_incomplete_fold: bool=True, verbose: bool=True) -> np.array:
     '''
-    Cross-validation of `ForecasterAutoreg`, `ForecasterCustom` or `ForecasterAutoregMultiOutput`
-    object. The order of is maintained and the training set increases in each iteration.
+    Cross-validation of `ForecasterAutoreg`, `ForecasterCustom`, `ForecasterAutoregCustom`
+    or `ForecasterAutoregMultiOutput` object. The order of is maintained and the
+    training set increases in each iteration.
     
     Parameters
     ----------
-    forecaster : ForecasterAutoreg, ForecasterCustom, ForecasterAutoregMultiOutput
-        `ForecasterAutoreg`, `ForecasterCustom` or `ForecasterAutoregMultiOutput` object.
+    forecaster : ForecasterAutoreg, ForecasterCustom, ForecasterAutoregCustom,
+                 ForecasterAutoregMultiOutput
+        `ForecasterAutoreg`, `ForecasterCustom` `ForecasterAutoregCustom` or
+        `ForecasterAutoregMultiOutput` object.
         
     y : 1D np.ndarray, pd.Series
         Training time series values. 
@@ -234,8 +238,8 @@ def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
                            metric: str, exog: Union[np.ndarray, pd.Series]=None,
                            verbose: bool=False) -> Tuple[np.array, np.array]:
     '''
-    Backtesting (validation) of `ForecasterAutoreg`, `ForecasterCustom` or
-    `ForecasterAutoregMultiOutput` object.
+    Backtesting (validation) of `ForecasterAutoreg`, `ForecasterCustom`,
+    `ForecasterAutoregCustom` or `ForecasterAutoregMultiOutput` object.
     The model is trained only once using the `initial_train_size` first observations.
     In each iteration, a number of `steps` predictions are evaluated.
     
@@ -244,8 +248,10 @@ def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
     
     Parameters
     ----------
-    forecaster : ForecasterAutoreg, ForecasterCustom, ForecasterAutoregMultiOutput
-        `ForecasterAutoreg`, `ForecasterCustom` or `ForecasterAutoregMultiOutput` object.
+    forecaster : ForecasterAutoreg, ForecasterCustom, ForecasterAutoregCustom,
+                 ForecasterAutoregMultiOutput
+        `ForecasterAutoreg`, `ForecasterCustom` `ForecasterAutoregCustom` or
+        `ForecasterAutoregMultiOutput` object.
         
     y : 1D np.ndarray, pd.Series
         Training time series values. 
@@ -386,8 +392,10 @@ def grid_search_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
     Parameters
     ----------
     
-    forecaster : ForecasterAutoreg, ForecasterCustom, ForecasterAutoregMultiOutput
-        ForecasterAutoreg, ForecasterCustom or ForecasterAutoregMultiOutput object.
+    forecaster : ForecasterAutoreg, ForecasterCustom, ForecasterAutoregCustom,
+                 ForecasterAutoregMultiOutput
+        `ForecasterAutoreg`, `ForecasterCustom` `ForecasterAutoregCustom` or
+        `ForecasterAutoregMultiOutput` object.
         
     y : 1D np.ndarray, pd.Series
         Training time series values. 
@@ -412,7 +420,7 @@ def grid_search_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
            
     lags_grid : list of int, lists, np.narray or range. 
         Lists of `lags` to try. Only used if forecaster is an instance of 
-        `ForecasterCustom`.
+        `ForecasterAutoreg`.
         
     method : {'cv', 'backtesting'}
         Method used to estimate the metric for each parameter combination.
@@ -444,10 +452,10 @@ def grid_search_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
         forecaster._check_exog(exog=exog)
         exog = forecaster._preproces_exog(exog=exog)
     
-    if isinstance(forecaster, ForecasterCustom):
+    if isinstance(forecaster, (ForecasterCustom, ForecasterAutoregCustom)):
         if lags_grid is not None:
             logging.warning(
-                '`lags_grid` ignored if forecaster is an instance of `ForecasterCustom`.'
+                '`lags_grid` ignored if forecaster is an instance of `ForecasterCustom` or `ForecasterAutoregCustom`.'
             )
         lags_grid = ['custom predictors']
         
@@ -534,18 +542,19 @@ def backtesting_forecaster_intervals(forecaster, y: Union[np.ndarray, pd.Series]
                            in_sample_residuals: bool=True,
                            verbose: bool=False) -> Tuple[np.array, np.array]:
     '''
-    Backtesting (validation) of `ForecasterAutoreg` or `ForecasterCustom` object.
-    The model is trained only once using the `initial_train_size` first observations.
-    In each iteration, a number of `steps` predictions are evaluated. Both, 
-    predictions and intervals, are calculated.
+    Backtesting (validation) of `ForecasterAutoreg`, `ForecasterCustom` or
+    `ForecasterAutoregCustom` object. The model is trained only once using the
+    `initial_train_size` first observations. In each iteration, a number of
+    `steps` predictions are evaluated. Both, predictions and intervals, are
+    calculated.
     
     This evaluation is much faster than `cv_forecaster()` since the model is
     trained only once.
     
     Parameters
     ----------
-    forecaster : ForecasterAutoreg, ForecasterCustom
-        `ForecasterAutoreg` or `ForecasterCustom` object.
+    forecaster : ForecasterAutoreg, ForecasterCustom, ForecasterAutoregCustom
+        `ForecasterAutoreg`, `ForecasterCustom` or `ForecasterAutoregCustom` object.
         
     y : 1D np.ndarray, pd.Series
         Training time series values. 
