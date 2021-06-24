@@ -16,65 +16,104 @@ from sklearn.ensemble import GradientBoostingRegressor
 #-------------------------------------------------------------------------------
 def test_init_lags_attribute_when_integer_is_passed():
    
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=10)
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=10, steps=3)
     assert (forecaster.lags == np.arange(10) + 1).all()
     
 def test_init_lags_attribute_when_list_is_passed():
    
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=[1, 2, 3])
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=[1, 2, 3], steps=3)
     assert (forecaster.lags == np.array([1, 2, 3])).all()
     
 def test_init_lags_attribute_when_range_is_passed():
    
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=range(1, 4))
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=range(1, 4), steps=3)
     assert (forecaster.lags == np.array(range(1, 4))).all()
     
 def test_init_lags_attribute_when_numpy_arange_is_passed():
    
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=np.arange(1, 10))
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=np.arange(1, 10), steps=3)
     assert (forecaster.lags == np.arange(1, 10)).all()
     
 
 def test_init_exception_when_lags_argument_is_int_less_than_1():
     
     with pytest.raises(Exception):
-        ForecasterAutoreg(LinearRegression(), lags=-10)
+        ForecasterAutoregMultiOutput(LinearRegression(), lags=-10, steps=3)
         
 def test_init_exception_when_lags_argument_is_range_starting_at_zero():
     
     with pytest.raises(Exception):
-        ForecasterAutoreg(LinearRegression(), lags=range(0, 4))
+        ForecasterAutoregMultiOutput(LinearRegression(), lags=range(0, 4), steps=3)
             
-        
         
 def test_init_exception_when_lags_argument_is_numpy_arange_starting_at_zero():
     
     with pytest.raises(Exception):
-        ForecasterAutoreg(LinearRegression(), lags=np.arange(0, 4))
+        ForecasterAutoregMultiOutput(LinearRegression(), lags=np.arange(0, 4), steps=3)
         
         
 def test_init_exception_when_lags_argument_is_list_starting_at_zero():
     
     with pytest.raises(Exception):
-        ForecasterAutoreg(LinearRegression(), lags=[0, 1, 2])
+        ForecasterAutoregMultiOutput(LinearRegression(), lags=[0, 1, 2], steps=3)
         
         
 # Test method create_lags()
 #-------------------------------------------------------------------------------
-def test_create_lags_when_lags_is_3_and_y_is_numpy_arange_10():
-    '''
-    Check matrix of lags is created properly
-    '''
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
+def test_create_lags_when_lags_is_3_steps_1_and_y_is_numpy_arange_10():
+
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=1)
     results = forecaster.create_lags(y=np.arange(10))
     expected = (np.array([[2., 1., 0.],
-                         [3., 2., 1.],
-                         [4., 3., 2.],
-                         [5., 4., 3.],
-                         [6., 5., 4.],
-                         [7., 6., 5.],
+                          [3., 2., 1.],
+                          [4., 3., 2.],
+                          [5., 4., 3.],
+                          [6., 5., 4.],
+                          [7., 6., 5.],
                          [8., 7., 6.]]),
-               np.array([3., 4., 5., 6., 7., 8., 9.]))
+                np.array([[3.],
+                          [4.],
+                          [5.],
+                          [6.],
+                          [7.],
+                          [8.],
+                          [9.]]))
+
+    assert (results[0] == expected[0]).all()
+    assert (results[1] == expected[1]).all()
+
+
+def test_create_lags_when_lags_is_3_steps_2_and_y_is_numpy_arange_10():
+
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=2)
+    results = forecaster.create_lags(y=np.arange(10))
+    expected = (np.array([[2., 1., 0.],
+                          [3., 2., 1.],
+                          [4., 3., 2.],
+                          [5., 4., 3.],
+                          [6., 5., 4.],
+                          [7., 6., 5.]]),
+                np.array([[3., 4.],
+                          [4., 5.],
+                          [5., 6.],
+                          [6., 7.],
+                          [7., 8.],
+                          [8., 9.]]))
+
+    assert (results[0] == expected[0]).all()
+    assert (results[1] == expected[1]).all()
+
+
+def test_create_lags_when_lags_is_3_steps_5_and_y_is_numpy_arange_10():
+
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=5)
+    results = forecaster.create_lags(y=np.arange(10))
+    expected = (np.array([[2., 1., 0.],
+                          [3., 2., 1.],
+                          [4., 3., 2.]]),
+                np.array([[3., 4., 5., 6., 7.],
+                          [4., 5., 6., 7., 8.],
+                          [5., 6., 7., 8., 9.]]))
 
     assert (results[0] == expected[0]).all()
     assert (results[1] == expected[1]).all()
