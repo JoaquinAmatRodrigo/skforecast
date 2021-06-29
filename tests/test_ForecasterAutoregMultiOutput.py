@@ -131,7 +131,7 @@ def test_create_lags_exception_when_len_of_y_is_less_than_maximum_lag():
 #-------------------------------------------------------------------------------
 def test_create_train_X_y_output_when_y_is_range_10_and_exog_is_None():
 
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=5)
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=1)
     results = forecaster.create_train_X_y(y=np.arange(10))
     expected = (np.array([[4., 3., 2., 1., 0.],
                         [5., 4., 3., 2., 1.],
@@ -146,7 +146,7 @@ def test_create_train_X_y_output_when_y_is_range_10_and_exog_is_None():
 
 def test_create_train_X_y_output_when_y_is_range_10_and_exog_is_1d_array():
 
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=5)
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=5, steps=1)
     results = forecaster.create_train_X_y(y=np.arange(10), exog=np.arange(100, 110))
     expected = (np.array([[4.,   3.,   2.,   1.,   0., 105.],
                         [5.,   4.,   3.,   2.,   1., 106.],
@@ -160,7 +160,7 @@ def test_create_train_X_y_output_when_y_is_range_10_and_exog_is_1d_array():
 
 def test_create_train_X_y_output_when_y_is_range_10_and_exog_is_2d_array():
 
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=5)
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=5, steps=1)
     results = forecaster.create_train_X_y(
             y=np.arange(10),
             exog=np.column_stack([np.arange(100, 110), np.arange(1000, 1010)])
@@ -180,7 +180,7 @@ def test_create_train_X_y_output_when_y_is_range_10_and_exog_is_2d_array():
 #-------------------------------------------------------------------------------
 def test_fit_exception_when_y_and_exog_have_different_lenght():
 
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=5)
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=5, steps=2)
     with pytest.raises(Exception):
         forecaster.fit(y=np.arange(50), exog=np.arange(10))
     with pytest.raises(Exception):
@@ -189,32 +189,23 @@ def test_fit_exception_when_y_and_exog_have_different_lenght():
 
 def test_last_window_stored_when_fit_forecaster():
     
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=2)
     forecaster.fit(y=np.arange(50))
     assert (forecaster.last_window == np.array([47, 48, 49])).all()
     
     
-def test_in_sample_residuals_stored_when_fit_forecaster():
-    
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
-    forecaster.fit(y=np.arange(5))
-    expected = np.array([0, 0])
-    results = forecaster.in_sample_residuals  
-    assert results == approx(expected)
-
-
 # Test method predict()
 #-------------------------------------------------------------------------------
 def test_predict_exception_when_steps_lower_than_1():
 
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=2)
     forecaster.fit(y=np.arange(50))
     with pytest.raises(Exception):
         forecaster.predict(steps=0)
 
 def test_predict_exception_when_forecaster_fited_without_exog_and_exog_passed_when_predict():
 
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=2)
     forecaster.fit(y=np.arange(50))
     with pytest.raises(Exception):
         forecaster.predict(steps=10, exog=np.arange(10))
@@ -222,7 +213,7 @@ def test_predict_exception_when_forecaster_fited_without_exog_and_exog_passed_wh
 
 def test_predict_exception_when_forecaster_fited_with_exog_but_not_exog_passed_when_predict():
 
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=2)
     forecaster.fit(y=np.arange(50), exog=np.arange(50))
     with pytest.raises(Exception):
         forecaster.predict(steps=10)
@@ -230,7 +221,7 @@ def test_predict_exception_when_forecaster_fited_with_exog_but_not_exog_passed_w
         
 def test_predict_exception_when_exog_lenght_is_less_than_steps():
 
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=2)
     forecaster.fit(y=np.arange(50), exog=np.arange(50))
     with pytest.raises(Exception):
         forecaster.predict(steps=10, exog=np.arange(5))
@@ -238,7 +229,7 @@ def test_predict_exception_when_exog_lenght_is_less_than_steps():
         
 def test_predict_exception_when_last_window_argument_is_not_numpy_array_or_pandas_series():
 
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=2)
     forecaster.fit(y=np.arange(50))
     with pytest.raises(Exception):
         forecaster.predict(steps=10, last_window=[1,2,3])
@@ -246,7 +237,7 @@ def test_predict_exception_when_last_window_argument_is_not_numpy_array_or_panda
 
 def test_predict_exception_when_last_window_lenght_is_less_than_maximum_lag():
 
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=2)
     forecaster.fit(y=np.arange(50))
     with pytest.raises(Exception):
         forecaster.predict(steps=10, last_window=pd.Series([1, 2]))
@@ -265,20 +256,20 @@ def test_predict_output_when_regresor_is_LinearRegression_lags_is_3_ytrain_is_nu
 #-------------------------------------------------------------------------------
 def test_check_y_exception_when_y_is_int():
     
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=2)
     with pytest.raises(Exception):
         forecaster._check_y(y=10)
         
 def test_check_y_exception_when_y_is_list():
     
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=2)
     with pytest.raises(Exception):
         forecaster._check_y(y=[1, 2, 3])
         
         
 def test_check_y_exception_when_y_is_numpy_array_with_more_than_one_dimension():
     
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=2)
     with pytest.raises(Exception):
         forecaster._check_y(y=np.arange(10).reshape(-1, 1))
         
@@ -288,20 +279,20 @@ def test_check_y_exception_when_y_is_numpy_array_with_more_than_one_dimension():
 #-------------------------------------------------------------------------------
 def test_check_last_window_exception_when_last_window_is_int():
     
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=2)
     with pytest.raises(Exception):
         forecaster._check_y(y=10)
         
 def test_check_last_window_exception_when_last_window_is_list():
     
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=2)
     with pytest.raises(Exception):
         forecaster._check_y(y=[1, 2, 3])
         
         
 def test_check_last_window_exception_when_last_window_is_numpy_array_with_more_than_one_dimension():
     
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=2)
     with pytest.raises(Exception):
         forecaster._check_y(y=np.arange(10).reshape(-1, 1))
     
@@ -310,28 +301,28 @@ def test_check_last_window_exception_when_last_window_is_numpy_array_with_more_t
 #-------------------------------------------------------------------------------
 def test_check_exog_exception_when_exog_is_int():
 
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=2)
     with pytest.raises(Exception):
         forecaster._check_exog(exog=10)
         
         
 def test_check_exog_exception_when_exog_is_list():
 
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=2)
     with pytest.raises(Exception):
         forecaster._check_exog(exog=[1, 2, 3])
         
         
 def test_check_exog_exception_when_exog_is_numpy_array_with_more_than_2_dimensions():
 
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=2)
     with pytest.raises(Exception):
         forecaster._check_exog(exog=np.arange(30).reshape(-1, 10, 3))
         
         
 def test_check_exog_exception_when_ref_type_is_pandas_series_and_exog_is_numpy_array_with_more_than_1_column():
 
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=2)
     with pytest.raises(Exception):
         forecaster._check_exog(
             exog     = np.arange(30).reshape(-1, 2),
@@ -341,14 +332,14 @@ def test_check_exog_exception_when_ref_type_is_pandas_series_and_exog_is_numpy_a
         
 def test_check_exog_exception_when_ref_type_is_pandas_series_and_exog_is_numpy_array_with_more_than_2_dimensions():
 
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=2)
     with pytest.raises(Exception):
         forecaster._check_exog(exog=np.arange(30).reshape(-1, 10, 3))
         
         
 def test_check_exog_exception_when_exog_has_diferent_number_of_columns_than_ref_shape():
 
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=2)
     with pytest.raises(Exception):
         forecaster._check_exog(
             exog      = np.arange(30).reshape(-1, 3),
@@ -358,7 +349,7 @@ def test_check_exog_exception_when_exog_has_diferent_number_of_columns_than_ref_
 
 def test_check_exog_exception_when_exog_is_1d_numpy_array_and_ref_shape_has_more_than_1_column():
 
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=2)
     with pytest.raises(Exception):
         forecaster._check_exog(
             exog      = np.arange(30),
@@ -369,7 +360,7 @@ def test_check_exog_exception_when_exog_is_1d_numpy_array_and_ref_shape_has_more
         
 def test_check_exog_exception_when_exog_is_pandas_series_and_ref_shape_has_more_than_1_column():
 
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=2)
     with pytest.raises(Exception):
         forecaster._check_exog(
             exog      = pd.Series(np.arange(30)),
@@ -382,13 +373,13 @@ def test_check_exog_exception_when_exog_is_pandas_series_and_ref_shape_has_more_
 #-------------------------------------------------------------------------------
 def test_preproces_y_when_y_is_pandas_series():
 
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=2)
     assert (forecaster._preproces_y(y=pd.Series([0, 1, 2])) == np.arange(3)).all()
     
 
 def test_preproces_y_when_y_is_1d_numpy_array():
 
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=2)
     assert (forecaster._preproces_y(y=np.arange(3)) == np.arange(3)).all()
     
 
@@ -397,13 +388,13 @@ def test_preproces_y_when_y_is_1d_numpy_array():
 #-------------------------------------------------------------------------------
 def test_preproces_last_window_when_last_window_is_pandas_series():
 
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=2)
     assert (forecaster._preproces_last_window(last_window=pd.Series([0, 1, 2])) == np.arange(3)).all()
     
 
 def test_preproces_last_window_when_last_window_is_1d_numpy_array():
 
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=2)
     assert (forecaster._preproces_last_window(last_window=np.arange(3)) == np.arange(3)).all()
 
 
@@ -411,13 +402,13 @@ def test_preproces_last_window_when_last_window_is_1d_numpy_array():
 #-------------------------------------------------------------------------------
 def test_preproces_exog_when_exog_is_pandas_series():
 
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=2)
     assert (forecaster._preproces_exog(exog=pd.Series([0, 1, 2])) == np.arange(3).reshape(-1, 1)).all()
     
 
 def test_preproces_exog_when_exog_is_1d_numpy_array():
 
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=2)
     assert (forecaster._preproces_exog(exog=np.arange(3)) == np.arange(3).reshape(-1, 1)).all()
     
     
@@ -425,7 +416,7 @@ def test_preproces_exog_when_exog_is_1d_numpy_array():
 #-------------------------------------------------------------------------------
 def test_set_paramns():
     
-    forecaster = ForecasterAutoreg(LinearRegression(fit_intercept=True), lags=3)
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(fit_intercept=True), lags=3, steps=2)
     new_paramns = {'fit_intercept': False}
     forecaster.set_params(**new_paramns)
     expected = {'copy_X': True,
@@ -441,61 +432,38 @@ def test_set_paramns():
 #-------------------------------------------------------------------------------
 def test_set_lags_excepion_when_lags_argument_is_int_less_than_1():
     
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=2)
     with pytest.raises(Exception):
         ForecasterAutoreg(LinearRegression(), lags=-10)
 
 def test_set_lags_excepion_when_lags_argument_has_any_value_less_than_1():
     
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=2)
     with pytest.raises(Exception):
         ForecasterAutoreg(LinearRegression(), lags=range(0, 4))
         
         
 def test_set_lags_when_lags_argument_is_int():
     
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=2)
     forecaster.set_lags(lags=5)
     assert (forecaster.lags == np.array([1, 2, 3, 4, 5])).all()
     assert forecaster.max_lag == 5
     
 def test_set_lags_when_lags_argument_is_list():
     
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=2)
     forecaster.set_lags(lags=[1,2,3])
     assert (forecaster.lags == np.array([1, 2, 3])).all()
     assert forecaster.max_lag == 3
     
 def test_set_lags_when_lags_argument_is_1d_numpy_array():
     
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=2)
     forecaster.set_lags(lags=np.array([1,2,3]))
     assert (forecaster.lags == np.array([1, 2, 3])).all()
     assert forecaster.max_lag == 3
-    
-    
-# Test method set_out_sample_residuals()
-#-------------------------------------------------------------------------------
-def test_set_out_sample_residuals_exception_when_residuals_argument_is_list():
-    
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
-    with pytest.raises(Exception):
-        forecaster.set_out_sample_residuals(residuals=[1,2,3])
         
-        
-def test_set_out_sample_residuals_when_residuals_lenght_is_less_or_equal_to_1000():
-    
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
-    forecaster.set_out_sample_residuals(residuals=np.arange(10))
-    assert (forecaster.out_sample_residuals == np.arange(10)).all()
-    
-
-def test_set_out_sample_residuals_when_residuals_lenght_is_greater_than_1000():
-    
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
-    forecaster.set_out_sample_residuals(residuals=np.arange(2000))
-    assert len(forecaster.out_sample_residuals) == 1000
-    
     
 # Test method get_coef()
 #-------------------------------------------------------------------------------
