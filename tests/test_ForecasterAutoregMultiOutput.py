@@ -129,7 +129,7 @@ def test_create_lags_exception_when_len_of_y_is_less_than_maximum_lag():
 
 # Test method create_train_X_y()
 #-------------------------------------------------------------------------------
-def test_create_train_X_y_output_when_y_is_range_10_and_exog_is_None():
+def test_create_train_X_y_output_when_lags_3_steps_1_y_is_range_10_and_exog_is_None():
 
     forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=1)
     results = forecaster.create_train_X_y(y=np.arange(10))
@@ -144,7 +144,28 @@ def test_create_train_X_y_output_when_y_is_range_10_and_exog_is_None():
     assert (results[1] == expected[1]).all()
 
 
-def test_create_train_X_y_output_when_y_is_range_10_and_exog_is_1d_array():
+def test_create_train_X_y_output_when_lags_3_steps_2_y_is_range_10_and_exog_is_None():
+
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=2)
+    results = forecaster.create_train_X_y(y=np.arange(10))
+    expected = (np.array([[2., 1., 0.],
+                        [3., 2., 1.],
+                        [4., 3., 2.],
+                        [5., 4., 3.],
+                        [6., 5., 4.],
+                        [7., 6., 5.]]),
+                np.array([[3., 4.],
+                        [4., 5.],
+                        [5., 6.],
+                        [6., 7.],
+                        [7., 8.],
+                        [8., 9.]]))  
+
+    assert (results[0] == expected[0]).all()
+    assert (results[1] == expected[1]).all()
+
+
+def test_create_train_X_y_output_when_lags_5_steps_1_y_is_range_10_and_exog_is_1d_array():
 
     forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=5, steps=1)
     results = forecaster.create_train_X_y(y=np.arange(10), exog=np.arange(100, 110))
@@ -158,7 +179,25 @@ def test_create_train_X_y_output_when_y_is_range_10_and_exog_is_1d_array():
     assert (results[0] == expected[0]).all()
     assert (results[1] == expected[1]).all()
 
-def test_create_train_X_y_output_when_y_is_range_10_and_exog_is_2d_array():
+
+def test_create_train_X_y_output_when_lags_5_steps_2_y_is_range_10_and_exog_is_1d_array():
+
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=5, steps=2)
+    results = forecaster.create_train_X_y(y=np.arange(10), exog=np.arange(100, 110))
+    expected = (np.array([[  4.,   3.,   2.,   1.,   0., 105., 106.],
+                        [  5.,   4.,   3.,   2.,   1., 106., 107.],
+                        [  6.,   5.,   4.,   3.,   2., 107., 108.],
+                        [  7.,   6.,   5.,   4.,   3., 108., 109.]]),
+                np.array([[5., 6.],
+                        [6., 7.],
+                        [7., 8.],
+                        [8., 9.]]))   
+
+    assert (results[0] == expected[0]).all()
+    assert (results[1] == expected[1]).all()
+
+
+def test_create_train_X_y_output_when_lags_5_steps_1_y_is_range_10_and_exog_is_2d_array():
 
     forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=5, steps=1)
     results = forecaster.create_train_X_y(
@@ -171,6 +210,23 @@ def test_create_train_X_y_output_when_y_is_range_10_and_exog_is_2d_array():
                         [7,    6,    5,    4,    3,  108, 1008],
                         [8,    7,    6,    5,    4,  109, 1009]]),
                 np.array([5, 6, 7, 8, 9]))     
+
+    assert (results[0] == expected[0]).all()
+    assert (results[1] == expected[1]).all()
+
+def test_create_train_X_y_output_when_lags_5_steps_3_y_is_range_10_and_exog_is_2d_array():
+
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=5, steps=3)
+    results = forecaster.create_train_X_y(
+            y=np.arange(10),
+            exog=np.column_stack([np.arange(100, 110), np.arange(1000, 1010)])
+          )
+    expected = (np.array([[   4,    3,    2,    1,    0,  105,  106,  107, 1005, 1006, 1007],
+                        [   5,    4,    3,    2,    1,  106,  107,  108, 1006, 1007, 1008],
+                        [   6,    5,    4,    3,    2,  107,  108,  109, 1007, 1008, 1009]]),
+                np.array([[5, 6, 7],
+                         [6, 7, 8],
+                         [7, 8, 9]]))     
 
     assert (results[0] == expected[0]).all()
     assert (results[1] == expected[1]).all()
