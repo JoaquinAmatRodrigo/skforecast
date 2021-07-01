@@ -11,10 +11,9 @@ All notable changes to this project will be documented in this file.
 
 + Class `ForecasterAutoregCustom`.
 
-+ Method `create_train_X_y()` to facilitate access to the training data matrix.
++ Method `create_train_X_y()` to facilitate access to the training data matrix created from `y` and `exog`.
 
 ### Changed
-
 
 + Class `ForecasterCustom` has been renamed to `ForecasterAutoregCustom`. However, `ForecasterCustom` will still remain to keep backward compatibility.
 
