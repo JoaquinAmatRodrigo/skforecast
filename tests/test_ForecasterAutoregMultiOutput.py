@@ -56,8 +56,18 @@ def test_init_exception_when_lags_argument_is_list_starting_at_zero():
     
     with pytest.raises(Exception):
         ForecasterAutoregMultiOutput(LinearRegression(), lags=[0, 1, 2], steps=3)
+
+
+def test_init_exception_when_steps_argument_is_lower_than_1():
+    
+    with pytest.raises(Exception):
+        ForecasterAutoregMultiOutput(LinearRegression(), lags=1, steps=0)
         
-        
+def test_init_exception_when_steps_argument_is_not_int():
+    
+    with pytest.raises(Exception):
+        ForecasterAutoregMultiOutput(LinearRegression(), lags=1, steps=10.5)
+
 # Test method create_lags()
 #-------------------------------------------------------------------------------
 def test_create_lags_when_lags_is_3_steps_1_and_y_is_numpy_arange_10():
@@ -122,7 +132,7 @@ def test_create_lags_when_lags_is_3_steps_5_and_y_is_numpy_arange_10():
 
 def test_create_lags_exception_when_len_of_y_is_less_than_maximum_lag():
    
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=10)
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=10, steps=1)
     with pytest.raises(Exception):
         forecaster.create_lags(y=np.arange(5))
 
@@ -133,12 +143,20 @@ def test_create_train_X_y_output_when_lags_3_steps_1_y_is_range_10_and_exog_is_N
 
     forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=1)
     results = forecaster.create_train_X_y(y=np.arange(10))
-    expected = (np.array([[4., 3., 2., 1., 0.],
-                        [5., 4., 3., 2., 1.],
-                        [6., 5., 4., 3., 2.],
-                        [7., 6., 5., 4., 3.],
-                        [8., 7., 6., 5., 4.]]),
-                np.array([5, 6, 7, 8, 9]))     
+    expected = (np.array([[2., 1., 0.],
+                        [3., 2., 1.],
+                        [4., 3., 2.],
+                        [5., 4., 3.],
+                        [6., 5., 4.],
+                        [7., 6., 5.],
+                        [8., 7., 6.]]),
+                np.array([[3.],
+                        [4.],
+                        [5.],
+                        [6.],
+                        [7.],
+                        [8.],
+                        [9.]]))   
 
     assert (results[0] == expected[0]).all()
     assert (results[1] == expected[1]).all()
@@ -170,11 +188,15 @@ def test_create_train_X_y_output_when_lags_5_steps_1_y_is_range_10_and_exog_is_1
     forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=5, steps=1)
     results = forecaster.create_train_X_y(y=np.arange(10), exog=np.arange(100, 110))
     expected = (np.array([[4.,   3.,   2.,   1.,   0., 105.],
-                        [5.,   4.,   3.,   2.,   1., 106.],
-                        [6.,   5.,   4.,   3.,   2., 107.],
-                        [7.,   6.,   5.,   4.,   3., 108.],
-                        [8.,   7.,   6.,   5.,   4., 109.]]),
-                np.array([5, 6, 7, 8, 9]))     
+                         [5.,   4.,   3.,   2.,   1., 106.],
+                         [6.,   5.,   4.,   3.,   2., 107.],
+                         [7.,   6.,   5.,   4.,   3., 108.],
+                         [8.,   7.,   6.,   5.,   4., 109.]]),
+                np.array([[5.],
+                         [6.],
+                         [7.],
+                         [8.],
+                         [9.]]))     
 
     assert (results[0] == expected[0]).all()
     assert (results[1] == expected[1]).all()
@@ -209,7 +231,11 @@ def test_create_train_X_y_output_when_lags_5_steps_1_y_is_range_10_and_exog_is_2
                         [6,    5,    4,    3,    2,  107, 1007],
                         [7,    6,    5,    4,    3,  108, 1008],
                         [8,    7,    6,    5,    4,  109, 1009]]),
-                np.array([5, 6, 7, 8, 9]))     
+                np.array([[5.],
+                         [6.],
+                         [7.],
+                         [8.],
+                         [9.]]))     
 
     assert (results[0] == expected[0]).all()
     assert (results[1] == expected[1]).all()
@@ -252,19 +278,12 @@ def test_last_window_stored_when_fit_forecaster():
     
 # Test method predict()
 #-------------------------------------------------------------------------------
-def test_predict_exception_when_steps_lower_than_1():
-
-    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=2)
-    forecaster.fit(y=np.arange(50))
-    with pytest.raises(Exception):
-        forecaster.predict(steps=0)
-
 def test_predict_exception_when_forecaster_fited_without_exog_and_exog_passed_when_predict():
 
     forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=2)
     forecaster.fit(y=np.arange(50))
     with pytest.raises(Exception):
-        forecaster.predict(steps=10, exog=np.arange(10))
+        forecaster.predict(exog=np.arange(10))
 
 
 def test_predict_exception_when_forecaster_fited_with_exog_but_not_exog_passed_when_predict():
@@ -272,15 +291,15 @@ def test_predict_exception_when_forecaster_fited_with_exog_but_not_exog_passed_w
     forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=2)
     forecaster.fit(y=np.arange(50), exog=np.arange(50))
     with pytest.raises(Exception):
-        forecaster.predict(steps=10)
+        forecaster.predict()
         
         
 def test_predict_exception_when_exog_lenght_is_less_than_steps():
 
-    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=2)
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=10)
     forecaster.fit(y=np.arange(50), exog=np.arange(50))
     with pytest.raises(Exception):
-        forecaster.predict(steps=10, exog=np.arange(5))
+        forecaster.predict(exog=np.arange(5))
         
         
 def test_predict_exception_when_last_window_argument_is_not_numpy_array_or_pandas_series():
@@ -288,7 +307,7 @@ def test_predict_exception_when_last_window_argument_is_not_numpy_array_or_panda
     forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=2)
     forecaster.fit(y=np.arange(50))
     with pytest.raises(Exception):
-        forecaster.predict(steps=10, last_window=[1,2,3])
+        forecaster.predict(last_window=[1,2,3])
 
 
 def test_predict_exception_when_last_window_lenght_is_less_than_maximum_lag():
@@ -296,15 +315,24 @@ def test_predict_exception_when_last_window_lenght_is_less_than_maximum_lag():
     forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=2)
     forecaster.fit(y=np.arange(50))
     with pytest.raises(Exception):
-        forecaster.predict(steps=10, last_window=pd.Series([1, 2]))
+        forecaster.predict(last_window=pd.Series([1, 2]))
         
 
-def test_predict_output_when_regresor_is_LinearRegression_lags_is_3_ytrain_is_numpy_arange_50_and_steps_is_5():
+def test_predict_output_when_regresor_is_LinearRegression_lags_is_3_steps_5_ytrain_is_numpy_arange_50():
 
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=5)
     forecaster.fit(y=np.arange(50))
-    predictions = forecaster.predict(steps=5)
+    predictions = forecaster.predict()
     expected = np.array([50., 51., 52., 53., 54.])
+    assert predictions == approx(expected)
+
+
+def test_predict_output_when_regresor_is_LinearRegression_lags_is_5_steps_2_ytrain_is_numpy_arange_50():
+
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=5, steps=2)
+    forecaster.fit(y=np.arange(50))
+    predictions = forecaster.predict()
+    expected = np.array([50., 51.])
     assert predictions == approx(expected)
     
     
@@ -424,6 +452,65 @@ def test_check_exog_exception_when_exog_is_pandas_series_and_ref_shape_has_more_
             ref_shape = (1, 5)
         )
 
+# Test method _exog_to_multi_output()
+#-------------------------------------------------------------------------------
+def test_exog_to_multi_output_when_lags_3_steps_2_exog_numpy_array_1d():
+
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=2)
+    exog = np.arange(10)
+    exog = forecaster._preproces_exog(exog=exog)
+    results = forecaster._exog_to_multi_output(exog=exog)
+    expected = np.array([[0, 1],
+                        [1, 2],
+                        [2, 3],
+                        [3, 4],
+                        [4, 5],
+                        [5, 6],
+                        [6, 7],
+                        [7, 8],
+                        [8, 9]])
+
+    assert results == approx(expected)
+
+
+
+def test_exog_to_multi_output_when_lags_3_steps_2_exog_numpy_array_2d():
+
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=2)
+    exog = np.column_stack([np.arange(100, 110), np.arange(1000, 1010)])
+    exog = forecaster._preproces_exog(exog=exog)
+    results = forecaster._exog_to_multi_output(exog=exog)
+    expected = np.array([[ 100,  101, 1000, 1001],
+                        [ 101,  102, 1001, 1002],
+                        [ 102,  103, 1002, 1003],
+                        [ 103,  104, 1003, 1004],
+                        [ 104,  105, 1004, 1005],
+                        [ 105,  106, 1005, 1006],
+                        [ 106,  107, 1006, 1007],
+                        [ 107,  108, 1007, 1008],
+                        [ 108,  109, 1008, 1009]])
+
+    assert results == approx(expected)
+
+
+
+def test_exog_to_multi_output_when_lags_2_steps_3_exog_numpy_array_2d():
+
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=2, steps=3)
+    exog = np.column_stack([np.arange(100, 110), np.arange(1000, 1010)])
+    exog = forecaster._preproces_exog(exog=exog)
+    results = forecaster._exog_to_multi_output(exog=exog)
+    expected = np.array([[ 100,  101,  102, 1000, 1001, 1002],
+                        [ 101,  102,  103, 1001, 1002, 1003],
+                        [ 102,  103,  104, 1002, 1003, 1004],
+                        [ 103,  104,  105, 1003, 1004, 1005],
+                        [ 104,  105,  106, 1004, 1005, 1006],
+                        [ 105,  106,  107, 1005, 1006, 1007],
+                        [ 106,  107,  108, 1006, 1007, 1008],
+                        [ 107,  108,  109, 1007, 1008, 1009]])
+
+    assert results == approx(expected)
+
         
 # Test method _preproces_y()
 #-------------------------------------------------------------------------------
@@ -523,187 +610,21 @@ def test_set_lags_when_lags_argument_is_1d_numpy_array():
     
 # Test method get_coef()
 #-------------------------------------------------------------------------------
-def test_get_coef_when_regressor_is_LinearRegression():
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
+def test_get_coef_when_regressor_is_LinearRegression_steps_1_lags_3():
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=1)
     forecaster.fit(y=np.arange(5))
     expected = np.array([0.33333333, 0.33333333, 0.33333333])
-    assert forecaster.get_coef() == approx(expected)
-    
-def test_get_coef_when_regressor_is_Ridge():
-    forecaster = ForecasterAutoreg(Ridge(), lags=3)
-    forecaster.fit(y=np.arange(5))
-    expected = np.array([0.2, 0.2, 0.2])
-    assert forecaster.get_coef() == approx(expected)
-    
-def test_get_coef_when_regressor_is_Lasso():
-    forecaster = ForecasterAutoreg(Lasso(), lags=3)
-    forecaster.fit(y=np.arange(50))
-    expected = np.array([9.94565217e-01, 6.16219995e-17, 0.00000000e+00])
-    assert forecaster.get_coef() == approx(expected)
+    assert forecaster.get_coef(step=1) == approx(expected)
 
-
+def test_get_coef_when_regressor_is_LinearRegression_steps_2_lags_3():
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=2)
+    forecaster.fit(y=np.arange(10))
+    expected = np.array([0.33333333, 0.33333333, 0.33333333])
+    assert forecaster.get_coef(step=1) == approx(expected)
+    assert forecaster.get_coef(step=2) == approx(expected)
+    
 def test_get_coef_when_regressor_is_RandomForest():
-    forecaster = ForecasterAutoreg(RandomForestRegressor(n_estimators=1, max_depth=2), lags=3)
+    forecaster = ForecasterAutoregMultiOutput(RandomForestRegressor(n_estimators=1, max_depth=2), lags=3, steps=2)
     forecaster.fit(y=np.arange(5))
     expected = None
-    assert forecaster.get_coef() is None
-    
-
-# Test method get_feature_importances
-#-------------------------------------------------------------------------------
-def test_get_feature_importances_when_regressor_is_RandomForest():
-    forecaster = ForecasterAutoreg(RandomForestRegressor(n_estimators=1, max_depth=2, random_state=123), lags=3)
-    forecaster.fit(y=np.arange(10))
-    expected = np.array([0.94766355, 0., 0.05233645])
-    assert forecaster.get_feature_importances() == approx(expected)
-    
-def test_get_feature_importances_when_regressor_is_GradientBoostingRegressor():
-    forecaster = ForecasterAutoreg(GradientBoostingRegressor(n_estimators=1, max_depth=2, random_state=123), lags=3)
-    forecaster.fit(y=np.arange(10))
-    expected = np.array([0.1509434 , 0.05660377, 0.79245283])
-    assert forecaster.get_feature_importances() == approx(expected)
-    
-def test_get_feature_importances_when_regressor_is_linear_model():
-    forecaster = ForecasterAutoreg(Lasso(), lags=3)
-    forecaster.fit(y=np.arange(50))
-    expected = None
-    assert forecaster.get_feature_importances() is None
-    
-    
-    
-# Test method _estimate_boot_interval()
-#-------------------------------------------------------------------------------
-
-def test_estimate_boot_interval_exception_when_steps_argument_is_less_than_1():
-    
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
-    forecaster.fit(y=np.arange(10))
-    with pytest.raises(Exception):
-        forecaster._estimate_boot_interval(steps=0)
-        
-        
-def test_estimate_boot_interval_exception_when_in_sample_residuals_argument_is_False_and_out_sample_residuals_attribute_is_empty():
-    
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
-    forecaster.fit(y=np.arange(10))
-    with pytest.raises(Exception):
-        forecaster._estimate_boot_interval(steps=5, in_sample_residuals=False)
-        
-        
-def test_estimate_boot_interval_exception_when_forecaster_fitted_with_exog_but_exog_argument_is_None():
-    
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
-    forecaster.fit(y=np.arange(10), exog=np.arange(10))
-    with pytest.raises(Exception):
-        forecaster._estimate_boot_interval(steps=5)
-        
-        
-def test_estimate_boot_interval_exception_when_forecaster_fitted_without_exog_but_exog_argument_is_not_None():
-    
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
-    forecaster.fit(y=np.arange(10))
-    with pytest.raises(Exception):
-        forecaster._estimate_boot_interval(steps=5, exog=np.arange(10))
-        
-        
-def test_estimate_boot_interval_exception_when_lenght_exog_argument_is_less_than_steps():
-    
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
-    forecaster.fit(y=np.arange(10), exog=np.arange(10))
-    with pytest.raises(Exception):
-        forecaster._estimate_boot_interval(steps=5, exog=np.arange(3))
-        
-
-def test_estimate_boot_interval_exception_when_lenght_last_window_argument_is_less_than_max_lag_attribute():
-    
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
-    forecaster.fit(y=np.arange(10))
-    with pytest.raises(Exception):
-        forecaster._estimate_boot_interval(steps=5, last_window=np.array([1,2]))
-        
-        
-def test_estimate_boot_interval_output_when_forecaster_is_LinearRegression_steps_is_1_in_sample_residuals_is_True():
-    
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
-    forecaster.fit(y=np.arange(10))
-    forecaster.in_sample_residuals = np.full_like(forecaster.in_sample_residuals, fill_value=10)
-    expected = np.array([[20., 20.]])
-    results = forecaster._estimate_boot_interval(steps=1, in_sample_residuals=True)  
-    assert results == approx(expected)
-    
-    
-def test_estimate_boot_interval_output_when_forecaster_is_LinearRegression_steps_is_2_in_sample_residuals_is_True():
-    
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
-    forecaster.fit(y=np.arange(10))
-    forecaster.in_sample_residuals = np.full_like(forecaster.in_sample_residuals, fill_value=10)
-    expected = np.array([[20.        , 20.        ],
-                        [24.33333333, 24.33333333]])
-    results = forecaster._estimate_boot_interval(steps=2, in_sample_residuals=True)  
-    assert results == approx(expected)
-    
-    
-def test_estimate_boot_interval_output_when_forecaster_is_LinearRegression_steps_is_1_in_sample_residuals_is_False():
-    
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
-    forecaster.fit(y=np.arange(10))
-    forecaster.out_sample_residuals = np.full_like(forecaster.in_sample_residuals, fill_value=10)
-    expected = np.array([[20., 20.]])
-    results = forecaster._estimate_boot_interval(steps=1, in_sample_residuals=False)  
-    assert results == approx(expected)
-    
-    
-def test_estimate_boot_interval_output_when_forecaster_is_LinearRegression_steps_is_2_in_sample_residuals_is_False():
-    
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
-    forecaster.fit(y=np.arange(10))
-    forecaster.out_sample_residuals = np.full_like(forecaster.in_sample_residuals, fill_value=10)
-    expected = np.array([[20.        , 20.        ],
-                        [24.33333333, 24.33333333]])
-    results = forecaster._estimate_boot_interval(steps=2, in_sample_residuals=False)  
-    assert results == approx(expected)
-    
-    
-    
-# Test method predict_interval()
-#-------------------------------------------------------------------------------
-def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_1_in_sample_residuals_is_True():
-    
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
-    forecaster.fit(y=np.arange(10))
-    forecaster.in_sample_residuals = np.full_like(forecaster.in_sample_residuals, fill_value=10)
-    expected = np.array([[10., 20., 20.]])
-    results = forecaster.predict_interval(steps=1, in_sample_residuals=True)  
-    assert results == approx(expected)
-    
-    
-def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_2_in_sample_residuals_is_True():
-    
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
-    forecaster.fit(y=np.arange(10))
-    forecaster.in_sample_residuals = np.full_like(forecaster.in_sample_residuals, fill_value=10)
-    expected = np.array([[10.        , 20.        , 20.        ],
-                         [11.        , 24.33333333, 24.33333333]])
-    results = forecaster.predict_interval(steps=2, in_sample_residuals=True)  
-    assert results == approx(expected)
-    
-    
-def testpredict_interval_output_when_forecaster_is_LinearRegression_steps_is_1_in_sample_residuals_is_False():
-    
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
-    forecaster.fit(y=np.arange(10))
-    forecaster.out_sample_residuals = np.full_like(forecaster.in_sample_residuals, fill_value=10)
-    expected = np.array([[10., 20., 20.]])
-    results = forecaster.predict_interval(steps=1, in_sample_residuals=False)  
-    assert results == approx(expected)
-    
-    
-def testpredict_interval_output_when_forecaster_is_LinearRegression_steps_is_2_in_sample_residuals_is_False():
-    
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
-    forecaster.fit(y=np.arange(10))
-    forecaster.out_sample_residuals = np.full_like(forecaster.in_sample_residuals, fill_value=10)
-    expected = np.array([[10.        , 20.        , 20.        ],
-                         [11.        , 24.33333333, 24.33333333]])
-    results = forecaster.predict_interval(steps=2, in_sample_residuals=False)  
-    assert results == approx(expected)
+    assert forecaster.get_coef(step=1) is None
