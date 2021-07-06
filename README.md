@@ -37,7 +37,9 @@ The most common error when importing the library is:
 
  `'cannot import name 'mean_absolute_percentage_error' from 'sklearn.metrics'`.
  
- This is because the scikit-learn installation is lower than 0.24. Try to upgrade scikit-learn with `pip install scikit-learn==0.24`.
+ This is because the scikit-learn installation is lower than 0.24. Try to upgrade scikit-learn with
+ 
+ `pip install scikit-learn==0.24`
 
 ## Dependencies
 
