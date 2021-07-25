@@ -95,7 +95,12 @@ The main challenge when using scikit-learn models for recursive multi-step forec
 
 **Direct multi-step forecasting**
 
-This strategy consists of training a different model for each step. For example, to predict the next 5 values of a time series, 5 different models are trainded, one for each step. As a result, the predictions are independent of each other. This forecasting strategy can be easily generated with the `ForecasterAutoregMultiOutput` class.
+This strategy consists of training a different model for each step. For example, to predict the next 5 values of a time series, 5 different models are trainded, one for each step. As a result, the predictions are independent of each other. This forecasting strategy can be easily generated with the `ForecasterAutoregMultiOutput` class. THIS IS STILL EXPERIMENTAL!
+
+<p><img src="./images/diagram_skforecast_multioutput.jpg" alt="forecasting-python" title="forecasting-python"></p>
+
+<center><font size="2.5"> <i>Time series transformation into the matrices needed to train a direct multi-step forecaster.</i></font></center>
+<br><br>
 
 <br><br>
 
