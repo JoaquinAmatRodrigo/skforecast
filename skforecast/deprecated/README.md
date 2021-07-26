@@ -1,5 +1,5 @@
 
-In the deprecated version of `ForecasterAutoregMultiOutput`, the data matrices used to train each model share the information of exogenous variables for all steps. Althougt this is not including future information (exogenous variables are known in advance), and could be informative for the model, the number of predictors increase rapidly.
+In the deprecated version of `ForecasterAutoregMultiOutput`, the data matrices used to train each model share the information of exogenous variables for all steps. Althougt this is not including future information (exogenous variables are known in advance), and may be informative for the model, the number of predictors increase rapidly.
 
 
 <p><img src="../../images/diagram_skforecast_multioutput_deprecated.jpg"></p>
