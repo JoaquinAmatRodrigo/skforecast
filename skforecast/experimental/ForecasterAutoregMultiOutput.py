@@ -303,8 +303,8 @@ class ForecasterAutoregMultiOutput():
         if not self.included_exog:
             X_train_step = X_train
         else:
-            idx_columns_lags = np.arange(0, self.max_lag)
-            idx_columns_exog = np.arange(X_train.shape[1])[self.max_lag + step::self.steps]
+            idx_columns_lags = np.arange(len(self.lags))
+            idx_columns_exog = np.arange(X_train.shape[1])[len(self.lags) + step::self.steps]
             idx_columns = np.hstack((idx_columns_lags, idx_columns_exog))
             X_train_step = X_train[:, idx_columns]
 
