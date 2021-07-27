@@ -24,7 +24,7 @@
 ## Installation
 
 ```bash
-$ pip install git+https://github.com/JoaquinAmatRodrigo/skforecast@v0.1.8.1
+$ pip install git+https://github.com/JoaquinAmatRodrigo/skforecast@v0.1.9
 ```
 
 Latest (unstable):
@@ -86,7 +86,7 @@ Since the value of *t(n)* is required to predict the point *t(n-1)*, and *t(n-1)
 
 <br>
 
-The main challenge when using scikit-learn models for recursive multi-step forecasting is transforming the time series in an matrix where, each value of the series, is related to the time window (lags) that precedes it. This forecasting strategy can be easily generated with the classes `ForecasterAutoreg` and `ForecasterCustom`.
+The main challenge when using scikit-learn models for recursive multi-step forecasting is transforming the time series in an matrix where, each value of the series, is related to the time window (lags) that precedes it. This forecasting strategy can be easily generated with the classes `ForecasterAutoreg` and `ForecasterAutoregCustom`.
 
 <p><img src="./images/transform_timeseries.gif" alt="forecasting-python" title="forecasting-python"></p>
 
@@ -116,7 +116,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
-from skforecast.ForecasterCustom import ForecasterCustom
+from skforecast.ForecasterAutoregCustom import ForecasterAutoregCustom
 from skforecast.model_selection import grid_search_forecaster
 from skforecast.model_selection import time_series_spliter
 from skforecast.model_selection import cv_forecaster
@@ -613,7 +613,7 @@ def create_predictors(y):
 ```python
 # Create and fit forecaster
 # ==============================================================================
-forecaster = ForecasterCustom(
+forecaster = ForecasterAutoregCustom(
                     regressor      = RandomForestRegressor(random_state=123),
                     fun_predictors = create_predictors,
                     window_size    = 20
@@ -625,7 +625,7 @@ forecaster.fit(y=datos_train)
 ```python
 # Grid search hiperparameters
 # ==============================================================================
-forecaster = ForecasterCustom(
+forecaster = ForecasterAutoregCustom(
                     regressor      = RandomForestRegressor(random_state=123),
                     fun_predictors = create_predictors,
                     window_size    = 20
