@@ -1,4 +1,5 @@
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/Naereen/StrapDown.js/graphs/commit-activity)
+<img src="https://camo.githubusercontent.com/8328a06bf42c2b1e7cfdb077954210f5ce8ab4258b79ea41bb1953ac64d0dfee/68747470733a2f2f696d672e736869656c64732e696f2f707970692f707976657273696f6e732f7363696b69742d6c65676f" alt="" data-canonical-src="https://img.shields.io/pypi/pyversions/scikit-lego" style="max-width:100%;">
 
 # skforecast
 
@@ -95,7 +96,7 @@ The main challenge when using scikit-learn models for recursive multi-step forec
 
 **Direct multi-step forecasting**
 
-This strategy consists of training a different model for each step. For example, to predict the next 5 values of a time series, 5 different models are trainded, one for each step. As a result, the predictions are independent of each other. This forecasting strategy can be easily generated with the `ForecasterAutoregMultiOutput` class. THIS IS STILL EXPERIMENTAL!
+This strategy consists of training a different model for each step. For example, to predict the next 5 values of a time series, 5 different models are trainded, one for each step. As a result, the predictions are independent of each other. This forecasting strategy can be easily generated with the `ForecasterAutoregMultiOutput` class (changed in version 0.1.9).
 
 <p><img src="./images/diagram_skforecast_multioutput.jpg" alt="forecasting-python" title="forecasting-python"></p>
 
