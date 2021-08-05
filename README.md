@@ -25,6 +25,10 @@
 ## Installation
 
 ```bash
+$ pip install skforecast
+```
+
+```bash
 $ pip install git+https://github.com/JoaquinAmatRodrigo/skforecast@v0.1.9
 ```
 
@@ -669,6 +673,6 @@ results_grid = grid_search_forecaster(
 
 
 
-## Author
+## Licence
 
-<a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons Licence" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />This work by  Joaquín Amat Rodrigo is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.
+**joaquinAmatRodrigo/skforecast** is licensed under the **MIT License**, a short and simple permissive license with conditions only requiring preservation of copyright and license notices. Licensed works, modifications, and larger works may be distributed under different terms and without source code.
