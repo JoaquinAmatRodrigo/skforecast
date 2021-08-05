@@ -124,6 +124,8 @@ from skforecast.ForecasterAutoregCustom import ForecasterAutoregCustom
 from skforecast.model_selection import grid_search_forecaster
 from skforecast.model_selection import time_series_spliter
 from skforecast.model_selection import cv_forecaster
+from skforecast.model_selection import backtesting_forecaster
+from skforecast.model_selection import backtesting_forecaster_intervals
 
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
