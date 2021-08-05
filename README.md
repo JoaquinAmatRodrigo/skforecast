@@ -1,5 +1,4 @@
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/Naereen/StrapDown.js/graphs/commit-activity)
-<img src="https://camo.githubusercontent.com/8328a06bf42c2b1e7cfdb077954210f5ce8ab4258b79ea41bb1953ac64d0dfee/68747470733a2f2f696d672e736869656c64732e696f2f707970692f707976657273696f6e732f7363696b69742d6c65676f" alt="" data-canonical-src="https://img.shields.io/pypi/pyversions/scikit-lego" style="max-width:100%;">
 
 # skforecast
 
