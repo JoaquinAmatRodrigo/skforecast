@@ -4,7 +4,7 @@ from pytest import approx
 import numpy as np
 import pandas as pd
 from skforecast import __version__
-from skforecast.experimental.ForecasterAutoregMultiOutput import ForecasterAutoregMultiOutput
+from skforecast.ForecasterAutoregMultiOutput import ForecasterAutoregMultiOutput
 from sklearn.linear_model import LinearRegression
 from sklearn.linear_model import Ridge
 from sklearn.linear_model import Lasso
