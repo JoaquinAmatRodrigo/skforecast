@@ -10,6 +10,9 @@ import setuptools
 import skforecast
 
 VERSION = skforecast.__version__
+
+def read(fname):
+    return open(os.path.join(os.path.dirname(__file__), fname)).read()
         
         
 setuptools.setup(
@@ -18,7 +21,7 @@ setuptools.setup(
     author="Joaquin Amat Rodrigo",
     author_email="j.amatrodrigo@gmail.com",
     description="Forecasting time series with scikitlearn regressors",
-    long_description=file: README.md,
+    long_description=read("README.md"),
     long_description_content_type="text/markdown",
     url="https://github.com/JoaquinAmatRodrigo/skforecast",
     packages=setuptools.find_packages(),
