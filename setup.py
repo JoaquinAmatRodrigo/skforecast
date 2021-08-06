@@ -18,9 +18,15 @@ setuptools.setup(
     author="Joaquin Amat Rodrigo",
     author_email="j.amatrodrigo@gmail.com",
     description="Forecasting time series with scikitlearn regressors",
+    long_description=file: README.md,
+    long_description_content_type="text/markdown",
     url="https://github.com/JoaquinAmatRodrigo/skforecast",
     packages=setuptools.find_packages(),
-    classifiers=[],
+    classifiers=[
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.7",
+        "License :: OSI Approved :: MIT License"
+    ],
     install_requires=[
           'numpy>=1.20.1',
           'pandas>=1.2.2',
