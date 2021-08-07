@@ -72,7 +72,7 @@ The most common error when importing the library is:
 - [ ] Pandas dataframe as input of multiple exogenous variables
 - [ ] Parallel grid search
 - [ ] Speed lag creation with numba
-- [ ] Increase coverage
+- [ ] Increase unit test coverage
 
 
 ## Introduction
