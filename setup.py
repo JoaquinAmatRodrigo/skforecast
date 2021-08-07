@@ -6,7 +6,7 @@
 ################################################################################
 
 import setuptools
-
+import os
 import skforecast
 
 VERSION = skforecast.__version__
