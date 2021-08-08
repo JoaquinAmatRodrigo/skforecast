@@ -1,4 +1,8 @@
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/Naereen/StrapDown.js/graphs/commit-activity)
+![Python](https://img.shields.io/badge/python-3.7%20%7C%203.8%20%7C%203.9-blue)
+![Licence](https://img.shields.io/badge/Licence-MIT-green)
+[![Downloads](https://pepy.tech/badge/skforecast)](https://pepy.tech/project/skforecast)
+
 
 # skforecast
 
