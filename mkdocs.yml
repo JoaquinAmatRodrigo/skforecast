@@ -1,0 +1,47 @@
+site_name: Skforecast Docs
+extra_css: [style.css]
+repo_url: https://github.com/JoaquinAmatRodrigo/skforecast
+site_url: 
+site_description: Python library that eases using scikit-learn regressors as multi-step forecasters. It also works with any regressor compatible with the scikit-learn API (XGBoost, LightGBM, Ranger...).
+site_author: Joaquin Amat Rodrigo
+use_directory_urls: false
+nav:
+  - Home:
+    - Index: index.md
+  - Guides:
+      - Getting Started: guides/getting-started.md
+      - Releases: guides/releases.md
+  - API:
+      - ForecasterAutoreg: api/ForecasterAutoreg.md
+  - Examples:
+      - ForecasterAutoreg: examples/ForecasterAutoreg.md
+plugins:
+  - mkdocstrings:
+      watch:
+        - skforecast
+  - search
+copyright: 
+theme:
+  name: material
+  icon:
+    logo: material/library
+  font:
+    text: Ubuntu
+    code: Ubuntu Mono
+  favicon: .logo.png
+  logo: ../images/logo_skforecast_no_background.png
+
+  feature:
+    tabs: true
+  palette:
+    primary: indigo
+    accent: blue
+markdown_extensions:
+  - codehilite
+  - pymdownx.inlinehilite
+  - pymdownx.details
+  - pymdownx.tabbed
+  - pymdownx.highlight:
+      use_pygments: true
+  - toc:
+      permalink: true
