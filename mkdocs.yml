@@ -23,16 +23,14 @@ plugins:
 copyright: 
 theme:
   name: material
-  icon:
-    logo: material/library
   font:
     text: Ubuntu
     code: Ubuntu Mono
-  favicon: .logo.png
-  logo: ../images/logo_skforecast_no_background.png
-
-  feature:
-    tabs: true
+  logo: img/logo_skforecast_no_background.png
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
   palette:
     primary: indigo
     accent: blue

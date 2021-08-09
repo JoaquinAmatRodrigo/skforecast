@@ -1,4 +1,4 @@
-<img src="logo_skforecast_no_background.png" width=185 height=185 align="right">
+<img src="img/logo_skforecast_no_background.png" width=185 height=185 align="right">
 
 # **skforecast**
 
