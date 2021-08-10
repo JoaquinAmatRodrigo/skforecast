@@ -1,0 +1,2024 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Python library that eases using scikit-learn regressors as multi-step forecasters. It also works with any regressor compatible with the scikit-learn API (XGBoost, LightGBM, Ranger...).">
+      
+      
+      
+        <meta name="author" content="Joaquin Amat Rodrigo">
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.2.2, mkdocs-material-7.2.2">
+    
+    
+      
+        <title>ForecasterAutoregCustom - Skforecast Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.1118c9be.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ba0d045b.min.css">
+        
+          
+          
+          <meta name="theme-color" content="#4051b5">
+        
+      
+    
+    
+    
+      
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:300,400,400i,700%7CUbuntu+Mono&display=fallback">
+        <style>:root{--md-text-font-family:"Ubuntu";--md-code-font-family:"Ubuntu Mono"}</style>
+      
+    
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../style.css">
+    
+    
+      
+
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="indigo" data-md-color-accent="blue">
+  
+    
+    <script>function __prefix(e){return new URL("..",location).pathname+"."+e}function __get(e,t=localStorage){return JSON.parse(t.getItem(__prefix(e)))}</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#forecasterautoregcustom" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Skforecast Docs" class="md-header__button md-logo" aria-label="Skforecast Docs" data-md-component="logo">
+      
+  <img src="../img/logo_skforecast_no_background.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Skforecast Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              ForecasterAutoregCustom
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+      </label>
+      
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        
+<a href="https://github.com/JoaquinAmatRodrigo/skforecast/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-tabs__inner md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../index.html" class="md-tabs__link">
+        Home
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../guides/getting-started.html" class="md-tabs__link">
+        Guides
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+    
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="ForecasterAutoreg.html" class="md-tabs__link md-tabs__link--active">
+        API
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../examples/ForecasterAutoreg.md" class="md-tabs__link">
+        Examples
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Skforecast Docs" class="md-nav__button md-logo" aria-label="Skforecast Docs" data-md-component="logo">
+      
+  <img src="../img/logo_skforecast_no_background.png" alt="logo">
+
+    </a>
+    Skforecast Docs
+  </label>
+  
+    <div class="md-nav__source">
+      
+<a href="https://github.com/JoaquinAmatRodrigo/skforecast/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1" type="checkbox" id="__nav_1" >
+      
+      <label class="md-nav__link" for="__nav_1">
+        Home
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Home" data-md-level="1">
+        <label class="md-nav__title" for="__nav_1">
+          <span class="md-nav__icon md-icon"></span>
+          Home
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../index.html" class="md-nav__link">
+        Index
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" >
+      
+      <label class="md-nav__link" for="__nav_2">
+        Guides
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Guides" data-md-level="1">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          Guides
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guides/getting-started.html" class="md-nav__link">
+        Getting Started
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guides/releases.md" class="md-nav__link">
+        Releases
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" type="checkbox" id="__nav_3" checked>
+      
+      <label class="md-nav__link" for="__nav_3">
+        API
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="API" data-md-level="1">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          API
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="ForecasterAutoreg.html" class="md-nav__link">
+        ForecasterAutoreg
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          ForecasterAutoregCustom
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="ForecasterAutoregCustom.html" class="md-nav__link md-nav__link--active">
+        ForecasterAutoregCustom
+      </a>
+      
+        
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom" class="md-nav__link">
+    skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom
+  </a>
+  
+    <nav class="md-nav" aria-label="skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom--parameters" class="md-nav__link">
+    Parameters
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom--attributes" class="md-nav__link">
+    Attributes
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.__repr__" class="md-nav__link">
+    __repr__()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.create_train_X_y" class="md-nav__link">
+    create_train_X_y()
+  </a>
+  
+    <nav class="md-nav" aria-label="create_train_X_y()">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.create_train_X_y--parameters" class="md-nav__link">
+    Parameters
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.create_train_X_y--returns" class="md-nav__link">
+    Returns
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.fit" class="md-nav__link">
+    fit()
+  </a>
+  
+    <nav class="md-nav" aria-label="fit()">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.fit--parameters" class="md-nav__link">
+    Parameters
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.fit--returns" class="md-nav__link">
+    Returns
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.get_coef" class="md-nav__link">
+    get_coef()
+  </a>
+  
+    <nav class="md-nav" aria-label="get_coef()">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.get_coef--parameters" class="md-nav__link">
+    Parameters
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.get_coef--returns" class="md-nav__link">
+    Returns
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.get_feature_importances" class="md-nav__link">
+    get_feature_importances()
+  </a>
+  
+    <nav class="md-nav" aria-label="get_feature_importances()">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.get_feature_importances--parameters" class="md-nav__link">
+    Parameters
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.get_feature_importances--returns" class="md-nav__link">
+    Returns
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.predict" class="md-nav__link">
+    predict()
+  </a>
+  
+    <nav class="md-nav" aria-label="predict()">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.predict--parameters" class="md-nav__link">
+    Parameters
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.predict--returns" class="md-nav__link">
+    Returns
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.predict_interval" class="md-nav__link">
+    predict_interval()
+  </a>
+  
+    <nav class="md-nav" aria-label="predict_interval()">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.predict_interval--parameters" class="md-nav__link">
+    Parameters
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.predict_interval--returns" class="md-nav__link">
+    Returns
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.predict_interval--notes" class="md-nav__link">
+    Notes
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.set_out_sample_residuals" class="md-nav__link">
+    set_out_sample_residuals()
+  </a>
+  
+    <nav class="md-nav" aria-label="set_out_sample_residuals()">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.set_out_sample_residuals--parameters" class="md-nav__link">
+    Parameters
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.set_params" class="md-nav__link">
+    set_params()
+  </a>
+  
+    <nav class="md-nav" aria-label="set_params()">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.set_params--parameters" class="md-nav__link">
+    Parameters
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.set_params--returns" class="md-nav__link">
+    Returns
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="ForecasterAutoregMultiOutput.html" class="md-nav__link">
+        ForecasterAutoregMultiOutput
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model_selection.html" class="md-nav__link">
+        model_selection
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" type="checkbox" id="__nav_4" >
+      
+      <label class="md-nav__link" for="__nav_4">
+        Examples
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Examples" data-md-level="1">
+        <label class="md-nav__title" for="__nav_4">
+          <span class="md-nav__icon md-icon"></span>
+          Examples
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/ForecasterAutoreg.md" class="md-nav__link">
+        ForecasterAutoreg
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom" class="md-nav__link">
+    skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom
+  </a>
+  
+    <nav class="md-nav" aria-label="skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom--parameters" class="md-nav__link">
+    Parameters
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom--attributes" class="md-nav__link">
+    Attributes
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.__repr__" class="md-nav__link">
+    __repr__()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.create_train_X_y" class="md-nav__link">
+    create_train_X_y()
+  </a>
+  
+    <nav class="md-nav" aria-label="create_train_X_y()">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.create_train_X_y--parameters" class="md-nav__link">
+    Parameters
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.create_train_X_y--returns" class="md-nav__link">
+    Returns
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.fit" class="md-nav__link">
+    fit()
+  </a>
+  
+    <nav class="md-nav" aria-label="fit()">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.fit--parameters" class="md-nav__link">
+    Parameters
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.fit--returns" class="md-nav__link">
+    Returns
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.get_coef" class="md-nav__link">
+    get_coef()
+  </a>
+  
+    <nav class="md-nav" aria-label="get_coef()">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.get_coef--parameters" class="md-nav__link">
+    Parameters
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.get_coef--returns" class="md-nav__link">
+    Returns
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.get_feature_importances" class="md-nav__link">
+    get_feature_importances()
+  </a>
+  
+    <nav class="md-nav" aria-label="get_feature_importances()">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.get_feature_importances--parameters" class="md-nav__link">
+    Parameters
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.get_feature_importances--returns" class="md-nav__link">
+    Returns
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.predict" class="md-nav__link">
+    predict()
+  </a>
+  
+    <nav class="md-nav" aria-label="predict()">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.predict--parameters" class="md-nav__link">
+    Parameters
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.predict--returns" class="md-nav__link">
+    Returns
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.predict_interval" class="md-nav__link">
+    predict_interval()
+  </a>
+  
+    <nav class="md-nav" aria-label="predict_interval()">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.predict_interval--parameters" class="md-nav__link">
+    Parameters
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.predict_interval--returns" class="md-nav__link">
+    Returns
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.predict_interval--notes" class="md-nav__link">
+    Notes
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.set_out_sample_residuals" class="md-nav__link">
+    set_out_sample_residuals()
+  </a>
+  
+    <nav class="md-nav" aria-label="set_out_sample_residuals()">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.set_out_sample_residuals--parameters" class="md-nav__link">
+    Parameters
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.set_params" class="md-nav__link">
+    set_params()
+  </a>
+  
+    <nav class="md-nav" aria-label="set_params()">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.set_params--parameters" class="md-nav__link">
+    Parameters
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.set_params--returns" class="md-nav__link">
+    Returns
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                  <a href="https://github.com/JoaquinAmatRodrigo/skforecast/edit/master/docs/api/ForecasterAutoregCustom.md" title="Edit this page" class="md-content__button md-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
+                  </a>
+                
+                
+                <h1 id="forecasterautoregcustom"><code>ForecasterAutoregCustom</code><a class="headerlink" href="#forecasterautoregcustom" title="Permanent link">&para;</a></h1>
+
+
+  <div class="doc doc-object doc-class">
+
+<a id="skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom"></a>
+    <div class="doc doc-contents first">
+
+      <p>This class turns a scikit-learn regressor into a recursive (multi-step)
+forecaster with a custom function to create predictors.</p>
+<h3 id="skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom--parameters">Parameters<a class="headerlink" href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom--parameters" title="Permanent link">&para;</a></h3>
+<p>regressor : scikit-learn regressor
+    An instance of a scikit-learn regressor.</p>
+<p>!!! fun_predictors "Callable"
+    Function that takes a time series window as an argument and returns an
+    <code>np.array</code> with the predictors associated with that window.</p>
+<p>!!! window_size "int"
+    Size of the window needed by <code>fun_predictors</code> to create the predictors.</p>
+<h3 id="skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom--attributes">Attributes<a class="headerlink" href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom--attributes" title="Permanent link">&para;</a></h3>
+<p>regressor : scikit-learn regressor
+    An instance of a scikit-learn regressor.</p>
+<p>!!! fun_predictors "Callable"
+    Function that takes a time series window as an argument and returns an
+    <code>np.array</code> with the predictors associated with that window.</p>
+<p>!!! window_size "int"
+    Size of the window needed by <code>fun_predictors</code> to create the predictors.</p>
+<p>last_window : 1D np.ndarray
+    Last time window the forecaster has seen when trained. It stores the
+    values needed to calculate the predictors for the next <code>step</code> after the
+    training data.</p>
+<p>included_exog : bool
+    If the forecaster has been trained using exogenous variable/s.</p>
+<p>exog_type : type
+    Type used for the exogenous variable/s.</p>
+<p>exog_shape : tuple
+    Shape of exog used in training.</p>
+<p>!!! in_sample_residuals "np.ndarray"
+    Residuals of the model when predicting training data. Only stored up to
+    1000 values.</p>
+<p>!!! out_sample_residuals "np.ndarray"
+    Residuals of the model when predicting non training data. Only stored
+    up to 1000 values.</p>
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h2 class="doc doc-heading" id="skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.__repr__">
+<code class="highlight language-python"><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code>
+
+  <span class="doc doc-properties">
+      <small class="doc doc-property doc-property-special"><code>special</code></small>
+  </span>
+
+<a class="headerlink" href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.__repr__" title="Permanent link">&para;</a></h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Information displayed when a ForecasterAutoregCustom object is printed.</p>
+
+        <details class="quote">
+          <summary>Source code in <code>skforecast/ForecasterAutoregCustom.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Information displayed when a ForecasterAutoregCustom object is printed.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">info</span> <span class="o">=</span>    <span class="s2">&quot;=======================&quot;</span> \
+            <span class="o">+</span> <span class="s2">&quot;ForecasterAutoregCustom&quot;</span> \
+            <span class="o">+</span> <span class="s2">&quot;=======================&quot;</span> \
+            <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> \
+            <span class="o">+</span> <span class="s2">&quot;Regressor: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">regressor</span><span class="p">)</span> \
+            <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> \
+            <span class="o">+</span> <span class="s2">&quot;Predictors created with: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">create_predictors</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span> \
+            <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> \
+            <span class="o">+</span> <span class="s2">&quot;Window size: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">window_size</span><span class="p">)</span> \
+            <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> \
+            <span class="o">+</span> <span class="s2">&quot;Exogenous variable: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">included_exog</span><span class="p">)</span> \
+            <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> \
+            <span class="o">+</span> <span class="s2">&quot;Parameters: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">regressor</span><span class="o">.</span><span class="n">get_params</span><span class="p">())</span>
+
+    <span class="k">return</span> <span class="n">info</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h2 class="doc doc-heading" id="skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.create_train_X_y">
+<code class="highlight language-python"><span class="n">create_train_X_y</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+
+<a class="headerlink" href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.create_train_X_y" title="Permanent link">&para;</a></h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Create training matrices X, y</p>
+<h4 id="skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.create_train_X_y--parameters">Parameters<a class="headerlink" href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.create_train_X_y--parameters" title="Permanent link">&para;</a></h4>
+<p>y : 1D np.ndarray, pd.Series
+    Training time series.</p>
+<p>exog : np.ndarray, pd.Series, default <code>None</code>
+    Exogenous variable/s included as predictor/s. Must have the same
+    number of observations as <code>y</code> and should be aligned so that y[i] is
+    regressed on exog[i].</p>
+<h4 id="skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.create_train_X_y--returns">Returns<a class="headerlink" href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.create_train_X_y--returns" title="Permanent link">&para;</a></h4>
+<p>X_train : 2D np.ndarray, shape (len(y) - self.max_lag, len(self.lags))
+    2D array with the training values (predictors).</p>
+<p>y_train : 1D np.ndarray, shape (len(y) - self.max_lag,)
+    Values (target) of the time series related to each row of <code>X_train</code>.</p>
+
+        <details class="quote">
+          <summary>Source code in <code>skforecast/ForecasterAutoregCustom.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">create_train_X_y</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">],</span>
+                 <span class="n">exog</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">]:</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Create training matrices X, y</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------        </span>
+<span class="sd">    y : 1D np.ndarray, pd.Series</span>
+<span class="sd">        Training time series.</span>
+
+<span class="sd">    exog : np.ndarray, pd.Series, default `None`</span>
+<span class="sd">        Exogenous variable/s included as predictor/s. Must have the same</span>
+<span class="sd">        number of observations as `y` and should be aligned so that y[i] is</span>
+<span class="sd">        regressed on exog[i].</span>
+
+
+<span class="sd">    Returns </span>
+<span class="sd">    -------</span>
+<span class="sd">    X_train : 2D np.ndarray, shape (len(y) - self.max_lag, len(self.lags))</span>
+<span class="sd">        2D array with the training values (predictors).</span>
+
+<span class="sd">    y_train : 1D np.ndarray, shape (len(y) - self.max_lag,)</span>
+<span class="sd">        Values (target) of the time series related to each row of `X_train`.</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_check_y</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preproces_y</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">exog</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_exog</span><span class="p">(</span><span class="n">exog</span><span class="o">=</span><span class="n">exog</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exog_type</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">exog</span><span class="p">)</span>
+        <span class="n">exog</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preproces_exog</span><span class="p">(</span><span class="n">exog</span><span class="o">=</span><span class="n">exog</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">included_exog</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exog_shape</span> <span class="o">=</span> <span class="n">exog</span><span class="o">.</span><span class="n">shape</span>
+
+        <span class="k">if</span> <span class="n">exog</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;`exog` must have same number of samples as `y`&quot;</span>
+            <span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">window_size</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;`y` must have as many values as the windows_size needed by </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">create_predictors</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">.&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;For this Forecaster the minimum lenght is </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">window_size</span> <span class="o">+</span> <span class="mi">1</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="p">)</span>
+
+    <span class="n">X_train</span>  <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">y_train</span>  <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">window_size</span><span class="p">):</span>
+
+        <span class="n">train_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">window_size</span> <span class="o">+</span> <span class="n">i</span><span class="p">)</span>
+        <span class="n">test_index</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">window_size</span> <span class="o">+</span> <span class="n">i</span>
+
+        <span class="n">X_train</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">create_predictors</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">[</span><span class="n">train_index</span><span class="p">]))</span>
+        <span class="n">y_train</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">test_index</span><span class="p">])</span>
+
+    <span class="n">X_train</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">X_train</span><span class="p">)</span>
+    <span class="n">y_train</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">y_train</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">X_train</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;`create_predictors()` is returning `NaN` values.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">exog</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># The first `self.window_size` positions have to be removed from</span>
+        <span class="c1"># exog since they are not in X_train.</span>
+        <span class="n">X_train</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">X_train</span><span class="p">,</span> <span class="n">exog</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">window_size</span><span class="p">:,]))</span>
+
+    <span class="k">return</span> <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h2 class="doc doc-heading" id="skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.fit">
+<code class="highlight language-python"><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+
+<a class="headerlink" href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.fit" title="Permanent link">&para;</a></h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Training ForecasterAutoregCustom</p>
+<h4 id="skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.fit--parameters">Parameters<a class="headerlink" href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.fit--parameters" title="Permanent link">&para;</a></h4>
+<p>y : 1D np.ndarray, pd.Series
+    Training time series.</p>
+<p>exog : np.ndarray, pd.Series, default <code>None</code>
+    Exogenous variable/s included as predictor/s. Must have the same
+    number of observations as <code>y</code> and should be aligned so that y[i] is
+    regressed on exog[i].</p>
+<h4 id="skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.fit--returns">Returns<a class="headerlink" href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.fit--returns" title="Permanent link">&para;</a></h4>
+<p>self : ForecasterAutoregCustom
+    Trained ForecasterAutoregCustom</p>
+
+        <details class="quote">
+          <summary>Source code in <code>skforecast/ForecasterAutoregCustom.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">],</span> <span class="n">exog</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Training ForecasterAutoregCustom</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------        </span>
+<span class="sd">    y : 1D np.ndarray, pd.Series</span>
+<span class="sd">        Training time series.</span>
+
+<span class="sd">    exog : np.ndarray, pd.Series, default `None`</span>
+<span class="sd">        Exogenous variable/s included as predictor/s. Must have the same</span>
+<span class="sd">        number of observations as `y` and should be aligned so that y[i] is</span>
+<span class="sd">        regressed on exog[i].</span>
+
+
+<span class="sd">    Returns </span>
+<span class="sd">    -------</span>
+<span class="sd">    self : ForecasterAutoregCustom</span>
+<span class="sd">        Trained ForecasterAutoregCustom</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="c1"># Reset values in case the forecaster has already been fitted before.</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">included_exog</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">exog_type</span>     <span class="o">=</span> <span class="kc">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">exog_shape</span>    <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_check_y</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preproces_y</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">exog</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_exog</span><span class="p">(</span><span class="n">exog</span><span class="o">=</span><span class="n">exog</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exog_type</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">exog</span><span class="p">)</span>
+        <span class="n">exog</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preproces_exog</span><span class="p">(</span><span class="n">exog</span><span class="o">=</span><span class="n">exog</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">included_exog</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exog_shape</span> <span class="o">=</span> <span class="n">exog</span><span class="o">.</span><span class="n">shape</span>
+
+        <span class="k">if</span> <span class="n">exog</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;`exog` must have same number of samples as `y`&quot;</span>
+            <span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">window_size</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;`y` must have as many values as the windows_size needed by </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">create_predictors</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">.&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;For this Forecaster the minimum lenght is </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">window_size</span> <span class="o">+</span> <span class="mi">1</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="p">)</span>
+
+    <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_train_X_y</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="n">exog</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">regressor</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y_train</span><span class="p">)</span>
+    <span class="n">residuals</span> <span class="o">=</span> <span class="n">y_train</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">regressor</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_train</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">residuals</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1000</span><span class="p">:</span>
+        <span class="c1"># Only up to 1000 residuals are stored</span>
+        <span class="n">residuals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="n">residuals</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>                                              
+    <span class="bp">self</span><span class="o">.</span><span class="n">in_sample_residuals</span> <span class="o">=</span> <span class="n">residuals</span>
+
+    <span class="c1"># The last time window of training data is stored so that predictors in</span>
+    <span class="c1"># the first iteration of `predict()` can be calculated.</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">last_window</span> <span class="o">=</span> <span class="n">y_train</span><span class="o">.</span><span class="n">flatten</span><span class="p">()[</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">window_size</span><span class="p">:]</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h2 class="doc doc-heading" id="skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.get_coef">
+<code class="highlight language-python"><span class="n">get_coef</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code>
+
+
+<a class="headerlink" href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.get_coef" title="Permanent link">&para;</a></h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Return estimated coefficients for the linear regression model stored in
+the forecaster. Only valid when the forecaster has been trained using
+as <code>regressor:</code>LinearRegression()<code>,</code>Lasso()<code>or</code>Ridge()`.</p>
+<h4 id="skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.get_coef--parameters">Parameters<a class="headerlink" href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.get_coef--parameters" title="Permanent link">&para;</a></h4>
+<p>self</p>
+<h4 id="skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.get_coef--returns">Returns<a class="headerlink" href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.get_coef--returns" title="Permanent link">&para;</a></h4>
+<p>coef : 1D np.ndarray
+    Value of the coefficients associated with each predictor.
+    Coefficients are aligned so that <code>coef[i]</code> is the value associated
+    with predictor i returned by <code>self.create_predictors</code>.</p>
+
+        <details class="quote">
+          <summary>Source code in <code>skforecast/ForecasterAutoregCustom.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">get_coef</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sd">&#39;&#39;&#39;      </span>
+<span class="sd">    Return estimated coefficients for the linear regression model stored in</span>
+<span class="sd">    the forecaster. Only valid when the forecaster has been trained using</span>
+<span class="sd">    as `regressor: `LinearRegression()`, `Lasso()` or `Ridge()`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    self</span>
+
+<span class="sd">    Returns </span>
+<span class="sd">    -------</span>
+<span class="sd">    coef : 1D np.ndarray</span>
+<span class="sd">        Value of the coefficients associated with each predictor.</span>
+<span class="sd">        Coefficients are aligned so that `coef[i]` is the value associated</span>
+<span class="sd">        with predictor i returned by `self.create_predictors`.</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">valid_instances</span> <span class="o">=</span> <span class="p">(</span><span class="n">sklearn</span><span class="o">.</span><span class="n">linear_model</span><span class="o">.</span><span class="n">_base</span><span class="o">.</span><span class="n">LinearRegression</span><span class="p">,</span>
+                      <span class="n">sklearn</span><span class="o">.</span><span class="n">linear_model</span><span class="o">.</span><span class="n">_coordinate_descent</span><span class="o">.</span><span class="n">Lasso</span><span class="p">,</span>
+                      <span class="n">sklearn</span><span class="o">.</span><span class="n">linear_model</span><span class="o">.</span><span class="n">_ridge</span><span class="o">.</span><span class="n">Ridge</span>
+                      <span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">regressor</span><span class="p">,</span> <span class="n">valid_instances</span><span class="p">):</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="p">(</span><span class="s1">&#39;Only forecasters with `regressor` `LinearRegression()`, &#39;</span> <span class="o">+</span>
+             <span class="s1">&#39; `Lasso()` or `Ridge()` have coef.&#39;</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">coef</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">regressor</span><span class="o">.</span><span class="n">coef_</span>
+
+    <span class="k">return</span> <span class="n">coef</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h2 class="doc doc-heading" id="skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.get_feature_importances">
+<code class="highlight language-python"><span class="n">get_feature_importances</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code>
+
+
+<a class="headerlink" href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.get_feature_importances" title="Permanent link">&para;</a></h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Return impurity-based feature importances of the model stored in the
+forecaster. Only valid when the forecaster has been trained using
+<code>regressor=GradientBoostingRegressor()</code> or <code>regressor=RandomForestRegressor</code>.</p>
+<h4 id="skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.get_feature_importances--parameters">Parameters<a class="headerlink" href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.get_feature_importances--parameters" title="Permanent link">&para;</a></h4>
+<p>self</p>
+<h4 id="skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.get_feature_importances--returns">Returns<a class="headerlink" href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.get_feature_importances--returns" title="Permanent link">&para;</a></h4>
+<p>feature_importances : 1D np.ndarray
+Impurity-based feature importances associated with each predictor.
+Values are aligned so that <code>feature_importances[i]</code> is the value
+associated with predictor i returned by <code>self.create_predictors</code>.</p>
+
+        <details class="quote">
+          <summary>Source code in <code>skforecast/ForecasterAutoregCustom.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">get_feature_importances</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sd">&#39;&#39;&#39;      </span>
+<span class="sd">    Return impurity-based feature importances of the model stored in the</span>
+<span class="sd">    forecaster. Only valid when the forecaster has been trained using</span>
+<span class="sd">    `regressor=GradientBoostingRegressor()` or `regressor=RandomForestRegressor`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    self</span>
+
+<span class="sd">    Returns </span>
+<span class="sd">    -------</span>
+<span class="sd">    feature_importances : 1D np.ndarray</span>
+<span class="sd">    Impurity-based feature importances associated with each predictor.</span>
+<span class="sd">    Values are aligned so that `feature_importances[i]` is the value</span>
+<span class="sd">    associated with predictor i returned by `self.create_predictors`.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">regressor</span><span class="p">,</span>
+                    <span class="p">(</span><span class="n">sklearn</span><span class="o">.</span><span class="n">ensemble</span><span class="o">.</span><span class="n">_forest</span><span class="o">.</span><span class="n">RandomForestRegressor</span><span class="p">,</span>
+                    <span class="n">sklearn</span><span class="o">.</span><span class="n">ensemble</span><span class="o">.</span><span class="n">_gb</span><span class="o">.</span><span class="n">GradientBoostingRegressor</span><span class="p">)):</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="p">(</span><span class="s1">&#39;Only forecasters with `regressor=GradientBoostingRegressor()` &#39;</span>
+                <span class="s1">&#39;or `regressor=RandomForestRegressor`.&#39;</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">feature_importances</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">regressor</span><span class="o">.</span><span class="n">feature_importances_</span>
+
+    <span class="k">return</span> <span class="n">feature_importances</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h2 class="doc doc-heading" id="skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.predict">
+<code class="highlight language-python"><span class="n">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">last_window</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+
+<a class="headerlink" href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.predict" title="Permanent link">&para;</a></h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Iterative process in which, each prediction, is used as a predictor
+for the next step.</p>
+<h4 id="skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.predict--parameters">Parameters<a class="headerlink" href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.predict--parameters" title="Permanent link">&para;</a></h4>
+<p>steps : int
+    Number of future steps predicted.</p>
+<p>last_window : 1D np.ndarray, pd.Series, default <code>None</code>
+    Values of the series used to create the predictors need in the first
+    iteration of predictiont (t + 1).</p>
+<div class="codehilite"><pre><span></span><code><span class="k">If</span> `<span class="nv">last_window</span> <span class="o">=</span> <span class="nv">None</span>`, <span class="nv">the</span> <span class="nv">values</span> <span class="nv">stored</span> <span class="nv">in</span>` <span class="nv">self</span>.<span class="nv">last_window</span>` <span class="nv">are</span>
+<span class="nv">used</span> <span class="nv">to</span> <span class="nv">calculate</span> <span class="nv">the</span> <span class="nv">initial</span> <span class="nv">predictors</span>, <span class="nv">and</span> <span class="nv">the</span> <span class="nv">predictions</span> <span class="nv">start</span>
+<span class="nv">right</span> <span class="nv">after</span> <span class="nv">training</span> <span class="nv">data</span>.
+</code></pre></div>
+
+<p>exog : np.ndarray, pd.Series, default <code>None</code>
+    Exogenous variable/s included as predictor/s.</p>
+<h4 id="skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.predict--returns">Returns<a class="headerlink" href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.predict--returns" title="Permanent link">&para;</a></h4>
+<p>predicciones : 1D np.array, shape (steps,)
+    Values predicted.</p>
+
+        <details class="quote">
+          <summary>Source code in <code>skforecast/ForecasterAutoregCustom.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">last_window</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">exog</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Iterative process in which, each prediction, is used as a predictor</span>
+<span class="sd">    for the next step.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    steps : int</span>
+<span class="sd">        Number of future steps predicted.</span>
+
+<span class="sd">    last_window : 1D np.ndarray, pd.Series, default `None`</span>
+<span class="sd">        Values of the series used to create the predictors need in the first</span>
+<span class="sd">        iteration of predictiont (t + 1).</span>
+
+<span class="sd">        If `last_window = None`, the values stored in` self.last_window` are</span>
+<span class="sd">        used to calculate the initial predictors, and the predictions start</span>
+<span class="sd">        right after training data.</span>
+
+<span class="sd">    exog : np.ndarray, pd.Series, default `None`</span>
+<span class="sd">        Exogenous variable/s included as predictor/s.</span>
+
+<span class="sd">    Returns </span>
+<span class="sd">    -------</span>
+<span class="sd">    predicciones : 1D np.array, shape (steps,)</span>
+<span class="sd">        Values predicted.</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">if</span> <span class="n">steps</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;`steps` must be integer greater than 0. Got </span><span class="si">{</span><span class="n">steps</span><span class="si">}</span><span class="s2">.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">exog</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">included_exog</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Forecaster trained with exogenous variable/s. &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;Same variable/s must be provided in `predict()`.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">exog</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">included_exog</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Forecaster trained without exogenous variable/s. &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;`exog` must be `None` in `predict()`.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">exog</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_exog</span><span class="p">(</span>
+            <span class="n">exog</span><span class="o">=</span><span class="n">exog</span><span class="p">,</span> <span class="n">ref_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">exog_type</span><span class="p">,</span> <span class="n">ref_shape</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">exog_shape</span>
+        <span class="p">)</span>
+        <span class="n">exog</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preproces_exog</span><span class="p">(</span><span class="n">exog</span><span class="o">=</span><span class="n">exog</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">exog</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">steps</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;`exog` must have at least as many values as `steps` predicted.&quot;</span>
+            <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">last_window</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_last_window</span><span class="p">(</span><span class="n">last_window</span><span class="o">=</span><span class="n">last_window</span><span class="p">)</span>
+        <span class="n">last_window</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preproces_last_window</span><span class="p">(</span><span class="n">last_window</span><span class="o">=</span><span class="n">last_window</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">last_window</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">window_size</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;`last_window` must have as many values as as needed to &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;calculate the predictors (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">window_size</span><span class="si">}</span><span class="s2">).&quot;</span>
+            <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">last_window</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_window</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="n">predictions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">steps</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">steps</span><span class="p">):</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_predictors</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">last_window</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;`create_predictors()` is returning `NaN` values.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">exog</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">prediction</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">regressor</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">prediction</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">regressor</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span>
+                            <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">X</span><span class="p">,</span> <span class="n">exog</span><span class="p">[</span><span class="n">i</span><span class="p">,]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)))</span>
+                         <span class="p">)</span>
+        <span class="n">predictions</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">prediction</span><span class="o">.</span><span class="n">ravel</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># Update `last_window` values. The first position is discarded and </span>
+        <span class="c1"># the new prediction is added at the end.</span>
+        <span class="n">last_window</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">last_window</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">prediction</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">predictions</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h2 class="doc doc-heading" id="skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.predict_interval">
+<code class="highlight language-python"><span class="n">predict_interval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">last_window</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">95</span><span class="p">],</span> <span class="n">n_boot</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">in_sample_residuals</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
+
+
+<a class="headerlink" href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.predict_interval" title="Permanent link">&para;</a></h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Iterative process in which, each prediction, is used as a predictor
+for the next step and bootstrapping is used to estimate prediction
+intervals. Both, predictions and intervals, are returned.</p>
+<h4 id="skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.predict_interval--parameters">Parameters<a class="headerlink" href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.predict_interval--parameters" title="Permanent link">&para;</a></h4>
+<p>steps : int
+    Number of future steps predicted.</p>
+<p>last_window : 1D np.ndarray, pd.Series, default <code>None</code>
+    Values of the series used to create the predictors need in the first
+    iteration of predictiont (t + 1).</p>
+<div class="codehilite"><pre><span></span><code><span class="k">If</span> `<span class="nv">last_window</span> <span class="o">=</span> <span class="nv">None</span>`, <span class="nv">the</span> <span class="nv">values</span> <span class="nv">stored</span> <span class="nv">in</span>` <span class="nv">self</span>.<span class="nv">last_window</span>` <span class="nv">are</span>
+<span class="nv">used</span> <span class="nv">to</span> <span class="nv">calculate</span> <span class="nv">the</span> <span class="nv">initial</span> <span class="nv">predictors</span>, <span class="nv">and</span> <span class="nv">the</span> <span class="nv">predictions</span> <span class="nv">start</span>
+<span class="nv">right</span> <span class="nv">after</span> <span class="nv">training</span> <span class="nv">data</span>.
+</code></pre></div>
+
+<p>exog : np.ndarray, pd.Series, default <code>None</code>
+    Exogenous variable/s included as predictor/s.</p>
+<p>!!! interval "list, default <code>[5, 100]</code>"
+    Confidence of the prediction interval estimated. Sequence of percentiles
+    to compute, which must be between 0 and 100 inclusive.</p>
+<p>!!! n_boot "int, default <code>500</code>"
+    Number of bootstrapping iterations used to estimate prediction
+    intervals.</p>
+<p>!!! in_sample_residuals "bool, default <code>True</code>"
+    If <code>True</code>, residuals from the training data are used as proxy of
+    prediction error to create prediction intervals. If <code>False</code>, out of
+    sample residuals are used. In the latter case, the user shoud have
+    calculated and stored the residuals within the forecaster (see
+    <code>set_out_sample_residuals()</code>).</p>
+<h4 id="skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.predict_interval--returns">Returns<a class="headerlink" href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.predict_interval--returns" title="Permanent link">&para;</a></h4>
+<p>predictions : np.array, shape (steps, 3)
+    Values predicted by the forecaster and their estimated interval.
+    Column 0 = predictions
+    Column 1 = lower bound interval
+    Column 2 = upper bound interval</p>
+<h4 id="skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.predict_interval--notes">Notes<a class="headerlink" href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.predict_interval--notes" title="Permanent link">&para;</a></h4>
+<p>More information about prediction intervals in forecasting:
+https://otexts.com/fpp2/prediction-intervals.html
+Forecasting: Principles and Practice (2nd ed) Rob J Hyndman and
+George Athanasopoulos.</p>
+
+        <details class="quote">
+          <summary>Source code in <code>skforecast/ForecasterAutoregCustom.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">predict_interval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">last_window</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                     <span class="n">exog</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">interval</span><span class="p">:</span> <span class="nb">list</span><span class="o">=</span><span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">95</span><span class="p">],</span>
+                     <span class="n">n_boot</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>
+                     <span class="n">in_sample_residuals</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Iterative process in which, each prediction, is used as a predictor</span>
+<span class="sd">    for the next step and bootstrapping is used to estimate prediction</span>
+<span class="sd">    intervals. Both, predictions and intervals, are returned.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    steps : int</span>
+<span class="sd">        Number of future steps predicted.</span>
+
+<span class="sd">    last_window : 1D np.ndarray, pd.Series, default `None`</span>
+<span class="sd">        Values of the series used to create the predictors need in the first</span>
+<span class="sd">        iteration of predictiont (t + 1).</span>
+
+<span class="sd">        If `last_window = None`, the values stored in` self.last_window` are</span>
+<span class="sd">        used to calculate the initial predictors, and the predictions start</span>
+<span class="sd">        right after training data.</span>
+
+<span class="sd">    exog : np.ndarray, pd.Series, default `None`</span>
+<span class="sd">        Exogenous variable/s included as predictor/s.</span>
+
+<span class="sd">    interval: list, default `[5, 100]`</span>
+<span class="sd">        Confidence of the prediction interval estimated. Sequence of percentiles</span>
+<span class="sd">        to compute, which must be between 0 and 100 inclusive.</span>
+
+<span class="sd">    n_boot: int, default `500`</span>
+<span class="sd">        Number of bootstrapping iterations used to estimate prediction</span>
+<span class="sd">        intervals.</span>
+
+<span class="sd">    in_sample_residuals: bool, default `True`</span>
+<span class="sd">        If `True`, residuals from the training data are used as proxy of</span>
+<span class="sd">        prediction error to create prediction intervals. If `False`, out of</span>
+<span class="sd">        sample residuals are used. In the latter case, the user shoud have</span>
+<span class="sd">        calculated and stored the residuals within the forecaster (see</span>
+<span class="sd">        `set_out_sample_residuals()`).</span>
+
+<span class="sd">    Returns </span>
+<span class="sd">    -------</span>
+<span class="sd">    predictions : np.array, shape (steps, 3)</span>
+<span class="sd">        Values predicted by the forecaster and their estimated interval.</span>
+<span class="sd">        Column 0 = predictions</span>
+<span class="sd">        Column 1 = lower bound interval</span>
+<span class="sd">        Column 2 = upper bound interval</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    More information about prediction intervals in forecasting:</span>
+<span class="sd">    https://otexts.com/fpp2/prediction-intervals.html</span>
+<span class="sd">    Forecasting: Principles and Practice (2nd ed) Rob J Hyndman and</span>
+<span class="sd">    George Athanasopoulos.</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">if</span> <span class="n">steps</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;`steps` must be integer greater than 0. Got </span><span class="si">{</span><span class="n">steps</span><span class="si">}</span><span class="s2">.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">in_sample_residuals</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_sample_residuals</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+            <span class="p">(</span><span class="s1">&#39;out_sample_residuals is empty. In order to estimate prediction &#39;</span>
+            <span class="s1">&#39;intervals using out of sample residuals, the user shoud have &#39;</span>
+            <span class="s1">&#39;calculated and stored the residuals within the forecaster (see&#39;</span>
+            <span class="s1">&#39;`set_out_sample_residuals()`.&#39;</span><span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">exog</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">included_exog</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Forecaster trained with exogenous variable/s. &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;Same variable/s must be provided in `predict()`.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">exog</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">included_exog</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Forecaster trained without exogenous variable/s. &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;`exog` must be `None` in `predict()`.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">exog</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_exog</span><span class="p">(</span>
+            <span class="n">exog</span><span class="o">=</span><span class="n">exog</span><span class="p">,</span> <span class="n">ref_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">exog_type</span><span class="p">,</span> <span class="n">ref_shape</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">exog_shape</span>
+        <span class="p">)</span>
+        <span class="n">exog</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preproces_exog</span><span class="p">(</span><span class="n">exog</span><span class="o">=</span><span class="n">exog</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">exog</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">steps</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;`exog` must have at least as many values as `steps` predicted.&quot;</span>
+            <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">last_window</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_last_window</span><span class="p">(</span><span class="n">last_window</span><span class="o">=</span><span class="n">last_window</span><span class="p">)</span>
+        <span class="n">last_window</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preproces_last_window</span><span class="p">(</span><span class="n">last_window</span><span class="o">=</span><span class="n">last_window</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">last_window</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">window_size</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;`last_window` must have as many values as as needed to &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;calculate the predictors (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">window_size</span><span class="si">}</span><span class="s2">).&quot;</span>
+            <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">last_window</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_window</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="c1"># Since during predict() `last_window` and `exog` are modified, the</span>
+    <span class="c1"># originals are stored to be used later</span>
+    <span class="n">last_window_original</span> <span class="o">=</span> <span class="n">last_window</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">exog</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">exog_original</span> <span class="o">=</span> <span class="n">exog</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">exog_original</span> <span class="o">=</span> <span class="n">exog</span>
+
+    <span class="n">predictions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span>
+                        <span class="n">steps</span>       <span class="o">=</span> <span class="n">steps</span><span class="p">,</span>
+                        <span class="n">last_window</span> <span class="o">=</span> <span class="n">last_window</span><span class="p">,</span>
+                        <span class="n">exog</span>        <span class="o">=</span> <span class="n">exog</span>
+                  <span class="p">)</span>
+
+    <span class="n">predictions_interval</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_estimate_boot_interval</span><span class="p">(</span>
+                                <span class="n">steps</span>       <span class="o">=</span> <span class="n">steps</span><span class="p">,</span>
+                                <span class="n">last_window</span> <span class="o">=</span> <span class="n">last_window_original</span><span class="p">,</span>
+                                <span class="n">exog</span>        <span class="o">=</span> <span class="n">exog_original</span><span class="p">,</span>
+                                <span class="n">interval</span>    <span class="o">=</span> <span class="n">interval</span><span class="p">,</span>
+                                <span class="n">n_boot</span>      <span class="o">=</span> <span class="n">n_boot</span><span class="p">,</span>
+                                <span class="n">in_sample_residuals</span> <span class="o">=</span> <span class="n">in_sample_residuals</span>
+                            <span class="p">)</span>
+
+    <span class="n">predictions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">predictions</span><span class="p">,</span> <span class="n">predictions_interval</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">predictions</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h2 class="doc doc-heading" id="skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.set_out_sample_residuals">
+<code class="highlight language-python"><span class="n">set_out_sample_residuals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">residuals</span><span class="p">)</span></code>
+
+
+<a class="headerlink" href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.set_out_sample_residuals" title="Permanent link">&para;</a></h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Set new values to the attribute <code>out_sample_residuals</code>. Out of sample
+residuals are meant to be calculated using observations that did not
+participate in the training process.</p>
+<h4 id="skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.set_out_sample_residuals--parameters">Parameters<a class="headerlink" href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.set_out_sample_residuals--parameters" title="Permanent link">&para;</a></h4>
+<p>params : 1D np.ndarray
+    Values of residuals. If len(residuals) &gt; 1000, only a random sample
+    of 1000 values are stored.
+Returns </p>
+<hr />
+<p>self</p>
+
+        <details class="quote">
+          <summary>Source code in <code>skforecast/ForecasterAutoregCustom.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">set_out_sample_residuals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">residuals</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Set new values to the attribute `out_sample_residuals`. Out of sample</span>
+<span class="sd">    residuals are meant to be calculated using observations that did not</span>
+<span class="sd">    participate in the training process.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    params : 1D np.ndarray</span>
+<span class="sd">        Values of residuals. If len(residuals) &gt; 1000, only a random sample</span>
+<span class="sd">        of 1000 values are stored.</span>
+<span class="sd">    Returns </span>
+<span class="sd">    -------</span>
+<span class="sd">    self</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">residuals</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;`residuals` argument must be `1D np.ndarray`. Got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">residuals</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">residuals</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1000</span><span class="p">:</span>
+        <span class="n">residuals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="n">residuals</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">out_sample_residuals</span> <span class="o">=</span> <span class="n">residuals</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h2 class="doc doc-heading" id="skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.set_params">
+<code class="highlight language-python"><span class="n">set_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span></code>
+
+
+<a class="headerlink" href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.set_params" title="Permanent link">&para;</a></h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Set new values to the parameters of the scikit learn model stored in the
+ForecasterAutoregCustom.</p>
+<h4 id="skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.set_params--parameters">Parameters<a class="headerlink" href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.set_params--parameters" title="Permanent link">&para;</a></h4>
+<p>params : dict
+    Parameters values.</p>
+<h4 id="skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.set_params--returns">Returns<a class="headerlink" href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.set_params--returns" title="Permanent link">&para;</a></h4>
+<p>self</p>
+
+        <details class="quote">
+          <summary>Source code in <code>skforecast/ForecasterAutoregCustom.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">set_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Set new values to the parameters of the scikit learn model stored in the</span>
+<span class="sd">    ForecasterAutoregCustom.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    params : dict</span>
+<span class="sd">        Parameters values.</span>
+
+<span class="sd">    Returns </span>
+<span class="sd">    -------</span>
+<span class="sd">    self</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">regressor</span><span class="o">.</span><span class="n">set_params</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+
+
+  </div>
+
+    </div>
+
+  </div>
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+        
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <nav class="md-footer__inner md-grid" aria-label="Footer">
+      
+        
+        <a href="ForecasterAutoreg.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: ForecasterAutoreg" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              ForecasterAutoreg
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="ForecasterAutoregMultiOutput.html" class="md-footer__link md-footer__link--next" aria-label="Next: ForecasterAutoregMultiOutput" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              ForecasterAutoregMultiOutput
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+        Made with
+        <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+          Material for MkDocs
+        </a>
+        
+      </div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections"], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "../assets/javascripts/workers/search.709b4209.min.js", "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.2b46852b.min.js"></script>
+      
+    
+  </body>
+</html>

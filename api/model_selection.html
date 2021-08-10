@@ -1,0 +1,1910 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Python library that eases using scikit-learn regressors as multi-step forecasters. It also works with any regressor compatible with the scikit-learn API (XGBoost, LightGBM, Ranger...).">
+      
+      
+      
+        <meta name="author" content="Joaquin Amat Rodrigo">
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.2.2, mkdocs-material-7.2.2">
+    
+    
+      
+        <title>model_selection - Skforecast Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.1118c9be.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ba0d045b.min.css">
+        
+          
+          
+          <meta name="theme-color" content="#4051b5">
+        
+      
+    
+    
+    
+      
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:300,400,400i,700%7CUbuntu+Mono&display=fallback">
+        <style>:root{--md-text-font-family:"Ubuntu";--md-code-font-family:"Ubuntu Mono"}</style>
+      
+    
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../style.css">
+    
+    
+      
+
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="indigo" data-md-color-accent="blue">
+  
+    
+    <script>function __prefix(e){return new URL("..",location).pathname+"."+e}function __get(e,t=localStorage){return JSON.parse(t.getItem(__prefix(e)))}</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#model_selection" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Skforecast Docs" class="md-header__button md-logo" aria-label="Skforecast Docs" data-md-component="logo">
+      
+  <img src="../img/logo_skforecast_no_background.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Skforecast Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              model_selection
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+      </label>
+      
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        
+<a href="https://github.com/JoaquinAmatRodrigo/skforecast/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-tabs__inner md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../index.html" class="md-tabs__link">
+        Home
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../guides/getting-started.html" class="md-tabs__link">
+        Guides
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+    
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="ForecasterAutoreg.html" class="md-tabs__link md-tabs__link--active">
+        API
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../examples/ForecasterAutoreg.md" class="md-tabs__link">
+        Examples
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Skforecast Docs" class="md-nav__button md-logo" aria-label="Skforecast Docs" data-md-component="logo">
+      
+  <img src="../img/logo_skforecast_no_background.png" alt="logo">
+
+    </a>
+    Skforecast Docs
+  </label>
+  
+    <div class="md-nav__source">
+      
+<a href="https://github.com/JoaquinAmatRodrigo/skforecast/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1" type="checkbox" id="__nav_1" >
+      
+      <label class="md-nav__link" for="__nav_1">
+        Home
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Home" data-md-level="1">
+        <label class="md-nav__title" for="__nav_1">
+          <span class="md-nav__icon md-icon"></span>
+          Home
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../index.html" class="md-nav__link">
+        Index
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" >
+      
+      <label class="md-nav__link" for="__nav_2">
+        Guides
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Guides" data-md-level="1">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          Guides
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guides/getting-started.html" class="md-nav__link">
+        Getting Started
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guides/releases.md" class="md-nav__link">
+        Releases
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" type="checkbox" id="__nav_3" checked>
+      
+      <label class="md-nav__link" for="__nav_3">
+        API
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="API" data-md-level="1">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          API
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="ForecasterAutoreg.html" class="md-nav__link">
+        ForecasterAutoreg
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="ForecasterAutoregCustom.html" class="md-nav__link">
+        ForecasterAutoregCustom
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="ForecasterAutoregMultiOutput.html" class="md-nav__link">
+        ForecasterAutoregMultiOutput
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          model_selection
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="model_selection.html" class="md-nav__link md-nav__link--active">
+        model_selection
+      </a>
+      
+        
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#skforecast.model_selection" class="md-nav__link">
+    skforecast.model_selection
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#skforecast.model_selection.backtesting_forecaster" class="md-nav__link">
+    backtesting_forecaster()
+  </a>
+  
+    <nav class="md-nav" aria-label="backtesting_forecaster()">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#skforecast.model_selection.backtesting_forecaster--parameters" class="md-nav__link">
+    Parameters
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#skforecast.model_selection.backtesting_forecaster--returns" class="md-nav__link">
+    Returns
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#skforecast.model_selection.backtesting_forecaster_intervals" class="md-nav__link">
+    backtesting_forecaster_intervals()
+  </a>
+  
+    <nav class="md-nav" aria-label="backtesting_forecaster_intervals()">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#skforecast.model_selection.backtesting_forecaster_intervals--parameters" class="md-nav__link">
+    Parameters
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#skforecast.model_selection.backtesting_forecaster_intervals--returns" class="md-nav__link">
+    Returns
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#skforecast.model_selection.backtesting_forecaster_intervals--notes" class="md-nav__link">
+    Notes
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#skforecast.model_selection.cv_forecaster" class="md-nav__link">
+    cv_forecaster()
+  </a>
+  
+    <nav class="md-nav" aria-label="cv_forecaster()">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#skforecast.model_selection.cv_forecaster--parameters" class="md-nav__link">
+    Parameters
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#skforecast.model_selection.cv_forecaster--returns" class="md-nav__link">
+    Returns
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#skforecast.model_selection.grid_search_forecaster" class="md-nav__link">
+    grid_search_forecaster()
+  </a>
+  
+    <nav class="md-nav" aria-label="grid_search_forecaster()">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#skforecast.model_selection.grid_search_forecaster--parameters" class="md-nav__link">
+    Parameters
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#skforecast.model_selection.grid_search_forecaster--returns" class="md-nav__link">
+    Returns
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#skforecast.model_selection.time_series_spliter" class="md-nav__link">
+    time_series_spliter()
+  </a>
+  
+    <nav class="md-nav" aria-label="time_series_spliter()">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#skforecast.model_selection.time_series_spliter--parameters" class="md-nav__link">
+    Parameters
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#skforecast.model_selection.time_series_spliter--yields" class="md-nav__link">
+    Yields
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" type="checkbox" id="__nav_4" >
+      
+      <label class="md-nav__link" for="__nav_4">
+        Examples
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Examples" data-md-level="1">
+        <label class="md-nav__title" for="__nav_4">
+          <span class="md-nav__icon md-icon"></span>
+          Examples
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/ForecasterAutoreg.md" class="md-nav__link">
+        ForecasterAutoreg
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#skforecast.model_selection" class="md-nav__link">
+    skforecast.model_selection
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#skforecast.model_selection.backtesting_forecaster" class="md-nav__link">
+    backtesting_forecaster()
+  </a>
+  
+    <nav class="md-nav" aria-label="backtesting_forecaster()">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#skforecast.model_selection.backtesting_forecaster--parameters" class="md-nav__link">
+    Parameters
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#skforecast.model_selection.backtesting_forecaster--returns" class="md-nav__link">
+    Returns
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#skforecast.model_selection.backtesting_forecaster_intervals" class="md-nav__link">
+    backtesting_forecaster_intervals()
+  </a>
+  
+    <nav class="md-nav" aria-label="backtesting_forecaster_intervals()">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#skforecast.model_selection.backtesting_forecaster_intervals--parameters" class="md-nav__link">
+    Parameters
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#skforecast.model_selection.backtesting_forecaster_intervals--returns" class="md-nav__link">
+    Returns
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#skforecast.model_selection.backtesting_forecaster_intervals--notes" class="md-nav__link">
+    Notes
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#skforecast.model_selection.cv_forecaster" class="md-nav__link">
+    cv_forecaster()
+  </a>
+  
+    <nav class="md-nav" aria-label="cv_forecaster()">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#skforecast.model_selection.cv_forecaster--parameters" class="md-nav__link">
+    Parameters
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#skforecast.model_selection.cv_forecaster--returns" class="md-nav__link">
+    Returns
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#skforecast.model_selection.grid_search_forecaster" class="md-nav__link">
+    grid_search_forecaster()
+  </a>
+  
+    <nav class="md-nav" aria-label="grid_search_forecaster()">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#skforecast.model_selection.grid_search_forecaster--parameters" class="md-nav__link">
+    Parameters
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#skforecast.model_selection.grid_search_forecaster--returns" class="md-nav__link">
+    Returns
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#skforecast.model_selection.time_series_spliter" class="md-nav__link">
+    time_series_spliter()
+  </a>
+  
+    <nav class="md-nav" aria-label="time_series_spliter()">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#skforecast.model_selection.time_series_spliter--parameters" class="md-nav__link">
+    Parameters
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#skforecast.model_selection.time_series_spliter--yields" class="md-nav__link">
+    Yields
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                  <a href="https://github.com/JoaquinAmatRodrigo/skforecast/edit/master/docs/api/model_selection.md" title="Edit this page" class="md-content__button md-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
+                  </a>
+                
+                
+                <h1 id="model_selection"><code>model_selection</code><a class="headerlink" href="#model_selection" title="Permanent link">&para;</a></h1>
+
+
+  <div class="doc doc-object doc-module">
+
+<a id="skforecast.model_selection"></a>
+    <div class="doc doc-contents first">
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h2 class="doc doc-heading" id="skforecast.model_selection.backtesting_forecaster">
+<code class="highlight language-python"><span class="n">backtesting_forecaster</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">initial_train_size</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+
+
+<a class="headerlink" href="#skforecast.model_selection.backtesting_forecaster" title="Permanent link">&para;</a></h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Backtesting (validation) of <code>ForecasterAutoreg</code>, <code>ForecasterCustom</code>,
+<code>ForecasterAutoregCustom</code> or <code>ForecasterAutoregMultiOutput</code> object.
+The model is trained only once using the <code>initial_train_size</code> first observations.
+In each iteration, a number of <code>steps</code> predictions are evaluated.</p>
+<p>This evaluation is much faster than <code>cv_forecaster()</code> since the model is
+trained only once.</p>
+<h4 id="skforecast.model_selection.backtesting_forecaster--parameters">Parameters<a class="headerlink" href="#skforecast.model_selection.backtesting_forecaster--parameters" title="Permanent link">&para;</a></h4>
+<p>forecaster : ForecasterAutoreg, ForecasterCustom, ForecasterAutoregCustom,
+             ForecasterAutoregMultiOutput
+    <code>ForecasterAutoreg</code>, <code>ForecasterCustom</code> <code>ForecasterAutoregCustom</code> or
+    <code>ForecasterAutoregMultiOutput</code> object.</p>
+<p>y : 1D np.ndarray, pd.Series
+    Training time series values. </p>
+<p>!!! initial_train_size "int "
+    Number of samples in the initial train split.</p>
+<p>steps : int
+    Number of steps to predict.</p>
+<p>metric : {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
+    Metric used to quantify the goodness of fit of the model.</p>
+<p>exog : np.ndarray, pd.Series, default <code>None</code>
+        Exogenous variable/s included as predictor/s. Must have the same
+        number of observations as <code>y</code> and should be aligned so that y[i] is
+        regressed on exog[i].</p>
+<p>verbose : bool, default <code>False</code>
+    Print number of folds used for backtesting.</p>
+<h4 id="skforecast.model_selection.backtesting_forecaster--returns">Returns<a class="headerlink" href="#skforecast.model_selection.backtesting_forecaster--returns" title="Permanent link">&para;</a></h4>
+<p>!!! backtest_predictions "1D np.ndarray"
+    Value of predictions.</p>
+<p>!!! metric_value "np.ndarray shape (1,)"
+    Value of the metric.</p>
+
+        <details class="quote">
+          <summary>Source code in <code>skforecast/model_selection.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">backtesting_forecaster</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">],</span>
+                           <span class="n">initial_train_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                           <span class="n">metric</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">exog</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                           <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">]:</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Backtesting (validation) of `ForecasterAutoreg`, `ForecasterCustom`,</span>
+<span class="sd">    `ForecasterAutoregCustom` or `ForecasterAutoregMultiOutput` object.</span>
+<span class="sd">    The model is trained only once using the `initial_train_size` first observations.</span>
+<span class="sd">    In each iteration, a number of `steps` predictions are evaluated.</span>
+
+<span class="sd">    This evaluation is much faster than `cv_forecaster()` since the model is</span>
+<span class="sd">    trained only once.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    forecaster : ForecasterAutoreg, ForecasterCustom, ForecasterAutoregCustom,</span>
+<span class="sd">                 ForecasterAutoregMultiOutput</span>
+<span class="sd">        `ForecasterAutoreg`, `ForecasterCustom` `ForecasterAutoregCustom` or</span>
+<span class="sd">        `ForecasterAutoregMultiOutput` object.</span>
+
+<span class="sd">    y : 1D np.ndarray, pd.Series</span>
+<span class="sd">        Training time series values. </span>
+
+<span class="sd">    initial_train_size: int </span>
+<span class="sd">        Number of samples in the initial train split.</span>
+
+<span class="sd">    steps : int</span>
+<span class="sd">        Number of steps to predict.</span>
+
+<span class="sd">    metric : {&#39;mean_squared_error&#39;, &#39;mean_absolute_error&#39;, &#39;mean_absolute_percentage_error&#39;}</span>
+<span class="sd">        Metric used to quantify the goodness of fit of the model.</span>
+
+<span class="sd">    exog : np.ndarray, pd.Series, default `None`</span>
+<span class="sd">            Exogenous variable/s included as predictor/s. Must have the same</span>
+<span class="sd">            number of observations as `y` and should be aligned so that y[i] is</span>
+<span class="sd">            regressed on exog[i].</span>
+
+<span class="sd">    verbose : bool, default `False`</span>
+<span class="sd">        Print number of folds used for backtesting.</span>
+
+<span class="sd">    Returns </span>
+<span class="sd">    -------</span>
+<span class="sd">    backtest_predictions: 1D np.ndarray</span>
+<span class="sd">        Value of predictions.</span>
+
+<span class="sd">    metric_value: np.ndarray shape (1,)</span>
+<span class="sd">        Value of the metric.</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">forecaster</span><span class="o">.</span><span class="n">_check_y</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">forecaster</span><span class="o">.</span><span class="n">_preproces_y</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">exog</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">forecaster</span><span class="o">.</span><span class="n">_check_exog</span><span class="p">(</span><span class="n">exog</span><span class="o">=</span><span class="n">exog</span><span class="p">)</span>
+        <span class="n">exog</span> <span class="o">=</span> <span class="n">forecaster</span><span class="o">.</span><span class="n">_preproces_exog</span><span class="p">(</span><span class="n">exog</span><span class="o">=</span><span class="n">exog</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">metric</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;mean_squared_error&#39;</span><span class="p">,</span> <span class="s1">&#39;mean_absolute_error&#39;</span><span class="p">,</span>
+                      <span class="s1">&#39;mean_absolute_percentage_error&#39;</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Allowed metrics are: &#39;mean_squared_error&#39;, &#39;mean_absolute_error&#39; and &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;&#39;mean_absolute_percentage_error&#39;. Got </span><span class="si">{</span><span class="n">metric</span><span class="si">}</span><span class="s2">.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="n">backtest_predictions</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">metrics</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;mean_squared_error&#39;</span><span class="p">:</span> <span class="n">mean_squared_error</span><span class="p">,</span>
+        <span class="s1">&#39;mean_absolute_error&#39;</span><span class="p">:</span> <span class="n">mean_absolute_error</span><span class="p">,</span>
+        <span class="s1">&#39;mean_absolute_percentage_error&#39;</span><span class="p">:</span> <span class="n">mean_absolute_percentage_error</span>
+    <span class="p">}</span>
+
+    <span class="n">metric</span> <span class="o">=</span> <span class="n">metrics</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">exog</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">forecaster</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">[:</span><span class="n">initial_train_size</span><span class="p">])</span>      
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">forecaster</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">[:</span><span class="n">initial_train_size</span><span class="p">],</span> <span class="n">exog</span><span class="o">=</span><span class="n">exog</span><span class="p">[:</span><span class="n">initial_train_size</span><span class="p">])</span>     
+
+
+    <span class="n">folds</span>     <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">-</span> <span class="n">initial_train_size</span><span class="p">)</span> <span class="o">//</span> <span class="n">steps</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">remainder</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">-</span> <span class="n">initial_train_size</span><span class="p">)</span> <span class="o">%</span> <span class="n">steps</span>
+    <span class="n">window_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">forecaster</span><span class="o">.</span><span class="n">last_window</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">ForecasterAutoregMultiOutput</span><span class="p">)</span> <span class="ow">and</span> <span class="n">remainder</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c1"># In ForecasterAutoregMultiOutput predictions are not iterative,</span>
+        <span class="c1"># therefore no remainder is allowed.</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Backtesting `ForecasterAutoregMultiOutput` only allow completed &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;folds. Last </span><span class="si">{</span><span class="n">remainder</span><span class="si">}</span><span class="s2"> observations are excluded.&quot;</span>
+        <span class="p">)</span>
+        <span class="n">remainder</span><span class="o">=</span><span class="mi">0</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of observations used for training: </span><span class="si">{</span><span class="n">initial_train_size</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of observations used for testing: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">-</span> <span class="n">initial_train_size</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    Number of folds: </span><span class="si">{</span><span class="n">folds</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">*</span> <span class="p">(</span><span class="n">remainder</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    Number of steps per fold: </span><span class="si">{</span><span class="n">steps</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">remainder</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    Last fold only includes </span><span class="si">{</span><span class="n">remainder</span><span class="si">}</span><span class="s2"> observations&quot;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">folds</span><span class="p">):</span>
+        <span class="n">last_window_end</span>   <span class="o">=</span> <span class="n">initial_train_size</span> <span class="o">+</span> <span class="n">i</span> <span class="o">*</span> <span class="n">steps</span>
+        <span class="n">last_window_start</span> <span class="o">=</span> <span class="p">(</span><span class="n">initial_train_size</span> <span class="o">+</span> <span class="n">i</span> <span class="o">*</span> <span class="n">steps</span><span class="p">)</span> <span class="o">-</span> <span class="n">window_size</span> 
+        <span class="n">last_window</span>       <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">last_window_start</span><span class="p">:</span><span class="n">last_window_end</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">folds</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">exog</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">pred</span> <span class="o">=</span> <span class="n">forecaster</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span>
+                            <span class="n">steps</span>       <span class="o">=</span> <span class="n">steps</span><span class="p">,</span>
+                            <span class="n">last_window</span> <span class="o">=</span> <span class="n">last_window</span>
+                        <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">pred</span> <span class="o">=</span> <span class="n">forecaster</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span>
+                            <span class="n">steps</span>       <span class="o">=</span> <span class="n">steps</span><span class="p">,</span>
+                            <span class="n">last_window</span> <span class="o">=</span> <span class="n">last_window</span><span class="p">,</span>
+                            <span class="n">exog</span>        <span class="o">=</span> <span class="n">exog</span><span class="p">[</span><span class="n">last_window_end</span><span class="p">:</span><span class="n">last_window_end</span> <span class="o">+</span> <span class="n">steps</span><span class="p">]</span>
+                        <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">remainder</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">steps</span> <span class="o">=</span> <span class="n">remainder</span> 
+            <span class="k">if</span> <span class="n">exog</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">pred</span> <span class="o">=</span> <span class="n">forecaster</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span>
+                            <span class="n">steps</span>       <span class="o">=</span> <span class="n">steps</span><span class="p">,</span>
+                            <span class="n">last_window</span> <span class="o">=</span> <span class="n">last_window</span>
+                        <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">pred</span> <span class="o">=</span> <span class="n">forecaster</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span>
+                            <span class="n">steps</span>       <span class="o">=</span> <span class="n">steps</span><span class="p">,</span>
+                            <span class="n">last_window</span> <span class="o">=</span> <span class="n">last_window</span><span class="p">,</span>
+                            <span class="n">exog</span>        <span class="o">=</span> <span class="n">exog</span><span class="p">[</span><span class="n">last_window_end</span><span class="p">:</span><span class="n">last_window_end</span> <span class="o">+</span> <span class="n">steps</span><span class="p">]</span>
+                        <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="n">backtest_predictions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pred</span><span class="p">)</span>
+
+    <span class="n">backtest_predictions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">backtest_predictions</span><span class="p">)</span>
+    <span class="n">metric_value</span> <span class="o">=</span> <span class="n">metric</span><span class="p">(</span>
+                        <span class="n">y_true</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">initial_train_size</span><span class="p">:</span> <span class="n">initial_train_size</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">backtest_predictions</span><span class="p">)],</span>
+                        <span class="n">y_pred</span> <span class="o">=</span> <span class="n">backtest_predictions</span>
+                   <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">metric_value</span><span class="p">]),</span> <span class="n">backtest_predictions</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h2 class="doc doc-heading" id="skforecast.model_selection.backtesting_forecaster_intervals">
+<code class="highlight language-python"><span class="n">backtesting_forecaster_intervals</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">initial_train_size</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">95</span><span class="p">],</span> <span class="n">n_boot</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">in_sample_residuals</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+
+
+<a class="headerlink" href="#skforecast.model_selection.backtesting_forecaster_intervals" title="Permanent link">&para;</a></h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Backtesting (validation) of <code>ForecasterAutoreg</code>, <code>ForecasterCustom</code> or
+<code>ForecasterAutoregCustom</code> object. The model is trained only once using the
+<code>initial_train_size</code> first observations. In each iteration, a number of
+<code>steps</code> predictions are evaluated. Both, predictions and intervals, are
+calculated.</p>
+<p>This evaluation is much faster than <code>cv_forecaster()</code> since the model is
+trained only once.</p>
+<h4 id="skforecast.model_selection.backtesting_forecaster_intervals--parameters">Parameters<a class="headerlink" href="#skforecast.model_selection.backtesting_forecaster_intervals--parameters" title="Permanent link">&para;</a></h4>
+<p>forecaster : ForecasterAutoreg, ForecasterCustom, ForecasterAutoregCustom
+    <code>ForecasterAutoreg</code>, <code>ForecasterCustom</code> or <code>ForecasterAutoregCustom</code> object.</p>
+<p>y : 1D np.ndarray, pd.Series
+    Training time series values. </p>
+<p>!!! initial_train_size "int "
+    Number of samples in the initial train split.</p>
+<p>steps : int
+    Number of steps to predict.</p>
+<p>metric : {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
+    Metric used to quantify the goodness of fit of the model.</p>
+<p>exog : np.ndarray, pd.Series, default <code>None</code>
+        Exogenous variable/s included as predictor/s. Must have the same
+        number of observations as <code>y</code> and should be aligned so that y[i] is
+        regressed on exog[i].</p>
+<p>!!! interval "list, default <code>[5, 100]</code>"
+        Confidence of the prediction interval estimated. Sequence of percentiles
+        to compute, which must be between 0 and 100 inclusive.</p>
+<p>!!! n_boot "int, default <code>500</code>"
+    Number of bootstrapping iterations used to estimate prediction
+    intervals.</p>
+<p>!!! in_sample_residuals "bool, default <code>True</code>"
+    If <code>True</code>, residuals from the training data are used as proxy of
+    prediction error to create prediction intervals.</p>
+<p>verbose : bool, default <code>True</code>
+    Print number of folds used for backtesting.</p>
+<h4 id="skforecast.model_selection.backtesting_forecaster_intervals--returns">Returns<a class="headerlink" href="#skforecast.model_selection.backtesting_forecaster_intervals--returns" title="Permanent link">&para;</a></h4>
+<p>!!! backtest_predictions "np.ndarray"
+    If <code>include_intervals=True</code>, 2D np.ndarray shape(steps, 3) with predicted
+    value and their estimated interval.
+        Column 0 = predictions
+        Column 1 = lower bound interval
+        Column 2 = upper bound interval</p>
+<p>!!! metric_value "np.ndarray shape (1,)"
+    Value of the metric.</p>
+<h4 id="skforecast.model_selection.backtesting_forecaster_intervals--notes">Notes<a class="headerlink" href="#skforecast.model_selection.backtesting_forecaster_intervals--notes" title="Permanent link">&para;</a></h4>
+<p>More information about prediction intervals in forecasting:
+https://otexts.com/fpp2/prediction-intervals.html
+Forecasting: Principles and Practice (2nd ed) Rob J Hyndman and
+George Athanasopoulos.</p>
+
+        <details class="quote">
+          <summary>Source code in <code>skforecast/model_selection.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">backtesting_forecaster_intervals</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">],</span>
+                           <span class="n">initial_train_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                           <span class="n">metric</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">exog</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                           <span class="n">interval</span><span class="p">:</span> <span class="nb">list</span><span class="o">=</span><span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">95</span><span class="p">],</span> <span class="n">n_boot</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>
+                           <span class="n">in_sample_residuals</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                           <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">]:</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Backtesting (validation) of `ForecasterAutoreg`, `ForecasterCustom` or</span>
+<span class="sd">    `ForecasterAutoregCustom` object. The model is trained only once using the</span>
+<span class="sd">    `initial_train_size` first observations. In each iteration, a number of</span>
+<span class="sd">    `steps` predictions are evaluated. Both, predictions and intervals, are</span>
+<span class="sd">    calculated.</span>
+
+<span class="sd">    This evaluation is much faster than `cv_forecaster()` since the model is</span>
+<span class="sd">    trained only once.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    forecaster : ForecasterAutoreg, ForecasterCustom, ForecasterAutoregCustom</span>
+<span class="sd">        `ForecasterAutoreg`, `ForecasterCustom` or `ForecasterAutoregCustom` object.</span>
+
+<span class="sd">    y : 1D np.ndarray, pd.Series</span>
+<span class="sd">        Training time series values. </span>
+
+<span class="sd">    initial_train_size: int </span>
+<span class="sd">        Number of samples in the initial train split.</span>
+
+<span class="sd">    steps : int</span>
+<span class="sd">        Number of steps to predict.</span>
+
+<span class="sd">    metric : {&#39;mean_squared_error&#39;, &#39;mean_absolute_error&#39;, &#39;mean_absolute_percentage_error&#39;}</span>
+<span class="sd">        Metric used to quantify the goodness of fit of the model.</span>
+
+<span class="sd">    exog : np.ndarray, pd.Series, default `None`</span>
+<span class="sd">            Exogenous variable/s included as predictor/s. Must have the same</span>
+<span class="sd">            number of observations as `y` and should be aligned so that y[i] is</span>
+<span class="sd">            regressed on exog[i].</span>
+
+<span class="sd">    interval: list, default `[5, 100]`</span>
+<span class="sd">            Confidence of the prediction interval estimated. Sequence of percentiles</span>
+<span class="sd">            to compute, which must be between 0 and 100 inclusive.</span>
+
+<span class="sd">    n_boot: int, default `500`</span>
+<span class="sd">        Number of bootstrapping iterations used to estimate prediction</span>
+<span class="sd">        intervals.</span>
+
+<span class="sd">    in_sample_residuals: bool, default `True`</span>
+<span class="sd">        If `True`, residuals from the training data are used as proxy of</span>
+<span class="sd">        prediction error to create prediction intervals.</span>
+
+<span class="sd">    verbose : bool, default `True`</span>
+<span class="sd">        Print number of folds used for backtesting.</span>
+
+<span class="sd">    Returns </span>
+<span class="sd">    -------</span>
+<span class="sd">    backtest_predictions: np.ndarray</span>
+<span class="sd">        If `include_intervals=True`, 2D np.ndarray shape(steps, 3) with predicted</span>
+<span class="sd">        value and their estimated interval.</span>
+<span class="sd">            Column 0 = predictions</span>
+<span class="sd">            Column 1 = lower bound interval</span>
+<span class="sd">            Column 2 = upper bound interval</span>
+
+<span class="sd">    metric_value: np.ndarray shape (1,)</span>
+<span class="sd">        Value of the metric.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    More information about prediction intervals in forecasting:</span>
+<span class="sd">    https://otexts.com/fpp2/prediction-intervals.html</span>
+<span class="sd">    Forecasting: Principles and Practice (2nd ed) Rob J Hyndman and</span>
+<span class="sd">    George Athanasopoulos.</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">forecaster</span><span class="o">.</span><span class="n">_check_y</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">forecaster</span><span class="o">.</span><span class="n">_preproces_y</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">exog</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">forecaster</span><span class="o">.</span><span class="n">_check_exog</span><span class="p">(</span><span class="n">exog</span><span class="o">=</span><span class="n">exog</span><span class="p">)</span>
+        <span class="n">exog</span> <span class="o">=</span> <span class="n">forecaster</span><span class="o">.</span><span class="n">_preproces_exog</span><span class="p">(</span><span class="n">exog</span><span class="o">=</span><span class="n">exog</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">metric</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;mean_squared_error&#39;</span><span class="p">,</span> <span class="s1">&#39;mean_absolute_error&#39;</span><span class="p">,</span>
+                      <span class="s1">&#39;mean_absolute_percentage_error&#39;</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Allowed metrics are: &#39;mean_squared_error&#39;, &#39;mean_absolute_error&#39; and &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;&#39;mean_absolute_percentage_error&#39;. Got </span><span class="si">{</span><span class="n">metric</span><span class="si">}</span><span class="s2">.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="n">backtest_predictions</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">metrics</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;mean_squared_error&#39;</span><span class="p">:</span> <span class="n">mean_squared_error</span><span class="p">,</span>
+        <span class="s1">&#39;mean_absolute_error&#39;</span><span class="p">:</span> <span class="n">mean_absolute_error</span><span class="p">,</span>
+        <span class="s1">&#39;mean_absolute_percentage_error&#39;</span><span class="p">:</span> <span class="n">mean_absolute_percentage_error</span>
+    <span class="p">}</span>
+
+    <span class="n">metric</span> <span class="o">=</span> <span class="n">metrics</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">exog</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">forecaster</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">[:</span><span class="n">initial_train_size</span><span class="p">])</span>   
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">forecaster</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">[:</span><span class="n">initial_train_size</span><span class="p">],</span> <span class="n">exog</span><span class="o">=</span><span class="n">exog</span><span class="p">[:</span><span class="n">initial_train_size</span><span class="p">])</span>     
+
+
+    <span class="n">folds</span>     <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">-</span> <span class="n">initial_train_size</span><span class="p">)</span> <span class="o">//</span> <span class="n">steps</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">remainder</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">-</span> <span class="n">initial_train_size</span><span class="p">)</span> <span class="o">%</span> <span class="n">steps</span>
+    <span class="n">window_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">forecaster</span><span class="o">.</span><span class="n">last_window</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of observations used for training: </span><span class="si">{</span><span class="n">initial_train_size</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of observations used for testing: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">-</span> <span class="n">initial_train_size</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    Number of folds: </span><span class="si">{</span><span class="n">folds</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">*</span> <span class="p">(</span><span class="n">remainder</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    Number of steps per fold: </span><span class="si">{</span><span class="n">steps</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">remainder</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    Last fold only includes </span><span class="si">{</span><span class="n">remainder</span><span class="si">}</span><span class="s2"> observations&quot;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">folds</span><span class="p">):</span>
+
+        <span class="n">last_window_end</span>   <span class="o">=</span> <span class="n">initial_train_size</span> <span class="o">+</span> <span class="n">i</span> <span class="o">*</span> <span class="n">steps</span>
+        <span class="n">last_window_start</span> <span class="o">=</span> <span class="p">(</span><span class="n">initial_train_size</span> <span class="o">+</span> <span class="n">i</span> <span class="o">*</span> <span class="n">steps</span><span class="p">)</span> <span class="o">-</span> <span class="n">window_size</span> 
+        <span class="n">last_window</span>       <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">last_window_start</span><span class="p">:</span><span class="n">last_window_end</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">folds</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">exog</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">pred</span> <span class="o">=</span> <span class="n">forecaster</span><span class="o">.</span><span class="n">predict_interval</span><span class="p">(</span>
+                            <span class="n">steps</span>       <span class="o">=</span> <span class="n">steps</span><span class="p">,</span>
+                            <span class="n">last_window</span> <span class="o">=</span> <span class="n">last_window</span><span class="p">,</span>
+                            <span class="n">interval</span>    <span class="o">=</span> <span class="n">interval</span><span class="p">,</span>
+                            <span class="n">n_boot</span>      <span class="o">=</span> <span class="n">n_boot</span><span class="p">,</span>
+                            <span class="n">in_sample_residuals</span> <span class="o">=</span> <span class="n">in_sample_residuals</span>
+                        <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">pred</span> <span class="o">=</span> <span class="n">forecaster</span><span class="o">.</span><span class="n">predict_interval</span><span class="p">(</span>
+                            <span class="n">steps</span>       <span class="o">=</span> <span class="n">steps</span><span class="p">,</span>
+                            <span class="n">last_window</span> <span class="o">=</span> <span class="n">last_window</span><span class="p">,</span>
+                            <span class="n">exog</span>        <span class="o">=</span> <span class="n">exog</span><span class="p">[</span><span class="n">last_window_end</span><span class="p">:</span><span class="n">last_window_end</span> <span class="o">+</span> <span class="n">steps</span><span class="p">],</span>
+                            <span class="n">interval</span>    <span class="o">=</span> <span class="n">interval</span><span class="p">,</span>
+                            <span class="n">n_boot</span>      <span class="o">=</span> <span class="n">n_boot</span><span class="p">,</span>
+                            <span class="n">in_sample_residuals</span> <span class="o">=</span> <span class="n">in_sample_residuals</span>
+                        <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">remainder</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">steps</span> <span class="o">=</span> <span class="n">remainder</span> 
+            <span class="k">if</span> <span class="n">exog</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">pred</span> <span class="o">=</span> <span class="n">forecaster</span><span class="o">.</span><span class="n">predict_interval</span><span class="p">(</span>
+                            <span class="n">steps</span>       <span class="o">=</span> <span class="n">steps</span><span class="p">,</span>
+                            <span class="n">last_window</span> <span class="o">=</span> <span class="n">last_window</span><span class="p">,</span>
+                            <span class="n">interval</span>    <span class="o">=</span> <span class="n">interval</span><span class="p">,</span>
+                            <span class="n">n_boot</span>      <span class="o">=</span> <span class="n">n_boot</span><span class="p">,</span>
+                            <span class="n">in_sample_residuals</span> <span class="o">=</span> <span class="n">in_sample_residuals</span>
+                        <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">pred</span> <span class="o">=</span> <span class="n">forecaster</span><span class="o">.</span><span class="n">predict_interval</span><span class="p">(</span>
+                            <span class="n">steps</span>       <span class="o">=</span> <span class="n">steps</span><span class="p">,</span>
+                            <span class="n">last_window</span> <span class="o">=</span> <span class="n">last_window</span><span class="p">,</span>
+                            <span class="n">exog</span>        <span class="o">=</span> <span class="n">exog</span><span class="p">[</span><span class="n">last_window_end</span><span class="p">:</span><span class="n">last_window_end</span> <span class="o">+</span> <span class="n">steps</span><span class="p">],</span>
+                            <span class="n">interval</span>    <span class="o">=</span> <span class="n">interval</span><span class="p">,</span>
+                            <span class="n">n_boot</span>      <span class="o">=</span> <span class="n">n_boot</span><span class="p">,</span>
+                            <span class="n">in_sample_residuals</span> <span class="o">=</span> <span class="n">in_sample_residuals</span>
+                        <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="n">backtest_predictions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pred</span><span class="p">)</span>
+
+    <span class="n">backtest_predictions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">backtest_predictions</span><span class="p">)</span>
+    <span class="n">metric_value</span> <span class="o">=</span> <span class="n">metric</span><span class="p">(</span>
+                        <span class="n">y_true</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">initial_train_size</span><span class="p">:],</span>
+                        <span class="n">y_pred</span> <span class="o">=</span> <span class="n">backtest_predictions</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+                   <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">metric_value</span><span class="p">]),</span> <span class="n">backtest_predictions</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h2 class="doc doc-heading" id="skforecast.model_selection.cv_forecaster">
+<code class="highlight language-python"><span class="n">cv_forecaster</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">initial_train_size</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">allow_incomplete_fold</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
+
+
+<a class="headerlink" href="#skforecast.model_selection.cv_forecaster" title="Permanent link">&para;</a></h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Cross-validation of <code>ForecasterAutoreg</code>, <code>ForecasterCustom</code>, <code>ForecasterAutoregCustom</code>
+or <code>ForecasterAutoregMultiOutput</code> object. The order of is maintained and the
+training set increases in each iteration.</p>
+<h4 id="skforecast.model_selection.cv_forecaster--parameters">Parameters<a class="headerlink" href="#skforecast.model_selection.cv_forecaster--parameters" title="Permanent link">&para;</a></h4>
+<p>forecaster : ForecasterAutoreg, ForecasterCustom, ForecasterAutoregCustom,
+             ForecasterAutoregMultiOutput
+    <code>ForecasterAutoreg</code>, <code>ForecasterCustom</code> <code>ForecasterAutoregCustom</code> or
+    <code>ForecasterAutoregMultiOutput</code> object.</p>
+<p>y : 1D np.ndarray, pd.Series
+    Training time series values. </p>
+<p>!!! initial_train_size "int "
+    Number of samples in the initial train split.</p>
+<p>steps : int
+    Number of steps to predict.</p>
+<p>metric : {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
+    Metric used to quantify the goodness of fit of the model.</p>
+<p>exog : np.ndarray, pd.Series, default <code>None</code>
+        Exogenous variable/s included as predictor/s. Must have the same
+        number of observations as <code>y</code> and should be aligned so that y[i] is
+        regressed on exog[i].</p>
+<p>allow_incomplete_fold : bool, default <code>True</code>
+    The last test set is allowed to be incomplete if it does not reach <code>steps</code>
+    observations. Otherwise, the latest observations are discarded.</p>
+<p>verbose : bool, default <code>True</code>
+    Print number of folds used for cross validation.</p>
+<h4 id="skforecast.model_selection.cv_forecaster--returns">Returns<a class="headerlink" href="#skforecast.model_selection.cv_forecaster--returns" title="Permanent link">&para;</a></h4>
+<p>!!! cv_results "1D np.ndarray"
+    Value of the metric for each partition.</p>
+
+        <details class="quote">
+          <summary>Source code in <code>skforecast/model_selection.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">cv_forecaster</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">],</span>
+                  <span class="n">initial_train_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                  <span class="n">metric</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">exog</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                  <span class="n">allow_incomplete_fold</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Cross-validation of `ForecasterAutoreg`, `ForecasterCustom`, `ForecasterAutoregCustom`</span>
+<span class="sd">    or `ForecasterAutoregMultiOutput` object. The order of is maintained and the</span>
+<span class="sd">    training set increases in each iteration.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    forecaster : ForecasterAutoreg, ForecasterCustom, ForecasterAutoregCustom,</span>
+<span class="sd">                 ForecasterAutoregMultiOutput</span>
+<span class="sd">        `ForecasterAutoreg`, `ForecasterCustom` `ForecasterAutoregCustom` or</span>
+<span class="sd">        `ForecasterAutoregMultiOutput` object.</span>
+
+<span class="sd">    y : 1D np.ndarray, pd.Series</span>
+<span class="sd">        Training time series values. </span>
+
+<span class="sd">    initial_train_size: int </span>
+<span class="sd">        Number of samples in the initial train split.</span>
+
+<span class="sd">    steps : int</span>
+<span class="sd">        Number of steps to predict.</span>
+
+<span class="sd">    metric : {&#39;mean_squared_error&#39;, &#39;mean_absolute_error&#39;, &#39;mean_absolute_percentage_error&#39;}</span>
+<span class="sd">        Metric used to quantify the goodness of fit of the model.</span>
+
+<span class="sd">    exog : np.ndarray, pd.Series, default `None`</span>
+<span class="sd">            Exogenous variable/s included as predictor/s. Must have the same</span>
+<span class="sd">            number of observations as `y` and should be aligned so that y[i] is</span>
+<span class="sd">            regressed on exog[i].</span>
+
+<span class="sd">    allow_incomplete_fold : bool, default `True`</span>
+<span class="sd">        The last test set is allowed to be incomplete if it does not reach `steps`</span>
+<span class="sd">        observations. Otherwise, the latest observations are discarded.</span>
+
+<span class="sd">    verbose : bool, default `True`</span>
+<span class="sd">        Print number of folds used for cross validation.</span>
+
+<span class="sd">    Returns </span>
+<span class="sd">    -------</span>
+<span class="sd">    cv_results: 1D np.ndarray</span>
+<span class="sd">        Value of the metric for each partition.</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">forecaster</span><span class="o">.</span><span class="n">_check_y</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">forecaster</span><span class="o">.</span><span class="n">_preproces_y</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">exog</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">forecaster</span><span class="o">.</span><span class="n">_check_exog</span><span class="p">(</span><span class="n">exog</span><span class="o">=</span><span class="n">exog</span><span class="p">)</span>
+        <span class="n">exog</span> <span class="o">=</span> <span class="n">forecaster</span><span class="o">.</span><span class="n">_preproces_exog</span><span class="p">(</span><span class="n">exog</span><span class="o">=</span><span class="n">exog</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">metric</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;mean_squared_error&#39;</span><span class="p">,</span> <span class="s1">&#39;mean_absolute_error&#39;</span><span class="p">,</span>
+                      <span class="s1">&#39;mean_absolute_percentage_error&#39;</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Allowed metrics are: &#39;mean_squared_error&#39;, &#39;mean_absolute_error&#39; and &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;&#39;mean_absolute_percentage_error&#39;. Got </span><span class="si">{</span><span class="n">metric</span><span class="si">}</span><span class="s2">.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="n">cv_results</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">metrics</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;mean_squared_error&#39;</span><span class="p">:</span> <span class="n">mean_squared_error</span><span class="p">,</span>
+        <span class="s1">&#39;mean_absolute_error&#39;</span><span class="p">:</span> <span class="n">mean_absolute_error</span><span class="p">,</span>
+        <span class="s1">&#39;mean_absolute_percentage_error&#39;</span><span class="p">:</span> <span class="n">mean_absolute_percentage_error</span>
+    <span class="p">}</span>
+
+    <span class="n">metric</span> <span class="o">=</span> <span class="n">metrics</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span>
+
+    <span class="n">splits</span> <span class="o">=</span> <span class="n">time_series_spliter</span><span class="p">(</span>
+                <span class="n">y</span>                     <span class="o">=</span> <span class="n">y</span><span class="p">,</span>
+                <span class="n">initial_train_size</span>    <span class="o">=</span> <span class="n">initial_train_size</span><span class="p">,</span>
+                <span class="n">steps</span>                 <span class="o">=</span> <span class="n">steps</span><span class="p">,</span>
+                <span class="n">allow_incomplete_fold</span> <span class="o">=</span> <span class="n">allow_incomplete_fold</span><span class="p">,</span>
+                <span class="n">verbose</span>               <span class="o">=</span> <span class="n">verbose</span>
+             <span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">train_index</span><span class="p">,</span> <span class="n">test_index</span> <span class="ow">in</span> <span class="n">splits</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="n">exog</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">forecaster</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">[</span><span class="n">train_index</span><span class="p">])</span>      
+            <span class="n">pred</span> <span class="o">=</span> <span class="n">forecaster</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">steps</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">test_index</span><span class="p">))</span>
+
+        <span class="k">else</span><span class="p">:</span>
+
+            <span class="n">forecaster</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">[</span><span class="n">train_index</span><span class="p">],</span> <span class="n">exog</span><span class="o">=</span><span class="n">exog</span><span class="p">[</span><span class="n">train_index</span><span class="p">])</span>      
+            <span class="n">pred</span> <span class="o">=</span> <span class="n">forecaster</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">steps</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">test_index</span><span class="p">),</span> <span class="n">exog</span><span class="o">=</span><span class="n">exog</span><span class="p">[</span><span class="n">test_index</span><span class="p">])</span>
+
+        <span class="n">metric_value</span> <span class="o">=</span> <span class="n">metric</span><span class="p">(</span>
+                            <span class="n">y_true</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">test_index</span><span class="p">],</span>
+                            <span class="n">y_pred</span> <span class="o">=</span> <span class="n">pred</span>
+                       <span class="p">)</span>
+
+        <span class="n">cv_results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric_value</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">cv_results</span><span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h2 class="doc doc-heading" id="skforecast.model_selection.grid_search_forecaster">
+<code class="highlight language-python"><span class="n">grid_search_forecaster</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">param_grid</span><span class="p">,</span> <span class="n">initial_train_size</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lags_grid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;cv&#39;</span><span class="p">,</span> <span class="n">allow_incomplete_fold</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_best</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
+
+
+<a class="headerlink" href="#skforecast.model_selection.grid_search_forecaster" title="Permanent link">&para;</a></h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Exhaustive search over specified parameter values for a Forecaster object.
+Validation is done using time series cross-validation or backtesting.</p>
+<h4 id="skforecast.model_selection.grid_search_forecaster--parameters">Parameters<a class="headerlink" href="#skforecast.model_selection.grid_search_forecaster--parameters" title="Permanent link">&para;</a></h4>
+<p>forecaster : ForecasterAutoreg, ForecasterCustom, ForecasterAutoregCustom,
+             ForecasterAutoregMultiOutput
+    <code>ForecasterAutoreg</code>, <code>ForecasterCustom</code> <code>ForecasterAutoregCustom</code> or
+    <code>ForecasterAutoregMultiOutput</code> object.</p>
+<p>y : 1D np.ndarray, pd.Series
+    Training time series values. </p>
+<p>param_grid : dict
+    Dictionary with parameters names (<code>str</code>) as keys and lists of parameter
+    settings to try as values.</p>
+<p>!!! initial_train_size "int "
+    Number of samples in the initial train split.</p>
+<p>steps : int
+    Number of steps to predict.</p>
+<p>metric : {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
+    Metric used to quantify the goodness of fit of the model.</p>
+<p>exog : np.ndarray, pd.Series, default <code>None</code>
+        Exogenous variable/s included as predictor/s. Must have the same
+        number of observations as <code>y</code> and should be aligned so that y[i] is
+        regressed on exog[i].</p>
+<p>lags_grid : list of int, lists, np.narray or range. 
+    Lists of <code>lags</code> to try. Only used if forecaster is an instance of 
+    <code>ForecasterAutoreg</code>.</p>
+<p>method : {'cv', 'backtesting'}
+    Method used to estimate the metric for each parameter combination.
+    'cv' for time series crosvalidation and 'backtesting' for simple
+    backtesting. 'backtesting' is much faster since the model is fitted only
+    once.</p>
+<p>allow_incomplete_fold : bool, default <code>True</code>
+    The last test set is allowed to be incomplete if it does not reach <code>steps</code>
+    observations. Otherwise, the latest observations are discarded.</p>
+<p>return_best : bool
+    Refit the <code>forecaster</code> using the best found parameters on the whole data.</p>
+<p>verbose : bool, default <code>True</code>
+    Print number of folds used for cv or backtesting.</p>
+<h4 id="skforecast.model_selection.grid_search_forecaster--returns">Returns<a class="headerlink" href="#skforecast.model_selection.grid_search_forecaster--returns" title="Permanent link">&para;</a></h4>
+<p>!!! results "pandas.DataFrame"
+    Metric value estimated for each combination of parameters.</p>
+
+        <details class="quote">
+          <summary>Source code in <code>skforecast/model_selection.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">grid_search_forecaster</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">],</span>
+                           <span class="n">param_grid</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">initial_train_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                           <span class="n">metric</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">exog</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                           <span class="n">lags_grid</span><span class="p">:</span> <span class="nb">list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">method</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;cv&#39;</span><span class="p">,</span>
+                           <span class="n">allow_incomplete_fold</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_best</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                           <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Exhaustive search over specified parameter values for a Forecaster object.</span>
+<span class="sd">    Validation is done using time series cross-validation or backtesting.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    forecaster : ForecasterAutoreg, ForecasterCustom, ForecasterAutoregCustom,</span>
+<span class="sd">                 ForecasterAutoregMultiOutput</span>
+<span class="sd">        `ForecasterAutoreg`, `ForecasterCustom` `ForecasterAutoregCustom` or</span>
+<span class="sd">        `ForecasterAutoregMultiOutput` object.</span>
+
+<span class="sd">    y : 1D np.ndarray, pd.Series</span>
+<span class="sd">        Training time series values. </span>
+
+<span class="sd">    param_grid : dict</span>
+<span class="sd">        Dictionary with parameters names (`str`) as keys and lists of parameter</span>
+<span class="sd">        settings to try as values.</span>
+
+<span class="sd">    initial_train_size: int </span>
+<span class="sd">        Number of samples in the initial train split.</span>
+
+<span class="sd">    steps : int</span>
+<span class="sd">        Number of steps to predict.</span>
+
+<span class="sd">    metric : {&#39;mean_squared_error&#39;, &#39;mean_absolute_error&#39;, &#39;mean_absolute_percentage_error&#39;}</span>
+<span class="sd">        Metric used to quantify the goodness of fit of the model.</span>
+
+<span class="sd">    exog : np.ndarray, pd.Series, default `None`</span>
+<span class="sd">            Exogenous variable/s included as predictor/s. Must have the same</span>
+<span class="sd">            number of observations as `y` and should be aligned so that y[i] is</span>
+<span class="sd">            regressed on exog[i].</span>
+
+<span class="sd">    lags_grid : list of int, lists, np.narray or range. </span>
+<span class="sd">        Lists of `lags` to try. Only used if forecaster is an instance of </span>
+<span class="sd">        `ForecasterAutoreg`.</span>
+
+<span class="sd">    method : {&#39;cv&#39;, &#39;backtesting&#39;}</span>
+<span class="sd">        Method used to estimate the metric for each parameter combination.</span>
+<span class="sd">        &#39;cv&#39; for time series crosvalidation and &#39;backtesting&#39; for simple</span>
+<span class="sd">        backtesting. &#39;backtesting&#39; is much faster since the model is fitted only</span>
+<span class="sd">        once.</span>
+
+<span class="sd">    allow_incomplete_fold : bool, default `True`</span>
+<span class="sd">        The last test set is allowed to be incomplete if it does not reach `steps`</span>
+<span class="sd">        observations. Otherwise, the latest observations are discarded.</span>
+
+<span class="sd">    return_best : bool</span>
+<span class="sd">        Refit the `forecaster` using the best found parameters on the whole data.</span>
+
+<span class="sd">    verbose : bool, default `True`</span>
+<span class="sd">        Print number of folds used for cv or backtesting.</span>
+
+<span class="sd">    Returns </span>
+<span class="sd">    -------</span>
+<span class="sd">    results: pandas.DataFrame</span>
+<span class="sd">        Metric value estimated for each combination of parameters.</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">forecaster</span><span class="o">.</span><span class="n">_check_y</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">forecaster</span><span class="o">.</span><span class="n">_preproces_y</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">exog</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">forecaster</span><span class="o">.</span><span class="n">_check_exog</span><span class="p">(</span><span class="n">exog</span><span class="o">=</span><span class="n">exog</span><span class="p">)</span>
+        <span class="n">exog</span> <span class="o">=</span> <span class="n">forecaster</span><span class="o">.</span><span class="n">_preproces_exog</span><span class="p">(</span><span class="n">exog</span><span class="o">=</span><span class="n">exog</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="p">(</span><span class="n">ForecasterCustom</span><span class="p">,</span> <span class="n">ForecasterAutoregCustom</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">lags_grid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s1">&#39;`lags_grid` ignored if forecaster is an instance of `ForecasterCustom` or `ForecasterAutoregCustom`.&#39;</span>
+            <span class="p">)</span>
+        <span class="n">lags_grid</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;custom predictors&#39;</span><span class="p">]</span>
+
+    <span class="k">elif</span> <span class="n">lags_grid</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">lags_grid</span> <span class="o">=</span> <span class="p">[</span><span class="n">forecaster</span><span class="o">.</span><span class="n">lags</span><span class="p">]</span>
+
+
+    <span class="n">lags_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">params_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">metric_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">param_grid</span> <span class="o">=</span>  <span class="nb">list</span><span class="p">(</span><span class="n">ParameterGrid</span><span class="p">(</span><span class="n">param_grid</span><span class="p">))</span>
+
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;Number of models to fit: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">param_grid</span><span class="p">)</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">lags_grid</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">lags</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="o">.</span><span class="n">tqdm</span><span class="p">(</span><span class="n">lags_grid</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;loop lags_grid&#39;</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="p">(</span><span class="n">ForecasterAutoreg</span><span class="p">,</span> <span class="n">ForecasterAutoregMultiOutput</span><span class="p">)):</span>
+            <span class="n">forecaster</span><span class="o">.</span><span class="n">set_lags</span><span class="p">(</span><span class="n">lags</span><span class="p">)</span>
+            <span class="n">lags</span> <span class="o">=</span> <span class="n">forecaster</span><span class="o">.</span><span class="n">lags</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">params</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="o">.</span><span class="n">tqdm</span><span class="p">(</span><span class="n">param_grid</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;loop param_grid&#39;</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">leave</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+            <span class="n">forecaster</span><span class="o">.</span><span class="n">set_params</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;cv&#39;</span><span class="p">:</span>
+                <span class="n">metrics</span> <span class="o">=</span> <span class="n">cv_forecaster</span><span class="p">(</span>
+                                <span class="n">forecaster</span> <span class="o">=</span> <span class="n">forecaster</span><span class="p">,</span>
+                                <span class="n">y</span>          <span class="o">=</span> <span class="n">y</span><span class="p">,</span>
+                                <span class="n">exog</span>       <span class="o">=</span> <span class="n">exog</span><span class="p">,</span>
+                                <span class="n">initial_train_size</span> <span class="o">=</span> <span class="n">initial_train_size</span><span class="p">,</span>
+                                <span class="n">steps</span>  <span class="o">=</span> <span class="n">steps</span><span class="p">,</span>
+                                <span class="n">metric</span> <span class="o">=</span> <span class="n">metric</span><span class="p">,</span>
+                                <span class="n">allow_incomplete_fold</span> <span class="o">=</span> <span class="n">allow_incomplete_fold</span><span class="p">,</span>
+                                <span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
+                             <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">metrics</span> <span class="o">=</span> <span class="n">backtesting_forecaster</span><span class="p">(</span>
+                                <span class="n">forecaster</span> <span class="o">=</span> <span class="n">forecaster</span><span class="p">,</span>
+                                <span class="n">y</span>          <span class="o">=</span> <span class="n">y</span><span class="p">,</span>
+                                <span class="n">exog</span>       <span class="o">=</span> <span class="n">exog</span><span class="p">,</span>
+                                <span class="n">initial_train_size</span> <span class="o">=</span> <span class="n">initial_train_size</span><span class="p">,</span>
+                                <span class="n">steps</span>  <span class="o">=</span> <span class="n">steps</span><span class="p">,</span>
+                                <span class="n">metric</span> <span class="o">=</span> <span class="n">metric</span><span class="p">,</span>
+                                <span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
+                             <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="n">lags_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lags</span><span class="p">)</span>
+            <span class="n">params_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+            <span class="n">metric_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metrics</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+
+    <span class="n">results</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+                <span class="s1">&#39;lags&#39;</span>  <span class="p">:</span> <span class="n">lags_list</span><span class="p">,</span>
+                <span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="n">params_list</span><span class="p">,</span>
+                <span class="s1">&#39;metric&#39;</span><span class="p">:</span> <span class="n">metric_list</span><span class="p">})</span>
+
+    <span class="n">results</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">&#39;metric&#39;</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">return_best</span><span class="p">:</span>
+
+        <span class="n">best_lags</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;lags&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">best_params</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;params&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Refitting `forecaster` using the best found parameters and the whole data set: </span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;lags: </span><span class="si">{</span><span class="n">best_lags</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;params: </span><span class="si">{</span><span class="n">best_params</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="p">(</span><span class="n">ForecasterAutoreg</span><span class="p">,</span> <span class="n">ForecasterAutoregMultiOutput</span><span class="p">)):</span>
+            <span class="n">forecaster</span><span class="o">.</span><span class="n">set_lags</span><span class="p">(</span><span class="n">best_lags</span><span class="p">)</span>
+
+        <span class="n">forecaster</span><span class="o">.</span><span class="n">set_params</span><span class="p">(</span><span class="o">**</span><span class="n">best_params</span><span class="p">)</span>
+        <span class="n">forecaster</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="n">exog</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">results</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h2 class="doc doc-heading" id="skforecast.model_selection.time_series_spliter">
+<code class="highlight language-python"><span class="n">time_series_spliter</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">initial_train_size</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">allow_incomplete_fold</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
+
+
+<a class="headerlink" href="#skforecast.model_selection.time_series_spliter" title="Permanent link">&para;</a></h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Split indices of a time series into multiple train-test pairs. The order of
+is maintained and the training set increases in each iteration.</p>
+<h4 id="skforecast.model_selection.time_series_spliter--parameters">Parameters<a class="headerlink" href="#skforecast.model_selection.time_series_spliter--parameters" title="Permanent link">&para;</a></h4>
+<p>y : 1D np.ndarray, pd.Series
+    Training time series values. </p>
+<p>!!! initial_train_size "int "
+    Number of samples in the initial train split.</p>
+<p>steps : int
+    Number of steps to predict.</p>
+<p>allow_incomplete_fold : bool, default <code>True</code>
+    The last test set is allowed to be incomplete if it does not reach <code>steps</code>
+    observations. Otherwise, the latest observations are discarded.</p>
+<p>verbose : bool, default <code>True</code>
+    Print number of splits created.</p>
+<h4 id="skforecast.model_selection.time_series_spliter--yields">Yields<a class="headerlink" href="#skforecast.model_selection.time_series_spliter--yields" title="Permanent link">&para;</a></h4>
+<p>train : 1D np.ndarray
+    Training indices.</p>
+<p>test : 1D np.ndarray
+    Test indices.</p>
+
+        <details class="quote">
+          <summary>Source code in <code>skforecast/model_selection.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">time_series_spliter</span><span class="p">(</span><span class="n">y</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">],</span>
+                        <span class="n">initial_train_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                        <span class="n">allow_incomplete_fold</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                        <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+
+<span class="sd">    Split indices of a time series into multiple train-test pairs. The order of</span>
+<span class="sd">    is maintained and the training set increases in each iteration.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------        </span>
+<span class="sd">    y : 1D np.ndarray, pd.Series</span>
+<span class="sd">        Training time series values. </span>
+
+<span class="sd">    initial_train_size: int </span>
+<span class="sd">        Number of samples in the initial train split.</span>
+
+<span class="sd">    steps : int</span>
+<span class="sd">        Number of steps to predict.</span>
+
+<span class="sd">    allow_incomplete_fold : bool, default `True`</span>
+<span class="sd">        The last test set is allowed to be incomplete if it does not reach `steps`</span>
+<span class="sd">        observations. Otherwise, the latest observations are discarded.</span>
+
+<span class="sd">    verbose : bool, default `True`</span>
+<span class="sd">        Print number of splits created.</span>
+
+<span class="sd">    Yields</span>
+<span class="sd">    ------</span>
+<span class="sd">    train : 1D np.ndarray</span>
+<span class="sd">        Training indices.</span>
+
+<span class="sd">    test : 1D np.ndarray</span>
+<span class="sd">        Test indices.</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)):</span>
+
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;`y` must be `1D np.ndarray` o `pd.Series`.&#39;</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="ow">and</span> <span class="n">y</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;`y` must be `1D np.ndarray` o `pd.Series`, &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;got `np.ndarray` with </span><span class="si">{</span><span class="n">y</span><span class="o">.</span><span class="n">ndim</span><span class="si">}</span><span class="s2"> dimensions.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">):</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+
+    <span class="n">folds</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">-</span> <span class="n">initial_train_size</span><span class="p">)</span> <span class="o">//</span> <span class="n">steps</span>  <span class="o">+</span> <span class="mi">1</span>
+    <span class="c1"># +1 fold is needed to allow including the remainder in the last iteration.</span>
+    <span class="n">remainder</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">-</span> <span class="n">initial_train_size</span><span class="p">)</span> <span class="o">%</span> <span class="n">steps</span>   
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">folds</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of folds: </span><span class="si">{</span><span class="n">folds</span> <span class="o">-</span> <span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Not enought observations in `y` to create to create even a complete fold.&quot;</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">remainder</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of folds: </span><span class="si">{</span><span class="n">folds</span> <span class="o">-</span> <span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">remainder</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">allow_incomplete_fold</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of folds: </span><span class="si">{</span><span class="n">folds</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Since `allow_incomplete_fold=True`, &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;last fold only includes </span><span class="si">{</span><span class="n">remainder</span><span class="si">}</span><span class="s2"> observations instead of </span><span class="si">{</span><span class="n">steps</span><span class="si">}</span><span class="s2">.&quot;</span>
+            <span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="s1">&#39;Incomplete folds with few observations could overestimate or &#39;</span><span class="p">,</span>
+                <span class="s1">&#39;underestimate validation metrics.&#39;</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">remainder</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">allow_incomplete_fold</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of folds: </span><span class="si">{</span><span class="n">folds</span> <span class="o">-</span> <span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Since `allow_incomplete_fold=False`, &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;last </span><span class="si">{</span><span class="n">remainder</span><span class="si">}</span><span class="s2"> observations are descarted.&quot;</span>
+            <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">folds</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="c1"># There are no observations to create even a complete fold</span>
+        <span class="k">return</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">folds</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">folds</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">train_end</span>     <span class="o">=</span> <span class="n">initial_train_size</span> <span class="o">+</span> <span class="n">i</span> <span class="o">*</span> <span class="n">steps</span>    
+            <span class="n">train_indices</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">train_end</span><span class="p">)</span>
+            <span class="n">test_indices</span>  <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">train_end</span><span class="p">,</span> <span class="n">train_end</span> <span class="o">+</span> <span class="n">steps</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">remainder</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">allow_incomplete_fold</span><span class="p">:</span>
+                <span class="n">train_end</span>     <span class="o">=</span> <span class="n">initial_train_size</span> <span class="o">+</span> <span class="n">i</span> <span class="o">*</span> <span class="n">steps</span>  
+                <span class="n">train_indices</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">train_end</span><span class="p">)</span>
+                <span class="n">test_indices</span>  <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">train_end</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">break</span>
+
+        <span class="k">yield</span> <span class="n">train_indices</span><span class="p">,</span> <span class="n">test_indices</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+  </div>
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+        
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <nav class="md-footer__inner md-grid" aria-label="Footer">
+      
+        
+        <a href="ForecasterAutoregMultiOutput.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: ForecasterAutoregMultiOutput" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              ForecasterAutoregMultiOutput
+            </div>
+          </div>
+        </a>
+      
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+        Made with
+        <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+          Material for MkDocs
+        </a>
+        
+      </div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections"], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "../assets/javascripts/workers/search.709b4209.min.js", "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.2b46852b.min.js"></script>
+      
+    
+  </body>
+</html>
