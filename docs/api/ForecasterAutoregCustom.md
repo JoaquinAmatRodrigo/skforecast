@@ -1,0 +1,3 @@
+# `ForecasterAutoregCustom`
+
+::: skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom

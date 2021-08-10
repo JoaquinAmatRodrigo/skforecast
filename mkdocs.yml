@@ -13,6 +13,10 @@ nav:
       - Releases: guides/releases.md
   - API:
       - ForecasterAutoreg: api/ForecasterAutoreg.md
+      - ForecasterAutoregCustom: api/ForecasterAutoregCustom.md
+      - ForecasterAutoregMultiOutput: api/ForecasterAutoregMultiOutput.md
+      - model_selection: api/model_selection.md
+
   - Examples:
       - ForecasterAutoreg: examples/ForecasterAutoreg.md
 plugins:

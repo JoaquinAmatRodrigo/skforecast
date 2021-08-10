@@ -1,0 +1,3 @@
+# `ForecasterAutoregMultiOutput`
+
+::: skforecast.ForecasterAutoregMultiOutput.ForecasterAutoregMultiOutput

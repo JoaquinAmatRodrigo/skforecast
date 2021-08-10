@@ -13,13 +13,13 @@ When working with time series, it is seldom needed to predict only the next elem
 
 Since the value of *t(n)* is required to predict the point *t(n-1)*, and *t(n-1)* is unknown, it is necessary to make recursive predictions in which, each new prediction, is based on the previous one. This process is known as recursive forecasting or recursive multi-step forecasting.
 
-<p><img src="../images/forecasting_multi-step.gif" alt="forecasting-python" title="forecasting-python"></p>
+<p><img src="../img/forecasting_multi-step.gif" alt="forecasting-python" title="forecasting-python"></p>
 
 <br>
 
 The main challenge when using scikit-learn models for recursive multi-step forecasting is transforming the time series in an matrix where, each value of the series, is related to the time window (lags) that precedes it. This forecasting strategy can be easily generated with the classes `ForecasterAutoreg` and `ForecasterAutoregCustom`.
 
-<p><img src="../images/transform_timeseries.gif" alt="forecasting-python" title="forecasting-python"></p>
+<p><img src="../img/transform_timeseries.gif" alt="forecasting-python" title="forecasting-python"></p>
 
 <center><font size="2.5"> <i>Time series  transformation into a matrix of 5 lags and a vector with the value of the series that follows each row of the matrix.</i></font></center>
 <br><br>
@@ -28,7 +28,7 @@ The main challenge when using scikit-learn models for recursive multi-step forec
 
 This strategy consists of training a different model for each step. For example, to predict the next 5 values of a time series, 5 different models are trainded, one for each step. As a result, the predictions are independent of each other. This forecasting strategy can be easily generated with the `ForecasterAutoregMultiOutput` class (changed in version 0.1.9).
 
-<p><img src="../images/diagram_skforecast_multioutput.jpg" alt="forecasting-python" title="forecasting-python"></p>
+<p><img src="../img/diagram_skforecast_multioutput.jpg" alt="forecasting-python" title="forecasting-python"></p>
 
 <center><font size="2.5"> <i>Time series transformation into the matrices needed to train a direct multi-step forecaster.</i></font></center>
 <br><br>
@@ -87,7 +87,7 @@ datos.plot(ax=ax, label='y')
 ax.legend();
 ```
 
-<p><img src="../images/data.png"</p>
+<p><img src="../img/data.png"</p>
 
 ```python
 # Create and fit forecaster
@@ -138,7 +138,7 @@ ax.legend();
 Test error (mse): 0.011051937043503587
 ```
 
-<p><img src="../images/prediction.png"</p>
+<p><img src="../img/prediction.png"</p>
 
 ```python
 # Grid search hiperparameters and lags
@@ -247,7 +247,7 @@ ax.fill_between(predictions.index,
 ax.legend();
 ```
 
-<p><img src="../images/prediction_interval.png"</p>
+<p><img src="../img/prediction_interval.png"</p>
 
 ```python
 # Backtesting
@@ -286,7 +286,7 @@ Last fold only includes 1 observations.
 [0.02150972]
 ```
 
-<p><img src="../images/backtesting_forecaster.png"</p>
+<p><img src="../img/backtesting_forecaster.png"</p>
 
 
 ### Autoregressive forecaster with 1 exogenous predictor
@@ -320,7 +320,7 @@ datos_exog.plot(ax=ax, label='exogenous variable')
 ax.legend();
 ```
 
-<p><img src="../images/data_with_exogenous.png"</p>
+<p><img src="../img/data_with_exogenous.png"</p>
 
 ```python
 # Split train-test
@@ -371,7 +371,7 @@ ax.legend();
 Test error (mse): 0.020306077140235308
 ```
 
-<p><img src="../images/prediction_with_exog.png"</p>
+<p><img src="../img/prediction_with_exog.png"</p>
 
 
 ```python
@@ -444,7 +444,7 @@ datos_exog_2.plot(ax=ax, label='exogenous 2')
 ax.legend();
 ```
 
-<p><img src="../images/data_with_multiple_exog.png"</p>
+<p><img src="../img/data_with_multiple_exog.png"</p>
 
 ```python
 # Split train-test
@@ -496,7 +496,7 @@ ax.legend();
 Test error (mse): 0.020306077140235298
 ```
 
-<p><img src="../images/prediction_with_multiple_exog.png"</p>
+<p><img src="../img/prediction_with_multiple_exog.png"</p>
   
   
 ### Autoregressive forecaster with custom predictors
