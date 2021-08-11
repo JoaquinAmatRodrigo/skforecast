@@ -1,3 +1,3 @@
 # `ForecasterAutoregMultiOutput`
 
-::: skforecast.ForecasterAutoregMultiOutput.ForecasterAutoregMultiOutput
+![mkapi](skforecast.ForecasterAutoregMultiOutput.ForecasterAutoregMultiOutput)
