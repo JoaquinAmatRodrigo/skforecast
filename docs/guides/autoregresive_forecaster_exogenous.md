@@ -1,17 +1,5 @@
-# Recursive multi-step forecasting
+# Recursive multi-step forecasting with exogenous variables
 
-Since the value of *t(n)* is required to predict the point *t(n-1)*, and *t(n-1)* is unknown, it is necessary to make recursive predictions in which, each new prediction, is based on the previous one. This process is known as recursive forecasting or recursive multi-step forecasting.
-
-<p><img src="../img/forecasting_multi-step.gif" alt="forecasting-python" title="forecasting-python"></p>
-
-<br>
-
-The main challenge when using scikit-learn models for recursive multi-step forecasting is transforming the time series in an matrix where, each value of the series, is related to the time window (lags) that precedes it. This forecasting strategy can be easily generated with the classes `ForecasterAutoreg` and `ForecasterAutoregCustom`.
-
-<p><img src="../img/transform_timeseries.gif" alt="forecasting-python" title="forecasting-python"></p>
-
-<center><font size="2.5"> <i>Time series  transformation into a matrix of 5 lags and a vector with the value of the series that follows each row of the matrix.</i></font></center>
-<br><br>
 
 # Example
 
@@ -44,20 +32,32 @@ datos = datos.asfreq('MS')
 datos = datos['y']
 datos = datos.sort_index()
 
+# Exogenous variable
+# ==============================================================================
+datos_exog = datos.rolling(window=10, closed='right').mean() + 0.5
+datos_exog = datos_exog[10:]
+datos = datos[10:]
+
+# Plot
+# ==============================================================================
+fig, ax=plt.subplots(figsize=(9, 4))
+datos.plot(ax=ax, label='y')
+datos_exog.plot(ax=ax, label='exogenous variable')
+ax.legend();
+```
+<img src="../img/data_with_exogenous.png">
+
+
+```python
 # Split train-test
 # ==============================================================================
 steps = 36
 datos_train = datos[:-steps]
 datos_test  = datos[-steps:]
 
-# Plot
-# ==============================================================================
-fig, ax=plt.subplots(figsize=(9, 4))
-datos_train.plot(ax=ax, label='train')
-datos_test.plot(ax=ax, label='test')
-ax.legend();
+datos_exog_train = datos_exog[:-steps]
+datos_exog_test  = datos_exog[-steps:]
 ```
-<img src="../img/data.png">
 
 # Train forecaster
 
@@ -65,21 +65,12 @@ ax.legend();
 ```python
 # Create and fit forecaster
 # ==============================================================================
-forecaster = ForecasterAutoregCustom(
-                    regressor      = RandomForestRegressor(random_state=123),
-                    fun_predictors = create_predictors,
-                    window_size    = 20
-                )
+forecaster = ForecasterAutoreg(
+                    regressor = LinearRegression(),
+                    lags      = 8
+             )
 
-forecaster.fit(y=datos_train)
-```
-
-```
-=======================ForecasterAutoreg=======================
-Regressor: LinearRegression()
-Lags: [ 1  2  3  4  5  6  7  8  9 10 11 12 13 14 15]
-Exogenous variable: False
-Parameters: {'copy_X': True, 'fit_intercept': True, 'n_jobs': None, 'normalize': False, 'positive': False}
+forecaster.fit(y=datos_train, exog=datos_exog_train)
 ```
 
 # Prediction 
@@ -88,11 +79,11 @@ Parameters: {'copy_X': True, 'fit_intercept': True, 'n_jobs': None, 'normalize':
 # Predict
 # ==============================================================================
 steps = 36
-predictions = forecaster.predict(steps=steps)
+predictions = forecaster.predict(steps=steps, exog=datos_exog_test)
 # Add datetime index to predictions
 predictions = pd.Series(data=predictions, index=datos_test.index)
 
-# Prediction error
+# Error prediction
 # ==============================================================================
 error_mse = mean_squared_error(
                 y_true = datos_test,
@@ -109,8 +100,9 @@ predictions.plot(ax=ax, label='predictions')
 ax.legend();
 ```
 
+
 ```
-Test error (mse): 0.011051937043503587
+Test error (mse): 0.020306077140235308
 ```
 
-<img src="../img/prediction.png">
+<img src="../img/prediction_with_exog.png">

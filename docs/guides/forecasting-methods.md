@@ -1,10 +1,10 @@
 
-# Forcasting methods
+# Introduction to forcasting
 
-## Time Series
+## Time Series and forecasting
 
 
-A time series is a sequence of data arranged chronologically, in principle, equally spaced in time. Time series forecasting is the use of a model to predict future values based on previously observed values, with the option of also including other external variables.
+A time series is a sequence of data arranged chronologically, in principle, equally spaced in time. Time series forecasting is the use of models to predict future values based on previously observed values, with the option of also including other external variables.
 
 When working with time series, it is seldom needed to predict only the next element in the series (*t+1*). Instead, the most common goal is to predict a whole future interval (*t+1, ..., t+n*)  or a far point in time (*t+n*). There are several strategies that allow generating this type of multiple predictions.
 <br>

@@ -10,8 +10,9 @@ nav:
     - Index: index.md
     
   - Guides:
-      - Forecasting methods: guides/forecasting-methods.md
+      - Introduction to forcasting: guides/forecasting-methods.md
       - Recursive multi-step forecasting: guides/autoregresive_forecaster.md
+      - Recursive multi-step forecasting with exogenous variables: guides/autoregresive_forecaster_exogenous.md
       - Custom predictors: guides/custom_predictors.md
       - Direct multi-step forecasting: guides/direct_multi_step_forecasting.md
       - Cross validation and Backtest: guides/cross_validation_backtest.md
