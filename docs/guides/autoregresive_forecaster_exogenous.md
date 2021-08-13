@@ -1,10 +1,11 @@
 # Recursive multi-step forecasting with exogenous variables
 
-`ForecasterAutoreg` and `ForecasterAutoregCustom` allow to include exogenous variables as predictors as long as their future valueis known, since they must be included during the predict process.
+`ForecasterAutoreg` and `ForecasterAutoregCustom` allow to include exogenous variables as predictors as long as their future values are known, since they must be included during the predict process.
 
-The main challenge when using scikit-learn models for recursive multi-step forecasting is transforming the time series in an matrix where, each value of the series, is related to the time window (lags) that precedes it. This forecasting strategy can be easily generated with the classes `ForecasterAutoreg` and `ForecasterAutoregCustom`.
+When using exogenous variables in recursive multi-step forecasting, their values should be aligned so that y[i] is regressed on exog[i].
 
 <img src="../img/matrix_transformation_with_exog_variable.png">
+
 
 ## Libraries
 

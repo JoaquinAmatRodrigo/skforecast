@@ -4,9 +4,8 @@ Since the value of *t(n)* is required to predict the point *t(n-1)*, and *t(n-1)
 
 The main challenge when using scikit-learn models for recursive multi-step forecasting is transforming the time series in an matrix where, each value of the series, is related to the time window (lags) that precedes it. This forecasting strategy can be easily generated with the classes `ForecasterAutoreg` and `ForecasterAutoregCustom`.
 
-<p><img src="../img/transform_timeseries.gif" alt="forecasting-python" title="forecasting-python"></p>
+<img src="../img/matrix_transformation_time_serie.png">
 
-<center><font size="2.5"> <i>Time series  transformation into a matrix of 5 lags and a vector with the value of the series that follows each row of the matrix.</i></font></center>
 <br><br>
 
 
