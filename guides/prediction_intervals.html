@@ -13,19 +13,19 @@
         <meta name="author" content="Joaquin Amat Rodrigo">
       
       
-      <link rel="icon" href="/assets/images/favicon.png">
+      <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.2.2, mkdocs-material-7.2.2">
     
     
       
-        <title>Skforecast Docs</title>
+        <title>Prediction intervals - Skforecast Docs</title>
       
     
     
-      <link rel="stylesheet" href="/assets/stylesheets/main.1118c9be.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.1118c9be.min.css">
       
         
-        <link rel="stylesheet" href="/assets/stylesheets/palette.ba0d045b.min.css">
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ba0d045b.min.css">
         
           
           
@@ -48,9 +48,9 @@
     
       <link rel="stylesheet" href="//use.fontawesome.com/releases/v5.8.1/css/v4-shims.css">
     
-      <link rel="stylesheet" href="/css/mkapi-common.css">
+      <link rel="stylesheet" href="../css/mkapi-common.css">
     
-      <link rel="stylesheet" href="/style.css">
+      <link rel="stylesheet" href="../style.css">
     
     
       
@@ -69,12 +69,17 @@
     <body dir="ltr" data-md-color-scheme="" data-md-color-primary="indigo" data-md-color-accent="blue">
   
     
-    <script>function __prefix(e){return new URL("/",location).pathname+"."+e}function __get(e,t=localStorage){return JSON.parse(t.getItem(__prefix(e)))}</script>
+    <script>function __prefix(e){return new URL("..",location).pathname+"."+e}function __get(e,t=localStorage){return JSON.parse(t.getItem(__prefix(e)))}</script>
     
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
+      
+        
+        <a href="#prediction-intervals" class="md-skip">
+          Skip to content
+        </a>
       
     </div>
     <div data-md-component="announce">
@@ -83,9 +88,9 @@
     
       <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="/." title="Skforecast Docs" class="md-header__button md-logo" aria-label="Skforecast Docs" data-md-component="logo">
+    <a href=".." title="Skforecast Docs" class="md-header__button md-logo" aria-label="Skforecast Docs" data-md-component="logo">
       
-  <img src="/img/logo_skforecast_no_background.png" alt="logo">
+  <img src="../img/logo_skforecast_no_background.png" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -101,7 +106,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              
+              Prediction intervals
             
           </span>
         </div>
@@ -179,7 +184,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="/index.html" class="md-tabs__link">
+      <a href="../index.html" class="md-tabs__link">
         Home
       </a>
     </li>
@@ -189,13 +194,15 @@
         
   
   
+    
+  
 
 
   
   
   
     <li class="md-tabs__item">
-      <a href="/guides/forecasting-methods.html" class="md-tabs__link">
+      <a href="forecasting-methods.html" class="md-tabs__link md-tabs__link--active">
         Guides
       </a>
     </li>
@@ -211,7 +218,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="/examples/examples.html" class="md-tabs__link">
+      <a href="../examples/examples.html" class="md-tabs__link">
         Examples
       </a>
     </li>
@@ -227,7 +234,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="/api/ForecasterAutoreg.html" class="md-tabs__link">
+      <a href="../api/ForecasterAutoreg.html" class="md-tabs__link">
         API
       </a>
     </li>
@@ -254,9 +261,9 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="/." title="Skforecast Docs" class="md-nav__button md-logo" aria-label="Skforecast Docs" data-md-component="logo">
+    <a href=".." title="Skforecast Docs" class="md-nav__button md-logo" aria-label="Skforecast Docs" data-md-component="logo">
       
-  <img src="/img/logo_skforecast_no_background.png" alt="logo">
+  <img src="../img/logo_skforecast_no_background.png" alt="logo">
 
     </a>
     Skforecast Docs
@@ -306,7 +313,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/index.html" class="md-nav__link">
+      <a href="../index.html" class="md-nav__link">
         Readme
       </a>
     </li>
@@ -325,12 +332,14 @@
 
   
   
+    
+  
   
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" checked>
       
       <label class="md-nav__link" for="__nav_2">
         Guides
@@ -348,7 +357,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/guides/forecasting-methods.html" class="md-nav__link">
+      <a href="forecasting-methods.html" class="md-nav__link">
         Introduction to forcasting
       </a>
     </li>
@@ -360,7 +369,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/guides/autoregresive_forecaster.html" class="md-nav__link">
+      <a href="autoregresive_forecaster.html" class="md-nav__link">
         Recursive multi-step forecasting
       </a>
     </li>
@@ -372,7 +381,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/guides/custom_predictors.html" class="md-nav__link">
+      <a href="custom_predictors.html" class="md-nav__link">
         Custom predictors
       </a>
     </li>
@@ -384,7 +393,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/guides/autoregresive_forecaster_exogenous.html" class="md-nav__link">
+      <a href="autoregresive_forecaster_exogenous.html" class="md-nav__link">
         Recursive multi-step forecasting with exogenous variables
       </a>
     </li>
@@ -396,7 +405,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/guides/direct_multi_step_forecasting.html" class="md-nav__link">
+      <a href="direct_multi_step_forecasting.html" class="md-nav__link">
         Direct multi-step forecasting
       </a>
     </li>
@@ -408,7 +417,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/guides/cross_validation_backtest.html" class="md-nav__link">
+      <a href="cross_validation_backtest.html" class="md-nav__link">
         Cross validation and Backtest
       </a>
     </li>
@@ -420,7 +429,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/guides/tuning.html" class="md-nav__link">
+      <a href="tuning.html" class="md-nav__link">
         Tuning forecaster
       </a>
     </li>
@@ -430,11 +439,21 @@
             
   
   
+    
   
-    <li class="md-nav__item">
-      <a href="/guides/prediction_intervals.html" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+      <a href="prediction_intervals.html" class="md-nav__link md-nav__link--active">
         Prediction intervals
       </a>
+      
     </li>
   
 
@@ -444,7 +463,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/guides/releases.html" class="md-nav__link">
+      <a href="releases.html" class="md-nav__link">
         Releases
       </a>
     </li>
@@ -486,7 +505,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/examples/examples.html" class="md-nav__link">
+      <a href="../examples/examples.html" class="md-nav__link">
         Forecasting series temporales con Python y Scikit-learn
       </a>
     </li>
@@ -498,7 +517,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/examples/examples.html" class="md-nav__link">
+      <a href="../examples/examples.html" class="md-nav__link">
         Forecasting energy demand
       </a>
     </li>
@@ -540,7 +559,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/api/ForecasterAutoreg.html" class="md-nav__link">
+      <a href="../api/ForecasterAutoreg.html" class="md-nav__link">
         ForecasterAutoreg
       </a>
     </li>
@@ -552,7 +571,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/api/ForecasterAutoregCustom.html" class="md-nav__link">
+      <a href="../api/ForecasterAutoregCustom.html" class="md-nav__link">
         ForecasterAutoregCustom
       </a>
     </li>
@@ -564,7 +583,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/api/ForecasterAutoregMultiOutput.html" class="md-nav__link">
+      <a href="../api/ForecasterAutoregMultiOutput.html" class="md-nav__link">
         ForecasterAutoregMultiOutput
       </a>
     </li>
@@ -576,7 +595,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/api/model_selection.html" class="md-nav__link">
+      <a href="../api/model_selection.html" class="md-nav__link">
         model_selection
       </a>
     </li>
@@ -596,11 +615,39 @@
               </div>
             
             
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
           
           <div class="md-content" data-md-component="content">
             <article class="md-content__inner md-typeset">
               
-  <h1>404 - Not found</h1>
+                
+                  <a href="https://github.com/JoaquinAmatRodrigo/skforecast/edit/master/docs/guides/prediction_intervals.md" title="Edit this page" class="md-content__button md-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
+                  </a>
+                
+                
+                <h1 id="prediction-intervals">Prediction intervals<a class="headerlink" href="#prediction-intervals" title="Permanent link">&para;</a></h1>
+                
+              
+              
+                
+
 
               
             </article>
@@ -611,6 +658,41 @@
       
         
 <footer class="md-footer">
+  
+    <nav class="md-footer__inner md-grid" aria-label="Footer">
+      
+        
+        <a href="tuning.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Tuning forecaster" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              Tuning forecaster
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="releases.html" class="md-footer__link md-footer__link--next" aria-label="Next: Releases" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              Releases
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
   
   <div class="md-footer-meta md-typeset">
     <div class="md-footer-meta__inner md-grid">
@@ -631,12 +713,12 @@
     <div class="md-dialog" data-md-component="dialog">
       <div class="md-dialog__inner md-typeset"></div>
     </div>
-    <script id="__config" type="application/json">{"base": "/", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections"], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "/assets/javascripts/workers/search.709b4209.min.js", "version": null}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections"], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "../assets/javascripts/workers/search.709b4209.min.js", "version": null}</script>
     
     
-      <script src="/assets/javascripts/bundle.2b46852b.min.js"></script>
+      <script src="../assets/javascripts/bundle.2b46852b.min.js"></script>
       
-        <script src="/js/mkapi.js"></script>
+        <script src="../js/mkapi.js"></script>
       
     
   </body>
