@@ -7,7 +7,7 @@ site_author: Joaquin Amat Rodrigo
 use_directory_urls: false
 nav:
   - Home:
-    - Index: index.md
+    - Readme: README.md
     
   - Guides:
       - Introduction to forcasting: guides/forecasting-methods.md

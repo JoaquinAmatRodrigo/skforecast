@@ -13,9 +13,8 @@ The main challenge when using scikit-learn models for recursive multi-step forec
 <center><font size="2.5"> <i>Time series  transformation into a matrix of 5 lags and a vector with the value of the series that follows each row of the matrix.</i></font></center>
 <br><br>
 
-# Example
 
-## Data
+## Libraries
 
 ```python
 # Libraries
@@ -25,64 +24,66 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
-from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import Ridge
 from sklearn.metrics import mean_squared_error
 ```
+## Data
 
 ```python
 # Download data
 # ==============================================================================
 url = ('https://raw.githubusercontent.com/JoaquinAmatRodrigo/skforecast/master/data/h2o.csv')
-datos = pd.read_csv(url, sep=',')
+df = pd.read_csv(url, sep=',')
 
 # Data preprocessing
 # ==============================================================================
-datos['fecha'] = pd.to_datetime(datos['fecha'], format='%Y/%m/%d')
-datos = datos.set_index('fecha')
-datos = datos.rename(columns={'x': 'y'})
-datos = datos.asfreq('MS')
-datos = datos['y']
-datos = datos.sort_index()
+df['fecha'] = pd.to_datetime(df['fecha'], format='%Y/%m/%d')
+df = df.set_index('fecha')
+df = df.rename(columns={'x': 'y'})
+df = df.asfreq('MS')
+df = df['y']
+df = df.sort_index()
 
 # Split train-test
 # ==============================================================================
 steps = 36
-datos_train = datos[:-steps]
-datos_test  = datos[-steps:]
+df_train = df[:-steps]
+df_test  = df[-steps:]
 
 # Plot
 # ==============================================================================
 fig, ax=plt.subplots(figsize=(9, 4))
-datos_train.plot(ax=ax, label='train')
-datos_test.plot(ax=ax, label='test')
+df_train.plot(ax=ax, label='train')
+df_test.plot(ax=ax, label='test')
 ax.legend();
 ```
 <img src="../img/data.png">
 
-# Train forecaster
+
+## Create and train forecaster
 
 
 ```python
 # Create and fit forecaster
 # ==============================================================================
-forecaster = ForecasterAutoregCustom(
-                    regressor      = RandomForestRegressor(random_state=123),
-                    fun_predictors = create_predictors,
-                    window_size    = 20
+forecaster = ForecasterAutoreg(
+                    regressor = Ridge(),
+                    lags      = 15
                 )
 
-forecaster.fit(y=datos_train)
+forecaster.fit(y=df_train)
+forecaster
 ```
 
 ```
 =======================ForecasterAutoreg=======================
-Regressor: LinearRegression()
+Regressor: Ridge()
 Lags: [ 1  2  3  4  5  6  7  8  9 10 11 12 13 14 15]
 Exogenous variable: False
-Parameters: {'copy_X': True, 'fit_intercept': True, 'n_jobs': None, 'normalize': False, 'positive': False}
+Parameters: {'alpha': 1.0, 'copy_X': True, 'fit_intercept': True, 'max_iter': None, 'normalize': False, 'random_state': None, 'solver': 'auto', 'tol': 0.001}
 ```
 
-# Prediction 
+## Prediction 
 
 ```python
 # Predict
@@ -90,27 +91,63 @@ Parameters: {'copy_X': True, 'fit_intercept': True, 'n_jobs': None, 'normalize':
 steps = 36
 predictions = forecaster.predict(steps=steps)
 # Add datetime index to predictions
-predictions = pd.Series(data=predictions, index=datos_test.index)
+predictions = pd.Series(data=predictions, index=df_test.index)
+predictions.head(3)
+```
 
-# Prediction error
-# ==============================================================================
-error_mse = mean_squared_error(
-                y_true = datos_test,
-                y_pred = predictions
-            )
-print(f"Test error (mse): {error_mse}")
+```
+fecha
+2005-07-01    0.973131
+2005-08-01    1.022154
+2005-09-01    1.151334
+Freq: MS, dtype: float64
+```
 
-# Plot
+```python
+# Plot predictions
 # ==============================================================================
 fig, ax=plt.subplots(figsize=(9, 4))
-datos_train.plot(ax=ax, label='train')
-datos_test.plot(ax=ax, label='test')
+df_train.plot(ax=ax, label='train')
+df_test.plot(ax=ax, label='test')
 predictions.plot(ax=ax, label='predictions')
 ax.legend();
 ```
 
-```
-Test error (mse): 0.011051937043503587
+<img src="../img/prediction.png">
+
+```python
+# Prediction error
+# ==============================================================================
+error_mse = mean_squared_error(
+                y_true = df_test,
+                y_pred = predictions
+            )
+print(f"Test error (mse): {error_mse}")
 ```
 
-<img src="../img/prediction.png">
+```
+Test error (mse): 0.009918738501371805
+```
+
+## Feature importance
+
+```python
+# When using as regressor LinearRegression, Ridge or Lasso
+forecaster.get_coef()
+
+# When using as regressor RandomForestRegressor or GradientBoostingRegressor
+# forecaster.get_feature_importances()
+```
+
+```
+array([ 1.58096176e-01,  6.18241513e-02,  6.44665806e-02, -2.41792429e-02,
+       -2.60679572e-02,  7.04191008e-04, -4.28090339e-02,  4.87464352e-04,
+        1.66853207e-02,  1.00022527e-02,  1.62219885e-01,  6.15595305e-01,
+        2.85168042e-02, -7.31915864e-02, -5.38785052e-02])
+```
+
+## Extract training matrix
+
+```python
+X, y = forecaster.create_train_X_y(df_train)
+```

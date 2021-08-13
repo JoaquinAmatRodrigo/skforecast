@@ -2,7 +2,7 @@
 
 # **skforecast**
 
-**Time series forecasting with scikit-learn regressors**
+**Time series forecasting with scikit-learn regressors.**
 
 **Skforecast** is a python library that eases using scikit-learn regressors as multi-step forecasters. It also works with any regressor compatible with the scikit-learn API (XGBoost, LightGBM, Ranger...).
 
