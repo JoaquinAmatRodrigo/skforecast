@@ -428,9 +428,67 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Cross validation and Backtest
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="cross_validation_backtest.html" class="md-nav__link md-nav__link--active">
         Cross validation and Backtest
       </a>
+      
+        
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#libraries" class="md-nav__link">
+    Libraries
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data" class="md-nav__link">
+    Data
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#time-series-cross-validation" class="md-nav__link">
+    Time series cross-validation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#backtest" class="md-nav__link">
+    Backtest
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#backtest-with-prediction-intervals" class="md-nav__link">
+    Backtest with prediction intervals
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -629,6 +687,49 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#libraries" class="md-nav__link">
+    Libraries
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data" class="md-nav__link">
+    Data
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#time-series-cross-validation" class="md-nav__link">
+    Time series cross-validation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#backtest" class="md-nav__link">
+    Backtest
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#backtest-with-prediction-intervals" class="md-nav__link">
+    Backtest with prediction intervals
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -645,6 +746,286 @@
                 
                 
                 <h1 id="cross-validation-and-backtest">Cross validation and backtest<a class="headerlink" href="#cross-validation-and-backtest" title="Permanent link">&para;</a></h1>
+<h2 id="libraries">Libraries<a class="headerlink" href="#libraries" title="Permanent link">&para;</a></h2>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="c1"># Libraries</span>
+<span class="c1"># ==============================================================================</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<span class="kn">from</span> <span class="nn">skforecast.ForecasterAutoreg</span> <span class="kn">import</span> <span class="n">ForecasterAutoreg</span>
+<span class="kn">from</span> <span class="nn">skforecast.model_selection</span> <span class="kn">import</span> <span class="n">cv_forecaster</span>
+<span class="kn">from</span> <span class="nn">skforecast.model_selection</span> <span class="kn">import</span> <span class="n">backtesting_forecaster</span>
+<span class="kn">from</span> <span class="nn">skforecast.model_selection</span> <span class="kn">import</span> <span class="n">backtesting_forecaster_intervals</span>
+<span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="kn">import</span> <span class="n">Ridge</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">mean_squared_error</span>
+</code></pre></div>
+</td></tr></table>
+<h2 id="data">Data<a class="headerlink" href="#data" title="Permanent link">&para;</a></h2>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="c1"># Download data</span>
+<span class="c1"># ==============================================================================</span>
+<span class="n">url</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;https://raw.githubusercontent.com/JoaquinAmatRodrigo/skforecast/master/data/h2o.csv&#39;</span><span class="p">)</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+
+<span class="c1"># Data preprocessing</span>
+<span class="c1"># ==============================================================================</span>
+<span class="n">data</span><span class="p">[</span><span class="s1">&#39;fecha&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;fecha&#39;</span><span class="p">],</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;%Y/%m/</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;fecha&#39;</span><span class="p">)</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="s1">&#39;y&#39;</span><span class="p">})</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">asfreq</span><span class="p">(</span><span class="s1">&#39;MS&#39;</span><span class="p">)</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">sort_index</span><span class="p">()</span>
+
+<span class="c1"># Plot</span>
+<span class="c1"># ==============================================================================</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="n">data</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">();</span>
+</code></pre></div>
+</td></tr></table>
+<p><img src="../img/data_full_serie.png"></p>
+<h2 id="time-series-cross-validation">Time series cross-validation<a class="headerlink" href="#time-series-cross-validation" title="Permanent link">&para;</a></h2>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="c1"># Cross-validation forecaster</span>
+<span class="c1"># ==============================================================================</span>
+<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
+                <span class="n">regressor</span> <span class="o">=</span> <span class="n">Ridge</span><span class="p">(),</span>
+                <span class="n">lags</span>      <span class="o">=</span> <span class="mi">15</span> 
+             <span class="p">)</span>
+
+<span class="n">cv_forecaster</span><span class="p">(</span>
+        <span class="n">forecaster</span>  <span class="o">=</span> <span class="n">forecaster</span><span class="p">,</span>
+        <span class="n">y</span>           <span class="o">=</span> <span class="n">data</span><span class="p">,</span>
+        <span class="n">steps</span>       <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="n">metric</span>      <span class="o">=</span> <span class="s1">&#39;mean_squared_error&#39;</span><span class="p">,</span>
+        <span class="n">initial_train_size</span>    <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">*</span><span class="mf">0.5</span><span class="p">),</span>
+        <span class="n">allow_incomplete_fold</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">verbose</span>     <span class="o">=</span> <span class="kc">True</span>
+    <span class="p">)</span>
+</code></pre></div>
+</td></tr></table>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>Number of folds: 11
+Since `allow_incomplete_fold=True`, last fold only includes 2 observations instead of 10.
+Incomplete folds with few observations could overestimate or  underestimate validation metrics.
+array([0.00422291, 0.00634336, 0.01092581, 0.00483358, 0.00746501,
+       0.0048392 , 0.01333912, 0.00597068, 0.00616372, 0.00881862,
+       0.00677257])
+</code></pre></div>
+</td></tr></table>
+<h2 id="backtest">Backtest<a class="headerlink" href="#backtest" title="Permanent link">&para;</a></h2>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="c1"># Backtest forecaster</span>
+<span class="c1"># ==============================================================================</span>
+<span class="n">n_backtest</span> <span class="o">=</span> <span class="mi">36</span><span class="o">*</span><span class="mi">3</span> <span class="o">+</span> <span class="mi">1</span> <span class="c1"># Last 3 months are used for backtest</span>
+<span class="n">data_train</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:</span><span class="o">-</span><span class="n">n_backtest</span><span class="p">]</span>
+<span class="n">data_test</span>  <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="o">-</span><span class="n">n_backtest</span><span class="p">:]</span>
+
+<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
+                <span class="n">regressor</span> <span class="o">=</span> <span class="n">Ridge</span><span class="p">(),</span>
+                <span class="n">lags</span>      <span class="o">=</span> <span class="mi">15</span> 
+             <span class="p">)</span>
+
+<span class="n">metric</span><span class="p">,</span> <span class="n">predictions_backtest</span> <span class="o">=</span> <span class="n">backtesting_forecaster</span><span class="p">(</span>
+                                    <span class="n">forecaster</span> <span class="o">=</span> <span class="n">forecaster</span><span class="p">,</span>
+                                    <span class="n">y</span>          <span class="o">=</span> <span class="n">data</span><span class="p">,</span>
+                                    <span class="n">initial_train_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_train</span><span class="p">),</span>
+                                    <span class="n">steps</span>      <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+                                    <span class="n">metric</span>     <span class="o">=</span> <span class="s1">&#39;mean_squared_error&#39;</span><span class="p">,</span>
+                                    <span class="n">verbose</span>    <span class="o">=</span> <span class="kc">True</span>
+                               <span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error de backtest: </span><span class="si">{</span><span class="n">metric</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+</td></tr></table>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>Number of observations used for training: 95
+Number of observations used for testing: 109
+    Number of folds: 11
+    Number of steps per fold: 10
+    Last fold only includes 9 observations
+ Error de backtest: [0.01823166]
+</code></pre></div>
+</td></tr></table>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="c1"># Plot backtest predictions</span>
+<span class="c1"># ==============================================================================</span>
+<span class="n">predictions_backtest</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">predictions_backtest</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">data_test</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="n">data_test</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;test&#39;</span><span class="p">)</span>
+<span class="n">predictions_backtest</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;predictions&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">();</span>
+</code></pre></div>
+</td></tr></table>
+<p><img src="../img/predictions_backtesting_forecaster.png"></p>
+<h2 id="backtest-with-prediction-intervals">Backtest with prediction intervals<a class="headerlink" href="#backtest-with-prediction-intervals" title="Permanent link">&para;</a></h2>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="c1"># Backtest forecaster</span>
+<span class="c1"># ==============================================================================</span>
+<span class="n">n_backtest</span> <span class="o">=</span> <span class="mi">36</span><span class="o">*</span><span class="mi">3</span> <span class="o">+</span> <span class="mi">1</span> <span class="c1"># Last 3 months are used for backtest</span>
+<span class="n">data_train</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:</span><span class="o">-</span><span class="n">n_backtest</span><span class="p">]</span>
+<span class="n">data_test</span>  <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="o">-</span><span class="n">n_backtest</span><span class="p">:]</span>
+
+<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
+                <span class="n">regressor</span> <span class="o">=</span> <span class="n">Ridge</span><span class="p">(),</span>
+                <span class="n">lags</span>      <span class="o">=</span> <span class="mi">15</span> 
+             <span class="p">)</span>
+
+<span class="n">metric</span><span class="p">,</span> <span class="n">predictions_backtest</span> <span class="o">=</span> <span class="n">backtesting_forecaster_intervals</span><span class="p">(</span>
+                                    <span class="n">forecaster</span> <span class="o">=</span> <span class="n">forecaster</span><span class="p">,</span>
+                                    <span class="n">y</span>          <span class="o">=</span> <span class="n">data</span><span class="p">,</span>
+                                    <span class="n">initial_train_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_train</span><span class="p">),</span>
+                                    <span class="n">steps</span>      <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+                                    <span class="n">metric</span>     <span class="o">=</span> <span class="s1">&#39;mean_squared_error&#39;</span><span class="p">,</span>
+                                    <span class="n">interval</span>   <span class="o">=</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">95</span><span class="p">],</span>
+                                    <span class="n">n_boot</span>     <span class="o">=</span> <span class="mi">500</span><span class="p">,</span>
+                                    <span class="n">verbose</span>    <span class="o">=</span> <span class="kc">True</span>
+                               <span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error de backtest: </span><span class="si">{</span><span class="n">metric</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+</td></tr></table>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>Number of observations used for training: 95
+Number of observations used for testing: 109
+    Number of folds: 11
+    Number of steps per fold: 10
+    Last fold only includes 9 observations
+ Error de backtest: [0.01823166]
+</code></pre></div>
+</td></tr></table>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="c1"># Plot backtest predictions</span>
+<span class="c1"># ==============================================================================</span>
+<span class="n">predictions_backtest</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">predictions_backtest</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">data_test</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="n">data_test</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;test&#39;</span><span class="p">)</span>
+<span class="n">predictions_backtest</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;predictions&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span>
+    <span class="n">predictions_backtest</span><span class="o">.</span><span class="n">index</span><span class="p">,</span>
+    <span class="n">predictions_backtest</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span>
+    <span class="n">predictions_backtest</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">],</span>
+    <span class="n">color</span> <span class="o">=</span> <span class="s1">&#39;red&#39;</span><span class="p">,</span>
+    <span class="n">alpha</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">,</span>
+    <span class="n">label</span> <span class="o">=</span> <span class="s1">&#39;prediction interval&#39;</span>
+<span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">();</span>
+</code></pre></div>
+</td></tr></table>
+<p><img src="../img/prediction_interval__backtesting_forecaster.png"></p>
                 
               
               
