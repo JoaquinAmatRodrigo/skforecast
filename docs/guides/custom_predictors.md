@@ -1,57 +1,59 @@
 # Custom predictors for  recursive multi-step forecasting
 
+It may be interesting to include additional characteristics of the time series in addition to the lags, for example, the moving average of the *n* last values ​​can be used to capture the trend of the series.
 
-# Example
+The `ForecasterAutoregCustom` class is very similar to the `ForecasterAutoreg` class described in the previous section, but it is the user who defines the function used to create the predictors.
 
-## Data
+## Libraries
 
-```python
+``` python
 # Libraries
 # ==============================================================================
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from skforecast.ForecasterAutoreg import ForecasterAutoregCustom
-from sklearn.linear_model import LinearRegression
+from skforecast.ForecasterAutoregCustom import ForecasterAutoregCustom
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error
 ```
+## Data
 
-```python
+``` python
 # Download data
 # ==============================================================================
 url = ('https://raw.githubusercontent.com/JoaquinAmatRodrigo/skforecast/master/data/h2o.csv')
-datos = pd.read_csv(url, sep=',')
+data = pd.read_csv(url, sep=',')
 
 # Data preprocessing
 # ==============================================================================
-datos['fecha'] = pd.to_datetime(datos['fecha'], format='%Y/%m/%d')
-datos = datos.set_index('fecha')
-datos = datos.rename(columns={'x': 'y'})
-datos = datos.asfreq('MS')
-datos = datos['y']
-datos = datos.sort_index()
+data['fecha'] = pd.to_datetime(data['fecha'], format='%Y/%m/%d')
+data = data.set_index('fecha')
+data = data.rename(columns={'x': 'y'})
+data = data.asfreq('MS')
+data = data['y']
+data = data.sort_index()
 
 # Split train-test
 # ==============================================================================
 steps = 36
-datos_train = datos[:-steps]
-datos_test  = datos[-steps:]
+data_train = data[:-steps]
+data_test  = data[-steps:]
 
 # Plot
 # ==============================================================================
 fig, ax=plt.subplots(figsize=(9, 4))
-datos_train.plot(ax=ax, label='train')
-datos_test.plot(ax=ax, label='test')
+data_train.plot(ax=ax, label='train')
+data_test.plot(ax=ax, label='test')
 ax.legend();
 ```
+
 <img src="../img/data.png">
 
-## Custom predictors
 
+## Create and train forecaster
 
-
-```python
+``` python
 # Custom function to create poredictors
 # ==============================================================================
 def create_predictors(y):
@@ -68,61 +70,95 @@ def create_predictors(y):
     
     X_train = X_train.drop(columns='y').tail(1).to_numpy()  
     
-    return X_train  
+    return X_train 
 ```
 
-# Train forecaster
-
-
-```python
+``` python
 # Create and fit forecaster
 # ==============================================================================
-forecaster = ForecasterAutoreg(
-                    regressor = LinearRegression(),
-                    lags      = 15
+forecaster = ForecasterAutoregCustom(
+                    regressor      = RandomForestRegressor(random_state=123),
+                    fun_predictors = create_predictors,
+                    window_size    = 20
                 )
 
-forecaster.fit(y=datos_train)
+forecaster.fit(y=data_train)
 forecaster
 ```
 
 ```
-=======================ForecasterAutoreg=======================
-Regressor: LinearRegression()
-Lags: [ 1  2  3  4  5  6  7  8  9 10 11 12 13 14 15]
+=======================ForecasterAutoregCustom=======================
+Regressor: RandomForestRegressor(random_state=123)
+Predictors created with: create_predictors
+Window size: 20
 Exogenous variable: False
-Parameters: {'copy_X': True, 'fit_intercept': True, 'n_jobs': None, 'normalize': False, 'positive': False}
+Parameters: {'bootstrap': True, 'ccp_alpha': 0.0, 'criterion': 'mse', 'max_depth': None, 'max_features': 'auto', 'max_leaf_nodes': None, 'max_samples': None, 'min_impurity_decrease': 0.0, 'min_impurity_split': None, 'min_samples_leaf': 1, 'min_samples_split': 2, 'min_weight_fraction_leaf': 0.0, 'n_estimators': 100, 'n_jobs': None, 'oob_score': False, 'random_state': 123, 'verbose': 0, 'warm_start': False}
 ```
 
-# Prediction 
+## Prediction 
 
-```python
+``` python
 # Predict
 # ==============================================================================
 steps = 36
 predictions = forecaster.predict(steps=steps)
 # Add datetime index to predictions
-predictions = pd.Series(data=predictions, index=datos_test.index)
+predictions = pd.Series(data=predictions, index=data_test.index)
+predictions.head(3)
+```
 
-# Prediction error
-# ==============================================================================
-error_mse = mean_squared_error(
-                y_true = datos_test,
-                y_pred = predictions
-            )
-print(f"Test error (mse): {error_mse}")
+```
+fecha
+2005-07-01    0.926598
+2005-08-01    0.948202
+2005-09-01    1.020947
+Freq: MS, dtype: float64
+```
 
-# Plot
+``` python
+# Plot predictions
 # ==============================================================================
 fig, ax=plt.subplots(figsize=(9, 4))
-datos_train.plot(ax=ax, label='train')
-datos_test.plot(ax=ax, label='test')
+data_train.plot(ax=ax, label='train')
+data_test.plot(ax=ax, label='test')
 predictions.plot(ax=ax, label='predictions')
 ax.legend();
 ```
 
-```
-Test error (mse): 0.011051937043503587
+<img src="../img/prediction_with_custom.png">
+
+``` python
+# Prediction error
+# ==============================================================================
+error_mse = mean_squared_error(
+                y_true = data_test,
+                y_pred = predictions
+            )
+print(f"Test error (mse): {error_mse}")
 ```
 
-<img src="../img/prediction.png">
+```
+Test error (mse): 0.04487765885818191
+```
+
+## Feature importance
+
+``` python
+# When using as regressor LinearRegression, Ridge or Lasso
+# forecaster.get_coef()
+
+# When using as regressor RandomForestRegressor or GradientBoostingRegressor
+forecaster.get_feature_importances()
+```
+
+```
+array([0.53971953, 0.11909726, 0.04640365, 0.0241653 , 0.03056669,
+       0.01513909, 0.04288317, 0.012742  , 0.01893797, 0.10863873,
+       0.04170661])
+```
+
+## Extract training matrix
+
+``` python
+X, y = forecaster.create_train_X_y(data_train)
+```

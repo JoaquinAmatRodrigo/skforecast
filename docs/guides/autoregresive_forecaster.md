@@ -2,10 +2,6 @@
 
 Since the value of *t(n)* is required to predict the point *t(n-1)*, and *t(n-1)* is unknown, it is necessary to make recursive predictions in which, each new prediction, is based on the previous one. This process is known as recursive forecasting or recursive multi-step forecasting.
 
-<p><img src="../img/forecasting_multi-step.gif" alt="forecasting-python" title="forecasting-python"></p>
-
-<br>
-
 The main challenge when using scikit-learn models for recursive multi-step forecasting is transforming the time series in an matrix where, each value of the series, is related to the time window (lags) that precedes it. This forecasting strategy can be easily generated with the classes `ForecasterAutoreg` and `ForecasterAutoregCustom`.
 
 <p><img src="../img/transform_timeseries.gif" alt="forecasting-python" title="forecasting-python"></p>
@@ -16,7 +12,7 @@ The main challenge when using scikit-learn models for recursive multi-step forec
 
 ## Libraries
 
-```python
+``` python
 # Libraries
 # ==============================================================================
 import numpy as np
@@ -29,7 +25,7 @@ from sklearn.metrics import mean_squared_error
 ```
 ## Data
 
-```python
+``` python
 # Download data
 # ==============================================================================
 url = ('https://raw.githubusercontent.com/JoaquinAmatRodrigo/skforecast/master/data/h2o.csv')
@@ -63,7 +59,7 @@ ax.legend();
 ## Create and train forecaster
 
 
-```python
+``` python
 # Create and fit forecaster
 # ==============================================================================
 forecaster = ForecasterAutoreg(
@@ -85,7 +81,7 @@ Parameters: {'alpha': 1.0, 'copy_X': True, 'fit_intercept': True, 'max_iter': No
 
 ## Prediction 
 
-```python
+``` python
 # Predict
 # ==============================================================================
 steps = 36
@@ -95,7 +91,7 @@ predictions = pd.Series(data=predictions, index=data_test.index)
 predictions.head(3)
 ```
 
-```
+``` python
 fecha
 2005-07-01    0.973131
 2005-08-01    1.022154
@@ -103,7 +99,7 @@ fecha
 Freq: MS, dtype: float64
 ```
 
-```python
+``` python
 # Plot predictions
 # ==============================================================================
 fig, ax=plt.subplots(figsize=(9, 4))
@@ -115,7 +111,7 @@ ax.legend();
 
 <img src="../img/prediction.png">
 
-```python
+``` python
 # Prediction error
 # ==============================================================================
 error_mse = mean_squared_error(
@@ -131,7 +127,7 @@ Test error (mse): 0.009918738501371805
 
 ## Feature importance
 
-```python
+``` python
 # When using as regressor LinearRegression, Ridge or Lasso
 forecaster.get_coef()
 
@@ -148,6 +144,6 @@ array([ 1.58096176e-01,  6.18241513e-02,  6.44665806e-02, -2.41792429e-02,
 
 ## Extract training matrix
 
-```python
+``` python
 X, y = forecaster.create_train_X_y(data_train)
 ```

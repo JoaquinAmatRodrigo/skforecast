@@ -2,9 +2,13 @@
 
 `ForecasterAutoreg` and `ForecasterAutoregCustom` allow to include exogenous variables as predictors as long as their future valueis known, since they must be included during the predict process.
 
+The main challenge when using scikit-learn models for recursive multi-step forecasting is transforming the time series in an matrix where, each value of the series, is related to the time window (lags) that precedes it. This forecasting strategy can be easily generated with the classes `ForecasterAutoreg` and `ForecasterAutoregCustom`.
+
+<img src="../img/matrix_transformation_with_exog_variable.png">
+
 ## Libraries
 
-```python
+``` python
 # Libraries
 # ==============================================================================
 import numpy as np
@@ -18,7 +22,7 @@ from sklearn.metrics import mean_squared_error
 
 ## Data
 
-```python
+``` python
 # Download data
 # ==============================================================================
 url = ('https://raw.githubusercontent.com/JoaquinAmatRodrigo/skforecast/master/data/h2o_exog.csv')
@@ -39,7 +43,7 @@ data.plot(ax=ax);
 ```
 <img src="../img/data_exog.png">
 
-```python
+``` python
 # Split train-test
 # ==============================================================================
 steps = 36
@@ -50,7 +54,7 @@ data_test  = data.iloc[-steps:, :]
 ## Create and train forecaster
 
 
-```python
+``` python
 forecaster = ForecasterAutoreg(
                     regressor = Ridge(),
                     lags      = 15
@@ -77,7 +81,7 @@ Parameters: {'alpha': 1.0, 'copy_X': True, 'fit_intercept': True, 'max_iter': No
 If the `Forecaster` has been trained with exogenous variables, they shlud be provided when predictiong.
 
 
-```python
+``` python
 # Predict
 # ==============================================================================
 steps = 36
@@ -98,7 +102,7 @@ fecha
 Freq: MS, dtype: float64
 ```
 
-```python
+``` python
 # Plot predictions
 # ==============================================================================
 fig, ax=plt.subplots(figsize=(9, 4))
@@ -110,7 +114,7 @@ ax.legend();
 
 <img src="../img/prediction.png">
 
-```python
+``` python
 # Prediction error
 # ==============================================================================
 error_mse = mean_squared_error(
@@ -126,7 +130,7 @@ Test error (mse): 0.008474661390588431
 
 ## Feature importance
 
-```python
+``` python
 # When using as regressor LinearRegression, Ridge or Lasso
 forecaster.get_coef()
 
@@ -143,7 +147,7 @@ array([ 0.1173852 ,  0.0290203 ,  0.02626445, -0.06322356, -0.04009523,
 
 ## Extract training matrix
 
-```python
+``` python
 X, y = forecaster.create_train_X_y(
             y    = data_train['y'],
             exog = data_train[['exog_1', 'exog_2']].values
