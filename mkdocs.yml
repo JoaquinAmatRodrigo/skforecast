@@ -45,6 +45,7 @@ theme:
     - navigation.tabs
     - navigation.tabs.sticky
     - navigation.sections
+    - navigation.expand
   palette:
     primary: indigo
     accent: blue
