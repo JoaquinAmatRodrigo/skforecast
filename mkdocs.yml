@@ -21,8 +21,8 @@ nav:
       - Releases: guides/releases.md
 
   - Examples:
-      - Guetting started with Skforecast: examples
-      - Forecasting demanda electrica: https://www.cienciadedatos.net/documentos/py29-forecasting-demanda-energia-electrica-python.html
+      - Forecasting series temporales con Python y Scikit-learn: examples/examples.md
+      - Forecasting energy demand: examples/examples.md
 
   - API:
       - ForecasterAutoreg: api/ForecasterAutoreg.md
@@ -57,5 +57,6 @@ markdown_extensions:
       use_pygments: true
       linenums: true
   - pymdownx.superfences
+  - pymdownx.magiclink
   - toc:
       permalink: true

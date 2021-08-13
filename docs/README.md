@@ -13,6 +13,8 @@
 pip install skforecast
 ```
 
+Specific version:
+
 ```
 pip install git+https://github.com/JoaquinAmatRodrigo/skforecast@v0.1.9
 ```

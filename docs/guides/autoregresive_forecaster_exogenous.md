@@ -56,6 +56,8 @@ data_test  = data.iloc[-steps:, :]
 
 
 ``` python
+# Create and fit forecaster
+# ==============================================================================
 forecaster = ForecasterAutoreg(
                     regressor = Ridge(),
                     lags      = 15
