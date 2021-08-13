@@ -6,11 +6,14 @@
 
 # skforecast
 
+<p><img src="./images/logo_skforecast_no_background.png" alt="logo-skforecast" title="logo-skforecast" width="200" align="right"></p>
+
 **Time series forecasting with scikit-learn regressors.**
 
 **Skforecast** is a python library that eases using scikit-learn regressors as multi-step forecasters. It also works with any regressor compatible with the scikit-learn API (XGBoost, LightGBM, Ranger...).
 
-<p><img src="./images/logo_skforecast_no_background.png" alt="logo-skforecast" title="logo-skforecast" width="200"></p>
+**Documentation: https://joaquinamatrodrigo.github.io/skforecast/**
+
 
 ## Table of contents
 
@@ -30,6 +33,8 @@
 ```bash
 $ pip install skforecast
 ```
+
+Specific version:
 
 ```bash
 $ pip install git+https://github.com/JoaquinAmatRodrigo/skforecast@v0.1.9
