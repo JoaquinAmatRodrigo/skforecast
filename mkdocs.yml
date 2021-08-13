@@ -1,0 +1,62 @@
+site_name: Skforecast Docs
+extra_css: [style.css]
+repo_url: https://github.com/JoaquinAmatRodrigo/skforecast
+site_url: 
+site_description: Python library that eases using scikit-learn regressors as multi-step forecasters. It also works with any regressor compatible with the scikit-learn API (XGBoost, LightGBM, Ranger...).
+site_author: Joaquin Amat Rodrigo
+use_directory_urls: false
+nav:
+  - Home:
+    - Readme: README.md
+    
+  - Guides:
+      - Introduction to forcasting: guides/forecasting-methods.md
+      - Recursive multi-step forecasting: guides/autoregresive_forecaster.md
+      - Custom predictors: guides/custom_predictors.md
+      - Recursive multi-step forecasting with exogenous variables: guides/autoregresive_forecaster_exogenous.md
+      - Direct multi-step forecasting: guides/direct_multi_step_forecasting.md
+      - Cross validation and Backtest: guides/cross_validation_backtest.md
+      - Tuning forecaster: guides/tuning.md
+      - Prediction intervals: guides/prediction_intervals.md
+      - Releases: guides/releases.md
+
+  - Examples:
+      - Forecasting series temporales con Python y Scikit-learn: examples/examples.md
+      - Forecasting energy demand: examples/examples.md
+
+  - API:
+      - ForecasterAutoreg: api/ForecasterAutoreg.md
+      - ForecasterAutoregCustom: api/ForecasterAutoregCustom.md
+      - ForecasterAutoregMultiOutput: api/ForecasterAutoregMultiOutput.md
+      - model_selection: api/model_selection.md
+
+plugins:
+  - mkapi
+  - search
+copyright: 
+theme:
+  name: material
+  font:
+    text: Ubuntu
+    code: Ubuntu Mono
+  logo: img/logo_skforecast_no_background.png
+  highlightjs: true
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+  palette:
+    primary: indigo
+    accent: blue
+markdown_extensions:
+  - codehilite
+  - pymdownx.inlinehilite
+  - pymdownx.details
+  - pymdownx.tabbed
+  - pymdownx.highlight:
+      use_pygments: true
+      linenums: true
+  - pymdownx.superfences
+  - pymdownx.magiclink
+  - toc:
+      permalink: true
