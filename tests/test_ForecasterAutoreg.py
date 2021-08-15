@@ -187,6 +187,20 @@ def test_predict_exception_when_forecaster_fited_with_exog_but_not_exog_passed_w
     forecaster.fit(y=np.arange(50), exog=np.arange(50))
     with pytest.raises(Exception):
         forecaster.predict(steps=10)
+
+
+def test_predict_exception_when_exog_passed_in_predict_has_different_columns_than_exog_used_to_fit_nparray():
+
+    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
+    forecaster.fit(y=np.arange(10), exog=np.arange(30).reshape(-1, 3))
+    with pytest.raises(Exception):
+        forecaster.predict(steps=10, exog=np.arange(30).reshape(-1, 2))
+
+def test_predict_exception_when_exog_passed_in_predict_has_different_columns_than_exog_used_to_fit_pdDataDrame():
+
+    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
+    forecaster.fit(y=np.arange(10), exog=pd.DataFrame(np.arange(30).reshape(-1, 3)))
+    forecaster.predict(steps=10, exog=pd.DataFrame(np.arange(30).reshape(-1, 2)))
         
         
 def test_predict_exception_when_exog_lenght_is_less_than_steps():
@@ -336,6 +350,15 @@ def test_check_exog_exception_when_exog_is_pandas_series_and_ref_shape_has_more_
             exog      = pd.Series(np.arange(30)),
             ref_type  = np.ndarray,
             ref_shape = (1, 5)
+        )
+
+def test_check_exog_exception_when_exog_is_pandas_dataframe_with_3_columns_and_ref_shape_has_2_columns():
+    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
+    with pytest.raises(Exception):
+        forecaster._check_exog(
+            exog      = pd.DataFrame(np.arange(30).reshape(-1, 3)),
+            ref_type  = pd.DataFrame,
+            ref_shape = (10, 2)
         )
 
         
