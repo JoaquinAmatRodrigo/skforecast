@@ -200,7 +200,8 @@ def test_predict_exception_when_exog_passed_in_predict_has_different_columns_tha
 
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
     forecaster.fit(y=np.arange(10), exog=pd.DataFrame(np.arange(30).reshape(-1, 3)))
-    forecaster.predict(steps=10, exog=pd.DataFrame(np.arange(30).reshape(-1, 2)))
+    with pytest.raises(Exception):
+        forecaster.predict(steps=10, exog=pd.DataFrame(np.arange(30).reshape(-1, 2)))
         
         
 def test_predict_exception_when_exog_lenght_is_less_than_steps():
