@@ -87,7 +87,7 @@ class ForecasterAutoreg():
         self.regressor     = regressor
         self.last_window   = None
         self.included_exog = False
-        self.exog_type     = False
+        self.exog_type     = None
         self.exog_shape    = None
         self.in_sample_residuals  = None
         self.out_sample_residuals = None
@@ -711,7 +711,7 @@ class ForecasterAutoreg():
     def _check_exog(self, exog: Union[np.ndarray, pd.Series], 
                     ref_type: type=None, ref_shape: tuple=None) -> None:
         '''
-        Raise Exception if `exog` is not `np.ndarray` or `pd.Series`.
+        Raise Exception if `exog` is not `np.ndarray`, `pd.Series` or `pd.DataFrame.
         If `ref_shape` is provided, raise Exception if `ref_shape[1]` do not match
         `exog.shape[1]` (number of columns).
         
@@ -722,8 +722,8 @@ class ForecasterAutoreg():
 
         '''
             
-        if not isinstance(exog, (np.ndarray, pd.Series)):
-            raise Exception('`exog` must be `np.ndarray` or `pd.Series`.')
+        if not isinstance(exog, (np.ndarray, pd.Series, pd.DataFrame)):
+            raise Exception('`exog` must be `np.ndarray`, `pd.Series` or `pd.DataFrame.')
             
         if isinstance(exog, np.ndarray) and exog.ndim > 2:
             raise Exception(
@@ -760,6 +760,13 @@ class ForecasterAutoreg():
                         f"`exog` must have {ref_shape[1]} columns. "
                         f"Got `np.ndarray` with {exog.shape[1]} columns."
                     )     
+                    
+            if ref_type == pd.DataFrame:
+                if ref_shape[1] != exog.shape[1]:
+                    raise Exception(
+                        f"`exog` must have {ref_shape[1]} columns. "
+                        f"Got `pd.DataFrame` with {exog.shape[1]} columns."
+                    )
         return
     
         
@@ -824,6 +831,8 @@ class ForecasterAutoreg():
             exog = exog.to_numpy().reshape(-1, 1)
         elif isinstance(exog, np.ndarray) and exog.ndim == 1:
             exog = exog.reshape(-1, 1)
+        elif isinstance(exog, pd.DataFrame):
+            exog = exog.to_numpy()
             
         return exog
     
