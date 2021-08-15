@@ -126,7 +126,7 @@ class ForecasterAutoreg():
                 + "\n" \
                 + "Lags: " + str(self.lags) \
                 + "\n" \
-                + "Exogenous variable: " + str(self.included_exog) + ', ' + self.exog_type \
+                + "Exogenous variable: " + str(self.included_exog) + ', ' + str(self.exog_type) \
                 + "\n" \
                 + "Parameters: " + str(self.regressor.get_params())
 
@@ -214,7 +214,7 @@ class ForecasterAutoreg():
         
         if exog is not None:
             self._check_exog(exog=exog)
-            self.exog_type = type(exog)
+            #self.exog_type = type(exog)
             exog = self._preproces_exog(exog=exog)
             self.included_exog = True
             self.exog_shape = exog.shape
