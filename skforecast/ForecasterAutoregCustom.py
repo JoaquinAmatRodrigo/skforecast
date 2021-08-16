@@ -689,7 +689,7 @@ class ForecasterAutoregCustom():
     def _check_exog(self, exog: Union[np.ndarray, pd.Series], 
                     ref_type: type=None, ref_shape: tuple=None) -> None:
         '''
-        Raise Exception if `exog` is not `np.ndarray`, `pd.Series` or `pd.DataFrame.
+        Raise Exception if `exog` is not `np.ndarray`, `pd.Series` or `pd.DataFrame`.
         If `ref_shape` is provided, raise Exception if `ref_shape[1]` do not match
         `exog.shape[1]` (number of columns).
         
@@ -701,7 +701,7 @@ class ForecasterAutoregCustom():
         '''
             
         if not isinstance(exog, (np.ndarray, pd.Series, pd.DataFrame)):
-            raise Exception('`exog` must be `np.ndarray`, `pd.Series` or `pd.DataFrame.')
+            raise Exception('`exog` must be `np.ndarray`, `pd.Series` or `pd.DataFrame`.')
             
         if isinstance(exog, np.ndarray) and exog.ndim > 2:
             raise Exception(
