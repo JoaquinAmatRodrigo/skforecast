@@ -7,9 +7,15 @@ All notable changes to this project will be documented in this file.
 ### Added
 
 
++ Multiple exogenous variables can be passed as pandas DataFrame.
+
++ Documentation
+
++ New unit test
+
 ### Changed
 
-+ Installation using `pip install skforecast`
++ New implementation of `ForecasterAutoregMultiOutput`. The training process in the new version creates a different X_train for each step. See [Direct multi-step forecasting](https://github.com/JoaquinAmatRodrigo/skforecast#introduction) for more details. Old versión can be acces with `skforecast.deprecated.ForecasterAutoregMultiOutput`.
 
 ### Fixed
 
