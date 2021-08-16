@@ -2,77 +2,77 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://joaquinamatrodrigo.github.io/skforecast/index.html</loc>
-         <lastmod>2021-08-13</lastmod>
+         <lastmod>2021-08-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://joaquinamatrodrigo.github.io/skforecast/api/ForecasterAutoreg.html</loc>
-         <lastmod>2021-08-13</lastmod>
+         <lastmod>2021-08-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://joaquinamatrodrigo.github.io/skforecast/api/ForecasterAutoregCustom.html</loc>
-         <lastmod>2021-08-13</lastmod>
+         <lastmod>2021-08-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://joaquinamatrodrigo.github.io/skforecast/api/ForecasterAutoregMultiOutput.html</loc>
-         <lastmod>2021-08-13</lastmod>
+         <lastmod>2021-08-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://joaquinamatrodrigo.github.io/skforecast/api/model_selection.html</loc>
-         <lastmod>2021-08-13</lastmod>
+         <lastmod>2021-08-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://joaquinamatrodrigo.github.io/skforecast/examples/examples.html</loc>
-         <lastmod>2021-08-13</lastmod>
+         <lastmod>2021-08-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://joaquinamatrodrigo.github.io/skforecast/guides/autoregresive_forecaster.html</loc>
-         <lastmod>2021-08-13</lastmod>
+         <lastmod>2021-08-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://joaquinamatrodrigo.github.io/skforecast/guides/autoregresive_forecaster_exogenous.html</loc>
-         <lastmod>2021-08-13</lastmod>
+         <lastmod>2021-08-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://joaquinamatrodrigo.github.io/skforecast/guides/cross_validation_backtest.html</loc>
-         <lastmod>2021-08-13</lastmod>
+         <lastmod>2021-08-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://joaquinamatrodrigo.github.io/skforecast/guides/custom_predictors.html</loc>
-         <lastmod>2021-08-13</lastmod>
+         <lastmod>2021-08-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://joaquinamatrodrigo.github.io/skforecast/guides/direct_multi_step_forecasting.html</loc>
-         <lastmod>2021-08-13</lastmod>
+         <lastmod>2021-08-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://joaquinamatrodrigo.github.io/skforecast/guides/forecasting-methods.html</loc>
-         <lastmod>2021-08-13</lastmod>
+         <lastmod>2021-08-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://joaquinamatrodrigo.github.io/skforecast/guides/prediction_intervals.html</loc>
-         <lastmod>2021-08-13</lastmod>
+         <lastmod>2021-08-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://joaquinamatrodrigo.github.io/skforecast/guides/releases.html</loc>
-         <lastmod>2021-08-13</lastmod>
+         <lastmod>2021-08-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://joaquinamatrodrigo.github.io/skforecast/guides/tuning.html</loc>
-         <lastmod>2021-08-13</lastmod>
+         <lastmod>2021-08-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
 </urlset>
