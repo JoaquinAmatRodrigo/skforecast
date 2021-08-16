@@ -9,7 +9,7 @@ nav:
   - Home:
     - Readme: README.md
     
-  - Guides:
+  - User Guides:
       - Introduction to forcasting: guides/forecasting-methods.md
       - Recursive multi-step forecasting: guides/autoregresive_forecaster.md
       - Custom predictors: guides/custom_predictors.md
@@ -24,7 +24,7 @@ nav:
       - Forecasting series temporales con Python y Scikit-learn: examples/examples.md
       - Forecasting energy demand: examples/examples.md
 
-  - API:
+  - API Reference:
       - ForecasterAutoreg: api/ForecasterAutoreg.md
       - ForecasterAutoregCustom: api/ForecasterAutoregCustom.md
       - ForecasterAutoregMultiOutput: api/ForecasterAutoregMultiOutput.md
