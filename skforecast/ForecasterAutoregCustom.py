@@ -119,7 +119,7 @@ class ForecasterAutoregCustom():
                 + "\n" \
                 + "Window size: " + str(self.window_size) \
                 + "\n" \
-                + "Exogenous variable: " + str(self.included_exog) + ', ' + str(self.exog_type) \
+                + "Exogenous variable: " + str(self.included_exog) + ', ' + self.exog_type.__name_ \
                 + "\n" \
                 + "Parameters: " + str(self.regressor.get_params())
 
