@@ -334,6 +334,21 @@ def test_predict_output_when_regresor_is_LinearRegression_lags_is_5_steps_2_ytra
     predictions = forecaster.predict()
     expected = np.array([50., 51.])
     assert predictions == approx(expected)
+
+
+def test_predict_exception_when_exog_passed_in_predict_has_different_columns_than_exog_used_to_fit_nparray():
+
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=5, steps=2)
+    forecaster.fit(y=np.arange(10), exog=np.arange(30).reshape(-1, 3))
+    with pytest.raises(Exception):
+        forecaster.predict(steps=10, exog=np.arange(30).reshape(-1, 2))
+
+def test_predict_exception_when_exog_passed_in_predict_has_different_columns_than_exog_used_to_fit_pdDataDrame():
+
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=5, steps=2)
+    forecaster.fit(y=np.arange(10), exog=pd.DataFrame(np.arange(30).reshape(-1, 3)))
+    with pytest.raises(Exception):
+        forecaster.predict(steps=10, exog=pd.DataFrame(np.arange(30).reshape(-1, 2)))
     
     
 # Test method _check_y()
@@ -450,6 +465,26 @@ def test_check_exog_exception_when_exog_is_pandas_series_and_ref_shape_has_more_
             exog      = pd.Series(np.arange(30)),
             ref_type  = np.ndarray,
             ref_shape = (1, 5)
+        )
+
+def test_check_exog_exception_when_exog_is_pandas_series_and_ref_shape_has_more_than_1_column():
+
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=2)
+    with pytest.raises(Exception):
+        forecaster._check_exog(
+            exog      = pd.Series(np.arange(30)),
+            ref_type  = np.ndarray,
+            ref_shape = (1, 5)
+        )
+
+def test_check_exog_exception_when_exog_is_pandas_dataframe_with_3_columns_and_ref_shape_has_2_columns():
+    
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=2)
+    with pytest.raises(Exception):
+        forecaster._check_exog(
+            exog      = pd.DataFrame(np.arange(30).reshape(-1, 3)),
+            ref_type  = pd.DataFrame,
+            ref_shape = (10, 2)
         )
 
 # Test method _exog_to_multi_output()
