@@ -148,7 +148,7 @@ class ForecasterAutoregMultiOutput():
                 + "\n" \
                 + "Lags: " + str(self.lags) \
                 + "\n" \
-                + "Exogenous variable: " + str(self.included_exog) + ', ' + self.exog_type.__name_ \
+                + "Exogenous variable: " + str(self.included_exog) + ', ' + self.exog_type.__name__ \
                 + "\n" \
                 + "Parameters: " + str(self.regressor.get_params())
 
