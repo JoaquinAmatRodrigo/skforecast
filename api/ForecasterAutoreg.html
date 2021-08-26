@@ -655,8 +655,8 @@
 </div>
 <div class="mkapi-docstring">
 <div class="mkapi-section">
-      <div class="mkapi-section-body"><p>This class turns a scikit-learn regressor into a recursive autoregressive
-(multi-step) forecaster.</p></div>
+      <div class="mkapi-section-body"><p>This class turns any regressor compatible with the scikit-learn API into a
+recursive autoregressive (multi-step) forecaster.</p></div>
     </div>
   <div class="mkapi-section parameters">
       <div class="mkapi-section-name parameters">
@@ -664,8 +664,8 @@
         </div>
       <div class="mkapi-section-body parameters"><ul class="mkapi-items">
 <li><code class="mkapi-item-name">regressor</code>
-<span class="mkapi-item-type">(scikit-learn regressor)</span>
-<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">An instance of a scikit-learn regressor.</span></li>
+<span class="mkapi-item-type">(regressor compatible with the scikit-learn API)</span>
+<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">An instance of a regressor compatible with the scikit-learn API.</span></li>
 
 <li><code class="mkapi-item-name">lags</code>
 <span class="mkapi-item-type">(int, list, 1D np.array, range)</span>
@@ -687,7 +687,7 @@
 
 <li><code class="mkapi-item-name">exog_type</code>
 <span class="mkapi-item-type">(type)</span>
-<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Type used for the exogenous variable/s.</span></li>
+<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Type used for the exogenous variable/s: pd.Series, pd.DataFrame or np.ndarray.</span></li>
 
 <li><code class="mkapi-item-name">in_sample_residuals</code>
 <span class="mkapi-item-type">(np.ndarray)</span>
@@ -718,8 +718,8 @@ after the training data.</span></li>
 up to 1000 values.</span></li>
 
 <li><code class="mkapi-item-name">regressor</code>
-<span class="mkapi-item-type">(scikit-learn regressor)</span>
-<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">An instance of a scikit-learn regressor.</span></li>
+<span class="mkapi-item-type">(regressor compatible with the scikit-learn API)</span>
+<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">An instance of a regressor compatible with the scikit-learn API.</span></li>
 
 
 </ul></div>
@@ -874,7 +874,7 @@ Values of the time series related to each row of <code>X_data</code>.</p></div>
 <span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Training time series.</span></li>
 
 <li><code class="mkapi-item-name">exog</code>
-<span class="mkapi-item-type">(np.ndarray, pd.Series, default `None`)</span>
+<span class="mkapi-item-type">(np.ndarray, pd.Series, pd.DataFrame, default `None`)</span>
 <span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Exogenous variable/s included as predictor/s. Must have the same
 number of observations as <code>y</code> and should be aligned so that y[i] is
 regressed on exog[i].</span></li>
@@ -918,7 +918,7 @@ Values (target) of the time series related to each row of <code>X_train</code>.<
 <span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Training time series.</span></li>
 
 <li><code class="mkapi-item-name">exog</code>
-<span class="mkapi-item-type">(np.ndarray, pd.Series, default `None`)</span>
+<span class="mkapi-item-type">(np.ndarray, pd.Series, pd.DataFrame, default `None`)</span>
 <span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Exogenous variable/s included as predictor/s. Must have the same
 number of observations as <code>y</code> and should be aligned so that y[i] is
 regressed on exog[i].</span></li>

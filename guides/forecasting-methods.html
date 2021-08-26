@@ -730,8 +730,11 @@
 <p>The main challenge when using scikit-learn models for recursive multi-step forecasting is transforming the time series in an matrix where, each value of the series, is related to the time window (lags) that precedes it. This forecasting strategy can be easily generated with the classes <code>ForecasterAutoreg</code> and <code>ForecasterAutoregCustom</code>.</p>
 <p><img src="../img/transform_timeseries.gif" alt="forecasting-python" title="forecasting-python"></p>
 
-<p><center><font size="2.5"> <i>Time series  transformation into a matrix of 5 lags and a vector with the value of the series that follows each row of the matrix.</i></font></center>
-<br><br></p>
+<p><center><font size="2.5"> <i>Time series  transformation into a matrix of 5 lags and a vector with the value of the series that follows each row of the matrix.</i></font></center></p>
+<p><img src="../img/matrix_transformation_with_exog_variable.png" alt="forecasting-python" title="forecasting-python"></p>
+
+<p><center><font size="2.5"> <i>Time series transformation including an exogenous variable.</i></font></center></p>
+<p><br><br></p>
 <h2 id="direct-multi-step-forecasting">Direct multi-step forecasting<a class="headerlink" href="#direct-multi-step-forecasting" title="Permanent link">&para;</a></h2>
 <p>This strategy consists of training a different model for each step. For example, to predict the next 5 values of a time series, 5 different models are trainded, one for each step. As a result, the predictions are independent of each other. This forecasting strategy can be easily generated with the <code>ForecasterAutoregMultiOutput</code> class (changed in version 0.1.9).</p>
 <p><img src="../img/diagram_skforecast_multioutput.jpg" alt="forecasting-python" title="forecasting-python"></p>

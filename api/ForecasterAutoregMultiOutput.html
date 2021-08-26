@@ -655,9 +655,9 @@
 </div>
 <div class="mkapi-docstring">
 <div class="mkapi-section">
-      <div class="mkapi-section-body"><p>This class turns a scikit-learn regressor into a autoregressive multi-output
-forecaster. A separate model is created for each forecast time step. See Notes
-for more details.</p></div>
+      <div class="mkapi-section-body"><p>This class turns any regressor compatible with the scikit-learn API into a
+autoregressive multi-output forecaster. A separate model is created for each
+forecast time step. See Notes for more details.</p></div>
     </div>
   <div class="mkapi-section parameters">
       <div class="mkapi-section-name parameters">
@@ -665,8 +665,8 @@ for more details.</p></div>
         </div>
       <div class="mkapi-section-body parameters"><ul class="mkapi-items">
 <li><code class="mkapi-item-name">regressor</code>
-<span class="mkapi-item-type">(scikit-learn regressor)</span>
-<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">An instance of a scikit-learn regressor.</span></li>
+<span class="mkapi-item-type">(regressor compatible with the scikit-learn API)</span>
+<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">An instance of a regressor compatible with the scikit-learn API.</span></li>
 
 <li><code class="mkapi-item-name">steps</code>
 <span class="mkapi-item-type">(int)</span>
@@ -715,13 +715,14 @@ after the training data.</span></li>
 <span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Maximum value of lag included in lags.</span></li>
 
 <li><code class="mkapi-item-name">regressor</code>
-<span class="mkapi-item-type">(scikit-learn regressor)</span>
-<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">An instance of a scikit-learn regressor. One instance of this regressor
-is trainned for each step. All them are stored in <code>slef.regressors_</code>.</span></li>
+<span class="mkapi-item-type">(regressor compatible with the scikit-learn API)</span>
+<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">An instance of regressor compatible with the scikit-learn API.
+One instance of this regressor is trainned for each step. All
+them are stored in <code>slef.regressors_</code>.</span></li>
 
 <li><code class="mkapi-item-name">regressors_</code>
 <span class="mkapi-item-type">(dict)</span>
-<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Dictionary with scikit-learn regressors trained for each step.</span></li>
+<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Dictionary with regressors trained for each step.</span></li>
 
 <li><code class="mkapi-item-name">steps</code>
 <span class="mkapi-item-type">(int)</span>
@@ -784,7 +785,8 @@ retireve information.</span></li>
 <li class="method"><code class="mkapi-item-name"><a href="#skforecast.ForecasterAutoregMultiOutput.ForecasterAutoregMultiOutput.predict">predict</a></code><code class="mkapi-object-parenthesis">(</code><code class="mkapi-object-signature">last_window</code>, <code class="mkapi-object-signature">exog</code>, <code class="mkapi-object-signature">steps</code><code class="mkapi-object-parenthesis">)</code>
 <span class="mkapi-item-type">(predictions : 1D np.array, shape (steps,))</span>
 <span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Multi-step prediction. The number of future steps predicted is defined when
-ininitializing the forecaster.</span></li>
+ininitializing the forecaster, argument <code>steps</code> not used, present here for
+API consistency by convention.</span></li>
 
 <li class="method"><code class="mkapi-item-name"><a href="#skforecast.ForecasterAutoregMultiOutput.ForecasterAutoregMultiOutput.set_lags">set_lags</a></code><code class="mkapi-object-parenthesis">(</code><code class="mkapi-object-signature">lags</code><code class="mkapi-object-parenthesis">)</code>
 <span class="mkapi-item-type">(self)</span>
@@ -886,7 +888,7 @@ variable and predictors needed to train all the forecaster (one per step).</p></
 <span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Training time series.</span></li>
 
 <li><code class="mkapi-item-name">exog</code>
-<span class="mkapi-item-type">(np.ndarray, pd.Series, default `None`)</span>
+<span class="mkapi-item-type">(np.ndarray, pd.Series, pd.DataFrame, default `None`)</span>
 <span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Exogenous variable/s included as predictor/s. Must have the same
 number of observations as <code>y</code> and should be aligned so that y[i] is
 regressed on exog[i].</span></li>
@@ -977,7 +979,7 @@ Values (target) of the time series related to each row of <code>X_train</code>.<
 <span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Training time series.</span></li>
 
 <li><code class="mkapi-item-name">exog</code>
-<span class="mkapi-item-type">(np.ndarray, pd.Series, default `None`)</span>
+<span class="mkapi-item-type">(np.ndarray, pd.Series, pd.DataFrame, default `None`)</span>
 <span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Exogenous variable/s included as predictor/s. Must have the same
 number of observations as <code>y</code> and should be aligned so that y[i] is
 regressed on exog[i].</span></li>
@@ -1008,7 +1010,8 @@ regressed on exog[i].</span></li>
 <div class="mkapi-docstring">
 <div class="mkapi-section">
       <div class="mkapi-section-body"><p>Multi-step prediction. The number of future steps predicted is defined when
-ininitializing the forecaster.</p></div>
+ininitializing the forecaster, argument <code>steps</code> not used, present here for
+API consistency by convention.</p></div>
     </div>
   <div class="mkapi-section returns">
       <div class="mkapi-section-name returns">
