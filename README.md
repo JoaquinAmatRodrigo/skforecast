@@ -105,6 +105,12 @@ The main challenge when using scikit-learn models for recursive multi-step forec
 <p><img src="./images/transform_timeseries.gif" alt="forecasting-python" title="forecasting-python"></p>
 
 <center><font size="2.5"> <i>Time series  transformation into a matrix of 5 lags and a vector with the value of the series that follows each row of the matrix.</i></font></center>
+
+
+<p><img src="./images/matrix_transformation_with_exog_variable.png" alt="forecasting-python" title="forecasting-python"></p>
+
+<center><font size="2.5"> <i>Time series transformation including an exogenous variable.</i></font></center>
+
 <br><br>
 
 **Direct multi-step forecasting**
