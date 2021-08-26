@@ -134,8 +134,8 @@ def time_series_spliter(y: Union[np.ndarray, pd.Series],
         
 
 def cv_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
-                  initial_train_size: int, steps: int,
-                  metric: str, exog: Union[np.ndarray, pd.Series]=None,
+                  initial_train_size: int, steps: int, metric: str,
+                  exog: Union[np.ndarray, pd.Series, pd.DataFrame]=None,
                   allow_incomplete_fold: bool=True, verbose: bool=True) -> np.array:
     '''
     Cross-validation of `ForecasterAutoreg`, `ForecasterCustom`, `ForecasterAutoregCustom`
@@ -161,10 +161,10 @@ def cv_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
     metric : {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
         Metric used to quantify the goodness of fit of the model.
         
-    exog : np.ndarray, pd.Series, default `None`
-            Exogenous variable/s included as predictor/s. Must have the same
-            number of observations as `y` and should be aligned so that y[i] is
-            regressed on exog[i].
+    exog : np.ndarray, pd.Series, pd.DataFrame, default `None`
+        Exogenous variable/s included as predictor/s. Must have the same
+        number of observations as `y` and should be aligned so that y[i] is
+        regressed on exog[i].
             
     allow_incomplete_fold : bool, default `True`
         The last test set is allowed to be incomplete if it does not reach `steps`
@@ -234,8 +234,8 @@ def cv_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
 
 
 def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
-                           initial_train_size: int, steps: int,
-                           metric: str, exog: Union[np.ndarray, pd.Series]=None,
+                           initial_train_size: int, steps: int, metric: str,
+                           exog: Union[np.ndarray, pd.Series, pd.DataFrame]=None,
                            verbose: bool=False) -> Tuple[np.array, np.array]:
     '''
     Backtesting (validation) of `ForecasterAutoreg`, `ForecasterCustom`,
@@ -265,10 +265,10 @@ def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
     metric : {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
         Metric used to quantify the goodness of fit of the model.
         
-    exog : np.ndarray, pd.Series, default `None`
-            Exogenous variable/s included as predictor/s. Must have the same
-            number of observations as `y` and should be aligned so that y[i] is
-            regressed on exog[i].
+    exog : np.ndarray, pd.Series, pd.DataFrame, default `None`
+        Exogenous variable/s included as predictor/s. Must have the same
+        number of observations as `y` and should be aligned so that y[i] is
+        regressed on exog[i].
             
     verbose : bool, default `False`
         Print number of folds used for backtesting.
@@ -381,7 +381,8 @@ def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
 
 def grid_search_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
                            param_grid: dict, initial_train_size: int, steps: int,
-                           metric: str, exog: Union[np.ndarray, pd.Series]=None,
+                           metric: str,
+                           exog: Union[np.ndarray, pd.Series, pd.DataFrame]=None,
                            lags_grid: list=None, method: str='cv',
                            allow_incomplete_fold: bool=True, return_best: bool=True,
                            verbose: bool=True) -> pd.DataFrame:
@@ -413,10 +414,10 @@ def grid_search_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
     metric : {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
         Metric used to quantify the goodness of fit of the model.
         
-    exog : np.ndarray, pd.Series, default `None`
-            Exogenous variable/s included as predictor/s. Must have the same
-            number of observations as `y` and should be aligned so that y[i] is
-            regressed on exog[i].
+    exog : np.ndarray, pd.Series, pd.DataFrame, default `None`
+        Exogenous variable/s included as predictor/s. Must have the same
+        number of observations as `y` and should be aligned so that y[i] is
+        regressed on exog[i].
            
     lags_grid : list of int, lists, np.narray or range. 
         Lists of `lags` to try. Only used if forecaster is an instance of 
@@ -536,8 +537,8 @@ def grid_search_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
 
 
 def backtesting_forecaster_intervals(forecaster, y: Union[np.ndarray, pd.Series],
-                           initial_train_size: int, steps: int,
-                           metric: str, exog: Union[np.ndarray, pd.Series]=None,
+                           initial_train_size: int, steps: int, metric: str,
+                           exog: Union[np.ndarray, pd.Series, pd.DataFrame]=None,
                            interval: list=[5, 95], n_boot: int=500,
                            in_sample_residuals: bool=True,
                            verbose: bool=False) -> Tuple[np.array, np.array]:
@@ -568,10 +569,10 @@ def backtesting_forecaster_intervals(forecaster, y: Union[np.ndarray, pd.Series]
     metric : {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
         Metric used to quantify the goodness of fit of the model.
         
-    exog : np.ndarray, pd.Series, default `None`
-            Exogenous variable/s included as predictor/s. Must have the same
-            number of observations as `y` and should be aligned so that y[i] is
-            regressed on exog[i].
+    exog : np.ndarray, pd.Series, pd.DataFrame, default `None`
+        Exogenous variable/s included as predictor/s. Must have the same
+        number of observations as `y` and should be aligned so that y[i] is
+        regressed on exog[i].
         
     interval: list, default `[5, 100]`
             Confidence of the prediction interval estimated. Sequence of percentiles

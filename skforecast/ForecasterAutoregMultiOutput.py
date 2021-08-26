@@ -33,14 +33,14 @@ logging.basicConfig(
 
 class ForecasterAutoregMultiOutput():
     '''
-    This class turns a scikit-learn regressor into a autoregressive multi-output
-    forecaster. A separate model is created for each forecast time step. See Notes
-    for more details.
+    This class turns any regressor compatible with the scikit-learn API into a
+    autoregressive multi-output forecaster. A separate model is created for each
+    forecast time step. See Notes for more details.
     
     Parameters
     ----------
-    regressor : scikit-learn regressor
-        An instance of a scikit-learn regressor.
+    regressor : regressor compatible with the scikit-learn API
+        An instance of a regressor compatible with the scikit-learn API.
         
     lags : int, list, 1D np.array, range
         Lags used as predictors. Index starts at 1, so lag 1 is equal to t-1.
@@ -54,12 +54,13 @@ class ForecasterAutoregMultiOutput():
     
     Attributes
     ----------
-    regressor : scikit-learn regressor
-        An instance of a scikit-learn regressor. One instance of this regressor
-        is trainned for each step. All them are stored in `slef.regressors_`.
+    regressor : regressor compatible with the scikit-learn API
+        An instance of regressor compatible with the scikit-learn API.
+        One instance of this regressor is trainned for each step. All
+        them are stored in `slef.regressors_`.
         
     regressors_ : dict
-        Dictionary with scikit-learn regressors trained for each step.
+        Dictionary with regressors trained for each step.
         
     steps : int
         Number of future steps the forecaster will predict when using method
@@ -204,7 +205,8 @@ class ForecasterAutoregMultiOutput():
 
 
     def create_train_X_y(self, y: Union[np.ndarray, pd.Series],
-                         exog: Union[np.ndarray, pd.Series]=None) -> Tuple[np.array, np.array]:
+                         exog: Union[np.ndarray, pd.Series, pd.DataFrame]=None
+                         ) -> Tuple[np.array, np.array]:
         '''
         Create training matrices X, y. The created matrices contain the target
         variable and predictors needed to train all the forecaster (one per step).         
@@ -214,7 +216,7 @@ class ForecasterAutoregMultiOutput():
         y : 1D np.ndarray, pd.Series
             Training time series.
             
-        exog : np.ndarray, pd.Series, default `None`
+        exog : np.ndarray, pd.Series, pd.DataFrame, default `None`
             Exogenous variable/s included as predictor/s. Must have the same
             number of observations as `y` and should be aligned so that y[i] is
             regressed on exog[i].
@@ -235,7 +237,6 @@ class ForecasterAutoregMultiOutput():
 
         if exog is not None:
             self._check_exog(exog=exog)
-            #self.exog_type = type(exog)
             exog = self._preproces_exog(exog=exog)
             self.included_exog = True
             self.exog_shape = exog.shape
@@ -312,7 +313,7 @@ class ForecasterAutoregMultiOutput():
     
     
     def fit(self, y: Union[np.ndarray, pd.Series],
-            exog: Union[np.ndarray, pd.Series]=None) -> None:
+            exog: Union[np.ndarray, pd.Series, pd.DataFrame]=None) -> None:
         '''
         Training ForecasterAutoregMultiOutput
 
@@ -321,7 +322,7 @@ class ForecasterAutoregMultiOutput():
         y : 1D np.ndarray, pd.Series
             Training time series.
 
-        exog : np.ndarray, pd.Series, default `None`
+        exog : np.ndarray, pd.Series, pd.DataFrame, default `None`
             Exogenous variable/s included as predictor/s. Must have the same
             number of observations as `y` and should be aligned so that y[i] is
             regressed on exog[i].
@@ -378,7 +379,7 @@ class ForecasterAutoregMultiOutput():
 
     
     def predict(self, last_window: Union[np.ndarray, pd.Series]=None,
-                exog: np.ndarray=None, steps=None):
+                exog: Union[np.ndarray, pd.Series, pd.DataFrame]=None) -> np.ndarray:
         '''
         Multi-step prediction. The number of future steps predicted is defined when
         ininitializing the forecaster.
@@ -394,7 +395,7 @@ class ForecasterAutoregMultiOutput():
             used to calculate the initial predictors, and the predictions start
             right after training data.
 
-        exog : np.ndarray, pd.Series, default `None`
+        exog : np.ndarray, pd.Series, pd.DataFrame, default `None`
             Exogenous variable/s included as predictor/s.
 
         steps : Ignored
@@ -504,7 +505,7 @@ class ForecasterAutoregMultiOutput():
         return
         
         
-    def _check_exog(self, exog: Union[np.ndarray, pd.Series], 
+    def _check_exog(self, exog: Union[np.ndarray, pd.Series, pd.DataFrame],
                     ref_type: type=None, ref_shape: tuple=None) -> None:
         '''
         Raise Exception if `exog` is not `np.ndarray`, `pd.Series` or `pd.DataFrame`.
@@ -513,8 +514,14 @@ class ForecasterAutoregMultiOutput():
         
         Parameters
         ----------        
-        exog : np.ndarray, pd.Series
-            Time series values
+        exog : np.ndarray, pd.Series, pd.DataFrame
+            Exogenous variable/s included as predictor/s.
+
+        exog_type : type, default `None`
+            Type of reference for exog.
+            
+        exog_shape : tuple, default `None`
+            Shape of reference for exog.
 
         '''
             
@@ -566,7 +573,7 @@ class ForecasterAutoregMultiOutput():
         return
     
         
-    def _preproces_y(self, y) -> np.ndarray:
+    def _preproces_y(self, y: Union[np.ndarray, pd.Series]) -> np.ndarray:
         
         '''
         Transforms `y` to 1D `np.ndarray` if it is `pd.Series`.
@@ -586,7 +593,8 @@ class ForecasterAutoregMultiOutput():
         else:
             return y.copy()
         
-    def _preproces_last_window(self, last_window) -> np.ndarray:
+
+    def _preproces_last_window(self, last_window: Union[np.ndarray, pd.Series]) -> np.ndarray:
         
         '''
         Transforms `last_window` to 1D `np.ndarray` if it is `pd.Series`.
@@ -607,15 +615,15 @@ class ForecasterAutoregMultiOutput():
             return last_window.copy()
         
         
-    def _preproces_exog(self, exog) -> np.ndarray:
+    def _preproces_exog(self, exog: Union[np.ndarray, pd.Series, pd.DataFrame]) -> np.ndarray:
         
         '''
-        Transforms `exog` to `np.ndarray` if it is `pd.Series`.
+        Transforms `exog` to `np.ndarray` if it is `pd.Series` or `pd.DataFrame`.
         If 1D `np.ndarray` reshape it to (n_samples, 1)
         
         Parameters
         ----------        
-        exog : np.ndarray, pd.Series
+        exog : np.ndarray, pd.Series, pd.DataFrame
             Time series values
 
         Returns 
@@ -635,7 +643,7 @@ class ForecasterAutoregMultiOutput():
         return exog_prep
     
 
-    def _exog_to_multi_output(self, exog)-> np.ndarray:
+    def _exog_to_multi_output(self, exog: np.ndarray)-> np.ndarray:
         
         '''
         Transforms `exog` to `np.ndarray` with the shape needed for multioutput
