@@ -2,16 +2,18 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-## [0.2.0] - [unreleased]
+## [0.2.0] - [2021-08-26]
 
 ### Added
 
 
 + Multiple exogenous variables can be passed as pandas DataFrame.
 
-+ Documentation
++ Documentation at https://joaquinamatrodrigo.github.io/skforecast/
 
 + New unit test
+
++ Increase typing
 
 ### Changed
 
