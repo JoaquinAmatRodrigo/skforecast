@@ -379,10 +379,12 @@ class ForecasterAutoregMultiOutput():
 
     
     def predict(self, last_window: Union[np.ndarray, pd.Series]=None,
-                exog: Union[np.ndarray, pd.Series, pd.DataFrame]=None) -> np.ndarray:
+                exog: Union[np.ndarray, pd.Series, pd.DataFrame]=None,
+                steps=None) -> np.ndarray:
         '''
         Multi-step prediction. The number of future steps predicted is defined when
-        ininitializing the forecaster.
+        ininitializing the forecaster, argument `steps` not used, present here for
+        API consistency by convention.
 
         Parameters
         ----------
