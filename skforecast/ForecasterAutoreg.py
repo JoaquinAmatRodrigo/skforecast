@@ -33,13 +33,13 @@ logging.basicConfig(
 
 class ForecasterAutoreg():
     '''
-    This class turns a scikit-learn regressor into a recursive autoregressive
-    (multi-step) forecaster.
+    This class turns any regressor compatible with the scikit-learn API into a
+    recursive autoregressive (multi-step) forecaster.
     
     Parameters
     ----------
-    regressor : scikit-learn regressor
-        An instance of a scikit-learn regressor.
+    regressor : regressor compatible with the scikit-learn API
+        An instance of a regressor compatible with the scikit-learn API.
         
     lags : int, list, 1D np.array, range
         Lags used as predictors. Index starts at 1, so lag 1 is equal to t-1.
@@ -49,8 +49,8 @@ class ForecasterAutoreg():
     
     Attributes
     ----------
-    regressor : scikit-learn regressor
-        An instance of a scikit-learn regressor.
+    regressor : regressor compatible with the scikit-learn API
+        An instance of a regressor compatible with the scikit-learn API.
         
     lags : 1D np.array
         Lags used as predictors.
@@ -67,7 +67,7 @@ class ForecasterAutoreg():
         If the forecaster has been trained using exogenous variable/s.
         
     exog_type : type
-        Type used for the exogenous variable/s.
+        Type used for the exogenous variable/s: pd.Series, pd.DataFrame or np.ndarray.
             
     exog_shape : tuple
         Shape of exog used in training.
@@ -184,7 +184,8 @@ class ForecasterAutoreg():
 
 
     def create_train_X_y(self, y: Union[np.ndarray, pd.Series],
-                         exog: Union[np.ndarray, pd.Series]=None) -> Tuple[np.array, np.array]:
+                         exog: Union[np.ndarray, pd.Series, pd.DataFrame]=None
+                         ) -> Tuple[np.array, np.array]:
         '''
         Create training matrices X, y
         
@@ -193,7 +194,7 @@ class ForecasterAutoreg():
         y : 1D np.ndarray, pd.Series
             Training time series.
             
-        exog : np.ndarray, pd.Series, default `None`
+        exog : np.ndarray, pd.Series, pd.DataFrame, default `None`
             Exogenous variable/s included as predictor/s. Must have the same
             number of observations as `y` and should be aligned so that y[i] is
             regressed on exog[i].
@@ -214,7 +215,6 @@ class ForecasterAutoreg():
         
         if exog is not None:
             self._check_exog(exog=exog)
-            #self.exog_type = type(exog)
             exog = self._preproces_exog(exog=exog)
             self.included_exog = True
             self.exog_shape = exog.shape
@@ -234,7 +234,8 @@ class ForecasterAutoreg():
         return X_train, y_train
 
         
-    def fit(self, y: Union[np.ndarray, pd.Series], exog: Union[np.ndarray, pd.Series]=None) -> None:
+    def fit(self, y: Union[np.ndarray, pd.Series],
+            exog: Union[np.ndarray, pd.Series, pd.DataFrame]=None) -> None:
         '''
         Training ForecasterAutoreg
         
@@ -243,7 +244,7 @@ class ForecasterAutoreg():
         y : 1D np.ndarray, pd.Series
             Training time series.
             
-        exog : np.ndarray, pd.Series, default `None`
+        exog : np.ndarray, pd.Series, pd.DataFrame, default `None`
             Exogenous variable/s included as predictor/s. Must have the same
             number of observations as `y` and should be aligned so that y[i] is
             regressed on exog[i].
@@ -293,7 +294,7 @@ class ForecasterAutoreg():
         
             
     def predict(self, steps: int, last_window: Union[np.ndarray, pd.Series]=None,
-                exog: np.ndarray=None) -> np.ndarray:
+                exog: Union[np.ndarray, pd.Series, pd.DataFrame]=None) -> np.ndarray:
         '''
         Iterative process in which, each prediction, is used as a predictor
         for the next step.
@@ -312,7 +313,7 @@ class ForecasterAutoreg():
             used to calculate the initial predictors, and the predictions start
             right after training data.
             
-        exog : np.ndarray, pd.Series, default `None`
+        exog : np.ndarray, pd.Series, pd.DataFrame, default `None`
             Exogenous variable/s included as predictor/s.
 
         Returns 
@@ -381,8 +382,9 @@ class ForecasterAutoreg():
     
     def _estimate_boot_interval(self, steps: int,
                                 last_window: Union[np.ndarray, pd.Series]=None,
-                                exog: np.ndarray=None, interval: list=[5, 95],
-                                n_boot: int=500, in_sample_residuals: bool=True) -> np.ndarray:
+                                exog: Union[np.ndarray, pd.Series, pd.DataFrame]=None,
+                                interval: list=[5, 95], n_boot: int=500,
+                                in_sample_residuals: bool=True) -> np.ndarray:
         '''
         Iterative process in which, each prediction, is used as a predictor
         for the next step and bootstrapping is used to estimate prediction
@@ -403,7 +405,7 @@ class ForecasterAutoreg():
             used to calculate the initial predictors, and the predictions start
             right after training data.
             
-        exog : np.ndarray, pd.Series, default `None`
+        exog : np.ndarray, pd.Series, pd.DataFrame, default `None`
             Exogenous variable/s included as predictor/s.
             
         n_boot: int, default `100`
@@ -534,8 +536,9 @@ class ForecasterAutoreg():
     
         
     def predict_interval(self, steps: int, last_window: Union[np.ndarray, pd.Series]=None,
-                         exog: np.ndarray=None, interval: list=[5, 95],
-                         n_boot: int=500, in_sample_residuals: bool=True) -> np.ndarray:
+                         exog: Union[np.ndarray, pd.Series, pd.DataFrame]=None,
+                         interval: list=[5, 95], n_boot: int=500,
+                         in_sample_residuals: bool=True) -> np.ndarray:
         '''
         Iterative process in which, each prediction, is used as a predictor
         for the next step and bootstrapping is used to estimate prediction
@@ -555,7 +558,7 @@ class ForecasterAutoreg():
             used to calculate the initial predictors, and the predictions start
             right after training data.
             
-        exog : np.ndarray, pd.Series, default `None`
+        exog : np.ndarray, pd.Series, pd.DataFrame, default `None`
             Exogenous variable/s included as predictor/s.
             
         interval: list, default `[5, 100]`
@@ -708,7 +711,7 @@ class ForecasterAutoreg():
         return
         
         
-    def _check_exog(self, exog: Union[np.ndarray, pd.Series], 
+    def _check_exog(self, exog: Union[np.ndarray, pd.Series, pd.DataFrame], 
                     ref_type: type=None, ref_shape: tuple=None) -> None:
         '''
         Raise Exception if `exog` is not `np.ndarray`, `pd.Series` or `pd.DataFrame`.
@@ -717,9 +720,14 @@ class ForecasterAutoreg():
         
         Parameters
         ----------        
-        exog : np.ndarray, pd.Series
-            Time series values
+        exog : np.ndarray, pd.Series, pd.DataFrame
+            Exogenous variable/s included as predictor/s.
 
+        exog_type : type, default `None`
+            Type of reference for exog.
+            
+        exog_shape : tuple, default `None`
+            Shape of reference for exog.
         '''
             
         if not isinstance(exog, (np.ndarray, pd.Series, pd.DataFrame)):
@@ -770,7 +778,7 @@ class ForecasterAutoreg():
         return
     
         
-    def _preproces_y(self, y) -> np.ndarray:
+    def _preproces_y(self, y: Union[np.ndarray, pd.Series]) -> np.ndarray:
         
         '''
         Transforms `y` to 1D `np.ndarray` if it is `pd.Series`.
@@ -786,11 +794,12 @@ class ForecasterAutoreg():
         '''
         
         if isinstance(y, pd.Series):
-            return y.to_numpy()
+            return y.to_numpy(copy=True)
         else:
             return y
+            
         
-    def _preproces_last_window(self, last_window) -> np.ndarray:
+    def _preproces_last_window(self, last_window: Union[np.ndarray, pd.Series]) -> np.ndarray:
         
         '''
         Transforms `last_window` to 1D `np.ndarray` if it is `pd.Series`.
@@ -806,20 +815,20 @@ class ForecasterAutoreg():
         '''
         
         if isinstance(last_window, pd.Series):
-            return last_window.to_numpy()
+            return last_window.to_numpy(copy=True)
         else:
             return last_window
         
         
-    def _preproces_exog(self, exog) -> np.ndarray:
+    def _preproces_exog(self, exog: Union[np.ndarray, pd.Series, pd.DataFrame]) -> np.ndarray:
         
         '''
-        Transforms `exog` to `np.ndarray` if it is `pd.Series`.
+        Transforms `exog` to `np.ndarray` if it is `pd.Series` or `pd.DataFrame`.
         If 1D `np.ndarray` reshape it to (n_samples, 1)
         
         Parameters
         ----------        
-        exog : np.ndarray, pd.Series
+        exog : np.ndarray, pd.Series, pd.DataFrame
             Time series values
 
         Returns 
@@ -828,11 +837,11 @@ class ForecasterAutoreg():
         '''
         
         if isinstance(exog, pd.Series):
-            exog = exog.to_numpy().reshape(-1, 1)
+            exog = exog.to_numpy(copy=True).reshape(-1, 1)
         elif isinstance(exog, np.ndarray) and exog.ndim == 1:
             exog = exog.reshape(-1, 1)
         elif isinstance(exog, pd.DataFrame):
-            exog = exog.to_numpy()
+            exog = exog.to_numpy(copy=True)
             
         return exog
     
