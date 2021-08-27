@@ -39,7 +39,7 @@ theme:
   font:
     text: Ubuntu
     code: Ubuntu Mono
-  logo: img/logo_skforecast_no_background.png
+  logo: img/logo_skforecast_white_no_background.png
   highlightjs: true
   features:
     - navigation.tabs
@@ -47,8 +47,8 @@ theme:
     - navigation.sections
     - navigation.expand
   palette:
-    primary: indigo
-    accent: blue
+    primary: deep purple
+    accent: light blue
 markdown_extensions:
   - codehilite
   - pymdownx.inlinehilite
