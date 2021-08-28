@@ -27,6 +27,277 @@ logging.basicConfig(
     level  = logging.INFO,
 )
 
+def backtesting_autoreg_statsmodels(
+    y: Union[np.ndarray, pd.Series],
+    lags: int, 
+    initial_train_size: int,
+    steps: int,
+    metric: str,
+    exog: Union[np.ndarray, pd.Series, pd.DataFrame]=None,
+    verbose: bool=False
+) -> Tuple[np.array, np.array]:
+    '''
+    
+    Backtesting (validation) of `AutoReg` model from statsmodels v0.12. The model is
+    trained only once using the `initial_train_size` first observations. In each
+    iteration, a number of `steps` predictions are evaluated. This evaluation is
+    much faster than cross-validation since the model is trained only once.
+        
+    Parameters
+    ----------
+        
+    y : 1D np.ndarray, pd.Series
+        Training time series values. 
+        
+    lags: int, list
+        The number of lags to include in the model if an integer or the list of
+        lag indices to include. For example, [1, 4] will only include lags 1 and
+        4 while lags=4 will include lags 1, 2, 3, and 4.
+    
+    initial_train_size: int 
+        Number of samples in the initial train split.
+        
+    steps : int
+        Number of steps to predict.
+        
+    metric : {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
+        Metric used to quantify the goodness of fit of the model.
+        
+    exog : np.ndarray, pd.Series, pd.DataFrame, default `None`
+        Exogenous variable/s included as predictor/s. Must have the same
+        number of observations as `y` and should be aligned so that y[i] is
+        regressed on exog[i].
+            
+    verbose : bool, default `False`
+        Print number of folds used for backtesting.
+
+    Returns 
+    -------
+        
+    metric_value: 1D np.ndarray
+        Value of the metric.
+        
+    backtest_predictions: 1D np.ndarray
+        Value of predictions.
+    '''
+    
+
+    if metric not in ['mean_squared_error', 'mean_absolute_error',
+                      'mean_absolute_percentage_error']:
+        raise Exception(
+            f"Allowed metrics are: 'mean_squared_error', 'mean_absolute_error' and "
+            f"'mean_absolute_percentage_error'. Got {metric}."
+        )
+    
+    backtest_predictions = []
+    
+    metrics = {
+        'mean_squared_error': mean_squared_error,
+        'mean_absolute_error': mean_absolute_error,
+        'mean_absolute_percentage_error': mean_absolute_percentage_error
+    }
+    
+    metric = metrics[metric]
+    
+    if isinstance(y, pd.Series):
+        y = y.to_numpy(copy=True)
+        
+    if isinstance(exog, (pd.Series, pd.DataFrame)):
+        exog = exog.to_numpy(copy=True)
+        
+    if exog is None:
+        model = AutoReg(endog=y[:initial_train_size], lags=lags).fit()
+    else:
+        model = AutoReg(
+                    endog = y[:initial_train_size],
+                    exog  = exog[:initial_train_size],
+                    lags  = lags
+                ).fit()
+    
+    
+    folds     = (len(y) - initial_train_size) // steps + 1
+    remainder = (len(y) - initial_train_size) % steps
+    
+    if verbose:
+        print(f"Number of observations used for training: {initial_train_size}")
+        print(f"Number of observations used for testing: {len(y) - initial_train_size}")
+        print(f"    Number of folds: {folds - 1 * (remainder == 0)}")
+        print(f"    Number of steps per fold: {steps}")
+        if remainder != 0:
+            print(f"    Last fold only includes {remainder} observations")
+      
+    for i in range(folds):
+        last_window_end   = initial_train_size + i * steps
+        last_window_start = (initial_train_size + i * steps) - steps 
+        last_window       = y[last_window_start:last_window_end]
+        
+        if i == 0:
+            if exog is None:
+                pred = model.forecast(steps=steps)
+                            
+            else:
+                pred = model.forecast(
+                            steps       = steps,
+                            exog        = exog[last_window_end:last_window_end + steps]
+                        )
+                
+        elif i < folds - 1:
+            # Update internal values stored by AutoReg
+            model.model._y = np.vstack((
+                                model.model._y,
+                                last_window.reshape(-1,1)
+                             ))
+        
+            if exog is None:
+                pred = model.forecast(steps=steps)
+                            
+            else:
+                pred = model.forecast(
+                            steps       = steps,
+                            exog        = exog[last_window_end:last_window_end + steps]
+                        )
+                
+        elif remainder != 0:
+            steps = remainder
+            # Update internal values stored by AutoReg
+            model.model._y = np.vstack((
+                                model.model._y,
+                                last_window.reshape(-1,1)
+                             ))
+            
+            if exog is None:
+                pred = model.forecast(steps=steps)
+                
+            else:
+                pred = model.forecast(
+                            steps       = steps,
+                            exog        = exog[last_window_end:last_window_end + steps]
+                        )
+        else:
+            continue
+        
+        backtest_predictions.append(pred)
+    
+    backtest_predictions = np.concatenate(backtest_predictions)
+    metric_value = metric(
+                        y_true = y[initial_train_size: initial_train_size + len(backtest_predictions)],
+                        y_pred = backtest_predictions
+                   )
+
+    return np.array([metric_value]), backtest_predictions
+
+
+def cv_autoreg_statsmodels(
+    y: Union[np.ndarray, pd.Series],
+    lags: int, 
+    initial_train_size: int,
+    steps: int,
+    metric: str,
+    exog: Union[np.ndarray, pd.Series, pd.DataFrame]=None,
+    allow_incomplete_fold: bool=True,
+    verbose: bool=False
+) -> Tuple[np.array, np.array]:
+    '''
+        
+    Cross-validation of `AutoReg` model from statsmodels v0.12. The order of data
+    is maintained and the training set increases in each iteration.
+    
+    Parameters
+    ----------
+        
+    y : 1D np.ndarray, pd.Series
+        Training time series values. 
+        
+    lags: int, list
+        The number of lags to include in the model if an integer or the list of
+        lag indices to include. For example, [1, 4] will only include lags 1 and
+        4 while lags=4 will include lags 1, 2, 3, and 4.
+    
+    initial_train_size: int 
+        Number of samples in the initial train split.
+        
+    steps : int
+        Number of steps to predict.
+        
+    metric : {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
+        Metric used to quantify the goodness of fit of the model.
+        
+    exog : np.ndarray, pd.Series, pd.DataFrame, default `None`
+        Exogenous variable/s included as predictor/s. Must have the same
+        number of observations as `y` and should be aligned so that y[i] is
+        regressed on exog[i].
+            
+    verbose : bool, default `False`
+        Print number of folds used for cross-validation.
+        
+    Returns 
+    -------
+
+    cv_metrics: 1D np.ndarray
+        Value of the metric for each fold.
+        
+    cv_predictions: 1D np.ndarray
+        Predictions.
+    '''
+    
+
+    if metric not in ['mean_squared_error', 'mean_absolute_error',
+                      'mean_absolute_percentage_error']:
+        raise Exception(
+            f"Allowed metrics are: 'mean_squared_error', 'mean_absolute_error' and "
+            f"'mean_absolute_percentage_error'. Got {metric}."
+        )
+        
+    metrics = {
+        'mean_squared_error': mean_squared_error,
+        'mean_absolute_error': mean_absolute_error,
+        'mean_absolute_percentage_error': mean_absolute_percentage_error
+    }
+    
+    metric = metrics[metric]
+    
+    if isinstance(y, pd.Series):
+        y = y.to_numpy(copy=True)
+        
+    if isinstance(exog, (pd.Series, pd.DataFrame)):
+        exog = exog.to_numpy(copy=True)
+        
+    cv_predictions = []
+    cv_metrics = []
+    
+    splits = time_series_spliter(
+                y                     = y,
+                initial_train_size    = initial_train_size,
+                steps                 = steps,
+                allow_incomplete_fold = allow_incomplete_fold,
+                verbose               = verbose
+             )
+    
+    for train_index, test_index in splits:
+        
+        if exog is None:
+            model = AutoReg(endog=y[train_index], lags=lags).fit()
+            pred = model.forecast(steps=len(test_index))
+            
+        else:
+            model = AutoReg(
+                        endog = y[train_index],
+                        exog  = exog[train_index],
+                        lags  = lags
+                    ).fit()
+            pred = model.forecast(steps=len(test_index), exog=exog[test_index])
+    
+               
+        metric_value = metric(
+                            y_true = y[test_index],
+                            y_pred = pred
+                       )
+        
+        cv_metrics.append(metric_value)
+        cv_predictions.append(pred)
+                          
+    return np.array(cv_metrics), np.concatenate(cv_predictions)
+
 
 def backtesting_sarimax_statsmodels(
     y: Union[np.ndarray, pd.Series],
@@ -99,6 +370,7 @@ def backtesting_sarimax_statsmodels(
         
     Returns 
     -------
+
     metric_value: np.ndarray shape (1,)
         Value of the metric.
 
@@ -282,11 +554,12 @@ def cv_sarimax_statsmodels(
         
     Returns 
     -------
+
     cv_metrics: 1D np.ndarray
         Value of the metric for each partition.
 
     cv_predictions: 1D np.ndarray
-    Predictions.
+        Predictions.
     '''
     
 
@@ -355,3 +628,147 @@ def cv_sarimax_statsmodels(
         cv_predictions.append(pred)
                           
     return np.array(cv_metrics), np.concatenate(cv_predictions)
+
+
+def grid_search_sarimax_statsmodels(
+        y: Union[np.ndarray, pd.Series],
+        param_grid: dict,
+        initial_train_size: int,
+        steps: int,
+        metric: str,
+        exog: Union[np.ndarray, pd.Series, pd.DataFrame]=None,
+        method: str='cv',
+        allow_incomplete_fold: bool=True,
+        return_best: bool=True,
+        verbose: bool=True
+) -> pd.DataFrame:
+    '''
+    Exhaustive search over specified parameter values for a `SARIMAX` model from
+    statsmodels v0.12. Validation is done using time series cross-validation or
+    backtesting.
+    
+    Parameters
+    ----------
+        
+    y : 1D np.ndarray, pd.Series
+        Training time series values. 
+        
+    param_grid : dict
+        Dictionary with parameters names (`str`) as keys and lists of parameter
+        settings to try as values. Allowed parameters in the grid are: order,
+        seasonal_order and trend.
+    
+    initial_train_size: int 
+        Number of samples in the initial train split.
+        
+    steps : int
+        Number of steps to predict.
+        
+    metric : {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
+        Metric used to quantify the goodness of fit of the model.
+        
+    exog : np.ndarray, pd.Series, pd.DataFrame, default `None`
+        Exogenous variable/s included as predictor/s. Must have the same
+        number of observations as `y` and should be aligned so that y[i] is
+        regressed on exog[i].
+        
+    method : {'cv', 'backtesting'}
+        Method used to estimate the metric for each parameter combination.
+        'cv' for time series crosvalidation and 'backtesting' for simple
+        backtesting. 'backtesting' is much faster since the model is fitted only
+        once.
+        
+    allow_incomplete_fold : bool, default `True`
+        The last test set is allowed to be incomplete if it does not reach `steps`
+        observations. Otherwise, the latest observations are discarded.
+        
+    return_best : bool
+        Refit the `forecaster` using the best found parameters on the whole data.
+        
+    verbose : bool, default `True`
+        Print number of folds used for cv or backtesting.
+
+    Returns 
+    -------
+    results: pandas.DataFrame
+        Metric value estimated for each combination of parameters.
+
+    '''
+    
+
+    
+    if isinstance(y, pd.Series):
+        y = y.to_numpy(copy=True)
+        
+    if isinstance(exog, (pd.Series, pd.DataFrame)):
+        exog = exog.to_numpy(copy=True)
+        
+      
+    params_list = []
+    metric_list = []
+    bic_list = []
+    
+    if 'order' not in param_grid:
+        param_grid['order'] = [(1, 0, 0)]
+    if 'seasonal_order' not in param_grid:
+        param_grid['seasonal_order'] = [(0, 0, 0, 0)]
+    if 'trend' not in param_grid:
+        param_grid['trend'] = [None]
+    
+    param_grid =  list(ParameterGrid(param_grid))
+
+    logging.info(
+        f"Number of models compared: {len(param_grid)}"
+    )
+        
+        
+    for params in tqdm.tqdm(param_grid):
+
+        if method == 'cv':
+            metrics = cv_sarimax_statsmodels(
+                            y     = y,
+                            exog  = exog,
+                            order = params['order'],
+                            seasonal_order = params['seasonal_order'],
+                            trend = params['trend'],
+                            initial_train_size = initial_train_size,
+                            steps   = steps,
+                            metric  = metric,
+                            verbose = verbose
+                        )[0]
+        else:
+            metrics = backtesting_sarimax_statsmodels(
+                            y     = y,
+                            exog  = exog,
+                            order = params['order'],
+                            seasonal_order = params['seasonal_order'],
+                            trend = params['trend'],
+                            initial_train_size = initial_train_size,
+                            steps   = steps,
+                            metric  = metric,
+                            verbose = verbose
+                        )[0]
+
+        params_list.append(params)
+        metric_list.append(metrics.mean())
+        
+        model = SARIMAX(
+                    endog = y,
+                    exog  = exog,
+                    order = params['order'],
+                    seasonal_order = params['seasonal_order'],
+                    trend = params['trend']
+                ).fit(disp=0)
+        
+        bic_list.append(model.bic)
+            
+    results = pd.DataFrame({
+                'params': params_list,
+                'metric': metric_list,
+                'bic'   : bic_list
+              })
+    
+    results = results.sort_values(by='metric', ascending=True)
+    results = pd.concat([results, results['params'].apply(pd.Series)], axis=1)
+            
+    return results
