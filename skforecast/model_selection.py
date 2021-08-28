@@ -176,11 +176,11 @@ def cv_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
 
     Returns 
     -------
-    cv_predictions: 1D np.ndarray
-        Predictions.
-        
     cv_metrics: 1D np.ndarray
         Value of the metric for each fold.
+
+    cv_predictions: 1D np.ndarray
+        Predictions.
 
     '''
     
@@ -240,7 +240,7 @@ def cv_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
     cv_predictions = np.concatenate(cv_predictions)
     cv_metrics = np.array(cv_metrics)
         
-    return cv_predictions, cv_metrics
+    return cv_metrics, cv_predictions
 
 
 def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
@@ -285,11 +285,11 @@ def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
 
     Returns 
     -------
-    backtest_predictions: 1D np.ndarray
-        Value of predictions.
-        
     metric_value: np.ndarray shape (1,)
         Value of the metric.
+
+    backtest_predictions: 1D np.ndarray
+        Value of predictions.
 
     '''
     
