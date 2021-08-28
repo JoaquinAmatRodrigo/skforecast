@@ -481,7 +481,7 @@ def grid_search_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
     param_grid =  list(ParameterGrid(param_grid))
 
     logging.info(
-        f"Number of models to fit: {len(param_grid)*len(lags_grid)}"
+        f"Number of models compared: {len(param_grid)*len(lags_grid)}"
     )
     
     for lags in tqdm.tqdm(lags_grid, desc='loop lags_grid', position=0):
