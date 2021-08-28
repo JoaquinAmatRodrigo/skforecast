@@ -2,20 +2,21 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-## [0.3.0] - unreleased
+## [0.3.0.dev0] - unreleased
 
 ### Added
 
-
-+ `backtesting_autoreg_statsmodels()`
-+ `cv_autoreg_statsmodels()`
-+ `backtesting_sarimax_statsmodels()`
-+ `cv_sarimax_statsmodels()`
++ new module named model_selection_statsmodels to cross-validate, backtesting and grid search AutoReg and SARIMAX models from statsmodels library:
+    + `backtesting_autoreg_statsmodels()`
+    + `cv_autoreg_statsmodels()`
+    + `backtesting_sarimax_statsmodels()`
+    + `cv_sarimax_statsmodels()`
+    + `grid_search_sarimax_statsmodels()`
 
 ### Changed
 
 + `cv_forecaster()` returns cross-validation metrics and cross-validation predictions.
-
++ added an extra column for each parameter in the dataframe returned by `grid_search_forecaster()` .
 + statsmodels 0.12.2 added to requirements
 
 ### Fixed
