@@ -453,13 +453,13 @@ def backtesting_sarimax_statsmodels(
                         )
                 
         elif i < folds - 1:
-            # Update internal values stored by SARIMAX
-            model = model.extend(last_window)
-        
             if exog is None:
+                # Update internal values stored by SARIMAX
+                model = model.extend(last_window)
                 pred = model.forecast(steps=steps)
                             
             else:
+                model = model.extend(last_window, exog=exog[last_window_start:last_window_end])
                 pred = model.forecast(
                             steps       = steps,
                             exog        = exog[last_window_end:last_window_end + steps]
@@ -467,17 +467,17 @@ def backtesting_sarimax_statsmodels(
                 
         elif remainder != 0:
             steps = remainder
-            # Update internal values stored by SARIMAX
-            model = model.extend(last_window)
             
             if exog is None:
+                model = model.extend(last_window)
                 pred = model.forecast(steps=steps)
                 
             else:
+                model = model.extend(last_window, exog=exog[last_window_start:last_window_end])
                 pred = model.forecast(
                             steps       = steps,
                             exog        = exog[last_window_end:last_window_end + steps]
-                        )
+                       )
         else:
             continue
         
