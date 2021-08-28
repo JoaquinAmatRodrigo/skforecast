@@ -300,15 +300,16 @@ def cv_autoreg_statsmodels(
 
 
 def backtesting_sarimax_statsmodels(
-    y: Union[np.ndarray, pd.Series],
-    initial_train_size: int,
-    steps: int,
-    metric: str,
-    order: tuple=(1, 0, 0), 
-    seasonal_order: tuple=(0, 0, 0, 0),
-    trend: str=None,
-    exog: Union[np.ndarray, pd.Series, pd.DataFrame]=None,
-    verbose: bool=False
+        y: Union[np.ndarray, pd.Series],
+        initial_train_size: int,
+        steps: int,
+        metric: str,
+        order: tuple=(1, 0, 0), 
+        seasonal_order: tuple=(0, 0, 0, 0),
+        trend: str=None,
+        exog: Union[np.ndarray, pd.Series, pd.DataFrame]=None,
+        verbose: bool=False,
+        **kwargs
 ) -> Tuple[np.array, np.array]:
     '''
     
@@ -368,6 +369,9 @@ def backtesting_sarimax_statsmodels(
     verbose : bool, default `False`
         Print number of folds used for backtesting.
         
+    **kwargs
+        Additional keyword arguments to SARIMAX and it's fit.
+        
     Returns 
     -------
 
@@ -407,8 +411,9 @@ def backtesting_sarimax_statsmodels(
                     endog = y[:initial_train_size],
                     order = order,
                     seasonal_order = seasonal_order,
-                    trend = trend
-                ).fit(disp=0)
+                    trend = trend,
+                    **kwargs
+                ).fit(disp=0, **kwargs)
         
     else:
         model = SARIMAX(
@@ -416,8 +421,9 @@ def backtesting_sarimax_statsmodels(
                     exog  = exog[:initial_train_size],
                     order = order,
                     seasonal_order = seasonal_order,
-                    trend = trend
-                ).fit(disp=0)
+                    trend = trend,
+                    **kwargs
+                ).fit(disp=0, **kwargs)
     
     
     folds     = (len(y) - initial_train_size) // steps + 1
@@ -487,16 +493,17 @@ def backtesting_sarimax_statsmodels(
 
 
 def cv_sarimax_statsmodels(
-    y: Union[np.ndarray, pd.Series],
-    initial_train_size: int,
-    steps: int,
-    metric: str,
-    order: tuple=(1, 0, 0), 
-    seasonal_order: tuple=(0, 0, 0, 0),
-    trend: str=None,
-    exog: Union[np.ndarray, pd.Series, pd.DataFrame]=None,
-    allow_incomplete_fold: bool=True,
-    verbose: bool=False
+        y: Union[np.ndarray, pd.Series],
+        initial_train_size: int,
+        steps: int,
+        metric: str,
+        order: tuple=(1, 0, 0), 
+        seasonal_order: tuple=(0, 0, 0, 0),
+        trend: str=None,
+        exog: Union[np.ndarray, pd.Series, pd.DataFrame]=None,
+        allow_incomplete_fold: bool=True,
+        verbose: bool=False,
+        **kwargs
 ) -> Tuple[np.array, np.array]:
     '''
         
@@ -552,6 +559,9 @@ def cv_sarimax_statsmodels(
     verbose : bool, default `False`
         Print number of folds used for cross-validation.
         
+    **kwargs
+        Additional keyword arguments to SARIMAX and it's fit.
+        
     Returns 
     -------
 
@@ -602,8 +612,9 @@ def cv_sarimax_statsmodels(
                     endog = y[train_index],
                     order = order,
                     seasonal_order = seasonal_order,
-                    trend = trend
-                ).fit(disp=0)
+                    trend = trend,
+                    **kwargs
+                ).fit(disp=0, **kwargs)
             
             pred = model.forecast(steps=len(test_index))
             
@@ -614,7 +625,7 @@ def cv_sarimax_statsmodels(
                     order = order,
                     seasonal_order = seasonal_order,
                     trend = trend
-                ).fit(disp=0)
+                ).fit(disp=0, **kwargs)
             
             pred = model.forecast(steps=len(test_index), exog=exog[test_index])
     
@@ -640,7 +651,8 @@ def grid_search_sarimax_statsmodels(
         method: str='cv',
         allow_incomplete_fold: bool=True,
         return_best: bool=True,
-        verbose: bool=True
+        verbose: bool=True,
+        **kwargs
 ) -> pd.DataFrame:
     '''
     Exhaustive search over specified parameter values for a `SARIMAX` model from
@@ -687,9 +699,13 @@ def grid_search_sarimax_statsmodels(
         
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
+        
+    **kwargs
+        Additional keyword arguments to SARIMAX and it's fit.
 
     Returns 
     -------
+    
     results: pandas.DataFrame
         Metric value estimated for each combination of parameters.
 
@@ -734,7 +750,8 @@ def grid_search_sarimax_statsmodels(
                             initial_train_size = initial_train_size,
                             steps   = steps,
                             metric  = metric,
-                            verbose = verbose
+                            verbose = verbose,
+                            **kwargs
                         )[0]
         else:
             metrics = backtesting_sarimax_statsmodels(
@@ -746,7 +763,8 @@ def grid_search_sarimax_statsmodels(
                             initial_train_size = initial_train_size,
                             steps   = steps,
                             metric  = metric,
-                            verbose = verbose
+                            verbose = verbose,
+                            **kwargs
                         )[0]
 
         params_list.append(params)
