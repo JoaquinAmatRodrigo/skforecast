@@ -136,11 +136,12 @@ def time_series_spliter(y: Union[np.ndarray, pd.Series],
 def cv_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
                   initial_train_size: int, steps: int, metric: str,
                   exog: Union[np.ndarray, pd.Series, pd.DataFrame]=None,
-                  allow_incomplete_fold: bool=True, verbose: bool=True) -> np.array:
+                  allow_incomplete_fold: bool=True, verbose: bool=True
+                 ) -> Tuple[np.array, np.array]:
     '''
     Cross-validation of `ForecasterAutoreg`, `ForecasterCustom`, `ForecasterAutoregCustom`
-    or `ForecasterAutoregMultiOutput` object. The order of is maintained and the
-    training set increases in each iteration.
+    or `ForecasterAutoregMultiOutput` object. The order of data is maintained
+    and the training set increases in each iteration.
     
     Parameters
     ----------
@@ -175,8 +176,11 @@ def cv_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
 
     Returns 
     -------
-    cv_results: 1D np.ndarray
-        Value of the metric for each partition.
+    cv_predictions: 1D np.ndarray
+        Predictions.
+        
+    cv_metrics: 1D np.ndarray
+        Value of the metric for each fold.
 
     '''
     
@@ -194,8 +198,6 @@ def cv_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
             f"'mean_absolute_percentage_error'. Got {metric}."
         )
     
-    cv_results = []
-    
     metrics = {
         'mean_squared_error': mean_squared_error,
         'mean_absolute_error': mean_absolute_error,
@@ -211,6 +213,9 @@ def cv_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
                 allow_incomplete_fold = allow_incomplete_fold,
                 verbose               = verbose
              )
+    
+    cv_predictions = []
+    cv_metrics = []
     
     for train_index, test_index in splits:
         
@@ -228,9 +233,14 @@ def cv_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
                             y_pred = pred
                        )
         
-        cv_results.append(metric_value)
-                          
-    return np.array(cv_results)
+        cv_predictions.append(pred)
+        cv_metrics.append(metric_value)
+        
+    
+    cv_predictions = np.concatenate(cv_predictions)
+    cv_metrics = np.array(cv_metrics)
+        
+    return cv_predictions, cv_metrics
 
 
 def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
@@ -494,7 +504,7 @@ def grid_search_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
                                 metric = metric,
                                 allow_incomplete_fold = allow_incomplete_fold,
                                 verbose = verbose
-                             )
+                             )[0]
             else:
                 metrics = backtesting_forecaster(
                                 forecaster = forecaster,
