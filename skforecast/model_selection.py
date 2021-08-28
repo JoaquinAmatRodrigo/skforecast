@@ -526,6 +526,7 @@ def grid_search_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
                 'metric': metric_list})
     
     results = results.sort_values(by='metric', ascending=True)
+    results = pd.concat([results, results['params'].apply(pd.Series)], axis=1)
     
     if return_best:
         
