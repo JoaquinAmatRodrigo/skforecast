@@ -2,16 +2,21 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-## [0.2.1] - unreleased
+## [0.3.0] - unreleased
 
 ### Added
 
 
-+ 
++ `backtesting_autoreg_statsmodels()`
++ `cv_autoreg_statsmodels()`
++ `backtesting_sarimax_statsmodels()`
++ `cv_sarimax_statsmodels()`
 
 ### Changed
 
 + `cv_forecaster()` returns cross-validation metrics and cross-validation predictions.
+
++ statsmodels 0.12.2 added to requirements
 
 ### Fixed
 
