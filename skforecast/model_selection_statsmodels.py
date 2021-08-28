@@ -99,11 +99,11 @@ def backtesting_sarimax_statsmodels(
         
     Returns 
     -------
-    backtest_predictions: 1D np.ndarray
-        Value of predictions.
-        
     metric_value: np.ndarray shape (1,)
         Value of the metric.
+
+    backtest_predictions: 1D np.ndarray
+        Value of predictions.
     '''
     
 
@@ -282,11 +282,11 @@ def cv_sarimax_statsmodels(
         
     Returns 
     -------
-    cv_predictions: 1D np.ndarray
-        Predictions.
-        
     cv_metrics: 1D np.ndarray
         Value of the metric for each partition.
+
+    cv_predictions: 1D np.ndarray
+    Predictions.
     '''
     
 
