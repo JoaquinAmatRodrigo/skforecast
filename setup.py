@@ -36,6 +36,7 @@ setuptools.setup(
           'numpy>=1.20.1',
           'pandas>=1.2.2',
           'tqdm>=4.57.0',
-          'scikit-learn>=0.24'
+          'scikit-learn>=0.24',
+          'statsmodels>=0.12.2'
     ]
 )
