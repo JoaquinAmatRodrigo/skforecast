@@ -2,6 +2,20 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [0.2.1] - unreleased
+
+### Added
+
+
++ 
+
+### Changed
+
++ `cv_forecaster()` returns cross-validation metrics and cross-validation predictions.
+
+### Fixed
+
+
 ## [0.2.0] - [2021-08-26]
 
 ### Added
