@@ -723,6 +723,7 @@ def grid_search_sarimax_statsmodels(
     params_list = []
     metric_list = []
     bic_list = []
+    aic_list = []
     
     if 'order' not in param_grid:
         param_grid['order'] = [(1, 0, 0)]
@@ -779,11 +780,13 @@ def grid_search_sarimax_statsmodels(
                 ).fit(disp=0)
         
         bic_list.append(model.bic)
+        aic_list.append(model.aic)
             
     results = pd.DataFrame({
                 'params': params_list,
                 'metric': metric_list,
-                'bic'   : bic_list
+                'bic'   : bic_list,
+                'aic'   : aic_list
               })
     
     results = results.sort_values(by='metric', ascending=True)
