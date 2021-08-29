@@ -308,8 +308,8 @@ def backtesting_sarimax_statsmodels(
         seasonal_order: tuple=(0, 0, 0, 0),
         trend: str=None,
         exog: Union[np.ndarray, pd.Series, pd.DataFrame]=None,
-        sarimax_kws: dict={},
-        fit_kws: dict={'disp':0},
+        sarimax_kwargs: dict={},
+        fit_kwargs: dict={'disp':0},
         verbose: bool=False
 ) -> Tuple[np.array, np.array]:
     '''
@@ -367,11 +367,11 @@ def backtesting_sarimax_statsmodels(
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
         
-    sarimax_kws: dict, default `{}`
-        Additional keyword arguments passed to SARIMAX initialization. See more in
+    sarimax_kwargs: dict, default `{}`
+        Additional keyword arguments passed to SARIMAX constructor. See more in
         https://www.statsmodels.org/stable/generated/statsmodels.tsa.statespace.sarimax.SARIMAX.html#statsmodels.tsa.statespace.sarimax.SARIMAX
         
-    fit_kws: dict, default `{'disp':0}`
+    fit_kwargs: dict, default `{'disp':0}`
         Additional keyword arguments passed to SARIMAX fit. See more in
         https://www.statsmodels.org/stable/generated/statsmodels.tsa.statespace.sarimax.SARIMAX.fit.html#statsmodels.tsa.statespace.sarimax.SARIMAX.fit
         
@@ -418,8 +418,8 @@ def backtesting_sarimax_statsmodels(
                     order = order,
                     seasonal_order = seasonal_order,
                     trend = trend,
-                    **sarimax_kws
-                ).fit(**fit_kws)
+                    **sarimax_kwargs
+                ).fit(**fit_kwargs)
         
     else:
         model = SARIMAX(
@@ -428,8 +428,8 @@ def backtesting_sarimax_statsmodels(
                     order = order,
                     seasonal_order = seasonal_order,
                     trend = trend,
-                    **sarimax_kws
-                ).fit(**fit_kws)
+                    **sarimax_kwargs
+                ).fit(**fit_kwargs)
     
     
     folds     = (len(y) - initial_train_size) // steps + 1
@@ -510,8 +510,8 @@ def cv_sarimax_statsmodels(
         trend: str=None,
         exog: Union[np.ndarray, pd.Series, pd.DataFrame]=None,
         allow_incomplete_fold: bool=True,
-        sarimax_kws: dict={},
-        fit_kws: dict={'disp':0},
+        sarimax_kwargs: dict={},
+        fit_kwargs: dict={'disp':0},
         verbose: bool=False
 ) -> Tuple[np.array, np.array]:
     '''
@@ -565,11 +565,11 @@ def cv_sarimax_statsmodels(
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
         
-    sarimax_kws: dict, default {}
+    sarimax_kwargs: dict, default {}
         Additional keyword arguments passed to SARIMAX initialization. See more in
         https://www.statsmodels.org/stable/generated/statsmodels.tsa.statespace.sarimax.SARIMAX.html#statsmodels.tsa.statespace.sarimax.SARIMAX
         
-    fit_kws: dict, default `{'disp':0}`
+    fit_kwargs: dict, default `{'disp':0}`
         Additional keyword arguments passed to SARIMAX fit. See more in
         https://www.statsmodels.org/stable/generated/statsmodels.tsa.statespace.sarimax.SARIMAX.fit.html#statsmodels.tsa.statespace.sarimax.SARIMAX.fit
         
@@ -627,8 +627,8 @@ def cv_sarimax_statsmodels(
                     order = order,
                     seasonal_order = seasonal_order,
                     trend = trend,
-                    **sarimax_kws
-                ).fit(**fit_kws)
+                    **sarimax_kwargs
+                ).fit(**fit_kwargs)
             
             pred = model.forecast(steps=len(test_index))
             
@@ -639,8 +639,8 @@ def cv_sarimax_statsmodels(
                     order = order,
                     seasonal_order = seasonal_order,
                     trend = trend,
-                    **sarimax_kws
-                ).fit(**fit_kws)
+                    **sarimax_kwargs
+                ).fit(**fit_kwargs)
             
             pred = model.forecast(steps=len(test_index), exog=exog[test_index])
     
@@ -665,8 +665,8 @@ def grid_search_sarimax_statsmodels(
         exog: Union[np.ndarray, pd.Series, pd.DataFrame]=None,
         method: str='cv',
         allow_incomplete_fold: bool=True,
-        sarimax_kws: dict={},
-        fit_kws: dict={'disp':0},
+        sarimax_kwargs: dict={},
+        fit_kwargs: dict={'disp':0},
         verbose: bool=False
 ) -> pd.DataFrame:
     '''
@@ -712,11 +712,11 @@ def grid_search_sarimax_statsmodels(
     return_best : bool
         Refit the `forecaster` using the best found parameters on the whole data.
         
-    sarimax_kws: dict, default `{}`
+    sarimax_kwargs: dict, default `{}`
         Additional keyword arguments passed to SARIMAX initialization. See more in
         https://www.statsmodels.org/stable/generated/statsmodels.tsa.statespace.sarimax.SARIMAX.html#statsmodels.tsa.statespace.sarimax.SARIMAX
         
-    fit_kws: dict, default `{'disp':0}`
+    fit_kwargs: dict, default `{'disp':0}`
         Additional keyword arguments passed to SARIMAX fit. See more in
         https://www.statsmodels.org/stable/generated/statsmodels.tsa.statespace.sarimax.SARIMAX.fit.html#statsmodels.tsa.statespace.sarimax.SARIMAX.fit
         
@@ -771,31 +771,31 @@ def grid_search_sarimax_statsmodels(
 
         if method == 'cv':
             metrics = cv_sarimax_statsmodels(
-                            y           = y,
-                            exog        = exog,
-                            order       = params['order'],
+                            y              = y,
+                            exog           = exog,
+                            order          = params['order'],
                             seasonal_order = params['seasonal_order'],
-                            trend       = params['trend'],
+                            trend          = params['trend'],
                             initial_train_size = initial_train_size,
-                            steps       = steps,
-                            metric      = metric,
-                            sarimax_kws = sarimax_kws,
-                            fit_kws     = fit_kws,
-                            verbose     = verbose
+                            steps          = steps,
+                            metric         = metric,
+                            sarimax_kwargs = sarimax_kwargs,
+                            fit_kwargs     = fit_kwargs,
+                            verbose        = verbose
                         )[0]
         else:
             metrics = backtesting_sarimax_statsmodels(
-                            y           = y,
-                            exog        = exog,
-                            order       = params['order'],
+                            y              = y,
+                            exog           = exog,
+                            order          = params['order'],
                             seasonal_order = params['seasonal_order'],
-                            trend       = params['trend'],
+                            trend          = params['trend'],
                             initial_train_size = initial_train_size,
-                            steps       = steps,
-                            metric      = metric,
-                            sarimax_kws = sarimax_kws,
-                            fit_kws     = fit_kws,
-                            verbose     = verbose
+                            steps          = steps,
+                            metric         = metric,
+                            sarimax_kwargs = sarimax_kwargs,
+                            fit_kwargs     = fit_kwargs,
+                            verbose        = verbose
                         )[0]
 
         params_list.append(params)
@@ -807,8 +807,8 @@ def grid_search_sarimax_statsmodels(
                     order = params['order'],
                     seasonal_order = params['seasonal_order'],
                     trend = params['trend'],
-                    **sarimax_kws
-                ).fit(**fit_kws)
+                    **sarimax_kwargs
+                ).fit(**fit_kwargs)
         
         bic_list.append(model.bic)
         aic_list.append(model.aic)
