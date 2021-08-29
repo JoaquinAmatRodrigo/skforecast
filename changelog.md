@@ -16,7 +16,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 
 + `cv_forecaster()` returns cross-validation metrics and cross-validation predictions.
-+ added an extra column for each parameter in the dataframe returned by `grid_search_forecaster()` .
++ added an extra column for each parameter in the dataframe returned by `grid_search_forecaster()`.
 + statsmodels 0.12.2 added to requirements
 
 ### Fixed
