@@ -733,7 +733,16 @@ def grid_search_sarimax_statsmodels(
         param_grid['seasonal_order'] = [(0, 0, 0, 0)]
     if 'trend' not in param_grid:
         param_grid['trend'] = [None]
-    
+
+    keys_to_ignore = set(param_grid.keys()) - {'order', 'seasonal_order', 'trend'}
+    if keys_to_ignore:
+        print(
+            f'Only arguments: order, seasonal_order and trend are allowed for grid serach.'
+            f' Ignoring {keys_to_ignore}.'
+        )
+        for key in keys_to_ignore:
+            del param_grid[key]
+            
     param_grid =  list(ParameterGrid(param_grid))
 
     logging.info(
