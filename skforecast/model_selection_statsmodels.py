@@ -438,9 +438,12 @@ def backtesting_sarimax_statsmodels(
             print(f"    Last fold only includes {remainder} observations")
       
     for i in range(folds):
-        last_window_end   = initial_train_size + i * steps
-        last_window_start = (initial_train_size + i * steps) - steps 
-        last_window       = y[last_window_start:last_window_end]
+        last_window_end     = initial_train_size + i * steps
+        last_window_start   = (initial_train_size + i * steps) - steps 
+        last_window_y       = y[last_window_start:last_window_end]
+        if exog is not None:
+            last_window_exog    = exog[last_window_start:last_window_end]
+            next_window_exog    = exog[last_window_end:last_window_end + steps]
         
         if i == 0:
             if exog is None:
@@ -449,34 +452,33 @@ def backtesting_sarimax_statsmodels(
             else:
                 pred = model.forecast(
                             steps       = steps,
-                            exog        = exog[last_window_end:last_window_end + steps]
-                        )
+                            exog        = next_window_exog
+                       )
                 
         elif i < folds - 1:
             if exog is None:
-                # Update internal values stored by SARIMAX
-                model = model.extend(last_window)
+                model = model.extend(endog=last_window_y)
                 pred = model.forecast(steps=steps)
                             
             else:
-                model = model.extend(last_window, exog=exog[last_window_start:last_window_end])
+                model = model.extend(endog=last_window_y, exog=last_window_exog)
                 pred = model.forecast(
-                            steps       = steps,
-                            exog        = exog[last_window_end:last_window_end + steps]
+                            steps = steps,
+                            exog  = next_window_exog
                         )
                 
         elif remainder != 0:
             steps = remainder
             
             if exog is None:
-                model = model.extend(last_window)
+                model = model.extend(exog=last_window_y)
                 pred = model.forecast(steps=steps)
                 
             else:
-                model = model.extend(last_window, exog=exog[last_window_start:last_window_end])
+                model = model.extend(endog=last_window_y, exog=last_window_exog)
                 pred = model.forecast(
-                            steps       = steps,
-                            exog        = exog[last_window_end:last_window_end + steps]
+                            steps = steps,
+                            exog  = next_window_exog
                        )
         else:
             continue
