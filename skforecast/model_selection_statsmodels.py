@@ -307,6 +307,7 @@ def backtesting_sarimax_statsmodels(
         order: tuple=(1, 0, 0), 
         seasonal_order: tuple=(0, 0, 0, 0),
         trend: str=None,
+        alpha: float= 0.05,
         exog: Union[np.ndarray, pd.Series, pd.DataFrame]=None,
         sarimax_kwargs: dict={},
         fit_kwargs: dict={'disp':0},
@@ -352,6 +353,9 @@ def backtesting_sarimax_statsmodels(
         and ‘ct’ is both. Can also be specified as an iterable defining the non-zero
         polynomial exponents to include, in increasing order. For example, [1,1,0,1]
         denotes a+bt+ct3. Default is to not include a trend component.
+        
+    alpha: float, default 0.05
+        The significance level for the confidence interval. The default alpha = .05 returns a 95% confidence interval.
     
     initial_train_size: int 
         Number of samples in the initial train split.
@@ -385,7 +389,10 @@ def backtesting_sarimax_statsmodels(
         Value of the metric.
 
     backtest_predictions: 1D np.ndarray
-        Value of predictions.
+        2D np.ndarray with predicted value and their estimated interval.
+            Column 0 = predictions
+            Column 1 = lower bound interval
+            Column 2 = upper bound interval.
     '''
     
 
@@ -453,39 +460,36 @@ def backtesting_sarimax_statsmodels(
         
         if i == 0:
             if exog is None:
-                pred = model.forecast(steps=steps)
+                pred = model.get_forecast(steps=steps)
+                pred = np.column_stack((pred.predicted_mean, pred.conf_int(alpha=alpha)))
                             
             else:
-                pred = model.forecast(
-                            steps       = steps,
-                            exog        = next_window_exog
-                       )
+                pred = model.get_forecast(steps=steps, exog=next_window_exog)
+                pred = np.column_stack((pred.predicted_mean, pred.conf_int(alpha=alpha)))
                 
         elif i < folds - 1:
             if exog is None:
                 model = model.extend(endog=last_window_y)
-                pred = model.forecast(steps=steps)
+                pred = model.get_forecast(steps=steps)
+                pred = np.column_stack((pred.predicted_mean, pred.conf_int(alpha=alpha)))
                             
             else:
                 model = model.extend(endog=last_window_y, exog=last_window_exog)
-                pred = model.forecast(
-                            steps = steps,
-                            exog  = next_window_exog
-                        )
+                pred = model.get_forecast(steps=steps, exog=next_window_exog)
+                pred = np.column_stack((pred.predicted_mean, pred.conf_int(alpha=alpha)))
                 
         elif remainder != 0:
             steps = remainder
             
             if exog is None:
                 model = model.extend(exog=last_window_y)
-                pred = model.forecast(steps=steps)
+                pred = model.get_forecast(steps=steps)
+                pred = np.column_stack((pred.predicted_mean, pred.conf_int(alpha=alpha)))
                 
             else:
                 model = model.extend(endog=last_window_y, exog=last_window_exog)
-                pred = model.forecast(
-                            steps = steps,
-                            exog  = next_window_exog
-                       )
+                pred = model.get_forecast(steps=steps, exog=next_window_exog)
+                pred = np.column_stack((pred.predicted_mean, pred.conf_int(alpha=alpha)))
         else:
             continue
         
@@ -494,7 +498,7 @@ def backtesting_sarimax_statsmodels(
     backtest_predictions = np.concatenate(backtest_predictions)
     metric_value = metric(
                         y_true = y[initial_train_size: initial_train_size + len(backtest_predictions)],
-                        y_pred = backtest_predictions
+                        y_pred = backtest_predictions[:, 0]
                    )
 
     return np.array([metric_value]), backtest_predictions
@@ -508,6 +512,7 @@ def cv_sarimax_statsmodels(
         order: tuple=(1, 0, 0), 
         seasonal_order: tuple=(0, 0, 0, 0),
         trend: str=None,
+        alpha: float= 0.05,
         exog: Union[np.ndarray, pd.Series, pd.DataFrame]=None,
         allow_incomplete_fold: bool=True,
         sarimax_kwargs: dict={},
@@ -550,6 +555,9 @@ def cv_sarimax_statsmodels(
         and ‘ct’ is both. Can also be specified as an iterable defining the non-zero
         polynomial exponents to include, in increasing order. For example, [1,1,0,1]
         denotes a+bt+ct3. Default is to not include a trend component.
+        
+    alpha: float, default 0.05
+        The significance level for the confidence interval. The default alpha = .05 returns a 95% confidence interval.
     
     initial_train_size: int 
         Number of samples in the initial train split.
@@ -582,8 +590,11 @@ def cv_sarimax_statsmodels(
     cv_metrics: 1D np.ndarray
         Value of the metric for each partition.
 
-    cv_predictions: 1D np.ndarray
-        Predictions.
+    cv_predictions:  np.ndarray
+        2D np.ndarray with predicted value and their estimated interval.
+            Column 0 = predictions
+            Column 1 = lower bound interval
+            Column 2 = upper bound interval.
     '''
     
 
@@ -630,7 +641,8 @@ def cv_sarimax_statsmodels(
                     **sarimax_kwargs
                 ).fit(**fit_kwargs)
             
-            pred = model.forecast(steps=len(test_index))
+            pred = model.get_forecast(steps=len(test_index))
+            pred = np.column_stack((pred.predicted_mean, pred.conf_int(alpha=alpha)))
             
         else:         
             model = SARIMAX(
@@ -642,12 +654,13 @@ def cv_sarimax_statsmodels(
                     **sarimax_kwargs
                 ).fit(**fit_kwargs)
             
-            pred = model.forecast(steps=len(test_index), exog=exog[test_index])
+            pred = model.get_forecast(steps=len(test_index), exog=exog[test_index])
+            pred = np.column_stack((pred.predicted_mean, pred.conf_int(alpha=alpha)))
     
                
         metric_value = metric(
                             y_true = y[test_index],
-                            y_pred = pred
+                            y_pred = pred[:, 0]
                        )
         
         cv_metrics.append(metric_value)
