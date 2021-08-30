@@ -1,16 +1,41 @@
-
 # Releases
 
-All notable changes to this project will be documented in this file.
+## [0.3.0.dev0] - unreleased
 
-## [0.2.0] - [unreleased]
+### Added
+
++ new module named model_selection_statsmodels to cross-validate, backtesting and grid search AutoReg and SARIMAX models from statsmodels library:
+    + `backtesting_autoreg_statsmodels()`
+    + `cv_autoreg_statsmodels()`
+    + `backtesting_sarimax_statsmodels()`
+    + `cv_sarimax_statsmodels()`
+    + `grid_search_sarimax_statsmodels()`
+
+### Changed
+
++ `cv_forecaster()` returns cross-validation metrics and cross-validation predictions.
++ added an extra column for each parameter in the dataframe returned by `grid_search_forecaster()`.
++ statsmodels 0.12.2 added to requirements
+
+### Fixed
+
+
+## [0.2.0] - [2021-08-26]
 
 ### Added
 
 
++ Multiple exogenous variables can be passed as pandas DataFrame.
+
++ Documentation at https://joaquinamatrodrigo.github.io/skforecast/
+
++ New unit test
+
++ Increased typing
+
 ### Changed
 
-+ Installation using `pip install skforecast`
++ New implementation of `ForecasterAutoregMultiOutput`. The training process in the new version creates a different X_train for each step. See [Direct multi-step forecasting](https://github.com/JoaquinAmatRodrigo/skforecast#introduction) for more details. Old versión can be acces with `skforecast.deprecated.ForecasterAutoregMultiOutput`.
 
 ### Fixed
 
@@ -124,8 +149,3 @@ All notable changes to this project will be documented in this file.
 
  
 ### Fixed
-
-
-
-
-
