@@ -704,11 +704,11 @@ regressed on exog[i].</span></li>
     </div>
   <div class="mkapi-section returns">
       <div class="mkapi-section-name returns">
-          <span class="mkapi-section-name-body returns">Returns</span> <span class="mkapi-item-type">(backtest_predictions: 1D np.ndarray)</span>
+          <span class="mkapi-section-name-body returns">Returns</span> <span class="mkapi-item-type">(metric_value: np.ndarray shape (1,))</span>
         </div>
-      <div class="mkapi-section-body returns"><p>Value of predictions.</p>
-<p>ic_value: np.ndarray shape (1,)
-Value of the metric.</p></div>
+      <div class="mkapi-section-body returns"><p>Value of the metric.</p>
+<p>test_predictions: 1D np.ndarray
+Value of predictions.</p></div>
     </div>
   </div>
 
@@ -773,11 +773,11 @@ regressed on exog[i].</span></li>
     </div>
   <div class="mkapi-section returns">
       <div class="mkapi-section-name returns">
-          <span class="mkapi-section-name-body returns">Returns</span> <span class="mkapi-item-type">(backtest_predictions: 1D np.ndarray)</span>
+          <span class="mkapi-section-name-body returns">Returns</span> <span class="mkapi-item-type">(metric_value: np.ndarray shape (1,))</span>
         </div>
-      <div class="mkapi-section-body returns"><p>Value of predictions.</p>
-<p>ic_value: np.ndarray shape (1,)
-Value of the metric.</p></div>
+      <div class="mkapi-section-body returns"><p>Value of the metric.</p>
+<p>test_predictions: 1D np.ndarray
+Value of predictions.</p></div>
     </div>
   </div>
 
@@ -794,8 +794,8 @@ Value of the metric.</p></div>
 <div class="mkapi-docstring">
 <div class="mkapi-section">
       <div class="mkapi-section-body"><p>Cross-validation of <code>ForecasterAutoreg</code>, <code>ForecasterCustom</code>, <code>ForecasterAutoregCustom</code>
-or <code>ForecasterAutoregMultiOutput</code> object. The order of is maintained and the
-training set increases in each iteration.</p></div>
+or <code>ForecasterAutoregMultiOutput</code> object. The order of data is maintained
+and the training set increases in each iteration.</p></div>
     </div>
   <div class="mkapi-section parameters">
       <div class="mkapi-section-name parameters">
@@ -844,9 +844,11 @@ observations. Otherwise, the latest observations are discarded.</span></li>
     </div>
   <div class="mkapi-section returns">
       <div class="mkapi-section-name returns">
-          <span class="mkapi-section-name-body returns">Returns</span> <span class="mkapi-item-type">(cv_results: 1D np.ndarray)</span>
+          <span class="mkapi-section-name-body returns">Returns</span> <span class="mkapi-item-type">(cv_metrics: 1D np.ndarray)</span>
         </div>
-      <div class="mkapi-section-body returns"><p>Value of the metric for each partition.</p></div>
+      <div class="mkapi-section-body returns"><p>Value of the metric for each fold.</p>
+<p>redictions: 1D np.ndarray
+Predictions.</p></div>
     </div>
   </div>
 
