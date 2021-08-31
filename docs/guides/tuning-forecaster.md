@@ -39,15 +39,7 @@ data = data.sort_index()
 steps = 36
 data_train = data[:-steps]
 data_test  = data[-steps:]
-
-# Plot
-# ==============================================================================
-fig, ax=plt.subplots(figsize=(9, 4))
-data_train.plot(ax=ax, label='train')
-data_test.plot(ax=ax, label='test')
-ax.legend();
 ```
-<img src="../img/data.png">
 
 
 ## Grid search with time series cross-validation

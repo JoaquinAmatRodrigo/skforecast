@@ -1,10 +1,11 @@
-# Recursive multi-step forecasting with exogenous variables
+# Recursive multi-step forecasting
 
-`ForecasterAutoreg` and `ForecasterAutoregCustom` allow to include exogenous variables as predictors as long as their future values are known, since they must be included during the predict process.
+Since the value of *t(n)* is required to predict the point *t(n-1)*, and *t(n-1)* is unknown, it is necessary to make recursive predictions in which, each new prediction, is based on the previous one. This process is known as recursive forecasting or recursive multi-step forecasting.
 
-When using exogenous variables in recursive multi-step forecasting, their values should be aligned so that y[i] is regressed on exog[i].
+The main challenge when using scikit-learn models for recursive multi-step forecasting is transforming the time series in an matrix where, each value of the series, is related to the time window (lags) that precedes it. This forecasting strategy can be easily generated with the classes `ForecasterAutoreg` and `ForecasterAutoregCustom`.
 
-<img src="../img/matrix_transformation_with_exog_variable.png">
+<img src="../img/matrix_transformation_time_serie.png" style="width: 500px;">
+
 
 
 ## Libraries
@@ -20,13 +21,12 @@ from skforecast.ForecasterAutoreg import ForecasterAutoreg
 from sklearn.linear_model import Ridge
 from sklearn.metrics import mean_squared_error
 ```
-
 ## Data
 
 ``` python
 # Download data
 # ==============================================================================
-url = ('https://raw.githubusercontent.com/JoaquinAmatRodrigo/skforecast/master/data/h2o_exog.csv')
+url = ('https://raw.githubusercontent.com/JoaquinAmatRodrigo/skforecast/master/data/h2o.csv')
 data = pd.read_csv(url, sep=',')
 
 # Data preprocessing
@@ -35,22 +35,24 @@ data['fecha'] = pd.to_datetime(data['fecha'], format='%Y/%m/%d')
 data = data.set_index('fecha')
 data = data.rename(columns={'x': 'y'})
 data = data.asfreq('MS')
+data = data['y']
 data = data.sort_index()
+
+# Split train-test
+# ==============================================================================
+steps = 36
+data_train = data[:-steps]
+data_test  = data[-steps:]
 
 # Plot
 # ==============================================================================
 fig, ax=plt.subplots(figsize=(9, 4))
-data.plot(ax=ax);
+data_train.plot(ax=ax, label='train')
+data_test.plot(ax=ax, label='test')
+ax.legend();
 ```
-<img src="../img/data_exog.png">
+<img src="../img/data.png" style="width: 500px;">
 
-``` python
-# Split train-test
-# ==============================================================================
-steps = 36
-data_train = data.iloc[:-steps, :]
-data_test  = data.iloc[-steps:, :]
-```
 
 ## Create and train forecaster
 
@@ -63,11 +65,7 @@ forecaster = ForecasterAutoreg(
                     lags      = 15
                 )
 
-forecaster.fit(
-    y    = data_train['y'],
-    exog = data_train[['exog_1', 'exog_2']].values
-)
-
+forecaster.fit(y=data_train)
 forecaster
 ```
 
@@ -75,33 +73,27 @@ forecaster
 =======================ForecasterAutoreg=======================
 Regressor: Ridge()
 Lags: [ 1  2  3  4  5  6  7  8  9 10 11 12 13 14 15]
-Exogenous variable: True
+Exogenous variable: False
 Parameters: {'alpha': 1.0, 'copy_X': True, 'fit_intercept': True, 'max_iter': None, 'normalize': False, 'random_state': None, 'solver': 'auto', 'tol': 0.001}
 ```
 
-## Prediction
-
-If the `Forecaster` has been trained with exogenous variables, they shlud be provided when predictiong.
-
+## Prediction 
 
 ``` python
 # Predict
 # ==============================================================================
 steps = 36
-predictions = forecaster.predict(
-                steps = steps,
-                exog = data_test[['exog_1', 'exog_2']].values
-               )
+predictions = forecaster.predict(steps=steps)
 # Add datetime index to predictions
 predictions = pd.Series(data=predictions, index=data_test.index)
 predictions.head(3)
 ```
 
-```
+``` python
 fecha
-2005-07-01    0.965051
-2005-08-01    1.014752
-2005-09-01    1.140090
+2005-07-01    0.973131
+2005-08-01    1.022154
+2005-09-01    1.151334
 Freq: MS, dtype: float64
 ```
 
@@ -109,26 +101,26 @@ Freq: MS, dtype: float64
 # Plot predictions
 # ==============================================================================
 fig, ax=plt.subplots(figsize=(9, 4))
-data_train['y'].plot(ax=ax, label='train')
-data_test['y'].plot(ax=ax, label='test')
+data_train.plot(ax=ax, label='train')
+data_test.plot(ax=ax, label='test')
 predictions.plot(ax=ax, label='predictions')
 ax.legend();
 ```
 
-<img src="../img/prediction.png">
+<img src="../img/prediction.png" style="width: 500px;">
 
 ``` python
 # Prediction error
 # ==============================================================================
 error_mse = mean_squared_error(
-                y_true = data_test['y'],
+                y_true = data_test,
                 y_pred = predictions
             )
 print(f"Test error (mse): {error_mse}")
 ```
 
 ```
-Test error (mse): 0.008474661390588431
+Test error (mse): 0.009918738501371805
 ```
 
 ## Feature importance
@@ -142,17 +134,14 @@ forecaster.get_coef()
 ```
 
 ```
-array([ 0.1173852 ,  0.0290203 ,  0.02626445, -0.06322356, -0.04009523,
-       -0.00921489, -0.04732691, -0.00662549,  0.01139862,  0.01485692,
-        0.15042588,  0.56962708,  0.01581026, -0.08791199, -0.06785373,
-        0.09607342,  0.21051962])
+array([ 1.58096176e-01,  6.18241513e-02,  6.44665806e-02, -2.41792429e-02,
+       -2.60679572e-02,  7.04191008e-04, -4.28090339e-02,  4.87464352e-04,
+        1.66853207e-02,  1.00022527e-02,  1.62219885e-01,  6.15595305e-01,
+        2.85168042e-02, -7.31915864e-02, -5.38785052e-02])
 ```
 
 ## Extract training matrix
 
 ``` python
-X, y = forecaster.create_train_X_y(
-            y    = data_train['y'],
-            exog = data_train[['exog_1', 'exog_2']].values
-       )
+X, y = forecaster.create_train_X_y(data_train)
 ```

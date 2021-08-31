@@ -13,17 +13,17 @@ When working with time series, it is seldom needed to predict only the next elem
 
 Since the value of *t(n)* is required to predict the point *t(n-1)*, and *t(n-1)* is unknown, it is necessary to make recursive predictions in which, each new prediction, is based on the previous one. This process is known as recursive forecasting or recursive multi-step forecasting.
 
-<p><img src="../img/forecasting_multi-step.gif" alt="forecasting-python" title="forecasting-python"></p>
+<p><img src="../img/forecasting_multi-step.gif" style="width: 500px"></p>
 
 <br>
 
 The main challenge when using scikit-learn models for recursive multi-step forecasting is transforming the time series in an matrix where, each value of the series, is related to the time window (lags) that precedes it. This forecasting strategy can be easily generated with the classes `ForecasterAutoreg` and `ForecasterAutoregCustom`.
 
-<p><img src="../img/transform_timeseries.gif" alt="forecasting-python" title="forecasting-python"></p>
+<p><img src="../img/transform_timeseries.gif" style="width: 500px;"></p>
 
 <center><font size="2.5"> <i>Time series  transformation into a matrix of 5 lags and a vector with the value of the series that follows each row of the matrix.</i></font></center>
 
-<p><img src="../img/matrix_transformation_with_exog_variable.png" alt="forecasting-python" title="forecasting-python"></p>
+<p><img src="../img/matrix_transformation_with_exog_variable.png" style="width: 500px;"></p>
 
 <center><font size="2.5"> <i>Time series transformation including an exogenous variable.</i></font></center>
 
@@ -33,7 +33,7 @@ The main challenge when using scikit-learn models for recursive multi-step forec
 
 This strategy consists of training a different model for each step. For example, to predict the next 5 values of a time series, 5 different models are trainded, one for each step. As a result, the predictions are independent of each other. This forecasting strategy can be easily generated with the `ForecasterAutoregMultiOutput` class (changed in version 0.1.9).
 
-<p><img src="../img/diagram_skforecast_multioutput.jpg" alt="forecasting-python" title="forecasting-python"></p>
+<p><img src="../img/diagram_skforecast_multioutput.jpg"></p>
 
 <center><font size="2.5"> <i>Time series transformation into the matrices needed to train a direct multi-step forecaster.</i></font></center>
 <br><br>

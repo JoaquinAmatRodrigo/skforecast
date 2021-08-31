@@ -44,7 +44,7 @@ data_train.plot(ax=ax, label='train')
 data_test.plot(ax=ax, label='test')
 ax.legend();
 ```
-<img src="../img/data.png">
+<img src="../img/data.png" style="width: 500px;">
 
 
 ## Create and train forecaster
@@ -113,4 +113,4 @@ ax.fill_between(
 ax.legend(loc='upper right');
 ```
 
-<img src="../img/prediction_interval.png">
+<img src="../img/prediction_interval.png" style="width: 500px;">

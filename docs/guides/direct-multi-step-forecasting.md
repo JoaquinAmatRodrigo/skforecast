@@ -50,7 +50,7 @@ data_train.plot(ax=ax, label='train')
 data_test.plot(ax=ax, label='test')
 ax.legend();
 ```
-<img src="../img/data.png">
+<img src="../img/data.png" style="width: 500px;">
 
 
 ## Create and train forecaster
@@ -112,7 +112,7 @@ predictions.plot(ax=ax, label='predictions')
 ax.legend();
 ```
 
-<img src="../img/prediction_with_direct_multi_output.png">
+<img src="../img/prediction_with_direct_multi_output.png" style="width: 500px;">
 
 ``` python
 # Prediction error

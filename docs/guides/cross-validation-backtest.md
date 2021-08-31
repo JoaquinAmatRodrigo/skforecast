@@ -42,7 +42,7 @@ data.plot(ax=ax)
 ax.legend();
 ```
 
-<img src="../img/data_full_serie.png">
+<img src="../img/data_full_serie.png" style="width: 500px;">
 
 
 ## Time series cross-validation
@@ -121,7 +121,7 @@ predictions_backtest.plot(ax=ax, label='predictions')
 ax.legend();
 ```
 
-<img src="../img/predictions_backtesting_forecaster.png">
+<img src="../img/predictions_backtesting_forecaster.png" style="width: 500px;">
 
 
 
@@ -180,7 +180,7 @@ ax.fill_between(
 ax.legend();
 ```
 
-<img src="../img/prediction_interval__backtesting_forecaster.png">
+<img src="../img/prediction_interval__backtesting_forecaster.png" style="width: 500px;">
 
 
 
