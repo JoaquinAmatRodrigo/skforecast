@@ -1,5 +1,4 @@
-# Change Log
-All notable changes to this project will be documented in this file.
+# Releases
 
 ## [0.3.0.dev0] - unreleased
 
@@ -36,7 +35,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
-+ New implementation of `ForecasterAutoregMultiOutput`. The training process in the new version creates a different X_train for each step. See [Direct multi-step forecasting](https://github.com/JoaquinAmatRodrigo/skforecast#introduction) for more details. Old versión can be acces with `skforecast.deprecated.ForecasterAutoregMultiOutput`.
++ New implementation of `ForecasterAutoregMultiOutput`. The training process in the new version creates a different X_train for each step. See [Direct multi-step forecasting](./direct_multi_step_forecasting.md) for more details. Old versión can be acces with `skforecast.deprecated.ForecasterAutoregMultiOutput`.
 
 ### Fixed
 

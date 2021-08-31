@@ -11,7 +11,7 @@ nav:
     - User Guides: guides/introduction-forecasting.md
     - Examples: examples/examples.md
     - API Reference: api/ForecasterAutoreg.md
-    - Releases: guides/releases.md
+    - Releases: releases/releases.md
     
   - User Guides:
       - Introduction to forcasting: guides/introduction-forecasting.md
