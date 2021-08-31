@@ -13,7 +13,7 @@
         <meta name="author" content="Joaquin Amat Rodrigo">
       
       
-        <link rel="canonical" href="https://joaquinamatrodrigo.github.io/skforecast/guides/releases.html">
+        <link rel="canonical" href="https://joaquinamatrodrigo.github.io/skforecast/releases/releases.html">
       
       <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.2.2, mkdocs-material-7.2.2">
@@ -204,7 +204,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="introduction-forecasting.html" class="md-tabs__link">
+      <a href="../guides/introduction-forecasting.html" class="md-tabs__link">
         User Guides
       </a>
     </li>
@@ -329,7 +329,7 @@
   
   
     <li class="md-nav__item">
-      <a href="introduction-forecasting.html" class="md-nav__link">
+      <a href="../guides/introduction-forecasting.html" class="md-nav__link">
         User Guides
       </a>
     </li>
@@ -712,7 +712,7 @@
   
   
     <li class="md-nav__item">
-      <a href="introduction-forecasting.html" class="md-nav__link">
+      <a href="../guides/introduction-forecasting.html" class="md-nav__link">
         Introduction to forcasting
       </a>
     </li>
@@ -724,7 +724,7 @@
   
   
     <li class="md-nav__item">
-      <a href="autoregresive-forecaster.html" class="md-nav__link">
+      <a href="../guides/autoregresive-forecaster.html" class="md-nav__link">
         Recursive multi-step forecasting
       </a>
     </li>
@@ -736,7 +736,7 @@
   
   
     <li class="md-nav__item">
-      <a href="custom-predictors.html" class="md-nav__link">
+      <a href="../guides/custom-predictors.html" class="md-nav__link">
         Custom predictors
       </a>
     </li>
@@ -748,7 +748,7 @@
   
   
     <li class="md-nav__item">
-      <a href="autoregresive-forecaster-exogenous.html" class="md-nav__link">
+      <a href="../guides/autoregresive-forecaster-exogenous.html" class="md-nav__link">
         Recursive multi-step forecasting with exogenous variables
       </a>
     </li>
@@ -760,7 +760,7 @@
   
   
     <li class="md-nav__item">
-      <a href="direct-multi-step-forecasting.html" class="md-nav__link">
+      <a href="../guides/direct-multi-step-forecasting.html" class="md-nav__link">
         Direct multi-step forecasting
       </a>
     </li>
@@ -772,7 +772,7 @@
   
   
     <li class="md-nav__item">
-      <a href="cross-validation-backtest.html" class="md-nav__link">
+      <a href="../guides/cross-validation-backtest.html" class="md-nav__link">
         Cross validation and Backtest
       </a>
     </li>
@@ -784,7 +784,7 @@
   
   
     <li class="md-nav__item">
-      <a href="tuning-forecaster.html" class="md-nav__link">
+      <a href="../guides/tuning-forecaster.html" class="md-nav__link">
         Tuning forecaster
       </a>
     </li>
@@ -796,7 +796,7 @@
   
   
     <li class="md-nav__item">
-      <a href="prediction-intervals.html" class="md-nav__link">
+      <a href="../guides/prediction-intervals.html" class="md-nav__link">
         Prediction intervals
       </a>
     </li>
@@ -1250,7 +1250,7 @@
             <article class="md-content__inner md-typeset">
               
                 
-                  <a href="https://github.com/JoaquinAmatRodrigo/skforecast/edit/master/docs/guides/releases.md" title="Edit this page" class="md-content__button md-icon">
+                  <a href="https://github.com/JoaquinAmatRodrigo/skforecast/edit/master/docs/releases/releases.md" title="Edit this page" class="md-content__button md-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
                   </a>
                 
@@ -1259,19 +1259,19 @@
 <h2 id="030dev0-unreleased">[0.3.0.dev0] - unreleased<a class="headerlink" href="#030dev0-unreleased" title="Permanent link">&para;</a></h2>
 <h3 id="added">Added<a class="headerlink" href="#added" title="Permanent link">&para;</a></h3>
 <ul>
-<li>new module named model_selection_statsmodels to cross-validate, backtesting and grid search AutoReg and SARIMAX models from statsmodels library:<ul>
-<li><code>backtesting_autoreg_statsmodels()</code></li>
-<li><code>cv_autoreg_statsmodels()</code></li>
-<li><code>backtesting_sarimax_statsmodels()</code></li>
-<li><code>cv_sarimax_statsmodels()</code></li>
-<li><code>grid_search_sarimax_statsmodels()</code></li>
+<li>New module model_selection_statsmodels to cross-validate, backtesting and grid search AutoReg and SARIMAX models from statsmodels library:<ul>
+<li><code>backtesting_autoreg_statsmodels</code></li>
+<li><code>cv_autoreg_statsmodels</code></li>
+<li><code>backtesting_sarimax_statsmodels</code></li>
+<li><code>cv_sarimax_statsmodels</code></li>
+<li><code>grid_search_sarimax_statsmodels</code></li>
 </ul>
 </li>
 </ul>
 <h3 id="changed">Changed<a class="headerlink" href="#changed" title="Permanent link">&para;</a></h3>
 <ul>
-<li><code>cv_forecaster()</code> returns cross-validation metrics and cross-validation predictions.</li>
-<li>added an extra column for each parameter in the dataframe returned by <code>grid_search_forecaster()</code>.</li>
+<li><code>cv_forecaster</code> returns cross-validation metrics and cross-validation predictions.</li>
+<li>Added an extra column for each parameter in the dataframe returned by <code>grid_search_forecaster</code>.</li>
 <li>statsmodels 0.12.2 added to requirements</li>
 </ul>
 <h3 id="fixed">Fixed<a class="headerlink" href="#fixed" title="Permanent link">&para;</a></h3>
@@ -1300,13 +1300,13 @@
 <h3 id="added_2">Added<a class="headerlink" href="#added_2" title="Permanent link">&para;</a></h3>
 <ul>
 <li>
-<p>Logging total number of models to fit in <code>grid_search_forecaster()</code>.</p>
+<p>Logging total number of models to fit in <code>grid_search_forecaster</code>.</p>
 </li>
 <li>
 <p>Class <code>ForecasterAutoregCustom</code>.</p>
 </li>
 <li>
-<p>Method <code>create_train_X_y()</code> to facilitate access to the training data matrix created from <code>y</code> and <code>exog</code>.</p>
+<p>Method <code>create_train_X_y</code> to facilitate access to the training data matrix created from <code>y</code> and <code>exog</code>.</p>
 </li>
 </ul>
 <h3 id="changed_2">Changed<a class="headerlink" href="#changed_2" title="Permanent link">&para;</a></h3>
@@ -1318,10 +1318,10 @@
 <p>Class <code>ForecasterCustom</code> has been renamed to <code>ForecasterAutoregCustom</code>. However, <code>ForecasterCustom</code> will still remain to keep backward compatibility.</p>
 </li>
 <li>
-<p>Argument <code>metric</code> in <code>cv_forecaster()</code>, <code>backtesting_forecaster()</code>, <code>grid_search_forecaster()</code> and <code>backtesting_forecaster_intervals()</code> changed from 'neg_mean_squared_error', 'neg_mean_absolute_error', 'neg_mean_absolute_percentage_error' to 'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'.</p>
+<p>Argument <code>metric</code> in <code>cv_forecaster</code>, <code>backtesting_forecaster</code>, <code>grid_search_forecaster</code> and <code>backtesting_forecaster_intervals</code> changed from 'neg_mean_squared_error', 'neg_mean_absolute_error', 'neg_mean_absolute_percentage_error' to 'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'.</p>
 </li>
 <li>
-<p>Check if argument <code>metric</code> in <code>cv_forecaster()</code>, <code>backtesting_forecaster()</code>, <code>grid_search_forecaster()</code> and <code>backtesting_forecaster_intervals()</code> is one of 'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'.</p>
+<p>Check if argument <code>metric</code> in <code>cv_forecaster</code>, <code>backtesting_forecaster</code>, <code>grid_search_forecaster</code> and <code>backtesting_forecaster_intervals</code> is one of 'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'.</p>
 </li>
 <li>
 <p><code>time_series_spliter</code> doesn't include the remaining observations in the last complete fold but in a new one when <code>allow_incomplete_fold=True</code>. Take in consideration that incomplete folds with few observations could overestimate or underestimate the validation metric.</p>
@@ -1329,12 +1329,12 @@
 </ul>
 <h3 id="fixed_2">Fixed<a class="headerlink" href="#fixed_2" title="Permanent link">&para;</a></h3>
 <ul>
-<li>Update lags of  <code>ForecasterAutoregMultiOutput</code> after <code>grid_search_forecaster()</code>.</li>
+<li>Update lags of  <code>ForecasterAutoregMultiOutput</code> after <code>grid_search_forecaster</code>.</li>
 </ul>
 <h2 id="0181-2021-05-17">[0.1.8.1] - 2021-05-17<a class="headerlink" href="#0181-2021-05-17" title="Permanent link">&para;</a></h2>
 <h3 id="added_3">Added<a class="headerlink" href="#added_3" title="Permanent link">&para;</a></h3>
 <ul>
-<li><code>set_out_sample_residuals()</code> method to store or update out of sample residuals used by <code>predict_interval()</code>.</li>
+<li><code>set_out_sample_residuals</code> method to store or update out of sample residuals used by <code>predict_interval</code>.</li>
 </ul>
 <h3 id="changed_3">Changed<a class="headerlink" href="#changed_3" title="Permanent link">&para;</a></h3>
 <ul>
@@ -1351,13 +1351,13 @@
 <h3 id="fixed_3">Fixed<a class="headerlink" href="#fixed_3" title="Permanent link">&para;</a></h3>
 <ul>
 <li>
-<p>Warning of inclompleted folds when using <code>backtesting_forecast()</code> with a  <code>ForecasterAutoregMultiOutput</code>.</p>
+<p>Warning of inclompleted folds when using <code>backtesting_forecast</code> with a  <code>ForecasterAutoregMultiOutput</code>.</p>
 </li>
 <li>
-<p><code>ForecasterAutoregMultiOutput.predict()</code> allow exog data longer than needed (steps).</p>
+<p><code>ForecasterAutoregMultiOutput.predict</code> allow exog data longer than needed (steps).</p>
 </li>
 <li>
-<p><code>backtesting_forecast()</code> prints correctly the number of folds when remainder observations are cero.</p>
+<p><code>backtesting_forecast</code> prints correctly the number of folds when remainder observations are cero.</p>
 </li>
 <li>
 <p>Removed named argument X in <code>self.regressor.predict(X)</code> to allow using XGBoost regressor.</p>
@@ -1370,8 +1370,8 @@
 <h3 id="added_4">Added<a class="headerlink" href="#added_4" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Class <code>ForecasterAutoregMultiOutput.py</code>: forecaster with direct multi-step predictions.</li>
-<li>Method <code>ForecasterCustom.predict_interval()</code> and  <code>ForecasterAutoreg.predict_interval()</code>: estimate prediction interval using bootstrapping.</li>
-<li><code>skforecast.model_selection.backtesting_forecaster_intervals()</code> perform backtesting and return prediction intervals.</li>
+<li>Method <code>ForecasterCustom.predict_interval</code> and  <code>ForecasterAutoreg.predict_interval</code>: estimate prediction interval using bootstrapping.</li>
+<li><code>skforecast.model_selection.backtesting_forecaster_intervals</code> perform backtesting and return prediction intervals.</li>
 </ul>
 <h3 id="changed_4">Changed<a class="headerlink" href="#changed_4" title="Permanent link">&para;</a></h3>
 <h3 id="fixed_4">Fixed<a class="headerlink" href="#fixed_4" title="Permanent link">&para;</a></h3>
@@ -1382,27 +1382,27 @@
 </ul>
 <h3 id="changed_5">Changed<a class="headerlink" href="#changed_5" title="Permanent link">&para;</a></h3>
 <ul>
-<li><code>grid_search forecaster()</code> adapted to work with objects <code>ForecasterCustom</code> in addition to <code>ForecasterAutoreg</code>.</li>
+<li><code>grid_search forecaster</code> adapted to work with objects <code>ForecasterCustom</code> in addition to <code>ForecasterAutoreg</code>.</li>
 </ul>
 <h3 id="fixed_5">Fixed<a class="headerlink" href="#fixed_5" title="Permanent link">&para;</a></h3>
 <h2 id="016-2021-03-14">[0.1.6] - 2021-03-14<a class="headerlink" href="#016-2021-03-14" title="Permanent link">&para;</a></h2>
 <h3 id="added_6">Added<a class="headerlink" href="#added_6" title="Permanent link">&para;</a></h3>
 <ul>
-<li>Method <code>get_feature_importances()</code> to <code>skforecast.ForecasterAutoreg</code>.</li>
-<li>Added backtesting strategy in <code>grid_search_forecaster()</code>.</li>
-<li>Added <code>backtesting_forecast()</code> to <code>skforecast.model_selection</code>.</li>
+<li>Method <code>get_feature_importances</code> to <code>skforecast.ForecasterAutoreg</code>.</li>
+<li>Added backtesting strategy in <code>grid_search_forecaster</code>.</li>
+<li>Added <code>backtesting_forecast</code> to <code>skforecast.model_selection</code>.</li>
 </ul>
 <h3 id="changed_6">Changed<a class="headerlink" href="#changed_6" title="Permanent link">&para;</a></h3>
 <ul>
-<li>Method <code>create_lags()</code> return a matrix where the order of columns match the ascending order of lags. For example, column 0 contains the values of the minimum lag used as predictor.</li>
-<li>Renamed argument <code>X</code> to <code>last_window</code> in method <code>predict()</code>.</li>
-<li>Renamed <code>ts_cv_forecaster()</code> to <code>cv_forecaster()</code>.</li>
+<li>Method <code>create_lags</code> return a matrix where the order of columns match the ascending order of lags. For example, column 0 contains the values of the minimum lag used as predictor.</li>
+<li>Renamed argument <code>X</code> to <code>last_window</code> in method <code>predict</code>.</li>
+<li>Renamed <code>ts_cv_forecaster</code> to <code>cv_forecaster</code>.</li>
 </ul>
 <h3 id="fixed_6">Fixed<a class="headerlink" href="#fixed_6" title="Permanent link">&para;</a></h3>
 <h2 id="014-2021-02-15">[0.1.4] - 2021-02-15<a class="headerlink" href="#014-2021-02-15" title="Permanent link">&para;</a></h2>
 <h3 id="added_7">Added<a class="headerlink" href="#added_7" title="Permanent link">&para;</a></h3>
 <ul>
-<li>Method <code>get_coef()</code> to <code>skforecast.ForecasterAutoreg</code>.</li>
+<li>Method <code>get_coef</code> to <code>skforecast.ForecasterAutoreg</code>.</li>
 </ul>
 <h3 id="changed_7">Changed<a class="headerlink" href="#changed_7" title="Permanent link">&para;</a></h3>
 <h3 id="fixed_7">Fixed<a class="headerlink" href="#fixed_7" title="Permanent link">&para;</a></h3>
@@ -1441,7 +1441,7 @@
       
       
         
-        <a href="introduction-forecasting.html" class="md-footer__link md-footer__link--next" aria-label="Next: Introduction to forcasting" rel="next">
+        <a href="../guides/introduction-forecasting.html" class="md-footer__link md-footer__link--next" aria-label="Next: Introduction to forcasting" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
