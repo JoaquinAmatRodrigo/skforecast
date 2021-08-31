@@ -1,5 +1,20 @@
 # Cross validation and backtest
 
+**Time series cross-validation**
+
+The model is trained before making the predictions, in this way, the model use all the information available so far. It is a variation of the standar cross-validation but, instead of making a random distribution of the observations, the training set is increased sequentially, maintaining the temporal order of the data.
+
+<img src="../img/diagram_time_series_backtesting.jpg" style="width: 500px;">
+
+<br>
+
+**Backtesting**
+
+It is a similar strategy to that of time series cross-validation but without retraining. After an initial train, the model is used sequentially without updating it and following the temporal order of the data. This strategy has the advantage of being much faster than time series cross-validation since the model is only trained once. However, the model does not incorporate the latest information available so it may lose predictive capacity over time.
+
+<img src="../img/diagram_time_series_cross_validation.jpg" style="width: 500px;">
+
+
 
 ## Libraries
 
