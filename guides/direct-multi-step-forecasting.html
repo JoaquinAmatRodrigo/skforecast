@@ -13,14 +13,14 @@
         <meta name="author" content="Joaquin Amat Rodrigo">
       
       
-        <link rel="canonical" href="https://joaquinamatrodrigo.github.io/skforecast/guides/autoregresive_forecaster.html">
+        <link rel="canonical" href="https://joaquinamatrodrigo.github.io/skforecast/guides/direct-multi-step-forecasting.html">
       
       <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.2.2, mkdocs-material-7.2.2">
     
     
       
-        <title>Recursive multi-step forecasting - Skforecast Docs</title>
+        <title>Direct multi-step forecasting - Skforecast Docs</title>
       
     
     
@@ -79,7 +79,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#recursive-multi-step-forecasting" class="md-skip">
+        <a href="#direct-multi-step-forecaster" class="md-skip">
           Skip to content
         </a>
       
@@ -108,7 +108,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Recursive multi-step forecasting
+              Direct multi-step forecasting
             
           </span>
         </div>
@@ -204,7 +204,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="forecasting-methods.html" class="md-tabs__link md-tabs__link--active">
+      <a href="introduction-forecasting.html" class="md-tabs__link md-tabs__link--active">
         User Guides
       </a>
     </li>
@@ -327,7 +327,7 @@
   
   
     <li class="md-nav__item">
-      <a href="forecasting-methods.html" class="md-nav__link">
+      <a href="introduction-forecasting.html" class="md-nav__link">
         User Guides
       </a>
     </li>
@@ -407,8 +407,44 @@
   
   
     <li class="md-nav__item">
-      <a href="forecasting-methods.html" class="md-nav__link">
+      <a href="introduction-forecasting.html" class="md-nav__link">
         Introduction to forcasting
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="autoregresive-forecaster.html" class="md-nav__link">
+        Recursive multi-step forecasting
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="custom-predictors.html" class="md-nav__link">
+        Custom predictors
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="autoregresive-forecaster-exogenous.html" class="md-nav__link">
+        Recursive multi-step forecasting with exogenous variables
       </a>
     </li>
   
@@ -429,12 +465,12 @@
       
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
-          Recursive multi-step forecasting
+          Direct multi-step forecasting
           <span class="md-nav__icon md-icon"></span>
         </label>
       
-      <a href="autoregresive_forecaster.html" class="md-nav__link md-nav__link--active">
-        Recursive multi-step forecasting
+      <a href="direct-multi-step-forecasting.html" class="md-nav__link md-nav__link--active">
+        Direct multi-step forecasting
       </a>
       
         
@@ -506,43 +542,7 @@
   
   
     <li class="md-nav__item">
-      <a href="custom_predictors.html" class="md-nav__link">
-        Custom predictors
-      </a>
-    </li>
-  
-
-          
-            
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="autoregresive_forecaster_exogenous.html" class="md-nav__link">
-        Recursive multi-step forecasting with exogenous variables
-      </a>
-    </li>
-  
-
-          
-            
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="direct_multi_step_forecasting.html" class="md-nav__link">
-        Direct multi-step forecasting
-      </a>
-    </li>
-  
-
-          
-            
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="cross_validation_backtest.html" class="md-nav__link">
+      <a href="cross-validation-backtest.html" class="md-nav__link">
         Cross validation and Backtest
       </a>
     </li>
@@ -554,7 +554,7 @@
   
   
     <li class="md-nav__item">
-      <a href="tuning.html" class="md-nav__link">
+      <a href="tuning-forecaster.html" class="md-nav__link">
         Tuning forecaster
       </a>
     </li>
@@ -566,7 +566,7 @@
   
   
     <li class="md-nav__item">
-      <a href="prediction_intervals.html" class="md-nav__link">
+      <a href="prediction-intervals.html" class="md-nav__link">
         Prediction intervals
       </a>
     </li>
@@ -790,16 +790,15 @@
             <article class="md-content__inner md-typeset">
               
                 
-                  <a href="https://github.com/JoaquinAmatRodrigo/skforecast/edit/master/docs/guides/autoregresive_forecaster.md" title="Edit this page" class="md-content__button md-icon">
+                  <a href="https://github.com/JoaquinAmatRodrigo/skforecast/edit/master/docs/guides/direct-multi-step-forecasting.md" title="Edit this page" class="md-content__button md-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
                   </a>
                 
                 
-                <h1 id="recursive-multi-step-forecasting">Recursive multi-step forecasting<a class="headerlink" href="#recursive-multi-step-forecasting" title="Permanent link">&para;</a></h1>
-<p>Since the value of <em>t(n)</em> is required to predict the point <em>t(n-1)</em>, and <em>t(n-1)</em> is unknown, it is necessary to make recursive predictions in which, each new prediction, is based on the previous one. This process is known as recursive forecasting or recursive multi-step forecasting.</p>
-<p>The main challenge when using scikit-learn models for recursive multi-step forecasting is transforming the time series in an matrix where, each value of the series, is related to the time window (lags) that precedes it. This forecasting strategy can be easily generated with the classes <code>ForecasterAutoreg</code> and <code>ForecasterAutoregCustom</code>.</p>
-<p><img src="../img/matrix_transformation_time_serie.png"></p>
-<p><br><br></p>
+                <h1 id="direct-multi-step-forecaster">Direct multi-step forecaster<a class="headerlink" href="#direct-multi-step-forecaster" title="Permanent link">&para;</a></h1>
+<p><code>ForecasterAutoreg</code> and <code>ForecasterAutoregCustom</code> models follow a recursive prediction strategy in which, each new prediction, builds on the previous prediction. An alternative is to train a model for each step that has to be predicted. This strategy, commonly known as direct multistep forecasting, is computationally more expensive than the recursive since it requires training several models. However, in some scenarios, it achieves better results. This type of model can be obtained with the <code>ForecasterAutoregMultiOutput</code> class and can also include one or multiple exogenous variables.</p>
+<p>In order to train a <code>ForecasterAutoregMultiOutput</code> a different training matrix is created for each model.</p>
+<p><img src="../img/diagram_skforecast_multioutput.jpg"></p>
 <h2 id="libraries">Libraries<a class="headerlink" href="#libraries" title="Permanent link">&para;</a></h2>
 <table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
 <span class="normal">2</span>
@@ -815,8 +814,8 @@
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 
-<span class="kn">from</span> <span class="nn">skforecast.ForecasterAutoreg</span> <span class="kn">import</span> <span class="n">ForecasterAutoreg</span>
-<span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="kn">import</span> <span class="n">Ridge</span>
+<span class="kn">from</span> <span class="nn">skforecast.ForecasterAutoregMultiOutput</span> <span class="kn">import</span> <span class="n">ForecasterAutoregMultiOutput</span>
+<span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">GradientBoostingRegressor</span>
 <span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">mean_squared_error</span>
 </code></pre></div>
 </td></tr></table>
@@ -874,20 +873,22 @@
 <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">();</span>
 </code></pre></div>
 </td></tr></table>
-<img src="../img/data.png"></p>
+<img src="../img/data.png" style="width: 500px;"></p>
 <h2 id="create-and-train-forecaster">Create and train forecaster<a class="headerlink" href="#create-and-train-forecaster" title="Permanent link">&para;</a></h2>
-<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
-<span class="normal">2</span>
-<span class="normal">3</span>
-<span class="normal">4</span>
-<span class="normal">5</span>
-<span class="normal">6</span>
-<span class="normal">7</span>
-<span class="normal">8</span>
-<span class="normal">9</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="c1"># Create and fit forecaster</span>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="c1"># Create and fit forecaster</span>
 <span class="c1"># ==============================================================================</span>
-<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
-                    <span class="n">regressor</span> <span class="o">=</span> <span class="n">Ridge</span><span class="p">(),</span>
+<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoregMultiOutput</span><span class="p">(</span>
+                    <span class="n">regressor</span> <span class="o">=</span> <span class="n">GradientBoostingRegressor</span><span class="p">(),</span>
+                    <span class="n">steps</span>     <span class="o">=</span> <span class="mi">36</span><span class="p">,</span>
                     <span class="n">lags</span>      <span class="o">=</span> <span class="mi">15</span>
                 <span class="p">)</span>
 
@@ -899,14 +900,17 @@
 <span class="normal">2</span>
 <span class="normal">3</span>
 <span class="normal">4</span>
-<span class="normal">5</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>=======================ForecasterAutoreg=======================
-Regressor: Ridge()
+<span class="normal">5</span>
+<span class="normal">6</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>============================ForecasterAutoregMultiOutput============================
+Regressor: GradientBoostingRegressor()
+Steps: 36
 Lags: [ 1  2  3  4  5  6  7  8  9 10 11 12 13 14 15]
 Exogenous variable: False
-Parameters: {&#39;alpha&#39;: 1.0, &#39;copy_X&#39;: True, &#39;fit_intercept&#39;: True, &#39;max_iter&#39;: None, &#39;normalize&#39;: False, &#39;random_state&#39;: None, &#39;solver&#39;: &#39;auto&#39;, &#39;tol&#39;: 0.001}
+Parameters: {&#39;alpha&#39;: 0.9, &#39;ccp_alpha&#39;: 0.0, &#39;criterion&#39;: &#39;friedman_mse&#39;, &#39;init&#39;: None, &#39;learning_rate&#39;: 0.1, &#39;loss&#39;: &#39;ls&#39;, &#39;max_depth&#39;: 3, &#39;max_features&#39;: None, &#39;max_leaf_nodes&#39;: None, &#39;min_impurity_decrease&#39;: 0.0, &#39;min_impurity_split&#39;: None, &#39;min_samples_leaf&#39;: 1, &#39;min_samples_split&#39;: 2, &#39;min_weight_fraction_leaf&#39;: 0.0, &#39;n_estimators&#39;: 100, &#39;n_iter_no_change&#39;: None, &#39;random_state&#39;: None, &#39;subsample&#39;: 1.0, &#39;tol&#39;: 0.0001, &#39;validation_fraction&#39;: 0.1, &#39;verbose&#39;: 0, &#39;warm_start&#39;: False}
 </code></pre></div>
 </td></tr></table>
 <h2 id="prediction">Prediction<a class="headerlink" href="#prediction" title="Permanent link">&para;</a></h2>
+<p>If the <code>Forecaster</code> has been trained with exogenous variables, they shlud be provided when predictiong.</p>
 <table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
 <span class="normal">2</span>
 <span class="normal">3</span>
@@ -926,11 +930,11 @@ Parameters: {&#39;alpha&#39;: 1.0, &#39;copy_X&#39;: True, &#39;fit_intercept&#3
 <span class="normal">2</span>
 <span class="normal">3</span>
 <span class="normal">4</span>
-<span class="normal">5</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="n">fecha</span>
-<span class="mi">2005</span><span class="o">-</span><span class="mi">07</span><span class="o">-</span><span class="mi">01</span>    <span class="mf">0.973131</span>
-<span class="mi">2005</span><span class="o">-</span><span class="mi">08</span><span class="o">-</span><span class="mi">01</span>    <span class="mf">1.022154</span>
-<span class="mi">2005</span><span class="o">-</span><span class="mi">09</span><span class="o">-</span><span class="mi">01</span>    <span class="mf">1.151334</span>
-<span class="n">Freq</span><span class="p">:</span> <span class="n">MS</span><span class="p">,</span> <span class="n">dtype</span><span class="p">:</span> <span class="n">float64</span>
+<span class="normal">5</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>fecha
+2005-07-01    0.877073
+2005-08-01    0.974353
+2005-09-01    1.021718
+Freq: MS, dtype: float64
 </code></pre></div>
 </td></tr></table>
 <table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
@@ -948,7 +952,7 @@ Parameters: {&#39;alpha&#39;: 1.0, &#39;copy_X&#39;: True, &#39;fit_intercept&#3
 <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">();</span>
 </code></pre></div>
 </td></tr></table>
-<p><img src="../img/prediction.png"></p>
+<p><img src="../img/prediction_with_direct_multi_output.png" style="width: 500px;"></p>
 <table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
 <span class="normal">2</span>
 <span class="normal">3</span>
@@ -964,32 +968,44 @@ Parameters: {&#39;alpha&#39;: 1.0, &#39;copy_X&#39;: True, &#39;fit_intercept&#3
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Test error (mse): </span><span class="si">{</span><span class="n">error_mse</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </code></pre></div>
 </td></tr></table>
-<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>Test error (mse): 0.009918738501371805
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>Test error (mse): 0.006208145903529839
 </code></pre></div>
 </td></tr></table>
 <h2 id="feature-importance">Feature importance<a class="headerlink" href="#feature-importance" title="Permanent link">&para;</a></h2>
+<p>Since <code>ForecasterAutoregMultiOutput</code> fits one model per step,it is necessary to specify from which model retrieve its feature importance.</p>
 <table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
 <span class="normal">2</span>
 <span class="normal">3</span>
 <span class="normal">4</span>
 <span class="normal">5</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="c1"># When using as regressor LinearRegression, Ridge or Lasso</span>
-<span class="n">forecaster</span><span class="o">.</span><span class="n">get_coef</span><span class="p">()</span>
+<span class="c1"># forecaster.get_coef()</span>
 
 <span class="c1"># When using as regressor RandomForestRegressor or GradientBoostingRegressor</span>
-<span class="c1"># forecaster.get_feature_importances()</span>
+<span class="n">forecaster</span><span class="o">.</span><span class="n">get_feature_importances</span><span class="p">(</span><span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 </code></pre></div>
 </td></tr></table>
 <table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
 <span class="normal">2</span>
-<span class="normal">3</span>
-<span class="normal">4</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>array([ 1.58096176e-01,  6.18241513e-02,  6.44665806e-02, -2.41792429e-02,
-       -2.60679572e-02,  7.04191008e-04, -4.28090339e-02,  4.87464352e-04,
-        1.66853207e-02,  1.00022527e-02,  1.62219885e-01,  6.15595305e-01,
-        2.85168042e-02, -7.31915864e-02, -5.38785052e-02])
+<span class="normal">3</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>array([0.0070333 , 0.07330653, 0.03192484, 0.00284055, 0.00525716,
+       0.0039042 , 0.00717631, 0.00676659, 0.00587334, 0.00856639,
+       0.01275252, 0.81823596, 0.005138  , 0.00413031, 0.007094])
 </code></pre></div>
 </td></tr></table>
 <h2 id="extract-training-matrix">Extract training matrix<a class="headerlink" href="#extract-training-matrix" title="Permanent link">&para;</a></h2>
-<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">forecaster</span><span class="o">.</span><span class="n">create_train_X_y</span><span class="p">(</span><span class="n">data_train</span><span class="p">)</span>
+<p>Two steps are needed. One to create the whole training matrix and a second one to subset the data needed for each model (step).</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">forecaster</span><span class="o">.</span><span class="n">create_train_X_y</span><span class="p">(</span><span class="n">data_train</span><span class="p">)</span>
+<span class="c1"># X and y to train model for step 1</span>
+<span class="n">X_1</span><span class="p">,</span> <span class="n">y_1</span> <span class="o">=</span> <span class="n">forecaster</span><span class="o">.</span><span class="n">filter_train_X_y_for_step</span><span class="p">(</span>
+                <span class="n">step</span>    <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="n">X_train</span> <span class="o">=</span> <span class="n">X</span><span class="p">,</span>
+                <span class="n">y_train</span> <span class="o">=</span> <span class="n">y</span><span class="p">,</span>
+            <span class="p">)</span>
 </code></pre></div>
 </td></tr></table>
                 
@@ -1011,7 +1027,7 @@ Parameters: {&#39;alpha&#39;: 1.0, &#39;copy_X&#39;: True, &#39;fit_intercept&#3
     <nav class="md-footer__inner md-grid" aria-label="Footer">
       
         
-        <a href="forecasting-methods.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Introduction to forcasting" rel="prev">
+        <a href="autoregresive-forecaster-exogenous.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Recursive multi-step forecasting with exogenous variables" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
           </div>
@@ -1020,20 +1036,20 @@ Parameters: {&#39;alpha&#39;: 1.0, &#39;copy_X&#39;: True, &#39;fit_intercept&#3
               <span class="md-footer__direction">
                 Previous
               </span>
-              Introduction to forcasting
+              Recursive multi-step forecasting with exogenous variables
             </div>
           </div>
         </a>
       
       
         
-        <a href="custom_predictors.html" class="md-footer__link md-footer__link--next" aria-label="Next: Custom predictors" rel="next">
+        <a href="cross-validation-backtest.html" class="md-footer__link md-footer__link--next" aria-label="Next: Cross validation and Backtest" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Custom predictors
+              Cross validation and Backtest
             </div>
           </div>
           <div class="md-footer__button md-icon">
