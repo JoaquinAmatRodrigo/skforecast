@@ -77,6 +77,9 @@ def time_series_spliter(y: Union[np.ndarray, pd.Series],
             f"got `np.ndarray` with {y.ndim} dimensions."
         )
         
+    if initial_train_size > len(y):
+        raise Exception('`initial_train_size` must be smaller than lenght of `y`.')
+
     if isinstance(y, pd.Series):
         y = y.to_numpy().copy()
     
@@ -109,7 +112,7 @@ def time_series_spliter(y: Union[np.ndarray, pd.Series],
                 f"Since `allow_incomplete_fold=False`, "
                 f"last {remainder} observations are descarted."
             )
-
+    print(folds)
     if folds == 1:
         # There are no observations to create even a complete fold
         return []
@@ -191,6 +194,9 @@ def cv_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
         forecaster._check_exog(exog=exog)
         exog = forecaster._preproces_exog(exog=exog)
 
+    if initial_train_size > len(y):
+        raise Exception('`initial_train_size` must be smaller than lenght of `y`.')
+
     if metric not in ['mean_squared_error', 'mean_absolute_error',
                       'mean_absolute_percentage_error']:
         raise Exception(
@@ -214,7 +220,7 @@ def cv_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
                 verbose               = verbose
              )
 
-    if not splits:
+    if not list(splits):
         print("Not enought observations in `y` to create even a complete fold."
               " Try to reduce initial_train_size or steps")
         return np.array([]), np.array([])
