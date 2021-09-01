@@ -77,6 +77,12 @@ def time_series_spliter(y: Union[np.ndarray, pd.Series],
             f"got `np.ndarray` with {y.ndim} dimensions."
         )
         
+    if initial_train_size > len(y):
+        raise Exception(
+            '`initial_train_size` must be smaller than lenght of `y`.'
+            ' Try to reduce `initial_train_size` or `steps`.'
+        )
+
     if isinstance(y, pd.Series):
         y = y.to_numpy().copy()
     
@@ -88,7 +94,9 @@ def time_series_spliter(y: Union[np.ndarray, pd.Series],
     if verbose:
         if folds == 1:
             print(f"Number of folds: {folds - 1}")
-            print("Not enought observations in `y` to create to create even a complete fold.")
+            print("Not enought observations in `y` to create even a complete fold."
+                  " Try to reduce `initial_train_size` or `steps`."
+            )
 
         elif remainder == 0:
             print(f"Number of folds: {folds - 1}")
@@ -191,6 +199,12 @@ def cv_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
         forecaster._check_exog(exog=exog)
         exog = forecaster._preproces_exog(exog=exog)
 
+    if initial_train_size > len(y):
+        raise Exception(
+            '`initial_train_size` must be smaller than lenght of `y`.'
+            ' Try to reduce `initial_train_size` or `steps`.'
+        )
+
     if metric not in ['mean_squared_error', 'mean_absolute_error',
                       'mean_absolute_percentage_error']:
         raise Exception(
@@ -213,7 +227,7 @@ def cv_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
                 allow_incomplete_fold = allow_incomplete_fold,
                 verbose               = verbose
              )
-    
+
     cv_predictions = []
     cv_metrics = []
     
@@ -237,8 +251,12 @@ def cv_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
         cv_metrics.append(metric_value)
         
     
-    cv_predictions = np.concatenate(cv_predictions)
-    cv_metrics = np.array(cv_metrics)
+    if cv_predictions and cv_metrics:
+        cv_predictions = np.concatenate(cv_predictions)
+        cv_metrics = np.array(cv_metrics)
+    else:
+        cv_predictions = np.array([])
+        cv_metrics = np.array([])
         
     return cv_metrics, cv_predictions
 
@@ -299,6 +317,12 @@ def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
     if exog is not None:
         forecaster._check_exog(exog=exog)
         exog = forecaster._preproces_exog(exog=exog)
+
+    if initial_train_size > len(y):
+        raise Exception(
+            '`initial_train_size` must be smaller than lenght of `y`.'
+            ' Try to reduce `initial_train_size` or `steps`.'
+        )
 
     if metric not in ['mean_squared_error', 'mean_absolute_error',
                       'mean_absolute_percentage_error']:
@@ -627,6 +651,12 @@ def backtesting_forecaster_intervals(forecaster, y: Union[np.ndarray, pd.Series]
     if exog is not None:
         forecaster._check_exog(exog=exog)
         exog = forecaster._preproces_exog(exog=exog)
+
+    if initial_train_size > len(y):
+        raise Exception(
+            '`initial_train_size` must be smaller than lenght of `y`.'
+            ' Try to reduce `initial_train_size` or `steps`.'
+        )
 
     if metric not in ['mean_squared_error', 'mean_absolute_error',
                       'mean_absolute_percentage_error']:

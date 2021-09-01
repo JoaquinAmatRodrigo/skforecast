@@ -21,7 +21,7 @@ def test_cv_forecaster_output_when_y_is_nparange_20_initial_train_size_10_steps_
                 exog=None,
                 allow_incomplete_fold=True,
                 verbose=True
-            )
+            )[0]
     expected = np.array([0,0])
     assert results == approx(expected)
        
@@ -39,7 +39,7 @@ def test_cv_forecaster_output_when_y_is_nparange_20_initial_train_size_10_steps_
                 exog=None,
                 allow_incomplete_fold=True,
                 verbose=True
-            )
+            )[0]
     expected = np.array([0, 0, 0])
     assert results == approx(expected)
 
@@ -57,7 +57,7 @@ def test_cv_forecaster_output_when_y_is_nparange_20_initial_train_size_10_steps_
                 exog=None,
                 allow_incomplete_fold=False,
                 verbose=True
-            )
+            )[0]
     expected = np.array([0, 0])
     assert results == approx(expected)
 
@@ -76,8 +76,24 @@ def test_cv_forecaster_output_when_y_and_initial_train_size_have_same_lenght():
                 allow_incomplete_fold=True,
                 verbose=True
             )
-    expected = []
+    expected = (np.array([]), np.array([]))
     assert results == approx(expected)
+
+def test_cv_forecaster_output_when_initial_train_size_is_higer_than_y_lenght():
+
+    forecaster = ForecasterAutoreg(LinearRegression(), lags=[1, 2, 3])
+
+    with pytest.raises(Exception):
+        cv_forecaster(
+            forecaster=forecaster,
+            y=np.arange(20),
+            initial_train_size=50,
+            steps=5,
+            metric='mean_absolute_error',
+            exog=None,
+            allow_incomplete_fold=True,
+            verbose=True
+        )
 
 
 def test_cv_forecaster_exception_when_forcaster_lags_is_higer_than_y_lenght():
