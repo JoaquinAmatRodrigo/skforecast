@@ -255,7 +255,7 @@ def cv_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
         cv_predictions = np.concatenate(cv_predictions)
         cv_metrics = np.array(cv_metrics)
     else:
-        cv_metrics = np.array([])
+        cv_predictions = np.array([])
         cv_metrics = np.array([])
         
     return cv_metrics, cv_predictions
