@@ -45,7 +45,6 @@ def backtesting_autoreg_statsmodels(
         
     Parameters
     ----------
-        
     y : 1D np.ndarray, pd.Series
         Training time series values. 
         
@@ -73,7 +72,6 @@ def backtesting_autoreg_statsmodels(
 
     Returns 
     -------
-        
     metric_value: 1D np.ndarray
         Value of the metric.
         
@@ -198,13 +196,12 @@ def cv_autoreg_statsmodels(
     verbose: bool=False
 ) -> Tuple[np.array, np.array]:
     '''
-        
+    
     Cross-validation of `AutoReg` model from statsmodels v0.12. The order of data
     is maintained and the training set increases in each iteration.
     
     Parameters
     ----------
-        
     y : 1D np.ndarray, pd.Series
         Training time series values. 
         
@@ -232,7 +229,6 @@ def cv_autoreg_statsmodels(
         
     Returns 
     -------
-
     cv_metrics: 1D np.ndarray
         Value of the metric for each fold.
         
@@ -324,7 +320,6 @@ def backtesting_sarimax_statsmodels(
     
     Parameters
     ----------
-        
     y : 1D np.ndarray, pd.Series
         Training time series values. 
         
@@ -384,7 +379,6 @@ def backtesting_sarimax_statsmodels(
         
     Returns 
     -------
-
     metric_value: np.ndarray shape (1,)
         Value of the metric.
 
@@ -519,14 +513,14 @@ def cv_sarimax_statsmodels(
         fit_kwargs: dict={'disp':0},
         verbose: bool=False
 ) -> Tuple[np.array, np.array]:
+
     '''
-        
+    
     Cross-validation of `SARIMAX` model from statsmodels v0.12. The order of data
     is maintained and the training set increases in each iteration.
     
     Parameters
     ----------
-        
     y : 1D np.ndarray, pd.Series
         Training time series values. 
         
@@ -586,7 +580,6 @@ def cv_sarimax_statsmodels(
         
     Returns 
     -------
-
     cv_metrics: 1D np.ndarray
         Value of the metric for each partition.
 
@@ -683,13 +676,13 @@ def grid_search_sarimax_statsmodels(
         verbose: bool=False
 ) -> pd.DataFrame:
     '''
+
     Exhaustive search over specified parameter values for a `SARIMAX` model from
     statsmodels v0.12. Validation is done using time series cross-validation or
     backtesting.
     
     Parameters
     ----------
-        
     y : 1D np.ndarray, pd.Series
         Training time series values. 
         
@@ -738,7 +731,6 @@ def grid_search_sarimax_statsmodels(
 
     Returns 
     -------
-    
     results: pandas.DataFrame
         Metric value estimated for each combination of parameters.
 

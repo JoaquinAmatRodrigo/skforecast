@@ -32,6 +32,7 @@ nav:
       - ForecasterAutoregCustom: api/ForecasterAutoregCustom.md
       - ForecasterAutoregMultiOutput: api/ForecasterAutoregMultiOutput.md
       - model_selection: api/model_selection.md
+      - model_selection_statsmodels: api/model_selection_statsmodels.md
 
 plugins:
   - mkapi

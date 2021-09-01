@@ -1,7 +1,7 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-## [0.3.0.dev0] - unreleased
+## [0.3.0] - [2021-09-01]
 
 ### Added
 
