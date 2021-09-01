@@ -88,7 +88,7 @@ def time_series_spliter(y: Union[np.ndarray, pd.Series],
     if verbose:
         if folds == 1:
             print(f"Number of folds: {folds - 1}")
-            print("Not enought observations in `y` to create to create even a complete fold.")
+            print("Not enought observations in `y` to create even a complete fold.")
 
         elif remainder == 0:
             print(f"Number of folds: {folds - 1}")
@@ -213,6 +213,11 @@ def cv_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
                 allow_incomplete_fold = allow_incomplete_fold,
                 verbose               = verbose
              )
+
+    if not splits:
+        print("Not enought observations in `y` to create even a complete fold."
+              " Try to reduce initial_train_size or steps")
+        return np.array([]), np.array([])
     
     cv_predictions = []
     cv_metrics = []

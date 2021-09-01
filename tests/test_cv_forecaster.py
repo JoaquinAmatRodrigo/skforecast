@@ -21,7 +21,7 @@ def test_cv_forecaster_output_when_y_is_nparange_20_initial_train_size_10_steps_
                 exog=None,
                 allow_incomplete_fold=True,
                 verbose=True
-            )
+            )[0]
     expected = np.array([0,0])
     assert results == approx(expected)
        
@@ -39,7 +39,7 @@ def test_cv_forecaster_output_when_y_is_nparange_20_initial_train_size_10_steps_
                 exog=None,
                 allow_incomplete_fold=True,
                 verbose=True
-            )
+            )[0]
     expected = np.array([0, 0, 0])
     assert results == approx(expected)
 
@@ -57,7 +57,7 @@ def test_cv_forecaster_output_when_y_is_nparange_20_initial_train_size_10_steps_
                 exog=None,
                 allow_incomplete_fold=False,
                 verbose=True
-            )
+            )[0]
     expected = np.array([0, 0])
     assert results == approx(expected)
 
