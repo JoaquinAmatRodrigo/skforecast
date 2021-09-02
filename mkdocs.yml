@@ -24,8 +24,9 @@ nav:
       - Prediction intervals: guides/prediction-intervals.md
 
   - Examples:
-      - Forecasting series temporales con Python y Scikit-learn: examples/examples.md
+      - Forecasting time series with con Python and Scikit-learn: examples/examples.md
       - Forecasting energy demand: examples/examples.md
+      - Forecasting web page traffic: examples/examples.md
 
   - API Reference:
       - ForecasterAutoreg: api/ForecasterAutoreg.md
