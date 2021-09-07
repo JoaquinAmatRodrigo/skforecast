@@ -79,18 +79,22 @@ class ForecasterAutoreg():
     out_sample_residuals: np.ndarray
         Residuals of the model when predicting non training data. Only stored
         up to 1000 values.
+
+    fitted: Bool
+        Tag to identify if the estimator is fitted.
      
     '''
     
     def __init__(self, regressor, lags: Union[int, np.ndarray, list]) -> None:
         
-        self.regressor     = regressor
-        self.last_window   = None
-        self.included_exog = False
-        self.exog_type     = None
-        self.exog_shape    = None
+        self.regressor            = regressor
+        self.last_window          = None
+        self.included_exog        = False
+        self.exog_type            = None
+        self.exog_shape           = None
         self.in_sample_residuals  = None
         self.out_sample_residuals = None
+        self.fitted               = False
         
         if isinstance(lags, int) and lags < 1:
             raise Exception('min value of lags allowed is 1')
@@ -280,7 +284,8 @@ class ForecasterAutoreg():
         
         X_train, y_train = self.create_train_X_y(y=y, exog=exog)
         
-        self.regressor.fit(X=X_train, y=y_train)            
+        self.regressor.fit(X=X_train, y=y_train)
+        self.fitted = True            
         residuals = y_train - self.regressor.predict(X_train)
             
         if len(residuals) > 1000:

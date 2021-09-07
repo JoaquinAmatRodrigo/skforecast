@@ -86,7 +86,9 @@ class ForecasterAutoregMultiOutput():
             
     exog_shape : tuple
         Shape of exog used in training.
-        
+    
+    fitted: Bool
+        Tag to identify if the estimator is fitted.
         
     Notes
     -----
@@ -106,6 +108,7 @@ class ForecasterAutoregMultiOutput():
         self.included_exog = False
         self.exog_type     = None
         self.exog_shape    = None
+        self.fitted        = False
 
         
         if not isinstance(steps, int) or steps < 1:
@@ -366,6 +369,7 @@ class ForecasterAutoregMultiOutput():
                                             y_train = y_train
                                          ) 
             self.regressors_[step].fit(X_train_step, y_train_step)
+            self.fitted = True
 
         # The last time window of training data is stored so that lags needed as
         # predictors in the first iteration of `predict()` can be calculated.

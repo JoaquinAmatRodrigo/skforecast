@@ -82,20 +82,24 @@ class ForecasterAutoregCustom():
     out_sample_residuals: np.ndarray
         Residuals of the model when predicting non training data. Only stored
         up to 1000 values.
+
+    fitted: Bool
+        Tag to identify if the estimator is fitted.
      
     '''
     
     def __init__(self, regressor, fun_predictors: callable, window_size: int) -> None:
         
-        self.regressor         = regressor
-        self.create_predictors = fun_predictors
-        self.window_size       = window_size
-        self.last_window       = None
-        self.included_exog     = False
-        self.exog_type         = None
-        self.exog_shape        = None
+        self.regressor            = regressor
+        self.create_predictors    = fun_predictors
+        self.window_size          = window_size
+        self.last_window          = None
+        self.included_exog        = False
+        self.exog_type            = None
+        self.exog_shape           = None
         self.in_sample_residuals  = None
         self.out_sample_residuals = None
+        self.fitted               = False
         
         if not isinstance(window_size, int):
             raise Exception(f'`window_size` must be int, got {type(window_size)}')
@@ -252,6 +256,7 @@ class ForecasterAutoregCustom():
         X_train, y_train = self.create_train_X_y(y=y, exog=exog)
 
         self.regressor.fit(X=X_train, y=y_train)
+        self.fitted = True
         residuals = y_train - self.regressor.predict(X_train)
             
         if len(residuals) > 1000:
