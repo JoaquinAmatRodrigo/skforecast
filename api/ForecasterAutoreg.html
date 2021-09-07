@@ -532,7 +532,7 @@
   
     <li class="md-nav__item">
       <a href="../examples/examples.html" class="md-nav__link">
-        Forecasting series temporales con Python y Scikit-learn
+        Forecasting time series with con Python and Scikit-learn
       </a>
     </li>
   
@@ -545,6 +545,18 @@
     <li class="md-nav__item">
       <a href="../examples/examples.html" class="md-nav__link">
         Forecasting energy demand
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/examples.html" class="md-nav__link">
+        Forecasting web page traffic
       </a>
     </li>
   
@@ -999,6 +1011,30 @@ regressed on exog[i].</span></li>
       <div class="mkapi-section-body"><p>Iterative process in which, each prediction, is used as a predictor
 for the next step.</p></div>
     </div>
+  <div class="mkapi-section parameters">
+      <div class="mkapi-section-name parameters">
+          <span class="mkapi-section-name-body parameters">Parameters</span> 
+        </div>
+      <div class="mkapi-section-body parameters"><ul class="mkapi-items">
+<li><code class="mkapi-item-name">steps</code>
+<span class="mkapi-item-type">(int)</span>
+<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Number of future steps predicted.</span></li>
+
+<li><code class="mkapi-item-name">last_window</code>
+<span class="mkapi-item-type">(1D np.ndarray, pd.Series, shape (, max_lag), default `None`)</span>
+<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Values of the series used to create the predictors (lags) need in the
+first iteration of predictiont (t + 1).<br>
+If <code>last_window = None</code>, the values stored in<code>self.last_window</code> are
+used to calculate the initial predictors, and the predictions start
+right after training data.</span></li>
+
+<li><code class="mkapi-item-name">exog</code>
+<span class="mkapi-item-type">(np.ndarray, pd.Series, pd.DataFrame, default `None`)</span>
+<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Exogenous variable/s included as predictor/s.</span></li>
+
+
+</ul></div>
+    </div>
   <div class="mkapi-section returns">
       <div class="mkapi-section-name returns">
           <span class="mkapi-section-name-body returns">Returns</span> <span class="mkapi-item-type">(predictions : 1D np.array, shape (steps,))</span>
@@ -1024,6 +1060,48 @@ for the next step.</p></div>
       <div class="mkapi-section-body"><p>Iterative process in which, each prediction, is used as a predictor
 for the next step and bootstrapping is used to estimate prediction
 intervals. Both, predictions and intervals, are returned.</p></div>
+    </div>
+  <div class="mkapi-section parameters">
+      <div class="mkapi-section-name parameters">
+          <span class="mkapi-section-name-body parameters">Parameters</span> 
+        </div>
+      <div class="mkapi-section-body parameters"><ul class="mkapi-items">
+<li><code class="mkapi-item-name">steps</code>
+<span class="mkapi-item-type">(int)</span>
+<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Number of future steps predicted.</span></li>
+
+<li><code class="mkapi-item-name">last_window</code>
+<span class="mkapi-item-type">(1D np.ndarray, pd.Series, shape (, max_lag), default `None`)</span>
+<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Values of the series used to create the predictors (lags) need in the
+first iteration of predictiont (t + 1).<br>
+If <code>last_window = None</code>, the values stored in<code>self.last_window</code> are
+used to calculate the initial predictors, and the predictions start
+right after training data.</span></li>
+
+<li><code class="mkapi-item-name">exog</code>
+<span class="mkapi-item-type">(np.ndarray, pd.Series, pd.DataFrame, default `None`)</span>
+<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Exogenous variable/s included as predictor/s.</span></li>
+
+<li><code class="mkapi-item-name">interval</code>
+<span class="mkapi-item-type">(list, default `[5, 100]`)</span>
+<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Confidence of the prediction interval estimated. Sequence of percentiles
+to compute, which must be between 0 and 100 inclusive.</span></li>
+
+<li><code class="mkapi-item-name">n_boot</code>
+<span class="mkapi-item-type">(int, default `500`)</span>
+<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Number of bootstrapping iterations used to estimate prediction
+intervals.</span></li>
+
+<li><code class="mkapi-item-name">in_sample_residuals</code>
+<span class="mkapi-item-type">(bool, default `True`)</span>
+<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">If <code>True</code>, residuals from the training data are used as proxy of
+prediction error to create prediction intervals. If <code>False</code>, out of
+sample residuals are used. In the latter case, the user shoud have
+calculated and stored the residuals within the forecaster (see
+<code>set_out_sample_residuals()</code>).</span></li>
+
+
+</ul></div>
     </div>
   <div class="mkapi-section returns">
       <div class="mkapi-section-name returns">
@@ -1225,7 +1303,7 @@ associated with <code>self.lags[i]</code>.</p></div>
     <nav class="md-footer__inner md-grid" aria-label="Footer">
       
         
-        <a href="../examples/examples.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Forecasting energy demand" rel="prev">
+        <a href="../examples/examples.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Forecasting web page traffic" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
           </div>
@@ -1234,7 +1312,7 @@ associated with <code>self.lags[i]</code>.</p></div>
               <span class="md-footer__direction">
                 Previous
               </span>
-              Forecasting energy demand
+              Forecasting web page traffic
             </div>
           </div>
         </a>

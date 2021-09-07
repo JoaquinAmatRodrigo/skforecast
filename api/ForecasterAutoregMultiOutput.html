@@ -532,7 +532,7 @@
   
     <li class="md-nav__item">
       <a href="../examples/examples.html" class="md-nav__link">
-        Forecasting series temporales con Python y Scikit-learn
+        Forecasting time series with con Python and Scikit-learn
       </a>
     </li>
   
@@ -545,6 +545,18 @@
     <li class="md-nav__item">
       <a href="../examples/examples.html" class="md-nav__link">
         Forecasting energy demand
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/examples.html" class="md-nav__link">
+        Forecasting web page traffic
       </a>
     </li>
   
@@ -1060,6 +1072,30 @@ regressed on exog[i].</span></li>
       <div class="mkapi-section-body"><p>Multi-step prediction. The number of future steps predicted is defined when
 ininitializing the forecaster, argument <code>steps</code> not used, present here for
 API consistency by convention.</p></div>
+    </div>
+  <div class="mkapi-section parameters">
+      <div class="mkapi-section-name parameters">
+          <span class="mkapi-section-name-body parameters">Parameters</span> 
+        </div>
+      <div class="mkapi-section-body parameters"><ul class="mkapi-items">
+<li><code class="mkapi-item-name">last_window</code>
+<span class="mkapi-item-type">(1D np.ndarray, pd.Series, shape (, max_lag), default `None`)</span>
+<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Values of the series used to create the predictors (lags) need in the
+first iteration of predictiont (t + 1).<br>
+If <code>last_window = None</code>, the values stored in<code>self.last_window</code> are
+used to calculate the initial predictors, and the predictions start
+right after training data.</span></li>
+
+<li><code class="mkapi-item-name">exog</code>
+<span class="mkapi-item-type">(np.ndarray, pd.Series, pd.DataFrame, default `None`)</span>
+<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Exogenous variable/s included as predictor/s.</span></li>
+
+<li><code class="mkapi-item-name">steps</code>
+<span class="mkapi-item-type">(Ignored)</span>
+<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Not used, present here for API consistency by convention.</span></li>
+
+
+</ul></div>
     </div>
   <div class="mkapi-section returns">
       <div class="mkapi-section-name returns">
