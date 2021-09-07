@@ -388,7 +388,6 @@ class ForecasterAutoregMultiOutput():
 
         Parameters
         ----------
-
         last_window : 1D np.ndarray, pd.Series, shape (, max_lag), default `None`
             Values of the series used to create the predictors (lags) need in the 
             first iteration of predictiont (t + 1).

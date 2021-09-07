@@ -426,7 +426,6 @@ def grid_search_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
     
     Parameters
     ----------
-    
     forecaster : ForecasterAutoreg, ForecasterCustom, ForecasterAutoregCustom,
                  ForecasterAutoregMultiOutput
         `ForecasterAutoreg`, `ForecasterCustom` `ForecasterAutoregCustom` or

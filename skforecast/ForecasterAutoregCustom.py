@@ -271,8 +271,7 @@ class ForecasterAutoregCustom():
         for the next step.
         
         Parameters
-        ----------
-               
+        ---------- 
         steps : int
             Number of future steps predicted.
             
@@ -367,8 +366,7 @@ class ForecasterAutoregCustom():
         See predict_intervals() to calculate both, predictions and intervals.
         
         Parameters
-        ----------
-               
+        ---------- 
         steps : int
             Number of future steps predicted.
             
@@ -521,8 +519,7 @@ class ForecasterAutoregCustom():
         intervals. Both, predictions and intervals, are returned.
         
         Parameters
-        ----------
-               
+        ----------   
         steps : int
             Number of future steps predicted.
             
