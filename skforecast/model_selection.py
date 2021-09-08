@@ -24,7 +24,7 @@ from .ForecasterCustom import ForecasterCustom
 from .ForecasterAutoregMultiOutput import ForecasterAutoregMultiOutput
 
 logging.basicConfig(
-    format = '%(asctime)-5s %(name)-10s %(levelname)-5s %(message)s', 
+    format = '%(name)-10s %(levelname)-5s %(message)s', 
     level  = logging.INFO,
 )
 
@@ -359,7 +359,6 @@ def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
     }
     
     metric = metrics[metric]
-    window_size = len(forecaster.last_window)
     backtest_predictions = []
 
     if initial_train_size is not None:
@@ -367,9 +366,15 @@ def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
             forecaster.fit(y=y[:initial_train_size])      
         else:
             forecaster.fit(y=y[:initial_train_size], exog=exog[:initial_train_size])
+        window_size = len(forecaster.last_window)
     else:
         # Although not used for training, first observations are needed to create the initial predictors
-        initial_train_size = window_size
+        if isinstance(forecaster, ForecasterAutoregCustom):
+            window_size = forecaster.window_size
+            initial_train_size = window_size
+        else:
+            window_size = forecaster.max_lag
+            initial_train_size = window_size
     
     folds     = (len(y) - initial_train_size) // steps + 1
     remainder = (len(y) - initial_train_size) % steps

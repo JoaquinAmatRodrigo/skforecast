@@ -297,6 +297,11 @@ class ForecasterAutoregCustom():
             Values predicted.
             
         '''
+
+        if not self.fitted:
+            raise Exception(
+                'This Forecaster instance is not fitted yet. Call `fit` with appropriate arguments before using this it.'
+            )
         
         if steps < 1:
             raise Exception(

@@ -22,7 +22,7 @@ from sklearn.metrics import mean_absolute_percentage_error
 
 
 logging.basicConfig(
-    format = '%(asctime)-5s %(name)-10s %(levelname)-5s %(message)s', 
+    format = '%(name)-10s %(levelname)-5s %(message)s', 
     level  = logging.INFO,
 )
 
@@ -326,6 +326,11 @@ class ForecasterAutoreg():
             Values predicted.
             
         '''
+
+        if not self.fitted:
+            raise Exception(
+                'This Forecaster instance is not fitted yet. Call `fit` with appropriate arguments before using this it.'
+            )
         
         if steps < 1:
             raise Exception(

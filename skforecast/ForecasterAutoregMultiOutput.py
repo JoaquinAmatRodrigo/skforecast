@@ -369,7 +369,7 @@ class ForecasterAutoregMultiOutput():
                                             y_train = y_train
                                          ) 
             self.regressors_[step].fit(X_train_step, y_train_step)
-            self.fitted = True
+        self.fitted = True
 
         # The last time window of training data is stored so that lags needed as
         # predictors in the first iteration of `predict()` can be calculated.
@@ -412,6 +412,11 @@ class ForecasterAutoregMultiOutput():
             Values predicted.
 
         '''
+
+        if not self.fitted:
+            raise Exception(
+                'This Forecaster instance is not fitted yet. Call `fit` with appropriate arguments before using this it.'
+            )
 
         if exog is None and self.included_exog:
             raise Exception(
