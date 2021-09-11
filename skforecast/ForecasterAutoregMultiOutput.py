@@ -73,6 +73,10 @@ class ForecasterAutoregMultiOutput():
     max_lag : int
         Maximum value of lag included in lags.
         
+    window_size: int
+        Size of the window needed to create the predictors. It is equal to
+        `max_lag`.
+        
     last_window : 1D np.ndarray
         Last time window the forecaster has seen when trained. It stores the
         values needed to calculate the lags used to predict the next `step`
@@ -134,7 +138,8 @@ class ForecasterAutoregMultiOutput():
                 f"Got {type(lags)}"
             )
             
-        self.max_lag  = max(self.lags)
+        self.max_lag = max(self.lags)
+        self.window_size = self.max_lag
                 
         
     def __repr__(self) -> str:
@@ -151,6 +156,8 @@ class ForecasterAutoregMultiOutput():
                 + "Steps: " + str(self.steps) \
                 + "\n" \
                 + "Lags: " + str(self.lags) \
+                + "\n" \
+                + "Window size: " + str(self.window_size) \
                 + "\n" \
                 + "Exogenous variable: " + str(self.included_exog) + ', ' + str(self.exog_type) \
                 + "\n" \

@@ -20,7 +20,6 @@ from sklearn.model_selection import ParameterGrid
 
 from .ForecasterAutoreg import ForecasterAutoreg
 from .ForecasterAutoregCustom import ForecasterAutoregCustom
-from .ForecasterCustom import ForecasterCustom
 from .ForecasterAutoregMultiOutput import ForecasterAutoregMultiOutput
 
 logging.basicConfig(
@@ -147,16 +146,14 @@ def cv_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
                   allow_incomplete_fold: bool=True, verbose: bool=True
                  ) -> Tuple[np.array, np.array]:
     '''
-    Cross-validation of `ForecasterAutoreg`, `ForecasterCustom`, `ForecasterAutoregCustom`
+    Cross-validation of `ForecasterAutoreg`, `ForecasterAutoregCustom`
     or `ForecasterAutoregMultiOutput` object. The order of data is maintained
     and the training set increases in each iteration.
     
     Parameters
     ----------
-    forecaster : ForecasterAutoreg, ForecasterCustom, ForecasterAutoregCustom,
-                 ForecasterAutoregMultiOutput
-        `ForecasterAutoreg`, `ForecasterCustom` `ForecasterAutoregCustom` or
-        `ForecasterAutoregMultiOutput` object.
+    forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregMultiOutput
+        `ForecasterAutoreg`, `ForecasterAutoregCustom` or `ForecasterAutoregMultiOutput` object.
         
     y : 1D np.ndarray, pd.Series
         Training time series values. 
@@ -202,7 +199,12 @@ def cv_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
     if initial_train_size > len(y):
         raise Exception(
             '`initial_train_size` must be smaller than lenght of `y`.'
-            ' Try to reduce `initial_train_size` or `steps`.'
+        )
+        
+    if initial_train_size is not None and initial_train_size < forecaster.window_size:
+        raise Exception(
+            f"`initial_train_size` must be greater than "
+            f"forecaster's window_size ({forecaster.window_size})."
         )
 
     if metric not in ['mean_squared_error', 'mean_absolute_error',
@@ -266,8 +268,8 @@ def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
                            exog: Union[np.ndarray, pd.Series, pd.DataFrame]=None,
                            verbose: bool=False) -> Tuple[np.array, np.array]:
     '''
-    Backtesting (validation) of `ForecasterAutoreg`, `ForecasterCustom`,
-    `ForecasterAutoregCustom` or `ForecasterAutoregMultiOutput` object.
+    Backtesting (validation) of `ForecasterAutoreg`, `ForecasterAutoregCustom` or
+    `ForecasterAutoregMultiOutput` object.
     The model is trained only once using the `initial_train_size` first observations.
     In each iteration, a number of `steps` predictions are evaluated.   
     This evaluation is much faster than `cv_forecaster()` since the model is
@@ -281,10 +283,8 @@ def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
     
     Parameters
     ----------
-    forecaster : ForecasterAutoreg, ForecasterCustom, ForecasterAutoregCustom,
-                 ForecasterAutoregMultiOutput
-        `ForecasterAutoreg`, `ForecasterCustom` `ForecasterAutoregCustom` or
-        `ForecasterAutoregMultiOutput` object.
+    forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregMultiOutput
+        `ForecasterAutoreg`, `ForecasterAutoregCustom` or `ForecasterAutoregMultiOutput` object.
         
     y : 1D np.ndarray, pd.Series
         Training time series values. 
@@ -330,7 +330,12 @@ def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
     if initial_train_size is not None and initial_train_size > len(y):
         raise Exception(
             'If used, `initial_train_size` must be smaller than lenght of `y`.'
-            ' Try to reduce `initial_train_size` or `steps`.'
+        )
+        
+    if initial_train_size is not None and initial_train_size < forecaster.window_size:
+        raise Exception(
+            f"`initial_train_size` must be greater than "
+            f"forecaster's window_size ({forecaster.window_size})."
         )
 
     if metric not in ['mean_squared_error', 'mean_absolute_error',
@@ -366,15 +371,11 @@ def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
             forecaster.fit(y=y[:initial_train_size])      
         else:
             forecaster.fit(y=y[:initial_train_size], exog=exog[:initial_train_size])
-        window_size = len(forecaster.last_window)
+        window_size = forecaster.window_size
     else:
         # Although not used for training, first observations are needed to create the initial predictors
-        if isinstance(forecaster, ForecasterAutoregCustom):
-            window_size = forecaster.window_size
-            initial_train_size = window_size
-        else:
-            window_size = forecaster.max_lag
-            initial_train_size = window_size
+        window_size = forecaster.window_size
+        initial_train_size = window_size
     
     folds     = (len(y) - initial_train_size) // steps + 1
     remainder = (len(y) - initial_train_size) % steps
@@ -456,10 +457,8 @@ def grid_search_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
     
     Parameters
     ----------
-    forecaster : ForecasterAutoreg, ForecasterCustom, ForecasterAutoregCustom,
-                 ForecasterAutoregMultiOutput
-        `ForecasterAutoreg`, `ForecasterCustom` `ForecasterAutoregCustom` or
-        `ForecasterAutoregMultiOutput` object.
+    forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregMultiOutput
+        `ForecasterAutoreg`, `ForecasterAutoregCustom` or `ForecasterAutoregMultiOutput` object.
         
     y : 1D np.ndarray, pd.Series
         Training time series values. 
@@ -516,10 +515,10 @@ def grid_search_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
         forecaster._check_exog(exog=exog)
         exog = forecaster._preproces_exog(exog=exog)
     
-    if isinstance(forecaster, (ForecasterCustom, ForecasterAutoregCustom)):
+    if isinstance(forecaster, ForecasterAutoregCustom):
         if lags_grid is not None:
             logging.warning(
-                '`lags_grid` ignored if forecaster is an instance of `ForecasterCustom` or `ForecasterAutoregCustom`.'
+                '`lags_grid` ignored if forecaster is an instance of `ForecasterAutoregCustom`.'
             )
         lags_grid = ['custom predictors']
         
@@ -607,19 +606,18 @@ def backtesting_forecaster_intervals(forecaster, y: Union[np.ndarray, pd.Series]
                            in_sample_residuals: bool=True,
                            verbose: bool=False) -> Tuple[np.array, np.array]:
     '''
-    Backtesting (validation) of `ForecasterAutoreg`, `ForecasterCustom` or
-    `ForecasterAutoregCustom` object. The model is trained only once using the
-    `initial_train_size` first observations. In each iteration, a number of
-    `steps` predictions are evaluated. Both, predictions and intervals, are
-    calculated.
+    Backtesting (validation) of `ForecasterAutoreg`, or `ForecasterAutoregCustom` object.
+    The model is trained only once using the `initial_train_size` first observations. In 
+    each iteration, a number of `steps` predictions are evaluated. Both, predictions and
+    intervals, are calculated.
     
     This evaluation is much faster than `cv_forecaster()` since the model is
     trained only once.
     
     Parameters
     ----------
-    forecaster : ForecasterAutoreg, ForecasterCustom, ForecasterAutoregCustom
-        `ForecasterAutoreg`, `ForecasterCustom` or `ForecasterAutoregCustom` object.
+    forecaster : ForecasterAutoreg, ForecasterAutoregCustom
+        `ForecasterAutoreg` or `ForecasterAutoregCustom` object.
         
     y : 1D np.ndarray, pd.Series
         Training time series values. 

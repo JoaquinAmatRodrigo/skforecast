@@ -1,3 +1,6 @@
+import sys
+sys.path.insert(1, '/home/ximo/Documents/GitHub/skforecast')
+
 import pytest
 from pytest import approx
 import numpy as np
