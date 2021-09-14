@@ -11,6 +11,8 @@ All notable changes to this project will be documented in this file.
     + `backtesting_sarimax_statsmodels`
     + `cv_sarimax_statsmodels`
     + `grid_search_sarimax_statsmodels`
+    
++ Added attribute window_size to `ForecasterAutoreg` and `ForecasterAutoregCustom`. It is equal to `max_lag`.
 
 ### Changed
 

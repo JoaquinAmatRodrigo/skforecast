@@ -22,7 +22,7 @@ from sklearn.metrics import mean_absolute_percentage_error
 
 
 logging.basicConfig(
-    format = '%(asctime)-5s %(name)-10s %(levelname)-5s %(message)s', 
+    format = '%(name)-10s %(levelname)-5s %(message)s', 
     level  = logging.INFO,
 )
 
@@ -58,6 +58,10 @@ class ForecasterAutoreg():
     max_lag : int
         Maximum value of lag included in lags.
         
+    window_size: int
+        Size of the window needed to create the predictors. It is equal to
+        `max_lag`.
+        
     last_window : 1D np.ndarray
         Last time window the forecaster has seen when trained. It stores the
         values needed to calculate the lags used to predict the next `step`
@@ -79,18 +83,22 @@ class ForecasterAutoreg():
     out_sample_residuals: np.ndarray
         Residuals of the model when predicting non training data. Only stored
         up to 1000 values.
+
+    fitted: Bool
+        Tag to identify if the estimator is fitted.
      
     '''
     
     def __init__(self, regressor, lags: Union[int, np.ndarray, list]) -> None:
         
-        self.regressor     = regressor
-        self.last_window   = None
-        self.included_exog = False
-        self.exog_type     = None
-        self.exog_shape    = None
+        self.regressor            = regressor
+        self.last_window          = None
+        self.included_exog        = False
+        self.exog_type            = None
+        self.exog_shape           = None
         self.in_sample_residuals  = None
         self.out_sample_residuals = None
+        self.fitted               = False
         
         if isinstance(lags, int) and lags < 1:
             raise Exception('min value of lags allowed is 1')
@@ -111,6 +119,7 @@ class ForecasterAutoreg():
             )
             
         self.max_lag  = max(self.lags)
+        self.window_size = self.max_lag
                 
         
     def __repr__(self) -> str:
@@ -125,6 +134,8 @@ class ForecasterAutoreg():
                 + "Regressor: " + str(self.regressor) \
                 + "\n" \
                 + "Lags: " + str(self.lags) \
+                + "\n" \
+                + "Window size: " + str(self.window_size) \
                 + "\n" \
                 + "Exogenous variable: " + str(self.included_exog) + ', ' + str(self.exog_type) \
                 + "\n" \
@@ -280,7 +291,8 @@ class ForecasterAutoreg():
         
         X_train, y_train = self.create_train_X_y(y=y, exog=exog)
         
-        self.regressor.fit(X=X_train, y=y_train)            
+        self.regressor.fit(X=X_train, y=y_train)
+        self.fitted = True            
         residuals = y_train - self.regressor.predict(X_train)
             
         if len(residuals) > 1000:
@@ -321,6 +333,11 @@ class ForecasterAutoreg():
             Values predicted.
             
         '''
+
+        if not self.fitted:
+            raise Exception(
+                'This Forecaster instance is not fitted yet. Call `fit` with appropriate arguments before using this it.'
+            )
         
         if steps < 1:
             raise Exception(
