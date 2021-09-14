@@ -8,7 +8,7 @@
 
 
 import typing
-from typing import Union, Dict, List, Tuple
+from typing import Union, Dict, List, Tuple, Optional
 import numpy as np
 import pandas as pd
 import logging
@@ -139,9 +139,41 @@ def time_series_spliter(y: Union[np.ndarray, pd.Series],
         yield train_indices, test_indices
         
         
+def get_metric(metric:str) -> callable:
+    '''
+    Get the corresponding scikitlearn function to calculate the metric.
+    
+    Parameters
+    ----------
+    metric : {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
+        Metric used to quantify the goodness of fit of the model.
+    
+    Returns 
+    -------
+    metric : callable
+        scikitlearn function to calculate the desired metric.
+    '''
+    
+    if metric not in ['mean_squared_error', 'mean_absolute_error',
+                      'mean_absolute_percentage_error']:
+        raise Exception(
+            f"Allowed metrics are: 'mean_squared_error', 'mean_absolute_error' and "
+            f"'mean_absolute_percentage_error'. Got {metric}."
+        )
+    
+    metrics = {
+        'mean_squared_error': mean_squared_error,
+        'mean_absolute_error': mean_absolute_error,
+        'mean_absolute_percentage_error': mean_absolute_percentage_error
+    }
+    
+    metric = metrics[metric]
+    
+    return metric
+    
 
 def cv_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
-                  initial_train_size: int, steps: int, metric: str,
+                  initial_train_size: int, steps: Union[int, None], metric: str,
                   exog: Union[np.ndarray, pd.Series, pd.DataFrame]=None,
                   allow_incomplete_fold: bool=True, verbose: bool=True
                  ) -> Tuple[np.array, np.array]:
@@ -161,8 +193,9 @@ def cv_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
     initial_train_size: int 
         Number of samples in the initial train split.
         
-    steps : int
-        Number of steps to predict.
+    steps : int, None
+        Number of steps to predict. Ignored if `forecaster` is a `ForecasterAutoregMultiOutput`
+        since this information is already stored inside it.
         
     metric : {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
         Metric used to quantify the goodness of fit of the model.
@@ -173,8 +206,9 @@ def cv_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
         regressed on exog[i].
             
     allow_incomplete_fold : bool, default `True`
-        The last test set is allowed to be incomplete if it does not reach `steps`
-        observations. Otherwise, the latest observations are discarded.
+        The last test partition is allowed to be incomplete if it does not reach `steps`
+        observations. Otherwise, the latest observations are discarded. This is set
+        automatically to `False` when forecaster is `ForecasterAutoregMultiOutput`.
         
     verbose : bool, default `True`
         Print number of folds used for cross validation.
@@ -205,22 +239,17 @@ def cv_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
         raise Exception(
             f"`initial_train_size` must be greater than "
             f"forecaster's window_size ({forecaster.window_size})."
-        )
-
-    if metric not in ['mean_squared_error', 'mean_absolute_error',
-                      'mean_absolute_percentage_error']:
-        raise Exception(
-            f"Allowed metrics are: 'mean_squared_error', 'mean_absolute_error' and "
-            f"'mean_absolute_percentage_error'. Got {metric}."
-        )
+        )  
     
-    metrics = {
-        'mean_squared_error': mean_squared_error,
-        'mean_absolute_error': mean_absolute_error,
-        'mean_absolute_percentage_error': mean_absolute_percentage_error
-    }
-    
-    metric = metrics[metric]
+    if isinstance(forecaster, ForecasterAutoregMultiOutput):
+        steps = forecaster.steps
+        if allow_incomplete_fold:
+            logging.warning(
+                f" `ForecasterAutoregMultiOutput` only allow completed folds."
+            )
+            allow_incomplete_fold = False
+        
+    metric = get_metric(metric=metric)
     
     splits = time_series_spliter(
                 y                     = y,
@@ -264,7 +293,7 @@ def cv_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
 
 
 def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
-                           steps: int, metric: str, initial_train_size: None,
+                           steps: Union[int, None], metric: str, initial_train_size: None,
                            exog: Union[np.ndarray, pd.Series, pd.DataFrame]=None,
                            verbose: bool=False) -> Tuple[np.array, np.array]:
     '''
@@ -296,8 +325,9 @@ def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
         observations are needed to create the initial predictors. Therefore,
         no predictions are calculated for them.
         
-    steps : int
-        Number of steps to predict.
+    steps : int, None
+        Number of steps to predict. Ignored if `forecaster` is a `ForecasterAutoregMultiOutput`
+        since this information is already stored inside it.
         
     metric : {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
         Metric used to quantify the goodness of fit of the model.
@@ -338,13 +368,6 @@ def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
             f"forecaster's window_size ({forecaster.window_size})."
         )
 
-    if metric not in ['mean_squared_error', 'mean_absolute_error',
-                      'mean_absolute_percentage_error']:
-        raise Exception(
-            f"Allowed metrics are: 'mean_squared_error', 'mean_absolute_error' and "
-            f"'mean_absolute_percentage_error'. Got {metric}."
-        )
-
     if initial_train_size is None and not forecaster.fitted:
         raise Exception(
             '`forecaster` must be already trained if no `initial_train_size` is provided.'
@@ -357,13 +380,10 @@ def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
             f'the initial predictors. Therefore, no predictions are calculated for them.'
         )
     
-    metrics = {
-        'mean_squared_error': mean_squared_error,
-        'mean_absolute_error': mean_absolute_error,
-        'mean_absolute_percentage_error': mean_absolute_percentage_error
-    }
-    
-    metric = metrics[metric]
+    if isinstance(forecaster, ForecasterAutoregMultiOutput):
+        steps = forecaster.steps
+        
+    metric = get_metric(metric=metric)
     backtest_predictions = []
 
     if initial_train_size is not None:
@@ -379,15 +399,6 @@ def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
     
     folds     = (len(y) - initial_train_size) // steps + 1
     remainder = (len(y) - initial_train_size) % steps
-
-    if isinstance(forecaster, ForecasterAutoregMultiOutput) and remainder != 0:
-        # In ForecasterAutoregMultiOutput predictions are not iterative,
-        # therefore no remainder is allowed.
-        logging.warning(
-                f"Backtesting `ForecasterAutoregMultiOutput` only allow completed "
-                f"folds. Last {remainder} observations are excluded."
-        )
-        remainder=0
     
     if verbose:
         print(f"Number of observations used for training or as initial window: {initial_train_size}")
@@ -416,7 +427,8 @@ def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
                             last_window = last_window_y,
                             exog        = next_window_exog
                         )
-        elif remainder != 0:
+                
+        elif remainder != 0 and not isinstance(forecaster, ForecasterAutoregMultiOutput):
             steps = remainder 
             if exog is None:
                 pred = forecaster.predict(
@@ -429,6 +441,30 @@ def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
                             last_window = last_window_y,
                             exog        = next_window_exog
                         )
+                
+        elif remainder != 0:
+            # ForecasterAutoregMultiOutput predict all steps simultaneusly, therefore,
+            # if the last fold is incomplete, it mus be completed with dummy values
+            # to avoid errors and then, dummy predictions removed.
+            dummy_steps = steps - remainder 
+            if exog is None:
+                pred = forecaster.predict(
+                            steps       = steps,
+                            last_window = last_window_y
+                        )
+                pred = pred[:-dummy_steps]
+            else:
+                next_window_exog = np.vstack((
+                                     exog,
+                                     np.ones(shape=(dummy_steps,) + exog.shape[1:])
+                                   ))
+                pred = forecaster.predict(
+                            steps       = steps,
+                            last_window = last_window_y,
+                            exog        = next_window_exog
+                        )
+                pred = pred[:-dummy_steps]
+            
         else:
             continue
         
