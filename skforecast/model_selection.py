@@ -444,8 +444,8 @@ def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
                 
         elif remainder != 0:
             # ForecasterAutoregMultiOutput predict all steps simultaneusly, therefore,
-            # if the last fold is incomplete, it mus be completed with dummy values
-            # to avoid errors and then, dummy predictions removed.
+            # if the last fold is incomplete, remaining steps must be completed with
+            # dummy values and removing then the corresponding predictions.
             dummy_steps = steps - remainder 
             if exog is None:
                 pred = forecaster.predict(
