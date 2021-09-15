@@ -749,6 +749,10 @@ recursive autoregressive (multi-step) forecaster.</p></div>
 <span class="mkapi-item-type">(type)</span>
 <span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Type used for the exogenous variable/s: pd.Series, pd.DataFrame or np.ndarray.</span></li>
 
+<li><code class="mkapi-item-name">fitted</code>
+<span class="mkapi-item-type">(Bool)</span>
+<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Tag to identify if the estimator is fitted.</span></li>
+
 <li><code class="mkapi-item-name">in_sample_residuals</code>
 <span class="mkapi-item-type">(np.ndarray)</span>
 <span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Residuals of the model when predicting training data. Only stored up to
@@ -780,6 +784,11 @@ up to 1000 values.</span></li>
 <li><code class="mkapi-item-name">regressor</code>
 <span class="mkapi-item-type">(regressor compatible with the scikit-learn API)</span>
 <span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">An instance of a regressor compatible with the scikit-learn API.</span></li>
+
+<li><code class="mkapi-item-name">window_size</code>
+<span class="mkapi-item-type">(int)</span>
+<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Size of the window needed to create the predictors. It is equal to
+<code>max_lag</code>.</span></li>
 
 
 </ul></div>

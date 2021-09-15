@@ -756,6 +756,10 @@ should be defined before training.</span></li>
 <span class="mkapi-item-type">(type)</span>
 <span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Type used for the exogenous variable/s.</span></li>
 
+<li><code class="mkapi-item-name">fitted</code>
+<span class="mkapi-item-type">(Bool)</span>
+<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Tag to identify if the estimator is fitted.</span></li>
+
 <li><code class="mkapi-item-name">included_exog</code>
 <span class="mkapi-item-type">(bool)</span>
 <span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">If the forecaster has been trained using exogenous variable/s.</span></li>
@@ -789,6 +793,11 @@ them are stored in <code>slef.regressors_</code>.</span></li>
 <span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Number of future steps the forecaster will predict when using method
 <code>predict()</code>. Since a diferent model is created for each step, this value
 should be defined before training.</span></li>
+
+<li><code class="mkapi-item-name">window_size</code>
+<span class="mkapi-item-type">(int)</span>
+<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Size of the window needed to create the predictors. It is equal to
+<code>max_lag</code>.</span></li>
 
 
 </ul></div>
