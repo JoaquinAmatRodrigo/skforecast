@@ -208,7 +208,7 @@ def cv_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
     allow_incomplete_fold : bool, default `True`
         The last test partition is allowed to be incomplete if it does not reach `steps`
         observations. Otherwise, the latest observations are discarded. This is set
-        automatically to `False` when forecaster is `ForecasterAutoregMultiOutput`.
+        automatically set to `False` when forecaster is `ForecasterAutoregMultiOutput`.
         
     verbose : bool, default `True`
         Print number of folds used for cross validation.
@@ -245,7 +245,8 @@ def cv_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
         steps = forecaster.steps
         if allow_incomplete_fold:
             logging.warning(
-                f" `ForecasterAutoregMultiOutput` only allow completed folds."
+                " Cross-validation of `ForecasterAutoregMultiOutput` only allow completed folds, "
+                 "`allow_incomplete_fold` is set to `False`."
             )
             allow_incomplete_fold = False
         
@@ -402,7 +403,7 @@ def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
     
     if verbose:
         print(f"Number of observations used for training or as initial window: {initial_train_size}")
-        print(f"Number of observations used for testing: {len(y) - initial_train_size}")
+        print(f"Number of observations used for backtesting: {len(y) - initial_train_size}")
         print(f"    Number of folds: {folds - 1 * (remainder == 0)}")
         print(f"    Number of steps per fold: {steps}")
         if remainder != 0:
