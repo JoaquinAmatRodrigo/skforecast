@@ -637,7 +637,7 @@ def grid_search_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
 
 
 def backtesting_forecaster_intervals(forecaster, y: Union[np.ndarray, pd.Series],
-                           initial_train_size: int, steps: int, metric: str,
+                           steps: int, metric: str, initial_train_size: int,
                            exog: Union[np.ndarray, pd.Series, pd.DataFrame]=None,
                            interval: list=[5, 95], n_boot: int=500,
                            in_sample_residuals: bool=True,
@@ -646,10 +646,14 @@ def backtesting_forecaster_intervals(forecaster, y: Union[np.ndarray, pd.Series]
     Backtesting (validation) of `ForecasterAutoreg`, or `ForecasterAutoregCustom` object.
     The model is trained only once using the `initial_train_size` first observations. In 
     each iteration, a number of `steps` predictions are evaluated. Both, predictions and
-    intervals, are calculated.
+    intervals, are calculated. This evaluation is much faster than `cv_forecaster()` 
+    since the model is trained only once.
     
-    This evaluation is much faster than `cv_forecaster()` since the model is
-    trained only once.
+    If `forecaster` is already trained and `initial_train_size` is `None`,
+    no initial train is done and all data is used to evaluate the model.
+    However, the first `len(forecaster.last_window)` observations are needed
+    to create the initial predictors, therefore, no predictions are
+    calculated for them.
     
     Parameters
     ----------
@@ -659,8 +663,12 @@ def backtesting_forecaster_intervals(forecaster, y: Union[np.ndarray, pd.Series]
     y : 1D np.ndarray, pd.Series
         Training time series values. 
     
-    initial_train_size: int 
-        Number of samples in the initial train split.
+    initial_train_size: int, default `None`
+        Number of samples in the initial train split. If `None` and `forecaster`
+        is already trained, no initial train is done and all data is used to
+        evaluate the model. However, the first `len(forecaster.last_window)`
+        observations are needed to create the initial predictors. Therefore,
+        no predictions are calculated for them.
         
     steps : int
         Number of steps to predict.
@@ -691,8 +699,7 @@ def backtesting_forecaster_intervals(forecaster, y: Union[np.ndarray, pd.Series]
     Returns 
     -------
     backtest_predictions: np.ndarray
-        If `include_intervals=True`, 2D np.ndarray shape(steps, 3) with predicted
-        value and their estimated interval.
+        2D np.ndarray shape(steps, 3) with predicted value and their estimated interval.
             Column 0 = predictions
             Column 1 = lower bound interval
             Column 2 = upper bound interval
@@ -716,41 +723,49 @@ def backtesting_forecaster_intervals(forecaster, y: Union[np.ndarray, pd.Series]
         forecaster._check_exog(exog=exog)
         exog = forecaster._preproces_exog(exog=exog)
 
-    if initial_train_size > len(y):
+    if initial_train_size is not None and initial_train_size > len(y):
         raise Exception(
-            '`initial_train_size` must be smaller than lenght of `y`.'
-            ' Try to reduce `initial_train_size` or `steps`.'
+            'If used, `initial_train_size` must be smaller than lenght of `y`.'
+        )
+        
+    if initial_train_size is not None and initial_train_size < forecaster.window_size:
+        raise Exception(
+            f"`initial_train_size` must be greater than "
+            f"forecaster's window_size ({forecaster.window_size})."
         )
 
-    if metric not in ['mean_squared_error', 'mean_absolute_error',
-                      'mean_absolute_percentage_error']:
+    if initial_train_size is None and not forecaster.fitted:
         raise Exception(
-            f"Allowed metrics are: 'mean_squared_error', 'mean_absolute_error' and "
-            f"'mean_absolute_percentage_error'. Got {metric}."
+            '`forecaster` must be already trained if no `initial_train_size` is provided.'
         )
-    
+
+    if initial_train_size is None and forecaster.fitted:
+        logging.warning(
+            f'Altough no initial train is done, the first '
+            f'{len(forecaster.last_window)} observations are needed to create '
+            f'the initial predictors. Therefore, no predictions are calculated for them.'
+        )
+
+    metric = get_metric(metric=metric)
     backtest_predictions = []
-    
-    metrics = {
-        'mean_squared_error': mean_squared_error,
-        'mean_absolute_error': mean_absolute_error,
-        'mean_absolute_percentage_error': mean_absolute_percentage_error
-    }
-    
-    metric = metrics[metric]
+
         
-    if exog is None:
-        forecaster.fit(y=y[:initial_train_size])   
+    if initial_train_size is not None:
+        if exog is None:
+            forecaster.fit(y=y[:initial_train_size])      
+        else:
+            forecaster.fit(y=y[:initial_train_size], exog=exog[:initial_train_size])
+        window_size = forecaster.window_size
     else:
-        forecaster.fit(y=y[:initial_train_size], exog=exog[:initial_train_size])     
-    
+        # Although not used for training, first observations are needed to create the initial predictors
+        window_size = forecaster.window_size
+        initial_train_size = window_size
     
     folds     = (len(y) - initial_train_size) // steps + 1
     remainder = (len(y) - initial_train_size) % steps
-    window_size = len(forecaster.last_window)
     
     if verbose:
-        print(f"Number of observations used for training: {initial_train_size}")
+        print(f"Number of observations used for training or as initial window: {initial_train_size}")
         print(f"Number of observations used for testing: {len(y) - initial_train_size}")
         print(f"    Number of folds: {folds - 1 * (remainder == 0)}")
         print(f"    Number of steps per fold: {steps}")
@@ -761,13 +776,15 @@ def backtesting_forecaster_intervals(forecaster, y: Union[np.ndarray, pd.Series]
         
         last_window_end   = initial_train_size + i * steps
         last_window_start = (initial_train_size + i * steps) - window_size 
-        last_window       = y[last_window_start:last_window_end]
+        last_window_y     = y[last_window_start:last_window_end]
+        if exog is not None:
+            next_window_exog    = exog[last_window_end:last_window_end + steps]
                 
         if i < folds - 1:
             if exog is None:
                 pred = forecaster.predict_interval(
                             steps       = steps,
-                            last_window = last_window,
+                            last_window = last_window_y,
                             interval    = interval,
                             n_boot      = n_boot,
                             in_sample_residuals = in_sample_residuals
@@ -775,8 +792,8 @@ def backtesting_forecaster_intervals(forecaster, y: Union[np.ndarray, pd.Series]
             else:
                 pred = forecaster.predict_interval(
                             steps       = steps,
-                            last_window = last_window,
-                            exog        = exog[last_window_end:last_window_end + steps],
+                            last_window = last_window_y,
+                            exog        = next_window_exog,
                             interval    = interval,
                             n_boot      = n_boot,
                             in_sample_residuals = in_sample_residuals
@@ -786,7 +803,7 @@ def backtesting_forecaster_intervals(forecaster, y: Union[np.ndarray, pd.Series]
             if exog is None:
                 pred = forecaster.predict_interval(
                             steps       = steps,
-                            last_window = last_window,
+                            last_window = last_window_y,
                             interval    = interval,
                             n_boot      = n_boot,
                             in_sample_residuals = in_sample_residuals
@@ -794,8 +811,8 @@ def backtesting_forecaster_intervals(forecaster, y: Union[np.ndarray, pd.Series]
             else:
                 pred = forecaster.predict_interval(
                             steps       = steps,
-                            last_window = last_window,
-                            exog        = exog[last_window_end:last_window_end + steps],
+                            last_window = last_window_y,
+                            exog        = next_window_exog,
                             interval    = interval,
                             n_boot      = n_boot,
                             in_sample_residuals = in_sample_residuals
