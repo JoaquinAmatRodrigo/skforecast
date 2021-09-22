@@ -282,6 +282,8 @@ def cv_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
         cv_predictions.append(pred)
         cv_metrics.append(metric_value)
         
+        if not isinstance(forecaster, ForecasterAutoregMultiOutput):
+            forecaster.set_out_sample_residuals(y[test_index] - pred)
     
     if cv_predictions and cv_metrics:
         cv_predictions = np.concatenate(cv_predictions)
