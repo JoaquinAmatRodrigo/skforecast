@@ -478,6 +478,11 @@ def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
                         y_true = y[initial_train_size: initial_train_size + len(backtest_predictions)],
                         y_pred = backtest_predictions
                    )
+    
+    if not isinstance(forecaster, ForecasterAutoregMultiOutput):
+        forecaster.set_out_sample_residuals(
+            y[initial_train_size: initial_train_size + len(backtest_predictions)] - backtest_predictions
+        )
 
     return np.array([metric_value]), backtest_predictions
 
@@ -829,5 +834,10 @@ def backtesting_forecaster_intervals(forecaster, y: Union[np.ndarray, pd.Series]
                         y_true = y[initial_train_size:],
                         y_pred = backtest_predictions[:, 0]
                    )
+    
+    if not isinstance(forecaster, ForecasterAutoregMultiOutput):
+        forecaster.set_out_sample_residuals(
+            y[initial_train_size: initial_train_size + len(backtest_predictions)] - backtest_predictions
+        )
 
     return np.array([metric_value]), backtest_predictions
