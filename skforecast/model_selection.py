@@ -175,8 +175,8 @@ def get_metric(metric:str) -> callable:
 def cv_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
                   initial_train_size: int, steps: Union[int, None], metric: str,
                   exog: Union[np.ndarray, pd.Series, pd.DataFrame]=None,
-                  allow_incomplete_fold: bool=True, verbose: bool=True
-                 ) -> Tuple[np.array, np.array]:
+                  allow_incomplete_fold: bool=True, set_out_sample_residuals: bool=True,
+                  verbose: bool=True) -> Tuple[np.array, np.array]:
     '''
     Cross-validation of `ForecasterAutoreg`, `ForecasterAutoregCustom`
     or `ForecasterAutoregMultiOutput` object. The order of data is maintained
@@ -209,6 +209,10 @@ def cv_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
         The last test partition is allowed to be incomplete if it does not reach `steps`
         observations. Otherwise, the latest observations are discarded. This is set
         automatically set to `False` when forecaster is `ForecasterAutoregMultiOutput`.
+    
+    set_out_sample_residuals: bool, default `True`
+        Save residuals generated during the cross-validation process as out of sample
+        residuals.
         
     verbose : bool, default `True`
         Print number of folds used for cross validation.
@@ -282,8 +286,9 @@ def cv_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
         cv_predictions.append(pred)
         cv_metrics.append(metric_value)
         
-        if not isinstance(forecaster, ForecasterAutoregMultiOutput):
-            forecaster.set_out_sample_residuals(y[test_index] - pred)
+        if set_out_sample_residuals:
+            if not isinstance(forecaster, ForecasterAutoregMultiOutput):
+                forecaster.set_out_sample_residuals(y[test_index] - pred)
     
     if cv_predictions and cv_metrics:
         cv_predictions = np.concatenate(cv_predictions)
@@ -298,6 +303,7 @@ def cv_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
 def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
                            steps: Union[int, None], metric: str, initial_train_size: None,
                            exog: Union[np.ndarray, pd.Series, pd.DataFrame]=None,
+                           set_out_sample_residuals: bool=True,
                            verbose: bool=False) -> Tuple[np.array, np.array]:
     '''
     Backtesting (validation) of `ForecasterAutoreg`, `ForecasterAutoregCustom` or
@@ -339,6 +345,10 @@ def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
+        
+    set_out_sample_residuals: bool, default `True`
+        Save residuals generated during the cross-validation process as out of sample
+        residuals.
             
     verbose : bool, default `False`
         Print number of folds used for backtesting.
@@ -479,10 +489,11 @@ def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
                         y_pred = backtest_predictions
                    )
     
-    if not isinstance(forecaster, ForecasterAutoregMultiOutput):
-        forecaster.set_out_sample_residuals(
-            y[initial_train_size: initial_train_size + len(backtest_predictions)] - backtest_predictions
-        )
+    if set_out_sample_residuals:
+        if not isinstance(forecaster, ForecasterAutoregMultiOutput):
+            forecaster.set_out_sample_residuals(
+                y[initial_train_size: initial_train_size + len(backtest_predictions)] - backtest_predictions
+            )
 
     return np.array([metric_value]), backtest_predictions
 
@@ -592,24 +603,26 @@ def grid_search_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
             
             if method == 'cv':
                 metrics = cv_forecaster(
-                                forecaster = forecaster,
-                                y          = y,
-                                exog       = exog,
-                                initial_train_size = initial_train_size,
-                                steps  = steps,
-                                metric = metric,
-                                allow_incomplete_fold = allow_incomplete_fold,
-                                verbose = verbose
+                                forecaster               = forecaster,
+                                y                        = y,
+                                exog                     = exog,
+                                initial_train_size       = initial_train_size,
+                                steps                    = steps,
+                                metric                   = metric,
+                                allow_incomplete_fold    = allow_incomplete_fold,
+                                set_out_sample_residuals = False,
+                                verbose                  = verbose
                              )[0]
             else:
                 metrics = backtesting_forecaster(
-                                forecaster = forecaster,
-                                y          = y,
-                                exog       = exog,
-                                initial_train_size = initial_train_size,
-                                steps  = steps,
-                                metric = metric,
-                                verbose = verbose
+                                forecaster               = forecaster,
+                                y                        = y,
+                                exog                     = exog,
+                                initial_train_size       = initial_train_size,
+                                steps                    = steps,
+                                metric                   = metric,
+                                set_out_sample_residuals = False,
+                                verbose                  = verbose
                              )[0]
 
             lags_list.append(lags)
@@ -643,11 +656,12 @@ def grid_search_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
     return results
 
 
-def backtesting_forecaster_intervals(forecaster, y: Union[np.ndarray, pd.Series],
+def backtesting_forecaster_intervals(
+                           forecaster, y: Union[np.ndarray, pd.Series],
                            steps: int, metric: str, initial_train_size: int,
                            exog: Union[np.ndarray, pd.Series, pd.DataFrame]=None,
                            interval: list=[5, 95], n_boot: int=500,
-                           in_sample_residuals: bool=True,
+                           in_sample_residuals: bool=True, set_out_sample_residuals: bool=True,
                            verbose: bool=False) -> Tuple[np.array, np.array]:
     '''
     Backtesting (validation) of `ForecasterAutoreg`, or `ForecasterAutoregCustom` object.
@@ -699,6 +713,10 @@ def backtesting_forecaster_intervals(forecaster, y: Union[np.ndarray, pd.Series]
     in_sample_residuals: bool, default `True`
         If `True`, residuals from the training data are used as proxy of
         prediction error to create prediction intervals.
+        
+    set_out_sample_residuals: bool, default `True`
+        Save residuals generated during the cross-validation process as out of sample
+        residuals.
         
     verbose : bool, default `True`
         Print number of folds used for backtesting.
@@ -835,9 +853,10 @@ def backtesting_forecaster_intervals(forecaster, y: Union[np.ndarray, pd.Series]
                         y_pred = backtest_predictions[:, 0]
                    )
     
-    if not isinstance(forecaster, ForecasterAutoregMultiOutput):
-        forecaster.set_out_sample_residuals(
-            y[initial_train_size: initial_train_size + len(backtest_predictions)] - backtest_predictions
-        )
+    if set_out_sample_residuals:
+        if not isinstance(forecaster, ForecasterAutoregMultiOutput):
+            forecaster.set_out_sample_residuals(
+                y[initial_train_size: initial_train_size + len(backtest_predictions)] - backtest_predictions
+            )
 
     return np.array([metric_value]), backtest_predictions
