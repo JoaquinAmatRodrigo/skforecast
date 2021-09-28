@@ -1,6 +1,24 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [0.4.0] - [Unreleased]
+
+### Added
+
++ Function `get_metric` to define metrics used by `backtesting_forecaster()` and `cv_forecaster()`.
++ Method `set_out_sample_residuals` now allows to append new residuals.
+
+### Changed
+
++ `backtesting_forecaster` allows to backtest forecasters already trained. Previous implementation of `backtesting_forecaster` always do an initial training. 
++ `backtesting_forecaster` of ForecasterAutoregMultiOutput allows incomplete folds.
++ `backtesting_forecaster` has the option to update out_sample_residuals with backtesting residuals.
+
++ `cv_forecaster` has the option to update out_sample_residuals with backtesting residuals.
++ Remove deprecated class `ForecasterCustom`.
+
+### Fixed
+
 ## [0.3.0] - [2021-09-01]
 
 ### Added
