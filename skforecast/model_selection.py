@@ -856,7 +856,7 @@ def backtesting_forecaster_intervals(
     if set_out_sample_residuals:
         if not isinstance(forecaster, ForecasterAutoregMultiOutput):
             forecaster.set_out_sample_residuals(
-                y[initial_train_size: initial_train_size + len(backtest_predictions)] - backtest_predictions
+                y[initial_train_size: initial_train_size + len(backtest_predictions)] - backtest_predictions[:, 0]
             )
 
     return np.array([metric_value]), backtest_predictions
