@@ -918,7 +918,7 @@ class ForecasterAutoreg():
         self.max_lag  = max(self.lags)
         
         
-    def set_out_sample_residuals(self, residuals: np.ndarray) -> None:
+    def set_out_sample_residuals(self, residuals: np.ndarray, append: bool=True)-> None:
         '''
         Set new values to the attribute `out_sample_residuals`. Out of sample
         residuals are meant to be calculated using observations that did not
@@ -929,6 +929,12 @@ class ForecasterAutoreg():
         params : 1D np.ndarray
             Values of residuals. If len(residuals) > 1000, only a random sample
             of 1000 values are stored.
+            
+        append : bool, default `True`
+            If `True`, new residuals are added to the once already stored in the attribute
+            `out_sample_residuals`. Once the limit of 1000 values is reached, no more values
+            are appended. If False, `out_sample_residuals` is overwrited with the new residuals.
+            
 
         Returns 
         -------
@@ -942,8 +948,15 @@ class ForecasterAutoreg():
             
         if len(residuals) > 1000:
             residuals = np.random.choice(a=residuals, size=1000, replace=False)
-            
-        self.out_sample_residuals = residuals
+                                 
+        if not append or self.out_sample_residuals is None:
+            self.out_sample_residuals = residuals
+        else:
+            free_space = max(0, 1000 - len(self.out_sample_residuals))
+            if len(residuals) < free_space:
+                self.out_sample_residuals = np.hstack((self.out_sample_residuals, residuals))
+            else:
+                self.out_sample_residuals = np.hstack((self.out_sample_residuals, residuals[:free_space]))
         
 
     def get_coef(self) -> np.ndarray:

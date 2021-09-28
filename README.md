@@ -63,8 +63,6 @@ The most common error when importing the library is:
 + scikit-learn>=0.24
 + statsmodels>=0.12.2
 
-
-
 ## Features
 
 + Create recursive autoregressive forecasters from any scikit-learn regressor
