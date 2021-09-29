@@ -723,7 +723,7 @@ class ForecasterAutoregMultiOutput():
     def set_lags(self, lags: int) -> None:
         '''      
         Set new value to the attribute `lags`.
-        Attribute `max_lag` is also updated.
+        Attributes `max_lag` and `window_size` are also updated.
         
         Parameters
         ----------
@@ -757,6 +757,7 @@ class ForecasterAutoregMultiOutput():
             )
             
         self.max_lag  = max(self.lags)
+        self.window_size = max(self.lags)
         
 
     def get_coef(self, step) -> np.ndarray:
