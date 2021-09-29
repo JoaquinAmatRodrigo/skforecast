@@ -882,7 +882,7 @@ class ForecasterAutoreg():
     def set_lags(self, lags: int) -> None:
         '''      
         Set new value to the attribute `lags`.
-        Attribute `max_lag` is also updated.
+        Attributes `max_lag` and `window_size` are also updated.
         
         Parameters
         ----------
@@ -916,6 +916,7 @@ class ForecasterAutoreg():
             )
             
         self.max_lag  = max(self.lags)
+        self.window_size = max(self.lags)
         
         
     def set_out_sample_residuals(self, residuals: np.ndarray, append: bool=True)-> None:

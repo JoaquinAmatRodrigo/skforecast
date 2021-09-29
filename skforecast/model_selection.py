@@ -425,6 +425,7 @@ def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
         last_window_end   = initial_train_size + i * steps
         last_window_start = (initial_train_size + i * steps) - window_size 
         last_window_y     = y[last_window_start:last_window_end]
+
         if exog is not None:
             next_window_exog    = exog[last_window_end:last_window_end + steps]
                 
@@ -649,7 +650,7 @@ def grid_search_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
         
         if isinstance(forecaster, (ForecasterAutoreg, ForecasterAutoregMultiOutput)):
             forecaster.set_lags(best_lags)
-            
+                
         forecaster.set_params(**best_params)
         forecaster.fit(y=y, exog=exog)
             
