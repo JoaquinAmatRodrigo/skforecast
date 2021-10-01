@@ -709,7 +709,7 @@
 <div class='mkapi-object-container'>
   <div class="mkapi-object function code top">
     <div class="mkapi-object-kind function top">function</div>
-    <div class="mkapi-object-body function top"><code class="mkapi-object-prefix">skforecast.model_selection.</code><code class="mkapi-object-name">backtesting_forecaster</code><code class="mkapi-object-parenthesis">(</code><code class="mkapi-object-signature">forecaster</code>, <code class="mkapi-object-signature">y</code>, <code class="mkapi-object-signature">steps</code>, <code class="mkapi-object-signature">metric</code>, <code class="mkapi-object-signature">initial_train_size</code>, <code class="mkapi-object-signature">exog=None</code>, <code class="mkapi-object-signature">verbose=False</code><code class="mkapi-object-parenthesis">)</code></div>
+    <div class="mkapi-object-body function top"><code class="mkapi-object-prefix">skforecast.model_selection.</code><code class="mkapi-object-name">backtesting_forecaster</code><code class="mkapi-object-parenthesis">(</code><code class="mkapi-object-signature">forecaster</code>, <code class="mkapi-object-signature">y</code>, <code class="mkapi-object-signature">steps</code>, <code class="mkapi-object-signature">metric</code>, <code class="mkapi-object-signature">initial_train_size</code>, <code class="mkapi-object-signature">exog=None</code>, <code class="mkapi-object-signature">set_out_sample_residuals=True</code>, <code class="mkapi-object-signature">verbose=False</code><code class="mkapi-object-parenthesis">)</code></div>
   </div>
   
 </div>
@@ -762,6 +762,11 @@ no predictions are calculated for them.</span></li>
 <span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Exogenous variable/s included as predictor/s. Must have the same
 number of observations as <code>y</code> and should be aligned so that y[i] is
 regressed on exog[i].</span></li>
+
+<li><code class="mkapi-item-name">set_out_sample_residuals</code>
+<span class="mkapi-item-type">(bool, default `True`)</span>
+<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Save residuals generated during the cross-validation process as out of sample
+residuals.</span></li>
 
 <li><code class="mkapi-item-name">verbose</code>
 <span class="mkapi-item-type">(bool, default `False`)</span>
@@ -786,7 +791,7 @@ Value of predictions.</p></div>
 <div class='mkapi-object-container'>
   <div class="mkapi-object function code top">
     <div class="mkapi-object-kind function top">function</div>
-    <div class="mkapi-object-body function top"><code class="mkapi-object-prefix">skforecast.model_selection.</code><code class="mkapi-object-name">backtesting_forecaster</code><code class="mkapi-object-parenthesis">(</code><code class="mkapi-object-signature">forecaster</code>, <code class="mkapi-object-signature">y</code>, <code class="mkapi-object-signature">steps</code>, <code class="mkapi-object-signature">metric</code>, <code class="mkapi-object-signature">initial_train_size</code>, <code class="mkapi-object-signature">exog=None</code>, <code class="mkapi-object-signature">verbose=False</code><code class="mkapi-object-parenthesis">)</code></div>
+    <div class="mkapi-object-body function top"><code class="mkapi-object-prefix">skforecast.model_selection.</code><code class="mkapi-object-name">backtesting_forecaster</code><code class="mkapi-object-parenthesis">(</code><code class="mkapi-object-signature">forecaster</code>, <code class="mkapi-object-signature">y</code>, <code class="mkapi-object-signature">steps</code>, <code class="mkapi-object-signature">metric</code>, <code class="mkapi-object-signature">initial_train_size</code>, <code class="mkapi-object-signature">exog=None</code>, <code class="mkapi-object-signature">set_out_sample_residuals=True</code>, <code class="mkapi-object-signature">verbose=False</code><code class="mkapi-object-parenthesis">)</code></div>
   </div>
   
 </div>
@@ -840,6 +845,11 @@ no predictions are calculated for them.</span></li>
 number of observations as <code>y</code> and should be aligned so that y[i] is
 regressed on exog[i].</span></li>
 
+<li><code class="mkapi-item-name">set_out_sample_residuals</code>
+<span class="mkapi-item-type">(bool, default `True`)</span>
+<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Save residuals generated during the cross-validation process as out of sample
+residuals.</span></li>
+
 <li><code class="mkapi-item-name">verbose</code>
 <span class="mkapi-item-type">(bool, default `False`)</span>
 <span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Print number of folds used for backtesting.</span></li>
@@ -863,7 +873,7 @@ Value of predictions.</p></div>
 <div class='mkapi-object-container'>
   <div class="mkapi-object function code top">
     <div class="mkapi-object-kind function top">function</div>
-    <div class="mkapi-object-body function top"><code class="mkapi-object-prefix">skforecast.model_selection.</code><code class="mkapi-object-name">cv_forecaster</code><code class="mkapi-object-parenthesis">(</code><code class="mkapi-object-signature">forecaster</code>, <code class="mkapi-object-signature">y</code>, <code class="mkapi-object-signature">initial_train_size</code>, <code class="mkapi-object-signature">steps</code>, <code class="mkapi-object-signature">metric</code>, <code class="mkapi-object-signature">exog=None</code>, <code class="mkapi-object-signature">allow_incomplete_fold=True</code>, <code class="mkapi-object-signature">verbose=True</code><code class="mkapi-object-parenthesis">)</code></div>
+    <div class="mkapi-object-body function top"><code class="mkapi-object-prefix">skforecast.model_selection.</code><code class="mkapi-object-name">cv_forecaster</code><code class="mkapi-object-parenthesis">(</code><code class="mkapi-object-signature">forecaster</code>, <code class="mkapi-object-signature">y</code>, <code class="mkapi-object-signature">initial_train_size</code>, <code class="mkapi-object-signature">steps</code>, <code class="mkapi-object-signature">metric</code>, <code class="mkapi-object-signature">exog=None</code>, <code class="mkapi-object-signature">allow_incomplete_fold=True</code>, <code class="mkapi-object-signature">set_out_sample_residuals=True</code>, <code class="mkapi-object-signature">verbose=True</code><code class="mkapi-object-parenthesis">)</code></div>
   </div>
   
 </div>
@@ -909,7 +919,12 @@ regressed on exog[i].</span></li>
 <span class="mkapi-item-type">(bool, default `True`)</span>
 <span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">The last test partition is allowed to be incomplete if it does not reach <code>steps</code>
 observations. Otherwise, the latest observations are discarded. This is set
-automatically to <code>False</code> when forecaster is <code>ForecasterAutoregMultiOutput</code>.</span></li>
+automatically set to <code>False</code> when forecaster is <code>ForecasterAutoregMultiOutput</code>.</span></li>
+
+<li><code class="mkapi-item-name">set_out_sample_residuals</code>
+<span class="mkapi-item-type">(bool, default `True`)</span>
+<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Save residuals generated during the cross-validation process as out of sample
+residuals.</span></li>
 
 <li><code class="mkapi-item-name">verbose</code>
 <span class="mkapi-item-type">(bool, default `True`)</span>

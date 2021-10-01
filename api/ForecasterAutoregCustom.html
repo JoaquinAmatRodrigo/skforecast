@@ -833,7 +833,7 @@ for the next step.</span></li>
 for the next step and bootstrapping is used to estimate prediction
 intervals. Both, predictions and intervals, are returned.</span></li>
 
-<li class="method"><code class="mkapi-item-name"><a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.set_out_sample_residuals">set_out_sample_residuals</a></code><code class="mkapi-object-parenthesis">(</code><code class="mkapi-object-signature">residuals</code><code class="mkapi-object-parenthesis">)</code>
+<li class="method"><code class="mkapi-item-name"><a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.set_out_sample_residuals">set_out_sample_residuals</a></code><code class="mkapi-object-parenthesis">(</code><code class="mkapi-object-signature">residuals</code>, <code class="mkapi-object-signature">append</code><code class="mkapi-object-parenthesis">)</code>
 <span class="mkapi-item-type">(self)</span>
 <span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Set new values to the attribute <code>out_sample_residuals</code>. Out of sample
 residuals are meant to be calculated using observations that did not
@@ -1121,7 +1121,7 @@ ForecasterAutoregCustom.</p></div>
 <div class='mkapi-object-container'>
   <div class="mkapi-object method code">
     <div class="mkapi-object-kind method">method</div>
-    <div class="mkapi-object-body method"><code class="mkapi-object-name">set_out_sample_residuals</code><code class="mkapi-object-parenthesis">(</code><code class="mkapi-object-signature">residuals</code><code class="mkapi-object-parenthesis">)</code></div>
+    <div class="mkapi-object-body method"><code class="mkapi-object-name">set_out_sample_residuals</code><code class="mkapi-object-parenthesis">(</code><code class="mkapi-object-signature">residuals</code>, <code class="mkapi-object-signature">append=True</code><code class="mkapi-object-parenthesis">)</code></div>
   </div>
   
 </div>
@@ -1136,6 +1136,12 @@ participate in the training process.</p></div>
           <span class="mkapi-section-name-body parameters">Parameters</span> 
         </div>
       <div class="mkapi-section-body parameters"><ul class="mkapi-items">
+
+<li><code class="mkapi-item-name">append</code>
+<span class="mkapi-item-type">(bool, default `True`)</span>
+<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">If <code>True</code>, new residuals are added to the once already stored in the attribute
+<code>out_sample_residuals</code>. Once the limit of 1000 values is reached, no more values
+are appended. If False, <code>out_sample_residuals</code> is overwrited with the new residuals.</span></li>
 
 <li><code class="mkapi-item-name">params</code>
 <span class="mkapi-item-type">(1D np.ndarray)</span>
