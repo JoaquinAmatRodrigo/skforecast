@@ -1,28 +1,41 @@
 import typing
+from typing import Union
 import matplotlib
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
 from statsmodels.graphics.tsaplots import plot_acf
 
-def plot_residuals(residuals: np.array=None, y_true: np.array=None,
-                   y_pred: np.array=None, ax: matplotlib.axes.Axes=None,
-                   **kwargs):
+def plot_residuals(residuals: Union[np.array, pd.Series]=None,
+                   y_true: Union[np.array, pd.Series]=None,
+                   y_pred: Union[np.array, pd.Series]=None,
+                   fig: matplotlib.figure.Figure=None,
+                   **kwargs) -> None:
     '''
     
     Parameters
     ----------
     residuals: np.array, default `None`.
+        Values of residuals. If `None`, residuals are calculated internally using
+        `y_true` and `y_true`.
         
     y_true: np.array, default `None`.
-                   
+        Ground truth (correct) values. Ignored if residuals is not `None`.
+
     y_pred: np.array, default `None`. 
-    
+        Values of predictions. Ignored if residuals is not `None`.
+        
     fig: matplotlib.figure.Figure, default `None`. 
-        Pre-existing fig for the plot. Otherwise, call matplotlib.pyplot.gca() internally.
+        Pre-existing fig for the plot. Otherwise, call matplotlib.pyplot.figure()
+        internally.
         
     kwargs
         Other keyword arguments are passed to matplotlib.pyplot.figure()
+        
+    Returns
+    -------
+        None
+    
     '''
     
     if residuals is None and (y_true is None or y_pred is None):
@@ -32,13 +45,11 @@ def plot_residuals(residuals: np.array=None, y_true: np.array=None,
         
     if residuals is None:
         residuals = y_pred - y_true
+            
+    if fig is None:
+        fig = plt.figure(constrained_layout=True, **kwargs)
         
-    
-
-    #TODO: icnluir índice temporal
-    
-    fig = plt.figure(constrained_layout=True, **kwargs)
-    gs = matplotlib.gridspec.GridSpec(2, 2, figure=fig)
+    gs  = matplotlib.gridspec.GridSpec(2, 2, figure=fig)
     ax1 = plt.subplot(gs[0, :])
     ax2 = plt.subplot(gs[1, 0])
     ax3 = plt.subplot(gs[1, 1])
