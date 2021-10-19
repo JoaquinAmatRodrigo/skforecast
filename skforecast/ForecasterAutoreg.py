@@ -112,8 +112,6 @@ class ForecasterAutoreg():
         self.out_sample_residuals = None
         self.fitted               = False
         
-
-        
         if isinstance(lags, int) and lags < 1:
             raise Exception('min value of lags allowed is 1')
             
@@ -134,8 +132,8 @@ class ForecasterAutoreg():
             
         self.max_lag  = max(self.lags)
         self.window_size = self.max_lag
-                
-        
+
+
     def __repr__(self) -> str:
         '''
         Information displayed when a ForecasterAutoreg object is printed.
@@ -149,6 +147,7 @@ class ForecasterAutoreg():
             f"Lags: {self.lags} \n"
             f"Window size: {self.window_size} \n"
             f"Included exogenous: {self.included_exog}, {self.exog_type if self.included_exog else ''} \n"
+            f"Type of exogenous variable: {self.exog_type if self.included_exog else ''} \n"
             f"Exogenous variables names: {self.exog_col_names} \n"
             f"Training range: {self.training_range.to_list()} \n"
             f"Training index type: {str(self.y_index_type)} \n"
@@ -322,7 +321,7 @@ class ForecasterAutoreg():
             self.included_exog = True
             if isinstance(exog, pd.DataFrame):
                 self.exog_col_names = exog.columns.to_list()
-                self.__check_aligment_y_exog(y=y, exog=exog)
+                self.__check_index_aligment_y_exog(y_index=y.index, exog_index=exog.index)
  
         X_train, y_train = self.create_train_X_y(y=y, exog=exog)
         
@@ -338,7 +337,54 @@ class ForecasterAutoreg():
         # The last time window of training data is stored so that lags needed as
         # predictors in the first iteration of `predict()` can be calculated.
         self.last_window = y_train.iloc[-self.max_lag:].copy()
+    
+
+    def __recursive_predict(
+        self,
+        steps: int,
+        last_window: np.array,
+        exog: np.array
+    ) -> pd.Series:
+        '''
+        Predict n steps ahead. It is an iterative process in which, each prediction,
+        is used as a predictor for the next step.
         
+        Parameters
+        ----------
+        steps : int
+            Number of future steps predicted.
+            
+        last_window : np.array
+            Values of the series used to create the predictors (lags) need in the 
+            first iteration of predictiont (t + 1).
+            
+        exog : np.array, pd.DataFrame
+            Exogenous variable/s included as predictor/s.
+
+        Returns 
+        -------
+        predictions : np.array
+            Predicted values.
+            
+        '''
+
+
+        predictions = np.full(shape=steps, fill_value=np.nan)
+
+        for i in range(steps):
+            X = last_window[-self.lags].reshape(1, -1)
+            if exog is not None:
+                X = np.column_stack((X, exog[i,].reshape(1, -1)))
+
+            prediction = self.regressor.predict(X)
+            predictions[i] = prediction.ravel()[0]
+
+            # Update `last_window` values. The first position is discarded and 
+            # the new prediction is added at the end.
+            last_window = np.append(last_window[1:], prediction)
+
+        return predictions
+            
             
     def predict(
         self,
@@ -404,9 +450,12 @@ class ForecasterAutoreg():
             self.__check_exog(
                 exog = exog,
                 ref_type = self.exog_type,
-                ref_shape = self.exog_col_names
+                ref_col_names = self.exog_col_names
             )
             exog_values, exog_index = self.__preproces_exog(exog=exog)
+        else:
+            exog_values = None
+            exog_index = None
             
         if last_window is not None:
             if len(last_window) < self.max_lag:
@@ -420,20 +469,11 @@ class ForecasterAutoreg():
         else:
             last_window_values, last_window_index = self.__preproces_y(y=self.last_window)
             
-        predictions = np.full(shape=steps, fill_value=np.nan)
-
-        for i in range(steps):
-            X = last_window_values[-self.lags].reshape(1, -1)
-            if exog is not None:
-                X = np.column_stack((X, exog[i,].reshape(1, -1)))
-
-
-            prediction = self.regressor.predict(X)
-            predictions[i] = prediction.ravel()[0]
-
-            # Update `last_window` values. The first position is discarded and 
-            # the new prediction is added at the end.
-            last_window_values = np.append(last_window_values[1:], prediction)
+        predictions = self.__recursive_predict(
+                        steps       = steps,
+                        last_window = last_window_values,
+                        exog        = exog_values 
+                      )
 
         predictions = pd.Series(
                         data = predictions,
@@ -451,7 +491,7 @@ class ForecasterAutoreg():
         self,
         steps: int,
         last_window: np.ndarray,
-        exog: np.ndarray=None,
+        exog: np.ndarray,
         interval: list=[5, 95],
         n_boot: int=500,
         in_sample_residuals: bool=True
@@ -475,14 +515,14 @@ class ForecasterAutoreg():
             used to calculate the initial predictors, and the predictions start
             right after training data.
             
-        exog : np.ndarray, default `None`
+        exog : np.ndarray
             Exogenous variable/s included as predictor/s.
             
-        n_boot: int, default `100`
+        n_boot: int, default `500`
             Number of bootstrapping iterations used to estimate prediction
             intervals.
             
-        interval: list, default `[5, 100]`
+        interval: list, default `[5, 95]`
             Confidence of the prediction interval estimated. Sequence of percentiles
             to compute, which must be between 0 and 100 inclusive.
             
@@ -538,12 +578,12 @@ class ForecasterAutoreg():
                                     replace = True
                                )
 
-            for step in range(steps):  
-                prediction = self.predict(
+            for step in range(steps):
+                prediction = self.__recursive_predict(
                                 steps       = 1,
                                 last_window = last_window_boot,
-                                exog        = exog_boot
-                             )
+                                exog        = exog_boot 
+                            )
                 
                 prediction_with_residual  = prediction + sample_residuals[step]
                 boot_predictions[step, i] = prediction_with_residual
@@ -657,9 +697,12 @@ class ForecasterAutoreg():
             self.__check_exog(
                 exog = exog,
                 ref_type = self.exog_type,
-                ref_shape = self.exog_col_names
+                ref_col_names = self.exog_col_names
             )
             exog_values, exog_index = self.__preproces_exog(exog=exog)
+        else:
+            exog_values = None
+            exog_index = None
      
         if last_window is not None:
             if len(last_window) < self.max_lag:
@@ -673,30 +716,39 @@ class ForecasterAutoreg():
         else:
             last_window_values, last_window_index = self.__preproces_y(y=self.last_window)
         
-        # Since during predict() `last_window` and `exog` are modified, the
-        # originals are stored to be used later
-        last_window_original = last_window.copy()
+        # Since during predict() `last_window_values` and `exog_values` are modified,
+        # the originals are stored to be used later.
+        last_window_values_original = last_window_values.copy()
         if exog is not None:
-            exog_original = exog.copy()
+            exog_values_original = exog_values.copy()
         else:
-            exog_original = exog
-            
-        predictions = self.predict(
+            exog_values_original = None
+        
+        predictions = self.__recursive_predict(
                             steps       = steps,
-                            last_window = last_window,
-                            exog        = exog
+                            last_window = last_window_values,
+                            exog        = exog_values
                       )
 
-        predictions_interval = self._estimate_boot_interval(
+        predictions_interval = self.__estimate_boot_interval(
                                     steps       = steps,
-                                    last_window = last_window_original,
-                                    exog        = exog_original,
+                                    last_window = last_window_values_original,
+                                    exog        = exog_values_original,
                                     interval    = interval,
                                     n_boot      = n_boot,
                                     in_sample_residuals = in_sample_residuals
                                 )
         
         predictions = np.column_stack((predictions, predictions_interval))
+
+        predictions = pd.DataFrame(
+                        data = predictions,
+                        index = self.__expand_index(
+                                    index = last_window_index,
+                                    steps = steps
+                                ),
+                        columns = ['pred', 'lower_bound', 'upper_bound']
+                      )
 
         return predictions
 
@@ -799,10 +851,11 @@ class ForecasterAutoreg():
             )
             
         if ref_col_names is not None and isinstance(exog, pd.DataFrame):
-            missing_cols = set(exog.columns).difference(set(ref_col_names))
+            missing_cols = set(ref_col_names ).difference(set(exog.columns))
             if missing_cols:
                 raise Exception(
-                    f"Missing columns in `exog` : {missing_cols}."
+                    f"Forecaster was trained with exogenous variables: {ref_col_names}. \n"
+                    f"The following columns are missing `exog` : {missing_cols}."
                 )
         return
     
@@ -825,6 +878,38 @@ class ForecasterAutoreg():
             raise Exception(
                ('`y` and `exog` must have same index. This is important '
                'to ensure the correct aligment of values.')      
+            )
+
+    @staticmethod
+    def __check_index_compatibility(
+        index: pd.Index,
+        ref_index_type: type,
+        ref_index_freq: str
+    ) -> None:
+        '''
+        Raise Warning if `index` is not of type `ref_index_type` or has not
+        frequancy `ref_index_freq`.
+
+        Parameters
+        ---------- 
+        index : pd.Index
+            Index to be check
+
+        ref_index_type: type
+            Type of reference
+        
+        ref_index_freq: str
+            Frequancy of reference
+        ''' 
+
+        if not type(index) == ref_index_type:
+            warnings.warn(
+               f"Expected index of type {ref_index_type}. Got {type(index)}"      
+            )
+
+        if not index.freqstr == ref_index_freq:
+            warnings.warn(
+               f"Expected index of type {ref_index_type}. Got {type(index)}"      
             )
         
     @staticmethod
@@ -901,7 +986,7 @@ class ForecasterAutoreg():
         else:
             exog_index = pd.RangeIndex(
                             start = 0,
-                            stop  = len(y),
+                            stop  = len(exog),
                             step  = 1
                           )
 
