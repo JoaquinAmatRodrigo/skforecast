@@ -148,7 +148,7 @@ class ForecasterAutoreg():
             f"Window size: {self.window_size} \n"
             f"Included exogenous: {self.included_exog}, {self.exog_type if self.included_exog else ''} \n"
             f"Type of exogenous variable: {self.exog_type if self.included_exog else ''} \n"
-            f"Exogenous variables names: {self.exog_col_names} \n"
+            f"Exogenous variables names: {self.exog_col_names if self.included_exog else ''} \n"
             f"Training range: {self.training_range.to_list()} \n"
             f"Training index type: {str(self.y_index_type)} \n"
             f"Training index frequancy: {self.y_index_freq} \n"
