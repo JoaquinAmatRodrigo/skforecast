@@ -236,12 +236,11 @@ def cv_forecaster(
 
     '''
     
-    forecaster.__check_y(y=y)
-    y = forecaster._preproces_y(y=y)
+    forecaster._check_y(y=y)
     
     if exog is not None:
         forecaster._check_exog(exog=exog)
-        exog = forecaster._preproces_exog(exog=exog)
+        forecaster._check_index_aligment_y_exog(y_index=y.index, exog_index=exog.index)
 
     if initial_train_size > len(y):
         raise Exception(
@@ -279,16 +278,15 @@ def cv_forecaster(
     for train_index, test_index in splits:
         
         if exog is None:
-            forecaster.fit(y=y[train_index])      
+            forecaster.fit(y=y.iloc[train_index])      
             pred = forecaster.predict(steps=len(test_index))
             
         else:
-            
-            forecaster.fit(y=y[train_index], exog=exog[train_index])      
-            pred = forecaster.predict(steps=len(test_index), exog=exog[test_index])
+            forecaster.fit(y=y.iloc[train_index], exog=exog.iloc[train_index,])      
+            pred = forecaster.predict(steps=len(test_index), exog=exog.iloc[test_index])
                
         metric_value = metric(
-                            y_true = y[test_index],
+                            y_true = y.iloc[test_index],
                             y_pred = pred
                        )
         
@@ -297,10 +295,11 @@ def cv_forecaster(
         
         if set_out_sample_residuals:
             if not isinstance(forecaster, ForecasterAutoregMultiOutput):
-                forecaster.set_out_sample_residuals(y[test_index] - pred)
+                residuals = (y.iloc[test_index] - pred).to_numpy()
+                forecaster.set_out_sample_residuals(residuals)
     
     if cv_predictions and cv_metrics:
-        cv_predictions = np.concatenate(cv_predictions)
+        cv_predictions = pd.concat(cv_predictions)
         cv_metrics = np.array(cv_metrics)
     else:
         cv_predictions = np.array([])
@@ -309,11 +308,15 @@ def cv_forecaster(
     return cv_metrics, cv_predictions
 
 
-def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
-                           steps: Union[int, None], metric: str, initial_train_size: None,
-                           exog: Union[np.ndarray, pd.Series, pd.DataFrame]=None,
-                           set_out_sample_residuals: bool=True,
-                           verbose: bool=False) -> Tuple[np.array, np.array]:
+def backtesting_forecaster(
+    forecaster,
+    y: pd.Series,
+    steps: Union[int, None],
+    metric: str, initial_train_size: None,
+    exog: Union[pd.Series, pd.DataFrame]=None,
+    set_out_sample_residuals: bool=True,
+    verbose: bool=False
+) -> Tuple[np.array, np.array]:
     '''
     Backtesting (validation) of `ForecasterAutoreg`, `ForecasterAutoregCustom` or
     `ForecasterAutoregMultiOutput` object.
@@ -333,7 +336,7 @@ def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
     forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregMultiOutput
         `ForecasterAutoreg`, `ForecasterAutoregCustom` or `ForecasterAutoregMultiOutput` object.
         
-    y : 1D np.ndarray, pd.Series
+    y : pd.Series
         Training time series values. 
     
     initial_train_size: int, default `None`
@@ -350,7 +353,7 @@ def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
     metric : {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
         Metric used to quantify the goodness of fit of the model.
         
-    exog : np.ndarray, pd.Series, pd.DataFrame, default `None`
+    exog : pd.Series, pd.DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
@@ -372,12 +375,11 @@ def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
 
     '''
     
-    forecaster.__check_y(y=y)
-    y = forecaster._preproces_y(y=y)
+    forecaster._check_y(y=y)
     
     if exog is not None:
         forecaster._check_exog(exog=exog)
-        exog = forecaster._preproces_exog(exog=exog)
+        forecaster._check_index_aligment_y_exog(y_index=y.index, exog_index=exog.index)
 
     if initial_train_size is not None and initial_train_size > len(y):
         raise Exception(
@@ -410,9 +412,12 @@ def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
 
     if initial_train_size is not None:
         if exog is None:
-            forecaster.fit(y=y[:initial_train_size])      
+            forecaster.fit(y=y.iloc[:initial_train_size])      
         else:
-            forecaster.fit(y=y[:initial_train_size], exog=exog[:initial_train_size])
+            forecaster.fit(
+                y = y.iloc[:initial_train_size],
+                exog = exog.iloc[:initial_train_size]
+            )
         window_size = forecaster.window_size
     else:
         # Although not used for training, first observations are needed to create the initial predictors
@@ -433,10 +438,10 @@ def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
     for i in range(folds):
         last_window_end   = initial_train_size + i * steps
         last_window_start = (initial_train_size + i * steps) - window_size 
-        last_window_y     = y[last_window_start:last_window_end]
+        last_window_y     = y.iloc[last_window_start:last_window_end]
 
         if exog is not None:
-            next_window_exog    = exog[last_window_end:last_window_end + steps]
+            next_window_exog = exog.iloc[last_window_end:last_window_end + steps, ]
                 
         if i < folds - 1:
             if exog is None:
@@ -475,35 +480,37 @@ def backtesting_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
                             steps       = steps,
                             last_window = last_window_y
                         )
-                pred = pred[:-dummy_steps]
+                pred = pred.iloc[:-dummy_steps]
             else:
                 next_window_exog = np.vstack((
-                                     exog,
+                                     next_window_exog.to_numpy(),
                                      np.ones(shape=(dummy_steps,) + exog.shape[1:])
                                    ))
+                print('aquii')
+                print(next_window_exog)
                 pred = forecaster.predict(
                             steps       = steps,
                             last_window = last_window_y,
                             exog        = next_window_exog
                         )
-                pred = pred[:-dummy_steps]
+                pred = pred.iloc[:-dummy_steps]
             
         else:
             continue
         
         backtest_predictions.append(pred)
     
-    backtest_predictions = np.concatenate(backtest_predictions)
+    backtest_predictions = pd.concat(backtest_predictions)
     metric_value = metric(
-                        y_true = y[initial_train_size: initial_train_size + len(backtest_predictions)],
+                        y_true = y.iloc[initial_train_size: initial_train_size + len(backtest_predictions)],
                         y_pred = backtest_predictions
                    )
     
     if set_out_sample_residuals:
         if not isinstance(forecaster, ForecasterAutoregMultiOutput):
-            forecaster.set_out_sample_residuals(
-                y[initial_train_size: initial_train_size + len(backtest_predictions)] - backtest_predictions
-            )
+            residuals = (y.iloc[initial_train_size: initial_train_size + len(backtest_predictions)]
+                         - backtest_predictions)
+            forecaster.set_out_sample_residuals(residuals.to_numpy())
 
     return np.array([metric_value]), backtest_predictions
 
@@ -573,7 +580,7 @@ def grid_search_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
 
     '''
     
-    forecaster.__check_y(y=y)
+    forecaster._check_y(y=y)
     y = forecaster._preproces_y(y=y)
     
     if exog is not None:
@@ -751,7 +758,7 @@ def backtesting_forecaster_intervals(
 
     '''
     
-    forecaster.__check_y(y=y)
+    forecaster._check_y(y=y)
     y = forecaster._preproces_y(y=y)
     
     if exog is not None:
