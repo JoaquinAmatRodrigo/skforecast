@@ -42,7 +42,7 @@ def time_series_spliter(
     
     Parameters
     ----------        
-    y : 1D np.ndarray, pd.Series
+    y : 1d numpy ndarray, pandas Series
         Training time series values. 
     
     initial_train_size: int 
@@ -60,10 +60,10 @@ def time_series_spliter(
 
     Yields
     ------
-    train : 1D np.ndarray
+    train : 1d numpy ndarray
         Training indices.
         
-    test : 1D np.ndarray
+    test : 1d numpy ndarray
         Test indices.
         
     '''
@@ -177,11 +177,11 @@ def get_metric(metric:str) -> callable:
 
 def cv_forecaster(
     forecaster,
-    y: Union[np.ndarray, pd.Series],
+    y: pd.Series,
     initial_train_size: int,
     steps: Union[int, None],
     metric: str,
-    exog: Union[np.ndarray, pd.Series, pd.DataFrame]=None,
+    exog: Union[pd.Series, pd.DataFrame]=None,
     allow_incomplete_fold: bool=True,
     set_out_sample_residuals: bool=True,
     verbose: bool=True
@@ -196,7 +196,7 @@ def cv_forecaster(
     forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregMultiOutput
         `ForecasterAutoreg`, `ForecasterAutoregCustom` or `ForecasterAutoregMultiOutput` object.
         
-    y : 1D np.ndarray, pd.Series
+    y : pandas Series
         Training time series values. 
     
     initial_train_size: int 
@@ -209,7 +209,7 @@ def cv_forecaster(
     metric : {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
         Metric used to quantify the goodness of fit of the model.
         
-    exog : np.ndarray, pd.Series, pd.DataFrame, default `None`
+    exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
@@ -228,19 +228,13 @@ def cv_forecaster(
 
     Returns 
     -------
-    cv_metrics: 1D np.ndarray
+    cv_metrics: 1d numpy ndarray
         Value of the metric for each fold.
 
-    cv_predictions: 1D np.ndarray
+    cv_predictions: 1d numpy ndarray
         Predictions.
 
     '''
-    
-    forecaster._check_y(y=y)
-    
-    if exog is not None:
-        forecaster._check_exog(exog=exog)
-        forecaster._check_index_aligment_y_exog(y_index=y.index, exog_index=exog.index)
 
     if initial_train_size > len(y):
         raise Exception(
@@ -336,7 +330,7 @@ def backtesting_forecaster(
     forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregMultiOutput
         `ForecasterAutoreg`, `ForecasterAutoregCustom` or `ForecasterAutoregMultiOutput` object.
         
-    y : pd.Series
+    y : pandas Series
         Training time series values. 
     
     initial_train_size: int, default `None`
@@ -353,7 +347,7 @@ def backtesting_forecaster(
     metric : {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
         Metric used to quantify the goodness of fit of the model.
         
-    exog : pd.Series, pd.DataFrame, default `None`
+    exog :panda Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
@@ -367,19 +361,13 @@ def backtesting_forecaster(
 
     Returns 
     -------
-    metric_value: np.ndarray shape (1,)
+    metric_value: numpy ndarray shape (1,)
         Value of the metric.
 
-    backtest_predictions: 1D np.ndarray
+    backtest_predictions: numpy ndarray
         Value of predictions.
 
     '''
-    
-    forecaster._check_y(y=y)
-    
-    if exog is not None:
-        forecaster._check_exog(exog=exog)
-        forecaster._check_index_aligment_y_exog(y_index=y.index, exog_index=exog.index)
 
     if initial_train_size is not None and initial_train_size > len(y):
         raise Exception(
@@ -416,7 +404,7 @@ def backtesting_forecaster(
         else:
             forecaster.fit(
                 y = y.iloc[:initial_train_size],
-                exog = exog.iloc[:initial_train_size]
+                exog = exog.iloc[:initial_train_size, ]
             )
         window_size = forecaster.window_size
     else:
@@ -516,13 +504,20 @@ def backtesting_forecaster(
 
 
 
-def grid_search_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
-                           param_grid: dict, initial_train_size: int, steps: int,
-                           metric: str,
-                           exog: Union[np.ndarray, pd.Series, pd.DataFrame]=None,
-                           lags_grid: list=None, method: str='cv',
-                           allow_incomplete_fold: bool=True, return_best: bool=True,
-                           verbose: bool=True) -> pd.DataFrame:
+def grid_search_forecaster(
+    forecaster,
+    y: pd.Series,
+    param_grid: dict,
+    initial_train_size: int,
+    steps: int,
+    metric: str,
+    exog: Union[pd.Series, pd.DataFrame]=None,
+    lags_grid: list=None,
+    method: str='cv',
+    allow_incomplete_fold: bool=True,
+    return_best: bool=True,
+    verbose: bool=True
+) -> pd.DataFrame:
     '''
     Exhaustive search over specified parameter values for a Forecaster object.
     Validation is done using time series cross-validation or backtesting.
@@ -532,7 +527,7 @@ def grid_search_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
     forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregMultiOutput
         `ForecasterAutoreg`, `ForecasterAutoregCustom` or `ForecasterAutoregMultiOutput` object.
         
-    y : 1D np.ndarray, pd.Series
+    y : pandas Series
         Training time series values. 
         
     param_grid : dict
@@ -548,7 +543,7 @@ def grid_search_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
     metric : {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
         Metric used to quantify the goodness of fit of the model.
         
-    exog : np.ndarray, pd.Series, pd.DataFrame, default `None`
+    exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
@@ -575,18 +570,11 @@ def grid_search_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
 
     Returns 
     -------
-    results: pandas.DataFrame
+    results: pandas DataFrame
         Metric value estimated for each combination of parameters.
 
     '''
-    
-    forecaster._check_y(y=y)
-    y = forecaster._preproces_y(y=y)
-    
-    if exog is not None:
-        forecaster._check_exog(exog=exog)
-        exog = forecaster._preproces_exog(exog=exog)
-    
+
     if isinstance(forecaster, ForecasterAutoregCustom):
         if lags_grid is not None:
             logging.warning(
@@ -674,12 +662,18 @@ def grid_search_forecaster(forecaster, y: Union[np.ndarray, pd.Series],
 
 
 def backtesting_forecaster_intervals(
-                           forecaster, y: Union[np.ndarray, pd.Series],
-                           steps: int, metric: str, initial_train_size: int,
-                           exog: Union[np.ndarray, pd.Series, pd.DataFrame]=None,
-                           interval: list=[5, 95], n_boot: int=500,
-                           in_sample_residuals: bool=True, set_out_sample_residuals: bool=True,
-                           verbose: bool=False) -> Tuple[np.array, np.array]:
+    forecaster,
+    y: pd.Series,
+    steps: int,
+    metric: str,
+    initial_train_size: int,
+    exog: Union[pd.Series, pd.DataFrame]=None,
+    interval: list=[5, 95],
+    n_boot: int=500,
+    in_sample_residuals: bool=True,
+    set_out_sample_residuals: bool=True,
+    verbose: bool=False
+) -> Tuple[np.array, np.array]:
     '''
     Backtesting (validation) of `ForecasterAutoreg`, or `ForecasterAutoregCustom` object.
     The model is trained only once using the `initial_train_size` first observations. In 
@@ -698,7 +692,7 @@ def backtesting_forecaster_intervals(
     forecaster : ForecasterAutoreg, ForecasterAutoregCustom
         `ForecasterAutoreg` or `ForecasterAutoregCustom` object.
         
-    y : 1D np.ndarray, pd.Series
+    y : pandas Series
         Training time series values. 
     
     initial_train_size: int, default `None`
@@ -714,14 +708,14 @@ def backtesting_forecaster_intervals(
     metric : {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
         Metric used to quantify the goodness of fit of the model.
         
-    exog : np.ndarray, pd.Series, pd.DataFrame, default `None`
+    exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
         
-    interval: list, default `[5, 100]`
-            Confidence of the prediction interval estimated. Sequence of percentiles
-            to compute, which must be between 0 and 100 inclusive.
+    interval: list, default `[5, 95]`
+        Confidence of the prediction interval estimated. Sequence of percentiles
+        to compute, which must be between 0 and 100 inclusive.
             
     n_boot: int, default `500`
         Number of bootstrapping iterations used to estimate prediction
@@ -740,13 +734,13 @@ def backtesting_forecaster_intervals(
 
     Returns 
     -------
-    backtest_predictions: np.ndarray
-        2D np.ndarray shape(steps, 3) with predicted value and their estimated interval.
-            Column 0 = predictions
-            Column 1 = lower bound interval
-            Column 2 = upper bound interval
+    backtest_predictions: pandas DataFrame
+        Values predicted by the forecaster and their estimated interval:
+            column pred = predictions.
+            column lower_bound = lower bound of the interval.
+            column upper_bound = upper bound interval of the interval.
         
-    metric_value: np.ndarray shape (1,)
+    metric_value: numpy ndarray shape (1,)
         Value of the metric.
 
     Notes
@@ -757,13 +751,6 @@ def backtesting_forecaster_intervals(
     George Athanasopoulos.
 
     '''
-    
-    forecaster._check_y(y=y)
-    y = forecaster._preproces_y(y=y)
-    
-    if exog is not None:
-        forecaster._check_exog(exog=exog)
-        exog = forecaster._preproces_exog(exog=exog)
 
     if initial_train_size is not None and initial_train_size > len(y):
         raise Exception(
@@ -787,16 +774,21 @@ def backtesting_forecaster_intervals(
             f'{len(forecaster.last_window)} observations are needed to create '
             f'the initial predictors. Therefore, no predictions are calculated for them.'
         )
-
+    
+    if isinstance(forecaster, ForecasterAutoregMultiOutput):
+        steps = forecaster.steps
+        
     metric = get_metric(metric=metric)
     backtest_predictions = []
 
-        
     if initial_train_size is not None:
         if exog is None:
-            forecaster.fit(y=y[:initial_train_size])      
+            forecaster.fit(y=y.iloc[:initial_train_size])      
         else:
-            forecaster.fit(y=y[:initial_train_size], exog=exog[:initial_train_size])
+            forecaster.fit(
+                y = y.iloc[:initial_train_size],
+                exog = exog.iloc[:initial_train_size, ]
+            )
         window_size = forecaster.window_size
     else:
         # Although not used for training, first observations are needed to create the initial predictors
@@ -808,19 +800,19 @@ def backtesting_forecaster_intervals(
     
     if verbose:
         print(f"Number of observations used for training or as initial window: {initial_train_size}")
-        print(f"Number of observations used for testing: {len(y) - initial_train_size}")
+        print(f"Number of observations used for backtesting: {len(y) - initial_train_size}")
         print(f"    Number of folds: {folds - 1 * (remainder == 0)}")
         print(f"    Number of steps per fold: {steps}")
         if remainder != 0:
             print(f"    Last fold only includes {remainder} observations")
-    
+      
     for i in range(folds):
-        
         last_window_end   = initial_train_size + i * steps
         last_window_start = (initial_train_size + i * steps) - window_size 
-        last_window_y     = y[last_window_start:last_window_end]
+        last_window_y     = y.iloc[last_window_start:last_window_end]
+
         if exog is not None:
-            next_window_exog    = exog[last_window_end:last_window_end + steps]
+            next_window_exog = exog.iloc[last_window_end:last_window_end + steps, ]
                 
         if i < folds - 1:
             if exog is None:
@@ -840,7 +832,8 @@ def backtesting_forecaster_intervals(
                             n_boot      = n_boot,
                             in_sample_residuals = in_sample_residuals
                         )
-        elif remainder != 0:
+                
+        elif remainder != 0 and not isinstance(forecaster, ForecasterAutoregMultiOutput):
             steps = remainder 
             if exog is None:
                 pred = forecaster.predict_interval(
@@ -859,21 +852,50 @@ def backtesting_forecaster_intervals(
                             n_boot      = n_boot,
                             in_sample_residuals = in_sample_residuals
                         )
+                
+        elif remainder != 0:
+            # ForecasterAutoregMultiOutput predict all steps simultaneusly, therefore,
+            # if the last fold is incomplete, remaining steps must be completed with
+            # dummy values and removing then the corresponding predictions.
+            dummy_steps = steps - remainder 
+            if exog is None:
+                pred = forecaster.predict_interval(
+                            steps       = steps,
+                            last_window = last_window_y,
+                            interval    = interval,
+                            n_boot      = n_boot,
+                            in_sample_residuals = in_sample_residuals
+                        )
+            else:
+                next_window_exog = np.vstack((
+                                     next_window_exog.to_numpy(),
+                                     np.ones(shape=(dummy_steps,) + exog.shape[1:])
+                                   ))
+                pred = forecaster.predict_interval(
+                            steps       = steps,
+                            last_window = last_window_y,
+                            exog        = next_window_exog,
+                            interval    = interval,
+                            n_boot      = n_boot,
+                            in_sample_residuals = in_sample_residuals
+                        )
+            pred = pred.iloc[:-dummy_steps]
+            
         else:
             continue
         
         backtest_predictions.append(pred)
     
-    backtest_predictions = np.concatenate(backtest_predictions)
+    backtest_predictions = pd.concat(backtest_predictions)
     metric_value = metric(
-                        y_true = y[initial_train_size:],
-                        y_pred = backtest_predictions[:, 0]
+                        y_true = y.iloc[initial_train_size: initial_train_size + len(backtest_predictions)],
+                        y_pred = backtest_predictions.iloc[:, 0]
                    )
     
     if set_out_sample_residuals:
         if not isinstance(forecaster, ForecasterAutoregMultiOutput):
-            forecaster.set_out_sample_residuals(
-                y[initial_train_size: initial_train_size + len(backtest_predictions)] - backtest_predictions[:, 0]
-            )
+            residuals = (y.iloc[initial_train_size: initial_train_size + len(backtest_predictions)]
+                         - backtest_predictions)
+            forecaster.set_out_sample_residuals(residuals.to_numpy())
 
     return np.array([metric_value]), backtest_predictions
