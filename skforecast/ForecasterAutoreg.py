@@ -217,7 +217,7 @@ class ForecasterAutoreg():
 
         Returns 
         -------
-        X_train : pandas DataFrame shape (len(y) - self.max_lag, len(self.lags))
+        X_train : pandas DataFrame, shape (len(y) - self.max_lag, len(self.lags))
             Pandas DataFrame with the training values (predictors).
             
         y_train : pandas Series, shape (len(y) - self.max_lag, )
@@ -311,7 +311,7 @@ class ForecasterAutoreg():
         X_train, y_train = self.create_train_X_y(y=y, exog=exog)      
         self.regressor.fit(X=X_train, y=y_train)
         self.fitted = True
-        self.training_range = X_train.index[[0, -1]]
+        self.training_range = self._preproces_y(y=y)[1][[0, -1]]
         self.index_type = type(X_train.index)
         if isinstance(X_train.index, pd.DatetimeIndex):
             self.index_freq = X_train.index.freqstr
@@ -503,7 +503,7 @@ class ForecasterAutoreg():
 
         Returns 
         -------
-        predicction_interval : numnpy ndarray, shape (steps, 2)
+        predicction_interval : numpy ndarray, shape (steps, 2)
             Interval estimated for each prediction by bootstrapping:
                 first column = lower bound of the interval.
                 second column= upper bound interval of the interval.
@@ -517,7 +517,6 @@ class ForecasterAutoreg():
             
         '''
         
-
         boot_predictions = np.full(
                                 shape      = (steps, n_boot),
                                 fill_value = np.nan,
