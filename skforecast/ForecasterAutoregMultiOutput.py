@@ -403,34 +403,39 @@ class ForecasterAutoregMultiOutput():
 
         # The last time window of training data is stored so that lags needed as
         # predictors in the first iteration of `predict()` can be calculated.
-        if self.steps >= self.max_lag:
-            self.last_window = y_train.iloc[-1, -self.max_lag:]
-        else:
-            self.last_window = pd.concat((
-                                    y_train.iloc[-(self.max_lag-self.steps + 1):-1, 0],
-                                    y_train.iloc[-1, :]
-                               ))
+        # self.last_window = y_train.iloc[-self.max_lag:, -1]
+        # if self.steps >= self.max_lag:
+        #     self.last_window = y_train.iloc[-1, -self.max_lag:]
+        # else:
+        #     self.last_window = pd.concat((
+        #                             y_train.iloc[-(self.max_lag-self.steps + 1):-1, 0],
+        #                             y_train.iloc[-1, :]
+        #                        ))
 
+        self.last_window = y_train.iloc[-self.max_lag:, -1]
     
-    def predict(self, last_window: Union[np.ndarray, pd.Series]=None,
-                exog: Union[np.ndarray, pd.Series, pd.DataFrame]=None,
-                steps=None) -> np.ndarray:
+    def predict(
+        self,
+        last_window: pd.Series=None,
+        exog: Union[pd.Series, pd.DataFrame]=None,
+        steps = None
+    ) -> np.ndarray:
         '''
-        Multi-step prediction. The number of future steps predicted is defined when
-        ininitializing the forecaster, argument `steps` not used, present here for
+        Predict n steps ahead. The number of future steps predicted is defined when
+        ininitializing the forecaster. Argument `steps` not used, present here for
         API consistency by convention.
 
         Parameters
         ----------
-        last_window : 1D np.ndarray, pd.Series, shape (, max_lag), default `None`
+        last_window : pandas Series, default `None`
             Values of the series used to create the predictors (lags) need in the 
             first iteration of predictiont (t + 1).
-
+    
             If `last_window = None`, the values stored in` self.last_window` are
             used to calculate the initial predictors, and the predictions start
             right after training data.
-
-        exog : np.ndarray, pd.Series, pd.DataFrame, default `None`
+            
+        exog : pandas Series, pandas DataFrame, default `None`
             Exogenous variable/s included as predictor/s.
 
         steps : Ignored
@@ -438,66 +443,65 @@ class ForecasterAutoregMultiOutput():
 
         Returns 
         -------
-        predictions : 1D np.array, shape (steps,)
-            Values predicted.
+        predictions : pandas Series
+            Predicted values.
 
         '''
 
-        if not self.fitted:
-            raise Exception(
-                'This Forecaster instance is not fitted yet. Call `fit` with appropriate arguments before using this it.'
-            )
-
-        if exog is None and self.included_exog:
-            raise Exception(
-                f"Forecaster trained with exogenous variable/s. "
-                f"Same variable/s must be provided in `predict()`."
-            )
-
-        if exog is not None and not self.included_exog:
-            raise Exception(
-                f"Forecaster trained without exogenous variable/s. "
-                f"`exog` must be `None` in `predict()`."
-            )
+        steps = self.steps
+        self._check_predict_input(
+            steps       = steps,
+            last_window = last_window, 
+            exog        = exog
+        )
 
         if exog is not None:
-            self._check_exog(
-                exog=exog, ref_type = self.exog_type, ref_shape=self.exog_shape
-            )
-            exog = self._preproces_exog(exog=exog)
-            if exog.shape[0] < self.steps:
-                raise Exception(
-                    f"`exog` must have at least as many values as `steps` predicted."
-                )
-
-            exog = self._exog_to_multi_output(exog=exog)
+            if isinstance(exog, pd.DataFrame):
+                exog_values, exog_index = self._preproces_exog(
+                                            exog = exog[self.exog_col_names].iloc[:steps, ]
+                                        )
+            else: 
+                exog_values, exog_index = self._preproces_exog(
+                                            exog = exog.iloc[:steps, ]
+                                        )
+            exog_values = self._exog_to_multi_output(exog=exog_values)
+        else:
+            exog_values = None
+            exog_index = None
 
         if last_window is not None:
-            self._check_last_window(last_window=last_window)
-            last_window = self._preproces_last_window(last_window=last_window)
-            if last_window.shape[0] < self.max_lag:
-                raise Exception(
-                    f"`last_window` must have as many values as as needed to "
-                    f"calculate the maximum lag ({self.max_lag})."
-                )
+            last_window_values, last_window_index = self._preproces_last_window(
+                                                        last_window = last_window
+                                                    )  
         else:
-            last_window = self.last_window.copy()
+            last_window_values, last_window_index = self._preproces_last_window(
+                                                        last_window = self.last_window
+                                                    )
 
 
-        predictions = np.full(shape=self.steps, fill_value=np.nan)
-        X_lags = last_window[-self.lags].reshape(1, -1)
+        predictions = np.full(shape=steps, fill_value=np.nan)
+        X_lags = last_window_values[-self.lags].reshape(1, -1)
 
-        for step in range(self.steps):
+        for step in range(steps):
             regressor = self.regressors_[step]
             if exog is None:
                 X = X_lags
                 predictions[step] = regressor.predict(X)
             else:
                 # Only columns from exog related with the current step are selected.
-                X = np.hstack([X_lags, exog[0][step::self.steps].reshape(1, -1)])
+                X = np.hstack([X_lags, exog_values[0][step::steps].reshape(1, -1)])
                 predictions[step] = regressor.predict(X)
 
-        return predictions.reshape(-1)
+        predictions = pd.Series(
+                        data  = predictions.reshape(-1),
+                        index = self._expand_index(
+                                    index = last_window_index,
+                                    steps = steps
+                                ),
+                        name = 'pred'
+                      )
+
+        return predictions
         
     
     
@@ -793,6 +797,9 @@ class ForecasterAutoregMultiOutput():
         '''
 
         exog_transformed = []
+
+        if exog.ndim < 2:
+            exog = exog.reshape(-1, 1)
 
         for column in range(exog.shape[1]):
 

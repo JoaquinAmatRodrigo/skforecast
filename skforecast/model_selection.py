@@ -474,8 +474,7 @@ def backtesting_forecaster(
                                      next_window_exog.to_numpy(),
                                      np.ones(shape=(dummy_steps,) + exog.shape[1:])
                                    ))
-                print('aquii')
-                print(next_window_exog)
+  
                 pred = forecaster.predict(
                             steps       = steps,
                             last_window = last_window_y,
