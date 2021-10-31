@@ -462,7 +462,7 @@ def backtesting_forecaster(
         elif remainder != 0:
             # ForecasterAutoregMultiOutput predict all steps simultaneusly, therefore,
             # if the last fold is incomplete, remaining steps must be completed with
-            # dummy values and removing then the corresponding predictions.
+            # dummy values and removing the corresponding predictions afterwards.
             dummy_steps = steps - remainder 
             if exog is None:
                 pred = forecaster.predict(
@@ -471,17 +471,31 @@ def backtesting_forecaster(
                         )
                 pred = pred.iloc[:-dummy_steps]
             else:
-                next_window_exog = pd.DataFrame(
+                if forecaster.exog_type == pd.DataFrame:
+                    next_window_exog = pd.DataFrame(
                                         data = np.vstack((
                                                 next_window_exog.to_numpy(),
-                                                np.ones(shape=(dummy_steps,) + exog.shape[1:])
-                                               )),
+                                                np.ones(shape=(dummy_steps,) + next_window_exog.shape[1:])
+                                            )),
                                         columns = next_window_exog.columns,
                                         index = forecaster._expand_index(
                                                     index = next_window_exog.index,
                                                     steps = steps
                                                 )
-                                   )
+                                      )
+                else:
+                    next_window_exog = pd.Series(
+                                        data = np.concatenate((
+                                                next_window_exog.to_numpy(),
+                                                np.ones(shape=dummy_steps)
+                                            )),
+                                        name = next_window_exog.name,
+                                        index = forecaster._expand_index(
+                                                    index = next_window_exog.index,
+                                                    steps = steps
+                                                )
+                                      )
+
                 pred = forecaster.predict(
                             steps       = steps,
                             last_window = last_window_y,
@@ -783,8 +797,8 @@ def backtesting_forecaster_intervals(
     
     if not isinstance(forecaster, (ForecasterAutoreg, ForecasterAutoregCustom)):
         warnings.war(
-            f"Only allowed forecasters of class ForecasterAutoreg or ForecasterAutoregCustom. "
-            f"Got {type(forecaster)}."
+            f"Only forecasters of class ForecasterAutoreg or ForecasterAutoregCustom "
+            f"are allowed. Got {type(forecaster)}."
         )
         
     metric = get_metric(metric=metric)
@@ -842,7 +856,7 @@ def backtesting_forecaster_intervals(
                             in_sample_residuals = in_sample_residuals
                         )
                 
-        elif remainder != 0 and not isinstance(forecaster, ForecasterAutoregMultiOutput):
+        elif remainder != 0:
             steps = remainder 
             if exog is None:
                 pred = forecaster.predict_interval(
@@ -861,35 +875,7 @@ def backtesting_forecaster_intervals(
                             n_boot      = n_boot,
                             in_sample_residuals = in_sample_residuals
                         )
-                
-        elif remainder != 0:
-            # ForecasterAutoregMultiOutput predict all steps simultaneusly, therefore,
-            # if the last fold is incomplete, remaining steps must be completed with
-            # dummy values and removing then the corresponding predictions.
-            dummy_steps = steps - remainder 
-            if exog is None:
-                pred = forecaster.predict_interval(
-                            steps       = steps,
-                            last_window = last_window_y,
-                            interval    = interval,
-                            n_boot      = n_boot,
-                            in_sample_residuals = in_sample_residuals
-                        )
-            else:
-                next_window_exog = np.vstack((
-                                     next_window_exog.to_numpy(),
-                                     np.ones(shape=(dummy_steps,) + exog.shape[1:])
-                                   ))
-                pred = forecaster.predict_interval(
-                            steps       = steps,
-                            last_window = last_window_y,
-                            exog        = next_window_exog,
-                            interval    = interval,
-                            n_boot      = n_boot,
-                            in_sample_residuals = in_sample_residuals
-                        )
-            pred = pred.iloc[:-dummy_steps]
-            
+    
         else:
             continue
         
