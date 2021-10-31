@@ -10,11 +10,18 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
++ Arguments `y` must be pandas Series. Numpy ndarrays are not allowed anymore.
+
++ Arguments `exog` must be pandas Series or pandas DataFrame. Numpy ndarrays are not allowed anymore.
+
++ Output of `predict` is a pandas Series with index acording to the steps predicted.
+
 + `backtesting_forecaster` allows to backtest forecasters already trained. Previous implementation of `backtesting_forecaster` always do an initial training. 
 + `backtesting_forecaster` of ForecasterAutoregMultiOutput allows incomplete folds.
 + `backtesting_forecaster` has the option to update out_sample_residuals with backtesting residuals.
 
 + `cv_forecaster` has the option to update out_sample_residuals with backtesting residuals.
+
 + Remove deprecated class `ForecasterCustom`.
 
 ### Fixed

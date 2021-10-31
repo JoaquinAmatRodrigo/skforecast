@@ -1,16 +1,24 @@
+ForecasterBase:
+    [] Create a base class with all common methods
+
 Backtesting `backtesting_forecaster()`:
-    [x] The current implementation of `backtesting_forecaster()` always do an initial training. Allow `backtesting_forecaster()` to backtest forecasters already trained.
     [] Include an argument `refit` to decide if the forecaster is retrained in each iteration.
-    [x] Currently, backtesting ForecasterAutoregMultiOutput do not allow for incomplete folds. Allow it including dummy values for the remaining steps of the last fold and removing then the corresponding predictions.
-    [x] Create a function to select the metric  
-    [] Add option to update out_sample_residuals at the end of the proces of backtesting
+        [] __backtesting_forecaster_refit()
+        [] __backtesting_forecaster_no_refit()
 
 Cross validation `cv_forecaster()`:
-    [x] Create a function to select the metric  
-    [] Add option to update out_sample_residuals at the end of the proces of cv
+    [] Deprecated in favour to `backtesting_forecaster(refit=True)`
 
-ForecasterCustom
-    [X] Remove class ForecasterCustom
+Grid search `grid_search_forecaster`:
+    [] Remove argument `method`
+    [] Add argument `refit`. This will be the strategy applied to `backtesting_forecaster`.
 
+Model_selection_statsmodels:
+    [] Change all inputs of `y` and `exog` to pandas Series and pandas DataFrame.
 
+Unit testing:
+    [] ForecasterAutoreg
+    [] ForecasterAutoregCustom
+    [] ForecasterAutoregMultioutput
+    [] backtesting_forecaster
 

@@ -12,6 +12,7 @@ import warnings
 import logging
 import numpy as np
 import pandas as pd
+from pandas.io.formats.format import return_docstring
 import sklearn
 import tqdm
 from copy import copy
@@ -20,7 +21,6 @@ from sklearn.metrics import mean_squared_error
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import mean_absolute_percentage_error
 
-
 logging.basicConfig(
     format = '%(name)-10s %(levelname)-5s %(message)s', 
     level  = logging.INFO,
@@ -28,46 +28,44 @@ logging.basicConfig(
 
 
 ################################################################################
-#                        ForecasterAutoregCustom                               #
+#                             ForecasterAutoreg                                #
 ################################################################################
 
-class ForecasterAutoregCustom():
+class ForecasterBase():
     '''
-    This class turns any regressor compatible with the scikit-learn API into a
-    recursive (multi-step) forecaster with a custom function to create predictors.
+    Base class for all forecasters in skforecast.
+
     
     Parameters
     ----------
-    regressor : any regressor compatible with the scikit-learn API
+    regressor : regressor compatible with the scikit-learn API
         An instance of a regressor compatible with the scikit-learn API.
         
-    fun_predictors: Callable
-        Function that takes a time series window as input and returns a numpy
-        ndarray with the predictors associated with that window.
-        
-    window_size: int
-        Size of the window needed by `fun_predictors` to create the predictors.
-    
+    lags : int, list, 1d numpy ndarray, range
+        Lags used as predictors. Index starts at 1, so lag 1 is equal to t-1.
+            `int`: include lags from 1 to `lags` (included).
+            `list`, `numpy ndarray` or range: include only lags present in `lags`.
+
     
     Attributes
     ----------
     regressor : regressor compatible with the scikit-learn API
         An instance of a regressor compatible with the scikit-learn API.
         
-    fun_predictors: Callable
-        Function that takes a time series window as input and returns a numpy
-        ndarray with the predictors associated with that window.
+    lags : numpy ndarray
+        Lags used as predictors.
         
-    window_size: int
-        Size of the window needed by `fun_predictors` to create the predictors.
-        
+    max_lag : int
+        Maximum value of lag included in `lags`.
+
     last_window : pandas Series
         Last window the forecaster has seen during trained. It stores the
         values needed to calculate the lags used to predict the next `step`
         after the training data.
         
     window_size: int
-        Size of the window needed by `fun_predictors` to create the predictors.
+        Size of the window needed to create the predictors. It is equal to
+        `max_lag`.
         
     fitted: Bool
         Tag to identify if the regressor has been fitted (trained).
@@ -100,11 +98,9 @@ class ForecasterAutoregCustom():
      
     '''
     
-    def __init__(self, regressor, fun_predictors: callable, window_size: int) -> None:
+    def __init__(self, regressor, lags: Union[int, np.ndarray, list]) -> None:
         
         self.regressor            = regressor
-        self.create_predictors    = fun_predictors
-        self.window_size          = window_size
         self.index_type           = None
         self.index_freq           = None
         self.training_range       = None
@@ -116,41 +112,77 @@ class ForecasterAutoregCustom():
         self.out_sample_residuals = None
         self.fitted               = False
         
-        if not isinstance(window_size, int):
+        if isinstance(lags, int) and lags < 1:
+            raise Exception('min value of lags allowed is 1')
+            
+        if isinstance(lags, (list, range, np.ndarray)) and min(lags) < 1:
+            raise Exception('min value of lags allowed is 1')
+            
+        if isinstance(lags, int):
+            self.lags = np.arange(lags) + 1
+        elif isinstance(lags, (list, range)):
+            self.lags = np.array(lags)
+        elif isinstance(lags, np.ndarray):
+            self.lags = lags
+        else:
             raise Exception(
-                f'`window_size` must be int, got {type(window_size)}'
+                '`lags` argument must be `int`, `1D np.ndarray`, `range` or `list`. '
+                f"Got {type(lags)}"
             )
+            
+        self.max_lag  = max(self.lags)
+        self.window_size = self.max_lag
 
-        if not callable(fun_predictors):
-            raise Exception(
-                f'`fun_predictors` must be callable, got {type(fun_predictors)}.'
-            )
-                
-        
+
     def __repr__(self) -> str:
         '''
-        Information displayed when a ForecasterAutoregCustom object is printed.
+        Information displayed when a ForecasterAutoreg object is printed.
         '''
 
-        info = (
-            f"{'=' * len(str(type(self)))} \n"
-            f"{type(self)} \n"
-            f"{'=' * len(str(type(self)))} \n"
-            f"Regressor: {self.regressor} \n"
-            f"Predictors created with function: {self.create_predictors.__name__} \n"
-            f"Window size: {self.window_size} \n"
-            f"Included exogenous: {self.included_exog} \n"
-            f"Type of exogenous variable: {self.exog_type} \n"
-            f"Exogenous variables names: {self.exog_col_names} \n"
-            f"Training range: {self.training_range.to_list() if self.fitted else None} \n"
-            f"Training index type: {str(self.index_type) if self.fitted else None} \n"
-            f"Training index frequancy: {self.index_freq if self.fitted else None} \n"
-            f"Regressor parameters: {self.regressor.get_params()} \n"
-        )
+        pass
 
-        return info
 
     
+    def _create_lags(self, y: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+        '''       
+        Transforms a 1d array into a 2d array (X) and a 1d array (y).
+        Each value of y is associated with a row in X that represents the lags
+        that precede it.
+        
+        Notice that, the returned matrix X_data, contains the lag 1 in the first
+        column, the lag 2 in the second column and so on.
+        
+        Parameters
+        ----------        
+        y : 1d numpy ndarray
+            Training time series.
+
+        Returns 
+        -------
+        X_data : 2d numpy ndarray, shape (samples - max(self.lags), len(self.lags))
+            2d numpy array with the lag values (predictors).
+        
+        y_data : 1d np.ndarray, shape (samples - max(self.lags),)
+            Values of the time series related to each row of `X_data`.
+            
+        '''
+          
+        n_splits = len(y) - self.max_lag
+        X_data  = np.full(shape=(n_splits, self.max_lag), fill_value=np.nan, dtype=float)
+        y_data  = np.full(shape=(n_splits, 1), fill_value=np.nan, dtype= float)
+
+        for i in range(n_splits):
+            X_index = np.arange(i, self.max_lag + i)
+            y_index = [self.max_lag + i]
+            X_data[i, :] = y[X_index]
+            y_data[i]    = y[y_index]
+            
+        X_data = X_data[:, -self.lags]
+        y_data = y_data.ravel()
+            
+        return X_data, y_data
+
+
     def create_train_X_y(
         self,
         y: pd.Series,
@@ -168,84 +200,24 @@ class ForecasterAutoregCustom():
             Exogenous variable/s included as predictor/s. Must have the same
             number of observations as `y` and their indexes must be aligned.
 
-
         Returns 
         -------
-        X_train : pandas DataFrame
+        X_train : pandas DataFrame shape (len(y) - self.max_lag, len(self.lags))
             Pandas DataFrame with the training values (predictors).
             
-        y_train : pandas Series
+        y_train : pandas Series, shape (len(y) - self.max_lag, )
             Values (target) of the time series related to each row of `X_train`.
         
         '''
         
-        if len(y) < self.window_size + 1:
-            raise Exception(
-                f'`y` must have as many values as the windows_size needed by '
-                f'{self.create_predictors.__name__}. For this Forecaster the '
-                f'minimum lenght is {self.window_size + 1}'
-            )
-
-        self._check_y(y=y)
-        y_values, y_index = self._preproces_y(y=y)
-        
-        if exog is not None:
-            if len(exog) != len(y):
-                raise Exception(
-                    "`exog` must have same number of samples as `y`."
-                )
-            self._check_exog(exog=exog)
-            exog_values, exog_index = self._preproces_exog(exog=exog)
-            if not (exog_index[:len(y_index)] == y_index).all():
-                raise Exception(
-                ('Different index for `y` and `exog`. They must be equal '
-                'to ensure the correct aligment of values.')      
-                )
-       
-        X_train  = []
-        y_train  = []
-
-        for i in range(len(y) - self.window_size):
-
-            train_index = np.arange(i, self.window_size + i)
-            test_index  = self.window_size + i
-
-            X_train.append(self.create_predictors(y=y_values[train_index]))
-            y_train.append(y_values[test_index])
-        
-        X_train = np.vstack(X_train)
-        y_train = np.array(y_train)
-        col_names_X_train = [f"custom_predictor_{i}" for i in range(X_train.shape[1])]
-
-        if np.isnan(X_train).any():
-            raise Exception(
-                f"`create_predictors()` is returning `NaN` values."
-            )
-        
-        if exog is not None:
-            col_names_exog = exog.columns if isinstance(exog, pd.DataFrame) else [exog.name]
-            col_names_X_train.extend(col_names_exog)
-            # The first `self.window_size` positions have to be removed from exog
-            # since they are not in X_train.
-            X_train = np.column_stack((X_train, exog_values[self.window_size:, ]))
-
-        X_train = pd.DataFrame(
-                    data    = X_train,
-                    columns = col_names_X_train,
-                    index   = y_index[self.window_size: ]
-                  )
-
-        y_train = pd.Series(
-                    data  = y_train,
-                    index = y_index[self.window_size: ],
-                    name  = 'y'
-                 )
-                        
-        return X_train, y_train
+        pass
 
         
-    def fit(self, y: Union[np.ndarray, pd.Series],
-            exog: Union[np.ndarray, pd.Series, pd.DataFrame]=None) -> None:
+    def fit(
+        self,
+        y: pd.Series,
+        exog: Union[pd.Series, pd.DataFrame]=None
+    ) -> None:
         '''
         Training Forecaster.
         
@@ -281,13 +253,13 @@ class ForecasterAutoregCustom():
         if exog is not None:
             self.included_exog = True
             self.exog_type = type(exog)
-            self.exog_col_names = \
-                 exog.columns.to_list() if isinstance(exog, pd.DataFrame) else exog.name
-        
+            if isinstance(exog, pd.DataFrame):
+                self.exog_col_names = exog.columns.to_list()
+ 
         X_train, y_train = self.create_train_X_y(y=y, exog=exog)      
         self.regressor.fit(X=X_train, y=y_train)
         self.fitted = True
-        self.training_range = self._preproces_y(y=y)[1][[0, -1]]
+        self.training_range = X_train.index[[0, -1]]
         self.index_type = type(X_train.index)
         if isinstance(X_train.index, pd.DatetimeIndex):
             self.index_freq = X_train.index.freqstr
@@ -300,10 +272,10 @@ class ForecasterAutoregCustom():
             residuals = np.random.choice(a=residuals, size=1000, replace=False)                                              
         self.in_sample_residuals = residuals
         
-        # The last time window of training data is stored so that predictors in
-        # the first iteration of `predict()` can be calculated.
-        self.last_window = y_train.iloc[-self.window_size:].copy()
-
+        # The last time window of training data is stored so that lags needed as
+        # predictors in the first iteration of `predict()` can be calculated.
+        self.last_window = y_train.iloc[-self.max_lag:].copy()
+    
 
     def _recursive_predict(
         self,
@@ -337,11 +309,7 @@ class ForecasterAutoregCustom():
         predictions = np.full(shape=steps, fill_value=np.nan)
 
         for i in range(steps):
-            X = self.create_predictors(y=last_window)
-            if np.isnan(X).any():
-                raise Exception(
-                    f"`create_predictors()` is returning `NaN` values."
-                )
+            X = last_window[-self.lags].reshape(1, -1)
             if exog is not None:
                 X = np.column_stack((X, exog[i, ].reshape(1, -1)))
 
@@ -353,7 +321,7 @@ class ForecasterAutoregCustom():
             last_window = np.append(last_window[1:], prediction)
 
         return predictions
-        
+
             
     def predict(
         self,
@@ -393,7 +361,7 @@ class ForecasterAutoregCustom():
             last_window = last_window, 
             exog        = exog
         )
-     
+
         if exog is not None:
             if isinstance(exog, pd.DataFrame):
                 exog_values, exog_index = self._preproces_exog(
@@ -406,7 +374,7 @@ class ForecasterAutoregCustom():
         else:
             exog_values = None
             exog_index = None
-        
+            
         if last_window is not None:
             last_window_values, last_window_index = self._preproces_last_window(
                                                         last_window = last_window
@@ -432,7 +400,6 @@ class ForecasterAutoregCustom():
                       )
 
         return predictions
-
     
     
     def _estimate_boot_interval(
@@ -451,7 +418,7 @@ class ForecasterAutoregCustom():
         See predict_intervals() to calculate both, predictions and intervals.
         
         Parameters
-        ---------- 
+        ----------   
         steps : int
             Number of future steps predicted.
             
@@ -484,7 +451,7 @@ class ForecasterAutoregCustom():
 
         Returns 
         -------
-        predicction_interval : numpy ndarray, shape (steps, 2)
+        predicction_interval : numnpy ndarray, shape (steps, 2)
             Interval estimated for each prediction by bootstrapping:
                 first column = lower bound of the interval.
                 second column= upper bound interval of the interval.
@@ -498,6 +465,7 @@ class ForecasterAutoregCustom():
             
         '''
         
+
         boot_predictions = np.full(
                                 shape      = (steps, n_boot),
                                 fill_value = np.nan,
@@ -548,7 +516,7 @@ class ForecasterAutoregCustom():
         
         return prediction_interval
     
-    
+        
     def predict_interval(
         self,
         steps: int,
@@ -616,7 +584,7 @@ class ForecasterAutoregCustom():
             last_window = last_window, 
             exog        = exog
         )
-        
+
         if exog is not None:
             exog_values, exog_index = self._preproces_exog(
                                         exog = exog[self.exog_col_names].iloc[:steps, ]
@@ -634,8 +602,8 @@ class ForecasterAutoregCustom():
                                                         last_window = self.last_window
                                                     )
         
-        # Since during predict() `last_window` and `exog` are modified, the
-        # originals are stored to be used later
+        # Since during predict() `last_window_values` and `exog_values` are modified,
+        # the originals are stored to be used later.
         last_window_values_original = last_window_values.copy()
         if exog is not None:
             exog_values_original = exog_values.copy()
@@ -669,7 +637,7 @@ class ForecasterAutoregCustom():
                       )
 
         return predictions
-    
+
     
     @staticmethod
     def _check_y(y: Any) -> None:
@@ -694,7 +662,7 @@ class ForecasterAutoregCustom():
             raise Exception('`y` has missing values.')
         
         return
-    
+        
         
     @staticmethod
     def _check_exog(exog: Any) -> None:
@@ -720,7 +688,7 @@ class ForecasterAutoregCustom():
                     
         return
 
-    
+
     def _check_predict_input(
         self,
         steps: int,
@@ -761,7 +729,8 @@ class ForecasterAutoregCustom():
                 )
             if not isinstance(exog, self.exog_type):
                 raise Exception(
-                    f"Expected type for `exog`: {self.exog_type}. Got {type(exog)}"      
+                    f"Expected type for `exog` {self.exog_type} for `exog`. "
+                    f"Got {type(exog)}"      
                 )
             if isinstance(exog, pd.DataFrame):
                 col_missing = set(self.exog_col_names).difference(set(exog.columns))
@@ -787,10 +756,10 @@ class ForecasterAutoregCustom():
                 )
             
         if last_window is not None:
-            if len(last_window) < self.window_size:
+            if len(last_window) < self.max_lag:
                 raise Exception(
                     f"`last_window` must have as many values as as needed to "
-                    f"calculate the predictors ({self.window_size})."
+                    f"calculate the maximum lag ({self.max_lag})."
                 )
             if not isinstance(last_window, pd.Series):
                 raise Exception('`last_window` must be a pandas Series.')
@@ -811,9 +780,9 @@ class ForecasterAutoregCustom():
                     f"Got {last_window_index.freqstr}"      
                 )
 
-        return
-    
+        return    
         
+
     @staticmethod
     def _preproces_y(y: pd.Series) -> Union[np.ndarray, pd.Index]:
         
@@ -987,7 +956,7 @@ class ForecasterAutoregCustom():
     def set_params(self, **params: dict) -> None:
         '''
         Set new values to the parameters of the scikit learn model stored in the
-        ForecasterAutoregCustom.
+        ForecasterAutoreg.
         
         Parameters
         ----------
@@ -1002,7 +971,47 @@ class ForecasterAutoregCustom():
         
         self.regressor.set_params(**params)
         
-    
+        
+    def set_lags(self, lags: int) -> None:
+        '''      
+        Set new value to the attribute `lags`.
+        Attributes `max_lag` and `window_size` are also updated.
+        
+        Parameters
+        ----------
+        lags : int, list, 1D np.array, range
+        Lags used as predictors. Index starts at 1, so lag 1 is equal to t-1.
+            `int`: include lags from 1 to `lags`.
+            `list` or `np.array`: include only lags present in `lags`.
+
+        Returns 
+        -------
+        self
+        
+        '''
+        
+        if isinstance(lags, int) and lags < 1:
+            raise Exception('min value of lags allowed is 1')
+            
+        if isinstance(lags, (list, range, np.ndarray)) and min(lags) < 1:
+            raise Exception('min value of lags allowed is 1')
+            
+        if isinstance(lags, int):
+            self.lags = np.arange(lags) + 1
+        elif isinstance(lags, (list, range)):
+            self.lags = np.array(lags)
+        elif isinstance(lags, np.ndarray):
+            self.lags = lags
+        else:
+            raise Exception(
+                f"`lags` argument must be `int`, `1D np.ndarray`, `range` or `list`. "
+                f"Got {type(lags)}"
+            )
+            
+        self.max_lag  = max(self.lags)
+        self.window_size = max(self.lags)
+        
+        
     def set_out_sample_residuals(self, residuals: np.ndarray, append: bool=True)-> None:
         '''
         Set new values to the attribute `out_sample_residuals`. Out of sample
@@ -1042,7 +1051,7 @@ class ForecasterAutoregCustom():
                 self.out_sample_residuals = np.hstack((self.out_sample_residuals, residuals))
             else:
                 self.out_sample_residuals = np.hstack((self.out_sample_residuals, residuals[:free_space]))
-                
+        
 
     def get_coef(self) -> np.ndarray:
         '''      
@@ -1057,9 +1066,9 @@ class ForecasterAutoregCustom():
         Returns 
         -------
         coef : 1D np.ndarray
-            Value of the coefficients associated with each predictor.
+            Value of the coefficients associated with each predictor (lag).
             Coefficients are aligned so that `coef[i]` is the value associated
-            with predictor i returned by `self.create_predictors`.
+            with `self.lags[i]`.
         
         '''
         
@@ -1093,9 +1102,9 @@ class ForecasterAutoregCustom():
         Returns 
         -------
         feature_importances : 1D np.ndarray
-        Impurity-based feature importances associated with each predictor.
+        Impurity-based feature importances associated with each predictor (lag).
         Values are aligned so that `feature_importances[i]` is the value
-        associated with predictor i returned by `self.create_predictors`.
+        associated with `self.lags[i]`.
         '''
 
         if not isinstance(self.regressor,
@@ -1103,7 +1112,7 @@ class ForecasterAutoregCustom():
                         sklearn.ensemble._gb.GradientBoostingRegressor)):
             warnings.warn(
                 ('Only forecasters with `regressor=GradientBoostingRegressor()` '
-                    'or `regressor=RandomForestRegressor`.')
+                 'or `regressor=RandomForestRegressor`.')
             )
             return
         else:
