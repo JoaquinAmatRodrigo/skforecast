@@ -264,7 +264,7 @@ class ForecasterAutoregMultiOutput():
         if exog is None:
             X_train = X_lags
         else:
-            col_names_exog = exog.columns if isinstance(exog, pd.DataFrame) else exog.name
+            col_names_exog = exog.columns if isinstance(exog, pd.DataFrame) else [exog.name]
             # Trasform exog to match multi output format
             X_exog = self._exog_to_multi_output(exog=exog_values)
             col_names_exog = [f"{col_name}_step_{i+1}" for col_name in col_names_exog for i in range(self.steps)]
@@ -378,8 +378,8 @@ class ForecasterAutoregMultiOutput():
         if exog is not None:
             self.included_exog = True
             self.exog_type = type(exog)
-            if isinstance(exog, pd.DataFrame):
-                self.exog_col_names = exog.columns.to_list()
+            self.exog_col_names = \
+                 exog.columns.to_list() if isinstance(exog, pd.DataFrame) else exog.name
 
         X_train, y_train = self.create_train_X_y(y=y, exog=exog)
         
@@ -594,8 +594,7 @@ class ForecasterAutoregMultiOutput():
                 )
             if not isinstance(exog, self.exog_type):
                 raise Exception(
-                    f"Expected type for `exog` {self.exog_type} for `exog`. "
-                    f"Got {type(exog)}"      
+                    f"Expected type for `exog`: {self.exog_type}. Got {type(exog)}"      
                 )
             if isinstance(exog, pd.DataFrame):
                 col_missing = set(self.exog_col_names).difference(set(exog.columns))

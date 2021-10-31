@@ -244,7 +244,7 @@ class ForecasterAutoreg():
         X_train, y_train = self._create_lags(y=y_values)
         col_names_X_train = [f"lag_{i}" for i in self.lags]
         if exog is not None:
-            col_names_exog = exog.columns if isinstance(exog, pd.DataFrame) else exog.name
+            col_names_exog = exog.columns if isinstance(exog, pd.DataFrame) else [exog.name]
             col_names_X_train.extend(col_names_exog)
             # The first `self.max_lag` positions have to be removed from exog
             # since they are not in X_train.
@@ -305,8 +305,8 @@ class ForecasterAutoreg():
         if exog is not None:
             self.included_exog = True
             self.exog_type = type(exog)
-            if isinstance(exog, pd.DataFrame):
-                self.exog_col_names = exog.columns.to_list()
+            self.exog_col_names = \
+                 exog.columns.to_list() if isinstance(exog, pd.DataFrame) else exog.name
  
         X_train, y_train = self.create_train_X_y(y=y, exog=exog)      
         self.regressor.fit(X=X_train, y=y_train)
@@ -780,8 +780,7 @@ class ForecasterAutoreg():
                 )
             if not isinstance(exog, self.exog_type):
                 raise Exception(
-                    f"Expected type for `exog` {self.exog_type} for `exog`. "
-                    f"Got {type(exog)}"      
+                    f"Expected type for `exog`: {self.exog_type}. Got {type(exog)}"       
                 )
             if isinstance(exog, pd.DataFrame):
                 col_missing = set(self.exog_col_names).difference(set(exog.columns))

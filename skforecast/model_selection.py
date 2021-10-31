@@ -97,7 +97,7 @@ def time_series_spliter(
         if folds == 1:
             print(f"Number of folds: {folds - 1}")
             print("Not enought observations in `y` to create even a complete fold."
-                  " Try to reduce `initial_train_size` or `steps`."
+                  " Try to reduce `initial_train_size` or `steps`.  \n"
             )
 
         elif remainder == 0:
@@ -107,11 +107,11 @@ def time_series_spliter(
             print(f"Number of folds: {folds}")
             print(
                 f"Since `allow_incomplete_fold=True`, "
-                f"last fold only includes {remainder} observations instead of {steps}."
+                f"last fold only includes {remainder} observations instead of {steps}. \n"
             )
             print(
                 'Incomplete folds with few observations could overestimate or ',
-                'underestimate validation metrics.'
+                'underestimate validation metrics. \n'
             )
         elif remainder != 0 and not allow_incomplete_fold:
             print(f"Number of folds: {folds - 1}")
@@ -470,11 +470,17 @@ def backtesting_forecaster(
                         )
                 pred = pred.iloc[:-dummy_steps]
             else:
-                next_window_exog = np.vstack((
-                                     next_window_exog.to_numpy(),
-                                     np.ones(shape=(dummy_steps,) + exog.shape[1:])
-                                   ))
-  
+                next_window_exog = pd.DataFrame(
+                                        data = np.vstack((
+                                                next_window_exog.to_numpy(),
+                                                np.ones(shape=(dummy_steps,) + exog.shape[1:])
+                                               )),
+                                        columns = next_window_exog.columns,
+                                        index = forecaster._expand_index(
+                                                    index = next_window_exog.index,
+                                                    steps = steps
+                                                )
+                                   )
                 pred = forecaster.predict(
                             steps       = steps,
                             last_window = last_window_y,
