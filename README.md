@@ -60,7 +60,7 @@ The most common error when importing the library is:
 + numpy>=1.20.1
 + pandas>=1.2.2
 + tqdm>=4.57.0
-+ scikit-learn>=0.24
++ scikit-learn>=1.0.1
 + statsmodels>=0.12.2
 
 ## Features
