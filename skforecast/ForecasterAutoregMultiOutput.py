@@ -486,10 +486,13 @@ class ForecasterAutoregMultiOutput():
             regressor = self.regressors_[step]
             if exog is None:
                 X = X_lags
-                predictions[step] = regressor.predict(X)
             else:
                 # Only columns from exog related with the current step are selected.
                 X = np.hstack([X_lags, exog_values[0][step::steps].reshape(1, -1)])
+            with warnings.catch_warnings():
+                # Supress scikitlearn warning: "X does not have valid feature names,
+                # but NoOpTransformer was fitted with feature names".
+                warnings.simplefilter("ignore")
                 predictions[step] = regressor.predict(X)
 
         predictions = pd.Series(
