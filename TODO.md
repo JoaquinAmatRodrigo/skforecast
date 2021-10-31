@@ -1,5 +1,5 @@
 ForecasterBase:
-    [] Create a base class with all common methods
+    [x] Create a base class with all common methods
     [] Add name of predictor in get_coef and get_feature_importances
 
 Backtesting `backtesting_forecaster()`:
@@ -7,11 +7,9 @@ Backtesting `backtesting_forecaster()`:
         [] __backtesting_forecaster_refit()
         [] __backtesting_forecaster_no_refit()
 
-Cross validation `cv_forecaster()`:
-    [] Deprecated in favour to `backtesting_forecaster(refit=True)`
-
 Grid search `grid_search_forecaster`:
     [] Remove argument `method`
+    [] method 'cv' deprecated in favour to `backtesting_forecaster(refit=True)`
     [] Add argument `refit`. This will be the strategy applied to `backtesting_forecaster`.
 
 Model_selection_statsmodels:
