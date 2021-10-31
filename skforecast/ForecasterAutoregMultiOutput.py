@@ -101,6 +101,9 @@ class ForecasterAutoregMultiOutput():
         
     exog_col_names : tuple
         Column names of exog if exog used in training is a pandas DataFrame.
+
+    X_train_col_names : tuple
+        Column names of matrix used internally for training.
         
     Notes
     -----
@@ -123,6 +126,7 @@ class ForecasterAutoregMultiOutput():
         self.included_exog        = False
         self.exog_type            = None
         self.exog_col_names       = None
+        self.X_train_col_names    = None
         self.fitted               = False
 
         if isinstance(lags, int) and lags < 1:
@@ -279,7 +283,7 @@ class ForecasterAutoregMultiOutput():
                     columns = col_names_X_train,
                     index   = y_index[self.max_lag + (self.steps -1): ]
                   )
-
+        self.X_train_col_names = col_names_X_train
         y_train = pd.DataFrame(
                     data  = y_train,
                     index = y_index[self.max_lag + (self.steps -1): ],
@@ -372,6 +376,7 @@ class ForecasterAutoregMultiOutput():
         self.included_exog        = False
         self.exog_type            = None
         self.exog_col_names       = None
+        self.X_train_col_names    = None
         self.fitted               = False
         self.training_range       = None
 
@@ -942,10 +947,8 @@ class ForecasterAutoregMultiOutput():
 
         Returns 
         -------
-        coef : 1D np.ndarray
-            Value of the coefficients associated with each predictor (lag).
-            Coefficients are aligned so that `coef[i]` is the value associated
-            with `self.lags[i]`.
+        coef : pandas DataFrame
+            Value of the coefficients associated with each predictor.
         
         '''
         
@@ -967,7 +970,10 @@ class ForecasterAutoregMultiOutput():
             )
             return
         else:
-            coef = self.regressors_[step-1].coef_
+            coef = pd.DataFrame({
+                        'feature': self.X_train_col_names,
+                        'coef' : self.regressors_[step-1].coef_
+                   })
             
         return coef
 
@@ -980,7 +986,8 @@ class ForecasterAutoregMultiOutput():
         retireve information.
         
         Only valid when the forecaster has been trained using
-        `regressor=GradientBoostingRegressor()` or `regressor=RandomForestRegressor`.
+        `GradientBoostingRegressor` , `RandomForestRegressor` or 
+        `HistGradientBoostingRegressor` as regressor.
 
         Parameters
         ----------
@@ -990,10 +997,8 @@ class ForecasterAutoregMultiOutput():
 
         Returns 
         -------
-        feature_importances : 1D np.ndarray
-        Impurity-based feature importances associated with each predictor (lag).
-        Values are aligned so that `feature_importances[i]` is the value
-        associated with `self.lags[i]`.
+        feature_importances : pandas DataFrame
+            Impurity-based feature importances associated with each predictor.
         '''
         
         if step > self.steps:
@@ -1002,15 +1007,20 @@ class ForecasterAutoregMultiOutput():
             )
         
         valid_instances = (sklearn.ensemble._forest.RandomForestRegressor,
-                           sklearn.ensemble._gb.GradientBoostingRegressor)
+                           sklearn.ensemble._gb.GradientBoostingRegressor,
+                           sklearn.ensemble.HistGradientBoostingRegressor)
 
         if not isinstance(self.regressor, valid_instances):
             warnings.warn(
-                ('Only forecasters with `regressor=GradientBoostingRegressor()` '
-                 'or `regressor=RandomForestRegressor`.')
+                ('Only valid when the forecaster has been trained using ',
+                 '`GradientBoostingRegressor` , `RandomForestRegressor` or ',
+                 '`HistGradientBoostingRegressor` as regressor.')
             )
             return
         else:
-            feature_importances = self.regressors_[step-1].feature_importances_
+            feature_importance = pd.DataFrame({
+                                    'feature': self.X_train_col_names,
+                                    'importance' : self.regressors_[step-1].feature_importances_
+                                })
 
-        return feature_importances
+        return feature_importance

@@ -84,6 +84,9 @@ class ForecasterAutoregCustom(ForecasterBase):
         
     exog_col_names : tuple
         Column names of exog if exog used in training is a pandas DataFrame.
+
+    X_train_col_names : tuple
+        Column names of matrix used internally for training.
         
     in_sample_residuals: numpy ndarray
         Residuals of the model when predicting training data. Only stored up to
@@ -107,6 +110,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         self.included_exog        = False
         self.exog_type            = None
         self.exog_col_names       = None
+        self.X_train_col_names    = None
         self.in_sample_residuals  = None
         self.out_sample_residuals = None
         self.fitted               = False
@@ -229,7 +233,7 @@ class ForecasterAutoregCustom(ForecasterBase):
                     columns = col_names_X_train,
                     index   = y_index[self.window_size: ]
                   )
-
+        self.X_train_col_names = col_names_X_train
         y_train = pd.Series(
                     data  = y_train,
                     index = y_index[self.window_size: ],
@@ -269,6 +273,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         self.exog_type            = None
         self.exog_col_names       = None
         self.in_sample_residuals  = None
+        self.X_train_col_names    = None
         self.out_sample_residuals = None
         self.fitted               = False
         self.training_range       = None
@@ -823,7 +828,7 @@ class ForecasterAutoregCustom(ForecasterBase):
                 self.out_sample_residuals = np.hstack((self.out_sample_residuals, residuals[:free_space]))
                 
 
-    def get_coef(self) -> np.ndarray:
+    def get_coef(self) -> pd.DataFrame:
         '''      
         Return estimated coefficients for the linear regression model stored in
         the forecaster. Only valid when the forecaster has been trained using
@@ -835,10 +840,8 @@ class ForecasterAutoregCustom(ForecasterBase):
 
         Returns 
         -------
-        coef : 1D np.ndarray
+        coef : pandas DataFrame
             Value of the coefficients associated with each predictor.
-            Coefficients are aligned so that `coef[i]` is the value associated
-            with predictor i returned by `self.create_predictors`.
         
         '''
         
@@ -854,16 +857,20 @@ class ForecasterAutoregCustom(ForecasterBase):
             )
             return
         else:
-            coef = self.regressor.coef_
+            coef = pd.DataFrame({
+                        'feature': self.X_train_col_names,
+                        'coef' : self.regressor.coef_
+                   })
             
         return coef
 
     
-    def get_feature_importances(self) -> np.ndarray:
+    def get_feature_importances(self) -> pd.DataFrame:
         '''      
         Return impurity-based feature importances of the model stored in the
         forecaster. Only valid when the forecaster has been trained using
-        `regressor=GradientBoostingRegressor()` or `regressor=RandomForestRegressor`.
+        `GradientBoostingRegressor` , `RandomForestRegressor` or 
+        `HistGradientBoostingRegressor` as regressor.
 
         Parameters
         ----------
@@ -871,21 +878,24 @@ class ForecasterAutoregCustom(ForecasterBase):
 
         Returns 
         -------
-        feature_importances : 1D np.ndarray
-        Impurity-based feature importances associated with each predictor.
-        Values are aligned so that `feature_importances[i]` is the value
-        associated with predictor i returned by `self.create_predictors`.
+        feature_importances : pandas DataFrame
+            Impurity-based feature importances associated with each predictor.
         '''
 
         if not isinstance(self.regressor,
                         (sklearn.ensemble._forest.RandomForestRegressor,
-                        sklearn.ensemble._gb.GradientBoostingRegressor)):
+                        sklearn.ensemble._gb.GradientBoostingRegressor,
+                        sklearn.ensemble.HistGradientBoostingRegressor)):
             warnings.warn(
-                ('Only forecasters with `regressor=GradientBoostingRegressor()` '
-                    'or `regressor=RandomForestRegressor`.')
+                ('Only valid when the forecaster has been trained using ',
+                 '`GradientBoostingRegressor` , `RandomForestRegressor` or ',
+                 '`HistGradientBoostingRegressor` as regressor.')
             )
             return
         else:
-            feature_importances = self.regressor.feature_importances_
+            feature_importance = pd.DataFrame({
+                                    'feature': self.X_train_col_names,
+                                    'importance' : self.regressor.feature_importances_
+                                })
 
-        return feature_importances
+        return feature_importance
