@@ -11,6 +11,7 @@ import typing
 from typing import Union, Dict, List, Tuple, Optional
 import numpy as np
 import pandas as pd
+import warnings
 import logging
 import tqdm
 from sklearn.metrics import mean_squared_error 
@@ -250,7 +251,7 @@ def cv_forecaster(
     if isinstance(forecaster, ForecasterAutoregMultiOutput):
         steps = forecaster.steps
         if allow_incomplete_fold:
-            logging.warning(
+            warnings.warn(
                 " Cross-validation of `ForecasterAutoregMultiOutput` only allow completed folds, "
                  "`allow_incomplete_fold` is set to `False`."
             )
@@ -386,7 +387,7 @@ def backtesting_forecaster(
         )
 
     if initial_train_size is None and forecaster.fitted:
-        logging.warning(
+        warnings.warn(
             f'Altough no initial train is done, the first '
             f'{len(forecaster.last_window)} observations are needed to create '
             f'the initial predictors. Therefore, no predictions are calculated for them.'
@@ -582,7 +583,7 @@ def grid_search_forecaster(
 
     if isinstance(forecaster, ForecasterAutoregCustom):
         if lags_grid is not None:
-            logging.warning(
+            warnings.warn(
                 '`lags_grid` ignored if forecaster is an instance of `ForecasterAutoregCustom`.'
             )
         lags_grid = ['custom predictors']
@@ -597,7 +598,7 @@ def grid_search_forecaster(
     
     param_grid =  list(ParameterGrid(param_grid))
 
-    logging.info(
+    print(
         f"Number of models compared: {len(param_grid)*len(lags_grid)}"
     )
     
@@ -651,7 +652,7 @@ def grid_search_forecaster(
         
         best_lags = results['lags'].iloc[0]
         best_params = results['params'].iloc[0]
-        logging.info(
+        print(
             f"Refitting `forecaster` using the best found parameters and the whole data set: \n"
             f"lags: {best_lags} \n"
             f"params: {best_params}\n"
@@ -774,14 +775,17 @@ def backtesting_forecaster_intervals(
         )
 
     if initial_train_size is None and forecaster.fitted:
-        logging.warning(
+        warnings.warn(
             f'Altough no initial train is done, the first '
             f'{len(forecaster.last_window)} observations are needed to create '
             f'the initial predictors. Therefore, no predictions are calculated for them.'
         )
     
-    if isinstance(forecaster, ForecasterAutoregMultiOutput):
-        steps = forecaster.steps
+    if not isinstance(forecaster, (ForecasterAutoreg, ForecasterAutoregCustom)):
+        warnings.war(
+            f"Only allowed forecasters of class ForecasterAutoreg or ForecasterAutoregCustom. "
+            f"Got {type(forecaster)}."
+        )
         
     metric = get_metric(metric=metric)
     backtest_predictions = []
