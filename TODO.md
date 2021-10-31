@@ -1,6 +1,8 @@
 ForecasterBase:
     [x] Create a base class with all common methods
-    [] Add name of predictor in get_coef and get_feature_importances
+
+Forecaster:
+    [x] Add name of predictor in get_coef and get_feature_importances
 
 Backtesting `backtesting_forecaster()`:
     [] Include an argument `refit` to decide if the forecaster is retrained in each iteration.
