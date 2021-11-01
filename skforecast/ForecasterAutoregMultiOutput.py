@@ -47,9 +47,9 @@ class ForecasterAutoregMultiOutput():
             `list`, `numpy ndarray` or range: include only lags present in `lags`.
             
     steps : int
-        Number of future steps the forecaster will predict when using method
-        `predict()`. Since a diferent model is created for each step, this value
-        should be defined before training.
+        Maximum number of future steps the forecaster will predict when using
+        method `predict()`. Since a diferent model is created for each step,
+        this value should be defined before training.
     
     Attributes
     ----------
@@ -163,6 +163,7 @@ class ForecasterAutoregMultiOutput():
             f"Regressor: {self.regressor} \n"
             f"Lags: {self.lags} \n"
             f"Window size: {self.window_size} \n"
+            f"Maximum steps predicted: {self.steps} \n"
             f"Included exogenous: {self.included_exog} \n"
             f"Type of exogenous variable: {self.exog_type} \n"
             f"Exogenous variables names: {self.exog_col_names} \n"
@@ -421,17 +422,20 @@ class ForecasterAutoregMultiOutput():
     
     def predict(
         self,
+        steps: Union[int, None]=None,
         last_window: pd.Series=None,
-        exog: Union[pd.Series, pd.DataFrame]=None,
-        steps = None
+        exog: Union[pd.Series, pd.DataFrame]=None
     ) -> np.ndarray:
         '''
-        Predict n steps ahead. The number of future steps predicted is defined when
-        ininitializing the forecaster. Argument `steps` not used, present here for
-        API consistency by convention.
+        Predict n steps ahead.
 
         Parameters
         ----------
+        steps : int, None, default `None`
+            Predict n steps ahead. `steps` must lower or equal to the value of
+            steps defined when initializing the forecaster. If `None`, as many
+            steps as defined in the initialization are predicted.
+
         last_window : pandas Series, default `None`
             Values of the series used to create the predictors (lags) need in the 
             first iteration of predictiont (t + 1).
@@ -443,9 +447,6 @@ class ForecasterAutoregMultiOutput():
         exog : pandas Series, pandas DataFrame, default `None`
             Exogenous variable/s included as predictor/s.
 
-        steps : Ignored
-            Not used, present here for API consistency by convention.
-
         Returns 
         -------
         predictions : pandas Series
@@ -453,7 +454,9 @@ class ForecasterAutoregMultiOutput():
 
         '''
 
-        steps = self.steps
+        if steps is None:
+            steps = self.steps
+
         self._check_predict_input(
             steps       = steps,
             last_window = last_window, 
@@ -581,6 +584,13 @@ class ForecasterAutoregMultiOutput():
         if steps < 1:
             raise Exception(
                 f"`steps` must be integer greater than 0. Got {steps}."
+            )
+
+        if steps > self.steps:
+            raise Exception(
+                f"`steps` must be lower or equal to the value of steps defined "
+                f"when initializing the forecaster. Got {steps} but the maximum "
+                f"is {self.steps}."
             )
         
         if exog is None and self.included_exog:
@@ -985,8 +995,8 @@ class ForecasterAutoregMultiOutput():
         each forecast time step, it is necessary to select the model from which
         retireve information.
         
-        Only valid when the forecaster has been trained using
-        `GradientBoostingRegressor` , `RandomForestRegressor` or 
+        Only valid when the forecaster has been trained using 
+        `GradientBoostingRegressor`, `RandomForestRegressor` or 
         `HistGradientBoostingRegressor` as regressor.
 
         Parameters
@@ -1006,10 +1016,10 @@ class ForecasterAutoregMultiOutput():
                 f"Forecaster traied for {self.steps} steps. Got step={step}."
             )
         
-        valid_instances = (sklearn.linear_model._base.LinearRegression,
-                           sklearn.linear_model._coordinate_descent.Lasso,
-                           sklearn.linear_model._ridge.Ridge
-                          )
+        valid_instances = (sklearn.ensemble._forest.RandomForestRegressor,
+                           sklearn.ensemble._gb.GradientBoostingRegressor,
+                           sklearn.ensemble.HistGradientBoostingRegressor)
+                           
         if not isinstance(self.regressor, valid_instances):
             warnings.warn(
                 f"`get_feature_importances` only valid for forecasters with "
