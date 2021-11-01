@@ -507,7 +507,7 @@ def _backtesting_forecaster_no_refit(
       
     for i in range(folds):
         last_window_end   = initial_train_size + i * steps
-        last_window_start = (initial_train_size + i * steps) - window_size 
+        last_window_start = last_window_end - window_size 
         last_window_y     = y.iloc[last_window_start:last_window_end]
 
         if exog is not None:
@@ -655,13 +655,6 @@ def backtesting_forecaster(
         raise Exception(
             f'`refit` is only allowed when there is a initial_train_size.'
         )
-
-    # if initial_train_size is None and forecaster.fitted:
-    #     warnings.warn(
-    #         f'Altough no initial train is done, the first '
-    #         f'{len(forecaster.last_window)} observations are needed to create '
-    #         f'the initial predictors. Therefore, no predictions are calculated for them.'
-    #     )
     
     if refit:
         metric_value, backtest_predictions = _backtesting_forecaster_refit(
@@ -669,7 +662,7 @@ def backtesting_forecaster(
             y = y,
             steps = steps,
             metric = metric,
-            initial_train_size= initial_train_size,
+            initial_train_size = initial_train_size,
             exog = exog,
             set_out_sample_residuals = set_out_sample_residuals,
             verbose = verbose
@@ -680,13 +673,14 @@ def backtesting_forecaster(
             y = y,
             steps = steps,
             metric = metric,
-            initial_train_size= initial_train_size,
+            initial_train_size = initial_train_size,
             exog = exog,
             set_out_sample_residuals = set_out_sample_residuals,
             verbose = verbose
         )
 
     return metric_value, backtest_predictions
+
 
 def grid_search_forecaster(
     forecaster,
