@@ -846,14 +846,13 @@ class ForecasterAutoregCustom(ForecasterBase):
         '''
         
         valid_instances = (sklearn.linear_model._base.LinearRegression,
-                          sklearn.linear_model._coordinate_descent.Lasso,
-                          sklearn.linear_model._ridge.Ridge
+                           sklearn.linear_model._coordinate_descent.Lasso,
+                           sklearn.linear_model._ridge.Ridge
                           )
-        
         if not isinstance(self.regressor, valid_instances):
             warnings.warn(
-                ('Only forecasters with `regressor` `LinearRegression()`, ' +
-                 ' `Lasso()` or `Ridge()` have coef.')
+                f"`get_feature_importances` only valid for forecasters with "
+                f"regressor of type {valid_instances}."
             )
             return
         else:
@@ -882,15 +881,16 @@ class ForecasterAutoregCustom(ForecasterBase):
             Impurity-based feature importances associated with each predictor.
         '''
 
-        if not isinstance(self.regressor,
-                        (sklearn.ensemble._forest.RandomForestRegressor,
-                        sklearn.ensemble._gb.GradientBoostingRegressor,
-                        sklearn.ensemble.HistGradientBoostingRegressor)):
+        valid_instances = (sklearn.ensemble._forest.RandomForestRegressor,
+                           sklearn.ensemble._gb.GradientBoostingRegressor,
+                           sklearn.ensemble.HistGradientBoostingRegressor)
+
+        if not isinstance(self.regressor, valid_instances):
             warnings.warn(
-                ('Only valid when the forecaster has been trained using ',
-                 '`GradientBoostingRegressor` , `RandomForestRegressor` or ',
-                 '`HistGradientBoostingRegressor` as regressor.')
+                f"`get_feature_importances` only valid for forecasters with "
+                f"regressor of type {valid_instances}."
             )
+
             return
         else:
             feature_importance = pd.DataFrame({
