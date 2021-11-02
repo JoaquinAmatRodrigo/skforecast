@@ -6,19 +6,16 @@
 ################################################################################
 # coding=utf-8
 
-import typing
 from typing import Union, Dict, List, Tuple, Any
 import warnings
 import logging
 import numpy as np
 import pandas as pd
 import sklearn
-import tqdm
-
 from sklearn.base import clone
-from sklearn.metrics import mean_squared_error
-from sklearn.metrics import mean_absolute_error
-from sklearn.metrics import mean_absolute_percentage_error
+
+from .ForecasterBase import ForecasterBase
+
 
 logging.basicConfig(
     format = '%(name)-10s %(levelname)-5s %(message)s', 
@@ -30,7 +27,7 @@ logging.basicConfig(
 #                         ForecasterAutoregMultiOutput                         #
 ################################################################################
 
-class ForecasterAutoregMultiOutput():
+class ForecasterAutoregMultiOutput(ForecasterBase):
     '''
     This class turns any regressor compatible with the scikit-learn API into a
     autoregressive multi-output forecaster. A separate model is created for each
@@ -513,57 +510,7 @@ class ForecasterAutoregMultiOutput():
                       )
 
         return predictions
-        
-    
-    
-    @staticmethod
-    def _check_y(y: Any) -> None:
-        '''
-        Raise Exception if `y` is not pandas Series or if it has missing values.
-        
-        Parameters
-        ----------        
-        y : Any
-            Time series values
-            
-        Returns
-        ----------
-        None
-        
-        '''
-        
-        if not isinstance(y, pd.Series):
-            raise Exception('`y` must be a pandas Series.')
-            
-        if y.isnull().any():
-            raise Exception('`y` has missing values.')
-        
-        return
 
-        
-    @staticmethod
-    def _check_exog(exog: Any) -> None:
-        '''
-        Raise Exception if `exog` is not pandas Series or DataFrame, or
-        if it has missing values.
-        
-        Parameters
-        ----------        
-        exog :  Any
-            Exogenous variable/s included as predictor/s.
-
-        Returns
-        ----------
-        None
-        '''
-            
-        if not isinstance(exog, (pd.Series, pd.DataFrame)):
-            raise Exception('`exog` must be `pd.Series` or `pd.DataFrame`.')
-
-        if exog.isnull().any().any():
-            raise Exception('`exog` has missing values.')
-                    
-        return
     
     def _check_predict_input(
         self,
@@ -663,138 +610,6 @@ class ForecasterAutoregMultiOutput():
                 )
 
         return    
-
-
-    @staticmethod
-    def _preproces_y(y: pd.Series) -> Union[np.ndarray, pd.Index]:
-        
-        '''
-        Returns values ​​and index of series separately. Index is overwritten
-        according to the next rules:
-            If index is not of type DatetimeIndex, a RangeIndex is created.
-            If index is of type DatetimeIndex and but has no frequency, a
-            RangeIndex is created.
-            If index is of type DatetimeIndex and has frequency, nothing is
-            changed.
-        
-        Parameters
-        ----------        
-        y : pandas Series
-            Time series values
-
-        Returns 
-        -------
-        y_values : numpy ndarray
-            Numpy array with values of `y`.
-
-        y_index : pandas Index
-            Index of of `y` modified according to the rules.
-        '''
-        
-        if isinstance(y.index, pd.DatetimeIndex) and y.index.freq is not None:
-            y_index = y.index
-        else:
-            warnings.warn(
-                '`y` has DatetimeIndex index but no frequency. Index is overwritten with a RangeIndex.'
-            )
-            y_index = pd.RangeIndex(
-                        start = 0,
-                        stop  = len(y),
-                        step  = 1
-                       )
-
-        y_values = y.to_numpy()
-
-        return y_values, y_index
-        
-
-    @staticmethod
-    def _preproces_last_window(last_window: pd.Series) -> Union[np.ndarray, pd.Index]:
-        
-        '''
-        Returns values ​​and index of series separately. Index is overwritten
-        according to the next rules:
-            If index is not of type DatetimeIndex, a RangeIndex is created.
-            If index is of type DatetimeIndex and but has no frequency, a
-            RangeIndex is created.
-            If index is of type DatetimeIndex and has frequency, nothing is
-            changed.
-        
-        Parameters
-        ----------        
-        last_window : pandas Series
-            Time series values
-
-        Returns 
-        -------
-        last_window_values : numpy ndarray
-            Numpy array with values of `last_window`.
-
-        last_window_index : pandas Index
-            Index of of `last_window` modified according to the rules.
-        '''
-        
-        if isinstance(last_window.index, pd.DatetimeIndex) and last_window.index.freq is not None:
-            last_window_index = last_window.index
-        else:
-            warnings.warn(
-                '`last_window` has DatetimeIndex index but no frequency. '
-                'Index is overwritten with a RangeIndex.'
-            )
-            last_window_index = pd.RangeIndex(
-                        start = 0,
-                        stop  = len(last_window),
-                        step  = 1
-                       )
-
-        last_window_values = last_window.to_numpy()
-
-        return last_window_values, last_window_index
-        
-        
-    @staticmethod
-    def _preproces_exog(
-        exog: Union[pd.Series, pd.DataFrame]
-    ) -> Union[np.ndarray, pd.Index]:
-        
-        '''
-        Returns values ​​and index separately. Index is overwritten according to
-        the next rules:
-            If index is not of type DatetimeIndex, a RangeIndex is created.
-            If index is of type DatetimeIndex and but has no frequency, a
-            RangeIndex is created.
-            If index is of type DatetimeIndex and has frequency, nothing is
-            changed.
-
-        Parameters
-        ----------        
-        exog : pd.Series, pd.DataFrame
-            Exogenous variables
-
-        Returns 
-        -------
-        exog_values : np.ndarray
-            Numpy array with values of `exog`.
-        exog_index : pd.Index
-            Exog index.
-        '''
-        
-        if isinstance(exog.index, pd.DatetimeIndex) and exog.index.freq is not None:
-            exog_index = exog.index
-        else:
-            warnings.warn(
-                ('`exog` has DatetimeIndex index but no frequency. The index is '
-                 'overwritten with a RangeIndex.')
-            )
-            exog_index = pd.RangeIndex(
-                            start = 0,
-                            stop  = len(exog),
-                            step  = 1
-                          )
-
-        exog_values = exog.to_numpy()
-
-        return exog_values, exog_index
     
 
     def _exog_to_multi_output(self, exog: np.ndarray)-> np.ndarray:
@@ -836,45 +651,6 @@ class ForecasterAutoregMultiOutput():
             exog_transformed = exog_column_transformed
 
         return exog_transformed
-
-
-    @staticmethod
-    def _expand_index(index: Union[pd.Index, None], steps: int) -> pd.Index:
-        
-        '''
-        Create a new index of lenght `steps` starting and the end of index.
-        
-        Parameters
-        ----------        
-        index : pd.Index, None
-            Index of last window
-        steps: int
-            Number of steps to expand.
-
-        Returns 
-        -------
-        new_index : pd.Index
-        '''
-        
-        if isinstance(index, pd.Index):
-            
-            if isinstance(index, pd.DatetimeIndex):
-                new_index = pd.date_range(
-                                index[-1] + index.freq,
-                                periods = steps,
-                                freq    = index.freq
-                            )
-            elif isinstance(index, pd.RangeIndex):
-                new_index = pd.RangeIndex(
-                                start = index[-1] + 1,
-                                stop  = index[-1] + 1 + steps
-                             )
-        else: 
-            new_index = pd.RangeIndex(
-                            start = 0,
-                            stop  = steps
-                         )
-        return new_index
     
     
     def set_params(self, **params: dict) -> None:
