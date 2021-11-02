@@ -370,7 +370,6 @@ def _backtesting_forecaster_refit(
         train_size = initial_train_size + i * steps
         if exog is not None:
             next_window_exog = exog.iloc[train_size:train_size + steps, ]
-            print(next_window_exog)
 
         if i < folds - 1: # from the first step to one before the last one.
             if exog is None:
@@ -806,8 +805,8 @@ def grid_search_forecaster(
         best_params = results['params'].iloc[0]
         print(
             f"Refitting `forecaster` using the best found parameters and the whole data set: \n"
-            f"lags: {best_lags} \n"
-            f"params: {best_params}\n"
+            f"  lags: {best_lags} \n"
+            f"  params: {best_params}\n"
         )
         
         if isinstance(forecaster, (ForecasterAutoreg, ForecasterAutoregMultiOutput)):
