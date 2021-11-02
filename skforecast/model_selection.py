@@ -7,7 +7,6 @@
 # coding=utf-8
 
 
-import typing
 from typing import Union, Dict, List, Tuple, Optional
 import numpy as np
 import pandas as pd
@@ -98,7 +97,7 @@ def time_series_spliter(
         if folds == 1:
             print(f"Number of folds: {folds - 1}")
             print("Not enought observations in `y` to create even a complete fold."
-                  " Try to reduce `initial_train_size` or `steps`.  \n"
+                  " Try to reduce `initial_train_size` or `steps`."
             )
 
         elif remainder == 0:
@@ -108,11 +107,11 @@ def time_series_spliter(
             print(f"Number of folds: {folds}")
             print(
                 f"Since `allow_incomplete_fold=True`, "
-                f"last fold only includes {remainder} observations instead of {steps}. \n"
+                f"last fold only includes {remainder} observations instead of {steps}."
             )
             print(
                 'Incomplete folds with few observations could overestimate or ',
-                'underestimate validation metrics. \n'
+                'underestimate validation metrics.'
             )
         elif remainder != 0 and not allow_incomplete_fold:
             print(f"Number of folds: {folds - 1}")
@@ -186,16 +185,15 @@ def cv_forecaster(
     allow_incomplete_fold: bool=True,
     set_out_sample_residuals: bool=True,
     verbose: bool=True
-) -> Tuple[np.array, np.array]:
+) -> Tuple[np.array, pd.Series]:
     '''
-    Cross-validation of `ForecasterAutoreg`, `ForecasterAutoregCustom`
-    or `ForecasterAutoregMultiOutput` object. The order of data is maintained
-    and the training set increases in each iteration.
+    Cross-validation of forecaster. The order of data is maintained and the
+    training set increases in each iteration.
     
     Parameters
     ----------
     forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregMultiOutput
-        `ForecasterAutoreg`, `ForecasterAutoregCustom` or `ForecasterAutoregMultiOutput` object.
+        Forecaster model.
         
     y : pandas Series
         Training time series values. 
@@ -217,8 +215,7 @@ def cv_forecaster(
             
     allow_incomplete_fold : bool, default `True`
         The last test partition is allowed to be incomplete if it does not reach `steps`
-        observations. Otherwise, the latest observations are discarded. This is set
-        automatically set to `False` when forecaster is `ForecasterAutoregMultiOutput`.
+        observations. Otherwise, the latest observations are discarded.
     
     set_out_sample_residuals: bool, default `True`
         Save residuals generated during the cross-validation process as out of sample
@@ -232,7 +229,7 @@ def cv_forecaster(
     cv_metrics: 1d numpy ndarray
         Value of the metric for each fold.
 
-    cv_predictions: 1d numpy ndarray
+    cv_predictions: pandas Series
         Predictions.
 
     '''
@@ -246,16 +243,7 @@ def cv_forecaster(
         raise Exception(
             f"`initial_train_size` must be greater than "
             f"forecaster's window_size ({forecaster.window_size})."
-        )  
-    
-    if isinstance(forecaster, ForecasterAutoregMultiOutput):
-        steps = forecaster.steps
-        if allow_incomplete_fold:
-            warnings.warn(
-                " Cross-validation of `ForecasterAutoregMultiOutput` only allow completed folds, "
-                 "`allow_incomplete_fold` is set to `False`."
-            )
-            allow_incomplete_fold = False
+        )
         
     metric = get_metric(metric=metric)
     
@@ -303,22 +291,140 @@ def cv_forecaster(
     return cv_metrics, cv_predictions
 
 
-def backtesting_forecaster(
+def _backtesting_forecaster_refit(
     forecaster,
     y: pd.Series,
-    steps: Union[int, None],
-    metric: str, initial_train_size: None,
+    steps: int,
+    metric: str,
+    initial_train_size: int,
     exog: Union[pd.Series, pd.DataFrame]=None,
     set_out_sample_residuals: bool=True,
     verbose: bool=False
-) -> Tuple[np.array, np.array]:
+) -> Tuple[np.array, pd.Series]:
     '''
-    Backtesting (validation) of `ForecasterAutoreg`, `ForecasterAutoregCustom` or
-    `ForecasterAutoregMultiOutput` object.
-    The model is trained only once using the `initial_train_size` first observations.
-    In each iteration, a number of `steps` predictions are evaluated.   
-    This evaluation is much faster than `cv_forecaster()` since the model is
-    trained only once.
+    Backtesting of forecaster with model re-fitting. In each iteration:
+        - A number of `steps` predictions are evaluated.
+        - The training set increases with `steps` observations.
+        - The model is re-fitted using the new training set.
+
+    In order to apply backtesting with re-fit, an initial train must be performed,
+    otherwise it would not be possible to increase the training set after each
+    iteration. Therefore, `initial_train_size` must be provided.
+    
+    Parameters
+    ----------
+    forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregMultiOutput
+        Forecaster model.
+        
+    y : pandas Series
+        Training time series values. 
+    
+    initial_train_size: int
+        Number of samples in the initial train split. Even though forecaster
+        is already trained, a initial train is done using the first `initial_train_size`
+        observations.
+        
+    steps : int
+        Number of steps to predict.
+        
+    metric : {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
+        Metric used to quantify the goodness of fit of the model.
+        
+    exog :panda Series, pandas DataFrame, default `None`
+        Exogenous variable/s included as predictor/s. Must have the same
+        number of observations as `y` and should be aligned so that y[i] is
+        regressed on exog[i].
+
+    set_out_sample_residuals: bool, default `True`
+        Save residuals generated during the cross-validation process as out of sample
+        residuals. Ignored if forecaster is of class `ForecasterAutoregMultiOutput`.
+            
+    verbose : bool, default `False`
+        Print number of folds used for backtesting.
+
+    Returns 
+    -------
+    metric_value: numpy ndarray shape (1,)
+        Value of the metric.
+
+    backtest_predictions: pandas Series
+        Value of predictions.
+
+    '''
+      
+    metric = get_metric(metric=metric)
+    backtest_predictions = []
+    
+    folds     = int(np.ceil((len(y) - initial_train_size) / steps))
+    remainder = (len(y) - initial_train_size) % steps
+    
+    if verbose:
+        print(f"Number of observations used for training: {initial_train_size}")
+        print(f"Number of observations used for backtesting: {len(y) - initial_train_size}")
+        print(f"    Number of folds: {folds}")
+        print(f"    Number of steps per fold: {steps}")
+        if remainder != 0:
+            print(f"    Last fold only includes {remainder} observations.")
+      
+    for i in range(folds):
+        train_size = initial_train_size + i * steps
+        if exog is not None:
+            next_window_exog = exog.iloc[train_size:train_size + steps, ]
+
+        if i < folds - 1: # from the first step to one before the last one.
+            if exog is None:
+                forecaster.fit(y=y.iloc[:train_size])
+                pred = forecaster.predict(steps=steps)
+            else:
+                forecaster.fit(y=y.iloc[:train_size], exog=exog.iloc[:train_size, ])
+                pred = forecaster.predict(steps=steps,exog=next_window_exog)
+        else:    
+            if remainder == 0:
+                if exog is None:
+                    forecaster.fit(y=y.iloc[:train_size])
+                    pred = forecaster.predict(steps=steps)
+                else:
+                    forecaster.fit(y=y.iloc[:train_size], exog=exog.iloc[:train_size, ])
+                    pred = forecaster.predict(steps=steps, exog=next_window_exog)
+            else:
+                steps = remainder
+                if exog is None:
+                    forecaster.fit(y=y.iloc[:train_size])
+                    pred = forecaster.predict(steps=steps)
+                else:
+                    forecaster.fit(y=y.iloc[:train_size], exog=exog.iloc[:train_size, ])
+                    pred = forecaster.predict(steps=steps, exog=next_window_exog)
+        
+        backtest_predictions.append(pred)
+    
+    backtest_predictions = pd.concat(backtest_predictions)
+    metric_value = metric(
+                        y_true = y.iloc[initial_train_size: initial_train_size + len(backtest_predictions)],
+                        y_pred = backtest_predictions
+                   )
+
+    if set_out_sample_residuals:
+        if not isinstance(forecaster, ForecasterAutoregMultiOutput):
+            residuals = (y.iloc[initial_train_size: initial_train_size + len(backtest_predictions)]
+                         - backtest_predictions)
+            forecaster.set_out_sample_residuals(residuals.to_numpy())
+
+    return np.array([metric_value]), backtest_predictions
+
+
+def _backtesting_forecaster_no_refit(
+    forecaster,
+    y: pd.Series,
+    steps: int,
+    metric: str,
+    initial_train_size: Union[int, None]=None,
+    exog: Union[pd.Series, pd.DataFrame]=None,
+    set_out_sample_residuals: bool=True,
+    verbose: bool=False
+) -> Tuple[np.array, pd.Series]:
+    '''
+    Backtesting of forecaster without iterative re-fitting. In each iteration,
+    a number of `steps` predictions are evaluated.
 
     If `forecaster` is already trained and `initial_train_size` is `None`,
     no initial train is done and all data is used to evaluate the model.
@@ -329,7 +435,7 @@ def backtesting_forecaster(
     Parameters
     ----------
     forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregMultiOutput
-        `ForecasterAutoreg`, `ForecasterAutoregCustom` or `ForecasterAutoregMultiOutput` object.
+        Forecaster model.
         
     y : pandas Series
         Training time series values. 
@@ -342,8 +448,7 @@ def backtesting_forecaster(
         no predictions are calculated for them.
         
     steps : int, None
-        Number of steps to predict. Ignored if `forecaster` is a `ForecasterAutoregMultiOutput`
-        since this information is already stored inside it.
+        Number of steps to predict.
         
     metric : {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
         Metric used to quantify the goodness of fit of the model.
@@ -352,10 +457,10 @@ def backtesting_forecaster(
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
-        
+
     set_out_sample_residuals: bool, default `True`
         Save residuals generated during the cross-validation process as out of sample
-        residuals.
+        residuals. Ignored if forecaster is of class `ForecasterAutoregMultiOutput`.
             
     verbose : bool, default `False`
         Print number of folds used for backtesting.
@@ -365,7 +470,166 @@ def backtesting_forecaster(
     metric_value: numpy ndarray shape (1,)
         Value of the metric.
 
-    backtest_predictions: numpy ndarray
+    backtest_predictions: pandas Series
+        Value of predictions.
+
+    '''
+        
+    metric = get_metric(metric=metric)
+    backtest_predictions = []
+
+    if initial_train_size is not None:
+        if exog is None:
+            forecaster.fit(y=y.iloc[:initial_train_size])      
+        else:
+            forecaster.fit(
+                y = y.iloc[:initial_train_size],
+                exog = exog.iloc[:initial_train_size, ]
+            )
+        window_size = forecaster.window_size
+    else:
+        # Although not used for training, first observations are needed to create
+        # the initial predictors
+        window_size = forecaster.window_size
+        initial_train_size = window_size
+    
+    folds     = int(np.ceil((len(y) - initial_train_size) / steps))
+    remainder = (len(y) - initial_train_size) % steps
+    
+    if verbose:
+        print(f"Number of observations used for training or as initial window: {initial_train_size}")
+        print(f"Number of observations used for backtesting: {len(y) - initial_train_size}")
+        print(f"    Number of folds: {folds}")
+        print(f"    Number of steps per fold: {steps}")
+        if remainder != 0:
+            print(f"    Last fold only includes {remainder} observations")
+      
+    for i in range(folds):
+        last_window_end   = initial_train_size + i * steps
+        last_window_start = last_window_end - window_size 
+        last_window_y     = y.iloc[last_window_start:last_window_end]
+
+        if exog is not None:
+            next_window_exog = exog.iloc[last_window_end:last_window_end + steps, ]
+                
+        if i < folds - 1: # from the first step to one before the last one.
+            if exog is None:
+                pred = forecaster.predict(
+                            steps       = steps,
+                            last_window = last_window_y
+                        )
+            else:
+                pred = forecaster.predict(
+                            steps       = steps,
+                            last_window = last_window_y,
+                            exog        = next_window_exog
+                        )            
+        else:    
+            if remainder == 0:
+                if exog is None:
+                    pred = forecaster.predict(
+                                steps       = steps,
+                                last_window = last_window_y
+                            )
+                else:
+                    pred = forecaster.predict(
+                                steps       = steps,
+                                last_window = last_window_y,
+                                exog        = next_window_exog
+                            )
+            else:
+                steps = remainder
+                if exog is None:
+                    pred = forecaster.predict(
+                                steps       = steps,
+                                last_window = last_window_y
+                            )
+                else:
+                    pred = forecaster.predict(
+                                steps       = steps,
+                                last_window = last_window_y,
+                                exog        = next_window_exog
+                            )
+        
+        backtest_predictions.append(pred)
+    
+    backtest_predictions = pd.concat(backtest_predictions)
+    metric_value = metric(
+                        y_true = y.iloc[initial_train_size: initial_train_size + len(backtest_predictions)],
+                        y_pred = backtest_predictions
+                   )
+
+    if set_out_sample_residuals:
+        if not isinstance(forecaster, ForecasterAutoregMultiOutput):
+            residuals = (y.iloc[initial_train_size: initial_train_size + len(backtest_predictions)]
+                         - backtest_predictions)
+            forecaster.set_out_sample_residuals(residuals.to_numpy())
+
+    return np.array([metric_value]), backtest_predictions
+
+
+def backtesting_forecaster(
+    forecaster,
+    y: pd.Series,
+    steps: int,
+    metric: str,
+    initial_train_size: Union[int, None],
+    exog: Union[pd.Series, pd.DataFrame]=None,
+    refit: bool=False,
+    set_out_sample_residuals: bool=True,
+    verbose: bool=False
+) -> Tuple[np.array, pd.Series]:
+    '''
+    Backtesting of forecaster model.
+
+    If `refit` is False, the model is trained only once using the `initial_train_size`
+    first observations. If `refit` is True, the model is trained in each iteration
+    increasing the training set.
+
+    Parameters
+    ----------
+    forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregMultiOutput
+        Forecaster model.
+        
+    y : pandas Series
+        Training time series values. 
+    
+    initial_train_size: int, default `None`
+        Number of samples in the initial train split. If `None` and `forecaster`
+        is already trained, no initial train is done and all data is used to
+        evaluate the model. However, the first `len(forecaster.last_window)`
+        observations are needed to create the initial predictors. Therefore,
+        no predictions are calculated for them.
+
+        `None` is only allowed when `refit` is False.
+        
+    steps : int
+        Number of steps to predict.
+        
+    metric : {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
+        Metric used to quantify the goodness of fit of the model.
+        
+    exog :panda Series, pandas DataFrame, default `None`
+        Exogenous variable/s included as predictor/s. Must have the same
+        number of observations as `y` and should be aligned so that y[i] is
+        regressed on exog[i].
+
+    refit: bool, default False
+        Whether to re-fit the forecaster in each iteration. 
+        
+    set_out_sample_residuals: bool, default `True`
+        Save residuals generated during the cross-validation process as out of sample
+        residuals. Ignored if forecaster is of class `ForecasterAutoregMultiOutput`.
+            
+    verbose : bool, default `False`
+        Print number of folds used for backtesting.
+
+    Returns 
+    -------
+    metric_value: numpy ndarray shape (1,)
+        Value of the metric.
+
+    backtest_predictions: pandas Series
         Value of predictions.
 
     '''
@@ -386,166 +650,58 @@ def backtesting_forecaster(
             '`forecaster` must be already trained if no `initial_train_size` is provided.'
         )
 
-    if initial_train_size is None and forecaster.fitted:
-        warnings.warn(
-            f'Altough no initial train is done, the first '
-            f'{len(forecaster.last_window)} observations are needed to create '
-            f'the initial predictors. Therefore, no predictions are calculated for them.'
+    if initial_train_size is None and refit:
+        raise Exception(
+            f'`refit` is only allowed when there is a initial_train_size.'
         )
     
-    if isinstance(forecaster, ForecasterAutoregMultiOutput):
-        steps = forecaster.steps
-        
-    metric = get_metric(metric=metric)
-    backtest_predictions = []
-
-    if initial_train_size is not None:
-        if exog is None:
-            forecaster.fit(y=y.iloc[:initial_train_size])      
-        else:
-            forecaster.fit(
-                y = y.iloc[:initial_train_size],
-                exog = exog.iloc[:initial_train_size, ]
-            )
-        window_size = forecaster.window_size
+    if refit:
+        metric_value, backtest_predictions = _backtesting_forecaster_refit(
+            forecaster = forecaster,
+            y = y,
+            steps = steps,
+            metric = metric,
+            initial_train_size = initial_train_size,
+            exog = exog,
+            set_out_sample_residuals = set_out_sample_residuals,
+            verbose = verbose
+        )
     else:
-        # Although not used for training, first observations are needed to create the initial predictors
-        window_size = forecaster.window_size
-        initial_train_size = window_size
-    
-    folds     = (len(y) - initial_train_size) // steps + 1
-    remainder = (len(y) - initial_train_size) % steps
-    
-    if verbose:
-        print(f"Number of observations used for training or as initial window: {initial_train_size}")
-        print(f"Number of observations used for backtesting: {len(y) - initial_train_size}")
-        print(f"    Number of folds: {folds - 1 * (remainder == 0)}")
-        print(f"    Number of steps per fold: {steps}")
-        if remainder != 0:
-            print(f"    Last fold only includes {remainder} observations")
-      
-    for i in range(folds):
-        last_window_end   = initial_train_size + i * steps
-        last_window_start = (initial_train_size + i * steps) - window_size 
-        last_window_y     = y.iloc[last_window_start:last_window_end]
+        metric_value, backtest_predictions = _backtesting_forecaster_no_refit(
+            forecaster = forecaster,
+            y = y,
+            steps = steps,
+            metric = metric,
+            initial_train_size = initial_train_size,
+            exog = exog,
+            set_out_sample_residuals = set_out_sample_residuals,
+            verbose = verbose
+        )
 
-        if exog is not None:
-            next_window_exog = exog.iloc[last_window_end:last_window_end + steps, ]
-                
-        if i < folds - 1:
-            if exog is None:
-                pred = forecaster.predict(
-                            steps       = steps,
-                            last_window = last_window_y
-                        )
-            else:
-                pred = forecaster.predict(
-                            steps       = steps,
-                            last_window = last_window_y,
-                            exog        = next_window_exog
-                        )
-                
-        elif remainder != 0 and not isinstance(forecaster, ForecasterAutoregMultiOutput):
-            steps = remainder 
-            if exog is None:
-                pred = forecaster.predict(
-                            steps       = steps,
-                            last_window = last_window_y
-                        )
-            else:
-                pred = forecaster.predict(
-                            steps       = steps,
-                            last_window = last_window_y,
-                            exog        = next_window_exog
-                        )
-                
-        elif remainder != 0:
-            # ForecasterAutoregMultiOutput predict all steps simultaneusly, therefore,
-            # if the last fold is incomplete, remaining steps must be completed with
-            # dummy values and removing the corresponding predictions afterwards.
-            dummy_steps = steps - remainder 
-            if exog is None:
-                pred = forecaster.predict(
-                            steps       = steps,
-                            last_window = last_window_y
-                        )
-                pred = pred.iloc[:-dummy_steps]
-            else:
-                if forecaster.exog_type == pd.DataFrame:
-                    next_window_exog = pd.DataFrame(
-                                        data = np.vstack((
-                                                next_window_exog.to_numpy(),
-                                                np.ones(shape=(dummy_steps,) + next_window_exog.shape[1:])
-                                            )),
-                                        columns = next_window_exog.columns,
-                                        index = forecaster._expand_index(
-                                                    index = next_window_exog.index,
-                                                    steps = steps
-                                                )
-                                      )
-                else:
-                    next_window_exog = pd.Series(
-                                        data = np.concatenate((
-                                                next_window_exog.to_numpy(),
-                                                np.ones(shape=dummy_steps)
-                                            )),
-                                        name = next_window_exog.name,
-                                        index = forecaster._expand_index(
-                                                    index = next_window_exog.index,
-                                                    steps = steps
-                                                )
-                                      )
-
-                pred = forecaster.predict(
-                            steps       = steps,
-                            last_window = last_window_y,
-                            exog        = next_window_exog
-                        )
-                pred = pred.iloc[:-dummy_steps]
-            
-        else:
-            continue
-        
-        backtest_predictions.append(pred)
-    
-    backtest_predictions = pd.concat(backtest_predictions)
-    metric_value = metric(
-                        y_true = y.iloc[initial_train_size: initial_train_size + len(backtest_predictions)],
-                        y_pred = backtest_predictions
-                   )
-    
-    if set_out_sample_residuals:
-        if not isinstance(forecaster, ForecasterAutoregMultiOutput):
-            residuals = (y.iloc[initial_train_size: initial_train_size + len(backtest_predictions)]
-                         - backtest_predictions)
-            forecaster.set_out_sample_residuals(residuals.to_numpy())
-
-    return np.array([metric_value]), backtest_predictions
-
+    return metric_value, backtest_predictions
 
 
 def grid_search_forecaster(
     forecaster,
     y: pd.Series,
     param_grid: dict,
-    initial_train_size: int,
+    initial_train_size: Union[int, None],
     steps: int,
     metric: str,
     exog: Union[pd.Series, pd.DataFrame]=None,
     lags_grid: list=None,
-    method: str='cv',
-    allow_incomplete_fold: bool=True,
+    refit: bool=False,
     return_best: bool=True,
     verbose: bool=True
 ) -> pd.DataFrame:
     '''
     Exhaustive search over specified parameter values for a Forecaster object.
-    Validation is done using time series cross-validation or backtesting.
+    Validation is done using time series backtesting.
     
     Parameters
     ----------
     forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregMultiOutput
-        `ForecasterAutoreg`, `ForecasterAutoregCustom` or `ForecasterAutoregMultiOutput` object.
+        Forcaster model.
         
     y : pandas Series
         Training time series values. 
@@ -572,15 +728,8 @@ def grid_search_forecaster(
         Lists of `lags` to try. Only used if forecaster is an instance of 
         `ForecasterAutoreg`.
         
-    method : {'cv', 'backtesting'}
-        Method used to estimate the metric for each parameter combination.
-        'cv' for time series crosvalidation and 'backtesting' for simple
-        backtesting. 'backtesting' is much faster since the model is fitted only
-        once.
-        
-    allow_incomplete_fold : bool, default `True`
-        The last test set is allowed to be incomplete if it does not reach `steps`
-        observations. Otherwise, the latest observations are discarded.
+    refit: bool, default False
+        Whether to re-fit the forecaster in each iteration of backtesting.
         
     return_best : bool
         Refit the `forecaster` using the best found parameters on the whole data.
@@ -625,30 +774,18 @@ def grid_search_forecaster(
         for params in tqdm.tqdm(param_grid, desc='loop param_grid', position=1, leave=False):
 
             forecaster.set_params(**params)
-            
-            if method == 'cv':
-                metrics = cv_forecaster(
-                                forecaster               = forecaster,
-                                y                        = y,
-                                exog                     = exog,
-                                initial_train_size       = initial_train_size,
-                                steps                    = steps,
-                                metric                   = metric,
-                                allow_incomplete_fold    = allow_incomplete_fold,
-                                set_out_sample_residuals = False,
-                                verbose                  = verbose
-                             )[0]
-            else:
-                metrics = backtesting_forecaster(
-                                forecaster               = forecaster,
-                                y                        = y,
-                                exog                     = exog,
-                                initial_train_size       = initial_train_size,
-                                steps                    = steps,
-                                metric                   = metric,
-                                set_out_sample_residuals = False,
-                                verbose                  = verbose
-                             )[0]
+
+            metrics = backtesting_forecaster(
+                            forecaster               = forecaster,
+                            y                        = y,
+                            exog                     = exog,
+                            initial_train_size       = initial_train_size,
+                            steps                    = steps,
+                            metric                   = metric,
+                            refit                    = refit,
+                            set_out_sample_residuals = False,
+                            verbose                  = verbose
+                            )[0]
 
             lags_list.append(lags)
             params_list.append(params)
@@ -668,13 +805,12 @@ def grid_search_forecaster(
         best_params = results['params'].iloc[0]
         print(
             f"Refitting `forecaster` using the best found parameters and the whole data set: \n"
-            f"lags: {best_lags} \n"
-            f"params: {best_params}\n"
+            f"  lags: {best_lags} \n"
+            f"  params: {best_params}\n"
         )
         
         if isinstance(forecaster, (ForecasterAutoreg, ForecasterAutoregMultiOutput)):
-            forecaster.set_lags(best_lags)
-                
+            forecaster.set_lags(best_lags)   
         forecaster.set_params(**best_params)
         forecaster.fit(y=y, exog=exog)
             
@@ -788,12 +924,12 @@ def backtesting_forecaster_intervals(
             '`forecaster` must be already trained if no `initial_train_size` is provided.'
         )
 
-    if initial_train_size is None and forecaster.fitted:
-        warnings.warn(
-            f'Altough no initial train is done, the first '
-            f'{len(forecaster.last_window)} observations are needed to create '
-            f'the initial predictors. Therefore, no predictions are calculated for them.'
-        )
+    # if initial_train_size is None and forecaster.fitted:
+    #     warnings.warn(
+    #         f'Altough no initial train is done, the first '
+    #         f'{len(forecaster.last_window)} observations are needed to create '
+    #         f'the initial predictors. Therefore, no predictions are calculated for them.'
+    #     )
     
     if not isinstance(forecaster, (ForecasterAutoreg, ForecasterAutoregCustom)):
         warnings.war(
