@@ -9,6 +9,11 @@ Backtesting `backtesting_forecaster()`:
 - [x] __backtesting_forecaster_refit()
 - [x] __backtesting_forecaster_no_refit()
 
+Backtesting `backtesting_forecaster_intervals()`:
+- [x] Include an argument `refit` to decide if the forecaster is retrained in each iteration.
+- [x] __backtesting_forecaster_refit()
+- [x] __backtesting_forecaster_no_refit()
+
 Grid search `grid_search_forecaster`:
 - [x] Remove argument `method`
 - [x] method 'cv' deprecated in favour to `backtesting_forecaster(refit=True)`
