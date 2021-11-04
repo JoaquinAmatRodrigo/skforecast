@@ -338,6 +338,20 @@ def _backtesting_forecaster_refit(
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
 
+    interval: list, default `None`
+        Confidence of the prediction interval estimated. Sequence of percentiles
+        to compute, which must be between 0 and 100 inclusive. If `None`, no
+        intervals are estimated. Only available for forecaster of type ForecasterAutoreg
+        and ForecasterAutoregCustom.
+            
+    n_boot: int, default `500`
+        Number of bootstrapping iterations used to estimate prediction
+        intervals.
+
+    in_sample_residuals: bool, default `True`
+        If `True`, residuals from the training data are used as proxy of
+        prediction error to create prediction intervals.
+
     set_out_sample_residuals: bool, default `True`
         Save residuals generated during the cross-validation process as out of sample
         residuals. Ignored if forecaster is of class `ForecasterAutoregMultiOutput`.
@@ -374,42 +388,103 @@ def _backtesting_forecaster_refit(
         if exog is not None:
             next_window_exog = exog.iloc[train_size:train_size + steps, ]
 
-        if i < folds - 1: # from the first step to one before the last one.
-            if exog is None:
-                forecaster.fit(y=y.iloc[:train_size])
-                pred = forecaster.predict(steps=steps)
-            else:
-                forecaster.fit(y=y.iloc[:train_size], exog=exog.iloc[:train_size, ])
-                pred = forecaster.predict(steps=steps,exog=next_window_exog)
-        else:    
-            if remainder == 0:
+        if interval is None:
+            if i < folds - 1: # from the first step to one before the last one.
                 if exog is None:
                     forecaster.fit(y=y.iloc[:train_size])
                     pred = forecaster.predict(steps=steps)
                 else:
                     forecaster.fit(y=y.iloc[:train_size], exog=exog.iloc[:train_size, ])
-                    pred = forecaster.predict(steps=steps, exog=next_window_exog)
-            else:
-                steps = remainder
+                    pred = forecaster.predict(steps=steps,exog=next_window_exog)
+            else:    
+                if remainder == 0:
+                    if exog is None:
+                        forecaster.fit(y=y.iloc[:train_size])
+                        pred = forecaster.predict(steps=steps)
+                    else:
+                        forecaster.fit(y=y.iloc[:train_size], exog=exog.iloc[:train_size, ])
+                        pred = forecaster.predict(steps=steps, exog=next_window_exog)
+                else:
+                    steps = remainder
+                    if exog is None:
+                        forecaster.fit(y=y.iloc[:train_size])
+                        pred = forecaster.predict(steps=steps)
+                    else:
+                        forecaster.fit(y=y.iloc[:train_size], exog=exog.iloc[:train_size, ])
+                        pred = forecaster.predict(steps=steps, exog=next_window_exog)
+        else:
+            if i < folds - 1: # from the first step to one before the last one.
                 if exog is None:
                     forecaster.fit(y=y.iloc[:train_size])
-                    pred = forecaster.predict(steps=steps)
+                    pred = forecaster.predict_interval(
+                                steps       = steps,
+                                interval    = interval,
+                                n_boot      = n_boot,
+                                in_sample_residuals = in_sample_residuals
+                            )
                 else:
                     forecaster.fit(y=y.iloc[:train_size], exog=exog.iloc[:train_size, ])
-                    pred = forecaster.predict(steps=steps, exog=next_window_exog)
-        
+                    pred = forecaster.predict_interval(
+                                steps       = steps,
+                                exog        = next_window_exog,
+                                interval    = interval,
+                                n_boot      = n_boot,
+                                in_sample_residuals = in_sample_residuals
+                           )
+            else:    
+                if remainder == 0:
+                    if exog is None:
+                        forecaster.fit(y=y.iloc[:train_size])
+                        pred = forecaster.predict_interval(
+                                steps       = steps,
+                                interval    = interval,
+                                n_boot      = n_boot,
+                                in_sample_residuals = in_sample_residuals
+                            )
+                    else:
+                        forecaster.fit(y=y.iloc[:train_size], exog=exog.iloc[:train_size, ])
+                        pred = forecaster.predict_interval(
+                                steps       = steps,
+                                exog        = next_window_exog,
+                                interval    = interval,
+                                n_boot      = n_boot,
+                                in_sample_residuals = in_sample_residuals
+                           )
+                else:
+                    steps = remainder
+                    if exog is None:
+                        forecaster.fit(y=y.iloc[:train_size])
+                        pred = forecaster.predict_interval(
+                                steps       = steps,
+                                interval    = interval,
+                                n_boot      = n_boot,
+                                in_sample_residuals = in_sample_residuals
+                            )
+                    else:
+                        forecaster.fit(y=y.iloc[:train_size], exog=exog.iloc[:train_size, ])
+                        pred = forecaster.predict_interval(
+                                steps       = steps,
+                                exog        = next_window_exog,
+                                interval    = interval,
+                                n_boot      = n_boot,
+                                in_sample_residuals = in_sample_residuals
+                           )
+
         backtest_predictions.append(pred)
     
     backtest_predictions = pd.concat(backtest_predictions)
+    if isinstance(backtest_predictions, pd.Series):
+            backtest_predictions = pd.DataFrame(backtest_predictions)
+
     metric_value = metric(
                         y_true = y.iloc[initial_train_size: initial_train_size + len(backtest_predictions)],
-                        y_pred = backtest_predictions
+                        y_pred = backtest_predictions['pred']
                    )
 
     if set_out_sample_residuals:
         if not isinstance(forecaster, ForecasterAutoregMultiOutput):
             residuals = (y.iloc[initial_train_size: initial_train_size + len(backtest_predictions)]
-                         - backtest_predictions)
+                         - backtest_predictions['pred'])
             forecaster.set_out_sample_residuals(residuals.to_numpy())
 
     return np.array([metric_value]), backtest_predictions
@@ -463,6 +538,20 @@ def _backtesting_forecaster_no_refit(
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
+
+    interval: list, default `None`
+        Confidence of the prediction interval estimated. Sequence of percentiles
+        to compute, which must be between 0 and 100 inclusive. If `None`, no
+        intervals are estimated. Only available for forecaster of type ForecasterAutoreg
+        and ForecasterAutoregCustom.
+            
+    n_boot: int, default `500`
+        Number of bootstrapping iterations used to estimate prediction
+        intervals.
+
+    in_sample_residuals: bool, default `True`
+        If `True`, residuals from the training data are used as proxy of
+        prediction error to create prediction intervals.
 
     set_out_sample_residuals: bool, default `True`
         Save residuals generated during the cross-validation process as out of sample
@@ -619,17 +708,19 @@ def _backtesting_forecaster_no_refit(
             
             backtest_predictions.append(pred)
 
-    
     backtest_predictions = pd.concat(backtest_predictions)
+    if isinstance(backtest_predictions, pd.Series):
+            backtest_predictions = pd.DataFrame(backtest_predictions)
+
     metric_value = metric(
                         y_true = y.iloc[initial_train_size: initial_train_size + len(backtest_predictions)],
-                        y_pred = backtest_predictions
+                        y_pred = backtest_predictions['pred']
                    )
 
     if set_out_sample_residuals:
         if not isinstance(forecaster, ForecasterAutoregMultiOutput):
             residuals = (y.iloc[initial_train_size: initial_train_size + len(backtest_predictions)]
-                         - backtest_predictions)
+                         - backtest_predictions['pred'])
             forecaster.set_out_sample_residuals(residuals.to_numpy())
 
     return np.array([metric_value]), backtest_predictions
@@ -643,7 +734,7 @@ def backtesting_forecaster(
     initial_train_size: Union[int, None],
     exog: Union[pd.Series, pd.DataFrame]=None,
     refit: bool=False,
-    interval: list=[5, 95],
+    interval: Union[list, None]=None,
     n_boot: int=500,
     in_sample_residuals: bool=True,
     set_out_sample_residuals: bool=True,
@@ -685,7 +776,21 @@ def backtesting_forecaster(
         regressed on exog[i].
 
     refit: bool, default False
-        Whether to re-fit the forecaster in each iteration. 
+        Whether to re-fit the forecaster in each iteration.
+
+    interval: list, default `None`
+        Confidence of the prediction interval estimated. Sequence of percentiles
+        to compute, which must be between 0 and 100 inclusive. If `None`, no
+        intervals are estimated. Only available for forecaster of type ForecasterAutoreg
+        and ForecasterAutoregCustom.
+            
+    n_boot: int, default `500`
+        Number of bootstrapping iterations used to estimate prediction
+        intervals.
+
+    in_sample_residuals: bool, default `True`
+        If `True`, residuals from the training data are used as proxy of
+        prediction error to create prediction intervals.
         
     set_out_sample_residuals: bool, default `True`
         Save residuals generated during the cross-validation process as out of sample
@@ -724,6 +829,12 @@ def backtesting_forecaster(
         raise Exception(
             f'`refit` is only allowed when there is a initial_train_size.'
         )
+
+    if interval is not None and isinstance(forecaster, ForecasterAutoregMultiOutput):
+        raise Exception(
+            ('Interval prediction is is only allowed when forecaster is of type '
+            'ForecasterAutoreg or ForecasterAutoregCustom.')
+        )
     
     if refit:
         metric_value, backtest_predictions = _backtesting_forecaster_refit(
@@ -733,6 +844,9 @@ def backtesting_forecaster(
             metric = metric,
             initial_train_size = initial_train_size,
             exog = exog,
+            interval = interval,
+            n_boot = n_boot,
+            in_sample_residuals = in_sample_residuals,
             set_out_sample_residuals = set_out_sample_residuals,
             verbose = verbose
         )
@@ -744,6 +858,9 @@ def backtesting_forecaster(
             metric = metric,
             initial_train_size = initial_train_size,
             exog = exog,
+            interval = interval,
+            n_boot = n_boot,
+            in_sample_residuals = in_sample_residuals,
             set_out_sample_residuals = set_out_sample_residuals,
             verbose = verbose
         )
@@ -853,6 +970,7 @@ def grid_search_forecaster(
                             steps                    = steps,
                             metric                   = metric,
                             refit                    = refit,
+                            interval                 = None,
                             set_out_sample_residuals = False,
                             verbose                  = verbose
                             )[0]
@@ -885,218 +1003,3 @@ def grid_search_forecaster(
         forecaster.fit(y=y, exog=exog)
             
     return results
-
-
-def backtesting_forecaster_intervals(
-    forecaster,
-    y: pd.Series,
-    steps: int,
-    metric: str,
-    initial_train_size: int,
-    exog: Union[pd.Series, pd.DataFrame]=None,
-    interval: list=[5, 95],
-    n_boot: int=500,
-    in_sample_residuals: bool=True,
-    set_out_sample_residuals: bool=True,
-    verbose: bool=False
-) -> Tuple[np.array, np.array]:
-    '''
-    Backtesting (validation) of `ForecasterAutoreg`, or `ForecasterAutoregCustom` object.
-    The model is trained only once using the `initial_train_size` first observations. In 
-    each iteration, a number of `steps` predictions are evaluated. Both, predictions and
-    intervals, are calculated. This evaluation is much faster than `cv_forecaster()` 
-    since the model is trained only once.
-    
-    If `forecaster` is already trained and `initial_train_size` is `None`,
-    no initial train is done and all data is used to evaluate the model.
-    However, the first `len(forecaster.last_window)` observations are needed
-    to create the initial predictors, therefore, no predictions are
-    calculated for them.
-    
-    Parameters
-    ----------
-    forecaster : ForecasterAutoreg, ForecasterAutoregCustom
-        `ForecasterAutoreg` or `ForecasterAutoregCustom` object.
-        
-    y : pandas Series
-        Training time series values. 
-    
-    initial_train_size: int, default `None`
-        Number of samples in the initial train split. If `None` and `forecaster`
-        is already trained, no initial train is done and all data is used to
-        evaluate the model. However, the first `len(forecaster.last_window)`
-        observations are needed to create the initial predictors. Therefore,
-        no predictions are calculated for them.
-        
-    steps : int
-        Number of steps to predict.
-        
-    metric : {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
-        Metric used to quantify the goodness of fit of the model.
-        
-    exog : pandas Series, pandas DataFrame, default `None`
-        Exogenous variable/s included as predictor/s. Must have the same
-        number of observations as `y` and should be aligned so that y[i] is
-        regressed on exog[i].
-        
-    interval: list, default `[5, 95]`
-        Confidence of the prediction interval estimated. Sequence of percentiles
-        to compute, which must be between 0 and 100 inclusive.
-            
-    n_boot: int, default `500`
-        Number of bootstrapping iterations used to estimate prediction
-        intervals.
-
-    in_sample_residuals: bool, default `True`
-        If `True`, residuals from the training data are used as proxy of
-        prediction error to create prediction intervals.
-        
-    set_out_sample_residuals: bool, default `True`
-        Save residuals generated during the cross-validation process as out of sample
-        residuals.
-        
-    verbose : bool, default `True`
-        Print number of folds used for backtesting.
-
-    Returns 
-    -------
-    backtest_predictions: pandas DataFrame
-        Values predicted by the forecaster and their estimated interval:
-            column pred = predictions.
-            column lower_bound = lower bound of the interval.
-            column upper_bound = upper bound interval of the interval.
-        
-    metric_value: numpy ndarray shape (1,)
-        Value of the metric.
-
-    Notes
-    -----
-    More information about prediction intervals in forecasting:
-    https://otexts.com/fpp2/prediction-intervals.html
-    Forecasting: Principles and Practice (2nd ed) Rob J Hyndman and
-    George Athanasopoulos.
-
-    '''
-
-    if initial_train_size is not None and initial_train_size > len(y):
-        raise Exception(
-            'If used, `initial_train_size` must be smaller than lenght of `y`.'
-        )
-        
-    if initial_train_size is not None and initial_train_size < forecaster.window_size:
-        raise Exception(
-            f"`initial_train_size` must be greater than "
-            f"forecaster's window_size ({forecaster.window_size})."
-        )
-
-    if initial_train_size is None and not forecaster.fitted:
-        raise Exception(
-            '`forecaster` must be already trained if no `initial_train_size` is provided.'
-        )
-
-    # if initial_train_size is None and forecaster.fitted:
-    #     warnings.warn(
-    #         f'Altough no initial train is done, the first '
-    #         f'{len(forecaster.last_window)} observations are needed to create '
-    #         f'the initial predictors. Therefore, no predictions are calculated for them.'
-    #     )
-    
-    if not isinstance(forecaster, (ForecasterAutoreg, ForecasterAutoregCustom)):
-        warnings.war(
-            f"Only forecasters of class ForecasterAutoreg or ForecasterAutoregCustom "
-            f"are allowed. Got {type(forecaster)}."
-        )
-        
-    metric = get_metric(metric=metric)
-    backtest_predictions = []
-
-    if initial_train_size is not None:
-        if exog is None:
-            forecaster.fit(y=y.iloc[:initial_train_size])      
-        else:
-            forecaster.fit(
-                y = y.iloc[:initial_train_size],
-                exog = exog.iloc[:initial_train_size, ]
-            )
-        window_size = forecaster.window_size
-    else:
-        # Although not used for training, first observations are needed to create the initial predictors
-        window_size = forecaster.window_size
-        initial_train_size = window_size
-    
-    folds     = (len(y) - initial_train_size) // steps + 1
-    remainder = (len(y) - initial_train_size) % steps
-    
-    if verbose:
-        print(f"Number of observations used for training or as initial window: {initial_train_size}")
-        print(f"Number of observations used for backtesting: {len(y) - initial_train_size}")
-        print(f"    Number of folds: {folds - 1 * (remainder == 0)}")
-        print(f"    Number of steps per fold: {steps}")
-        if remainder != 0:
-            print(f"    Last fold only includes {remainder} observations")
-      
-    for i in range(folds):
-        last_window_end   = initial_train_size + i * steps
-        last_window_start = (initial_train_size + i * steps) - window_size 
-        last_window_y     = y.iloc[last_window_start:last_window_end]
-
-        if exog is not None:
-            next_window_exog = exog.iloc[last_window_end:last_window_end + steps, ]
-                
-        if i < folds - 1:
-            if exog is None:
-                pred = forecaster.predict_interval(
-                            steps       = steps,
-                            last_window = last_window_y,
-                            interval    = interval,
-                            n_boot      = n_boot,
-                            in_sample_residuals = in_sample_residuals
-                        )
-            else:
-                pred = forecaster.predict_interval(
-                            steps       = steps,
-                            last_window = last_window_y,
-                            exog        = next_window_exog,
-                            interval    = interval,
-                            n_boot      = n_boot,
-                            in_sample_residuals = in_sample_residuals
-                        )
-                
-        elif remainder != 0:
-            steps = remainder 
-            if exog is None:
-                pred = forecaster.predict_interval(
-                            steps       = steps,
-                            last_window = last_window_y,
-                            interval    = interval,
-                            n_boot      = n_boot,
-                            in_sample_residuals = in_sample_residuals
-                        )
-            else:
-                pred = forecaster.predict_interval(
-                            steps       = steps,
-                            last_window = last_window_y,
-                            exog        = next_window_exog,
-                            interval    = interval,
-                            n_boot      = n_boot,
-                            in_sample_residuals = in_sample_residuals
-                        )
-    
-        else:
-            continue
-        
-        backtest_predictions.append(pred)
-    
-    backtest_predictions = pd.concat(backtest_predictions)
-    metric_value = metric(
-                        y_true = y.iloc[initial_train_size: initial_train_size + len(backtest_predictions)],
-                        y_pred = backtest_predictions.iloc[:, 0]
-                   )
-    
-    if set_out_sample_residuals:
-        if not isinstance(forecaster, ForecasterAutoregMultiOutput):
-            residuals = (y.iloc[initial_train_size: initial_train_size + len(backtest_predictions)]
-                         - backtest_predictions)
-            forecaster.set_out_sample_residuals(residuals.to_numpy())
-
-    return np.array([metric_value]), backtest_predictions
