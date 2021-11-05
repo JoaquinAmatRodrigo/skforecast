@@ -303,16 +303,17 @@ def _backtesting_forecaster_refit(
     in_sample_residuals: bool=True,
     set_out_sample_residuals: bool=True,
     verbose: bool=False
-) -> Tuple[np.array, pd.Series]:
+) -> Tuple[np.array, pd.DataFrame]:
     '''
     Backtesting of forecaster with model re-fitting. In each iteration:
-        - A number of `steps` predictions are evaluated.
+        - Fit forecaster with the training set.
+        - A number of `steps` ahead are predicted.
         - The training set increases with `steps` observations.
         - The model is re-fitted using the new training set.
 
-    In order to apply backtesting with re-fit, an initial train must be performed,
-    otherwise it would not be possible to increase the training set after each
-    iteration. Therefore, `initial_train_size` must be provided.
+    In order to apply backtesting with re-fit, an initial training set must be
+    available, otherwise it would not be possible to increase the training set after each
+    iteration. `initial_train_size` must be provided.
     
     Parameters
     ----------
@@ -353,8 +354,9 @@ def _backtesting_forecaster_refit(
         prediction error to create prediction intervals.
 
     set_out_sample_residuals: bool, default `True`
-        Save residuals generated during the cross-validation process as out of sample
-        residuals. Ignored if forecaster is of class `ForecasterAutoregMultiOutput`.
+        At the end of the process, save residuals generated during the backtesting
+        as out of sample residuals. Ignored if forecaster is of class
+        `ForecasterAutoregMultiOutput`.
             
     verbose : bool, default `False`
         Print number of folds used for backtesting.
@@ -364,7 +366,7 @@ def _backtesting_forecaster_refit(
     metric_value: numpy ndarray shape (1,)
         Value of the metric.
 
-    backtest_predictions: pandas Series
+    backtest_predictions: pandas Dataframe
         Value of predictions.
 
     '''
@@ -502,10 +504,10 @@ def _backtesting_forecaster_no_refit(
     in_sample_residuals: bool=True,
     set_out_sample_residuals: bool=True,
     verbose: bool=False
-) -> Tuple[np.array, pd.Series]:
+) -> Tuple[np.array, pd.DataFrame]:
     '''
     Backtesting of forecaster without iterative re-fitting. In each iteration,
-    a number of `steps` predictions are evaluated.
+    a number of `steps` are predicted.
 
     If `forecaster` is already trained and `initial_train_size` is `None`,
     no initial train is done and all data is used to evaluate the model.
@@ -554,8 +556,9 @@ def _backtesting_forecaster_no_refit(
         prediction error to create prediction intervals.
 
     set_out_sample_residuals: bool, default `True`
-        Save residuals generated during the cross-validation process as out of sample
-        residuals. Ignored if forecaster is of class `ForecasterAutoregMultiOutput`.
+        At the end of the process, save residuals generated during the backtesting
+        as out of sample residuals. Ignored if forecaster is of class
+        `ForecasterAutoregMultiOutput`.
             
     verbose : bool, default `False`
         Print number of folds used for backtesting.
@@ -565,7 +568,7 @@ def _backtesting_forecaster_no_refit(
     metric_value: numpy ndarray shape (1,)
         Value of the metric.
 
-    backtest_predictions: pandas Series
+    backtest_predictions: pandas DataFrame
         Value of predictions.
 
     '''
@@ -739,7 +742,7 @@ def backtesting_forecaster(
     in_sample_residuals: bool=True,
     set_out_sample_residuals: bool=True,
     verbose: bool=False
-) -> Tuple[np.array, pd.Series]:
+) -> Tuple[np.array, pd.DataFrame]:
     '''
     Backtesting of forecaster model.
 
@@ -832,37 +835,37 @@ def backtesting_forecaster(
 
     if interval is not None and isinstance(forecaster, ForecasterAutoregMultiOutput):
         raise Exception(
-            ('Interval prediction is is only allowed when forecaster is of type '
+            ('Interval prediction is only available when forecaster is of type '
             'ForecasterAutoreg or ForecasterAutoregCustom.')
         )
     
     if refit:
         metric_value, backtest_predictions = _backtesting_forecaster_refit(
-            forecaster = forecaster,
-            y = y,
-            steps = steps,
-            metric = metric,
-            initial_train_size = initial_train_size,
-            exog = exog,
-            interval = interval,
-            n_boot = n_boot,
-            in_sample_residuals = in_sample_residuals,
+            forecaster               = forecaster,
+            y                        = y,
+            steps                    = steps,
+            metric                   = metric,
+            initial_train_size       = initial_train_size,
+            exog                     = exog,
+            interval                 = interval,
+            n_boot                   = n_boot,
+            in_sample_residuals      = in_sample_residuals,
             set_out_sample_residuals = set_out_sample_residuals,
-            verbose = verbose
+            verbose                  = verbose
         )
     else:
-        metric_value, backtest_predictions = _backtesting_forecaster_no_refit(
-            forecaster = forecaster,
-            y = y,
-            steps = steps,
-            metric = metric,
-            initial_train_size = initial_train_size,
-            exog = exog,
-            interval = interval,
-            n_boot = n_boot,
-            in_sample_residuals = in_sample_residuals,
+        metric_value, backtest_predictions = _backtesting_forecaster_refit(
+            forecaster               = forecaster,
+            y                        = y,
+            steps                    = steps,
+            metric                   = metric,
+            initial_train_size       = initial_train_size,
+            exog                     = exog,
+            interval                 = interval,
+            n_boot                   = n_boot,
+            in_sample_residuals      = in_sample_residuals,
             set_out_sample_residuals = set_out_sample_residuals,
-            verbose = verbose
+            verbose                  = verbose
         )
 
     return metric_value, backtest_predictions
@@ -872,7 +875,7 @@ def grid_search_forecaster(
     forecaster,
     y: pd.Series,
     param_grid: dict,
-    initial_train_size: Union[int, None],
+    initial_train_size: int,
     steps: int,
     metric: str,
     exog: Union[pd.Series, pd.DataFrame]=None,
