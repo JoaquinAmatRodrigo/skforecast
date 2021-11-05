@@ -854,7 +854,7 @@ def backtesting_forecaster(
             verbose                  = verbose
         )
     else:
-        metric_value, backtest_predictions = _backtesting_forecaster_refit(
+        metric_value, backtest_predictions = _backtesting_forecaster_no_refit(
             forecaster               = forecaster,
             y                        = y,
             steps                    = steps,
