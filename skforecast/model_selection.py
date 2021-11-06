@@ -179,7 +179,7 @@ def cv_forecaster(
     forecaster,
     y: pd.Series,
     initial_train_size: int,
-    steps: Union[int, None],
+    steps: int,
     metric: str,
     exog: Union[pd.Series, pd.DataFrame]=None,
     allow_incomplete_fold: bool=True,
@@ -201,9 +201,8 @@ def cv_forecaster(
     initial_train_size: int 
         Number of samples in the initial train split.
         
-    steps : int, None
-        Number of steps to predict. Ignored if `forecaster` is a `ForecasterAutoregMultiOutput`
-        since this information is already stored inside it.
+    steps : int
+        Number of steps to predict.
         
     metric : {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
         Metric used to quantify the goodness of fit of the model.
@@ -609,7 +608,7 @@ def _backtesting_forecaster_no_refit(
 
         if exog is not None:
             next_window_exog = exog.iloc[last_window_end:last_window_end + steps, ]
-
+    
         if interval is None:    
             if i < folds - 1: # from the first step to one before the last one.
                 if exog is None:
@@ -826,6 +825,11 @@ def backtesting_forecaster(
     if initial_train_size is None and not forecaster.fitted:
         raise Exception(
             '`forecaster` must be already trained if no `initial_train_size` is provided.'
+        )
+
+    if not isinstance(refit, bool):
+        raise Exception(
+            f'`refit` bost be boolean: True, False.'
         )
 
     if initial_train_size is None and refit:

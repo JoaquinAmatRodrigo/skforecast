@@ -403,18 +403,6 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
             self.index_freq = X_train.index.freqstr
         else: 
             self.index_freq = X_train.index.step
-
-        # The last time window of training data is stored so that lags needed as
-        # predictors in the first iteration of `predict()` can be calculated.
-        # self.last_window = y_train.iloc[-self.max_lag:, -1]
-        # if self.steps >= self.max_lag:
-        #     self.last_window = y_train.iloc[-1, -self.max_lag:]
-        # else:
-        #     self.last_window = pd.concat((
-        #                             y_train.iloc[-(self.max_lag-self.steps + 1):-1, 0],
-        #                             y_train.iloc[-1, :]
-        #                        ))
-
         self.last_window = y_train.iloc[-self.max_lag:, -1]
     
     def predict(
@@ -469,7 +457,8 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
                 exog_values, exog_index = self._preproces_exog(
                                             exog = exog.iloc[:steps, ]
                                         )
-            exog_values = self._exog_to_multi_output(exog=exog_values)
+            exog_values = self._exog_to_multi_output(exog=exog_values, steps=steps)
+
         else:
             exog_values = None
             exog_index = None
@@ -492,8 +481,16 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
             if exog is None:
                 X = X_lags
             else:
+                # print(step)
+                # print(exog_values)
+                # print(exog_values.shape)
+                # print(exog_values)
+                # print(exog_values[0])
+                #print(list(range(exog_values.shape[1])[step::steps]))
+                
                 # Only columns from exog related with the current step are selected.
                 X = np.hstack([X_lags, exog_values[0][step::steps].reshape(1, -1)])
+                #print(X)
             with warnings.catch_warnings():
                 # Supress scikitlearn warning: "X does not have valid feature names,
                 # but NoOpTransformer was fitted with feature names".
@@ -612,7 +609,7 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
         return    
     
 
-    def _exog_to_multi_output(self, exog: np.ndarray)-> np.ndarray:
+    def _exog_to_multi_output(self, exog: np.ndarray, steps: int=None)-> np.ndarray:
         
         '''
         Transforms `exog` to `np.ndarray` with the shape needed for multioutput
@@ -628,6 +625,9 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
         exog_transformed: numpy ndarray, shape(samples - self.max_lag, self.steps)
         '''
 
+        if steps is None:
+            steps = self.steps
+
         exog_transformed = []
 
         if exog.ndim < 2:
@@ -637,8 +637,8 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
 
             exog_column_transformed = []
 
-            for i in range(exog.shape[0] - (self.steps -1)):
-                exog_column_transformed.append(exog[i:i + self.steps, column])
+            for i in range(exog.shape[0] - (steps -1)):
+                exog_column_transformed.append(exog[i:i + steps, column])
 
             if len(exog_column_transformed) > 1:
                 exog_column_transformed = np.vstack(exog_column_transformed)
