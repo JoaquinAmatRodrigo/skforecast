@@ -481,16 +481,8 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
             if exog is None:
                 X = X_lags
             else:
-                # print(step)
-                # print(exog_values)
-                # print(exog_values.shape)
-                # print(exog_values)
-                # print(exog_values[0])
-                #print(list(range(exog_values.shape[1])[step::steps]))
-                
                 # Only columns from exog related with the current step are selected.
                 X = np.hstack([X_lags, exog_values[0][step::steps].reshape(1, -1)])
-                #print(X)
             with warnings.catch_warnings():
                 # Supress scikitlearn warning: "X does not have valid feature names,
                 # but NoOpTransformer was fitted with feature names".
@@ -609,7 +601,11 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
         return    
     
 
-    def _exog_to_multi_output(self, exog: np.ndarray, steps: int=None)-> np.ndarray:
+    def _exog_to_multi_output(
+        self,
+        exog: np.ndarray,
+        steps: Union[int, None]=None
+    )-> np.ndarray:
         
         '''
         Transforms `exog` to `np.ndarray` with the shape needed for multioutput
@@ -620,9 +616,13 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
         exog : numpy ndarray, shape(samples,)
             Time series values
 
+        steps: int, default `None`.
+            Number of steps that will be predicted using this exog. If `None`,
+            `self.steps` is used.
+
         Returns 
         -------
-        exog_transformed: numpy ndarray, shape(samples - self.max_lag, self.steps)
+        exog_transformed: numpy ndarray
         '''
 
         if steps is None:
