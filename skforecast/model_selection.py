@@ -185,7 +185,7 @@ def cv_forecaster(
     allow_incomplete_fold: bool=True,
     set_out_sample_residuals: bool=True,
     verbose: bool=True
-) -> Tuple[np.array, pd.Series]:
+) -> Tuple[np.array, pd.DataFrame]:
     '''
     Cross-validation of forecaster. The order of data is maintained and the
     training set increases in each iteration.
@@ -228,7 +228,7 @@ def cv_forecaster(
     cv_metrics: 1d numpy ndarray
         Value of the metric for each fold.
 
-    cv_predictions: pandas Series
+    cv_predictions: pandas DataFrame
         Predictions.
 
     '''
@@ -280,13 +280,10 @@ def cv_forecaster(
                 residuals = (y.iloc[test_index] - pred).to_numpy()
                 forecaster.set_out_sample_residuals(residuals)
     
-    if cv_predictions and cv_metrics:
-        cv_predictions = pd.concat(cv_predictions)
-        cv_metrics = np.array(cv_metrics)
-    else:
-        cv_predictions = np.array([])
-        cv_metrics = np.array([])
-        
+    cv_predictions = pd.concat(cv_predictions)
+    cv_predictions = pd.DataFrame(cv_predictions)
+    cv_metrics = np.array(cv_metrics)
+    
     return cv_metrics, cv_predictions
 
 
