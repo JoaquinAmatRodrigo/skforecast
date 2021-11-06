@@ -12,6 +12,7 @@ import logging
 import numpy as np
 import pandas as pd
 import sklearn
+import sklearn.pipeline
 from copy import copy
 
 from .ForecasterBase import ForecasterBase
@@ -33,8 +34,8 @@ class ForecasterAutoregCustom(ForecasterBase):
     
     Parameters
     ----------
-    regressor : any regressor compatible with the scikit-learn API
-        An instance of a regressor compatible with the scikit-learn API.
+    regressor : regressor or pipeline compatible with the scikit-learn API
+        An instance of a regressor or pipeline compatible with the scikit-learn API.
         
     fun_predictors: Callable
         Function that takes a time series window as input and returns a numpy
@@ -131,6 +132,13 @@ class ForecasterAutoregCustom(ForecasterBase):
         Information displayed when a ForecasterAutoregCustom object is printed.
         '''
 
+        if isinstance(self.regressor, sklearn.pipeline.Pipeline):
+            name_pipe_steps = tuple(name + "__" for name in self.regressor.named_steps.keys())
+            params = {key : value for key, value in self.regressor.get_params().items() \
+                     if key.startswith(name_pipe_steps)}
+        else:
+            params = self.regressor.get_params()
+
         info = (
             f"{'=' * len(str(type(self)))} \n"
             f"{type(self)} \n"
@@ -144,7 +152,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             f"Training range: {self.training_range.to_list() if self.fitted else None} \n"
             f"Training index type: {str(self.index_type) if self.fitted else None} \n"
             f"Training index frequancy: {self.index_freq if self.fitted else None} \n"
-            f"Regressor parameters: {self.regressor.get_params()} \n"
+            f"Regressor parameters: {params} \n"
         )
 
         return info
@@ -845,11 +853,16 @@ class ForecasterAutoregCustom(ForecasterBase):
         
         '''
         
+        if isinstance(self.regressor, sklearn.pipeline.Pipeline):
+            estimator = self.regressor[-1]
+        else:
+            estimator = self.regressor
+
         valid_instances = (sklearn.linear_model._base.LinearRegression,
                            sklearn.linear_model._coordinate_descent.Lasso,
                            sklearn.linear_model._ridge.Ridge
                           )
-        if not isinstance(self.regressor, valid_instances):
+        if not isinstance(estimator, valid_instances):
             warnings.warn(
                 f"`get_feature_importances` only valid for forecasters with "
                 f"regressor of type {valid_instances}."
@@ -858,7 +871,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         else:
             coef = pd.DataFrame({
                         'feature': self.X_train_col_names,
-                        'coef' : self.regressor.coef_
+                        'coef' : estimator.coef_
                    })
             
         return coef
@@ -881,11 +894,16 @@ class ForecasterAutoregCustom(ForecasterBase):
             Impurity-based feature importances associated with each predictor.
         '''
 
+        if isinstance(self.regressor, sklearn.pipeline.Pipeline):
+            estimator = self.regressor[-1]
+        else:
+            estimator = self.regressor
+
         valid_instances = (sklearn.ensemble._forest.RandomForestRegressor,
                            sklearn.ensemble._gb.GradientBoostingRegressor,
                            sklearn.ensemble.HistGradientBoostingRegressor)
 
-        if not isinstance(self.regressor, valid_instances):
+        if not isinstance(estimator, valid_instances):
             warnings.warn(
                 f"`get_feature_importances` only valid for forecasters with "
                 f"regressor of type {valid_instances}."
@@ -895,7 +913,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         else:
             feature_importance = pd.DataFrame({
                                     'feature': self.X_train_col_names,
-                                    'importance' : self.regressor.feature_importances_
+                                    'importance' : estimator.feature_importances_
                                 })
 
         return feature_importance

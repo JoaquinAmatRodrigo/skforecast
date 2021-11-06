@@ -12,6 +12,7 @@ import logging
 import numpy as np
 import pandas as pd
 import sklearn
+import sklearn.pipeline
 from sklearn.base import clone
 
 from .ForecasterBase import ForecasterBase
@@ -35,8 +36,8 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
     
     Parameters
     ----------
-    regressor : regressor compatible with the scikit-learn API
-        An instance of a regressor compatible with the scikit-learn API.
+    regressor : regressor or pipeline compatible with the scikit-learn API
+        An instance of a regressor or pipeline compatible with the scikit-learn API.
         
     lags : int, list, 1d numpy ndarray, range
         Lags used as predictors. Index starts at 1, so lag 1 is equal to t-1.
@@ -50,8 +51,8 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
     
     Attributes
     ----------
-    regressor : regressor compatible with the scikit-learn API
-        An instance of regressor compatible with the scikit-learn API.
+    regressor : regressor or pipeline compatible with the scikit-learn API
+        An instance of a regressor or pipeline compatible with the scikit-learn API.
         One instance of this regressor is trainned for each step. All
         them are stored in `slef.regressors_`.
         
@@ -153,6 +154,13 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
         Information displayed when a ForecasterAutoreg object is printed.
         '''
 
+        if isinstance(self.regressor, sklearn.pipeline.Pipeline):
+            name_pipe_steps = tuple(name + "__" for name in self.regressor.named_steps.keys())
+            params = {key : value for key, value in self.regressor.get_params().items() \
+                     if key.startswith(name_pipe_steps)}
+        else:
+            params = self.regressor.get_params()
+
         info = (
             f"{'=' * len(str(type(self)))} \n"
             f"{type(self)} \n"
@@ -167,7 +175,7 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
             f"Training range: {self.training_range.to_list() if self.fitted else None} \n"
             f"Training index type: {str(self.index_type) if self.fitted else None} \n"
             f"Training index frequancy: {self.index_freq if self.fitted else None} \n"
-            f"Regressor parameters: {self.regressor.get_params()} \n"
+            f"Regressor parameters: {params} \n"
         )
 
         return info
@@ -743,13 +751,17 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
                 f"Forecaster traied for {self.steps} steps. Got step={step}."
             )
             
-        
+        if isinstance(self.regressor, sklearn.pipeline.Pipeline):
+            estimator = self.regressors_[step-1][-1]
+        else:
+            estimator = self.regressors_[step-1]
+
         valid_instances = (sklearn.linear_model._base.LinearRegression,
                            sklearn.linear_model._coordinate_descent.Lasso,
                            sklearn.linear_model._ridge.Ridge
                            )
         
-        if not isinstance(self.regressor, valid_instances):
+        if not isinstance(estimator, valid_instances):
             warnings.warn(
                 ('`get_coef` only available for forecasters with regressor of type '
                  'LinearRegression, Lasso or Ridge.')
@@ -758,7 +770,7 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
         else:
             coef = pd.DataFrame({
                         'feature': self.X_train_col_names,
-                        'coef' : self.regressors_[step-1].coef_
+                        'coef' : estimator.coef_
                    })
             
         return coef
@@ -792,11 +804,16 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
                 f"Forecaster traied for {self.steps} steps. Got step={step}."
             )
         
+        if isinstance(self.regressor, sklearn.pipeline.Pipeline):
+            estimator = self.regressors_[step-1][-1]
+        else:
+            estimator = self.regressors_[step-1]
+
         valid_instances = (sklearn.ensemble._forest.RandomForestRegressor,
                            sklearn.ensemble._gb.GradientBoostingRegressor,
                            sklearn.ensemble.HistGradientBoostingRegressor)
                            
-        if not isinstance(self.regressor, valid_instances):
+        if not isinstance(estimator, valid_instances):
             warnings.warn(
                 f"`get_feature_importances` only valid for forecasters with "
                 f"regressor of type {valid_instances}."
@@ -805,7 +822,7 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
         else:
             feature_importance = pd.DataFrame({
                                     'feature': self.X_train_col_names,
-                                    'importance' : self.regressors_[step-1].feature_importances_
+                                    'importance' : estimator.feature_importances_
                                 })
 
         return feature_importance
