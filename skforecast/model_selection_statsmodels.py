@@ -600,8 +600,8 @@ def grid_search_sarimax(
 
     params_list = []
     metric_list = []
-    bic_list = []
-    aic_list = []
+    # bic_list = []
+    # aic_list = []
     
     if 'order' not in param_grid:
         param_grid['order'] = [(1, 0, 0)]
