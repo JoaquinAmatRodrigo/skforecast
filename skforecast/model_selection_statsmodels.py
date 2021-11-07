@@ -1,5 +1,5 @@
 ################################################################################
-#                        skforecast.model_selection                            #
+#                  skforecast.model_selection_statsmodels                      #
 #                                                                              #
 # This work by Joaquín Amat Rodrigo is licensed under a Creative Commons       #
 # Attribution 4.0 International License.                                       #
@@ -7,7 +7,6 @@
 # coding=utf-8
 
 
-import typing
 from typing import Union, Dict, List, Tuple
 import numpy as np
 import pandas as pd
@@ -18,7 +17,6 @@ from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import mean_absolute_percentage_error
 from sklearn.model_selection import ParameterGrid
 from statsmodels.tsa.statespace.sarimax import SARIMAX
-from statsmodels.tsa.ar_model import AutoReg
 
 from .model_selection import time_series_spliter
 
@@ -27,301 +25,47 @@ logging.basicConfig(
     level  = logging.INFO,
 )
 
-def backtesting_autoreg_statsmodels(
-    y: Union[np.ndarray, pd.Series],
-    lags: int, 
-    initial_train_size: int,
-    steps: int,
-    metric: str,
-    exog: Union[np.ndarray, pd.Series, pd.DataFrame]=None,
-    verbose: bool=False
-) -> Tuple[np.array, np.array]:
-    '''
-    
-    Backtesting (validation) of `AutoReg` model from statsmodels v0.12. The model is
-    trained only once using the `initial_train_size` first observations. In each
-    iteration, a number of `steps` predictions are evaluated. This evaluation is
-    much faster than cross-validation since the model is trained only once.
-        
-    Parameters
-    ----------
-    y : 1D np.ndarray, pd.Series
-        Training time series values. 
-        
-    lags: int, list
-        The number of lags to include in the model if an integer or the list of
-        lag indices to include. For example, [1, 4] will only include lags 1 and
-        4 while lags=4 will include lags 1, 2, 3, and 4.
-    
-    initial_train_size: int 
-        Number of samples in the initial train split.
-        
-    steps : int
-        Number of steps to predict.
-        
-    metric : {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
-        Metric used to quantify the goodness of fit of the model.
-        
-    exog : np.ndarray, pd.Series, pd.DataFrame, default `None`
-        Exogenous variable/s included as predictor/s. Must have the same
-        number of observations as `y` and should be aligned so that y[i] is
-        regressed on exog[i].
-            
-    verbose : bool, default `False`
-        Print number of folds used for backtesting.
 
-    Returns 
-    -------
-    metric_value: 1D np.ndarray
-        Value of the metric.
-        
-    backtest_predictions: 1D np.ndarray
-        Value of predictions.
-    '''
-    
-
-    if metric not in ['mean_squared_error', 'mean_absolute_error',
-                      'mean_absolute_percentage_error']:
-        raise Exception(
-            f"Allowed metrics are: 'mean_squared_error', 'mean_absolute_error' and "
-            f"'mean_absolute_percentage_error'. Got {metric}."
-        )
-    
-    backtest_predictions = []
-    
-    metrics = {
-        'mean_squared_error': mean_squared_error,
-        'mean_absolute_error': mean_absolute_error,
-        'mean_absolute_percentage_error': mean_absolute_percentage_error
-    }
-    
-    metric = metrics[metric]
-    
-    if isinstance(y, pd.Series):
-        y = y.to_numpy(copy=True)
-        
-    if isinstance(exog, (pd.Series, pd.DataFrame)):
-        exog = exog.to_numpy(copy=True)
-        
-    if exog is None:
-        model = AutoReg(endog=y[:initial_train_size], lags=lags).fit()
-    else:
-        model = AutoReg(
-                    endog = y[:initial_train_size],
-                    exog  = exog[:initial_train_size],
-                    lags  = lags
-                ).fit()
-    
-    
-    folds     = (len(y) - initial_train_size) // steps + 1
-    remainder = (len(y) - initial_train_size) % steps
-    
-    if verbose:
-        print(f"Number of observations used for training: {initial_train_size}")
-        print(f"Number of observations used for testing: {len(y) - initial_train_size}")
-        print(f"    Number of folds: {folds - 1 * (remainder == 0)}")
-        print(f"    Number of steps per fold: {steps}")
-        if remainder != 0:
-            print(f"    Last fold only includes {remainder} observations")
-      
-    for i in range(folds):
-        last_window_end   = initial_train_size + i * steps
-        last_window_start = (initial_train_size + i * steps) - steps 
-        last_window       = y[last_window_start:last_window_end]
-        
-        if i == 0:
-            if exog is None:
-                pred = model.forecast(steps=steps)
-                            
-            else:
-                pred = model.forecast(
-                            steps       = steps,
-                            exog        = exog[last_window_end:last_window_end + steps]
-                        )
-                
-        elif i < folds - 1:
-            # Update internal values stored by AutoReg
-            model.model._y = np.vstack((
-                                model.model._y,
-                                last_window.reshape(-1,1)
-                             ))
-        
-            if exog is None:
-                pred = model.forecast(steps=steps)
-                            
-            else:
-                pred = model.forecast(
-                            steps       = steps,
-                            exog        = exog[last_window_end:last_window_end + steps]
-                        )
-                
-        elif remainder != 0:
-            steps = remainder
-            # Update internal values stored by AutoReg
-            model.model._y = np.vstack((
-                                model.model._y,
-                                last_window.reshape(-1,1)
-                             ))
-            
-            if exog is None:
-                pred = model.forecast(steps=steps)
-                
-            else:
-                pred = model.forecast(
-                            steps       = steps,
-                            exog        = exog[last_window_end:last_window_end + steps]
-                        )
-        else:
-            continue
-        
-        backtest_predictions.append(pred)
-    
-    backtest_predictions = np.concatenate(backtest_predictions)
-    metric_value = metric(
-                        y_true = y[initial_train_size: initial_train_size + len(backtest_predictions)],
-                        y_pred = backtest_predictions
-                   )
-
-    return np.array([metric_value]), backtest_predictions
-
-
-def cv_autoreg_statsmodels(
-    y: Union[np.ndarray, pd.Series],
-    lags: int, 
-    initial_train_size: int,
-    steps: int,
-    metric: str,
-    exog: Union[np.ndarray, pd.Series, pd.DataFrame]=None,
-    allow_incomplete_fold: bool=True,
-    verbose: bool=False
-) -> Tuple[np.array, np.array]:
-    '''
-    
-    Cross-validation of `AutoReg` model from statsmodels v0.12. The order of data
-    is maintained and the training set increases in each iteration.
-    
-    Parameters
-    ----------
-    y : 1D np.ndarray, pd.Series
-        Training time series values. 
-        
-    lags: int, list
-        The number of lags to include in the model if an integer or the list of
-        lag indices to include. For example, [1, 4] will only include lags 1 and
-        4 while lags=4 will include lags 1, 2, 3, and 4.
-    
-    initial_train_size: int 
-        Number of samples in the initial train split.
-        
-    steps : int
-        Number of steps to predict.
-        
-    metric : {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
-        Metric used to quantify the goodness of fit of the model.
-        
-    exog : np.ndarray, pd.Series, pd.DataFrame, default `None`
-        Exogenous variable/s included as predictor/s. Must have the same
-        number of observations as `y` and should be aligned so that y[i] is
-        regressed on exog[i].
-            
-    verbose : bool, default `False`
-        Print number of folds used for cross-validation.
-        
-    Returns 
-    -------
-    cv_metrics: 1D np.ndarray
-        Value of the metric for each fold.
-        
-    cv_predictions: 1D np.ndarray
-        Predictions.
-    '''
-    
-
-    if metric not in ['mean_squared_error', 'mean_absolute_error',
-                      'mean_absolute_percentage_error']:
-        raise Exception(
-            f"Allowed metrics are: 'mean_squared_error', 'mean_absolute_error' and "
-            f"'mean_absolute_percentage_error'. Got {metric}."
-        )
-        
-    metrics = {
-        'mean_squared_error': mean_squared_error,
-        'mean_absolute_error': mean_absolute_error,
-        'mean_absolute_percentage_error': mean_absolute_percentage_error
-    }
-    
-    metric = metrics[metric]
-    
-    if isinstance(y, pd.Series):
-        y = y.to_numpy(copy=True)
-        
-    if isinstance(exog, (pd.Series, pd.DataFrame)):
-        exog = exog.to_numpy(copy=True)
-        
-    cv_predictions = []
-    cv_metrics = []
-    
-    splits = time_series_spliter(
-                y                     = y,
-                initial_train_size    = initial_train_size,
-                steps                 = steps,
-                allow_incomplete_fold = allow_incomplete_fold,
-                verbose               = verbose
-             )
-    
-    for train_index, test_index in splits:
-        
-        if exog is None:
-            model = AutoReg(endog=y[train_index], lags=lags).fit()
-            pred = model.forecast(steps=len(test_index))
-            
-        else:
-            model = AutoReg(
-                        endog = y[train_index],
-                        exog  = exog[train_index],
-                        lags  = lags
-                    ).fit()
-            pred = model.forecast(steps=len(test_index), exog=exog[test_index])
-    
-               
-        metric_value = metric(
-                            y_true = y[test_index],
-                            y_pred = pred
-                       )
-        
-        cv_metrics.append(metric_value)
-        cv_predictions.append(pred)
-                          
-    return np.array(cv_metrics), np.concatenate(cv_predictions)
-
-
-def backtesting_sarimax_statsmodels(
-        y: Union[np.ndarray, pd.Series],
+def backtesting_sarimax(
+        y: pd.Series,
         initial_train_size: int,
         steps: int,
         metric: str,
+        refit: bool=False,
         order: tuple=(1, 0, 0), 
         seasonal_order: tuple=(0, 0, 0, 0),
         trend: str=None,
         alpha: float= 0.05,
-        exog: Union[np.ndarray, pd.Series, pd.DataFrame]=None,
+        exog: Union[pd.Series, pd.DataFrame]=None,
         sarimax_kwargs: dict={},
         fit_kwargs: dict={'disp':0},
         verbose: bool=False
-) -> Tuple[np.array, np.array]:
+) -> Tuple[np.array, pd.DataFrame]:
     '''
     
     Backtesting (validation) of `SARIMAX` model from statsmodels v0.12. The model
-    is trained only once using the `initial_train_size` first observations. In each
-    iteration, a number of `steps` predictions are evaluated. This evaluation is
-    much faster than cross-validation since the model is trained only once.
+    is trained using the `initial_train_size` first observations, then, in each
+    iteration, a number of `steps` predictions are evaluated. If refit is `True`,
+    the model is re-fitted in each iteration before making predictions.
     
     https://www.statsmodels.org/dev/examples/notebooks/generated/statespace_forecasting.html
     
     Parameters
     ----------
-    y : 1D np.ndarray, pd.Series
-        Training time series values. 
+    y : pandas Series
+        Time series values. 
+
+    initial_train_size: int 
+        Number of samples used in the initial train.
+        
+    steps : int
+        Number of steps to predict.
+
+    metric : {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
+        Metric used to quantify the goodness of fit of the model.
+    
+    refit: bool, default False
+        Whether to re-fit the model in each iteration.
         
     order: tuple 
         The (p,d,q) order of the model for the number of AR parameters, differences,
@@ -350,18 +94,10 @@ def backtesting_sarimax_statsmodels(
         denotes a+bt+ct3. Default is to not include a trend component.
         
     alpha: float, default 0.05
-        The significance level for the confidence interval. The default alpha = .05 returns a 95% confidence interval.
-    
-    initial_train_size: int 
-        Number of samples in the initial train split.
+        The significance level for the confidence interval. The default
+        alpha = .05 returns a 95% confidence interval.
         
-    steps : int
-        Number of steps to predict.
-        
-    metric : {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
-        Metric used to quantify the goodness of fit of the model.
-        
-    exog : np.ndarray, pd.Series, pd.DataFrame, default `None`
+    exog : pd.Series, pd.DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
@@ -382,11 +118,11 @@ def backtesting_sarimax_statsmodels(
     metric_value: np.ndarray shape (1,)
         Value of the metric.
 
-    backtest_predictions: 1D np.ndarray
-        2D np.ndarray with predicted value and their estimated interval.
-            Column 0 = predictions
-            Column 1 = lower bound interval
-            Column 2 = upper bound interval.
+    backtest_predictions: pandas DataFrame
+        Values predicted and their estimated interval:
+                column pred   = predictions.
+                column lower  = lower bound of the interval.
+                column upper  = upper bound interval of the interval.
     '''
     
 
@@ -397,8 +133,6 @@ def backtesting_sarimax_statsmodels(
             f"'mean_absolute_percentage_error'. Got {metric}."
         )
     
-    backtest_predictions = []
-    
     metrics = {
         'mean_squared_error': mean_squared_error,
         'mean_absolute_error': mean_absolute_error,
@@ -407,99 +141,237 @@ def backtesting_sarimax_statsmodels(
     
     metric = metrics[metric]
     
-    if isinstance(y, pd.Series):
-        y = y.to_numpy(copy=True)
-        
-    if isinstance(exog, (pd.Series, pd.DataFrame)):
-        exog = exog.to_numpy(copy=True)
-        
-    if exog is None:
-        model = SARIMAX(
-                    endog = y[:initial_train_size],
-                    order = order,
-                    seasonal_order = seasonal_order,
-                    trend = trend,
-                    **sarimax_kwargs
-                ).fit(**fit_kwargs)
-        
-    else:
-        model = SARIMAX(
-                    endog = y[:initial_train_size],
-                    exog  = exog[:initial_train_size],
-                    order = order,
-                    seasonal_order = seasonal_order,
-                    trend = trend,
-                    **sarimax_kwargs
-                ).fit(**fit_kwargs)
-    
-    
-    folds     = (len(y) - initial_train_size) // steps + 1
+    folds     = int(np.ceil((len(y) - initial_train_size) / steps))
     remainder = (len(y) - initial_train_size) % steps
-    
+    backtest_predictions = []
+
     if verbose:
         print(f"Number of observations used for training: {initial_train_size}")
-        print(f"Number of observations used for testing: {len(y) - initial_train_size}")
-        print(f"    Number of folds: {folds - 1 * (remainder == 0)}")
+        print(f"Number of observations used for backtesting: {len(y) - initial_train_size}")
+        print(f"    Number of folds: {folds}")
         print(f"    Number of steps per fold: {steps}")
         if remainder != 0:
-            print(f"    Last fold only includes {remainder} observations")
-      
-    for i in range(folds):
-        last_window_end     = initial_train_size + i * steps
-        last_window_start   = (initial_train_size + i * steps) - steps 
-        last_window_y       = y[last_window_start:last_window_end]
-        if exog is not None:
-            last_window_exog    = exog[last_window_start:last_window_end]
-            next_window_exog    = exog[last_window_end:last_window_end + steps]
-        
-        if i == 0:
-            if exog is None:
-                pred = model.get_forecast(steps=steps)
-                pred = np.column_stack((pred.predicted_mean, pred.conf_int(alpha=alpha)))
-                            
-            else:
-                pred = model.get_forecast(steps=steps, exog=next_window_exog)
-                pred = np.column_stack((pred.predicted_mean, pred.conf_int(alpha=alpha)))
-                
-        elif i < folds - 1:
-            if exog is None:
-                model = model.extend(endog=last_window_y)
-                pred = model.get_forecast(steps=steps)
-                pred = np.column_stack((pred.predicted_mean, pred.conf_int(alpha=alpha)))
-                            
-            else:
-                model = model.extend(endog=last_window_y, exog=last_window_exog)
-                pred = model.get_forecast(steps=steps, exog=next_window_exog)
-                pred = np.column_stack((pred.predicted_mean, pred.conf_int(alpha=alpha)))
-                
-        elif remainder != 0:
-            steps = remainder
-            
-            if exog is None:
-                model = model.extend(exog=last_window_y)
-                pred = model.get_forecast(steps=steps)
-                pred = np.column_stack((pred.predicted_mean, pred.conf_int(alpha=alpha)))
-                
-            else:
-                model = model.extend(endog=last_window_y, exog=last_window_exog)
-                pred = model.get_forecast(steps=steps, exog=next_window_exog)
-                pred = np.column_stack((pred.predicted_mean, pred.conf_int(alpha=alpha)))
+            print(f"    Last fold only includes {remainder} observations.")
+
+    if refit:
+        # In each iteratión (except the last one) the model is fitted before
+        # making predictions. The train size increases by `steps` in each iteration.
+        for i in range(folds):
+            train_size = initial_train_size + i * steps
+            if exog is not None:
+                next_window_exog = exog.iloc[train_size:train_size + steps, ]
+
+            if i < folds - 1: # from the first step to one before the last one.
+                if exog is None:
+                    model = SARIMAX(
+                                endog = y.iloc[:train_size],
+                                order = order,
+                                seasonal_order = seasonal_order,
+                                trend = trend,
+                                **sarimax_kwargs
+                            ).fit(**fit_kwargs)
+                    pred = model.get_forecast(steps=steps)
+                    pred = pd.concat((
+                                pred.predicted_mean.rename("predicted_mean"),
+                                pred.conf_int(alpha=alpha)),
+                                axis = 1
+                           )
+                else:
+                    model = SARIMAX(
+                                endog = y.iloc[:train_size],
+                                exog  = exog.iloc[:train_size, ],
+                                order = order,
+                                seasonal_order = seasonal_order,
+                                trend = trend,
+                                **sarimax_kwargs
+                            ).fit(**fit_kwargs)
+                    pred = model.get_forecast(steps=steps, exog=next_window_exog)
+                    pred = pd.concat((
+                                pred.predicted_mean.rename("predicted_mean"),
+                                pred.conf_int(alpha=alpha)),
+                                axis = 1
+                           )
+            else:    
+                if remainder == 0:
+                    if exog is None:
+                        model = SARIMAX(
+                                    endog = y.iloc[:train_size],
+                                    order = order,
+                                    seasonal_order = seasonal_order,
+                                    trend = trend,
+                                    **sarimax_kwargs
+                                ).fit(**fit_kwargs)
+                        pred = model.get_forecast(steps=steps)
+                        pred = pd.concat((
+                                pred.predicted_mean.rename("predicted_mean"),
+                                pred.conf_int(alpha=alpha)),
+                                axis = 1
+                           )
+                    else:
+                        model = SARIMAX(
+                                    endog = y.iloc[:train_size],
+                                    exog  = exog.iloc[:train_size, ],
+                                    order = order,
+                                    seasonal_order = seasonal_order,
+                                    trend = trend,
+                                    **sarimax_kwargs
+                                ).fit(**fit_kwargs)
+                        pred = model.get_forecast(steps=steps, exog=next_window_exog)
+                        pred = pd.concat((
+                                pred.predicted_mean.rename("predicted_mean"),
+                                pred.conf_int(alpha=alpha)),
+                                axis = 1
+                              )   
+                else:
+                    # Only the remaining steps need to be predicted
+                    steps = remainder
+                    if exog is None:
+                        model = SARIMAX(
+                                    endog = y.iloc[:train_size],
+                                    order = order,
+                                    seasonal_order = seasonal_order,
+                                    trend = trend,
+                                    **sarimax_kwargs
+                                ).fit(**fit_kwargs)
+                        pred = model.get_forecast(steps=steps)
+                        pred = pd.concat((
+                                pred.predicted_mean.rename("predicted_mean"),
+                                pred.conf_int(alpha=alpha)),
+                                axis = 1
+                              )
+                    else:
+                        model = SARIMAX(
+                                    endog = y.iloc[:train_size],
+                                    exog  = exog.iloc[:train_size, ],
+                                    order = order,
+                                    seasonal_order = seasonal_order,
+                                    trend = trend,
+                                    **sarimax_kwargs
+                                ).fit(**fit_kwargs)
+                        pred = model.get_forecast(steps=steps, exog=next_window_exog)
+                        pred = pd.concat((
+                                pred.predicted_mean.rename("predicted_mean"),
+                                pred.conf_int(alpha=alpha)),
+                                axis = 1
+                              )
+            backtest_predictions.append(pred)
+    else:
+        # Since the model is only fitted with the initial_train_size, the model
+        # must be extended in each iteration to include the data needed to make
+        # predictions.
+        if exog is None:
+            model = SARIMAX(
+                        endog = y.iloc[:initial_train_size],
+                        order = order,
+                        seasonal_order = seasonal_order,
+                        trend = trend,
+                        **sarimax_kwargs
+                    ).fit(**fit_kwargs)
         else:
-            continue
+            model = SARIMAX(
+                        endog = y.iloc[:initial_train_size],
+                        exog  = exog.iloc[:initial_train_size],
+                        order = order,
+                        seasonal_order = seasonal_order,
+                        trend = trend,
+                        **sarimax_kwargs
+                    ).fit(**fit_kwargs)
+      
+        for i in range(folds):
+            last_window_end   = initial_train_size + i * steps
+            last_window_start = (initial_train_size + i * steps) - steps 
+            last_window_y     = y.iloc[last_window_start:last_window_end]
+            if exog is not None:
+                last_window_exog = exog.iloc[last_window_start:last_window_end]
+                next_window_exog = exog.iloc[last_window_end:last_window_end + steps]
+            
+            if i == 0:
+                # No extend is needed for the first fold
+                if exog is None:
+                    pred = model.get_forecast(steps=steps)
+                    pred = pd.concat((
+                                pred.predicted_mean.rename("predicted_mean"),
+                                pred.conf_int(alpha=alpha)),
+                                axis = 1
+                           )     
+                else:
+                    pred = model.get_forecast(steps=steps, exog=next_window_exog)
+                    pred = pd.concat((
+                                pred.predicted_mean.rename("predicted_mean"),
+                                pred.conf_int(alpha=alpha)),
+                                axis = 1
+                           )
+                    
+            elif i < folds - 1:
+                if exog is None:
+                    model = model.extend(endog=last_window_y)
+                    pred = model.get_forecast(steps=steps)
+                    pred = pd.concat((
+                                pred.predicted_mean.rename("predicted_mean"),
+                                pred.conf_int(alpha=alpha)),
+                                axis = 1
+                           )
+                else:
+                    model = model.extend(endog=last_window_y, exog=last_window_exog)
+                    pred = model.get_forecast(steps=steps, exog=next_window_exog)
+                    pred = pd.concat((
+                                pred.predicted_mean.rename("predicted_mean"),
+                                pred.conf_int(alpha=alpha)),
+                                axis = 1
+                           )
+                    
+            else:
+                if remainder == 0:
+                    if exog is None:
+                        model = model.extend(endog=last_window_y)
+                        pred = model.get_forecast(steps=steps)
+                        pred = pd.concat((
+                                pred.predicted_mean.rename("predicted_mean"),
+                                pred.conf_int(alpha=alpha)),
+                                axis = 1
+                               )
+                                    
+                    else:
+                        model = model.extend(endog=last_window_y, exog=last_window_exog)
+                        pred = model.get_forecast(steps=steps, exog=next_window_exog)
+                        pred = pd.concat((
+                                pred.predicted_mean.rename("predicted_mean"),
+                                pred.conf_int(alpha=alpha)),
+                                axis = 1
+                               )
+                else:
+                    # Only the remaining steps need to be predicted
+                    steps = remainder
+                    if exog is None:
+                        model = model.extend(endog=last_window_y)
+                        pred = model.get_forecast(steps=steps)
+                        pred = pd.concat((
+                                pred.predicted_mean.rename("predicted_mean"),
+                                pred.conf_int(alpha=alpha)),
+                                axis = 1
+                               )
+                        
+                    else:
+                        model = model.extend(endog=last_window_y, exog=last_window_exog)
+                        pred = model.get_forecast(steps=steps, exog=next_window_exog)
+                        pred = pd.concat((
+                                pred.predicted_mean.rename("predicted_mean"),
+                                pred.conf_int(alpha=alpha)),
+                                axis = 1
+                               )
+            backtest_predictions.append(pred)
         
-        backtest_predictions.append(pred)
-    
-    backtest_predictions = np.concatenate(backtest_predictions)
+    backtest_predictions = pd.concat(backtest_predictions)
     metric_value = metric(
-                        y_true = y[initial_train_size: initial_train_size + len(backtest_predictions)],
-                        y_pred = backtest_predictions[:, 0]
-                   )
+                    y_true = y.iloc[initial_train_size: initial_train_size + len(backtest_predictions)],
+                    y_pred = backtest_predictions['predicted_mean']
+                  )
 
     return np.array([metric_value]), backtest_predictions
 
 
 def cv_sarimax_statsmodels(
-        y: Union[np.ndarray, pd.Series],
+        y: pd.Series,
         initial_train_size: int,
         steps: int,
         metric: str,
@@ -507,7 +379,7 @@ def cv_sarimax_statsmodels(
         seasonal_order: tuple=(0, 0, 0, 0),
         trend: str=None,
         alpha: float= 0.05,
-        exog: Union[np.ndarray, pd.Series, pd.DataFrame]=None,
+        exog: Union[pd.Series, pd.DataFrame]=None,
         allow_incomplete_fold: bool=True,
         sarimax_kwargs: dict={},
         fit_kwargs: dict={'disp':0},
@@ -521,8 +393,8 @@ def cv_sarimax_statsmodels(
     
     Parameters
     ----------
-    y : 1D np.ndarray, pd.Series
-        Training time series values. 
+    y : pandas Series
+        Time series values. 
         
     order: tuple 
         The (p,d,q) order of the model for the number of AR parameters, differences,
@@ -551,7 +423,8 @@ def cv_sarimax_statsmodels(
         denotes a+bt+ct3. Default is to not include a trend component.
         
     alpha: float, default 0.05
-        The significance level for the confidence interval. The default alpha = .05 returns a 95% confidence interval.
+        The significance level for the confidence interval. The default
+        alpha = .05 returns a 95% confidence interval.
     
     initial_train_size: int 
         Number of samples in the initial train split.
@@ -562,7 +435,7 @@ def cv_sarimax_statsmodels(
     metric : {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
         Metric used to quantify the goodness of fit of the model.
         
-    exog : np.ndarray, pd.Series, pd.DataFrame, default `None`
+    exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
@@ -583,11 +456,11 @@ def cv_sarimax_statsmodels(
     cv_metrics: 1D np.ndarray
         Value of the metric for each partition.
 
-    cv_predictions:  np.ndarray
-        2D np.ndarray with predicted value and their estimated interval.
-            Column 0 = predictions
-            Column 1 = lower bound interval
-            Column 2 = upper bound interval.
+    cv_predictions:  pandas DataFrame
+        Values predicted and their estimated interval:
+                column pred   = predictions.
+                column lower  = lower bound of the interval.
+                column upper  = upper bound interval of the interval.
     '''
     
 
@@ -627,7 +500,7 @@ def cv_sarimax_statsmodels(
         
         if exog is None:
             model = SARIMAX(
-                    endog = y[train_index],
+                    endog = y.iloc[train_index],
                     order = order,
                     seasonal_order = seasonal_order,
                     trend = trend,
@@ -639,20 +512,20 @@ def cv_sarimax_statsmodels(
             
         else:         
             model = SARIMAX(
-                    endog = y[train_index],
-                    exog  = exog[train_index],
+                    endog = y.iloc[train_index],
+                    exog  = exog.iloc[train_index],
                     order = order,
                     seasonal_order = seasonal_order,
                     trend = trend,
                     **sarimax_kwargs
                 ).fit(**fit_kwargs)
             
-            pred = model.get_forecast(steps=len(test_index), exog=exog[test_index])
+            pred = model.get_forecast(steps=len(test_index), exog=exog.iloc[test_index])
             pred = np.column_stack((pred.predicted_mean, pred.conf_int(alpha=alpha)))
     
                
         metric_value = metric(
-                            y_true = y[test_index],
+                            y_true = y.iloc[test_index],
                             y_pred = pred[:, 0]
                        )
         
@@ -662,15 +535,14 @@ def cv_sarimax_statsmodels(
     return np.array(cv_metrics), np.concatenate(cv_predictions)
 
 
-def grid_search_sarimax_statsmodels(
-        y: Union[np.ndarray, pd.Series],
+def grid_search_sarimax(
+        y: pd.Series,
         param_grid: dict,
         initial_train_size: int,
         steps: int,
         metric: str,
-        exog: Union[np.ndarray, pd.Series, pd.DataFrame]=None,
-        method: str='cv',
-        allow_incomplete_fold: bool=True,
+        exog: Union[pd.Series, pd.DataFrame]=None,
+        refit: bool=False,
         sarimax_kwargs: dict={},
         fit_kwargs: dict={'disp':0},
         verbose: bool=False
@@ -683,16 +555,16 @@ def grid_search_sarimax_statsmodels(
     
     Parameters
     ----------
-    y : 1D np.ndarray, pd.Series
-        Training time series values. 
-        
+    y : pandas Series
+        Time series values. 
+
     param_grid : dict
         Dictionary with parameters names (`str`) as keys and lists of parameter
         settings to try as values. Allowed parameters in the grid are: order,
         seasonal_order and trend.
     
     initial_train_size: int 
-        Number of samples in the initial train split.
+        Number of samples used in the initial train.
         
     steps : int
         Number of steps to predict.
@@ -705,18 +577,8 @@ def grid_search_sarimax_statsmodels(
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
         
-    method : {'cv', 'backtesting'}
-        Method used to estimate the metric for each parameter combination.
-        'cv' for time series crosvalidation and 'backtesting' for simple
-        backtesting. 'backtesting' is much faster since the model is fitted only
-        once.
-        
-    allow_incomplete_fold : bool, default `True`
-        The last test set is allowed to be incomplete if it does not reach `steps`
-        observations. Otherwise, the latest observations are discarded.
-        
-    return_best : bool
-        Refit the `forecaster` using the best found parameters on the whole data.
+    refit: bool, default False
+        Whether to re-fit the model in each iteration.
         
     sarimax_kwargs: dict, default `{}`
         Additional keyword arguments passed to SARIMAX initialization. See more in
@@ -731,23 +593,15 @@ def grid_search_sarimax_statsmodels(
 
     Returns 
     -------
-    results: pandas.DataFrame
+    results: pandas DataFrame
         Metric value estimated for each combination of parameters.
 
     '''
 
-    
-    if isinstance(y, pd.Series):
-        y = y.to_numpy(copy=True)
-        
-    if isinstance(exog, (pd.Series, pd.DataFrame)):
-        exog = exog.to_numpy(copy=True)
-        
-      
     params_list = []
     metric_list = []
-    bic_list = []
-    aic_list = []
+    # bic_list = []
+    # aic_list = []
     
     if 'order' not in param_grid:
         param_grid['order'] = [(1, 0, 0)]
@@ -774,8 +628,7 @@ def grid_search_sarimax_statsmodels(
         
     for params in tqdm.tqdm(param_grid):
 
-        if method == 'cv':
-            metrics = cv_sarimax_statsmodels(
+        metric_value = backtesting_sarimax(
                             y              = y,
                             exog           = exog,
                             order          = params['order'],
@@ -783,20 +636,7 @@ def grid_search_sarimax_statsmodels(
                             trend          = params['trend'],
                             initial_train_size = initial_train_size,
                             steps          = steps,
-                            metric         = metric,
-                            sarimax_kwargs = sarimax_kwargs,
-                            fit_kwargs     = fit_kwargs,
-                            verbose        = verbose
-                        )[0]
-        else:
-            metrics = backtesting_sarimax_statsmodels(
-                            y              = y,
-                            exog           = exog,
-                            order          = params['order'],
-                            seasonal_order = params['seasonal_order'],
-                            trend          = params['trend'],
-                            initial_train_size = initial_train_size,
-                            steps          = steps,
+                            refit          = refit,
                             metric         = metric,
                             sarimax_kwargs = sarimax_kwargs,
                             fit_kwargs     = fit_kwargs,
@@ -804,25 +644,25 @@ def grid_search_sarimax_statsmodels(
                         )[0]
 
         params_list.append(params)
-        metric_list.append(metrics.mean())
+        metric_list.append(metric_value)
         
-        model = SARIMAX(
-                    endog = y,
-                    exog  = exog,
-                    order = params['order'],
-                    seasonal_order = params['seasonal_order'],
-                    trend = params['trend'],
-                    **sarimax_kwargs
-                ).fit(**fit_kwargs)
+        # model = SARIMAX(
+        #             endog = y,
+        #             exog  = exog,
+        #             order = params['order'],
+        #             seasonal_order = params['seasonal_order'],
+        #             trend = params['trend'],
+        #             **sarimax_kwargs
+        #         ).fit(**fit_kwargs)
         
-        bic_list.append(model.bic)
-        aic_list.append(model.aic)
+        # bic_list.append(model.bic)
+        # aic_list.append(model.aic)
             
     results = pd.DataFrame({
                 'params': params_list,
                 'metric': metric_list,
-                'bic'   : bic_list,
-                'aic'   : aic_list
+                #'bic'   : bic_list,
+                #'aic'   : aic_list
               })
     
     results = results.sort_values(by='metric', ascending=True)

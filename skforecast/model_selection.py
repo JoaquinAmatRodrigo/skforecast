@@ -363,14 +363,17 @@ def _backtesting_forecaster_refit(
         Value of the metric.
 
     backtest_predictions: pandas Dataframe
-        Value of predictions.
+        Value of predictions and their estimated interval if `interval` is not `None`.
+            column pred = predictions.
+            column lower_bound = lower bound of the interval.
+            column upper_bound = upper bound interval of the interval.
 
     '''
       
     metric = get_metric(metric=metric)
     backtest_predictions = []
     
-    folds     = int(np.ceil((len(y) - initial_train_size) / steps))
+    folds = int(np.ceil((len(y) - initial_train_size) / steps))
     remainder = (len(y) - initial_train_size) % steps
     
     if verbose:
@@ -382,12 +385,15 @@ def _backtesting_forecaster_refit(
             print(f"    Last fold only includes {remainder} observations.")
       
     for i in range(folds):
+        # In each iteratión (except the last one) the model is fitted before
+        # making predictions. The train size increases by `steps` in each iteration.
         train_size = initial_train_size + i * steps
         if exog is not None:
             next_window_exog = exog.iloc[train_size:train_size + steps, ]
 
         if interval is None:
-            if i < folds - 1: # from the first step to one before the last one.
+
+            if i < folds - 1:
                 if exog is None:
                     forecaster.fit(y=y.iloc[:train_size])
                     pred = forecaster.predict(steps=steps)
@@ -403,6 +409,7 @@ def _backtesting_forecaster_refit(
                         forecaster.fit(y=y.iloc[:train_size], exog=exog.iloc[:train_size, ])
                         pred = forecaster.predict(steps=steps, exog=next_window_exog)
                 else:
+                    # Only the remaining steps need to be predicted
                     steps = remainder
                     if exog is None:
                         forecaster.fit(y=y.iloc[:train_size])
@@ -411,7 +418,8 @@ def _backtesting_forecaster_refit(
                         forecaster.fit(y=y.iloc[:train_size], exog=exog.iloc[:train_size, ])
                         pred = forecaster.predict(steps=steps, exog=next_window_exog)
         else:
-            if i < folds - 1: # from the first step to one before the last one.
+
+            if i < folds - 1:
                 if exog is None:
                     forecaster.fit(y=y.iloc[:train_size])
                     pred = forecaster.predict_interval(
@@ -449,6 +457,7 @@ def _backtesting_forecaster_refit(
                                 in_sample_residuals = in_sample_residuals
                            )
                 else:
+                    # Only the remaining steps need to be predicted
                     steps = remainder
                     if exog is None:
                         forecaster.fit(y=y.iloc[:train_size])
@@ -475,8 +484,8 @@ def _backtesting_forecaster_refit(
             backtest_predictions = pd.DataFrame(backtest_predictions)
 
     metric_value = metric(
-                        y_true = y.iloc[initial_train_size: initial_train_size + len(backtest_predictions)],
-                        y_pred = backtest_predictions['pred']
+                    y_true = y.iloc[initial_train_size: initial_train_size + len(backtest_predictions)],
+                    y_pred = backtest_predictions['pred']
                    )
 
     if set_out_sample_residuals:
@@ -565,7 +574,10 @@ def _backtesting_forecaster_no_refit(
         Value of the metric.
 
     backtest_predictions: pandas DataFrame
-        Value of predictions.
+        Value of predictions and their estimated interval if `interval` is not `None`.
+            column pred = predictions.
+            column lower_bound = lower bound of the interval.
+            column upper_bound = upper bound interval of the interval.
 
     '''
         
@@ -599,15 +611,18 @@ def _backtesting_forecaster_no_refit(
             print(f"    Last fold only includes {remainder} observations")
       
     for i in range(folds):
+        # Since the model is only fitted with the initial_train_size, last_window
+        # and next_window_exog must be updated to include the data needed to make
+        # predictions.
         last_window_end   = initial_train_size + i * steps
         last_window_start = last_window_end - window_size 
         last_window_y     = y.iloc[last_window_start:last_window_end]
-
         if exog is not None:
             next_window_exog = exog.iloc[last_window_end:last_window_end + steps, ]
     
-        if interval is None:    
-            if i < folds - 1: # from the first step to one before the last one.
+        if interval is None:  
+
+            if i < folds - 1: 
                 if exog is None:
                     pred = forecaster.predict(
                                 steps       = steps,
@@ -633,6 +648,7 @@ def _backtesting_forecaster_no_refit(
                                     exog        = next_window_exog
                                 )
                 else:
+                    # Only the remaining steps need to be predicted
                     steps = remainder
                     if exog is None:
                         pred = forecaster.predict(
@@ -647,8 +663,9 @@ def _backtesting_forecaster_no_refit(
                                 )
             
             backtest_predictions.append(pred)
+
         else:
-            if i < folds - 1: # from the first step to one before the last one.
+            if i < folds - 1:
                 if exog is None:
                     pred = forecaster.predict_interval(
                                 steps       = steps,
@@ -686,6 +703,7 @@ def _backtesting_forecaster_no_refit(
                                     in_sample_residuals = in_sample_residuals
                                 )
                 else:
+                    # Only the remaining steps need to be predicted
                     steps = remainder
                     if exog is None:
                         pred = forecaster.predict_interval(
@@ -712,8 +730,8 @@ def _backtesting_forecaster_no_refit(
             backtest_predictions = pd.DataFrame(backtest_predictions)
 
     metric_value = metric(
-                        y_true = y.iloc[initial_train_size: initial_train_size + len(backtest_predictions)],
-                        y_pred = backtest_predictions['pred']
+                    y_true = y.iloc[initial_train_size : initial_train_size + len(backtest_predictions)],
+                    y_pred = backtest_predictions['pred']
                    )
 
     if set_out_sample_residuals:
@@ -803,8 +821,11 @@ def backtesting_forecaster(
     metric_value: numpy ndarray shape (1,)
         Value of the metric.
 
-    backtest_predictions: pandas Series
-        Value of predictions.
+    backtest_predictions: pandas DataFrame
+        Value of predictions and their estimated interval if `interval` is not `None`.
+            column pred = predictions.
+            column lower_bound = lower bound of the interval.
+            column upper_bound = upper bound interval of the interval.
 
     '''
 
