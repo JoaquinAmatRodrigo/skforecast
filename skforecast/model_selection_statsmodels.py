@@ -18,6 +18,7 @@ from sklearn.metrics import mean_absolute_percentage_error
 from sklearn.model_selection import ParameterGrid
 from statsmodels.tsa.statespace.sarimax import SARIMAX
 
+from .model_selection import time_series_spliter
 
 logging.basicConfig(
     format = '%(asctime)-5s %(name)-10s %(levelname)-5s %(message)s', 
@@ -156,7 +157,6 @@ def backtesting_sarimax(
         # In each iteratión (except the last one) the model is fitted before
         # making predictions. The train size increases by `steps` in each iteration.
         for i in range(folds):
-            start = pd.Timestamp.now()
             train_size = initial_train_size + i * steps
             if exog is not None:
                 next_window_exog = exog.iloc[train_size:train_size + steps, ]
@@ -255,8 +255,6 @@ def backtesting_sarimax(
                                 axis = 1
                               )
             backtest_predictions.append(pred)
-            end = pd.Timestamp.now()
-            print(end - start)
     else:
         # Since the model is only fitted with the initial_train_size, the model
         # must be extended in each iteration to include the data needed to make
@@ -663,8 +661,8 @@ def grid_search_sarimax(
     results = pd.DataFrame({
                 'params': params_list,
                 'metric': metric_list,
-                'bic'   : bic_list,
-                'aic'   : aic_list
+                #'bic'   : bic_list,
+                #'aic'   : aic_list
               })
     
     results = results.sort_values(by='metric', ascending=True)
