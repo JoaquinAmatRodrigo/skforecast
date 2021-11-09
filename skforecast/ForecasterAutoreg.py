@@ -56,8 +56,7 @@ class ForecasterAutoreg(ForecasterBase):
 
     last_window : pandas Series
         Last window the forecaster has seen during trained. It stores the
-        values needed to calculate the lags used to predict the next `step`
-        after the training data.
+        values needed to predict the next `step` right after the training data.
         
     window_size: int
         Size of the window needed to create the predictors. It is equal to
@@ -67,13 +66,13 @@ class ForecasterAutoreg(ForecasterBase):
         Tag to identify if the regressor has been fitted (trained).
         
     index_type : type
-        Index type of the inputused in training.
+        Type of index of the input used in training.
         
     index_freq : str
-        Index frequency of the input used in training.
+        Frequency of Index of the input used in training.
         
     training_range: pandas Index
-        First and last index of samples used during training.
+        First and last values of index of the data used during training.
         
     included_exog : bool
         If the forecaster has been trained using exogenous variable/s.
@@ -81,11 +80,12 @@ class ForecasterAutoreg(ForecasterBase):
     exog_type : type
         Type of exogenous variable/s used in training.
         
-    exog_col_names : tuple
-        Column names of exog if exog used in training is a pandas DataFrame.
+    exog_col_names : list
+        Names of columns of `exog` if `exog` used in training was a pandas
+        DataFrame.
 
-    X_train_col_names : tuple
-        Column names of matrix used internally for training.
+    X_train_col_names : list
+        Names of columns of the matrix created internally for training.
         
     in_sample_residuals: numpy ndarray
         Residuals of the model when predicting training data. Only stored up to
@@ -113,10 +113,10 @@ class ForecasterAutoreg(ForecasterBase):
         self.fitted               = False
         
         if isinstance(lags, int) and lags < 1:
-            raise Exception('min value of lags allowed is 1')
+            raise Exception('Minimum value of lags allowed is 1.')
             
         if isinstance(lags, (list, range, np.ndarray)) and min(lags) < 1:
-            raise Exception('min value of lags allowed is 1')
+            raise Exception('Minimum value of lags allowed is 1.')
             
         if isinstance(lags, int):
             self.lags = np.arange(lags) + 1
@@ -126,7 +126,7 @@ class ForecasterAutoreg(ForecasterBase):
             self.lags = lags
         else:
             raise Exception(
-                '`lags` argument must be `int`, `1D np.ndarray`, `range` or `list`. '
+                '`lags` argument must be int, 1d numpy ndarray, range or list. '
                 f"Got {type(lags)}"
             )
             
@@ -167,9 +167,9 @@ class ForecasterAutoreg(ForecasterBase):
     
     def _create_lags(self, y: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         '''       
-        Transforms a 1d array into a 2d array (X) and a 1d array (y).
-        Each value of y is associated with a row in X that represents the lags
-        that precede it.
+        Transforms a 1d array into a 2d array (X) and a 1d array (y). Each row
+        in X is associated with a value of y and it represents the lags that
+        precede it.
         
         Notice that, the returned matrix X_data, contains the lag 1 in the first
         column, the lag 2 in the second column and so on.
@@ -182,7 +182,7 @@ class ForecasterAutoreg(ForecasterBase):
         Returns 
         -------
         X_data : 2d numpy ndarray, shape (samples - max(self.lags), len(self.lags))
-            2d numpy array with the lag values (predictors).
+            2d numpy array with the lagged values (predictors).
         
         y_data : 1d np.ndarray, shape (samples - max(self.lags),)
             Values of the time series related to each row of `X_data`.
@@ -190,8 +190,8 @@ class ForecasterAutoreg(ForecasterBase):
         '''
           
         n_splits = len(y) - self.max_lag
-        X_data  = np.full(shape=(n_splits, self.max_lag), fill_value=np.nan, dtype=float)
-        y_data  = np.full(shape=(n_splits, 1), fill_value=np.nan, dtype= float)
+        X_data   = np.full(shape=(n_splits, self.max_lag), fill_value=np.nan, dtype=float)
+        y_data   = np.full(shape=(n_splits, 1), fill_value=np.nan, dtype= float)
 
         for i in range(n_splits):
             X_index = np.arange(i, self.max_lag + i)
@@ -199,7 +199,7 @@ class ForecasterAutoreg(ForecasterBase):
             X_data[i, :] = y[X_index]
             y_data[i]    = y[y_index]
             
-        X_data = X_data[:, -self.lags]
+        X_data = X_data[:, -self.lags] # Only keep needed lags
         y_data = y_data.ravel()
             
         return X_data, y_data
@@ -211,7 +211,8 @@ class ForecasterAutoreg(ForecasterBase):
         exog: Union[pd.Series, pd.DataFrame]=None
     ) -> Tuple[pd.DataFrame, pd.Series]:
         '''
-        Create training matrices from univariante time series.
+        Create training matrices from univariante time series and exogenous
+        variables.
         
         Parameters
         ----------        
@@ -249,20 +250,20 @@ class ForecasterAutoreg(ForecasterBase):
                 )
         
         X_train, y_train = self._create_lags(y=y_values)
-        col_names_X_train = [f"lag_{i}" for i in self.lags]
+        X_train_col_names = [f"lag_{i}" for i in self.lags]
         if exog is not None:
             col_names_exog = exog.columns if isinstance(exog, pd.DataFrame) else [exog.name]
-            col_names_X_train.extend(col_names_exog)
+            X_train_col_names.extend(col_names_exog)
             # The first `self.max_lag` positions have to be removed from exog
             # since they are not in X_train.
             X_train = np.column_stack((X_train, exog_values[self.max_lag:, ]))
 
         X_train = pd.DataFrame(
                     data    = X_train,
-                    columns = col_names_X_train,
+                    columns = X_train_col_names,
                     index   = y_index[self.max_lag: ]
                   )
-        self.X_train_col_names = col_names_X_train
+        self.X_train_col_names = X_train_col_names
         y_train = pd.Series(
                     data  = y_train,
                     index = y_index[self.max_lag: ],
@@ -354,7 +355,7 @@ class ForecasterAutoreg(ForecasterBase):
             
         last_window : numpy ndarray
             Values of the series used to create the predictors (lags) need in the 
-            first iteration of predictiont (t + 1).
+            first iteration of prediction (t + 1).
             
         exog : numpy ndarray, pandas DataFrame
             Exogenous variable/s included as predictor/s.
@@ -428,16 +429,15 @@ class ForecasterAutoreg(ForecasterBase):
 
         if exog is not None:
             if isinstance(exog, pd.DataFrame):
-                exog_values, exog_index = self._preproces_exog(
-                                            exog = exog[self.exog_col_names].iloc[:steps, ]
-                                        )
+                exog_values, _ = self._preproces_exog(
+                                    exog = exog[self.exog_col_names].iloc[:steps, ]
+                                 )
             else: 
-                exog_values, exog_index = self._preproces_exog(
-                                            exog = exog.iloc[:steps, ]
-                                        )
+                exog_values, _ = self._preproces_exog(
+                                    exog = exog.iloc[:steps, ]
+                                 )
         else:
             exog_values = None
-            exog_index = None
             
         if last_window is not None:
             last_window_values, last_window_index = self._preproces_last_window(
@@ -649,12 +649,11 @@ class ForecasterAutoreg(ForecasterBase):
         )
 
         if exog is not None:
-            exog_values, exog_index = self._preproces_exog(
-                                        exog = exog[self.exog_col_names].iloc[:steps, ]
-                                      )
+            exog_values, _ = self._preproces_exog(
+                                exog = exog[self.exog_col_names].iloc[:steps, ]
+                             )
         else:
             exog_values = None
-            exog_index = None
             
         if last_window is not None:
             last_window_values, last_window_index = self._preproces_last_window(
@@ -752,9 +751,9 @@ class ForecasterAutoreg(ForecasterBase):
                         f"Got {exog.columns.to_list()}"      
                     )
             self._check_exog(exog = exog)
-            exog_values, exog_index = self._preproces_exog(
-                                        exog = exog.iloc[:0, ]
-                                      )
+            _ , exog_index = self._preproces_exog(
+                                exog = exog.iloc[:0, ]
+                             )
             
             if not isinstance(exog_index, self.index_type):
                 raise Exception(
@@ -777,10 +776,9 @@ class ForecasterAutoreg(ForecasterBase):
                 raise Exception('`last_window` must be a pandas Series.')
             if last_window.isnull().any():
                 raise Exception('`last_window` has missing values.')
-            last_window_values, last_window_index = \
-                self._preproces_last_window(
-                    last_window = last_window.iloc[:0]
-                ) 
+            _ , last_window_index = self._preproces_last_window(
+                                        last_window = last_window.iloc[:0]
+                                    ) 
             if not isinstance(last_window_index, self.index_type):
                 raise Exception(
                     f"Expected index of type {self.index_type} for `last_window`. "
@@ -867,9 +865,10 @@ class ForecasterAutoreg(ForecasterBase):
             of 1000 values are stored.
             
         append : bool, default `True`
-            If `True`, new residuals are added to the once already stored in the attribute
-            `out_sample_residuals`. Once the limit of 1000 values is reached, no more values
-            are appended. If False, `out_sample_residuals` is overwrited with the new residuals.
+            If `True`, new residuals are added to the once already stored in the
+            attribute `out_sample_residuals`. Once the limit of 1000 values is
+            reached, no more values are appended. If False, `out_sample_residuals`
+            is overwrited with the new residuals.
             
 
         Returns 
@@ -890,9 +889,15 @@ class ForecasterAutoreg(ForecasterBase):
         else:
             free_space = max(0, 1000 - len(self.out_sample_residuals))
             if len(residuals) < free_space:
-                self.out_sample_residuals = np.hstack((self.out_sample_residuals, residuals))
+                self.out_sample_residuals = np.hstack((
+                                                self.out_sample_residuals,
+                                                residuals
+                                            ))
             else:
-                self.out_sample_residuals = np.hstack((self.out_sample_residuals, residuals[:free_space]))
+                self.out_sample_residuals = np.hstack((
+                                                self.out_sample_residuals,
+                                                residuals[:free_space]
+                                            ))
         
 
     def get_coef(self) -> pd.DataFrame:

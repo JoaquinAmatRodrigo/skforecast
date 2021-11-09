@@ -59,8 +59,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         
     last_window : pandas Series
         Last window the forecaster has seen during trained. It stores the
-        values needed to calculate the lags used to predict the next `step`
-        after the training data.
+        values needed to predict the next `step` right after the training data.
         
     window_size: int
         Size of the window needed by `fun_predictors` to create the predictors.
@@ -69,13 +68,13 @@ class ForecasterAutoregCustom(ForecasterBase):
         Tag to identify if the regressor has been fitted (trained).
         
     index_type : type
-        Index type of the inputused in training.
+        Type of index of the input used in training.
         
     index_freq : str
-        Index frequency of the input used in training.
+        Frequency of Index of the input used in training.
         
     training_range: pandas Index
-        First and last index of samples used during training.
+        First and last values of index of the data used during training.
         
     included_exog : bool
         If the forecaster has been trained using exogenous variable/s.
@@ -83,11 +82,12 @@ class ForecasterAutoregCustom(ForecasterBase):
     exog_type : type
         Type of exogenous variable/s used in training.
         
-    exog_col_names : tuple
-        Column names of exog if exog used in training is a pandas DataFrame.
+    exog_col_names : list
+        Names of columns of `exog` if `exog` used in training was a pandas
+        DataFrame.
 
-    X_train_col_names : tuple
-        Column names of matrix used internally for training.
+    X_train_col_names : list
+        Names of columns of the matrix created internally for training.
         
     in_sample_residuals: numpy ndarray
         Residuals of the model when predicting training data. Only stored up to
@@ -222,7 +222,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         
         X_train = np.vstack(X_train)
         y_train = np.array(y_train)
-        col_names_X_train = [f"custom_predictor_{i}" for i in range(X_train.shape[1])]
+        X_train_col_names = [f"custom_predictor_{i}" for i in range(X_train.shape[1])]
 
         if np.isnan(X_train).any():
             raise Exception(
@@ -231,17 +231,17 @@ class ForecasterAutoregCustom(ForecasterBase):
         
         if exog is not None:
             col_names_exog = exog.columns if isinstance(exog, pd.DataFrame) else [exog.name]
-            col_names_X_train.extend(col_names_exog)
+            X_train_col_names.extend(col_names_exog)
             # The first `self.window_size` positions have to be removed from exog
             # since they are not in X_train.
             X_train = np.column_stack((X_train, exog_values[self.window_size:, ]))
 
         X_train = pd.DataFrame(
                     data    = X_train,
-                    columns = col_names_X_train,
+                    columns = X_train_col_names,
                     index   = y_index[self.window_size: ]
                   )
-        self.X_train_col_names = col_names_X_train
+        self.X_train_col_names = X_train_col_names
         y_train = pd.Series(
                     data  = y_train,
                     index = y_index[self.window_size: ],
@@ -330,7 +330,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             
         last_window : numpy ndarray
             Values of the series used to create the predictors (lags) need in the 
-            first iteration of predictiont (t + 1).
+            first iteration of prediction (t + 1).
             
         exog : numpy ndarray, pandas DataFrame
             Exogenous variable/s included as predictor/s.
@@ -408,16 +408,15 @@ class ForecasterAutoregCustom(ForecasterBase):
      
         if exog is not None:
             if isinstance(exog, pd.DataFrame):
-                exog_values, exog_index = self._preproces_exog(
-                                            exog = exog[self.exog_col_names].iloc[:steps, ]
-                                        )
+                exog_values, _ = self._preproces_exog(
+                                    exog = exog[self.exog_col_names].iloc[:steps, ]
+                                 )
             else: 
-                exog_values, exog_index = self._preproces_exog(
-                                            exog = exog.iloc[:steps, ]
-                                        )
+                exog_values, _ = self._preproces_exog(
+                                    exog = exog.iloc[:steps, ]
+                                 )
         else:
             exog_values = None
-            exog_index = None
         
         if last_window is not None:
             last_window_values, last_window_index = self._preproces_last_window(
@@ -630,12 +629,11 @@ class ForecasterAutoregCustom(ForecasterBase):
         )
         
         if exog is not None:
-            exog_values, exog_index = self._preproces_exog(
-                                        exog = exog[self.exog_col_names].iloc[:steps, ]
-                                      )
+            exog_values, _ = self._preproces_exog(
+                                exog = exog[self.exog_col_names].iloc[:steps, ]
+                              )
         else:
             exog_values = None
-            exog_index = None
             
         if last_window is not None:
             last_window_values, last_window_index = self._preproces_last_window(
@@ -733,9 +731,7 @@ class ForecasterAutoregCustom(ForecasterBase):
                         f"Got {exog.columns.to_list()}"      
                     )
             self._check_exog(exog = exog)
-            exog_values, exog_index = self._preproces_exog(
-                                        exog = exog.iloc[:0, ]
-                                      )
+            _, exog_index = self._preproces_exog(exog = exog.iloc[:0, ])
             
             if not isinstance(exog_index, self.index_type):
                 raise Exception(
@@ -758,10 +754,9 @@ class ForecasterAutoregCustom(ForecasterBase):
                 raise Exception('`last_window` must be a pandas Series.')
             if last_window.isnull().any():
                 raise Exception('`last_window` has missing values.')
-            last_window_values, last_window_index = \
-                self._preproces_last_window(
-                    last_window = last_window.iloc[:0]
-                ) 
+            _, last_window_index = self._preproces_last_window(
+                                        last_window = last_window.iloc[:0]
+                                   ) 
             if not isinstance(last_window_index, self.index_type):
                 raise Exception(
                     f"Expected index of type {self.index_type} for `last_window`. "
@@ -808,9 +803,10 @@ class ForecasterAutoregCustom(ForecasterBase):
             of 1000 values are stored.
             
         append : bool, default `True`
-            If `True`, new residuals are added to the once already stored in the attribute
-            `out_sample_residuals`. Once the limit of 1000 values is reached, no more values
-            are appended. If False, `out_sample_residuals` is overwrited with the new residuals.
+            If `True`, new residuals are added to the once already stored in the
+            attribute `out_sample_residuals`. Once the limit of 1000 values is
+            reached, no more values are appended. If False, `out_sample_residuals`
+            is overwrited with the new residuals.
             
 
         Returns 
@@ -831,9 +827,15 @@ class ForecasterAutoregCustom(ForecasterBase):
         else:
             free_space = max(0, 1000 - len(self.out_sample_residuals))
             if len(residuals) < free_space:
-                self.out_sample_residuals = np.hstack((self.out_sample_residuals, residuals))
+                self.out_sample_residuals = np.hstack((
+                                                self.out_sample_residuals,
+                                                residuals
+                                            ))
             else:
-                self.out_sample_residuals = np.hstack((self.out_sample_residuals, residuals[:free_space]))
+                self.out_sample_residuals = np.hstack((
+                                                self.out_sample_residuals,
+                                                residuals[:free_space]
+                                            ))
                 
 
     def get_coef(self) -> pd.DataFrame:
