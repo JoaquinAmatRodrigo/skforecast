@@ -215,9 +215,19 @@ class ForecasterBase():
         
         if isinstance(y.index, pd.DatetimeIndex) and y.index.freq is not None:
             y_index = y.index
+        elif isinstance(y.index, pd.DatetimeIndex):
+            warnings.warn(
+                '`y` has DatetimeIndex index but no frequency. ',
+                'Index is overwritten with a RangeIndex.'
+            )
+            y_index = pd.RangeIndex(
+                        start = 0,
+                        stop  = len(y),
+                        step  = 1
+                       )
         else:
             warnings.warn(
-                '`y` has DatetimeIndex index but no frequency. Index is overwritten with a RangeIndex.'
+                '`y` has no DatetimeIndex index. Index is overwritten with a RangeIndex.'
             )
             y_index = pd.RangeIndex(
                         start = 0,
