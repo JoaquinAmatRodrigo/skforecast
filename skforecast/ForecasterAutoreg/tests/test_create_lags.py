@@ -1,6 +1,6 @@
 
-import sys
-sys.path.insert(1, '/home/ximo/Documents/GitHub/skforecast')
+# Unit test _create_lags
+# ==============================================================================
 
 import pytest
 from pytest import approx
@@ -9,11 +9,10 @@ import pandas as pd
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
 from sklearn.linear_model import LinearRegression
 
-# Test method _create_lags()
-#-------------------------------------------------------------------------------
-def test_create_lags_when_lags_is_3_and_y_is_numpy_arange_10():
+
+def test_create_lags_output():
     '''
-    Check matrix of lags is created properly
+    Test matrix of lags is created properly when langs=3 and y=np.arange(10).
     '''
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
     results = forecaster._create_lags(y=np.arange(10))
@@ -29,10 +28,12 @@ def test_create_lags_when_lags_is_3_and_y_is_numpy_arange_10():
     assert (results[0] == expected[0]).all()
     assert (results[1] == expected[1]).all()
     
-
-
-def test_create_lags_exception_when_len_of_y_is_less_than_maximum_lag():
-   
+    
+def test_create_lags_exception_when_len_of_y_is_lower_than_maximum_lag():
+    '''
+    Test exception is raised when lenght of y is lower than maximum lag included
+    in the forecaster.
+    '''
     forecaster = ForecasterAutoreg(LinearRegression(), lags=10)
     with pytest.raises(Exception):
         forecaster._create_lags(y=np.arange(5))

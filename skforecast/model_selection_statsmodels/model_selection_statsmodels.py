@@ -18,7 +18,7 @@ from sklearn.metrics import mean_absolute_percentage_error
 from sklearn.model_selection import ParameterGrid
 from statsmodels.tsa.statespace.sarimax import SARIMAX
 
-from .model_selection import time_series_spliter
+from ..model_selection import time_series_spliter
 
 logging.basicConfig(
     format = '%(asctime)-5s %(name)-10s %(levelname)-5s %(message)s', 

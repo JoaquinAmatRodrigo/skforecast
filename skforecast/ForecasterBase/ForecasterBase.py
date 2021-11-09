@@ -11,7 +11,6 @@ import warnings
 import logging
 import numpy as np
 import pandas as pd
-from pandas.io.formats.format import return_docstring
 
 logging.basicConfig(
     format = '%(name)-10s %(levelname)-5s %(message)s', 

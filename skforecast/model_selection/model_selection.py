@@ -18,9 +18,9 @@ from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import mean_absolute_percentage_error
 from sklearn.model_selection import ParameterGrid
 
-from .ForecasterAutoreg import ForecasterAutoreg
-from .ForecasterAutoregCustom import ForecasterAutoregCustom
-from .ForecasterAutoregMultiOutput import ForecasterAutoregMultiOutput
+from ..ForecasterAutoreg import ForecasterAutoreg
+from ..ForecasterAutoregCustom import ForecasterAutoregCustom
+from ..ForecasterAutoregMultiOutput import ForecasterAutoregMultiOutput
 
 logging.basicConfig(
     format = '%(name)-10s %(levelname)-5s %(message)s', 

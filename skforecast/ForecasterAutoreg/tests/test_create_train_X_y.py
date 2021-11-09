@@ -1,5 +1,5 @@
-import sys
-sys.path.insert(1, '/home/ximo/Documents/GitHub/skforecast')
+# Unit test create_train_X_y
+# ==============================================================================
 
 import pytest
 from pytest import approx
@@ -10,7 +10,10 @@ from sklearn.linear_model import LinearRegression
 
 
 def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_None():
-
+    '''
+    Test the output of create_train_X_y when y=pd.Series(np.arange(10)) and 
+    exog is None.
+    '''
     forecaster = ForecasterAutoreg(LinearRegression(), lags=5)
     results = forecaster.create_train_X_y(y=pd.Series(np.arange(10)))
     expected = (pd.DataFrame(
@@ -32,7 +35,10 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_None():
 
 
 def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_series():
-
+    '''
+    Test the output of create_train_X_y when y=pd.Series(np.arange(10)) and 
+    exog is a pandas series
+    '''
     forecaster = ForecasterAutoreg(LinearRegression(), lags=5)
     results = forecaster.create_train_X_y(
                 y = pd.Series(np.arange(10)),
@@ -56,7 +62,10 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_series():
     assert (results[1] == expected[1]).all()
 
 def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_daraframe():
-
+    '''
+    Test the output of create_train_X_y when y=pd.Series(np.arange(10)) and 
+    exog is a pandas dataframe with two columns.
+    '''
     forecaster = ForecasterAutoreg(LinearRegression(), lags=5)
     results = forecaster.create_train_X_y(
                 y = pd.Series(np.arange(10)),
@@ -83,3 +92,29 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_daraframe():
 
     assert (results[0] == expected[0]).all().all()
     assert (results[1] == expected[1]).all()
+
+def test_create_train_X_y_exception_when_y_and_exog_have_different_lenght():
+    '''
+    Test exception is raised when lenght of y and lenght of exog are different.
+    '''
+    forecaster = ForecasterAutoreg(LinearRegression(), lags=5)
+    with pytest.raises(Exception):
+        forecaster.fit(y=pd.Series(np.arange(50)), exog=pd.Series(np.arange(10)))
+    with pytest.raises(Exception):
+        forecaster.fit(y=pd.Series(np.arange(10)), exog=pd.Series(np.arange(50)))
+    with pytest.raises(Exception):
+        forecaster.fit(
+            y=pd.Series(np.arange(10)),
+            exog=pd.DataFrame(np.arange(50).reshape(25,2))
+        )
+        
+def test_create_train_X_y_exception_when_y_and_exog_have_different_index():
+    '''
+    Test exception is raised when y and exog have diferent index.
+    '''
+    forecaster = ForecasterAutoreg(LinearRegression(), lags=5)
+    with pytest.raises(Exception):
+        forecaster.fit(
+            y=pd.Series(np.arange(50)),
+            exog=pd.Series(np.arange(10), index=np.arange(100, 110))
+        )    

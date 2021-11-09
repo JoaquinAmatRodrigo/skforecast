@@ -15,7 +15,7 @@ import sklearn
 import sklearn.pipeline
 from sklearn.base import clone
 
-from .ForecasterBase import ForecasterBase
+from ..ForecasterBase import ForecasterBase
 
 
 logging.basicConfig(
