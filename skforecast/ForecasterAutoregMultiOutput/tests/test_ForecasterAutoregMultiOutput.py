@@ -353,51 +353,6 @@ def test_predict_exception_when_exog_passed_in_predict_has_different_columns_tha
         forecaster.predict(steps=10, exog=pd.DataFrame(np.arange(30).reshape(-1, 2)))
     
     
-# Test method _check_y()
-#-------------------------------------------------------------------------------
-def test_check_y_exception_when_y_is_int():
-    
-    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=2)
-    with pytest.raises(Exception):
-        forecaster._check_y(y=10)
-        
-def test_check_y_exception_when_y_is_list():
-    
-    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=2)
-    with pytest.raises(Exception):
-        forecaster._check_y(y=[1, 2, 3])
-        
-        
-def test_check_y_exception_when_y_is_numpy_array_with_more_than_one_dimension():
-    
-    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=2)
-    with pytest.raises(Exception):
-        forecaster._check_y(y=np.arange(10).reshape(-1, 1))
-        
-        
-        
-# Test method _check_last_window()
-#-------------------------------------------------------------------------------
-def test_check_last_window_exception_when_last_window_is_int():
-    
-    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=2)
-    with pytest.raises(Exception):
-        forecaster._check_y(y=10)
-        
-def test_check_last_window_exception_when_last_window_is_list():
-    
-    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=2)
-    with pytest.raises(Exception):
-        forecaster._check_y(y=[1, 2, 3])
-        
-        
-def test_check_last_window_exception_when_last_window_is_numpy_array_with_more_than_one_dimension():
-    
-    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=2)
-    with pytest.raises(Exception):
-        forecaster._check_y(y=np.arange(10).reshape(-1, 1))
-    
-    
 # Test method _check_exog()
 #-------------------------------------------------------------------------------
 def test_check_exog_exception_when_exog_is_int():

@@ -204,7 +204,7 @@ class ForecasterAutoreg(ForecasterBase):
             
         return X_data, y_data
 
-
+    @ForecasterBase._y_pd_series
     def create_train_X_y(
         self,
         y: pd.Series,
@@ -233,7 +233,6 @@ class ForecasterAutoreg(ForecasterBase):
         
         '''
         
-        self._check_y(y=y)
         y_values, y_index = self._preproces_y(y=y)
         
         if exog is not None:

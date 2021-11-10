@@ -6,7 +6,8 @@
 ################################################################################
 # coding=utf-8
 
-from typing import Union, Dict, List, Tuple, Any
+import inspect
+from typing import Callable, Union, Dict, List, Tuple, Any
 import warnings
 import logging
 import numpy as np
@@ -123,31 +124,36 @@ class ForecasterBase():
         pass
 
     
-    @staticmethod
-    def _check_y(y: Any) -> None:
+    def _y_pd_series(func: Callable) -> Callable:
         '''
-        Raise Exception if `y` is not pandas Series or if it has missing values.
+        Decorator. Raise Exception if `y` is not pandas Series or if it has missing values.
         
         Parameters
         ----------        
-        y : Any
-            Time series values
+        func : Callable
+            Function to apply decorator.
             
         Returns
         ----------
-        None
+        inner: Callable
+            Altered function
         
         '''
-        
-        if not isinstance(y, pd.Series):
-            raise Exception('`y` must be a pandas Series.')
+        def inner(*args, **kwargs):
+            argspec = inspect.getfullargspec(func)
+            for i, arg in enumerate(args):
+                kwargs[argspec.args[i]] = arg
+
+            if not isinstance(kwargs['y'], pd.Series):
+                raise Exception('`y` must be a pandas Series.')
             
-        if y.isnull().any():
-            raise Exception('`y` has missing values.')
-        
-        return
-        
-        
+            if kwargs['y'].isnull().any():
+                raise Exception('`y` has missing values.')    
+
+            return func(**kwargs)
+        return inner
+ 
+      
     @staticmethod
     def _check_exog(exog: Any) -> None:
         '''
