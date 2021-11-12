@@ -528,7 +528,7 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
             raise Exception(
                 f"`steps` must be integer greater than 0. Got {steps}."
             )
-
+        
         if steps > self.steps:
             raise Exception(
                 f"`steps` must be lower or equal to the value of steps defined "

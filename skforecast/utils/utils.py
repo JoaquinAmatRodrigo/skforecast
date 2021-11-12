@@ -50,6 +50,7 @@ def check_exog(exog: Any) -> None:
         raise Exception('`exog` has missing values.')
                 
     return
+    
 
 def preproces_y(y: pd.Series) -> Union[np.ndarray, pd.Index]:
     

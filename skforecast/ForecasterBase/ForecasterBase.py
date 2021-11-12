@@ -122,20 +122,7 @@ class ForecasterBase(ABC):
         '''
 
         pass
-
-
-    @abstractmethod
-    def _check_predict_input(
-        self,
-        steps: int,
-        last_window: pd.Series=None,
-        exog: Union[pd.Series, pd.DataFrame]=None
-    ) -> None:
-        '''
-        Check all inputs of predict method
-        '''
-
-        pass    
+   
         
 
     @abstractmethod

@@ -751,9 +751,7 @@ class ForecasterAutoreg(ForecasterBase):
                         f"Got {exog.columns.to_list()}"      
                     )
             self._check_exog(exog = exog)
-            _ , exog_index = self._preproces_exog(
-                                exog = exog.iloc[:0, ]
-                             )
+            _, exog_index = self._preproces_exog(exog=exog.iloc[:0, ])
             
             if not isinstance(exog_index, self.index_type):
                 raise Exception(
@@ -776,7 +774,7 @@ class ForecasterAutoreg(ForecasterBase):
                 raise Exception('`last_window` must be a pandas Series.')
             if last_window.isnull().any():
                 raise Exception('`last_window` has missing values.')
-            _ , last_window_index = self._preproces_last_window(
+            _, last_window_index = self._preproces_last_window(
                                         last_window = last_window.iloc[:0]
                                     ) 
             if not isinstance(last_window_index, self.index_type):
