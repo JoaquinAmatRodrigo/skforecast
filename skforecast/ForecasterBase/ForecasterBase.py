@@ -96,8 +96,7 @@ class ForecasterBase(ABC):
         exog: Union[pd.Series, pd.DataFrame]=None
     ) -> pd.Series:
         '''
-        Predict n steps ahead. It is an recursive process in which, each prediction,
-        is used as a predictor for the next step.
+        Predict n steps ahead.
         
         Parameters
         ----------
