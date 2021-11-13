@@ -1,16 +1,27 @@
-Backtesting `backtesting_forecaster()`:
-    [x] The current implementation of `backtesting_forecaster()` always do an initial training. Allow `backtesting_forecaster()` to backtest forecasters already trained.
-    [] Include an argument `refit` to decide if the forecaster is retrained in each iteration.
-    [x] Currently, backtesting ForecasterAutoregMultiOutput do not allow for incomplete folds. Allow it including dummy values for the remaining steps of the last fold and removing then the corresponding predictions.
-    [x] Create a function to select the metric  
-    [] Add option to update out_sample_residuals at the end of the proces of backtesting
+Forecaster Classes
+- [x] unified inputs `y` and `exog` to pandas Series and pandas Dataframe
+- [x] unified `predict` and `predict_interval`
+- [x] unified inputs checks as static methods
+- [x] ForecasterBase as parent class
+- [ ] add examples in docstrings (statsmodels)
+- [ ] add references in docstrings (statsmodels)
 
-Cross validation `cv_forecaster()`:
-    [x] Create a function to select the metric  
-    [] Add option to update out_sample_residuals at the end of the proces of cv
+Module model_selection
+- [x] unified cross-validation and backtsting throught argument `refit`
+- [ ] unified `grid_search` methods throught argument `refit`
 
-ForecasterCustom
-    [X] Remove class ForecasterCustom
+Model_selection_statsmodels:
+- [x] Change all inputs of `y` and `exog` to pandas Series and pandas DataFrame
+- [x] Combine `backtesting_sarimax_statsmodels` and `cv_sarimax_statsmodels` in a single function
 
+Module utils
+- [x] all static methods for checking and preprocessing inputs of ForecasterBase moved to module utils
+
+Unit testing:
+- [ ] ForecasterAutoreg
+- [ ] ForecasterAutoregCustom
+- [ ] ForecasterAutoregMultioutput
+- [ ] model_selection
+- [x] utils
 
 
