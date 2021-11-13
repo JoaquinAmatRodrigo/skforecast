@@ -1,8 +1,8 @@
 ################################################################################
-#                               skforecast                                     #
+#                                ForecasterBase                                #
 #                                                                              #
 # This work by Joaquín Amat Rodrigo is licensed under a Creative Commons       #
-# Attribution 4.0 International License.                                       #
+# Attribution 4.0 International License.    
 ################################################################################
 # coding=utf-8
 
@@ -16,10 +16,6 @@ logging.basicConfig(
     level  = logging.INFO,
 )
 
-
-################################################################################
-#                                ForecasterBase                                #
-################################################################################
 
 class ForecasterBase(ABC):
     '''

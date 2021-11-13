@@ -1,5 +1,5 @@
 ################################################################################
-#                               skforecast                                     #
+#                        ForecasterAutoregCustom                               #
 #                                                                              #
 # This work by Joaquín Amat Rodrigo is licensed under a Creative Commons       #
 # Attribution 4.0 International License.                                       #
@@ -16,16 +16,19 @@ import sklearn.pipeline
 from copy import copy
 
 from ..ForecasterBase import ForecasterBase
+from ..utils import check_y
+from ..utils import check_exog
+from ..utils import preprocess_y
+from ..utils import preprocess_last_window
+from ..utils import preprocess_exog
+from ..utils import expand_index
+
 
 logging.basicConfig(
     format = '%(name)-10s %(levelname)-5s %(message)s', 
     level  = logging.INFO,
 )
 
-
-################################################################################
-#                        ForecasterAutoregCustom                               #
-################################################################################
 
 class ForecasterAutoregCustom(ForecasterBase):
     '''
