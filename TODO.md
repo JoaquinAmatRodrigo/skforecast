@@ -14,9 +14,14 @@ Model_selection_statsmodels:
 - [x] Change all inputs of `y` and `exog` to pandas Series and pandas DataFrame
 - [x] Combine `backtesting_sarimax_statsmodels` and `cv_sarimax_statsmodels` in a single function
 
+Module utils
+- [x] all static methods for checking and preprocessing inputs of ForecasterBase moved to module utils
+
 Unit testing:
 - [ ] ForecasterAutoreg
 - [ ] ForecasterAutoregCustom
 - [ ] ForecasterAutoregMultioutput
 - [ ] model_selection
+- [x] utils
+
 

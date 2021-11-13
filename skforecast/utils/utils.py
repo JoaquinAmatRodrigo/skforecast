@@ -1,4 +1,12 @@
-from typing import Union, Dict, List, Tuple, Any
+################################################################################
+#                                 utils                                        #
+#                                                                              #
+# This work by Joaquín Amat Rodrigo is licensed under a Creative Commons       #
+# Attribution 4.0 International License.    
+################################################################################
+# coding=utf-8
+
+from typing import Union, List, Tuple, Any
 import warnings
 import numpy as np
 import pandas as pd
@@ -52,7 +60,7 @@ def check_exog(exog: Any) -> None:
     return
     
 
-def preproces_y(y: pd.Series) -> Union[np.ndarray, pd.Index]:
+def preprocess_y(y: pd.Series) -> Union[np.ndarray, pd.Index]:
     
     '''
     Returns values ​​and index of series separately. Index is overwritten
@@ -66,7 +74,7 @@ def preproces_y(y: pd.Series) -> Union[np.ndarray, pd.Index]:
     Parameters
     ----------        
     y : pandas Series
-        Time series values
+        Time series
 
     Returns 
     -------
@@ -74,21 +82,21 @@ def preproces_y(y: pd.Series) -> Union[np.ndarray, pd.Index]:
         Numpy array with values of `y`.
 
     y_index : pandas Index
-        Index of of `y` modified according to the rules.
+        Index of `y` modified according to the rules.
     '''
     
     if isinstance(y.index, pd.DatetimeIndex) and y.index.freq is not None:
         y_index = y.index
     elif isinstance(y.index, pd.DatetimeIndex):
         warnings.warn(
-            '`y` has DatetimeIndex index but no frequency. ',
+            '`y` has DatetimeIndex index but no frequency. '
             'Index is overwritten with a RangeIndex.'
         )
         y_index = pd.RangeIndex(
                     start = 0,
                     stop  = len(y),
                     step  = 1
-                    )
+                  )
     else:
         warnings.warn(
             '`y` has no DatetimeIndex index. Index is overwritten with a RangeIndex.'
@@ -97,14 +105,14 @@ def preproces_y(y: pd.Series) -> Union[np.ndarray, pd.Index]:
                     start = 0,
                     stop  = len(y),
                     step  = 1
-                    )
+                  )
 
     y_values = y.to_numpy()
 
     return y_values, y_index
 
 
-def preproces_last_window(last_window: pd.Series) -> Union[np.ndarray, pd.Index]:
+def preprocess_last_window(last_window: pd.Series) -> Union[np.ndarray, pd.Index]:
     
     '''
     Returns values ​​and index of series separately. Index is overwritten
@@ -137,17 +145,17 @@ def preproces_last_window(last_window: pd.Series) -> Union[np.ndarray, pd.Index]
             'Index is overwritten with a RangeIndex.'
         )
         last_window_index = pd.RangeIndex(
-                    start = 0,
-                    stop  = len(last_window),
-                    step  = 1
-                    )
+                                start = 0,
+                                stop  = len(last_window),
+                                step  = 1
+                            )
 
     last_window_values = last_window.to_numpy()
 
     return last_window_values, last_window_index
 
 
-def preproces_exog(
+def preprocess_exog(
     exog: Union[pd.Series, pd.DataFrame]
 ) -> Union[np.ndarray, pd.Index]:
     
@@ -178,13 +186,13 @@ def preproces_exog(
     else:
         warnings.warn(
             ('`exog` has DatetimeIndex index but no frequency. The index is '
-                'overwritten with a RangeIndex.')
+             'overwritten with a RangeIndex.')
         )
         exog_index = pd.RangeIndex(
                         start = 0,
                         stop  = len(exog),
                         step  = 1
-                        )
+                    )
 
     exog_values = exog.to_numpy()
 
@@ -220,10 +228,10 @@ def expand_index(index: Union[pd.Index, None], steps: int) -> pd.Index:
             new_index = pd.RangeIndex(
                             start = index[-1] + 1,
                             stop  = index[-1] + 1 + steps
-                            )
+                        )
     else: 
         new_index = pd.RangeIndex(
                         start = 0,
                         stop  = steps
-                        )
+                     )
     return new_index

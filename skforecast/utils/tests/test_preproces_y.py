@@ -1,22 +1,54 @@
-import sys
-sys.path.insert(1, '/home/ximo/Documents/GitHub/skforecast')
-
+# Unit test preprocess_y
+# ==============================================================================
 import pytest
-from pytest import approx
 import numpy as np
 import pandas as pd
-from skforecast.ForecasterAutoreg import ForecasterAutoreg
-from sklearn.linear_model import LinearRegression
+from skforecast.utils import preprocess_y
 
-
-
-def test_preproces_y_when_y_is_pandas_series():
-
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
-    assert (forecaster._preproces_y(y=pd.Series([0, 1, 2])) == np.arange(3)).all()
+def test_output_preprocess_y_when_y_index_is_DatetimeIndex_and_has_frequecy():
+    '''
+    Test values returned by when y is a pandas Series DatetimeIndex and freq is
+    not None.
+    '''
+    y = pd.Series(
+            data = np.arange(3),
+            index = pd.date_range("1990-01-01", periods=3, freq='D')
+        )
+    results = preprocess_y(y)
+    expected = (np.arange(3),
+                pd.DatetimeIndex(['1990-01-01', '1990-01-02', '1990-01-03'],
+                                 dtype='datetime64[ns]', freq='D')
+               )
+    assert (results[0] == expected[0]).all()
+    assert (results[1] == expected[1]).all()
     
 
-def test_preproces_y_when_y_is_1d_numpy_array():
-
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
-    assert (forecaster._preproces_y(y=np.arange(3)) == np.arange(3)).all()
+def test_output_preprocess_y_when_y_index_is_DatetimeIndex_but_has_not_frequecy():
+    '''
+    Test values returned by when y is a pandas Series with DatetimeIndex but freq 
+    is None.
+    '''
+    y = pd.Series(
+            data = np.arange(3),
+            index = pd.to_datetime(["1990-01-01", "1990-01-02", "1990-01-03"])
+        )
+    
+    results = preprocess_y(y)
+    expected = (np.arange(3),
+                pd.RangeIndex(start=0, stop=3, step=1)
+               )
+    assert (results[0] == expected[0]).all()
+    assert (results[1] == expected[1]).all()
+    
+    
+def test_output_preprocess_y_when_y_index_is_not_DatetimeIndex():
+    '''
+    Test values returned by when y is a pandas Series without DatetimeIndex.
+    '''
+    y = pd.Series(data=np.arange(3))
+    results = preprocess_y(y)
+    expected = (np.arange(3),
+                pd.RangeIndex(start=0, stop=3, step=1)
+               )
+    assert (results[0] == expected[0]).all()
+    assert (results[1] == expected[1]).all()
