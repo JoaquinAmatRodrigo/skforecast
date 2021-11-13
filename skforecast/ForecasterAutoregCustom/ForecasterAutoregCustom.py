@@ -140,9 +140,9 @@ class ForecasterAutoregCustom(ForecasterBase):
             params = self.regressor.get_params()
 
         info = (
-            f"{'=' * len(str(type(self)))} \n"
-            f"{type(self)} \n"
-            f"{'=' * len(str(type(self)))} \n"
+            f"{'=' * len(str(type(self)).split('.')[1])} \n"
+            f"{str(type(self)).split('.')[1]} \n"
+            f"{'=' * len(str(type(self)).split('.')[1])} \n"
             f"Regressor: {self.regressor} \n"
             f"Predictors created with function: {self.create_predictors.__name__} \n"
             f"Window size: {self.window_size} \n"

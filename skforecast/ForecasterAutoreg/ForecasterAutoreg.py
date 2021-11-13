@@ -147,9 +147,9 @@ class ForecasterAutoreg(ForecasterBase):
             params = self.regressor.get_params()
 
         info = (
-            f"{'=' * len(str(type(self)))} \n"
-            f"{type(self)} \n"
-            f"{'=' * len(str(type(self)))} \n"
+            f"{'=' * len(str(type(self)).split('.')[1])} \n"
+            f"{str(type(self)).split('.')[1]} \n"
+            f"{'=' * len(str(type(self)).split('.')[1])} \n"
             f"Regressor: {self.regressor} \n"
             f"Lags: {self.lags} \n"
             f"Window size: {self.window_size} \n"
