@@ -204,8 +204,9 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
             Values of the time series related to each row of `X_data` for each step.
             
         '''
-          
+        print(self.max_lag)
         n_splits = len(y) - self.max_lag - (self.steps -1)
+        print(n_splits)
         X_data  = np.full(shape=(n_splits, self.max_lag), fill_value=np.nan, dtype=float)
         y_data  = np.full(shape=(n_splits, self.steps), fill_value=np.nan, dtype= float)
 
