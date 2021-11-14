@@ -661,9 +661,14 @@ class ForecasterAutoreg(ForecasterBase):
         )
 
         if exog is not None:
-            exog_values, _ = self._preproces_exog(
-                                exog = exog[self.exog_col_names].iloc[:steps, ]
-                             )
+            if isinstance(exog, pd.DataFrame):
+                exog_values, _ = self._preproces_exog(
+                                    exog = exog[self.exog_col_names].iloc[:steps, ]
+                                 )
+            else: 
+                exog_values, _ = self._preproces_exog(
+                                    exog = exog.iloc[:steps, ]
+                                 )
         else:
             exog_values = None
             
