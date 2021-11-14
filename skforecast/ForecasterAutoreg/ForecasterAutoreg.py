@@ -504,7 +504,7 @@ class ForecasterAutoreg(ForecasterBase):
 
         random_state: int
             Sets a seed to the random generator, so that boot intervals are always 
-            deterministic
+            deterministic.
             
         interval: list, default `[5, 95]`
             Confidence of the prediction interval estimated. Sequence of percentiles
@@ -628,7 +628,7 @@ class ForecasterAutoreg(ForecasterBase):
 
         random_state: int
             Sets a seed to the random generator, so that boot intervals are always 
-            deterministic
+            deterministic.
             
         in_sample_residuals: bool, default `True`
             If `True`, residuals from the training data are used as proxy of

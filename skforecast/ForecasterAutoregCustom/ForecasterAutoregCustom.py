@@ -453,6 +453,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         exog: np.ndarray,
         interval: list=[5, 95],
         n_boot: int=500,
+        random_state: int=123,
         in_sample_residuals: bool=True
     ) -> np.ndarray:
         '''
@@ -480,6 +481,10 @@ class ForecasterAutoregCustom(ForecasterBase):
         n_boot: int, default `500`
             Number of bootstrapping iterations used to estimate prediction
             intervals.
+
+        random_state: int
+            Sets a seed to the random generator, so that boot intervals are always 
+            deterministic.
             
         interval: list, default `[5, 95]`
             Confidence of the prediction interval estimated. Sequence of percentiles
@@ -514,6 +519,8 @@ class ForecasterAutoregCustom(ForecasterBase):
                                 fill_value = np.nan,
                                 dtype      = float
                            )
+        rng = np.random.default_rng(seed=random_state)
+        seeds = rng.integers(low=0, high=10000, size=n_boot)
 
         for i in range(n_boot):
 
@@ -530,7 +537,8 @@ class ForecasterAutoregCustom(ForecasterBase):
             else:
                 residuals = self.out_sample_residuals
 
-            sample_residuals = np.random.choice(
+            rng = np.random.default_rng(seed=seeds[i])
+            sample_residuals = rng.choice(
                                     a       = residuals,
                                     size    = steps,
                                     replace = True
@@ -567,6 +575,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         exog: Union[pd.Series, pd.DataFrame]=None,
         interval: list=[5, 95],
         n_boot: int=500,
+        random_state: int=123,
         in_sample_residuals: bool=True
     ) -> pd.DataFrame:
         '''
@@ -597,6 +606,10 @@ class ForecasterAutoregCustom(ForecasterBase):
         n_boot: int, default `500`
             Number of bootstrapping iterations used to estimate prediction
             intervals.
+
+        random_state: int
+            Sets a seed to the random generator, so that boot intervals are always 
+            deterministic.
             
         in_sample_residuals: bool, default `True`
             If `True`, residuals from the training data are used as proxy of
@@ -669,6 +682,7 @@ class ForecasterAutoregCustom(ForecasterBase):
                                     exog        = copy(exog_values_original),
                                     interval    = interval,
                                     n_boot      = n_boot,
+                                    random_state = random_state,
                                     in_sample_residuals = in_sample_residuals
                                 )
         
