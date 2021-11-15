@@ -1,5 +1,5 @@
 ################################################################################
-#                               skforecast                                     #
+#                        ForecasterAutoregCustom                               #
 #                                                                              #
 # This work by Joaquín Amat Rodrigo is licensed under a Creative Commons       #
 # Attribution 4.0 International License.                                       #
@@ -16,16 +16,19 @@ import sklearn.pipeline
 from copy import copy
 
 from ..ForecasterBase import ForecasterBase
+from ..utils import check_y
+from ..utils import check_exog
+from ..utils import preprocess_y
+from ..utils import preprocess_last_window
+from ..utils import preprocess_exog
+from ..utils import expand_index
+
 
 logging.basicConfig(
     format = '%(name)-10s %(levelname)-5s %(message)s', 
     level  = logging.INFO,
 )
 
-
-################################################################################
-#                        ForecasterAutoregCustom                               #
-################################################################################
 
 class ForecasterAutoregCustom(ForecasterBase):
     '''
@@ -193,16 +196,16 @@ class ForecasterAutoregCustom(ForecasterBase):
                 f'minimum lenght is {self.window_size + 1}'
             )
 
-        self._check_y(y=y)
-        y_values, y_index = self._preproces_y(y=y)
+        check_y(y=y)
+        y_values, y_index = preprocess_y(y=y)
         
         if exog is not None:
             if len(exog) != len(y):
                 raise Exception(
                     "`exog` must have same number of samples as `y`."
                 )
-            self._check_exog(exog=exog)
-            exog_values, exog_index = self._preproces_exog(exog=exog)
+            check_exog(exog=exog)
+            exog_values, exog_index = preprocess_exog(exog=exog)
             if not (exog_index[:len(y_index)] == y_index).all():
                 raise Exception(
                 ('Different index for `y` and `exog`. They must be equal '
@@ -295,7 +298,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         X_train, y_train = self.create_train_X_y(y=y, exog=exog)      
         self.regressor.fit(X=X_train, y=y_train)
         self.fitted = True
-        self.training_range = self._preproces_y(y=y)[1][[0, -1]]
+        self.training_range = preprocess_y(y=y)[1][[0, -1]]
         self.index_type = type(X_train.index)
         if isinstance(X_train.index, pd.DatetimeIndex):
             self.index_freq = X_train.index.freqstr
@@ -408,22 +411,22 @@ class ForecasterAutoregCustom(ForecasterBase):
      
         if exog is not None:
             if isinstance(exog, pd.DataFrame):
-                exog_values, _ = self._preproces_exog(
+                exog_values, _ = preprocess_exog(
                                     exog = exog[self.exog_col_names].iloc[:steps, ]
                                  )
             else: 
-                exog_values, _ = self._preproces_exog(
+                exog_values, _ = preprocess_exog(
                                     exog = exog.iloc[:steps, ]
                                  )
         else:
             exog_values = None
         
         if last_window is not None:
-            last_window_values, last_window_index = self._preproces_last_window(
+            last_window_values, last_window_index = preprocess_last_window(
                                                         last_window = last_window
                                                     )  
         else:
-            last_window_values, last_window_index = self._preproces_last_window(
+            last_window_values, last_window_index = preprocess_last_window(
                                                         last_window = self.last_window
                                                     )
             
@@ -435,7 +438,7 @@ class ForecasterAutoregCustom(ForecasterBase):
 
         predictions = pd.Series(
                         data  = predictions,
-                        index = self._expand_index(
+                        index = expand_index(
                                     index = last_window_index,
                                     steps = steps
                                 ),
@@ -643,22 +646,22 @@ class ForecasterAutoregCustom(ForecasterBase):
         
         if exog is not None:
             if isinstance(exog, pd.DataFrame):
-                exog_values, _ = self._preproces_exog(
+                exog_values, _ = preprocess_exog(
                                     exog = exog[self.exog_col_names].iloc[:steps, ]
                                  )
             else: 
-                exog_values, _ = self._preproces_exog(
+                exog_values, _ = preprocess_exog(
                                     exog = exog.iloc[:steps, ]
                                  )
         else:
             exog_values = None
             
         if last_window is not None:
-            last_window_values, last_window_index = self._preproces_last_window(
+            last_window_values, last_window_index = preprocess_last_window(
                                                         last_window = last_window
                                                     )  
         else:
-            last_window_values, last_window_index = self._preproces_last_window(
+            last_window_values, last_window_index = preprocess_last_window(
                                                         last_window = self.last_window
                                                     )
         
@@ -690,7 +693,7 @@ class ForecasterAutoregCustom(ForecasterBase):
 
         predictions = pd.DataFrame(
                         data = predictions,
-                        index = self._expand_index(
+                        index = expand_index(
                                     index = last_window_index,
                                     steps = steps
                                 ),
@@ -749,8 +752,8 @@ class ForecasterAutoregCustom(ForecasterBase):
                         f"Missing columns in `exog`. Expected {self.exog_col_names}. "
                         f"Got {exog.columns.to_list()}"      
                     )
-            self._check_exog(exog = exog)
-            _, exog_index = self._preproces_exog(exog = exog.iloc[:0, ])
+            check_exog(exog = exog)
+            _, exog_index = preprocess_exog(exog = exog.iloc[:0, ])
             
             if not isinstance(exog_index, self.index_type):
                 raise Exception(
@@ -773,7 +776,7 @@ class ForecasterAutoregCustom(ForecasterBase):
                 raise Exception('`last_window` must be a pandas Series.')
             if last_window.isnull().any():
                 raise Exception('`last_window` has missing values.')
-            _, last_window_index = self._preproces_last_window(
+            _, last_window_index = preprocess_last_window(
                                         last_window = last_window.iloc[:0]
                                    ) 
             if not isinstance(last_window_index, self.index_type):
