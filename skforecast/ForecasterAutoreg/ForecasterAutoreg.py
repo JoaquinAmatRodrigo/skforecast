@@ -436,7 +436,7 @@ class ForecasterAutoreg(ForecasterBase):
                                  )
             else: 
                 exog_values, _ = preprocess_exog(
-                                    exog = exog[self.exog_col_names].iloc[:steps, ]
+                                    exog = exog.iloc[:steps, ]
                                  )
         else:
             exog_values = None
