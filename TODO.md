@@ -8,7 +8,7 @@ Forecaster Classes
 
 Module model_selection
 - [x] unified cross-validation and backtsting throught argument `refit`
-- [ ] unified `grid_search` methods throught argument `refit`
+- [x] unified `grid_search` methods throught argument `refit`
 
 Model_selection_statsmodels:
 - [x] Change all inputs of `y` and `exog` to pandas Series and pandas DataFrame
@@ -16,6 +16,9 @@ Model_selection_statsmodels:
 
 Module utils
 - [x] all static methods for checking and preprocessing inputs of ForecasterBase moved to module utils
+
+Module plot
+- [x] function to plot residuals
 
 Unit testing:
 - [ ] ForecasterAutoreg
