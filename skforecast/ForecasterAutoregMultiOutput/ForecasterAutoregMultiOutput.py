@@ -1,5 +1,5 @@
 ################################################################################
-#                               skforecast                                     #
+#                         ForecasterAutoregMultiOutput                         #
 #                                                                              #
 # This work by Joaquín Amat Rodrigo is licensed under a Creative Commons       #
 # Attribution 4.0 International License.                                       #
@@ -16,6 +16,12 @@ import sklearn.pipeline
 from sklearn.base import clone
 
 from ..ForecasterBase import ForecasterBase
+from ..utils import check_y
+from ..utils import check_exog
+from ..utils import preprocess_y
+from ..utils import preprocess_last_window
+from ..utils import preprocess_exog
+from ..utils import expand_index
 
 
 logging.basicConfig(
@@ -24,9 +30,6 @@ logging.basicConfig(
 )
 
 
-################################################################################
-#                         ForecasterAutoregMultiOutput                         #
-################################################################################
 
 class ForecasterAutoregMultiOutput(ForecasterBase):
     '''
@@ -204,7 +207,7 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
             Values of the time series related to each row of `X_data` for each step.
             
         '''
-          
+
         n_splits = len(y) - self.max_lag - (self.steps -1)
         X_data  = np.full(shape=(n_splits, self.max_lag), fill_value=np.nan, dtype=float)
         y_data  = np.full(shape=(n_splits, self.steps), fill_value=np.nan, dtype= float)
@@ -252,16 +255,21 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
         
         '''
 
-        self._check_y(y=y)
-        y_values, y_index = self._preproces_y(y=y)
+        check_y(y=y)
+        y_values, y_index = preprocess_y(y=y)
 
+        if len(y_values) < self.max_lag + self.steps:
+            raise Exception(
+                f"Mínimum lenght of `y` for training this forecaster is "
+                f"{self.max_lag + self.steps}. Got {len(y_values)}"
+            )
         if exog is not None:
             if len(exog) != len(y):
                 raise Exception(
                     "`exog` must have same number of samples as `y`."
                 )
-            self._check_exog(exog=exog)
-            exog_values, exog_index = self._preproces_exog(exog=exog)
+            check_exog(exog=exog)
+            exog_values, exog_index = preprocess_exog(exog=exog)
             if not (exog_index[:len(y_index)] == y_index).all():
                 raise Exception(
                 ('Different index for `y` and `exog`. They must be equal '
@@ -406,7 +414,7 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
             self.regressors_[step].fit(X_train_step, y_train_step)
         
         self.fitted = True
-        self.training_range = self._preproces_y(y=y)[1][[0, -1]]
+        self.training_range = preprocess_y(y=y)[1][[0, -1]]
         self.index_type = type(X_train.index)
         if isinstance(X_train.index, pd.DatetimeIndex):
             self.index_freq = X_train.index.freqstr
@@ -459,11 +467,11 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
 
         if exog is not None:
             if isinstance(exog, pd.DataFrame):
-                exog_values, _ = self._preproces_exog(
+                exog_values, _ = preprocess_exog(
                                     exog = exog[self.exog_col_names].iloc[:steps, ]
                                  )
             else: 
-                exog_values, _ = self._preproces_exog(
+                exog_values, _ = preprocess_exog(
                                         exog = exog.iloc[:steps, ]
                                  )
             exog_values = self._exog_to_multi_output(exog=exog_values, steps=steps)
@@ -472,11 +480,11 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
             exog_values = None
 
         if last_window is not None:
-            last_window_values, last_window_index = self._preproces_last_window(
+            last_window_values, last_window_index = preprocess_last_window(
                                                         last_window = last_window
                                                     )  
         else:
-            last_window_values, last_window_index = self._preproces_last_window(
+            last_window_values, last_window_index = preprocess_last_window(
                                                         last_window = self.last_window
                                                     )
 
@@ -498,7 +506,7 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
 
         predictions = pd.Series(
                         data  = predictions.reshape(-1),
-                        index = self._expand_index(
+                        index = expand_index(
                                     index = last_window_index,
                                     steps = steps
                                 ),
@@ -564,8 +572,8 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
                         f"Missing columns in `exog`. Expected {self.exog_col_names}. "
                         f"Got {exog.columns.to_list()}"      
                     )
-            self._check_exog(exog = exog)
-            _, exog_index = self._preproces_exog(exog=exog.iloc[:0, ])
+            check_exog(exog = exog)
+            _, exog_index = preprocess_exog(exog=exog.iloc[:0, ])
             
             if not isinstance(exog_index, self.index_type):
                 raise Exception(
@@ -588,7 +596,7 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
                 raise Exception('`last_window` must be a pandas Series.')
             if last_window.isnull().any():
                 raise Exception('`last_window` has missing values.')
-            _, last_window_index = self._preproces_last_window(
+            _, last_window_index = preprocess_last_window(
                                         last_window = last_window.iloc[:0]
                                    ) 
             if not isinstance(last_window_index, self.index_type):

@@ -1,5 +1,5 @@
 ################################################################################
-#                               skforecast                                     #
+#                            ForecasterAutoreg                                 #
 #                                                                              #
 # This work by Joaquín Amat Rodrigo is licensed under a Creative Commons       #
 # Attribution 4.0 International License.                                       #
@@ -16,16 +16,18 @@ import sklearn.pipeline
 from copy import copy
 
 from ..ForecasterBase import ForecasterBase
+from ..utils import check_y
+from ..utils import check_exog
+from ..utils import preprocess_y
+from ..utils import preprocess_last_window
+from ..utils import preprocess_exog
+from ..utils import expand_index
 
 logging.basicConfig(
     format = '%(name)-10s %(levelname)-5s %(message)s', 
     level  = logging.INFO,
 )
 
-
-################################################################################
-#                             ForecasterAutoreg                                #
-################################################################################
 
 class ForecasterAutoreg(ForecasterBase):
     '''
@@ -233,16 +235,16 @@ class ForecasterAutoreg(ForecasterBase):
         
         '''
         
-        self._check_y(y=y)
-        y_values, y_index = self._preproces_y(y=y)
+        check_y(y=y)
+        y_values, y_index = preprocess_y(y=y)
         
         if exog is not None:
             if len(exog) != len(y):
                 raise Exception(
                     "`exog` must have same number of samples as `y`."
                 )
-            self._check_exog(exog=exog)
-            exog_values, exog_index = self._preproces_exog(exog=exog)
+            check_exog(exog=exog)
+            exog_values, exog_index = preprocess_exog(exog=exog)
             if not (exog_index[:len(y_index)] == y_index).all():
                 raise Exception(
                 ('Different index for `y` and `exog`. They must be equal '
@@ -320,7 +322,7 @@ class ForecasterAutoreg(ForecasterBase):
         X_train, y_train = self.create_train_X_y(y=y, exog=exog)      
         self.regressor.fit(X=X_train, y=y_train)
         self.fitted = True
-        self.training_range = self._preproces_y(y=y)[1][[0, -1]]
+        self.training_range = preprocess_y(y=y)[1][[0, -1]]
         self.index_type = type(X_train.index)
         if isinstance(X_train.index, pd.DatetimeIndex):
             self.index_freq = X_train.index.freqstr
@@ -429,22 +431,22 @@ class ForecasterAutoreg(ForecasterBase):
 
         if exog is not None:
             if isinstance(exog, pd.DataFrame):
-                exog_values, _ = self._preproces_exog(
+                exog_values, _ = preprocess_exog(
                                     exog = exog[self.exog_col_names].iloc[:steps, ]
                                  )
             else: 
-                exog_values, _ = self._preproces_exog(
-                                    exog = exog.iloc[:steps, ]
+                exog_values, _ = preprocess_exog(
+                                    exog = exog[self.exog_col_names].iloc[:steps, ]
                                  )
         else:
             exog_values = None
             
         if last_window is not None:
-            last_window_values, last_window_index = self._preproces_last_window(
+            last_window_values, last_window_index = preprocess_last_window(
                                                         last_window = last_window
                                                     )  
         else:
-            last_window_values, last_window_index = self._preproces_last_window(
+            last_window_values, last_window_index = preprocess_last_window(
                                                         last_window = self.last_window
                                                     )
             
@@ -456,7 +458,7 @@ class ForecasterAutoreg(ForecasterBase):
 
         predictions = pd.Series(
                         data  = predictions,
-                        index = self._expand_index(
+                        index = expand_index(
                                     index = last_window_index,
                                     steps = steps
                                 ),
@@ -473,6 +475,7 @@ class ForecasterAutoreg(ForecasterBase):
         exog: np.ndarray,
         interval: list=[5, 95],
         n_boot: int=500,
+        random_state: int=123,
         in_sample_residuals: bool=True
     ) -> np.ndarray:
         '''
@@ -500,6 +503,10 @@ class ForecasterAutoreg(ForecasterBase):
         n_boot: int, default `500`
             Number of bootstrapping iterations used to estimate prediction
             intervals.
+
+        random_state: int
+            Sets a seed to the random generator, so that boot intervals are always 
+            deterministic.
             
         interval: list, default `[5, 95]`
             Confidence of the prediction interval estimated. Sequence of percentiles
@@ -534,9 +541,10 @@ class ForecasterAutoreg(ForecasterBase):
                                 fill_value = np.nan,
                                 dtype      = float
                            )
+        rng = np.random.default_rng(seed=random_state)
+        seeds = rng.integers(low=0, high=10000, size=n_boot)
 
         for i in range(n_boot):
-
             # In each bootstraping iteration the initial last_window and exog 
             # need to be restored.
             last_window_boot = last_window.copy()
@@ -550,7 +558,8 @@ class ForecasterAutoreg(ForecasterBase):
             else:
                 residuals = self.out_sample_residuals
 
-            sample_residuals = np.random.choice(
+            rng = np.random.default_rng(seed=seeds[i])
+            sample_residuals = rng.choice(
                                     a       = residuals,
                                     size    = steps,
                                     replace = True
@@ -587,6 +596,7 @@ class ForecasterAutoreg(ForecasterBase):
         exog: Union[pd.Series, pd.DataFrame]=None,
         interval: list=[5, 95],
         n_boot: int=500,
+        random_state: int=123,
         in_sample_residuals: bool=True
     ) -> pd.DataFrame:
         '''
@@ -617,6 +627,10 @@ class ForecasterAutoreg(ForecasterBase):
         n_boot: int, default `500`
             Number of bootstrapping iterations used to estimate prediction
             intervals.
+
+        random_state: int
+            Sets a seed to the random generator, so that boot intervals are always 
+            deterministic.
             
         in_sample_residuals: bool, default `True`
             If `True`, residuals from the training data are used as proxy of
@@ -649,18 +663,23 @@ class ForecasterAutoreg(ForecasterBase):
         )
 
         if exog is not None:
-            exog_values, _ = self._preproces_exog(
-                                exog = exog[self.exog_col_names].iloc[:steps, ]
-                             )
+            if isinstance(exog, pd.DataFrame):
+                exog_values, _ = preprocess_exog(
+                                    exog = exog[self.exog_col_names].iloc[:steps, ]
+                                 )
+            else: 
+                exog_values, _ = preprocess_exog(
+                                    exog = exog.iloc[:steps, ]
+                                 )
         else:
             exog_values = None
             
         if last_window is not None:
-            last_window_values, last_window_index = self._preproces_last_window(
+            last_window_values, last_window_index = preprocess_last_window(
                                                         last_window = last_window
                                                     )  
         else:
-            last_window_values, last_window_index = self._preproces_last_window(
+            last_window_values, last_window_index = preprocess_last_window(
                                                         last_window = self.last_window
                                                     )
         
@@ -684,6 +703,7 @@ class ForecasterAutoreg(ForecasterBase):
                                     exog        = copy(exog_values_original),
                                     interval    = interval,
                                     n_boot      = n_boot,
+                                    random_state = random_state,
                                     in_sample_residuals = in_sample_residuals
                                 )
         
@@ -691,7 +711,7 @@ class ForecasterAutoreg(ForecasterBase):
 
         predictions = pd.DataFrame(
                         data = predictions,
-                        index = self._expand_index(
+                        index = expand_index(
                                     index = last_window_index,
                                     steps = steps
                                 ),
@@ -750,10 +770,8 @@ class ForecasterAutoreg(ForecasterBase):
                         f"Missing columns in `exog`. Expected {self.exog_col_names}. "
                         f"Got {exog.columns.to_list()}"      
                     )
-            self._check_exog(exog = exog)
-            _ , exog_index = self._preproces_exog(
-                                exog = exog.iloc[:0, ]
-                             )
+            check_exog(exog = exog)
+            _, exog_index = preprocess_exog(exog=exog.iloc[:0, ])
             
             if not isinstance(exog_index, self.index_type):
                 raise Exception(
@@ -776,7 +794,7 @@ class ForecasterAutoreg(ForecasterBase):
                 raise Exception('`last_window` must be a pandas Series.')
             if last_window.isnull().any():
                 raise Exception('`last_window` has missing values.')
-            _ , last_window_index = self._preproces_last_window(
+            _, last_window_index = preprocess_last_window(
                                         last_window = last_window.iloc[:0]
                                     ) 
             if not isinstance(last_window_index, self.index_type):
