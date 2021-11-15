@@ -420,7 +420,8 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
             self.index_freq = X_train.index.freqstr
         else: 
             self.index_freq = X_train.index.step
-        self.last_window = y_train.iloc[-self.max_lag:, -1]
+        self.last_window = y.loc[y_train.index[-1] - self.max_lag * y_train.index.freq: ]
+
     
     def predict(
         self,
