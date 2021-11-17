@@ -199,6 +199,54 @@ def preprocess_exog(
     return exog_values, exog_index
 
 
+def exog_to_multi_output(
+    self,
+    exog: np.ndarray,
+    steps: int
+)-> np.ndarray:
+    
+    '''
+    Transforms `exog` to `np.ndarray` with the shape needed for multioutput
+    regresors.
+    
+    Parameters
+    ----------        
+    exog : numpy ndarray, shape(samples,)
+        Time series values
+
+    steps: int.
+        Number of steps that will be predicted using this exog.
+
+    Returns 
+    -------
+    exog_transformed: numpy ndarray
+    '''
+
+    exog_transformed = []
+
+    if exog.ndim < 2:
+        exog = exog.reshape(-1, 1)
+
+    for column in range(exog.shape[1]):
+
+        exog_column_transformed = []
+
+        for i in range(exog.shape[0] - (steps -1)):
+            exog_column_transformed.append(exog[i:i + steps, column])
+
+        if len(exog_column_transformed) > 1:
+            exog_column_transformed = np.vstack(exog_column_transformed)
+
+        exog_transformed.append(exog_column_transformed)
+
+    if len(exog_transformed) > 1:
+        exog_transformed = np.hstack(exog_transformed)
+    else:
+        exog_transformed = exog_column_transformed
+
+    return exog_transformed
+
+
 def expand_index(index: Union[pd.Index, None], steps: int) -> pd.Index:
     
     '''

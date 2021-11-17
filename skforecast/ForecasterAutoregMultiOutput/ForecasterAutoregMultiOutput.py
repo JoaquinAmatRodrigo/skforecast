@@ -21,6 +21,7 @@ from ..utils import check_exog
 from ..utils import preprocess_y
 from ..utils import preprocess_last_window
 from ..utils import preprocess_exog
+from ..utils import exog_to_multi_output
 from ..utils import expand_index
 
 
@@ -285,7 +286,7 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
         else:
             col_names_exog = exog.columns if isinstance(exog, pd.DataFrame) else [exog.name]
             # Transform exog to match multi output format
-            X_exog = self._exog_to_multi_output(exog=exog_values)
+            X_exog = self.exog_to_multi_output(exog=exog_values, steps=self.steps)
             col_names_exog = [f"{col_name}_step_{i+1}" for col_name in col_names_exog for i in range(self.steps)]
             X_train_col_names.extend(col_names_exog)
             # The first `self.max_lag` positions have to be removed from X_exog
@@ -475,7 +476,7 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
                 exog_values, _ = preprocess_exog(
                                         exog = exog.iloc[:steps, ]
                                  )
-            exog_values = self._exog_to_multi_output(exog=exog_values, steps=steps)
+            exog_values = self.exog_to_multi_output(exog=exog_values, steps=steps)
 
         else:
             exog_values = None
@@ -514,156 +515,7 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
                         name = 'pred'
                       )
 
-        return predictions
-
-    
-    def _check_predict_input(
-        self,
-        steps: int,
-        last_window: pd.Series=None,
-        exog: Union[pd.Series, pd.DataFrame]=None
-    ) -> None:
-        '''
-        Check all inputs of predict method
-        '''
-
-        if not self.fitted:
-            raise Exception(
-                'This Forecaster instance is not fitted yet. Call `fit` with'
-                'appropriate arguments before using predict.'
-            )
-        
-        if steps < 1:
-            raise Exception(
-                f"`steps` must be integer greater than 0. Got {steps}."
-            )
-
-        if steps > self.steps:
-            raise Exception(
-                f"`steps` must be lower or equal to the value of steps defined "
-                f"when initializing the forecaster. Got {steps} but the maximum "
-                f"is {self.steps}."
-            )
-        
-        if exog is None and self.included_exog:
-            raise Exception(
-                'Forecaster trained with exogenous variable/s. '
-                'Same variable/s must be provided in `predict()`.'
-            )
-            
-        if exog is not None and not self.included_exog:
-            raise Exception(
-                'Forecaster trained without exogenous variable/s. '
-                '`exog` must be `None` in `predict()`.'
-            )
-        
-        if exog is not None:
-            if len(exog) < steps:
-                raise Exception(
-                    '`exog` must have at least as many values as `steps` predicted.'
-                )
-            if not isinstance(exog, self.exog_type):
-                raise Exception(
-                    f"Expected type for `exog`: {self.exog_type}. Got {type(exog)}"      
-                )
-            if isinstance(exog, pd.DataFrame):
-                col_missing = set(self.exog_col_names).difference(set(exog.columns))
-                if col_missing:
-                    raise Exception(
-                        f"Missing columns in `exog`. Expected {self.exog_col_names}. "
-                        f"Got {exog.columns.to_list()}"      
-                    )
-            check_exog(exog = exog)
-            _, exog_index = preprocess_exog(exog=exog.iloc[:0, ])
-            
-            if not isinstance(exog_index, self.index_type):
-                raise Exception(
-                    f"Expected index of type {self.index_type} for `exog`. "
-                    f"Got {type(exog_index)}"      
-                )
-            if not exog_index.freqstr == self.index_freq:
-                raise Exception(
-                    f"Expected frequency of type {self.index_type} for `exog`. "
-                    f"Got {exog_index.freqstr}"      
-                )
-            
-        if last_window is not None:
-            if len(last_window) < self.max_lag:
-                raise Exception(
-                    f"`last_window` must have as many values as as needed to "
-                    f"calculate the maximum lag ({self.max_lag})."
-                )
-            if not isinstance(last_window, pd.Series):
-                raise Exception('`last_window` must be a pandas Series.')
-            if last_window.isnull().any():
-                raise Exception('`last_window` has missing values.')
-            _, last_window_index = preprocess_last_window(
-                                        last_window = last_window.iloc[:0]
-                                   ) 
-            if not isinstance(last_window_index, self.index_type):
-                raise Exception(
-                    f"Expected index of type {self.index_type} for `last_window`. "
-                    f"Got {type(last_window_index)}"      
-                )
-            if not last_window_index.freqstr == self.index_freq:
-                raise Exception(
-                    f"Expected frequency of type {self.index_type} for `last_window`. "
-                    f"Got {last_window_index.freqstr}"      
-                )
-
-        return    
-    
-
-    def _exog_to_multi_output(
-        self,
-        exog: np.ndarray,
-        steps: Union[int, None]=None
-    )-> np.ndarray:
-        
-        '''
-        Transforms `exog` to `np.ndarray` with the shape needed for multioutput
-        regresors.
-        
-        Parameters
-        ----------        
-        exog : numpy ndarray, shape(samples,)
-            Time series values
-
-        steps: int, default `None`.
-            Number of steps that will be predicted using this exog. If `None`,
-            `self.steps` is used.
-
-        Returns 
-        -------
-        exog_transformed: numpy ndarray
-        '''
-
-        if steps is None:
-            steps = self.steps
-
-        exog_transformed = []
-
-        if exog.ndim < 2:
-            exog = exog.reshape(-1, 1)
-
-        for column in range(exog.shape[1]):
-
-            exog_column_transformed = []
-
-            for i in range(exog.shape[0] - (steps -1)):
-                exog_column_transformed.append(exog[i:i + steps, column])
-
-            if len(exog_column_transformed) > 1:
-                exog_column_transformed = np.vstack(exog_column_transformed)
-
-            exog_transformed.append(exog_column_transformed)
-
-        if len(exog_transformed) > 1:
-            exog_transformed = np.hstack(exog_transformed)
-        else:
-            exog_transformed = exog_column_transformed
-
-        return exog_transformed
+        return predictions    
     
     
     def set_params(self, **params: dict) -> None:
