@@ -1,7 +1,7 @@
 ################################################################################
 #                         ForecasterAutoregMultiOutput                         #
 #                                                                              #
-# This work by Joaquín Amat Rodrigo is licensed under a Creative Commons       #
+# This work by Joaquin Amat Rodrigo is licensed under a Creative Commons       #
 # Attribution 4.0 International License.                                       #
 ################################################################################
 # coding=utf-8
@@ -49,7 +49,7 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
             
     steps : int
         Maximum number of future steps the forecaster will predict when using
-        method `predict()`. Since a diferent model is created for each step,
+        method `predict()`. Since a different model is created for each step,
         this value should be defined before training.
     
     Attributes
@@ -284,7 +284,7 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
             X_train = X_lags
         else:
             col_names_exog = exog.columns if isinstance(exog, pd.DataFrame) else [exog.name]
-            # Trasform exog to match multi output format
+            # Transform exog to match multi output format
             X_exog = self._exog_to_multi_output(exog=exog_values)
             col_names_exog = [f"{col_name}_step_{i+1}" for col_name in col_names_exog for i in range(self.steps)]
             X_train_col_names.extend(col_names_exog)
@@ -316,7 +316,7 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
     ) -> Tuple[pd.DataFrame, pd.Series]:
 
         '''
-        Select columns needed to train a forcaster for a specific step. The imput
+        Select columns needed to train a forcaster for a specific step. The input
         matrices should be created with created with `create_train_X_y()`.         
 
         Parameters
@@ -441,7 +441,7 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
 
         last_window : pandas Series, default `None`
             Values of the series used to create the predictors (lags) need in the 
-            first iteration of predictiont (t + 1).
+            first iteration of prediction (t + 1).
     
             If `last_window = None`, the values stored in` self.last_window` are
             used to calculate the initial predictors, and the predictions start
@@ -500,7 +500,7 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
                 # Only columns from exog related with the current step are selected.
                 X = np.hstack([X_lags, exog_values[0][step::steps].reshape(1, -1)])
             with warnings.catch_warnings():
-                # Supress scikitlearn warning: "X does not have valid feature names,
+                # Suppress scikitlearn warning: "X does not have valid feature names,
                 # but NoOpTransformer was fitted with feature names".
                 warnings.simplefilter("ignore")
                 predictions[step] = regressor.predict(X)

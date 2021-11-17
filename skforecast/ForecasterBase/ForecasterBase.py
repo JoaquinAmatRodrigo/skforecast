@@ -160,4 +160,102 @@ class ForecasterBase(ABC):
         '''
         
         pass
+
+
+    def _check_predict_input(
+        self,
+        steps: int,
+        last_window: pd.Series=None,
+        exog: Union[pd.Series, pd.DataFrame]=None
+    ) -> None:
+        '''
+        Check all inputs of predict method
+        '''
+
+        if not self.fitted:
+            raise Exception(
+                'This Forecaster instance is not fitted yet. Call `fit` with'
+                'appropriate arguments before using predict.'
+            )
+        
+        if steps < 1:
+            raise Exception(
+                f"`steps` must be integer greater than 0. Got {steps}."
+            )
+
+        if hasattr(self, 'steps'):
+            if steps > self.steps:
+                raise Exception(
+                    f"`steps` must be lower or equal to the value of steps defined "
+                    f"when initializing the forecaster. Got {steps} but the maximum "
+                    f"is {self.steps}."
+                )
+        
+        if exog is None and self.included_exog:
+            raise Exception(
+                'Forecaster trained with exogenous variable/s. '
+                'Same variable/s must be provided in `predict()`.'
+            )
+            
+        if exog is not None and not self.included_exog:
+            raise Exception(
+                'Forecaster trained without exogenous variable/s. '
+                '`exog` must be `None` in `predict()`.'
+            )
+        
+        if exog is not None:
+            if len(exog) < steps:
+                raise Exception(
+                    '`exog` must have at least as many values as `steps` predicted.'
+                )
+            if not isinstance(exog, self.exog_type):
+                raise Exception(
+                    f"Expected type for `exog`: {self.exog_type}. Got {type(exog)}"      
+                )
+            if isinstance(exog, pd.DataFrame):
+                col_missing = set(self.exog_col_names).difference(set(exog.columns))
+                if col_missing:
+                    raise Exception(
+                        f"Missing columns in `exog`. Expected {self.exog_col_names}. "
+                        f"Got {exog.columns.to_list()}"      
+                    )
+            check_exog(exog = exog)
+            _, exog_index = preprocess_exog(exog=exog.iloc[:0, ])
+            
+            if not isinstance(exog_index, self.index_type):
+                raise Exception(
+                    f"Expected index of type {self.index_type} for `exog`. "
+                    f"Got {type(exog_index)}"      
+                )
+            if not exog_index.freqstr == self.index_freq:
+                raise Exception(
+                    f"Expected frequency of type {self.index_type} for `exog`. "
+                    f"Got {exog_index.freqstr}"      
+                )
+            
+        if last_window is not None:
+            if len(last_window) < self.max_lag:
+                raise Exception(
+                    f"`last_window` must have as many values as as needed to "
+                    f"calculate the maximum lag ({self.max_lag})."
+                )
+            if not isinstance(last_window, pd.Series):
+                raise Exception('`last_window` must be a pandas Series.')
+            if last_window.isnull().any():
+                raise Exception('`last_window` has missing values.')
+            _, last_window_index = preprocess_last_window(
+                                        last_window = last_window.iloc[:0]
+                                   ) 
+            if not isinstance(last_window_index, self.index_type):
+                raise Exception(
+                    f"Expected index of type {self.index_type} for `last_window`. "
+                    f"Got {type(last_window_index)}"      
+                )
+            if not last_window_index.freqstr == self.index_freq:
+                raise Exception(
+                    f"Expected frequency of type {self.index_type} for `last_window`. "
+                    f"Got {last_window_index.freqstr}"      
+                )
+
+        return
         
