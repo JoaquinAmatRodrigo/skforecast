@@ -11,6 +11,10 @@ from typing import Union, Dict, List, Tuple, Any
 import logging
 import pandas as pd
 
+from ..utils import check_exog
+from ..utils import preprocess_last_window
+from ..utils import preprocess_exog
+
 logging.basicConfig(
     format = '%(name)-10s %(levelname)-5s %(message)s', 
     level  = logging.INFO,
@@ -30,7 +34,7 @@ class ForecasterBase(ABC):
         exog: Union[pd.Series, pd.DataFrame]=None
     ) -> Tuple[pd.DataFrame, pd.Series]:
         '''
-        Create training matrices from univariante time series and exogenous
+        Create training matrices from univariate time series and exogenous
         variables.
         
         Parameters

@@ -58,14 +58,14 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
     regressor : regressor or pipeline compatible with the scikit-learn API
         An instance of a regressor or pipeline compatible with the scikit-learn API.
         One instance of this regressor is trainned for each step. All
-        them are stored in `slef.regressors_`.
+        them are stored in `self.regressors_`.
         
     regressors_ : dict
         Dictionary with regressors trained for each step.
         
     steps : int
         Number of future steps the forecaster will predict when using method
-        `predict()`. Since a diferent model is created for each step, this value
+        `predict()`. Since a different model is created for each step, this value
         should be defined before training.
         
     lags : numpy ndarray
@@ -178,7 +178,7 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
             f"Exogenous variables names: {self.exog_col_names} \n"
             f"Training range: {self.training_range.to_list() if self.fitted else None} \n"
             f"Training index type: {str(self.index_type) if self.fitted else None} \n"
-            f"Training index frequancy: {self.index_freq if self.fitted else None} \n"
+            f"Training index frequency: {self.index_freq if self.fitted else None} \n"
             f"Regressor parameters: {params} \n"
         )
 
@@ -231,7 +231,7 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
         exog: Union[pd.Series, pd.DataFrame]=None
     ) -> Tuple[pd.DataFrame, pd.DataFrame]:
         '''
-        Create training matrices from univariante time series and exogenous
+        Create training matrices from univariate time series and exogenous
         variables. The resulting matrices contain the target variable and predictors
         needed to train all the forecaster (one per step).      
         
@@ -286,7 +286,7 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
         else:
             col_names_exog = exog.columns if isinstance(exog, pd.DataFrame) else [exog.name]
             # Transform exog to match multi output format
-            X_exog = self.exog_to_multi_output(exog=exog_values, steps=self.steps)
+            X_exog = exog_to_multi_output(exog=exog_values, steps=self.steps)
             col_names_exog = [f"{col_name}_step_{i+1}" for col_name in col_names_exog for i in range(self.steps)]
             X_train_col_names.extend(col_names_exog)
             # The first `self.max_lag` positions have to be removed from X_exog
@@ -476,7 +476,7 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
                 exog_values, _ = preprocess_exog(
                                         exog = exog.iloc[:steps, ]
                                  )
-            exog_values = self.exog_to_multi_output(exog=exog_values, steps=steps)
+            exog_values = exog_to_multi_output(exog=exog_values, steps=steps)
 
         else:
             exog_values = None
@@ -585,7 +585,7 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
         Return estimated coefficients for the linear regression model stored in
         the forecaster for a specific step. Since a separate model is created for
         each forecast time step, it is necessary to select the model from which
-        retireve information.
+        retrieve information.
         
         Only valid when the forecaster has been trained using as `regressor:
         `LinearRegression()`, `Lasso()` or `Ridge()`.
@@ -593,7 +593,7 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
         Parameters
         ----------
         step : int
-            Model from which retireve information (a separate model is created for
+            Model from which retrieve information (a separate model is created for
             each forecast time step).
 
         Returns 
@@ -605,7 +605,7 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
         
         if step > self.steps:
             raise Exception(
-                f"Forecaster traied for {self.steps} steps. Got step={step}."
+                f"Forecaster trained for {self.steps} steps. Got step={step}."
             )
             
         if isinstance(self.regressor, sklearn.pipeline.Pipeline):
@@ -633,12 +633,12 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
         return coef
 
     
-    def get_feature_importances(self, step) -> np.ndarray:
+    def get_feature_importance(self, step) -> np.ndarray:
         '''      
-        Return impurity-based feature importances of the model stored in
+        Return impurity-based feature importance of the model stored in
         the forecaster for a specific step. Since a separate model is created for
         each forecast time step, it is necessary to select the model from which
-        retireve information.
+        retrieve information.
         
         Only valid when the forecaster has been trained using 
         `GradientBoostingRegressor`, `RandomForestRegressor` or 
@@ -647,18 +647,18 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
         Parameters
         ----------
         step : int
-            Model from which retireve information (a separate model is created for
+            Model from which retrieve information (a separate model is created for
             each forecast time step).
 
         Returns 
         -------
-        feature_importances : pandas DataFrame
-            Impurity-based feature importances associated with each predictor.
+        feature_importance : pandas DataFrame
+            Impurity-based feature importance associated with each predictor.
         '''
         
         if step > self.steps:
             raise Exception(
-                f"Forecaster traied for {self.steps} steps. Got step={step}."
+                f"Forecaster trained for {self.steps} steps. Got step={step}."
             )
         
         if isinstance(self.regressor, sklearn.pipeline.Pipeline):
@@ -672,7 +672,7 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
                            
         if not isinstance(estimator, valid_instances):
             warnings.warn(
-                f"`get_feature_importances` only valid for forecasters with "
+                f"`get_feature_importance` only valid for forecasters with "
                 f"regressor of type {valid_instances}."
             )
             return

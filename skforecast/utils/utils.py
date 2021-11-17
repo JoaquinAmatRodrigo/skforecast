@@ -58,6 +58,111 @@ def check_exog(exog: Any) -> None:
         raise Exception('`exog` has missing values.')
                 
     return
+
+
+def check_predict_input(
+    steps: int,
+    fitted: bool,
+    included_exog: bool,
+    exog_type: type,
+    exog_col_names: list,
+    index_type: type,
+    index_freq: str,
+    max_lag: int,
+    last_window: pd.Series=None,
+    exog: Union[pd.Series, pd.DataFrame]=None,
+    max_steps: int=None
+) -> None:
+    '''
+    Check all inputs of predict method
+    '''
+
+    if not fitted:
+        raise Exception(
+            'This Forecaster instance is not fitted yet. Call `fit` with'
+            'appropriate arguments before using predict.'
+        )
+    
+    if steps < 1:
+        raise Exception(
+            f"`steps` must be integer greater than 0. Got {steps}."
+        )
+
+    if max_steps is not None:
+        if steps > max_steps:
+            raise Exception(
+                f"`steps` must be lower or equal to the value of steps defined "
+                f"when initializing the forecaster. Got {steps} but the maximum "
+                f"is {max_steps}."
+            )
+    
+    if exog is None and included_exog:
+        raise Exception(
+            'Forecaster trained with exogenous variable/s. '
+            'Same variable/s must be provided in `predict()`.'
+        )
+        
+    if exog is not None and not included_exog:
+        raise Exception(
+            'Forecaster trained without exogenous variable/s. '
+            '`exog` must be `None` in `predict()`.'
+        )
+    
+    if exog is not None:
+        if len(exog) < steps:
+            raise Exception(
+                '`exog` must have at least as many values as `steps` predicted.'
+            )
+        if not isinstance(exog, exog_type):
+            raise Exception(
+                f"Expected type for `exog`: {exog_type}. Got {type(exog)}"      
+            )
+        if isinstance(exog, pd.DataFrame):
+            col_missing = set(exog_col_names).difference(set(exog.columns))
+            if col_missing:
+                raise Exception(
+                    f"Missing columns in `exog`. Expected {exog_col_names}. "
+                    f"Got {exog.columns.to_list()}"      
+                )
+        check_exog(exog = exog)
+        _, exog_index = preprocess_exog(exog=exog.iloc[:0, ])
+        
+        if not isinstance(exog_index, index_type):
+            raise Exception(
+                f"Expected index of type {index_type} for `exog`. "
+                f"Got {type(exog_index)}"      
+            )
+        if not exog_index.freqstr == index_freq:
+            raise Exception(
+                f"Expected frequency of type {index_type} for `exog`. "
+                f"Got {exog_index.freqstr}"      
+            )
+        
+    if last_window is not None:
+        if len(last_window) < max_lag:
+            raise Exception(
+                f"`last_window` must have as many values as as needed to "
+                f"calculate the maximum lag ({max_lag})."
+            )
+        if not isinstance(last_window, pd.Series):
+            raise Exception('`last_window` must be a pandas Series.')
+        if last_window.isnull().any():
+            raise Exception('`last_window` has missing values.')
+        _, last_window_index = preprocess_last_window(
+                                    last_window = last_window.iloc[:0]
+                                ) 
+        if not isinstance(last_window_index, index_type):
+            raise Exception(
+                f"Expected index of type {index_type} for `last_window`. "
+                f"Got {type(last_window_index)}"      
+            )
+        if not last_window_index.freqstr == index_freq:
+            raise Exception(
+                f"Expected frequency of type {index_type} for `last_window`. "
+                f"Got {last_window_index.freqstr}"      
+            )
+
+    return
     
 
 def preprocess_y(y: pd.Series) -> Union[np.ndarray, pd.Index]:
@@ -200,7 +305,6 @@ def preprocess_exog(
 
 
 def exog_to_multi_output(
-    self,
     exog: np.ndarray,
     steps: int
 )-> np.ndarray:

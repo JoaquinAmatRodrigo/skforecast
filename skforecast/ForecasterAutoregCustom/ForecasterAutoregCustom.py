@@ -154,7 +154,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             f"Exogenous variables names: {self.exog_col_names} \n"
             f"Training range: {self.training_range.to_list() if self.fitted else None} \n"
             f"Training index type: {str(self.index_type) if self.fitted else None} \n"
-            f"Training index frequancy: {self.index_freq if self.fitted else None} \n"
+            f"Training index frequency: {self.index_freq if self.fitted else None} \n"
             f"Regressor parameters: {params} \n"
         )
 
@@ -167,7 +167,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         exog: Union[pd.Series, pd.DataFrame]=None
     ) -> Tuple[pd.DataFrame, pd.Series]:
         '''
-        Create training matrices from univariante time series.
+        Create training matrices from univariate time series.
         
         Parameters
         ----------        
@@ -193,7 +193,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             raise Exception(
                 f'`y` must have as many values as the windows_size needed by '
                 f'{self.create_predictors.__name__}. For this Forecaster the '
-                f'minimum lenght is {self.window_size + 1}'
+                f'minimum length is {self.window_size + 1}'
             )
 
         check_y(y=y)
@@ -209,7 +209,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             if not (exog_index[:len(y_index)] == y_index).all():
                 raise Exception(
                 ('Different index for `y` and `exog`. They must be equal '
-                'to ensure the correct aligment of values.')      
+                'to ensure the correct alignment of values.')      
                 )
        
         X_train  = []
@@ -357,7 +357,7 @@ class ForecasterAutoregCustom(ForecasterBase):
                 X = np.column_stack((X, exog[i, ].reshape(1, -1)))
 
             with warnings.catch_warnings():
-                # Supress scikitlearn warning: "X does not have valid feature names,
+                # Suppress scikitlearn warning: "X does not have valid feature names,
                 # but NoOpTransformer was fitted with feature names".
                 warnings.simplefilter("ignore")
                 prediction = self.regressor.predict(X)
@@ -387,7 +387,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             
         last_window : pandas Series, default `None`
             Values of the series used to create the predictors (lags) need in the 
-            first iteration of predictiont (t + 1).
+            first iteration of prediction (t + 1).
     
             If `last_window = None`, the values stored in` self.last_window` are
             used to calculate the initial predictors, and the predictions start
@@ -472,7 +472,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             
         last_window : 1d numpy ndarray shape (, max_lag)
             Values of the series used to create the predictors (lags) needed in the 
-            first iteration of predictiont (t + 1).
+            first iteration of prediction (t + 1).
     
             If `last_window = None`, the values stored in` self.last_window` are
             used to calculate the initial predictors, and the predictions start
@@ -496,14 +496,14 @@ class ForecasterAutoregCustom(ForecasterBase):
         in_sample_residuals: bool, default `True`
             If `True`, residuals from the training data are used as proxy of
             prediction error to create prediction intervals. If `False`, out of
-            sample residuals are used. In the latter case, the user shoud have
+            sample residuals are used. In the latter case, the user should have
             calculated and stored the residuals within the forecaster (see
             `set_out_sample_residuals()`).
             
 
         Returns 
         -------
-        predicction_interval : numpy ndarray, shape (steps, 2)
+        prediction_interval : numpy ndarray, shape (steps, 2)
             Interval estimated for each prediction by bootstrapping:
                 first column = lower bound of the interval.
                 second column= upper bound interval of the interval.
@@ -593,7 +593,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             
         last_window : pandas Series, default `None`
             Values of the series used to create the predictors (lags) needed in the 
-            first iteration of predictiont (t + 1).
+            first iteration of prediction (t + 1).
     
             If `last_window = None`, the values stored in` self.last_window` are
             used to calculate the initial predictors, and the predictions start
@@ -617,7 +617,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         in_sample_residuals: bool, default `True`
             If `True`, residuals from the training data are used as proxy of
             prediction error to create prediction intervals. If `False`, out of
-            sample residuals are used. In the latter case, the user shoud have
+            sample residuals are used. In the latter case, the user should have
             calculated and stored the residuals within the forecaster (see
             `set_out_sample_residuals()`).
 
@@ -738,7 +738,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             If `True`, new residuals are added to the once already stored in the
             attribute `out_sample_residuals`. Once the limit of 1000 values is
             reached, no more values are appended. If False, `out_sample_residuals`
-            is overwrited with the new residuals.
+            is overwritten with the new residuals.
             
 
         Returns 
@@ -798,7 +798,7 @@ class ForecasterAutoregCustom(ForecasterBase):
                           )
         if not isinstance(estimator, valid_instances):
             warnings.warn(
-                f"`get_feature_importances` only valid for forecasters with "
+                f"`get_coef` only valid for forecasters with "
                 f"regressor of type {valid_instances}."
             )
             return
@@ -811,9 +811,9 @@ class ForecasterAutoregCustom(ForecasterBase):
         return coef
 
     
-    def get_feature_importances(self) -> pd.DataFrame:
+    def get_feature_importance(self) -> pd.DataFrame:
         '''      
-        Return impurity-based feature importances of the model stored in the
+        Return impurity-based feature importance of the model stored in the
         forecaster. Only valid when the forecaster has been trained using
         `GradientBoostingRegressor` , `RandomForestRegressor` or 
         `HistGradientBoostingRegressor` as regressor.
@@ -824,8 +824,8 @@ class ForecasterAutoregCustom(ForecasterBase):
 
         Returns 
         -------
-        feature_importances : pandas DataFrame
-            Impurity-based feature importances associated with each predictor.
+        feature_importance : pandas DataFrame
+            Impurity-based feature importance associated with each predictor.
         '''
 
         if isinstance(self.regressor, sklearn.pipeline.Pipeline):
@@ -839,7 +839,7 @@ class ForecasterAutoregCustom(ForecasterBase):
 
         if not isinstance(estimator, valid_instances):
             warnings.warn(
-                f"`get_feature_importances` only valid for forecasters with "
+                f"`get_feature_importance` only valid for forecasters with "
                 f"regressor of type {valid_instances}."
             )
 
