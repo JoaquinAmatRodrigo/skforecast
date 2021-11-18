@@ -3,7 +3,6 @@
 # ==============================================================================
 
 import pytest
-from pytest import approx
 import numpy as np
 import pandas as pd
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
@@ -31,7 +30,7 @@ def test_create_lags_output():
     
 def test_create_lags_exception_when_len_of_y_is_lower_than_maximum_lag():
     '''
-    Test exception is raised when lenght of y is lower than maximum lag included
+    Test exception is raised when length of y is lower than maximum lag included
     in the forecaster.
     '''
     forecaster = ForecasterAutoreg(LinearRegression(), lags=10)

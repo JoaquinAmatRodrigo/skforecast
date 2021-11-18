@@ -7,7 +7,7 @@ from skforecast.ForecasterAutoreg import ForecasterAutoreg
 from sklearn.linear_model import LinearRegression
 
         
-def test_predict_output_when_regresor_is_LinearRegression():
+def test_predict_output_when_regressor_is_LinearRegression():
     '''
     Test predict output when using LinearRegression as regressor.
     '''

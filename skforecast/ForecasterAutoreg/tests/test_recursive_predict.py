@@ -7,7 +7,7 @@ import pandas as pd
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
 from sklearn.linear_model import LinearRegression
 
-def test_recursive_predict_output_when_regresor_is_LinearRegression():
+def test_recursive_predict_output_when_regressor_is_LinearRegression():
     '''
     Test _recursive_predict output when using LinearRegression as regressor.
     '''
