@@ -1,7 +1,5 @@
-import sys
-sys.path.insert(1, '/home/ximo/Documents/GitHub/skforecast')
-
-import pytest
+# Unit test get_feature_importance
+# ==============================================================================
 from pytest import approx
 import numpy as np
 import pandas as pd
@@ -14,21 +12,22 @@ from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.linear_model import Lasso
 from sklearn.ensemble import RandomForestRegressor
 
-def test_get_feature_importances_when_regressor_is_RandomForest():
+def test_output_get_feature_importance_when_regressor_is_RandomForest():
     forecaster = ForecasterAutoreg(RandomForestRegressor(n_estimators=1, max_depth=2, random_state=123), lags=3)
-    forecaster.fit(y=np.arange(10))
-    expected = np.array([0.94766355, 0., 0.05233645])
-    assert forecaster.get_feature_importances() == approx(expected)
+    forecaster.fit(y=pd.Series(np.arange(10)))
+    expected = pd.DataFrame({
+                    'feature': ['lag_1', 'lag_2', 'lag_3'],
+                    'importance': np.array([0.94766355, 0., 0.05233645])
+                })
+    results = forecaster.get_feature_importance()
+    assert (results['feature'] == expected['feature']).all()
+    assert results['importance'].values == approx(expected['importance'].values)
     
-def test_get_feature_importances_when_regressor_is_GradientBoostingRegressor():
-    forecaster = ForecasterAutoreg(GradientBoostingRegressor(n_estimators=1, max_depth=2, random_state=123), lags=3)
-    forecaster.fit(y=np.arange(10))
-    expected = np.array([0.1509434 , 0.05660377, 0.79245283])
-    assert forecaster.get_feature_importances() == approx(expected)
     
-def test_get_feature_importances_when_regressor_is_linear_model():
+def test_output_get_feature_importance_when_regressor_is_linear_model():
     forecaster = ForecasterAutoreg(Lasso(), lags=3)
-    forecaster.fit(y=np.arange(50))
+    forecaster.fit(y=pd.Series(np.arange(5)))
     expected = None
-    assert forecaster.get_feature_importances() is None
+    results = forecaster.get_feature_importance()
+    assert results is expected
     

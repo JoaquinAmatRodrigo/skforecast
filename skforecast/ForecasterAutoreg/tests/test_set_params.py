@@ -1,7 +1,5 @@
-import sys
-sys.path.insert(1, '/home/ximo/Documents/GitHub/skforecast')
-
-import pytest
+# Unit test set_params
+# ==============================================================================
 from pytest import approx
 import numpy as np
 import pandas as pd
@@ -9,7 +7,7 @@ from skforecast.ForecasterAutoreg import ForecasterAutoreg
 from sklearn.linear_model import LinearRegression
 
 
-def test_set_paramns():
+def test_set_params():
     
     forecaster = ForecasterAutoreg(LinearRegression(fit_intercept=True), lags=3)
     new_paramns = {'fit_intercept': False}
@@ -17,7 +15,8 @@ def test_set_paramns():
     expected = {'copy_X': True,
                  'fit_intercept': False,
                  'n_jobs': None,
-                 'normalize': False,
+                 'normalize': 'deprecated',
                  'positive': False
                 }
-    assert forecaster.regressor.get_params() == expected
+    results = forecaster.regressor.get_params()
+    assert results == expected
