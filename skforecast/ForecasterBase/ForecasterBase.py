@@ -139,8 +139,7 @@ class ForecasterBase(ABC):
         
         pass
         
-
-    @abstractmethod    
+   
     def set_lags(self, lags: int) -> None:
         '''      
         Set new value to the attribute `lags`.
