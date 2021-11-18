@@ -23,6 +23,7 @@ from ..utils import preprocess_last_window
 from ..utils import preprocess_exog
 from ..utils import exog_to_multi_output
 from ..utils import expand_index
+from ..utils import check_predict_input
 
 
 logging.basicConfig(
@@ -111,7 +112,7 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
     -----
     A separate model is created for each forecast time step. It is important to
     note that all models share the same configuration of parameters and
-    hiperparameters.
+    hyperparameters.
      
     '''
     
@@ -261,7 +262,7 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
 
         if len(y_values) < self.max_lag + self.steps:
             raise Exception(
-                f"Mínimum lenght of `y` for training this forecaster is "
+                f"Minimum length of `y` for training this forecaster is "
                 f"{self.max_lag + self.steps}. Got {len(y_values)}"
             )
         if exog is not None:
@@ -274,7 +275,7 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
             if not (exog_index[:len(y_index)] == y_index).all():
                 raise Exception(
                 ('Different index for `y` and `exog`. They must be equal '
-                'to ensure the correct aligment of values.')      
+                'to ensure the correct alignment of values.')      
                 )
       
         X_lags, y_train = self._create_lags(y=y_values)
@@ -461,11 +462,19 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
         if steps is None:
             steps = self.steps
 
-        self._check_predict_input(
-            steps       = steps,
-            last_window = last_window, 
-            exog        = exog
-        )
+        check_predict_input(
+            steps          = steps,
+            fitted         = self.fitted,
+            included_exog  = self.included_exog,
+            index_type     = self.index_type,
+            index_freq     = self.index_freq,
+            window_size    = self.window_size,
+            last_window    = last_window,
+            exog           = exog,
+            exog_type      = self.exog_type,
+            exog_col_names = self.exog_col_names,
+            max_steps      = self.steps,
+        ) 
 
         if exog is not None:
             if isinstance(exog, pd.DataFrame):
@@ -522,7 +531,7 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
         '''
         Set new values to the parameters of the scikit learn model stored in the
         forecaster. It is important to note that all models share the same 
-        configuration of parameters and hiperparameters.
+        configuration of parameters and hyperparameters.
         
         Parameters
         ----------

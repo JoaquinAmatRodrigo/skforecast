@@ -1,7 +1,7 @@
 ################################################################################
 #                        ForecasterAutoregCustom                               #
 #                                                                              #
-# This work by Joaquín Amat Rodrigo is licensed under a Creative Commons       #
+# This work by Joaquin Amat Rodrigo is licensed under a Creative Commons       #
 # Attribution 4.0 International License.                                       #
 ################################################################################
 # coding=utf-8
@@ -22,6 +22,7 @@ from ..utils import preprocess_y
 from ..utils import preprocess_last_window
 from ..utils import preprocess_exog
 from ..utils import expand_index
+from ..utils import check_predict_input
 
 
 logging.basicConfig(
@@ -403,10 +404,18 @@ class ForecasterAutoregCustom(ForecasterBase):
             
         '''
 
-        self._check_predict_input(
-            steps       = steps,
-            last_window = last_window, 
-            exog        = exog
+        check_predict_input(
+            steps          = steps,
+            fitted         = self.fitted,
+            included_exog  = self.included_exog,
+            index_type     = self.index_type,
+            index_freq     = self.index_freq,
+            window_size    = self.window_size,
+            last_window    = last_window,
+            exog           = exog,
+            exog_type      = self.exog_type,
+            exog_col_names = self.exog_col_names,
+            max_steps      = None,
         )
      
         if exog is not None:
@@ -478,7 +487,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             used to calculate the initial predictors, and the predictions start
             right after training data.
             
-        exog : numnpy ndarray
+        exog : numpy ndarray
             Exogenous variable/s included as predictor/s.
             
         n_boot: int, default `500`
@@ -638,10 +647,18 @@ class ForecasterAutoregCustom(ForecasterBase):
             
         '''
         
-        self._check_predict_input(
-            steps       = steps,
-            last_window = last_window, 
-            exog        = exog
+        check_predict_input(
+            steps          = steps,
+            fitted         = self.fitted,
+            included_exog  = self.included_exog,
+            index_type     = self.index_type,
+            index_freq     = self.index_freq,
+            window_size    = self.window_size,
+            last_window    = last_window,
+            exog           = exog,
+            exog_type      = self.exog_type,
+            exog_col_names = self.exog_col_names,
+            max_steps      = None,
         )
         
         if exog is not None:

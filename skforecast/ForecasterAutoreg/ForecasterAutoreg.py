@@ -1,7 +1,7 @@
 ################################################################################
 #                            ForecasterAutoreg                                 #
 #                                                                              #
-# This work by Joaquín Amat Rodrigo is licensed under a Creative Commons       #
+# This work by Joaquin Amat Rodrigo is licensed under a Creative Commons       #
 # Attribution 4.0 International License.                                       #
 ################################################################################
 # coding=utf-8
@@ -22,6 +22,7 @@ from ..utils import preprocess_y
 from ..utils import preprocess_last_window
 from ..utils import preprocess_exog
 from ..utils import expand_index
+from ..utils import check_predict_input
 
 logging.basicConfig(
     format = '%(name)-10s %(levelname)-5s %(message)s', 
@@ -248,7 +249,7 @@ class ForecasterAutoreg(ForecasterBase):
             if not (exog_index[:len(y_index)] == y_index).all():
                 raise Exception(
                 ('Different index for `y` and `exog`. They must be equal '
-                'to ensure the correct aligment of values.')      
+                'to ensure the correct alignment of values.')      
                 )
         
         X_train, y_train = self._create_lags(y=y_values)
@@ -377,7 +378,7 @@ class ForecasterAutoreg(ForecasterBase):
                 X = np.column_stack((X, exog[i, ].reshape(1, -1)))
 
             with warnings.catch_warnings():
-                # Supress scikitlearn warning: "X does not have valid feature names,
+                # Suppress scikitlearn warning: "X does not have valid feature names,
                 # but NoOpTransformer was fitted with feature names".
                 warnings.simplefilter("ignore")
                 prediction = self.regressor.predict(X)
@@ -423,11 +424,19 @@ class ForecasterAutoreg(ForecasterBase):
             
         '''
 
-        self._check_predict_input(
-            steps       = steps,
-            last_window = last_window, 
-            exog        = exog
-        )
+        check_predict_input(
+            steps          = steps,
+            fitted         = self.fitted,
+            included_exog  = self.included_exog,
+            index_type     = self.index_type,
+            index_freq     = self.index_freq,
+            window_size    = self.window_size,
+            last_window    = last_window,
+            exog           = exog,
+            exog_type      = self.exog_type,
+            exog_col_names = self.exog_col_names,
+            max_steps      = None,
+        ) 
 
         if exog is not None:
             if isinstance(exog, pd.DataFrame):
@@ -656,11 +665,19 @@ class ForecasterAutoreg(ForecasterBase):
             
         '''
         
-        self._check_predict_input(
-            steps       = steps,
-            last_window = last_window, 
-            exog        = exog
-        )
+        check_predict_input(
+            steps          = steps,
+            fitted         = self.fitted,
+            included_exog  = self.included_exog,
+            index_type     = self.index_type,
+            index_freq     = self.index_freq,
+            window_size    = self.window_size,
+            last_window    = last_window,
+            exog           = exog,
+            exog_type      = self.exog_type,
+            exog_col_names = self.exog_col_names,
+            max_steps      = None,
+        ) 
 
         if exog is not None:
             if isinstance(exog, pd.DataFrame):

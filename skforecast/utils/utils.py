@@ -64,17 +64,41 @@ def check_predict_input(
     steps: int,
     fitted: bool,
     included_exog: bool,
-    exog_type: type,
-    exog_col_names: list,
     index_type: type,
     index_freq: str,
-    max_lag: int,
+    window_size: int,
     last_window: pd.Series=None,
     exog: Union[pd.Series, pd.DataFrame]=None,
+    exog_type: Union[type, None]=None,
+    exog_col_names: Union[list, None]=None,
     max_steps: int=None
 ) -> None:
     '''
-    Check all inputs of predict method
+    Check all inputs of predict method.
+
+    Parameters
+    ----------
+    steps: int
+
+    fitted: bool
+
+    included_exog: bool
+
+    index_type: type
+
+    index_freq: str
+
+    window_size: int
+
+    last_window: pd.Series=None
+
+    exog: Union[pd.Series, pd.DataFrame]=None
+
+    exog_type: Union[type, None]=None
+
+    exog_col_names: Union[list, None]=None
+
+    max_steps: int=None
     '''
 
     if not fitted:
@@ -139,10 +163,10 @@ def check_predict_input(
             )
         
     if last_window is not None:
-        if len(last_window) < max_lag:
+        if len(last_window) < window_size:
             raise Exception(
                 f"`last_window` must have as many values as as needed to "
-                f"calculate the maximum lag ({max_lag})."
+                f"calculate the predictors. For this forecaster it is {window_size}."
             )
         if not isinstance(last_window, pd.Series):
             raise Exception('`last_window` must be a pandas Series.')
