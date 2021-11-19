@@ -54,9 +54,3 @@ def test_set_lags_when_lags_argument_is_1d_numpy_array():
     forecaster.set_lags(lags=np.array([1,2,3]))
     assert (forecaster.lags == np.array([1, 2, 3])).all()
     assert forecaster.max_lag == 3
-    
-test_set_lags_exception_when_lags_argument_is_int_lower_than_1()
-test_set_lags_exception_when_lags_argument_has_any_value_lower_than_1()
-test_set_lags_when_lags_argument_is_int()
-test_set_lags_when_lags_argument_is_list()
-test_set_lags_when_lags_argument_is_1d_numpy_array()

@@ -6,11 +6,6 @@ import pandas as pd
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
 from sklearn.linear_model import Lasso
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.ensemble import GradientBoostingRegressor
-
-
-from sklearn.linear_model import Lasso
-from sklearn.ensemble import RandomForestRegressor
 
 def test_output_get_feature_importance_when_regressor_is_RandomForest():
     forecaster = ForecasterAutoreg(RandomForestRegressor(n_estimators=1, max_depth=2, random_state=123), lags=3)
