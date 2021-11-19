@@ -480,8 +480,8 @@ class ForecasterAutoreg(ForecasterBase):
     def _estimate_boot_interval(
         self,
         steps: int,
-        last_window: np.ndarray,
-        exog: np.ndarray,
+        last_window: np.ndarray=None,
+        exog: np.ndarray=None,
         interval: list=[5, 95],
         n_boot: int=500,
         random_state: int=123,
@@ -498,15 +498,15 @@ class ForecasterAutoreg(ForecasterBase):
         steps : int
             Number of future steps predicted.
             
-        last_window : 1d numpy ndarray shape (, max_lag)
+        last_window : 1d numpy ndarray shape (, max_lag), default `None`
             Values of the series used to create the predictors (lags) needed in the 
             first iteration of prediction (t + 1).
     
-            If `last_window = None`, the values stored in` self.last_window` are
+            If `last_window = `None`, the values stored in` self.last_window` are
             used to calculate the initial predictors, and the predictions start
             right after training data.
             
-        exog : numpy ndarray
+        exog : numpy ndarray, default `None`
             Exogenous variable/s included as predictor/s.
             
         n_boot: int, default `500`
@@ -545,6 +545,9 @@ class ForecasterAutoreg(ForecasterBase):
             
         '''
         
+        if last_window is None:
+            last_window = self.last_window.values
+
         boot_predictions = np.full(
                                 shape      = (steps, n_boot),
                                 fill_value = np.nan,
@@ -678,7 +681,7 @@ class ForecasterAutoreg(ForecasterBase):
             exog_col_names = self.exog_col_names,
             max_steps      = None,
         ) 
-
+        
         if exog is not None:
             if isinstance(exog, pd.DataFrame):
                 exog_values, _ = preprocess_exog(
