@@ -2,7 +2,6 @@
 # ==============================================================================
 
 import pytest
-from pytest import approx
 import numpy as np
 import pandas as pd
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
@@ -61,7 +60,7 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_series():
     assert (results[0] == expected[0]).all().all()
     assert (results[1] == expected[1]).all()
 
-def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_daraframe():
+def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_dataframe():
     '''
     Test the output of create_train_X_y when y=pd.Series(np.arange(10)) and 
     exog is a pandas dataframe with two columns.
@@ -93,9 +92,9 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_daraframe():
     assert (results[0] == expected[0]).all().all()
     assert (results[1] == expected[1]).all()
 
-def test_create_train_X_y_exception_when_y_and_exog_have_different_lenght():
+def test_create_train_X_y_exception_when_y_and_exog_have_different_length():
     '''
-    Test exception is raised when lenght of y and lenght of exog are different.
+    Test exception is raised when length of y and length of exog are different.
     '''
     forecaster = ForecasterAutoreg(LinearRegression(), lags=5)
     with pytest.raises(Exception):
@@ -110,7 +109,7 @@ def test_create_train_X_y_exception_when_y_and_exog_have_different_lenght():
         
 def test_create_train_X_y_exception_when_y_and_exog_have_different_index():
     '''
-    Test exception is raised when y and exog have diferent index.
+    Test exception is raised when y and exog have different index.
     '''
     forecaster = ForecasterAutoreg(LinearRegression(), lags=5)
     with pytest.raises(Exception):

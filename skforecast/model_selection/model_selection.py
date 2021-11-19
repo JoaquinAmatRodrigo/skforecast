@@ -1,7 +1,7 @@
 ################################################################################
 #                        skforecast.model_selection                            #
 #                                                                              #
-# This work by Joaquín Amat Rodrigo is licensed under a Creative Commons       #
+# This work by Joaquin Amat Rodrigo is licensed under a Creative Commons       #
 # Attribution 4.0 International License.                                       #
 ################################################################################
 # coding=utf-8
@@ -81,7 +81,7 @@ def time_series_spliter(
         
     if initial_train_size > len(y):
         raise Exception(
-            '`initial_train_size` must be smaller than lenght of `y`.'
+            '`initial_train_size` must be smaller than length of `y`.'
             ' Try to reduce `initial_train_size` or `steps`.'
         )
 
@@ -96,7 +96,7 @@ def time_series_spliter(
     if verbose:
         if folds == 1:
             print(f"Number of folds: {folds - 1}")
-            print("Not enought observations in `y` to create even a complete fold."
+            print("Not enough observations in `y` to create even a complete fold."
                   " Try to reduce `initial_train_size` or `steps`."
             )
 
@@ -235,7 +235,7 @@ def cv_forecaster(
 
     if initial_train_size > len(y):
         raise Exception(
-            '`initial_train_size` must be smaller than lenght of `y`.'
+            '`initial_train_size` must be smaller than length of `y`.'
         )
         
     if initial_train_size is not None and initial_train_size < forecaster.window_size:
@@ -385,7 +385,7 @@ def _backtesting_forecaster_refit(
             print(f"    Last fold only includes {remainder} observations.")
       
     for i in range(folds):
-        # In each iteratión (except the last one) the model is fitted before
+        # In each iteration (except the last one) the model is fitted before
         # making predictions. The train size increases by `steps` in each iteration.
         train_size = initial_train_size + i * steps
         if exog is not None:
@@ -831,7 +831,7 @@ def backtesting_forecaster(
 
     if initial_train_size is not None and initial_train_size > len(y):
         raise Exception(
-            'If used, `initial_train_size` must be smaller than lenght of `y`.'
+            'If used, `initial_train_size` must be smaller than length of `y`.'
         )
         
     if initial_train_size is not None and initial_train_size < forecaster.window_size:
@@ -847,7 +847,7 @@ def backtesting_forecaster(
 
     if not isinstance(refit, bool):
         raise Exception(
-            f'`refit` bost be boolean: True, False.'
+            f'`refit` must be boolean: True, False.'
         )
 
     if initial_train_size is None and refit:

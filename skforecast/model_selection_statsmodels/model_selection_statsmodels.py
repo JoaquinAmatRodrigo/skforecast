@@ -1,7 +1,7 @@
 ################################################################################
 #                  skforecast.model_selection_statsmodels                      #
 #                                                                              #
-# This work by Joaquín Amat Rodrigo is licensed under a Creative Commons       #
+# This work by Joaquin Amat Rodrigo is licensed under a Creative Commons       #
 # Attribution 4.0 International License.                                       #
 ################################################################################
 # coding=utf-8
@@ -154,7 +154,7 @@ def backtesting_sarimax(
             print(f"    Last fold only includes {remainder} observations.")
 
     if refit:
-        # In each iteratión (except the last one) the model is fitted before
+        # In each iteration (except the last one) the model is fitted before
         # making predictions. The train size increases by `steps` in each iteration.
         for i in range(folds):
             train_size = initial_train_size + i * steps
@@ -613,7 +613,7 @@ def grid_search_sarimax(
     keys_to_ignore = set(param_grid.keys()) - {'order', 'seasonal_order', 'trend'}
     if keys_to_ignore:
         print(
-            f'Only arguments: order, seasonal_order and trend are allowed for grid serach.'
+            f'Only arguments: order, seasonal_order and trend are allowed for grid search.'
             f' Ignoring {keys_to_ignore}.'
         )
         for key in keys_to_ignore:
