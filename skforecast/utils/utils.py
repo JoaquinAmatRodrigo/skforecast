@@ -74,31 +74,47 @@ def check_predict_input(
     max_steps: int=None
 ) -> None:
     '''
-    Check all inputs of predict method.
+    Check all inputs of predict method. This is a helper function to validate
+    that inputs used in predict method match attributes of a forecaster already
+    trained.
 
     Parameters
     ----------
-    steps: int
+    steps : int
+        Number of future steps predicted.
 
-    fitted: bool
+    fitted: Bool
+        Tag to identify if the regressor has been fitted (trained).
 
-    included_exog: bool
+    included_exog : bool
+        If the forecaster has been trained using exogenous variable/s.
 
-    index_type: type
+    index_type : type
+        Type of index of the input used in training.
 
-    index_freq: str
+    index_freq : str
+        Frequency of Index of the input used in training.
 
     window_size: int
+        Size of the window needed to create the predictors. It is equal to
+        `max_lag`.
 
-    last_window: pd.Series=None
+    last_window : pandas Series, default `None`
+        Values of the series used to create the predictors (lags) need in the 
+        first iteration of prediction (t + 1).
 
-    exog: Union[pd.Series, pd.DataFrame]=None
+    exog : pandas Series, pandas DataFrame, default `None`
+        Exogenous variable/s included as predictor/s.
 
-    exog_type: Union[type, None]=None
+    exog_type : type
+        Type of exogenous variable/s used in training.
+        
+    exog_col_names : list
+        Names of columns of `exog` if `exog` used in training was a pandas
+        DataFrame.
 
-    exog_col_names: Union[list, None]=None
-
-    max_steps: int=None
+    max_steps: int
+        Maximum number of steps allowed.
     '''
 
     if not fitted:
@@ -137,6 +153,10 @@ def check_predict_input(
             raise Exception(
                 '`exog` must have at least as many values as `steps` predicted.'
             )
+        if not isinstance(exog, (pd.Series, pd.DataFrame)):
+            raise Exception('`exog` must be a pandas Series or DataFrame.')
+        if exog.isnull().any():
+            raise Exception('`exog` has missing values.')
         if not isinstance(exog, exog_type):
             raise Exception(
                 f"Expected type for `exog`: {exog_type}. Got {type(exog)}"      
@@ -156,11 +176,13 @@ def check_predict_input(
                 f"Expected index of type {index_type} for `exog`. "
                 f"Got {type(exog_index)}"      
             )
-        if not exog_index.freqstr == index_freq:
-            raise Exception(
-                f"Expected frequency of type {index_type} for `exog`. "
-                f"Got {exog_index.freqstr}"      
-            )
+        
+        if isinstance(exog_index, pd.DatetimeIndex):
+            if not exog_index.freqstr == index_freq:
+                raise Exception(
+                    f"Expected frequency of type {index_freq} for `exog`. "
+                    f"Got {exog_index.freqstr}"      
+                )
         
     if last_window is not None:
         if len(last_window) < window_size:
@@ -180,11 +202,12 @@ def check_predict_input(
                 f"Expected index of type {index_type} for `last_window`. "
                 f"Got {type(last_window_index)}"      
             )
-        if not last_window_index.freqstr == index_freq:
-            raise Exception(
-                f"Expected frequency of type {index_type} for `last_window`. "
-                f"Got {last_window_index.freqstr}"      
-            )
+        if isinstance(last_window_index, pd.DatetimeIndex):
+            if not last_window_index.freqstr == index_freq:
+                raise Exception(
+                    f"Expected frequency of type {index_type} for `last_window`. "
+                    f"Got {last_window_index.freqstr}"      
+                )
 
     return
     
