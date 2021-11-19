@@ -15,6 +15,7 @@
 
 **Documentation: https://joaquinamatrodrigo.github.io/skforecast/**
 
+**Version 0.4.0 comming soon!!! :rocket:**
 
 ## Table of contents
 
