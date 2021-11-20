@@ -27,6 +27,8 @@ def test_output_get_coef_when_regressor_is_LinearRegression():
     
 def test_output_get_coef_when_regressor_is_RandomForest():
     '''
+    Test output of get_coef when regressor is RandomForestRegressor with lags=3
+    and it is trained with y=pd.Series(np.arange(5)).
     '''
     forecaster = ForecasterAutoreg(RandomForestRegressor(n_estimators=1, max_depth=2), lags=3)
     forecaster.fit(y=pd.Series(np.arange(5)))

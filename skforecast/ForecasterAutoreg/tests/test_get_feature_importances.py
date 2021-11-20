@@ -8,6 +8,8 @@ from sklearn.linear_model import Lasso
 from sklearn.ensemble import RandomForestRegressor
 
 def test_output_get_feature_importance_when_regressor_is_RandomForest():
+    '''
+    '''
     forecaster = ForecasterAutoreg(RandomForestRegressor(n_estimators=1, max_depth=2, random_state=123), lags=3)
     forecaster.fit(y=pd.Series(np.arange(10)))
     expected = pd.DataFrame({
@@ -20,6 +22,8 @@ def test_output_get_feature_importance_when_regressor_is_RandomForest():
     
     
 def test_output_get_feature_importance_when_regressor_is_linear_model():
+    '''
+    '''
     forecaster = ForecasterAutoreg(Lasso(), lags=3)
     forecaster.fit(y=pd.Series(np.arange(5)))
     expected = None
