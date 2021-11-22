@@ -32,7 +32,7 @@ def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_1_
     expected = pd.DataFrame(
                    np.array([[10., 20., 20.]]),
                    columns = ['pred', 'lower_bound', 'upper_bound'],
-                   index = [3]
+                   index = [5]
                )
     results = forecaster.predict_interval(steps=1, in_sample_residuals=True, n_boot=2)  
     pd.testing.assert_frame_equal(results, expected)
@@ -51,10 +51,10 @@ def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_2_
     forecaster.fit(y=pd.Series(np.arange(10)))
     forecaster.in_sample_residuals = np.full_like(forecaster.in_sample_residuals, fill_value=10)
     expected = pd.DataFrame(
-                   np.array([[10, 20, 20],
-                         [11, 23, 23]]),
+                   np.array([[10., 20., 20.],
+                         [11., 23., 23.]]),
                    columns = ['pred', 'lower_bound', 'upper_bound'],
-                   index = [3, 4]
+                   index = [5, 6]
                )
     results = forecaster.predict_interval(steps=2, in_sample_residuals=True, n_boot=2)  
     pd.testing.assert_frame_equal(results, expected)
@@ -75,7 +75,7 @@ def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_1_
     expected = pd.DataFrame(
                    np.array([[10., 20., 20.]]),
                    columns = ['pred', 'lower_bound', 'upper_bound'],
-                   index = [3]
+                   index = [5]
                )
     results = forecaster.predict_interval(steps=1, in_sample_residuals=False, n_boot=2)  
     pd.testing.assert_frame_equal(results, expected)
@@ -86,15 +86,18 @@ def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_2_
     Test output when regressor is LinearRegression and two step ahead is predicted
     using out sample residuals.
     '''
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregCustom(
+                        regressor      = LinearRegression(),
+                        fun_predictors = create_predictors,
+                        window_size    = 5
+                    )
     forecaster.fit(y=pd.Series(np.arange(10)))
     forecaster.out_sample_residuals = np.full_like(forecaster.in_sample_residuals, fill_value=10)
     expected = pd.DataFrame(
-                   np.array([[10, 20, 20],
-                         [11, 23, 23]]),
+                   np.array([[10., 20., 20.],
+                         [11., 23., 23.]]),
                    columns = ['pred', 'lower_bound', 'upper_bound'],
-                   index = [3, 4]
+                   index = [5, 6]
                )
     results = forecaster.predict_interval(steps=2, in_sample_residuals=False)  
     pd.testing.assert_frame_equal(results, expected)
-

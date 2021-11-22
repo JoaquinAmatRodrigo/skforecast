@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 from pytest import approx
-from skforecast import __version__
 from skforecast.ForecasterAutoregCustom import ForecasterAutoregCustom
 from sklearn.linear_model import LinearRegression
 

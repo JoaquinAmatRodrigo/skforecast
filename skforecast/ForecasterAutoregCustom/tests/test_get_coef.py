@@ -29,9 +29,10 @@ def test_output_get_coef_when_regressor_is_LinearRegression():
                         window_size    = 5
                  )
     forecaster.fit(y=pd.Series(np.arange(7)))
-    expected = np.array([0.2, 0.2, 0.2, 0.2, 0.2])
     expected = pd.DataFrame({
-                    'feature': ['custom_1', 'custom_2', 'custom_3', 'custom_3', 'custom_3'],
+                    'feature': ['custom_predictor_0', 'custom_predictor_1',
+                                'custom_predictor_2', 'custom_predictor_3',
+                                'custom_predictor_4'],
                     'coef': np.array([0.2, 0.2, 0.2, 0.2, 0.2])
                 })
     results = forecaster.get_coef()
@@ -49,7 +50,8 @@ def test_get_coef_when_regressor_is_RandomForest():
                         fun_predictors = create_predictors,
                         window_size    = 5
                  )
-    forecaster.fit(y=pd.Series(np.arange(5)))
+    forecaster.fit(y=pd.Series(np.arange(6)))
     expected = None
     results = forecaster.get_coef()
     assert results is expected
+    

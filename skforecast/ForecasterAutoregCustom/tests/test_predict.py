@@ -27,11 +27,10 @@ def test_predict_output_when_regressor_is_LinearRegression():
                         window_size    = 5
                     )
     forecaster.fit(y=pd.Series(np.arange(50)))
-    predictions = forecaster.predict(steps=5)
+    results = forecaster.predict(steps=5)
     expected = pd.Series(
                 data = np.array([50., 51., 52., 53., 54.]),
-                index = [3, 4, 5, 6, 7]
+                index = [5, 6, 7, 8, 9],
+                name = 'pred'
                )
-    assert (predictions.values == approx(expected.values))
-    assert (predictions.index == expected.index).all()
-
+    pd.testing.assert_series_equal(results, expected)

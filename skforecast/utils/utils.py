@@ -1,7 +1,7 @@
 ################################################################################
 #                                 utils                                        #
 #                                                                              #
-# This work by Joaquín Amat Rodrigo is licensed under a Creative Commons       #
+# This work by Joaquin Amat Rodrigo is licensed under a Creative Commons       #
 # Attribution 4.0 International License.    
 ################################################################################
 # coding=utf-8
@@ -155,7 +155,7 @@ def check_predict_input(
             )
         if not isinstance(exog, (pd.Series, pd.DataFrame)):
             raise Exception('`exog` must be a pandas Series or DataFrame.')
-        if exog.isnull().any():
+        if exog.isnull().values.any():
             raise Exception('`exog` has missing values.')
         if not isinstance(exog, exog_type):
             raise Exception(

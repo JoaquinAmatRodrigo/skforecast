@@ -38,7 +38,9 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_None():
                                     [7, 6, 5, 4, 3],
                                     [8, 7, 6, 5, 4]]),
                     index   = np.array([5, 6, 7, 8, 9]),
-                    columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5']
+                    columns = ['custom_predictor_0', 'custom_predictor_1',
+                               'custom_predictor_2', 'custom_predictor_3',
+                               'custom_predictor_4']
                 ),
                 pd.Series(
                     np.array([5, 6, 7, 8, 9]),
@@ -70,7 +72,9 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_series():
                                     [7, 6, 5, 4, 3, 108],
                                     [8, 7, 6, 5, 4, 109]]),
                     index   = np.array([5, 6, 7, 8, 9]),
-                    columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 'exog']
+                    columns = ['custom_predictor_0', 'custom_predictor_1',
+                               'custom_predictor_2', 'custom_predictor_3',
+                               'custom_predictor_4', 'exog']
                 ),
                 pd.Series(
                     np.array([5, 6, 7, 8, 9]),
@@ -104,7 +108,9 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_dataframe():
                                   [7, 6, 5, 4, 3, 108, 1008],
                                   [8, 7, 6, 5, 4, 109, 1009]]),
                     index   = np.array([5, 6, 7, 8, 9]),
-                    columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 'exog_1', 'exog_2']
+                    columns = ['custom_predictor_0', 'custom_predictor_1',
+                               'custom_predictor_2', 'custom_predictor_3',
+                               'custom_predictor_4', 'exog_1', 'exog_2']
                 ),
                 pd.Series(
                     np.array([5, 6, 7, 8, 9]),
@@ -115,6 +121,7 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_dataframe():
     assert (results[0] == expected[0]).all().all()
     assert (results[1] == expected[1]).all()
 
+    
 def test_create_train_X_y_exception_when_y_and_exog_have_different_length():
     '''
     Test exception is raised when length of y and length of exog are different.
@@ -148,3 +155,4 @@ def test_create_train_X_y_exception_when_y_and_exog_have_different_index():
             y=pd.Series(np.arange(50)),
             exog=pd.Series(np.arange(10), index=np.arange(100, 110))
         )  
+        
