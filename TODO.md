@@ -20,8 +20,8 @@ Module plot
 - [x] function to plot residuals
 
 Unit testing:
-- [ ] ForecasterAutoreg
-- [ ] ForecasterAutoregCustom
+- [x] ForecasterAutoreg
+- [x] ForecasterAutoregCustom
 - [ ] ForecasterAutoregMultioutput
 - [ ] model_selection
 - [x] utils
