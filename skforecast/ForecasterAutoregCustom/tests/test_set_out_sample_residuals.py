@@ -1,0 +1,73 @@
+import pytest
+import numpy as np
+import pandas as pd
+from skforecast.ForecasterAutoregCustom import ForecasterAutoregCustom
+from sklearn.linear_model import LinearRegression
+
+
+def create_predictors(y):
+    '''
+    Create first 5 lags of a time series.
+    '''
+    X_train = pd.DataFrame({'y':y.copy()})
+    for i in range(0, 5):
+        X_train[f'lag_{i+1}'] = X_train['y'].shift(i)
+    X_train = X_train.drop(columns='y').tail(1).to_numpy()  
+    
+    return X_train  
+    
+
+def test_set_out_sample_residuals_exception_when_residuals_is_not_array():
+    '''
+    Test exception is raised when residuals argument is not numpy array.
+    '''
+    forecaster = ForecasterAutoregCustom(
+                        regressor      = LinearRegression(),
+                        fun_predictors = create_predictors,
+                        window_size    = 5
+                 )
+    with pytest.raises(Exception):
+        forecaster.set_out_sample_residuals(residuals=[1, 2, 3])
+        
+        
+def test_set_out_sample_residuals_when_residuals_length_is_less_than_1000_and_no_append():
+    '''
+    Test residuals stored when its length is less than 1000 and append is False.
+    '''
+    forecaster = ForecasterAutoregCustom(
+                        regressor      = LinearRegression(),
+                        fun_predictors = create_predictors,
+                        window_size    = 5
+                 )
+    forecaster.set_out_sample_residuals(residuals=np.arange(10), append=False)
+    expected = np.arange(10)
+    results = forecaster.out_sample_residuals
+    assert (results == expected).all()
+    
+def test_set_out_sample_residuals_when_residuals_length_is_less_than_1000_and_append():
+    '''
+    Test residuals stored when its length is less than 1000 and append is True.
+    '''
+    forecaster = ForecasterAutoregCustom(
+                        regressor      = LinearRegression(),
+                        fun_predictors = create_predictors,
+                        window_size    = 5
+                 )
+    forecaster.set_out_sample_residuals(residuals=np.arange(10), append=True)
+    forecaster.set_out_sample_residuals(residuals=np.arange(10), append=True)
+    expected = np.hstack([np.arange(10), np.arange(10)])
+    results = forecaster.out_sample_residuals
+    assert (results == expected).all()
+    
+
+def test_set_out_sample_residuals_when_residuals_length_is_greater_than_1000():
+    '''
+    Test residuals stored when its length is greater than 1000.
+    '''
+    forecaster = ForecasterAutoregCustom(
+                        regressor      = LinearRegression(),
+                        fun_predictors = create_predictors,
+                        window_size    = 5
+                 )
+    forecaster.set_out_sample_residuals(residuals=np.arange(2000))
+    assert len(forecaster.out_sample_residuals) == 1000
