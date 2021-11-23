@@ -26,4 +26,6 @@ Unit testing:
 - [ ] model_selection
 - [x] utils
 
+Others
 
+- [ ] add typing Optional[]
