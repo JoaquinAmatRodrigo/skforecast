@@ -28,4 +28,4 @@ Unit testing:
 
 Others
 
-- [ ] add typing Optional[]
+- [x] add typing Optional[]
