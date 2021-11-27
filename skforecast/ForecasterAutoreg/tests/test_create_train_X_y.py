@@ -71,7 +71,7 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_dataframe():
                 exog = pd.DataFrame({
                             'exog_1' : np.arange(100, 110),
                             'exog_2' : np.arange(1000, 1010)
-                })
+                        })
               )
         
     expected = (pd.DataFrame(
