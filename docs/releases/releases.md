@@ -1,6 +1,6 @@
 # Releases
 
-## [0.3.0.dev0] - unreleased
+## [0.3.0] - [2021-09-01]
 
 ### Added
 
@@ -35,7 +35,7 @@
 
 ### Changed
 
-+ New implementation of `ForecasterAutoregMultiOutput`. The training process in the new version creates a different X_train for each step. See [Direct multi-step forecasting](./direct_multi_step_forecasting.md) for more details. Old versión can be acces with `skforecast.deprecated.ForecasterAutoregMultiOutput`.
++ New implementation of `ForecasterAutoregMultiOutput`. The training process in the new version creates a different X_train for each step. See [Direct multi-step forecasting](../guides/direct-multi-step-forecasting.md) for more details. Old versión can be acces with `skforecast.deprecated.ForecasterAutoregMultiOutput`.
 
 ### Fixed
 
