@@ -784,11 +784,11 @@
                 <h1 id="cross-validation-and-backtest">Cross validation and backtest<a class="headerlink" href="#cross-validation-and-backtest" title="Permanent link">&para;</a></h1>
 <p><strong>Time series cross-validation</strong></p>
 <p>The model is trained before making the predictions, in this way, the model use all the information available so far. It is a variation of the standar cross-validation but, instead of making a random distribution of the observations, the training set is increased sequentially, maintaining the temporal order of the data.</p>
-<p><img src="../img/diagram_time_series_backtesting.jpg" style="width: 500px;"></p>
+<p><img src="../img/diagram_time_series_cross_validation.jpg" style="width: 500px;"></p>
 <p><br></p>
 <p><strong>Backtesting</strong></p>
 <p>It is a similar strategy to that of time series cross-validation but without retraining. After an initial train, the model is used sequentially without updating it and following the temporal order of the data. This strategy has the advantage of being much faster than time series cross-validation since the model is only trained once. However, the model does not incorporate the latest information available so it may lose predictive capacity over time.</p>
-<p><img src="../img/diagram_time_series_cross_validation.jpg" style="width: 500px;"></p>
+<p><img src="../img/diagram_time_series_backtesting.jpg" style="width: 500px;"></p>
 <h2 id="libraries">Libraries<a class="headerlink" href="#libraries" title="Permanent link">&para;</a></h2>
 <table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
@@ -1139,7 +1139,7 @@ Number of observations used for testing: 109
     <div class="md-dialog" data-md-component="dialog">
       <div class="md-dialog__inner md-typeset"></div>
     </div>
-    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand"], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "../assets/javascripts/workers/search.709b4209.min.js", "version": {"provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand"], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "../assets/javascripts/workers/search.709b4209.min.js", "version": null}</script>
     
     
       <script src="../assets/javascripts/bundle.2b46852b.min.js"></script>
