@@ -24,21 +24,23 @@ nav:
       - Prediction intervals: guides/prediction-intervals.md
 
   - Examples:
-      - Forecasting series temporales con Python y Scikit-learn: examples/examples.md
+      - Forecasting time series with con Python and Scikit-learn: examples/examples.md
       - Forecasting energy demand: examples/examples.md
+      - Forecasting web page traffic: examples/examples.md
 
   - API Reference:
       - ForecasterAutoreg: api/ForecasterAutoreg.md
       - ForecasterAutoregCustom: api/ForecasterAutoregCustom.md
       - ForecasterAutoregMultiOutput: api/ForecasterAutoregMultiOutput.md
       - model_selection: api/model_selection.md
-
+      - model_selection_statsmodels: api/model_selection_statsmodels.md
 plugins:
   - mkapi
   - search
 copyright: 
 theme:
   name: material
+  custom_dir: overrides
   font:
     text: Ubuntu
     code: Ubuntu Mono
@@ -64,3 +66,6 @@ markdown_extensions:
   - pymdownx.magiclink
   - toc:
       permalink: true
+extra:
+  version:
+    provider: mike
