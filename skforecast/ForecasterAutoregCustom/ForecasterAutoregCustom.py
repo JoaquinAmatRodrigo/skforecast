@@ -6,7 +6,7 @@
 ################################################################################
 # coding=utf-8
 
-from typing import Union, Dict, List, Tuple, Any
+from typing import Union, Dict, List, Tuple, Any, Optional
 import warnings
 import logging
 import numpy as np
@@ -165,7 +165,7 @@ class ForecasterAutoregCustom(ForecasterBase):
     def create_train_X_y(
         self,
         y: pd.Series,
-        exog: Union[pd.Series, pd.DataFrame]=None
+        exog: Optional[Union[pd.Series, pd.DataFrame]]=None
     ) -> Tuple[pd.DataFrame, pd.Series]:
         '''
         Create training matrices from univariate time series.
@@ -255,8 +255,11 @@ class ForecasterAutoregCustom(ForecasterBase):
         return X_train, y_train
 
         
-    def fit(self, y: Union[np.ndarray, pd.Series],
-            exog: Union[np.ndarray, pd.Series, pd.DataFrame]=None) -> None:
+    def fit(
+        self,
+        y: Union[np.ndarray, pd.Series],
+        exog: Optional[Union[np.ndarray, pd.Series, pd.DataFrame]]=None
+    ) -> None:
         '''
         Training Forecaster.
         
@@ -374,8 +377,8 @@ class ForecasterAutoregCustom(ForecasterBase):
     def predict(
         self,
         steps: int,
-        last_window: pd.Series=None,
-        exog: Union[pd.Series, pd.DataFrame]=None
+        last_window: Optional[pd.Series]=None,
+        exog: Optional[Union[pd.Series, pd.DataFrame]]=None
     ) -> pd.Series:
         '''
         Predict n steps ahead. It is an recursive process in which, each prediction,
@@ -461,8 +464,8 @@ class ForecasterAutoregCustom(ForecasterBase):
     def _estimate_boot_interval(
         self,
         steps: int,
-        last_window: np.ndarray=None,
-        exog: np.ndarray=None,
+        last_window: Optional[np.ndarray]=None,
+        exog: Optional[np.ndarray]=None,
         interval: list=[5, 95],
         n_boot: int=500,
         random_state: int=123,
@@ -586,8 +589,8 @@ class ForecasterAutoregCustom(ForecasterBase):
     def predict_interval(
         self,
         steps: int,
-        last_window: pd.Series=None,
-        exog: Union[pd.Series, pd.DataFrame]=None,
+        last_window: Optional[pd.Series]=None,
+        exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
         interval: list=[5, 95],
         n_boot: int=500,
         random_state: int=123,

@@ -6,7 +6,7 @@
 ################################################################################
 # coding=utf-8
 
-from typing import Union, Dict, List, Tuple, Any
+from typing import Union, Dict, List, Tuple, Any, Optional
 import warnings
 import logging
 import numpy as np
@@ -229,7 +229,7 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
     def create_train_X_y(
         self,
         y: pd.Series,
-        exog: Union[pd.Series, pd.DataFrame]=None
+        exog: Optional[Union[pd.Series, pd.DataFrame]]=None
     ) -> Tuple[pd.DataFrame, pd.DataFrame]:
         '''
         Create training matrices from univariate time series and exogenous
@@ -364,7 +364,7 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
     def fit(
         self,
         y: pd.Series,
-        exog: Union[pd.Series, pd.DataFrame]=None
+        exog: Optional[Union[pd.Series, pd.DataFrame]]=None
     ) -> None:
         '''
         Training Forecaster.
@@ -419,17 +419,19 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
         self.training_range = preprocess_y(y=y)[1][[0, -1]]
         self.index_type = type(X_train.index)
         if isinstance(X_train.index, pd.DatetimeIndex):
-            self.index_freq = X_train.index.freqstr
+            self.index_freq = y_train.index.freqstr
+            self.last_window = y.loc[y_train.index[-1] - self.max_lag * y_train.index.freq: ]
         else: 
-            self.index_freq = X_train.index.step
-        self.last_window = y.loc[y_train.index[-1] - self.max_lag * y_train.index.freq: ]
+            self.index_freq = y_train.index.step
+            self.last_window = y.loc[y_train.index[-1] - self.max_lag * y_train.index.step: ]
+        
 
     
     def predict(
         self,
-        steps: Union[int, None]=None,
-        last_window: pd.Series=None,
-        exog: Union[pd.Series, pd.DataFrame]=None
+        steps: Optional[Union[int, None]]=None,
+        last_window: Optional[pd.Series]=None,
+        exog: Optional[Union[pd.Series, pd.DataFrame]]=None
     ) -> np.ndarray:
         '''
         Predict n steps ahead.
