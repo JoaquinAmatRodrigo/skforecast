@@ -27,5 +27,5 @@ Unit testing:
 - [x] utils
 
 Others
-
 - [x] add typing Optional[]
+- [ ] format code with black and flake8
