@@ -32,7 +32,7 @@ def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_1_
     expected = pd.DataFrame(
                    np.array([[10., 20., 20.]]),
                    columns = ['pred', 'lower_bound', 'upper_bound'],
-                   index = [5]
+                   index = pd.RangeIndex(start=10, stop=11, step=1)
                )
     results = forecaster.predict_interval(steps=1, in_sample_residuals=True, n_boot=2)  
     pd.testing.assert_frame_equal(results, expected)
@@ -54,7 +54,7 @@ def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_2_
                    np.array([[10., 20., 20.],
                          [11., 23., 23.]]),
                    columns = ['pred', 'lower_bound', 'upper_bound'],
-                   index = [5, 6]
+                   index = pd.RangeIndex(start=10, stop=12, step=1)
                )
     results = forecaster.predict_interval(steps=2, in_sample_residuals=True, n_boot=2)  
     pd.testing.assert_frame_equal(results, expected)
@@ -75,7 +75,7 @@ def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_1_
     expected = pd.DataFrame(
                    np.array([[10., 20., 20.]]),
                    columns = ['pred', 'lower_bound', 'upper_bound'],
-                   index = [5]
+                   index = pd.RangeIndex(start=10, stop=11, step=1)
                )
     results = forecaster.predict_interval(steps=1, in_sample_residuals=False, n_boot=2)  
     pd.testing.assert_frame_equal(results, expected)
@@ -97,7 +97,7 @@ def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_2_
                    np.array([[10., 20., 20.],
                          [11., 23., 23.]]),
                    columns = ['pred', 'lower_bound', 'upper_bound'],
-                   index = [5, 6]
+                   index = pd.RangeIndex(start=10, stop=12, step=1)
                )
     results = forecaster.predict_interval(steps=2, in_sample_residuals=False)  
     pd.testing.assert_frame_equal(results, expected)

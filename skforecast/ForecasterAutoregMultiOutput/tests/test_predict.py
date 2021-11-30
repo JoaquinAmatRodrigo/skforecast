@@ -15,7 +15,7 @@ def test_predict_output_when_regressor_is_LinearRegression():
     results = forecaster.predict()
     expected = pd.Series(
                 data = np.array([50., 51., 52.]),
-                index = [4, 5, 6],
+                index = pd.RangeIndex(start=50, stop=53, step=1),
                 name = 'pred'
                )
     pd.testing.assert_series_equal(results, expected)
