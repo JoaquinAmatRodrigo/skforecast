@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 
 ## [0.4.0] - [Unreleased]
 
-Version 0.4 has undergone a huge code refactoring. Main changes are related to input-output formats (only pandas series and dataframes are allowed) and model validation methods (unified into backtesting with and without refit).
+Version 0.4 has undergone a huge code refactoring. Main changes are related to input-output formats (only pandas series and dataframes are allowed although internally numpy arrays are used for performance) and model validation methods (unified into backtesting with and without refit).
 
 ### Added
 
