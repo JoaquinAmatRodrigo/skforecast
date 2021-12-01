@@ -15,6 +15,7 @@ import sklearn
 import sklearn.pipeline
 from copy import copy
 
+import skforecast
 from ..ForecasterBase import ForecasterBase
 from ..utils import check_y
 from ..utils import check_exog
@@ -163,6 +164,8 @@ class ForecasterAutoreg(ForecasterBase):
             f"Training index type: {str(self.index_type) if self.fitted else None} \n"
             f"Training index frequency: {self.index_freq if self.fitted else None} \n"
             f"Regressor parameters: {params} \n"
+            f"Creation date: {pd.Timestamp.today()} \n"
+            f"Skforecast version: {skforecast.__version__} \n"
         )
 
         return info
