@@ -3,24 +3,35 @@ All notable changes to this project will be documented in this file.
 
 ## [0.4.0] - [Unreleased]
 
+Version 0.4 has undergone a huge code refactoring. Main changes are related to input-output formats (only pandas series and dataframes are allowed) and model validation methods (unified into backtesting with and without refit).
+
 ### Added
 
-+ Function `get_metric` to define metrics used by `backtesting_forecaster()` and `cv_forecaster()`.
-+ Method `set_out_sample_residuals` now allows to append new residuals.
++ `ForecasterBase` as parent class
 
 ### Changed
 
-+ Arguments `y` must be pandas Series. Numpy ndarrays are not allowed anymore.
++ Argument `y` must be pandas Series. Numpy ndarrays are not allowed anymore.
 
-+ Arguments `exog` must be pandas Series or pandas DataFrame. Numpy ndarrays are not allowed anymore.
++ Argument `exog` must be pandas Series or pandas DataFrame. Numpy ndarrays are not allowed anymore.
 
-+ Output of `predict` is a pandas Series with index acording to the steps predicted.
++ Output of `predict` is a pandas Series with index according to the steps predicted.
 
-+ `backtesting_forecaster` allows to backtest forecasters already trained. Previous implementation of `backtesting_forecaster` always do an initial training. 
-+ `backtesting_forecaster` of ForecasterAutoregMultiOutput allows incomplete folds.
-+ `backtesting_forecaster` has the option to update out_sample_residuals with backtesting residuals.
++ `backtesting_forecaster` and `backtesting_forecaster_intervals` have been combined in a single function.
 
-+ `cv_forecaster` has the option to update out_sample_residuals with backtesting residuals.
+    + It is possible to backtest forecasters already trained.
+    + `ForecasterAutoregMultiOutput` allows incomplete folds.
+    + It is possible to update `out_sample_residuals` with backtesting residuals.
+    
++ `cv_forecaster` has the option to update `out_sample_residuals` with backtesting residuals.
+
++ `backtesting_sarimax_statsmodels` and `cv_sarimax_statsmodels` have been combined in a single function.
+
++ `gridsearch_forecaster` use backtesting as validation strategy with the option of refit.
+
++ Extended information when printing `Forecaster` object.
+
++ All static methods for checking and preprocessing inputs moved to module utils.
 
 + Remove deprecated class `ForecasterCustom`.
 
