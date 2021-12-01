@@ -774,20 +774,21 @@ Value of predictions.</p></div>
 
 </div>
 
-<div class="mkapi-node" id="skforecast.model_selection.backtesting_forecaster">
+<div class="mkapi-node" id="skforecast.model_selection.backtesting_forecaster_intervals">
 <div class='mkapi-object-container'>
   <div class="mkapi-object function code top">
     <div class="mkapi-object-kind function top">function</div>
-    <div class="mkapi-object-body function top"><code class="mkapi-object-prefix">skforecast.model_selection.</code><code class="mkapi-object-name">backtesting_forecaster</code><code class="mkapi-object-parenthesis">(</code><code class="mkapi-object-signature">forecaster</code>, <code class="mkapi-object-signature">y</code>, <code class="mkapi-object-signature">initial_train_size</code>, <code class="mkapi-object-signature">steps</code>, <code class="mkapi-object-signature">metric</code>, <code class="mkapi-object-signature">exog=None</code>, <code class="mkapi-object-signature">verbose=False</code><code class="mkapi-object-parenthesis">)</code></div>
+    <div class="mkapi-object-body function top"><code class="mkapi-object-prefix">skforecast.model_selection.</code><code class="mkapi-object-name">backtesting_forecaster_intervals</code><code class="mkapi-object-parenthesis">(</code><code class="mkapi-object-signature">forecaster</code>, <code class="mkapi-object-signature">y</code>, <code class="mkapi-object-signature">initial_train_size</code>, <code class="mkapi-object-signature">steps</code>, <code class="mkapi-object-signature">metric</code>, <code class="mkapi-object-signature">exog=None</code>, <code class="mkapi-object-signature">interval=[5, 95]</code>, <code class="mkapi-object-signature">n_boot=500</code>, <code class="mkapi-object-signature">in_sample_residuals=True</code>, <code class="mkapi-object-signature">verbose=False</code><code class="mkapi-object-parenthesis">)</code></div>
   </div>
   
 </div>
 <div class="mkapi-docstring">
 <div class="mkapi-section">
-      <div class="mkapi-section-body"><p>Backtesting (validation) of <code>ForecasterAutoreg</code>, <code>ForecasterCustom</code>,
-<code>ForecasterAutoregCustom</code> or <code>ForecasterAutoregMultiOutput</code> object.
-The model is trained only once using the <code>initial_train_size</code> first observations.
-In each iteration, a number of <code>steps</code> predictions are evaluated.</p>
+      <div class="mkapi-section-body"><p>Backtesting (validation) of <code>ForecasterAutoreg</code>, <code>ForecasterCustom</code> or
+<code>ForecasterAutoregCustom</code> object. The model is trained only once using the
+<code>initial_train_size</code> first observations. In each iteration, a number of
+<code>steps</code> predictions are evaluated. Both, predictions and intervals, are
+calculated.</p>
 <p>This evaluation is much faster than <code>cv_forecaster()</code> since the model is
 trained only once.</p></div>
     </div>
@@ -797,10 +798,8 @@ trained only once.</p></div>
         </div>
       <div class="mkapi-section-body parameters"><ul class="mkapi-items">
 <li><code class="mkapi-item-name">forecaster</code>
-<span class="mkapi-item-type">(ForecasterAutoreg, ForecasterCustom, ForecasterAutoregCustom,)</span>
-<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">ForecasterAutoregMultiOutput
-erAutoreg<code>,</code>ForecasterCustom<code></code>ForecasterAutoregCustom<code>or
-erAutoregMultiOutput</code> object.</span></li>
+<span class="mkapi-item-type">(ForecasterAutoreg, ForecasterCustom, ForecasterAutoregCustom)</span>
+<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description"><code>ForecasterAutoreg</code>, <code>ForecasterCustom</code> or <code>ForecasterAutoregCustom</code> object.</span></li>
 
 <li><code class="mkapi-item-name">y</code>
 <span class="mkapi-item-type">(1D np.ndarray, pd.Series)</span>
@@ -824,8 +823,23 @@ erAutoregMultiOutput</code> object.</span></li>
 number of observations as <code>y</code> and should be aligned so that y[i] is
 regressed on exog[i].</span></li>
 
+<li><code class="mkapi-item-name">interval</code>
+<span class="mkapi-item-type">(list, default `[5, 100]`)</span>
+<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Confidence of the prediction interval estimated. Sequence of percentiles
+to compute, which must be between 0 and 100 inclusive.</span></li>
+
+<li><code class="mkapi-item-name">n_boot</code>
+<span class="mkapi-item-type">(int, default `500`)</span>
+<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Number of bootstrapping iterations used to estimate prediction
+intervals.</span></li>
+
+<li><code class="mkapi-item-name">in_sample_residuals</code>
+<span class="mkapi-item-type">(bool, default `True`)</span>
+<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">If <code>True</code>, residuals from the training data are used as proxy of
+prediction error to create prediction intervals.</span></li>
+
 <li><code class="mkapi-item-name">verbose</code>
-<span class="mkapi-item-type">(bool, default `False`)</span>
+<span class="mkapi-item-type">(bool, default `True`)</span>
 <span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Print number of folds used for backtesting.</span></li>
 
 
@@ -833,11 +847,24 @@ regressed on exog[i].</span></li>
     </div>
   <div class="mkapi-section returns">
       <div class="mkapi-section-name returns">
-          <span class="mkapi-section-name-body returns">Returns</span> <span class="mkapi-item-type">(metric_value: np.ndarray shape (1,))</span>
+          <span class="mkapi-section-name-body returns">Returns</span> <span class="mkapi-item-type">(backtest_predictions: np.ndarray)</span>
         </div>
-      <div class="mkapi-section-body returns"><p>Value of the metric.</p>
-<p>test_predictions: 1D np.ndarray
-Value of predictions.</p></div>
+      <div class="mkapi-section-body returns"><p>If <code>include_intervals=True</code>, 2D np.ndarray shape(steps, 3) with predicted
+value and their estimated interval.
+    Column 0 = predictions
+    Column 1 = lower bound interval
+    Column 2 = upper bound interval</p>
+<p>ic_value: np.ndarray shape (1,)
+Value of the metric.</p></div>
+    </div>
+  <div class="mkapi-section">
+      <div class="mkapi-section-body"><div class="admonition note">
+<p class="admonition-title">Notes</p>
+<p>More information about prediction intervals in forecasting:
+<a href="https://otexts.com/fpp2/prediction-intervals.html">https://otexts.com/fpp2/prediction-intervals.html</a>
+Forecasting: Principles and Practice (2nd ed) Rob J Hyndman and
+George Athanasopoulos.</p>
+</div></div>
     </div>
   </div>
 
