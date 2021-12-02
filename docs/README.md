@@ -4,7 +4,7 @@
 
 **Time series forecasting with scikit-learn regressors.**
 
-**Skforecast** is a python library that eases using scikit-learn regressors as multi-step forecasters. It also works with any regressor compatible with the scikit-learn API (XGBoost, LightGBM, Ranger...).
+**Skforecast** is a python library that eases using scikit-learn regressors as multi-step forecasters. It also works with any regressor compatible with the scikit-learn API (pipelines, XGBoost, LightGBM, Ranger...).
 
 
 ## Installation
@@ -40,7 +40,7 @@ python>=3.7.1
 numpy>=1.20.1
 pandas>=1.2.2
 tqdm>=4.57.0
-scikit-learn>=0.24
+scikit-learn>=1.0.1
 statsmodels>=0.12.2
 ```
 
@@ -57,10 +57,20 @@ statsmodels>=0.12.2
 + Get predictor importance
 
 
-## Tutorials (spanish)
+## Tutorials 
 
-+ [Forecasting series temporales con Python y Scikit Learn](https://www.cienciadedatos.net/documentos/py27-forecasting-series-temporales-python-scikitlearn.html)
-+ [Predicción (forecasting) de la demanda eléctrica con Python](https://www.cienciadedatos.net/documentos/py29-forecasting-demanda-energia-electrica-python.html)
+**English**
+
++ [**Time series forecasting with Python and Scikit-learn**](https://joaquinamatrodrigo.github.io/skforecast/0.4/html/py27-time-series-forecasting-python-scikitlearn.html)
+
+
+**Español**
+
++ [**Forecasting series temporales con Python y Scikit-learn**](https://joaquinamatrodrigo.github.io/skforecast/0.4/html/py27-forecasting-series-temporales-python-scikitlearn.html)
+
++ [**Forecasting de la demanda eléctrica**](https://www.cienciadedatos.net/documentos/py29-forecasting-demanda-energia-electrica-python.html)
+
++ [**Forecasting de las visitas a una página web**](https://www.cienciadedatos.net/documentos/py37-forecasting-visitas-web-machine-learning.html)
 
 
 ## References
