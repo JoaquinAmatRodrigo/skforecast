@@ -17,6 +17,8 @@ Version 0.4 has undergone a huge code refactoring. Main changes are related to i
 
 + Output of `predict` is a pandas Series with index according to the steps predicted.
 
++ Scikitlearn pipelines are allowed as regressors.
+
 + `backtesting_forecaster` and `backtesting_forecaster_intervals` have been combined in a single function.
 
     + It is possible to backtest forecasters already trained.
