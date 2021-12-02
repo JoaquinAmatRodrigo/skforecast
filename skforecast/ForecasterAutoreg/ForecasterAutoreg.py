@@ -44,7 +44,7 @@ class ForecasterAutoreg(ForecasterBase):
     lags : int, list, 1d numpy ndarray, range
         Lags used as predictors. Index starts at 1, so lag 1 is equal to t-1.
             `int`: include lags from 1 to `lags` (included).
-            `list`, `numpy ndarray` or range: include only lags present in `lags`.
+            `list`, `numpy ndarray` or `range`: include only lags present in `lags`.
 
     
     Attributes
