@@ -98,6 +98,15 @@ class ForecasterAutoreg(ForecasterBase):
     out_sample_residuals: numpy ndarray
         Residuals of the model when predicting non training data. Only stored
         up to 1000 values.
+
+    creation_date: str
+        Date of creation.
+
+    fit_date: str
+        Date of last fit.
+
+    skforcast_version: str
+        Version of skforecast library used to create the forecaster.
      
     '''
     
@@ -115,6 +124,9 @@ class ForecasterAutoreg(ForecasterBase):
         self.in_sample_residuals  = None
         self.out_sample_residuals = None
         self.fitted               = False
+        self.creation_date        = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
+        self.fit_date             = None
+        self.skforcast_version    = skforecast.__version__
         
         if isinstance(lags, int) and lags < 1:
             raise Exception('Minimum value of lags allowed is 1.')
@@ -161,11 +173,12 @@ class ForecasterAutoreg(ForecasterBase):
             f"Type of exogenous variable: {self.exog_type} \n"
             f"Exogenous variables names: {self.exog_col_names} \n"
             f"Training range: {self.training_range.to_list() if self.fitted else None} \n"
-            f"Training index type: {str(self.index_type) if self.fitted else None} \n"
+            f"Training index type: {str(self.index_type).split('.')[-1][:-2] if self.fitted else None} \n"
             f"Training index frequency: {self.index_freq if self.fitted else None} \n"
             f"Regressor parameters: {params} \n"
-            f"Creation date: {pd.Timestamp.today()} \n"
-            f"Skforecast version: {skforecast.__version__} \n"
+            f"Creation date: {self.creation_date} \n"
+            f"Last fit date: {self.fit_date} \n"
+            f"Skforecast version: {self.skforcast_version} \n"
         )
 
         return info
@@ -326,6 +339,7 @@ class ForecasterAutoreg(ForecasterBase):
         X_train, y_train = self.create_train_X_y(y=y, exog=exog)      
         self.regressor.fit(X=X_train, y=y_train)
         self.fitted = True
+        self.fit_date = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
         self.training_range = preprocess_y(y=y)[1][[0, -1]]
         self.index_type = type(X_train.index)
         if isinstance(X_train.index, pd.DatetimeIndex):
