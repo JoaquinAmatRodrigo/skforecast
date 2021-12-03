@@ -108,6 +108,15 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
 
     X_train_col_names : tuple
         Names of columns of the matrix created internally for training.
+
+    creation_date: str
+        Date of creation.
+
+    fit_date: str
+        Date of last fit.
+
+    skforcast_version: str
+        Version of skforecast library used to create the forecaster.
         
     Notes
     -----

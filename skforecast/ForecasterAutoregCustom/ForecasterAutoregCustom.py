@@ -101,6 +101,15 @@ class ForecasterAutoregCustom(ForecasterBase):
     out_sample_residuals: numpy ndarray
         Residuals of the model when predicting non training data. Only stored
         up to 1000 values.
+
+    creation_date: str
+        Date of creation.
+
+    fit_date: str
+        Date of last fit.
+
+    skforcast_version: str
+        Version of skforecast library used to create the forecaster.
      
     '''
     
