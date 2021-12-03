@@ -132,6 +132,9 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
         self.exog_col_names       = None
         self.X_train_col_names    = None
         self.fitted               = False
+        self.creation_date        = pd.Timestamp.today()
+        self.fit_date             = None
+        self.skforcast_version    = skforecast.__version__
 
         if isinstance(lags, int) and lags < 1:
             raise Exception('Minimum value of lags allowed is 1')
@@ -182,8 +185,9 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
             f"Training index type: {str(self.index_type) if self.fitted else None} \n"
             f"Training index frequency: {self.index_freq if self.fitted else None} \n"
             f"Regressor parameters: {params} \n"
-            f"Creation date: {pd.Timestamp.today()} \n"
-            f"Skforecast version: {skforecast.__version__} \n"
+            f"Creation date: {self.creation_date} \n"
+            f"Last fit date: {self.fit_date} \n"
+            f"Skforecast version: {self.skforcast_version} \n"
         )
 
         return info
@@ -419,6 +423,7 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
             self.regressors_[step].fit(X_train_step, y_train_step)
         
         self.fitted = True
+        self.fit_date = pd.Timestamp.today()
         self.training_range = preprocess_y(y=y)[1][[0, -1]]
         self.index_type = type(X_train.index)
         if isinstance(X_train.index, pd.DatetimeIndex):
