@@ -379,7 +379,7 @@ def _backtesting_forecaster_refit(
     if verbose:
         print(f"Information of backtesting process")
         print(f"----------------------------------")
-        print(f"Number of observations used for training: {initial_train_size}")
+        print(f"Number of observations used for initial training: {initial_train_size}")
         print(f"Number of observations used for backtesting: {len(y) - initial_train_size}")
         print(f"    Number of folds: {folds}")
         print(f"    Number of steps per fold: {steps}")
@@ -390,11 +390,11 @@ def _backtesting_forecaster_refit(
             train_size = initial_train_size + i * steps
             print(f"Data partition in fold: {i}")
             if i < folds - 1:
-                print(f"    Training:   {y.iloc[:train_size].index[[0, -1]]}")
-                print(f"    Validation: {y.iloc[train_size:train_size + steps].index[[0, -1]]}")
+                print(f"    Training:   {y.index[0]} -- {y.index[train_size - 1]}")
+                print(f"    Validation: {y.index[train_size]} -- {y.index[train_size + steps]}")
             else:
-                print(f"    Training:   {y.iloc[:train_size].index[[0, -1]]}")
-                print(f"    Validation: {y.iloc[train_size:].index[[0, -1]]}")
+                print(f"    Training:   {y.index[0]} -- {y.index[train_size - 1]}")
+                print(f"    Validation: {y.index[train_size]} -- {y.index[-1]}")
         print("")
 
     for i in range(folds):
@@ -618,7 +618,7 @@ def _backtesting_forecaster_no_refit(
     if verbose:
         print(f"Information of backtesting process")
         print(f"----------------------------------")
-        print(f"Number of observations used for training or as initial window: {initial_train_size}")
+        print(f"Number of observations used for initial training or as initial window: {initial_train_size}")
         print(f"Number of observations used for backtesting: {len(y) - initial_train_size}")
         print(f"    Number of folds: {folds}")
         print(f"    Number of steps per fold: {steps}")
@@ -626,13 +626,15 @@ def _backtesting_forecaster_no_refit(
             print(f"    Last fold only includes {remainder} observations")
         print("")
         for i in range(folds):
-            last_window_end   = initial_train_size + i * steps
+            last_window_end = initial_train_size + i * steps
             print(f"Data partition in fold: {i}")
             if i < folds - 1:
                 print(f"    Training:   {y.iloc[:initial_train_size].index[[0, -1]]}")
+                print(f"    Training:   {y.index[0]} -- {y.index[initial_train_size - 1]}")
                 print(f"    Validation: {y.iloc[last_window_end:last_window_end + steps].index[[0, -1]]}")
             else:
                 print(f"    Training:   {y.iloc[:initial_train_size].index[[0, -1]]}")
+                print(f"    Training:   {y.index[0]} -- {y.index[initial_train_size - 1]}")
                 print(f"    Validation: {y.iloc[last_window_end:].index[[0, -1]]}")
         print("")
 
