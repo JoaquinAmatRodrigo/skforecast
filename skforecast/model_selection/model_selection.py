@@ -377,13 +377,26 @@ def _backtesting_forecaster_refit(
     remainder = (len(y) - initial_train_size) % steps
     
     if verbose:
+        print(f"Information of backtesting process")
+        print(f"----------------------------------")
         print(f"Number of observations used for training: {initial_train_size}")
         print(f"Number of observations used for backtesting: {len(y) - initial_train_size}")
         print(f"    Number of folds: {folds}")
         print(f"    Number of steps per fold: {steps}")
         if remainder != 0:
             print(f"    Last fold only includes {remainder} observations.")
-      
+        print("")
+        for i in range(folds):
+            train_size = initial_train_size + i * steps
+            print(f"Data partition in fold: {i}")
+            if i < folds - 1:
+                print(f"    Training:   {y.iloc[:train_size].index[[0, -1]]}")
+                print(f"    Validation: {y.iloc[train_size:train_size + steps].index[[0, -1]]}")
+            else:
+                print(f"    Training:   {y.iloc[:train_size].index[[0, -1]]}")
+                print(f"    Validation: {y.iloc[train_size:].index[[0, -1]]}")
+        print("")
+
     for i in range(folds):
         # In each iteration (except the last one) the model is fitted before
         # making predictions. The train size increases by `steps` in each iteration.
@@ -603,13 +616,26 @@ def _backtesting_forecaster_no_refit(
     remainder = (len(y) - initial_train_size) % steps
     
     if verbose:
+        print(f"Information of backtesting process")
+        print(f"----------------------------------")
         print(f"Number of observations used for training or as initial window: {initial_train_size}")
         print(f"Number of observations used for backtesting: {len(y) - initial_train_size}")
         print(f"    Number of folds: {folds}")
         print(f"    Number of steps per fold: {steps}")
         if remainder != 0:
             print(f"    Last fold only includes {remainder} observations")
-      
+        print("")
+        for i in range(folds):
+            last_window_end   = initial_train_size + i * steps
+            print(f"Data partition in fold: {i}")
+            if i < folds - 1:
+                print(f"    Training:   {y.iloc[:initial_train_size].index[[0, -1]]}")
+                print(f"    Validation: {y.iloc[last_window_end:last_window_end + steps].index[[0, -1]]}")
+            else:
+                print(f"    Training:   {y.iloc[:initial_train_size].index[[0, -1]]}")
+                print(f"    Validation: {y.iloc[last_window_end:].index[[0, -1]]}")
+        print("")
+
     for i in range(folds):
         # Since the model is only fitted with the initial_train_size, last_window
         # and next_window_exog must be updated to include the data needed to make
