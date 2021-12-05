@@ -391,7 +391,7 @@ def _backtesting_forecaster_refit(
             print(f"Data partition in fold: {i}")
             if i < folds - 1:
                 print(f"    Training:   {y.index[0]} -- {y.index[train_size - 1]}")
-                print(f"    Validation: {y.index[train_size]} -- {y.index[train_size + steps]}")
+                print(f"    Validation: {y.index[train_size]} -- {y.index[train_size + steps - 1]}")
             else:
                 print(f"    Training:   {y.index[0]} -- {y.index[train_size - 1]}")
                 print(f"    Validation: {y.index[train_size]} -- {y.index[-1]}")
@@ -629,13 +629,11 @@ def _backtesting_forecaster_no_refit(
             last_window_end = initial_train_size + i * steps
             print(f"Data partition in fold: {i}")
             if i < folds - 1:
-                print(f"    Training:   {y.iloc[:initial_train_size].index[[0, -1]]}")
                 print(f"    Training:   {y.index[0]} -- {y.index[initial_train_size - 1]}")
-                print(f"    Validation: {y.iloc[last_window_end:last_window_end + steps].index[[0, -1]]}")
+                print(f"    Validation: {y.index[last_window_end]} -- {y.index[last_window_end + steps -1]}")
             else:
-                print(f"    Training:   {y.iloc[:initial_train_size].index[[0, -1]]}")
                 print(f"    Training:   {y.index[0]} -- {y.index[initial_train_size - 1]}")
-                print(f"    Validation: {y.iloc[last_window_end:].index[[0, -1]]}")
+                print(f"    Validation: {y.index[last_window_end]} -- {y.index[-1]}")
         print("")
 
     for i in range(folds):
