@@ -18,7 +18,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
-from sklearn.linear_model import Ridge
+from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
 ```
 ## Data
@@ -27,13 +27,12 @@ from sklearn.metrics import mean_squared_error
 # Download data
 # ==============================================================================
 url = ('https://raw.githubusercontent.com/JoaquinAmatRodrigo/skforecast/master/data/h2o.csv')
-data = pd.read_csv(url, sep=',')
+data = pd.read_csv(url, sep=',', header=0, names=['y', 'datetime'])
 
 # Data preprocessing
 # ==============================================================================
-data['fecha'] = pd.to_datetime(data['fecha'], format='%Y/%m/%d')
-data = data.set_index('fecha')
-data = data.rename(columns={'x': 'y'})
+data['datetime'] = pd.to_datetime(data['datetime'], format='%Y/%m/%d')
+data = data.set_index('datetime')
 data = data.asfreq('MS')
 data = data['y']
 data = data.sort_index()
@@ -61,7 +60,7 @@ ax.legend();
 # Create and fit forecaster
 # ==============================================================================
 forecaster = ForecasterAutoreg(
-                    regressor = Ridge(),
+                    regressor = LinearRegression(),
                     lags      = 15
                 )
 
@@ -70,11 +69,22 @@ forecaster
 ```
 
 ```
-=======================ForecasterAutoreg=======================
-Regressor: Ridge()
-Lags: [ 1  2  3  4  5  6  7  8  9 10 11 12 13 14 15]
-Exogenous variable: False
-Parameters: {'alpha': 1.0, 'copy_X': True, 'fit_intercept': True, 'max_iter': None, 'normalize': False, 'random_state': None, 'solver': 'auto', 'tol': 0.001}
+================= 
+ForecasterAutoreg 
+================= 
+Regressor: LinearRegression() 
+Lags: [ 1  2  3  4  5  6  7  8  9 10 11 12 13 14 15] 
+Window size: 15 
+Included exogenous: False 
+Type of exogenous variable: None 
+Exogenous variables names: None 
+Training range: [Timestamp('1991-07-01 00:00:00'), Timestamp('2005-06-01 00:00:00')] 
+Training index type: DatetimeIndex 
+Training index frequency: MS 
+Regressor parameters: {'copy_X': True, 'fit_intercept': True, 'n_jobs': None, 'normalize': 'deprecated', 'positive': False} 
+Creation date: 2021-12-06 21:49:16 
+Last fit date: 2021-12-06 21:49:16 
+Skforecast version: 0.4.0
 ```
 
 ## Prediction 
@@ -84,17 +94,14 @@ Parameters: {'alpha': 1.0, 'copy_X': True, 'fit_intercept': True, 'max_iter': No
 # ==============================================================================
 steps = 36
 predictions = forecaster.predict(steps=steps)
-# Add datetime index to predictions
-predictions = pd.Series(data=predictions, index=data_test.index)
 predictions.head(3)
 ```
 
 ``` python
-fecha
-2005-07-01    0.973131
-2005-08-01    1.022154
-2005-09-01    1.151334
-Freq: MS, dtype: float64
+2005-07-01    0.962395
+2005-08-01    0.975943
+2005-09-01    1.141913
+Freq: MS, Name: pred, dtype: float64
 ```
 
 ``` python
@@ -120,7 +127,7 @@ print(f"Test error (mse): {error_mse}")
 ```
 
 ```
-Test error (mse): 0.009918738501371805
+Test error (mse): 0.011051937043503714
 ```
 
 ## Feature importance
@@ -134,14 +141,37 @@ forecaster.get_coef()
 ```
 
 ```
-array([ 1.58096176e-01,  6.18241513e-02,  6.44665806e-02, -2.41792429e-02,
-       -2.60679572e-02,  7.04191008e-04, -4.28090339e-02,  4.87464352e-04,
-        1.66853207e-02,  1.00022527e-02,  1.62219885e-01,  6.15595305e-01,
-        2.85168042e-02, -7.31915864e-02, -5.38785052e-02])
+|    | feature   |        coef |
+|---:|:----------|------------:|
+|  0 | lag_1     |  0.195142   |
+|  1 | lag_2     |  0.255029   |
+|  2 | lag_3     |  0.234592   |
+|  3 | lag_4     | -0.030925   |
+|  4 | lag_5     | -0.00166564 |
+|  5 | lag_6     |  0.011375   |
+|  6 | lag_7     | -0.0392188  |
+|  7 | lag_8     |  0.0195864  |
+|  8 | lag_9     | -0.00660407 |
+|  9 | lag_10    | -0.00212056 |
+| 10 | lag_11    |  0.0706455  |
+| 11 | lag_12    |  0.926457   |
+| 12 | lag_13    | -0.158592   |
+| 13 | lag_14    | -0.284126   |
+| 14 | lag_15    | -0.23648    |
 ```
 
 ## Extract training matrix
 
 ``` python
 X, y = forecaster.create_train_X_y(data_train)
+```
+
+```
+| datetime            |    lag_1 |    lag_2 |    lag_3 |    lag_4 |    lag_5 |    lag_6 |    lag_7 |    lag_8 |    lag_9 |   lag_10 |   lag_11 |   lag_12 |   lag_13 |   lag_14 |   lag_15 |
+|:--------------------|---------:|---------:|---------:|---------:|---------:|---------:|---------:|---------:|---------:|---------:|---------:|---------:|---------:|---------:|---------:|
+| 1992-10-01 00:00:00 | 0.534761 | 0.475463 | 0.483389 | 0.410534 | 0.361801 | 0.379808 | 0.351348 | 0.33622  | 0.660119 | 0.602652 | 0.502369 | 0.492543 | 0.432159 | 0.400906 | 0.429795 |
+| 1992-11-01 00:00:00 | 0.568606 | 0.534761 | 0.475463 | 0.483389 | 0.410534 | 0.361801 | 0.379808 | 0.351348 | 0.33622  | 0.660119 | 0.602652 | 0.502369 | 0.492543 | 0.432159 | 0.400906 |
+| 1992-12-01 00:00:00 | 0.595223 | 0.568606 | 0.534761 | 0.475463 | 0.483389 | 0.410534 | 0.361801 | 0.379808 | 0.351348 | 0.33622  | 0.660119 | 0.602652 | 0.502369 | 0.492543 | 0.432159 |
+| 1993-01-01 00:00:00 | 0.771258 | 0.595223 | 0.568606 | 0.534761 | 0.475463 | 0.483389 | 0.410534 | 0.361801 | 0.379808 | 0.351348 | 0.33622  | 0.660119 | 0.602652 | 0.502369 | 0.492543 |
+| 1993-02-01 00:00:00 | 0.751503 | 0.771258 | 0.595223 | 0.568606 | 0.534761 | 0.475463 | 0.483389 | 0.410534 | 0.361801 | 0.379808 | 0.351348 | 0.33622  | 0.660119 | 0.602652 | 0.502369 |
 ```
