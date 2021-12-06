@@ -26,13 +26,12 @@ from sklearn.metrics import mean_squared_error
 # Download data
 # ==============================================================================
 url = ('https://raw.githubusercontent.com/JoaquinAmatRodrigo/skforecast/master/data/h2o.csv')
-data = pd.read_csv(url, sep=',')
+data = pd.read_csv(url, sep=',', header=0, names=['y', 'datetime'])
 
 # Data preprocessing
 # ==============================================================================
-data['fecha'] = pd.to_datetime(data['fecha'], format='%Y/%m/%d')
-data = data.set_index('fecha')
-data = data.rename(columns={'x': 'y'})
+data['datetime'] = pd.to_datetime(data['datetime'], format='%Y/%m/%d')
+data = data.set_index('datetime')
 data = data.asfreq('MS')
 data = data['y']
 data = data.sort_index()
