@@ -17,6 +17,7 @@ from sklearn.metrics import mean_squared_error
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import mean_absolute_percentage_error
 from sklearn.model_selection import ParameterGrid
+from sklearn.base import clone
 
 from ..ForecasterAutoreg import ForecasterAutoreg
 from ..ForecasterAutoregCustom import ForecasterAutoregCustom
@@ -1011,6 +1012,7 @@ def grid_search_forecaster(
         
         for params in tqdm.tqdm(param_grid, desc='loop param_grid', position=1, leave=False):
 
+            forecaster = clone(forecaster)
             forecaster.set_params(**params)
 
             metrics = backtesting_forecaster(
@@ -1049,7 +1051,8 @@ def grid_search_forecaster(
         )
         
         if isinstance(forecaster, (ForecasterAutoreg, ForecasterAutoregMultiOutput)):
-            forecaster.set_lags(best_lags)   
+            forecaster.set_lags(best_lags)
+        forecaster = clone(forecaster)   
         forecaster.set_params(**best_params)
         forecaster.fit(y=y, exog=exog)
             

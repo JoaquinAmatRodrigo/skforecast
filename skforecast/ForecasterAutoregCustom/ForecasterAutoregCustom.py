@@ -13,6 +13,7 @@ import numpy as np
 import pandas as pd
 import sklearn
 import sklearn.pipeline
+from sklearn.base import clone
 from copy import copy
 
 import skforecast
@@ -759,6 +760,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         
         '''
         
+        self.regressor = clone(self.regressor)
         self.regressor.set_params(**params)
         
     
