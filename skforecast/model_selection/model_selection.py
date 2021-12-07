@@ -355,7 +355,7 @@ def _backtesting_forecaster_refit(
         `ForecasterAutoregMultiOutput`.
             
     verbose : bool, default `False`
-        Print number of folds used for backtesting.
+        Print number of folds and index of training and validation sets used for backtesting.
 
     Returns 
     -------
@@ -579,7 +579,7 @@ def _backtesting_forecaster_no_refit(
         `ForecasterAutoregMultiOutput`.
             
     verbose : bool, default `False`
-        Print number of folds used for backtesting.
+        Print number of folds and index of training and validation sets used for backtesting.
 
     Returns 
     -------
@@ -840,7 +840,7 @@ def backtesting_forecaster(
         residuals. Ignored if forecaster is of class `ForecasterAutoregMultiOutput`.
             
     verbose : bool, default `False`
-        Print number of folds used for backtesting.
+        Print number of folds and index of training and validation sets used for backtesting.
 
     Returns 
     -------
