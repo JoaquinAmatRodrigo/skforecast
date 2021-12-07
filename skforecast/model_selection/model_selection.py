@@ -1012,7 +1012,6 @@ def grid_search_forecaster(
         for params in tqdm.tqdm(param_grid, desc='loop param_grid', position=1, leave=False):
 
             forecaster.set_params(**params)
-
             metrics = backtesting_forecaster(
                             forecaster               = forecaster,
                             y                        = y,
@@ -1049,7 +1048,7 @@ def grid_search_forecaster(
         )
         
         if isinstance(forecaster, (ForecasterAutoreg, ForecasterAutoregMultiOutput)):
-            forecaster.set_lags(best_lags)   
+            forecaster.set_lags(best_lags)
         forecaster.set_params(**best_params)
         forecaster.fit(y=y, exog=exog)
             

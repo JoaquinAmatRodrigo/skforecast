@@ -563,6 +563,7 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
         
         '''
         
+        self.regressor = clone(self.regressor)
         self.regressor.set_params(**params)
         self.regressors_ = {step: clone(self.regressor) for step in range(self.steps)}
         
