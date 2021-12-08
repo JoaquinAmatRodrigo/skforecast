@@ -1,4 +1,4 @@
-# Cross validation and backtest
+# Backtesting
 
 **Backtesting with refit**
 
@@ -26,9 +26,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
-from skforecast.model_selection import cv_forecaster
 from skforecast.model_selection import backtesting_forecaster
-from skforecast.model_selection import backtesting_forecaster_intervals
 from sklearn.linear_model import Ridge
 from sklearn.metrics import mean_squared_error
 ```
@@ -54,7 +52,7 @@ data = data.sort_index()
 # ==============================================================================
 fig, ax=plt.subplots(figsize=(9, 4))
 data.plot(ax=ax)
-ax.legend();
+ax.legend()
 ```
 
 <img src="../img/data_full_serie.png" style="width: 500px;">
@@ -138,7 +136,7 @@ Error de backtest: [0.00726621]
 ```
 
 ``` python
-print(predictions_backtest.head(4).to_markdown())
+predictions_backtest.head(4)
 ```
 
 ```

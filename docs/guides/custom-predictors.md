@@ -12,7 +12,6 @@ The `ForecasterAutoregCustom` class is very similar to the `ForecasterAutoreg` c
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-
 from skforecast.ForecasterAutoregCustom import ForecasterAutoregCustom
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error
@@ -109,8 +108,7 @@ Skforecast version: 0.4.0
 ``` python
 # Predict
 # ==============================================================================
-steps = 36
-predictions = forecaster.predict(steps=steps)
+predictions = forecaster.predict(steps=36)
 predictions.head(3)
 ```
 

@@ -16,7 +16,6 @@ The main challenge when using scikit-learn models for recursive multi-step forec
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error
@@ -48,8 +47,9 @@ data_test  = data[-steps:]
 fig, ax=plt.subplots(figsize=(9, 4))
 data_train.plot(ax=ax, label='train')
 data_test.plot(ax=ax, label='test')
-ax.legend();
+ax.legend()
 ```
+
 <img src="../img/data.png" style="width: 500px;">
 
 
@@ -60,9 +60,9 @@ ax.legend();
 # Create and fit forecaster
 # ==============================================================================
 forecaster = ForecasterAutoreg(
-                    regressor = RandomForestRegressor(),
-                    lags      = 15
-                )
+                regressor = RandomForestRegressor(),
+                lags      = 15
+             )
 
 forecaster.fit(y=data_train)
 forecaster
@@ -97,7 +97,7 @@ predictions = forecaster.predict(steps=steps)
 predictions.head(3)
 ```
 
-``` python
+```
 2005-07-01    0.916878
 2005-08-01    0.946228
 2005-09-01    1.107921
@@ -111,7 +111,7 @@ fig, ax=plt.subplots(figsize=(9, 4))
 data_train.plot(ax=ax, label='train')
 data_test.plot(ax=ax, label='test')
 predictions.plot(ax=ax, label='predictions')
-ax.legend();
+ax.legend()
 ```
 
 <img src="../img/prediction.png" style="width: 500px;">

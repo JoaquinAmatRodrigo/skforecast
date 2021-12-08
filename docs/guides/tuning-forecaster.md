@@ -45,14 +45,14 @@ data_test  = data.loc['2006-01-01':]
 ## Grid search
 
 ``` python
-# Grid search hiperparameters and lags
+# Grid search hyperparameter and lags
 # ==============================================================================
 forecaster = ForecasterAutoreg(
                 regressor = RandomForestRegressor(random_state=123),
                 lags      = 12 # Placeholder, the value will be overwritten
              )
 
-# Regressor hiperparameters
+# Regressor hyperparameters
 param_grid = {'n_estimators': [50, 100],
               'max_depth': [5, 10, 15]}
 

@@ -8,7 +8,6 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error
@@ -41,8 +40,9 @@ data_test  = data[-steps:]
 fig, ax=plt.subplots(figsize=(9, 4))
 data_train.plot(ax=ax, label='train')
 data_test.plot(ax=ax, label='test')
-ax.legend();
+ax.legend()
 ```
+
 <img src="../img/data.png" style="width: 500px;">
 
 

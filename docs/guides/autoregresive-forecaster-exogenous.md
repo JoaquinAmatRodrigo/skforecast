@@ -15,7 +15,6 @@ When using exogenous variables in recursive multi-step forecasting, their values
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error
@@ -58,9 +57,9 @@ data_test  = data.iloc[-steps:, :]
 # Create and fit forecaster
 # ==============================================================================
 forecaster = ForecasterAutoreg(
-                    regressor = RandomForestRegressor(random_state=123),
-                    lags      = 15
-                )
+                regressor = RandomForestRegressor(random_state=123),
+                lags      = 15
+             )
 
 forecaster.fit(
     y    = data_train['y'],
@@ -102,8 +101,6 @@ predictions = forecaster.predict(
                 steps = steps,
                 exog = data_test[['exog_1', 'exog_2']]
                )
-# Add datetime index to predictions
-predictions = pd.Series(data=predictions, index=data_test.index)
 predictions.head(3)
 ```
 
@@ -122,7 +119,7 @@ fig, ax=plt.subplots(figsize=(9, 4))
 data_train['y'].plot(ax=ax, label='train')
 data_test['y'].plot(ax=ax, label='test')
 predictions.plot(ax=ax, label='predictions')
-ax.legend();
+ax.legend()
 ```
 
 <img src="../img/prediction.png" style="width: 500px;">

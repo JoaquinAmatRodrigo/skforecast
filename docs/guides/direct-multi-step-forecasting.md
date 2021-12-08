@@ -14,7 +14,6 @@ In order to train a `ForecasterAutoregMultiOutput` a different training matrix i
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-
 from skforecast.ForecasterAutoregMultiOutput import ForecasterAutoregMultiOutput
 from sklearn.linear_model import Ridge
 from sklearn.metrics import mean_squared_error
@@ -62,7 +61,7 @@ forecaster = ForecasterAutoregMultiOutput(
                     regressor = make_pipeline(StandardScaler(), Ridge()),
                     steps     = 36,
                     lags      = 15
-                )
+             )
 
 forecaster.fit(y=data_train)
 forecaster
@@ -97,8 +96,7 @@ If the `Forecaster` has been trained with exogenous variables, they shlud be pro
 ``` python
 # Predict
 # ==============================================================================
-steps = 36
-predictions = forecaster.predict(steps=steps)
+predictions = forecaster.predict(steps=36)
 predictions.head(3)
 ```
 

@@ -25,21 +25,22 @@
 + [Introduction](#introduction)
 + [Examples](#examples)
   + [Autoregressive forecaster](#autoregressive-forecaster)
-  + [Autoregressive forecaster with 1 exogenous predictor](#autoregressive-forecaster-with-1-exogenous-predictor)
-  + [Autoregressive forecaster with n exogenous predictors](#autoregressive-forecaster-with-n-exogenous-predictors)
+  + [Autoregressive forecaster with exogenous predictors](#autoregressive-forecaster-with-exogenous-predictors)
   + [Autoregressive forecaster with custom predictors](#autoregressive-forecaster-with-custom-predictors)
+  + [Backtesting](#backtesting)
+  + [Model tuning](#model-tuning)
 + [Tutorials](#tutorials)
 
 ## Installation
 
 ```bash
-$ pip install skforecast
+$ pip3 install -U scikit-learn
 ```
 
 Specific version:
 
 ```bash
-$ pip install git+https://github.com/JoaquinAmatRodrigo/skforecast@v0.1.9
+$ pip install skforecast==0.3
 ```
 
 Latest (unstable):
@@ -128,16 +129,7 @@ This strategy consists of training a different model for each step. For example,
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
-from skforecast.ForecasterAutoregCustom import ForecasterAutoregCustom
-from skforecast.model_selection import grid_search_forecaster
-from skforecast.model_selection import time_series_spliter
-from skforecast.model_selection import cv_forecaster
-from skforecast.model_selection import backtesting_forecaster
-from skforecast.model_selection import backtesting_forecaster_intervals
-
-from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error
 ```
@@ -146,468 +138,260 @@ from sklearn.metrics import mean_squared_error
 # Download data
 # ==============================================================================
 url = ('https://raw.githubusercontent.com/JoaquinAmatRodrigo/skforecast/master/data/h2o.csv')
-datos = pd.read_csv(url, sep=',')
+data = pd.read_csv(url, sep=',', header=0, names=['y', 'datetime'])
 
 # Data preprocessing
 # ==============================================================================
-datos['fecha'] = pd.to_datetime(datos['fecha'], format='%Y/%m/%d')
-datos = datos.set_index('fecha')
-datos = datos.rename(columns={'x': 'y'})
-datos = datos.asfreq('MS')
-datos = datos['y']
-datos = datos.sort_index()
+data['datetime'] = pd.to_datetime(data['datetime'], format='%Y/%m/%d')
+data = data.set_index('datetime')
+data = data.asfreq('MS')
+data = data['y']
+data = data.sort_index()
 
 # Split train-test
 # ==============================================================================
 steps = 36
-datos_train = datos[:-steps]
-datos_test  = datos[-steps:]
+data_train = data[:-steps]
+data_test  = data[-steps:]
 
 # Plot
 # ==============================================================================
-fig, ax=plt.subplots(figsize=(9, 4))
-datos.plot(ax=ax, label='y')
-ax.legend();
+fig, ax = plt.subplots(figsize=(9, 4))
+data_train.plot(ax=ax, label='train')
+data_test.plot(ax=ax, label='test')
+ax.legend()
 ```
 
-<p><img src="./images/data.png"</p>
+<p><img src="./images/data_train_test.png"></p>
 
-```python
+``` python
 # Create and fit forecaster
 # ==============================================================================
 forecaster = ForecasterAutoreg(
-                    regressor = LinearRegression(),
-                    lags      = 15
-                )
+                regressor = RandomForestRegressor(random_state=123),
+                lags      = 15
+             )
 
-forecaster.fit(y=datos_train)
+forecaster.fit(y=data_train)
 forecaster
 ```
 
 ```
-=======================ForecasterAutoreg=======================
-Regressor: LinearRegression()
-Lags: [ 1  2  3  4  5  6  7  8  9 10 11 12 13 14 15]
-Exogenous variable: False
-Parameters: {'copy_X': True, 'fit_intercept': True, 'n_jobs': None, 'normalize': False, 'positive': False}
+================= 
+ForecasterAutoreg 
+================= 
+Regressor: RandomForestRegressor(random_state=123) 
+Lags: [ 1  2  3  4  5  6  7  8  9 10 11 12 13 14 15] 
+Window size: 15 
+Included exogenous: False 
+Type of exogenous variable: None 
+Exogenous variables names: None 
+Training range: [Timestamp('1991-07-01 00:00:00'), Timestamp('2005-06-01 00:00:00')] 
+Training index type: DatetimeIndex 
+Training index frequency: MS 
+Regressor parameters: {'bootstrap': True, 'ccp_alpha': 0.0, 'criterion': 'squared_error', 'max_depth': None, 'max_features': 'auto', 'max_leaf_nodes': None, 'max_samples': None, 'min_impurity_decrease': 0.0, 'min_samples_leaf': 1, 'min_samples_split': 2, 'min_weight_fraction_leaf': 0.0, 'n_estimators': 100, 'n_jobs': None, 'oob_score': False, 'random_state': 123, 'verbose': 0, 'warm_start': False} 
+Creation date: 2021-12-08 18:21:27 
+Last fit date: 2021-12-08 18:21:27 
+Skforecast version: 0.4.0
 ```
 
-```python
+``` python
 # Predict
 # ==============================================================================
-steps = 36
-predictions = forecaster.predict(steps=steps)
-# Add datetime index to predictions
-predictions = pd.Series(data=predictions, index=datos_test.index)
+predictions = forecaster.predict(steps=36)
+predictions.head(3)
+```
 
+```
+2005-07-01    0.921840
+2005-08-01    0.954921
+2005-09-01    1.101716
+Freq: MS, Name: pred, dtype: float64
+```
+
+``` python
+# Plot predictions
+# ==============================================================================
+fig, ax=plt.subplots(figsize=(9, 4))
+data_train.plot(ax=ax, label='train')
+data_test.plot(ax=ax, label='test')
+predictions.plot(ax=ax, label='predictions')
+ax.legend()
+```
+
+<p><img src="./images/prediction.png"></p>
+
+``` python
 # Prediction error
 # ==============================================================================
 error_mse = mean_squared_error(
-                y_true = datos_test,
+                y_true = data_test,
                 y_pred = predictions
             )
 print(f"Test error (mse): {error_mse}")
+```
+
+```
+Test error (mse): 0.00429855684785846
+```
+
+```python
+# Feature importance
+# ==============================================================================
+forecaster.get_feature_importance()
+```
+
+```
+| feature   |   importance |
+|-----------|--------------|
+| lag_1     |   0.0123397  |
+| lag_2     |   0.0851603  |
+| lag_3     |   0.0134071  |
+| lag_4     |   0.00437446 |
+| lag_5     |   0.00318805 |
+| lag_6     |   0.00343593 |
+| lag_7     |   0.00313612 |
+| lag_8     |   0.00714094 |
+| lag_9     |   0.00783053 |
+| lag_10    |   0.0127507  |
+| lag_11    |   0.00901919 |
+| lag_12    |   0.807098   |
+| lag_13    |   0.00481128 |
+| lag_14    |   0.0163282  |
+| lag_15    |   0.0099792  |
+```
+
+
+### Autoregressive forecaster with exogenous predictors
+
+```python
+# Download data
+# ==============================================================================
+url = ('https://raw.githubusercontent.com/JoaquinAmatRodrigo/skforecast/master/data/h2o_exog.csv')
+data = pd.read_csv(url, sep=',', header=0, names=['datetime', 'y', 'exog_1', 'exog_2'])
+
+# Data preprocessing
+# ==============================================================================
+data['datetime'] = pd.to_datetime(data['datetime'], format='%Y/%m/%d')
+data = data.set_index('datetime')
+data = data.asfreq('MS')
+data = data.sort_index()
 
 # Plot
 # ==============================================================================
 fig, ax=plt.subplots(figsize=(9, 4))
-datos_train.plot(ax=ax, label='train')
-datos_test.plot(ax=ax, label='test')
-predictions.plot(ax=ax, label='predictions')
-ax.legend();
+data.plot(ax=ax);
 ```
 
-```
-Test error (mse): 0.011051937043503587
-```
-
-<p><img src="./images/prediction.png"</p>
+<p><img src="./images/data_with_multiple_exog.png"></p>
 
 ```python
-# Grid search hiperparameters and lags
+# Split train-test
+# ==============================================================================
+steps = 36
+data_train = data.iloc[:-steps, :]
+data_test  = data.iloc[-steps:, :]
+```
+
+```python
+# Create and fit forecaster
 # ==============================================================================
 forecaster = ForecasterAutoreg(
                 regressor = RandomForestRegressor(random_state=123),
-                lags      = 12
+                lags      = 15
              )
 
-# Regressor hiperparameters
-param_grid = {'n_estimators': [50, 100],
-              'max_depth': [5, 10]}
-
-# Lags used as predictors
-lags_grid = [3, 10, [1,2,3,20]]
-
-results_grid = grid_search_forecaster(
-                        forecaster  = forecaster,
-                        y           = datos_train,
-                        param_grid  = param_grid,
-                        lags_grid   = lags_grid,
-                        steps       = 10,
-                        method      = 'cv',
-                        metric      = 'mean_squared_error',
-                        initial_train_size    = int(len(datos_train)*0.5),
-                        allow_incomplete_fold = False,
-                        return_best = True,
-                        verbose     = False
-                    )
-
-results_grid
-```
-
-```
-loop lags_grid:   0%|          | 0/3 [00:00<?, ?it/s]
-loop param_grid:   0%|          | 0/4 [00:00<?, ?it/s]
-loop param_grid:  25%|██▌       | 1/4 [00:00<00:02,  1.40it/s]
-loop param_grid:  50%|█████     | 2/4 [00:02<00:02,  1.11s/it]
-loop param_grid:  75%|███████▌  | 3/4 [00:02<00:00,  1.06it/s]
-loop param_grid: 100%|██████████| 4/4 [00:04<00:00,  1.13s/it]
-loop lags_grid:  33%|███▎      | 1/3 [00:04<00:08,  4.28s/it] 
-loop param_grid:   0%|          | 0/4 [00:00<?, ?it/s]
-loop param_grid:  25%|██▌       | 1/4 [00:00<00:02,  1.29it/s]
-loop param_grid:  50%|█████     | 2/4 [00:02<00:02,  1.20s/it]
-loop param_grid:  75%|███████▌  | 3/4 [00:03<00:01,  1.03s/it]
-loop param_grid: 100%|██████████| 4/4 [00:04<00:00,  1.25s/it]
-loop lags_grid:  67%|██████▋   | 2/3 [00:08<00:04,  4.52s/it] 
-loop param_grid:   0%|          | 0/4 [00:00<?, ?it/s]
-loop param_grid:  25%|██▌       | 1/4 [00:00<00:02,  1.38it/s]
-loop param_grid:  50%|█████     | 2/4 [00:02<00:02,  1.12s/it]
-loop param_grid:  75%|███████▌  | 3/4 [00:02<00:00,  1.06it/s]
-loop param_grid: 100%|██████████| 4/4 [00:04<00:00,  1.14s/it]
-loop lags_grid: 100%|██████████| 3/3 [00:13<00:00,  4.42s/it] 
-2021-02-25 09:51:43,075 root       INFO  Refitting `forecaster` using the best found parameters: 
-lags: [ 1  2  3  4  5  6  7  8  9 10] 
-params: {'max_depth': 10, 'n_estimators': 50}
-```
-
-
-```
-      lags	params	metric
-6	[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]	{'max_depth': 10, 'n_estimators': 50}	0.023449
-4	[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]	{'max_depth': 5, 'n_estimators': 50}	0.025417
-7	[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]	{'max_depth': 10, 'n_estimators': 100}	0.025954
-5	[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]	{'max_depth': 5, 'n_estimators': 100}	0.026003
-1	[1, 2, 3]	{'max_depth': 5, 'n_estimators': 100}	0.028223
-0	[1, 2, 3]	{'max_depth': 5, 'n_estimators': 50}	0.030685
-3	[1, 2, 3]	{'max_depth': 10, 'n_estimators': 100}	0.031385
-2	[1, 2, 3]	{'max_depth': 10, 'n_estimators': 50}	0.038591
-8	[1, 2, 3, 20]	{'max_depth': 5, 'n_estimators': 50}	0.048428
-9	[1, 2, 3, 20]	{'max_depth': 5, 'n_estimators': 100}	0.049842
-10	[1, 2, 3, 20]	{'max_depth': 10, 'n_estimators': 50}	0.051059
-11	[1, 2, 3, 20]	{'max_depth': 10, 'n_estimators': 100}	0.052205
-```
-
-```python
-# Predictors importance
-# ==============================================================================
-forecaster.get_feature_importances()
-```
-
-```
-[0.58116139 0.12777451 0.04191822 0.03095527 0.02517231 0.02482571
- 0.04065757 0.01652861 0.02619182 0.08481458]
-```
-
-```python
-# Prediction intervals
-# ==============================================================================
-predictions = forecaster.predict_interval(
-                    steps    = steps,
-                    interval = [5, 95],
-                    n_boot   = 1000
-              )
-
-# Add datetime index to predictions
-predictions = pd.DataFrame(data=predictions, index=datos_test.index)
-fig, ax=plt.subplots(figsize=(9, 4))
-#datos_train.plot(ax=ax, label='train')
-datos_test.plot(ax=ax, label='test')
-predictions.iloc[:, 0].plot(ax=ax, label='predictions')
-ax.fill_between(predictions.index,
-                predictions.iloc[:, 1],
-                predictions.iloc[:, 2],
-                alpha=0.5)
-ax.legend();
-```
-
-<p><img src="./images/prediction_interval.png"</p>
-
-```python
-# Backtesting
-# ==============================================================================
-n_test = 36*3 + 1
-datos_train = datos[:-n_test]
-datos_test  = datos[-n_test:]
-
-steps = 36
-regressor = LinearRegression()
-forecaster = ForecasterAutoreg(regressor=regressor, lags=15)
-
-metric, predictions_backtest = backtesting_forecaster(
-    forecaster = forecaster,
-    y          = datos,
-    initial_train_size = len(datos_train),
-    steps      = steps,
-    metric     = 'mean_squared_error',
-    verbose    = True
+forecaster.fit(
+    y    = data_train['y'],
+    exog = data_train[['exog_1', 'exog_2']]
 )
-print(metric)
 
-# Add datetime index to predictions
-predictions_backtest = pd.Series(data=predictions_backtest, index=datos_test.index)
-fig, ax = plt.subplots(figsize=(9, 4))
-#datos_train.plot(ax=ax, label='train')
-datos_test.plot(ax=ax, label='test')
-predictions_backtest.plot(ax=ax, label='predictions')
-ax.legend();
+forecaster
 ```
 
 ```
-Number of observations used for training: 95
-Number of folds: 4
-Last fold only includes 1 observations.
-[0.02150972]
-```
-
-<p><img src="./images/backtesting_forecaster.png"</p>
-
-
-### Autoregressive forecaster with 1 exogenous predictor
-
-```python
-# Download data
-# ==============================================================================
-url = ('https://raw.githubusercontent.com/JoaquinAmatRodrigo/skforecast/master/data/h2o.csv')
-datos = pd.read_csv(url, sep=',')
-
-# Data preprocessing
-# ==============================================================================
-datos['fecha'] = pd.to_datetime(datos['fecha'], format='%Y/%m/%d')
-datos = datos.set_index('fecha')
-datos = datos.rename(columns={'x': 'y'})
-datos = datos.asfreq('MS')
-datos = datos['y']
-datos = datos.sort_index()
-
-# Exogenous variable
-# ==============================================================================
-datos_exog = datos.rolling(window=10, closed='right').mean() + 0.5
-datos_exog = datos_exog[10:]
-datos = datos[10:]
-
-# Plot
-# ==============================================================================
-fig, ax=plt.subplots(figsize=(9, 4))
-datos.plot(ax=ax, label='y')
-datos_exog.plot(ax=ax, label='exogenous variable')
-ax.legend();
-```
-
-<p><img src="./images/data_with_exogenous.png"</p>
-
-```python
-# Split train-test
-# ==============================================================================
-steps = 36
-datos_train = datos[:-steps]
-datos_test  = datos[-steps:]
-
-datos_exog_train = datos_exog[:-steps]
-datos_exog_test  = datos_exog[-steps:]
+================= 
+ForecasterAutoreg 
+================= 
+Regressor: RandomForestRegressor(random_state=123) 
+Lags: [ 1  2  3  4  5  6  7  8  9 10 11 12 13 14 15] 
+Window size: 15 
+Included exogenous: True 
+Type of exogenous variable: <class 'pandas.core.frame.DataFrame'> 
+Exogenous variables names: ['exog_1', 'exog_2'] 
+Training range: [Timestamp('1992-04-01 00:00:00'), Timestamp('2005-06-01 00:00:00')] 
+Training index type: DatetimeIndex 
+Training index frequency: MS 
+Regressor parameters: {'bootstrap': True, 'ccp_alpha': 0.0, 'criterion': 'squared_error', 'max_depth': None, 'max_features': 'auto', 'max_leaf_nodes': None, 'max_samples': None, 'min_impurity_decrease': 0.0, 'min_samples_leaf': 1, 'min_samples_split': 2, 'min_weight_fraction_leaf': 0.0, 'n_estimators': 100, 'n_jobs': None, 'oob_score': False, 'random_state': 123, 'verbose': 0, 'warm_start': False} 
+Creation date: 2021-12-08 18:26:10 
+Last fit date: 2021-12-08 18:26:10 
+Skforecast version: 0.4.0 
 ```
 
 ```python
-# Create and fit forecaster
+# Feature importance
 # ==============================================================================
-forecaster = ForecasterAutoreg(
-                    regressor = LinearRegression(),
-                    lags      = 8
-             )
-
-forecaster.fit(y=datos_train, exog=datos_exog_train)
-
-# Predict
-# ==============================================================================
-steps = 36
-predictions = forecaster.predict(steps=steps, exog=datos_exog_test)
-# Add datetime index to predictions
-predictions = pd.Series(data=predictions, index=datos_test.index)
-
-# Error prediction
-# ==============================================================================
-error_mse = mean_squared_error(
-                y_true = datos_test,
-                y_pred = predictions
-            )
-print(f"Test error (mse): {error_mse}")
-
-# Plot
-# ==============================================================================
-fig, ax=plt.subplots(figsize=(9, 4))
-datos_train.plot(ax=ax, label='train')
-datos_test.plot(ax=ax, label='test')
-predictions.plot(ax=ax, label='predictions')
-ax.legend();
+forecaster.get_feature_importance()
 ```
 
 ```
-Test error (mse): 0.020306077140235308
+| feature   |   importance |
+|-----------|--------------|
+| lag_1     |   0.0133541  |
+| lag_2     |   0.0611202  |
+| lag_3     |   0.00908617 |
+| lag_4     |   0.00272094 |
+| lag_5     |   0.00247847 |
+| lag_6     |   0.00315493 |
+| lag_7     |   0.00217887 |
+| lag_8     |   0.00815443 |
+| lag_9     |   0.0103189  |
+| lag_10    |   0.0205869  |
+| lag_11    |   0.00703555 |
+| lag_12    |   0.773389   |
+| lag_13    |   0.00458297 |
+| lag_14    |   0.0181272  |
+| lag_15    |   0.00873237 |
+| exog_1    |   0.0103638  |
+| exog_2    |   0.0446156  |
 ```
-
-<p><img src="./images/prediction_with_exog.png"</p>
-
-
-```python
-# Grid search hiperparameters and lags
-# ==============================================================================
-forecaster = ForecasterAutoreg(
-                regressor=RandomForestRegressor(random_state=123),
-                lags=12
-             )
-
-# Regressor hiperparameters
-param_grid = {'n_estimators': [50, 100],
-              'max_depth': [5, 10]}
-
-# Lags used as predictors
-lags_grid = [3, 10, [1,2,3,20]]
-
-results_grid = grid_search_forecaster(
-                        forecaster  = forecaster,
-                        y           = datos_train,
-                        exog        = datos_exog_train,
-                        param_grid  = param_grid,
-                        lags_grid   = lags_grid,
-                        steps       = 10,
-                        method      = 'cv',
-                        metric      = 'mean_squared_error',
-                        initial_train_size    = int(len(datos_train)*0.5),
-                        allow_incomplete_fold = False,
-                        return_best = True,
-                        verbose     = False
-                )
-
-# Results grid Search
-# ==============================================================================
-results_grid
-```
-
-### Autoregressive forecaster with n exogenous predictors
-<br>
-
-```python
-# Download data
-# ==============================================================================
-url = ('https://raw.githubusercontent.com/JoaquinAmatRodrigo/skforecast/master/data/h2o.csv')
-datos = pd.read_csv(url, sep=',')
-
-# Data preprocessing
-# ==============================================================================
-datos['fecha'] = pd.to_datetime(datos['fecha'], format='%Y/%m/%d')
-datos = datos.set_index('fecha')
-datos = datos.rename(columns={'x': 'y'})
-datos = datos.asfreq('MS')
-datos = datos['y']
-datos = datos.sort_index()
-
-# Exogenous variables
-# ==============================================================================
-datos_exog_1 = datos.rolling(window=10, closed='right').mean() + 0.5
-datos_exog_2 = datos.rolling(window=10, closed='right').mean() + 1
-datos_exog_1 = datos_exog_1[10:]
-datos_exog_2 = datos_exog_2[10:]
-datos = datos[10:]
-
-# Plot
-# ==============================================================================
-fig, ax=plt.subplots(figsize=(9, 4))
-datos.plot(ax=ax, label='y')
-datos_exog_1.plot(ax=ax, label='exogenous 1')
-datos_exog_2.plot(ax=ax, label='exogenous 2')
-ax.legend();
-```
-
-<p><img src="./images/data_with_multiple_exog.png"</p>
-
-```python
-# Split train-test
-# ==============================================================================
-steps = 36
-datos_train = datos[:-steps]
-datos_test  = datos[-steps:]
-
-datos_exog = np.column_stack((datos_exog_1.values, datos_exog_2.values))
-datos_exog_train = datos_exog[:-steps,]
-datos_exog_test  = datos_exog[-steps:,]
-```
-
-```python
-# Create and fit forecaster
-# ==============================================================================
-forecaster = ForecasterAutoreg(
-                    regressor = LinearRegression(),
-                    lags      = 8
-             )
-
-forecaster.fit(y=datos_train, exog=datos_exog_train)
-
-# Predict
-# ==============================================================================
-steps = 36
-predictions = forecaster.predict(steps=steps, exog=datos_exog_test)
-# Add datetime index
-predictions = pd.Series(data=predictions, index=datos_test.index)
-
-# Error
-# ==============================================================================
-error_mse = mean_squared_error(
-                y_true = datos_test,
-                y_pred = predictions
-            )
-print(f"Test error (mse): {error_mse}")
-
-# Plot
-# ==============================================================================
-fig, ax=plt.subplots(figsize=(9, 4))
-datos_train.plot(ax=ax, label='train')
-datos_test.plot(ax=ax, label='test')
-predictions.plot(ax=ax, label='predictions')
-ax.legend();
-```
-
-```
-Test error (mse): 0.020306077140235298
-```
-
-<p><img src="./images/prediction_with_multiple_exog.png"</p>
-  
   
 ### Autoregressive forecaster with custom predictors
 
 ```python
+# Libraries
+# ==============================================================================
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from skforecast.ForecasterAutoregCustom import ForecasterAutoregCustom
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_squared_error
+```
+
+```python
 # Download data
 # ==============================================================================
 url = ('https://raw.githubusercontent.com/JoaquinAmatRodrigo/skforecast/master/data/h2o.csv')
-datos = pd.read_csv(url, sep=',')
+data = pd.read_csv(url, sep=',', header=0, names=['y', 'datetime'])
 
 # Data preprocessing
 # ==============================================================================
-datos['fecha'] = pd.to_datetime(datos['fecha'], format='%Y/%m/%d')
-datos = datos.set_index('fecha')
-datos = datos.rename(columns={'x': 'y'})
-datos = datos.asfreq('MS')
-datos = datos['y']
-datos = datos.sort_index()
+data['datetime'] = pd.to_datetime(data['datetime'], format='%Y/%m/%d')
+data = data.set_index('datetime')
+data = data.asfreq('MS')
+data = data['y']
+data = data.sort_index()
 
 # Split train-test
 # ==============================================================================
 steps = 36
-datos_train = datos[:-steps]
-datos_test  = datos[-steps:]
+data_train = data[:-steps]
+data_test  = data[-steps:]
 ```
 
 ```python
-# Custom function to create poredictors
+# Custom function to create predictors
 # ==============================================================================
 def create_predictors(y):
     '''
@@ -635,36 +419,72 @@ forecaster = ForecasterAutoregCustom(
                     window_size    = 20
                 )
 
-forecaster.fit(y=datos_train)
+forecaster.fit(y=data_train)
+forecaster
+```
+
+```
+======================= 
+ForecasterAutoregCustom 
+======================= 
+Regressor: RandomForestRegressor(random_state=123) 
+Predictors created with function: create_predictors 
+Window size: 20 
+Included exogenous: False 
+Type of exogenous variable: None 
+Exogenous variables names: None 
+Training range: [Timestamp('1991-07-01 00:00:00'), Timestamp('2005-06-01 00:00:00')] 
+Training index type: DatetimeIndex 
+Training index frequency: MS 
+Regressor parameters: {'bootstrap': True, 'ccp_alpha': 0.0, 'criterion': 'squared_error', 'max_depth': None, 'max_features': 'auto', 'max_leaf_nodes': None, 'max_samples': None, 'min_impurity_decrease': 0.0, 'min_samples_leaf': 1, 'min_samples_split': 2, 'min_weight_fraction_leaf': 0.0, 'n_estimators': 100, 'n_jobs': None, 'oob_score': False, 'random_state': 123, 'verbose': 0, 'warm_start': False} 
+Creation date: 2021-12-08 18:37:36 
+Last fit date: 2021-12-08 18:37:37 
+Skforecast version: 0.4.0 
 ```
 
 ```python
-# Grid search hiperparameters
+# Predict
 # ==============================================================================
-forecaster = ForecasterAutoregCustom(
-                    regressor      = RandomForestRegressor(random_state=123),
-                    fun_predictors = create_predictors,
-                    window_size    = 20
-                )
-
-# Regressor hiperparameters
-param_grid = {'n_estimators': [50, 100],
-              'max_depth': [5, 10]}
-
-
-results_grid = grid_search_forecaster(
-                        forecaster  = forecaster,
-                        y           = datos_train,
-                        param_grid  = param_grid,
-                        steps       = 36,
-                        metric      = 'mean_squared_error',
-                        method      = 'cv',
-                        initial_train_size    = int(len(datos_train)*0.5),
-                        allow_incomplete_fold = False,
-                        return_best = True,
-                        verbose     = False
-                    )
+predictions = forecaster.predict(steps=36)
+predictions.head(3)
 ```
+
+```
+2005-07-01    0.926598
+2005-08-01    0.948202
+2005-09-01    1.020947
+Freq: MS, Name: pred, dtype: float64
+```
+
+```python
+# Feature importance
+# ==============================================================================
+forecaster.get_feature_importance()
+```
+
+```
+| feature             |   importance |
+|---------------------|--------------|
+| custom_predictor_0  |    0.53972   |
+| custom_predictor_1  |    0.119097  |
+| custom_predictor_2  |    0.0464036 |
+| custom_predictor_3  |    0.0241653 |
+| custom_predictor_4  |    0.0305667 |
+| custom_predictor_5  |    0.0151391 |
+| custom_predictor_6  |    0.0428832 |
+| custom_predictor_7  |    0.012742  |
+| custom_predictor_8  |    0.018938  |
+| custom_predictor_9  |    0.108639  |
+| custom_predictor_10 |    0.0417066 |
+```
+
+### Prediction intervals
+
+
+### Backtesting
+
+
+### Model tuning
 
 ## Tutorials 
 
@@ -689,7 +509,6 @@ results_grid = grid_search_forecaster(
 + Time Series Analysis and Forecasting with ADAM Ivan Svetunkov
 
 + Python for Finance: Mastering Data-Driven Finance
-
 
 
 ## Licence
