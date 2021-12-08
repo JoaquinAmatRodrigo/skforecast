@@ -19,7 +19,7 @@ nav:
       - Custom predictors: guides/custom-predictors.md
       - Recursive multi-step forecasting with exogenous variables: guides/autoregresive-forecaster-exogenous.md
       - Direct multi-step forecasting: guides/direct-multi-step-forecasting.md
-      - Cross validation and Backtest: guides/cross-validation-backtest.md
+      - Backtesting: guides/backtesting.md
       - Tuning forecaster: guides/tuning-forecaster.md
       - Prediction intervals: guides/prediction-intervals.md
 

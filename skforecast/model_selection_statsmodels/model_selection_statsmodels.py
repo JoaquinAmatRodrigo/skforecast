@@ -370,7 +370,7 @@ def backtesting_sarimax(
     return np.array([metric_value]), backtest_predictions
 
 
-def cv_sarimax_statsmodels(
+def cv_sarimax(
         y: pd.Series,
         initial_train_size: int,
         steps: int,
