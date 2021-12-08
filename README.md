@@ -34,19 +34,19 @@
 ## Installation
 
 ```bash
-$ pip3 install -U scikit-learn
+pip install skforecast
 ```
 
 Specific version:
 
 ```bash
-$ pip install skforecast==0.3
+pip install skforecast==0.3
 ```
 
 Latest (unstable):
 
 ```bash
-$ pip install git+https://github.com/JoaquinAmatRodrigo/skforecast#master
+pip install git+https://github.com/JoaquinAmatRodrigo/skforecast#master
 ```
 
 The most common error when importing the library is:
@@ -55,7 +55,9 @@ The most common error when importing the library is:
  
  This is because the scikit-learn installation is lower than 0.24. Try to upgrade scikit-learn with
  
- `pip install scikit-learn==0.24`
+ ```bash
+pip3 install -U scikit-learn
+```
 
 ## Dependencies
 
@@ -480,11 +482,302 @@ forecaster.get_feature_importance()
 
 ### Prediction intervals
 
+```python
+# Libraries
+# ==============================================================================
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from skforecast.ForecasterAutoreg import ForecasterAutoreg
+from sklearn.linear_model import Ridge
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import make_pipeline
+```
+
+```python
+# Download data
+# ==============================================================================
+url = ('https://raw.githubusercontent.com/JoaquinAmatRodrigo/skforecast/master/data/h2o.csv')
+data = pd.read_csv(url, sep=',', header=0, names=['y', 'datetime'])
+
+# Data preprocessing
+# ==============================================================================
+data['datetime'] = pd.to_datetime(data['datetime'], format='%Y/%m/%d')
+data = data.set_index('datetime')
+data = data.asfreq('MS')
+data = data['y']
+data = data.sort_index()
+
+# Split train-test
+# ==============================================================================
+steps = 36
+data_train = data[:-steps]
+data_test  = data[-steps:]
+```
+
+```python
+# Create and fit forecaster
+# ==============================================================================
+forecaster = ForecasterAutoreg(
+                    regressor = make_pipeline(StandardScaler(), Ridge()),
+                    lags      = 15
+                )
+
+forecaster.fit(y=data_train)
+forecaster
+```
+
+```
+================= 
+ForecasterAutoreg 
+================= 
+Regressor: Pipeline(steps=[('standardscaler', StandardScaler()), ('ridge', Ridge())]) 
+Lags: [ 1  2  3  4  5  6  7  8  9 10 11 12 13 14 15] 
+Window size: 15 
+Included exogenous: False 
+Type of exogenous variable: None 
+Exogenous variables names: None 
+Training range: [Timestamp('1991-07-01 00:00:00'), Timestamp('2005-06-01 00:00:00')] 
+Training index type: DatetimeIndex 
+Training index frequency: MS 
+Regressor parameters: {'standardscaler__copy': True, 'standardscaler__with_mean': True, 'standardscaler__with_std': True, 'ridge__alpha': 1.0, 'ridge__copy_X': True, 'ridge__fit_intercept': True, 'ridge__max_iter': None, 'ridge__normalize': 'deprecated', 'ridge__positive': False, 'ridge__random_state': None, 'ridge__solver': 'auto', 'ridge__tol': 0.001} 
+Creation date: 2021-12-08 20:15:44 
+Last fit date: 2021-12-08 20:15:44 
+Skforecast version: 0.4.0 
+```
+
+```python
+# Prediction intervals
+# ==============================================================================
+predictions = forecaster.predict_interval(
+                    steps    = steps,
+                    interval = [5, 95],
+                    n_boot   = 500
+              )
+
+
+fig, ax=plt.subplots(figsize=(9, 4))
+data_test.plot(ax=ax, label='test')
+predictions['pred'].plot(ax=ax, label='predictions')
+ax.fill_between(
+    predictions.index,
+    predictions['lower_bound'],
+    predictions['upper_bound'],
+    alpha=0.5
+)
+ax.legend()
+```
+
+<p><img src="./images/prediction_interval.png"></p>
+
 
 ### Backtesting
 
+```python
+# Libraries
+# ==============================================================================
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from skforecast.ForecasterAutoreg import ForecasterAutoreg
+from skforecast.model_selection import backtesting_forecaster
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_squared_error
+```
+
+
+```python
+# Download data
+# ==============================================================================
+url = ('https://raw.githubusercontent.com/JoaquinAmatRodrigo/skforecast/master/data/h2o.csv')
+data = pd.read_csv(url, sep=',', header=0, names=['y', 'datetime'])
+
+# Data preprocessing
+# ==============================================================================
+data['datetime'] = pd.to_datetime(data['datetime'], format='%Y/%m/%d')
+data = data.set_index('datetime')
+data = data.asfreq('MS')
+data = data['y']
+data = data.sort_index()
+
+# Split train-backtest
+# ==============================================================================
+n_backtest = 36*3  # Last 9 years are used for backtest
+data_train = data[:-n_backtest]
+data_backtest = data[-n_backtest:]
+
+# Plot
+# ==============================================================================
+fig, ax=plt.subplots(figsize=(9, 4))
+data_train.plot(ax=ax, label='train')
+data_backtest.plot(ax=ax, label='backtest')
+ax.legend()
+```
+
+```python
+# Backtest forecaster
+# ==============================================================================
+forecaster = ForecasterAutoreg(
+                regressor = RandomForestRegressor(random_state=123),
+                lags      = 15 
+             )
+
+metric, predictions_backtest = backtesting_forecaster(
+                                    forecaster = forecaster,
+                                    y          = data,
+                                    initial_train_size = len(data_train),
+                                    steps      = 12,
+                                    metric     = 'mean_squared_error',
+                                    refit      = True,
+                                    verbose    = True
+                               )
+```
+
+```
+Information of backtesting process
+----------------------------------
+Number of observations used for initial training: 96
+Number of observations used for backtesting: 108
+    Number of folds: 9
+    Number of steps per fold: 12
+
+Data partition in fold: 0
+    Training:   1991-07-01 00:00:00 -- 1999-06-01 00:00:00
+    Validation: 1999-07-01 00:00:00 -- 2000-06-01 00:00:00
+Data partition in fold: 1
+    Training:   1991-07-01 00:00:00 -- 2000-06-01 00:00:00
+    Validation: 2000-07-01 00:00:00 -- 2001-06-01 00:00:00
+Data partition in fold: 2
+    Training:   1991-07-01 00:00:00 -- 2001-06-01 00:00:00
+    Validation: 2001-07-01 00:00:00 -- 2002-06-01 00:00:00
+Data partition in fold: 3
+    Training:   1991-07-01 00:00:00 -- 2002-06-01 00:00:00
+    Validation: 2002-07-01 00:00:00 -- 2003-06-01 00:00:00
+Data partition in fold: 4
+    Training:   1991-07-01 00:00:00 -- 2003-06-01 00:00:00
+    Validation: 2003-07-01 00:00:00 -- 2004-06-01 00:00:00
+Data partition in fold: 5
+    Training:   1991-07-01 00:00:00 -- 2004-06-01 00:00:00
+    Validation: 2004-07-01 00:00:00 -- 2005-06-01 00:00:00
+Data partition in fold: 6
+    Training:   1991-07-01 00:00:00 -- 2005-06-01 00:00:00
+    Validation: 2005-07-01 00:00:00 -- 2006-06-01 00:00:00
+Data partition in fold: 7
+    Training:   1991-07-01 00:00:00 -- 2006-06-01 00:00:00
+    Validation: 2006-07-01 00:00:00 -- 2007-06-01 00:00:00
+Data partition in fold: 8
+    Training:   1991-07-01 00:00:00 -- 2007-06-01 00:00:00
+    Validation: 2007-07-01 00:00:00 -- 2008-06-01 00:00:00
+```
+
+```python
+fig, ax = plt.subplots(figsize=(9, 4))
+data_backtest.plot(ax=ax, label='backtest')
+predictions_backtest.plot(ax=ax, label='predictions')
+ax.legend()
+```
+
+<p><img src="./images/backtesting_forecaster.png"></p>
 
 ### Model tuning
+
+```python
+# Libraries
+# ==============================================================================
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from skforecast.ForecasterAutoreg import ForecasterAutoreg
+from skforecast.model_selection import grid_search_forecaster
+from sklearn.ensemble import RandomForestRegressor
+```
+
+```python
+# Download data
+# ==============================================================================
+url = ('https://raw.githubusercontent.com/JoaquinAmatRodrigo/skforecast/master/data/h2o.csv')
+data = pd.read_csv(url, sep=',', header=0, names=['y', 'datetime'])
+
+# Data preprocessing
+# ==============================================================================
+data['datetime'] = pd.to_datetime(data['datetime'], format='%Y/%m/%d')
+data = data.set_index('datetime')
+data = data.asfreq('MS')
+data = data['y']
+data = data.sort_index()
+
+# Split train-test
+# ==============================================================================
+steps = 24
+data_train = data.loc[: '2001-01-01']
+data_val = data.loc['2001-01-01' : '2006-01-01']
+data_test  = data.loc['2006-01-01':]
+
+# Plot
+# ==============================================================================
+fig, ax=plt.subplots(figsize=(9, 4))
+data_train.plot(ax=ax, label='train')
+data_val.plot(ax=ax, label='validation')
+data_test.plot(ax=ax, label='test')
+ax.legend()
+```
+
+
+<p><img src="./images/tuning_forecaster.png"></p>
+
+```python
+# Grid search hyperparameters and lags
+# ==============================================================================
+forecaster = ForecasterAutoreg(
+                regressor = RandomForestRegressor(random_state=123),
+                lags      = 12 # Placeholder, the value will be overwritten
+             )
+
+# Regressor hyperparameters
+param_grid = {'n_estimators': [50, 100],
+              'max_depth': [5, 10, 15]}
+
+# Lags used as predictors
+lags_grid = [3, 10, [1, 2, 3, 20]]
+
+results_grid = grid_search_forecaster(
+                        forecaster  = forecaster,
+                        y           = data.loc[:'2006-01-01'],
+                        param_grid  = param_grid,
+                        lags_grid   = lags_grid,
+                        steps       = 12,
+                        refit       = True,
+                        metric      = 'mean_squared_error',
+                        initial_train_size = len(data_train),
+                        return_best = True,
+                        verbose     = False
+                    )
+
+results_grid
+```
+
+```
+| lags                            | params                                 |    metric |   max_depth |   n_estimators |
+|---------------------------------|----------------------------------------|-----------|-------------|----------------|
+| [ 1  2  3  4  5  6  7  8  9 10] | {'max_depth': 5, 'n_estimators': 50}   | 0.0334486 |           5 |             50 |
+| [ 1  2  3  4  5  6  7  8  9 10] | {'max_depth': 10, 'n_estimators': 50}  | 0.0392212 |          10 |             50 |
+| [ 1  2  3  4  5  6  7  8  9 10] | {'max_depth': 15, 'n_estimators': 100} | 0.0392658 |          15 |            100 |
+| [ 1  2  3  4  5  6  7  8  9 10] | {'max_depth': 5, 'n_estimators': 100}  | 0.0395258 |           5 |            100 |
+| [ 1  2  3  4  5  6  7  8  9 10] | {'max_depth': 10, 'n_estimators': 100} | 0.0402408 |          10 |            100 |
+| [ 1  2  3  4  5  6  7  8  9 10] | {'max_depth': 15, 'n_estimators': 50}  | 0.0407645 |          15 |             50 |
+| [ 1  2  3 20]                   | {'max_depth': 15, 'n_estimators': 100} | 0.0439092 |          15 |            100 |
+| [ 1  2  3 20]                   | {'max_depth': 5, 'n_estimators': 100}  | 0.0449923 |           5 |            100 |
+| [ 1  2  3 20]                   | {'max_depth': 5, 'n_estimators': 50}   | 0.0462237 |           5 |             50 |
+| [1 2 3]                         | {'max_depth': 5, 'n_estimators': 50}   | 0.0486662 |           5 |             50 |
+| [ 1  2  3 20]                   | {'max_depth': 10, 'n_estimators': 100} | 0.0489914 |          10 |            100 |
+| [ 1  2  3 20]                   | {'max_depth': 10, 'n_estimators': 50}  | 0.0501932 |          10 |             50 |
+| [1 2 3]                         | {'max_depth': 15, 'n_estimators': 100} | 0.0505563 |          15 |            100 |
+| [ 1  2  3 20]                   | {'max_depth': 15, 'n_estimators': 50}  | 0.0512172 |          15 |             50 |
+| [1 2 3]                         | {'max_depth': 5, 'n_estimators': 100}  | 0.0531229 |           5 |            100 |
+| [1 2 3]                         | {'max_depth': 15, 'n_estimators': 50}  | 0.0602604 |          15 |             50 |
+| [1 2 3]                         | {'max_depth': 10, 'n_estimators': 50}  | 0.0609513 |          10 |             50 |
+| [1 2 3]                         | {'max_depth': 10, 'n_estimators': 100} | 0.0673343 |          10 |            100 |
+```
 
 ## Tutorials 
 
