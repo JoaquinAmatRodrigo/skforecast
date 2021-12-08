@@ -22,7 +22,7 @@ Module plot
 Unit testing:
 - [x] ForecasterAutoreg
 - [x] ForecasterAutoregCustom
-- [ ] ForecasterAutoregMultioutput
+- [x] ForecasterAutoregMultioutput
 - [ ] model_selection
 - [x] utils
 
