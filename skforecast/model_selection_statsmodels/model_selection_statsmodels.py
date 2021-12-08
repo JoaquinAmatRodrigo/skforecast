@@ -11,7 +11,7 @@ from typing import Union, Dict, List, Tuple
 import numpy as np
 import pandas as pd
 import logging
-import tqdm
+from tqdm import tqdm
 from sklearn.metrics import mean_squared_error 
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import mean_absolute_percentage_error
@@ -626,7 +626,7 @@ def grid_search_sarimax(
     )
         
         
-    for params in tqdm.tqdm(param_grid):
+    for params in tqdm(param_grid, ncols=90):
 
         metric_value = backtesting_sarimax(
                             y              = y,
