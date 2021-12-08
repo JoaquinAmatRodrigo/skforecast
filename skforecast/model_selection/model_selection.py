@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 import warnings
 import logging
-import tqdm
+from tqdm import tqdm
 from sklearn.metrics import mean_squared_error 
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import mean_absolute_percentage_error
@@ -1003,13 +1003,13 @@ def grid_search_forecaster(
         f"Number of models compared: {len(param_grid)*len(lags_grid)}"
     )
     
-    for lags in tqdm.tqdm(lags_grid, desc='loop lags_grid', position=0):
+    for lags in tqdm(lags_grid, desc='loop lags_grid', position=0, ncols=90):
         
         if isinstance(forecaster, (ForecasterAutoreg, ForecasterAutoregMultiOutput)):
             forecaster.set_lags(lags)
             lags = forecaster.lags.copy()
         
-        for params in tqdm.tqdm(param_grid, desc='loop param_grid', position=1, leave=False):
+        for params in tqdm(param_grid, desc='loop param_grid', position=1, leave=False, ncols=90):
 
             forecaster.set_params(**params)
             metrics = backtesting_forecaster(
