@@ -26,14 +26,6 @@ Latest (unstable):
 pip install git+https://github.com/JoaquinAmatRodrigo/skforecast#master
 ```
 
-The most common error when importing the library is:
-
- `'cannot import name 'mean_absolute_percentage_error' from 'sklearn.metrics'`.
- 
- This is because the scikit-learn installation is lower than 1.0.1. Try to upgrade scikit-learn with
- 
- `pip install scikit-learn==1.0.1`
-
 ## Dependencies
 
 ```
