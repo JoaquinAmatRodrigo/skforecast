@@ -16,7 +16,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from skforecast.ForecasterAutoregMultiOutput import ForecasterAutoregMultiOutput
-from sklearn.ensemble import GradientBoostingRegressor
+from sklearn.linear_model import Ridge
 from sklearn.metrics import mean_squared_error
 ```
 
@@ -59,7 +59,7 @@ ax.legend();
 # Create and fit forecaster
 # ==============================================================================
 forecaster = ForecasterAutoregMultiOutput(
-                    regressor = GradientBoostingRegressor(),
+                    regressor = make_pipeline(StandardScaler(), Ridge()),
                     steps     = 36,
                     lags      = 15
                 )
@@ -69,12 +69,23 @@ forecaster
 ```
 
 ```
-============================ForecasterAutoregMultiOutput============================
-Regressor: GradientBoostingRegressor()
-Steps: 36
-Lags: [ 1  2  3  4  5  6  7  8  9 10 11 12 13 14 15]
-Exogenous variable: False
-Parameters: {'alpha': 0.9, 'ccp_alpha': 0.0, 'criterion': 'friedman_mse', 'init': None, 'learning_rate': 0.1, 'loss': 'ls', 'max_depth': 3, 'max_features': None, 'max_leaf_nodes': None, 'min_impurity_decrease': 0.0, 'min_impurity_split': None, 'min_samples_leaf': 1, 'min_samples_split': 2, 'min_weight_fraction_leaf': 0.0, 'n_estimators': 100, 'n_iter_no_change': None, 'random_state': None, 'subsample': 1.0, 'tol': 0.0001, 'validation_fraction': 0.1, 'verbose': 0, 'warm_start': False}
+============================ 
+ForecasterAutoregMultiOutput 
+============================ 
+Regressor: Pipeline(steps=[('standardscaler', StandardScaler()), ('ridge', Ridge())]) 
+Lags: [ 1  2  3  4  5  6  7  8  9 10 11 12 13 14 15] 
+Window size: 15 
+Maximum steps predicted: 36 
+Included exogenous: False 
+Type of exogenous variable: None 
+Exogenous variables names: None 
+Training range: [Timestamp('1991-07-01 00:00:00'), Timestamp('2005-06-01 00:00:00')] 
+Training index type: DatetimeIndex 
+Training index frequency: MS 
+Regressor parameters: {'standardscaler__copy': True, 'standardscaler__with_mean': True, 'standardscaler__with_std': True, 'ridge__alpha': 1.0, 'ridge__copy_X': True, 'ridge__fit_intercept': True, 'ridge__max_iter': None, 'ridge__normalize': 'deprecated', 'ridge__positive': False, 'ridge__random_state': None, 'ridge__solver': 'auto', 'ridge__tol': 0.001} 
+Creation date: 2021-12-07 21:30:45 
+Last fit date: 2021-12-07 21:30:45 
+Skforecast version: 0.4.0 
 
 ```
 
@@ -88,17 +99,14 @@ If the `Forecaster` has been trained with exogenous variables, they shlud be pro
 # ==============================================================================
 steps = 36
 predictions = forecaster.predict(steps=steps)
-# Add datetime index to predictions
-predictions = pd.Series(data=predictions, index=data_test.index)
 predictions.head(3)
 ```
 
 ```
-fecha
-2005-07-01    0.877073
-2005-08-01    0.974353
-2005-09-01    1.021718
-Freq: MS, dtype: float64
+2005-07-01    0.965991
+2005-08-01    0.973200
+2005-09-01    1.144204
+Freq: MS, Name: pred, dtype: float64
 ```
 
 ``` python
@@ -124,7 +132,7 @@ print(f"Test error (mse): {error_mse}")
 ```
 
 ```
-Test error (mse): 0.006208145903529839
+Test error (mse): 0.009067941608532212
 ```
 
 ## Feature importance
@@ -132,17 +140,27 @@ Test error (mse): 0.006208145903529839
 Since `ForecasterAutoregMultiOutput` fits one model per step,it is necessary to specify from which model retrieve its feature importance.
 
 ``` python
-# When using as regressor LinearRegression, Ridge or Lasso
-# forecaster.get_coef()
-
-# When using as regressor RandomForestRegressor or GradientBoostingRegressor
-forecaster.get_feature_importances(step=1)
+forecaster.get_coef(step=1)
 ```
 
 ```
-array([0.0070333 , 0.07330653, 0.03192484, 0.00284055, 0.00525716,
-       0.0039042 , 0.00717631, 0.00676659, 0.00587334, 0.00856639,
-       0.01275252, 0.81823596, 0.005138  , 0.00413031, 0.007094])
+| feature   |         coef |
+|:----------|-------------:|
+| lag_1     |  0.0306858   |
+| lag_2     |  0.0407212   |
+| lag_3     |  0.0345991   |
+| lag_4     | -0.0018438   |
+| lag_5     | -0.00110815  |
+| lag_6     |  0.000759624 |
+| lag_7     | -0.00282664  |
+| lag_8     |  0.00109809  |
+| lag_9     | -0.0046271   |
+| lag_10    |  0.00610878  |
+| lag_11    |  0.0054867   |
+| lag_12    |  0.159351    |
+| lag_13    | -0.0260086   |
+| lag_14    | -0.0460312   |
+| lag_15    | -0.0358484   |
 ```
 
 ## Extract training matrix
@@ -157,4 +175,22 @@ X_1, y_1 = forecaster.filter_train_X_y_for_step(
                 X_train = X,
                 y_train = y,
             )
+print(X_1.head(4))
+print(y_1.head(4))
+```
+
+```
+|    lag_1 |    lag_2 |    lag_3 |    lag_4 |    lag_5 |    lag_6 |    lag_7 |    lag_8 |    lag_9 |   lag_10 |   lag_11 |   lag_12 |   lag_13 |   lag_14 |   lag_15 |
+|---------:|---------:|---------:|---------:|---------:|---------:|---------:|---------:|---------:|---------:|---------:|---------:|---------:|---------:|---------:|
+| 0.534761 | 0.475463 | 0.483389 | 0.410534 | 0.361801 | 0.379808 | 0.351348 | 0.33622  | 0.660119 | 0.602652 | 0.502369 | 0.492543 | 0.432159 | 0.400906 | 0.429795 |
+| 0.568606 | 0.534761 | 0.475463 | 0.483389 | 0.410534 | 0.361801 | 0.379808 | 0.351348 | 0.33622  | 0.660119 | 0.602652 | 0.502369 | 0.492543 | 0.432159 | 0.400906 |
+| 0.595223 | 0.568606 | 0.534761 | 0.475463 | 0.483389 | 0.410534 | 0.361801 | 0.379808 | 0.351348 | 0.33622  | 0.660119 | 0.602652 | 0.502369 | 0.492543 | 0.432159 |
+| 0.771258 | 0.595223 | 0.568606 | 0.534761 | 0.475463 | 0.483389 | 0.410534 | 0.361801 | 0.379808 | 0.351348 | 0.33622  | 0.660119 | 0.602652 | 0.502369 | 0.492543 |
+
+|   y_step_1 |
+|-----------:|
+|   0.595223 |
+|   0.771258 |
+|   0.751503 |
+|   0.387554 |
 ```
