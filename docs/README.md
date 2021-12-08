@@ -57,22 +57,6 @@ statsmodels>=0.12.2
 + Get predictor importance
 
 
-## Tutorials 
-
-**English**
-
-+ [**Time series forecasting with Python and Scikit-learn**](https://joaquinamatrodrigo.github.io/skforecast/0.4/html/py27-time-series-forecasting-python-scikitlearn.html)
-
-
-**Español**
-
-+ [**Forecasting series temporales con Python y Scikit-learn**](https://joaquinamatrodrigo.github.io/skforecast/0.4/html/py27-forecasting-series-temporales-python-scikitlearn.html)
-
-+ [**Forecasting de la demanda eléctrica**](https://www.cienciadedatos.net/documentos/py29-forecasting-demanda-energia-electrica-python.html)
-
-+ [**Forecasting de las visitas a una página web**](https://www.cienciadedatos.net/documentos/py37-forecasting-visitas-web-machine-learning.html)
-
-
 ## References
 
 + Hyndman, R.J., & Athanasopoulos, G. (2018) Forecasting: principles and practice, 2nd edition, OTexts: Melbourne, Australia
