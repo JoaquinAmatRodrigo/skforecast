@@ -396,6 +396,12 @@ def _backtesting_forecaster_refit(
                 print(f"    Training:   {y.index[0]} -- {y.index[train_size - 1]}")
                 print(f"    Validation: {y.index[train_size]} -- {y.index[-1]}")
         print("")
+        
+    if folds > 20:
+        print(
+            f"Forecaster will be fit {folds} times. This can take substantial amounts of time. "
+            f"If not feasible, try backtesting with `refit = False`."
+        )
 
     for i in range(folds):
         # In each iteration (except the last one) the model is fitted before
