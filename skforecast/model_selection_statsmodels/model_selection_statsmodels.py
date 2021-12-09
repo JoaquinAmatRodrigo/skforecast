@@ -153,10 +153,10 @@ def backtesting_sarimax(
         if remainder != 0:
             print(f"    Last fold only includes {remainder} observations.")
             
-    if folds > 20 and refit:
+    if folds > 50 and refit:
         print(
             f"Model will be fit {folds} times. This can take substantial amounts of time. "
-            f"If not feasible, try backtesting with `refit = False`."
+            f"If not feasible, try with `refit = False`."
         )
 
     if refit:
