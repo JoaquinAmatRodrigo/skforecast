@@ -2,8 +2,8 @@ Forecaster Classes
 - [x] unified inputs `y` and `exog` to pandas Series and pandas Dataframe
 - [x] unified `predict` and `predict_interval`
 - [x] ForecasterBase as parent class
-- [ ] add examples in docstrings (statsmodels)
-- [ ] add references in docstrings (statsmodels)
+- [ ] add examples in docstrings
+- [ ] add references in docstrings
 
 Module model_selection
 - [x] unified cross-validation and backtesting using argument `refit`
