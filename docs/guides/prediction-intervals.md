@@ -8,9 +8,8 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
-from sklearn.linear_model import Ridge
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error
 ```
 
@@ -20,13 +19,12 @@ from sklearn.metrics import mean_squared_error
 # Download data
 # ==============================================================================
 url = ('https://raw.githubusercontent.com/JoaquinAmatRodrigo/skforecast/master/data/h2o.csv')
-data = pd.read_csv(url, sep=',')
+data = pd.read_csv(url, sep=',', header=0, names=['y', 'datetime'])
 
 # Data preprocessing
 # ==============================================================================
-data['fecha'] = pd.to_datetime(data['fecha'], format='%Y/%m/%d')
-data = data.set_index('fecha')
-data = data.rename(columns={'x': 'y'})
+data['datetime'] = pd.to_datetime(data['datetime'], format='%Y/%m/%d')
+data = data.set_index('datetime')
 data = data.asfreq('MS')
 data = data['y']
 data = data.sort_index()
@@ -42,8 +40,9 @@ data_test  = data[-steps:]
 fig, ax=plt.subplots(figsize=(9, 4))
 data_train.plot(ax=ax, label='train')
 data_test.plot(ax=ax, label='test')
-ax.legend();
+ax.legend()
 ```
+
 <img src="../img/data.png" style="width: 500px;">
 
 
@@ -54,46 +53,54 @@ ax.legend();
 # Create and fit forecaster
 # ==============================================================================
 forecaster = ForecasterAutoreg(
-                    regressor = Ridge(),
-                    lags      = 15
-                )
+                regressor = RandomForestRegressor(random_state=123),
+                lags      = 15
+             )
 
 forecaster.fit(y=data_train)
 forecaster
 ```
 
 ```
-=======================ForecasterAutoreg=======================
-Regressor: Ridge()
-Lags: [ 1  2  3  4  5  6  7  8  9 10 11 12 13 14 15]
-Exogenous variable: False
-Parameters: {'alpha': 1.0, 'copy_X': True, 'fit_intercept': True, 'max_iter': None, 'normalize': False, 'random_state': None, 'solver': 'auto', 'tol': 0.001}
+================= 
+ForecasterAutoreg 
+================= 
+Regressor: RandomForestRegressor(random_state=123) 
+Lags: [ 1  2  3  4  5  6  7  8  9 10 11 12 13 14 15] 
+Window size: 15 
+Included exogenous: False 
+Type of exogenous variable: None 
+Exogenous variables names: None 
+Training range: [Timestamp('1991-07-01 00:00:00'), Timestamp('2005-06-01 00:00:00')] 
+Training index type: DatetimeIndex 
+Training index frequency: MS 
+Regressor parameters: {'bootstrap': True, 'ccp_alpha': 0.0, 'criterion': 'squared_error', 'max_depth': None, 'max_features': 'auto', 'max_leaf_nodes': None, 'max_samples': None, 'min_impurity_decrease': 0.0, 'min_samples_leaf': 1, 'min_samples_split': 2, 'min_weight_fraction_leaf': 0.0, 'n_estimators': 100, 'n_jobs': None, 'oob_score': False, 'random_state': 123, 'verbose': 0, 'warm_start': False} 
+Creation date: 2021-12-08 00:27:29 
+Last fit date: 2021-12-08 00:27:29 
+Skforecast version: 0.4.0 
 ```
 
-## Prediction
+## Prediction intervals
 
 ``` python
 # Prediction intervals
 # ==============================================================================
 predictions = forecaster.predict_interval(
-                    steps    = steps,
+                    steps    = 36,
                     interval = [5, 95],
-                    n_boot   = 1000
+                    n_boot   = 500
               )
 
-# Add datetime index to predictions
-predictions = pd.DataFrame(data=predictions, index=data_test.index)
 predictions.head(4)
 ```
 
 ```
-
-                0	        1	        2
-fecha			
-2005-07-01	0.973131	0.874545	1.074531
-2005-08-01	1.022154	0.925574	1.118590
-2005-09-01	1.151334	1.048968	1.255996
-2005-10-01	1.206401	1.105658	1.311676
+|                     |     pred |   lower_bound |   upper_bound |
+|:--------------------|---------:|--------------:|--------------:|
+| 2005-07-01 00:00:00 | 0.899283 |      0.832109 |      0.977063 |
+| 2005-08-01 00:00:00 | 0.954796 |      0.881798 |      1.02203  |
+| 2005-09-01 00:00:00 | 1.06672  |      0.964466 |      1.13247  |
+| 2005-10-01 00:00:00 | 1.1022   |      1.01777  |      1.17421  |
 ```
 
 ``` python
@@ -101,14 +108,14 @@ fecha
 # ==============================================================================
 fig, ax=plt.subplots(figsize=(9, 4))
 data_test.plot(ax=ax, label='test')
-predictions.iloc[:, 0].plot(ax=ax, label='predictions')
+predictions['pred'].plot(ax=ax, label='predictions')
 ax.fill_between(
     predictions.index,
-    predictions.iloc[:, 1],
-    predictions.iloc[:, 2],
-    color='red',
-    alpha=0.2,
-    label='prediction_interval'
+    predictions['lower_bound'],
+    predictions['upper_bound'],
+    color = 'red',
+    alpha = 0.2,
+    label = 'prediction_interval'
 )
 ax.legend(loc='upper right');
 ```

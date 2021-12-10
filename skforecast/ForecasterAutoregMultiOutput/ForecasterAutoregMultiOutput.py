@@ -1,12 +1,12 @@
 ################################################################################
 #                         ForecasterAutoregMultiOutput                         #
 #                                                                              #
-# This work by Joaquín Amat Rodrigo is licensed under a Creative Commons       #
+# This work by Joaquin Amat Rodrigo is licensed under a Creative Commons       #
 # Attribution 4.0 International License.                                       #
 ################################################################################
 # coding=utf-8
 
-from typing import Union, Dict, List, Tuple, Any
+from typing import Union, Dict, List, Tuple, Any, Optional
 import warnings
 import logging
 import numpy as np
@@ -15,14 +15,16 @@ import sklearn
 import sklearn.pipeline
 from sklearn.base import clone
 
+import skforecast
 from ..ForecasterBase import ForecasterBase
 from ..utils import check_y
 from ..utils import check_exog
 from ..utils import preprocess_y
 from ..utils import preprocess_last_window
 from ..utils import preprocess_exog
+from ..utils import exog_to_multi_output
 from ..utils import expand_index
-
+from ..utils import check_predict_input
 
 
 logging.basicConfig(
@@ -50,7 +52,7 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
             
     steps : int
         Maximum number of future steps the forecaster will predict when using
-        method `predict()`. Since a diferent model is created for each step,
+        method `predict()`. Since a different model is created for each step,
         this value should be defined before training.
     
     Attributes
@@ -58,14 +60,14 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
     regressor : regressor or pipeline compatible with the scikit-learn API
         An instance of a regressor or pipeline compatible with the scikit-learn API.
         One instance of this regressor is trainned for each step. All
-        them are stored in `slef.regressors_`.
+        them are stored in `self.regressors_`.
         
     regressors_ : dict
         Dictionary with regressors trained for each step.
         
     steps : int
         Number of future steps the forecaster will predict when using method
-        `predict()`. Since a diferent model is created for each step, this value
+        `predict()`. Since a different model is created for each step, this value
         should be defined before training.
         
     lags : numpy ndarray
@@ -106,12 +108,21 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
 
     X_train_col_names : tuple
         Names of columns of the matrix created internally for training.
+
+    creation_date: str
+        Date of creation.
+
+    fit_date: str
+        Date of last fit.
+
+    skforcast_version: str
+        Version of skforecast library used to create the forecaster.
         
     Notes
     -----
     A separate model is created for each forecast time step. It is important to
     note that all models share the same configuration of parameters and
-    hiperparameters.
+    hyperparameters.
      
     '''
     
@@ -130,6 +141,9 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
         self.exog_col_names       = None
         self.X_train_col_names    = None
         self.fitted               = False
+        self.creation_date        = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
+        self.fit_date             = None
+        self.skforcast_version    = skforecast.__version__
 
         if isinstance(lags, int) and lags < 1:
             raise Exception('Minimum value of lags allowed is 1')
@@ -166,9 +180,9 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
             params = self.regressor.get_params()
 
         info = (
-            f"{'=' * len(str(type(self)))} \n"
-            f"{type(self)} \n"
-            f"{'=' * len(str(type(self)))} \n"
+            f"{'=' * len(str(type(self)).split('.')[1])} \n"
+            f"{str(type(self)).split('.')[1]} \n"
+            f"{'=' * len(str(type(self)).split('.')[1])} \n"
             f"Regressor: {self.regressor} \n"
             f"Lags: {self.lags} \n"
             f"Window size: {self.window_size} \n"
@@ -177,9 +191,12 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
             f"Type of exogenous variable: {self.exog_type} \n"
             f"Exogenous variables names: {self.exog_col_names} \n"
             f"Training range: {self.training_range.to_list() if self.fitted else None} \n"
-            f"Training index type: {str(self.index_type) if self.fitted else None} \n"
-            f"Training index frequancy: {self.index_freq if self.fitted else None} \n"
+            f"Training index type: {str(self.index_type).split('.')[-1][:-2] if self.fitted else None} \n"
+            f"Training index frequency: {self.index_freq if self.fitted else None} \n"
             f"Regressor parameters: {params} \n"
+            f"Creation date: {self.creation_date} \n"
+            f"Last fit date: {self.fit_date} \n"
+            f"Skforecast version: {self.skforcast_version} \n"
         )
 
         return info
@@ -208,7 +225,7 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
             Values of the time series related to each row of `X_data` for each step.
             
         '''
-          
+
         n_splits = len(y) - self.max_lag - (self.steps -1)
         X_data  = np.full(shape=(n_splits, self.max_lag), fill_value=np.nan, dtype=float)
         y_data  = np.full(shape=(n_splits, self.steps), fill_value=np.nan, dtype= float)
@@ -228,10 +245,10 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
     def create_train_X_y(
         self,
         y: pd.Series,
-        exog: Union[pd.Series, pd.DataFrame]=None
+        exog: Optional[Union[pd.Series, pd.DataFrame]]=None
     ) -> Tuple[pd.DataFrame, pd.DataFrame]:
         '''
-        Create training matrices from univariante time series and exogenous
+        Create training matrices from univariate time series and exogenous
         variables. The resulting matrices contain the target variable and predictors
         needed to train all the forecaster (one per step).      
         
@@ -259,6 +276,11 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
         check_y(y=y)
         y_values, y_index = preprocess_y(y=y)
 
+        if len(y_values) < self.max_lag + self.steps:
+            raise Exception(
+                f"Minimum length of `y` for training this forecaster is "
+                f"{self.max_lag + self.steps}. Got {len(y_values)}"
+            )
         if exog is not None:
             if len(exog) != len(y):
                 raise Exception(
@@ -269,7 +291,7 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
             if not (exog_index[:len(y_index)] == y_index).all():
                 raise Exception(
                 ('Different index for `y` and `exog`. They must be equal '
-                'to ensure the correct aligment of values.')      
+                'to ensure the correct alignment of values.')      
                 )
       
         X_lags, y_train = self._create_lags(y=y_values)
@@ -280,8 +302,8 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
             X_train = X_lags
         else:
             col_names_exog = exog.columns if isinstance(exog, pd.DataFrame) else [exog.name]
-            # Trasform exog to match multi output format
-            X_exog = self._exog_to_multi_output(exog=exog_values)
+            # Transform exog to match multi output format
+            X_exog = exog_to_multi_output(exog=exog_values, steps=self.steps)
             col_names_exog = [f"{col_name}_step_{i+1}" for col_name in col_names_exog for i in range(self.steps)]
             X_train_col_names.extend(col_names_exog)
             # The first `self.max_lag` positions have to be removed from X_exog
@@ -312,7 +334,7 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
     ) -> Tuple[pd.DataFrame, pd.Series]:
 
         '''
-        Select columns needed to train a forcaster for a specific step. The imput
+        Select columns needed to train a forcaster for a specific step. The input
         matrices should be created with created with `create_train_X_y()`.         
 
         Parameters
@@ -358,7 +380,7 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
     def fit(
         self,
         y: pd.Series,
-        exog: Union[pd.Series, pd.DataFrame]=None
+        exog: Optional[Union[pd.Series, pd.DataFrame]]=None
     ) -> None:
         '''
         Training Forecaster.
@@ -410,19 +432,23 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
             self.regressors_[step].fit(X_train_step, y_train_step)
         
         self.fitted = True
+        self.fit_date = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
         self.training_range = preprocess_y(y=y)[1][[0, -1]]
         self.index_type = type(X_train.index)
         if isinstance(X_train.index, pd.DatetimeIndex):
-            self.index_freq = X_train.index.freqstr
+            self.index_freq = y_train.index.freqstr
+            self.last_window = y.loc[y_train.index[-1] - self.max_lag * y_train.index.freq: ]
         else: 
-            self.index_freq = X_train.index.step
-        self.last_window = y_train.iloc[-self.max_lag:, -1]
+            self.index_freq = y_train.index.step
+            self.last_window = y.loc[y_train.index[-1] - self.max_lag * y_train.index.step: ]
+        
+
     
     def predict(
         self,
-        steps: Union[int, None]=None,
-        last_window: pd.Series=None,
-        exog: Union[pd.Series, pd.DataFrame]=None
+        steps: Optional[Union[int, None]]=None,
+        last_window: Optional[pd.Series]=None,
+        exog: Optional[Union[pd.Series, pd.DataFrame]]=None
     ) -> np.ndarray:
         '''
         Predict n steps ahead.
@@ -436,7 +462,7 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
 
         last_window : pandas Series, default `None`
             Values of the series used to create the predictors (lags) need in the 
-            first iteration of predictiont (t + 1).
+            first iteration of prediction (t + 1).
     
             If `last_window = None`, the values stored in` self.last_window` are
             used to calculate the initial predictors, and the predictions start
@@ -455,11 +481,19 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
         if steps is None:
             steps = self.steps
 
-        self._check_predict_input(
-            steps       = steps,
-            last_window = last_window, 
-            exog        = exog
-        )
+        check_predict_input(
+            steps          = steps,
+            fitted         = self.fitted,
+            included_exog  = self.included_exog,
+            index_type     = self.index_type,
+            index_freq     = self.index_freq,
+            window_size    = self.window_size,
+            last_window    = last_window,
+            exog           = exog,
+            exog_type      = self.exog_type,
+            exog_col_names = self.exog_col_names,
+            max_steps      = self.steps,
+        ) 
 
         if exog is not None:
             if isinstance(exog, pd.DataFrame):
@@ -470,7 +504,7 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
                 exog_values, _ = preprocess_exog(
                                         exog = exog.iloc[:steps, ]
                                  )
-            exog_values = self._exog_to_multi_output(exog=exog_values, steps=steps)
+            exog_values = exog_to_multi_output(exog=exog_values, steps=steps)
 
         else:
             exog_values = None
@@ -495,7 +529,7 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
                 # Only columns from exog related with the current step are selected.
                 X = np.hstack([X_lags, exog_values[0][step::steps].reshape(1, -1)])
             with warnings.catch_warnings():
-                # Supress scikitlearn warning: "X does not have valid feature names,
+                # Suppress scikitlearn warning: "X does not have valid feature names,
                 # but NoOpTransformer was fitted with feature names".
                 warnings.simplefilter("ignore")
                 predictions[step] = regressor.predict(X)
@@ -509,163 +543,14 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
                         name = 'pred'
                       )
 
-        return predictions
-
-    
-    def _check_predict_input(
-        self,
-        steps: int,
-        last_window: pd.Series=None,
-        exog: Union[pd.Series, pd.DataFrame]=None
-    ) -> None:
-        '''
-        Check all inputs of predict method
-        '''
-
-        if not self.fitted:
-            raise Exception(
-                'This Forecaster instance is not fitted yet. Call `fit` with'
-                'appropriate arguments before using predict.'
-            )
-        
-        if steps < 1:
-            raise Exception(
-                f"`steps` must be integer greater than 0. Got {steps}."
-            )
-        
-        if steps > self.steps:
-            raise Exception(
-                f"`steps` must be lower or equal to the value of steps defined "
-                f"when initializing the forecaster. Got {steps} but the maximum "
-                f"is {self.steps}."
-            )
-        
-        if exog is None and self.included_exog:
-            raise Exception(
-                'Forecaster trained with exogenous variable/s. '
-                'Same variable/s must be provided in `predict()`.'
-            )
-            
-        if exog is not None and not self.included_exog:
-            raise Exception(
-                'Forecaster trained without exogenous variable/s. '
-                '`exog` must be `None` in `predict()`.'
-            )
-        
-        if exog is not None:
-            if len(exog) < steps:
-                raise Exception(
-                    '`exog` must have at least as many values as `steps` predicted.'
-                )
-            if not isinstance(exog, self.exog_type):
-                raise Exception(
-                    f"Expected type for `exog`: {self.exog_type}. Got {type(exog)}"      
-                )
-            if isinstance(exog, pd.DataFrame):
-                col_missing = set(self.exog_col_names).difference(set(exog.columns))
-                if col_missing:
-                    raise Exception(
-                        f"Missing columns in `exog`. Expected {self.exog_col_names}. "
-                        f"Got {exog.columns.to_list()}"      
-                    )
-            check_exog(exog = exog)
-            _, exog_index = preprocess_exog(exog=exog.iloc[:0, ])
-            
-            if not isinstance(exog_index, self.index_type):
-                raise Exception(
-                    f"Expected index of type {self.index_type} for `exog`. "
-                    f"Got {type(exog_index)}"      
-                )
-            if not exog_index.freqstr == self.index_freq:
-                raise Exception(
-                    f"Expected frequency of type {self.index_type} for `exog`. "
-                    f"Got {exog_index.freqstr}"      
-                )
-            
-        if last_window is not None:
-            if len(last_window) < self.max_lag:
-                raise Exception(
-                    f"`last_window` must have as many values as as needed to "
-                    f"calculate the maximum lag ({self.max_lag})."
-                )
-            if not isinstance(last_window, pd.Series):
-                raise Exception('`last_window` must be a pandas Series.')
-            if last_window.isnull().any():
-                raise Exception('`last_window` has missing values.')
-            _, last_window_index = preprocess_last_window(
-                                        last_window = last_window.iloc[:0]
-                                   ) 
-            if not isinstance(last_window_index, self.index_type):
-                raise Exception(
-                    f"Expected index of type {self.index_type} for `last_window`. "
-                    f"Got {type(last_window_index)}"      
-                )
-            if not last_window_index.freqstr == self.index_freq:
-                raise Exception(
-                    f"Expected frequency of type {self.index_type} for `last_window`. "
-                    f"Got {last_window_index.freqstr}"      
-                )
-
-        return    
-    
-
-    def _exog_to_multi_output(
-        self,
-        exog: np.ndarray,
-        steps: Union[int, None]=None
-    )-> np.ndarray:
-        
-        '''
-        Transforms `exog` to `np.ndarray` with the shape needed for multioutput
-        regresors.
-        
-        Parameters
-        ----------        
-        exog : numpy ndarray, shape(samples,)
-            Time series values
-
-        steps: int, default `None`.
-            Number of steps that will be predicted using this exog. If `None`,
-            `self.steps` is used.
-
-        Returns 
-        -------
-        exog_transformed: numpy ndarray
-        '''
-
-        if steps is None:
-            steps = self.steps
-
-        exog_transformed = []
-
-        if exog.ndim < 2:
-            exog = exog.reshape(-1, 1)
-
-        for column in range(exog.shape[1]):
-
-            exog_column_transformed = []
-
-            for i in range(exog.shape[0] - (steps -1)):
-                exog_column_transformed.append(exog[i:i + steps, column])
-
-            if len(exog_column_transformed) > 1:
-                exog_column_transformed = np.vstack(exog_column_transformed)
-
-            exog_transformed.append(exog_column_transformed)
-
-        if len(exog_transformed) > 1:
-            exog_transformed = np.hstack(exog_transformed)
-        else:
-            exog_transformed = exog_column_transformed
-
-        return exog_transformed
+        return predictions    
     
     
     def set_params(self, **params: dict) -> None:
         '''
         Set new values to the parameters of the scikit learn model stored in the
         forecaster. It is important to note that all models share the same 
-        configuration of parameters and hiperparameters.
+        configuration of parameters and hyperparameters.
         
         Parameters
         ----------
@@ -678,6 +563,7 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
         
         '''
         
+        self.regressor = clone(self.regressor)
         self.regressor.set_params(**params)
         self.regressors_ = {step: clone(self.regressor) for step in range(self.steps)}
         
@@ -728,7 +614,7 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
         Return estimated coefficients for the linear regression model stored in
         the forecaster for a specific step. Since a separate model is created for
         each forecast time step, it is necessary to select the model from which
-        retireve information.
+        retrieve information.
         
         Only valid when the forecaster has been trained using as `regressor:
         `LinearRegression()`, `Lasso()` or `Ridge()`.
@@ -736,7 +622,7 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
         Parameters
         ----------
         step : int
-            Model from which retireve information (a separate model is created for
+            Model from which retrieve information (a separate model is created for
             each forecast time step).
 
         Returns 
@@ -748,7 +634,7 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
         
         if step > self.steps:
             raise Exception(
-                f"Forecaster traied for {self.steps} steps. Got step={step}."
+                f"Forecaster trained for {self.steps} steps. Got step={step}."
             )
             
         if isinstance(self.regressor, sklearn.pipeline.Pipeline):
@@ -776,12 +662,12 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
         return coef
 
     
-    def get_feature_importances(self, step) -> np.ndarray:
+    def get_feature_importance(self, step) -> np.ndarray:
         '''      
-        Return impurity-based feature importances of the model stored in
+        Return impurity-based feature importance of the model stored in
         the forecaster for a specific step. Since a separate model is created for
         each forecast time step, it is necessary to select the model from which
-        retireve information.
+        retrieve information.
         
         Only valid when the forecaster has been trained using 
         `GradientBoostingRegressor`, `RandomForestRegressor` or 
@@ -790,18 +676,18 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
         Parameters
         ----------
         step : int
-            Model from which retireve information (a separate model is created for
+            Model from which retrieve information (a separate model is created for
             each forecast time step).
 
         Returns 
         -------
-        feature_importances : pandas DataFrame
-            Impurity-based feature importances associated with each predictor.
+        feature_importance : pandas DataFrame
+            Impurity-based feature importance associated with each predictor.
         '''
         
         if step > self.steps:
             raise Exception(
-                f"Forecaster traied for {self.steps} steps. Got step={step}."
+                f"Forecaster trained for {self.steps} steps. Got step={step}."
             )
         
         if isinstance(self.regressor, sklearn.pipeline.Pipeline):
@@ -815,7 +701,7 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
                            
         if not isinstance(estimator, valid_instances):
             warnings.warn(
-                f"`get_feature_importances` only valid for forecasters with "
+                f"`get_feature_importance` only valid for forecasters with "
                 f"regressor of type {valid_instances}."
             )
             return

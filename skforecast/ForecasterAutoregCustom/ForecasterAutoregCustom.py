@@ -1,20 +1,22 @@
 ################################################################################
 #                        ForecasterAutoregCustom                               #
 #                                                                              #
-# This work by Joaquín Amat Rodrigo is licensed under a Creative Commons       #
+# This work by Joaquin Amat Rodrigo is licensed under a Creative Commons       #
 # Attribution 4.0 International License.                                       #
 ################################################################################
 # coding=utf-8
 
-from typing import Union, Dict, List, Tuple, Any
+from typing import Union, Dict, List, Tuple, Any, Optional
 import warnings
 import logging
 import numpy as np
 import pandas as pd
 import sklearn
 import sklearn.pipeline
+from sklearn.base import clone
 from copy import copy
 
+import skforecast
 from ..ForecasterBase import ForecasterBase
 from ..utils import check_y
 from ..utils import check_exog
@@ -22,6 +24,7 @@ from ..utils import preprocess_y
 from ..utils import preprocess_last_window
 from ..utils import preprocess_exog
 from ..utils import expand_index
+from ..utils import check_predict_input
 
 
 logging.basicConfig(
@@ -99,6 +102,15 @@ class ForecasterAutoregCustom(ForecasterBase):
     out_sample_residuals: numpy ndarray
         Residuals of the model when predicting non training data. Only stored
         up to 1000 values.
+
+    creation_date: str
+        Date of creation.
+
+    fit_date: str
+        Date of last fit.
+
+    skforcast_version: str
+        Version of skforecast library used to create the forecaster.
      
     '''
     
@@ -118,6 +130,9 @@ class ForecasterAutoregCustom(ForecasterBase):
         self.in_sample_residuals  = None
         self.out_sample_residuals = None
         self.fitted               = False
+        self.creation_date        = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
+        self.fit_date             = None
+        self.skforcast_version    = skforecast.__version__
         
         if not isinstance(window_size, int):
             raise Exception(
@@ -143,9 +158,9 @@ class ForecasterAutoregCustom(ForecasterBase):
             params = self.regressor.get_params()
 
         info = (
-            f"{'=' * len(str(type(self)))} \n"
-            f"{type(self)} \n"
-            f"{'=' * len(str(type(self)))} \n"
+            f"{'=' * len(str(type(self)).split('.')[1])} \n"
+            f"{str(type(self)).split('.')[1]} \n"
+            f"{'=' * len(str(type(self)).split('.')[1])} \n"
             f"Regressor: {self.regressor} \n"
             f"Predictors created with function: {self.create_predictors.__name__} \n"
             f"Window size: {self.window_size} \n"
@@ -153,9 +168,12 @@ class ForecasterAutoregCustom(ForecasterBase):
             f"Type of exogenous variable: {self.exog_type} \n"
             f"Exogenous variables names: {self.exog_col_names} \n"
             f"Training range: {self.training_range.to_list() if self.fitted else None} \n"
-            f"Training index type: {str(self.index_type) if self.fitted else None} \n"
-            f"Training index frequancy: {self.index_freq if self.fitted else None} \n"
+            f"Training index type: {str(self.index_type).split('.')[-1][:-2] if self.fitted else None} \n"
+            f"Training index frequency: {self.index_freq if self.fitted else None} \n"
             f"Regressor parameters: {params} \n"
+            f"Creation date: {self.creation_date} \n"
+            f"Last fit date: {self.fit_date} \n"
+            f"Skforecast version: {self.skforcast_version} \n"
         )
 
         return info
@@ -164,10 +182,10 @@ class ForecasterAutoregCustom(ForecasterBase):
     def create_train_X_y(
         self,
         y: pd.Series,
-        exog: Union[pd.Series, pd.DataFrame]=None
+        exog: Optional[Union[pd.Series, pd.DataFrame]]=None
     ) -> Tuple[pd.DataFrame, pd.Series]:
         '''
-        Create training matrices from univariante time series.
+        Create training matrices from univariate time series.
         
         Parameters
         ----------        
@@ -193,23 +211,23 @@ class ForecasterAutoregCustom(ForecasterBase):
             raise Exception(
                 f'`y` must have as many values as the windows_size needed by '
                 f'{self.create_predictors.__name__}. For this Forecaster the '
-                f'minimum lenght is {self.window_size + 1}'
+                f'minimum length is {self.window_size + 1}'
             )
 
-        self._check_y(y=y)
-        y_values, y_index = self._preproces_y(y=y)
+        check_y(y=y)
+        y_values, y_index = preprocess_y(y=y)
         
         if exog is not None:
             if len(exog) != len(y):
                 raise Exception(
                     "`exog` must have same number of samples as `y`."
                 )
-            self._check_exog(exog=exog)
-            exog_values, exog_index = self._preproces_exog(exog=exog)
+            check_exog(exog=exog)
+            exog_values, exog_index = preprocess_exog(exog=exog)
             if not (exog_index[:len(y_index)] == y_index).all():
                 raise Exception(
                 ('Different index for `y` and `exog`. They must be equal '
-                'to ensure the correct aligment of values.')      
+                'to ensure the correct alignment of values.')      
                 )
        
         X_train  = []
@@ -254,8 +272,11 @@ class ForecasterAutoregCustom(ForecasterBase):
         return X_train, y_train
 
         
-    def fit(self, y: Union[np.ndarray, pd.Series],
-            exog: Union[np.ndarray, pd.Series, pd.DataFrame]=None) -> None:
+    def fit(
+        self,
+        y: Union[np.ndarray, pd.Series],
+        exog: Optional[Union[np.ndarray, pd.Series, pd.DataFrame]]=None
+    ) -> None:
         '''
         Training Forecaster.
         
@@ -298,7 +319,8 @@ class ForecasterAutoregCustom(ForecasterBase):
         X_train, y_train = self.create_train_X_y(y=y, exog=exog)      
         self.regressor.fit(X=X_train, y=y_train)
         self.fitted = True
-        self.training_range = self._preproces_y(y=y)[1][[0, -1]]
+        self.fit_date = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
+        self.training_range = preprocess_y(y=y)[1][[0, -1]]
         self.index_type = type(X_train.index)
         if isinstance(X_train.index, pd.DatetimeIndex):
             self.index_freq = X_train.index.freqstr
@@ -357,7 +379,7 @@ class ForecasterAutoregCustom(ForecasterBase):
                 X = np.column_stack((X, exog[i, ].reshape(1, -1)))
 
             with warnings.catch_warnings():
-                # Supress scikitlearn warning: "X does not have valid feature names,
+                # Suppress scikitlearn warning: "X does not have valid feature names,
                 # but NoOpTransformer was fitted with feature names".
                 warnings.simplefilter("ignore")
                 prediction = self.regressor.predict(X)
@@ -373,8 +395,8 @@ class ForecasterAutoregCustom(ForecasterBase):
     def predict(
         self,
         steps: int,
-        last_window: pd.Series=None,
-        exog: Union[pd.Series, pd.DataFrame]=None
+        last_window: Optional[pd.Series]=None,
+        exog: Optional[Union[pd.Series, pd.DataFrame]]=None
     ) -> pd.Series:
         '''
         Predict n steps ahead. It is an recursive process in which, each prediction,
@@ -387,7 +409,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             
         last_window : pandas Series, default `None`
             Values of the series used to create the predictors (lags) need in the 
-            first iteration of predictiont (t + 1).
+            first iteration of prediction (t + 1).
     
             If `last_window = None`, the values stored in` self.last_window` are
             used to calculate the initial predictors, and the predictions start
@@ -403,30 +425,38 @@ class ForecasterAutoregCustom(ForecasterBase):
             
         '''
 
-        self._check_predict_input(
-            steps       = steps,
-            last_window = last_window, 
-            exog        = exog
+        check_predict_input(
+            steps          = steps,
+            fitted         = self.fitted,
+            included_exog  = self.included_exog,
+            index_type     = self.index_type,
+            index_freq     = self.index_freq,
+            window_size    = self.window_size,
+            last_window    = last_window,
+            exog           = exog,
+            exog_type      = self.exog_type,
+            exog_col_names = self.exog_col_names,
+            max_steps      = None,
         )
      
         if exog is not None:
             if isinstance(exog, pd.DataFrame):
-                exog_values, _ = self._preproces_exog(
+                exog_values, _ = preprocess_exog(
                                     exog = exog[self.exog_col_names].iloc[:steps, ]
                                  )
             else: 
-                exog_values, _ = self._preproces_exog(
+                exog_values, _ = preprocess_exog(
                                     exog = exog.iloc[:steps, ]
                                  )
         else:
             exog_values = None
         
         if last_window is not None:
-            last_window_values, last_window_index = self._preproces_last_window(
+            last_window_values, last_window_index = preprocess_last_window(
                                                         last_window = last_window
                                                     )  
         else:
-            last_window_values, last_window_index = self._preproces_last_window(
+            last_window_values, last_window_index = preprocess_last_window(
                                                         last_window = self.last_window
                                                     )
             
@@ -438,7 +468,7 @@ class ForecasterAutoregCustom(ForecasterBase):
 
         predictions = pd.Series(
                         data  = predictions,
-                        index = self._expand_index(
+                        index = expand_index(
                                     index = last_window_index,
                                     steps = steps
                                 ),
@@ -452,10 +482,11 @@ class ForecasterAutoregCustom(ForecasterBase):
     def _estimate_boot_interval(
         self,
         steps: int,
-        last_window: np.ndarray,
-        exog: np.ndarray,
+        last_window: Optional[np.ndarray]=None,
+        exog: Optional[np.ndarray]=None,
         interval: list=[5, 95],
         n_boot: int=500,
+        random_state: int=123,
         in_sample_residuals: bool=True
     ) -> np.ndarray:
         '''
@@ -469,20 +500,24 @@ class ForecasterAutoregCustom(ForecasterBase):
         steps : int
             Number of future steps predicted.
             
-        last_window : 1d numpy ndarray shape (, max_lag)
+        last_window : 1d numpy ndarray shape (, max_lag), default `None`
             Values of the series used to create the predictors (lags) needed in the 
-            first iteration of predictiont (t + 1).
+            first iteration of prediction (t + 1).
     
             If `last_window = None`, the values stored in` self.last_window` are
             used to calculate the initial predictors, and the predictions start
             right after training data.
             
-        exog : numnpy ndarray
+        exog : numpy ndarray, default `None`
             Exogenous variable/s included as predictor/s.
             
         n_boot: int, default `500`
             Number of bootstrapping iterations used to estimate prediction
             intervals.
+
+        random_state: int
+            Sets a seed to the random generator, so that boot intervals are always 
+            deterministic.
             
         interval: list, default `[5, 95]`
             Confidence of the prediction interval estimated. Sequence of percentiles
@@ -491,14 +526,14 @@ class ForecasterAutoregCustom(ForecasterBase):
         in_sample_residuals: bool, default `True`
             If `True`, residuals from the training data are used as proxy of
             prediction error to create prediction intervals. If `False`, out of
-            sample residuals are used. In the latter case, the user shoud have
+            sample residuals are used. In the latter case, the user should have
             calculated and stored the residuals within the forecaster (see
             `set_out_sample_residuals()`).
             
 
         Returns 
         -------
-        predicction_interval : numpy ndarray, shape (steps, 2)
+        prediction_interval : numpy ndarray, shape (steps, 2)
             Interval estimated for each prediction by bootstrapping:
                 first column = lower bound of the interval.
                 second column= upper bound interval of the interval.
@@ -511,12 +546,17 @@ class ForecasterAutoregCustom(ForecasterBase):
         George Athanasopoulos.
             
         '''
+
+        if last_window is None:
+            last_window = self.last_window.values
         
         boot_predictions = np.full(
                                 shape      = (steps, n_boot),
                                 fill_value = np.nan,
                                 dtype      = float
                            )
+        rng = np.random.default_rng(seed=random_state)
+        seeds = rng.integers(low=0, high=10000, size=n_boot)
 
         for i in range(n_boot):
 
@@ -533,7 +573,8 @@ class ForecasterAutoregCustom(ForecasterBase):
             else:
                 residuals = self.out_sample_residuals
 
-            sample_residuals = np.random.choice(
+            rng = np.random.default_rng(seed=seeds[i])
+            sample_residuals = rng.choice(
                                     a       = residuals,
                                     size    = steps,
                                     replace = True
@@ -566,10 +607,11 @@ class ForecasterAutoregCustom(ForecasterBase):
     def predict_interval(
         self,
         steps: int,
-        last_window: pd.Series=None,
-        exog: Union[pd.Series, pd.DataFrame]=None,
+        last_window: Optional[pd.Series]=None,
+        exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
         interval: list=[5, 95],
         n_boot: int=500,
+        random_state: int=123,
         in_sample_residuals: bool=True
     ) -> pd.DataFrame:
         '''
@@ -584,7 +626,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             
         last_window : pandas Series, default `None`
             Values of the series used to create the predictors (lags) needed in the 
-            first iteration of predictiont (t + 1).
+            first iteration of prediction (t + 1).
     
             If `last_window = None`, the values stored in` self.last_window` are
             used to calculate the initial predictors, and the predictions start
@@ -600,11 +642,15 @@ class ForecasterAutoregCustom(ForecasterBase):
         n_boot: int, default `500`
             Number of bootstrapping iterations used to estimate prediction
             intervals.
+
+        random_state: int
+            Sets a seed to the random generator, so that boot intervals are always 
+            deterministic.
             
         in_sample_residuals: bool, default `True`
             If `True`, residuals from the training data are used as proxy of
             prediction error to create prediction intervals. If `False`, out of
-            sample residuals are used. In the latter case, the user shoud have
+            sample residuals are used. In the latter case, the user should have
             calculated and stored the residuals within the forecaster (see
             `set_out_sample_residuals()`).
 
@@ -625,25 +671,38 @@ class ForecasterAutoregCustom(ForecasterBase):
             
         '''
         
-        self._check_predict_input(
-            steps       = steps,
-            last_window = last_window, 
-            exog        = exog
+        check_predict_input(
+            steps          = steps,
+            fitted         = self.fitted,
+            included_exog  = self.included_exog,
+            index_type     = self.index_type,
+            index_freq     = self.index_freq,
+            window_size    = self.window_size,
+            last_window    = last_window,
+            exog           = exog,
+            exog_type      = self.exog_type,
+            exog_col_names = self.exog_col_names,
+            max_steps      = None,
         )
         
         if exog is not None:
-            exog_values, _ = self._preproces_exog(
-                                exog = exog[self.exog_col_names].iloc[:steps, ]
-                              )
+            if isinstance(exog, pd.DataFrame):
+                exog_values, _ = preprocess_exog(
+                                    exog = exog[self.exog_col_names].iloc[:steps, ]
+                                 )
+            else: 
+                exog_values, _ = preprocess_exog(
+                                    exog = exog.iloc[:steps, ]
+                                 )
         else:
             exog_values = None
             
         if last_window is not None:
-            last_window_values, last_window_index = self._preproces_last_window(
+            last_window_values, last_window_index = preprocess_last_window(
                                                         last_window = last_window
                                                     )  
         else:
-            last_window_values, last_window_index = self._preproces_last_window(
+            last_window_values, last_window_index = preprocess_last_window(
                                                         last_window = self.last_window
                                                     )
         
@@ -667,6 +726,7 @@ class ForecasterAutoregCustom(ForecasterBase):
                                     exog        = copy(exog_values_original),
                                     interval    = interval,
                                     n_boot      = n_boot,
+                                    random_state = random_state,
                                     in_sample_residuals = in_sample_residuals
                                 )
         
@@ -674,7 +734,7 @@ class ForecasterAutoregCustom(ForecasterBase):
 
         predictions = pd.DataFrame(
                         data = predictions,
-                        index = self._expand_index(
+                        index = expand_index(
                                     index = last_window_index,
                                     steps = steps
                                 ),
@@ -682,96 +742,6 @@ class ForecasterAutoregCustom(ForecasterBase):
                       )
 
         return predictions
-
-    
-    def _check_predict_input(
-        self,
-        steps: int,
-        last_window: pd.Series=None,
-        exog: Union[pd.Series, pd.DataFrame]=None
-    ) -> None:
-        '''
-        Check all inputs of predict method
-        '''
-
-        if not self.fitted:
-            raise Exception(
-                'This Forecaster instance is not fitted yet. Call `fit` with'
-                'appropriate arguments before using predict.'
-            )
-        
-        if steps < 1:
-            raise Exception(
-                f"`steps` must be integer greater than 0. Got {steps}."
-            )
-        
-        if exog is None and self.included_exog:
-            raise Exception(
-                'Forecaster trained with exogenous variable/s. '
-                'Same variable/s must be provided in `predict()`.'
-            )
-            
-        if exog is not None and not self.included_exog:
-            raise Exception(
-                'Forecaster trained without exogenous variable/s. '
-                '`exog` must be `None` in `predict()`.'
-            )
-        
-        if exog is not None:
-            if len(exog) < steps:
-                raise Exception(
-                    '`exog` must have at least as many values as `steps` predicted.'
-                )
-            if not isinstance(exog, self.exog_type):
-                raise Exception(
-                    f"Expected type for `exog`: {self.exog_type}. Got {type(exog)}"      
-                )
-            if isinstance(exog, pd.DataFrame):
-                col_missing = set(self.exog_col_names).difference(set(exog.columns))
-                if col_missing:
-                    raise Exception(
-                        f"Missing columns in `exog`. Expected {self.exog_col_names}. "
-                        f"Got {exog.columns.to_list()}"      
-                    )
-            self._check_exog(exog = exog)
-            _, exog_index = self._preproces_exog(exog = exog.iloc[:0, ])
-            
-            if not isinstance(exog_index, self.index_type):
-                raise Exception(
-                    f"Expected index of type {self.index_type} for `exog`. "
-                    f"Got {type(exog_index)}"      
-                )
-            if not exog_index.freqstr == self.index_freq:
-                raise Exception(
-                    f"Expected frequency of type {self.index_type} for `exog`. "
-                    f"Got {exog_index.freqstr}"      
-                )
-            
-        if last_window is not None:
-            if len(last_window) < self.window_size:
-                raise Exception(
-                    f"`last_window` must have as many values as as needed to "
-                    f"calculate the predictors ({self.window_size})."
-                )
-            if not isinstance(last_window, pd.Series):
-                raise Exception('`last_window` must be a pandas Series.')
-            if last_window.isnull().any():
-                raise Exception('`last_window` has missing values.')
-            _, last_window_index = self._preproces_last_window(
-                                        last_window = last_window.iloc[:0]
-                                   ) 
-            if not isinstance(last_window_index, self.index_type):
-                raise Exception(
-                    f"Expected index of type {self.index_type} for `last_window`. "
-                    f"Got {type(last_window_index)}"      
-                )
-            if not last_window_index.freqstr == self.index_freq:
-                raise Exception(
-                    f"Expected frequency of type {self.index_type} for `last_window`. "
-                    f"Got {last_window_index.freqstr}"      
-                )
-
-        return
 
     
     def set_params(self, **params: dict) -> None:
@@ -790,6 +760,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         
         '''
         
+        self.regressor = clone(self.regressor)
         self.regressor.set_params(**params)
         
     
@@ -809,7 +780,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             If `True`, new residuals are added to the once already stored in the
             attribute `out_sample_residuals`. Once the limit of 1000 values is
             reached, no more values are appended. If False, `out_sample_residuals`
-            is overwrited with the new residuals.
+            is overwritten with the new residuals.
             
 
         Returns 
@@ -869,7 +840,7 @@ class ForecasterAutoregCustom(ForecasterBase):
                           )
         if not isinstance(estimator, valid_instances):
             warnings.warn(
-                f"`get_feature_importances` only valid for forecasters with "
+                f"`get_coef` only valid for forecasters with "
                 f"regressor of type {valid_instances}."
             )
             return
@@ -882,9 +853,9 @@ class ForecasterAutoregCustom(ForecasterBase):
         return coef
 
     
-    def get_feature_importances(self) -> pd.DataFrame:
+    def get_feature_importance(self) -> pd.DataFrame:
         '''      
-        Return impurity-based feature importances of the model stored in the
+        Return impurity-based feature importance of the model stored in the
         forecaster. Only valid when the forecaster has been trained using
         `GradientBoostingRegressor` , `RandomForestRegressor` or 
         `HistGradientBoostingRegressor` as regressor.
@@ -895,8 +866,8 @@ class ForecasterAutoregCustom(ForecasterBase):
 
         Returns 
         -------
-        feature_importances : pandas DataFrame
-            Impurity-based feature importances associated with each predictor.
+        feature_importance : pandas DataFrame
+            Impurity-based feature importance associated with each predictor.
         '''
 
         if isinstance(self.regressor, sklearn.pipeline.Pipeline):
@@ -910,7 +881,7 @@ class ForecasterAutoregCustom(ForecasterBase):
 
         if not isinstance(estimator, valid_instances):
             warnings.warn(
-                f"`get_feature_importances` only valid for forecasters with "
+                f"`get_feature_importance` only valid for forecasters with "
                 f"regressor of type {valid_instances}."
             )
 

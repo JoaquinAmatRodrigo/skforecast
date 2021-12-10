@@ -1,7 +1,7 @@
 ################################################################################
 #                        skforecast.model_selection                            #
 #                                                                              #
-# This work by Joaquín Amat Rodrigo is licensed under a Creative Commons       #
+# This work by Joaquin Amat Rodrigo is licensed under a Creative Commons       #
 # Attribution 4.0 International License.                                       #
 ################################################################################
 # coding=utf-8
@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 import warnings
 import logging
-import tqdm
+from tqdm import tqdm
 from sklearn.metrics import mean_squared_error 
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import mean_absolute_percentage_error
@@ -81,7 +81,7 @@ def time_series_spliter(
         
     if initial_train_size > len(y):
         raise Exception(
-            '`initial_train_size` must be smaller than lenght of `y`.'
+            '`initial_train_size` must be smaller than length of `y`.'
             ' Try to reduce `initial_train_size` or `steps`.'
         )
 
@@ -96,7 +96,7 @@ def time_series_spliter(
     if verbose:
         if folds == 1:
             print(f"Number of folds: {folds - 1}")
-            print("Not enought observations in `y` to create even a complete fold."
+            print("Not enough observations in `y` to create even a complete fold."
                   " Try to reduce `initial_train_size` or `steps`."
             )
 
@@ -181,7 +181,7 @@ def cv_forecaster(
     initial_train_size: int,
     steps: int,
     metric: str,
-    exog: Union[pd.Series, pd.DataFrame]=None,
+    exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     allow_incomplete_fold: bool=True,
     set_out_sample_residuals: bool=True,
     verbose: bool=True
@@ -235,7 +235,7 @@ def cv_forecaster(
 
     if initial_train_size > len(y):
         raise Exception(
-            '`initial_train_size` must be smaller than lenght of `y`.'
+            '`initial_train_size` must be smaller than length of `y`.'
         )
         
     if initial_train_size is not None and initial_train_size < forecaster.window_size:
@@ -293,8 +293,8 @@ def _backtesting_forecaster_refit(
     steps: int,
     metric: str,
     initial_train_size: int,
-    exog: Union[pd.Series, pd.DataFrame]=None,
-    interval: Union[list, None]=None,
+    exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+    interval: Optional[list]=None,
     n_boot: int=500,
     in_sample_residuals: bool=True,
     set_out_sample_residuals: bool=True,
@@ -355,7 +355,7 @@ def _backtesting_forecaster_refit(
         `ForecasterAutoregMultiOutput`.
             
     verbose : bool, default `False`
-        Print number of folds used for backtesting.
+        Print number of folds and index of training and validation sets used for backtesting.
 
     Returns 
     -------
@@ -377,15 +377,34 @@ def _backtesting_forecaster_refit(
     remainder = (len(y) - initial_train_size) % steps
     
     if verbose:
-        print(f"Number of observations used for training: {initial_train_size}")
+        print(f"Information of backtesting process")
+        print(f"----------------------------------")
+        print(f"Number of observations used for initial training: {initial_train_size}")
         print(f"Number of observations used for backtesting: {len(y) - initial_train_size}")
         print(f"    Number of folds: {folds}")
         print(f"    Number of steps per fold: {steps}")
         if remainder != 0:
             print(f"    Last fold only includes {remainder} observations.")
-      
+        print("")
+        for i in range(folds):
+            train_size = initial_train_size + i * steps
+            print(f"Data partition in fold: {i}")
+            if i < folds - 1:
+                print(f"    Training:   {y.index[0]} -- {y.index[train_size - 1]}")
+                print(f"    Validation: {y.index[train_size]} -- {y.index[train_size + steps - 1]}")
+            else:
+                print(f"    Training:   {y.index[0]} -- {y.index[train_size - 1]}")
+                print(f"    Validation: {y.index[train_size]} -- {y.index[-1]}")
+        print("")
+        
+    if folds > 50:
+        print(
+            f"Forecaster will be fit {folds} times. This can take substantial amounts of time. "
+            f"If not feasible, try with `refit = False`. \n"
+        )
+
     for i in range(folds):
-        # In each iteratión (except the last one) the model is fitted before
+        # In each iteration (except the last one) the model is fitted before
         # making predictions. The train size increases by `steps` in each iteration.
         train_size = initial_train_size + i * steps
         if exog is not None:
@@ -502,9 +521,9 @@ def _backtesting_forecaster_no_refit(
     y: pd.Series,
     steps: int,
     metric: str,
-    initial_train_size: Union[int, None]=None,
-    exog: Union[pd.Series, pd.DataFrame]=None,
-    interval: Union[list, None]=None,
+    initial_train_size: Optional[int]=None,
+    exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+    interval: Optional[list]=None,
     n_boot: int=500,
     in_sample_residuals: bool=True,
     set_out_sample_residuals: bool=True,
@@ -566,7 +585,7 @@ def _backtesting_forecaster_no_refit(
         `ForecasterAutoregMultiOutput`.
             
     verbose : bool, default `False`
-        Print number of folds used for backtesting.
+        Print number of folds and index of training and validation sets used for backtesting.
 
     Returns 
     -------
@@ -603,13 +622,26 @@ def _backtesting_forecaster_no_refit(
     remainder = (len(y) - initial_train_size) % steps
     
     if verbose:
-        print(f"Number of observations used for training or as initial window: {initial_train_size}")
+        print(f"Information of backtesting process")
+        print(f"----------------------------------")
+        print(f"Number of observations used for initial training or as initial window: {initial_train_size}")
         print(f"Number of observations used for backtesting: {len(y) - initial_train_size}")
         print(f"    Number of folds: {folds}")
         print(f"    Number of steps per fold: {steps}")
         if remainder != 0:
             print(f"    Last fold only includes {remainder} observations")
-      
+        print("")
+        for i in range(folds):
+            last_window_end = initial_train_size + i * steps
+            print(f"Data partition in fold: {i}")
+            if i < folds - 1:
+                print(f"    Training:   {y.index[0]} -- {y.index[initial_train_size - 1]}")
+                print(f"    Validation: {y.index[last_window_end]} -- {y.index[last_window_end + steps -1]}")
+            else:
+                print(f"    Training:   {y.index[0]} -- {y.index[initial_train_size - 1]}")
+                print(f"    Validation: {y.index[last_window_end]} -- {y.index[-1]}")
+        print("")
+
     for i in range(folds):
         # Since the model is only fitted with the initial_train_size, last_window
         # and next_window_exog must be updated to include the data needed to make
@@ -748,10 +780,10 @@ def backtesting_forecaster(
     y: pd.Series,
     steps: int,
     metric: str,
-    initial_train_size: Union[int, None],
-    exog: Union[pd.Series, pd.DataFrame]=None,
+    initial_train_size: Optional[int],
+    exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     refit: bool=False,
-    interval: Union[list, None]=None,
+    interval: Optional[list]=None,
     n_boot: int=500,
     in_sample_residuals: bool=True,
     set_out_sample_residuals: bool=True,
@@ -814,7 +846,7 @@ def backtesting_forecaster(
         residuals. Ignored if forecaster is of class `ForecasterAutoregMultiOutput`.
             
     verbose : bool, default `False`
-        Print number of folds used for backtesting.
+        Print number of folds and index of training and validation sets used for backtesting.
 
     Returns 
     -------
@@ -831,7 +863,7 @@ def backtesting_forecaster(
 
     if initial_train_size is not None and initial_train_size > len(y):
         raise Exception(
-            'If used, `initial_train_size` must be smaller than lenght of `y`.'
+            'If used, `initial_train_size` must be smaller than length of `y`.'
         )
         
     if initial_train_size is not None and initial_train_size < forecaster.window_size:
@@ -847,7 +879,7 @@ def backtesting_forecaster(
 
     if not isinstance(refit, bool):
         raise Exception(
-            f'`refit` bost be boolean: True, False.'
+            f'`refit` must be boolean: True, False.'
         )
 
     if initial_train_size is None and refit:
@@ -900,8 +932,8 @@ def grid_search_forecaster(
     initial_train_size: int,
     steps: int,
     metric: str,
-    exog: Union[pd.Series, pd.DataFrame]=None,
-    lags_grid: list=None,
+    exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+    lags_grid: Optional[list]=None,
     refit: bool=False,
     return_best: bool=True,
     verbose: bool=True
@@ -977,16 +1009,15 @@ def grid_search_forecaster(
         f"Number of models compared: {len(param_grid)*len(lags_grid)}"
     )
     
-    for lags in tqdm.tqdm(lags_grid, desc='loop lags_grid', position=0):
+    for lags in tqdm(lags_grid, desc='loop lags_grid', position=0, ncols=90):
         
         if isinstance(forecaster, (ForecasterAutoreg, ForecasterAutoregMultiOutput)):
             forecaster.set_lags(lags)
             lags = forecaster.lags.copy()
         
-        for params in tqdm.tqdm(param_grid, desc='loop param_grid', position=1, leave=False):
+        for params in tqdm(param_grid, desc='loop param_grid', position=1, leave=False, ncols=90):
 
             forecaster.set_params(**params)
-
             metrics = backtesting_forecaster(
                             forecaster               = forecaster,
                             y                        = y,
@@ -1023,7 +1054,7 @@ def grid_search_forecaster(
         )
         
         if isinstance(forecaster, (ForecasterAutoreg, ForecasterAutoregMultiOutput)):
-            forecaster.set_lags(best_lags)   
+            forecaster.set_lags(best_lags)
         forecaster.set_params(**best_params)
         forecaster.fit(y=y, exog=exog)
             

@@ -1,13 +1,13 @@
 ################################################################################
 #                                ForecasterBase                                #
 #                                                                              #
-# This work by Joaquín Amat Rodrigo is licensed under a Creative Commons       #
+# This work by Joaquin Amat Rodrigo is licensed under a Creative Commons       #
 # Attribution 4.0 International License.    
 ################################################################################
 # coding=utf-8
 
 from abc import ABC, abstractmethod
-from typing import Union, Dict, List, Tuple, Any
+from typing import Union, Dict, List, Tuple, Any, Optional
 import logging
 import pandas as pd
 
@@ -27,10 +27,10 @@ class ForecasterBase(ABC):
     def create_train_X_y(
         self,
         y: pd.Series,
-        exog: Union[pd.Series, pd.DataFrame]=None
+        exog: Optional[Union[pd.Series, pd.DataFrame]]=None
     ) -> Tuple[pd.DataFrame, pd.Series]:
         '''
-        Create training matrices from univariante time series and exogenous
+        Create training matrices from univariate time series and exogenous
         variables.
         
         Parameters
@@ -59,7 +59,7 @@ class ForecasterBase(ABC):
     def fit(
         self,
         y: pd.Series,
-        exog: Union[pd.Series, pd.DataFrame]=None
+        exog: Optional[Union[pd.Series, pd.DataFrame]]=None
     ) -> None:
         '''
         Training Forecaster.
@@ -88,8 +88,8 @@ class ForecasterBase(ABC):
     def predict(
         self,
         steps: int,
-        last_window: pd.Series=None,
-        exog: Union[pd.Series, pd.DataFrame]=None
+        last_window: Optional[pd.Series]=None,
+        exog: Optional[Union[pd.Series, pd.DataFrame]]=None
     ) -> pd.Series:
         '''
         Predict n steps ahead.
@@ -101,7 +101,7 @@ class ForecasterBase(ABC):
             
         last_window : pandas Series, default `None`
             Values of the series used to create the predictors (lags) need in the 
-            first iteration of predictiont (t + 1).
+            first iteration of prediction (t + 1).
     
             If `last_window = None`, the values stored in` self.last_window` are
             used to calculate the initial predictors, and the predictions start
@@ -118,7 +118,6 @@ class ForecasterBase(ABC):
         '''
 
         pass
-   
         
 
     @abstractmethod
@@ -140,8 +139,7 @@ class ForecasterBase(ABC):
         
         pass
         
-
-    @abstractmethod    
+   
     def set_lags(self, lags: int) -> None:
         '''      
         Set new value to the attribute `lags`.
@@ -161,4 +159,11 @@ class ForecasterBase(ABC):
         '''
         
         pass
+
+    def summary(self) -> None:
+        '''      
+        Show forecaster information.
+        '''
+        
+        print(self)
         

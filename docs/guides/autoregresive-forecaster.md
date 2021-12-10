@@ -16,9 +16,8 @@ The main challenge when using scikit-learn models for recursive multi-step forec
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
-from sklearn.linear_model import Ridge
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error
 ```
 ## Data
@@ -27,13 +26,12 @@ from sklearn.metrics import mean_squared_error
 # Download data
 # ==============================================================================
 url = ('https://raw.githubusercontent.com/JoaquinAmatRodrigo/skforecast/master/data/h2o.csv')
-data = pd.read_csv(url, sep=',')
+data = pd.read_csv(url, sep=',', header=0, names=['y', 'datetime'])
 
 # Data preprocessing
 # ==============================================================================
-data['fecha'] = pd.to_datetime(data['fecha'], format='%Y/%m/%d')
-data = data.set_index('fecha')
-data = data.rename(columns={'x': 'y'})
+data['datetime'] = pd.to_datetime(data['datetime'], format='%Y/%m/%d')
+data = data.set_index('datetime')
 data = data.asfreq('MS')
 data = data['y']
 data = data.sort_index()
@@ -49,8 +47,9 @@ data_test  = data[-steps:]
 fig, ax=plt.subplots(figsize=(9, 4))
 data_train.plot(ax=ax, label='train')
 data_test.plot(ax=ax, label='test')
-ax.legend();
+ax.legend()
 ```
+
 <img src="../img/data.png" style="width: 500px;">
 
 
@@ -61,20 +60,31 @@ ax.legend();
 # Create and fit forecaster
 # ==============================================================================
 forecaster = ForecasterAutoreg(
-                    regressor = Ridge(),
-                    lags      = 15
-                )
+                regressor = RandomForestRegressor(),
+                lags      = 15
+             )
 
 forecaster.fit(y=data_train)
 forecaster
 ```
 
 ```
-=======================ForecasterAutoreg=======================
-Regressor: Ridge()
-Lags: [ 1  2  3  4  5  6  7  8  9 10 11 12 13 14 15]
-Exogenous variable: False
-Parameters: {'alpha': 1.0, 'copy_X': True, 'fit_intercept': True, 'max_iter': None, 'normalize': False, 'random_state': None, 'solver': 'auto', 'tol': 0.001}
+================= 
+ForecasterAutoreg 
+================= 
+Regressor: RandomForestRegressor() 
+Lags: [ 1  2  3  4  5  6  7  8  9 10 11 12 13 14 15] 
+Window size: 15 
+Included exogenous: False 
+Type of exogenous variable: None 
+Exogenous variables names: None 
+Training range: [Timestamp('1991-07-01 00:00:00'), Timestamp('2005-06-01 00:00:00')] 
+Training index type: DatetimeIndex 
+Training index frequency: MS 
+Regressor parameters: {'bootstrap': True, 'ccp_alpha': 0.0, 'criterion': 'squared_error', 'max_depth': None, 'max_features': 'auto', 'max_leaf_nodes': None, 'max_samples': None, 'min_impurity_decrease': 0.0, 'min_samples_leaf': 1, 'min_samples_split': 2, 'min_weight_fraction_leaf': 0.0, 'n_estimators': 100, 'n_jobs': None, 'oob_score': False, 'random_state': None, 'verbose': 0, 'warm_start': False} 
+Creation date: 2021-12-06 23:22:17 
+Last fit date: 2021-12-06 23:22:17 
+Skforecast version: 0.4.0
 ```
 
 ## Prediction 
@@ -84,17 +94,14 @@ Parameters: {'alpha': 1.0, 'copy_X': True, 'fit_intercept': True, 'max_iter': No
 # ==============================================================================
 steps = 36
 predictions = forecaster.predict(steps=steps)
-# Add datetime index to predictions
-predictions = pd.Series(data=predictions, index=data_test.index)
 predictions.head(3)
 ```
 
-``` python
-fecha
-2005-07-01    0.973131
-2005-08-01    1.022154
-2005-09-01    1.151334
-Freq: MS, dtype: float64
+```
+2005-07-01    0.916878
+2005-08-01    0.946228
+2005-09-01    1.107921
+Freq: MS, Name: pred, dtype: float64
 ```
 
 ``` python
@@ -104,7 +111,7 @@ fig, ax=plt.subplots(figsize=(9, 4))
 data_train.plot(ax=ax, label='train')
 data_test.plot(ax=ax, label='test')
 predictions.plot(ax=ax, label='predictions')
-ax.legend();
+ax.legend()
 ```
 
 <img src="../img/prediction.png" style="width: 500px;">
@@ -120,28 +127,57 @@ print(f"Test error (mse): {error_mse}")
 ```
 
 ```
-Test error (mse): 0.009918738501371805
+Test error (mse): 0.003811271443540486
 ```
 
 ## Feature importance
 
 ``` python
-# When using as regressor LinearRegression, Ridge or Lasso
-forecaster.get_coef()
-
-# When using as regressor RandomForestRegressor or GradientBoostingRegressor
-# forecaster.get_feature_importances()
+forecaster.get_feature_importance()
 ```
 
 ```
-array([ 1.58096176e-01,  6.18241513e-02,  6.44665806e-02, -2.41792429e-02,
-       -2.60679572e-02,  7.04191008e-04, -4.28090339e-02,  4.87464352e-04,
-        1.66853207e-02,  1.00022527e-02,  1.62219885e-01,  6.15595305e-01,
-        2.85168042e-02, -7.31915864e-02, -5.38785052e-02])
+| feature   |   importance |
+|:----------|-------------:|
+| lag_1     |   0.0121745  |
+| lag_2     |   0.0857522  |
+| lag_3     |   0.0166948  |
+| lag_4     |   0.00287025 |
+| lag_5     |   0.00346738 |
+| lag_6     |   0.00333398 |
+| lag_7     |   0.00331932 |
+| lag_8     |   0.00757049 |
+| lag_9     |   0.00997129 |
+| lag_10    |   0.01222    |
+| lag_11    |   0.0120539  |
+| lag_12    |   0.794896   |
+| lag_13    |   0.00438497 |
+| lag_14    |   0.0161486  |
+| lag_15    |   0.0151425  |
 ```
 
 ## Extract training matrix
 
 ``` python
 X, y = forecaster.create_train_X_y(data_train)
+print(X)
+print(y)
+```
+
+```
+| datetime            |    lag_1 |    lag_2 |    lag_3 |    lag_4 |    lag_5 |    lag_6 |    lag_7 |    lag_8 |    lag_9 |   lag_10 |   lag_11 |   lag_12 |   lag_13 |   lag_14 |   lag_15 |
+|:--------------------|---------:|---------:|---------:|---------:|---------:|---------:|---------:|---------:|---------:|---------:|---------:|---------:|---------:|---------:|---------:|
+| 1992-10-01 00:00:00 | 0.534761 | 0.475463 | 0.483389 | 0.410534 | 0.361801 | 0.379808 | 0.351348 | 0.33622  | 0.660119 | 0.602652 | 0.502369 | 0.492543 | 0.432159 | 0.400906 | 0.429795 |
+| 1992-11-01 00:00:00 | 0.568606 | 0.534761 | 0.475463 | 0.483389 | 0.410534 | 0.361801 | 0.379808 | 0.351348 | 0.33622  | 0.660119 | 0.602652 | 0.502369 | 0.492543 | 0.432159 | 0.400906 |
+| 1992-12-01 00:00:00 | 0.595223 | 0.568606 | 0.534761 | 0.475463 | 0.483389 | 0.410534 | 0.361801 | 0.379808 | 0.351348 | 0.33622  | 0.660119 | 0.602652 | 0.502369 | 0.492543 | 0.432159 |
+| 1993-01-01 00:00:00 | 0.771258 | 0.595223 | 0.568606 | 0.534761 | 0.475463 | 0.483389 | 0.410534 | 0.361801 | 0.379808 | 0.351348 | 0.33622  | 0.660119 | 0.602652 | 0.502369 | 0.492543 |
+| 1993-02-01 00:00:00 | 0.751503 | 0.771258 | 0.595223 | 0.568606 | 0.534761 | 0.475463 | 0.483389 | 0.410534 | 0.361801 | 0.379808 | 0.351348 | 0.33622  | 0.660119 | 0.602652 | 0.502369 |
+
+| datetime            |        y |
+|:--------------------|---------:|
+| 1992-10-01 00:00:00 | 0.568606 |
+| 1992-11-01 00:00:00 | 0.595223 |
+| 1992-12-01 00:00:00 | 0.771258 |
+| 1993-01-01 00:00:00 | 0.751503 |
+| 1993-02-01 00:00:00 | 0.387554 |
 ```

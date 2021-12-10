@@ -19,7 +19,7 @@ nav:
       - Custom predictors: guides/custom-predictors.md
       - Recursive multi-step forecasting with exogenous variables: guides/autoregresive-forecaster-exogenous.md
       - Direct multi-step forecasting: guides/direct-multi-step-forecasting.md
-      - Cross validation and Backtest: guides/cross-validation-backtest.md
+      - Backtesting: guides/backtesting.md
       - Tuning forecaster: guides/tuning-forecaster.md
       - Prediction intervals: guides/prediction-intervals.md
 
@@ -34,13 +34,13 @@ nav:
       - ForecasterAutoregMultiOutput: api/ForecasterAutoregMultiOutput.md
       - model_selection: api/model_selection.md
       - model_selection_statsmodels: api/model_selection_statsmodels.md
-
 plugins:
   - mkapi
   - search
 copyright: 
 theme:
   name: material
+  custom_dir: overrides
   font:
     text: Ubuntu
     code: Ubuntu Mono
@@ -66,3 +66,6 @@ markdown_extensions:
   - pymdownx.magiclink
   - toc:
       permalink: true
+extra:
+  version:
+    provider: mike

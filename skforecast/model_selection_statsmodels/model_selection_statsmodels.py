@@ -1,7 +1,7 @@
 ################################################################################
 #                  skforecast.model_selection_statsmodels                      #
 #                                                                              #
-# This work by Joaquín Amat Rodrigo is licensed under a Creative Commons       #
+# This work by Joaquin Amat Rodrigo is licensed under a Creative Commons       #
 # Attribution 4.0 International License.                                       #
 ################################################################################
 # coding=utf-8
@@ -11,7 +11,7 @@ from typing import Union, Dict, List, Tuple
 import numpy as np
 import pandas as pd
 import logging
-import tqdm
+from tqdm import tqdm
 from sklearn.metrics import mean_squared_error 
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import mean_absolute_percentage_error
@@ -152,9 +152,15 @@ def backtesting_sarimax(
         print(f"    Number of steps per fold: {steps}")
         if remainder != 0:
             print(f"    Last fold only includes {remainder} observations.")
+            
+    if folds > 50 and refit:
+        print(
+            f"Model will be fit {folds} times. This can take substantial amounts of time. "
+            f"If not feasible, try with `refit = False`."
+        )
 
     if refit:
-        # In each iteratión (except the last one) the model is fitted before
+        # In each iteration (except the last one) the model is fitted before
         # making predictions. The train size increases by `steps` in each iteration.
         for i in range(folds):
             train_size = initial_train_size + i * steps
@@ -370,7 +376,7 @@ def backtesting_sarimax(
     return np.array([metric_value]), backtest_predictions
 
 
-def cv_sarimax_statsmodels(
+def cv_sarimax(
         y: pd.Series,
         initial_train_size: int,
         steps: int,
@@ -613,7 +619,7 @@ def grid_search_sarimax(
     keys_to_ignore = set(param_grid.keys()) - {'order', 'seasonal_order', 'trend'}
     if keys_to_ignore:
         print(
-            f'Only arguments: order, seasonal_order and trend are allowed for grid serach.'
+            f'Only arguments: order, seasonal_order and trend are allowed for grid search.'
             f' Ignoring {keys_to_ignore}.'
         )
         for key in keys_to_ignore:
@@ -626,7 +632,7 @@ def grid_search_sarimax(
     )
         
         
-    for params in tqdm.tqdm(param_grid):
+    for params in tqdm(param_grid, ncols=90):
 
         metric_value = backtesting_sarimax(
                             y              = y,
