@@ -16,6 +16,8 @@
 
 **Documentation: https://joaquinamatrodrigo.github.io/skforecast/**
 
+**Version 0.4** has undergone a huge code refactoring. Main changes are related to input-output formats (only pandas series and dataframes are allowed although internally numpy arrays are used for performance) and model validation methods (unified into backtesting with and without refit). [Changelog](./changelog.md)
+
 
 ## Table of contents
 
@@ -118,6 +120,10 @@ This strategy consists of training a different model for each step. For example,
 
 <center><font size="2.5"> <i>Time series transformation into the matrices needed to train a direct multi-step forecaster.</i></font></center>
 <br><br>
+
+**Multiple output forecasting**
+
+Certain models are capable of simultaneously predicting several values of a sequence (one-shot), for example, LSTM neural networks. This strategy is not implemented in skforecast.
 
 <br><br>
 
