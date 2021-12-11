@@ -56,8 +56,7 @@ statsmodels>=0.12.2
 
 **English**
 
-+ [**Time series forecasting with Python and Scikit-learn**](https://joaquinamatrodrigo.github.io/skforecast/0.4/html/py27-time-series-forecasting-python-scikitlearn.html)
-
+In construction
 
 **Español**
 
