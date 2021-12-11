@@ -26,7 +26,7 @@
   + [Autoregressive forecaster with 1 exogenous predictor](#autoregressive-forecaster-with-1-exogenous-predictor)
   + [Autoregressive forecaster with n exogenous predictors](#autoregressive-forecaster-with-n-exogenous-predictors)
   + [Autoregressive forecaster with custom predictors](#autoregressive-forecaster-with-custom-predictors)
-  + [Tutorials (spanish)](#tutorials)
++ [Tutorials](#tutorials)
 
 ## Installation
 
@@ -674,20 +674,19 @@ results_grid = grid_search_forecaster(
 ```
 
 ## Tutorials 
-**(spanish)**
 
-+ [Forecasting series temporales con Python y Scikit Learn](https://www.cienciadedatos.net/documentos/py27-forecasting-series-temporales-python-scikitlearn.html)
+**English**
 
-+ [Predicción (forecasting) de la demanda eléctrica con Python](https://www.cienciadedatos.net/documentos/py29-forecasting-demanda-energia-electrica-python.html)
++ [**Time series forecasting with Python and Scikit-learn**](https://www.cienciadedatos.net/documentos/py27-time-series-forecasting-python-scikitlearn-0.3.html)
 
 
-## References
+**Español**
 
-+ Hyndman, R.J., & Athanasopoulos, G. (2018) Forecasting: principles and practice, 2nd edition, OTexts: Melbourne, Australia
++ [**Skforecast: forecasting series temporales con Python y Scikit-learn**](https://www.cienciadedatos.net/documentos/py27-forecasting-series-temporales-python-scikitlearn-0.3.html)
 
-+ Time Series Analysis and Forecasting with ADAM Ivan Svetunkov
++ [**Forecasting de la demanda eléctrica**](https://www.cienciadedatos.net/documentos/py29-forecasting-demanda-energia-electrica-python-0.3.html)
 
-+ Python for Finance: Mastering Data-Driven Finance
++ [**Forecasting de las visitas a una página web**](https://www.cienciadedatos.net/documentos/py37-forecasting-visitas-web-machine-learning-0.3.html)
 
 
 
