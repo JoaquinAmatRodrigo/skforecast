@@ -12,8 +12,6 @@ import logging
 import numpy as np
 import pandas as pd
 import sklearn
-import sklearn.ensemble
-import sklearn.linear_model
 import sklearn.pipeline
 from sklearn.base import clone
 from copy import copy
@@ -897,31 +895,28 @@ class ForecasterAutoreg(ForecasterBase):
         else:
             estimator = self.regressor
 
-        valid_instances = (sklearn.linear_model._base.LinearRegression,
-                           sklearn.linear_model._coordinate_descent.Lasso,
-                           sklearn.linear_model._ridge.Ridge
-                          )
-        if not isinstance(estimator, valid_instances):
-            warnings.warn(
-                f"`get_coef` only valid for forecasters with "
-                f"regressor of type {valid_instances}."
-            )
-            return
-        else:
+        try:
             coef = pd.DataFrame({
                         'feature': self.X_train_col_names,
                         'coef' : estimator.coef_
                    })
+        except:
+            warnings.warn(
+                f"Impossible to access feature coefficients for regressor of type {type(estimator)}. "
+                f"This method is only valid when the regressor stores internally "
+                f" the coefficients in the attribute `coef_`."
+            )
+
+            coef = None
             
         return coef
 
     
     def get_feature_importance(self) -> pd.DataFrame:
         '''      
-        Return impurity-based feature importance of the model stored in the
-        forecaster. Only valid when the forecaster has been trained using
-        `GradientBoostingRegressor` , `RandomForestRegressor` or 
-        `HistGradientBoostingRegressor` as regressor.
+        Return feature importance of the regressor stored in the
+        forecaster. Only valid when regressor stores internally the feature
+        importance in the attribute `feature_importances_`.
 
         Parameters
         ----------
@@ -930,7 +925,7 @@ class ForecasterAutoreg(ForecasterBase):
         Returns 
         -------
         feature_importance : pandas DataFrame
-            Impurity-based feature importance associated with each predictor.
+            Feature importance associated with each predictor.
         '''
 
         if isinstance(self.regressor, sklearn.pipeline.Pipeline):
@@ -938,21 +933,18 @@ class ForecasterAutoreg(ForecasterBase):
         else:
             estimator = self.regressor
 
-        valid_instances = (sklearn.ensemble._forest.RandomForestRegressor,
-                           sklearn.ensemble._gb.GradientBoostingRegressor,
-                           sklearn.ensemble.HistGradientBoostingRegressor)
-
-        if not isinstance(estimator, valid_instances):
-            warnings.warn(
-                f"`get_feature_importance` only valid for forecasters with "
-                f"regressor of type {valid_instances}."
-            )
-
-            return
-        else:
+        try:
             feature_importance = pd.DataFrame({
                                     'feature': self.X_train_col_names,
                                     'importance' : estimator.feature_importances_
                                 })
+        except:
+            warnings.warn(
+                f"Impossible to access feature importance for regressor of type {type(estimator)}. "
+                f"This method is only valid when the regressor stores internally "
+                f" the feature importance in the attribute `feature_importances_`."
+            )
 
+            feature_importance = None
+        
         return feature_importance

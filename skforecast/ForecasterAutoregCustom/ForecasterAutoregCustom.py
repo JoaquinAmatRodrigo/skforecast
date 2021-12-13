@@ -44,8 +44,8 @@ class ForecasterAutoregCustom(ForecasterBase):
         An instance of a regressor or pipeline compatible with the scikit-learn API.
         
     fun_predictors: Callable
-        Function that takes a time series window as input and returns a numpy
-        ndarray with the predictors associated with that window.
+        Function that takes a numpy ndarray as a window of values as input and  
+        returns a numpy ndarray with the predictors associated with that window.
         
     window_size: int
         Size of the window needed by `fun_predictors` to create the predictors.
@@ -57,8 +57,8 @@ class ForecasterAutoregCustom(ForecasterBase):
         An instance of a regressor compatible with the scikit-learn API.
         
     fun_predictors: Callable
-        Function that takes a time series window as input and returns a numpy
-        ndarray with the predictors associated with that window.
+        Function that takes a numpy ndarray as a window of values as input and  
+        returns a numpy ndarray with the predictors associated with that window.
         
     window_size: int
         Size of the window needed by `fun_predictors` to create the predictors.
@@ -377,7 +377,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         predictions = np.full(shape=steps, fill_value=np.nan)
 
         for i in range(steps):
-            X = self.create_predictors(y=last_window)
+            X = self.create_predictors(y=last_window).reshape(1, -1)
             if np.isnan(X).any():
                 raise Exception(
                     f"`create_predictors()` is returning `NaN` values."
@@ -821,9 +821,9 @@ class ForecasterAutoregCustom(ForecasterBase):
 
     def get_coef(self) -> pd.DataFrame:
         '''      
-        Return estimated coefficients for the linear regression model stored in
-        the forecaster. Only valid when the forecaster has been trained using
-        as `regressor: `LinearRegression()`, `Lasso()` or `Ridge()`.
+        Return estimated coefficients for the regressor stored in the forecaster.
+        Only valid when regressor stores internally the feature coefficients in
+        the attribute `coef_`.
         
         Parameters
         ----------
@@ -841,31 +841,28 @@ class ForecasterAutoregCustom(ForecasterBase):
         else:
             estimator = self.regressor
 
-        valid_instances = (sklearn.linear_model._base.LinearRegression,
-                           sklearn.linear_model._coordinate_descent.Lasso,
-                           sklearn.linear_model._ridge.Ridge
-                          )
-        if not isinstance(estimator, valid_instances):
-            warnings.warn(
-                f"`get_coef` only valid for forecasters with "
-                f"regressor of type {valid_instances}."
-            )
-            return
-        else:
+        try:
             coef = pd.DataFrame({
                         'feature': self.X_train_col_names,
                         'coef' : estimator.coef_
                    })
+        except:
+            warnings.warn(
+                f"Impossible to access feature coefficients for regressor of type {type(estimator)}. "
+                f"This method is only valid when the regressor stores internally "
+                f" the coefficients in the attribute `coef_`."
+            )
+
+            coef = None
             
         return coef
 
     
     def get_feature_importance(self) -> pd.DataFrame:
         '''      
-        Return impurity-based feature importance of the model stored in the
-        forecaster. Only valid when the forecaster has been trained using
-        `GradientBoostingRegressor` , `RandomForestRegressor` or 
-        `HistGradientBoostingRegressor` as regressor.
+        Return feature importance of the regressor stored in the
+        forecaster. Only valid when regressor stores internally the feature
+        importance in the attribute `feature_importances_`.
 
         Parameters
         ----------
@@ -874,7 +871,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         Returns 
         -------
         feature_importance : pandas DataFrame
-            Impurity-based feature importance associated with each predictor.
+            Feature importance associated with each predictor.
         '''
 
         if isinstance(self.regressor, sklearn.pipeline.Pipeline):
@@ -882,21 +879,18 @@ class ForecasterAutoregCustom(ForecasterBase):
         else:
             estimator = self.regressor
 
-        valid_instances = (sklearn.ensemble._forest.RandomForestRegressor,
-                           sklearn.ensemble._gb.GradientBoostingRegressor,
-                           sklearn.ensemble.HistGradientBoostingRegressor)
-
-        if not isinstance(estimator, valid_instances):
-            warnings.warn(
-                f"`get_feature_importance` only valid for forecasters with "
-                f"regressor of type {valid_instances}."
-            )
-
-            return
-        else:
+        try:
             feature_importance = pd.DataFrame({
                                     'feature': self.X_train_col_names,
                                     'importance' : estimator.feature_importances_
                                 })
+        except:
+            warnings.warn(
+                f"Impossible to access feature importance for regressor of type {type(estimator)}. "
+                f"This method is only valid when the regressor stores internally "
+                f" the feature importance in the attribute `feature_importances_`."
+            )
 
+            feature_importance = None
+        
         return feature_importance
