@@ -1,6 +1,16 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [0.4.1] - [2021-13-10]
+
+### Added
+
+### Changed
+
+### Fixed
+
++ `fit` and `predict` transform pandas series and dataframes to numpy arrays if regressor is XGBoost.
+
 ## [0.4.0] - [2021-12-10]
 
 Version 0.4 has undergone a huge code refactoring. Main changes are related to input-output formats (only pandas series and dataframes are allowed although internally numpy arrays are used for performance) and model validation methods (unified into backtesting with and without refit).
