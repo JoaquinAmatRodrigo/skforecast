@@ -875,9 +875,9 @@ class ForecasterAutoreg(ForecasterBase):
 
     def get_coef(self) -> pd.DataFrame:
         '''      
-        Return estimated coefficients for the linear regression model stored in
-        the forecaster. Only valid when the forecaster has been trained using
-        as `regressor: `LinearRegression()`, `Lasso()` or `Ridge()`.
+        Return estimated coefficients for the regressor stored in the forecaster.
+        Only valid when regressor stores internally the feature coefficients in
+        the attribute `coef_`.
         
         Parameters
         ----------
