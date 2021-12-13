@@ -12,6 +12,8 @@ import logging
 import numpy as np
 import pandas as pd
 import sklearn
+import sklearn.ensemble
+import sklearn.linear_model
 import sklearn.pipeline
 from sklearn.base import clone
 from copy import copy
