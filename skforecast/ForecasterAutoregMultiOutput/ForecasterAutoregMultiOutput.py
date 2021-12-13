@@ -428,8 +428,11 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
                                             step    = step,
                                             X_train = X_train,
                                             y_train = y_train
-                                         ) 
-            self.regressors_[step].fit(X_train_step, y_train_step)
+                                         )
+            if not str(type(self.regressor)) == "<class 'xgboost.sklearn.XGBRegressor'>":
+                self.regressors_[step].fit(X_train_step, y_train_step)
+            else:
+                self.regressors_[step].fit(X_train_step.to_numpy(), y_train_step.to_numpy())
         
         self.fitted = True
         self.fit_date = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')

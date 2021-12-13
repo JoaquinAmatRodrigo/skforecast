@@ -337,8 +337,12 @@ class ForecasterAutoreg(ForecasterBase):
             self.exog_col_names = \
                  exog.columns.to_list() if isinstance(exog, pd.DataFrame) else exog.name
  
-        X_train, y_train = self.create_train_X_y(y=y, exog=exog)      
-        self.regressor.fit(X=X_train, y=y_train)
+        X_train, y_train = self.create_train_X_y(y=y, exog=exog)
+
+        if not str(type(self.regressor)) == "<class 'xgboost.sklearn.XGBRegressor'>":
+            self.regressor.fit(X=X_train, y=y_train)
+        else:
+            self.regressor.fit(X=X_train.to_numpy(), y=y_train.to_numpy())
         self.fitted = True
         self.fit_date = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
         self.training_range = preprocess_y(y=y)[1][[0, -1]]
@@ -348,7 +352,10 @@ class ForecasterAutoreg(ForecasterBase):
         else: 
             self.index_freq = X_train.index.step
 
-        residuals = y_train - self.regressor.predict(X_train)
+        if not str(type(self.regressor)) == "<class 'xgboost.sklearn.XGBRegressor'>":
+            residuals = y_train - self.regressor.predict(X_train)
+        else:
+            residuals = y_train - self.regressor.predict(X_train.to_numpy())
         if len(residuals) > 1000:
             # Only up to 1000 residuals are stored
             residuals = np.random.choice(a=residuals, size=1000, replace=False)                                              
