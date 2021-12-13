@@ -428,8 +428,11 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
                                             step    = step,
                                             X_train = X_train,
                                             y_train = y_train
-                                         ) 
-            self.regressors_[step].fit(X_train_step, y_train_step)
+                                         )
+            if not str(type(self.regressor)) == "<class 'xgboost.sklearn.XGBRegressor'>":
+                self.regressors_[step].fit(X_train_step, y_train_step)
+            else:
+                self.regressors_[step].fit(X_train_step.to_numpy(), y_train_step.to_numpy())
         
         self.fitted = True
         self.fit_date = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
@@ -611,13 +614,13 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
 
     def get_coef(self, step) -> np.ndarray:
         '''      
-        Return estimated coefficients for the linear regression model stored in
-        the forecaster for a specific step. Since a separate model is created for
-        each forecast time step, it is necessary to select the model from which
-        retrieve information.
+        Return estimated coefficients for the regressor stored in the forecaster
+        for a specific step. Since a separate model is created for each forecast
+        time step, it is necessary to select the model from which retrieve the
+        information.
         
-        Only valid when the forecaster has been trained using as `regressor:
-        `LinearRegression()`, `Lasso()` or `Ridge()`.
+        Only valid when regressor stores internally the feature coefficients in
+        the attribute `coef_`.
         
         Parameters
         ----------
@@ -642,22 +645,19 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
         else:
             estimator = self.regressors_[step-1]
 
-        valid_instances = (sklearn.linear_model._base.LinearRegression,
-                           sklearn.linear_model._coordinate_descent.Lasso,
-                           sklearn.linear_model._ridge.Ridge
-                           )
-        
-        if not isinstance(estimator, valid_instances):
-            warnings.warn(
-                ('`get_coef` only available for forecasters with regressor of type '
-                 'LinearRegression, Lasso or Ridge.')
-            )
-            return
-        else:
+        try:
             coef = pd.DataFrame({
                         'feature': self.X_train_col_names,
                         'coef' : estimator.coef_
                    })
+        except:
+            warnings.warn(
+                f"Impossible to access feature coefficients for regressor of type {type(estimator)}. "
+                f"This method is only valid when the regressor stores internally "
+                f" the coefficients in the attribute `coef_`."
+            )
+
+            coef = None
             
         return coef
 
@@ -695,20 +695,18 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
         else:
             estimator = self.regressors_[step-1]
 
-        valid_instances = (sklearn.ensemble._forest.RandomForestRegressor,
-                           sklearn.ensemble._gb.GradientBoostingRegressor,
-                           sklearn.ensemble.HistGradientBoostingRegressor)
-                           
-        if not isinstance(estimator, valid_instances):
-            warnings.warn(
-                f"`get_feature_importance` only valid for forecasters with "
-                f"regressor of type {valid_instances}."
-            )
-            return
-        else:
+        try:
             feature_importance = pd.DataFrame({
                                     'feature': self.X_train_col_names,
                                     'importance' : estimator.feature_importances_
                                 })
+        except:
+            warnings.warn(
+                f"Impossible to access feature importance for regressor of type {type(estimator)}. "
+                f"This method is only valid when the regressor stores internally "
+                f" the feature importance in the attribute `feature_importances_`."
+            )
+
+            feature_importance = None
 
         return feature_importance
