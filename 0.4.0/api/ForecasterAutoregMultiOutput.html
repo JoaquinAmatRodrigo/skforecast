@@ -872,10 +872,10 @@ matrices should be created with created with <code>create_train_X_y()</code>.</s
 
 <li class="method"><code class="mkapi-item-name"><a href="#skforecast.ForecasterAutoregMultiOutput.ForecasterAutoregMultiOutput.ForecasterAutoregMultiOutput.get_coef">get_coef</a></code><code class="mkapi-object-parenthesis">(</code><code class="mkapi-object-signature">step</code><code class="mkapi-object-parenthesis">)</code>
 <span class="mkapi-item-type">(coef : pandas DataFrame)</span>
-<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Return estimated coefficients for the linear regression model stored in
-the forecaster for a specific step. Since a separate model is created for
-each forecast time step, it is necessary to select the model from which
-retrieve information.</span></li>
+<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Return estimated coefficients for the regressor stored in the forecaster
+for a specific step. Since a separate model is created for each forecast
+time step, it is necessary to select the model from which retrieve the
+information.</span></li>
 
 <li class="method"><code class="mkapi-item-name"><a href="#skforecast.ForecasterAutoregMultiOutput.ForecasterAutoregMultiOutput.ForecasterAutoregMultiOutput.get_feature_importance">get_feature_importance</a></code><code class="mkapi-object-parenthesis">(</code><code class="mkapi-object-signature">step</code><code class="mkapi-object-parenthesis">)</code>
 <span class="mkapi-item-type">(feature_importance : pandas DataFrame)</span>
@@ -1175,11 +1175,12 @@ Attributes <code>max_lag</code> and <code>window_size</code> are also updated.</
 </div>
 <div class="mkapi-docstring">
 <div class="mkapi-section">
-      <div class="mkapi-section-body"><p>Return estimated coefficients for the linear regression model stored in
-the forecaster for a specific step. Since a separate model is created for
-each forecast time step, it is necessary to select the model from which
-retrieve information.</p>
-<p>Only valid when the forecaster has been trained using as <code>regressor:</code>LinearRegression()<code>,</code>Lasso()<code>or</code>Ridge()`.</p></div>
+      <div class="mkapi-section-body"><p>Return estimated coefficients for the regressor stored in the forecaster
+for a specific step. Since a separate model is created for each forecast
+time step, it is necessary to select the model from which retrieve the
+information.</p>
+<p>Only valid when regressor stores internally the feature coefficients in
+the attribute <code>coef_</code>.</p></div>
     </div>
   <div class="mkapi-section parameters">
       <div class="mkapi-section-name parameters">

@@ -737,8 +737,8 @@ recursive (multi-step) forecaster with a custom function to create predictors.</
 
 <li><code class="mkapi-item-name">fun_predictors</code>
 <span class="mkapi-item-type">(Callable)</span>
-<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Function that takes a time series window as input and returns a numpy
-ndarray with the predictors associated with that window.</span></li>
+<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Function that takes a numpy ndarray as a window of values as input and
+returns a numpy ndarray with the predictors associated with that window.</span></li>
 
 <li><code class="mkapi-item-name">window_size</code>
 <span class="mkapi-item-type">(int)</span>
@@ -756,6 +756,10 @@ ndarray with the predictors associated with that window.</span></li>
 <span class="mkapi-item-type">(list)</span>
 <span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Names of columns of the matrix created internally for training.</span></li>
 
+<li><code class="mkapi-item-name">create_predictors</code>
+<span class="mkapi-item-type">(Callable)</span>
+<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Function that takes a numpy ndarray as a window of values as input and
+returns a numpy ndarray with the predictors associated with that window.</span></li>
 
 <li><code class="mkapi-item-name">creation_date</code>
 <span class="mkapi-item-type">(str)</span>
@@ -777,11 +781,6 @@ DataFrame.</span></li>
 <li><code class="mkapi-item-name">fitted</code>
 <span class="mkapi-item-type">(Bool)</span>
 <span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Tag to identify if the regressor has been fitted (trained).</span></li>
-
-<li><code class="mkapi-item-name">fun_predictors</code>
-<span class="mkapi-item-type">(Callable)</span>
-<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Function that takes a time series window as input and returns a numpy
-ndarray with the predictors associated with that window.</span></li>
 
 <li><code class="mkapi-item-name">in_sample_residuals</code>
 <span class="mkapi-item-type">(numpy ndarray)</span>
@@ -818,9 +817,17 @@ up to 1000 values.</span></li>
 <span class="mkapi-item-type">(str)</span>
 <span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Version of skforecast library used to create the forecaster.</span></li>
 
+<li><code class="mkapi-item-name">source_code_create_predictors</code>
+<span class="mkapi-item-type">(str)</span>
+<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Source code of the custom function used to create the predictors.</span></li>
+
 <li><code class="mkapi-item-name">training_range</code>
 <span class="mkapi-item-type">(pandas Index)</span>
 <span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">First and last values of index of the data used during training.</span></li>
+
+<li><code class="mkapi-item-name">window_size</code>
+<span class="mkapi-item-type">(int)</span>
+<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Size of the window needed by <code>fun_predictors</code> to create the predictors.</span></li>
 
 <li><code class="mkapi-item-name">window_size</code>
 <span class="mkapi-item-type">(int)</span>
@@ -848,16 +855,15 @@ up to 1000 values.</span></li>
 
 <li class="method"><code class="mkapi-item-name"><a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.ForecasterAutoregCustom.get_coef">get_coef</a></code><code class="mkapi-object-parenthesis">(</code><code class="mkapi-object-parenthesis">)</code>
 <span class="mkapi-item-type">(coef : pandas DataFrame)</span>
-<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Return estimated coefficients for the linear regression model stored in
-the forecaster. Only valid when the forecaster has been trained using
-as <code>regressor:</code>LinearRegression()<code>,</code>Lasso()<code>or</code>Ridge()`.</span></li>
+<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Return estimated coefficients for the regressor stored in the forecaster.
+Only valid when regressor stores internally the feature coefficients in
+the attribute <code>coef_</code>.</span></li>
 
 <li class="method"><code class="mkapi-item-name"><a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.ForecasterAutoregCustom.get_feature_importance">get_feature_importance</a></code><code class="mkapi-object-parenthesis">(</code><code class="mkapi-object-parenthesis">)</code>
 <span class="mkapi-item-type">(feature_importance : pandas DataFrame)</span>
-<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Return impurity-based feature importance of the model stored in the
-forecaster. Only valid when the forecaster has been trained using
-<code>GradientBoostingRegressor</code> , <code>RandomForestRegressor</code> or
-<code>HistGradientBoostingRegressor</code> as regressor.</span></li>
+<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Return feature importance of the regressor stored in the
+forecaster. Only valid when regressor stores internally the feature
+importance in the attribute <code>feature_importances_</code>.</span></li>
 
 <li class="method"><code class="mkapi-item-name"><a href="#skforecast.ForecasterAutoregCustom.ForecasterAutoregCustom.ForecasterAutoregCustom.predict">predict</a></code><code class="mkapi-object-parenthesis">(</code><code class="mkapi-object-signature">steps</code>, <code class="mkapi-object-signature">last_window</code>, <code class="mkapi-object-signature">exog</code><code class="mkapi-object-parenthesis">)</code>
 <span class="mkapi-item-type">(predictions : pandas Series)</span>
@@ -1236,9 +1242,9 @@ of 1000 values are stored.</span></li>
 </div>
 <div class="mkapi-docstring">
 <div class="mkapi-section">
-      <div class="mkapi-section-body"><p>Return estimated coefficients for the linear regression model stored in
-the forecaster. Only valid when the forecaster has been trained using
-as <code>regressor:</code>LinearRegression()<code>,</code>Lasso()<code>or</code>Ridge()`.</p></div>
+      <div class="mkapi-section-body"><p>Return estimated coefficients for the regressor stored in the forecaster.
+Only valid when regressor stores internally the feature coefficients in
+the attribute <code>coef_</code>.</p></div>
     </div>
   <div class="mkapi-section returns">
       <div class="mkapi-section-name returns">
@@ -1262,16 +1268,15 @@ as <code>regressor:</code>LinearRegression()<code>,</code>Lasso()<code>or</code>
 </div>
 <div class="mkapi-docstring">
 <div class="mkapi-section">
-      <div class="mkapi-section-body"><p>Return impurity-based feature importance of the model stored in the
-forecaster. Only valid when the forecaster has been trained using
-<code>GradientBoostingRegressor</code> , <code>RandomForestRegressor</code> or
-<code>HistGradientBoostingRegressor</code> as regressor.</p></div>
+      <div class="mkapi-section-body"><p>Return feature importance of the regressor stored in the
+forecaster. Only valid when regressor stores internally the feature
+importance in the attribute <code>feature_importances_</code>.</p></div>
     </div>
   <div class="mkapi-section returns">
       <div class="mkapi-section-name returns">
           <span class="mkapi-section-name-body returns">Returns</span> <span class="mkapi-item-type">(feature_importance : pandas DataFrame)</span>
         </div>
-      <div class="mkapi-section-body returns"><p>Impurity-based feature importance associated with each predictor.</p></div>
+      <div class="mkapi-section-body returns"><p>Feature importance associated with each predictor.</p></div>
     </div>
   </div>
 

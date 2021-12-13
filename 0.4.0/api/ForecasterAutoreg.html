@@ -849,16 +849,15 @@ variables.</span></li>
 
 <li class="method"><code class="mkapi-item-name"><a href="#skforecast.ForecasterAutoreg.ForecasterAutoreg.ForecasterAutoreg.get_coef">get_coef</a></code><code class="mkapi-object-parenthesis">(</code><code class="mkapi-object-parenthesis">)</code>
 <span class="mkapi-item-type">(coef : pandas DataFrame)</span>
-<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Return estimated coefficients for the linear regression model stored in
-the forecaster. Only valid when the forecaster has been trained using
-as <code>regressor:</code>LinearRegression()<code>,</code>Lasso()<code>or</code>Ridge()`.</span></li>
+<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Return estimated coefficients for the regressor stored in the forecaster.
+Only valid when regressor stores internally the feature coefficients in
+the attribute <code>coef_</code>.</span></li>
 
 <li class="method"><code class="mkapi-item-name"><a href="#skforecast.ForecasterAutoreg.ForecasterAutoreg.ForecasterAutoreg.get_feature_importance">get_feature_importance</a></code><code class="mkapi-object-parenthesis">(</code><code class="mkapi-object-parenthesis">)</code>
 <span class="mkapi-item-type">(feature_importance : pandas DataFrame)</span>
-<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Return impurity-based feature importance of the model stored in the
-forecaster. Only valid when the forecaster has been trained using
-<code>GradientBoostingRegressor</code> , <code>RandomForestRegressor</code> or
-<code>HistGradientBoostingRegressor</code> as regressor.</span></li>
+<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Return feature importance of the regressor stored in the
+forecaster. Only valid when regressor stores internally the feature
+importance in the attribute <code>feature_importances_</code>.</span></li>
 
 <li class="method"><code class="mkapi-item-name"><a href="#skforecast.ForecasterAutoreg.ForecasterAutoreg.ForecasterAutoreg.predict">predict</a></code><code class="mkapi-object-parenthesis">(</code><code class="mkapi-object-signature">steps</code>, <code class="mkapi-object-signature">last_window</code>, <code class="mkapi-object-signature">exog</code><code class="mkapi-object-parenthesis">)</code>
 <span class="mkapi-item-type">(predictions : pandas Series)</span>
@@ -1238,9 +1237,9 @@ of 1000 values are stored.</span></li>
 </div>
 <div class="mkapi-docstring">
 <div class="mkapi-section">
-      <div class="mkapi-section-body"><p>Return estimated coefficients for the linear regression model stored in
-the forecaster. Only valid when the forecaster has been trained using
-as <code>regressor:</code>LinearRegression()<code>,</code>Lasso()<code>or</code>Ridge()`.</p></div>
+      <div class="mkapi-section-body"><p>Return estimated coefficients for the regressor stored in the forecaster.
+Only valid when regressor stores internally the feature coefficients in
+the attribute <code>coef_</code>.</p></div>
     </div>
   <div class="mkapi-section returns">
       <div class="mkapi-section-name returns">
@@ -1264,16 +1263,15 @@ as <code>regressor:</code>LinearRegression()<code>,</code>Lasso()<code>or</code>
 </div>
 <div class="mkapi-docstring">
 <div class="mkapi-section">
-      <div class="mkapi-section-body"><p>Return impurity-based feature importance of the model stored in the
-forecaster. Only valid when the forecaster has been trained using
-<code>GradientBoostingRegressor</code> , <code>RandomForestRegressor</code> or
-<code>HistGradientBoostingRegressor</code> as regressor.</p></div>
+      <div class="mkapi-section-body"><p>Return feature importance of the regressor stored in the
+forecaster. Only valid when regressor stores internally the feature
+importance in the attribute <code>feature_importances_</code>.</p></div>
     </div>
   <div class="mkapi-section returns">
       <div class="mkapi-section-name returns">
           <span class="mkapi-section-name-body returns">Returns</span> <span class="mkapi-item-type">(feature_importance : pandas DataFrame)</span>
         </div>
-      <div class="mkapi-section-body returns"><p>Impurity-based feature importance associated with each predictor.</p></div>
+      <div class="mkapi-section-body returns"><p>Feature importance associated with each predictor.</p></div>
     </div>
   </div>
 
