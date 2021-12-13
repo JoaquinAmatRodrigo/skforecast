@@ -1,5 +1,53 @@
 # Releases
 
+All notable changes to this project will be documented in this file.
+
+## [0.4.1] - [2021-12-13]
+
+### Added
+
+### Changed
+
+### Fixed
+
++ `fit` and `predict` transform pandas series and dataframes to numpy arrays if regressor is XGBoost.
+
+## [0.4.0] - [2021-12-10]
+
+Version 0.4 has undergone a huge code refactoring. Main changes are related to input-output formats (only pandas series and dataframes are allowed although internally numpy arrays are used for performance) and model validation methods (unified into backtesting with and without refit).
+
+### Added
+
++ `ForecasterBase` as parent class
+
+### Changed
+
++ Argument `y` must be pandas Series. Numpy ndarrays are not allowed anymore.
+
++ Argument `exog` must be pandas Series or pandas DataFrame. Numpy ndarrays are not allowed anymore.
+
++ Output of `predict` is a pandas Series with index according to the steps predicted.
+
++ Scikitlearn pipelines are allowed as regressors.
+
++ `backtesting_forecaster` and `backtesting_forecaster_intervals` have been combined in a single function.
+
+    + It is possible to backtest forecasters already trained.
+    + `ForecasterAutoregMultiOutput` allows incomplete folds.
+    + It is possible to update `out_sample_residuals` with backtesting residuals.
+    
++ `cv_forecaster` has the option to update `out_sample_residuals` with backtesting residuals.
+
++ `backtesting_sarimax_statsmodels` and `cv_sarimax_statsmodels` have been combined in a single function.
+
++ `gridsearch_forecaster` use backtesting as validation strategy with the option of refit.
+
++ Extended information when printing `Forecaster` object.
+
++ All static methods for checking and preprocessing inputs moved to module utils.
+
++ Remove deprecated class `ForecasterCustom`.
+
 ## [0.3.0] - [2021-09-01]
 
 ### Added
