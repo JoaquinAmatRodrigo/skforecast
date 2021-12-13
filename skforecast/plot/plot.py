@@ -1,4 +1,3 @@
-import typing
 from typing import Union
 import matplotlib
 import matplotlib.pyplot as plt
@@ -7,23 +6,25 @@ import numpy as np
 import pandas as pd
 from statsmodels.graphics.tsaplots import plot_acf
 
-def plot_residuals(residuals: Union[np.array, pd.Series]=None,
-                   y_true: Union[np.array, pd.Series]=None,
-                   y_pred: Union[np.array, pd.Series]=None,
-                   fig: matplotlib.figure.Figure=None,
-                   **kwargs) -> None:
+def plot_residuals(
+    residuals: Union[np.array, pd.Series]=None,
+    y_true: Union[np.array, pd.Series]=None,
+    y_pred: Union[np.array, pd.Series]=None,
+    fig: matplotlib.figure.Figure=None,
+    **kwargs
+) -> None:
     '''
     
     Parameters
     ----------
-    residuals: np.array, default `None`.
+    residuals: pandas series, np.array, default `None`.
         Values of residuals. If `None`, residuals are calculated internally using
         `y_true` and `y_true`.
         
-    y_true: np.array, default `None`.
+    y_true: pandas series, np.array, default `None`.
         Ground truth (correct) values. Ignored if residuals is not `None`.
 
-    y_pred: np.array, default `None`. 
+    y_pred: pandas series, np.array, default `None`. 
         Values of predictions. Ignored if residuals is not `None`.
         
     fig: matplotlib.figure.Figure, default `None`. 
@@ -41,7 +42,7 @@ def plot_residuals(residuals: Union[np.array, pd.Series]=None,
     
     if residuals is None and (y_true is None or y_pred is None):
         raise Exception(
-            "If `residuals` aregument is None then, y_true and y_pred must be provided."
+            "If `residuals` argument is None then, y_true and y_pred must be provided."
         )
         
     if residuals is None:
