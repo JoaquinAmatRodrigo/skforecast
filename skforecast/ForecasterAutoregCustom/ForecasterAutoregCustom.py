@@ -15,6 +15,7 @@ import sklearn
 import sklearn.pipeline
 from sklearn.base import clone
 from copy import copy
+from inspect import getsource
 
 import skforecast
 from ..ForecasterBase import ForecasterBase
@@ -56,9 +57,12 @@ class ForecasterAutoregCustom(ForecasterBase):
     regressor : regressor compatible with the scikit-learn API
         An instance of a regressor compatible with the scikit-learn API.
         
-    fun_predictors: Callable
+    create_predictors: Callable
         Function that takes a numpy ndarray as a window of values as input and  
         returns a numpy ndarray with the predictors associated with that window.
+
+    source_code_create_predictors: str
+        Source code of the custom function used to create the predictors.
         
     window_size: int
         Size of the window needed by `fun_predictors` to create the predictors.
@@ -143,6 +147,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             raise Exception(
                 f'`fun_predictors` must be callable, got {type(fun_predictors)}.'
             )
+        self.source_code_create_predictors = getsource(fun_predictors)
                 
         
     def __repr__(self) -> str:
