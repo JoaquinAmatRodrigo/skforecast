@@ -7,7 +7,7 @@ Use cases where **skforecast** library is used for forecasting.
 
 + [**Skforecast: time series forecasting with Python and Scikit-learn**](https://www.cienciadedatos.net/documentos/py27-time-series-forecasting-python-scikitlearn.html)
 
-
++ [**Forecasting electricity demand with Python**](https://www.cienciadedatos.net/documentos/py29-forecasting-electricity-power-demand-python.html)
 
 ## Español
 
