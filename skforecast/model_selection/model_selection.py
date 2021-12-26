@@ -7,11 +7,12 @@
 # coding=utf-8
 
 
-from typing import Union, Dict, List, Tuple, Optional
+from typing import Union, Tuple, Optional
 import numpy as np
 import pandas as pd
 import warnings
 import logging
+from copy import deepcopy
 from tqdm import tqdm
 from sklearn.metrics import mean_squared_error 
 from sklearn.metrics import mean_absolute_error
@@ -28,7 +29,7 @@ logging.basicConfig(
 )
 
 
-def time_series_spliter(
+def time_series_splitter(
     y: Union[np.ndarray, pd.Series],
     initial_train_size: int,
     steps: int,
@@ -183,7 +184,6 @@ def cv_forecaster(
     metric: str,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     allow_incomplete_fold: bool=True,
-    set_out_sample_residuals: bool=True,
     verbose: bool=True
 ) -> Tuple[np.array, pd.DataFrame]:
     '''
@@ -215,11 +215,7 @@ def cv_forecaster(
     allow_incomplete_fold : bool, default `True`
         The last test partition is allowed to be incomplete if it does not reach `steps`
         observations. Otherwise, the latest observations are discarded.
-    
-    set_out_sample_residuals: bool, default `True`
-        Save residuals generated during the cross-validation process as out of sample
-        residuals.
-        
+            
     verbose : bool, default `True`
         Print number of folds used for cross validation.
 
@@ -244,9 +240,10 @@ def cv_forecaster(
             f"forecaster's window_size ({forecaster.window_size})."
         )
         
+    forecaster = deepcopy(forecaster)
     metric = get_metric(metric=metric)
     
-    splits = time_series_spliter(
+    splits = time_series_splitter(
                 y                     = y,
                 initial_train_size    = initial_train_size,
                 steps                 = steps,
@@ -274,12 +271,7 @@ def cv_forecaster(
         
         cv_predictions.append(pred)
         cv_metrics.append(metric_value)
-        
-        if set_out_sample_residuals:
-            if not isinstance(forecaster, ForecasterAutoregMultiOutput):
-                residuals = (y.iloc[test_index] - pred).to_numpy()
-                forecaster.set_out_sample_residuals(residuals)
-    
+            
     cv_predictions = pd.concat(cv_predictions)
     cv_predictions = pd.DataFrame(cv_predictions)
     cv_metrics = np.array(cv_metrics)
@@ -297,7 +289,6 @@ def _backtesting_forecaster_refit(
     interval: Optional[list]=None,
     n_boot: int=500,
     in_sample_residuals: bool=True,
-    set_out_sample_residuals: bool=True,
     verbose: bool=False
 ) -> Tuple[np.array, pd.DataFrame]:
     '''
@@ -347,12 +338,8 @@ def _backtesting_forecaster_refit(
 
     in_sample_residuals: bool, default `True`
         If `True`, residuals from the training data are used as proxy of
-        prediction error to create prediction intervals.
-
-    set_out_sample_residuals: bool, default `True`
-        At the end of the process, save residuals generated during the backtesting
-        as out of sample residuals. Ignored if forecaster is of class
-        `ForecasterAutoregMultiOutput`.
+        prediction error to create prediction intervals. If `False`, out_sample_residuals
+        are used if they are already stored inside the forecaster.
             
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used for backtesting.
@@ -369,7 +356,8 @@ def _backtesting_forecaster_refit(
             column upper_bound = upper bound interval of the interval.
 
     '''
-      
+    
+    forecaster = deepcopy(forecaster)
     metric = get_metric(metric=metric)
     backtest_predictions = []
     
@@ -507,12 +495,6 @@ def _backtesting_forecaster_refit(
                     y_pred = backtest_predictions['pred']
                    )
 
-    if set_out_sample_residuals:
-        if not isinstance(forecaster, ForecasterAutoregMultiOutput):
-            residuals = (y.iloc[initial_train_size: initial_train_size + len(backtest_predictions)]
-                         - backtest_predictions['pred'])
-            forecaster.set_out_sample_residuals(residuals.to_numpy())
-
     return np.array([metric_value]), backtest_predictions
 
 
@@ -526,7 +508,6 @@ def _backtesting_forecaster_no_refit(
     interval: Optional[list]=None,
     n_boot: int=500,
     in_sample_residuals: bool=True,
-    set_out_sample_residuals: bool=True,
     verbose: bool=False
 ) -> Tuple[np.array, pd.DataFrame]:
     '''
@@ -577,12 +558,8 @@ def _backtesting_forecaster_no_refit(
 
     in_sample_residuals: bool, default `True`
         If `True`, residuals from the training data are used as proxy of
-        prediction error to create prediction intervals.
-
-    set_out_sample_residuals: bool, default `True`
-        At the end of the process, save residuals generated during the backtesting
-        as out of sample residuals. Ignored if forecaster is of class
-        `ForecasterAutoregMultiOutput`.
+        prediction error to create prediction intervals.  If `False`, out_sample_residuals
+        are used if they are already stored inside the forecaster.
             
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used for backtesting.
@@ -600,6 +577,7 @@ def _backtesting_forecaster_no_refit(
 
     '''
         
+    forecaster = deepcopy(forecaster)
     metric = get_metric(metric=metric)
     backtest_predictions = []
 
@@ -766,12 +744,6 @@ def _backtesting_forecaster_no_refit(
                     y_pred = backtest_predictions['pred']
                    )
 
-    if set_out_sample_residuals:
-        if not isinstance(forecaster, ForecasterAutoregMultiOutput):
-            residuals = (y.iloc[initial_train_size: initial_train_size + len(backtest_predictions)]
-                         - backtest_predictions['pred'])
-            forecaster.set_out_sample_residuals(residuals.to_numpy())
-
     return np.array([metric_value]), backtest_predictions
 
 
@@ -786,7 +758,6 @@ def backtesting_forecaster(
     interval: Optional[list]=None,
     n_boot: int=500,
     in_sample_residuals: bool=True,
-    set_out_sample_residuals: bool=True,
     verbose: bool=False
 ) -> Tuple[np.array, pd.DataFrame]:
     '''
@@ -839,12 +810,9 @@ def backtesting_forecaster(
 
     in_sample_residuals: bool, default `True`
         If `True`, residuals from the training data are used as proxy of
-        prediction error to create prediction intervals.
-        
-    set_out_sample_residuals: bool, default `True`
-        Save residuals generated during the cross-validation process as out of sample
-        residuals. Ignored if forecaster is of class `ForecasterAutoregMultiOutput`.
-            
+        prediction error to create prediction intervals.  If `False`, out_sample_residuals
+        are used if they are already stored inside the forecaster.
+                  
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used for backtesting.
 
@@ -895,31 +863,29 @@ def backtesting_forecaster(
     
     if refit:
         metric_value, backtest_predictions = _backtesting_forecaster_refit(
-            forecaster               = forecaster,
-            y                        = y,
-            steps                    = steps,
-            metric                   = metric,
-            initial_train_size       = initial_train_size,
-            exog                     = exog,
-            interval                 = interval,
-            n_boot                   = n_boot,
-            in_sample_residuals      = in_sample_residuals,
-            set_out_sample_residuals = set_out_sample_residuals,
-            verbose                  = verbose
+            forecaster          = forecaster,
+            y                   = y,
+            steps               = steps,
+            metric              = metric,
+            initial_train_size  = initial_train_size,
+            exog                = exog,
+            interval            = interval,
+            n_boot              = n_boot,
+            in_sample_residuals = in_sample_residuals,
+            verbose             = verbose
         )
     else:
         metric_value, backtest_predictions = _backtesting_forecaster_no_refit(
-            forecaster               = forecaster,
-            y                        = y,
-            steps                    = steps,
-            metric                   = metric,
-            initial_train_size       = initial_train_size,
-            exog                     = exog,
-            interval                 = interval,
-            n_boot                   = n_boot,
-            in_sample_residuals      = in_sample_residuals,
-            set_out_sample_residuals = set_out_sample_residuals,
-            verbose                  = verbose
+            forecaster          = forecaster,
+            y                   = y,
+            steps               = steps,
+            metric              = metric,
+            initial_train_size  = initial_train_size,
+            exog                = exog,
+            interval            = interval,
+            n_boot              = n_boot,
+            in_sample_residuals = in_sample_residuals,
+            verbose             = verbose
         )
 
     return metric_value, backtest_predictions
@@ -1019,16 +985,15 @@ def grid_search_forecaster(
 
             forecaster.set_params(**params)
             metrics = backtesting_forecaster(
-                            forecaster               = forecaster,
-                            y                        = y,
-                            exog                     = exog,
-                            initial_train_size       = initial_train_size,
-                            steps                    = steps,
-                            metric                   = metric,
-                            refit                    = refit,
-                            interval                 = None,
-                            set_out_sample_residuals = False,
-                            verbose                  = verbose
+                            forecaster         = forecaster,
+                            y                  = y,
+                            exog               = exog,
+                            initial_train_size = initial_train_size,
+                            steps              = steps,
+                            metric             = metric,
+                            refit              = refit,
+                            interval           = None,
+                            verbose            = verbose
                             )[0]
 
             lags_list.append(lags)
