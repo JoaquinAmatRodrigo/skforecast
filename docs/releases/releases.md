@@ -12,6 +12,10 @@ All notable changes to this project will be documented in this file.
 
 + Function `backtesting_forecaster()` do not modify the original forecaster.
 
++ Removed argument `set_out_sample_residuals` in function `backtesting_forecaster()`.
+
++ Function `model_selection.time_series_spliter` renamed to `model_selection.time_series_splitter`
+
 ### Fixed
 
 
