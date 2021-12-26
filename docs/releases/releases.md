@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.2] - [Unreleased]
+
+### Added
+
++ Increased verbosity of function `backtesting_forecaster()`.
+
+### Changed
+
++ Function `backtesting_forecaster()` do not modify the original forecaster.
+
++ Removed argument `set_out_sample_residuals` in function `backtesting_forecaster()`.
+
++ Function `model_selection.time_series_spliter` renamed to `model_selection.time_series_splitter`
+
+### Fixed
+
+
 ## [0.4.1] - [2021-12-13]
 
 ### Added
