@@ -20,6 +20,7 @@ nav:
       - Recursive multi-step forecasting with exogenous variables: guides/autoregresive-forecaster-exogenous.md
       - Direct multi-step forecasting: guides/direct-multi-step-forecasting.md
       - Backtesting: guides/backtesting.md
+      - Predictions on training data: guides/predictions-on-training-data.md
       - Tuning forecaster: guides/tuning-forecaster.md
       - Prediction intervals: guides/prediction-intervals.md
 
