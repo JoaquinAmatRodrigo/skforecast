@@ -1,6 +1,6 @@
-# Training predictions
+# Predictions on training data
 
-In the **Skforecast** library, training predictions can be obtained either by using the `backtesting_forecaster()` function or by using the `predict()` method on the regressor of the forecaster object.
+In the **Skforecast** library, training predictions can be obtained either by using the `backtesting_forecaster()` function or by accessing the `predict()` method of the regressor stored inside the forecaster object."
 
 
 
