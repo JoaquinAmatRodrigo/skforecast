@@ -1,6 +1,11 @@
 # Feature importance
 
-For all forecasters, the importance of predictors can be obtained using the methods `get_coef` and `get_feature_importance`. These methods access the attributes `coef_` and `feature_importances_` of the internal regressor, respectively.
+The importance of predictors can be obtained using the methods `get_coef` and `get_feature_importance`. These methods access the attributes `coef_` and `feature_importances_` of the internal regressor, respectively.
+
+> **⚠ WARNING:**  
+> This methods only return values if the regressor used inside the forecaster has the attribute `coef_` or `feature_importances_`.
+
+
 
 ## Libraries
 
