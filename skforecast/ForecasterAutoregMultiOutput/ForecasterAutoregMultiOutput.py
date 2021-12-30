@@ -626,7 +626,7 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
         ----------
         step : int
             Model from which retrieve information (a separate model is created for
-            each forecast time step).
+            each forecast time step). First step is 1.
 
         Returns 
         -------
@@ -702,7 +702,7 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
                 f"Forecaster trained for {self.steps} steps. Got step={step}."
             )
         if step < 1:
-            raise Exception("First step is 1.")
+            raise Exception("Minimum step is 1.")
         
         # Stored regressors start at index 0
         step = step - 1
