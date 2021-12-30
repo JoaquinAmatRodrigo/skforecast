@@ -417,6 +417,18 @@
   
   
     <li class="md-nav__item">
+      <a href="../guides/input-data.html" class="md-nav__link">
+        Input data
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../guides/autoregresive-forecaster.html" class="md-nav__link">
         Recursive multi-step forecasting
       </a>
@@ -477,6 +489,30 @@
   
   
     <li class="md-nav__item">
+      <a href="../guides/forecast-time-ahead_training.html" class="md-nav__link">
+        Forecasting time ahead training
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guides/predictions-on-training-data.html" class="md-nav__link">
+        Predictions on training data
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../guides/tuning-forecaster.html" class="md-nav__link">
         Tuning forecaster
       </a>
@@ -491,6 +527,54 @@
     <li class="md-nav__item">
       <a href="../guides/prediction-intervals.html" class="md-nav__link">
         Prediction intervals
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guides/feature-importance.html" class="md-nav__link">
+        Feature importance
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guides/sklearn-pipeline.html" class="md-nav__link">
+        Scikit-learn Pipeline
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guides/xgboost.html" class="md-nav__link">
+        XGBoost
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guides/save-load-forecaster.html" class="md-nav__link">
+        Save and load forecaster
       </a>
     </li>
   
@@ -709,7 +793,7 @@
 <div class='mkapi-object-container'>
   <div class="mkapi-object function code top">
     <div class="mkapi-object-kind function top">function</div>
-    <div class="mkapi-object-body function top"><code class="mkapi-object-prefix">skforecast.model_selection.model_selection.</code><code class="mkapi-object-name">backtesting_forecaster</code><code class="mkapi-object-parenthesis">(</code><code class="mkapi-object-signature">forecaster</code>, <code class="mkapi-object-signature">y</code>, <code class="mkapi-object-signature">steps</code>, <code class="mkapi-object-signature">metric</code>, <code class="mkapi-object-signature">initial_train_size</code>, <code class="mkapi-object-signature">exog=None</code>, <code class="mkapi-object-signature">refit=False</code>, <code class="mkapi-object-signature">interval=None</code>, <code class="mkapi-object-signature">n_boot=500</code>, <code class="mkapi-object-signature">in_sample_residuals=True</code>, <code class="mkapi-object-signature">set_out_sample_residuals=True</code>, <code class="mkapi-object-signature">verbose=False</code><code class="mkapi-object-parenthesis">)</code></div>
+    <div class="mkapi-object-body function top"><code class="mkapi-object-prefix">skforecast.model_selection.model_selection.</code><code class="mkapi-object-name">backtesting_forecaster</code><code class="mkapi-object-parenthesis">(</code><code class="mkapi-object-signature">forecaster</code>, <code class="mkapi-object-signature">y</code>, <code class="mkapi-object-signature">steps</code>, <code class="mkapi-object-signature">metric</code>, <code class="mkapi-object-signature">initial_train_size</code>, <code class="mkapi-object-signature">exog=None</code>, <code class="mkapi-object-signature">refit=False</code>, <code class="mkapi-object-signature">interval=None</code>, <code class="mkapi-object-signature">n_boot=500</code>, <code class="mkapi-object-signature">in_sample_residuals=True</code>, <code class="mkapi-object-signature">verbose=False</code><code class="mkapi-object-parenthesis">)</code></div>
   </div>
   
 </div>
@@ -775,12 +859,8 @@ intervals.</span></li>
 <li><code class="mkapi-item-name">in_sample_residuals</code>
 <span class="mkapi-item-type">(bool, default `True`)</span>
 <span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">If <code>True</code>, residuals from the training data are used as proxy of
-prediction error to create prediction intervals.</span></li>
-
-<li><code class="mkapi-item-name">set_out_sample_residuals</code>
-<span class="mkapi-item-type">(bool, default `True`)</span>
-<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Save residuals generated during the cross-validation process as out of sample
-residuals. Ignored if forecaster is of class <code>ForecasterAutoregMultiOutput</code>.</span></li>
+prediction error to create prediction intervals.  If <code>False</code>, out_sample_residuals
+are used if they are already stored inside the forecaster.</span></li>
 
 <li><code class="mkapi-item-name">verbose</code>
 <span class="mkapi-item-type">(bool, default `False`)</span>
@@ -808,7 +888,7 @@ Value of predictions and their estimated interval if <code>interval</code> is no
 <div class='mkapi-object-container'>
   <div class="mkapi-object function code top">
     <div class="mkapi-object-kind function top">function</div>
-    <div class="mkapi-object-body function top"><code class="mkapi-object-prefix">skforecast.model_selection.model_selection.</code><code class="mkapi-object-name">cv_forecaster</code><code class="mkapi-object-parenthesis">(</code><code class="mkapi-object-signature">forecaster</code>, <code class="mkapi-object-signature">y</code>, <code class="mkapi-object-signature">initial_train_size</code>, <code class="mkapi-object-signature">steps</code>, <code class="mkapi-object-signature">metric</code>, <code class="mkapi-object-signature">exog=None</code>, <code class="mkapi-object-signature">allow_incomplete_fold=True</code>, <code class="mkapi-object-signature">set_out_sample_residuals=True</code>, <code class="mkapi-object-signature">verbose=True</code><code class="mkapi-object-parenthesis">)</code></div>
+    <div class="mkapi-object-body function top"><code class="mkapi-object-prefix">skforecast.model_selection.model_selection.</code><code class="mkapi-object-name">cv_forecaster</code><code class="mkapi-object-parenthesis">(</code><code class="mkapi-object-signature">forecaster</code>, <code class="mkapi-object-signature">y</code>, <code class="mkapi-object-signature">initial_train_size</code>, <code class="mkapi-object-signature">steps</code>, <code class="mkapi-object-signature">metric</code>, <code class="mkapi-object-signature">exog=None</code>, <code class="mkapi-object-signature">allow_incomplete_fold=True</code>, <code class="mkapi-object-signature">verbose=True</code><code class="mkapi-object-parenthesis">)</code></div>
   </div>
   
 </div>
@@ -852,11 +932,6 @@ regressed on exog[i].</span></li>
 <span class="mkapi-item-type">(bool, default `True`)</span>
 <span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">The last test partition is allowed to be incomplete if it does not reach <code>steps</code>
 observations. Otherwise, the latest observations are discarded.</span></li>
-
-<li><code class="mkapi-item-name">set_out_sample_residuals</code>
-<span class="mkapi-item-type">(bool, default `True`)</span>
-<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Save residuals generated during the cross-validation process as out of sample
-residuals.</span></li>
 
 <li><code class="mkapi-item-name">verbose</code>
 <span class="mkapi-item-type">(bool, default `True`)</span>
@@ -956,11 +1031,11 @@ regressed on exog[i].</span></li>
 
 </div>
 
-<div class="mkapi-node" id="skforecast.model_selection.model_selection.time_series_spliter">
+<div class="mkapi-node" id="skforecast.model_selection.model_selection.time_series_splitter">
 <div class='mkapi-object-container'>
   <div class="mkapi-object generator code top">
     <div class="mkapi-object-kind generator top">generator</div>
-    <div class="mkapi-object-body generator top"><code class="mkapi-object-prefix">skforecast.model_selection.model_selection.</code><code class="mkapi-object-name">time_series_spliter</code><code class="mkapi-object-parenthesis">(</code><code class="mkapi-object-signature">y</code>, <code class="mkapi-object-signature">initial_train_size</code>, <code class="mkapi-object-signature">steps</code>, <code class="mkapi-object-signature">allow_incomplete_fold=True</code>, <code class="mkapi-object-signature">verbose=True</code><code class="mkapi-object-parenthesis">)</code></div>
+    <div class="mkapi-object-body generator top"><code class="mkapi-object-prefix">skforecast.model_selection.model_selection.</code><code class="mkapi-object-name">time_series_splitter</code><code class="mkapi-object-parenthesis">(</code><code class="mkapi-object-signature">y</code>, <code class="mkapi-object-signature">initial_train_size</code>, <code class="mkapi-object-signature">steps</code>, <code class="mkapi-object-signature">allow_incomplete_fold=True</code>, <code class="mkapi-object-signature">verbose=True</code><code class="mkapi-object-parenthesis">)</code></div>
   </div>
   
 </div>
