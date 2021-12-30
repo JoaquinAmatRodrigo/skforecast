@@ -66,4 +66,4 @@ Since the provided `last_window` contains values from 2008-02-01 to 2008-06-01, 
 
 
 > **⚠ WARNING:**  
-> It is important to note that the length of last windows must be enough to include the maximum lag used by the forecaster. Fore example, if the forecaster uses lags 1, 24, 48, `last_window` must include the last 72 values of the series.
+> It is important to note that the length of last windows must be enough to include the maximum lag used by the forecaster. Fore example, if the forecaster uses lags 1, 24, 48 and 72 `last_window` must include the last 72 values of the series.
