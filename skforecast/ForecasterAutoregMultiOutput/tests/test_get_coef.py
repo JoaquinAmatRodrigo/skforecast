@@ -33,4 +33,20 @@ def test_output_get_coef_when_regressor_is_RandomForest():
     expected = None
     results = forecaster.get_coef(step=1)
     assert results is expected
+
+
+def test_get_coef_when_regressor_is_LinearRegression_lags_3_step_1_exog_included():
+    '''
+    Test output of get_coef for step 1, when regressor is LinearRegression with lags=3
+    and it is trained with y=pd.Series(np.arange(5)) and
+    exog=pd.Series(np.arange(5), name='exog').
+    '''
+    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=1)
+    forecaster.fit(y=pd.Series(np.arange(5)), exog=pd.Series(np.arange(5), name='exog'))
+    results = forecaster.get_coef(step=1)
+    expected = pd.DataFrame({
+                    'feature': ['lag_1', 'lag_2', 'lag_3', 'exog'],
+                    'coef': np.array([0.25, 0.25, 0.25, 0.25])
+                })
+    pd.testing.assert_frame_equal(results, expected)
     
