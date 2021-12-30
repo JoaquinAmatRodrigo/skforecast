@@ -626,7 +626,7 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
         ----------
         step : int
             Model from which retrieve information (a separate model is created for
-            each forecast time step).
+            each forecast time step). First step is 1.
 
         Returns 
         -------
@@ -639,15 +639,27 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
             raise Exception(
                 f"Forecaster trained for {self.steps} steps. Got step={step}."
             )
+        if step < 1:
+            raise Exception("Minimum step is 1.")
+        
+        # Stored regressors start at index 0
+        step = step - 1
             
         if isinstance(self.regressor, sklearn.pipeline.Pipeline):
-            estimator = self.regressors_[step-1][-1]
+            estimator = self.regressors_[step][-1]
         else:
-            estimator = self.regressors_[step-1]
+            estimator = self.regressors_[step]
 
         try:
+            idx_columns_lags = np.arange(len(self.lags))
+            idx_columns_exog = np.array([], dtype=int)
+            if self.included_exog:
+                idx_columns_exog = np.arange(len(self.X_train_col_names))[len(self.lags) + step::self.steps]
+            idx_columns = np.hstack((idx_columns_lags, idx_columns_exog))
+            feature_names = [self.X_train_col_names[i] for i in idx_columns]
+            feature_names = [name.replace(f"_step_{step+1}", "") for name in feature_names]
             coef = pd.DataFrame({
-                        'feature': self.X_train_col_names,
+                        'feature': feature_names,
                         'coef' : estimator.coef_
                    })
         except:
@@ -677,7 +689,7 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
         ----------
         step : int
             Model from which retrieve information (a separate model is created for
-            each forecast time step).
+            each forecast time step). First step is 1.
 
         Returns 
         -------
@@ -689,15 +701,27 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
             raise Exception(
                 f"Forecaster trained for {self.steps} steps. Got step={step}."
             )
+        if step < 1:
+            raise Exception("Minimum step is 1.")
         
+        # Stored regressors start at index 0
+        step = step - 1
+
         if isinstance(self.regressor, sklearn.pipeline.Pipeline):
-            estimator = self.regressors_[step-1][-1]
+            estimator = self.regressors_[step][-1]
         else:
-            estimator = self.regressors_[step-1]
+            estimator = self.regressors_[step]
 
         try:
+            idx_columns_lags = np.arange(len(self.lags))
+            idx_columns_exog = np.array([], dtype=int)
+            if self.included_exog:
+                idx_columns_exog = np.arange(len(self.X_train_col_names))[len(self.lags) + step::self.steps]
+            idx_columns = np.hstack((idx_columns_lags, idx_columns_exog))
+            feature_names = [self.X_train_col_names[i] for i in idx_columns]
+            feature_names = [name.replace(f"_step_{step+1}", "") for name in feature_names]
             feature_importance = pd.DataFrame({
-                                    'feature': self.X_train_col_names,
+                                    'feature': feature_names,
                                     'importance' : estimator.feature_importances_
                                 })
         except:
