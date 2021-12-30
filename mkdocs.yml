@@ -15,14 +15,20 @@ nav:
     
   - User Guides:
       - Introduction to forcasting: guides/introduction-forecasting.md
+      - Input data: guides/input-data.md
       - Recursive multi-step forecasting: guides/autoregresive-forecaster.md
       - Custom predictors: guides/custom-predictors.md
       - Recursive multi-step forecasting with exogenous variables: guides/autoregresive-forecaster-exogenous.md
       - Direct multi-step forecasting: guides/direct-multi-step-forecasting.md
       - Backtesting: guides/backtesting.md
+      - Forecasting time ahead training: guides/forecast-time-ahead_training.md
       - Predictions on training data: guides/predictions-on-training-data.md
       - Tuning forecaster: guides/tuning-forecaster.md
       - Prediction intervals: guides/prediction-intervals.md
+      - Feature importance: guides/feature-importance.md
+      - Scikit-learn Pipeline: guides/sklearn-pipeline.md
+      - XGBoost: guides/xgboost.md
+      - Save and load forecaster: guides/save-load-forecaster.md
 
   - Examples:
       - Forecasting time series with con Python and Scikit-learn: examples/examples.md
