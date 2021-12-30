@@ -1,31 +1,19 @@
 Forecaster Classes
-- [x] unified inputs `y` and `exog` to pandas Series and pandas Dataframe
-- [x] unified `predict` and `predict_interval`
-- [x] ForecasterBase as parent class
+- [ ] unify methods `get_coef` and `get_feature_importance`
+- [ ] allow using `sklearn.compose.ColumnTransformer` when pipeline is used as regressor.
 - [ ] add examples in docstrings
 - [ ] add references in docstrings
 
 Module model_selection
-- [x] unified cross-validation and backtesting using argument `refit`
-- [x] unified `grid_search` methods using argument `refit`
+- [ ] unit testing
 
-Model_selection_statsmodels:
-- [x] Change all inputs of `y` and `exog` to pandas Series and pandas DataFrame
-- [x] Combine `backtesting_sarimax_statsmodels` and `cv_sarimax_statsmodels` in a single function
-
-Module utils
-- [x] all static methods for checking and preprocessing inputs moved to module utils
+Module model_selection_statsmodels
+- [ ] add to docs user guides
+- [ ] unit testing
 
 Module plot
-- [x] function to plot residuals
-
-Unit testing:
-- [x] ForecasterAutoreg
-- [x] ForecasterAutoregCustom
-- [x] ForecasterAutoregMultioutput
-- [ ] model_selection
-- [x] utils
+- [ ] add to docs user guides
+- [ ] unit testing
 
 Others
-- [x] add typing Optional[]
 - [ ] format code with black and flake8
