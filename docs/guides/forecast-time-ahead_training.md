@@ -38,12 +38,12 @@ forecaster = ForecasterAutoreg(
 forecaster.fit(y=data_train['y'])
 ```
 
-```
+<pre>
 2005-02-01    0.872294
 2005-03-01    0.679100
 2005-04-01    0.759507
 Freq: MS, Name: pred, dtype: float64
-```
+</pre>
 
 As expected, predictions follow directly from the end of training data.
 
@@ -55,12 +55,12 @@ With skforecast, it is possible to generate predictions starting time ahead of t
 forecaster.predict(steps=3, last_window=data['y'].tail(5))
 ```
 
-```
+<pre>
 2008-07-01    0.783482
 2008-08-01    0.865240
 2008-09-01    0.897055
 Freq: MS, Name: pred, dtype: float64
-```
+</pre>
 
 Since the provided `last_window` contains values from 2008-02-01 to 2008-06-01, the forecaster is able to create the needed lags and predict the next 5 steps.
 

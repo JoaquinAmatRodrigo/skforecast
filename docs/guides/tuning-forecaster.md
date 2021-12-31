@@ -7,15 +7,10 @@ Skforecast library allows to combine grid search strategy with backtesting in or
 ## Libraries
 
 ``` python
-# Libraries
-# ==============================================================================
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
 from sklearn.ensembre import Ridge
-from sklearn.metrics import mean_squared_error
 ```
 ## Data
 
@@ -78,7 +73,6 @@ results_grid = grid_search_forecaster(
 results_grid
 ```
 
-```
 | lags                            | params                                 |    metric |   max_depth |   n_estimators |
 |---------------------------------|----------------------------------------|-----------|-------------|----------------|
 | [ 1  2  3  4  5  6  7  8  9 10] | {'max_depth': 5, 'n_estimators': 50}   | 0.0334486 |           5 |             50 |
@@ -99,7 +93,8 @@ results_grid
 | [1 2 3]                         | {'max_depth': 15, 'n_estimators': 50}  | 0.0602604 |          15 |             50 |
 | [1 2 3]                         | {'max_depth': 10, 'n_estimators': 50}  | 0.0609513 |          10 |             50 |
 | [1 2 3]                         | {'max_depth': 10, 'n_estimators': 100} | 0.0673343 |          10 |            100 |
-```
+
+If argument `return_best = True`, the forecaster is retrained using all data available and the best combination of lags and hyperparameters.
 
 ``` python
 skforecast

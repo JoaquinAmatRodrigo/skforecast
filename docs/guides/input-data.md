@@ -45,13 +45,14 @@ forecaster.fit(y=data['y'])
 forecaster.predict(steps=5)
 ```
 
+<pre>
 2008-07-01    0.714526
 2008-08-01    0.789144
 2008-09-01    0.818433
 2008-10-01    0.845027
 2008-11-01    0.914621
 Freq: MS, Name: pred, dtype: float64
-
+</pre>
 
 ## Train and predict using input without datetime index
 
@@ -61,7 +62,6 @@ data = data.reset_index(drop=True)
 data
 ```
 
-```
 |    |        y |
 |---:|---------:|
 |  0 | 0.429795 |
@@ -69,7 +69,6 @@ data
 |  2 | 0.432159 |
 |  3 | 0.492543 |
 |  4 | 0.502369 |
-```
 
 
 ``` python
@@ -77,12 +76,12 @@ forecaster.fit(y=data['y'])
 forecaster.predict(steps=5)
 ```
 
-```
+<pre>
 204    0.714526
 205    0.789144
 206    0.818433
 207    0.845027
 208    0.914621
 Name: pred, dtype: float64
-```
+</pre>
 

@@ -83,12 +83,12 @@ predictions = forecaster.predict(steps=36)
 predictions.head(3)
 ```
 
-```
+<pre>
 2005-07-01    0.921840
 2005-08-01    0.954921
 2005-09-01    1.101716
 Freq: MS, Name: pred, dtype: float64
-```
+</pre>
 
 ``` python
 fig, ax=plt.subplots(figsize=(9, 4))
@@ -108,9 +108,9 @@ error_mse = mean_squared_error(
 print(f"Test error (mse): {error_mse}")
 ```
 
-```
+<pre>
 Test error (mse): 0.00429855684785846
-```
+</pre>
 
 ## Feature importance
 

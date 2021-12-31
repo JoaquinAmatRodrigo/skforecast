@@ -90,7 +90,7 @@ Skforecast version: 0.4.0
 
 ## Prediction
 
-If the `Forecaster` has been trained with exogenous variables, they shlud be provided when predictiong.
+If the `Forecaster` has been trained with exogenous variables, they should be provided when prediction.
 
 
 ``` python
@@ -100,12 +100,12 @@ predictions = forecaster.predict(steps=36)
 predictions.head(3)
 ```
 
-```
+<pre>
 2005-07-01    0.965991
 2005-08-01    0.973200
 2005-09-01    1.144204
 Freq: MS, Name: pred, dtype: float64
-```
+</pre>
 
 ``` python
 # Plot predictions
@@ -129,9 +129,9 @@ error_mse = mean_squared_error(
 print(f"Test error (mse): {error_mse}")
 ```
 
-```
+<pre>
 Test error (mse): 0.009067941608532212
-```
+</pre>
 
 ## Feature importance
 
@@ -141,7 +141,6 @@ Since `ForecasterAutoregMultiOutput` fits one model per step,it is necessary to 
 forecaster.get_coef(step=1)
 ```
 
-```
 | feature   |         coef |
 |:----------|-------------:|
 | lag_1     |  0.0306858   |
@@ -159,7 +158,6 @@ forecaster.get_coef(step=1)
 | lag_13    | -0.0260086   |
 | lag_14    | -0.0460312   |
 | lag_15    | -0.0358484   |
-```
 
 ## Extract training matrix
 
@@ -177,7 +175,6 @@ print(X_1.head(4))
 print(y_1.head(4))
 ```
 
-```
 |    lag_1 |    lag_2 |    lag_3 |    lag_4 |    lag_5 |    lag_6 |    lag_7 |    lag_8 |    lag_9 |   lag_10 |   lag_11 |   lag_12 |   lag_13 |   lag_14 |   lag_15 |
 |---------:|---------:|---------:|---------:|---------:|---------:|---------:|---------:|---------:|---------:|---------:|---------:|---------:|---------:|---------:|
 | 0.534761 | 0.475463 | 0.483389 | 0.410534 | 0.361801 | 0.379808 | 0.351348 | 0.33622  | 0.660119 | 0.602652 | 0.502369 | 0.492543 | 0.432159 | 0.400906 | 0.429795 |
@@ -191,4 +188,3 @@ print(y_1.head(4))
 |   0.771258 |
 |   0.751503 |
 |   0.387554 |
-```

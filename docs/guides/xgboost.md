@@ -76,7 +76,7 @@ Skforecast version: 0.4.1
 forecaster.predict(steps=10, exog=data_test[['exog_1', 'exog_2']])
 ```
 
-```
+<pre>
 2008-07-01    0.700701
 2008-08-01    0.829139
 2008-09-01    0.983677
@@ -88,7 +88,7 @@ forecaster.predict(steps=10, exog=data_test[['exog_1', 'exog_2']])
 2009-03-01    0.947129
 2009-04-01    0.700440
 Freq: MS, Name: pred, dtype: float64
-```
+</pre>
 
 ## Feature importance
 

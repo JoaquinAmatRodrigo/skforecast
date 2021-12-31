@@ -7,8 +7,6 @@ The `ForecasterAutoregCustom` class is very similar to the `ForecasterAutoreg` c
 ## Libraries
 
 ``` python
-# Libraries
-# ==============================================================================
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -108,12 +106,12 @@ predictions = forecaster.predict(steps=36)
 predictions.head(3)
 ```
 
-```
+<pre>
 2005-07-01    0.926598
 2005-08-01    0.948202
 2005-09-01    1.020947
 Freq: MS, Name: pred, dtype: float64
-```
+</pre>
 
 ``` python
 # Plot predictions
@@ -137,9 +135,9 @@ error_mse = mean_squared_error(
 print(f"Test error (mse): {error_mse}")
 ```
 
-```
+<pre>
 Test error (mse): 0.04487765885818191
-```
+</pre>
 
 ## Feature importance
 
@@ -147,7 +145,6 @@ Test error (mse): 0.04487765885818191
 forecaster.get_feature_importance()
 ```
 
-```
 | feature             |   importance |
 |:--------------------|-------------:|
 | custom_predictor_0  |    0.53972   |
@@ -161,7 +158,6 @@ forecaster.get_feature_importance()
 | custom_predictor_8  |    0.018938  |
 | custom_predictor_9  |    0.108639  |
 | custom_predictor_10 |    0.0417066 |
-```
 
 ## Extract training matrix
 
@@ -171,7 +167,6 @@ print(X)
 print(y)
 ```
 
-```
 | datetime            |   custom_predictor_0 |   custom_predictor_1 |   custom_predictor_2 |   custom_predictor_3 |   custom_predictor_4 |   custom_predictor_5 |   custom_predictor_6 |   custom_predictor_7 |   custom_predictor_8 |   custom_predictor_9 |   custom_predictor_10 |
 |:--------------------|---------------------:|---------------------:|---------------------:|---------------------:|---------------------:|---------------------:|---------------------:|---------------------:|---------------------:|---------------------:|----------------------:|
 | 1993-03-01 00:00:00 |             0.387554 |             0.751503 |             0.771258 |             0.595223 |             0.568606 |             0.534761 |             0.475463 |             0.483389 |             0.410534 |             0.361801 |              0.496401 |
@@ -179,9 +174,8 @@ print(y)
 | 1993-05-01 00:00:00 |             0.41389  |             0.427283 |             0.387554 |             0.751503 |             0.771258 |             0.595223 |             0.568606 |             0.534761 |             0.475463 |             0.483389 |              0.496924 |
 | 1993-06-01 00:00:00 |             0.428859 |             0.41389  |             0.427283 |             0.387554 |             0.751503 |             0.771258 |             0.595223 |             0.568606 |             0.534761 |             0.475463 |              0.496759 |
 | 1993-07-01 00:00:00 |             0.470126 |             0.428859 |             0.41389  |             0.427283 |             0.387554 |             0.751503 |             0.771258 |             0.595223 |             0.568606 |             0.534761 |              0.495638 |
-```
 
-```
+
 | datetime            |        y |
 |:--------------------|---------:|
 | 1993-03-01 00:00:00 | 0.427283 |
@@ -189,4 +183,3 @@ print(y)
 | 1993-05-01 00:00:00 | 0.428859 |
 | 1993-06-01 00:00:00 | 0.470126 |
 | 1993-07-01 00:00:00 | 0.50921  |
-```
