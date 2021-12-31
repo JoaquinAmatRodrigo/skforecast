@@ -881,17 +881,11 @@
 <span class="normal">2</span>
 <span class="normal">3</span>
 <span class="normal">4</span>
-<span class="normal">5</span>
-<span class="normal">6</span>
-<span class="normal">7</span>
-<span class="normal">8</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="c1"># Libraries</span>
-<span class="c1"># ==============================================================================</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="normal">5</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">from</span> <span class="nn">skforecast.ForecasterAutoreg</span> <span class="kn">import</span> <span class="n">ForecasterAutoreg</span>
 <span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestRegressor</span>
-<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">mean_squared_error</span>
 </code></pre></div>
 </td></tr></table>
 <h2 id="data">Data<a class="headerlink" href="#data" title="Permanent link">&para;</a></h2>
@@ -1020,19 +1014,42 @@ Skforecast version: 0.4.0
 <span class="n">predictions</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
 </code></pre></div>
 </td></tr></table>
-<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
-<span class="normal">2</span>
-<span class="normal">3</span>
-<span class="normal">4</span>
-<span class="normal">5</span>
-<span class="normal">6</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>|                     |     pred |   lower_bound |   upper_bound |
-|:--------------------|---------:|--------------:|--------------:|
-| 2005-07-01 00:00:00 | 0.899283 |      0.832109 |      0.977063 |
-| 2005-08-01 00:00:00 | 0.954796 |      0.881798 |      1.02203  |
-| 2005-09-01 00:00:00 | 1.06672  |      0.964466 |      1.13247  |
-| 2005-10-01 00:00:00 | 1.1022   |      1.01777  |      1.17421  |
-</code></pre></div>
-</td></tr></table>
+<table>
+<thead>
+<tr>
+<th align="left"></th>
+<th align="right">pred</th>
+<th align="right">lower_bound</th>
+<th align="right">upper_bound</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">2005-07-01 00:00:00</td>
+<td align="right">0.899283</td>
+<td align="right">0.832109</td>
+<td align="right">0.977063</td>
+</tr>
+<tr>
+<td align="left">2005-08-01 00:00:00</td>
+<td align="right">0.954796</td>
+<td align="right">0.881798</td>
+<td align="right">1.02203</td>
+</tr>
+<tr>
+<td align="left">2005-09-01 00:00:00</td>
+<td align="right">1.06672</td>
+<td align="right">0.964466</td>
+<td align="right">1.13247</td>
+</tr>
+<tr>
+<td align="left">2005-10-01 00:00:00</td>
+<td align="right">1.1022</td>
+<td align="right">1.01777</td>
+<td align="right">1.17421</td>
+</tr>
+</tbody>
+</table>
 <table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
 <span class="normal"> 3</span>

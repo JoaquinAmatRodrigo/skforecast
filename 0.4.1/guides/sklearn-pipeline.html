@@ -931,9 +931,10 @@ Version 0.4 does not allow including ColumnTransformer in the pipeline used as r
 <span class="n">pipe</span>
 </code></pre></div>
 </td></tr></table>
-<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>Pipeline(steps=[(&#39;standardscaler&#39;, StandardScaler()), (&#39;ridge&#39;, Ridge())])
-</code></pre></div>
-</td></tr></table>
+<pre>
+Pipeline(steps=[('standardscaler', StandardScaler()), ('ridge', Ridge())])
+</pre>
+
 <h2 id="create-and-train-forecaster">Create and train forecaster<a class="headerlink" href="#create-and-train-forecaster" title="Permanent link">&para;</a></h2>
 <table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
 <span class="normal">2</span>

@@ -1037,17 +1037,14 @@ Skforecast version: 0.4.0
 <span class="n">predictions</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
 </code></pre></div>
 </td></tr></table>
-<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
-<span class="normal">2</span>
-<span class="normal">3</span>
-<span class="normal">4</span>
-<span class="normal">5</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>datetime
+<pre>
+datetime
 2005-07-01    0.908832
 2005-08-01    0.953925
 2005-09-01    1.100887
 Freq: MS, Name: pred, dtype: float64
-</code></pre></div>
-</td></tr></table>
+</pre>
+
 <table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
 <span class="normal">2</span>
 <span class="normal">3</span>
@@ -1079,52 +1076,92 @@ Freq: MS, Name: pred, dtype: float64
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Test error (mse): </span><span class="si">{</span><span class="n">error_mse</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </code></pre></div>
 </td></tr></table>
-<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>Test error (mse): 0.004022228812838391
-</code></pre></div>
-</td></tr></table>
+<pre>
+Test error (mse): 0.004022228812838391
+</pre>
+
 <h2 id="feature-importance">Feature importance<a class="headerlink" href="#feature-importance" title="Permanent link">&para;</a></h2>
 <table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="n">forecaster</span><span class="o">.</span><span class="n">get_feature_importance</span><span class="p">()</span>
 </code></pre></div>
 </td></tr></table>
-<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
-<span class="normal"> 2</span>
-<span class="normal"> 3</span>
-<span class="normal"> 4</span>
-<span class="normal"> 5</span>
-<span class="normal"> 6</span>
-<span class="normal"> 7</span>
-<span class="normal"> 8</span>
-<span class="normal"> 9</span>
-<span class="normal">10</span>
-<span class="normal">11</span>
-<span class="normal">12</span>
-<span class="normal">13</span>
-<span class="normal">14</span>
-<span class="normal">15</span>
-<span class="normal">16</span>
-<span class="normal">17</span>
-<span class="normal">18</span>
-<span class="normal">19</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>| feature   |   importance |
-|:----------|-------------:|
-| lag_1     |   0.0133541  |
-| lag_2     |   0.0611202  |
-| lag_3     |   0.00908617 |
-| lag_4     |   0.00272094 |
-| lag_5     |   0.00247847 |
-| lag_6     |   0.00315493 |
-| lag_7     |   0.00217887 |
-| lag_8     |   0.00815443 |
-| lag_9     |   0.0103189  |
-| lag_10    |   0.0205869  |
-| lag_11    |   0.00703555 |
-| lag_12    |   0.773389   |
-| lag_13    |   0.00458297 |
-| lag_14    |   0.0181272  |
-| lag_15    |   0.00873237 |
-| exog_1    |   0.0103638  |
-| exog_2    |   0.0446156  |
-</code></pre></div>
-</td></tr></table>
+<table>
+<thead>
+<tr>
+<th align="left">feature</th>
+<th align="right">importance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">lag_1</td>
+<td align="right">0.0133541</td>
+</tr>
+<tr>
+<td align="left">lag_2</td>
+<td align="right">0.0611202</td>
+</tr>
+<tr>
+<td align="left">lag_3</td>
+<td align="right">0.00908617</td>
+</tr>
+<tr>
+<td align="left">lag_4</td>
+<td align="right">0.00272094</td>
+</tr>
+<tr>
+<td align="left">lag_5</td>
+<td align="right">0.00247847</td>
+</tr>
+<tr>
+<td align="left">lag_6</td>
+<td align="right">0.00315493</td>
+</tr>
+<tr>
+<td align="left">lag_7</td>
+<td align="right">0.00217887</td>
+</tr>
+<tr>
+<td align="left">lag_8</td>
+<td align="right">0.00815443</td>
+</tr>
+<tr>
+<td align="left">lag_9</td>
+<td align="right">0.0103189</td>
+</tr>
+<tr>
+<td align="left">lag_10</td>
+<td align="right">0.0205869</td>
+</tr>
+<tr>
+<td align="left">lag_11</td>
+<td align="right">0.00703555</td>
+</tr>
+<tr>
+<td align="left">lag_12</td>
+<td align="right">0.773389</td>
+</tr>
+<tr>
+<td align="left">lag_13</td>
+<td align="right">0.00458297</td>
+</tr>
+<tr>
+<td align="left">lag_14</td>
+<td align="right">0.0181272</td>
+</tr>
+<tr>
+<td align="left">lag_15</td>
+<td align="right">0.00873237</td>
+</tr>
+<tr>
+<td align="left">exog_1</td>
+<td align="right">0.0103638</td>
+</tr>
+<tr>
+<td align="left">exog_2</td>
+<td align="right">0.0446156</td>
+</tr>
+</tbody>
+</table>
                 
               
               

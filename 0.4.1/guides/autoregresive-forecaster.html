@@ -1013,15 +1013,13 @@ Skforecast version: 0.4.1
 <span class="n">predictions</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
 </code></pre></div>
 </td></tr></table>
-<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
-<span class="normal">2</span>
-<span class="normal">3</span>
-<span class="normal">4</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>2005-07-01    0.921840
+<pre>
+2005-07-01    0.921840
 2005-08-01    0.954921
 2005-09-01    1.101716
 Freq: MS, Name: pred, dtype: float64
-</code></pre></div>
-</td></tr></table>
+</pre>
+
 <table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
 <span class="normal">2</span>
 <span class="normal">3</span>
@@ -1045,9 +1043,10 @@ Freq: MS, Name: pred, dtype: float64
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Test error (mse): </span><span class="si">{</span><span class="n">error_mse</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </code></pre></div>
 </td></tr></table>
-<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>Test error (mse): 0.00429855684785846
-</code></pre></div>
-</td></tr></table>
+<pre>
+Test error (mse): 0.00429855684785846
+</pre>
+
 <h2 id="feature-importance">Feature importance<a class="headerlink" href="#feature-importance" title="Permanent link">&para;</a></h2>
 <table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="n">forecaster</span><span class="o">.</span><span class="n">get_feature_importance</span><span class="p">()</span>
 </code></pre></div>
