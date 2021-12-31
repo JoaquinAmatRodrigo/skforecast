@@ -4,12 +4,12 @@ Since **Version 0.4.0** only pandas series and dataframes are allowed (although 
 
 + If index is not of type DatetimeIndex, a RangeIndex is created.
 
-+ If index is of type DatetimeIndex and but has no frequency, a RangeIndex is created.
++ If index is of type DatetimeIndex but has no frequency, a RangeIndex is created.
 
 + If index is of type DatetimeIndex and has frequency, nothing is changed.
 
 > **Note:**  
-> There is nothing wrong with using data that does not have an associated date/time index. However, if pandas series with an associated frequency is used, results will have a more useful index.
+> There is nothing wrong with using data that does not have an associated DatetimeIndex with frequency. However, results will have less informative index.
 
 
 
@@ -45,14 +45,13 @@ forecaster.fit(y=data['y'])
 forecaster.predict(steps=5)
 ```
 
-```
 2008-07-01    0.714526
 2008-08-01    0.789144
 2008-09-01    0.818433
 2008-10-01    0.845027
 2008-11-01    0.914621
 Freq: MS, Name: pred, dtype: float64
-```
+
 
 ## Train and predict using input without datetime index
 
@@ -62,6 +61,7 @@ data = data.reset_index(drop=True)
 data
 ```
 
+```
 |    |        y |
 |---:|---------:|
 |  0 | 0.429795 |
@@ -69,6 +69,7 @@ data
 |  2 | 0.432159 |
 |  3 | 0.492543 |
 |  4 | 0.502369 |
+```
 
 
 ``` python
