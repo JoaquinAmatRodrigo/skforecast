@@ -104,13 +104,13 @@ predictions = forecaster.predict(
 predictions.head(3)
 ```
 
-```
+<pre>
 datetime
 2005-07-01    0.908832
 2005-08-01    0.953925
 2005-09-01    1.100887
 Freq: MS, Name: pred, dtype: float64
-```
+</pre>
 
 ``` python
 # Plot predictions
@@ -134,9 +134,9 @@ error_mse = mean_squared_error(
 print(f"Test error (mse): {error_mse}")
 ```
 
-```
+<pre>
 Test error (mse): 0.004022228812838391
-```
+</pre>
 
 ## Feature importance
 
@@ -144,7 +144,6 @@ Test error (mse): 0.004022228812838391
 forecaster.get_feature_importance()
 ```
 
-```
 | feature   |   importance |
 |:----------|-------------:|
 | lag_1     |   0.0133541  |
@@ -164,4 +163,3 @@ forecaster.get_feature_importance()
 | lag_15    |   0.00873237 |
 | exog_1    |   0.0103638  |
 | exog_2    |   0.0446156  |
-```

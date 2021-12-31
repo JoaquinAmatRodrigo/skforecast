@@ -36,12 +36,12 @@ forecaster.fit(y=data['y'])
 forecaster.predict(steps=3)
 ```
 
-```
+<pre>
 2008-07-01    0.714526
 2008-08-01    0.789144
 2008-09-01    0.818433
 Freq: MS, Name: pred, dtype: float64
-```
+</pre>
 
 ``` python
 # Save model
@@ -54,10 +54,10 @@ forecaster_loaded = load('forecaster.py')
 forecaster_loaded.predict(steps=3)
 ```
 
-```
+<pre>
 2008-07-01    0.714526
 2008-08-01    0.789144
 2008-09-01    0.818433
 Freq: MS, Name: pred, dtype: float64
-```
+</pre>
 

@@ -2,7 +2,7 @@
 
 **Backtesting with refit**
 
-The model is trained each tieme before making the predictions, in this way, the model use all the information available so far. It is a variation of the standar cross-validation but, instead of making a random distribution of the observations, the training set is increased sequentially, maintaining the temporal order of the data.
+The model is trained each time before making the predictions, in this way, the model use all the information available so far. It is a variation of the standard cross-validation but, instead of making a random distribution of the observations, the training set is increased sequentially, maintaining the temporal order of the data.
 
 <img src="../img/diagram-backtesting-refit.png" style="width: 500px;">
 
@@ -19,8 +19,6 @@ After an initial train, the model is used sequentially without updating it and f
 ## Libraries
 
 ``` python
-# Libraries
-# ==============================================================================
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -83,7 +81,7 @@ metric, predictions_backtest = backtesting_forecaster(
                                )
 ```
 
-```
+<pre>
 Information of backtesting process
 ----------------------------------
 Number of observations used for initial training: 96
@@ -125,28 +123,26 @@ Data partition in fold: 9
 Data partition in fold: 10
     Training:   1991-07-01 00:00:00 -- 2007-10-01 00:00:00
     Validation: 2007-11-01 00:00:00 -- 2008-06-01 00:00:00
-```
+</pre>
 
 ``` python
 print(f"Error de backtest: {metric}")
 ```
 
-```
+<pre>
 Error de backtest: [0.00726621]
-```
+</pre>
 
 ``` python
 predictions_backtest.head(4)
 ```
 
-```
 |                     |     pred |
 |:--------------------|---------:|
 | 1999-07-01 00:00:00 | 0.712336 |
 | 1999-08-01 00:00:00 | 0.750542 |
 | 1999-09-01 00:00:00 | 0.802371 |
-| 1999-10-01 00:00:00 | 0.806941 |
-``` 
+| 1999-10-01 00:00:00 | 0.806941 | 
 
 ``` python
 # Plot backtest predictions
@@ -154,7 +150,7 @@ predictions_backtest.head(4)
 fig, ax = plt.subplots(figsize=(9, 4))
 data_test.plot(ax=ax, label='test')
 predictions_backtest.plot(ax=ax, label='predictions')
-ax.legend();
+ax.legend()
 ```
 
 <img src="../img/predictions_backtesting_forecaster.png" style="width: 500px;">
@@ -189,7 +185,7 @@ metric, predictions_backtest = backtesting_forecaster(
 
 ```
 
-```
+<pre>
 Information of backtesting process
 ----------------------------------
 Number of observations used for initial training: 96
@@ -231,7 +227,7 @@ Data partition in fold: 9
 Data partition in fold: 10
     Training:   1991-07-01 00:00:00 -- 2007-10-01 00:00:00
     Validation: 2007-11-01 00:00:00 -- 2008-06-01 00:00:00
-```
+</pre>
 
 ``` python
 # Plot backtest predictions

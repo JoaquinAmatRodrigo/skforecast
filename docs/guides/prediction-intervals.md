@@ -3,14 +3,11 @@
 ## Libraries
 
 ``` python
-# Libraries
-# ==============================================================================
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import mean_squared_error
 ```
 
 ## Data
@@ -94,14 +91,14 @@ predictions = forecaster.predict_interval(
 predictions.head(4)
 ```
 
-```
+
 |                     |     pred |   lower_bound |   upper_bound |
 |:--------------------|---------:|--------------:|--------------:|
 | 2005-07-01 00:00:00 | 0.899283 |      0.832109 |      0.977063 |
 | 2005-08-01 00:00:00 | 0.954796 |      0.881798 |      1.02203  |
 | 2005-09-01 00:00:00 | 1.06672  |      0.964466 |      1.13247  |
 | 2005-10-01 00:00:00 | 1.1022   |      1.01777  |      1.17421  |
-```
+
 
 ``` python
 # Plot predictions and interval

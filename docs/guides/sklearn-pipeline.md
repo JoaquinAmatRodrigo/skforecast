@@ -34,9 +34,9 @@ pipe = make_pipeline(StandardScaler(), Ridge())
 pipe
 ```
 
-```
+<pre>
 Pipeline(steps=[('standardscaler', StandardScaler()), ('ridge', Ridge())])
-```
+</pre>
 
 ## Create and train forecaster
 
