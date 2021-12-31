@@ -296,7 +296,6 @@ def _backtesting_forecaster_refit(
         - Fit forecaster with the training set.
         - A number of `steps` ahead are predicted.
         - The training set increases with `steps` observations.
-        - The model is re-fitted using the new training set.
 
     In order to apply backtesting with re-fit, an initial training set must be
     available, otherwise it would not be possible to increase the training set after each
@@ -311,9 +310,9 @@ def _backtesting_forecaster_refit(
         Training time series values. 
     
     initial_train_size: int
-        Number of samples in the initial train split. Even though forecaster
-        is already trained, a initial train is done using the first `initial_train_size`
-        observations.
+        Number of samples in the initial train split. The backtest forecaster is
+        trained using the first `initial_train_size` observations.
+        The object forecaster is not overwritten.
         
     steps : int
         Number of steps to predict.
@@ -517,8 +516,7 @@ def _backtesting_forecaster_no_refit(
     If `forecaster` is already trained and `initial_train_size` is `None`,
     no initial train is done and all data is used to evaluate the model.
     However, the first `len(forecaster.last_window)` observations are needed
-    to create the initial predictors, therefore, no predictions are
-    calculated for them.
+    to create the initial predictors, so no predictions are calculated for them.
     
     Parameters
     ----------
@@ -529,11 +527,11 @@ def _backtesting_forecaster_no_refit(
         Training time series values. 
     
     initial_train_size: int, default `None`
-        Number of samples in the initial train split. If `None` and `forecaster`
-        is already trained, no initial train is done and all data is used to
-        evaluate the model. However, the first `len(forecaster.last_window)`
-        observations are needed to create the initial predictors. Therefore,
-        no predictions are calculated for them.
+        Number of samples in the initial train split. The object forecaster 
+        is not overwritten. If `None` and `forecaster` is already trained, 
+        no initial train is done and all data is used to evaluate the model. However, 
+        the first `len(forecaster.last_window)` observations are needed to create the 
+        initial predictors, so no predictions are calculated for them.
         
     steps : int, None
         Number of steps to predict.
@@ -776,11 +774,11 @@ def backtesting_forecaster(
         Training time series values. 
     
     initial_train_size: int, default `None`
-        Number of samples in the initial train split. If `None` and `forecaster`
-        is already trained, no initial train is done and all data is used to
-        evaluate the model. However, the first `len(forecaster.last_window)`
-        observations are needed to create the initial predictors. Therefore,
-        no predictions are calculated for them.
+        Number of samples in the initial train split. The object forecaster 
+        is not overwritten. If `None` and `forecaster` is already trained, 
+        no initial train is done and all data is used to evaluate the model. However, 
+        the first `len(forecaster.last_window)` observations are needed to create the 
+        initial predictors, so no predictions are calculated for them.
 
         `None` is only allowed when `refit` is False.
         
