@@ -1,6 +1,6 @@
 # Predictions on training data
 
-In the **Skforecast** library, training predictions can be obtained either by using the `backtesting_forecaster()` function or by accessing the `predict()` method of the regressor stored inside the forecaster object."
+Predictions on training data can be obtained either by using the `backtesting_forecaster()` function or by accessing the `predict()` method of the regressor stored inside the forecaster object.
 
 
 
@@ -25,16 +25,13 @@ from sklearn.metrics import mean_squared_error
 # Download data
 # ==============================================================================
 url = ('https://raw.githubusercontent.com/JoaquinAmatRodrigo/skforecast/master/data/h2o.csv')
-data_raw = pd.read_csv(url, sep=',', header=0, names=['y', 'datetime'])
+data = pd.read_csv(url, sep=',', header=0, names=['y', 'datetime'])
 
 # Data preprocessing
 # ==============================================================================
-data = data_raw.copy()
 data['datetime'] = pd.to_datetime(data['datetime'], format='%Y/%m/%d')
 data = data.set_index('datetime')
 data = data.asfreq('MS')
-data = data['y']
-data = data.sort_index()
 print(data.head(4))
 ```
 
@@ -55,16 +52,11 @@ ax.legend();
 
 <img src="../img/data_full_serie.png" style="width: 500px;">
 
+<br>
 
-## Training predictions with backtesting_forecaster()
+## Backtesting forecaster on training data
 
-``` python
-# Split train-test
-# ==============================================================================
-n_backtest = 36*3  # Last 9 years are used for backtest
-data_train = data[:-n_backtest]
-data_test  = data[-n_backtest:]
-```
+First, the forecaster is trained.
 
 ``` python
 # Fit forecaster
@@ -74,20 +66,17 @@ forecaster = ForecasterAutoreg(
                 lags      = 15 
              )
 
-forecaster.fit(y=data_train)
+forecaster.fit(y=data['y'])
 ```
 
-**Backtesting_forecaster() parameters:**
-+ Forecaster already trained
-+ `initial_train_size = None` and `refit = False`
-+ If `steps = 1`, all predictions are t(+1). If `steps` > 1 the data will be predicted in folds
+It is possible to perform backtesting using an already trained forecaster without modifying it if arguments `initial_train_size = None` and `refit = False`. 
 
 ``` python
 # Backtest train data
 # ==============================================================================
 metric, predictions_train = backtesting_forecaster(
                                 forecaster = forecaster,
-                                y          = data_train,
+                                y          = data['y'],
                                 initial_train_size = None,
                                 steps      = 1,
                                 metric     = 'mean_squared_error',
@@ -95,10 +84,10 @@ metric, predictions_train = backtesting_forecaster(
                                 verbose    = False
                            )
 
-print(f"Backtest error: {metric}")
+print(f"Backtest training error: {metric}")
 ```
 
-Backtest error: [0.00045087]
+Backtest training error: [0.00045087]
 
 ``` python
 predictions_train.head(4)
@@ -111,26 +100,24 @@ predictions_train.head(4)
 | 1992-12-01 00:00:00 | 0.721389 |
 | 1993-01-01 00:00:00 | 0.750997 |
 
+<br>
+
+The first 15 observations are not predicted since they are needed to create the lags used as predictors.
+
 ``` python
 # Plot training predictions
 # ==============================================================================
-n_lags = max(forecaster.lags)
-
-print(f"The first {n_lags} observations are not predicted because "\
-      "it is not possible to create the lags matrix")
-
 fig, ax = plt.subplots(figsize=(9, 4))
-data_train.plot(ax=ax, label='train')
-predictions_train.plot(ax=ax, label='predictions')
+data.plot(ax=ax)
+predictions_train.plot(ax=ax)
 ax.legend();
 ```
 
-The first 15 observations are not predicted because it is not possible to create the lags matrix
-
 <img src="../img/training_predictions_backtesting_forecaster.png" style="width: 500px;">
 
+<br>
 
-## Training predictions through the regressor
+## Predict using the internal regressor
 
 ``` python
 # Fit forecaster
@@ -140,22 +127,23 @@ forecaster = ForecasterAutoreg(
                 lags      = 15 
              )
 
-forecaster.fit(y=data_train)
+forecaster.fit(y=data['y')
 ```
 
 ``` python
-# Create lags matrix
+# Create training matrix
 # ==============================================================================
 X, y = forecaster.create_train_X_y(
-            y = data_train, 
+            y = data['y'], 
             exog = None
        )
 ```
 
+Using the internal regressor only allows predicting one step.
+
 ``` python
-# Predict through the regressor
+# Predict using the internal regressor
 # ==============================================================================
 forecaster.regressor.predict(X)[:4]
 ```
-
 array([0.55313393, 0.56776596, 0.72138941, 0.75099737])

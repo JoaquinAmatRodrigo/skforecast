@@ -289,18 +289,22 @@ def _backtesting_forecaster_refit(
     interval: Optional[list]=None,
     n_boot: int=500,
     in_sample_residuals: bool=True,
-    verbose: bool=False
+    verbose: bool=False,
+    set_out_sample_residuals: str='deprecated'
 ) -> Tuple[np.array, pd.DataFrame]:
     '''
-    Backtesting of forecaster with model re-fitting. In each iteration:
+    Backtesting of forecaster model with a re-fitting strategy. A copy of the  
+    original forecaster is created so it is not modified during the process.
+    
+    In each iteration:
         - Fit forecaster with the training set.
         - A number of `steps` ahead are predicted.
         - The training set increases with `steps` observations.
         - The model is re-fitted using the new training set.
 
     In order to apply backtesting with re-fit, an initial training set must be
-    available, otherwise it would not be possible to increase the training set after each
-    iteration. `initial_train_size` must be provided.
+    available, otherwise it would not be possible to increase the training set 
+    after each iteration. `initial_train_size` must be provided.
     
     Parameters
     ----------
@@ -311,9 +315,8 @@ def _backtesting_forecaster_refit(
         Training time series values. 
     
     initial_train_size: int
-        Number of samples in the initial train split. Even though forecaster
-        is already trained, a initial train is done using the first `initial_train_size`
-        observations.
+        Number of samples in the initial train split. The backtest forecaster is
+        trained using the first `initial_train_size` observations.
         
     steps : int
         Number of steps to predict.
@@ -340,6 +343,9 @@ def _backtesting_forecaster_refit(
         If `True`, residuals from the training data are used as proxy of
         prediction error to create prediction intervals. If `False`, out_sample_residuals
         are used if they are already stored inside the forecaster.
+
+    set_out_sample_residuals: 'deprecated'
+        Deprecated since version 0.4.2, will be removed on version 0.5.0.
             
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used for backtesting.
@@ -508,17 +514,18 @@ def _backtesting_forecaster_no_refit(
     interval: Optional[list]=None,
     n_boot: int=500,
     in_sample_residuals: bool=True,
-    verbose: bool=False
+    verbose: bool=False,
+    set_out_sample_residuals: str='deprecated'
 ) -> Tuple[np.array, pd.DataFrame]:
     '''
     Backtesting of forecaster without iterative re-fitting. In each iteration,
-    a number of `steps` are predicted.
+    a number of `steps` are predicted. A copy of the  original forecaster is
+    created so it is not modified during the process.
 
     If `forecaster` is already trained and `initial_train_size` is `None`,
     no initial train is done and all data is used to evaluate the model.
     However, the first `len(forecaster.last_window)` observations are needed
-    to create the initial predictors, therefore, no predictions are
-    calculated for them.
+    to create the initial predictors, so no predictions are calculated for them.
     
     Parameters
     ----------
@@ -529,11 +536,10 @@ def _backtesting_forecaster_no_refit(
         Training time series values. 
     
     initial_train_size: int, default `None`
-        Number of samples in the initial train split. If `None` and `forecaster`
-        is already trained, no initial train is done and all data is used to
-        evaluate the model. However, the first `len(forecaster.last_window)`
-        observations are needed to create the initial predictors. Therefore,
-        no predictions are calculated for them.
+        Number of samples in the initial train split. If `None` and `forecaster` is already
+        trained, no initial train is done and all data is used to evaluate the model. However, 
+        the first `len(forecaster.last_window)` observations are needed to create the 
+        initial predictors, so no predictions are calculated for them.
         
     steps : int, None
         Number of steps to predict.
@@ -560,6 +566,9 @@ def _backtesting_forecaster_no_refit(
         If `True`, residuals from the training data are used as proxy of
         prediction error to create prediction intervals.  If `False`, out_sample_residuals
         are used if they are already stored inside the forecaster.
+
+    set_out_sample_residuals: 'deprecated'
+        Deprecated since version 0.4.2, will be removed on version 0.5.0.
             
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used for backtesting.
@@ -758,14 +767,16 @@ def backtesting_forecaster(
     interval: Optional[list]=None,
     n_boot: int=500,
     in_sample_residuals: bool=True,
-    verbose: bool=False
+    verbose: bool=False,
+    set_out_sample_residuals: str='deprecated'
 ) -> Tuple[np.array, pd.DataFrame]:
     '''
     Backtesting of forecaster model.
 
     If `refit` is False, the model is trained only once using the `initial_train_size`
     first observations. If `refit` is True, the model is trained in each iteration
-    increasing the training set.
+    increasing the training set. A copy of the original forecaster is created so 
+    it is not modified during the process.
 
     Parameters
     ----------
@@ -776,11 +787,10 @@ def backtesting_forecaster(
         Training time series values. 
     
     initial_train_size: int, default `None`
-        Number of samples in the initial train split. If `None` and `forecaster`
-        is already trained, no initial train is done and all data is used to
-        evaluate the model. However, the first `len(forecaster.last_window)`
-        observations are needed to create the initial predictors. Therefore,
-        no predictions are calculated for them.
+        Number of samples in the initial train split. If `None` and `forecaster` is already 
+        trained, no initial train is done and all data is used to evaluate the model. However, 
+        the first `len(forecaster.last_window)` observations are needed to create the 
+        initial predictors, so no predictions are calculated for them.
 
         `None` is only allowed when `refit` is False.
         
@@ -812,6 +822,9 @@ def backtesting_forecaster(
         If `True`, residuals from the training data are used as proxy of
         prediction error to create prediction intervals.  If `False`, out_sample_residuals
         are used if they are already stored inside the forecaster.
+
+    set_out_sample_residuals: 'deprecated'
+        Deprecated since version 0.4.2, will be removed on version 0.5.0.
                   
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used for backtesting.
