@@ -61,7 +61,7 @@ forecaster
 ================= 
 ForecasterAutoreg 
 ================= 
-Regressor: RandomForestRegressor(random_state=123)
+Regressor: RandomForestRegressor(random_state=123) 
 Lags: [ 1  2  3  4  5  6  7  8  9 10 11 12 13 14 15] 
 Window size: 15 
 Included exogenous: False 
@@ -70,10 +70,10 @@ Exogenous variables names: None
 Training range: [Timestamp('1991-07-01 00:00:00'), Timestamp('2005-06-01 00:00:00')] 
 Training index type: DatetimeIndex 
 Training index frequency: MS 
-Regressor parameters: {'bootstrap': True, 'ccp_alpha': 0.0, 'criterion': 'squared_error', 'max_depth': None, 'max_features': 'auto', 'max_leaf_nodes': None, 'max_samples': None, 'min_impurity_decrease': 0.0, 'min_samples_leaf': 1, 'min_samples_split': 2, 'min_weight_fraction_leaf': 0.0, 'n_estimators': 100, 'n_jobs': None, 'oob_score': False, 'random_state': None, 'verbose': 0, 'warm_start': False} 
-Creation date: 2021-12-06 23:22:17 
-Last fit date: 2021-12-06 23:22:17 
-Skforecast version: 0.4.1
+Regressor parameters: {'bootstrap': True, 'ccp_alpha': 0.0, 'criterion': 'squared_error', 'max_depth': None, 'max_features': 'auto', 'max_leaf_nodes': None, 'max_samples': None, 'min_impurity_decrease': 0.0, 'min_samples_leaf': 1, 'min_samples_split': 2, 'min_weight_fraction_leaf': 0.0, 'n_estimators': 100, 'n_jobs': None, 'oob_score': False, 'random_state': 123, 'verbose': 0, 'warm_start': False} 
+Creation date: 2022-01-02 16:14:39 
+Last fit date: 2022-01-02 16:14:39 
+Skforecast version: 0.4.2 
 ```
 
 ## Prediction 
@@ -135,27 +135,3 @@ forecaster.get_feature_importance()
 | lag_13    |   0.00481128 |
 | lag_14    |   0.0163282  |
 | lag_15    |   0.0099792  |
-
-## Extract training matrix
-
-``` python
-X, y = forecaster.create_train_X_y(data_train)
-print(X)
-print(y)
-```
-
-| datetime            |    lag_1 |    lag_2 |    lag_3 |    lag_4 |    lag_5 |    lag_6 |    lag_7 |    lag_8 |    lag_9 |   lag_10 |   lag_11 |   lag_12 |   lag_13 |   lag_14 |   lag_15 |
-|:--------------------|---------:|---------:|---------:|---------:|---------:|---------:|---------:|---------:|---------:|---------:|---------:|---------:|---------:|---------:|---------:|
-| 1992-10-01 00:00:00 | 0.534761 | 0.475463 | 0.483389 | 0.410534 | 0.361801 | 0.379808 | 0.351348 | 0.33622  | 0.660119 | 0.602652 | 0.502369 | 0.492543 | 0.432159 | 0.400906 | 0.429795 |
-| 1992-11-01 00:00:00 | 0.568606 | 0.534761 | 0.475463 | 0.483389 | 0.410534 | 0.361801 | 0.379808 | 0.351348 | 0.33622  | 0.660119 | 0.602652 | 0.502369 | 0.492543 | 0.432159 | 0.400906 |
-| 1992-12-01 00:00:00 | 0.595223 | 0.568606 | 0.534761 | 0.475463 | 0.483389 | 0.410534 | 0.361801 | 0.379808 | 0.351348 | 0.33622  | 0.660119 | 0.602652 | 0.502369 | 0.492543 | 0.432159 |
-| 1993-01-01 00:00:00 | 0.771258 | 0.595223 | 0.568606 | 0.534761 | 0.475463 | 0.483389 | 0.410534 | 0.361801 | 0.379808 | 0.351348 | 0.33622  | 0.660119 | 0.602652 | 0.502369 | 0.492543 |
-| 1993-02-01 00:00:00 | 0.751503 | 0.771258 | 0.595223 | 0.568606 | 0.534761 | 0.475463 | 0.483389 | 0.410534 | 0.361801 | 0.379808 | 0.351348 | 0.33622  | 0.660119 | 0.602652 | 0.502369 |
-
-| datetime            |        y |
-|:--------------------|---------:|
-| 1992-10-01 00:00:00 | 0.568606 |
-| 1992-11-01 00:00:00 | 0.595223 |
-| 1992-12-01 00:00:00 | 0.771258 |
-| 1993-01-01 00:00:00 | 0.751503 |
-| 1993-02-01 00:00:00 | 0.387554 |

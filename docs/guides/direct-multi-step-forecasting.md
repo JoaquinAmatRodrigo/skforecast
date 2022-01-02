@@ -58,10 +58,10 @@ ax.legend();
 # Create and fit forecaster
 # ==============================================================================
 forecaster = ForecasterAutoregMultiOutput(
-                    regressor = make_pipeline(StandardScaler(), Ridge()),
+                    regressor = Ridge(),
                     steps     = 36,
                     lags      = 15
-             )
+                )
 
 forecaster.fit(y=data_train)
 forecaster
@@ -71,7 +71,7 @@ forecaster
 ============================ 
 ForecasterAutoregMultiOutput 
 ============================ 
-Regressor: Pipeline(steps=[('standardscaler', StandardScaler()), ('ridge', Ridge())]) 
+Regressor: Ridge() 
 Lags: [ 1  2  3  4  5  6  7  8  9 10 11 12 13 14 15] 
 Window size: 15 
 Maximum steps predicted: 36 
@@ -81,10 +81,10 @@ Exogenous variables names: None
 Training range: [Timestamp('1991-07-01 00:00:00'), Timestamp('2005-06-01 00:00:00')] 
 Training index type: DatetimeIndex 
 Training index frequency: MS 
-Regressor parameters: {'standardscaler__copy': True, 'standardscaler__with_mean': True, 'standardscaler__with_std': True, 'ridge__alpha': 1.0, 'ridge__copy_X': True, 'ridge__fit_intercept': True, 'ridge__max_iter': None, 'ridge__normalize': 'deprecated', 'ridge__positive': False, 'ridge__random_state': None, 'ridge__solver': 'auto', 'ridge__tol': 0.001} 
-Creation date: 2021-12-07 21:30:45 
-Last fit date: 2021-12-07 21:30:45 
-Skforecast version: 0.4.0 
+Regressor parameters: {'alpha': 1.0, 'copy_X': True, 'fit_intercept': True, 'max_iter': None, 'normalize': 'deprecated', 'positive': False, 'random_state': None, 'solver': 'auto', 'tol': 0.001} 
+Creation date: 2022-01-02 16:26:58 
+Last fit date: 2022-01-02 16:26:58 
+Skforecast version: 0.4.2 
 
 ```
 
@@ -101,9 +101,9 @@ predictions.head(3)
 ```
 
 <pre>
-2005-07-01    0.965991
-2005-08-01    0.973200
-2005-09-01    1.144204
+2005-07-01    0.952051
+2005-08-01    1.004145
+2005-09-01    1.114590
 Freq: MS, Name: pred, dtype: float64
 </pre>
 
@@ -130,7 +130,7 @@ print(f"Test error (mse): {error_mse}")
 ```
 
 <pre>
-Test error (mse): 0.009067941608532212
+Test error (mse): 0.008419597278831953
 </pre>
 
 ## Feature importance
@@ -141,23 +141,23 @@ Since `ForecasterAutoregMultiOutput` fits one model per step,it is necessary to 
 forecaster.get_coef(step=1)
 ```
 
-| feature   |         coef |
-|:----------|-------------:|
-| lag_1     |  0.0306858   |
-| lag_2     |  0.0407212   |
-| lag_3     |  0.0345991   |
-| lag_4     | -0.0018438   |
-| lag_5     | -0.00110815  |
-| lag_6     |  0.000759624 |
-| lag_7     | -0.00282664  |
-| lag_8     |  0.00109809  |
-| lag_9     | -0.0046271   |
-| lag_10    |  0.00610878  |
-| lag_11    |  0.0054867   |
-| lag_12    |  0.159351    |
-| lag_13    | -0.0260086   |
-| lag_14    | -0.0460312   |
-| lag_15    | -0.0358484   |
+| feature   |       coef |
+|:----------|-----------:|
+| lag_1     |  0.139299  |
+| lag_2     |  0.0510889 |
+| lag_3     |  0.0441923 |
+| lag_4     | -0.0198684 |
+| lag_5     | -0.0179349 |
+| lag_6     | -0.0132333 |
+| lag_7     | -0.0210635 |
+| lag_8     | -0.0125908 |
+| lag_9     |  0.0119178 |
+| lag_10    |  0.0205112 |
+| lag_11    |  0.15403   |
+| lag_12    |  0.551652  |
+| lag_13    |  0.0575131 |
+| lag_14    | -0.0710707 |
+| lag_15    | -0.0352375 |
 
 ## Extract training matrix
 

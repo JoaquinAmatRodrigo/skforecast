@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.linear_model import Ridge
 ```
 
 ## Data
@@ -50,10 +50,9 @@ ax.legend()
 # Create and fit forecaster
 # ==============================================================================
 forecaster = ForecasterAutoreg(
-                regressor = RandomForestRegressor(random_state=123),
+                regressor = Ridge(),
                 lags      = 15
              )
-
 forecaster.fit(y=data_train)
 forecaster
 ```
@@ -62,7 +61,7 @@ forecaster
 ================= 
 ForecasterAutoreg 
 ================= 
-Regressor: RandomForestRegressor(random_state=123) 
+Regressor: Ridge() 
 Lags: [ 1  2  3  4  5  6  7  8  9 10 11 12 13 14 15] 
 Window size: 15 
 Included exogenous: False 
@@ -71,10 +70,10 @@ Exogenous variables names: None
 Training range: [Timestamp('1991-07-01 00:00:00'), Timestamp('2005-06-01 00:00:00')] 
 Training index type: DatetimeIndex 
 Training index frequency: MS 
-Regressor parameters: {'bootstrap': True, 'ccp_alpha': 0.0, 'criterion': 'squared_error', 'max_depth': None, 'max_features': 'auto', 'max_leaf_nodes': None, 'max_samples': None, 'min_impurity_decrease': 0.0, 'min_samples_leaf': 1, 'min_samples_split': 2, 'min_weight_fraction_leaf': 0.0, 'n_estimators': 100, 'n_jobs': None, 'oob_score': False, 'random_state': 123, 'verbose': 0, 'warm_start': False} 
-Creation date: 2021-12-08 00:27:29 
-Last fit date: 2021-12-08 00:27:29 
-Skforecast version: 0.4.0 
+Regressor parameters: {'alpha': 1.0, 'copy_X': True, 'fit_intercept': True, 'max_iter': None, 'normalize': 'deprecated', 'positive': False, 'random_state': None, 'solver': 'auto', 'tol': 0.001} 
+Creation date: 2022-01-02 16:46:14 
+Last fit date: 2022-01-02 16:46:14 
+Skforecast version: 0.4.2 
 ```
 
 ## Prediction intervals
@@ -94,10 +93,10 @@ predictions.head(4)
 
 |                     |     pred |   lower_bound |   upper_bound |
 |:--------------------|---------:|--------------:|--------------:|
-| 2005-07-01 00:00:00 | 0.899283 |      0.832109 |      0.977063 |
-| 2005-08-01 00:00:00 | 0.954796 |      0.881798 |      1.02203  |
-| 2005-09-01 00:00:00 | 1.06672  |      0.964466 |      1.13247  |
-| 2005-10-01 00:00:00 | 1.1022   |      1.01777  |      1.17421  |
+| 2005-07-01 00:00:00 | 0.973131 |      0.876141 |       1.06889 |
+| 2005-08-01 00:00:00 | 1.02215  |      0.926207 |       1.13022 |
+| 2005-09-01 00:00:00 | 1.15133  |      1.05097  |       1.26154 |
+| 2005-10-01 00:00:00 | 1.2064   |      1.10905  |       1.30338 |
 
 
 ``` python

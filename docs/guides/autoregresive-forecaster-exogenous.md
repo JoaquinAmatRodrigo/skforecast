@@ -10,8 +10,6 @@ When using exogenous variables in recursive multi-step forecasting, their values
 ## Libraries
 
 ``` python
-# Libraries
-# ==============================================================================
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -83,9 +81,9 @@ Training range: [Timestamp('1992-04-01 00:00:00'), Timestamp('2005-06-01 00:00:0
 Training index type: DatetimeIndex 
 Training index frequency: MS 
 Regressor parameters: {'bootstrap': True, 'ccp_alpha': 0.0, 'criterion': 'squared_error', 'max_depth': None, 'max_features': 'auto', 'max_leaf_nodes': None, 'max_samples': None, 'min_impurity_decrease': 0.0, 'min_samples_leaf': 1, 'min_samples_split': 2, 'min_weight_fraction_leaf': 0.0, 'n_estimators': 100, 'n_jobs': None, 'oob_score': False, 'random_state': 123, 'verbose': 0, 'warm_start': False} 
-Creation date: 2021-12-07 21:15:22 
-Last fit date: 2021-12-07 21:15:22 
-Skforecast version: 0.4.0 
+Creation date: 2022-01-02 16:24:18 
+Last fit date: 2022-01-02 16:24:18 
+Skforecast version: 0.4.2
 ```
 
 ## Prediction
