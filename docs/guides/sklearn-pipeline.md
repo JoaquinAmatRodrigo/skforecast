@@ -66,9 +66,9 @@ Training range: [Timestamp('1992-04-01 00:00:00'), Timestamp('2008-06-01 00:00:0
 Training index type: DatetimeIndex 
 Training index frequency: MS 
 Regressor parameters: {'standardscaler__copy': True, 'standardscaler__with_mean': True, 'standardscaler__with_std': True, 'ridge__alpha': 1.0, 'ridge__copy_X': True, 'ridge__fit_intercept': True, 'ridge__max_iter': None, 'ridge__normalize': 'deprecated', 'ridge__positive': False, 'ridge__random_state': None, 'ridge__solver': 'auto', 'ridge__tol': 0.001} 
-Creation date: 2021-12-30 17:30:04 
-Last fit date: 2021-12-30 17:30:04 
-Skforecast version: 0.4.1
+Creation date: 2022-01-02 16:47:46 
+Last fit date: 2022-01-02 16:47:46 
+Skforecast version: 0.4.2 
 ```
 
 ## Grid Search
@@ -101,6 +101,36 @@ results_grid = grid_search_forecaster(
                         return_best = True,
                         verbose     = False
                   )
+```
+
+```
+Number of models compared: 30
+loop lags_grid:   0%|                                               | 0/3 [00:00<?, ?it/s]
+loop param_grid:   0%|                                             | 0/10 [00:00<?, ?it/s]
+loop param_grid:  10%|███▋                                 | 1/10 [00:00<00:01,  7.71it/s]
+loop param_grid:  30%|███████████                          | 3/10 [00:00<00:00, 10.74it/s]
+loop param_grid:  50%|██████████████████▌                  | 5/10 [00:00<00:00, 12.45it/s]
+loop param_grid:  70%|█████████████████████████▉           | 7/10 [00:00<00:00, 13.30it/s]
+loop param_grid:  90%|█████████████████████████████████▎   | 9/10 [00:00<00:00, 12.91it/s]
+loop lags_grid:  33%|█████████████                          | 1/3 [00:00<00:01,  1.17it/s]
+loop param_grid:   0%|                                             | 0/10 [00:00<?, ?it/s]
+loop param_grid:  20%|███████▍                             | 2/10 [00:00<00:00, 11.57it/s]
+loop param_grid:  40%|██████████████▊                      | 4/10 [00:00<00:00, 10.51it/s]
+loop param_grid:  60%|██████████████████████▏              | 6/10 [00:00<00:00, 11.47it/s]
+loop param_grid:  80%|█████████████████████████████▌       | 8/10 [00:00<00:00, 12.24it/s]
+loop param_grid: 100%|████████████████████████████████████| 10/10 [00:00<00:00, 11.99it/s]
+loop lags_grid:  67%|██████████████████████████             | 2/3 [00:01<00:00,  1.17it/s]
+loop param_grid:   0%|                                             | 0/10 [00:00<?, ?it/s]
+loop param_grid:  20%|███████▍                             | 2/10 [00:00<00:00, 13.18it/s]
+loop param_grid:  40%|██████████████▊                      | 4/10 [00:00<00:00, 11.01it/s]
+loop param_grid:  60%|██████████████████████▏              | 6/10 [00:00<00:00, 11.97it/s]
+loop param_grid:  80%|█████████████████████████████▌       | 8/10 [00:00<00:00, 12.65it/s]
+loop param_grid: 100%|████████████████████████████████████| 10/10 [00:00<00:00, 11.66it/s]
+loop lags_grid: 100%|███████████████████████████████████████| 3/3 [00:02<00:00,  1.17it/s]
+Refitting `forecaster` using the best found lags and parameters and the whole data set: 
+  Lags: [1 2 3 4 5] 
+  Parameters: {'ridge__alpha': 0.001}
+  Backtesting metric: 6.845311709573567e-05
 ```
 
 |    | lags                                                                      | params                                 |      metric |    ridge__alpha |

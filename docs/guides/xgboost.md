@@ -65,9 +65,9 @@ Training range: [Timestamp('1992-04-01 00:00:00'), Timestamp('2008-06-01 00:00:0
 Training index type: DatetimeIndex 
 Training index frequency: MS 
 Regressor parameters: {'objective': 'reg:squarederror', 'base_score': 0.5, 'booster': 'gbtree', 'colsample_bylevel': 1, 'colsample_bynode': 1, 'colsample_bytree': 1, 'gamma': 0, 'gpu_id': -1, 'importance_type': 'gain', 'interaction_constraints': '', 'learning_rate': 0.300000012, 'max_delta_step': 0, 'max_depth': 6, 'min_child_weight': 1, 'missing': nan, 'monotone_constraints': '()', 'n_estimators': 100, 'n_jobs': 8, 'num_parallel_tree': 1, 'random_state': 0, 'reg_alpha': 0, 'reg_lambda': 1, 'scale_pos_weight': 1, 'subsample': 1, 'tree_method': 'exact', 'validate_parameters': 1, 'verbosity': None} 
-Creation date: 2021-12-30 17:24:05 
-Last fit date: 2021-12-30 17:24:05 
-Skforecast version: 0.4.1
+Creation date: 2022-01-02 16:49:14 
+Last fit date: 2022-01-02 16:49:14 
+Skforecast version: 0.4.2 
 ```
 
 ## Prediction 

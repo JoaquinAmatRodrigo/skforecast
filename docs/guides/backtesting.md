@@ -22,10 +22,9 @@ After an initial train, the model is used sequentially without updating it and f
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
 from skforecast.model_selection import backtesting_forecaster
-from sklearn.linear_model import Ridge
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error
 ```
 
@@ -35,36 +34,25 @@ from sklearn.metrics import mean_squared_error
 # Download data
 # ==============================================================================
 url = ('https://raw.githubusercontent.com/JoaquinAmatRodrigo/skforecast/master/data/h2o.csv')
-data = pd.read_csv(url, sep=',')
+data = pd.read_csv(url, sep=',', header=0, names=['y', 'datetime'])
 
 # Data preprocessing
 # ==============================================================================
-data['fecha'] = pd.to_datetime(data['fecha'], format='%Y/%m/%d')
-data = data.set_index('fecha')
-data = data.rename(columns={'x': 'y'})
+data['datetime'] = pd.to_datetime(data['datetime'], format='%Y/%m/%d')
+data = data.set_index('datetime')
 data = data.asfreq('MS')
 data = data['y']
 data = data.sort_index()
 
-# Plot
-# ==============================================================================
-fig, ax=plt.subplots(figsize=(9, 4))
-data.plot(ax=ax)
-ax.legend()
-```
-
-<img src="../img/data_full_serie.png" style="width: 500px;">
-
-
-## Backtest
-
-``` python
-# Backtest forecaster
+# Split data in train snd backtest
 # ==============================================================================
 n_backtest = 36*3  # Last 9 years are used for backtest
 data_train = data[:-n_backtest]
-data_test  = data[-n_backtest:]
+data_backtest = data[-n_backtest:]
+```
+## Backtest
 
+``` python
 forecaster = ForecasterAutoreg(
                 regressor = RandomForestRegressor(random_state=123),
                 lags      = 15 
@@ -148,9 +136,9 @@ predictions_backtest.head(4)
 # Plot backtest predictions
 # ==============================================================================
 fig, ax = plt.subplots(figsize=(9, 4))
-data_test.plot(ax=ax, label='test')
-predictions_backtest.plot(ax=ax, label='predictions')
-ax.legend()
+data_backtest.plot(ax=ax)
+predictions_backtest.plot(ax=ax)
+ax.legend();
 ```
 
 <img src="../img/predictions_backtesting_forecaster.png" style="width: 500px;">
@@ -160,12 +148,6 @@ ax.legend()
 ## Backtest with prediction intervals
 
 ``` python
-# Backtest forecaster
-# ==============================================================================
-n_backtest = 36*3
-data_train = data[:-n_backtest]
-data_test  = data[-n_backtest:]
-
 forecaster = ForecasterAutoreg(
                 regressor = Ridge(),
                 lags      = 15 
@@ -233,7 +215,7 @@ Data partition in fold: 10
 # Plot backtest predictions
 # ==============================================================================
 fig, ax=plt.subplots(figsize=(9, 4))
-data_test.plot(ax=ax, label='test')
+data_backtest.plot(ax=ax, label='test')
 predictions_backtest.iloc[:, 0].plot(ax=ax, label='predictions')
 ax.fill_between(
     predictions_backtest.index,

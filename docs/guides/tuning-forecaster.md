@@ -68,6 +68,38 @@ results_grid = grid_search_forecaster(
                     )
 ```
 
+```
+Number of models compared: 18
+loop lags_grid:   0%|                                               | 0/3 [00:00<?, ?it/s]
+loop param_grid:   0%|                                              | 0/6 [00:00<?, ?it/s]
+loop param_grid:  17%|██████▎                               | 1/6 [00:00<00:02,  2.01it/s]
+loop param_grid:  33%|████████████▋                         | 2/6 [00:01<00:03,  1.13it/s]
+loop param_grid:  50%|███████████████████                   | 3/6 [00:02<00:02,  1.40it/s]
+loop param_grid:  67%|█████████████████████████▎            | 4/6 [00:03<00:01,  1.20it/s]
+loop param_grid:  83%|███████████████████████████████▋      | 5/6 [00:03<00:00,  1.42it/s]
+loop param_grid: 100%|██████████████████████████████████████| 6/6 [00:04<00:00,  1.12it/s]
+loop lags_grid:  33%|█████████████                          | 1/3 [00:04<00:09,  4.93s/it]
+loop param_grid:   0%|                                              | 0/6 [00:00<?, ?it/s]
+loop param_grid:  17%|██████▎                               | 1/6 [00:00<00:03,  1.43it/s]
+loop param_grid:  33%|████████████▋                         | 2/6 [00:01<00:04,  1.02s/it]
+loop param_grid:  50%|███████████████████                   | 3/6 [00:02<00:02,  1.24it/s]
+loop param_grid:  67%|█████████████████████████▎            | 4/6 [00:03<00:01,  1.14it/s]
+loop param_grid:  83%|███████████████████████████████▋      | 5/6 [00:04<00:00,  1.33it/s]
+loop param_grid: 100%|██████████████████████████████████████| 6/6 [00:05<00:00,  1.20it/s]
+loop lags_grid:  67%|██████████████████████████             | 2/3 [00:09<00:04,  4.98s/it]
+loop param_grid:   0%|                                              | 0/6 [00:00<?, ?it/s]
+loop param_grid:  17%|██████▎                               | 1/6 [00:00<00:02,  2.08it/s]
+loop param_grid:  33%|████████████▋                         | 2/6 [00:01<00:03,  1.33it/s]
+loop param_grid:  50%|███████████████████                   | 3/6 [00:02<00:02,  1.25it/s]
+loop param_grid:  67%|█████████████████████████▎            | 4/6 [00:03<00:01,  1.01it/s]
+loop param_grid:  83%|███████████████████████████████▋      | 5/6 [00:04<00:00,  1.22it/s]
+loop param_grid: 100%|██████████████████████████████████████| 6/6 [00:04<00:00,  1.17it/s]
+loop lags_grid: 100%|███████████████████████████████████████| 3/3 [00:14<00:00,  4.98s/it]
+Refitting `forecaster` using the best found lags and parameters and the whole data set: 
+  Lags: [ 1  2  3  4  5  6  7  8  9 10] 
+  Parameters: {'max_depth': 5, 'n_estimators': 50}
+  Backtesting metric: 0.03344857370906804
+```
 
 ``` python
 results_grid
@@ -101,9 +133,9 @@ skforecast
 ```
 
 ```
-========================================================================== 
-<class 'skforecast.ForecasterAutoreg.ForecasterAutoreg.ForecasterAutoreg'> 
-========================================================================== 
+================= 
+ForecasterAutoreg 
+================= 
 Regressor: RandomForestRegressor(max_depth=5, n_estimators=50, random_state=123) 
 Lags: [ 1  2  3  4  5  6  7  8  9 10] 
 Window size: 10 
@@ -111,7 +143,10 @@ Included exogenous: False
 Type of exogenous variable: None 
 Exogenous variables names: None 
 Training range: [Timestamp('1991-07-01 00:00:00'), Timestamp('2006-01-01 00:00:00')] 
-Training index type: <class 'pandas.core.indexes.datetimes.DatetimeIndex'> 
-Training index frequancy: MS 
+Training index type: DatetimeIndex 
+Training index frequency: MS 
 Regressor parameters: {'bootstrap': True, 'ccp_alpha': 0.0, 'criterion': 'squared_error', 'max_depth': 5, 'max_features': 'auto', 'max_leaf_nodes': None, 'max_samples': None, 'min_impurity_decrease': 0.0, 'min_samples_leaf': 1, 'min_samples_split': 2, 'min_weight_fraction_leaf': 0.0, 'n_estimators': 50, 'n_jobs': None, 'oob_score': False, 'random_state': 123, 'verbose': 0, 'warm_start': False} 
+Creation date: 2022-01-02 16:40:40 
+Last fit date: 2022-01-02 16:40:55 
+Skforecast version: 0.4.2
 ```

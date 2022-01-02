@@ -1,7 +1,7 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-## [0.4.2] - [Unreleased]
+## [0.4.2] - [2022-01-02]
 
 ### Added
 
