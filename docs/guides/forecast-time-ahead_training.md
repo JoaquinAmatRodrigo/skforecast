@@ -25,6 +25,16 @@ data = data.asfreq('MS')
 data_train = data.loc[:'2005-01-01']
 data_train.tail()
 ```
+
+| date                |       y |
+|:--------------------|--------:|
+| 2004-09-01 00:00:00 | 1.13443 |
+| 2004-10-01 00:00:00 | 1.18101 |
+| 2004-11-01 00:00:00 | 1.21604 |
+| 2004-12-01 00:00:00 | 1.25724 |
+| 2005-01-01 00:00:00 | 1.17069 |
+
+
 ## Predict
 
 By default, when using `predict` method on a trained forecaster object, predictions starts right after the last training observation.
