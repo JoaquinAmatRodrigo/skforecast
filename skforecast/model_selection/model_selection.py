@@ -875,7 +875,7 @@ def backtesting_forecaster(
         )
 
     if set_out_sample_residuals is not 'deprecated':
-        raise Exception(
+        warnings.warn(
             ('`set_out_sample_residuals` is deprecated since version 0.4.2, '
             'will be removed on version 0.5.0.')
         )    
