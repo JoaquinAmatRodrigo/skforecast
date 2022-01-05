@@ -873,6 +873,12 @@ def backtesting_forecaster(
             ('Interval prediction is only available when forecaster is of type '
             'ForecasterAutoreg or ForecasterAutoregCustom.')
         )
+
+    if set_out_sample_residuals is not 'deprecated':
+        warnings.warn(
+            ('`set_out_sample_residuals` is deprecated since version 0.4.2, '
+            'will be removed on version 0.5.0.')
+        )    
     
     if refit:
         metric_value, backtest_predictions = _backtesting_forecaster_refit(
