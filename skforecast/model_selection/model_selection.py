@@ -7,7 +7,7 @@
 # coding=utf-8
 
 
-from typing import Union, Tuple, Optional
+from typing import Union, Tuple, Optional, Any
 import numpy as np
 import pandas as pd
 import warnings
@@ -290,7 +290,7 @@ def _backtesting_forecaster_refit(
     n_boot: int=500,
     in_sample_residuals: bool=True,
     verbose: bool=False,
-    set_out_sample_residuals: str='deprecated'
+    set_out_sample_residuals: Any='deprecated'
 ) -> Tuple[np.array, pd.DataFrame]:
     '''
     Backtesting of forecaster model with a re-fitting strategy. A copy of the  
@@ -515,7 +515,7 @@ def _backtesting_forecaster_no_refit(
     n_boot: int=500,
     in_sample_residuals: bool=True,
     verbose: bool=False,
-    set_out_sample_residuals: str='deprecated'
+    set_out_sample_residuals: Any='deprecated'
 ) -> Tuple[np.array, pd.DataFrame]:
     '''
     Backtesting of forecaster without iterative re-fitting. In each iteration,
@@ -768,7 +768,7 @@ def backtesting_forecaster(
     n_boot: int=500,
     in_sample_residuals: bool=True,
     verbose: bool=False,
-    set_out_sample_residuals: str='deprecated'
+    set_out_sample_residuals: Any='deprecated'
 ) -> Tuple[np.array, pd.DataFrame]:
     '''
     Backtesting of forecaster model.
