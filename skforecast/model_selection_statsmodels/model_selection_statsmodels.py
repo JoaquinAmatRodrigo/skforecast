@@ -7,7 +7,7 @@
 # coding=utf-8
 
 
-from typing import Union, Dict, List, Tuple
+from typing import Union, Tuple
 import numpy as np
 import pandas as pd
 import logging
@@ -85,11 +85,11 @@ def backtesting_sarimax(
         periods in season), often it is 4 for quarterly data or 12 for monthly data.
         Default is no seasonal effect.
         
-    trend: str {‘n’,’c’,’t’,’ct’}
+    trend: str {'n', 'c', 't', 'ct'}
         Parameter controlling the deterministic trend polynomial A(t). Can be
-        specified as a string where ‘c’ indicates a constant (i.e. a degree zero
-        component of the trend polynomial), ‘t’ indicates a linear trend with time,
-        and ‘ct’ is both. Can also be specified as an iterable defining the non-zero
+        specified as a string where 'c' indicates a constant (i.e. a degree zero
+        component of the trend polynomial), 't' indicates a linear trend with time,
+        and 'ct' is both. Can also be specified as an iterable defining the non-zero
         polynomial exponents to include, in increasing order. For example, [1,1,0,1]
         denotes a+bt+ct3. Default is to not include a trend component.
         
@@ -420,11 +420,11 @@ def cv_sarimax(
         periods in season), often it is 4 for quarterly data or 12 for monthly data.
         Default is no seasonal effect.
         
-    trend: str {‘n’,’c’,’t’,’ct’}
+    trend: str {'n', 'c', 't', 'ct'}
         Parameter controlling the deterministic trend polynomial A(t). Can be
-        specified as a string where ‘c’ indicates a constant (i.e. a degree zero
-        component of the trend polynomial), ‘t’ indicates a linear trend with time,
-        and ‘ct’ is both. Can also be specified as an iterable defining the non-zero
+        specified as a string where 'c' indicates a constant (i.e. a degree zero
+        component of the trend polynomial), 't' indicates a linear trend with time,
+        and 'ct' is both. Can also be specified as an iterable defining the non-zero
         polynomial exponents to include, in increasing order. For example, [1,1,0,1]
         denotes a+bt+ct3. Default is to not include a trend component.
         
