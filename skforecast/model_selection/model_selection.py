@@ -341,8 +341,8 @@ def _backtesting_forecaster_refit(
         intervals.
 
     random_state: int, default 123
-            Sets a seed to the random generator, so that boot intervals are always 
-            deterministic.
+        Sets a seed to the random generator, so that boot intervals are always 
+        deterministic.
 
     in_sample_residuals: bool, default `True`
         If `True`, residuals from the training data are used as proxy of
@@ -575,8 +575,8 @@ def _backtesting_forecaster_no_refit(
         intervals.
 
     random_state: int, default 123
-            Sets a seed to the random generator, so that boot intervals are always 
-            deterministic.
+        Sets a seed to the random generator, so that boot intervals are always 
+        deterministic.
 
     in_sample_residuals: bool, default `True`
         If `True`, residuals from the training data are used as proxy of
@@ -842,8 +842,8 @@ def backtesting_forecaster(
         intervals.
 
     random_state: int, default 123
-            Sets a seed to the random generator, so that boot intervals are always 
-            deterministic.
+        Sets a seed to the random generator, so that boot intervals are always 
+        deterministic.
 
     in_sample_residuals: bool, default `True`
         If `True`, residuals from the training data are used as proxy of
@@ -1068,7 +1068,7 @@ def grid_search_forecaster(
         forecaster.fit(y=y, exog=exog)
         
         print(
-            f"`Forecaster` refitted using the best-found lags and parameters and, the whole data set: \n"
+            f"`Forecaster` refitted using the best-found lags and parameters, and the whole data set: \n"
             f"  Lags: {best_lags} \n"
             f"  Parameters: {best_params}\n"
             f"  Backtesting metric: {best_metric}\n"
