@@ -655,7 +655,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             Number of bootstrapping iterations used to estimate prediction
             intervals.
 
-        random_state: int
+        random_state: int, default 123
             Sets a seed to the random generator, so that boot intervals are always 
             deterministic.
             
