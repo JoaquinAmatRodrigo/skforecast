@@ -7,7 +7,7 @@
 # coding=utf-8
 
 
-from typing import Union, Tuple, Optional
+from typing import Union, Tuple, Optional, Any
 import numpy as np
 import pandas as pd
 import warnings
@@ -288,9 +288,10 @@ def _backtesting_forecaster_refit(
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     interval: Optional[list]=None,
     n_boot: int=500,
+    random_state: int=123,
     in_sample_residuals: bool=True,
     verbose: bool=False,
-    set_out_sample_residuals: str='deprecated'
+    set_out_sample_residuals: Any='deprecated'
 ) -> Tuple[np.array, pd.DataFrame]:
     '''
     Backtesting of forecaster model with a re-fitting strategy. A copy of the  
@@ -338,6 +339,10 @@ def _backtesting_forecaster_refit(
     n_boot: int, default `500`
         Number of bootstrapping iterations used to estimate prediction
         intervals.
+
+    random_state: int, default 123
+        Sets a seed to the random generator, so that boot intervals are always 
+        deterministic.
 
     in_sample_residuals: bool, default `True`
         If `True`, residuals from the training data are used as proxy of
@@ -436,18 +441,20 @@ def _backtesting_forecaster_refit(
                 if exog is None:
                     forecaster.fit(y=y.iloc[:train_size])
                     pred = forecaster.predict_interval(
-                                steps       = steps,
-                                interval    = interval,
-                                n_boot      = n_boot,
+                                steps        = steps,
+                                interval     = interval,
+                                n_boot       = n_boot,
+                                random_state = random_state,
                                 in_sample_residuals = in_sample_residuals
                             )
                 else:
                     forecaster.fit(y=y.iloc[:train_size], exog=exog.iloc[:train_size, ])
                     pred = forecaster.predict_interval(
-                                steps       = steps,
-                                exog        = next_window_exog,
-                                interval    = interval,
-                                n_boot      = n_boot,
+                                steps        = steps,
+                                exog         = next_window_exog,
+                                interval     = interval,
+                                n_boot       = n_boot,
+                                random_state = random_state,
                                 in_sample_residuals = in_sample_residuals
                            )
             else:    
@@ -455,18 +462,20 @@ def _backtesting_forecaster_refit(
                     if exog is None:
                         forecaster.fit(y=y.iloc[:train_size])
                         pred = forecaster.predict_interval(
-                                steps       = steps,
-                                interval    = interval,
-                                n_boot      = n_boot,
+                                steps        = steps,
+                                interval     = interval,
+                                n_boot       = n_boot,
+                                random_state = random_state,
                                 in_sample_residuals = in_sample_residuals
                             )
                     else:
                         forecaster.fit(y=y.iloc[:train_size], exog=exog.iloc[:train_size, ])
                         pred = forecaster.predict_interval(
-                                steps       = steps,
-                                exog        = next_window_exog,
-                                interval    = interval,
-                                n_boot      = n_boot,
+                                steps        = steps,
+                                exog         = next_window_exog,
+                                interval     = interval,
+                                n_boot       = n_boot,
+                                random_state = random_state,
                                 in_sample_residuals = in_sample_residuals
                            )
                 else:
@@ -475,18 +484,20 @@ def _backtesting_forecaster_refit(
                     if exog is None:
                         forecaster.fit(y=y.iloc[:train_size])
                         pred = forecaster.predict_interval(
-                                steps       = steps,
-                                interval    = interval,
-                                n_boot      = n_boot,
+                                steps        = steps,
+                                interval     = interval,
+                                n_boot       = n_boot,
+                                random_state = random_state,
                                 in_sample_residuals = in_sample_residuals
                             )
                     else:
                         forecaster.fit(y=y.iloc[:train_size], exog=exog.iloc[:train_size, ])
                         pred = forecaster.predict_interval(
-                                steps       = steps,
-                                exog        = next_window_exog,
-                                interval    = interval,
-                                n_boot      = n_boot,
+                                steps        = steps,
+                                exog         = next_window_exog,
+                                interval     = interval,
+                                n_boot       = n_boot,
+                                random_state = random_state,
                                 in_sample_residuals = in_sample_residuals
                            )
 
@@ -513,9 +524,10 @@ def _backtesting_forecaster_no_refit(
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     interval: Optional[list]=None,
     n_boot: int=500,
+    random_state: int=123,
     in_sample_residuals: bool=True,
     verbose: bool=False,
-    set_out_sample_residuals: str='deprecated'
+    set_out_sample_residuals: Any='deprecated'
 ) -> Tuple[np.array, pd.DataFrame]:
     '''
     Backtesting of forecaster without iterative re-fitting. In each iteration,
@@ -561,6 +573,10 @@ def _backtesting_forecaster_no_refit(
     n_boot: int, default `500`
         Number of bootstrapping iterations used to estimate prediction
         intervals.
+
+    random_state: int, default 123
+        Sets a seed to the random generator, so that boot intervals are always 
+        deterministic.
 
     in_sample_residuals: bool, default `True`
         If `True`, residuals from the training data are used as proxy of
@@ -687,38 +703,42 @@ def _backtesting_forecaster_no_refit(
             if i < folds - 1:
                 if exog is None:
                     pred = forecaster.predict_interval(
-                                steps       = steps,
-                                last_window = last_window_y,
-                                interval    = interval,
-                                n_boot      = n_boot,
+                                steps        = steps,
+                                last_window  = last_window_y,
+                                interval     = interval,
+                                n_boot       = n_boot,
+                                random_state = random_state,
                                 in_sample_residuals = in_sample_residuals
                             )
                 else:
                     pred = forecaster.predict_interval(
-                                steps       = steps,
-                                last_window = last_window_y,
-                                exog        = next_window_exog,
-                                interval    = interval,
-                                n_boot      = n_boot,
+                                steps        = steps,
+                                last_window  = last_window_y,
+                                exog         = next_window_exog,
+                                interval     = interval,
+                                n_boot       = n_boot,
+                                random_state = random_state,
                                 in_sample_residuals = in_sample_residuals
                             )            
             else:    
                 if remainder == 0:
                     if exog is None:
                         pred = forecaster.predict_interval(
-                                    steps       = steps,
-                                    last_window = last_window_y,
-                                    interval    = interval,
-                                    n_boot      = n_boot,
+                                    steps        = steps,
+                                    last_window  = last_window_y,
+                                    interval     = interval,
+                                    n_boot       = n_boot,
+                                    random_state = random_state,
                                     in_sample_residuals = in_sample_residuals
                                 )
                     else:
                         pred = forecaster.predict_interval(
-                                    steps       = steps,
-                                    last_window = last_window_y,
-                                    exog        = next_window_exog,
-                                    interval    = interval,
-                                    n_boot      = n_boot,
+                                    steps        = steps,
+                                    last_window  = last_window_y,
+                                    exog         = next_window_exog,
+                                    interval     = interval,
+                                    n_boot       = n_boot,
+                                    random_state = random_state,
                                     in_sample_residuals = in_sample_residuals
                                 )
                 else:
@@ -726,19 +746,21 @@ def _backtesting_forecaster_no_refit(
                     steps = remainder
                     if exog is None:
                         pred = forecaster.predict_interval(
-                                    steps       = steps,
-                                    last_window = last_window_y,
-                                    interval    = interval,
-                                    n_boot      = n_boot,
+                                    steps        = steps,
+                                    last_window  = last_window_y,
+                                    interval     = interval,
+                                    n_boot       = n_boot,
+                                    random_state = random_state,
                                     in_sample_residuals = in_sample_residuals
                                 )
                     else:
                         pred = forecaster.predict_interval(
-                                    steps       = steps,
-                                    last_window = last_window_y,
-                                    exog        = next_window_exog,
-                                    interval    = interval,
-                                    n_boot      = n_boot,
+                                    steps        = steps,
+                                    last_window  = last_window_y,
+                                    exog         = next_window_exog,
+                                    interval     = interval,
+                                    n_boot       = n_boot,
+                                    random_state = random_state,
                                     in_sample_residuals = in_sample_residuals
                                 )
             
@@ -766,9 +788,10 @@ def backtesting_forecaster(
     refit: bool=False,
     interval: Optional[list]=None,
     n_boot: int=500,
+    random_state: int=123,
     in_sample_residuals: bool=True,
     verbose: bool=False,
-    set_out_sample_residuals: str='deprecated'
+    set_out_sample_residuals: Any='deprecated'
 ) -> Tuple[np.array, pd.DataFrame]:
     '''
     Backtesting of forecaster model.
@@ -817,6 +840,10 @@ def backtesting_forecaster(
     n_boot: int, default `500`
         Number of bootstrapping iterations used to estimate prediction
         intervals.
+
+    random_state: int, default 123
+        Sets a seed to the random generator, so that boot intervals are always 
+        deterministic.
 
     in_sample_residuals: bool, default `True`
         If `True`, residuals from the training data are used as proxy of
@@ -873,6 +900,12 @@ def backtesting_forecaster(
             ('Interval prediction is only available when forecaster is of type '
             'ForecasterAutoreg or ForecasterAutoregCustom.')
         )
+
+    if set_out_sample_residuals is not 'deprecated':
+        warnings.warn(
+            ('`set_out_sample_residuals` is deprecated since version 0.4.2, '
+            'will be removed on version 0.5.0.')
+        )    
     
     if refit:
         metric_value, backtest_predictions = _backtesting_forecaster_refit(
@@ -884,6 +917,7 @@ def backtesting_forecaster(
             exog                = exog,
             interval            = interval,
             n_boot              = n_boot,
+            random_state        = random_state,
             in_sample_residuals = in_sample_residuals,
             verbose             = verbose
         )
@@ -897,6 +931,7 @@ def backtesting_forecaster(
             exog                = exog,
             interval            = interval,
             n_boot              = n_boot,
+            random_state        = random_state,
             in_sample_residuals = in_sample_residuals,
             verbose             = verbose
         )
@@ -1027,16 +1062,16 @@ def grid_search_forecaster(
         best_params = results['params'].iloc[0]
         best_metric = results['metric'].iloc[0]
         
-        print(
-            f"Refitting `forecaster` using the best found lags and parameters and the whole data set: \n"
-            f"  Lags: {best_lags} \n"
-            f"  Parameters: {best_params}\n"
-            f"  Backtesting metric: {best_metric}\n"
-        )
-        
         if isinstance(forecaster, (ForecasterAutoreg, ForecasterAutoregMultiOutput)):
             forecaster.set_lags(best_lags)
         forecaster.set_params(**best_params)
         forecaster.fit(y=y, exog=exog)
+        
+        print(
+            f"`Forecaster` refitted using the best-found lags and parameters, and the whole data set: \n"
+            f"  Lags: {best_lags} \n"
+            f"  Parameters: {best_params}\n"
+            f"  Backtesting metric: {best_metric}\n"
+        )
             
     return results

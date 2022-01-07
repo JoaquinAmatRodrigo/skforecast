@@ -7,6 +7,8 @@ All notable changes to this project will be documented in this file.
 
 + Increased verbosity of function `backtesting_forecaster()`.
 
++ Random state argument in `backtesting_forecaster()`.
+
 ### Changed
 
 + Function `backtesting_forecaster()` do not modify the original forecaster.
