@@ -1062,16 +1062,16 @@ def grid_search_forecaster(
         best_params = results['params'].iloc[0]
         best_metric = results['metric'].iloc[0]
         
-        print(
-            f"Refitting `forecaster` using the best found lags and parameters and the whole data set: \n"
-            f"  Lags: {best_lags} \n"
-            f"  Parameters: {best_params}\n"
-            f"  Backtesting metric: {best_metric}\n"
-        )
-        
         if isinstance(forecaster, (ForecasterAutoreg, ForecasterAutoregMultiOutput)):
             forecaster.set_lags(best_lags)
         forecaster.set_params(**best_params)
         forecaster.fit(y=y, exog=exog)
+        
+        print(
+            f"`Forecaster` refitted using the best-found lags and parameters and, the whole data set: \n"
+            f"  Lags: {best_lags} \n"
+            f"  Parameters: {best_params}\n"
+            f"  Backtesting metric: {best_metric}\n"
+        )
             
     return results
