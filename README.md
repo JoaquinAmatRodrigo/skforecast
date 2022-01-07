@@ -25,13 +25,13 @@
 + [Dependencies](#dependencies)
 + [Features](#features)
 + [Introduction](#introduction)
-+ [Examples](#examples)
++ [Getting started](#getting-started)
   + [Autoregressive forecaster](#autoregressive-forecaster)
   + [Autoregressive forecaster with exogenous predictors](#autoregressive-forecaster-with-exogenous-predictors)
   + [Autoregressive forecaster with custom predictors](#autoregressive-forecaster-with-custom-predictors)
   + [Backtesting](#backtesting)
   + [Model tuning](#model-tuning)
-+ [Tutorials](#tutorials)
++ [Examples and tutorials](#examples-and-tutorials)
 
 ## Installation
 
@@ -127,7 +127,7 @@ Certain models are capable of simultaneously predicting several values of a sequ
 
 <br><br>
 
-## Examples
+## Getting started
 
 ### Autoregressive forecaster
 
@@ -814,7 +814,7 @@ Refitting `forecaster` using the best found lags and parameters and the whole da
 | [1 2 3]                         | {'max_depth': 10, 'n_estimators': 100} | 0.0673343 |          10 |            100 |
 ```
 
-## Tutorials 
+## Examples and tutorials 
 
 **English**
 
