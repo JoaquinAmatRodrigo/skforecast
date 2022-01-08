@@ -8,7 +8,6 @@ Module model_selection
 - [ ] unit testing
 
 Module model_selection_statsmodels
-- [ ] add to docs user guides
 - [ ] unit testing
 
 Module plot
