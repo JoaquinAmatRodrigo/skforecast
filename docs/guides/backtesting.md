@@ -8,13 +8,21 @@ The model is trained each time before making the predictions, in this way, the m
 
 <br>
 
+<img src="../img/backtesting_refit.gif" style="width: 500px;">
+
+<br>
+
 **Backtesting without refit**
 
 After an initial train, the model is used sequentially without updating it and following the temporal order of the data. This strategy has the advantage of being much faster since the model is only trained once. However, the model does not incorporate the latest information available so it may lose predictive capacity over time.
 
 <img src="../img/diagram-backtesting-no-refit.png" style="width: 500px;">
 
+<br>
 
+<img src="../img/backtesting_no_refit.gif" style="width: 500px;">
+
+<br>
 
 ## Libraries
 
