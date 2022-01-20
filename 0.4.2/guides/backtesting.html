@@ -904,9 +904,14 @@
 <p>The model is trained each time before making the predictions, in this way, the model use all the information available so far. It is a variation of the standard cross-validation but, instead of making a random distribution of the observations, the training set is increased sequentially, maintaining the temporal order of the data.</p>
 <p><img src="../img/diagram-backtesting-refit.png" style="width: 500px;"></p>
 <p><br></p>
+<p><img src="../img/backtesting_refit.gif" style="width: 500px;"></p>
+<p><br></p>
 <p><strong>Backtesting without refit</strong></p>
 <p>After an initial train, the model is used sequentially without updating it and following the temporal order of the data. This strategy has the advantage of being much faster since the model is only trained once. However, the model does not incorporate the latest information available so it may lose predictive capacity over time.</p>
 <p><img src="../img/diagram-backtesting-no-refit.png" style="width: 500px;"></p>
+<p><br></p>
+<p><img src="../img/backtesting_no_refit.gif" style="width: 500px;"></p>
+<p><br></p>
 <h2 id="libraries">Libraries<a class="headerlink" href="#libraries" title="Permanent link">&para;</a></h2>
 <table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
 <span class="normal">2</span>
