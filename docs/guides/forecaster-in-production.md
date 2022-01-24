@@ -1,7 +1,19 @@
-# Use forecaster after training
+# Use forecaster in production
 
-By default, when using `predict` method on a trained forecaster object, predictions starts right after the last training observation.
+A trained model may be deployed in production in order to generate predictions regularly. Suppose predictions have to be generated on a weekly basis, for example, every Monday.
 
+By default, when using the `predict` method on a trained forecaster object, predictions start right after the last training observation. Therefore, the model could be retrained weekly, just before the first prediction is needed, and call the predict method. This strategy, although simple, may not be possible to use for several reasons:
+
+
++ Model training is very expensive and cannot be run as often.
+
++ The history with which the model was trained is no longer available.
+
++ The prediction frequency is so high that there is no time to train the model between predictions.
+
+In these scenarios, the model must be able to predict at any time, even if it has not been recently trained.
+
+Every model generated using skforecast has the `last_window` argument in its `predict` method. Using this argument, it is possible to provide only the past values needs to create the autoregressive predictors (lags) and thus, generate the predictions without the need to retrain the model.
 
 
 ## Libraries
@@ -37,8 +49,6 @@ data_train.tail()
 
 ## Predict
 
-By default, when using `predict` method on a trained forecaster object, predictions starts right after the last training observation.
-
 ``` python
 forecaster = ForecasterAutoreg(
                     regressor = RandomForestRegressor(),
@@ -55,11 +65,10 @@ forecaster.fit(y=data_train['y'])
 Freq: MS, Name: pred, dtype: float64
 </pre>
 
+
 As expected, predictions follow directly from the end of training data.
 
-If the training sample is relatively small or if it is desired compute the best possible forecasts, the forecaster should be retrained using all the available data before making predictions. However, if that strategy is infeasible (for example, because the training set is very large), it is useful to generate predictions without retraining the model each time.
-
-With skforecast, it is possible to generate predictions starting time ahead of training date. When `last_window` is provided, the forecaster use this data to generate the lads needed as predictors.
+When `last window` is provided, the forecaster uses this data to generate the lags needed as predictors and starts the prediction afterwards.
 
 ``` python
 forecaster.predict(steps=3, last_window=data['y'].tail(5))
