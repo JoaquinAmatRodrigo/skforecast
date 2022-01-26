@@ -13,14 +13,14 @@
         <meta name="author" content="Joaquin Amat Rodrigo">
       
       
-        <link rel="canonical" href="https://joaquinamatrodrigo.github.io/skforecast/0.4.2/guides/forecast-time-ahead_training.html">
+        <link rel="canonical" href="https://joaquinamatrodrigo.github.io/skforecast/0.4.2/guides/forecaster-in-production.html">
       
       <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.2.2, mkdocs-material-7.2.2">
     
     
       
-        <title>Forecasting time ahead training - Skforecast Docs</title>
+        <title>Forecaster in production - Skforecast Docs</title>
       
     
     
@@ -79,7 +79,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#use-forecaster-after-training" class="md-skip">
+        <a href="#use-forecaster-in-production" class="md-skip">
           Skip to content
         </a>
       
@@ -108,7 +108,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Forecasting time ahead training
+              Forecaster in production
             
           </span>
         </div>
@@ -501,12 +501,12 @@
       
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
-          Forecasting time ahead training
+          Forecaster in production
           <span class="md-nav__icon md-icon"></span>
         </label>
       
-      <a href="forecast-time-ahead_training.html" class="md-nav__link md-nav__link--active">
-        Forecasting time ahead training
+      <a href="forecaster-in-production.html" class="md-nav__link md-nav__link--active">
+        Forecaster in production
       </a>
       
         
@@ -880,13 +880,26 @@
             <article class="md-content__inner md-typeset">
               
                 
-                  <a href="https://github.com/JoaquinAmatRodrigo/skforecast/edit/master/docs/guides/forecast-time-ahead_training.md" title="Edit this page" class="md-content__button md-icon">
+                  <a href="https://github.com/JoaquinAmatRodrigo/skforecast/edit/master/docs/guides/forecaster-in-production.md" title="Edit this page" class="md-content__button md-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
                   </a>
                 
                 
-                <h1 id="use-forecaster-after-training">Use forecaster after training<a class="headerlink" href="#use-forecaster-after-training" title="Permanent link">&para;</a></h1>
-<p>By default, when using <code>predict</code> method on a trained forecaster object, predictions starts right after the last training observation.</p>
+                <h1 id="use-forecaster-in-production">Use forecaster in production<a class="headerlink" href="#use-forecaster-in-production" title="Permanent link">&para;</a></h1>
+<p>A trained model may be deployed in production in order to generate predictions regularly. Suppose predictions have to be generated on a weekly basis, for example, every Monday. By default, when using the <code>predict</code> method on a trained forecaster object, predictions start right after the last training observation. Therefore, the model could be retrained weekly, just before the first prediction is needed, and call the predict method. This strategy, although simple, may not be possible to use for several reasons:</p>
+<ul>
+<li>
+<p>Model training is very expensive and cannot be run as often.</p>
+</li>
+<li>
+<p>The history with which the model was trained is no longer available.</p>
+</li>
+<li>
+<p>The prediction frequency is so high that there is no time to train the model between predictions.</p>
+</li>
+</ul>
+<p>In these scenarios, the model must be able to predict at any time, even if it has not been recently trained.</p>
+<p>Every model generated using skforecast has the <code>last_window</code> argument in its <code>predict</code> method. Using this argument, it is possible to provide only the past values needs to create the autoregressive predictors (lags) and thus, generate the predictions without the need to retrain the model.</p>
 <h2 id="libraries">Libraries<a class="headerlink" href="#libraries" title="Permanent link">&para;</a></h2>
 <table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
 <span class="normal">2</span>
@@ -946,7 +959,6 @@
 </tbody>
 </table>
 <h2 id="predict">Predict<a class="headerlink" href="#predict" title="Permanent link">&para;</a></h2>
-<p>By default, when using <code>predict</code> method on a trained forecaster object, predictions starts right after the last training observation.</p>
 <table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
 <span class="normal">2</span>
 <span class="normal">3</span>
@@ -968,8 +980,7 @@ Freq: MS, Name: pred, dtype: float64
 </pre>
 
 <p>As expected, predictions follow directly from the end of training data.</p>
-<p>If the training sample is relatively small or if it is desired compute the best possible forecasts, the forecaster should be retrained using all the available data before making predictions. However, if that strategy is infeasible (for example, because the training set is very large), it is useful to generate predictions without retraining the model each time.</p>
-<p>With skforecast, it is possible to generate predictions starting time ahead of training date. When <code>last_window</code> is provided, the forecaster use this data to generate the lads needed as predictors.</p>
+<p>When <code>last window</code> is provided, the forecaster uses this data to generate the lags needed as predictors and starts the prediction afterwards.</p>
 <table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="n">forecaster</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">steps</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">last_window</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">tail</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
 </code></pre></div>
 </td></tr></table>
