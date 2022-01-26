@@ -1,8 +1,6 @@
 # Use forecaster in production
 
-A trained model may be deployed in production in order to generate predictions regularly. Suppose predictions have to be generated on a weekly basis, for example, every Monday.
-
-By default, when using the `predict` method on a trained forecaster object, predictions start right after the last training observation. Therefore, the model could be retrained weekly, just before the first prediction is needed, and call the predict method. This strategy, although simple, may not be possible to use for several reasons:
+A trained model may be deployed in production in order to generate predictions regularly. Suppose predictions have to be generated on a weekly basis, for example, every Monday. By default, when using the `predict` method on a trained forecaster object, predictions start right after the last training observation. Therefore, the model could be retrained weekly, just before the first prediction is needed, and call the predict method. This strategy, although simple, may not be possible to use for several reasons:
 
 
 + Model training is very expensive and cannot be run as often.
