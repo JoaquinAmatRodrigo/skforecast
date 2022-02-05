@@ -6,6 +6,7 @@ Forecaster Classes
 
 Module model_selection
 - [ ] unit testing
+- [ ] allow custom metrics
 
 Module model_selection_statsmodels
 - [ ] unit testing
