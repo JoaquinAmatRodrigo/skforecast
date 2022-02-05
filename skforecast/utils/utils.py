@@ -215,13 +215,17 @@ def check_predict_input(
 def preprocess_y(y: pd.Series) -> Union[np.ndarray, pd.Index]:
     
     '''
-    Returns values ​​and index of series separately. Index is overwritten
+    Returns values and index of series separately. Index is overwritten
     according to the next rules:
-        If index is not of type DatetimeIndex, a RangeIndex is created.
-        If index is of type DatetimeIndex and but has no frequency, a
-        RangeIndex is created.
+
         If index is of type DatetimeIndex and has frequency, nothing is
         changed.
+
+        If index is not of type DatetimeIndex, a RangeIndex is created.
+
+        If index is of type DatetimeIndex but has no frequency, a
+        RangeIndex is created.
+        
     
     Parameters
     ----------        

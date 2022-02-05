@@ -181,7 +181,7 @@ def cv_forecaster(
     y: pd.Series,
     initial_train_size: int,
     steps: int,
-    metric: str,
+    metric: Union[str, callable],
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     allow_incomplete_fold: bool=True,
     verbose: bool=True
@@ -204,8 +204,14 @@ def cv_forecaster(
     steps : int
         Number of steps to predict.
         
-    metric : {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
+    metric : str, callable
         Metric used to quantify the goodness of fit of the model.
+        
+        If string:
+            {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
+
+        It callable:
+            Function with arguments y_true, y_pred that returns a float.
         
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
@@ -241,7 +247,8 @@ def cv_forecaster(
         )
         
     forecaster = deepcopy(forecaster)
-    metric = get_metric(metric=metric)
+    if isinstance(metric, str):
+        metric = get_metric(metric=metric)
     
     splits = time_series_splitter(
                 y                     = y,
@@ -283,7 +290,7 @@ def _backtesting_forecaster_refit(
     forecaster,
     y: pd.Series,
     steps: int,
-    metric: str,
+    metric: Union[str, callable],
     initial_train_size: int,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     interval: Optional[list]=None,
@@ -322,8 +329,14 @@ def _backtesting_forecaster_refit(
     steps : int
         Number of steps to predict.
         
-    metric : {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
+    metric : str, callable
         Metric used to quantify the goodness of fit of the model.
+        
+        If string:
+            {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
+
+        It callable:
+            Function with arguments y_true, y_pred that returns a float.
         
     exog :panda Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
@@ -369,7 +382,8 @@ def _backtesting_forecaster_refit(
     '''
     
     forecaster = deepcopy(forecaster)
-    metric = get_metric(metric=metric)
+    if isinstance(metric, str):
+        metric = get_metric(metric=metric)
     backtest_predictions = []
     
     folds = int(np.ceil((len(y) - initial_train_size) / steps))
@@ -519,7 +533,7 @@ def _backtesting_forecaster_no_refit(
     forecaster,
     y: pd.Series,
     steps: int,
-    metric: str,
+    metric: Union[str, callable],
     initial_train_size: Optional[int]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     interval: Optional[list]=None,
@@ -556,8 +570,14 @@ def _backtesting_forecaster_no_refit(
     steps : int, None
         Number of steps to predict.
         
-    metric : {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
+    metric : str, callable
         Metric used to quantify the goodness of fit of the model.
+        
+        If string:
+            {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
+
+        It callable:
+            Function with arguments y_true, y_pred that returns a float.
         
     exog :panda Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
@@ -603,7 +623,8 @@ def _backtesting_forecaster_no_refit(
     '''
         
     forecaster = deepcopy(forecaster)
-    metric = get_metric(metric=metric)
+    if isinstance(metric, str):
+        metric = get_metric(metric=metric)
     backtest_predictions = []
 
     if initial_train_size is not None:
@@ -782,7 +803,7 @@ def backtesting_forecaster(
     forecaster,
     y: pd.Series,
     steps: int,
-    metric: str,
+    metric: Union[str, callable],
     initial_train_size: Optional[int],
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     refit: bool=False,
@@ -820,8 +841,14 @@ def backtesting_forecaster(
     steps : int
         Number of steps to predict.
         
-    metric : {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
+    metric : str, callable
         Metric used to quantify the goodness of fit of the model.
+        
+        If string:
+            {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
+
+        It callable:
+            Function with arguments y_true, y_pred that returns a float.
         
     exog :panda Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
@@ -945,7 +972,7 @@ def grid_search_forecaster(
     param_grid: dict,
     initial_train_size: int,
     steps: int,
-    metric: str,
+    metric: Union[str, callable],
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Optional[list]=None,
     refit: bool=False,
@@ -974,8 +1001,14 @@ def grid_search_forecaster(
     steps : int
         Number of steps to predict.
         
-    metric : {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
+    metric : str, callable
         Metric used to quantify the goodness of fit of the model.
+        
+        If string:
+            {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
+
+        It callable:
+            Function with arguments y_true, y_pred that returns a float.
         
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
