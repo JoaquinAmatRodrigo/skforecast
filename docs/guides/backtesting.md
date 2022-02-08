@@ -44,7 +44,7 @@ data = data.asfreq('MS')
 data = data['y']
 data = data.sort_index()
 
-# Split data in train snd backtest
+# Split data in train and backtest
 # ==============================================================================
 n_backtest = 36*3  # Last 9 years are used for backtest
 data_train = data[:-n_backtest]
@@ -247,7 +247,7 @@ data = data.set_index('datetime')
 data = data.asfreq('MS')
 data = data.sort_index()
 
-# Split data in train snd backtest
+# Split data in train and backtest
 # ==============================================================================
 n_backtest = 36*3  # Last 9 years are used for backtest
 data_train = data[:-n_backtest]
