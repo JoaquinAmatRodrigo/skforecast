@@ -62,9 +62,18 @@ The most common error when importing the library is:
 pip3 install -U scikit-learn
 ```
 
+There is a current problem when installing statsmodels 0.13 in Google Colab. To avoid this dependency issues when installing skforecast:
+
+ ```bash
+pip install statsmodels==0.12.2
+```
+
+ ```bash
+pip install skforecast
+```
+
 ## Dependencies
 
-+ python>=3.7.1
 + numpy>=1.20.1
 + pandas>=1.2.2
 + tqdm>=4.57.0
