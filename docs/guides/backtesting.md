@@ -6,11 +6,7 @@ The model is trained each time before making the predictions, in this way, the m
 
 <img src="../img/diagram-backtesting-refit.png" style="width: 500px;">
 
-<br>
-
-<img src="../img/backtesting_refit.gif" style="width: 500px;">
-
-<br>
+<img src="../img/backtesting_refit.gif" style="width: 600px;">
 
 **Backtesting without refit**
 
@@ -18,11 +14,7 @@ After an initial train, the model is used sequentially without updating it and f
 
 <img src="../img/diagram-backtesting-no-refit.png" style="width: 500px;">
 
-<br>
-
-<img src="../img/backtesting_no_refit.gif" style="width: 500px;">
-
-<br>
+<img src="../img/backtesting_no_refit.gif" style="width: 600px;">
 
 ## Libraries
 
@@ -52,7 +44,7 @@ data = data.asfreq('MS')
 data = data['y']
 data = data.sort_index()
 
-# Split data in train snd backtest
+# Split data in train and backtest
 # ==============================================================================
 n_backtest = 36*3  # Last 9 years are used for backtest
 data_train = data[:-n_backtest]
@@ -122,11 +114,11 @@ Data partition in fold: 10
 </pre>
 
 ``` python
-print(f"Error de backtest: {metric}")
+print(f"Backtest error: {metric}")
 ```
 
 <pre>
-Error de backtest: [0.00726621]
+Backtest error: [0.00726621]
 </pre>
 
 ``` python
@@ -240,5 +232,112 @@ ax.legend();
 
 
 
+## Backtest with exogenous variables
 
+``` python
+# Download data
+# ==============================================================================
+url = ('https://raw.githubusercontent.com/JoaquinAmatRodrigo/skforecast/master/data/h2o_exog.csv')
+data = pd.read_csv(url, sep=',', header=0, names=['datetime', 'y', 'exog_1', 'exog_2'])
 
+# Data preprocessing
+# ==============================================================================
+data['datetime'] = pd.to_datetime(data['datetime'], format='%Y/%m/%d')
+data = data.set_index('datetime')
+data = data.asfreq('MS')
+data = data.sort_index()
+
+# Split data in train and backtest
+# ==============================================================================
+n_backtest = 36*3  # Last 9 years are used for backtest
+data_train = data[:-n_backtest]
+data_backtest = data[-n_backtest:]
+
+# Plot
+# ==============================================================================
+fig, ax=plt.subplots(figsize=(9, 4))
+data.plot(ax=ax);
+```
+
+<img src="../img/data_exog.png" style="width: 500px;">
+
+``` python
+# Backtest forecaster exogenous variables
+# ==============================================================================
+forecaster = ForecasterAutoreg(
+                regressor = RandomForestRegressor(random_state=123),
+                lags      = 15 
+             )
+
+metric, predictions_backtest = backtesting_forecaster(
+                                    forecaster = forecaster,
+                                    y          = data['y'],
+                                    exog       = data[['exog_1', 'exog_2']],
+                                    initial_train_size = len(data_train),
+                                    steps      = 10,
+                                    metric     = 'mean_squared_error',
+                                    refit      = True,
+                                    verbose    = True
+                               )
+```
+
+<pre>
+Information of backtesting process
+----------------------------------
+Number of observations used for initial training: 87
+Number of observations used for backtesting: 108
+    Number of folds: 11
+    Number of steps per fold: 10
+    Last fold only includes 8 observations.
+
+Data partition in fold: 0
+    Training:   1992-04-01 00:00:00 -- 1999-06-01 00:00:00
+    Validation: 1999-07-01 00:00:00 -- 2000-04-01 00:00:00
+Data partition in fold: 1
+    Training:   1992-04-01 00:00:00 -- 2000-04-01 00:00:00
+    Validation: 2000-05-01 00:00:00 -- 2001-02-01 00:00:00
+Data partition in fold: 2
+    Training:   1992-04-01 00:00:00 -- 2001-02-01 00:00:00
+    Validation: 2001-03-01 00:00:00 -- 2001-12-01 00:00:00
+Data partition in fold: 3
+    Training:   1992-04-01 00:00:00 -- 2001-12-01 00:00:00
+    Validation: 2002-01-01 00:00:00 -- 2002-10-01 00:00:00
+Data partition in fold: 4
+    Training:   1992-04-01 00:00:00 -- 2002-10-01 00:00:00
+    Validation: 2002-11-01 00:00:00 -- 2003-08-01 00:00:00
+Data partition in fold: 5
+    Training:   1992-04-01 00:00:00 -- 2003-08-01 00:00:00
+    Validation: 2003-09-01 00:00:00 -- 2004-06-01 00:00:00
+Data partition in fold: 6
+    Training:   1992-04-01 00:00:00 -- 2004-06-01 00:00:00
+    Validation: 2004-07-01 00:00:00 -- 2005-04-01 00:00:00
+Data partition in fold: 7
+    Training:   1992-04-01 00:00:00 -- 2005-04-01 00:00:00
+    Validation: 2005-05-01 00:00:00 -- 2006-02-01 00:00:00
+Data partition in fold: 8
+    Training:   1992-04-01 00:00:00 -- 2006-02-01 00:00:00
+    Validation: 2006-03-01 00:00:00 -- 2006-12-01 00:00:00
+Data partition in fold: 9
+    Training:   1992-04-01 00:00:00 -- 2006-12-01 00:00:00
+    Validation: 2007-01-01 00:00:00 -- 2007-10-01 00:00:00
+Data partition in fold: 10
+    Training:   1992-04-01 00:00:00 -- 2007-10-01 00:00:00
+    Validation: 2007-11-01 00:00:00 -- 2008-06-01 00:00:00
+</pre>
+
+``` python
+print(f"Backtest error with exogenous variables: {metric}")
+```
+
+<pre>
+Backtest error with exogenous variables: [0.00683408]
+</pre>
+
+``` python
+fig, ax = plt.subplots(figsize=(9, 4))
+data_backtest.plot(ax=ax)
+predictions_backtest.plot(ax=ax)
+ax.legend();
+```
+
+<img src="../img/predictions_backtesting_forecaster_with_exog.png" style="width: 500px;">
