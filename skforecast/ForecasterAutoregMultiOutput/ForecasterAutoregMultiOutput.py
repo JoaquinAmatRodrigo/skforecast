@@ -150,6 +150,11 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
             
         if isinstance(lags, (list, range, np.ndarray)) and min(lags) < 1:
             raise Exception('Minimum value of lags allowed is 1')
+
+        if isinstance(lags, (list, np.ndarray)):
+            for lag in lags:
+                if not isinstance(lag, (int, np.int64, np.int32)):
+                    raise Exception('Values in lags must be int.')
             
         if isinstance(lags, int):
             self.lags = np.arange(lags) + 1

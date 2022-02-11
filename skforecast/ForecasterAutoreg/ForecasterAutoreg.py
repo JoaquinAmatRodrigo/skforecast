@@ -45,7 +45,8 @@ class ForecasterAutoreg(ForecasterBase):
     lags : int, list, 1d numpy ndarray, range
         Lags used as predictors. Index starts at 1, so lag 1 is equal to t-1.
             `int`: include lags from 1 to `lags` (included).
-            `list`, `numpy ndarray` or `range`: include only lags present in `lags`.
+            `list`, `numpy ndarray` or `range`: include only lags present in `lags`,
+            all elements must be int.
 
     
     Attributes
@@ -134,6 +135,11 @@ class ForecasterAutoreg(ForecasterBase):
             
         if isinstance(lags, (list, range, np.ndarray)) and min(lags) < 1:
             raise Exception('Minimum value of lags allowed is 1.')
+
+        if isinstance(lags, (list, np.ndarray)):
+            for lag in lags:
+                if not isinstance(lag, (int, np.int64, np.int32)):
+                    raise Exception('Values in lags must be int.')
             
         if isinstance(lags, int):
             self.lags = np.arange(lags) + 1
