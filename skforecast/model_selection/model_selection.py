@@ -143,7 +143,7 @@ def time_series_splitter(
         yield train_indices, test_indices
         
         
-def get_metric(metric:str) -> callable:
+def _get_metric(metric:str) -> callable:
     '''
     Get the corresponding scikitlearn function to calculate the metric.
     
@@ -248,7 +248,7 @@ def cv_forecaster(
         
     forecaster = deepcopy(forecaster)
     if isinstance(metric, str):
-        metric = get_metric(metric=metric)
+        metric = _get_metric(metric=metric)
     
     splits = time_series_splitter(
                 y                     = y,
@@ -383,7 +383,7 @@ def _backtesting_forecaster_refit(
     
     forecaster = deepcopy(forecaster)
     if isinstance(metric, str):
-        metric = get_metric(metric=metric)
+        metric = _get_metric(metric=metric)
     backtest_predictions = []
     
     folds = int(np.ceil((len(y) - initial_train_size) / steps))
@@ -624,7 +624,7 @@ def _backtesting_forecaster_no_refit(
         
     forecaster = deepcopy(forecaster)
     if isinstance(metric, str):
-        metric = get_metric(metric=metric)
+        metric = _get_metric(metric=metric)
     backtest_predictions = []
 
     if initial_train_size is not None:

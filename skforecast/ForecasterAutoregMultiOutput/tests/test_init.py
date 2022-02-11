@@ -48,3 +48,16 @@ def test_init_exception_when_lags_has_values_lower_than_1():
     for lags in [[0, 1], range(0, 2), np.arange(0, 2)]:
         with pytest.raises(Exception):
             ForecasterAutoregMultiOutput(LinearRegression(), lags=lags, steps=2)
+
+def test_init_exception_when_lags_list_or_numpy_array_with_values_not_int():
+    '''
+    Test exception is raised when lags is list or numpy array and element(s) are not int.
+    '''
+    lags_list = [1, 1.5, [1, 2], range(5)]
+    lags_np_array = np.array([1.2, 1.5])
+    
+    for lags in [lags_list, lags_np_array]:
+        for lag in lags:
+            if not isinstance(lag, (int, np.int64, np.int32)):
+                with pytest.raises(Exception):
+                    ForecasterAutoregMultiOutput(LinearRegression(), lags=lags)

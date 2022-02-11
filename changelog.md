@@ -1,6 +1,22 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [0.4.x] - [Unreleased]
+
+### Added
+
++ Checks if all elements in lags are int when creating ForecasterAutoreg and ForecasterAutoregMultiOutput
+
+### Changed
+
++ Rename get_metric to _get_metric
+
++ Functions in model_selection module allow custom metrics
+
+### Fixed
+
+
+
 ## [0.4.2] - [2022-01-08]
 
 ### Added
