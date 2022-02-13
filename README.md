@@ -930,14 +930,9 @@ Since the provided `last_window` contains values from 2008-02-01 to 2008-06-01, 
 
 ## Contribution
 
-If you found skforecast useful, you can support us with a donation. Your contribution will help to continue developing and improving this project. Many thanks! &#128522
+If you found skforecast useful, you can support us with a donation. Your contribution will help to continue developing and improving this project. Many thanks!
 
-<form action="https://www.paypal.com/donate" method="post" target="_top">
-  <input type="hidden" name="hosted_button_id" value="6NULYFYDKFTQL" />
-  <input type="image" src="https://www.paypalobjects.com/en_US/ES/i/btn/btn_donateCC_LG.gif" border="0" name="submit" title="PayPal - The safer, easier way to pay online!" alt="Donate with PayPal button" />
-  <img alt="" border="0" src="https://www.paypal.com/en_ES/i/scr/pixel.gif" width="1" height="1" />
-  </form>	
-</p>
+[![paypal](https://www.paypalobjects.com/en_US/ES/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate/?hosted_button_id=D2JZSWRLTZDL6)
 
 
 ## Licence
