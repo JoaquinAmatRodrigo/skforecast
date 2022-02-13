@@ -32,10 +32,8 @@ nav:
       - Grid search SARIMAX and ARIMA models: guides/grid-search-sarimax-arima.md
       - Backtesting SARIMAX and ARIMA models: guides/backtesting-sarimax-arima.md
 
-  - Examples:
-      - Forecasting time series with con Python and Scikit-learn: examples/examples.md
-      - Forecasting energy demand: examples/examples.md
-      - Forecasting web page traffic: examples/examples.md
+  - Examples and tutorials:
+      - Examples and tutorials: examples/examples.md
 
   - API Reference:
       - ForecasterAutoreg: api/ForecasterAutoreg.md
