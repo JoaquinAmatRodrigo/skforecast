@@ -219,7 +219,7 @@
   
     <li class="md-tabs__item">
       <a href="../examples/examples.html" class="md-tabs__link">
-        Examples
+        Examples and tutorials
       </a>
     </li>
   
@@ -624,13 +624,13 @@
         <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" data-md-state="indeterminate" type="checkbox" id="__nav_3" checked>
       
       <label class="md-nav__link" for="__nav_3">
-        Examples
+        Examples and tutorials
         <span class="md-nav__icon md-icon"></span>
       </label>
-      <nav class="md-nav" aria-label="Examples" data-md-level="1">
+      <nav class="md-nav" aria-label="Examples and tutorials" data-md-level="1">
         <label class="md-nav__title" for="__nav_3">
           <span class="md-nav__icon md-icon"></span>
-          Examples
+          Examples and tutorials
         </label>
         <ul class="md-nav__list" data-md-scrollfix>
           
@@ -640,31 +640,7 @@
   
     <li class="md-nav__item">
       <a href="../examples/examples.html" class="md-nav__link">
-        Forecasting time series with con Python and Scikit-learn
-      </a>
-    </li>
-  
-
-          
-            
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../examples/examples.html" class="md-nav__link">
-        Forecasting energy demand
-      </a>
-    </li>
-  
-
-          
-            
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../examples/examples.html" class="md-nav__link">
-        Forecasting web page traffic
+        Examples and tutorials
       </a>
     </li>
   
@@ -847,8 +823,12 @@ it is not modified during the process.</p></div>
 <span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Number of steps to predict.</span></li>
 
 <li><code class="mkapi-item-name">metric</code>
-<span class="mkapi-item-type">({'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'})</span>
-<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Metric used to quantify the goodness of fit of the model.</span></li>
+<span class="mkapi-item-type">(str, callable)</span>
+<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Metric used to quantify the goodness of fit of the model.<br>
+If string:
+    {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}<br>
+It callable:
+    Function with arguments y_true, y_pred that returns a float.</span></li>
 
 <li><code class="mkapi-item-name">initial_train_size</code>
 <span class="mkapi-item-type">(int, default `None`)</span>
@@ -952,8 +932,12 @@ training set increases in each iteration.</p></div>
 <span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Number of steps to predict.</span></li>
 
 <li><code class="mkapi-item-name">metric</code>
-<span class="mkapi-item-type">({'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'})</span>
-<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Metric used to quantify the goodness of fit of the model.</span></li>
+<span class="mkapi-item-type">(str, callable)</span>
+<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Metric used to quantify the goodness of fit of the model.<br>
+If string:
+    {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}<br>
+It callable:
+    Function with arguments y_true, y_pred that returns a float.</span></li>
 
 <li><code class="mkapi-item-name">exog</code>
 <span class="mkapi-item-type">(pandas Series, pandas DataFrame, default `None`)</span>
@@ -1025,8 +1009,12 @@ settings to try as values.</span></li>
 <span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Number of steps to predict.</span></li>
 
 <li><code class="mkapi-item-name">metric</code>
-<span class="mkapi-item-type">({'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'})</span>
-<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Metric used to quantify the goodness of fit of the model.</span></li>
+<span class="mkapi-item-type">(str, callable)</span>
+<span class="mkapi-item-dash">&mdash;</span> <span class="mkapi-item-description">Metric used to quantify the goodness of fit of the model.<br>
+If string:
+    {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}<br>
+It callable:
+    Function with arguments y_true, y_pred that returns a float.</span></li>
 
 <li><code class="mkapi-item-name">exog</code>
 <span class="mkapi-item-type">(pandas Series, pandas DataFrame, default `None`)</span>
