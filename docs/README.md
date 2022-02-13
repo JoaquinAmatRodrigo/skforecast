@@ -29,7 +29,6 @@ pip install git+https://github.com/JoaquinAmatRodrigo/skforecast#master
 ## Dependencies
 
 ```
-python>=3.7.1
 numpy>=1.20.1
 pandas>=1.2.2
 tqdm>=4.57.0
@@ -73,7 +72,7 @@ statsmodels>=0.12.2
 + [**Forecasting series temporales con gradient boosting: Skforecast, XGBoost, LightGBM y CatBoost**](https://www.cienciadedatos.net/documentos/py39-forecasting-series-temporales-con-skforecast-xgboost-lightgbm-catboost.html)
 
 
-## Contribution
+## Donating
 
 If you found skforecast useful, you can support us with a donation. Your contribution will help to continue developing and improving this project. Many thanks!
 
