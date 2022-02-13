@@ -928,13 +928,11 @@ Since the provided `last_window` contains values from 2008-02-01 to 2008-06-01, 
 + [**Forecasting series temporales con gradient boosting: Skforecast, XGBoost, LightGBM y CatBoost**](https://www.cienciadedatos.net/documentos/py39-forecasting-series-temporales-con-skforecast-xgboost-lightgbm-catboost.html)
 
 
-## References
+## Contribution
 
-+ Hyndman, R.J., & Athanasopoulos, G. (2018) Forecasting: principles and practice, 2nd edition, OTexts: Melbourne, Australia
+If you found skforecast useful, you can support us with a donation. Your contribution will help to continue developing and improving this project. Many thanks!
 
-+ Time Series Analysis and Forecasting with ADAM Ivan Svetunkov
-
-+ Python for Finance: Mastering Data-Driven Finance
+[![paypal](https://www.paypalobjects.com/en_US/ES/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate/?hosted_button_id=D2JZSWRLTZDL6)
 
 
 ## Licence
