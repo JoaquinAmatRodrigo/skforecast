@@ -1,5 +1,5 @@
-numpy~=1.21
-pandas~=1.4
-tqdm~=4.62
-scikit-learn~=1.0
-statsmodels~=0.13
+numpy==1.21.*
+pandas==1.4.*
+tqdm==4.62.*
+scikit-learn==1.0.*
+statsmodels==0.13.*
