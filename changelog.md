@@ -1,7 +1,7 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-## [0.4.x] - [Unreleased]
+## [0.4.3] - [Unreleased]
 
 ### Added
 
@@ -15,6 +15,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
++ Requirements versions
 
 
 ## [0.4.2] - [2022-01-08]
