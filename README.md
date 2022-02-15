@@ -74,11 +74,11 @@ pip install skforecast
 
 ## Dependencies
 
-+ numpy>=1.20.1
-+ pandas>=1.2.2
-+ tqdm>=4.57.0
-+ scikit-learn>=1.0.1
-+ statsmodels>=0.12.2
++ numpy==1.20.*
++ pandas==1.2.*
++ tqdm==4.57.*
++ scikit-learn==1.0.*
++ statsmodels==0.12.*
 
 ## Features
 
