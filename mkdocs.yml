@@ -22,7 +22,6 @@ nav:
       - Direct multi-step forecasting: guides/direct-multi-step-forecasting.md
       - Backtesting forecaster: guides/backtesting.md
       - Forecaster in production: guides/forecaster-in-production.md
-      - Predictions on training data: guides/predictions-on-training-data.md
       - Tuning forecaster: guides/tuning-forecaster.md
       - Prediction intervals: guides/prediction-intervals.md
       - Feature importance: guides/feature-importance.md
