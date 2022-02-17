@@ -4,17 +4,17 @@
 
 The model is trained each time before making the predictions, in this way, the model use all the information available so far. It is a variation of the standard cross-validation but, instead of making a random distribution of the observations, the training set is increased sequentially, maintaining the temporal order of the data.
 
-<img src="../img/diagram-backtesting-refit.png" style="width: 500px;">
+<p align="center"><img src="../img/diagram-backtesting-refit.png" style="width: 500px;"></p>
 
-<img src="../img/backtesting_refit.gif" style="width: 600px;">
+<p align="center"><img src="../img/backtesting_refit.gif" style="width: 600px;"></p>
 
 **Backtesting without refit**
 
 After an initial train, the model is used sequentially without updating it and following the temporal order of the data. This strategy has the advantage of being much faster since the model is only trained once. However, the model does not incorporate the latest information available so it may lose predictive capacity over time.
 
-<img src="../img/diagram-backtesting-no-refit.png" style="width: 500px;">
+<p align="center"><img src="../img/diagram-backtesting-no-refit.png" style="width: 500px;"></p>
 
-<img src="../img/backtesting_no_refit.gif" style="width: 600px;">
+<p align="center"><img src="../img/backtesting_no_refit.gif" style="width: 600px;"></p>
 
 ## Libraries
 
@@ -24,6 +24,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
 from skforecast.model_selection import backtesting_forecaster
+from sklearn.linear_model import Ridge
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error
 ```
@@ -41,8 +42,9 @@ data = pd.read_csv(url, sep=',', header=0, names=['y', 'datetime'])
 data['datetime'] = pd.to_datetime(data['datetime'], format='%Y/%m/%d')
 data = data.set_index('datetime')
 data = data.asfreq('MS')
-data = data['y']
+data = data[['y']]
 data = data.sort_index()
+display(data.head(4))
 
 # Split data in train and backtest
 # ==============================================================================
@@ -50,6 +52,24 @@ n_backtest = 36*3  # Last 9 years are used for backtest
 data_train = data[:-n_backtest]
 data_backtest = data[-n_backtest:]
 ```
+
+| datetime            |        y |
+|:--------------------|---------:|
+| 1991-07-01 00:00:00 | 0.429795 |
+| 1991-08-01 00:00:00 | 0.400906 |
+| 1991-09-01 00:00:00 | 0.432159 |
+| 1991-10-01 00:00:00 | 0.492543 |
+
+``` python
+# Plot
+# ==============================================================================
+fig, ax=plt.subplots(figsize=(9, 4))
+data.plot(ax=ax)
+ax.legend();
+```
+
+<img src="../img/data_full_serie.png" style="width: 500px;">
+
 ## Backtest
 
 ``` python
@@ -60,7 +80,7 @@ forecaster = ForecasterAutoreg(
 
 metric, predictions_backtest = backtesting_forecaster(
                                     forecaster = forecaster,
-                                    y          = data,
+                                    y          = data['y'],
                                     initial_train_size = len(data_train),
                                     steps      = 10,
                                     metric     = 'mean_squared_error',
@@ -155,7 +175,7 @@ forecaster = ForecasterAutoreg(
 
 metric, predictions_backtest = backtesting_forecaster(
                                     forecaster = forecaster,
-                                    y          = data,
+                                    y          = data['y'],
                                     initial_train_size = len(data_train),
                                     steps      = 10,
                                     metric     = 'mean_squared_error',
@@ -228,7 +248,103 @@ ax.fill_between(
 ax.legend();
 ```
 
-<img src="../img/prediction_interval__backtesting_forecaster.png" style="width: 500px;">
+<img src="../img/prediction_interval_backtesting_forecaster.png" style="width: 500px;">
+
+
+
+## Predictions on training data
+
+Predictions on training data can be obtained either by using the `backtesting_forecaster()` function or by accessing the `predict()` method of the regressor stored inside the forecaster object.
+
+### Predict using backtesting_forecaster()
+
+A trained forecaster is needed.
+
+``` python
+# Fit forecaster
+# ==============================================================================
+forecaster = ForecasterAutoreg(
+                regressor = RandomForestRegressor(random_state=123),
+                lags      = 15 
+             )
+
+forecaster.fit(y=data['y'])
+```
+
+Set arguments `initial_train_size = None` and `refit = False` to perform backtesting using the already trained forecaster. 
+
+``` python
+# Backtest train data
+# ==============================================================================
+metric, predictions_train = backtesting_forecaster(
+                                forecaster = forecaster,
+                                y          = data['y'],
+                                initial_train_size = None,
+                                steps      = 1,
+                                metric     = 'mean_squared_error',
+                                refit      = False,
+                                verbose    = False
+                           )
+
+print(f"Backtest training error: {metric}")
+```
+
+Backtest training error: [0.00053925]
+
+``` python
+predictions_train.head(4)
+```
+
+|                     |     pred |
+|:--------------------|---------:|
+| 1992-10-01 00:00:00 | 0.553611 |
+| 1992-11-01 00:00:00 | 0.568324 |
+| 1992-12-01 00:00:00 | 0.735167 |
+| 1993-01-01 00:00:00 | 0.723217 |
+
+The first 15 observations are not predicted since they are needed to create the lags used as predictors.
+
+``` python
+# Plot training predictions
+# ==============================================================================
+fig, ax = plt.subplots(figsize=(9, 4))
+data.plot(ax=ax)
+predictions_train.plot(ax=ax)
+ax.legend();
+```
+
+<img src="../img/training_predictions_backtesting_forecaster.png" style="width: 500px;">
+
+### Predict using the internal regressor
+
+``` python
+# Fit forecaster
+# ==============================================================================
+forecaster = ForecasterAutoreg(
+                regressor = RandomForestRegressor(random_state=123),
+                lags      = 15 
+             )
+
+forecaster.fit(y=data['y'])
+```
+
+``` python
+# Create training matrix
+# ==============================================================================
+X, y = forecaster.create_train_X_y(
+            y = data['y'], 
+            exog = None
+       )
+```
+
+Using the internal regressor only allows predicting one step.
+
+``` python
+# Predict using the internal regressor
+# ==============================================================================
+forecaster.regressor.predict(X)[:4]
+```
+array([0.55361079, 0.56832448, 0.73516725, 0.72321715])
 
 
 

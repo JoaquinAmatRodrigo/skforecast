@@ -1,6 +1,6 @@
 # Examples
 
-Use cases where **skforecast** library is used for forecasting.
+Examples and tutorials where **skforecast** library is used for forecasting.
 
 
 ## English
