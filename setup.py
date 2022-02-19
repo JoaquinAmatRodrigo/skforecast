@@ -11,6 +11,9 @@ import skforecast
 
 VERSION = skforecast.__version__
 
+with open('requirements.txt') as f:
+    requirements = f.read().splitlines()
+
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
         
@@ -32,11 +35,5 @@ setuptools.setup(
         "Programming Language :: Python :: 3.9",
         "License :: OSI Approved :: MIT License"
     ],
-    install_requires=[
-        'numpy==1.21.*',
-        'pandas==1.4.*',
-        'tqdm==4.62.*',
-        'scikit-learn==1.0.*',
-        'statsmodels==0.13.*'
-    ]
+    install_requires=requirements
 )
