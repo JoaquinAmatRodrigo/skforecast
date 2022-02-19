@@ -20,7 +20,7 @@ setuptools.setup(
     version=VERSION,
     author="Joaquin Amat Rodrigo",
     author_email="j.amatrodrigo@gmail.com",
-    description="Forecasting time series with scikitlearn regressors",
+    description="Forecasting time series with scikitlearn regressors. It also works with any regressor compatible with the scikit-learn API (pipelines, CatBoost, LightGBM, XGBoost, Ranger...).",
     long_description=read("README.md"),
     long_description_content_type="text/markdown",
     url="https://github.com/JoaquinAmatRodrigo/skforecast",
@@ -33,10 +33,10 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License"
     ],
     install_requires=[
-          'numpy>=1.20.1',
-          'pandas>=1.2.2',
-          'tqdm>=4.57.0',
-          'scikit-learn>=1.0.1',
-          'statsmodels>=0.12.2'
+        'numpy==1.21.*',
+        'pandas==1.4.*',
+        'tqdm==4.62.*',
+        'scikit-learn==1.0.*',
+        'statsmodels==0.13.*'
     ]
 )
