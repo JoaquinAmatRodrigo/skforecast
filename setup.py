@@ -11,6 +11,9 @@ import skforecast
 
 VERSION = skforecast.__version__
 
+with open('requirements.txt') as f:
+    requirements = f.read().splitlines()
+
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
         
@@ -20,7 +23,7 @@ setuptools.setup(
     version=VERSION,
     author="Joaquin Amat Rodrigo",
     author_email="j.amatrodrigo@gmail.com",
-    description="Forecasting time series with scikitlearn regressors",
+    description="Forecasting time series with scikitlearn regressors. It also works with any regressor compatible with the scikit-learn API (pipelines, CatBoost, LightGBM, XGBoost, Ranger...).",
     long_description=read("README.md"),
     long_description_content_type="text/markdown",
     url="https://github.com/JoaquinAmatRodrigo/skforecast",
@@ -32,11 +35,5 @@ setuptools.setup(
         "Programming Language :: Python :: 3.9",
         "License :: OSI Approved :: MIT License"
     ],
-    install_requires=[
-          'numpy>=1.20.1',
-          'pandas>=1.2.2',
-          'tqdm>=4.57.0',
-          'scikit-learn>=1.0.1',
-          'statsmodels>=0.12.2'
-    ]
+    install_requires=requirements
 )
