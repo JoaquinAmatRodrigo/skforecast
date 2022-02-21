@@ -540,6 +540,33 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#predictions-on-training-data" class="md-nav__link">
+    Predictions on training data
+  </a>
+  
+    <nav class="md-nav" aria-label="Predictions on training data">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#predict-using-backtesting_forecaster" class="md-nav__link">
+    Predict using backtesting_forecaster()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#predict-using-the-internal-regressor" class="md-nav__link">
+    Predict using the internal regressor
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#backtest-with-exogenous-variables" class="md-nav__link">
     Backtest with exogenous variables
   </a>
@@ -561,18 +588,6 @@
     <li class="md-nav__item">
       <a href="forecaster-in-production.html" class="md-nav__link">
         Forecaster in production
-      </a>
-    </li>
-  
-
-          
-            
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="predictions-on-training-data.html" class="md-nav__link">
-        Predictions on training data
       </a>
     </li>
   
@@ -866,6 +881,33 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#predictions-on-training-data" class="md-nav__link">
+    Predictions on training data
+  </a>
+  
+    <nav class="md-nav" aria-label="Predictions on training data">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#predict-using-backtesting_forecaster" class="md-nav__link">
+    Predict using backtesting_forecaster()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#predict-using-the-internal-regressor" class="md-nav__link">
+    Predict using the internal regressor
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#backtest-with-exogenous-variables" class="md-nav__link">
     Backtest with exogenous variables
   </a>
@@ -892,12 +934,16 @@
                 <h1 id="backtesting">Backtesting<a class="headerlink" href="#backtesting" title="Permanent link">&para;</a></h1>
 <p><strong>Backtesting with refit</strong></p>
 <p>The model is trained each time before making the predictions, in this way, the model use all the information available so far. It is a variation of the standard cross-validation but, instead of making a random distribution of the observations, the training set is increased sequentially, maintaining the temporal order of the data.</p>
-<p><img src="../img/diagram-backtesting-refit.png" style="width: 500px;"></p>
-<p><img src="../img/backtesting_refit.gif" style="width: 600px;"></p>
+<p align="center"><img src="../img/diagram-backtesting-refit.png" style="width: 500px;"></p>
+
+<p align="center"><img src="../img/backtesting_refit.gif" style="width: 600px;"></p>
+
 <p><strong>Backtesting without refit</strong></p>
 <p>After an initial train, the model is used sequentially without updating it and following the temporal order of the data. This strategy has the advantage of being much faster since the model is only trained once. However, the model does not incorporate the latest information available so it may lose predictive capacity over time.</p>
-<p><img src="../img/diagram-backtesting-no-refit.png" style="width: 500px;"></p>
-<p><img src="../img/backtesting_no_refit.gif" style="width: 600px;"></p>
+<p align="center"><img src="../img/diagram-backtesting-no-refit.png" style="width: 500px;"></p>
+
+<p align="center"><img src="../img/backtesting_no_refit.gif" style="width: 600px;"></p>
+
 <h2 id="libraries">Libraries<a class="headerlink" href="#libraries" title="Permanent link">&para;</a></h2>
 <table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
 <span class="normal">2</span>
@@ -905,11 +951,13 @@
 <span class="normal">4</span>
 <span class="normal">5</span>
 <span class="normal">6</span>
-<span class="normal">7</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="normal">7</span>
+<span class="normal">8</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">from</span> <span class="nn">skforecast.ForecasterAutoreg</span> <span class="kn">import</span> <span class="n">ForecasterAutoreg</span>
 <span class="kn">from</span> <span class="nn">skforecast.model_selection</span> <span class="kn">import</span> <span class="n">backtesting_forecaster</span>
+<span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="kn">import</span> <span class="n">Ridge</span>
 <span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestRegressor</span>
 <span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">mean_squared_error</span>
 </code></pre></div>
@@ -932,7 +980,8 @@
 <span class="normal">15</span>
 <span class="normal">16</span>
 <span class="normal">17</span>
-<span class="normal">18</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="c1"># Download data</span>
+<span class="normal">18</span>
+<span class="normal">19</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="c1"># Download data</span>
 <span class="c1"># ==============================================================================</span>
 <span class="n">url</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;https://raw.githubusercontent.com/JoaquinAmatRodrigo/skforecast/master/data/h2o.csv&#39;</span><span class="p">)</span>
 <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;datetime&#39;</span><span class="p">])</span>
@@ -942,8 +991,9 @@
 <span class="n">data</span><span class="p">[</span><span class="s1">&#39;datetime&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;datetime&#39;</span><span class="p">],</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;%Y/%m/</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span>
 <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;datetime&#39;</span><span class="p">)</span>
 <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">asfreq</span><span class="p">(</span><span class="s1">&#39;MS&#39;</span><span class="p">)</span>
-<span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[[</span><span class="s1">&#39;y&#39;</span><span class="p">]]</span>
 <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">sort_index</span><span class="p">()</span>
+<span class="n">display</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
 
 <span class="c1"># Split data in train and backtest</span>
 <span class="c1"># ==============================================================================</span>
@@ -952,6 +1002,44 @@
 <span class="n">data_backtest</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="o">-</span><span class="n">n_backtest</span><span class="p">:]</span>
 </code></pre></div>
 </td></tr></table>
+<table>
+<thead>
+<tr>
+<th align="left">datetime</th>
+<th align="right">y</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">1991-07-01 00:00:00</td>
+<td align="right">0.429795</td>
+</tr>
+<tr>
+<td align="left">1991-08-01 00:00:00</td>
+<td align="right">0.400906</td>
+</tr>
+<tr>
+<td align="left">1991-09-01 00:00:00</td>
+<td align="right">0.432159</td>
+</tr>
+<tr>
+<td align="left">1991-10-01 00:00:00</td>
+<td align="right">0.492543</td>
+</tr>
+</tbody>
+</table>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="c1"># Plot</span>
+<span class="c1"># ==============================================================================</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="n">data</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">();</span>
+</code></pre></div>
+</td></tr></table>
+<p><img src="../img/data_full_serie.png" style="width: 500px;"></p>
 <h2 id="backtest">Backtest<a class="headerlink" href="#backtest" title="Permanent link">&para;</a></h2>
 <table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
@@ -973,7 +1061,7 @@
 
 <span class="n">metric</span><span class="p">,</span> <span class="n">predictions_backtest</span> <span class="o">=</span> <span class="n">backtesting_forecaster</span><span class="p">(</span>
                                     <span class="n">forecaster</span> <span class="o">=</span> <span class="n">forecaster</span><span class="p">,</span>
-                                    <span class="n">y</span>          <span class="o">=</span> <span class="n">data</span><span class="p">,</span>
+                                    <span class="n">y</span>          <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">],</span>
                                     <span class="n">initial_train_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_train</span><span class="p">),</span>
                                     <span class="n">steps</span>      <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
                                     <span class="n">metric</span>     <span class="o">=</span> <span class="s1">&#39;mean_squared_error&#39;</span><span class="p">,</span>
@@ -1099,7 +1187,7 @@ Backtest error: [0.00726621]
 
 <span class="n">metric</span><span class="p">,</span> <span class="n">predictions_backtest</span> <span class="o">=</span> <span class="n">backtesting_forecaster</span><span class="p">(</span>
                                     <span class="n">forecaster</span> <span class="o">=</span> <span class="n">forecaster</span><span class="p">,</span>
-                                    <span class="n">y</span>          <span class="o">=</span> <span class="n">data</span><span class="p">,</span>
+                                    <span class="n">y</span>          <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">],</span>
                                     <span class="n">initial_train_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_train</span><span class="p">),</span>
                                     <span class="n">steps</span>      <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
                                     <span class="n">metric</span>     <span class="o">=</span> <span class="s1">&#39;mean_squared_error&#39;</span><span class="p">,</span>
@@ -1183,7 +1271,141 @@ Data partition in fold: 10
 <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">();</span>
 </code></pre></div>
 </td></tr></table>
-<p><img src="../img/prediction_interval__backtesting_forecaster.png" style="width: 500px;"></p>
+<p><img src="../img/prediction_interval_backtesting_forecaster.png" style="width: 500px;"></p>
+<h2 id="predictions-on-training-data">Predictions on training data<a class="headerlink" href="#predictions-on-training-data" title="Permanent link">&para;</a></h2>
+<p>Predictions on training data can be obtained either by using the <code>backtesting_forecaster()</code> function or by accessing the <code>predict()</code> method of the regressor stored inside the forecaster object.</p>
+<h3 id="predict-using-backtesting_forecaster">Predict using backtesting_forecaster()<a class="headerlink" href="#predict-using-backtesting_forecaster" title="Permanent link">&para;</a></h3>
+<p>A trained forecaster is needed.</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="c1"># Fit forecaster</span>
+<span class="c1"># ==============================================================================</span>
+<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
+                <span class="n">regressor</span> <span class="o">=</span> <span class="n">RandomForestRegressor</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">),</span>
+                <span class="n">lags</span>      <span class="o">=</span> <span class="mi">15</span> 
+             <span class="p">)</span>
+
+<span class="n">forecaster</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">])</span>
+</code></pre></div>
+</td></tr></table>
+<p>Set arguments <code>initial_train_size = None</code> and <code>refit = False</code> to perform backtesting using the already trained forecaster. </p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="c1"># Backtest train data</span>
+<span class="c1"># ==============================================================================</span>
+<span class="n">metric</span><span class="p">,</span> <span class="n">predictions_train</span> <span class="o">=</span> <span class="n">backtesting_forecaster</span><span class="p">(</span>
+                                <span class="n">forecaster</span> <span class="o">=</span> <span class="n">forecaster</span><span class="p">,</span>
+                                <span class="n">y</span>          <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">],</span>
+                                <span class="n">initial_train_size</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                                <span class="n">steps</span>      <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+                                <span class="n">metric</span>     <span class="o">=</span> <span class="s1">&#39;mean_squared_error&#39;</span><span class="p">,</span>
+                                <span class="n">refit</span>      <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                                <span class="n">verbose</span>    <span class="o">=</span> <span class="kc">False</span>
+                           <span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Backtest training error: </span><span class="si">{</span><span class="n">metric</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+</td></tr></table>
+<p>Backtest training error: [0.00053925]</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="n">predictions_train</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+</code></pre></div>
+</td></tr></table>
+<table>
+<thead>
+<tr>
+<th align="left"></th>
+<th align="right">pred</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">1992-10-01 00:00:00</td>
+<td align="right">0.553611</td>
+</tr>
+<tr>
+<td align="left">1992-11-01 00:00:00</td>
+<td align="right">0.568324</td>
+</tr>
+<tr>
+<td align="left">1992-12-01 00:00:00</td>
+<td align="right">0.735167</td>
+</tr>
+<tr>
+<td align="left">1993-01-01 00:00:00</td>
+<td align="right">0.723217</td>
+</tr>
+</tbody>
+</table>
+<p>The first 15 observations are not predicted since they are needed to create the lags used as predictors.</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="c1"># Plot training predictions</span>
+<span class="c1"># ==============================================================================</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="n">data</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+<span class="n">predictions_train</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">();</span>
+</code></pre></div>
+</td></tr></table>
+<p><img src="../img/training_predictions_backtesting_forecaster.png" style="width: 500px;"></p>
+<h3 id="predict-using-the-internal-regressor">Predict using the internal regressor<a class="headerlink" href="#predict-using-the-internal-regressor" title="Permanent link">&para;</a></h3>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="c1"># Fit forecaster</span>
+<span class="c1"># ==============================================================================</span>
+<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
+                <span class="n">regressor</span> <span class="o">=</span> <span class="n">RandomForestRegressor</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">),</span>
+                <span class="n">lags</span>      <span class="o">=</span> <span class="mi">15</span> 
+             <span class="p">)</span>
+
+<span class="n">forecaster</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">])</span>
+</code></pre></div>
+</td></tr></table>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="c1"># Create training matrix</span>
+<span class="c1"># ==============================================================================</span>
+<span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">forecaster</span><span class="o">.</span><span class="n">create_train_X_y</span><span class="p">(</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">],</span> 
+            <span class="n">exog</span> <span class="o">=</span> <span class="kc">None</span>
+       <span class="p">)</span>
+</code></pre></div>
+</td></tr></table>
+<p>Using the internal regressor only allows predicting one step.</p>
+<p><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="c1"># Predict using the internal regressor</span>
+<span class="c1"># ==============================================================================</span>
+<span class="n">forecaster</span><span class="o">.</span><span class="n">regressor</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)[:</span><span class="mi">4</span><span class="p">]</span>
+</code></pre></div>
+</td></tr></table>
+array([0.55361079, 0.56832448, 0.73516725, 0.72321715])</p>
 <h2 id="backtest-with-exogenous-variables">Backtest with exogenous variables<a class="headerlink" href="#backtest-with-exogenous-variables" title="Permanent link">&para;</a></h2>
 <table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>

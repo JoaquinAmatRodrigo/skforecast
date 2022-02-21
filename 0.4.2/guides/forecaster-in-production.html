@@ -557,18 +557,6 @@
   
   
     <li class="md-nav__item">
-      <a href="predictions-on-training-data.html" class="md-nav__link">
-        Predictions on training data
-      </a>
-    </li>
-  
-
-          
-            
-  
-  
-  
-    <li class="md-nav__item">
       <a href="tuning-forecaster.html" class="md-nav__link">
         Tuning forecaster
       </a>
@@ -862,7 +850,7 @@
                 
                 
                 <h1 id="use-forecaster-in-production">Use forecaster in production<a class="headerlink" href="#use-forecaster-in-production" title="Permanent link">&para;</a></h1>
-<p>A trained model may be deployed in production in order to generate predictions regularly. Suppose predictions have to be generated on a weekly basis, for example, every Monday. By default, when using the <code>predict</code> method on a trained forecaster object, predictions start right after the last training observation. Therefore, the model could be retrained weekly, just before the first prediction is needed, and call the predict method. This strategy, although simple, may not be possible to use for several reasons:</p>
+<p>A trained model may be deployed in production in order to generate predictions regularly. Suppose predictions have to be generated on a weekly basis, for example, every Monday. By default, when using the <code>predict</code> method on a trained forecaster object, predictions start right after the last training observation. Therefore, the model could be retrained weekly, just before the first prediction is needed, and call its predict method. This strategy, although simple, may not be possible to use for several reasons:</p>
 <ul>
 <li>
 <p>Model training is very expensive and cannot be run as often.</p>
@@ -1007,13 +995,13 @@ It is important to note that the length of last windows must be enough to includ
       
       
         
-        <a href="predictions-on-training-data.html" class="md-footer__link md-footer__link--next" aria-label="Next: Predictions on training data" rel="next">
+        <a href="tuning-forecaster.html" class="md-footer__link md-footer__link--next" aria-label="Next: Tuning forecaster" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Predictions on training data
+              Tuning forecaster
             </div>
           </div>
           <div class="md-footer__button md-icon">
