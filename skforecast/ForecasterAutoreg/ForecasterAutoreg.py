@@ -895,7 +895,11 @@ class ForecasterAutoreg(ForecasterBase):
             Value of the coefficients associated with each predictor.
         
         '''
-        
+        warnings.warn(
+            f'This method was deprecated in version 0.4.3 in favor of the get_feature_importance. '
+            f'This method will be removed in 0.4.4', DeprecationWarning
+        )
+
         if isinstance(self.regressor, sklearn.pipeline.Pipeline):
             estimator = self.regressor[-1]
         else:
@@ -922,13 +926,13 @@ class ForecasterAutoreg(ForecasterBase):
         '''      
         Return feature importance of the regressor stored in the
         forecaster. Only valid when regressor stores internally the feature
-        importance in the attribute `feature_importances_`.
+        importance in the attribute `feature_importances_` or `coef_`.
 
         Parameters
         ----------
         self
 
-        Returns 
+        Returns
         -------
         feature_importance : pandas DataFrame
             Feature importance associated with each predictor.
@@ -944,13 +948,20 @@ class ForecasterAutoreg(ForecasterBase):
                                     'feature': self.X_train_col_names,
                                     'importance' : estimator.feature_importances_
                                 })
-        except:
-            warnings.warn(
-                f"Impossible to access feature importance for regressor of type {type(estimator)}. "
-                f"This method is only valid when the regressor stores internally "
-                f" the feature importance in the attribute `feature_importances_`."
-            )
+        except:   
+            try:
+                feature_importance = pd.DataFrame({
+                                        'feature': self.X_train_col_names,
+                                        'importance' : estimator.coef_
+                                    })
+            except:
+                warnings.warn(
+                    f"Impossible to access feature importance for regressor of type {type(estimator)}. "
+                    f"This method is only valid when the regressor stores internally "
+                    f"the feature importance in the attribute `feature_importances_` "
+                    f"or `coef_`."
+                )
 
-            feature_importance = None
-        
+                feature_importance = None
+
         return feature_importance
