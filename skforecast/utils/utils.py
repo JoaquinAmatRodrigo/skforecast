@@ -251,7 +251,7 @@ def preprocess_y(y: pd.Series) -> Union[np.ndarray, pd.Index]:
                     start = 0,
                     stop  = len(y),
                     step  = 1
-                  )
+                    )
     else:
         warnings.warn(
             '`y` has no DatetimeIndex nor RangeIndex index. Index is overwritten with a RangeIndex.'
@@ -260,7 +260,7 @@ def preprocess_y(y: pd.Series) -> Union[np.ndarray, pd.Index]:
                     start = 0,
                     stop  = len(y),
                     step  = 1
-                  )
+                    )
 
     y_values = y.to_numpy()
 
@@ -270,13 +270,14 @@ def preprocess_y(y: pd.Series) -> Union[np.ndarray, pd.Index]:
 def preprocess_last_window(last_window: pd.Series) -> Union[np.ndarray, pd.Index]:
     
     '''
-    Returns values ​​and index of series separately. Index is overwritten
+    Returns values and index of series separately. Index is overwritten 
     according to the next rules:
-        If index is not of type DatetimeIndex, a RangeIndex is created.
-        If index is of type DatetimeIndex and but has no frequency, a
-        RangeIndex is created.
-        If index is of type DatetimeIndex and has frequency, nothing is
+        If index is of type DatetimeIndex and has frequency, nothing is 
         changed.
+        If index is of type RangeIndex, nothing is changed.
+        If index is of type DatetimeIndex but has no frequency, a 
+        RangeIndex is created.
+        If index is not of type DatetimeIndex, a RangeIndex is created.
     
     Parameters
     ----------        
@@ -289,14 +290,14 @@ def preprocess_last_window(last_window: pd.Series) -> Union[np.ndarray, pd.Index
         Numpy array with values of `last_window`.
 
     last_window_index : pandas Index
-        Index of of `last_window` modified according to the rules.
+        Index of `last_window` modified according to the rules.
     '''
     
     if isinstance(last_window.index, pd.DatetimeIndex) and last_window.index.freq is not None:
         last_window_index = last_window.index
     elif isinstance(last_window.index, pd.RangeIndex):
         last_window_index = last_window.index
-    else:
+    elif isinstance(last_window.index, pd.DatetimeIndex) and last_window.index.freq is None:
         warnings.warn(
             '`last_window` has DatetimeIndex index but no frequency. '
             'Index is overwritten with a RangeIndex of step 1.'
@@ -305,7 +306,16 @@ def preprocess_last_window(last_window: pd.Series) -> Union[np.ndarray, pd.Index
                                 start = 0,
                                 stop  = len(last_window),
                                 step  = 1
-                            )
+                                )
+    else:
+        warnings.warn(
+            '`last_window` has no DatetimeIndex nor RangeIndex index. Index is overwritten with a RangeIndex.'
+        )
+        last_window_index = pd.RangeIndex(
+                                start = 0,
+                                stop  = len(last_window),
+                                step  = 1
+                                )
 
     last_window_values = last_window.to_numpy()
 
@@ -350,10 +360,10 @@ def preprocess_exog(
             'Index is overwritten with a RangeIndex of step 1.'
         )
         exog_index = pd.RangeIndex(
-                    start = 0,
-                    stop  = len(exog),
-                    step  = 1
-                  )
+                        start = 0,
+                        stop  = len(exog),
+                        step  = 1
+                        )
 
     else:
         warnings.warn(
@@ -363,7 +373,7 @@ def preprocess_exog(
                         start = 0,
                         stop  = len(exog),
                         step  = 1
-                    )
+                        )
 
     exog_values = exog.to_numpy()
 
