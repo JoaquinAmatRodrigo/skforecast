@@ -292,6 +292,7 @@ def _backtesting_forecaster_refit(
     steps: int,
     metric: Union[str, callable],
     initial_train_size: int,
+    fixed_train_size: bool=False,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     interval: Optional[list]=None,
     n_boot: int=500,
@@ -325,6 +326,9 @@ def _backtesting_forecaster_refit(
     initial_train_size: int
         Number of samples in the initial train split. The backtest forecaster is
         trained using the first `initial_train_size` observations.
+        
+    fixed_train_size: bool, default `False`
+        If True, train size doesn't increases but moves by `steps` in each iteration.
         
     steps : int
         Number of steps to predict.
@@ -370,7 +374,7 @@ def _backtesting_forecaster_refit(
 
     Returns 
     -------
-    metric_value: numpy ndarray shape (1,)
+    metric_value: float
         Value of the metric.
 
     backtest_predictions: pandas Dataframe
@@ -380,7 +384,7 @@ def _backtesting_forecaster_refit(
             column upper_bound = upper bound interval of the interval.
 
     '''
-    
+
     forecaster = deepcopy(forecaster)
     if isinstance(metric, str):
         metric = _get_metric(metric=metric)
@@ -400,14 +404,21 @@ def _backtesting_forecaster_refit(
             print(f"    Last fold only includes {remainder} observations.")
         print("")
         for i in range(folds):
-            train_size = initial_train_size + i * steps
+            if fixed_train_size:
+                # The train size doesn't increase but moves by `steps` in each iteration.
+                train_idx_start = i * steps
+                train_idx_end = initial_train_size + i * steps
+            else:
+                # The train size increases by `steps` in each iteration.
+                train_idx_start = 0
+                train_idx_end = initial_train_size + i * steps
             print(f"Data partition in fold: {i}")
             if i < folds - 1:
-                print(f"    Training:   {y.index[0]} -- {y.index[train_size - 1]}")
-                print(f"    Validation: {y.index[train_size]} -- {y.index[train_size + steps - 1]}")
+                print(f"    Training:   {y.index[train_idx_start]} -- {y.index[train_idx_end - 1]}")
+                print(f"    Validation: {y.index[train_idx_end]} -- {y.index[train_idx_end + steps - 1]}")
             else:
-                print(f"    Training:   {y.index[0]} -- {y.index[train_size - 1]}")
-                print(f"    Validation: {y.index[train_size]} -- {y.index[-1]}")
+                print(f"    Training:   {y.index[train_idx_start]} -- {y.index[train_idx_end - 1]}")
+                print(f"    Validation: {y.index[train_idx_end]} -- {y.index[-1]}")
         print("")
         
     if folds > 50:
@@ -417,43 +428,59 @@ def _backtesting_forecaster_refit(
         )
 
     for i in range(folds):
-        # In each iteration (except the last one) the model is fitted before
-        # making predictions. The train size increases by `steps` in each iteration.
-        train_size = initial_train_size + i * steps
+        # In each iteration (except the last one) the model is fitted before making predictions.
+        if fixed_train_size:
+            # The train size doesn't increases but moves by `steps` in each iteration.
+            train_idx_start = i * steps
+            train_idx_end = initial_train_size + i * steps
+        else:
+            # The train size increases by `steps` in each iteration.
+            train_idx_start = 0
+            train_idx_end = initial_train_size + i * steps
+            
         if exog is not None:
-            next_window_exog = exog.iloc[train_size:train_size + steps, ]
+            next_window_exog = exog.iloc[train_idx_end:train_idx_end + steps, ]
 
         if interval is None:
 
             if i < folds - 1:
                 if exog is None:
-                    forecaster.fit(y=y.iloc[:train_size])
+                    forecaster.fit(y=y.iloc[train_idx_start:train_idx_end])
                     pred = forecaster.predict(steps=steps)
                 else:
-                    forecaster.fit(y=y.iloc[:train_size], exog=exog.iloc[:train_size, ])
-                    pred = forecaster.predict(steps=steps,exog=next_window_exog)
+                    forecaster.fit(
+                        y = y.iloc[train_idx_start:train_idx_end], 
+                        exog = exog.iloc[train_idx_start:train_idx_end, ]
+                    )
+                    pred = forecaster.predict(steps=steps, exog=next_window_exog)
             else:    
                 if remainder == 0:
                     if exog is None:
-                        forecaster.fit(y=y.iloc[:train_size])
+                        forecaster.fit(y=y.iloc[train_idx_start:train_idx_end])
                         pred = forecaster.predict(steps=steps)
                     else:
-                        forecaster.fit(y=y.iloc[:train_size], exog=exog.iloc[:train_size, ])
+                        forecaster.fit(
+                            y = y.iloc[train_idx_start:train_idx_end], 
+                            exog = exog.iloc[train_idx_start:train_idx_end, ]
+                        )
                         pred = forecaster.predict(steps=steps, exog=next_window_exog)
                 else:
                     # Only the remaining steps need to be predicted
                     steps = remainder
                     if exog is None:
-                        forecaster.fit(y=y.iloc[:train_size])
+                        forecaster.fit(y=y.iloc[train_idx_start:train_idx_end])
                         pred = forecaster.predict(steps=steps)
                     else:
-                        forecaster.fit(y=y.iloc[:train_size], exog=exog.iloc[:train_size, ])
+                        forecaster.fit(
+                            y = y.iloc[train_idx_start:train_idx_end], 
+                            exog = exog.iloc[train_idx_start:train_idx_end, ]
+                        )
                         pred = forecaster.predict(steps=steps, exog=next_window_exog)
         else:
 
             if i < folds - 1:
                 if exog is None:
-                    forecaster.fit(y=y.iloc[:train_size])
+                    forecaster.fit(y=y.iloc[train_idx_start:train_idx_end])
                     pred = forecaster.predict_interval(
                                 steps        = steps,
                                 interval     = interval,
@@ -462,7 +489,10 @@ def _backtesting_forecaster_refit(
                                 in_sample_residuals = in_sample_residuals
                             )
                 else:
-                    forecaster.fit(y=y.iloc[:train_size], exog=exog.iloc[:train_size, ])
+                    forecaster.fit(
+                        y = y.iloc[train_idx_start:train_idx_end], 
+                        exog = exog.iloc[train_idx_start:train_idx_end, ]
+                    )
                     pred = forecaster.predict_interval(
                                 steps        = steps,
                                 exog         = next_window_exog,
@@ -474,7 +504,7 @@ def _backtesting_forecaster_refit(
             else:    
                 if remainder == 0:
                     if exog is None:
-                        forecaster.fit(y=y.iloc[:train_size])
+                        forecaster.fit(y=y.iloc[train_idx_start:train_idx_end])
                         pred = forecaster.predict_interval(
                                 steps        = steps,
                                 interval     = interval,
@@ -483,7 +513,10 @@ def _backtesting_forecaster_refit(
                                 in_sample_residuals = in_sample_residuals
                             )
                     else:
-                        forecaster.fit(y=y.iloc[:train_size], exog=exog.iloc[:train_size, ])
+                        forecaster.fit(
+                            y = y.iloc[train_idx_start:train_idx_end], 
+                            exog = exog.iloc[train_idx_start:train_idx_end, ]
+                        )
                         pred = forecaster.predict_interval(
                                 steps        = steps,
                                 exog         = next_window_exog,
@@ -496,7 +529,7 @@ def _backtesting_forecaster_refit(
                     # Only the remaining steps need to be predicted
                     steps = remainder
                     if exog is None:
-                        forecaster.fit(y=y.iloc[:train_size])
+                        forecaster.fit(y=y.iloc[train_idx_start:train_idx_end])
                         pred = forecaster.predict_interval(
                                 steps        = steps,
                                 interval     = interval,
@@ -505,7 +538,10 @@ def _backtesting_forecaster_refit(
                                 in_sample_residuals = in_sample_residuals
                             )
                     else:
-                        forecaster.fit(y=y.iloc[:train_size], exog=exog.iloc[:train_size, ])
+                        forecaster.fit(
+                            y = y.iloc[train_idx_start:train_idx_end], 
+                            exog = exog.iloc[train_idx_start:train_idx_end, ]
+                        )
                         pred = forecaster.predict_interval(
                                 steps        = steps,
                                 exog         = next_window_exog,
@@ -519,14 +555,14 @@ def _backtesting_forecaster_refit(
     
     backtest_predictions = pd.concat(backtest_predictions)
     if isinstance(backtest_predictions, pd.Series):
-            backtest_predictions = pd.DataFrame(backtest_predictions)
+        backtest_predictions = pd.DataFrame(backtest_predictions)
 
     metric_value = metric(
                     y_true = y.iloc[initial_train_size: initial_train_size + len(backtest_predictions)],
                     y_pred = backtest_predictions['pred']
                    )
 
-    return np.array([metric_value]), backtest_predictions
+    return metric_value, backtest_predictions
 
 
 def _backtesting_forecaster_no_refit(
@@ -611,7 +647,7 @@ def _backtesting_forecaster_no_refit(
 
     Returns 
     -------
-    metric_value: numpy ndarray shape (1,)
+    metric_value: float
         Value of the metric.
 
     backtest_predictions: pandas DataFrame
@@ -621,7 +657,7 @@ def _backtesting_forecaster_no_refit(
             column upper_bound = upper bound interval of the interval.
 
     '''
-        
+
     forecaster = deepcopy(forecaster)
     if isinstance(metric, str):
         metric = _get_metric(metric=metric)
@@ -789,14 +825,14 @@ def _backtesting_forecaster_no_refit(
 
     backtest_predictions = pd.concat(backtest_predictions)
     if isinstance(backtest_predictions, pd.Series):
-            backtest_predictions = pd.DataFrame(backtest_predictions)
+        backtest_predictions = pd.DataFrame(backtest_predictions)
 
     metric_value = metric(
                     y_true = y.iloc[initial_train_size : initial_train_size + len(backtest_predictions)],
                     y_pred = backtest_predictions['pred']
                    )
 
-    return np.array([metric_value]), backtest_predictions
+    return metric_value, backtest_predictions
 
 
 def backtesting_forecaster(
@@ -805,6 +841,7 @@ def backtesting_forecaster(
     steps: int,
     metric: Union[str, callable],
     initial_train_size: Optional[int],
+    fixed_train_size: bool=False,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     refit: bool=False,
     interval: Optional[list]=None,
@@ -837,6 +874,9 @@ def backtesting_forecaster(
         initial predictors, so no predictions are calculated for them.
 
         `None` is only allowed when `refit` is False.
+    
+    fixed_train_size: bool, default `False`
+        If True, train size doesn't increases but moves by `steps` in each iteration.
         
     steps : int
         Number of steps to predict.
@@ -885,7 +925,7 @@ def backtesting_forecaster(
 
     Returns 
     -------
-    metric_value: numpy ndarray shape (1,)
+    metric_value: float
         Value of the metric.
 
     backtest_predictions: pandas DataFrame
@@ -941,6 +981,7 @@ def backtesting_forecaster(
             steps               = steps,
             metric              = metric,
             initial_train_size  = initial_train_size,
+            fixed_train_size    = fixed_train_size,
             exog                = exog,
             interval            = interval,
             n_boot              = n_boot,
@@ -970,9 +1011,10 @@ def grid_search_forecaster(
     forecaster,
     y: pd.Series,
     param_grid: dict,
-    initial_train_size: int,
     steps: int,
     metric: Union[str, callable],
+    initial_train_size: int,
+    fixed_train_size: bool=False,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Optional[list]=None,
     refit: bool=False,
@@ -994,10 +1036,7 @@ def grid_search_forecaster(
     param_grid : dict
         Dictionary with parameters names (`str`) as keys and lists of parameter
         settings to try as values.
-    
-    initial_train_size: int 
-        Number of samples in the initial train split.
-        
+
     steps : int
         Number of steps to predict.
         
@@ -1009,7 +1048,13 @@ def grid_search_forecaster(
 
         It callable:
             Function with arguments y_true, y_pred that returns a float.
-        
+
+    initial_train_size: int 
+        Number of samples in the initial train split.
+ 
+    fixed_train_size: bool, default `False`
+        If True, train size doesn't increases but moves by `steps` in each iteration.
+
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
@@ -1044,8 +1089,7 @@ def grid_search_forecaster(
         
     elif lags_grid is None:
         lags_grid = [forecaster.lags]
-        
-      
+   
     lags_list = []
     params_list = []
     metric_list = []
@@ -1055,7 +1099,7 @@ def grid_search_forecaster(
     print(
         f"Number of models compared: {len(param_grid)*len(lags_grid)}"
     )
-    
+
     for lags in tqdm(lags_grid, desc='loop lags_grid', position=0, ncols=90):
         
         if isinstance(forecaster, (ForecasterAutoreg, ForecasterAutoregMultiOutput)):
@@ -1069,9 +1113,10 @@ def grid_search_forecaster(
                             forecaster         = forecaster,
                             y                  = y,
                             exog               = exog,
-                            initial_train_size = initial_train_size,
                             steps              = steps,
                             metric             = metric,
+                            initial_train_size = initial_train_size,
+                            fixed_train_size   = fixed_train_size,
                             refit              = refit,
                             interval           = None,
                             verbose            = verbose
@@ -1079,7 +1124,7 @@ def grid_search_forecaster(
 
             lags_list.append(lags)
             params_list.append(params)
-            metric_list.append(metrics.mean())
+            metric_list.append(metrics)
             
     results = pd.DataFrame({
                 'lags'  : lags_list,
