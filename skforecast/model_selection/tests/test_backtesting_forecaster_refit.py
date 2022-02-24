@@ -6,7 +6,6 @@ import pandas as pd
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
-from skforecast.model_selection.model_selection import _get_metric
 from skforecast.model_selection.model_selection import _backtesting_forecaster_refit
 
 # Fixtures _backtesting_forecaster_refit Series (skforecast==0.4.2)
@@ -94,7 +93,7 @@ backtest_predictions_mocked_yes_exog_yes_remainder = pd.DataFrame({
 
 def test_output_backtesting_forecaster_refit_no_exog_no_remainder_with_mocked():
     '''
-    Test output of _backtesting_forecaster_refit with bactesting mocked, interval no.
+    Test output of _backtesting_forecaster_refit with backtesting mocked, interval no.
     Regressor is LinearRegression with lags=3, Series y is mocked, no exog, 
     12 observations to backtest, steps=4 (no remainder), metric='mean_squared_error'
     '''
@@ -125,7 +124,7 @@ def test_output_backtesting_forecaster_refit_no_exog_no_remainder_with_mocked():
 
 def test_output_backtesting_forecaster_refit_no_exog_yes_remainder_with_mocked():
     '''
-    Test output of _backtesting_forecaster_refit with bactesting mocked, interval no.
+    Test output of _backtesting_forecaster_refit with backtesting mocked, interval no.
     Regressor is LinearRegression with lags=3, Series y is mocked, no exog, 
     12 observations to backtest, steps=5 (2 remainder), metric='mean_squared_error'
     '''
@@ -156,7 +155,7 @@ def test_output_backtesting_forecaster_refit_no_exog_yes_remainder_with_mocked()
 
 def test_output_backtesting_forecaster_refit_yes_exog_no_remainder_with_mocked():
     '''
-    Test output of _backtesting_forecaster_refit with bactesting mocked, interval no.
+    Test output of _backtesting_forecaster_refit with backtesting mocked, interval no.
     Regressor is LinearRegression with lags=3, Series y is mocked, exog is mocked, 
     12 observations to backtest, steps=4 (no remainder), metric='mean_squared_error'
     '''
@@ -187,7 +186,7 @@ def test_output_backtesting_forecaster_refit_yes_exog_no_remainder_with_mocked()
 
 def test_output_backtesting_forecaster_refit_yes_exog_yes_remainder_with_mocked():
     '''
-    Test output of _backtesting_forecaster_refit with bactesting mocked, interval no.
+    Test output of _backtesting_forecaster_refit with backtesting mocked, interval no.
     Regressor is LinearRegression with lags=3, Series y is mocked, exog is mocked, 
     12 observations to backtest, steps=5 (2 remainder), metric='mean_squared_error'
     '''
@@ -273,7 +272,7 @@ backtest_predictions_mocked_interval_yes_exog_yes_remainder = pd.DataFrame({
 
 def test_output_backtesting_forecaster_refit_interval_no_exog_no_remainder_with_mocked():
     '''
-    Test output of _backtesting_forecaster_refit with bactesting mocked, interval yes.
+    Test output of _backtesting_forecaster_refit with backtesting mocked, interval yes.
     Regressor is LinearRegression with lags=3, Series y is mocked, no exog, 
     12 observations to backtest, steps=4 (no remainder), metric='mean_squared_error',
     'in_sample_residuals = True'
@@ -305,7 +304,7 @@ def test_output_backtesting_forecaster_refit_interval_no_exog_no_remainder_with_
 
 def test_output_backtesting_forecaster_refit_interval_no_exog_yes_remainder_with_mocked():
     '''
-    Test output of _backtesting_forecaster_refit with bactesting mocked, interval yes. 
+    Test output of _backtesting_forecaster_refit with backtesting mocked, interval yes. 
     Regressor is LinearRegression with lags=3, Series y is mocked, no exog, 
     12 observations to backtest, steps=5 (2 remainder), metric='mean_squared_error',
     'in_sample_residuals = True'
@@ -337,7 +336,7 @@ def test_output_backtesting_forecaster_refit_interval_no_exog_yes_remainder_with
 
 def test_output_backtesting_forecaster_refit_interval_yes_exog_no_remainder_with_mocked():
     '''
-    Test output of _backtesting_forecaster_refit with bactesting mocked, interval yes.
+    Test output of _backtesting_forecaster_refit with backtesting mocked, interval yes.
     Regressor is LinearRegression with lags=3, Series y is mocked, exog is mocked, 
     12 observations to backtest, steps=4 (no remainder), metric='mean_squared_error',
     'in_sample_residuals = True'
@@ -369,7 +368,7 @@ def test_output_backtesting_forecaster_refit_interval_yes_exog_no_remainder_with
 
 def test_output_backtesting_forecaster_refit_interval_yes_exog_yes_remainder_with_mocked():
     '''
-    Test output of _backtesting_forecaster_refit with bactesting mocked, interval yes. 
+    Test output of _backtesting_forecaster_refit with backtesting mocked, interval yes. 
     Regressor is LinearRegression with lags=3, Series y is mocked, exog is mocked, 
     12 observations to backtest, steps=5 (2 remainder), metric='mean_squared_error',
     'in_sample_residuals = True'
@@ -423,7 +422,7 @@ def my_metric(y_true, y_pred):
 
 def test_calleable_metric_backtesting_forecaster_refit_no_exog_no_remainder_with_mocked():
     '''
-    Test calleable metric in _backtesting_forecaster_refit with bactesting mocked, interval no. 
+    Test calleable metric in _backtesting_forecaster_refit with backtesting mocked, interval no. 
     Regressor is LinearRegression with lags=3, Series y is mocked, no exog, 
     12 observations to backtest, steps=4 (no remainder), metric='mean_squared_error'
     '''
