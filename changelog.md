@@ -5,13 +5,21 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
-+ Checks if all elements in lags are int when creating ForecasterAutoreg and ForecasterAutoregMultiOutput
++ Checks if all elements in lags are `int` when creating ForecasterAutoreg and ForecasterAutoregMultiOutput.
+
++ Add `fixed_train_size: bool=False` argument to `_backtesting_forecaster_refit`.
+
++ Add unit test for model_selection module (functions: `_backtesting_forecaster_refit`).
 
 ### Changed
 
-+ Rename get_metric to _get_metric
++ Rename `get_metric` to `_get_metric`.
 
-+ Functions in model_selection module allow custom metrics
++ Functions in model_selection module allow custom metrics.
+
++ Change function `set_out_sample_residuals` (ForecasterAutoreg and ForecasterAutoregCustom), `residuals` argument must be `pd.Series` (was `numpy ndarray`).
+
++ Return `metric_value` of backtesting functions is now a `float` (was `numpy ndarray`).
 
 ### Fixed
 
