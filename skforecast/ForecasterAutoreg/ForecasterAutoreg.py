@@ -831,7 +831,7 @@ class ForecasterAutoreg(ForecasterBase):
         self.window_size = max(self.lags)
         
         
-    def set_out_sample_residuals(self, residuals: np.ndarray, append: bool=True)-> None:
+    def set_out_sample_residuals(self, residuals: pd.Series, append: bool=True)-> None:
         '''
         Set new values to the attribute `out_sample_residuals`. Out of sample
         residuals are meant to be calculated using observations that did not
@@ -839,7 +839,7 @@ class ForecasterAutoreg(ForecasterBase):
         
         Parameters
         ----------
-        params : 1D np.ndarray
+        params : pd.Series
             Values of residuals. If len(residuals) > 1000, only a random sample
             of 1000 values are stored.
             
@@ -849,34 +849,37 @@ class ForecasterAutoreg(ForecasterBase):
             reached, no more values are appended. If False, `out_sample_residuals`
             is overwritten with the new residuals.
             
-
         Returns 
         -------
         self
-        
         '''
-        if not isinstance(residuals, np.ndarray):
+
+        if not isinstance(residuals, pd.Series):
             raise Exception(
-                f"`residuals` argument must be `1D np.ndarray`. Got {type(residuals)}"
+                f"`residuals` argument must be `pd.Series`. Got {type(residuals)}"
             )
             
         if len(residuals) > 1000:
             residuals = np.random.choice(a=residuals, size=1000, replace=False)
-                                 
+            residuals = pd.Series(residuals)   
+      
         if not append or self.out_sample_residuals is None:
             self.out_sample_residuals = residuals
         else:
             free_space = max(0, 1000 - len(self.out_sample_residuals))
             if len(residuals) < free_space:
-                self.out_sample_residuals = np.hstack((
-                                                self.out_sample_residuals,
-                                                residuals
-                                            ))
+                residuals = np.hstack((
+                                self.out_sample_residuals,
+                                residuals
+                            ))
+                self.out_sample_residuals = pd.Series(residuals)
+
             else:
-                self.out_sample_residuals = np.hstack((
-                                                self.out_sample_residuals,
-                                                residuals[:free_space]
-                                            ))
+                residuals = np.hstack((
+                                self.out_sample_residuals,
+                                residuals[:free_space]
+                            ))
+                self.out_sample_residuals = pd.Series(residuals)
         
 
     def get_coef(self) -> pd.DataFrame:
