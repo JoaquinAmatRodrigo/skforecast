@@ -25,6 +25,8 @@ All notable changes to this project will be documented in this file.
 
 + Requirements versions
 
++ Method `fit` doesn't remove `out_sample_residuals`
+
 
 ## [0.4.2] - [2022-01-08]
 

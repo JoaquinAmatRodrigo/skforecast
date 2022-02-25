@@ -333,7 +333,6 @@ class ForecasterAutoreg(ForecasterBase):
         self.exog_col_names       = None
         self.X_train_col_names    = None
         self.in_sample_residuals  = None
-        self.out_sample_residuals = None
         self.fitted               = False
         self.training_range       = None
         
@@ -595,7 +594,7 @@ class ForecasterAutoreg(ForecasterBase):
                 exog_boot = exog.copy()
             else:
                 exog_boot = None
-                
+ 
             if in_sample_residuals:
                 residuals = self.in_sample_residuals
             else:
@@ -863,24 +862,21 @@ class ForecasterAutoreg(ForecasterBase):
             residuals = np.random.choice(a=residuals, size=1000, replace=False)
             residuals = pd.Series(residuals)   
       
-        if not append or self.out_sample_residuals is None:
-            self.out_sample_residuals = residuals
-        else:
+        if append and self.out_sample_residuals is not None:
             free_space = max(0, 1000 - len(self.out_sample_residuals))
             if len(residuals) < free_space:
                 residuals = np.hstack((
                                 self.out_sample_residuals,
                                 residuals
                             ))
-                self.out_sample_residuals = pd.Series(residuals)
-
             else:
                 residuals = np.hstack((
                                 self.out_sample_residuals,
                                 residuals[:free_space]
                             ))
-                self.out_sample_residuals = pd.Series(residuals)
-        
+
+        self.out_sample_residuals = pd.Series(residuals)
+
 
     def get_coef(self) -> pd.DataFrame:
         '''      
