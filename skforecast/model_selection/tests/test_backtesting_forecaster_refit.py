@@ -1,15 +1,12 @@
 # Unit test _backtesting_forecaster_refit
 # ==============================================================================
-from pytest import approx
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import LinearRegression
-from sklearn.metrics import mean_squared_error
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
 from skforecast.model_selection.model_selection import _backtesting_forecaster_refit
 
 # Fixtures _backtesting_forecaster_refit Series (skforecast==0.4.2)
-# ==============================================================================
 # np.random.seed(123)
 # y = np.random.rand(50)
 # exog = np.random.rand(50)
@@ -59,32 +56,28 @@ out_sample_residuals = pd.Series(
 # ******************************************************************************
 
 # Fixtures _backtesting_forecaster_refit No exog No remainder (skforecast==0.4.2)
-# ==============================================================================
-metric_mocked_no_exog_no_remainder = np.array(0.06598802629306816)
+metric_mocked_no_exog_no_remainder = 0.06598802629306816
 backtest_predictions_mocked_no_exog_no_remainder = pd.DataFrame({
     'pred':np.array([0.55717779, 0.43355138, 0.54969767, 0.52945466, 0.38969292, 0.52778339,
                      0.49152015, 0.4841678 , 0.4076433 , 0.50904672, 0.50249462, 0.49232817])
                                                                 }, index=np.arange(38, 50))
 
 # Fixtures _backtesting_forecaster_refit No exog Yes remainder (skforecast==0.4.2)
-# ==============================================================================
-metric_mocked_no_exog_yes_remainder = np.array(0.06916732087926723)
+metric_mocked_no_exog_yes_remainder = 0.06916732087926723
 backtest_predictions_mocked_no_exog_yes_remainder = pd.DataFrame({
     'pred':np.array([0.55717779, 0.43355138, 0.54969767, 0.52945466, 0.48308861, 0.5096801 ,
                     0.49519677, 0.47997916, 0.49177914, 0.495797  , 0.57738724, 0.44370472])
                                                                  }, index=np.arange(38, 50))
 
 # Fixtures _backtesting_forecaster_refit Yes exog No remainder (skforecast==0.4.2)
-# ==============================================================================
-metric_mocked_yes_exog_no_remainder = np.array(0.05663345135204598)
+metric_mocked_yes_exog_no_remainder = 0.05663345135204598
 backtest_predictions_mocked_yes_exog_no_remainder = pd.DataFrame({
     'pred':np.array([0.59059622, 0.47257504, 0.53024098, 0.46163343, 0.42295275, 0.46286083,
                      0.43618422, 0.43552906, 0.48687517, 0.55455072, 0.55577332, 0.53943402])
                                                                  }, index=np.arange(38, 50))
 
 # Fixtures _backtesting_forecaster_refit Yes exog Yes remainder (skforecast==0.4.2)
-# ==============================================================================
-metric_mocked_yes_exog_yes_remainder = np.array(0.061723961096013524)
+metric_mocked_yes_exog_yes_remainder = 0.061723961096013524
 backtest_predictions_mocked_yes_exog_yes_remainder = pd.DataFrame({
     'pred':np.array([0.59059622, 0.47257504, 0.53024098, 0.46163343, 0.50035119, 0.43595809,
                      0.4349167 , 0.42381237, 0.55165332, 0.53442833, 0.65361802, 0.51297419])
@@ -216,14 +209,11 @@ def test_output_backtesting_forecaster_refit_yes_exog_yes_remainder_with_mocked(
 
 
 # ******************************************************************************
-
-# ******************************************************************************
 # * Test _backtesting_forecaster_refit Interval                                *
 # ******************************************************************************
 
 # Fixtures _backtesting_forecaster_refit Interval No exog No remainder (skforecast==0.4.2)
-# ==============================================================================
-metric_mocked_interval_no_exog_no_remainder = np.array(0.06598802629306816)
+metric_mocked_interval_no_exog_no_remainder = 0.06598802629306816
 backtest_predictions_mocked_interval_no_exog_no_remainder = pd.DataFrame({
     'pred':np.array([0.55717779, 0.43355138, 0.54969767, 0.52945466, 0.38969292, 0.52778339, 
                      0.49152015, 0.4841678, 0.4076433, 0.50904672, 0.50249462, 0.49232817]),
@@ -234,8 +224,7 @@ backtest_predictions_mocked_interval_no_exog_no_remainder = pd.DataFrame({
                                                                          }, index=np.arange(38, 50))
 
 # Fixtures _backtesting_forecaster_refit Interval No exog Yes remainder (skforecast==0.4.2)
-# ==============================================================================
-metric_mocked_interval_no_exog_yes_remainder = np.array(0.06916732087926723)
+metric_mocked_interval_no_exog_yes_remainder = 0.06916732087926723
 backtest_predictions_mocked_interval_no_exog_yes_remainder = pd.DataFrame({
     'pred':np.array([0.55717779, 0.43355138, 0.54969767, 0.52945466, 0.48308861, 0.5096801 , 
                      0.49519677, 0.47997916, 0.49177914, 0.495797  , 0.57738724, 0.44370472]),
@@ -246,8 +235,7 @@ backtest_predictions_mocked_interval_no_exog_yes_remainder = pd.DataFrame({
                                                                 }, index=np.arange(38, 50))
 
 # Fixtures _backtesting_forecaster_refit Interval Yes exog No remainder (skforecast==0.4.2)
-# ==============================================================================
-metric_mocked_interval_yes_exog_no_remainder = np.array(0.05663345135204598)
+metric_mocked_interval_yes_exog_no_remainder = 0.05663345135204598
 backtest_predictions_mocked_interval_yes_exog_no_remainder = pd.DataFrame({
     'pred':np.array([0.59059622, 0.47257504, 0.53024098, 0.46163343, 0.42295275, 0.46286083,
                      0.43618422, 0.43552906, 0.48687517, 0.55455072, 0.55577332, 0.53943402]),
@@ -258,8 +246,7 @@ backtest_predictions_mocked_interval_yes_exog_no_remainder = pd.DataFrame({
                                                                          }, index=np.arange(38, 50))
 
 # Fixtures _backtesting_forecaster_refit Interval Yes exog Yes remainder (skforecast==0.4.2)
-# ==============================================================================
-metric_mocked_interval_yes_exog_yes_remainder = np.array(0.061723961096013524)
+metric_mocked_interval_yes_exog_yes_remainder = 0.061723961096013524
 backtest_predictions_mocked_interval_yes_exog_yes_remainder = pd.DataFrame({
     'pred':np.array([0.59059622, 0.47257504, 0.53024098, 0.46163343, 0.50035119, 0.43595809,
                      0.4349167 , 0.42381237, 0.55165332, 0.53442833, 0.65361802, 0.51297419]),
@@ -399,14 +386,59 @@ def test_output_backtesting_forecaster_refit_interval_yes_exog_yes_remainder_wit
 
 
 # ******************************************************************************
+# * Out sample residuals                                                       *
+# ******************************************************************************
+
+# Fixtures _backtesting_forecaster_refit out_sample_residuals No exog No remainder (skforecast==0.4.2)
+metric_mocked_interval_out_sample_residuals_no_exog_no_remainder = 0.06598802629306816
+backtest_predictions_mocked_interval_out_sample_residuals_no_exog_no_remainder = pd.DataFrame({
+    'pred':np.array([0.55717779, 0.43355138, 0.54969767, 0.52945466, 0.38969292, 0.52778339, 
+                     0.49152015, 0.4841678 , 0.4076433 , 0.50904672, 0.50249462, 0.49232817]),
+    'lower_bound':np.array([0.63654358, 0.62989756, 0.67156167, 0.70363265, 0.46905871, 0.73507276, 
+                            0.64554988, 0.64183541, 0.48700909, 0.68845988, 0.63865297, 0.60684242]),
+    'upper_bound':np.array([1.54070487, 1.5131313 , 1.56749058, 1.62564968, 1.37322   , 1.61930035, 
+                            1.54870568, 1.55335041, 1.39117037, 1.56935123, 1.51973211, 1.50300901])                                                                
+                                                                         }, index=np.arange(38, 50))
+
+def test_output_backtesting_forecaster_refit_interval_out_sample_residuals_no_exog_no_remainder_with_mocked():
+    '''
+    Test output of _backtesting_forecaster_refit with backtesting mocked, interval yes.
+    Regressor is LinearRegression with lags=3, Series y is mocked, no exog, 
+    12 observations to backtest, steps=4 (no remainder), metric='mean_squared_error',
+    'in_sample_residuals = False'
+    '''
+    forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3)
+    forecaster.fit(y=y)
+    forecaster.set_out_sample_residuals(residuals=out_sample_residuals, append=False)
+
+    n_backtest = 12
+    y_train = y[:-n_backtest]
+
+    metric, backtest_predictions = _backtesting_forecaster_refit(
+                                        forecaster          = forecaster,
+                                        y                   = y,
+                                        exog                = None,
+                                        initial_train_size  = len(y_train),
+                                        steps               = 4,
+                                        metric              = 'mean_squared_error',
+                                        interval            = [5, 95],
+                                        n_boot              = 500,
+                                        random_state        = 123,
+                                        in_sample_residuals = False,
+                                        verbose             = False
+                                   ) 
+    expected_metric = metric_mocked_interval_out_sample_residuals_no_exog_no_remainder
+    expected_backtest_predictions = backtest_predictions_mocked_interval_out_sample_residuals_no_exog_no_remainder
+    assert expected_metric == metric
+    pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions)
+
 
 # ******************************************************************************
 # * Calleable metric                                                           *
 # ******************************************************************************
 
-# Fixtures _backtesting_forecaster_refit No exog No remainder (skforecast==0.4.2)
-# ==============================================================================
-my_metric_mocked_no_exog_no_remainder = np.array(0.005283745900436151)
+# Fixtures _backtesting_forecaster_refit my_metric No exog No remainder (skforecast==0.4.2)
+my_metric_mocked_no_exog_no_remainder = 0.005283745900436151
 my_metric_backtest_predictions_mocked_no_exog_no_remainder = pd.DataFrame({
     'pred':np.array([0.55717779, 0.43355138, 0.54969767, 0.52945466, 0.38969292, 0.52778339,
                      0.49152015, 0.4841678 , 0.4076433 , 0.50904672, 0.50249462, 0.49232817])
@@ -447,5 +479,169 @@ def test_calleable_metric_backtesting_forecaster_refit_no_exog_no_remainder_with
                                    )
     expected_metric = my_metric_mocked_no_exog_no_remainder
     expected_backtest_predictions = my_metric_backtest_predictions_mocked_no_exog_no_remainder
+    assert expected_metric == metric
+    pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions)
+
+
+# ******************************************************************************
+# * fixed_train_size = True                                                    *
+# ******************************************************************************
+
+# Fixtures _backtesting_forecaster_refit fixed_train_size No exog No remainder (skforecast==0.4.2)
+metric_mocked_fixed_train_no_exog_no_remainder = 0.06720844584333846
+backtest_predictions_mocked_fixed_train_no_exog_no_remainder = pd.DataFrame({
+    'pred':np.array([0.55717779, 0.43355138, 0.54969767, 0.52945466, 0.34597367, 0.50223873,
+                     0.47833829, 0.46082257, 0.37810191, 0.49508366, 0.48808014, 0.47323313])
+                                                                }, index=np.arange(38, 50))
+
+# Fixtures _backtesting_forecaster_refit fixed_train_size No exog Yes remainder (skforecast==0.4.2)
+metric_mocked_fixed_train_no_exog_yes_remainder = 0.07217085374372428
+backtest_predictions_mocked_fixed_train_no_exog_yes_remainder = pd.DataFrame({
+    'pred':np.array([0.55717779, 0.43355138, 0.54969767, 0.52945466, 0.48308861, 0.4909399 , 
+                     0.47942107, 0.46025344, 0.46649132, 0.47061725, 0.57603136, 0.41480551])
+                                                                }, index=np.arange(38, 50))
+
+# Fixtures _backtesting_forecaster_refit fixed_train_size Yes exog No remainder (skforecast==0.4.2)
+metric_mocked_fixed_train_yes_exog_no_remainder = 0.05758244401484334
+backtest_predictions_mocked_fixed_train_yes_exog_no_remainder = pd.DataFrame({
+    'pred':np.array([0.59059622, 0.47257504, 0.53024098, 0.46163343, 0.37689967, 0.44267729, 
+                     0.42642836, 0.41604275, 0.45047245, 0.53784704, 0.53726274, 0.51516772])
+                                                                }, index=np.arange(38, 50))
+
+# Fixtures _backtesting_forecaster_refit fixed_train_size Yes exog Yes remainder (skforecast==0.4.2)
+metric_mocked_fixed_train_yes_exog_yes_remainder = 0.06425019123005545
+backtest_predictions_mocked_fixed_train_yes_exog_yes_remainder = pd.DataFrame({
+    'pred':np.array([0.59059622, 0.47257504, 0.53024098, 0.46163343, 0.50035119, 0.41975558, 
+                     0.4256614 , 0.41176005, 0.52357817, 0.509974  , 0.65354628, 0.48210726])
+                                                                }, index=np.arange(38, 50))
+
+def test_output_backtesting_forecaster_refit_fixed_train_size_no_exog_no_remainder_with_mocked():
+    '''
+    Test output of _backtesting_forecaster_refit with backtesting mocked, interval no.
+    Regressor is LinearRegression with lags=3, Series y is mocked, no exog, 
+    12 observations to backtest, steps=4 (no remainder), metric='mean_squared_error',
+    fixed_train_size=True
+    '''
+    forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3)
+    forecaster.fit(y=y)
+
+    n_backtest = 12
+    y_train = y[:-n_backtest]
+
+    metric, backtest_predictions = _backtesting_forecaster_refit(
+                                        forecaster          = forecaster,
+                                        y                   = y,
+                                        exog                = None,
+                                        initial_train_size  = len(y_train),
+                                        fixed_train_size    = True,
+                                        steps               = 4,
+                                        metric              = 'mean_squared_error',
+                                        interval            = None,
+                                        n_boot              = 500,
+                                        random_state        = 123,
+                                        in_sample_residuals = True,
+                                        verbose             = False
+                                   )
+    expected_metric = metric_mocked_fixed_train_no_exog_no_remainder
+    expected_backtest_predictions = backtest_predictions_mocked_fixed_train_no_exog_no_remainder
+    assert expected_metric == metric
+    pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions)
+
+
+def test_output_backtesting_forecaster_refit_fixed_train_size_no_exog_yes_remainder_with_mocked():
+    '''
+    Test output of _backtesting_forecaster_refit with backtesting mocked, interval no.
+    Regressor is LinearRegression with lags=3, Series y is mocked, no exog, 
+    12 observations to backtest, steps=5 (2 remainder), metric='mean_squared_error',
+    fixed_train_size=True
+    '''
+    forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3)
+    forecaster.fit(y=y)
+
+    n_backtest = 12
+    y_train = y[:-n_backtest]
+
+    metric, backtest_predictions = _backtesting_forecaster_refit(
+                                        forecaster          = forecaster,
+                                        y                   = y,
+                                        exog                = None,
+                                        initial_train_size  = len(y_train),
+                                        fixed_train_size    = True,
+                                        steps               = 5,
+                                        metric              = 'mean_squared_error',
+                                        interval            = None,
+                                        n_boot              = 500,
+                                        random_state        = 123,
+                                        in_sample_residuals = True,
+                                        verbose             = False
+                                   )
+    expected_metric = metric_mocked_fixed_train_no_exog_yes_remainder
+    expected_backtest_predictions = backtest_predictions_mocked_fixed_train_no_exog_yes_remainder
+    assert expected_metric == metric
+    pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions)
+
+
+def test_output_backtesting_forecaster_refit_fixed_train_size_yes_exog_no_remainder_with_mocked():
+    '''
+    Test output of _backtesting_forecaster_refit with backtesting mocked, interval no.
+    Regressor is LinearRegression with lags=3, Series y is mocked, exog is mocked,
+    12 observations to backtest, steps=4 (no remainder), metric='mean_squared_error',
+    fixed_train_size=True
+    '''
+    forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3)
+    forecaster.fit(y=y, exog=exog)
+
+    n_backtest = 12
+    y_train = y[:-n_backtest]
+
+    metric, backtest_predictions = _backtesting_forecaster_refit(
+                                        forecaster          = forecaster,
+                                        y                   = y,
+                                        exog                = exog,
+                                        initial_train_size  = len(y_train),
+                                        fixed_train_size    = True,
+                                        steps               = 4,
+                                        metric              = 'mean_squared_error',
+                                        interval            = None,
+                                        n_boot              = 500,
+                                        random_state        = 123,
+                                        in_sample_residuals = True,
+                                        verbose             = False
+                                   )
+    expected_metric = metric_mocked_fixed_train_yes_exog_no_remainder
+    expected_backtest_predictions = backtest_predictions_mocked_fixed_train_yes_exog_no_remainder
+    assert expected_metric == metric
+    pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions)
+
+
+def test_output_backtesting_forecaster_refit_fixed_train_size_yes_exog_yes_remainder_with_mocked():
+    '''
+    Test output of _backtesting_forecaster_refit with backtesting mocked, interval no.
+    Regressor is LinearRegression with lags=3, Series y is mocked, exog is mocked,
+    12 observations to backtest, steps=5 (2 remainder), metric='mean_squared_error',
+    fixed_train_size=True
+    '''
+    forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3)
+    forecaster.fit(y=y, exog=exog)
+
+    n_backtest = 12
+    y_train = y[:-n_backtest]
+
+    metric, backtest_predictions = _backtesting_forecaster_refit(
+                                        forecaster          = forecaster,
+                                        y                   = y,
+                                        exog                = exog,
+                                        initial_train_size  = len(y_train),
+                                        fixed_train_size    = True,
+                                        steps               = 5,
+                                        metric              = 'mean_squared_error',
+                                        interval            = None,
+                                        n_boot              = 500,
+                                        random_state        = 123,
+                                        in_sample_residuals = True,
+                                        verbose             = False
+                                   )
+    expected_metric = metric_mocked_fixed_train_yes_exog_yes_remainder
+    expected_backtest_predictions = backtest_predictions_mocked_fixed_train_yes_exog_yes_remainder
     assert expected_metric == metric
     pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions)
