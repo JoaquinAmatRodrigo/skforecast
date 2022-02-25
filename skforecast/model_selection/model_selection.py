@@ -300,7 +300,7 @@ def _backtesting_forecaster_refit(
     in_sample_residuals: bool=True,
     verbose: bool=False,
     set_out_sample_residuals: Any='deprecated'
-) -> Tuple[np.array, pd.DataFrame]:
+) -> Tuple[float, pd.DataFrame]:
     '''
     Backtesting of forecaster model with a re-fitting strategy. A copy of the  
     original forecaster is created so it is not modified during the process.
@@ -578,7 +578,7 @@ def _backtesting_forecaster_no_refit(
     in_sample_residuals: bool=True,
     verbose: bool=False,
     set_out_sample_residuals: Any='deprecated'
-) -> Tuple[np.array, pd.DataFrame]:
+) -> Tuple[float, pd.DataFrame]:
     '''
     Backtesting of forecaster without iterative re-fitting. In each iteration,
     a number of `steps` are predicted. A copy of the  original forecaster is
@@ -850,7 +850,7 @@ def backtesting_forecaster(
     in_sample_residuals: bool=True,
     verbose: bool=False,
     set_out_sample_residuals: Any='deprecated'
-) -> Tuple[np.array, pd.DataFrame]:
+) -> Tuple[float, pd.DataFrame]:
     '''
     Backtesting of forecaster model.
 
