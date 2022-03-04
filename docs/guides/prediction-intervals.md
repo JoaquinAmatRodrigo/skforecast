@@ -4,8 +4,7 @@ When trying to anticipate future values, the majority of forecasting models try 
 
 Probabilistic forecasting, as opposed to point-forecasting, is a family of techniques that allow predicting the expected distribution function instead of a single future value. This type of forecasting provides much rich information since it allows to create prediction intervals, the range of likely values where the true value may fall. More formally, a prediction interval defines the interval within which the true value of the response variable is expected to be found with a given probability.
 
-In the book Forecasting: Principles and Practice, Rob J Hyndman and George Athanasopoulos list [multiple ways to estimate prediction intervals](https://otexts.com/fpp3/prediction-intervals.html), most of which require that the residuals (errors) of the model are distributed in a normal way. When this property cannot be assumed, bootstrapping can be resorted to, which only assumes that the residuals are uncorrelated. This is the method used in the Skforecast.
-
+In the book Forecasting: Principles and Practice, Rob J Hyndman and George Athanasopoulos list [multiple ways to estimate prediction intervals](https://otexts.com/fpp3/prediction-intervals.html), most of which require that the residuals (errors) of the model follow a normal distribution. When this property cannot be assumed, bootstrapping can be resorted to, which only assumes that the residuals are uncorrelated. This is the method used in skforecast.
 
 
 ## Libraries
@@ -125,3 +124,27 @@ ax.legend(loc='upper right');
 ```
 
 <img src="../img/prediction_interval.png" style="width: 500px;">
+
+
+## Out of sample residuals
+
+By default, training residuals are used to create the prediction intervals. However, other residuals may be used, for example, residuals obtained from a validation set.
+
+First, the new residuals haver o be stored inside the forecaster using the method `set_out_sample_residuals`.
+
+``` python
+# Simulated out of sample residuals
+out_sample_residuals = pd.Series(np.random.normal(size=500))
+forecaster.set_out_sample_residuals(residuals=out_sample_residuals)
+```
+
+Once the new residuals have been added to the forecaster, it is possible to indicate `in_sample_residuals = False` when using its method `predict`.
+
+``` python
+predictions = forecaster.predict_interval(
+                    steps    = 36,
+                    interval = [5, 95],
+                    n_boot   = 250,
+                    in_sample_residuals = False
+              )
+```

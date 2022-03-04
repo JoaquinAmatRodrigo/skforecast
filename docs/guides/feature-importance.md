@@ -1,6 +1,6 @@
 # Feature importance
 
-The importance of predictors can be obtained using the methods `get_coef` and `get_feature_importance`. These methods access the attributes `coef_` and `feature_importances_` of the internal regressor, respectively.
+The importance of predictors included in a forecaster can be obtained using the method `get_feature_importance`. This method access the attributes `coef_` and `feature_importances_` of the internal regressor.
 
 > **⚠ WARNING:**  
 > This methods only return values if the regressor used inside the forecaster has the attribute `coef_` or `feature_importances_`.
@@ -60,10 +60,10 @@ orecaster = ForecasterAutoreg(
 
 forecaster.fit(y=data['y'], exog=data[['exog_1', 'exog_2']])
 
-forecaster.get_coef()
+forecaster.get_feature_importance()
 ```
 
-|    | feature   |       coef |
+|    | feature   | importance |
 |----|-----------|------------|
 |  0 | lag_1     |  0.327688  |
 |  1 | lag_2     | -0.0735932 |
@@ -74,7 +74,7 @@ forecaster.get_coef()
 |  6 | exog_2    |  0.668162  |
 
 
-When using a `ForecasterAutoregMultiOutput`, since a different model is fit for each step, it is needed to indicate from which model extract the information.
+When using a `ForecasterAutoregMultiOutput`, since a different model is fit for each step, it is necessary to indicate which model to extract the information from.
 
 ``` python
 forecaster = ForecasterAutoregMultiOutput(
