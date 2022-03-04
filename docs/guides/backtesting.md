@@ -12,7 +12,7 @@ The model is trained each time before making the predictions, in this way, the m
 
 A technique similar to Backtesting with refit but, in this case, the training set doesn't increase sequentially.
 
-<p align="center"><img src="../img/diagram-backtesting-refit.png" style="width: 500px;"></p>
+<p align="center"><img src="../img/diagram-backtesting-refit-fixed-train-size.png" style="width: 500px;"></p>
 
 <p align="center"><img src="../img/backtesting_refit_fixed_train_size.gif" style="width: 600px;"></p>
 
@@ -147,7 +147,7 @@ print(f"Backtest error: {metric}")
 ```
 
 <pre>
-Backtest error: [0.00726621]
+Backtest error: 0.007266210302212634
 </pre>
 
 ``` python
@@ -299,7 +299,7 @@ metric, predictions_train = backtesting_forecaster(
 print(f"Backtest training error: {metric}")
 ```
 
-Backtest training error: [0.00053925]
+Backtest training error: 0.0005392479040738611
 
 ``` python
 predictions_train.head(4)
@@ -354,7 +354,10 @@ Using the internal regressor only allows predicting one step.
 # ==============================================================================
 forecaster.regressor.predict(X)[:4]
 ```
+
+<pre>
 array([0.55361079, 0.56832448, 0.73516725, 0.72321715])
+</pre>
 
 
 
@@ -386,8 +389,9 @@ print(f"Backtest error custom metric: {metric}")
 ```
 
 <pre>
-Backtest error: 0.00053925
+Backtest error custom metric: 3.136057139917678e-05
 </pre>
+
 
 
 ## Backtest with exogenous variables
@@ -489,7 +493,7 @@ print(f"Backtest error with exogenous variables: {metric}")
 ```
 
 <pre>
-Backtest error with exogenous variables: [0.00683408]
+Backtest error with exogenous variables: 0.0068340846122841425
 </pre>
 
 ``` python
