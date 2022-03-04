@@ -63,7 +63,7 @@ forecaster.fit(y=data['y'], exog=data[['exog_1', 'exog_2']])
 forecaster.get_feature_importance()
 ```
 
-|    | feature   |       coef |
+|    | feature   | importance |
 |----|-----------|------------|
 |  0 | lag_1     |  0.327688  |
 |  1 | lag_2     | -0.0735932 |
