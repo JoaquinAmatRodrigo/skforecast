@@ -363,7 +363,7 @@ array([0.55361079, 0.56832448, 0.73516725, 0.72321715])
 
 ## Backtest with a custom metric
 
-`backtesting_forecaster()` function allows a calleable metric.
+`backtesting_forecaster()` allows using a custom function in order to calculate the metric.
 
 ``` python
 def custom_metric(y_true, y_pred):
@@ -373,6 +373,7 @@ def custom_metric(y_true, y_pred):
     metric = ((y_true - y_pred)/len(y_true)).mean()
     
     return metric
+    
 
 metric, predictions_backtest = backtesting_forecaster(
                                     forecaster = forecaster,

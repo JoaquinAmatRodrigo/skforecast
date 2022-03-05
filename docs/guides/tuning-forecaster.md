@@ -7,10 +7,11 @@ Skforecast library allows to combine grid search strategy with backtesting in or
 ## Libraries
 
 ``` python
-import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.ensemble import RandomForestRegressor
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
-from sklearn.ensembre import Ridge
+from skforecast.model_selection import grid_search_forecaster
 ```
 ## Data
 
@@ -44,7 +45,7 @@ data_test  = data.loc['2006-01-01':]
 # ==============================================================================
 forecaster = ForecasterAutoreg(
                 regressor = RandomForestRegressor(random_state=123),
-                lags      = 12 # Placeholder, the value will be overwritten
+                lags      = 10 # Placeholder, the value will be overwritten
              )
 
 # Regressor hyperparameters
@@ -63,9 +64,10 @@ results_grid = grid_search_forecaster(
                         refit       = True,
                         metric      = 'mean_squared_error',
                         initial_train_size = len(data_train),
+                        fixed_train_size   = False,
                         return_best = True,
                         verbose     = False
-                    )
+                )
 ```
 
 ```
@@ -149,4 +151,45 @@ Regressor parameters: {'bootstrap': True, 'ccp_alpha': 0.0, 'criterion': 'square
 Creation date: 2022-01-02 16:40:40 
 Last fit date: 2022-01-02 16:40:55 
 Skforecast version: 0.4.2
+```
+
+## Grid search with custom metric
+
+`grid_search_forecaster()` allows using a custom function in order to calculate the metric.
+
+``` python
+
+def custom_metric(y_true, y_pred):
+    '''
+    Custom metric function
+    '''
+    metric = ((y_true - y_pred)/len(y_true)).mean()
+    
+    return metric
+
+forecaster = ForecasterAutoreg(
+                regressor = RandomForestRegressor(random_state=123),
+                lags      = 10 # Placeholder, the value will be overwritten
+             )
+
+# Regressor hyperparameters
+param_grid = {'n_estimators': [50, 100],
+              'max_depth': [5, 10, 15]}
+
+# Lags used as predictors
+lags_grid = [3, 10, [1, 2, 3, 20]]
+
+results_grid = grid_search_forecaster(
+                        forecaster  = forecaster,
+                        y           = data.loc[:'2006-01-01'],
+                        param_grid  = param_grid,
+                        lags_grid   = lags_grid,
+                        steps       = 12,
+                        refit       = True,
+                        metric      = custom_metric,
+                        initial_train_size = len(data_train),
+                        fixed_train_size   = False,
+                        return_best = True,
+                        verbose     = False
+               )
 ```
