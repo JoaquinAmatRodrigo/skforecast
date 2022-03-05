@@ -8,6 +8,14 @@ The model is trained each time before making the predictions, in this way, the m
 
 <p align="center"><img src="../img/backtesting_refit.gif" style="width: 600px;"></p>
 
+**Backtesting with refit and fixed train size**
+
+A technique similar to Backtesting with refit but, in this case, the training set doesn't increase sequentially.
+
+<p align="center"><img src="../img/diagram-backtesting-refit-fixed-train-size.png" style="width: 500px;"></p>
+
+<p align="center"><img src="../img/backtesting_refit_fixed_train_size.gif" style="width: 600px;"></p>
+
 **Backtesting without refit**
 
 After an initial train, the model is used sequentially without updating it and following the temporal order of the data. This strategy has the advantage of being much faster since the model is only trained once. However, the model does not incorporate the latest information available so it may lose predictive capacity over time.
@@ -82,6 +90,7 @@ metric, predictions_backtest = backtesting_forecaster(
                                     forecaster = forecaster,
                                     y          = data['y'],
                                     initial_train_size = len(data_train),
+                                    fixed_train_size   = False,
                                     steps      = 10,
                                     metric     = 'mean_squared_error',
                                     refit      = True,
@@ -138,7 +147,7 @@ print(f"Backtest error: {metric}")
 ```
 
 <pre>
-Backtest error: [0.00726621]
+Backtest error: 0.007266210302212634
 </pre>
 
 ``` python
@@ -177,6 +186,7 @@ metric, predictions_backtest = backtesting_forecaster(
                                     forecaster = forecaster,
                                     y          = data['y'],
                                     initial_train_size = len(data_train),
+                                    fixed_train_size   = False,
                                     steps      = 10,
                                     metric     = 'mean_squared_error',
                                     refit      = True,
@@ -289,7 +299,7 @@ metric, predictions_train = backtesting_forecaster(
 print(f"Backtest training error: {metric}")
 ```
 
-Backtest training error: [0.00053925]
+Backtest training error: 0.0005392479040738611
 
 ``` python
 predictions_train.head(4)
@@ -344,7 +354,43 @@ Using the internal regressor only allows predicting one step.
 # ==============================================================================
 forecaster.regressor.predict(X)[:4]
 ```
+
+<pre>
 array([0.55361079, 0.56832448, 0.73516725, 0.72321715])
+</pre>
+
+
+
+## Backtest with a custom metric
+
+`backtesting_forecaster()` function allows a calleable metric.
+
+``` python
+def custom_metric(y_true, y_pred):
+    '''
+    Custom metric function
+    '''
+    metric = ((y_true - y_pred)/len(y_true)).mean()
+    
+    return metric
+
+metric, predictions_backtest = backtesting_forecaster(
+                                    forecaster = forecaster,
+                                    y          = data['y'],
+                                    initial_train_size = len(data_train),
+                                    fixed_train_size   = False,
+                                    steps      = 10,
+                                    metric     = custom_metric,
+                                    refit      = True,
+                                    verbose    = False
+                               )
+
+print(f"Backtest error custom metric: {metric}")
+```
+
+<pre>
+Backtest error custom metric: 3.136057139917678e-05
+</pre>
 
 
 
@@ -378,7 +424,7 @@ data.plot(ax=ax);
 <img src="../img/data_exog.png" style="width: 500px;">
 
 ``` python
-# Backtest forecaster exogenous variables
+# Backtest forecaster with exogenous variables
 # ==============================================================================
 forecaster = ForecasterAutoreg(
                 regressor = RandomForestRegressor(random_state=123),
@@ -390,6 +436,7 @@ metric, predictions_backtest = backtesting_forecaster(
                                     y          = data['y'],
                                     exog       = data[['exog_1', 'exog_2']],
                                     initial_train_size = len(data_train),
+                                    fixed_train_size   = False,
                                     steps      = 10,
                                     metric     = 'mean_squared_error',
                                     refit      = True,
@@ -446,7 +493,7 @@ print(f"Backtest error with exogenous variables: {metric}")
 ```
 
 <pre>
-Backtest error with exogenous variables: [0.00683408]
+Backtest error with exogenous variables: 0.0068340846122841425
 </pre>
 
 ``` python

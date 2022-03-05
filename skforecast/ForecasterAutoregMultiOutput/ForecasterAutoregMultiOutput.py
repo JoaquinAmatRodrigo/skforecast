@@ -639,7 +639,11 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
             Value of the coefficients associated with each predictor.
         
         '''
-        
+        warnings.warn(
+            f'This method was deprecated in version 0.4.3 in favor of the get_feature_importance. '
+            f'This method will be removed in 0.4.4', DeprecationWarning
+        )
+
         if step > self.steps:
             raise Exception(
                 f"Forecaster trained for {self.steps} steps. Got step={step}."
@@ -685,7 +689,7 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
         the forecaster for a specific step. Since a separate model is created for
         each forecast time step, it is necessary to select the model from which
         retrieve information.
-        
+
         Only valid when the forecaster has been trained using 
         `GradientBoostingRegressor`, `RandomForestRegressor` or 
         `HistGradientBoostingRegressor` as regressor.
@@ -701,14 +705,13 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
         feature_importance : pandas DataFrame
             Impurity-based feature importance associated with each predictor.
         '''
-        
         if step > self.steps:
             raise Exception(
                 f"Forecaster trained for {self.steps} steps. Got step={step}."
             )
         if step < 1:
             raise Exception("Minimum step is 1.")
-        
+
         # Stored regressors start at index 0
         step = step - 1
 
@@ -729,13 +732,27 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
                                     'feature': feature_names,
                                     'importance' : estimator.feature_importances_
                                 })
-        except:
-            warnings.warn(
-                f"Impossible to access feature importance for regressor of type {type(estimator)}. "
-                f"This method is only valid when the regressor stores internally "
-                f" the feature importance in the attribute `feature_importances_`."
-            )
+        except:   
+            try:
+                idx_columns_lags = np.arange(len(self.lags))
+                idx_columns_exog = np.array([], dtype=int)
+                if self.included_exog:
+                    idx_columns_exog = np.arange(len(self.X_train_col_names))[len(self.lags) + step::self.steps]
+                idx_columns = np.hstack((idx_columns_lags, idx_columns_exog))
+                feature_names = [self.X_train_col_names[i] for i in idx_columns]
+                feature_names = [name.replace(f"_step_{step+1}", "") for name in feature_names]
+                feature_importance = pd.DataFrame({
+                                        'feature': feature_names,
+                                        'importance' : estimator.coef_
+                                    })
+            except:
+                warnings.warn(
+                    f"Impossible to access feature importance for regressor of type {type(estimator)}. "
+                    f"This method is only valid when the regressor stores internally "
+                    f"the feature importance in the attribute `feature_importances_` "
+                    f"or `coef_`."
+                )
 
-            feature_importance = None
+                feature_importance = None
 
         return feature_importance

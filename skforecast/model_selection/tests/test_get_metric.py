@@ -1,6 +1,5 @@
-# Unit test _create_lags
+# Unit test _get_metric
 # ==============================================================================
-
 import pytest
 from pytest import approx
 import numpy as np
