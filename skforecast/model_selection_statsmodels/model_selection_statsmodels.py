@@ -7,18 +7,16 @@
 # coding=utf-8
 
 
-from typing import Union, Tuple
+from typing import Union, Tuple, Optional
 import numpy as np
 import pandas as pd
 import logging
 from tqdm import tqdm
-from sklearn.metrics import mean_squared_error 
-from sklearn.metrics import mean_absolute_error
-from sklearn.metrics import mean_absolute_percentage_error
 from sklearn.model_selection import ParameterGrid
 from statsmodels.tsa.statespace.sarimax import SARIMAX
 
 from ..model_selection import time_series_splitter
+from ..model_selection.model_selection import _get_metric
 
 logging.basicConfig(
     format = '%(asctime)-5s %(name)-10s %(levelname)-5s %(message)s', 
@@ -28,19 +26,20 @@ logging.basicConfig(
 
 def backtesting_sarimax(
         y: pd.Series,
-        initial_train_size: int,
         steps: int,
-        metric: str,
+        metric: Union[str, callable],
+        initial_train_size: int,
+        fixed_train_size: bool=False,
         refit: bool=False,
         order: tuple=(1, 0, 0), 
         seasonal_order: tuple=(0, 0, 0, 0),
         trend: str=None,
         alpha: float= 0.05,
-        exog: Union[pd.Series, pd.DataFrame]=None,
+        exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
         sarimax_kwargs: dict={},
         fit_kwargs: dict={'disp':0},
         verbose: bool=False
-) -> Tuple[np.array, pd.DataFrame]:
+) -> Tuple[float, pd.DataFrame]:
     '''
     
     Backtesting (validation) of `SARIMAX` model from statsmodels v0.12. The model
@@ -55,15 +54,24 @@ def backtesting_sarimax(
     y : pandas Series
         Time series values. 
 
-    initial_train_size: int 
-        Number of samples used in the initial train.
-        
     steps : int
         Number of steps to predict.
 
-    metric : {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
+    metric : str, callable
         Metric used to quantify the goodness of fit of the model.
+        
+        If string:
+            {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
+
+        It callable:
+            Function with arguments y_true, y_pred that returns a float.
+
+    initial_train_size: int 
+        Number of samples used in the initial train.
     
+    fixed_train_size: bool, default `False`
+        If True, train size doesn't increases but moves by `steps` in each iteration.
+
     refit: bool, default False
         Whether to re-fit the model in each iteration.
         
@@ -97,7 +105,7 @@ def backtesting_sarimax(
         The significance level for the confidence interval. The default
         alpha = .05 returns a 95% confidence interval.
         
-    exog : pd.Series, pd.DataFrame, default `None`
+    exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
@@ -115,7 +123,7 @@ def backtesting_sarimax(
         
     Returns 
     -------
-    metric_value: np.ndarray shape (1,)
+    metric_value: float
         Value of the metric.
 
     backtest_predictions: pandas DataFrame
@@ -124,22 +132,9 @@ def backtesting_sarimax(
                 column lower  = lower bound of the interval.
                 column upper  = upper bound interval of the interval.
     '''
-    
 
-    if metric not in ['mean_squared_error', 'mean_absolute_error',
-                      'mean_absolute_percentage_error']:
-        raise Exception(
-            f"Allowed metrics are: 'mean_squared_error', 'mean_absolute_error' and "
-            f"'mean_absolute_percentage_error'. Got {metric}."
-        )
-    
-    metrics = {
-        'mean_squared_error': mean_squared_error,
-        'mean_absolute_error': mean_absolute_error,
-        'mean_absolute_percentage_error': mean_absolute_percentage_error
-    }
-    
-    metric = metrics[metric]
+    if isinstance(metric, str):
+        metric = _get_metric(metric=metric)
     
     folds     = int(np.ceil((len(y) - initial_train_size) / steps))
     remainder = (len(y) - initial_train_size) % steps
@@ -160,17 +155,24 @@ def backtesting_sarimax(
         )
 
     if refit:
-        # In each iteration (except the last one) the model is fitted before
-        # making predictions. The train size increases by `steps` in each iteration.
         for i in range(folds):
-            train_size = initial_train_size + i * steps
+            # In each iteration (except the last one) the model is fitted before making predictions.
+            if fixed_train_size:
+                # The train size doesn't increases but moves by `steps` in each iteration.
+                train_idx_start = i * steps
+                train_idx_end = initial_train_size + i * steps
+            else:
+                # The train size increases by `steps` in each iteration.
+                train_idx_start = 0
+                train_idx_end = initial_train_size + i * steps
+
             if exog is not None:
-                next_window_exog = exog.iloc[train_size:train_size + steps, ]
+                next_window_exog = exog.iloc[train_idx_end:train_idx_end + steps, ]
 
             if i < folds - 1: # from the first step to one before the last one.
                 if exog is None:
                     model = SARIMAX(
-                                endog = y.iloc[:train_size],
+                                endog = y.iloc[train_idx_start:train_idx_end],
                                 order = order,
                                 seasonal_order = seasonal_order,
                                 trend = trend,
@@ -184,8 +186,8 @@ def backtesting_sarimax(
                            )
                 else:
                     model = SARIMAX(
-                                endog = y.iloc[:train_size],
-                                exog  = exog.iloc[:train_size, ],
+                                endog = y.iloc[train_idx_start:train_idx_end],
+                                exog  = exog.iloc[train_idx_start:train_idx_end, ],
                                 order = order,
                                 seasonal_order = seasonal_order,
                                 trend = trend,
@@ -201,7 +203,7 @@ def backtesting_sarimax(
                 if remainder == 0:
                     if exog is None:
                         model = SARIMAX(
-                                    endog = y.iloc[:train_size],
+                                    endog = y.iloc[train_idx_start:train_idx_end],
                                     order = order,
                                     seasonal_order = seasonal_order,
                                     trend = trend,
@@ -215,8 +217,8 @@ def backtesting_sarimax(
                            )
                     else:
                         model = SARIMAX(
-                                    endog = y.iloc[:train_size],
-                                    exog  = exog.iloc[:train_size, ],
+                                    endog = y.iloc[train_idx_start:train_idx_end],
+                                    exog  = exog.iloc[train_idx_start:train_idx_end, ],
                                     order = order,
                                     seasonal_order = seasonal_order,
                                     trend = trend,
@@ -233,7 +235,7 @@ def backtesting_sarimax(
                     steps = remainder
                     if exog is None:
                         model = SARIMAX(
-                                    endog = y.iloc[:train_size],
+                                    endog = y.iloc[train_idx_start:train_idx_end],
                                     order = order,
                                     seasonal_order = seasonal_order,
                                     trend = trend,
@@ -247,8 +249,8 @@ def backtesting_sarimax(
                               )
                     else:
                         model = SARIMAX(
-                                    endog = y.iloc[:train_size],
-                                    exog  = exog.iloc[:train_size, ],
+                                    endog = y.iloc[train_idx_start:train_idx_end],
+                                    exog  = exog.iloc[train_idx_start:train_idx_end, ],
                                     order = order,
                                     seasonal_order = seasonal_order,
                                     trend = trend,
@@ -368,19 +370,20 @@ def backtesting_sarimax(
             backtest_predictions.append(pred)
         
     backtest_predictions = pd.concat(backtest_predictions)
+
     metric_value = metric(
                     y_true = y.iloc[initial_train_size: initial_train_size + len(backtest_predictions)],
                     y_pred = backtest_predictions['predicted_mean']
                   )
 
-    return np.array([metric_value]), backtest_predictions
+    return metric_value, backtest_predictions
 
 
 def cv_sarimax(
         y: pd.Series,
         initial_train_size: int,
         steps: int,
-        metric: str,
+        metric: Union[str, callable],
         order: tuple=(1, 0, 0), 
         seasonal_order: tuple=(0, 0, 0, 0),
         trend: str=None,
@@ -438,8 +441,14 @@ def cv_sarimax(
     steps : int
         Number of steps to predict.
         
-    metric : {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
+    metric : str, callable
         Metric used to quantify the goodness of fit of the model.
+        
+        If string:
+            {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
+
+        It callable:
+            Function with arguments y_true, y_pred that returns a float.
         
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
@@ -469,21 +478,8 @@ def cv_sarimax(
                 column upper  = upper bound interval of the interval.
     '''
     
-
-    if metric not in ['mean_squared_error', 'mean_absolute_error',
-                      'mean_absolute_percentage_error']:
-        raise Exception(
-            f"Allowed metrics are: 'mean_squared_error', 'mean_absolute_error' and "
-            f"'mean_absolute_percentage_error'. Got {metric}."
-        )
-        
-    metrics = {
-        'mean_squared_error': mean_squared_error,
-        'mean_absolute_error': mean_absolute_error,
-        'mean_absolute_percentage_error': mean_absolute_percentage_error
-    }
-    
-    metric = metrics[metric]
+    if isinstance(metric, str):
+        metric = _get_metric(metric=metric)
     
     if isinstance(y, pd.Series):
         y = y.to_numpy(copy=True)
@@ -544,9 +540,10 @@ def cv_sarimax(
 def grid_search_sarimax(
         y: pd.Series,
         param_grid: dict,
-        initial_train_size: int,
         steps: int,
-        metric: str,
+        metric: Union[str, callable],
+        initial_train_size: int,
+        fixed_train_size: bool=False,
         exog: Union[pd.Series, pd.DataFrame]=None,
         refit: bool=False,
         sarimax_kwargs: dict={},
@@ -568,15 +565,24 @@ def grid_search_sarimax(
         Dictionary with parameters names (`str`) as keys and lists of parameter
         settings to try as values. Allowed parameters in the grid are: order,
         seasonal_order and trend.
-    
-    initial_train_size: int 
-        Number of samples used in the initial train.
-        
+  
     steps : int
         Number of steps to predict.
         
-    metric : {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
+    metric : str, callable
         Metric used to quantify the goodness of fit of the model.
+        
+        If string:
+            {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
+
+        It callable:
+            Function with arguments y_true, y_pred that returns a float.
+
+    initial_train_size: int 
+        Number of samples used in the initial train.
+    
+    fixed_train_size: bool, default `False`
+        If True, train size doesn't increases but moves by `steps` in each iteration.
         
     exog : np.ndarray, pd.Series, pd.DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
@@ -631,7 +637,6 @@ def grid_search_sarimax(
         f"Number of models compared: {len(param_grid)}"
     )
         
-        
     for params in tqdm(param_grid, ncols=90):
 
         metric_value = backtesting_sarimax(
@@ -641,6 +646,7 @@ def grid_search_sarimax(
                             seasonal_order = params['seasonal_order'],
                             trend          = params['trend'],
                             initial_train_size = initial_train_size,
+                            fixed_train_size   = fixed_train_size,
                             steps          = steps,
                             refit          = refit,
                             metric         = metric,

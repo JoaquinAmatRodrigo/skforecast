@@ -11,21 +11,27 @@ All notable changes to this project will be documented in this file.
 
 + Add unit test for model_selection module (functions: `_backtesting_forecaster_refit`).
 
++ Add `fixed_train_size: bool=False` argument to `backtesting_sarimax`.
+
++ Add unit test for model_selection_statsmodels module (functions: `backtesting_sarimax`).
+
 ### Changed
 
 + Rename `get_metric` to `_get_metric`.
 
 + Functions in model_selection module allow custom metrics.
 
++ Functions in model_selection_statsmodels module allow custom metrics, `_get_metric` is used from model_selection module.
+
 + Change function `set_out_sample_residuals` (ForecasterAutoreg and ForecasterAutoregCustom), `residuals` argument must be `pd.Series` (was `numpy ndarray`).
 
-+ Return `metric_value` of backtesting functions is now a `float` (was `numpy ndarray`).
++ Return `metric_value` of backtesting functions (model_selection and model_selection_statsmodels) is now a `float` (was `numpy ndarray`).
 
 ### Fixed
 
-+ Requirements versions
++ Requirements versions.
 
-+ Method `fit` doesn't remove `out_sample_residuals`
++ Method `fit` doesn't remove `out_sample_residuals`.
 
 
 ## [0.4.2] - [2022-01-08]
