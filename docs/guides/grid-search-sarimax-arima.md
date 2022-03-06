@@ -62,9 +62,10 @@ param_grid = {'order': [(12, 0, 0), (12, 2, 0), (12, 1, 0), (12, 1, 1), (14, 1, 
 results_grid = grid_search_sarimax(
                 y = data.loc[:'2006-01-01'],
                 param_grid = param_grid,
-                initial_train_size = len(data_train),
                 steps = 7,
                 metric = 'mean_absolute_error',
+                initial_train_size = len(data_train),
+                fixed_train_size = False,
                 refit = False,
                 verbose = False,
                 fit_kwargs = {'maxiter': 200, 'disp': 0}
@@ -84,18 +85,18 @@ results_grid
 
 | params                                                               |    metric | order      | seasonal_order   | trend   |
 |----------------------------------------------------------------------|-----------|------------|------------------|---------|
-| {'order': (12, 1, 1), 'seasonal_order': (0, 0, 0, 0), 'trend': None} | 0.0504759 | (12, 1, 1) | (0, 0, 0, 0)     |         |
-| {'order': (12, 1, 1), 'seasonal_order': (0, 0, 0, 0), 'trend': 'n'}  | 0.0504759 | (12, 1, 1) | (0, 0, 0, 0)     | n       |
-| {'order': (14, 1, 4), 'seasonal_order': (0, 0, 0, 0), 'trend': None} | 0.0505509 | (14, 1, 4) | (0, 0, 0, 0)     |         |
-| {'order': (14, 1, 4), 'seasonal_order': (0, 0, 0, 0), 'trend': 'n'}  | 0.0505509 | (14, 1, 4) | (0, 0, 0, 0)     | n       |
-| {'order': (12, 1, 1), 'seasonal_order': (0, 0, 0, 0), 'trend': 'c'}  | 0.0518921 | (12, 1, 1) | (0, 0, 0, 0)     | c       |
-| {'order': (12, 1, 0), 'seasonal_order': (0, 0, 0, 0), 'trend': None} | 0.0528397 | (12, 1, 0) | (0, 0, 0, 0)     |         |
-| {'order': (12, 1, 0), 'seasonal_order': (0, 0, 0, 0), 'trend': 'n'}  | 0.0528397 | (12, 1, 0) | (0, 0, 0, 0)     | n       |
-| {'order': (12, 1, 0), 'seasonal_order': (0, 0, 0, 0), 'trend': 'c'}  | 0.0534996 | (12, 1, 0) | (0, 0, 0, 0)     | c       |
-| {'order': (14, 1, 4), 'seasonal_order': (0, 0, 0, 0), 'trend': 'c'}  | 0.0537079 | (14, 1, 4) | (0, 0, 0, 0)     | c       |
-| {'order': (12, 2, 0), 'seasonal_order': (0, 0, 0, 0), 'trend': None} | 0.054425  | (12, 2, 0) | (0, 0, 0, 0)     |         |
-| {'order': (12, 2, 0), 'seasonal_order': (0, 0, 0, 0), 'trend': 'n'}  | 0.054425  | (12, 2, 0) | (0, 0, 0, 0)     | n       |
-| {'order': (12, 2, 0), 'seasonal_order': (0, 0, 0, 0), 'trend': 'c'}  | 0.0544985 | (12, 2, 0) | (0, 0, 0, 0)     | c       |
-| {'order': (12, 0, 0), 'seasonal_order': (0, 0, 0, 0), 'trend': None} | 0.0636531 | (12, 0, 0) | (0, 0, 0, 0)     |         |
-| {'order': (12, 0, 0), 'seasonal_order': (0, 0, 0, 0), 'trend': 'n'}  | 0.0636531 | (12, 0, 0) | (0, 0, 0, 0)     | n       |
-| {'order': (12, 0, 0), 'seasonal_order': (0, 0, 0, 0), 'trend': 'c'}  | 0.0640216 | (12, 0, 0) | (0, 0, 0, 0)     | c       |
+| {'order': (12, 1, 1), 'seasonal_order': (0, 0, 0, 0), 'trend': None} | 0.0504716 | (12, 1, 1) | (0, 0, 0, 0)     |         |
+| {'order': (12, 1, 1), 'seasonal_order': (0, 0, 0, 0), 'trend': 'n'}  | 0.0504716 | (12, 1, 1) | (0, 0, 0, 0)     | n       |
+| {'order': (14, 1, 4), 'seasonal_order': (0, 0, 0, 0), 'trend': None} | 0.0507239 | (14, 1, 4) | (0, 0, 0, 0)     |         |
+| {'order': (14, 1, 4), 'seasonal_order': (0, 0, 0, 0), 'trend': 'n'}  | 0.0507239 | (14, 1, 4) | (0, 0, 0, 0)     | n       |
+| {'order': (14, 1, 4), 'seasonal_order': (0, 0, 0, 0), 'trend': 'c'}  | 0.051443  | (14, 1, 4) | (0, 0, 0, 0)     | c       |
+| {'order': (12, 1, 1), 'seasonal_order': (0, 0, 0, 0), 'trend': 'c'}  | 0.0519186 | (12, 1, 1) | (0, 0, 0, 0)     | c       |
+| {'order': (12, 1, 0), 'seasonal_order': (0, 0, 0, 0), 'trend': None} | 0.0528444 | (12, 1, 0) | (0, 0, 0, 0)     |         |
+| {'order': (12, 1, 0), 'seasonal_order': (0, 0, 0, 0), 'trend': 'n'}  | 0.0528444 | (12, 1, 0) | (0, 0, 0, 0)     | n       |
+| {'order': (12, 1, 0), 'seasonal_order': (0, 0, 0, 0), 'trend': 'c'}  | 0.0535008 | (12, 1, 0) | (0, 0, 0, 0)     | c       |
+| {'order': (12, 2, 0), 'seasonal_order': (0, 0, 0, 0), 'trend': None} | 0.0544416 | (12, 2, 0) | (0, 0, 0, 0)     |         |
+| {'order': (12, 2, 0), 'seasonal_order': (0, 0, 0, 0), 'trend': 'n'}  | 0.0544416 | (12, 2, 0) | (0, 0, 0, 0)     | n       |
+| {'order': (12, 2, 0), 'seasonal_order': (0, 0, 0, 0), 'trend': 'c'}  | 0.0544721 | (12, 2, 0) | (0, 0, 0, 0)     | c       |
+| {'order': (12, 0, 0), 'seasonal_order': (0, 0, 0, 0), 'trend': None} | 0.0636542 | (12, 0, 0) | (0, 0, 0, 0)     |         |
+| {'order': (12, 0, 0), 'seasonal_order': (0, 0, 0, 0), 'trend': 'n'}  | 0.0636542 | (12, 0, 0) | (0, 0, 0, 0)     | n       |
+| {'order': (12, 0, 0), 'seasonal_order': (0, 0, 0, 0), 'trend': 'c'}  | 0.0640849 | (12, 0, 0) | (0, 0, 0, 0)     | c       |

@@ -39,9 +39,10 @@ metric, predictions_backtest = backtesting_sarimax(
                                     y = data,
                                     order = (12, 1, 1),
                                     seasonal_order = (0, 0, 0, 0),
-                                    initial_train_size = len(data_train),
                                     steps = 7,
                                     metric = 'mean_absolute_error',
+                                    initial_train_size = len(data_train),
+                                    fixed_train_size = False,
                                     refit = False,
                                     verbose = True,
                                     fit_kwargs = {'maxiter': 250, 'disp': 0},
@@ -61,7 +62,7 @@ print(f"Error backtest: {metric}")
 ```
 
 <pre>
-Error backtest: [0.05544072]
+Error backtest: 0.055440709178810936
 </pre>
 
 ``` python
@@ -70,7 +71,7 @@ predictions_backtest.head(4)
 
 |                     |   predicted_mean |   lower y |   upper y |
 |:--------------------|-----------------:|----------:|----------:|
-| 1999-07-01 00:00:00 |         0.734616 |  0.650009 |  0.819222 |
-| 1999-08-01 00:00:00 |         0.751851 |  0.660717 |  0.842986 |
-| 1999-09-01 00:00:00 |         0.86531  |  0.768134 |  0.962486 |
-| 1999-10-01 00:00:00 |         0.832383 |  0.730362 |  0.934404 |
+| 1999-07-01 00:00:00 |         0.734693 |  0.650096 |  0.81929  |
+| 1999-08-01 00:00:00 |         0.751835 |  0.660703 |  0.842967 |
+| 1999-09-01 00:00:00 |         0.865333 |  0.768144 |  0.962522 |
+| 1999-10-01 00:00:00 |         0.832345 |  0.730306 |  0.934385 |
