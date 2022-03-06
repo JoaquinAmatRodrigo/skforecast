@@ -91,7 +91,6 @@ def test_output_backtesting_forecaster_refit_no_exog_no_remainder_with_mocked():
     12 observations to backtest, steps=4 (no remainder), metric='mean_squared_error'
     '''
     forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3)
-    forecaster.fit(y=y)
 
     n_backtest = 12
     y_train = y[:-n_backtest]
@@ -123,7 +122,6 @@ def test_output_backtesting_forecaster_refit_no_exog_yes_remainder_with_mocked()
     12 observations to backtest, steps=5 (2 remainder), metric='mean_squared_error'
     '''
     forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3)
-    forecaster.fit(y=y)
 
     n_backtest = 12
     y_train = y[:-n_backtest]
@@ -155,7 +153,6 @@ def test_output_backtesting_forecaster_refit_yes_exog_no_remainder_with_mocked()
     12 observations to backtest, steps=4 (no remainder), metric='mean_squared_error'
     '''
     forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3)
-    forecaster.fit(y=y, exog=exog)
 
     n_backtest = 12
     y_train = y[:-n_backtest]
@@ -187,7 +184,6 @@ def test_output_backtesting_forecaster_refit_yes_exog_yes_remainder_with_mocked(
     12 observations to backtest, steps=5 (2 remainder), metric='mean_squared_error'
     '''
     forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3)
-    forecaster.fit(y=y, exog=exog)
 
     n_backtest = 12
     y_train = y[:-n_backtest]
@@ -269,7 +265,6 @@ def test_output_backtesting_forecaster_refit_interval_no_exog_no_remainder_with_
     'in_sample_residuals = True'
     '''
     forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3)
-    forecaster.fit(y=y)
 
     n_backtest = 12
     y_train = y[:-n_backtest]
@@ -302,7 +297,6 @@ def test_output_backtesting_forecaster_refit_interval_no_exog_yes_remainder_with
     'in_sample_residuals = True'
     '''
     forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3)
-    forecaster.fit(y=y)
 
     n_backtest = 12
     y_train = y[:-n_backtest]
@@ -335,7 +329,6 @@ def test_output_backtesting_forecaster_refit_interval_yes_exog_no_remainder_with
     'in_sample_residuals = True'
     '''
     forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3)
-    forecaster.fit(y=y, exog=exog)
 
     n_backtest = 12
     y_train = y[:-n_backtest]
@@ -368,7 +361,6 @@ def test_output_backtesting_forecaster_refit_interval_yes_exog_yes_remainder_wit
     'in_sample_residuals = True'
     '''
     forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3)
-    forecaster.fit(y=y, exog=exog)
 
     n_backtest = 12
     y_train = y[:-n_backtest]
@@ -416,7 +408,6 @@ def test_output_backtesting_forecaster_refit_interval_out_sample_residuals_no_ex
     'in_sample_residuals = False'
     '''
     forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3)
-    forecaster.fit(y=y)
     forecaster.set_out_sample_residuals(residuals=out_sample_residuals, append=False)
 
     n_backtest = 12
@@ -468,7 +459,6 @@ def test_calleable_metric_backtesting_forecaster_refit_no_exog_no_remainder_with
     12 observations to backtest, steps=4 (no remainder), metric='mean_squared_error'
     '''
     forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3)
-    forecaster.fit(y=y)
 
     n_backtest = 12
     y_train = y[:-n_backtest]
@@ -533,7 +523,6 @@ def test_output_backtesting_forecaster_refit_fixed_train_size_no_exog_no_remaind
     fixed_train_size=True
     '''
     forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3)
-    forecaster.fit(y=y)
 
     n_backtest = 12
     y_train = y[:-n_backtest]
@@ -566,7 +555,6 @@ def test_output_backtesting_forecaster_refit_fixed_train_size_no_exog_yes_remain
     fixed_train_size=True
     '''
     forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3)
-    forecaster.fit(y=y)
 
     n_backtest = 12
     y_train = y[:-n_backtest]
@@ -599,7 +587,6 @@ def test_output_backtesting_forecaster_refit_fixed_train_size_yes_exog_no_remain
     fixed_train_size=True
     '''
     forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3)
-    forecaster.fit(y=y, exog=exog)
 
     n_backtest = 12
     y_train = y[:-n_backtest]
@@ -632,7 +619,6 @@ def test_output_backtesting_forecaster_refit_fixed_train_size_yes_exog_yes_remai
     fixed_train_size=True
     '''
     forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3)
-    forecaster.fit(y=y, exog=exog)
 
     n_backtest = 12
     y_train = y[:-n_backtest]
