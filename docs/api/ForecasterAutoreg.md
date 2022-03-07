@@ -1,3 +1,3 @@
 # `ForecasterAutoreg`
 
-![mkapi](skforecast.ForecasterAutoreg.ForecasterAutoreg.ForecasterAutoreg)
+::: skforecast.ForecasterAutoreg.ForecasterAutoreg.ForecasterAutoreg

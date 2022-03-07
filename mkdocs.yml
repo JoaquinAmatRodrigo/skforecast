@@ -41,7 +41,16 @@ nav:
       - model_selection: api/model_selection.md
       - model_selection_statsmodels: api/model_selection_statsmodels.md
 plugins:
-  - mkapi
+  - mkdocstrings:
+      handlers:
+        python:
+          selection:
+            docstring_style: numpy
+            filters:
+              - "!^_"  # exclude all members starting with _
+          rendering:
+            show_root_heading: no
+            docstring_section_style: spacy
   - search
 copyright: 
 theme:
@@ -57,6 +66,7 @@ theme:
     - navigation.tabs.sticky
     - navigation.sections
     - navigation.expand
+    - navigation.top
   palette:
     primary: deep purple
     accent: light blue
