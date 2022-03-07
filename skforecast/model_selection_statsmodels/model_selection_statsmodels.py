@@ -42,7 +42,7 @@ def backtesting_sarimax(
 ) -> Tuple[float, pd.DataFrame]:
     '''
     
-    Backtesting (validation) of `SARIMAX` model from statsmodels v0.12. The model
+    Backtesting (validation) of `SARIMAX` model from statsmodels >= 0.12. The model
     is trained using the `initial_train_size` first observations, then, in each
     iteration, a number of `steps` predictions are evaluated. If refit is `True`,
     the model is re-fitted in each iteration before making predictions.
@@ -397,7 +397,7 @@ def cv_sarimax(
 
     '''
     
-    Cross-validation of `SARIMAX` model from statsmodels v0.12. The order of data
+    Cross-validation of `SARIMAX` model from statsmodels >= 0.12. The order of data
     is maintained and the training set increases in each iteration.
     
     Parameters
@@ -553,7 +553,7 @@ def grid_search_sarimax(
     '''
 
     Exhaustive search over specified parameter values for a `SARIMAX` model from
-    statsmodels v0.12. Validation is done using time series cross-validation or
+    statsmodels >= 0.12. Validation is done using time series cross-validation or
     backtesting.
     
     Parameters
