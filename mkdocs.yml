@@ -50,12 +50,11 @@ plugins:
               - "!^_"  # exclude all members starting with _
           rendering:
             show_root_heading: no
-            docstring_section_style: spacy
+            docstring_section_style: table
   - search
 copyright: 
 theme:
   name: material
-  custom_dir: overrides
   font:
     text: Ubuntu
     code: Ubuntu Mono
