@@ -8,8 +8,9 @@ Since **Version 0.4.0** only pandas series and dataframes are allowed (although 
 
 + If index is of type DatetimeIndex and has frequency, nothing is changed.
 
-> **Note:**  
-> There is nothing wrong with using data that does not have an associated DatetimeIndex with frequency. However, results will have less informative index.
+!!! Note
+
+    There is nothing wrong with using data that does not have an associated DatetimeIndex with frequency. However, results will have less informative index.
 
 
 

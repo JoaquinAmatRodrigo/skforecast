@@ -2,8 +2,9 @@
 
 XGBoost, acronym for Extreme Gradient Boosting, is a very efficient implementation of the stochastic gradient boosting algorithm that has become a benchmark in the field of machine learning. In addition to its own API, XGBoost library includes the XGBRegressor class which follows the scikit learn API and therefore it is compatible with skforecast.
 
-> **NOTE:**  
-> Since the success of XGBoost as a machine learning algorithm, new implementations have been developed that also achieve excellent results, two of them are: [LightGBM](https://lightgbm.readthedocs.io/en/latest/) and [CatBoost](https://catboost.ai/). A more detailed example can be found [here](https://www.cienciadedatos.net/documentos/py39-forecasting-time-series-with-skforecast-xgboost-lightgbm-catboost.html).
+!!! Note
+
+     Since the success of XGBoost as a machine learning algorithm, new implementations have been developed that also achieve excellent results, two of them are: [LightGBM](https://lightgbm.readthedocs.io/en/latest/) and [CatBoost](https://catboost.ai/). A more detailed example can be found [here](https://www.cienciadedatos.net/documentos/py39-forecasting-time-series-with-skforecast-xgboost-lightgbm-catboost.html).
 
 
 

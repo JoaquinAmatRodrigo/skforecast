@@ -82,5 +82,6 @@ Freq: MS, Name: pred, dtype: float64
 Since the provided `last_window` contains values from 2008-02-01 to 2008-06-01, the forecaster is able to create the needed lags and predict the next 5 steps.
 
 
-> **⚠ WARNING:**  
-> It is important to note that the length of last windows must be enough to include the maximum lag used by the forecaster. Fore example, if the forecaster uses lags 1, 24, 48 and 72 `last_window` must include the last 72 values of the series.
+!!! warning
+
+     It is important to note that the length of last windows must be enough to include the maximum lag used by the forecaster. Fore example, if the forecaster uses lags 1, 24, 48 and 72 `last_window` must include the last 72 values of the series.

@@ -16,6 +16,7 @@ nav:
   - User Guides:
       - Introduction to forcasting: guides/introduction-forecasting.md
       - Input data: guides/input-data.md
+      - Input data 2: notebooks/input_data.ipynb
       - Recursive multi-step forecasting: guides/autoregresive-forecaster.md
       - Custom predictors: guides/custom-predictors.md
       - Recursive multi-step forecasting with exogenous variables: guides/autoregresive-forecaster-exogenous.md
@@ -51,6 +52,9 @@ plugins:
           rendering:
             show_root_heading: no
             docstring_section_style: table
+  - mkdocs-jupyter:
+      include_source: False
+      ignore_h1_titles: True
   - search
 copyright: 
 theme:
@@ -70,6 +74,9 @@ theme:
     primary: deep purple
     accent: light blue
 markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
   - codehilite
   - pymdownx.inlinehilite
   - pymdownx.details
@@ -79,6 +86,9 @@ markdown_extensions:
       linenums: true
   - pymdownx.superfences
   - pymdownx.magiclink
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
   - toc:
       permalink: true
 extra:

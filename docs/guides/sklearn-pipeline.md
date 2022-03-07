@@ -2,8 +2,9 @@
 
 Since version 0.4.0, skforecast allows using scikit-learn pipelines as regressors. This is useful since, many machine learning models, need specific data preprocessing transformations. For example, linear models with Ridge or Lasso regularization benefits from features been scaled.
 
-> **⚠ WARNING:**  
-> Version 0.4 does not allow including ColumnTransformer in the pipeline used as regressor, so if the preprocessing transformations only apply to some specific columns, they have to be applied on the data set before training the model. A more detailed example can be found [here](https://www.cienciadedatos.net/documentos/py39-forecasting-time-series-with-skforecast-xgboost-lightgbm-catboost.html#Exogenous-variables).
+!!! warning
+
+     Version 0.4 does not allow including ColumnTransformer in the pipeline used as regressor, so if the preprocessing transformations only apply to some specific columns, they have to be applied on the data set before training the model. A more detailed example can be found [here](https://www.cienciadedatos.net/documentos/py39-forecasting-time-series-with-skforecast-xgboost-lightgbm-catboost.html#Exogenous-variables).
 
 ## Libraries
 
