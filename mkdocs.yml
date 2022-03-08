@@ -1,5 +1,6 @@
 site_name: Skforecast Docs
-extra_css: [style.css]
+extra_css:
+  - stylesheets/extra.css
 repo_url: https://github.com/JoaquinAmatRodrigo/skforecast
 site_url: https://joaquinamatrodrigo.github.io/skforecast/
 site_description: Python library that eases using scikit-learn regressors as multi-step forecasters. It also works with any regressor compatible with the scikit-learn API (XGBoost, LightGBM, Ranger...).
@@ -15,9 +16,8 @@ nav:
     
   - User Guides:
       - Introduction to forcasting: guides/introduction-forecasting.md
-      - Input data: guides/input-data.md
-      - Input data 2: notebooks/input_data.ipynb
-      - Recursive multi-step forecasting: guides/autoregresive-forecaster.md
+      - Input data: notebooks/input_data.ipynb
+      - Recursive multi-step forecasting: notebooks/autoregresive_forecaster.ipynb
       - Custom predictors: guides/custom-predictors.md
       - Recursive multi-step forecasting with exogenous variables: guides/autoregresive-forecaster-exogenous.md
       - Direct multi-step forecasting: guides/direct-multi-step-forecasting.md
@@ -25,7 +25,7 @@ nav:
       - Forecaster in production: guides/forecaster-in-production.md
       - Tuning forecaster: guides/tuning-forecaster.md
       - Prediction intervals: guides/prediction-intervals.md
-      - Feature importance: guides/feature-importance.md
+      - Feature importance: notebooks/feature_importance.ipynb
       - Scikit-learn Pipeline: guides/sklearn-pipeline.md
       - XGBoost: guides/xgboost.md
       - Save and load forecaster: guides/save-load-forecaster.md
@@ -52,9 +52,13 @@ plugins:
           rendering:
             show_root_heading: no
             docstring_section_style: table
+  # - mknotebooks:
+  #     enable_default_jupyter_cell_styling: false
+  #     enable_default_pandas_dataframe_styling: true
   - mkdocs-jupyter:
       include_source: False
       ignore_h1_titles: True
+      include_source: True
   - search
 copyright: 
 theme:
