@@ -577,7 +577,7 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
         
         
         
-    def set_lags(self, lags: int) -> None:
+    def set_lags(self, lags: Union[int, list, np.ndarray, range]) -> None:
         '''      
         Set new value to the attribute `lags`.
         Attributes `max_lag` and `window_size` are also updated.
@@ -585,9 +585,9 @@ class ForecasterAutoregMultiOutput(ForecasterBase):
         Parameters
         ----------
         lags : int, list, 1D np.array, range
-        Lags used as predictors. Index starts at 1, so lag 1 is equal to t-1.
-            `int`: include lags from 1 to `lags`.
-            `list` or `np.array`: include only lags present in `lags`.
+            Lags used as predictors. Index starts at 1, so lag 1 is equal to t-1.
+                `int`: include lags from 1 to `lags`.
+                `list` or `np.array`: include only lags present in `lags`.
 
         Returns 
         -------
