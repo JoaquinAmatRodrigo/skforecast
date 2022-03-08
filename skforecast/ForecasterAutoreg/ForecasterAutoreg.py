@@ -790,7 +790,7 @@ class ForecasterAutoreg(ForecasterBase):
         self.regressor.set_params(**params)
         
         
-    def set_lags(self, lags: int) -> None:
+    def set_lags(self, lags: Union[int, list, np.ndarray, range]) -> None:
         '''      
         Set new value to the attribute `lags`.
         Attributes `max_lag` and `window_size` are also updated.
@@ -798,13 +798,13 @@ class ForecasterAutoreg(ForecasterBase):
         Parameters
         ----------
         lags : int, list, 1D np.array, range
-        Lags used as predictors. Index starts at 1, so lag 1 is equal to t-1.
-            `int`: include lags from 1 to `lags`.
-            `list` or `np.array`: include only lags present in `lags`.
+            Lags used as predictors. Index starts at 1, so lag 1 is equal to t-1.
+                `int`: include lags from 1 to `lags`.
+                `list` or `np.array`: include only lags present in `lags`.
 
         Returns 
         -------
-        self
+        None
         
         '''
         
@@ -838,7 +838,7 @@ class ForecasterAutoreg(ForecasterBase):
         
         Parameters
         ----------
-        params : pd.Series
+        residuals : pd.Series
             Values of residuals. If len(residuals) > 1000, only a random sample
             of 1000 values are stored.
             

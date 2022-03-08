@@ -783,7 +783,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         
         Parameters
         ----------
-        params : pd.Series
+        residuals : pd.Series
             Values of residuals. If len(residuals) > 1000, only a random sample
             of 1000 values are stored.
             
