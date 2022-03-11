@@ -33,6 +33,8 @@ All notable changes to this project will be documented in this file.
 
 + Method `fit` doesn't remove `out_sample_residuals`.
 
++ Added random seed during residuals downsampling (ForecasterAutoreg and ForecasterAutoregCustom)
+
 
 ## [0.4.2] - [2022-01-08]
 
