@@ -15,3 +15,10 @@
     white-space: pre-wrap;
     font-size: medium;
 }
+
+.jupyter-wrapper .jp-OutputPrompt {
+    display: none;
+}
+.jupyter-wrapper .jp-CodeCell .jp-Cell-inputWrapper .jp-InputPrompt {
+    display: none;
+}

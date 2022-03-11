@@ -18,19 +18,19 @@ nav:
       - Introduction to forcasting: guides/introduction-forecasting.md
       - Input data: notebooks/input_data.ipynb
       - Recursive multi-step forecasting: notebooks/autoregresive_forecaster.ipynb
-      - Custom predictors: guides/custom-predictors.md
-      - Recursive multi-step forecasting with exogenous variables: guides/autoregresive-forecaster-exogenous.md
-      - Direct multi-step forecasting: guides/direct-multi-step-forecasting.md
-      - Backtesting forecaster: guides/backtesting.md
-      - Forecaster in production: guides/forecaster-in-production.md
-      - Tuning forecaster: guides/tuning-forecaster.md
-      - Prediction intervals: guides/prediction-intervals.md
+      - Custom predictors: notebooks/custom_predictors.ipynb
+      - Exogenous variables: notebooks/autoregresive_forecaster_exogenous.ipynb
+      - Direct multi-step forecasting: notebooks/direct_multi_step_forecasting.ipynb
+      - Backtesting forecaster: notebooks/backtesting.md
+      - Forecaster in production: notebooks/forecaster-in-production.md
+      - Tuning forecaster: notebooks/tuning-forecaster.md
+      - Prediction intervals: notebooks/prediction-intervals.md
       - Feature importance: notebooks/feature_importance.ipynb
-      - Scikit-learn Pipeline: guides/sklearn-pipeline.md
-      - XGBoost: guides/xgboost.md
-      - Save and load forecaster: guides/save-load-forecaster.md
-      - Grid search SARIMAX and ARIMA models: guides/grid-search-sarimax-arima.md
-      - Backtesting SARIMAX and ARIMA models: guides/backtesting-sarimax-arima.md
+      - Scikit-learn Pipeline: notebooks/sklearn-pipeline.md
+      - XGBoost: notebooks/xgboost.md
+      - Save and load forecaster: notebooks/save-load-forecaster.md
+      - Grid search SARIMAX and ARIMA models: notebooks/grid-search-sarimax-arima.md
+      - Backtesting SARIMAX and ARIMA models: notebooks/backtesting-sarimax-arima.md
 
   - Examples and tutorials:
       - Examples and tutorials: examples/examples.md
