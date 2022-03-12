@@ -16,21 +16,21 @@ nav:
     
   - User Guides:
       - Introduction to forcasting: guides/introduction-forecasting.md
-      - Input data: notebooks/input_data.ipynb
-      - Recursive multi-step forecasting: notebooks/autoregresive_forecaster.ipynb
-      - Custom predictors: notebooks/custom_predictors.ipynb
-      - Exogenous variables: notebooks/autoregresive_forecaster_exogenous.ipynb
-      - Direct multi-step forecasting: notebooks/direct_multi_step_forecasting.ipynb
-      - Backtesting forecaster: notebooks/backtesting.md
-      - Forecaster in production: notebooks/forecaster-in-production.md
-      - Tuning forecaster: notebooks/tuning-forecaster.md
-      - Prediction intervals: notebooks/prediction-intervals.md
-      - Feature importance: notebooks/feature_importance.ipynb
-      - Scikit-learn Pipeline: notebooks/sklearn-pipeline.md
-      - XGBoost: notebooks/xgboost.md
-      - Save and load forecaster: notebooks/save-load-forecaster.md
-      - Grid search SARIMAX and ARIMA models: notebooks/grid-search-sarimax-arima.md
-      - Backtesting SARIMAX and ARIMA models: notebooks/backtesting-sarimax-arima.md
+      - Input data: notebooks/input-data.ipynb
+      - Recursive multi-step forecasting: notebooks/autoregresive-forecaster.ipynb
+      - Custom predictors: notebooks/custom-predictors.ipynb
+      - Exogenous variables: notebooks/autoregresive-forecaster-exogenous.ipynb
+      - Direct multi-step forecasting: notebooks/direct-multi-step-forecasting.ipynb
+      - Backtesting forecaster: notebooks/backtesting.ipynb
+      - Forecaster in production: notebooks/forecaster-in-production.ipynb
+      - Grid search forecaster: notebooks/grid-search-forecaster.ipynb
+      - Prediction intervals: notebooks/prediction-intervals.ipynb
+      - Feature importance: notebooks/feature-importance.ipynb
+      - Scikit-learn Pipeline: notebooks/sklearn-pipeline.ipynb
+      - Forecasting with XGBoost: notebooks/xgboost.ipynb
+      - Save and load forecaster: notebooks/save-load-forecaster.ipynb
+      - Grid search SARIMAX and ARIMA models: guides/grid-search-sarimax-arima.md
+      - Backtesting SARIMAX and ARIMA models: guides/backtesting-sarimax-arima.md
 
   - Examples and tutorials:
       - Examples and tutorials: examples/examples.md
