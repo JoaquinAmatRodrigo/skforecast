@@ -29,8 +29,8 @@ nav:
       - Scikit-learn Pipeline: notebooks/sklearn-pipeline.ipynb
       - Forecasting with XGBoost: notebooks/xgboost.ipynb
       - Save and load forecaster: notebooks/save-load-forecaster.ipynb
-      - Grid search SARIMAX and ARIMA models: guides/grid-search-sarimax-arima.md
-      - Backtesting SARIMAX and ARIMA models: guides/backtesting-sarimax-arima.md
+      - Grid search SARIMAX and ARIMA models: notebooks/grid-search-sarimax-arima.ipynb
+      - Backtesting SARIMAX and ARIMA models: notebooks/backtesting-sarimax-arima.ipynb
 
   - Examples and tutorials:
       - Examples and tutorials: examples/examples.md
