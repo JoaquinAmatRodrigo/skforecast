@@ -58,7 +58,6 @@ Direct multi-step forecasting consists of training a different model for each st
 
 
 ### Multiple output forecasting
-<br>
 
 Some machine learning models, such as long short-term memory (LSTM) neural network  are able 
 to predict simultaniusly several values of a sequence (*one-shot*). This strategy is not currently implemented in skforecast library.

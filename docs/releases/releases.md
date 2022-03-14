@@ -4,13 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ## [0.4.2] - [2022-01-08]
 
-### Added
+**Added**
 
 + Increased verbosity of function `backtesting_forecaster()`.
 
 + Random state argument in `backtesting_forecaster()`.
 
-### Changed
+**Changed**
 
 + Function `backtesting_forecaster()` do not modify the original forecaster.
 
@@ -18,7 +18,7 @@ All notable changes to this project will be documented in this file.
 
 + Function `model_selection.time_series_spliter` renamed to `model_selection.time_series_splitter`
 
-### Fixed
+**Fixed**
 
 + Methods `get_coef` and `get_feature_importance` of `ForecasterAutoregMultiOutput` class return proper feature names.
 
