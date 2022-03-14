@@ -9,13 +9,15 @@ use_directory_urls: false
 nav:
   - Home:
     - Readme: README.md
-    - User Guides: guides/introduction-forecasting.md
+    - Introduction to forcasting: introduction-forecasting/introduction-forecasting.md
+    - User Guides: notebooks/input-data.ipynb
     - Examples: examples/examples.md
     - API Reference: api/ForecasterAutoreg.md
     - Releases: releases/releases.md
+
+  - Introduction to forcasting: introduction-forecasting/introduction-forecasting.md
     
   - User Guides:
-      - Introduction to forcasting: guides/introduction-forecasting.md
       - Input data: notebooks/input-data.ipynb
       - Recursive multi-step forecasting: notebooks/autoregresive-forecaster.ipynb
       - Custom predictors: notebooks/custom-predictors.ipynb
@@ -41,6 +43,9 @@ nav:
       - ForecasterAutoregMultiOutput: api/ForecasterAutoregMultiOutput.md
       - model_selection: api/model_selection.md
       - model_selection_statsmodels: api/model_selection_statsmodels.md
+
+  - Releases: releases/releases.md
+
 plugins:
   - mkdocstrings:
       handlers:

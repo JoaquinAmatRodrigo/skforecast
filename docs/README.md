@@ -1,4 +1,5 @@
 <script src="https://kit.fontawesome.com/d20edc211b.js" crossorigin="anonymous"></script>
+
 <img src="img/logo_skforecast_no_background.png" width=185 height=185 align="right">
 
 # **skforecast**
