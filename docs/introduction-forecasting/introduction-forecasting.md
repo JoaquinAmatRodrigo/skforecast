@@ -4,7 +4,7 @@
 ## Time series and forecasting
 
 
-A time series is a sequence of data arranged chronologically, in principle, equally spaced in time. Forecasting is the process of predicting future values of a time series based on its previously observed patterns (autoregressive), or including other external variables.
+A time series is a sequence of data arranged chronologically, in principle, equally spaced in time. Forecasting is the process of predicting future values of a time series based on its previously observed patterns (autoregressive), or including external variables.
 
 
 <p align="center"><img src="../img/forecasting_multi-step.gif" style="width: 500px"></p>
@@ -12,7 +12,7 @@ A time series is a sequence of data arranged chronologically, in principle, equa
 
 ## Machine learning for forecasting
 
-The main adaptation that needs to be made to apply machine learning models to forecasting problems is to transform the time series into a matrix in which, each value, is related to the time window (lags) that precede it.
+The main adaptation that needs to be made in order to apply machine learning models to forecasting problems is to transform the time series into a matrix in which, each value, is related to the time window (lags) that precede it.
 
 <p align="center"><img src="../img/transform_timeseries.gif" style="width: 500px;"></p>
 
@@ -25,7 +25,7 @@ This type of transformation also allows to include additional variables.
 <center><font size="2.5"> <i>Time series transformation including an exogenous variable.</i></font></center>
 
 
-Once data have been rearranged into the new shape, any regression model can be trained in ordert to predict the next value (step) of the serie.
+Once data have been rearranged into the new shape, any regression model can be trained to predict the next value (step) of the series.
 
 <p align="center"><img src="../img/diagram-trainig-forecaster.png" style="width: 700px;"></p>
 
@@ -51,7 +51,7 @@ Since the value *t(n-1)* is required to predict *t(n)*, and *t(n-1)* is unknown,
 
 ### Direct multi-step forecasting
 
-Direct multi-step forecasting consists of training a different model for each step. For example, to predict the next 5 values of a time series, 5 different models are traineded, one for each step. As a result, the predictions are independent of each other.
+Direct multi-step forecasting consists of training a different model for each step. For example, to predict the next 5 values of a time series, 5 different models are trained, one for each step. As a result, the predictions are independent of each other.
 
 <p align="center"><img src="../img/diagram-direct-multi-step-forecasting.png" style="width: 700px"></p>
 
@@ -60,4 +60,4 @@ Direct multi-step forecasting consists of training a different model for each st
 ### Multiple output forecasting
 
 Some machine learning models, such as long short-term memory (LSTM) neural network  are able 
-to predict simultaniusly several values of a sequence (*one-shot*). This strategy is not currently implemented in skforecast library.
+to predict simultaneously several values of a sequence (*one-shot*). This strategy is not currently implemented in skforecast library.
