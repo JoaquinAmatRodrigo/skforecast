@@ -21,7 +21,7 @@ pip install skforecast
 Specific version:
 
 ```
-pip install skforecast==0.4.1
+pip install skforecast==0.4.2
 ```
 
 Latest (unstable):
@@ -42,13 +42,14 @@ statsmodels>=0.12, <=0.13
 
 ## Features
 
-+ Create recursive autoregressive forecasters from any scikit-learn regressor
-+ Create multi-output autoregressive forecasters from any scikit-learn regressor
++ Create recursive autoregressive forecasters from any regressor that follows the scikit-learn API
++ Create multi-output autoregressive forecasters from any regressor that follows the scikit-learn API
 + Grid search to find optimal hyperparameters
 + Grid search to find optimal lags (predictors)
 + Include exogenous variables as predictors
 + Include custom predictors (rolling mean, rolling variance ...)
-+ Backtesting
++ Multiple backtesting methods for model validation
++ Include custom metrics for model validation
 + Prediction interval estimated by bootstrapping
 + Get predictor importance
 
