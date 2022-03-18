@@ -1,5 +1,6 @@
 site_name: Skforecast Docs
-extra_css: [style.css]
+extra_css:
+  - stylesheets/extra.css
 repo_url: https://github.com/JoaquinAmatRodrigo/skforecast
 site_url: https://joaquinamatrodrigo.github.io/skforecast/
 site_description: Python library that eases using scikit-learn regressors as multi-step forecasters. It also works with any regressor compatible with the scikit-learn API (XGBoost, LightGBM, Ranger...).
@@ -8,28 +9,30 @@ use_directory_urls: false
 nav:
   - Home:
     - Readme: README.md
-    - User Guides: guides/introduction-forecasting.md
+    - Introduction to forcasting: introduction-forecasting/introduction-forecasting.md
+    - User Guides: notebooks/input-data.ipynb
     - Examples: examples/examples.md
     - API Reference: api/ForecasterAutoreg.md
     - Releases: releases/releases.md
+
+  - Introduction to forcasting: introduction-forecasting/introduction-forecasting.md
     
   - User Guides:
-      - Introduction to forcasting: guides/introduction-forecasting.md
-      - Input data: guides/input-data.md
-      - Recursive multi-step forecasting: guides/autoregresive-forecaster.md
-      - Custom predictors: guides/custom-predictors.md
-      - Recursive multi-step forecasting with exogenous variables: guides/autoregresive-forecaster-exogenous.md
-      - Direct multi-step forecasting: guides/direct-multi-step-forecasting.md
-      - Backtesting forecaster: guides/backtesting.md
-      - Forecaster in production: guides/forecaster-in-production.md
-      - Tuning forecaster: guides/tuning-forecaster.md
-      - Prediction intervals: guides/prediction-intervals.md
-      - Feature importance: guides/feature-importance.md
-      - Scikit-learn Pipeline: guides/sklearn-pipeline.md
-      - XGBoost: guides/xgboost.md
-      - Save and load forecaster: guides/save-load-forecaster.md
-      - Grid search SARIMAX and ARIMA models: guides/grid-search-sarimax-arima.md
-      - Backtesting SARIMAX and ARIMA models: guides/backtesting-sarimax-arima.md
+      - Input data: notebooks/input-data.ipynb
+      - Recursive multi-step forecasting: notebooks/autoregresive-forecaster.ipynb
+      - Custom predictors: notebooks/custom-predictors.ipynb
+      - Exogenous variables: notebooks/autoregresive-forecaster-exogenous.ipynb
+      - Direct multi-step forecasting: notebooks/direct-multi-step-forecasting.ipynb
+      - Backtesting forecaster: notebooks/backtesting.ipynb
+      - Forecaster in production: notebooks/forecaster-in-production.ipynb
+      - Grid search forecaster: notebooks/grid-search-forecaster.ipynb
+      - Prediction intervals: notebooks/prediction-intervals.ipynb
+      - Feature importance: notebooks/feature-importance.ipynb
+      - Scikit-learn Pipeline: notebooks/sklearn-pipeline.ipynb
+      - Forecasting with XGBoost: notebooks/xgboost.ipynb
+      - Save and load forecaster: notebooks/save-load-forecaster.ipynb
+      - Grid search SARIMAX and ARIMA models: notebooks/grid-search-sarimax-arima.ipynb
+      - Backtesting SARIMAX and ARIMA models: notebooks/backtesting-sarimax-arima.ipynb
 
   - Examples and tutorials:
       - Examples and tutorials: examples/examples.md
@@ -40,13 +43,31 @@ nav:
       - ForecasterAutoregMultiOutput: api/ForecasterAutoregMultiOutput.md
       - model_selection: api/model_selection.md
       - model_selection_statsmodels: api/model_selection_statsmodels.md
+
+  - Releases: releases/releases.md
+
 plugins:
-  - mkapi
+  - mkdocstrings:
+      handlers:
+        python:
+          selection:
+            docstring_style: numpy
+            filters:
+              - "!^_"  # exclude all members starting with _
+          rendering:
+            show_root_heading: no
+            docstring_section_style: table
+  # - mknotebooks:
+  #     enable_default_jupyter_cell_styling: false
+  #     enable_default_pandas_dataframe_styling: true
+  - mkdocs-jupyter:
+      include_source: False
+      ignore_h1_titles: True
+      include_source: True
   - search
 copyright: 
 theme:
   name: material
-  custom_dir: overrides
   font:
     text: Ubuntu
     code: Ubuntu Mono
@@ -57,10 +78,14 @@ theme:
     - navigation.tabs.sticky
     - navigation.sections
     - navigation.expand
+    - navigation.top
   palette:
     primary: deep purple
     accent: light blue
 markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
   - codehilite
   - pymdownx.inlinehilite
   - pymdownx.details
@@ -70,6 +95,9 @@ markdown_extensions:
       linenums: true
   - pymdownx.superfences
   - pymdownx.magiclink
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
   - toc:
       permalink: true
 extra:

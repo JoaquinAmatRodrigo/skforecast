@@ -363,7 +363,8 @@ class ForecasterAutoreg(ForecasterBase):
             residuals = y_train - self.regressor.predict(X_train.to_numpy())
         if len(residuals) > 1000:
             # Only up to 1000 residuals are stored
-            residuals = np.random.choice(a=residuals, size=1000, replace=False)                                              
+            rng = np.random.default_rng(seed=123)
+            residuals = rng.choice(a=residuals, size=1000, replace=False)                                              
         self.in_sample_residuals = residuals
         
         # The last time window of training data is stored so that lags needed as
@@ -790,7 +791,7 @@ class ForecasterAutoreg(ForecasterBase):
         self.regressor.set_params(**params)
         
         
-    def set_lags(self, lags: int) -> None:
+    def set_lags(self, lags: Union[int, list, np.ndarray, range]) -> None:
         '''      
         Set new value to the attribute `lags`.
         Attributes `max_lag` and `window_size` are also updated.
@@ -798,13 +799,13 @@ class ForecasterAutoreg(ForecasterBase):
         Parameters
         ----------
         lags : int, list, 1D np.array, range
-        Lags used as predictors. Index starts at 1, so lag 1 is equal to t-1.
-            `int`: include lags from 1 to `lags`.
-            `list` or `np.array`: include only lags present in `lags`.
+            Lags used as predictors. Index starts at 1, so lag 1 is equal to t-1.
+                `int`: include lags from 1 to `lags`.
+                `list` or `np.array`: include only lags present in `lags`.
 
         Returns 
         -------
-        self
+        None
         
         '''
         
@@ -838,7 +839,7 @@ class ForecasterAutoreg(ForecasterBase):
         
         Parameters
         ----------
-        params : pd.Series
+        residuals : pd.Series
             Values of residuals. If len(residuals) > 1000, only a random sample
             of 1000 values are stored.
             
@@ -857,9 +858,10 @@ class ForecasterAutoreg(ForecasterBase):
             raise Exception(
                 f"`residuals` argument must be `pd.Series`. Got {type(residuals)}"
             )
-            
+
         if len(residuals) > 1000:
-            residuals = np.random.choice(a=residuals, size=1000, replace=False)
+            rng = np.random.default_rng(seed=123)
+            residuals = rng.choice(a=residuals, size=1000, replace=False)
             residuals = pd.Series(residuals)   
       
         if append and self.out_sample_residuals is not None:

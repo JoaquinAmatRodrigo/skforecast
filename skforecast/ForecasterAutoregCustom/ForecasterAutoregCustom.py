@@ -341,7 +341,8 @@ class ForecasterAutoregCustom(ForecasterBase):
             residuals = y_train - self.regressor.predict(X_train.to_numpy())
         if len(residuals) > 1000:
             # Only up to 1000 residuals are stored
-            residuals = np.random.choice(a=residuals, size=1000, replace=False)                                              
+            rng = np.random.default_rng(seed=123)
+            residuals = rng.choice(a=residuals, size=1000, replace=False)                                              
         self.in_sample_residuals = residuals
         
         # The last time window of training data is stored so that predictors in
@@ -783,7 +784,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         
         Parameters
         ----------
-        params : pd.Series
+        residuals : pd.Series
             Values of residuals. If len(residuals) > 1000, only a random sample
             of 1000 values are stored.
             
@@ -804,7 +805,8 @@ class ForecasterAutoregCustom(ForecasterBase):
             )
             
         if len(residuals) > 1000:
-            residuals = np.random.choice(a=residuals, size=1000, replace=False)
+            rng = np.random.default_rng(seed=123)
+            residuals = rng.choice(a=residuals, size=1000, replace=False)
             residuals = pd.Series(residuals)   
     
         if append and self.out_sample_residuals is not None:
