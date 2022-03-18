@@ -1,6 +1,41 @@
-# Releases
+# Releases (Change Log)
 
 All notable changes to this project will be documented in this file.
+
+## [0.4.3] - [2022-03-18]
+
+**Added**
+
++ Checks if all elements in lags are `int` when creating ForecasterAutoreg and ForecasterAutoregMultiOutput.
+
++ Add `fixed_train_size: bool=False` argument to `_backtesting_forecaster_refit`.
+
++ Add unit test for model_selection module (functions: `_backtesting_forecaster_refit`).
+
++ Add `fixed_train_size: bool=False` argument to `backtesting_sarimax`.
+
++ Add unit test for model_selection_statsmodels module (functions: `backtesting_sarimax`).
+
+**Changed**
+
++ Rename `get_metric` to `_get_metric`.
+
++ Functions in model_selection module allow custom metrics.
+
++ Functions in model_selection_statsmodels module allow custom metrics, `_get_metric` is used from model_selection module.
+
++ Change function `set_out_sample_residuals` (ForecasterAutoreg and ForecasterAutoregCustom), `residuals` argument must be `pd.Series` (was `numpy ndarray`).
+
++ Return `metric_value` of backtesting functions (model_selection and model_selection_statsmodels) is now a `float` (was `numpy ndarray`).
+
+**Fixed**
+
++ Requirements versions.
+
++ Method `fit` doesn't remove `out_sample_residuals`.
+
++ Added random seed during residuals downsampling (ForecasterAutoreg and ForecasterAutoregCustom)
+
 
 ## [0.4.2] - [2022-01-08]
 
@@ -25,23 +60,23 @@ All notable changes to this project will be documented in this file.
 
 ## [0.4.1] - [2021-12-13]
 
-### Added
+**Added**
 
-### Changed
+**Changed**
 
-### Fixed
+**Fixed**
 
 + `fit` and `predict` transform pandas series and dataframes to numpy arrays if regressor is XGBoost.
 
 ## [0.4.0] - [2021-12-10]
 
-**Version 0.4 has undergone a huge code refactoring. Main changes are related to input-output formats (only pandas series and dataframes are allowed although internally numpy arrays are used for performance) and model validation methods (unified into backtesting with and without refit).**
+Version 0.4 has undergone a huge code refactoring. Main changes are related to input-output formats (only pandas series and dataframes are allowed although internally numpy arrays are used for performance) and model validation methods (unified into backtesting with and without refit).
 
-### Added
+**Added**
 
 + `ForecasterBase` as parent class
 
-### Changed
+**Changed**
 
 + Argument `y` must be pandas Series. Numpy ndarrays are not allowed anymore.
 
@@ -69,9 +104,11 @@ All notable changes to this project will be documented in this file.
 
 + Remove deprecated class `ForecasterCustom`.
 
+**Fixed**
+
 ## [0.3.0] - [2021-09-01]
 
-### Added
+**Added**
 
 + New module model_selection_statsmodels to cross-validate, backtesting and grid search AutoReg and SARIMAX models from statsmodels library:
     + `backtesting_autoreg_statsmodels`
@@ -79,19 +116,21 @@ All notable changes to this project will be documented in this file.
     + `backtesting_sarimax_statsmodels`
     + `cv_sarimax_statsmodels`
     + `grid_search_sarimax_statsmodels`
+    
++ Added attribute window_size to `ForecasterAutoreg` and `ForecasterAutoregCustom`. It is equal to `max_lag`.
 
-### Changed
+**Changed**
 
 + `cv_forecaster` returns cross-validation metrics and cross-validation predictions.
 + Added an extra column for each parameter in the dataframe returned by `grid_search_forecaster`.
 + statsmodels 0.12.2 added to requirements
 
-### Fixed
+**Fixed**
 
 
 ## [0.2.0] - [2021-08-26]
 
-### Added
+**Added**
 
 
 + Multiple exogenous variables can be passed as pandas DataFrame.
@@ -102,17 +141,17 @@ All notable changes to this project will be documented in this file.
 
 + Increased typing
 
-### Changed
+**Changed**
 
-+ New implementation of `ForecasterAutoregMultiOutput`. The training process in the new version creates a different X_train for each step. See [Direct multi-step forecasting](../guides/direct-multi-step-forecasting.md) for more details. Old versión can be acces with `skforecast.deprecated.ForecasterAutoregMultiOutput`.
++ New implementation of `ForecasterAutoregMultiOutput`. The training process in the new version creates a different X_train for each step. See [Direct multi-step forecasting](https://github.com/JoaquinAmatRodrigo/skforecast#introduction) for more details. Old versión can be acces with `skforecast.deprecated.ForecasterAutoregMultiOutput`.
 
-### Fixed
+**Fixed**
 
 
 
 ## [0.1.9] - 2121-07-27
 
-### Added
+**Added**
 
 + Logging total number of models to fit in `grid_search_forecaster`.
 
@@ -120,7 +159,7 @@ All notable changes to this project will be documented in this file.
 
 + Method `create_train_X_y` to facilitate access to the training data matrix created from `y` and `exog`.
 
-### Changed
+**Changed**
 
 
 + New implementation of `ForecasterAutoregMultiOutput`. The training process in the new version creates a different X_train for each step. See [Direct multi-step forecasting](https://github.com/JoaquinAmatRodrigo/skforecast#introduction) for more details. Old versión can be acces with `skforecast.deprecated.ForecasterAutoregMultiOutput`.
@@ -133,18 +172,18 @@ All notable changes to this project will be documented in this file.
 
 + `time_series_spliter` doesn't include the remaining observations in the last complete fold but in a new one when `allow_incomplete_fold=True`. Take in consideration that incomplete folds with few observations could overestimate or underestimate the validation metric.
 
-### Fixed
+**Fixed**
 
 + Update lags of  `ForecasterAutoregMultiOutput` after `grid_search_forecaster`.
 
 
 ## [0.1.8.1] - 2021-05-17
 
-### Added
+**Added**
 
 + `set_out_sample_residuals` method to store or update out of sample residuals used by `predict_interval`.
 
-### Changed
+**Changed**
 
 + `backtesting_forecaster_intervals` and `backtesting_forecaster` print number of steps per fold.
 
@@ -152,7 +191,7 @@ All notable changes to this project will be documented in this file.
 
 + Improved verbose in `backtesting_forecaster_intervals`.
 
-### Fixed
+**Fixed**
 
 + Warning of inclompleted folds when using `backtesting_forecast` with a  `ForecasterAutoregMultiOutput`.
 
@@ -167,54 +206,54 @@ All notable changes to this project will be documented in this file.
 
 ## [0.1.8] - 2021-04-02
 
-### Added
+**Added**
 
 - Class `ForecasterAutoregMultiOutput.py`: forecaster with direct multi-step predictions.
 - Method `ForecasterCustom.predict_interval` and  `ForecasterAutoreg.predict_interval`: estimate prediction interval using bootstrapping.
 - `skforecast.model_selection.backtesting_forecaster_intervals` perform backtesting and return prediction intervals.
  
-### Changed
+**Changed**
 
  
-### Fixed
+**Fixed**
 
 
 ## [0.1.7] - 2021-03-19
 
-### Added
+**Added**
 
 - Class `ForecasterCustom`: same functionalities as `ForecasterAutoreg` but allows custom definition of predictors.
  
-### Changed
+**Changed**
 
 - `grid_search forecaster` adapted to work with objects `ForecasterCustom` in addition to `ForecasterAutoreg`.
  
-### Fixed
+**Fixed**
  
  
 ## [0.1.6] - 2021-03-14
 
-### Added
+**Added**
 
 - Method `get_feature_importances` to `skforecast.ForecasterAutoreg`.
 - Added backtesting strategy in `grid_search_forecaster`.
 - Added `backtesting_forecast` to `skforecast.model_selection`.
  
-### Changed
+**Changed**
 
 - Method `create_lags` return a matrix where the order of columns match the ascending order of lags. For example, column 0 contains the values of the minimum lag used as predictor.
 - Renamed argument `X` to `last_window` in method `predict`.
 - Renamed `ts_cv_forecaster` to `cv_forecaster`.
  
-### Fixed
+**Fixed**
  
 ## [0.1.4] - 2021-02-15
   
-### Added
+**Added**
 
 - Method `get_coef` to `skforecast.ForecasterAutoreg`.
  
-### Changed
+**Changed**
 
  
-### Fixed
+**Fixed**
