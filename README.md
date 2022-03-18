@@ -74,17 +74,15 @@ The documentation for the latest release is at [skforecast docs
 
 Recent improvements are highlighted in the [release notes](https://joaquinamatrodrigo.github.io/skforecast/latest/releases/releases.html).
 
-+ [Introduction to time series and forecasting]()
++ [Introduction to time series and forecasting](https://joaquinamatrodrigo.github.io/skforecast/latest/introduction-forecasting/introduction-forecasting.html)
 
-+ [Single-step forecasting]()
++ [Multi-step forecasting](https://joaquinamatrodrigo.github.io/skforecast/latest/autoregresive-forecaster.html)
 
-+ [Multi-step forecasting]()
++ [Backtesting (validation) of forecasting models](https://joaquinamatrodrigo.github.io/skforecast/latest/backtesting.html)
 
-+ [Backtesting (validation) of forecasting models]()
++ [Grid search of forecasting models](https://joaquinamatrodrigo.github.io/skforecast/latest/grid-search-forecaster.html)
 
-+ [Grid search of forecasting models]()
-
-+ [Using forecaster in production]()
++ [Using forecaster in production](https://joaquinamatrodrigo.github.io/skforecast/latest/forecaster-in-production.html)
 
 
 # Examples and tutorials 
