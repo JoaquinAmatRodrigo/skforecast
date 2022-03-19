@@ -76,13 +76,15 @@ Recent improvements are highlighted in the [release notes](https://joaquinamatro
 
 + [Introduction to time series and forecasting](https://joaquinamatrodrigo.github.io/skforecast/latest/introduction-forecasting/introduction-forecasting.html)
 
-+ [Multi-step forecasting](https://joaquinamatrodrigo.github.io/skforecast/latest/autoregresive-forecaster.html)
++ [Recursive multi-step forecasting](https://joaquinamatrodrigo.github.io/skforecast/latest/notebooks/autoregresive-forecaster.html)
 
-+ [Backtesting (validation) of forecasting models](https://joaquinamatrodrigo.github.io/skforecast/latest/backtesting.html)
++ [Backtesting (validation) of forecasting models](https://joaquinamatrodrigo.github.io/skforecast/latest/notebooks/backtesting.html)
 
-+ [Grid search of forecasting models](https://joaquinamatrodrigo.github.io/skforecast/latest/grid-search-forecaster.html)
++ [Grid search of forecasting models](https://joaquinamatrodrigo.github.io/skforecast/latest/notebooks/grid-search-forecaster.html)
 
-+ [Using forecaster in production](https://joaquinamatrodrigo.github.io/skforecast/latest/forecaster-in-production.html)
++ [Prediction intervals](https://joaquinamatrodrigo.github.io/skforecast/latest/notebooks/prediction-intervals.html)
+
++ [Using forecaster in production](https://joaquinamatrodrigo.github.io/skforecast/latest/notebooks/forecaster-in-production.html)
 
 
 # Examples and tutorials 
