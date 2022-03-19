@@ -76,13 +76,15 @@ Recent improvements are highlighted in the [release notes](https://joaquinamatro
 
 + [Introduction to time series and forecasting](https://joaquinamatrodrigo.github.io/skforecast/latest/introduction-forecasting/introduction-forecasting.html)
 
-+ [Multi-step forecasting](https://joaquinamatrodrigo.github.io/skforecast/latest/autoregresive-forecaster.html)
++ [Recursive multi-step forecasting](https://joaquinamatrodrigo.github.io/skforecast/latest/notebooks/autoregresive-forecaster.html)
 
-+ [Backtesting (validation) of forecasting models](https://joaquinamatrodrigo.github.io/skforecast/latest/backtesting.html)
++ [Backtesting (validation) of forecasting models](https://joaquinamatrodrigo.github.io/skforecast/latest/notebooks/backtesting.html)
 
-+ [Grid search of forecasting models](https://joaquinamatrodrigo.github.io/skforecast/latest/grid-search-forecaster.html)
++ [Grid search of forecasting models](https://joaquinamatrodrigo.github.io/skforecast/latest/notebooks/grid-search-forecaster.html)
 
-+ [Using forecaster in production](https://joaquinamatrodrigo.github.io/skforecast/latest/forecaster-in-production.html)
++ [Prediction intervals](https://joaquinamatrodrigo.github.io/skforecast/latest/notebooks/prediction-intervals.html)
+
++ [Using forecaster in production](https://joaquinamatrodrigo.github.io/skforecast/latest/notebooks/forecaster-in-production.html)
 
 
 # Examples and tutorials 
@@ -97,6 +99,8 @@ Recent improvements are highlighted in the [release notes](https://joaquinamatro
 
 + [**Forecasting web traffic with machine learning and Python**](https://www.cienciadedatos.net/documentos/py37-forecasting-web-traffic-machine-learning.html)
 
++ [**Bitcoin price prediction with Python**](https://www.cienciadedatos.net/documentos/py41-forecasting-cryptocurrency-bitcoin-machine-learning-python.html)
+
 **Español**
 
 + [**Skforecast: forecasting series temporales con Python y Scikit-learn**](https://www.cienciadedatos.net/documentos/py27-forecasting-series-temporales-python-scikitlearn.html)
@@ -106,6 +110,8 @@ Recent improvements are highlighted in the [release notes](https://joaquinamatro
 + [**Forecasting de las visitas a una página web**](https://www.cienciadedatos.net/documentos/py37-forecasting-visitas-web-machine-learning.html)
 
 + [**Forecasting series temporales con gradient boosting: Skforecast, XGBoost, LightGBM y CatBoost**](https://www.cienciadedatos.net/documentos/py39-forecasting-series-temporales-con-skforecast-xgboost-lightgbm-catboost.html)
+
++ [**Predicción del precio de Bitcoin con Python**](https://www.cienciadedatos.net/documentos/py41-forecasting-criptomoneda-bitcoin-machine-learning-python.html)
 
 
 # Donating
