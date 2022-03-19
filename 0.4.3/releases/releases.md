@@ -8,13 +8,7 @@ All notable changes to this project will be documented in this file.
 
 + Checks if all elements in lags are `int` when creating ForecasterAutoreg and ForecasterAutoregMultiOutput.
 
-+ Add `fixed_train_size: bool=False` argument to `_backtesting_forecaster_refit`.
-
-+ Add unit test for model_selection module (functions: `_backtesting_forecaster_refit`).
-
-+ Add `fixed_train_size: bool=False` argument to `backtesting_sarimax`.
-
-+ Add unit test for model_selection_statsmodels module (functions: `backtesting_sarimax`).
++ Add `fixed_train_size: bool=False` argument to `backtesting_forecaster` and `backtesting_sarimax`
 
 **Changed**
 
@@ -22,19 +16,19 @@ All notable changes to this project will be documented in this file.
 
 + Functions in model_selection module allow custom metrics.
 
-+ Functions in model_selection_statsmodels module allow custom metrics, `_get_metric` is used from model_selection module.
++ Functions in model_selection_statsmodels module allow custom metrics.
 
 + Change function `set_out_sample_residuals` (ForecasterAutoreg and ForecasterAutoregCustom), `residuals` argument must be `pd.Series` (was `numpy ndarray`).
 
-+ Return `metric_value` of backtesting functions (model_selection and model_selection_statsmodels) is now a `float` (was `numpy ndarray`).
++ Returned value of backtesting functions (model_selection and model_selection_statsmodels) is now a `float` (was `numpy ndarray`).
 
 **Fixed**
 
 + Requirements versions.
 
-+ Method `fit` doesn't remove `out_sample_residuals`.
++ Method `fit` doesn't remove `out_sample_residuals` each time the forecaster is fitted.
 
-+ Added random seed during residuals downsampling (ForecasterAutoreg and ForecasterAutoregCustom)
++ Added random seed to residuals downsampling (ForecasterAutoreg and ForecasterAutoregCustom)
 
 
 ## [0.4.2] - [2022-01-08]

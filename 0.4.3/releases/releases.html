@@ -1230,16 +1230,7 @@
 <p>Checks if all elements in lags are <code>int</code> when creating ForecasterAutoreg and ForecasterAutoregMultiOutput.</p>
 </li>
 <li>
-<p>Add <code>fixed_train_size: bool=False</code> argument to <code>_backtesting_forecaster_refit</code>.</p>
-</li>
-<li>
-<p>Add unit test for model_selection module (functions: <code>_backtesting_forecaster_refit</code>).</p>
-</li>
-<li>
-<p>Add <code>fixed_train_size: bool=False</code> argument to <code>backtesting_sarimax</code>.</p>
-</li>
-<li>
-<p>Add unit test for model_selection_statsmodels module (functions: <code>backtesting_sarimax</code>).</p>
+<p>Add <code>fixed_train_size: bool=False</code> argument to <code>backtesting_forecaster</code> and <code>backtesting_sarimax</code></p>
 </li>
 </ul>
 <p><strong>Changed</strong></p>
@@ -1251,13 +1242,13 @@
 <p>Functions in model_selection module allow custom metrics.</p>
 </li>
 <li>
-<p>Functions in model_selection_statsmodels module allow custom metrics, <code>_get_metric</code> is used from model_selection module.</p>
+<p>Functions in model_selection_statsmodels module allow custom metrics.</p>
 </li>
 <li>
 <p>Change function <code>set_out_sample_residuals</code> (ForecasterAutoreg and ForecasterAutoregCustom), <code>residuals</code> argument must be <code>pd.Series</code> (was <code>numpy ndarray</code>).</p>
 </li>
 <li>
-<p>Return <code>metric_value</code> of backtesting functions (model_selection and model_selection_statsmodels) is now a <code>float</code> (was <code>numpy ndarray</code>).</p>
+<p>Returned value of backtesting functions (model_selection and model_selection_statsmodels) is now a <code>float</code> (was <code>numpy ndarray</code>).</p>
 </li>
 </ul>
 <p><strong>Fixed</strong></p>
@@ -1266,10 +1257,10 @@
 <p>Requirements versions.</p>
 </li>
 <li>
-<p>Method <code>fit</code> doesn't remove <code>out_sample_residuals</code>.</p>
+<p>Method <code>fit</code> doesn't remove <code>out_sample_residuals</code> each time the forecaster is fitted.</p>
 </li>
 <li>
-<p>Added random seed during residuals downsampling (ForecasterAutoreg and ForecasterAutoregCustom)</p>
+<p>Added random seed to residuals downsampling (ForecasterAutoreg and ForecasterAutoregCustom)</p>
 </li>
 </ul>
 <h2 id="042-2022-01-08">[0.4.2] - [2022-01-08]<a class="headerlink" href="#042-2022-01-08" title="Permanent link">&para;</a></h2>
