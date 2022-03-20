@@ -392,7 +392,7 @@
   
     <li class="md-nav__item">
       <a href="../examples/examples.html" class="md-nav__link">
-        Examples
+        Examples and tutorials
       </a>
     </li>
   
@@ -574,8 +574,8 @@
   
   
     <li class="md-nav__item">
-      <a href="custom-predictors.html" class="md-nav__link">
-        Custom predictors
+      <a href="direct-multi-step-forecasting.html" class="md-nav__link">
+        Direct multi-step forecasting
       </a>
     </li>
   
@@ -602,8 +602,8 @@
   
   
     <li class="md-nav__item">
-      <a href="direct-multi-step-forecasting.html" class="md-nav__link">
-        Direct multi-step forecasting
+      <a href="custom-predictors.html" class="md-nav__link">
+        Custom predictors
       </a>
     </li>
   
@@ -630,8 +630,8 @@
   
   
     <li class="md-nav__item">
-      <a href="forecaster-in-production.html" class="md-nav__link">
-        Forecaster in production
+      <a href="grid-search-forecaster.html" class="md-nav__link">
+        Grid search forecaster
       </a>
     </li>
   
@@ -644,8 +644,8 @@
   
   
     <li class="md-nav__item">
-      <a href="grid-search-forecaster.html" class="md-nav__link">
-        Grid search forecaster
+      <a href="sklearn-pipeline.html" class="md-nav__link">
+        Scikit-learn Pipeline
       </a>
     </li>
   
@@ -686,21 +686,7 @@
   
   
     <li class="md-nav__item">
-      <a href="sklearn-pipeline.html" class="md-nav__link">
-        Scikit-learn Pipeline
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="xgboost.html" class="md-nav__link">
+      <a href="forecasting-xgboost.html" class="md-nav__link">
         Forecasting with XGBoost
       </a>
     </li>
@@ -716,6 +702,20 @@
     <li class="md-nav__item">
       <a href="save-load-forecaster.html" class="md-nav__link">
         Save and load forecaster
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="forecaster-in-production.html" class="md-nav__link">
+        Forecaster in production
       </a>
     </li>
   
@@ -2042,13 +2042,13 @@ Licensed under the Apache License, Version 2.0.
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>Since <strong>Version 0.4.0</strong> only pandas series and dataframes are allowed (although internally numpy arrays are used for performance). Base on the type of pandas index, the following rules are applied:</p>
+<p>Since <strong>Version 0.4.0</strong> only pandas series and dataframes are allowed (although internally numpy arrays are used for performance). Based on the type of pandas index, the following rules are applied:</p>
 <ul>
-<li><p>If index is not of type DatetimeIndex, a RangeIndex is created.</p>
+<li><p>If the index is not of type DatetimeIndex, a RangeIndex is created.</p>
 </li>
-<li><p>If index is of type DatetimeIndex and but has no frequency, a RangeIndex is created.</p>
+<li><p>If the index is of type DatetimeIndex and but has no frequency, a RangeIndex is created.</p>
 </li>
-<li><p>If index is of type DatetimeIndex and has frequency, nothing is changed.</p>
+<li><p>If the index is of type DatetimeIndex and has a frequency, nothing is changed.</p>
 </li>
 </ul>
 
@@ -2069,7 +2069,7 @@ Licensed under the Apache License, Version 2.0.
     <b> &nbsp Note</b>
 </p>
 
-There is nothing wrong with using data that does not have an associated date/time index. However, if pandas series with an associated frequency is used, results will have a more useful index.
+There is nothing wrong with using data that does not have an associated date/time index. However, if a pandas series with an associated frequency is used, results will have a more useful index.
 
 </div>
 </div>

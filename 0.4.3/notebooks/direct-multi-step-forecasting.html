@@ -392,7 +392,7 @@
   
     <li class="md-nav__item">
       <a href="../examples/examples.html" class="md-nav__link">
-        Examples
+        Examples and tutorials
       </a>
     </li>
   
@@ -510,34 +510,6 @@
               
   
   
-  
-    <li class="md-nav__item">
-      <a href="custom-predictors.html" class="md-nav__link">
-        Custom predictors
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="autoregresive-forecaster-exogenous.html" class="md-nav__link">
-        Exogenous variables
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
     
   
   
@@ -630,6 +602,34 @@
   
   
     <li class="md-nav__item">
+      <a href="autoregresive-forecaster-exogenous.html" class="md-nav__link">
+        Exogenous variables
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="custom-predictors.html" class="md-nav__link">
+        Custom predictors
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="backtesting.html" class="md-nav__link">
         Backtesting forecaster
       </a>
@@ -644,8 +644,8 @@
   
   
     <li class="md-nav__item">
-      <a href="forecaster-in-production.html" class="md-nav__link">
-        Forecaster in production
+      <a href="grid-search-forecaster.html" class="md-nav__link">
+        Grid search forecaster
       </a>
     </li>
   
@@ -658,8 +658,8 @@
   
   
     <li class="md-nav__item">
-      <a href="grid-search-forecaster.html" class="md-nav__link">
-        Grid search forecaster
+      <a href="sklearn-pipeline.html" class="md-nav__link">
+        Scikit-learn Pipeline
       </a>
     </li>
   
@@ -700,21 +700,7 @@
   
   
     <li class="md-nav__item">
-      <a href="sklearn-pipeline.html" class="md-nav__link">
-        Scikit-learn Pipeline
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="xgboost.html" class="md-nav__link">
+      <a href="forecasting-xgboost.html" class="md-nav__link">
         Forecasting with XGBoost
       </a>
     </li>
@@ -730,6 +716,20 @@
     <li class="md-nav__item">
       <a href="save-load-forecaster.html" class="md-nav__link">
         Save and load forecaster
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="forecaster-in-production.html" class="md-nav__link">
+        Forecaster in production
       </a>
     </li>
   
@@ -2059,8 +2059,8 @@ Licensed under the Apache License, Version 2.0.
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h1 id="direct-multi-step-forecaster">Direct multi-step forecaster<a class="anchor-link" href="#direct-multi-step-forecaster">&#182;</a></h1><p><code>ForecasterAutoreg</code> and <code>ForecasterAutoregCustom</code> models follow a recursive prediction strategy in which, each new prediction, builds on the previous prediction. An alternative is to train a model for each step that has to be predicted. This strategy, commonly known as direct multistep forecasting, is computationally more expensive than the recursive since it requires training several models. However, in some scenarios, it achieves better results. This type of model can be obtained with the <code>ForecasterAutoregMultiOutput</code> class and can also include one or multiple exogenous variables.</p>
-<p>In order to train a <code>ForecasterAutoregMultiOutput</code> a different training matrix is created for each model.</p>
+<h1 id="direct-multi-step-forecaster">Direct multi-step forecaster<a class="anchor-link" href="#direct-multi-step-forecaster">&#182;</a></h1><p><code>ForecasterAutoreg</code> and <code>ForecasterAutoregCustom</code> models follow a recursive prediction strategy in which each new prediction builds on the previous one. An alternative is to train a model for each step that has to be predicted. This strategy, commonly known as direct multistep forecasting, is computationally more expensive than the recursive since it requires training several models. However, in some scenarios, it achieves better results. This type of model can be obtained with the <code>ForecasterAutoregMultiOutput</code> class and can also include one or multiple exogenous variables.</p>
+<p>To train a <code>ForecasterAutoregMultiOutput</code> a different training matrix is created for each model.</p>
 
 </div>
 </div>
@@ -2280,7 +2280,7 @@ jp-needs-light-background
                     <span class="n">regressor</span> <span class="o">=</span> <span class="n">Ridge</span><span class="p">(),</span>
                     <span class="n">steps</span>     <span class="o">=</span> <span class="mi">36</span><span class="p">,</span>
                     <span class="n">lags</span>      <span class="o">=</span> <span class="mi">15</span>
-                <span class="p">)</span>
+             <span class="p">)</span>
 
 <span class="n">forecaster</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">data_train</span><span class="p">)</span>
 <span class="n">forecaster</span>
@@ -2291,7 +2291,7 @@ forecaster = ForecasterAutoregMultiOutput(
                     regressor = Ridge(),
                     steps     = 36,
                     lags      = 15
-                )
+             )
 
 forecaster.fit(y=data_train)
 forecaster</div>
@@ -2570,7 +2570,7 @@ print(f"Test error (mse): {error_mse}")</div>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h2 id="feature-importance">Feature importance<a class="anchor-link" href="#feature-importance">&#182;</a></h2><p>Since <code>ForecasterAutoregMultiOutput</code> fits one model per step, it is necessary to specify from which model retrieve its feature importance.</p>
+<h2 id="feature-importance">Feature importance<a class="anchor-link" href="#feature-importance">&#182;</a></h2><p>Since <code>ForecasterAutoregMultiOutput</code> fits one model per step, it is necessary to specify from which model retrieves its feature importance.</p>
 
 </div>
 </div>
@@ -2770,7 +2770,7 @@ print(f"Test error (mse): {error_mse}")</div>
                 <span class="n">step</span>    <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
                 <span class="n">X_train</span> <span class="o">=</span> <span class="n">X</span><span class="p">,</span>
                 <span class="n">y_train</span> <span class="o">=</span> <span class="n">y</span><span class="p">,</span>
-            <span class="p">)</span>
+           <span class="p">)</span>
 
 <span class="n">X_1</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
 </pre></div>
@@ -2780,7 +2780,7 @@ X_1, y_1 = forecaster.filter_train_X_y_for_step(
                 step    = 1,
                 X_train = X,
                 y_train = y,
-            )
+           )
 
 X_1.head(4)</div>
     
@@ -3092,7 +3092,7 @@ Freq: MS, Name: y_step_1, dtype: float64</pre>
     <nav class="md-footer__inner md-grid" aria-label="Footer">
       
         
-        <a href="autoregresive-forecaster-exogenous.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Exogenous variables" rel="prev">
+        <a href="autoregresive-forecaster.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Recursive multi-step forecasting" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
           </div>
@@ -3101,20 +3101,20 @@ Freq: MS, Name: y_step_1, dtype: float64</pre>
               <span class="md-footer__direction">
                 Previous
               </span>
-              Exogenous variables
+              Recursive multi-step forecasting
             </div>
           </div>
         </a>
       
       
         
-        <a href="backtesting.html" class="md-footer__link md-footer__link--next" aria-label="Next: Backtesting forecaster" rel="next">
+        <a href="autoregresive-forecaster-exogenous.html" class="md-footer__link md-footer__link--next" aria-label="Next: Exogenous variables" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Backtesting forecaster
+              Exogenous variables
             </div>
           </div>
           <div class="md-footer__button md-icon">

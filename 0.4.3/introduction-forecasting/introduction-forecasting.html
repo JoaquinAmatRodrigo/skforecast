@@ -479,7 +479,7 @@
   
     <li class="md-nav__item">
       <a href="../examples/examples.html" class="md-nav__link">
-        Examples
+        Examples and tutorials
       </a>
     </li>
   
@@ -686,8 +686,8 @@
   
   
     <li class="md-nav__item">
-      <a href="../notebooks/custom-predictors.html" class="md-nav__link">
-        Custom predictors
+      <a href="../notebooks/direct-multi-step-forecasting.html" class="md-nav__link">
+        Direct multi-step forecasting
       </a>
     </li>
   
@@ -714,8 +714,8 @@
   
   
     <li class="md-nav__item">
-      <a href="../notebooks/direct-multi-step-forecasting.html" class="md-nav__link">
-        Direct multi-step forecasting
+      <a href="../notebooks/custom-predictors.html" class="md-nav__link">
+        Custom predictors
       </a>
     </li>
   
@@ -742,8 +742,8 @@
   
   
     <li class="md-nav__item">
-      <a href="../notebooks/forecaster-in-production.html" class="md-nav__link">
-        Forecaster in production
+      <a href="../notebooks/grid-search-forecaster.html" class="md-nav__link">
+        Grid search forecaster
       </a>
     </li>
   
@@ -756,8 +756,8 @@
   
   
     <li class="md-nav__item">
-      <a href="../notebooks/grid-search-forecaster.html" class="md-nav__link">
-        Grid search forecaster
+      <a href="../notebooks/sklearn-pipeline.html" class="md-nav__link">
+        Scikit-learn Pipeline
       </a>
     </li>
   
@@ -798,21 +798,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../notebooks/sklearn-pipeline.html" class="md-nav__link">
-        Scikit-learn Pipeline
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../notebooks/xgboost.html" class="md-nav__link">
+      <a href="../notebooks/forecasting-xgboost.html" class="md-nav__link">
         Forecasting with XGBoost
       </a>
     </li>
@@ -828,6 +814,20 @@
     <li class="md-nav__item">
       <a href="../notebooks/save-load-forecaster.html" class="md-nav__link">
         Save and load forecaster
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../notebooks/forecaster-in-production.html" class="md-nav__link">
+        Forecaster in production
       </a>
     </li>
   
@@ -1134,16 +1134,16 @@
 
 
 
-<h1 id="introduction-to-forecasting">Introduction to forecasting<a class="headerlink" href="#introduction-to-forecasting" title="Permanent link">&para;</a></h1>
-<h2 id="time-series-and-forecasting">Time series and forecasting<a class="headerlink" href="#time-series-and-forecasting" title="Permanent link">&para;</a></h2>
+<h1 id="introduction-to-forecasting"><strong>Introduction to forecasting</strong><a class="headerlink" href="#introduction-to-forecasting" title="Permanent link">&para;</a></h1>
+<h2 id="time-series-and-forecasting"><strong>Time series and forecasting</strong><a class="headerlink" href="#time-series-and-forecasting" title="Permanent link">&para;</a></h2>
 <p>A time series is a sequence of data arranged chronologically, in principle, equally spaced in time. Forecasting is the process of predicting future values of a time series based on its previously observed patterns (autoregressive), or including external variables.</p>
 <p align="center"><img src="../img/forecasting_multi-step.gif" style="width: 500px"></p>
 
-<h2 id="machine-learning-for-forecasting">Machine learning for forecasting<a class="headerlink" href="#machine-learning-for-forecasting" title="Permanent link">&para;</a></h2>
-<p>The main adaptation that needs to be made in order to apply machine learning models to forecasting problems is to transform the time series into a matrix in which, each value, is related to the time window (lags) that precede it.</p>
+<h2 id="machine-learning-for-forecasting"><strong>Machine learning for forecasting</strong><a class="headerlink" href="#machine-learning-for-forecasting" title="Permanent link">&para;</a></h2>
+<p>The main adaptation that needs to be done to apply machine learning models to forecasting problems is to transform the time series into a matrix in which each value is related to the time window (lags) that precedes it.</p>
 <p align="center"><img src="../img/transform_timeseries.gif" style="width: 500px;"></p>
 
-<p><center><font size="2.5"> <i>Time series  transformation into a matrix of 5 lags and a vector with the value of the series that follows each row of the matrix.</i></font></center></p>
+<p><center><font size="2.5"> <i>Time series transformation into a matrix of 5 lags and a vector with the value of the series that follows each row of the matrix.</i></font></center></p>
 <p>This type of transformation also allows to include additional variables.</p>
 <p align="center"><img src="../img/matrix_transformation_with_exog_variable.png" style="width: 600px;"></p>
 
@@ -1151,23 +1151,22 @@
 <p>Once data have been rearranged into the new shape, any regression model can be trained to predict the next value (step) of the series.</p>
 <p align="center"><img src="../img/diagram-trainig-forecaster.png" style="width: 700px;"></p>
 
-<h2 id="single-step-forecasting">Single-step forecasting<a class="headerlink" href="#single-step-forecasting" title="Permanent link">&para;</a></h2>
-<p>Single step prediction is used when the goal is to predict only the next value of the series.</p>
+<h2 id="single-step-forecasting"><strong>Single-step forecasting</strong><a class="headerlink" href="#single-step-forecasting" title="Permanent link">&para;</a></h2>
+<p>Single-step prediction is used when the goal is to predict only the next value of the series.</p>
 <p align="center"><img src="../img/diagram-single-step-forecasting.png" style="width: 700px;"></p>
 
-<h2 id="multi-step-forecasting">Multi-step forecasting<a class="headerlink" href="#multi-step-forecasting" title="Permanent link">&para;</a></h2>
-<p>When working with time series, it is seldom needed to predict only the next element in the series (<em>t+1</em>). Instead, the most common goal is to predict a whole future interval (<em>t+1, ..., t+n</em>)  or a far point in time (<em>t+n</em>). There are several strategies that allow generating this type  predictions.</p>
-<h3 id="recursive-multi-step-forecasting">Recursive multi-step forecasting<a class="headerlink" href="#recursive-multi-step-forecasting" title="Permanent link">&para;</a></h3>
+<h2 id="multi-step-forecasting"><strong>Multi-step forecasting</strong><a class="headerlink" href="#multi-step-forecasting" title="Permanent link">&para;</a></h2>
+<p>When working with time series, it is seldom needed to predict only the next element in the series (<em>t+1</em>). Instead, the most common goal is to predict a whole future interval (<em>t+1, ..., t+n</em>)  or a far point in time (<em>t+n</em>). Several strategies allow generating this type of prediction.</p>
+<h3 id="recursive-multi-step-forecasting"><strong>Recursive multi-step forecasting</strong><a class="headerlink" href="#recursive-multi-step-forecasting" title="Permanent link">&para;</a></h3>
 <p>Since the value <em>t(n-1)</em> is required to predict <em>t(n)</em>, and <em>t(n-1)</em> is unknown, it is necessary to make recursive predictions in which, each new prediction, is based on the previous one. This process is known as recursive forecasting or recursive multi-step forecasting.</p>
 <p align="center"><img src="../img/diagram-recursive-mutistep-forecasting.png" style="width: 700px"></p>
 
-<h3 id="direct-multi-step-forecasting">Direct multi-step forecasting<a class="headerlink" href="#direct-multi-step-forecasting" title="Permanent link">&para;</a></h3>
+<h3 id="direct-multi-step-forecasting"><strong>Direct multi-step forecasting</strong><a class="headerlink" href="#direct-multi-step-forecasting" title="Permanent link">&para;</a></h3>
 <p>Direct multi-step forecasting consists of training a different model for each step. For example, to predict the next 5 values of a time series, 5 different models are trained, one for each step. As a result, the predictions are independent of each other.</p>
 <p align="center"><img src="../img/diagram-direct-multi-step-forecasting.png" style="width: 700px"></p>
 
-<h3 id="multiple-output-forecasting">Multiple output forecasting<a class="headerlink" href="#multiple-output-forecasting" title="Permanent link">&para;</a></h3>
-<p>Some machine learning models, such as long short-term memory (LSTM) neural network  are able 
-to predict simultaneously several values of a sequence (<em>one-shot</em>). This strategy is not currently implemented in skforecast library.</p>
+<h3 id="multiple-output-forecasting"><strong>Multiple output forecasting</strong><a class="headerlink" href="#multiple-output-forecasting" title="Permanent link">&para;</a></h3>
+<p>Some machine learning models, such as long short-term memory (LSTM) neural network, can predict simultaneously several values of a sequence (<em>one-shot</em>). This strategy is not currently implemented in skforecast library.</p>
 
               
             </article>

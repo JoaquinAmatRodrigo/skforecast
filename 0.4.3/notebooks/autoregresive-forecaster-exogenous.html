@@ -392,7 +392,7 @@
   
     <li class="md-nav__item">
       <a href="../examples/examples.html" class="md-nav__link">
-        Examples
+        Examples and tutorials
       </a>
     </li>
   
@@ -512,8 +512,8 @@
   
   
     <li class="md-nav__item">
-      <a href="custom-predictors.html" class="md-nav__link">
-        Custom predictors
+      <a href="direct-multi-step-forecasting.html" class="md-nav__link">
+        Direct multi-step forecasting
       </a>
     </li>
   
@@ -609,8 +609,8 @@
   
   
     <li class="md-nav__item">
-      <a href="direct-multi-step-forecasting.html" class="md-nav__link">
-        Direct multi-step forecasting
+      <a href="custom-predictors.html" class="md-nav__link">
+        Custom predictors
       </a>
     </li>
   
@@ -637,8 +637,8 @@
   
   
     <li class="md-nav__item">
-      <a href="forecaster-in-production.html" class="md-nav__link">
-        Forecaster in production
+      <a href="grid-search-forecaster.html" class="md-nav__link">
+        Grid search forecaster
       </a>
     </li>
   
@@ -651,8 +651,8 @@
   
   
     <li class="md-nav__item">
-      <a href="grid-search-forecaster.html" class="md-nav__link">
-        Grid search forecaster
+      <a href="sklearn-pipeline.html" class="md-nav__link">
+        Scikit-learn Pipeline
       </a>
     </li>
   
@@ -693,21 +693,7 @@
   
   
     <li class="md-nav__item">
-      <a href="sklearn-pipeline.html" class="md-nav__link">
-        Scikit-learn Pipeline
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="xgboost.html" class="md-nav__link">
+      <a href="forecasting-xgboost.html" class="md-nav__link">
         Forecasting with XGBoost
       </a>
     </li>
@@ -723,6 +709,20 @@
     <li class="md-nav__item">
       <a href="save-load-forecaster.html" class="md-nav__link">
         Save and load forecaster
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="forecaster-in-production.html" class="md-nav__link">
+        Forecaster in production
       </a>
     </li>
   
@@ -2045,7 +2045,7 @@ Licensed under the Apache License, Version 2.0.
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h1 id="recursive-multi-step-forecasting-with-exogenous-variables">Recursive multi-step forecasting with exogenous variables<a class="anchor-link" href="#recursive-multi-step-forecasting-with-exogenous-variables">&#182;</a></h1><p>All forecasters allow to include exogenous variables as predictors as long as their future values are known, since they must be included during the predict process.</p>
+<h1 id="recursive-multi-step-forecasting-with-exogenous-variables">Recursive multi-step forecasting with exogenous variables<a class="anchor-link" href="#recursive-multi-step-forecasting-with-exogenous-variables">&#182;</a></h1><p>All forecasters allow to include exogenous variables as predictors as long as their future values are known. These variables must be included during the prediction process.</p>
 
 </div>
 </div>
@@ -2096,7 +2096,7 @@ When using exogenous variables, their values should be aligned so that y[i] is r
     <b> &nbsp Warning</b>
 </p>
 
-When including exogenous variables in a forecasting model, it is being assumed that all exogenous inputs are known into the future. Do not include exogenous variables as predictors if their future value will not known when doing predictions.
+When including exogenous variables in a forecasting model, it is being assumed that all exogenous inputs are known into the future. Do not include exogenous variables as predictors if their future value will not be known when doing predictions.
 
 </div>
 </div>
@@ -2897,7 +2897,7 @@ print(f"Test error (mse): {error_mse}")</div>
     <nav class="md-footer__inner md-grid" aria-label="Footer">
       
         
-        <a href="custom-predictors.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Custom predictors" rel="prev">
+        <a href="direct-multi-step-forecasting.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Direct multi-step forecasting" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
           </div>
@@ -2906,20 +2906,20 @@ print(f"Test error (mse): {error_mse}")</div>
               <span class="md-footer__direction">
                 Previous
               </span>
-              Custom predictors
+              Direct multi-step forecasting
             </div>
           </div>
         </a>
       
       
         
-        <a href="direct-multi-step-forecasting.html" class="md-footer__link md-footer__link--next" aria-label="Next: Direct multi-step forecasting" rel="next">
+        <a href="custom-predictors.html" class="md-footer__link md-footer__link--next" aria-label="Next: Custom predictors" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Direct multi-step forecasting
+              Custom predictors
             </div>
           </div>
           <div class="md-footer__button md-icon">

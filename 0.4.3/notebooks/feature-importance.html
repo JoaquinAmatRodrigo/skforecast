@@ -392,7 +392,7 @@
   
     <li class="md-nav__item">
       <a href="../examples/examples.html" class="md-nav__link">
-        Examples
+        Examples and tutorials
       </a>
     </li>
   
@@ -512,8 +512,8 @@
   
   
     <li class="md-nav__item">
-      <a href="custom-predictors.html" class="md-nav__link">
-        Custom predictors
+      <a href="direct-multi-step-forecasting.html" class="md-nav__link">
+        Direct multi-step forecasting
       </a>
     </li>
   
@@ -540,8 +540,8 @@
   
   
     <li class="md-nav__item">
-      <a href="direct-multi-step-forecasting.html" class="md-nav__link">
-        Direct multi-step forecasting
+      <a href="custom-predictors.html" class="md-nav__link">
+        Custom predictors
       </a>
     </li>
   
@@ -568,8 +568,8 @@
   
   
     <li class="md-nav__item">
-      <a href="forecaster-in-production.html" class="md-nav__link">
-        Forecaster in production
+      <a href="grid-search-forecaster.html" class="md-nav__link">
+        Grid search forecaster
       </a>
     </li>
   
@@ -582,8 +582,8 @@
   
   
     <li class="md-nav__item">
-      <a href="grid-search-forecaster.html" class="md-nav__link">
-        Grid search forecaster
+      <a href="sklearn-pipeline.html" class="md-nav__link">
+        Scikit-learn Pipeline
       </a>
     </li>
   
@@ -679,21 +679,7 @@
   
   
     <li class="md-nav__item">
-      <a href="sklearn-pipeline.html" class="md-nav__link">
-        Scikit-learn Pipeline
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="xgboost.html" class="md-nav__link">
+      <a href="forecasting-xgboost.html" class="md-nav__link">
         Forecasting with XGBoost
       </a>
     </li>
@@ -709,6 +695,20 @@
     <li class="md-nav__item">
       <a href="save-load-forecaster.html" class="md-nav__link">
         Save and load forecaster
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="forecaster-in-production.html" class="md-nav__link">
+        Forecaster in production
       </a>
     </li>
   
@@ -2017,7 +2017,7 @@ Licensed under the Apache License, Version 2.0.
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h1 id="feature-importance">Feature importance<a class="anchor-link" href="#feature-importance">&#182;</a></h1><p>The importance of predictors included in a forecaster can be obtained using the method <code>get_feature_importance</code>. This method access the attributes <code>coef_</code> and <code>feature_importances_</code> of the internal regressor.</p>
+<h1 id="feature-importance">Feature importance<a class="anchor-link" href="#feature-importance">&#182;</a></h1><p>The importance of the predictors included in a forecaster can be obtained using the method <code>get_feature_importance</code>. This method accesses the <code>coef_</code> and <code>feature_importances_</code> attributes of the internal regressor.</p>
 
 </div>
 </div>
@@ -2036,7 +2036,7 @@ Licensed under the Apache License, Version 2.0.
     <b> &nbsp Warning</b>
 </p>
 
-This methods only return values if the regressor used inside the forecaster has the attribute `coef_` or `feature_importances_`.
+This method only returns values if the regressor used inside the forecaster has the attribute `coef_` or `feature_importances_`.
 
 </div>
 </div>
@@ -2450,7 +2450,7 @@ forecaster.get_feature_importance()</div>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>When using a <code>ForecasterAutoregMultiOutput</code>, since a different model is fit for each step, it is needed to indicate from which model extract the information.</p>
+<p>Since <code>ForecasterAutoregMultiOutput</code> fits one model per step, it is necessary to specify from which model retrieves its feature importance.</p>
 
 </div>
 </div>
@@ -2700,13 +2700,13 @@ forecaster.get_feature_importance(step=1)</div>
       
       
         
-        <a href="sklearn-pipeline.html" class="md-footer__link md-footer__link--next" aria-label="Next: Scikit-learn Pipeline" rel="next">
+        <a href="forecasting-xgboost.html" class="md-footer__link md-footer__link--next" aria-label="Next: Forecasting with XGBoost" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Scikit-learn Pipeline
+              Forecasting with XGBoost
             </div>
           </div>
           <div class="md-footer__button md-icon">

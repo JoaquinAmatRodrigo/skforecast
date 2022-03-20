@@ -392,7 +392,7 @@
   
     <li class="md-nav__item">
       <a href="../examples/examples.html" class="md-nav__link">
-        Examples
+        Examples and tutorials
       </a>
     </li>
   
@@ -510,6 +510,34 @@
               
   
   
+  
+    <li class="md-nav__item">
+      <a href="direct-multi-step-forecasting.html" class="md-nav__link">
+        Direct multi-step forecasting
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="autoregresive-forecaster-exogenous.html" class="md-nav__link">
+        Exogenous variables
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
     
   
   
@@ -602,34 +630,6 @@
   
   
     <li class="md-nav__item">
-      <a href="autoregresive-forecaster-exogenous.html" class="md-nav__link">
-        Exogenous variables
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="direct-multi-step-forecasting.html" class="md-nav__link">
-        Direct multi-step forecasting
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
       <a href="backtesting.html" class="md-nav__link">
         Backtesting forecaster
       </a>
@@ -644,8 +644,8 @@
   
   
     <li class="md-nav__item">
-      <a href="forecaster-in-production.html" class="md-nav__link">
-        Forecaster in production
+      <a href="grid-search-forecaster.html" class="md-nav__link">
+        Grid search forecaster
       </a>
     </li>
   
@@ -658,8 +658,8 @@
   
   
     <li class="md-nav__item">
-      <a href="grid-search-forecaster.html" class="md-nav__link">
-        Grid search forecaster
+      <a href="sklearn-pipeline.html" class="md-nav__link">
+        Scikit-learn Pipeline
       </a>
     </li>
   
@@ -700,21 +700,7 @@
   
   
     <li class="md-nav__item">
-      <a href="sklearn-pipeline.html" class="md-nav__link">
-        Scikit-learn Pipeline
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="xgboost.html" class="md-nav__link">
+      <a href="forecasting-xgboost.html" class="md-nav__link">
         Forecasting with XGBoost
       </a>
     </li>
@@ -730,6 +716,20 @@
     <li class="md-nav__item">
       <a href="save-load-forecaster.html" class="md-nav__link">
         Save and load forecaster
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="forecaster-in-production.html" class="md-nav__link">
+        Forecaster in production
       </a>
     </li>
   
@@ -2059,8 +2059,8 @@ Licensed under the Apache License, Version 2.0.
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h1 id="custom-predictors-for-recursive-multi-step-forecasting">Custom predictors for recursive multi-step forecasting<a class="anchor-link" href="#custom-predictors-for-recursive-multi-step-forecasting">&#182;</a></h1><p>It may be interesting to include additional characteristics of the time series in addition to the lags, for example, the moving average of the n last values ​​can be used to capture the trend of the series.</p>
-<p>The <code>ForecasterAutoregCustom</code> class is very similar to the <code>ForecasterAutoreg</code> class described in the previous section, but it is the user who defines the function used to create the predictors.</p>
+<h1 id="custom-predictors-for-recursive-multi-step-forecasting">Custom predictors for recursive multi-step forecasting<a class="anchor-link" href="#custom-predictors-for-recursive-multi-step-forecasting">&#182;</a></h1><p>It may be interesting to include additional features of the time series besides the lags. For example, the moving average of the n last values ​​can be used to capture the trend of the series.</p>
+<p>The <code>ForecasterAutoregCustom</code> class is very similar to the <code>ForecasterAutoreg</code> class described in the previous section, but the user defines the function used to create the predictors.</p>
 
 </div>
 </div>
@@ -2332,7 +2332,7 @@ def create_predictors(y):
                     <span class="n">regressor</span>      <span class="o">=</span> <span class="n">RandomForestRegressor</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">),</span>
                     <span class="n">fun_predictors</span> <span class="o">=</span> <span class="n">create_predictors</span><span class="p">,</span>
                     <span class="n">window_size</span>    <span class="o">=</span> <span class="mi">20</span>
-                <span class="p">)</span>
+             <span class="p">)</span>
 
 <span class="n">forecaster</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">data_train</span><span class="p">)</span>
 <span class="n">forecaster</span>
@@ -2343,7 +2343,7 @@ forecaster = ForecasterAutoregCustom(
                     regressor      = RandomForestRegressor(random_state=123),
                     fun_predictors = create_predictors,
                     window_size    = 20
-                )
+             )
 
 forecaster.fit(y=data_train)
 forecaster</div>
@@ -3098,7 +3098,7 @@ Freq: MS, Name: y, dtype: float64</pre>
     <nav class="md-footer__inner md-grid" aria-label="Footer">
       
         
-        <a href="autoregresive-forecaster.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Recursive multi-step forecasting" rel="prev">
+        <a href="autoregresive-forecaster-exogenous.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Exogenous variables" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
           </div>
@@ -3107,20 +3107,20 @@ Freq: MS, Name: y, dtype: float64</pre>
               <span class="md-footer__direction">
                 Previous
               </span>
-              Recursive multi-step forecasting
+              Exogenous variables
             </div>
           </div>
         </a>
       
       
         
-        <a href="autoregresive-forecaster-exogenous.html" class="md-footer__link md-footer__link--next" aria-label="Next: Exogenous variables" rel="next">
+        <a href="backtesting.html" class="md-footer__link md-footer__link--next" aria-label="Next: Backtesting forecaster" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Exogenous variables
+              Backtesting forecaster
             </div>
           </div>
           <div class="md-footer__button md-icon">

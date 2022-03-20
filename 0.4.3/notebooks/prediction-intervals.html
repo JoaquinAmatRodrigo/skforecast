@@ -392,7 +392,7 @@
   
     <li class="md-nav__item">
       <a href="../examples/examples.html" class="md-nav__link">
-        Examples
+        Examples and tutorials
       </a>
     </li>
   
@@ -512,8 +512,8 @@
   
   
     <li class="md-nav__item">
-      <a href="custom-predictors.html" class="md-nav__link">
-        Custom predictors
+      <a href="direct-multi-step-forecasting.html" class="md-nav__link">
+        Direct multi-step forecasting
       </a>
     </li>
   
@@ -540,8 +540,8 @@
   
   
     <li class="md-nav__item">
-      <a href="direct-multi-step-forecasting.html" class="md-nav__link">
-        Direct multi-step forecasting
+      <a href="custom-predictors.html" class="md-nav__link">
+        Custom predictors
       </a>
     </li>
   
@@ -568,8 +568,8 @@
   
   
     <li class="md-nav__item">
-      <a href="forecaster-in-production.html" class="md-nav__link">
-        Forecaster in production
+      <a href="grid-search-forecaster.html" class="md-nav__link">
+        Grid search forecaster
       </a>
     </li>
   
@@ -582,8 +582,8 @@
   
   
     <li class="md-nav__item">
-      <a href="grid-search-forecaster.html" class="md-nav__link">
-        Grid search forecaster
+      <a href="sklearn-pipeline.html" class="md-nav__link">
+        Scikit-learn Pipeline
       </a>
     </li>
   
@@ -686,21 +686,7 @@
   
   
     <li class="md-nav__item">
-      <a href="sklearn-pipeline.html" class="md-nav__link">
-        Scikit-learn Pipeline
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="xgboost.html" class="md-nav__link">
+      <a href="forecasting-xgboost.html" class="md-nav__link">
         Forecasting with XGBoost
       </a>
     </li>
@@ -716,6 +702,20 @@
     <li class="md-nav__item">
       <a href="save-load-forecaster.html" class="md-nav__link">
         Save and load forecaster
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="forecaster-in-production.html" class="md-nav__link">
+        Forecaster in production
       </a>
     </li>
   
@@ -2031,8 +2031,8 @@ Licensed under the Apache License, Version 2.0.
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h1 id="prediction-intervals">Prediction intervals<a class="anchor-link" href="#prediction-intervals">&#182;</a></h1><p>When trying to anticipate future values, the majority of forecasting models try to predict what will be the most likely value, this is call point-forecasting. Although knowing in advance the expected value of a time series is useful in almost every business case, this kind of prediction does not provide any information about the confidence of the model nor the uncertainty in the prediction.</p>
-<p>Probabilistic forecasting, as opposed to point-forecasting, is a family of techniques that allow predicting the expected distribution function instead of a single future value. This type of forecasting provides much rich information since it allows to create prediction intervals, the range of likely values where the true value may fall. More formally, a prediction interval defines the interval within which the true value of the response variable is expected to be found with a given probability.</p>
+<h1 id="prediction-intervals">Prediction intervals<a class="anchor-link" href="#prediction-intervals">&#182;</a></h1><p>When trying to anticipate future values, most of forecasting models try to predict what will be the most likely value. This is call point-forecasting. Although knowing in advance the expected value of a time series is useful in almost every business case, this kind of prediction does not provide any information about the confidence of the model or the prediction uncertainty.</p>
+<p>Probabilistic forecasting, as opposed to point-forecasting, is a family of techniques that allow for predicting the expected distribution function instead of a single future value. This type of forecasting provides much rich information since it allows for creating prediction intervals, the range of likely values where the true value may fall. More formally, a prediction interval defines the interval within which the true value of the response variable is expected to be found with a given probability.</p>
 <p>In the book Forecasting: Principles and Practice, Rob J Hyndman and George Athanasopoulos list <a href="https://otexts.com/fpp3/prediction-intervals.html">multiple ways to estimate prediction intervals</a>, most of which require that the residuals (errors) of the model follow a normal distribution. When this property cannot be assumed, bootstrapping can be resorted to, which only assumes that the residuals are uncorrelated. This is the method used in skforecast.</p>
 
 </div>
@@ -2045,7 +2045,7 @@ Licensed under the Apache License, Version 2.0.
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>The error of one-step forecast is defined as $e_t = y_t - \hat{y}_{t|t-1}$. Assuming future errors will be similar to past errors, it is possible to  simulate different predictions by sampling from the collection of errors previously seen in the past (i.e., the residuals) and adding them to the predictions.</p>
+<p>The error of one-step forecast is defined as $e_t = y_t - \hat{y}_{t|t-1}$. Assuming future errors will be like past errors, it is possible to simulate different predictions by sampling from the collection of errors previously seen in the past (i.e., the residuals) and adding them to the predictions.</p>
 
 </div>
 </div>
@@ -2068,7 +2068,7 @@ Licensed under the Apache License, Version 2.0.
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>Doing this repeatedly, a collection of slightly different predictions are created (possible futures), that represents the expected variance in the forecasting process. Then, prediction intervals can be computed by calculating percentiles of the future sample paths for each forecast horizon.</p>
+<p>Doing this repeatedly, a collection of slightly different predictions is created (possible futures), that represent the expected variance in the forecasting process. Then, prediction intervals can be computed by calculating the percentiles of the future sample paths for each forecast horizon.</p>
 
 </div>
 </div>
@@ -2582,7 +2582,7 @@ jp-needs-light-background
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <h2 id="out-of-sample-residuals">Out of sample residuals<a class="anchor-link" href="#out-of-sample-residuals">&#182;</a></h2><p>By default, training residuals are used to create the prediction intervals. However, other residuals may be used, for example, residuals obtained from a validation set.</p>
-<p>First, the new residuals haver o be stored inside the forecaster using the method <code>set_out_sample_residuals</code>.</p>
+<p>First, the new residuals must be stored inside the forecaster using the method <code>set_out_sample_residuals</code>.</p>
 
 </div>
 </div>
@@ -2630,7 +2630,7 @@ forecaster.set_out_sample_residuals(residuals=simulated_residuals)</div>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>Once the new residuals have been added to the forecaster, it is possible to indicate <code>in_sample_residuals = False</code> when using its method <code>predict</code>.</p>
+<p>Once the new residuals have been added to the forecaster, it is possible to indicate <code>in_sample_residuals = False</code> when using the <code>predict</code> method.</p>
 
 </div>
 </div>
@@ -2764,7 +2764,7 @@ forecaster.set_out_sample_residuals(residuals=simulated_residuals)</div>
     <nav class="md-footer__inner md-grid" aria-label="Footer">
       
         
-        <a href="grid-search-forecaster.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Grid search forecaster" rel="prev">
+        <a href="sklearn-pipeline.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Scikit-learn Pipeline" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
           </div>
@@ -2773,7 +2773,7 @@ forecaster.set_out_sample_residuals(residuals=simulated_residuals)</div>
               <span class="md-footer__direction">
                 Previous
               </span>
-              Grid search forecaster
+              Scikit-learn Pipeline
             </div>
           </div>
         </a>

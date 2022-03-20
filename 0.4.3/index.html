@@ -406,11 +406,11 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#tutorials" class="md-nav__link">
-    Tutorials
+  <a href="#examples-and-tutorials" class="md-nav__link">
+    Examples and tutorials
   </a>
   
-    <nav class="md-nav" aria-label="Tutorials">
+    <nav class="md-nav" aria-label="Examples and tutorials">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -490,7 +490,7 @@
   
     <li class="md-nav__item">
       <a href="examples/examples.html" class="md-nav__link">
-        Examples
+        Examples and tutorials
       </a>
     </li>
   
@@ -608,8 +608,8 @@
   
   
     <li class="md-nav__item">
-      <a href="notebooks/custom-predictors.html" class="md-nav__link">
-        Custom predictors
+      <a href="notebooks/direct-multi-step-forecasting.html" class="md-nav__link">
+        Direct multi-step forecasting
       </a>
     </li>
   
@@ -636,8 +636,8 @@
   
   
     <li class="md-nav__item">
-      <a href="notebooks/direct-multi-step-forecasting.html" class="md-nav__link">
-        Direct multi-step forecasting
+      <a href="notebooks/custom-predictors.html" class="md-nav__link">
+        Custom predictors
       </a>
     </li>
   
@@ -664,8 +664,8 @@
   
   
     <li class="md-nav__item">
-      <a href="notebooks/forecaster-in-production.html" class="md-nav__link">
-        Forecaster in production
+      <a href="notebooks/grid-search-forecaster.html" class="md-nav__link">
+        Grid search forecaster
       </a>
     </li>
   
@@ -678,8 +678,8 @@
   
   
     <li class="md-nav__item">
-      <a href="notebooks/grid-search-forecaster.html" class="md-nav__link">
-        Grid search forecaster
+      <a href="notebooks/sklearn-pipeline.html" class="md-nav__link">
+        Scikit-learn Pipeline
       </a>
     </li>
   
@@ -720,21 +720,7 @@
   
   
     <li class="md-nav__item">
-      <a href="notebooks/sklearn-pipeline.html" class="md-nav__link">
-        Scikit-learn Pipeline
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="notebooks/xgboost.html" class="md-nav__link">
+      <a href="notebooks/forecasting-xgboost.html" class="md-nav__link">
         Forecasting with XGBoost
       </a>
     </li>
@@ -750,6 +736,20 @@
     <li class="md-nav__item">
       <a href="notebooks/save-load-forecaster.html" class="md-nav__link">
         Save and load forecaster
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="notebooks/forecaster-in-production.html" class="md-nav__link">
+        Forecaster in production
       </a>
     </li>
   
@@ -1005,11 +1005,11 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#tutorials" class="md-nav__link">
-    Tutorials
+  <a href="#examples-and-tutorials" class="md-nav__link">
+    Examples and tutorials
   </a>
   
-    <nav class="md-nav" aria-label="Tutorials">
+    <nav class="md-nav" aria-label="Examples and tutorials">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -1073,7 +1073,7 @@
 <p class="admonition-title">Info</p>
 <p><strong>Version 0.4</strong> has undergone a huge code refactoring. Main changes are related to input-output formats (only pandas series and dataframes are allowed although internally numpy arrays are used for performance) and model validation methods (unified into backtesting with and without refit). All notable changes are listed in <a href="releases/releases.html">Releases</a>.</p>
 </div>
-<h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h2>
+<h2 id="installation"><strong>Installation</strong><a class="headerlink" href="#installation" title="Permanent link">&para;</a></h2>
 <table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>pip install skforecast
 </code></pre></div>
 </td></tr></table>
@@ -1085,7 +1085,7 @@
 <table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>pip install git+https://github.com/JoaquinAmatRodrigo/skforecast#master
 </code></pre></div>
 </td></tr></table>
-<h2 id="dependencies">Dependencies<a class="headerlink" href="#dependencies" title="Permanent link">&para;</a></h2>
+<h2 id="dependencies"><strong>Dependencies</strong><a class="headerlink" href="#dependencies" title="Permanent link">&para;</a></h2>
 <table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
 <span class="normal">2</span>
 <span class="normal">3</span>
@@ -1097,36 +1097,36 @@ scikit-learn&gt;=1.0
 statsmodels&gt;=0.12, &lt;=0.13
 </code></pre></div>
 </td></tr></table>
-<h2 id="features">Features<a class="headerlink" href="#features" title="Permanent link">&para;</a></h2>
+<h2 id="features"><strong>Features</strong><a class="headerlink" href="#features" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Create recursive autoregressive forecasters from any regressor that follows the scikit-learn API</li>
 <li>Create multi-output autoregressive forecasters from any regressor that follows the scikit-learn API</li>
-<li>Grid search to find optimal hyperparameters</li>
-<li>Grid search to find optimal lags (predictors)</li>
 <li>Include exogenous variables as predictors</li>
 <li>Include custom predictors (rolling mean, rolling variance ...)</li>
 <li>Multiple backtesting methods for model validation</li>
-<li>Include custom metrics for model validation</li>
+<li>Grid search to find optimal lags (predictors) and best hyperparameters</li>
+<li>Include custom metrics for model validation and grid search</li>
 <li>Prediction interval estimated by bootstrapping</li>
 <li>Get predictor importance</li>
+<li>Forecaster in production</li>
 </ul>
-<h2 id="tutorials">Tutorials<a class="headerlink" href="#tutorials" title="Permanent link">&para;</a></h2>
+<h2 id="examples-and-tutorials"><strong>Examples and tutorials</strong><a class="headerlink" href="#examples-and-tutorials" title="Permanent link">&para;</a></h2>
 <h3 id="english">English<a class="headerlink" href="#english" title="Permanent link">&para;</a></h3>
 <p><i class="fa-duotone fa-chart-line fa" style="font-size: 25px; color:#1DA1F2;"></i>  <a href="https://www.cienciadedatos.net/documentos/py27-time-series-forecasting-python-scikitlearn.html"><strong>Skforecast: time series forecasting with Python and Scikit-learn</strong></a></p>
 <p><i class="fa-duotone fa-lightbulb fa" style="font-size: 25px; color:#fcea2b;"></i> <a href="https://www.cienciadedatos.net/documentos/py29-forecasting-electricity-power-demand-python.html"><strong>Forecasting electricity demand with Python</strong></a></p>
-<p><i class="fa-solid fa-bicycle fa" style="font-size: 25px; color:#00cc99;"></i> <a href="https://www.cienciadedatos.net/documentos/py39-forecasting-time-series-with-skforecast-xgboost-lightgbm-catboost.html"><strong>Forecasting time series with gradient boosting: Skforecast, XGBoost, LightGBM and CatBoost</strong></a></p>
 <p><i class="fa-duotone fa-rss fa" style="font-size: 25px; color:#666666;"></i> <a href="https://www.cienciadedatos.net/documentos/py37-forecasting-web-traffic-machine-learning.html"><strong>Forecasting web traffic with machine learning and Python</strong></a></p>
+<p><i class="fa-solid fa-bicycle fa" style="font-size: 25px; color:#00cc99;"></i> <a href="https://www.cienciadedatos.net/documentos/py39-forecasting-time-series-with-skforecast-xgboost-lightgbm-catboost.html"><strong>Forecasting time series with gradient boosting: Skforecast, XGBoost, LightGBM and CatBoost</strong></a></p>
 <p><i class="fa-brands fa-bitcoin fa" style="font-size: 25px; color:#f7931a;"></i> <a href="https://www.cienciadedatos.net/documentos/py41-forecasting-cryptocurrency-bitcoin-machine-learning-python.html"><strong>Bitcoin price prediction with Python</strong></a></p>
 <h3 id="espanol">Español<a class="headerlink" href="#espanol" title="Permanent link">&para;</a></h3>
 <p><i class="fa-duotone fa-chart-line fa" style="font-size: 25px; color:#1DA1F2;"></i> <a href="https://www.cienciadedatos.net/documentos/py27-forecasting-series-temporales-python-scikitlearn.html"><strong>Skforecast: forecasting series temporales con Python y Scikit-learn</strong></a></p>
 <p><i class="fa-duotone fa-lightbulb fa" style="font-size: 25px; color:#fcea2b;"></i> <a href="https://www.cienciadedatos.net/documentos/py29-forecasting-demanda-energia-electrica-python.html"><strong>Forecasting de la demanda eléctrica</strong></a></p>
-<p><i class="fa-solid fa-bicycle fa" style="font-size: 25px; color:#00cc99;"></i>  <a href="https://www.cienciadedatos.net/documentos/py37-forecasting-visitas-web-machine-learning.html"><strong>Forecasting de las visitas a una página web</strong></a></p>
-<p><i class="fa-duotone fa-rss fa" style="font-size: 25px; color:#666666;"></i> <a href="https://www.cienciadedatos.net/documentos/py39-forecasting-series-temporales-con-skforecast-xgboost-lightgbm-catboost.html"><strong>Forecasting series temporales con gradient boosting: Skforecast, XGBoost, LightGBM y CatBoost</strong></a></p>
+<p><i class="fa-duotone fa-rss fa" style="font-size: 25px; color:#666666;"></i>  <a href="https://www.cienciadedatos.net/documentos/py37-forecasting-visitas-web-machine-learning.html"><strong>Forecasting de las visitas a una página web</strong></a></p>
+<p><i class="fa-solid fa-bicycle fa" style="font-size: 25px; color:#00cc99;"></i> <a href="https://www.cienciadedatos.net/documentos/py39-forecasting-series-temporales-con-skforecast-xgboost-lightgbm-catboost.html"><strong>Forecasting series temporales con gradient boosting: Skforecast, XGBoost, LightGBM y CatBoost</strong></a></p>
 <p><i class="fa-brands fa-bitcoin fa" style="font-size: 25px; color:#f7931a;"></i> <a href="https://www.cienciadedatos.net/documentos/py41-forecasting-criptomoneda-bitcoin-machine-learning-python.html"><strong>Predicción del precio de Bitcoin con Python</strong></a></p>
-<h2 id="donating">Donating<a class="headerlink" href="#donating" title="Permanent link">&para;</a></h2>
+<h2 id="donating"><strong>Donating</strong><a class="headerlink" href="#donating" title="Permanent link">&para;</a></h2>
 <p>If you found skforecast useful, you can support us with a donation. Your contribution will help to continue developing and improving this project. Many thanks! <img alt="🤗" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/1f917.svg" title=":hugging_face:" /> <img alt="😍" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/1f60d.svg" title=":heart_eyes:" /></p>
 <p><a href="https://www.paypal.com/donate/?hosted_button_id=D2JZSWRLTZDL6"><img alt="paypal" src="https://www.paypalobjects.com/en_US/ES/i/btn/btn_donateCC_LG.gif" /></a></p>
-<h2 id="licence">Licence<a class="headerlink" href="#licence" title="Permanent link">&para;</a></h2>
+<h2 id="licence"><strong>Licence</strong><a class="headerlink" href="#licence" title="Permanent link">&para;</a></h2>
 <p><strong>joaquinAmatRodrigo/skforecast</strong> is licensed under the <strong>MIT License</strong>, a short and simple permissive license with conditions only requiring preservation of copyright and license notices. Licensed works, modifications, and larger works may be distributed under different terms and without source code.</p>
 
               

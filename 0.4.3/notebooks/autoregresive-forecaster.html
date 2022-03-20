@@ -73,7 +73,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#libraries" class="md-skip">
+        <a href="#recursive-multi-step-forecasting" class="md-skip">
           Skip to content
         </a>
       
@@ -392,7 +392,7 @@
   
     <li class="md-nav__item">
       <a href="../examples/examples.html" class="md-nav__link">
-        Examples
+        Examples and tutorials
       </a>
     </li>
   
@@ -504,6 +504,8 @@
       <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
       
       
+        
+      
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
           Recursive multi-step forecasting
@@ -519,6 +521,8 @@
 <nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
   
+  
+    
   
   
     <label class="md-nav__title" for="__toc">
@@ -584,8 +588,8 @@
   
   
     <li class="md-nav__item">
-      <a href="custom-predictors.html" class="md-nav__link">
-        Custom predictors
+      <a href="direct-multi-step-forecasting.html" class="md-nav__link">
+        Direct multi-step forecasting
       </a>
     </li>
   
@@ -612,8 +616,8 @@
   
   
     <li class="md-nav__item">
-      <a href="direct-multi-step-forecasting.html" class="md-nav__link">
-        Direct multi-step forecasting
+      <a href="custom-predictors.html" class="md-nav__link">
+        Custom predictors
       </a>
     </li>
   
@@ -640,8 +644,8 @@
   
   
     <li class="md-nav__item">
-      <a href="forecaster-in-production.html" class="md-nav__link">
-        Forecaster in production
+      <a href="grid-search-forecaster.html" class="md-nav__link">
+        Grid search forecaster
       </a>
     </li>
   
@@ -654,8 +658,8 @@
   
   
     <li class="md-nav__item">
-      <a href="grid-search-forecaster.html" class="md-nav__link">
-        Grid search forecaster
+      <a href="sklearn-pipeline.html" class="md-nav__link">
+        Scikit-learn Pipeline
       </a>
     </li>
   
@@ -696,21 +700,7 @@
   
   
     <li class="md-nav__item">
-      <a href="sklearn-pipeline.html" class="md-nav__link">
-        Scikit-learn Pipeline
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="xgboost.html" class="md-nav__link">
+      <a href="forecasting-xgboost.html" class="md-nav__link">
         Forecasting with XGBoost
       </a>
     </li>
@@ -726,6 +716,20 @@
     <li class="md-nav__item">
       <a href="save-load-forecaster.html" class="md-nav__link">
         Save and load forecaster
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="forecaster-in-production.html" class="md-nav__link">
+        Forecaster in production
       </a>
     </li>
   
@@ -950,6 +954,8 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -1016,8 +1022,6 @@
 </a>
 
 
-
-  <h1>Recursive multi-step forecasting</h1>
 
 <script>
 (function (global, factory) {
@@ -2049,6 +2053,19 @@ Licensed under the Apache License, Version 2.0.
     init_mathjax();
     </script>
     <!-- End of mathjax configuration --><div class="jupyter-wrapper">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<h1 id="recursive-multi-step-forecasting">Recursive multi-step forecasting<a class="anchor-link" href="#recursive-multi-step-forecasting">&#182;</a></h1><p>Since the value of $t_{n}$ is required to predict the point $t_{n-1}$, and $t_{n-1}$ is unknown, it is necessary to make recursive predictions in which, each new prediction, is based on the previous one. This process is known as recursive forecasting or recursive multi-step forecasting.</p>
+<p>The major challenge when using machine learning models for recursive multi-step forecasting is transforming the time series into a matrix where each value of the series is related to the time window (lags) that precedes it. This forecasting strategy can be easily generated with the classes <code>ForecasterAutoreg</code> and <code>ForecasterAutoregCustom</code>.</p>
+
+</div>
+</div>
+</div>
+</div>
 <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
@@ -3089,13 +3106,13 @@ Freq: MS, Name: y, dtype: float64</pre>
       
       
         
-        <a href="custom-predictors.html" class="md-footer__link md-footer__link--next" aria-label="Next: Custom predictors" rel="next">
+        <a href="direct-multi-step-forecasting.html" class="md-footer__link md-footer__link--next" aria-label="Next: Direct multi-step forecasting" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Custom predictors
+              Direct multi-step forecasting
             </div>
           </div>
           <div class="md-footer__button md-icon">
