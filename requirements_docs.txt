@@ -3,3 +3,7 @@ mkdocs==1.2.3
 mkdocs-jupyter==0.20.0
 mkdocs-material==8.2.5
 mkdocstrings==0.18.1
+skforecast>=0.4.3
+jupyter==1.0.0
+#jupyter_contrib_nbextensions==0.5.1
+#jupyter contrib nbextension install
