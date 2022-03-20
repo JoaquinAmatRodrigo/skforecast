@@ -12,7 +12,7 @@
 
      **Version 0.4** has undergone a huge code refactoring. Main changes are related to input-output formats (only pandas series and dataframes are allowed although internally numpy arrays are used for performance) and model validation methods (unified into backtesting with and without refit). All notable changes are listed in [Releases](./releases/releases.md).
 
-## Installation
+## **Installation**
 
 ```
 pip install skforecast
@@ -30,7 +30,7 @@ Latest (unstable):
 pip install git+https://github.com/JoaquinAmatRodrigo/skforecast#master
 ```
 
-## Dependencies
+## **Dependencies**
 
 ```
 numpy>=1.20, <=1.22
@@ -40,7 +40,7 @@ scikit-learn>=1.0
 statsmodels>=0.12, <=0.13
 ```
 
-## Features
+## **Features**
 
 + Create recursive autoregressive forecasters from any regressor that follows the scikit-learn API
 + Create multi-output autoregressive forecasters from any regressor that follows the scikit-learn API
@@ -54,7 +54,7 @@ statsmodels>=0.12, <=0.13
 + Forecaster in production
 
 
-## Tutorials 
+## **Examples and tutorials**
 
 ### English
 
@@ -82,13 +82,13 @@ statsmodels>=0.12, <=0.13
 <i class="fa-brands fa-bitcoin fa" style="font-size: 25px; color:#f7931a;"></i> [**Predicción del precio de Bitcoin con Python**](https://www.cienciadedatos.net/documentos/py41-forecasting-criptomoneda-bitcoin-machine-learning-python.html)
 
 
-## Donating
+## **Donating**
 
 If you found skforecast useful, you can support us with a donation. Your contribution will help to continue developing and improving this project. Many thanks! :hugging_face: :heart_eyes:
 
 [![paypal](https://www.paypalobjects.com/en_US/ES/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate/?hosted_button_id=D2JZSWRLTZDL6)
 
 
-## Licence
+## **Licence**
 
 **joaquinAmatRodrigo/skforecast** is licensed under the **MIT License**, a short and simple permissive license with conditions only requiring preservation of copyright and license notices. Licensed works, modifications, and larger works may be distributed under different terms and without source code.
