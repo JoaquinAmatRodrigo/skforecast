@@ -39,7 +39,7 @@ The most common error when importing the library is:
 
  `'cannot import name 'mean_absolute_percentage_error' from 'sklearn.metrics'`.
  
- This is because the scikit-learn installation is lower than 0.24. Try to upgrade scikit-learn with
+ This is because the scikit-learn installation is lower than 0.24. Try to upgrade scikit-learn with:
  
  ```bash
 pip3 install -U scikit-learn
@@ -121,6 +121,6 @@ If you found skforecast useful, you can support us with a donation. Your contrib
 [![paypal](https://www.paypalobjects.com/en_US/ES/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate/?hosted_button_id=D2JZSWRLTZDL6)
 
 
-# Licence
+# License
 
 **joaquinAmatRodrigo/skforecast** is licensed under the **MIT License**, a short and simple permissive license with conditions only requiring preservation of copyright and license notices. Licensed works, modifications, and larger works may be distributed under different terms and without source code.
