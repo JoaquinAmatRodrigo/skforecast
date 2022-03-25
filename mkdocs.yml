@@ -9,14 +9,17 @@ use_directory_urls: false
 nav:
   - Home:
     - Readme: README.md
-    - Introduction to forcasting: introduction-forecasting/introduction-forecasting.md
+    - Introduction to forecasting: quick-start/introduction-forecasting.md
     - User Guides: notebooks/input-data.ipynb
     - Examples and tutorials: examples/examples.md
     - API Reference: api/ForecasterAutoreg.md
     - Releases: releases/releases.md
 
-  - Introduction to forcasting: introduction-forecasting/introduction-forecasting.md
-    
+  - Quick start:
+    - Introduction to forecasting: quick-start/introduction-forecasting.md
+    - Backtesting, forecaster validation: quick-start/backtesting-forecaster-validation.md
+    - Quick Code - skforecast: notebooks/00_quick-code-skforecast.ipynb
+
   - User Guides:
       - Input data: notebooks/input-data.ipynb
       - Recursive multi-step forecasting: notebooks/autoregresive-forecaster.ipynb
