@@ -43,7 +43,7 @@ When working with time series, it is seldom needed to predict only the next elem
 
 Since the value *t(n-1)* is required to predict *t(n)*, and *t(n-1)* is unknown, it is necessary to make recursive predictions in which, each new prediction, is based on the previous one. This process is known as recursive forecasting or recursive multi-step forecasting.
 
-<p align="center"><img src="../img/diagram-recursive-mutistep-forecasting.png" style="width: 700px"></p>
+<p align="center"><img src="../img/diagram-recursive-mutistep-forecasting.png" style="width: 650px"></p>
 
 
 ### Direct multi-step forecasting
