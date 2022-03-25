@@ -8,7 +8,7 @@ site_author: Joaquin Amat Rodrigo
 use_directory_urls: false
 nav:
   - Home:
-    - Readme: README.md
+    - Welcome to skforecast: README.md
     - Introduction to forecasting: quick-start/introduction-forecasting.md
     - User Guides: notebooks/input-data.ipynb
     - Examples and tutorials: examples/examples.md
@@ -17,8 +17,7 @@ nav:
 
   - Quick start:
     - Introduction to forecasting: quick-start/introduction-forecasting.md
-    - Backtesting, forecaster validation: quick-start/backtesting-forecaster-validation.md
-    - Quick Code - skforecast: notebooks/00_quick-code-skforecast.ipynb
+    - Quick start skforecast: notebooks/quick-start-skforecast.ipynb
 
   - User Guides:
       - Input data: notebooks/input-data.ipynb
