@@ -19,7 +19,7 @@
     
     
       
-        <title>Readme - Skforecast Docs</title>
+        <title>Welcome to skforecast - Skforecast Docs</title>
       
     
     
@@ -113,7 +113,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Readme
+              Welcome to skforecast
             
           </span>
         </div>
@@ -199,11 +199,15 @@
   
 
 
-  <li class="md-tabs__item">
-    <a href="introduction-forecasting/introduction-forecasting.html" class="md-tabs__link">
-      Introduction to forcasting
-    </a>
-  </li>
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="quick-start/introduction-forecasting.html" class="md-tabs__link">
+        Quick start
+      </a>
+    </li>
+  
 
       
         
@@ -361,12 +365,12 @@
       
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
-          Readme
+          Welcome to skforecast
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <a href="index.html" class="md-nav__link md-nav__link--active">
-        Readme
+        Welcome to skforecast
       </a>
       
         
@@ -440,8 +444,8 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#licence" class="md-nav__link">
-    Licence
+  <a href="#license" class="md-nav__link">
+    License
   </a>
   
 </li>
@@ -461,8 +465,8 @@
   
   
     <li class="md-nav__item">
-      <a href="introduction-forecasting/introduction-forecasting.html" class="md-nav__link">
-        Introduction to forcasting
+      <a href="quick-start/introduction-forecasting.html" class="md-nav__link">
+        Introduction to forecasting
       </a>
     </li>
   
@@ -538,10 +542,57 @@
   
   
   
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" data-md-state="indeterminate" type="checkbox" id="__nav_2" checked>
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2">
+          Quick start
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Quick start" data-md-level="1">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          Quick start
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
     <li class="md-nav__item">
-      <a href="introduction-forecasting/introduction-forecasting.html" class="md-nav__link">
-        Introduction to forcasting
+      <a href="quick-start/introduction-forecasting.html" class="md-nav__link">
+        Introduction to forecasting
       </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="notebooks/quick-start-skforecast.html" class="md-nav__link">
+        Quick start skforecast
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
     </li>
   
 
@@ -1039,8 +1090,8 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#licence" class="md-nav__link">
-    Licence
+  <a href="#license" class="md-nav__link">
+    License
   </a>
   
 </li>
@@ -1066,14 +1117,14 @@
 <script src="https://kit.fontawesome.com/d20edc211b.js" crossorigin="anonymous"></script>
 
 <p><img src="img/logo_skforecast_no_background.png" width=185 height=185 align="right"></p>
-<h1 id="skforecast"><strong>skforecast</strong><a class="headerlink" href="#skforecast" title="Permanent link">&para;</a></h1>
+<h1 id="skforecast">skforecast<a class="headerlink" href="#skforecast" title="Permanent link">&para;</a></h1>
 <p><strong>Time series forecasting with scikit-learn regressors.</strong></p>
 <p><strong>Skforecast</strong> is a python library that eases using scikit-learn regressors as multi-step forecasters. It also works with any regressor compatible with the scikit-learn API (pipelines, CatBoost, LightGBM, XGBoost, Ranger...).</p>
 <div class="admonition info">
 <p class="admonition-title">Info</p>
-<p><strong>Version 0.4</strong> has undergone a huge code refactoring. Main changes are related to input-output formats (only pandas series and dataframes are allowed although internally numpy arrays are used for performance) and model validation methods (unified into backtesting with and without refit). All notable changes are listed in <a href="releases/releases.html">Releases</a>.</p>
+<p><strong>Version 0.4</strong> has undergone huge code refactoring. Major changes are related to input-output formats (only pandas series and dataframes are allowed although internally numpy arrays are used for performance) and model validation methods (unified into backtesting with and without refit). All notable changes are listed in <a href="releases/releases.html">Releases</a>.</p>
 </div>
-<h2 id="installation"><strong>Installation</strong><a class="headerlink" href="#installation" title="Permanent link">&para;</a></h2>
+<h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h2>
 <table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>pip install skforecast
 </code></pre></div>
 </td></tr></table>
@@ -1085,7 +1136,7 @@
 <table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>pip install git+https://github.com/JoaquinAmatRodrigo/skforecast#master
 </code></pre></div>
 </td></tr></table>
-<h2 id="dependencies"><strong>Dependencies</strong><a class="headerlink" href="#dependencies" title="Permanent link">&para;</a></h2>
+<h2 id="dependencies">Dependencies<a class="headerlink" href="#dependencies" title="Permanent link">&para;</a></h2>
 <table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
 <span class="normal">2</span>
 <span class="normal">3</span>
@@ -1097,7 +1148,7 @@ scikit-learn&gt;=1.0
 statsmodels&gt;=0.12, &lt;=0.13
 </code></pre></div>
 </td></tr></table>
-<h2 id="features"><strong>Features</strong><a class="headerlink" href="#features" title="Permanent link">&para;</a></h2>
+<h2 id="features">Features<a class="headerlink" href="#features" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Create recursive autoregressive forecasters from any regressor that follows the scikit-learn API</li>
 <li>Create multi-output autoregressive forecasters from any regressor that follows the scikit-learn API</li>
@@ -1110,7 +1161,7 @@ statsmodels&gt;=0.12, &lt;=0.13
 <li>Get predictor importance</li>
 <li>Forecaster in production</li>
 </ul>
-<h2 id="examples-and-tutorials"><strong>Examples and tutorials</strong><a class="headerlink" href="#examples-and-tutorials" title="Permanent link">&para;</a></h2>
+<h2 id="examples-and-tutorials">Examples and tutorials<a class="headerlink" href="#examples-and-tutorials" title="Permanent link">&para;</a></h2>
 <h3 id="english">English<a class="headerlink" href="#english" title="Permanent link">&para;</a></h3>
 <p><i class="fa-duotone fa-chart-line fa" style="font-size: 25px; color:#1DA1F2;"></i>  <a href="https://www.cienciadedatos.net/documentos/py27-time-series-forecasting-python-scikitlearn.html"><strong>Skforecast: time series forecasting with Python and Scikit-learn</strong></a></p>
 <p><i class="fa-duotone fa-lightbulb fa" style="font-size: 25px; color:#fcea2b;"></i> <a href="https://www.cienciadedatos.net/documentos/py29-forecasting-electricity-power-demand-python.html"><strong>Forecasting electricity demand with Python</strong></a></p>
@@ -1123,10 +1174,10 @@ statsmodels&gt;=0.12, &lt;=0.13
 <p><i class="fa-duotone fa-rss fa" style="font-size: 25px; color:#666666;"></i>  <a href="https://www.cienciadedatos.net/documentos/py37-forecasting-visitas-web-machine-learning.html"><strong>Forecasting de las visitas a una página web</strong></a></p>
 <p><i class="fa-solid fa-bicycle fa" style="font-size: 25px; color:#00cc99;"></i> <a href="https://www.cienciadedatos.net/documentos/py39-forecasting-series-temporales-con-skforecast-xgboost-lightgbm-catboost.html"><strong>Forecasting series temporales con gradient boosting: Skforecast, XGBoost, LightGBM y CatBoost</strong></a></p>
 <p><i class="fa-brands fa-bitcoin fa" style="font-size: 25px; color:#f7931a;"></i> <a href="https://www.cienciadedatos.net/documentos/py41-forecasting-criptomoneda-bitcoin-machine-learning-python.html"><strong>Predicción del precio de Bitcoin con Python</strong></a></p>
-<h2 id="donating"><strong>Donating</strong><a class="headerlink" href="#donating" title="Permanent link">&para;</a></h2>
+<h2 id="donating">Donating<a class="headerlink" href="#donating" title="Permanent link">&para;</a></h2>
 <p>If you found skforecast useful, you can support us with a donation. Your contribution will help to continue developing and improving this project. Many thanks! <img alt="🤗" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/1f917.svg" title=":hugging_face:" /> <img alt="😍" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/1f60d.svg" title=":heart_eyes:" /></p>
 <p><a href="https://www.paypal.com/donate/?hosted_button_id=D2JZSWRLTZDL6"><img alt="paypal" src="https://www.paypalobjects.com/en_US/ES/i/btn/btn_donateCC_LG.gif" /></a></p>
-<h2 id="licence"><strong>Licence</strong><a class="headerlink" href="#licence" title="Permanent link">&para;</a></h2>
+<h2 id="license">License<a class="headerlink" href="#license" title="Permanent link">&para;</a></h2>
 <p><strong>joaquinAmatRodrigo/skforecast</strong> is licensed under the <strong>MIT License</strong>, a short and simple permissive license with conditions only requiring preservation of copyright and license notices. Licensed works, modifications, and larger works may be distributed under different terms and without source code.</p>
 
               
@@ -1147,13 +1198,13 @@ statsmodels&gt;=0.12, &lt;=0.13
       
       
         
-        <a href="introduction-forecasting/introduction-forecasting.html" class="md-footer__link md-footer__link--next" aria-label="Next: Introduction to forcasting" rel="next">
+        <a href="quick-start/introduction-forecasting.html" class="md-footer__link md-footer__link--next" aria-label="Next: Introduction to forecasting" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Introduction to forcasting
+              Introduction to forecasting
             </div>
           </div>
           <div class="md-footer__button md-icon">
