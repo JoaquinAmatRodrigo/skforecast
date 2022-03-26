@@ -2111,7 +2111,7 @@ Licensed under the Apache License, Version 2.0.
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <h1 id="direct-multi-step-forecaster">Direct multi-step forecaster<a class="anchor-link" href="#direct-multi-step-forecaster">&#182;</a></h1><p><code>ForecasterAutoreg</code> and <code>ForecasterAutoregCustom</code> models follow a recursive prediction strategy in which each new prediction builds on the previous one. An alternative is to train a model for each step that has to be predicted. This strategy, commonly known as direct multistep forecasting, is computationally more expensive than the recursive since it requires training several models. However, in some scenarios, it achieves better results. This type of model can be obtained with the <code>ForecasterAutoregMultiOutput</code> class and can also include one or multiple exogenous variables.</p>
-<p>To train a <code>ForecasterAutoregMultiOutput</code> a different training matrix is created for each model.</p>
+<p align="center"><img src="../img/diagram-direct-multi-step-forecasting.png" style="width: 700px"></p><p>To train a <code>ForecasterAutoregMultiOutput</code> a different training matrix is created for each model.</p>
 
 </div>
 </div>
