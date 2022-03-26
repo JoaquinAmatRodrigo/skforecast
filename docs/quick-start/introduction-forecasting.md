@@ -41,14 +41,14 @@ When working with time series, it is seldom needed to predict only the next elem
 
 ### Recursive multi-step forecasting
 
-Since the value *t(n-1)* is required to predict *t(n)*, and *t(n-1)* is unknown, it is necessary to make recursive predictions in which, each new prediction, is based on the previous one. This process is known as recursive forecasting or recursive multi-step forecasting.
+Since the value *t(n-1)* is required to predict *t(n)*, and *t(n-1)* is unknown, it is necessary to make recursive predictions in which, each new prediction, is based on the previous one. This process is known as recursive forecasting or recursive multi-step forecasting and can be easily generated with the `ForecasterAutoreg` and `ForecasterAutoregCustom` classes.
 
 <p align="center"><img src="../img/diagram-recursive-mutistep-forecasting.png" style="width: 650px"></p>
 
 
 ### Direct multi-step forecasting
 
-Direct multi-step forecasting consists of training a different model for each step. For example, to predict the next 5 values of a time series, 5 different models are trained, one for each step. As a result, the predictions are independent of each other.
+Direct multi-step forecasting consists of training a different model for each step. For example, to predict the next 5 values of a time series, 5 different models are trained, one for each step. As a result, the predictions are independent of each other. This entire process is automated in the `ForecasterAutoregMultiOutput` class. 
 
 <p align="center"><img src="../img/diagram-direct-multi-step-forecasting.png" style="width: 700px"></p>
 
@@ -60,7 +60,8 @@ Some machine learning models, such as long short-term memory (LSTM) neural netwo
 
 ## Backtesting forecasting models
 
-Backtesting is a term used in modeling to refer to testing a predictive model on historical data. Backtesting involves moving backwards in time, step-by-step, in as many stages as are considered necessary. Therefore, it is a special type of cross-validation applied to previous time period(s).
+Backtesting is a term used in modeling to refer to testing a predictive model on historical data. Backtesting involves moving backward in time, step-by-step, in as many stages as is necessary. Therefore, it is a special type of cross-validation applied to previous period(s).
+
 
 ### Backtesting with refit
 
@@ -69,6 +70,7 @@ The model is trained each time before making predictions. With this configuratio
 <p align="center"><img src="../img/diagram-backtesting-refit.png" style="width: 500px;"></p>
 
 <p align="center"><img src="../img/backtesting_refit.gif" style="width: 600px;"></p>
+
 
 ### Backtesting with refit and fixed train size
 
