@@ -57,7 +57,7 @@ plugins:
             filters:
               - "!^_"  # exclude all members starting with _
           rendering:
-            show_root_heading: no
+            show_root_heading: yes
             docstring_section_style: table
   # - mknotebooks:
   #     enable_default_jupyter_cell_styling: false
