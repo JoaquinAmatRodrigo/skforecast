@@ -2763,22 +2763,20 @@ Skforecast version: 0.4.3 </pre>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h2 id="grid-search-with-custom-metric">Grid search with custom metric<a class="anchor-link" href="#grid-search-with-custom-metric">&#182;</a></h2><p>In addition to the frequently used metrics: mean_squared_error, mean_absolute_error, and mean_absolute_percentage_error, it is possible to use any custom function as long as:</p>
+<h2 id="grid-search-with-custom-metric">Grid search with custom metric<a class="anchor-link" href="#grid-search-with-custom-metric">&#182;</a></h2><p>Besides the frequently used metrics: mean_squared_error, mean_absolute_error, and mean_absolute_percentage_error, it is possible to use any custom function as long as:</p>
 <ul>
 <li><p>It includes the arguments:</p>
 <ul>
-<li><p>y_true: true values of the series.</p>
+<li><p><code>y_true</code>: true values of the series.</p>
 </li>
-<li><p>y_pred: predicted values.</p>
-</li>
-</ul>
-</li>
-<li><p>It returns a numeric value (float or int).</p>
-</li>
-<li><p>The lower the metric, the better the model. This is needed to automatically retrain the best found model.</p>
+<li><p><code>y_pred</code>: predicted values.</p>
 </li>
 </ul>
-<p>This allows evaluating the predictive capacity of the model in very diverse scenarios, for example:</p>
+</li>
+<li><p>It returns a numeric value (<code>float</code> or <code>int</code>).</p>
+</li>
+</ul>
+<p>It allows evaluating the predictive capability of the model in a wide range of scenarios, for example:</p>
 <ul>
 <li><p>Consider only certain months, days, hours...</p>
 </li>
@@ -2787,7 +2785,7 @@ Skforecast version: 0.4.3 </pre>
 <li><p>Consider only the last step of the predicted horizon.</p>
 </li>
 </ul>
-<p>The following example shows how to predict an horizon of 12 months, comparing the models based only on their performance when predicting the last 3 months of each year.</p>
+<p>The following example shows how to forecast a 12-month horizon but considering only the last 3 months of each year to calculate the interest metric.</p>
 
 </div>
 </div>
@@ -2815,7 +2813,6 @@ Skforecast version: 0.4.3 </pre>
         </div>
             <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Grid search hyperparameter and lags with custom metric</span>
 <span class="c1"># ==============================================================================</span>
-
 <span class="k">def</span> <span class="nf">custom_metric</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Calculate the mean squared error using only the predicted values of the last</span>
@@ -2831,12 +2828,12 @@ Skforecast version: 0.4.3 </pre>
                 <span class="n">lags</span>      <span class="o">=</span> <span class="mi">10</span> <span class="c1"># Placeholder, the value will be overwritten</span>
              <span class="p">)</span>
 
+<span class="c1"># Lags used as predictors</span>
+<span class="n">lags_grid</span> <span class="o">=</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">20</span><span class="p">]]</span>
+
 <span class="c1"># Regressor hyperparameters</span>
 <span class="n">param_grid</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;n_estimators&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">50</span><span class="p">,</span> <span class="mi">100</span><span class="p">],</span>
               <span class="s1">&#39;max_depth&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">15</span><span class="p">]}</span>
-
-<span class="c1"># Lags used as predictors</span>
-<span class="n">lags_grid</span> <span class="o">=</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">20</span><span class="p">]]</span>
 
 <span class="n">results_grid</span> <span class="o">=</span> <span class="n">grid_search_forecaster</span><span class="p">(</span>
                         <span class="n">forecaster</span>  <span class="o">=</span> <span class="n">forecaster</span><span class="p">,</span>
@@ -2854,7 +2851,6 @@ Skforecast version: 0.4.3 </pre>
 </pre></div>
 <div id="cell-6" class="clipboard-copy-txt"># Grid search hyperparameter and lags with custom metric
 # ==============================================================================
-
 def custom_metric(y_true, y_pred):
     '''
     Calculate the mean squared error using only the predicted values of the last
@@ -2870,12 +2866,12 @@ forecaster = ForecasterAutoreg(
                 lags      = 10 # Placeholder, the value will be overwritten
              )
 
+# Lags used as predictors
+lags_grid = [3, 10, [1, 2, 3, 20]]
+
 # Regressor hyperparameters
 param_grid = {'n_estimators': [50, 100],
               'max_depth': [5, 10, 15]}
-
-# Lags used as predictors
-lags_grid = [3, 10, [1, 2, 3, 20]]
 
 results_grid = grid_search_forecaster(
                         forecaster  = forecaster,

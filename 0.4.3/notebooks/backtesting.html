@@ -2164,7 +2164,7 @@ Licensed under the Apache License, Version 2.0.
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h1 id="backtesting">Backtesting<a class="anchor-link" href="#backtesting">&#182;</a></h1><p>Backtesting is a term used in modeling to refer to testing a predictive model on historical data. Backtesting involves moving backwards in time, step-by-step, in as many stages as are considered necessary. Therefore, it is a special type of cross-validation applied to previous time period(s).</p>
+<h1 id="backtesting">Backtesting<a class="anchor-link" href="#backtesting">&#182;</a></h1><p>Backtesting is a term used in modeling to refer to testing a predictive model on historical data. Backtesting involves moving backward in time, step-by-step, in as many stages as is necessary. Therefore, it is a special type of cross-validation applied to previous period(s).</p>
 <p><strong>Backtesting with refit</strong></p>
 <p>The model is trained each time before making predictions. With this configuration, the model uses all the information available so far. It is a variation of the standard cross-validation but, instead of making a random distribution of the observations, the training set increases sequentially, maintaining the temporal order of the data.</p>
 <p align="center"><img src="../img/diagram-backtesting-refit.png" style="width: 500px;"></p><p align="center"><img src="../img/backtesting_refit.gif" style="width: 600px;"></p><p><strong>Backtesting with refit and fixed train size</strong></p>
@@ -2441,7 +2441,20 @@ jp-needs-light-background
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h2 id="backtest">Backtest<a class="anchor-link" href="#backtest">&#182;</a></h2>
+<h2 id="backtest">Backtest<a class="anchor-link" href="#backtest">&#182;</a></h2><p>The backtesting process adapted to this scenario is:</p>
+<ol>
+<li><p><code>backtesting_forecaster</code> creates a copy of the forecaster object and trains the model with the length of the series set in <code>initial_train_size</code>.</p>
+</li>
+<li><p>It predicts and stores the next 10 steps, <code>steps=10</code>.</p>
+</li>
+<li><p>Since <code>refit=True</code>, the training set increases to a length of <code>initial_train_size</code> + <code>steps</code>, and the test data becomes the following 10 steps.</p>
+</li>
+<li><p>The model is re-trained with the new training set. The new 10 steps are then predicted.</p>
+</li>
+<li><p>This process is repeated until the entire series has been run.</p>
+</li>
+</ol>
+
 </div>
 </div>
 </div>
@@ -3507,20 +3520,20 @@ forecaster.regressor.predict(X)[:4]</div>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h2 id="backtest-with-custom-metric">Backtest with custom metric<a class="anchor-link" href="#backtest-with-custom-metric">&#182;</a></h2><p>In addition to the frequently used metrics: mean_squared_error, mean_absolute_error, and mean_absolute_percentage_error, it is possible to use any custom function as long as:</p>
+<h2 id="backtest-with-custom-metric">Backtest with custom metric<a class="anchor-link" href="#backtest-with-custom-metric">&#182;</a></h2><p>Besides the frequently used metrics: mean_squared_error, mean_absolute_error, and mean_absolute_percentage_error, it is possible to use any custom function as long as:</p>
 <ul>
 <li><p>It includes the arguments:</p>
 <ul>
-<li><p>y_true: true values of the series.</p>
+<li><p><code>y_true</code>: true values of the series.</p>
 </li>
-<li><p>y_pred: predicted values.</p>
-</li>
-</ul>
-</li>
-<li><p>It returns a numeric value (float or int).</p>
+<li><p><code>y_pred</code>: predicted values.</p>
 </li>
 </ul>
-<p>This allows evaluating the predictive capacity of the model in very diverse scenarios, for example:</p>
+</li>
+<li><p>It returns a numeric value (<code>float</code> or <code>int</code>).</p>
+</li>
+</ul>
+<p>It allows evaluating the predictive capability of the model in a wide range of scenarios, for example:</p>
 <ul>
 <li><p>Consider only certain months, days, hours...</p>
 </li>
@@ -3529,7 +3542,7 @@ forecaster.regressor.predict(X)[:4]</div>
 <li><p>Consider only the last step of the predicted horizon.</p>
 </li>
 </ul>
-<p>The following example shows how to predict an horizon of 12 months, but only considering the last 3 months of each year to calculate the metric of interest.</p>
+<p>The following example shows how to forecast a 12-month horizon but considering only the last 3 months of each year to calculate the interest metric.</p>
 
 </div>
 </div>
@@ -3555,7 +3568,9 @@ forecaster.regressor.predict(X)[:4]</div>
                 </div>
             </clipboard-copy>
         </div>
-            <div class="highlight-ipynb hl-python"><pre><span></span><span class="k">def</span> <span class="nf">custom_metric</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">):</span>
+            <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Backtest forecaster with custom metric</span>
+<span class="c1"># ==============================================================================</span>
+<span class="k">def</span> <span class="nf">custom_metric</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Calculate the mean squared error using only the predicted values of the last</span>
 <span class="sd">    3 months of the year.</span>
@@ -3578,7 +3593,9 @@ forecaster.regressor.predict(X)[:4]</div>
 
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Backtest error custom metric: </span><span class="si">{</span><span class="n">metric</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
-<div id="cell-16" class="clipboard-copy-txt">def custom_metric(y_true, y_pred):
+<div id="cell-16" class="clipboard-copy-txt"># Backtest forecaster with custom metric
+# ==============================================================================
+def custom_metric(y_true, y_pred):
     '''
     Calculate the mean squared error using only the predicted values of the last
     3 months of the year.

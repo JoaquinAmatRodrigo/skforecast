@@ -1313,17 +1313,17 @@
 <h2 id="multi-step-forecasting">Multi-step forecasting<a class="headerlink" href="#multi-step-forecasting" title="Permanent link">&para;</a></h2>
 <p>When working with time series, it is seldom needed to predict only the next element in the series (<em>t+1</em>). Instead, the most common goal is to predict a whole future interval (<em>t+1, ..., t+n</em>)  or a far point in time (<em>t+n</em>). Several strategies allow generating this type of prediction.</p>
 <h3 id="recursive-multi-step-forecasting">Recursive multi-step forecasting<a class="headerlink" href="#recursive-multi-step-forecasting" title="Permanent link">&para;</a></h3>
-<p>Since the value <em>t(n-1)</em> is required to predict <em>t(n)</em>, and <em>t(n-1)</em> is unknown, it is necessary to make recursive predictions in which, each new prediction, is based on the previous one. This process is known as recursive forecasting or recursive multi-step forecasting.</p>
+<p>Since the value <em>t(n-1)</em> is required to predict <em>t(n)</em>, and <em>t(n-1)</em> is unknown, it is necessary to make recursive predictions in which, each new prediction, is based on the previous one. This process is known as recursive forecasting or recursive multi-step forecasting and can be easily generated with the <code>ForecasterAutoreg</code> and <code>ForecasterAutoregCustom</code> classes.</p>
 <p align="center"><img src="../img/diagram-recursive-mutistep-forecasting.png" style="width: 650px"></p>
 
 <h3 id="direct-multi-step-forecasting">Direct multi-step forecasting<a class="headerlink" href="#direct-multi-step-forecasting" title="Permanent link">&para;</a></h3>
-<p>Direct multi-step forecasting consists of training a different model for each step. For example, to predict the next 5 values of a time series, 5 different models are trained, one for each step. As a result, the predictions are independent of each other.</p>
+<p>Direct multi-step forecasting consists of training a different model for each step. For example, to predict the next 5 values of a time series, 5 different models are trained, one for each step. As a result, the predictions are independent of each other. This entire process is automated in the <code>ForecasterAutoregMultiOutput</code> class. </p>
 <p align="center"><img src="../img/diagram-direct-multi-step-forecasting.png" style="width: 700px"></p>
 
 <h3 id="multiple-output-forecasting">Multiple output forecasting<a class="headerlink" href="#multiple-output-forecasting" title="Permanent link">&para;</a></h3>
 <p>Some machine learning models, such as long short-term memory (LSTM) neural network, can predict simultaneously several values of a sequence (<em>one-shot</em>). This strategy is not currently implemented in skforecast library.</p>
 <h2 id="backtesting-forecasting-models">Backtesting forecasting models<a class="headerlink" href="#backtesting-forecasting-models" title="Permanent link">&para;</a></h2>
-<p>Backtesting is a term used in modeling to refer to testing a predictive model on historical data. Backtesting involves moving backwards in time, step-by-step, in as many stages as are considered necessary. Therefore, it is a special type of cross-validation applied to previous time period(s).</p>
+<p>Backtesting is a term used in modeling to refer to testing a predictive model on historical data. Backtesting involves moving backward in time, step-by-step, in as many stages as is necessary. Therefore, it is a special type of cross-validation applied to previous period(s).</p>
 <h3 id="backtesting-with-refit">Backtesting with refit<a class="headerlink" href="#backtesting-with-refit" title="Permanent link">&para;</a></h3>
 <p>The model is trained each time before making predictions. With this configuration, the model uses all the information available so far. It is a variation of the standard cross-validation but, instead of making a random distribution of the observations, the training set increases sequentially, maintaining the temporal order of the data.</p>
 <p align="center"><img src="../img/diagram-backtesting-refit.png" style="width: 500px;"></p>
