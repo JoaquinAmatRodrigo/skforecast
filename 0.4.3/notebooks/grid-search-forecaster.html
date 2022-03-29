@@ -667,8 +667,8 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#grid-search-with-time-series-cross-validation" class="md-nav__link">
-    Grid search with time series cross-validation
+  <a href="#grid-search" class="md-nav__link">
+    Grid search
   </a>
   
 </li>
@@ -676,6 +676,13 @@
         <li class="md-nav__item">
   <a href="#grid-search-with-custom-metric" class="md-nav__link">
     Grid search with custom metric
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hide-progress-bar" class="md-nav__link">
+    Hide progress bar
   </a>
   
 </li>
@@ -1015,8 +1022,8 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#grid-search-with-time-series-cross-validation" class="md-nav__link">
-    Grid search with time series cross-validation
+  <a href="#grid-search" class="md-nav__link">
+    Grid search
   </a>
   
 </li>
@@ -1024,6 +1031,13 @@
         <li class="md-nav__item">
   <a href="#grid-search-with-custom-metric" class="md-nav__link">
     Grid search with custom metric
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hide-progress-bar" class="md-nav__link">
+    Hide progress bar
   </a>
   
 </li>
@@ -2115,7 +2129,7 @@ Licensed under the Apache License, Version 2.0.
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[1]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[7]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
         
         
         <div class="CodeMirror cm-s-jupyter">
@@ -2174,7 +2188,7 @@ from sklearn.metrics import mean_squared_error</div>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[2]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[8]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
         
         
         <div class="CodeMirror cm-s-jupyter">
@@ -2306,7 +2320,7 @@ jp-needs-light-background
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h2 id="grid-search-with-time-series-cross-validation">Grid search with time series cross-validation<a class="anchor-link" href="#grid-search-with-time-series-cross-validation">&#182;</a></h2>
+<h2 id="grid-search">Grid search<a class="anchor-link" href="#grid-search">&#182;</a></h2>
 </div>
 </div>
 </div>
@@ -2316,7 +2330,7 @@ jp-needs-light-background
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[3]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[9]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
         
         
         <div class="CodeMirror cm-s-jupyter">
@@ -2419,7 +2433,31 @@ results_grid = grid_search_forecaster(
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
-<pre>loop lags_grid: 100%|███████████████████████████████████████| 3/3 [00:15&lt;00:00,  5.11s/it]</pre>
+<pre>loop lags_grid:   0%|                                               | 0/3 [00:00&lt;?, ?it/s]
+loop param_grid:   0%|                                              | 0/6 [00:00&lt;?, ?it/s]
+loop param_grid:  17%|██████▎                               | 1/6 [00:00&lt;00:01,  2.55it/s]
+loop param_grid:  33%|████████████▋                         | 2/6 [00:01&lt;00:02,  1.72it/s]
+loop param_grid:  50%|███████████████████                   | 3/6 [00:01&lt;00:01,  2.01it/s]
+loop param_grid:  67%|█████████████████████████▎            | 4/6 [00:02&lt;00:01,  1.69it/s]
+loop param_grid:  83%|███████████████████████████████▋      | 5/6 [00:02&lt;00:00,  1.93it/s]
+loop param_grid: 100%|██████████████████████████████████████| 6/6 [00:03&lt;00:00,  1.67it/s]
+loop lags_grid:  33%|█████████████                          | 1/3 [00:03&lt;00:06,  3.39s/it]
+loop param_grid:   0%|                                              | 0/6 [00:00&lt;?, ?it/s]
+loop param_grid:  17%|██████▎                               | 1/6 [00:00&lt;00:02,  2.30it/s]
+loop param_grid:  33%|████████████▋                         | 2/6 [00:01&lt;00:02,  1.59it/s]
+loop param_grid:  50%|███████████████████                   | 3/6 [00:01&lt;00:01,  1.86it/s]
+loop param_grid:  67%|█████████████████████████▎            | 4/6 [00:02&lt;00:01,  1.55it/s]
+loop param_grid:  83%|███████████████████████████████▋      | 5/6 [00:02&lt;00:00,  1.77it/s]
+loop param_grid: 100%|██████████████████████████████████████| 6/6 [00:03&lt;00:00,  1.54it/s]
+loop lags_grid:  67%|██████████████████████████             | 2/3 [00:07&lt;00:03,  3.56s/it]
+loop param_grid:   0%|                                              | 0/6 [00:00&lt;?, ?it/s]
+loop param_grid:  17%|██████▎                               | 1/6 [00:00&lt;00:01,  2.61it/s]
+loop param_grid:  33%|████████████▋                         | 2/6 [00:01&lt;00:02,  1.73it/s]
+loop param_grid:  50%|███████████████████                   | 3/6 [00:01&lt;00:01,  2.03it/s]
+loop param_grid:  67%|█████████████████████████▎            | 4/6 [00:02&lt;00:01,  1.70it/s]
+loop param_grid:  83%|███████████████████████████████▋      | 5/6 [00:02&lt;00:00,  1.93it/s]
+loop param_grid: 100%|██████████████████████████████████████| 6/6 [00:03&lt;00:00,  1.69it/s]
+loop lags_grid: 100%|███████████████████████████████████████| 3/3 [00:10&lt;00:00,  3.48s/it]</pre>
 </div>
 </div>
 
@@ -2462,7 +2500,7 @@ results_grid = grid_search_forecaster(
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[4]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[10]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
         
         
         <div class="CodeMirror cm-s-jupyter">
@@ -2497,7 +2535,7 @@ results_grid = grid_search_forecaster(
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[4]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[10]:</div>
 
 
 
@@ -2690,7 +2728,7 @@ results_grid = grid_search_forecaster(
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[5]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[11]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
         
         
         <div class="CodeMirror cm-s-jupyter">
@@ -2725,7 +2763,7 @@ results_grid = grid_search_forecaster(
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[5]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[11]:</div>
 
 
 
@@ -2744,8 +2782,8 @@ Training range: [Timestamp(&#39;1991-07-01 00:00:00&#39;), Timestamp(&#39;2006-0
 Training index type: DatetimeIndex 
 Training index frequency: MS 
 Regressor parameters: {&#39;bootstrap&#39;: True, &#39;ccp_alpha&#39;: 0.0, &#39;criterion&#39;: &#39;squared_error&#39;, &#39;max_depth&#39;: 5, &#39;max_features&#39;: &#39;auto&#39;, &#39;max_leaf_nodes&#39;: None, &#39;max_samples&#39;: None, &#39;min_impurity_decrease&#39;: 0.0, &#39;min_samples_leaf&#39;: 1, &#39;min_samples_split&#39;: 2, &#39;min_weight_fraction_leaf&#39;: 0.0, &#39;n_estimators&#39;: 50, &#39;n_jobs&#39;: None, &#39;oob_score&#39;: False, &#39;random_state&#39;: 123, &#39;verbose&#39;: 0, &#39;warm_start&#39;: False} 
-Creation date: 2022-03-26 17:52:42 
-Last fit date: 2022-03-26 17:52:57 
+Creation date: 2022-03-29 21:30:34 
+Last fit date: 2022-03-29 21:30:44 
 Skforecast version: 0.4.3 </pre>
 </div>
 
@@ -2796,7 +2834,7 @@ Skforecast version: 0.4.3 </pre>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[6]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[12]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
         
         
         <div class="CodeMirror cm-s-jupyter">
@@ -2919,7 +2957,31 @@ results_grid = grid_search_forecaster(
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
-<pre>loop lags_grid: 100%|███████████████████████████████████████| 3/3 [00:12&lt;00:00,  4.30s/it]</pre>
+<pre>loop lags_grid:   0%|                                               | 0/3 [00:00&lt;?, ?it/s]
+loop param_grid:   0%|                                              | 0/6 [00:00&lt;?, ?it/s]
+loop param_grid:  17%|██████▎                               | 1/6 [00:00&lt;00:01,  2.53it/s]
+loop param_grid:  33%|████████████▋                         | 2/6 [00:01&lt;00:02,  1.72it/s]
+loop param_grid:  50%|███████████████████                   | 3/6 [00:01&lt;00:01,  2.01it/s]
+loop param_grid:  67%|█████████████████████████▎            | 4/6 [00:02&lt;00:01,  1.70it/s]
+loop param_grid:  83%|███████████████████████████████▋      | 5/6 [00:02&lt;00:00,  1.93it/s]
+loop param_grid: 100%|██████████████████████████████████████| 6/6 [00:03&lt;00:00,  1.69it/s]
+loop lags_grid:  33%|█████████████                          | 1/3 [00:03&lt;00:06,  3.37s/it]
+loop param_grid:   0%|                                              | 0/6 [00:00&lt;?, ?it/s]
+loop param_grid:  17%|██████▎                               | 1/6 [00:00&lt;00:02,  2.46it/s]
+loop param_grid:  33%|████████████▋                         | 2/6 [00:01&lt;00:02,  1.61it/s]
+loop param_grid:  50%|███████████████████                   | 3/6 [00:01&lt;00:01,  1.89it/s]
+loop param_grid:  67%|█████████████████████████▎            | 4/6 [00:02&lt;00:01,  1.56it/s]
+loop param_grid:  83%|███████████████████████████████▋      | 5/6 [00:02&lt;00:00,  1.77it/s]
+loop param_grid: 100%|██████████████████████████████████████| 6/6 [00:03&lt;00:00,  1.54it/s]
+loop lags_grid:  67%|██████████████████████████             | 2/3 [00:07&lt;00:03,  3.53s/it]
+loop param_grid:   0%|                                              | 0/6 [00:00&lt;?, ?it/s]
+loop param_grid:  17%|██████▎                               | 1/6 [00:00&lt;00:01,  2.64it/s]
+loop param_grid:  33%|████████████▋                         | 2/6 [00:01&lt;00:02,  1.73it/s]
+loop param_grid:  50%|███████████████████                   | 3/6 [00:01&lt;00:01,  2.03it/s]
+loop param_grid:  67%|█████████████████████████▎            | 4/6 [00:02&lt;00:01,  1.70it/s]
+loop param_grid:  83%|███████████████████████████████▋      | 5/6 [00:02&lt;00:00,  1.93it/s]
+loop param_grid: 100%|██████████████████████████████████████| 6/6 [00:03&lt;00:00,  1.69it/s]
+loop lags_grid: 100%|███████████████████████████████████████| 3/3 [00:10&lt;00:00,  3.46s/it]</pre>
 </div>
 </div>
 
@@ -2956,13 +3018,25 @@ results_grid = grid_search_forecaster(
 </div>
 
 </div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<h2 id="hide-progress-bar">Hide progress bar<a class="anchor-link" href="#hide-progress-bar">&#182;</a></h2><p>It is possible to hide the progress bar using the following code.</p>
+
+</div>
+</div>
+</div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[7]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[14]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
         
         
         <div class="CodeMirror cm-s-jupyter">
@@ -2977,12 +3051,104 @@ results_grid = grid_search_forecaster(
                 </div>
             </clipboard-copy>
         </div>
+            <div class="highlight-ipynb hl-python"><pre><span></span><span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partialmethod</span>
+<span class="n">tqdm</span><span class="o">.</span><span class="fm">__init__</span> <span class="o">=</span> <span class="n">partialmethod</span><span class="p">(</span><span class="n">tqdm</span><span class="o">.</span><span class="fm">__init__</span><span class="p">,</span> <span class="n">disable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">results_grid</span> <span class="o">=</span> <span class="n">grid_search_forecaster</span><span class="p">(</span>
+                        <span class="n">forecaster</span>  <span class="o">=</span> <span class="n">forecaster</span><span class="p">,</span>
+                        <span class="n">y</span>           <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:</span><span class="n">end_val</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">],</span>
+                        <span class="n">param_grid</span>  <span class="o">=</span> <span class="n">param_grid</span><span class="p">,</span>
+                        <span class="n">lags_grid</span>   <span class="o">=</span> <span class="n">lags_grid</span><span class="p">,</span>
+                        <span class="n">steps</span>       <span class="o">=</span> <span class="mi">12</span><span class="p">,</span>
+                        <span class="n">refit</span>       <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                        <span class="n">metric</span>      <span class="o">=</span> <span class="s1">&#39;mean_squared_error&#39;</span><span class="p">,</span>
+                        <span class="n">initial_train_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:</span><span class="n">end_train</span><span class="p">]),</span>
+                        <span class="n">fixed_train_size</span>   <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                        <span class="n">return_best</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                        <span class="n">verbose</span>     <span class="o">=</span> <span class="kc">False</span>
+               <span class="p">)</span>
+</pre></div>
+<div id="cell-7" class="clipboard-copy-txt">from tqdm import tqdm
+from functools import partialmethod
+tqdm.__init__ = partialmethod(tqdm.__init__, disable=True)
+
+results_grid = grid_search_forecaster(
+                        forecaster  = forecaster,
+                        y           = data.loc[:end_val, 'y'],
+                        param_grid  = param_grid,
+                        lags_grid   = lags_grid,
+                        steps       = 12,
+                        refit       = True,
+                        metric      = 'mean_squared_error',
+                        initial_train_size = len(data.loc[:end_train]),
+                        fixed_train_size   = False,
+                        return_best = True,
+                        verbose     = False
+               )</div>
+    
+        </div>
+    </div>
+
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
+<pre>Number of models compared: 18
+`Forecaster` refitted using the best-found lags and parameters, and the whole data set: 
+  Lags: [ 1  2  3  4  5  6  7  8  9 10] 
+  Parameters: {&#39;max_depth&#39;: 5, &#39;n_estimators&#39;: 50}
+  Backtesting metric: 0.03344857370906804
+
+</pre>
+</div>
+</div>
+
+</div>
+
+</div>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[13]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+        
+        
+        <div class="CodeMirror cm-s-jupyter">
+        <div class="zeroclipboard-container">
+            <clipboard-copy for="cell-8">
+            <div>
+                <span class="notice" hidden>Copied!</span>
+                <svg aria-hidden="true" width="20" height="20" viewBox="0 0 16 16" version="1.1"  data-view-component="true" class="clipboard-copy-icon">
+                    <path fill="currentColor" fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path>
+                    <path fill="currentColor" fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path>
+                </svg>
+                </div>
+            </clipboard-copy>
+        </div>
             <div class="highlight-ipynb hl-python"><pre><span></span><span class="o">%%</span><span class="n">html</span>
 <span class="o">&lt;</span><span class="n">style</span><span class="o">&gt;</span>
 <span class="o">.</span><span class="n">jupyter</span><span class="o">-</span><span class="n">wrapper</span> <span class="o">.</span><span class="n">jp</span><span class="o">-</span><span class="n">CodeCell</span> <span class="o">.</span><span class="n">jp</span><span class="o">-</span><span class="n">Cell</span><span class="o">-</span><span class="n">inputWrapper</span> <span class="o">.</span><span class="n">jp</span><span class="o">-</span><span class="n">InputPrompt</span> <span class="p">{</span><span class="n">display</span><span class="p">:</span> <span class="n">none</span><span class="p">;}</span>
 <span class="o">&lt;/</span><span class="n">style</span><span class="o">&gt;</span>
 </pre></div>
-<div id="cell-7" class="clipboard-copy-txt">%%html
+<div id="cell-8" class="clipboard-copy-txt">%%html
 <style>
 .jupyter-wrapper .jp-CodeCell .jp-Cell-inputWrapper .jp-InputPrompt {display: none;}
 </style></div>
