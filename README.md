@@ -1,3 +1,5 @@
+<script src="https://kit.fontawesome.com/d20edc211b.js" crossorigin="anonymous"></script>
+
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/Naereen/StrapDown.js/graphs/commit-activity)
 ![Lifecycle](https://img.shields.io/badge/lifecycle-maturing-blue)
 ![Python](https://img.shields.io/badge/python-3.7%20%7C%203.8%20%7C%203.9-blue)
