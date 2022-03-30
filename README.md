@@ -1,5 +1,3 @@
-<script src="https://kit.fontawesome.com/d20edc211b.js" crossorigin="anonymous"></script>
-
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/Naereen/StrapDown.js/graphs/commit-activity)
 ![Lifecycle](https://img.shields.io/badge/lifecycle-maturing-blue)
 ![Python](https://img.shields.io/badge/python-3.7%20%7C%203.8%20%7C%203.9-blue)
@@ -115,8 +113,7 @@ Recent improvements are highlighted in the [release notes](https://joaquinamatro
 
 + [**Predicción del precio de Bitcoin con Python**](https://www.cienciadedatos.net/documentos/py41-forecasting-criptomoneda-bitcoin-machine-learning-python.html)
 
-<i class="fa-brands fa-youtube" style="font-size: 25px; color:#c4302b;"></i> [**Workshop predicción de series temporales con machine learning 
-Universidad de Deusto / Deustuko Unibertsitatea**](https://youtu.be/MlktVhReO0E)
++ [**Workshop predicción de series temporales con machine learning Universidad de Deusto / Deustuko Unibertsitatea**](https://youtu.be/MlktVhReO0E)
 
 
 # Donating
