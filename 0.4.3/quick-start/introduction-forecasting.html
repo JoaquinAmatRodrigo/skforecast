@@ -462,15 +462,15 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#backtesting-with-refit" class="md-nav__link">
-    Backtesting with refit
+  <a href="#backtesting-with-refit-and-increasing-training-size-fixed-origin" class="md-nav__link">
+    Backtesting with refit and increasing training size (fixed origin)
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#backtesting-with-refit-and-fixed-train-size" class="md-nav__link">
-    Backtesting with refit and fixed train size
+  <a href="#backtesting-with-refit-and-fixed-training-size-rolling-origin" class="md-nav__link">
+    Backtesting with refit and fixed training size (rolling origin)
   </a>
   
 </li>
@@ -691,15 +691,15 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#backtesting-with-refit" class="md-nav__link">
-    Backtesting with refit
+  <a href="#backtesting-with-refit-and-increasing-training-size-fixed-origin" class="md-nav__link">
+    Backtesting with refit and increasing training size (fixed origin)
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#backtesting-with-refit-and-fixed-train-size" class="md-nav__link">
-    Backtesting with refit and fixed train size
+  <a href="#backtesting-with-refit-and-fixed-training-size-rolling-origin" class="md-nav__link">
+    Backtesting with refit and fixed training size (rolling origin)
   </a>
   
 </li>
@@ -1246,15 +1246,15 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#backtesting-with-refit" class="md-nav__link">
-    Backtesting with refit
+  <a href="#backtesting-with-refit-and-increasing-training-size-fixed-origin" class="md-nav__link">
+    Backtesting with refit and increasing training size (fixed origin)
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#backtesting-with-refit-and-fixed-train-size" class="md-nav__link">
-    Backtesting with refit and fixed train size
+  <a href="#backtesting-with-refit-and-fixed-training-size-rolling-origin" class="md-nav__link">
+    Backtesting with refit and fixed training size (rolling origin)
   </a>
   
 </li>
@@ -1295,7 +1295,7 @@
 <p align="center"><img src="../img/forecasting_multi-step_en.gif" style="width: 500px"></p>
 
 <h2 id="machine-learning-for-forecasting">Machine learning for forecasting<a class="headerlink" href="#machine-learning-for-forecasting" title="Permanent link">&para;</a></h2>
-<p>The main adaptation that needs to be done to apply machine learning models to forecasting problems is to transform the time series into a matrix in which each value is related to the time window (lags) that precedes it.</p>
+<p>In order to apply machine learning models to forecasting problems, the time series has to be transformed into a matrix in which each value is related to the time window (lags) that precedes it. In a time series context, a lag with respect to a time step <em>t</em> is defined as the values of the series at previous time steps. For example, lag 1 is the value at time step <em>t−1</em> and lag <em>m</em> is the value at time step <em>t−m</em>.</p>
 <p align="center"><img src="../img/transform_timeseries.gif" style="width: 500px;"></p>
 
 <p><center><font size="2.5"> <i>Time series transformation into a matrix of 5 lags and a vector with the value of the series that follows each row of the matrix.</i></font></center></p>
@@ -1303,7 +1303,7 @@
 <p align="center"><img src="../img/matrix_transformation_with_exog_variable.png" style="width: 600px;"></p>
 
 <p><center><font size="2.5"> <i>Time series transformation including an exogenous variable.</i></font></center></p>
-<p>Once data have been rearranged into the new shape, any regression model can be trained to predict the next value (step) of the series.</p>
+<p>Once data have been rearranged into the new shape, any regression model can be trained to predict the next value (step) of the series. During model training, every row is considered a separate data instance, where values at lags 1, 2, ... <em>p</em> are considered predictors for the target quantity of the time series at time step <em>p+1</em>. </p>
 <p align="center"><img src="../img/diagram-trainig-forecaster.png" style="width: 700px;"></p>
 
 <h2 id="single-step-forecasting">Single-step forecasting<a class="headerlink" href="#single-step-forecasting" title="Permanent link">&para;</a></h2>
@@ -1313,25 +1313,25 @@
 <h2 id="multi-step-forecasting">Multi-step forecasting<a class="headerlink" href="#multi-step-forecasting" title="Permanent link">&para;</a></h2>
 <p>When working with time series, it is seldom needed to predict only the next element in the series (<em>t+1</em>). Instead, the most common goal is to predict a whole future interval (<em>t+1, ..., t+n</em>)  or a far point in time (<em>t+n</em>). Several strategies allow generating this type of prediction.</p>
 <h3 id="recursive-multi-step-forecasting">Recursive multi-step forecasting<a class="headerlink" href="#recursive-multi-step-forecasting" title="Permanent link">&para;</a></h3>
-<p>Since the value <em>t(n-1)</em> is required to predict <em>t(n)</em>, and <em>t(n-1)</em> is unknown, it is necessary to make recursive predictions in which, each new prediction, is based on the previous one. This process is known as recursive forecasting or recursive multi-step forecasting and can be easily generated with the <code>ForecasterAutoreg</code> and <code>ForecasterAutoregCustom</code> classes.</p>
+<p>Since the value <em>t(n-1)</em> is required to predict <em>t(n)</em>, and <em>t(n-1)</em> is unknown, a recursive process is applied in which, each new prediction, is based on the previous one. This process is known as recursive forecasting or recursive multi-step forecasting and can be easily generated with the <code>ForecasterAutoreg</code> and <code>ForecasterAutoregCustom</code> classes.</p>
 <p align="center"><img src="../img/diagram-recursive-mutistep-forecasting.png" style="width: 650px"></p>
 
 <h3 id="direct-multi-step-forecasting">Direct multi-step forecasting<a class="headerlink" href="#direct-multi-step-forecasting" title="Permanent link">&para;</a></h3>
-<p>Direct multi-step forecasting consists of training a different model for each step. For example, to predict the next 5 values of a time series, 5 different models are trained, one for each step. As a result, the predictions are independent of each other. This entire process is automated in the <code>ForecasterAutoregMultiOutput</code> class. </p>
+<p>Direct multi-step forecasting consists of training a different model for each step of the forecast horizon. For example, to predict the next 5 values of a time series, 5 different models are trained, one for each step. As a result, the predictions are independent of each other. This entire process is automated in the <code>ForecasterAutoregMultiOutput</code> class. </p>
 <p align="center"><img src="../img/diagram-direct-multi-step-forecasting.png" style="width: 700px"></p>
 
 <h3 id="multiple-output-forecasting">Multiple output forecasting<a class="headerlink" href="#multiple-output-forecasting" title="Permanent link">&para;</a></h3>
 <p>Some machine learning models, such as long short-term memory (LSTM) neural network, can predict simultaneously several values of a sequence (<em>one-shot</em>). This strategy is not currently implemented in skforecast library.</p>
 <h2 id="backtesting-forecasting-models">Backtesting forecasting models<a class="headerlink" href="#backtesting-forecasting-models" title="Permanent link">&para;</a></h2>
 <p>Backtesting is a term used in modeling to refer to testing a predictive model on historical data. Backtesting involves moving backward in time, step-by-step, in as many stages as is necessary. Therefore, it is a special type of cross-validation applied to previous period(s).</p>
-<h3 id="backtesting-with-refit">Backtesting with refit<a class="headerlink" href="#backtesting-with-refit" title="Permanent link">&para;</a></h3>
-<p>The model is trained each time before making predictions. With this configuration, the model uses all the information available so far. It is a variation of the standard cross-validation but, instead of making a random distribution of the observations, the training set increases sequentially, maintaining the temporal order of the data.</p>
+<h3 id="backtesting-with-refit-and-increasing-training-size-fixed-origin">Backtesting with refit and increasing training size (fixed origin)<a class="headerlink" href="#backtesting-with-refit-and-increasing-training-size-fixed-origin" title="Permanent link">&para;</a></h3>
+<p>The model is trained each time before making predictions. With this configuration, the model uses all the data available so far. It is a variation of the standard cross-validation but, instead of making a random distribution of the observations, the training set increases sequentially, maintaining the temporal order of the data.</p>
 <p align="center"><img src="../img/diagram-backtesting-refit.png" style="width: 500px;"></p>
 
 <p align="center"><img src="../img/backtesting_refit.gif" style="width: 600px;"></p>
 
-<h3 id="backtesting-with-refit-and-fixed-train-size">Backtesting with refit and fixed train size<a class="headerlink" href="#backtesting-with-refit-and-fixed-train-size" title="Permanent link">&para;</a></h3>
-<p>A technique similar to backtesting with refit but, in this case, the training set doesn't increase sequentially. This is also known as time series cross-validation or walk-forward validation.</p>
+<h3 id="backtesting-with-refit-and-fixed-training-size-rolling-origin">Backtesting with refit and fixed training size (rolling origin)<a class="headerlink" href="#backtesting-with-refit-and-fixed-training-size-rolling-origin" title="Permanent link">&para;</a></h3>
+<p>A technique similar to the previous one but, in this case, the forecast origin rolls forward, therefore, the size of training remains constant. This is also known as time series cross-validation or walk-forward validation.</p>
 <p align="center"><img src="../img/diagram-backtesting-refit-fixed-train-size.png" style="width: 500px;"></p>
 
 <p align="center"><img src="../img/backtesting_refit_fixed_train_size.gif" style="width: 600px;"></p>

@@ -10,7 +10,7 @@ A time series is a sequence of data arranged chronologically, in principle, equa
 
 ## Machine learning for forecasting
 
-The main adaptation that needs to be done to apply machine learning models to forecasting problems is to transform the time series into a matrix in which each value is related to the time window (lags) that precedes it.
+In order to apply machine learning models to forecasting problems, the time series has to be transformed into a matrix in which each value is related to the time window (lags) that precedes it. In a time series context, a lag with respect to a time step *t* is defined as the values of the series at previous time steps. For example, lag 1 is the value at time step *t−1* and lag *m* is the value at time step *t−m*.
 
 <p align="center"><img src="../img/transform_timeseries.gif" style="width: 500px;"></p>
 
@@ -22,7 +22,7 @@ This type of transformation also allows to include additional variables.
 
 <center><font size="2.5"> <i>Time series transformation including an exogenous variable.</i></font></center>
 
-Once data have been rearranged into the new shape, any regression model can be trained to predict the next value (step) of the series.
+Once data have been rearranged into the new shape, any regression model can be trained to predict the next value (step) of the series. During model training, every row is considered a separate data instance, where values at lags 1, 2, ... *p* are considered predictors for the target quantity of the time series at time step *p+1*. 
 
 <p align="center"><img src="../img/diagram-trainig-forecaster.png" style="width: 700px;"></p>
 
@@ -41,14 +41,14 @@ When working with time series, it is seldom needed to predict only the next elem
 
 ### Recursive multi-step forecasting
 
-Since the value *t(n-1)* is required to predict *t(n)*, and *t(n-1)* is unknown, it is necessary to make recursive predictions in which, each new prediction, is based on the previous one. This process is known as recursive forecasting or recursive multi-step forecasting and can be easily generated with the `ForecasterAutoreg` and `ForecasterAutoregCustom` classes.
+Since the value *t(n-1)* is required to predict *t(n)*, and *t(n-1)* is unknown, a recursive process is applied in which, each new prediction, is based on the previous one. This process is known as recursive forecasting or recursive multi-step forecasting and can be easily generated with the `ForecasterAutoreg` and `ForecasterAutoregCustom` classes.
 
 <p align="center"><img src="../img/diagram-recursive-mutistep-forecasting.png" style="width: 650px"></p>
 
 
 ### Direct multi-step forecasting
 
-Direct multi-step forecasting consists of training a different model for each step. For example, to predict the next 5 values of a time series, 5 different models are trained, one for each step. As a result, the predictions are independent of each other. This entire process is automated in the `ForecasterAutoregMultiOutput` class. 
+Direct multi-step forecasting consists of training a different model for each step of the forecast horizon. For example, to predict the next 5 values of a time series, 5 different models are trained, one for each step. As a result, the predictions are independent of each other. This entire process is automated in the `ForecasterAutoregMultiOutput` class. 
 
 <p align="center"><img src="../img/diagram-direct-multi-step-forecasting.png" style="width: 700px"></p>
 
@@ -63,18 +63,18 @@ Some machine learning models, such as long short-term memory (LSTM) neural netwo
 Backtesting is a term used in modeling to refer to testing a predictive model on historical data. Backtesting involves moving backward in time, step-by-step, in as many stages as is necessary. Therefore, it is a special type of cross-validation applied to previous period(s).
 
 
-### Backtesting with refit
+### Backtesting with refit and increasing training size (fixed origin)
 
-The model is trained each time before making predictions. With this configuration, the model uses all the information available so far. It is a variation of the standard cross-validation but, instead of making a random distribution of the observations, the training set increases sequentially, maintaining the temporal order of the data.
+The model is trained each time before making predictions. With this configuration, the model uses all the data available so far. It is a variation of the standard cross-validation but, instead of making a random distribution of the observations, the training set increases sequentially, maintaining the temporal order of the data.
 
 <p align="center"><img src="../img/diagram-backtesting-refit.png" style="width: 500px;"></p>
 
 <p align="center"><img src="../img/backtesting_refit.gif" style="width: 600px;"></p>
 
 
-### Backtesting with refit and fixed train size
+### Backtesting with refit and fixed training size (rolling origin)
 
-A technique similar to backtesting with refit but, in this case, the training set doesn't increase sequentially. This is also known as time series cross-validation or walk-forward validation.
+A technique similar to the previous one but, in this case, the forecast origin rolls forward, therefore, the size of training remains constant. This is also known as time series cross-validation or walk-forward validation.
 
 <p align="center"><img src="../img/diagram-backtesting-refit-fixed-train-size.png" style="width: 500px;"></p>
 

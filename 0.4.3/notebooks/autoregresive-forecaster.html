@@ -2110,7 +2110,7 @@ Licensed under the Apache License, Version 2.0.
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h1 id="recursive-multi-step-forecasting">Recursive multi-step forecasting<a class="anchor-link" href="#recursive-multi-step-forecasting">&#182;</a></h1><p>Since the value of $t_{n-1}$ is required to predict $t_{n}$, and $t_{n-1}$ is unknown, it is necessary to make recursive predictions in which, each new prediction, is based on the previous one. This process is known as recursive forecasting or recursive multi-step forecasting.</p>
+<h1 id="recursive-multi-step-forecasting">Recursive multi-step forecasting<a class="anchor-link" href="#recursive-multi-step-forecasting">&#182;</a></h1><p>Since the value of $t_{n-1}$ is required to predict $t_{n}$, and $t_{n-1}$ is unknown, a recursive process is applied in which, each new prediction, is based on the previous one. This process is known as recursive forecasting or recursive multi-step forecasting.</p>
 <p align="center"><img src="../img/diagram-recursive-mutistep-forecasting.png" style="width: 650px"></p><p>The major challenge when using machine learning models for recursive multi-step forecasting is transforming the time series into a matrix where each value of the series is related to the time window (lags) that precedes it. This forecasting strategy can be easily generated with the classes <code>ForecasterAutoreg</code> and <code>ForecasterAutoregCustom</code>.</p>
 
 </div>
