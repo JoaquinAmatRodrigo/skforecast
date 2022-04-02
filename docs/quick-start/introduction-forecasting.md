@@ -10,7 +10,7 @@ A time series is a sequence of data arranged chronologically, in principle, equa
 
 ## Machine learning for forecasting
 
-In order to apply machine learning models to forecasting problems, the time series has to be transformed into a matrix in which each value is related to the time window (lags) that precedes it. In a time series context, a lag with respect to a time step $t$ is defined as the values of the series at previous time steps. For example, lag 1 is the value at time step $t−1$ and lag $m$ is the value at time step $t−m$.
+In order to apply machine learning models to forecasting problems, the time series has to be transformed into a matrix in which each value is related to the time window (lags) that precedes it. In a time series context, a lag with respect to a time step *t* is defined as the values of the series at previous time steps. For example, lag 1 is the value at time step *t−1* and lag *m* is the value at time step *t−m*.
 
 <p align="center"><img src="../img/transform_timeseries.gif" style="width: 500px;"></p>
 
@@ -22,7 +22,7 @@ This type of transformation also allows to include additional variables.
 
 <center><font size="2.5"> <i>Time series transformation including an exogenous variable.</i></font></center>
 
-Once data have been rearranged into the new shape, any regression model can be trained to predict the next value (step) of the series. During model training, every row is considered a separate data instance, where values at lags 1, 2, ... $p$ are considered predictors for the target quantity of the time series at time step $p+1$. 
+Once data have been rearranged into the new shape, any regression model can be trained to predict the next value (step) of the series. During model training, every row is considered a separate data instance, where values at lags 1, 2, ... *p* are considered predictors for the target quantity of the time series at time step *p+1*. 
 
 <p align="center"><img src="../img/diagram-trainig-forecaster.png" style="width: 700px;"></p>
 
