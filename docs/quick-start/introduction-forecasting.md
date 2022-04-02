@@ -63,18 +63,18 @@ Some machine learning models, such as long short-term memory (LSTM) neural netwo
 Backtesting is a term used in modeling to refer to testing a predictive model on historical data. Backtesting involves moving backward in time, step-by-step, in as many stages as is necessary. Therefore, it is a special type of cross-validation applied to previous period(s).
 
 
-### Backtesting with refit
+### Backtesting with refit and increasing training size (fixed origin)
 
-The model is trained each time before making predictions. With this configuration, the model uses all the information available so far. It is a variation of the standard cross-validation but, instead of making a random distribution of the observations, the training set increases sequentially, maintaining the temporal order of the data.
+The model is trained each time before making predictions. With this configuration, the model uses all the data available so far. It is a variation of the standard cross-validation but, instead of making a random distribution of the observations, the training set increases sequentially, maintaining the temporal order of the data.
 
 <p align="center"><img src="../img/diagram-backtesting-refit.png" style="width: 500px;"></p>
 
 <p align="center"><img src="../img/backtesting_refit.gif" style="width: 600px;"></p>
 
 
-### Backtesting with refit and fixed train size
+### Backtesting with refit and fixed training size (rolling origin)**
 
-A technique similar to backtesting with refit but, in this case, the training set doesn't increase sequentially. This is also known as time series cross-validation or walk-forward validation.
+A technique similar to the previous one but, in this case, the forecast origin rolls forward, therefore, the size of training remains constant. This is also known as time series cross-validation or walk-forward validation.
 
 <p align="center"><img src="../img/diagram-backtesting-refit-fixed-train-size.png" style="width: 500px;"></p>
 
