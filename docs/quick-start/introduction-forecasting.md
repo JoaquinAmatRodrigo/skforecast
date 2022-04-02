@@ -72,7 +72,7 @@ The model is trained each time before making predictions. With this configuratio
 <p align="center"><img src="../img/backtesting_refit.gif" style="width: 600px;"></p>
 
 
-### Backtesting with refit and fixed training size (rolling origin)**
+### Backtesting with refit and fixed training size (rolling origin)
 
 A technique similar to the previous one but, in this case, the forecast origin rolls forward, therefore, the size of training remains constant. This is also known as time series cross-validation or walk-forward validation.
 
