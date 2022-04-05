@@ -9,7 +9,7 @@ use_directory_urls: false
 nav:
   - Home:
     - Welcome to skforecast: README.md
-    - Introduction to forecasting: quick-start/introduction-forecasting.md
+    - Quick start: quick-start/introduction-forecasting.md
     - User Guides: notebooks/input-data.ipynb
     - Examples and tutorials: examples/examples.md
     - API Reference: api/ForecasterAutoreg.md
