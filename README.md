@@ -74,7 +74,7 @@ The documentation for the latest release is at [skforecast docs
 
 Recent improvements are highlighted in the [release notes](https://joaquinamatrodrigo.github.io/skforecast/latest/releases/releases.html).
 
-+ [Introduction to time series and forecasting](https://joaquinamatrodrigo.github.io/skforecast/latest/introduction-forecasting/introduction-forecasting.html)
++ [Introduction to time series and forecasting](https://joaquinamatrodrigo.github.io/skforecast/0.4.3/quick-start/introduction-forecasting.html)
 
 + [Recursive multi-step forecasting](https://joaquinamatrodrigo.github.io/skforecast/latest/notebooks/autoregresive-forecaster.html)
 
