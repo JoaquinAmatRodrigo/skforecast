@@ -67,7 +67,7 @@ plugins:
 copyright: 
 theme:
   name: material
-  custom_dir: overrides
+  custom_dir: docs/overrides
   font:
     text: Ubuntu
     code: Ubuntu Mono
