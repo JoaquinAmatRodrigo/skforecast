@@ -59,9 +59,6 @@ plugins:
           rendering:
             show_root_heading: yes
             docstring_section_style: table
-  # - mknotebooks:
-  #     enable_default_jupyter_cell_styling: false
-  #     enable_default_pandas_dataframe_styling: true
   - mkdocs-jupyter:
       include_source: False
       ignore_h1_titles: True
@@ -70,6 +67,7 @@ plugins:
 copyright: 
 theme:
   name: material
+  custom_dir: overrides
   font:
     text: Ubuntu
     code: Ubuntu Mono
