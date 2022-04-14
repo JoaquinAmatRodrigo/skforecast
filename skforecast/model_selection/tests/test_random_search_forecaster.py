@@ -1,11 +1,11 @@
-# Unit test grid_search_forecaster
+# Unit test random_search_forecaster
 # ==============================================================================
 import numpy as np
 import pandas as pd
 from sklearn.metrics import mean_squared_error
 from sklearn.linear_model import Ridge
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
-from skforecast.model_selection import grid_search_forecaster
+from skforecast.model_selection import random_search_forecaster
 
 from tqdm import tqdm
 from functools import partialmethod
@@ -27,9 +27,9 @@ y = pd.Series(
               0.62395295, 0.1156184 , 0.31728548, 0.41482621, 0.86630916,
               0.25045537, 0.48303426, 0.98555979, 0.51948512, 0.61289453]))
 
-def test_output_grid_search_forecaster_ForecasterAutoreg_with_mocked():
+def test_output_random_search_forecaster_ForecasterAutoreg_with_mocked():
     '''
-    Test output of grid_search_forecaster in ForecasterAutoreg with mocked
+    Test output of random_search_forecaster in ForecasterAutoreg with mocked
     (mocked done in Skforecast v0.4.3)
     '''
     forecaster = ForecasterAutoreg(
@@ -41,30 +41,35 @@ def test_output_grid_search_forecaster_ForecasterAutoreg_with_mocked():
     n_validation = 12
     y_train = y[:-n_validation]
     lags_grid = [2, 4]
-    param_grid = {'alpha': [0.01, 0.1, 1]}
-    idx = len(lags_grid)*len(param_grid['alpha'])
+    param_distributions = {'alpha':np.logspace(-5, 3, 10)}
+    n_iter = 3
 
-    results = grid_search_forecaster(
-                            forecaster  = forecaster,
-                            y           = y,
-                            lags_grid   = lags_grid,
-                            param_grid  = param_grid,
-                            steps       = steps,
-                            refit       = False,
-                            metric      = 'mean_squared_error',
-                            initial_train_size = len(y_train),
-                            fixed_train_size   = False,
-                            return_best = False,
-                            verbose     = False
-                            )
+    results = random_search_forecaster(
+                        forecaster   = forecaster,
+                        y            = y,
+                        lags_grid    = lags_grid,
+                        param_distributions  = param_distributions,
+                        steps        = steps,
+                        refit        = False,
+                        metric       = 'mean_squared_error',
+                        initial_train_size = len(y_train),
+                        fixed_train_size   = False,
+                        n_iter       = n_iter,
+                        random_state = 123,
+                        return_best  = False,
+                        verbose      = False
+                        )
     
     expected_results = pd.DataFrame({
-            'lags'  :[[1, 2], [1, 2], [1, 2], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]],
-            'params':[{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}, {'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}],
-            'metric':np.array([0.06464646, 0.06502362, 0.06745534, 0.06779272, 0.06802481, 0.06948609]),                                                               
-            'alpha' :np.array([0.01, 0.1 , 1.  , 0.01, 0.1 , 1.  ])
+            'lags'  :[[1, 2], [1, 2], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2]],
+            'params':[{'alpha': 1e-05}, {'alpha': 0.03593813663804626}, {'alpha': 1e-05},
+                      {'alpha': 0.03593813663804626}, {'alpha': 16.681005372000556}, {'alpha': 16.681005372000556}],
+            'metric':np.array([0.06460234, 0.06475887, 0.06776596, 
+                               0.06786132, 0.0713478, 0.07161]),                                                               
+            'alpha' :np.array([1.00000000e-05, 3.59381366e-02, 1.00000000e-05, 
+                               3.59381366e-02, 1.66810054e+01, 1.66810054e+01])
                                      },
-            index=np.arange(idx)
+            index=[1, 0, 4, 3, 5, 2]
                                    )
 
     pd.testing.assert_frame_equal(results, expected_results)
