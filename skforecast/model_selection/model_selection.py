@@ -411,11 +411,11 @@ def _backtesting_forecaster_refit(
                 train_idx_end = initial_train_size + i * steps
             print(f"Data partition in fold: {i}")
             if i < folds - 1:
-                print(f"    Training:   {y.index[train_idx_start]} -- {y.index[train_idx_end - 1]}")
-                print(f"    Validation: {y.index[train_idx_end]} -- {y.index[train_idx_end + steps - 1]}")
+                print(f"    Training:   {y.index[train_idx_start]} -- {y.index[train_idx_end - 1]}  (n={len(y.index[train_idx_start:train_idx_end])})")
+                print(f"    Validation: {y.index[train_idx_end]} -- {y.index[train_idx_end + steps - 1]}  (n={len(y.index[train_idx_end:train_idx_end + steps])})")
             else:
-                print(f"    Training:   {y.index[train_idx_start]} -- {y.index[train_idx_end - 1]}")
-                print(f"    Validation: {y.index[train_idx_end]} -- {y.index[-1]}")
+                print(f"    Training:   {y.index[train_idx_start]} -- {y.index[train_idx_end - 1]}  (n={len(y.index[train_idx_start:train_idx_end])})")
+                print(f"    Validation: {y.index[train_idx_end]} -- {y.index[-1]}  (n={len(y.index[train_idx_end:])})")
         print("")
         
     if folds > 50:
@@ -688,11 +688,11 @@ def _backtesting_forecaster_no_refit(
             last_window_end = initial_train_size + i * steps
             print(f"Data partition in fold: {i}")
             if i < folds - 1:
-                print(f"    Training:   {y.index[0]} -- {y.index[initial_train_size - 1]}")
-                print(f"    Validation: {y.index[last_window_end]} -- {y.index[last_window_end + steps -1]}")
+                print(f"    Training:   {y.index[0]} -- {y.index[initial_train_size - 1]}  (n={len(y.index[:initial_train_size])})")
+                print(f"    Validation: {y.index[last_window_end]} -- {y.index[last_window_end + steps -1]}  (n={len(y.index[last_window_end:last_window_end + steps])})")
             else:
-                print(f"    Training:   {y.index[0]} -- {y.index[initial_train_size - 1]}")
-                print(f"    Validation: {y.index[last_window_end]} -- {y.index[-1]}")
+                print(f"    Training:   {y.index[0]} -- {y.index[initial_train_size - 1]}  (n={len(y.index[:initial_train_size])})")
+                print(f"    Validation: {y.index[last_window_end]} -- {y.index[-1]}  (n={len(y.index[last_window_end:])})")
         print("")
 
     for i in range(folds):
