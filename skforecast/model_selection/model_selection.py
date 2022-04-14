@@ -299,8 +299,7 @@ def _backtesting_forecaster_refit(
     n_boot: int=500,
     random_state: int=123,
     in_sample_residuals: bool=True,
-    verbose: bool=False,
-    set_out_sample_residuals: Any='deprecated'
+    verbose: bool=False
 ) -> Tuple[float, pd.DataFrame]:
     '''
     Backtesting of forecaster model with a re-fitting strategy. A copy of the  
@@ -366,9 +365,6 @@ def _backtesting_forecaster_refit(
         If `True`, residuals from the training data are used as proxy of
         prediction error to create prediction intervals. If `False`, out_sample_residuals
         are used if they are already stored inside the forecaster.
-
-    set_out_sample_residuals: 'deprecated'
-        Deprecated since version 0.4.2, will be removed on version 0.5.0.
             
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used for backtesting.
@@ -577,8 +573,7 @@ def _backtesting_forecaster_no_refit(
     n_boot: int=500,
     random_state: int=123,
     in_sample_residuals: bool=True,
-    verbose: bool=False,
-    set_out_sample_residuals: Any='deprecated'
+    verbose: bool=False
 ) -> Tuple[float, pd.DataFrame]:
     '''
     Backtesting of forecaster without iterative re-fitting. In each iteration,
@@ -639,9 +634,6 @@ def _backtesting_forecaster_no_refit(
         If `True`, residuals from the training data are used as proxy of
         prediction error to create prediction intervals.  If `False`, out_sample_residuals
         are used if they are already stored inside the forecaster.
-
-    set_out_sample_residuals: 'deprecated'
-        Deprecated since version 0.4.2, will be removed on version 0.5.0.
             
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used for backtesting.
@@ -849,8 +841,7 @@ def backtesting_forecaster(
     n_boot: int=500,
     random_state: int=123,
     in_sample_residuals: bool=True,
-    verbose: bool=False,
-    set_out_sample_residuals: Any='deprecated'
+    verbose: bool=False
 ) -> Tuple[float, pd.DataFrame]:
     '''
     Backtesting of forecaster model.
@@ -917,9 +908,6 @@ def backtesting_forecaster(
         If `True`, residuals from the training data are used as proxy of
         prediction error to create prediction intervals.  If `False`, out_sample_residuals
         are used if they are already stored inside the forecaster.
-
-    set_out_sample_residuals: 'deprecated'
-        Deprecated since version 0.4.2, will be removed on version 0.5.0.
                   
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used for backtesting.
@@ -968,12 +956,6 @@ def backtesting_forecaster(
             ('Interval prediction is only available when forecaster is of type '
             'ForecasterAutoreg or ForecasterAutoregCustom.')
         )
-
-    if set_out_sample_residuals != 'deprecated':
-        warnings.warn(
-            ('`set_out_sample_residuals` is deprecated since version 0.4.2, '
-            'will be removed on version 0.5.0.')
-        )    
     
     if refit:
         metric_value, backtest_predictions = _backtesting_forecaster_refit(
