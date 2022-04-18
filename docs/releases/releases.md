@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.0] - [Dev]
+
+**Added**
+
++ Functions `random_search_forecaster` and `_evaluate_grid_hyperparameters` in model_selection.
+
+**Changed**
+
++ `backtesting_forecaster` change default value of argument `fixed_train_size: bool=True`.
+
++ Remove argument `set_out_sample_residuals` in function `backtesting_forecaster` (deprecated since 0.4.2).
+
++ `backtesting_forecaster` verbose now includes fold size.
+
++ Remove `get_coef` method from `ForecasterAutoreg`, `ForecasterAutoregCustom` and `ForecasterAutoregMultiOutput` (deprecated since 0.4.3).
+
+**Fixed**
+
+
 ## [0.4.3] - [2022-03-18]
 
 **Added**
@@ -21,6 +40,8 @@ All notable changes to this project will be documented in this file.
 + Change function `set_out_sample_residuals` (ForecasterAutoreg and ForecasterAutoregCustom), `residuals` argument must be `pd.Series` (was `numpy ndarray`).
 
 + Returned value of backtesting functions (model_selection and model_selection_statsmodels) is now a `float` (was `numpy ndarray`).
+
++ `get_coef` and `get_feature_importance` methods unified in `get_feature_importance`.
 
 **Fixed**
 
