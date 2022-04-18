@@ -10,31 +10,31 @@ nav:
   - Home:
     - Welcome to skforecast: README.md
     - Quick start: quick-start/introduction-forecasting.md
-    - User Guides: notebooks/input-data.ipynb
+    - User Guides: user_guides/input-data.ipynb
     - Examples and tutorials: examples/examples.md
     - API Reference: api/ForecasterAutoreg.md
     - Releases: releases/releases.md
 
   - Quick start:
     - Introduction to forecasting: quick-start/introduction-forecasting.md
-    - Quick start skforecast: notebooks/quick-start-skforecast.ipynb
+    - Quick start skforecast: user_guides/quick-start-skforecast.ipynb
 
   - User Guides:
-      - Input data: notebooks/input-data.ipynb
-      - Recursive multi-step forecasting: notebooks/autoregresive-forecaster.ipynb
-      - Direct multi-step forecasting: notebooks/direct-multi-step-forecasting.ipynb
-      - Exogenous variables: notebooks/autoregresive-forecaster-exogenous.ipynb
-      - Custom predictors: notebooks/custom-predictors.ipynb
-      - Backtesting forecaster: notebooks/backtesting.ipynb
-      - Grid search forecaster: notebooks/grid-search-forecaster.ipynb
-      - Scikit-learn Pipeline: notebooks/sklearn-pipeline.ipynb
-      - Prediction intervals: notebooks/prediction-intervals.ipynb
-      - Feature importance: notebooks/feature-importance.ipynb
-      - Forecasting with XGBoost: notebooks/forecasting-xgboost.ipynb
-      - Save and load forecaster: notebooks/save-load-forecaster.ipynb
-      - Forecaster in production: notebooks/forecaster-in-production.ipynb
-      - Grid search SARIMAX and ARIMA models: notebooks/grid-search-sarimax-arima.ipynb
-      - Backtesting SARIMAX and ARIMA models: notebooks/backtesting-sarimax-arima.ipynb
+      - Input data: user_guides/input-data.ipynb
+      - Recursive multi-step forecasting: user_guides/autoregresive-forecaster.ipynb
+      - Direct multi-step forecasting: user_guides/direct-multi-step-forecasting.ipynb
+      - Exogenous variables: user_guides/autoregresive-forecaster-exogenous.ipynb
+      - Custom predictors: user_guides/custom-predictors.ipynb
+      - Backtesting forecaster: user_guides/backtesting.ipynb
+      - Grid search forecaster: user_guides/grid-search-forecaster.ipynb
+      - Scikit-learn Pipeline: user_guides/sklearn-pipeline.ipynb
+      - Prediction intervals: user_guides/prediction-intervals.ipynb
+      - Feature importance: user_guides/feature-importance.ipynb
+      - Forecasting with XGBoost: user_guides/forecasting-xgboost.ipynb
+      - Save and load forecaster: user_guides/save-load-forecaster.ipynb
+      - Forecaster in production: user_guides/forecaster-in-production.ipynb
+      - Grid search SARIMAX and ARIMA models: user_guides/grid-search-sarimax-arima.ipynb
+      - Backtesting SARIMAX and ARIMA models: user_guides/backtesting-sarimax-arima.ipynb
 
   - Examples and tutorials:
       - Examples and tutorials: examples/examples.md
