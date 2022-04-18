@@ -823,49 +823,6 @@ class ForecasterAutoregCustom(ForecasterBase):
                             ))
 
         self.out_sample_residuals = pd.Series(residuals)
-                
-
-    def get_coef(self) -> pd.DataFrame:
-        '''      
-        Return estimated coefficients for the regressor stored in the forecaster.
-        Only valid when regressor stores internally the feature coefficients in
-        the attribute `coef_`.
-        
-        Parameters
-        ----------
-        self
-
-        Returns 
-        -------
-        coef : pandas DataFrame
-            Value of the coefficients associated with each predictor.
-        
-        '''
-        warnings.warn(
-            f'This method was deprecated in version 0.4.3 in favor of the get_feature_importance. '
-            f'This method will be removed in 0.4.4', DeprecationWarning
-        )
-        
-        if isinstance(self.regressor, sklearn.pipeline.Pipeline):
-            estimator = self.regressor[-1]
-        else:
-            estimator = self.regressor
-
-        try:
-            coef = pd.DataFrame({
-                        'feature': self.X_train_col_names,
-                        'coef' : estimator.coef_
-                   })
-        except:
-            warnings.warn(
-                f"Impossible to access feature coefficients for regressor of type {type(estimator)}. "
-                f"This method is only valid when the regressor stores internally "
-                f" the coefficients in the attribute `coef_`."
-            )
-
-            coef = None
-            
-        return coef
 
     
     def get_feature_importance(self) -> pd.DataFrame:
