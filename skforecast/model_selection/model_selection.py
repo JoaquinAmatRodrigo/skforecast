@@ -293,7 +293,7 @@ def _backtesting_forecaster_refit(
     steps: int,
     metric: Union[str, callable],
     initial_train_size: int,
-    fixed_train_size: bool=False,
+    fixed_train_size: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     interval: Optional[list]=None,
     n_boot: int=500,
@@ -327,7 +327,7 @@ def _backtesting_forecaster_refit(
         Number of samples in the initial train split. The backtest forecaster is
         trained using the first `initial_train_size` observations.
         
-    fixed_train_size: bool, default `False`
+    fixed_train_size: bool, default `True`
         If True, train size doesn't increases but moves by `steps` in each iteration.
         
     steps : int
@@ -834,7 +834,7 @@ def backtesting_forecaster(
     steps: int,
     metric: Union[str, callable],
     initial_train_size: Optional[int],
-    fixed_train_size: bool=False,
+    fixed_train_size: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     refit: bool=False,
     interval: Optional[list]=None,
@@ -867,7 +867,7 @@ def backtesting_forecaster(
 
         `None` is only allowed when `refit` is False.
     
-    fixed_train_size: bool, default `False`
+    fixed_train_size: bool, default `True`
         If True, train size doesn't increases but moves by `steps` in each iteration.
         
     steps : int
