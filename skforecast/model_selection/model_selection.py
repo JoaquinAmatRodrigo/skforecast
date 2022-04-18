@@ -18,6 +18,7 @@ from sklearn.metrics import mean_squared_error
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import mean_absolute_percentage_error
 from sklearn.model_selection import ParameterGrid
+from sklearn.model_selection import ParameterSampler
 
 from ..ForecasterAutoreg import ForecasterAutoreg
 from ..ForecasterAutoregCustom import ForecasterAutoregCustom
@@ -298,8 +299,7 @@ def _backtesting_forecaster_refit(
     n_boot: int=500,
     random_state: int=123,
     in_sample_residuals: bool=True,
-    verbose: bool=False,
-    set_out_sample_residuals: Any='deprecated'
+    verbose: bool=False
 ) -> Tuple[float, pd.DataFrame]:
     '''
     Backtesting of forecaster model with a re-fitting strategy. A copy of the  
@@ -365,9 +365,6 @@ def _backtesting_forecaster_refit(
         If `True`, residuals from the training data are used as proxy of
         prediction error to create prediction intervals. If `False`, out_sample_residuals
         are used if they are already stored inside the forecaster.
-
-    set_out_sample_residuals: 'deprecated'
-        Deprecated since version 0.4.2, will be removed on version 0.5.0.
             
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used for backtesting.
@@ -414,11 +411,11 @@ def _backtesting_forecaster_refit(
                 train_idx_end = initial_train_size + i * steps
             print(f"Data partition in fold: {i}")
             if i < folds - 1:
-                print(f"    Training:   {y.index[train_idx_start]} -- {y.index[train_idx_end - 1]}")
-                print(f"    Validation: {y.index[train_idx_end]} -- {y.index[train_idx_end + steps - 1]}")
+                print(f"    Training:   {y.index[train_idx_start]} -- {y.index[train_idx_end - 1]}  (n={len(y.index[train_idx_start:train_idx_end])})")
+                print(f"    Validation: {y.index[train_idx_end]} -- {y.index[train_idx_end + steps - 1]}  (n={len(y.index[train_idx_end:train_idx_end + steps])})")
             else:
-                print(f"    Training:   {y.index[train_idx_start]} -- {y.index[train_idx_end - 1]}")
-                print(f"    Validation: {y.index[train_idx_end]} -- {y.index[-1]}")
+                print(f"    Training:   {y.index[train_idx_start]} -- {y.index[train_idx_end - 1]}  (n={len(y.index[train_idx_start:train_idx_end])})")
+                print(f"    Validation: {y.index[train_idx_end]} -- {y.index[-1]}  (n={len(y.index[train_idx_end:])})")
         print("")
         
     if folds > 50:
@@ -576,8 +573,7 @@ def _backtesting_forecaster_no_refit(
     n_boot: int=500,
     random_state: int=123,
     in_sample_residuals: bool=True,
-    verbose: bool=False,
-    set_out_sample_residuals: Any='deprecated'
+    verbose: bool=False
 ) -> Tuple[float, pd.DataFrame]:
     '''
     Backtesting of forecaster without iterative re-fitting. In each iteration,
@@ -638,9 +634,6 @@ def _backtesting_forecaster_no_refit(
         If `True`, residuals from the training data are used as proxy of
         prediction error to create prediction intervals.  If `False`, out_sample_residuals
         are used if they are already stored inside the forecaster.
-
-    set_out_sample_residuals: 'deprecated'
-        Deprecated since version 0.4.2, will be removed on version 0.5.0.
             
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used for backtesting.
@@ -695,11 +688,11 @@ def _backtesting_forecaster_no_refit(
             last_window_end = initial_train_size + i * steps
             print(f"Data partition in fold: {i}")
             if i < folds - 1:
-                print(f"    Training:   {y.index[0]} -- {y.index[initial_train_size - 1]}")
-                print(f"    Validation: {y.index[last_window_end]} -- {y.index[last_window_end + steps -1]}")
+                print(f"    Training:   {y.index[0]} -- {y.index[initial_train_size - 1]}  (n={len(y.index[:initial_train_size])})")
+                print(f"    Validation: {y.index[last_window_end]} -- {y.index[last_window_end + steps -1]}  (n={len(y.index[last_window_end:last_window_end + steps])})")
             else:
-                print(f"    Training:   {y.index[0]} -- {y.index[initial_train_size - 1]}")
-                print(f"    Validation: {y.index[last_window_end]} -- {y.index[-1]}")
+                print(f"    Training:   {y.index[0]} -- {y.index[initial_train_size - 1]}  (n={len(y.index[:initial_train_size])})")
+                print(f"    Validation: {y.index[last_window_end]} -- {y.index[-1]}  (n={len(y.index[last_window_end:])})")
         print("")
 
     for i in range(folds):
@@ -848,8 +841,7 @@ def backtesting_forecaster(
     n_boot: int=500,
     random_state: int=123,
     in_sample_residuals: bool=True,
-    verbose: bool=False,
-    set_out_sample_residuals: Any='deprecated'
+    verbose: bool=False
 ) -> Tuple[float, pd.DataFrame]:
     '''
     Backtesting of forecaster model.
@@ -916,9 +908,6 @@ def backtesting_forecaster(
         If `True`, residuals from the training data are used as proxy of
         prediction error to create prediction intervals.  If `False`, out_sample_residuals
         are used if they are already stored inside the forecaster.
-
-    set_out_sample_residuals: 'deprecated'
-        Deprecated since version 0.4.2, will be removed on version 0.5.0.
                   
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used for backtesting.
@@ -967,12 +956,6 @@ def backtesting_forecaster(
             ('Interval prediction is only available when forecaster is of type '
             'ForecasterAutoreg or ForecasterAutoregCustom.')
         )
-
-    if set_out_sample_residuals != 'deprecated':
-        warnings.warn(
-            ('`set_out_sample_residuals` is deprecated since version 0.4.2, '
-            'will be removed on version 0.5.0.')
-        )    
     
     if refit:
         metric_value, backtest_predictions = _backtesting_forecaster_refit(
@@ -1062,7 +1045,201 @@ def grid_search_forecaster(
            
     lags_grid : list of int, lists, np.narray or range. 
         Lists of `lags` to try. Only used if forecaster is an instance of 
-        `ForecasterAutoreg`.
+        `ForecasterAutoreg` or `ForecasterAutoregMultiOutput`.
+        
+    refit: bool, default False
+        Whether to re-fit the forecaster in each iteration of backtesting.
+        
+    return_best : bool
+        Refit the `forecaster` using the best found parameters on the whole data.
+        
+    verbose : bool, default `True`
+        Print number of folds used for cv or backtesting.
+
+    Returns 
+    -------
+    results: pandas DataFrame
+        Metric value estimated for each combination of parameters.
+
+    '''
+
+    param_grid = list(ParameterGrid(param_grid))
+
+    results = _evaluate_grid_hyperparameters(
+        forecaster          = forecaster,
+        y                   = y,
+        param_grid          = param_grid,
+        steps               = steps,
+        metric              = metric,
+        initial_train_size  = initial_train_size,
+        fixed_train_size    = fixed_train_size,
+        exog                = exog,
+        lags_grid           = lags_grid,
+        refit               = refit,
+        return_best         = return_best,
+        verbose             = verbose
+    )
+
+    return results
+
+
+def random_search_forecaster(
+    forecaster,
+    y: pd.Series,
+    param_distributions: dict,
+    steps: int,
+    metric: Union[str, callable],
+    initial_train_size: int,
+    fixed_train_size: bool=False,
+    exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+    lags_grid: Optional[list]=None,
+    refit: bool=False,
+    n_iter: int=10,
+    random_state: int=123,
+    return_best: bool=True,
+    verbose: bool=True
+) -> pd.DataFrame:
+    '''
+    Random search over specified parameter values or distributions for a Forecaster object.
+    Validation is done using time series backtesting.
+    
+    Parameters
+    ----------
+    forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregMultiOutput
+        Forcaster model.
+        
+    y : pandas Series
+        Training time series values. 
+        
+    param_distributions : dict
+        Dictionary with parameters names (`str`) as keys and 
+        distributions or lists of parameters to try.
+
+    steps : int
+        Number of steps to predict.
+        
+    metric : str, callable
+        Metric used to quantify the goodness of fit of the model.
+        
+        If string:
+            {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
+
+        It callable:
+            Function with arguments y_true, y_pred that returns a float.
+
+    initial_train_size: int 
+        Number of samples in the initial train split.
+ 
+    fixed_train_size: bool, default `False`
+        If True, train size doesn't increases but moves by `steps` in each iteration.
+
+    exog : pandas Series, pandas DataFrame, default `None`
+        Exogenous variable/s included as predictor/s. Must have the same
+        number of observations as `y` and should be aligned so that y[i] is
+        regressed on exog[i].
+           
+    lags_grid : list of int, lists, np.narray or range. 
+        Lists of `lags` to try. Only used if forecaster is an instance of 
+        `ForecasterAutoreg` or `ForecasterAutoregMultiOutput`.
+        
+    refit: bool, default False
+        Whether to re-fit the forecaster in each iteration of backtesting.
+
+    n_iter: int, default 10
+        Number of parameter settings that are sampled. 
+        n_iter trades off runtime vs quality of the solution.
+
+    random_state: int, default 123
+        Sets a seed to the random sampling for reproducible output.
+
+    return_best : bool
+        Refit the `forecaster` using the best found parameters on the whole data.
+        
+    verbose : bool, default `True`
+        Print number of folds used for cv or backtesting.
+
+    Returns 
+    -------
+    results: pandas DataFrame
+        Metric value estimated for each combination of parameters.
+
+    '''
+
+    param_grid = list(ParameterSampler(param_distributions, n_iter=n_iter, random_state=random_state))
+
+    results = _evaluate_grid_hyperparameters(
+        forecaster          = forecaster,
+        y                   = y,
+        param_grid          = param_grid,
+        steps               = steps,
+        metric              = metric,
+        initial_train_size  = initial_train_size,
+        fixed_train_size    = fixed_train_size,
+        exog                = exog,
+        lags_grid           = lags_grid,
+        refit               = refit,
+        return_best         = return_best,
+        verbose             = verbose
+    )
+
+    return results
+
+
+def _evaluate_grid_hyperparameters(
+    forecaster,
+    y: pd.Series,
+    param_grid: dict,
+    steps: int,
+    metric: Union[str, callable],
+    initial_train_size: int,
+    fixed_train_size: bool=False,
+    exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+    lags_grid: Optional[list]=None,
+    refit: bool=False,
+    return_best: bool=True,
+    verbose: bool=True
+) -> pd.DataFrame:
+    '''
+    Evaluate parameter values for a Forecaster object using time series backtesting.
+    
+    Parameters
+    ----------
+    forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregMultiOutput
+        Forcaster model.
+        
+    y : pandas Series
+        Training time series values. 
+        
+    param_grid : dict
+        Dictionary with parameters names (`str`) as keys and lists of parameter
+        settings to try as values.
+
+    steps : int
+        Number of steps to predict.
+        
+    metric : str, callable
+        Metric used to quantify the goodness of fit of the model.
+        
+        If string:
+            {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
+
+        It callable:
+            Function with arguments y_true, y_pred that returns a float.
+
+    initial_train_size: int 
+        Number of samples in the initial train split.
+ 
+    fixed_train_size: bool, default `False`
+        If True, train size doesn't increases but moves by `steps` in each iteration.
+
+    exog : pandas Series, pandas DataFrame, default `None`
+        Exogenous variable/s included as predictor/s. Must have the same
+        number of observations as `y` and should be aligned so that y[i] is
+        regressed on exog[i].
+           
+    lags_grid : list of int, lists, np.narray or range. 
+        Lists of `lags` to try. Only used if forecaster is an instance of 
+        `ForecasterAutoreg` or `ForecasterAutoregMultiOutput`.
         
     refit: bool, default False
         Whether to re-fit the forecaster in each iteration of backtesting.
@@ -1093,8 +1270,6 @@ def grid_search_forecaster(
     lags_list = []
     params_list = []
     metric_list = []
-    
-    param_grid =  list(ParameterGrid(param_grid))
 
     print(
         f"Number of models compared: {len(param_grid)*len(lags_grid)}"

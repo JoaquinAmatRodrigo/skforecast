@@ -1,1 +1,1 @@
-from .model_selection import time_series_splitter, cv_forecaster, backtesting_forecaster, grid_search_forecaster
+from .model_selection import time_series_splitter, cv_forecaster, backtesting_forecaster, grid_search_forecaster, random_search_forecaster
