@@ -2122,11 +2122,11 @@ Licensed under the Apache License, Version 2.0.
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <h1 id="prediction-intervals-in-multi-step-forecasting-models">Prediction intervals in multi-step forecasting models<a class="anchor-link" href="#prediction-intervals-in-multi-step-forecasting-models">&#182;</a></h1><p>When trying to anticipate future values, most forecasting models try to predict what will be the most likely value. This is called point-forecasting. Although knowing in advance the expected value of a time series is useful in almost every business case, this kind of prediction does not provide any information about the confidence of the model nor the prediction uncertainty.</p>
 <p>Probabilistic forecasting, as opposed to point-forecasting, is a family of techniques that allow for predicting the expected distribution of the outcome instead of a single future value. This type of forecasting provides much rich information since it allows for creating prediction intervals, the range of likely values where the true value may fall. More formally, a prediction interval defines the interval within which the true value of the response variable is expected to be found with a given probability.</p>
-<p>There are <a href="https://otexts.com/fpp3/prediction-intervals.html">multiple ways to estimate prediction intervals</a>, most of which require that the residuals (errors) of the model follow a normal distribution. When this property cannot be assumed, two alternatives commonly used are bootstrapping and quantile regression. In order to illustrate how <a href="https://joaquinamatrodrigo.github.io/skforecast/">skforecast</a> allows estimating prediction intervals for multi-step forecasting, the following examples attempt to predict energy demand for a 7-day horizon on an hourly basis. Two strategies are shown:</p>
+<p>There are <a href="https://otexts.com/fpp3/prediction-intervals.html">multiple ways to estimate prediction intervals</a>, most of which require that the residuals (errors) of the model follow a normal distribution. When this property cannot be assumed, two alternatives commonly used are bootstrapping and quantile regression. In order to illustrate how <a href="https://joaquinamatrodrigo.github.io/skforecast/">skforecast</a> allows estimating prediction intervals for multi-step forecasting, the following examples attempt to predict energy demand for a 7-day horizon. Two strategies are shown:</p>
 <ul>
-<li><p>Prediction intervals based on bootstrapped residuals and <a href="https://joaquinamatrodrigo.github.io/skforecast/latest/notebooks/autoregresive-forecaster.html">recursive-multi-step forecaster</a>.</p>
+<li><p>Prediction intervals based on bootstrapped residuals and a <a href="https://joaquinamatrodrigo.github.io/skforecast/latest/notebooks/autoregresive-forecaster.html">recursive-multi-step forecaster</a>.</p>
 </li>
-<li><p>Prediction intervals based on quantile regression and <a href="https://joaquinamatrodrigo.github.io/skforecast/latest/notebooks/direct-multi-step-forecasting.html">direct-multi-step forecaster</a>.
+<li><p>Prediction intervals based on quantile regression and a <a href="https://joaquinamatrodrigo.github.io/skforecast/latest/notebooks/direct-multi-step-forecasting.html">direct-multi-step forecaster</a>.
 <br></p>
 </li>
 </ul>
@@ -2169,7 +2169,7 @@ at each forecasting horizon.</p>
 <p><p align="center"><img src="../img/forecasting-intervals.gif" style="width: 800px;"></p>
 <br></p>
 <p>The main advantage of this strategy is that it only requires a single model to estimate any interval. The drawback is that, running hundreds or thousands of bootstrapping iterations, is computationally very expensive and not always workable.</p>
-<p>This type of prediction intervals can be easily estimated using <a href="https://joaquinamatrodrigo.github.io/skforecast/latest/api/ForecasterAutoreg.html">ForecasterAutoreg</a> and <a href="https://joaquinamatrodrigo.github.io/skforecast/latest/api/ForecasterAutoregCustom.html">ForecasterAutoregCustom</a> models.</p>
+<p>This type of prediction intervals can be easily estimated using the method <code>predict_interval</code> of classes <a href="https://joaquinamatrodrigo.github.io/skforecast/latest/api/ForecasterAutoreg.html">ForecasterAutoreg</a> and <a href="https://joaquinamatrodrigo.github.io/skforecast/latest/api/ForecasterAutoregCustom.html">ForecasterAutoregCustom</a>.</p>
 
 </div>
 </div>
@@ -2202,7 +2202,7 @@ at each forecasting horizon.</p>
 $$\text{pinball}(y, \hat{y}) = \frac{1}{n_{\text{samples}}} \sum_{i=0}^{n_{\text{samples}}-1}  \alpha \max(y_i - \hat{y}_i, 0) + (1 - \alpha) \max(\hat{y}_i - y_i, 0)$$<p>where $\alpha$ is the target quantile, $y$ the real value and $\hat{y}$ the quantile prediction.</p>
 <p>It can be seen that loss differs depending on the evaluated quantile. The higher the quantile, the more the loss function penalizes underestimates, and the less it penalizes overestimates. As with MSE and MAE, the goal is to minimize its values (the lower loss, the better).</p>
 <p>Two disadvantages of quantile regression, compared to the bootstrap approach to prediction intervals, are that each quantile needs its regressor and quantile regression is not available for all types of regression models. However, once the models are trained, the inference is much faster since no iterative process is needed.</p>
-<p>This type of prediction intervals can be easily estimated using <a href="https://joaquinamatrodrigo.github.io/skforecast/latest/api/ForecasterAutoregMultiOutput.html">ForecasterAutoregMultiOutput</a> models.</p>
+<p>This type of prediction intervals can be easily estimated using quantile regressor inside a Forecaster object.</p>
 
 </div>
 </div>
