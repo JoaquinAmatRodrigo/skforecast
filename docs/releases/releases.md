@@ -18,6 +18,8 @@ All notable changes to this project will be documented in this file.
 
 + Remove `get_coef` method from `ForecasterAutoreg`, `ForecasterAutoregCustom` and `ForecasterAutoregMultiOutput` (deprecated since 0.4.3).
 
++ `_get_metric` now allows `mean_squared_log_error`.
+
 **Fixed**
 
 

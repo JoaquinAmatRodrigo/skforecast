@@ -1,4 +1,5 @@
 # Change Log
+
 All notable changes to this project will be documented in this file.
 
 ## [0.5.0] - [Dev]
@@ -16,6 +17,8 @@ All notable changes to this project will be documented in this file.
 + `backtesting_forecaster` verbose now includes fold size.
 
 + Remove `get_coef` method from `ForecasterAutoreg`, `ForecasterAutoregCustom` and `ForecasterAutoregMultiOutput` (deprecated since 0.4.3).
+
++ `_get_metric` now allows `mean_squared_log_error`.
 
 **Fixed**
 
