@@ -17,6 +17,7 @@ from tqdm import tqdm
 from sklearn.metrics import mean_squared_error 
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import mean_absolute_percentage_error
+from sklearn.metrics import mean_squared_log_error
 from sklearn.model_selection import ParameterGrid
 from sklearn.model_selection import ParameterSampler
 
@@ -150,7 +151,8 @@ def _get_metric(metric:str) -> callable:
     
     Parameters
     ----------
-    metric : {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
+    metric : {'mean_squared_error', 'mean_absolute_error', 
+              'mean_absolute_percentage_error', 'mean_squared_log_error'}
         Metric used to quantify the goodness of fit of the model.
     
     Returns 
@@ -160,16 +162,17 @@ def _get_metric(metric:str) -> callable:
     '''
     
     if metric not in ['mean_squared_error', 'mean_absolute_error',
-                      'mean_absolute_percentage_error']:
+                      'mean_absolute_percentage_error', 'mean_squared_log_error']:
         raise Exception(
-            f"Allowed metrics are: 'mean_squared_error', 'mean_absolute_error' and "
-            f"'mean_absolute_percentage_error'. Got {metric}."
+            f"Allowed metrics are: 'mean_squared_error', 'mean_absolute_error', "
+            f"'mean_absolute_percentage_error' and 'mean_squared_log_error'. Got {metric}."
         )
     
     metrics = {
         'mean_squared_error': mean_squared_error,
         'mean_absolute_error': mean_absolute_error,
-        'mean_absolute_percentage_error': mean_absolute_percentage_error
+        'mean_absolute_percentage_error': mean_absolute_percentage_error,
+        'mean_squared_log_error': mean_squared_log_error
     }
     
     metric = metrics[metric]
