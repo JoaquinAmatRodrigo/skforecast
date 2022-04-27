@@ -2,7 +2,6 @@
 # ==============================================================================
 import numpy as np
 import pandas as pd
-from sklearn.metrics import mean_squared_error
 from sklearn.linear_model import Ridge
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
 from skforecast.ForecasterAutoregCustom import ForecasterAutoregCustom
@@ -37,7 +36,7 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoreg_with_mocked():
     forecaster = ForecasterAutoreg(
                     regressor = Ridge(random_state=123),
                     lags      = 2 # Placeholder, the value will be overwritten
-                 )
+                    )
 
     steps = 3
     n_validation = 12
@@ -90,7 +89,7 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregCustom_with_mocke
                         regressor      = Ridge(random_state=123),
                         fun_predictors = create_predictors,
                         window_size    = 4
-                    )
+                        )
 
     steps = 3
     n_validation = 12
@@ -130,7 +129,7 @@ def test_evaluate_grid_hyperparameters_when_return_best():
     forecaster = ForecasterAutoreg(
                     regressor = Ridge(random_state=123),
                     lags      = 2 # Placeholder, the value will be overwritten
-                 )
+                    )
 
     steps = 3
     n_validation = 12

@@ -20,6 +20,8 @@ from sklearn.metrics import mean_absolute_percentage_error
 from sklearn.metrics import mean_squared_log_error
 from sklearn.model_selection import ParameterGrid
 from sklearn.model_selection import ParameterSampler
+from skopt.utils import use_named_args
+from skopt import gp_minimize
 
 from ..ForecasterAutoreg import ForecasterAutoreg
 from ..ForecasterAutoregCustom import ForecasterAutoregCustom
@@ -1331,3 +1333,123 @@ def _evaluate_grid_hyperparameters(
         )
             
     return results
+
+
+def _bayesian_search_skopt(
+    forecaster,
+    y: pd.Series,
+    search_space: dict,
+    steps: int,
+    metric: Union[str, callable],
+    initial_train_size: int,
+    fixed_train_size: bool=False,
+    exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+    lags_grid: Optional[list]=None,
+    refit: bool=False,
+    n_calls: int=10,
+    random_state: int=123,
+    return_best: bool=True,
+    verbose: bool=True,
+    *args, **kwargs
+) -> Tuple[pd.DataFrame, dict]:
+    
+    if isinstance(forecaster, ForecasterAutoregCustom):
+        if lags_grid is not None:
+            warnings.warn(
+                '`lags_grid` ignored if forecaster is an instance of `ForecasterAutoregCustom`.'
+            )
+        lags_grid = ['custom predictors']
+        
+    elif lags_grid is None:
+        lags_grid = [forecaster.lags]
+   
+    lags_list = []
+    params_list = []
+    metric_list = []
+    results_opt_dict = {}
+
+    search_space = list(search_space.values())
+
+    # Objective function using backtesting_forecaster
+    @use_named_args(search_space)
+    def _objective(forecaster         = forecaster,
+                  y                  = y,
+                  exog               = exog,
+                  initial_train_size = initial_train_size,
+                  fixed_train_size   = fixed_train_size,
+                  steps              = steps,
+                  metric             = metric,
+                  refit              = refit,
+                  verbose            = verbose,
+                  **params):
+        
+        forecaster.set_params(**params)
+        
+        metric, _ = backtesting_forecaster(
+                        forecaster         = forecaster,
+                        y                  = y,
+                        exog               = exog,
+                        steps              = steps,
+                        metric             = metric,
+                        initial_train_size = initial_train_size,
+                        fixed_train_size   = fixed_train_size,
+                        refit              = refit,
+                        verbose            = verbose
+                        )
+
+        return abs(metric)
+
+    print(
+        f"Number of models compared: {n_calls*len(lags_grid)}, {n_calls} bayesian search in each lag configuration"
+    )
+
+    for lags in tqdm(lags_grid, desc='loop lags_grid', position=0, ncols=90):
+        
+        if isinstance(forecaster, (ForecasterAutoreg, ForecasterAutoregMultiOutput)):
+            forecaster.set_lags(lags)
+            lags = forecaster.lags.copy()
+        
+        results_opt = gp_minimize(
+                        func         = _objective,
+                        dimensions   = search_space,
+                        n_calls      = n_calls,
+                        random_state = random_state,
+                        *args, **kwargs
+                        )
+
+        params = {}
+        for i, x in enumerate(search_space):
+            params[x.name] = results_opt.x[i]
+
+        lags_list.append(lags)
+        params_list.append(params)
+        metric_list.append(results_opt.fun)
+        results_opt_dict[str(lags)] = results_opt
+        
+    results = pd.DataFrame({
+                'lags'  : lags_list,
+                'params': params_list,
+                'metric': metric_list})
+    
+    results = results.sort_values(by='metric', ascending=True)
+    results = pd.concat([results, results['params'].apply(pd.Series)], axis=1)
+    
+    if return_best:
+        
+        best_lags = results['lags'].iloc[0]
+        best_params = results['params'].iloc[0]
+        best_metric = results['metric'].iloc[0]
+        
+        if isinstance(forecaster, (ForecasterAutoreg, ForecasterAutoregMultiOutput)):
+            forecaster.set_lags(best_lags)
+        forecaster.set_params(**best_params)
+        forecaster.fit(y=y, exog=exog)
+        
+        print(
+            f"`Forecaster` refitted using the best-found lags and parameters, and the whole data set: \n"
+            f"  Lags: {best_lags} \n"
+            f"  Parameters: {best_params}\n"
+            f"  Backtesting metric: {best_metric}\n"
+        )
+            
+    return results, results_opt_dict

@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file.
 
 **Added**
 
-+ Functions `random_search_forecaster` and `_evaluate_grid_hyperparameters` in model_selection.
++ Functions `random_search_forecaster`, `_bayesian_search_skopt` and `_evaluate_grid_hyperparameters` in model_selection.
 
 **Changed**
 
@@ -166,7 +166,7 @@ Version 0.4 has undergone a huge code refactoring. Main changes are related to i
 
 
 
-## [0.1.9] - 2121-07-27
+## [0.1.9] - [2021-07-27]
 
 **Added**
 
@@ -194,7 +194,7 @@ Version 0.4 has undergone a huge code refactoring. Main changes are related to i
 + Update lags of  `ForecasterAutoregMultiOutput` after `grid_search_forecaster`.
 
 
-## [0.1.8.1] - 2021-05-17
+## [0.1.8.1] - [2021-05-17]
 
 **Added**
 
@@ -221,7 +221,7 @@ Version 0.4 has undergone a huge code refactoring. Main changes are related to i
 + Values stored in `self.last_window` when training `ForecasterAutoregMultiOutput`. 
 
 
-## [0.1.8] - 2021-04-02
+## [0.1.8] - [2021-04-02]
 
 **Added**
 
@@ -235,7 +235,7 @@ Version 0.4 has undergone a huge code refactoring. Main changes are related to i
 **Fixed**
 
 
-## [0.1.7] - 2021-03-19
+## [0.1.7] - [2021-03-19]
 
 **Added**
 
@@ -248,7 +248,7 @@ Version 0.4 has undergone a huge code refactoring. Main changes are related to i
 **Fixed**
  
  
-## [0.1.6] - 2021-03-14
+## [0.1.6] - [2021-03-14]
 
 **Added**
 
@@ -264,7 +264,7 @@ Version 0.4 has undergone a huge code refactoring. Main changes are related to i
  
 **Fixed**
  
-## [0.1.4] - 2021-02-15
+## [0.1.4] - [2021-02-15]
   
 **Added**
 
