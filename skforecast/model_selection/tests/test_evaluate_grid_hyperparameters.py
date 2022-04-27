@@ -70,7 +70,49 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoreg_with_mocked():
 
     pd.testing.assert_frame_equal(results, expected_results)
     
+
+def test_output_evaluate_grid_hyperparameters_ForecasterAutoreg_lags_grid_is_None_with_mocked():
+    '''
+    Test output of _evaluate_grid_hyperparameters in ForecasterAutoreg when lags_grid is None with mocked
+    (mocked done in Skforecast v0.4.3), should use forecaster.lags as lags_grid.
+    '''
+    forecaster = ForecasterAutoreg(
+                    regressor = Ridge(random_state=123),
+                    lags      = 2
+                    )
+
+    steps = 3
+    n_validation = 12
+    y_train = y[:-n_validation]
+    lags_grid = None
+    param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
+
+    results = _evaluate_grid_hyperparameters(
+                            forecaster  = forecaster,
+                            y           = y,
+                            lags_grid   = lags_grid,
+                            param_grid  = param_grid,
+                            steps       = steps,
+                            refit       = False,
+                            metric      = 'mean_squared_error',
+                            initial_train_size = len(y_train),
+                            fixed_train_size   = False,
+                            return_best = False,
+                            verbose     = False
+                             )
     
+    expected_results = pd.DataFrame({
+            'lags'  :[[1, 2], [1, 2], [1, 2]],
+            'params':[{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}],
+            'metric':np.array([0.06464646, 0.06502362, 0.06745534]),                                                               
+            'alpha' :np.array([0.01, 0.1 , 1.])
+                                     },
+            index=[0, 1, 2]
+                                   )
+
+    pd.testing.assert_frame_equal(results, expected_results)
+
+
 def test_output_evaluate_grid_hyperparameters_ForecasterAutoregCustom_with_mocked():
     '''
     Test output of _evaluate_grid_hyperparameters in ForecasterAutoregCustom with mocked

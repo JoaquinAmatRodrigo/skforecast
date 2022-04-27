@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file.
 
 **Added**
 
-+ Functions `random_search_forecaster`, `_bayesian_search_skopt` and `_evaluate_grid_hyperparameters` in model_selection.
++ Functions `random_search_forecaster`, `_evaluate_grid_hyperparameters`, `bayesian_search_forecaster`, `_bayesian_search_optuna` and `_bayesian_search_skopt` in model_selection.
 
 **Changed**
 
