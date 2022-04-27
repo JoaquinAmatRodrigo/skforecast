@@ -1064,7 +1064,11 @@ def grid_search_forecaster(
     Returns 
     -------
     results: pandas DataFrame
-        Metric value estimated for each combination of parameters.
+        Results for each combination of parameters.
+            column lags = predictions.
+            column params = lower bound of the interval.
+            column metric = metric value estimated for the combination of parameters.
+            additional n columns with param = value.
 
     '''
 
@@ -1166,7 +1170,11 @@ def random_search_forecaster(
     Returns 
     -------
     results: pandas DataFrame
-        Metric value estimated for each combination of parameters.
+        Results for each combination of parameters.
+            column lags = predictions.
+            column params = lower bound of the interval.
+            column metric = metric value estimated for the combination of parameters.
+            additional n columns with param = value.
 
     '''
 
@@ -1258,7 +1266,11 @@ def _evaluate_grid_hyperparameters(
     Returns 
     -------
     results: pandas DataFrame
-        Metric value estimated for each combination of parameters.
+        Results for each combination of parameters.
+            column lags = predictions.
+            column params = lower bound of the interval.
+            column metric = metric value estimated for the combination of parameters.
+            additional n columns with param = value.
 
     '''
 
@@ -1335,6 +1347,55 @@ def _evaluate_grid_hyperparameters(
     return results
 
 
+def bayesian_search_forecaster(
+    forecaster,
+    y: pd.Series,
+    search_space: dict,
+    steps: int,
+    metric: Union[str, callable],
+    initial_train_size: int,
+    fixed_train_size: bool=False,
+    exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+    lags_grid: Optional[list]=None,
+    refit: bool=False,
+    n_calls: int=10,
+    random_state: int=123,
+    return_best: bool=True,
+    verbose: bool=True,
+    engine: str='skopt',
+    *args, **kwargs
+) -> Tuple[pd.DataFrame, dict]:
+
+    if engine == 'optuna':
+        # Include code for _bayesian_search_optuna
+        pass
+    else:
+        if engine != 'skopt':
+            warnings.warn(
+                f'''`engine` only allows 'optuna' or 'skopt', got {engine}. Trying skopt approach...'''
+            )
+
+        results, results_opt_dict = _bayesian_search_skopt(
+                                        forecaster   = forecaster,
+                                        y            = y,
+                                        exog         = exog,
+                                        lags_grid    = lags_grid,
+                                        search_space = search_space,
+                                        steps        = steps,
+                                        metric       = metric,
+                                        refit        = refit,
+                                        initial_train_size = initial_train_size,
+                                        fixed_train_size   = fixed_train_size,
+                                        n_calls      = n_calls,
+                                        random_state = random_state,
+                                        return_best  = return_best,
+                                        verbose      = verbose,
+                                        *args, **kwargs
+                                        )
+
+    return results, results_opt_dict
+
+
 def _bayesian_search_skopt(
     forecaster,
     y: pd.Series,
@@ -1352,7 +1413,81 @@ def _bayesian_search_skopt(
     verbose: bool=True,
     *args, **kwargs
 ) -> Tuple[pd.DataFrame, dict]:
+    '''
+    Bayesian optimization for a Forecaster object using time series backtesting and skopt library.
     
+    Parameters
+    ----------
+    forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregMultiOutput
+        Forcaster model.
+        
+    y : pandas Series
+        Training time series values. 
+        
+    search_space : dict
+        Dictionary with parameters names (`str`) as keys and Space object from skopt 
+        (Real, Integer, Categorical) as values.
+
+    steps : int
+        Number of steps to predict.
+        
+    metric : str, callable
+        Metric used to quantify the goodness of fit of the model.
+        
+        If string:
+            {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
+
+        It callable:
+            Function with arguments y_true, y_pred that returns a float.
+
+    initial_train_size: int 
+        Number of samples in the initial train split.
+ 
+    fixed_train_size: bool, default `False`
+        If True, train size doesn't increases but moves by `steps` in each iteration.
+
+    exog : pandas Series, pandas DataFrame, default `None`
+        Exogenous variable/s included as predictor/s. Must have the same
+        number of observations as `y` and should be aligned so that y[i] is
+        regressed on exog[i].
+           
+    lags_grid : list of int, lists, np.narray or range. 
+        Lists of `lags` to try. Only used if forecaster is an instance of 
+        `ForecasterAutoreg` or `ForecasterAutoregMultiOutput`.
+        
+    refit: bool, default False
+        Whether to re-fit the forecaster in each iteration of backtesting.
+        
+    n_calls: int, default 10
+        Number of parameter settings that are sampled. 
+        n_iter trades off runtime vs quality of the solution.
+
+    random_state: int, default 123
+        Sets a seed to the sampling for reproducible output.
+
+    return_best : bool
+        Refit the `forecaster` using the best found parameters on the whole data.
+        
+    verbose : bool, default `True`
+        Print number of folds used for cv or backtesting.
+
+    *args, **kwargs : 
+        *args and **kwargs to pass to skopt.gp_minimize() 
+
+    Returns 
+    -------
+    results: pandas DataFrame
+        Results for each combination of parameters.
+            column lags = predictions.
+            column params = lower bound of the interval.
+            column metric = metric value estimated for the combination of parameters.
+            additional n columns with param = value.
+
+    results_opt_dict: dict
+        Dictionary with lags (`str`) as keys and OptimizeResult (`scipy object`) 
+        from skopt.gp_minimize() as values.
+    '''
+
     if isinstance(forecaster, ForecasterAutoregCustom):
         if lags_grid is not None:
             warnings.warn(
