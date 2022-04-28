@@ -440,7 +440,7 @@ def test_results_opt_best_output_bayesian_search_skopt_with_output_gp_minimize_s
                         random_state = random_state
                   )
 
-    lags_grid = [2]
+    lags_grid = [4, 2]
     search_space = {'alpha': Real(0.01, 1.0, "log-uniform", name='alpha')}
     return_best  = False
 
