@@ -383,9 +383,9 @@ def test_evaluate_bayesian_search_skopt_when_return_best():
     assert expected_alpha == forecaster.regressor.alpha
 
 
-def test_results_opt_output_bayesian_search_skopt_with_output_gp_minimize_skopt():
+def test_results_opt_best_output_bayesian_search_skopt_with_output_gp_minimize_skopt():
     '''
-    Test results_opt output of _bayesian_search_skopt with output gp_minimize() skopt
+    Test results_opt_best output of _bayesian_search_skopt with output gp_minimize() skopt
     '''
     forecaster = ForecasterAutoreg(
                     regressor = Ridge(random_state=123),
