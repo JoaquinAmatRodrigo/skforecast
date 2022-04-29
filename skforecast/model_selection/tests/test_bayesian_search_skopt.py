@@ -36,7 +36,8 @@ y = pd.Series(
 
 def test_bayesian_search_skopt_exception_when_search_space_names_do_not_match():
     '''
-    Test Exception is raised when search_space key name do not match the Space object name from skopt.
+    Test Exception is raised when search_space key name do not match the Space 
+    object name from skopt.
     '''
     forecaster = ForecasterAutoreg(
                     regressor = Ridge(random_state=123),
@@ -70,7 +71,7 @@ def test_bayesian_search_skopt_exception_when_search_space_names_do_not_match():
 def test_results_output_bayesian_search_skopt_ForecasterAutoreg_with_mocked():
     '''
     Test output of _bayesian_search_skopt in ForecasterAutoreg with mocked
-    (mocked done in Skforecast v0.4.3)
+    (mocked done in Skforecast v0.4.3).
     '''
     forecaster = ForecasterAutoreg(
                     regressor = RandomForestRegressor(random_state=123),
@@ -155,7 +156,7 @@ def test_results_output_bayesian_search_skopt_ForecasterAutoreg_with_mocked():
 def test_results_output_bayesian_search_skopt_ForecasterAutoreg_with_mocked_when_args_kwargs():
     '''
     Test output of _bayesian_search_skopt in ForecasterAutoreg when args and kwargs with mocked
-    (mocked done in Skforecast v0.4.3)
+    (mocked done in Skforecast v0.4.3).
     '''
     forecaster = ForecasterAutoreg(
                     regressor = Ridge(random_state=123),
@@ -283,7 +284,7 @@ def test_results_output_bayesian_search_skopt_ForecasterAutoreg_with_mocked_when
 def test_results_output_bayesian_search_skopt_ForecasterAutoregCustom_with_mocked():
     '''
     Test output of _bayesian_search_skopt in ForecasterAutoregCustom with mocked
-    (mocked done in Skforecast v0.4.3)
+    (mocked done in Skforecast v0.4.3).
     '''
     def create_predictors(y):
         '''
@@ -347,7 +348,7 @@ def test_results_output_bayesian_search_skopt_ForecasterAutoregCustom_with_mocke
 
 def test_evaluate_bayesian_search_skopt_when_return_best():
     '''
-    Test forecaster is refited when return_best=True in _bayesian_search_skopt
+    Test forecaster is refited when return_best=True in _bayesian_search_skopt.
     '''
     forecaster = ForecasterAutoreg(
                     regressor = Ridge(random_state=123),
@@ -385,7 +386,7 @@ def test_evaluate_bayesian_search_skopt_when_return_best():
 
 def test_results_opt_best_output_bayesian_search_skopt_with_output_gp_minimize_skopt():
     '''
-    Test results_opt_best output of _bayesian_search_skopt with output gp_minimize() skopt
+    Test results_opt_best output of _bayesian_search_skopt with output gp_minimize() skopt.
     '''
     forecaster = ForecasterAutoreg(
                     regressor = Ridge(random_state=123),

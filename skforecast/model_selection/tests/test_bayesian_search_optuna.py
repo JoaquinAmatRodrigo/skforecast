@@ -36,7 +36,8 @@ y = pd.Series(
 
 def test_bayesian_search_optuna_exception_when_search_space_names_do_not_match():
     '''
-    Test Exception is raised when search_space key name do not match the trial object name from optuna.
+    Test Exception is raised when search_space key name do not match the trial 
+    object name from optuna.
     '''
     forecaster = ForecasterAutoreg(
                     regressor = Ridge(random_state=123),
@@ -73,7 +74,7 @@ def test_bayesian_search_optuna_exception_when_search_space_names_do_not_match()
 def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_mocked():
     '''
     Test output of _bayesian_search_optuna in ForecasterAutoreg with mocked
-    (mocked done in Skforecast v0.4.3)
+    (mocked done in Skforecast v0.4.3).
     '''
     forecaster = ForecasterAutoreg(
                     regressor = RandomForestRegressor(random_state=123),
@@ -161,7 +162,7 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_mocked():
 def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_mocked_when_args_kwargs():
     '''
     Test output of _bayesian_search_optuna in ForecasterAutoreg when args and kwargs with mocked
-    (mocked done in Skforecast v0.4.3)
+    (mocked done in Skforecast v0.4.3).
     '''
     forecaster = ForecasterAutoreg(
                     regressor = Ridge(random_state=123),
@@ -297,7 +298,7 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_mocked_whe
 def test_results_output_bayesian_search_optuna_ForecasterAutoregCustom_with_mocked():
     '''
     Test output of _bayesian_search_optuna in ForecasterAutoregCustom with mocked
-    (mocked done in Skforecast v0.4.3)
+    (mocked done in Skforecast v0.4.3).
     '''
     def create_predictors(y):
         '''
@@ -365,7 +366,7 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoregCustom_with_mock
 
 def test_evaluate_bayesian_search_optuna_when_return_best():
     '''
-    Test forecaster is refited when return_best=True in _bayesian_search_optuna
+    Test forecaster is refited when return_best=True in _bayesian_search_optuna.
     '''
     forecaster = ForecasterAutoreg(
                     regressor = Ridge(random_state=123),
@@ -407,7 +408,7 @@ def test_evaluate_bayesian_search_optuna_when_return_best():
 
 def test_results_opt_best_output_bayesian_search_optuna_with_output_study_best_trial_optuna():
     '''
-    Test results_opt_best output of _bayesian_search_optuna with output study.best_trial optuna
+    Test results_opt_best output of _bayesian_search_optuna with output study.best_trial optuna.
     '''
     forecaster = ForecasterAutoreg(
                     regressor = Ridge(random_state=123),

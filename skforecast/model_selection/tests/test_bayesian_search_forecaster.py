@@ -60,7 +60,7 @@ def test_bayesian_search_forecaster_exception_when_engine_not_optuna_or_skopt():
 def test_results_output_bayesian_search_forecaster_optuna_engine_ForecasterAutoregCustom_with_mocked():
     '''
     Test output of bayesian_search_forecaster in ForecasterAutoregCustom with mocked
-    using optuna engine (mocked done in Skforecast v0.4.3)
+    using optuna engine (mocked done in Skforecast v0.4.3).
     '''
     def create_predictors(y):
         '''
@@ -128,7 +128,7 @@ def test_results_output_bayesian_search_forecaster_optuna_engine_ForecasterAutor
 def test_results_output_bayesian_search_forecaster_skopt_engine_ForecasterAutoregCustom_with_mocked():
     '''
     Test output of bayesian_search_forecaster in ForecasterAutoregCustom with mocked
-    using skopt engine (mocked done in Skforecast v0.4.3)
+    using skopt engine (mocked done in Skforecast v0.4.3).
     '''
     def create_predictors(y):
         '''
