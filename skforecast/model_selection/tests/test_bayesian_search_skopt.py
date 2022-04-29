@@ -52,19 +52,19 @@ def test_bayesian_search_skopt_exception_when_search_space_names_do_not_match():
     
     with pytest.raises(Exception):
         _bayesian_search_skopt(
-            forecaster   = forecaster,
-            y            = y,
-            lags_grid    = lags_grid,
-            search_space = search_space,
-            steps        = steps,
-            metric       = 'mean_absolute_error',
-            refit        = True,
+            forecaster         = forecaster,
+            y                  = y,
+            lags_grid          = lags_grid,
+            search_space       = search_space,
+            steps              = steps,
+            metric             = 'mean_absolute_error',
+            refit              = True,
             initial_train_size = len(y_train),
             fixed_train_size   = True,
-            n_trials     = 10,
-            random_state = 123,
-            return_best  = False,
-            verbose      = False,
+            n_trials           = 10,
+            random_state       = 123,
+            return_best        = False,
+            verbose            = False
         )
 
 
@@ -88,19 +88,19 @@ def test_results_output_bayesian_search_skopt_ForecasterAutoreg_with_mocked():
                    }
 
     results = _bayesian_search_skopt(
-                    forecaster   = forecaster,
-                    y            = y,
-                    lags_grid    = lags_grid,
-                    search_space = search_space,
-                    steps        = steps,
-                    metric       = 'mean_absolute_error',
-                    refit        = True,
+                    forecaster         = forecaster,
+                    y                  = y,
+                    lags_grid          = lags_grid,
+                    search_space       = search_space,
+                    steps              = steps,
+                    metric             = 'mean_absolute_error',
+                    refit              = True,
                     initial_train_size = len(y_train),
                     fixed_train_size   = True,
-                    n_trials     = 10,
-                    random_state = 123,
-                    return_best  = False,
-                    verbose      = False
+                    n_trials           = 10,
+                    random_state       = 123,
+                    return_best        = False,
+                    verbose            = False
               )[0]
     
     expected_results = pd.DataFrame({
@@ -153,9 +153,9 @@ def test_results_output_bayesian_search_skopt_ForecasterAutoreg_with_mocked():
     pd.testing.assert_frame_equal(results, expected_results)
     
 
-def test_results_output_bayesian_search_skopt_ForecasterAutoreg_with_mocked_when_args_kwargs():
+def test_results_output_bayesian_search_skopt_ForecasterAutoreg_with_mocked_when_kwargs_gp_minimize():
     '''
-    Test output of _bayesian_search_skopt in ForecasterAutoreg when args and kwargs with mocked
+    Test output of _bayesian_search_skopt in ForecasterAutoreg when kwargs_gp_minimize with mocked
     (mocked done in Skforecast v0.4.3).
     '''
     forecaster = ForecasterAutoreg(
@@ -169,26 +169,26 @@ def test_results_output_bayesian_search_skopt_ForecasterAutoreg_with_mocked_when
     lags_grid = [2, 4]
     search_space = {'alpha': Real(0.01, 1.0, "log-uniform", name='alpha')}
 
-    # *args and **kwargs for gp_minimize()
+    # kwargs_gp_minimize
     initial_point_generator = 'lhs'
     kappa = 1.8
 
     results = _bayesian_search_skopt(
-                    forecaster   = forecaster,
-                    y            = y,
-                    lags_grid    = lags_grid,
-                    search_space = search_space,
-                    steps        = steps,
-                    metric       = 'mean_absolute_error',
-                    refit        = True,
+                    forecaster         = forecaster,
+                    y                  = y,
+                    lags_grid          = lags_grid,
+                    search_space       = search_space,
+                    steps              = steps,
+                    metric             = 'mean_absolute_error',
+                    refit              = True,
                     initial_train_size = len(y_train),
                     fixed_train_size   = True,
-                    n_trials     = 10,
-                    random_state = 123,
-                    return_best  = False,
-                    verbose      = False,
-                    initial_point_generator = initial_point_generator,
-                    kappa = kappa
+                    n_trials           = 10,
+                    random_state       = 123,
+                    return_best        = False,
+                    verbose            = False,
+                    kwargs_gp_minimize = {'initial_point_generator': initial_point_generator,
+                                          'kappa': kappa }
               )[0]
     
     expected_results = pd.DataFrame({
@@ -243,19 +243,19 @@ def test_results_output_bayesian_search_skopt_ForecasterAutoreg_with_mocked_when
     search_space = {'alpha': Real(0.01, 1.0, "log-uniform", name='alpha')}
 
     results = _bayesian_search_skopt(
-                    forecaster   = forecaster,
-                    y            = y,
-                    lags_grid    = lags_grid,
-                    search_space = search_space,
-                    steps        = steps,
-                    metric       = 'mean_absolute_error',
-                    refit        = True,
+                    forecaster         = forecaster,
+                    y                  = y,
+                    lags_grid          = lags_grid,
+                    search_space       = search_space,
+                    steps              = steps,
+                    metric             = 'mean_absolute_error',
+                    refit              = True,
                     initial_train_size = len(y_train),
                     fixed_train_size   = True,
-                    n_trials     = 10,
-                    random_state = 123,
-                    return_best  = False,
-                    verbose      = False
+                    n_trials           = 10,
+                    random_state       = 123,
+                    return_best        = False,
+                    verbose            = False
               )[0]
     
     expected_results = pd.DataFrame({
@@ -307,18 +307,18 @@ def test_results_output_bayesian_search_skopt_ForecasterAutoregCustom_with_mocke
     search_space = {'alpha': Real(0.01, 1.0, "log-uniform", name='alpha')}
 
     results = _bayesian_search_skopt(
-                    forecaster   = forecaster,
-                    y            = y,
-                    search_space = search_space,
-                    steps        = steps,
-                    metric       = 'mean_absolute_error',
-                    refit        = True,
+                    forecaster         = forecaster,
+                    y                  = y,
+                    search_space       = search_space,
+                    steps              = steps,
+                    metric             = 'mean_absolute_error',
+                    refit              = True,
                     initial_train_size = len(y_train),
                     fixed_train_size   = True,
-                    n_trials     = 10,
-                    random_state = 123,
-                    return_best  = False,
-                    verbose      = False
+                    n_trials           = 10,
+                    random_state       = 123,
+                    return_best        = False,
+                    verbose            = False
               )[0]
     
     expected_results = pd.DataFrame({
@@ -362,19 +362,19 @@ def test_evaluate_bayesian_search_skopt_when_return_best():
     search_space = {'alpha': Real(0.01, 1.0, "log-uniform", name='alpha')}
 
     _bayesian_search_skopt(
-        forecaster   = forecaster,
-        y            = y,
-        lags_grid    = lags_grid,
-        search_space = search_space,
-        steps        = steps,
-        metric       = 'mean_absolute_error',
-        refit        = True,
+        forecaster         = forecaster,
+        y                  = y,
+        lags_grid          = lags_grid,
+        search_space       = search_space,
+        steps              = steps,
+        metric             = 'mean_absolute_error',
+        refit              = True,
         initial_train_size = len(y_train),
         fixed_train_size   = True,
-        n_trials     = 10,
-        random_state = 123,
-        return_best  = True,
-        verbose      = False
+        n_trials           = 10,
+        random_state       = 123,
+        return_best        = True,
+        verbose            = False
     )
     
     expected_lags = np.array([1, 2])
@@ -446,19 +446,20 @@ def test_results_opt_best_output_bayesian_search_skopt_with_output_gp_minimize_s
     return_best  = False
 
     results_opt_best = _bayesian_search_skopt(
-                            forecaster   = forecaster,
-                            y            = y,
-                            lags_grid    = lags_grid,
-                            search_space = search_space,
-                            steps        = steps,
-                            metric       = metric,
-                            refit        = refit,
+                            forecaster         = forecaster,
+                            y                  = y,
+                            lags_grid          = lags_grid,
+                            search_space       = search_space,
+                            steps              = steps,
+                            metric             = metric,
+                            refit              = refit,
                             initial_train_size = initial_train_size,
                             fixed_train_size   = fixed_train_size,
-                            n_trials     = n_trials,
-                            random_state = random_state,
-                            return_best  = return_best,
-                            verbose      = verbose
+                            n_trials           = n_trials,
+                            random_state       = random_state,
+                            return_best        = return_best,
+                            verbose            = verbose,
+                            kwargs_gp_minimize = {}
                        )[1]
 
     assert results_opt.x == results_opt_best.x

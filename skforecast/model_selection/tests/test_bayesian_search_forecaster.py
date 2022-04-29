@@ -40,20 +40,20 @@ def test_bayesian_search_forecaster_exception_when_engine_not_optuna_or_skopt():
     
     with pytest.raises(Exception):
         bayesian_search_forecaster(
-            forecaster   = forecaster,
-            y            = y,
-            lags_grid    = [2, 4],
-            search_space = {'not_alpha': Real(0.01, 1.0, "log-uniform", name='alpha')},
-            steps        = 3,
-            metric       = 'mean_absolute_error',
-            refit        = True,
-            initial_train_size = len(y[:-12]),
-            fixed_train_size   = True,
-            n_trials     = 10,
-            random_state = 123,
-            return_best  = False,
-            verbose      = False,
-            engine       = engine
+            forecaster            = forecaster,
+            y                     = y,
+            lags_grid             = [2, 4],
+            search_space          = {'not_alpha': Real(0.01, 1.0, "log-uniform", name='alpha')},
+            steps                 = 3,
+            metric                = 'mean_absolute_error',
+            refit                 = True,
+            initial_train_size    = len(y[:-12]),
+            fixed_train_size      = True,
+            n_trials              = 10,
+            random_state          = 123,
+            return_best           = False,
+            verbose               = False,
+            engine                = engine
         )
 
 
@@ -85,19 +85,19 @@ def test_results_output_bayesian_search_forecaster_optuna_engine_ForecasterAutor
     engine = 'optuna'
 
     results = bayesian_search_forecaster(
-                    forecaster   = forecaster,
-                    y            = y,
-                    search_space = search_space,
-                    steps        = 3,
-                    metric       = 'mean_absolute_error',
-                    refit        = True,
-                    initial_train_size = len(y[:-12]),
-                    fixed_train_size   = True,
-                    n_trials     = 10,
-                    random_state = 123,
-                    return_best  = False,
-                    verbose      = False,
-                    engine       = engine
+                    forecaster            = forecaster,
+                    y                     = y,
+                    search_space          = search_space,
+                    steps                 = 3,
+                    metric                = 'mean_absolute_error',
+                    refit                 = True,
+                    initial_train_size    = len(y[:-12]),
+                    fixed_train_size      = True,
+                    n_trials              = 10,
+                    random_state          = 123,
+                    return_best           = False,
+                    verbose               = False,
+                    engine                = engine
               )[0]
     
     expected_results = pd.DataFrame({
@@ -148,19 +148,19 @@ def test_results_output_bayesian_search_forecaster_skopt_engine_ForecasterAutore
     engine = 'skopt'
 
     results = bayesian_search_forecaster(
-                    forecaster   = forecaster,
-                    y            = y,
+                    forecaster            = forecaster,
+                    y                     = y,
                     search_space = {'alpha': Real(0.01, 1.0, "log-uniform", name='alpha')},
-                    steps        = 3,
-                    metric       = 'mean_absolute_error',
-                    refit        = True,
-                    initial_train_size = len(y[:-12]),
-                    fixed_train_size   = True,
-                    n_trials     = 10,
-                    random_state = 123,
-                    return_best  = False,
-                    verbose      = False,
-                    engine       = engine
+                    steps                 = 3,
+                    metric                = 'mean_absolute_error',
+                    refit                 = True,
+                    initial_train_size    = len(y[:-12]),
+                    fixed_train_size      = True,
+                    n_trials              = 10,
+                    random_state          = 123,
+                    return_best           = False,
+                    verbose               = False,
+                    engine                = engine
               )[0]
     
     expected_results = pd.DataFrame({

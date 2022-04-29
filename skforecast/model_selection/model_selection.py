@@ -1366,7 +1366,9 @@ def bayesian_search_forecaster(
     return_best: bool=True,
     verbose: bool=True,
     engine: str='skopt',
-    *args, **kwargs
+    kwargs_create_study: dict={},
+    kwargs_study_optimize: dict={},
+    kwargs_gp_minimize: dict={},
 ) -> Tuple[pd.DataFrame, object]:
     '''
     Bayesian optimization for a Forecaster object using time series backtesting and 
@@ -1439,13 +1441,17 @@ def bayesian_search_forecaster(
         If 'skopt':
             Bayesian optimization runs through the skopt library
 
-    *args, **kwargs : 
-        If optuna engine:
-            *args and **kwargs to pass to optuna.samplers.TPESampler() argument in 
-            optuna.create_study()
+    kwargs_create_study : dict, default `{'direction':'minimize', 'sampler':TPESampler(seed=123)}`
+        Only applies to engine='optuna'.
+            Keyword arguments (key, value mappings) to pass to optuna.create_study.
 
-        If skopt engine:
-            *args and **kwargs to pass to skopt.gp_minimize() 
+    kwargs_study_optimize : dict, default `{}`
+        Only applies to engine='optuna'.
+            Other keyword arguments (key, value mappings) to pass to study.optimize().
+
+    kwargs_gp_minimize : dict, default `{}`
+        Only applies to engine='skopt'.
+            Other keyword arguments (key, value mappings) to pass to skopt.gp_minimize().
 
     Returns 
     -------
@@ -1471,39 +1477,40 @@ def bayesian_search_forecaster(
 
     if engine == 'optuna':
         results, results_opt_best = _bayesian_search_optuna(
-                                        forecaster   = forecaster,
-                                        y            = y,
-                                        exog         = exog,
-                                        lags_grid    = lags_grid,
-                                        search_space = search_space,
-                                        steps        = steps,
-                                        metric       = metric,
-                                        refit        = refit,
-                                        initial_train_size = initial_train_size,
-                                        fixed_train_size   = fixed_train_size,
-                                        n_trials     = n_trials,
-                                        random_state = random_state,
-                                        return_best  = return_best,
-                                        verbose      = verbose,
-                                        *args, **kwargs
+                                        forecaster            = forecaster,
+                                        y                     = y,
+                                        exog                  = exog,
+                                        lags_grid             = lags_grid,
+                                        search_space          = search_space,
+                                        steps                 = steps,
+                                        metric                = metric,
+                                        refit                 = refit,
+                                        initial_train_size    = initial_train_size,
+                                        fixed_train_size      = fixed_train_size,
+                                        n_trials              = n_trials,
+                                        random_state          = random_state,
+                                        return_best           = return_best,
+                                        verbose               = verbose,
+                                        kwargs_create_study   = kwargs_create_study,
+                                        kwargs_study_optimize = kwargs_study_optimize
                                     )
     else:
         results, results_opt_best = _bayesian_search_skopt(
-                                        forecaster   = forecaster,
-                                        y            = y,
-                                        exog         = exog,
-                                        lags_grid    = lags_grid,
-                                        search_space = search_space,
-                                        steps        = steps,
-                                        metric       = metric,
-                                        refit        = refit,
+                                        forecaster         = forecaster,
+                                        y                  = y,
+                                        exog               = exog,
+                                        lags_grid          = lags_grid,
+                                        search_space       = search_space,
+                                        steps              = steps,
+                                        metric             = metric,
+                                        refit              = refit,
                                         initial_train_size = initial_train_size,
                                         fixed_train_size   = fixed_train_size,
-                                        n_trials     = n_trials,
-                                        random_state = random_state,
-                                        return_best  = return_best,
-                                        verbose      = verbose,
-                                        *args, **kwargs
+                                        n_trials           = n_trials,
+                                        random_state       = random_state,
+                                        return_best        = return_best,
+                                        verbose            = verbose,
+                                        kwargs_gp_minimize = kwargs_gp_minimize
                                     )
 
     return results, results_opt_best
@@ -1524,7 +1531,8 @@ def _bayesian_search_optuna(
     random_state: int=123,
     return_best: bool=True,
     verbose: bool=True,
-    *args, **kwargs
+    kwargs_create_study: dict={},
+    kwargs_study_optimize: dict={}
 ) -> Tuple[pd.DataFrame, object]:
     '''
     Bayesian optimization for a Forecaster object using time series backtesting 
@@ -1585,9 +1593,11 @@ def _bayesian_search_optuna(
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
 
-    *args, **kwargs : 
-        *args and **kwargs to pass to optuna.samplers.TPESampler() argument in
-        optuna.create_study()
+    kwargs_create_study : dict, default `{'direction':'minimize', 'sampler':TPESampler(seed=123)}`
+        Keyword arguments (key, value mappings) to pass to optuna.create_study.
+
+    kwargs_study_optimize : dict, default `{}`
+        Other keyword arguments (key, value mappings) to pass to study.optimize().
 
     Returns 
     -------
@@ -1658,8 +1668,12 @@ def _bayesian_search_optuna(
             forecaster.set_lags(lags)
             lags = forecaster.lags.copy()
         
-        study = optuna.create_study(direction="minimize", sampler=TPESampler(seed=random_state, *args, **kwargs))
-        study.optimize(_objective, n_trials=n_trials)
+        study = optuna.create_study(**kwargs_create_study)
+
+        if 'sampler' not in kwargs_create_study.keys():
+            study.sampler = TPESampler(seed=random_state)
+
+        study.optimize(_objective, n_trials=n_trials, **kwargs_study_optimize)
 
         best_trial = study.best_trial
 
@@ -1725,7 +1739,7 @@ def _bayesian_search_skopt(
     random_state: int=123,
     return_best: bool=True,
     verbose: bool=True,
-    *args, **kwargs
+    kwargs_gp_minimize: dict={}
 ) -> Tuple[pd.DataFrame, object]:
     '''
     Bayesian optimization for a Forecaster object using time series backtesting and skopt library.
@@ -1784,8 +1798,8 @@ def _bayesian_search_skopt(
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
 
-    *args, **kwargs : 
-        *args and **kwargs to pass to skopt.gp_minimize() 
+    kwargs_gp_minimize : dict, default `{}`
+        Other keyword arguments (key, value mappings) to pass to skopt.gp_minimize().
 
     Returns 
     -------
@@ -1870,7 +1884,7 @@ def _bayesian_search_skopt(
                         dimensions   = search_space,
                         n_calls      = n_trials,
                         random_state = random_state,
-                        *args, **kwargs
+                        **kwargs_gp_minimize
                       )
 
         for i, x in enumerate(results_opt.x_iters):
