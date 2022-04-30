@@ -159,7 +159,6 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_mocked():
     pd.testing.assert_frame_equal(results, expected_results)
     
 
-@pytest.mark.skip(reason="experimental")
 def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_mocked_when_kwargs_create_study():
     '''
     Test output of _bayesian_search_optuna in ForecasterAutoreg when kwargs_create_study with mocked

@@ -21,7 +21,7 @@ from sklearn.metrics import mean_squared_log_error
 from sklearn.model_selection import ParameterGrid
 from sklearn.model_selection import ParameterSampler
 import optuna
-from optuna.samplers import TPESampler
+from optuna.samplers import TPESampler, RandomSampler
 optuna.logging.set_verbosity(optuna.logging.WARNING) # disable optuna logs
 from skopt.utils import use_named_args
 from skopt import gp_minimize
@@ -1668,6 +1668,10 @@ def _bayesian_search_optuna(
             forecaster.set_lags(lags)
             lags = forecaster.lags.copy()
         
+        if 'sampler' in kwargs_create_study.keys():
+            kwargs_create_study['sampler']._rng = np.random.RandomState(random_state)
+            kwargs_create_study['sampler']._random_sampler = RandomSampler(seed=random_state)    
+
         study = optuna.create_study(**kwargs_create_study)
 
         if 'sampler' not in kwargs_create_study.keys():
