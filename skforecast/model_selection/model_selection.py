@@ -20,6 +20,11 @@ from sklearn.metrics import mean_absolute_percentage_error
 from sklearn.metrics import mean_squared_log_error
 from sklearn.model_selection import ParameterGrid
 from sklearn.model_selection import ParameterSampler
+import optuna
+from optuna.samplers import TPESampler, RandomSampler
+optuna.logging.set_verbosity(optuna.logging.WARNING) # disable optuna logs
+from skopt.utils import use_named_args
+from skopt import gp_minimize
 
 from ..ForecasterAutoreg import ForecasterAutoreg
 from ..ForecasterAutoregCustom import ForecasterAutoregCustom
@@ -342,7 +347,7 @@ def _backtesting_forecaster_refit(
         If string:
             {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
 
-        It callable:
+        If callable:
             Function with arguments y_true, y_pred that returns a float.
         
     exog :panda Series, pandas DataFrame, default `None`
@@ -360,7 +365,7 @@ def _backtesting_forecaster_refit(
         Number of bootstrapping iterations used to estimate prediction
         intervals.
 
-    random_state: int, default 123
+    random_state: int, default `123`
         Sets a seed to the random generator, so that boot intervals are always 
         deterministic.
 
@@ -611,7 +616,7 @@ def _backtesting_forecaster_no_refit(
         If string:
             {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
 
-        It callable:
+        If callable:
             Function with arguments y_true, y_pred that returns a float.
         
     exog :panda Series, pandas DataFrame, default `None`
@@ -629,7 +634,7 @@ def _backtesting_forecaster_no_refit(
         Number of bootstrapping iterations used to estimate prediction
         intervals.
 
-    random_state: int, default 123
+    random_state: int, default `123`
         Sets a seed to the random generator, so that boot intervals are always 
         deterministic.
 
@@ -868,7 +873,7 @@ def backtesting_forecaster(
         the first `len(forecaster.last_window)` observations are needed to create the 
         initial predictors, so no predictions are calculated for them.
 
-        `None` is only allowed when `refit` is False.
+        `None` is only allowed when `refit` is `False`.
     
     fixed_train_size: bool, default `True`
         If True, train size doesn't increases but moves by `steps` in each iteration.
@@ -882,7 +887,7 @@ def backtesting_forecaster(
         If string:
             {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
 
-        It callable:
+        If callable:
             Function with arguments y_true, y_pred that returns a float.
         
     exog :panda Series, pandas DataFrame, default `None`
@@ -890,7 +895,7 @@ def backtesting_forecaster(
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
 
-    refit: bool, default False
+    refit: bool, default `False`
         Whether to re-fit the forecaster in each iteration.
 
     interval: list, default `None`
@@ -903,7 +908,7 @@ def backtesting_forecaster(
         Number of bootstrapping iterations used to estimate prediction
         intervals.
 
-    random_state: int, default 123
+    random_state: int, default `123`
         Sets a seed to the random generator, so that boot intervals are always 
         deterministic.
 
@@ -1000,7 +1005,7 @@ def grid_search_forecaster(
     steps: int,
     metric: Union[str, callable],
     initial_train_size: int,
-    fixed_train_size: bool=False,
+    fixed_train_size: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Optional[list]=None,
     refit: bool=False,
@@ -1032,13 +1037,13 @@ def grid_search_forecaster(
         If string:
             {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
 
-        It callable:
+        If callable:
             Function with arguments y_true, y_pred that returns a float.
 
     initial_train_size: int 
         Number of samples in the initial train split.
  
-    fixed_train_size: bool, default `False`
+    fixed_train_size: bool, default `True`
         If True, train size doesn't increases but moves by `steps` in each iteration.
 
     exog : pandas Series, pandas DataFrame, default `None`
@@ -1046,14 +1051,14 @@ def grid_search_forecaster(
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
            
-    lags_grid : list of int, lists, np.narray or range. 
+    lags_grid : list of int, lists, np.narray or range, default `None`
         Lists of `lags` to try. Only used if forecaster is an instance of 
         `ForecasterAutoreg` or `ForecasterAutoregMultiOutput`.
         
-    refit: bool, default False
+    refit: bool, default `False`
         Whether to re-fit the forecaster in each iteration of backtesting.
         
-    return_best : bool
+    return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
         
     verbose : bool, default `True`
@@ -1062,7 +1067,11 @@ def grid_search_forecaster(
     Returns 
     -------
     results: pandas DataFrame
-        Metric value estimated for each combination of parameters.
+        Results for each combination of parameters.
+            column lags = predictions.
+            column params = lower bound of the interval.
+            column metric = metric value estimated for the combination of parameters.
+            additional n columns with param = value.
 
     '''
 
@@ -1093,7 +1102,7 @@ def random_search_forecaster(
     steps: int,
     metric: Union[str, callable],
     initial_train_size: int,
-    fixed_train_size: bool=False,
+    fixed_train_size: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Optional[list]=None,
     refit: bool=False,
@@ -1127,13 +1136,13 @@ def random_search_forecaster(
         If string:
             {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
 
-        It callable:
+        If callable:
             Function with arguments y_true, y_pred that returns a float.
 
     initial_train_size: int 
         Number of samples in the initial train split.
  
-    fixed_train_size: bool, default `False`
+    fixed_train_size: bool, default `True`
         If True, train size doesn't increases but moves by `steps` in each iteration.
 
     exog : pandas Series, pandas DataFrame, default `None`
@@ -1141,21 +1150,21 @@ def random_search_forecaster(
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
            
-    lags_grid : list of int, lists, np.narray or range. 
+    lags_grid : list of int, lists, np.narray or range, default `None`
         Lists of `lags` to try. Only used if forecaster is an instance of 
         `ForecasterAutoreg` or `ForecasterAutoregMultiOutput`.
         
-    refit: bool, default False
+    refit: bool, default `False`
         Whether to re-fit the forecaster in each iteration of backtesting.
 
-    n_iter: int, default 10
+    n_iter: int, default `10`
         Number of parameter settings that are sampled. 
         n_iter trades off runtime vs quality of the solution.
 
-    random_state: int, default 123
+    random_state: int, default `123`
         Sets a seed to the random sampling for reproducible output.
 
-    return_best : bool
+    return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
         
     verbose : bool, default `True`
@@ -1164,7 +1173,11 @@ def random_search_forecaster(
     Returns 
     -------
     results: pandas DataFrame
-        Metric value estimated for each combination of parameters.
+        Results for each combination of parameters.
+            column lags = predictions.
+            column params = lower bound of the interval.
+            column metric = metric value estimated for the combination of parameters.
+            additional n columns with param = value.
 
     '''
 
@@ -1195,7 +1208,7 @@ def _evaluate_grid_hyperparameters(
     steps: int,
     metric: Union[str, callable],
     initial_train_size: int,
-    fixed_train_size: bool=False,
+    fixed_train_size: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Optional[list]=None,
     refit: bool=False,
@@ -1226,13 +1239,13 @@ def _evaluate_grid_hyperparameters(
         If string:
             {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
 
-        It callable:
+        If callable:
             Function with arguments y_true, y_pred that returns a float.
 
     initial_train_size: int 
         Number of samples in the initial train split.
  
-    fixed_train_size: bool, default `False`
+    fixed_train_size: bool, default `True`
         If True, train size doesn't increases but moves by `steps` in each iteration.
 
     exog : pandas Series, pandas DataFrame, default `None`
@@ -1240,14 +1253,14 @@ def _evaluate_grid_hyperparameters(
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
            
-    lags_grid : list of int, lists, np.narray or range. 
+    lags_grid : list of int, lists, np.narray or range, default `None`
         Lists of `lags` to try. Only used if forecaster is an instance of 
         `ForecasterAutoreg` or `ForecasterAutoregMultiOutput`.
         
-    refit: bool, default False
+    refit: bool, default `False`
         Whether to re-fit the forecaster in each iteration of backtesting.
         
-    return_best : bool
+    return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
         
     verbose : bool, default `True`
@@ -1256,7 +1269,11 @@ def _evaluate_grid_hyperparameters(
     Returns 
     -------
     results: pandas DataFrame
-        Metric value estimated for each combination of parameters.
+        Results for each combination of parameters.
+            column lags = predictions.
+            column params = lower bound of the interval.
+            column metric = metric value estimated for the combination of parameters.
+            additional n columns with param = value.
 
     '''
 
@@ -1275,7 +1292,7 @@ def _evaluate_grid_hyperparameters(
     metric_list = []
 
     print(
-        f"Number of models compared: {len(param_grid)*len(lags_grid)}"
+        f"Number of models compared: {len(param_grid)*len(lags_grid)}."
     )
 
     for lags in tqdm(lags_grid, desc='loop lags_grid', position=0, ncols=90):
@@ -1331,3 +1348,588 @@ def _evaluate_grid_hyperparameters(
         )
             
     return results
+
+
+def bayesian_search_forecaster(
+    forecaster,
+    y: pd.Series,
+    search_space: Union[callable, dict],
+    steps: int,
+    metric: Union[str, callable],
+    initial_train_size: int,
+    fixed_train_size: bool=True,
+    exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+    lags_grid: Optional[list]=None,
+    refit: bool=False,
+    n_trials: int=10,
+    random_state: int=123,
+    return_best: bool=True,
+    verbose: bool=True,
+    engine: str='skopt',
+    kwargs_create_study: dict={},
+    kwargs_study_optimize: dict={},
+    kwargs_gp_minimize: dict={},
+) -> Tuple[pd.DataFrame, object]:
+    '''
+    Bayesian optimization for a Forecaster object using time series backtesting and 
+    optuna or skopt library.
+    
+    Parameters
+    ----------
+    forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregMultiOutput
+        Forcaster model.
+        
+    y : pandas Series
+        Training time series values. 
+        
+    search_space : callable (optuna), dict (skopt)
+        If optuna engine: callable
+            Function with argument `trial` which returns a dictionary with parameters names 
+            (`str`) as keys and Trial object from optuna (trial.suggest_float, 
+            trial.suggest_int, trial.suggest_categorical) as values.
+
+        If skopt engine: dict
+            Dictionary with parameters names (`str`) as keys and Space object from skopt 
+            (Real, Integer, Categorical) as values.
+
+    steps : int
+        Number of steps to predict.
+        
+    metric : str, callable
+        Metric used to quantify the goodness of fit of the model.
+        
+        If string:
+            {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
+
+        If callable:
+            Function with arguments y_true, y_pred that returns a float.
+
+    initial_train_size: int 
+        Number of samples in the initial train split.
+ 
+    fixed_train_size: bool, default `True`
+        If True, train size doesn't increases but moves by `steps` in each iteration.
+
+    exog : pandas Series, pandas DataFrame, default `None`
+        Exogenous variable/s included as predictor/s. Must have the same
+        number of observations as `y` and should be aligned so that y[i] is
+        regressed on exog[i].
+           
+    lags_grid : list of int, lists, np.narray or range, default `None`
+        Lists of `lags` to try. Only used if forecaster is an instance of 
+        `ForecasterAutoreg` or `ForecasterAutoregMultiOutput`.
+        
+    refit: bool, default `False`
+        Whether to re-fit the forecaster in each iteration of backtesting.
+        
+    n_trials: int, default `10`
+        Number of parameter settings that are sampled in each lag configuration.
+
+    random_state: int, default `123`
+        Sets a seed to the sampling for reproducible output.
+
+    return_best : bool, default `True`
+        Refit the `forecaster` using the best found parameters on the whole data.
+        
+    verbose : bool, default `True`
+        Print number of folds used for cv or backtesting.
+
+    engine : str, default `'skopt'`
+        If 'optuna':
+            Bayesian optimization runs through the optuna library 
+
+        If 'skopt':
+            Bayesian optimization runs through the skopt library
+
+    kwargs_create_study : dict, default `{'direction':'minimize', 'sampler':TPESampler(seed=123)}`
+        Only applies to engine='optuna'.
+            Keyword arguments (key, value mappings) to pass to optuna.create_study.
+
+    kwargs_study_optimize : dict, default `{}`
+        Only applies to engine='optuna'.
+            Other keyword arguments (key, value mappings) to pass to study.optimize().
+
+    kwargs_gp_minimize : dict, default `{}`
+        Only applies to engine='skopt'.
+            Other keyword arguments (key, value mappings) to pass to skopt.gp_minimize().
+
+    Returns 
+    -------
+    results: pandas DataFrame
+        Results for each combination of parameters.
+            column lags = predictions.
+            column params = lower bound of the interval.
+            column metric = metric value estimated for the combination of parameters.
+            additional n columns with param = value.
+
+    results_opt_best: optuna object (optuna), scipy object (skopt)   
+        If optuna engine:
+            The best optimization result returned as a FrozenTrial optuna object.
+
+        If skopt engine:
+            The best optimization result returned as a OptimizeResult object.
+    '''
+
+    if engine not in ['optuna', 'skopt']:
+        raise Exception(
+                f'''`engine` only allows 'optuna' or 'skopt', got {engine}.'''
+              )
+
+    if engine == 'optuna':
+        results, results_opt_best = _bayesian_search_optuna(
+                                        forecaster            = forecaster,
+                                        y                     = y,
+                                        exog                  = exog,
+                                        lags_grid             = lags_grid,
+                                        search_space          = search_space,
+                                        steps                 = steps,
+                                        metric                = metric,
+                                        refit                 = refit,
+                                        initial_train_size    = initial_train_size,
+                                        fixed_train_size      = fixed_train_size,
+                                        n_trials              = n_trials,
+                                        random_state          = random_state,
+                                        return_best           = return_best,
+                                        verbose               = verbose,
+                                        kwargs_create_study   = kwargs_create_study,
+                                        kwargs_study_optimize = kwargs_study_optimize
+                                    )
+    else:
+        results, results_opt_best = _bayesian_search_skopt(
+                                        forecaster         = forecaster,
+                                        y                  = y,
+                                        exog               = exog,
+                                        lags_grid          = lags_grid,
+                                        search_space       = search_space,
+                                        steps              = steps,
+                                        metric             = metric,
+                                        refit              = refit,
+                                        initial_train_size = initial_train_size,
+                                        fixed_train_size   = fixed_train_size,
+                                        n_trials           = n_trials,
+                                        random_state       = random_state,
+                                        return_best        = return_best,
+                                        verbose            = verbose,
+                                        kwargs_gp_minimize = kwargs_gp_minimize
+                                    )
+
+    return results, results_opt_best
+
+
+def _bayesian_search_optuna(
+    forecaster,
+    y: pd.Series,
+    search_space: callable,
+    steps: int,
+    metric: Union[str, callable],
+    initial_train_size: int,
+    fixed_train_size: bool=True,
+    exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+    lags_grid: Optional[list]=None,
+    refit: bool=False,
+    n_trials: int=10,
+    random_state: int=123,
+    return_best: bool=True,
+    verbose: bool=True,
+    kwargs_create_study: dict={},
+    kwargs_study_optimize: dict={}
+) -> Tuple[pd.DataFrame, object]:
+    '''
+    Bayesian optimization for a Forecaster object using time series backtesting 
+    and optuna library.
+    
+    Parameters
+    ----------
+    forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregMultiOutput
+        Forcaster model.
+        
+    y : pandas Series
+        Training time series values. 
+        
+    search_space : callable
+        Function with argument `trial` which returns a dictionary with parameters names 
+        (`str`) as keys and Trial object from optuna (trial.suggest_float, 
+        trial.suggest_int, trial.suggest_categorical) as values.
+
+    steps : int
+        Number of steps to predict.
+        
+    metric : str, callable
+        Metric used to quantify the goodness of fit of the model.
+        
+        If string:
+            {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
+
+        If callable:
+            Function with arguments y_true, y_pred that returns a float.
+
+    initial_train_size: int 
+        Number of samples in the initial train split.
+ 
+    fixed_train_size: bool, default `True`
+        If True, train size doesn't increases but moves by `steps` in each iteration.
+
+    exog : pandas Series, pandas DataFrame, default `None`
+        Exogenous variable/s included as predictor/s. Must have the same
+        number of observations as `y` and should be aligned so that y[i] is
+        regressed on exog[i].
+           
+    lags_grid : list of int, lists, np.narray or range, default `None`
+        Lists of `lags` to try. Only used if forecaster is an instance of 
+        `ForecasterAutoreg` or `ForecasterAutoregMultiOutput`.
+        
+    refit: bool, default `False`
+        Whether to re-fit the forecaster in each iteration of backtesting.
+        
+    n_trials: int, default `10`
+        Number of parameter settings that are sampled in each lag configuration.
+
+    random_state: int, default `123`
+        Sets a seed to the sampling for reproducible output.
+
+    return_best : bool, default `True`
+        Refit the `forecaster` using the best found parameters on the whole data.
+        
+    verbose : bool, default `True`
+        Print number of folds used for cv or backtesting.
+
+    kwargs_create_study : dict, default `{'direction':'minimize', 'sampler':TPESampler(seed=123)}`
+        Keyword arguments (key, value mappings) to pass to optuna.create_study.
+
+    kwargs_study_optimize : dict, default `{}`
+        Other keyword arguments (key, value mappings) to pass to study.optimize().
+
+    Returns 
+    -------
+    results: pandas DataFrame
+        Results for each combination of parameters.
+            column lags = predictions.
+            column params = lower bound of the interval.
+            column metric = metric value estimated for the combination of parameters.
+            additional n columns with param = value.
+
+    results_opt_best: optuna object
+        The best optimization result returned as a FrozenTrial optuna object.
+    '''
+
+    if isinstance(forecaster, ForecasterAutoregCustom):
+        if lags_grid is not None:
+            warnings.warn(
+                '`lags_grid` ignored if forecaster is an instance of `ForecasterAutoregCustom`.'
+            )
+        lags_grid = ['custom predictors']
+        
+    elif lags_grid is None:
+        lags_grid = [forecaster.lags]
+   
+    lags_list = []
+    params_list = []
+    metric_list = []
+    results_opt_best = None
+
+    # Objective function using backtesting_forecaster
+    def _objective(
+        trial,
+        forecaster         = forecaster,
+        y                  = y,
+        exog               = exog,
+        initial_train_size = initial_train_size,
+        fixed_train_size   = fixed_train_size,
+        steps              = steps,
+        metric             = metric,
+        refit              = refit,
+        verbose            = verbose,
+        search_space       = search_space,
+    ) -> float:
+        
+        forecaster.set_params(**search_space(trial))
+        
+        metric, _ = backtesting_forecaster(
+                        forecaster         = forecaster,
+                        y                  = y,
+                        exog               = exog,
+                        steps              = steps,
+                        metric             = metric,
+                        initial_train_size = initial_train_size,
+                        fixed_train_size   = fixed_train_size,
+                        refit              = refit,
+                        verbose            = verbose
+                        )
+
+        return abs(metric)
+
+    print(
+        f'''Number of models compared: {n_trials*len(lags_grid)}, {n_trials} bayesian search in each lag configuration.'''
+    )
+
+    for lags in tqdm(lags_grid, desc='loop lags_grid', position=0, ncols=90):
+        
+        if isinstance(forecaster, (ForecasterAutoreg, ForecasterAutoregMultiOutput)):
+            forecaster.set_lags(lags)
+            lags = forecaster.lags.copy()
+        
+        if 'sampler' in kwargs_create_study.keys():
+            kwargs_create_study['sampler']._rng = np.random.RandomState(random_state)
+            kwargs_create_study['sampler']._random_sampler = RandomSampler(seed=random_state)    
+
+        study = optuna.create_study(**kwargs_create_study)
+
+        if 'sampler' not in kwargs_create_study.keys():
+            study.sampler = TPESampler(seed=random_state)
+
+        study.optimize(_objective, n_trials=n_trials, **kwargs_study_optimize)
+
+        best_trial = study.best_trial
+
+        if search_space(best_trial).keys() != best_trial.params.keys():
+            raise Exception(
+                f'''Some of the key values do not match the search_space key names.
+                Dict keys     : {list(search_space(best_trial).keys())}
+                Trial objects : {list(best_trial.params.keys())}.'''
+                )
+
+        for trial in study.get_trials():
+            params_list.append(trial.params)
+            lags_list.append(lags)
+            metric_list.append(trial.value)
+        
+        if results_opt_best is None:
+            results_opt_best = best_trial
+        else:
+            if best_trial.value < results_opt_best.value:
+                results_opt_best = best_trial
+        
+    results = pd.DataFrame({
+                'lags'  : lags_list,
+                'params': params_list,
+                'metric': metric_list})
+    
+    results = results.sort_values(by='metric', ascending=True)
+    results = pd.concat([results, results['params'].apply(pd.Series)], axis=1)
+    
+    if return_best:
+        
+        best_lags = results['lags'].iloc[0]
+        best_params = results['params'].iloc[0]
+        best_metric = results['metric'].iloc[0]
+        
+        if isinstance(forecaster, (ForecasterAutoreg, ForecasterAutoregMultiOutput)):
+            forecaster.set_lags(best_lags)
+        forecaster.set_params(**best_params)
+        forecaster.fit(y=y, exog=exog)
+        
+        print(
+            f"`Forecaster` refitted using the best-found lags and parameters, and the whole data set: \n"
+            f"  Lags: {best_lags} \n"
+            f"  Parameters: {best_params}\n"
+            f"  Backtesting metric: {best_metric}\n"
+        )
+            
+    return results, results_opt_best
+
+
+def _bayesian_search_skopt(
+    forecaster,
+    y: pd.Series,
+    search_space: dict,
+    steps: int,
+    metric: Union[str, callable],
+    initial_train_size: int,
+    fixed_train_size: bool=True,
+    exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+    lags_grid: Optional[list]=None,
+    refit: bool=False,
+    n_trials: int=10,
+    random_state: int=123,
+    return_best: bool=True,
+    verbose: bool=True,
+    kwargs_gp_minimize: dict={}
+) -> Tuple[pd.DataFrame, object]:
+    '''
+    Bayesian optimization for a Forecaster object using time series backtesting and skopt library.
+    
+    Parameters
+    ----------
+    forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregMultiOutput
+        Forcaster model.
+        
+    y : pandas Series
+        Training time series values. 
+        
+    search_space : dict
+        Dictionary with parameters names (`str`) as keys and Space object from skopt 
+        (Real, Integer, Categorical) as values.
+
+    steps : int
+        Number of steps to predict.
+        
+    metric : str, callable
+        Metric used to quantify the goodness of fit of the model.
+        
+        If string:
+            {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
+
+        It callable:
+            Function with arguments y_true, y_pred that returns a float.
+
+    initial_train_size: int 
+        Number of samples in the initial train split.
+ 
+    fixed_train_size: bool, default `True`
+        If True, train size doesn't increases but moves by `steps` in each iteration.
+
+    exog : pandas Series, pandas DataFrame, default `None`
+        Exogenous variable/s included as predictor/s. Must have the same
+        number of observations as `y` and should be aligned so that y[i] is
+        regressed on exog[i].
+           
+    lags_grid : list of int, lists, np.narray or range, default `None`
+        Lists of `lags` to try. Only used if forecaster is an instance of 
+        `ForecasterAutoreg` or `ForecasterAutoregMultiOutput`.
+        
+    refit: bool, default `False`
+        Whether to re-fit the forecaster in each iteration of backtesting.
+        
+    n_trials: int, default `10`
+        Number of parameter settings that are sampled in each lag configuration.
+
+    random_state: int, default `123`
+        Sets a seed to the sampling for reproducible output.
+
+    return_best : bool, default `True`
+        Refit the `forecaster` using the best found parameters on the whole data.
+        
+    verbose : bool, default `True`
+        Print number of folds used for cv or backtesting.
+
+    kwargs_gp_minimize : dict, default `{}`
+        Other keyword arguments (key, value mappings) to pass to skopt.gp_minimize().
+
+    Returns 
+    -------
+    results: pandas DataFrame
+        Results for each combination of parameters.
+            column lags = predictions.
+            column params = lower bound of the interval.
+            column metric = metric value estimated for the combination of parameters.
+            additional n columns with param = value.
+
+    results_opt_best: scipy object
+        The best optimization result returned as a OptimizeResult object.
+    '''
+
+    if isinstance(forecaster, ForecasterAutoregCustom):
+        if lags_grid is not None:
+            warnings.warn(
+                '`lags_grid` ignored if forecaster is an instance of `ForecasterAutoregCustom`.'
+            )
+        lags_grid = ['custom predictors']
+        
+    elif lags_grid is None:
+        lags_grid = [forecaster.lags]
+   
+    lags_list = []
+    params_list = []
+    metric_list = []
+    results_opt_best = None
+
+    for key in search_space.keys():
+        if key != search_space[key].name:
+            raise Exception(
+                f'''Some of the key values do not match the Space object name from skopt.
+                    {key} != {search_space[key].name}.'''
+            )
+
+    search_space = list(search_space.values())
+
+    # Objective function using backtesting_forecaster
+    @use_named_args(search_space)
+    def _objective(
+        forecaster         = forecaster,
+        y                  = y,
+        exog               = exog,
+        initial_train_size = initial_train_size,
+        fixed_train_size   = fixed_train_size,
+        steps              = steps,
+        metric             = metric,
+        refit              = refit,
+        verbose            = verbose,
+        **params
+    ) -> float:
+        
+        forecaster.set_params(**params)
+        
+        metric, _ = backtesting_forecaster(
+                        forecaster         = forecaster,
+                        y                  = y,
+                        exog               = exog,
+                        steps              = steps,
+                        metric             = metric,
+                        initial_train_size = initial_train_size,
+                        fixed_train_size   = fixed_train_size,
+                        refit              = refit,
+                        verbose            = verbose
+                    )
+
+        return abs(metric)
+
+    print(
+        f'''Number of models compared: {n_trials*len(lags_grid)}, {n_trials} bayesian search in each lag configuration.'''
+    )
+
+    for lags in tqdm(lags_grid, desc='loop lags_grid', position=0, ncols=90):
+        
+        if isinstance(forecaster, (ForecasterAutoreg, ForecasterAutoregMultiOutput)):
+            forecaster.set_lags(lags)
+            lags = forecaster.lags.copy()
+        
+        results_opt = gp_minimize(
+                        func         = _objective,
+                        dimensions   = search_space,
+                        n_calls      = n_trials,
+                        random_state = random_state,
+                        **kwargs_gp_minimize
+                      )
+
+        for i, x in enumerate(results_opt.x_iters):
+            params = {}
+            for j, x in enumerate(search_space):
+                params[x.name] = results_opt.x_iters[i][j]
+            
+            params_list.append(params)
+            lags_list.append(lags)
+            metric_list.append(results_opt.func_vals[i])
+
+        if results_opt_best is None:
+            results_opt_best = results_opt
+        else:
+            if results_opt.fun < results_opt_best.fun:
+                results_opt_best = results_opt
+        
+    results = pd.DataFrame({
+                'lags'  : lags_list,
+                'params': params_list,
+                'metric': metric_list})
+    
+    results = results.sort_values(by='metric', ascending=True)
+    results = pd.concat([results, results['params'].apply(pd.Series)], axis=1)
+    
+    if return_best:
+        
+        best_lags = results['lags'].iloc[0]
+        best_params = results['params'].iloc[0]
+        best_metric = results['metric'].iloc[0]
+        
+        if isinstance(forecaster, (ForecasterAutoreg, ForecasterAutoregMultiOutput)):
+            forecaster.set_lags(best_lags)
+        forecaster.set_params(**best_params)
+        forecaster.fit(y=y, exog=exog)
+        
+        print(
+            f"`Forecaster` refitted using the best-found lags and parameters, and the whole data set: \n"
+            f"  Lags: {best_lags} \n"
+            f"  Parameters: {best_params}\n"
+            f"  Backtesting metric: {best_metric}\n"
+        )
+
+    return results, results_opt_best
