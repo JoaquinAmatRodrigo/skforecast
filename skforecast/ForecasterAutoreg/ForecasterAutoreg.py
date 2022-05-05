@@ -369,7 +369,7 @@ class ForecasterAutoreg(ForecasterBase):
         
         # The last time window of training data is stored so that lags needed as
         # predictors in the first iteration of `predict()` can be calculated.
-        self.last_window = y_train.iloc[-self.max_lag:].copy()
+        self.last_window = y.iloc[-self.max_lag:].copy()
     
 
     def _recursive_predict(

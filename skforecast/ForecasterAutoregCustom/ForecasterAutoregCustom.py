@@ -347,7 +347,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         
         # The last time window of training data is stored so that predictors in
         # the first iteration of `predict()` can be calculated.
-        self.last_window = y_train.iloc[-self.window_size:].copy()
+        self.last_window = y.iloc[-self.window_size:].copy()
 
 
     def _recursive_predict(
