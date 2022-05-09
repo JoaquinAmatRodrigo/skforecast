@@ -22,6 +22,8 @@ All notable changes to this project will be documented in this file.
 
 **Fixed**
 
++ `fit` now stores `last_window` values with len = forecaster.max_lag in ForecasterAutoreg and ForecasterAutoregCustom.
+
 
 ## [0.4.3] - [2022-03-18]
 
