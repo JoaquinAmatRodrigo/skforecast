@@ -21,7 +21,7 @@ pip install skforecast
 Specific version:
 
 ```
-pip install skforecast==0.4.2
+pip install skforecast==0.4.3
 ```
 
 Latest (unstable):
