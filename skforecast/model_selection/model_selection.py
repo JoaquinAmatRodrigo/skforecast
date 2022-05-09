@@ -301,7 +301,7 @@ def _backtesting_forecaster_refit(
     forecaster,
     y: pd.Series,
     steps: int,
-    metric: Union[str, callable],
+    metric: Union[str, list, callable],
     initial_train_size: int,
     fixed_train_size: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
@@ -344,11 +344,14 @@ def _backtesting_forecaster_refit(
     steps : int
         Number of steps to predict.
         
-    metric : str, callable
+    metric : str, list, callable
         Metric used to quantify the goodness of fit of the model.
         
         If string:
             {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
+        
+        If list:
+            List containing 'mean_squared_error', 'mean_absolute_error' and/or 'mean_absolute_percentage_error'.
 
         If callable:
             Function with arguments y_true, y_pred that returns a float.
@@ -382,8 +385,8 @@ def _backtesting_forecaster_refit(
 
     Returns 
     -------
-    metric_value: float
-        Value of the metric.
+    metrics_values: float | list
+        Value(s) of the metric(s).
 
     backtest_predictions: pandas Dataframe
         Value of predictions and their estimated interval if `interval` is not `None`.
@@ -395,7 +398,12 @@ def _backtesting_forecaster_refit(
 
     forecaster = deepcopy(forecaster)
     if isinstance(metric, str):
-        metric = _get_metric(metric=metric)
+        metrics = _get_metric(metric=metric)
+    elif isinstance(metric, list):
+        metrics = [_get_metric(metric=m) for m in metric]
+    else:
+        metrics = metric
+    
     backtest_predictions = []
     
     folds = int(np.ceil((len(y) - initial_train_size) / steps))
@@ -565,19 +573,28 @@ def _backtesting_forecaster_refit(
     if isinstance(backtest_predictions, pd.Series):
         backtest_predictions = pd.DataFrame(backtest_predictions)
 
-    metric_value = metric(
-                    y_true = y.iloc[initial_train_size: initial_train_size + len(backtest_predictions)],
-                    y_pred = backtest_predictions['pred']
-                   )
+    if isinstance(metric, list):
+        metrics_values = [
+                metric2(
+                        y_true = y.iloc[initial_train_size: initial_train_size + len(backtest_predictions)],
+                        y_pred = backtest_predictions['pred']
+                    )
+                for metric2 in metrics
+            ]
+    else:
+        metrics_values = metrics(
+                y_true = y.iloc[initial_train_size: initial_train_size + len(backtest_predictions)],
+                y_pred = backtest_predictions['pred']
+            )
 
-    return metric_value, backtest_predictions
+    return metrics_values, backtest_predictions
 
 
 def _backtesting_forecaster_no_refit(
     forecaster,
     y: pd.Series,
     steps: int,
-    metric: Union[str, callable],
+    metric: Union[str, list, callable],
     initial_train_size: Optional[int]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     interval: Optional[list]=None,
@@ -614,11 +631,14 @@ def _backtesting_forecaster_no_refit(
     steps : int, None
         Number of steps to predict.
         
-    metric : str, callable
+    metric : str, list, callable
         Metric used to quantify the goodness of fit of the model.
         
         If string:
             {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
+        
+        If list:
+            List containing 'mean_squared_error', 'mean_absolute_error' and/or 'mean_absolute_percentage_error'.
 
         If callable:
             Function with arguments y_true, y_pred that returns a float.
@@ -652,8 +672,8 @@ def _backtesting_forecaster_no_refit(
 
     Returns 
     -------
-    metric_value: float
-        Value of the metric.
+    metrics_values: float | list
+        Value(s) of the metric(s).
 
     backtest_predictions: pandas DataFrame
         Value of predictions and their estimated interval if `interval` is not `None`.
@@ -665,7 +685,12 @@ def _backtesting_forecaster_no_refit(
 
     forecaster = deepcopy(forecaster)
     if isinstance(metric, str):
-        metric = _get_metric(metric=metric)
+        metrics = _get_metric(metric=metric)
+    elif isinstance(metric, list):
+        metrics = [_get_metric(metric=m) for m in metric]
+    else:
+        metrics = metric
+    
     backtest_predictions = []
 
     if initial_train_size is not None:
@@ -832,19 +857,32 @@ def _backtesting_forecaster_no_refit(
     if isinstance(backtest_predictions, pd.Series):
         backtest_predictions = pd.DataFrame(backtest_predictions)
 
-    metric_value = metric(
-                    y_true = y.iloc[initial_train_size : initial_train_size + len(backtest_predictions)],
-                    y_pred = backtest_predictions['pred']
-                   )
 
-    return metric_value, backtest_predictions
+    if isinstance(backtest_predictions, pd.Series):
+        backtest_predictions = pd.DataFrame(backtest_predictions)
+
+    if isinstance(metric, list):
+        metrics_values = [
+                metric2(
+                        y_true = y.iloc[initial_train_size: initial_train_size + len(backtest_predictions)],
+                        y_pred = backtest_predictions['pred']
+                    )
+                for metric2 in metrics
+            ]
+    else:
+        metrics_values = metrics(
+                y_true = y.iloc[initial_train_size: initial_train_size + len(backtest_predictions)],
+                y_pred = backtest_predictions['pred']
+            )
+
+    return metrics_values, backtest_predictions
 
 
 def backtesting_forecaster(
     forecaster,
     y: pd.Series,
     steps: int,
-    metric: Union[str, callable],
+    metric: Union[str, list, callable],
     initial_train_size: Optional[int],
     fixed_train_size: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
@@ -886,11 +924,14 @@ def backtesting_forecaster(
     steps : int
         Number of steps to predict.
         
-    metric : str, callable
+    metric : str, list, callable
         Metric used to quantify the goodness of fit of the model.
         
         If string:
             {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
+        
+        If list:
+            List containing 'mean_squared_error', 'mean_absolute_error' and/or 'mean_absolute_percentage_error'.
 
         If callable:
             Function with arguments y_true, y_pred that returns a float.
@@ -927,8 +968,8 @@ def backtesting_forecaster(
 
     Returns 
     -------
-    metric_value: float
-        Value of the metric.
+    metrics_values: float | list
+        Value(s) of the metric(s).
 
     backtest_predictions: pandas DataFrame
         Value of predictions and their estimated interval if `interval` is not `None`.
@@ -972,7 +1013,7 @@ def backtesting_forecaster(
         )
     
     if refit:
-        metric_value, backtest_predictions = _backtesting_forecaster_refit(
+        metrics_values, backtest_predictions = _backtesting_forecaster_refit(
             forecaster          = forecaster,
             y                   = y,
             steps               = steps,
@@ -987,7 +1028,7 @@ def backtesting_forecaster(
             verbose             = verbose
         )
     else:
-        metric_value, backtest_predictions = _backtesting_forecaster_no_refit(
+        metrics_values, backtest_predictions = _backtesting_forecaster_no_refit(
             forecaster          = forecaster,
             y                   = y,
             steps               = steps,
@@ -1001,7 +1042,7 @@ def backtesting_forecaster(
             verbose             = verbose
         )
 
-    return metric_value, backtest_predictions
+    return metrics_values, backtest_predictions
 
 
 def grid_search_forecaster(
@@ -1009,7 +1050,7 @@ def grid_search_forecaster(
     y: pd.Series,
     param_grid: dict,
     steps: int,
-    metric: Union[str, callable],
+    metric: Union[str, list, callable],
     initial_train_size: int,
     fixed_train_size: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
@@ -1038,11 +1079,14 @@ def grid_search_forecaster(
     steps : int
         Number of steps to predict.
         
-    metric : str, callable
+    metric : str, list, callable
         Metric used to quantify the goodness of fit of the model.
         
         If string:
             {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
+        
+        If list:
+            List containing 'mean_squared_error', 'mean_absolute_error' and/or 'mean_absolute_percentage_error'.
 
         If callable:
             Function with arguments y_true, y_pred that returns a float.
@@ -1278,11 +1322,15 @@ def _evaluate_grid_hyperparameters(
     Returns 
     -------
     results: pandas DataFrame
+<<<<<<< HEAD
         Results for each combination of parameters.
             column lags = predictions.
             column params = lower bound of the interval.
             column metric = metric value estimated for the combination of parameters.
             additional n columns with param = value.
+=======
+        Metrics values estimated for each combination of parameters.
+>>>>>>> f7ee091... Support for multiple metrics in model_selection
 
     '''
 
@@ -1298,7 +1346,9 @@ def _evaluate_grid_hyperparameters(
    
     lags_list = []
     params_list = []
-    metric_list = []
+    metric_list = [] if not isinstance(metric, list) else [[]]*len(metric)
+    
+    param_grid =  list(ParameterGrid(param_grid))
 
     print(
         f"Number of models compared: {len(param_grid)*len(lags_grid)}."
@@ -1329,21 +1379,39 @@ def _evaluate_grid_hyperparameters(
 
             lags_list.append(lags)
             params_list.append(params)
-            metric_list.append(metrics)
-            
-    results = pd.DataFrame({
+            if isinstance(metric, list):
+                for m, m_list in zip(metrics, metric_list):
+                    m_list.append(m)
+            else:
+                metric_list.append(metrics)
+        
+    if isinstance(metric, list):
+        results = pd.DataFrame({
                 'lags'  : lags_list,
                 'params': params_list,
-                'metric': metric_list})
-    
-    results = results.sort_values(by='metric', ascending=True)
+                **dict(zip(metric,metric_list))
+            })
+        
+        results.sort_values(by=metric[0], ascending=True, inplace=True)
+    else:
+        results = pd.DataFrame({
+                'lags'  : lags_list,
+                'params': params_list,
+                'metric': metric_list
+            })
+        
+        results.sort_values(by='metric', ascending=True, inplace=True)
     results = pd.concat([results, results['params'].apply(pd.Series)], axis=1)
     
     if return_best:
         
         best_lags = results['lags'].iloc[0]
         best_params = results['params'].iloc[0]
-        best_metric = results['metric'].iloc[0]
+        
+        if isinstance(metric, list):
+            best_metric = results[metric[0]].iloc[0]
+        else:
+            best_metric = results['metric'].iloc[0]
         
         if isinstance(forecaster, (ForecasterAutoreg, ForecasterAutoregDirect, 
         ForecasterAutoregMultiOutput)):
