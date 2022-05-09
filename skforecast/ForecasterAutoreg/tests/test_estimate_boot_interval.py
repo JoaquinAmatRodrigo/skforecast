@@ -1,4 +1,4 @@
-# Unit test _estimate_boot_interval
+# Unit test _estimate_boot_interval ForecasterAutoreg
 # ==============================================================================
 import pytest
 from pytest import approx

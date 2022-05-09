@@ -42,7 +42,7 @@ nav:
   - API Reference:
       - ForecasterAutoreg: api/ForecasterAutoreg.md
       - ForecasterAutoregCustom: api/ForecasterAutoregCustom.md
-      - ForecasterAutoregMultiOutput: api/ForecasterAutoregMultiOutput.md
+      - ForecasterAutoregDirect: api/ForecasterAutoregDirect.md
       - model_selection: api/model_selection.md
       - model_selection_statsmodels: api/model_selection_statsmodels.md
 

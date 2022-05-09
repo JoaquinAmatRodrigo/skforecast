@@ -1,6 +1,5 @@
-# Unit test _create_lags
+# Unit test _create_lags ForecasterAutoreg
 # ==============================================================================
-
 import pytest
 import numpy as np
 import pandas as pd

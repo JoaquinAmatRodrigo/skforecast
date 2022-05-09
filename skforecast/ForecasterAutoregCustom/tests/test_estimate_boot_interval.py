@@ -1,3 +1,5 @@
+# Unit test _estimate_boot_interval ForecasterAutoregCustom
+# ==============================================================================
 from pytest import approx
 import numpy as np
 import pandas as pd
