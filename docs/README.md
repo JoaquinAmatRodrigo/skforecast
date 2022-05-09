@@ -38,6 +38,8 @@ pandas>=1.2, <=1.4
 tqdm>=4.57.0, <=4.62
 scikit-learn>=1.0
 statsmodels>=0.12, <=0.13
+optuna>=2.10.0
+scikit-optimize>=0.9.0
 ```
 
 ## Features
