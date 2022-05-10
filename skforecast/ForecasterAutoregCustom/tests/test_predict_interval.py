@@ -1,8 +1,9 @@
+# Unit test predict_interval ForecasterAutoregCustom
+# ==============================================================================
 import numpy as np
 import pandas as pd
 from skforecast.ForecasterAutoregCustom import ForecasterAutoregCustom
 from sklearn.linear_model import LinearRegression
-
 
 
 def create_predictors(y):

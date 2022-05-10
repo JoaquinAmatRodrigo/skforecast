@@ -26,7 +26,7 @@ pip install skforecast
 Specific version:
 
 ```bash
-pip install skforecast==0.4.1
+pip install skforecast==0.4.3
 ```
 
 Latest (unstable):
@@ -50,8 +50,10 @@ pip3 install -U scikit-learn
 + numpy>=1.20, <=1.22
 + pandas>=1.2, <=1.4
 + tqdm>=4.57.0, <=4.62
-+ scikit-learn>=1.0
++ scikit-learn>=1.0, <=1.0.2
 + statsmodels>=0.12, <=0.13
++ optuna==2.10.0
++ scikit-optimize==0.9.0
 
 # Features
 

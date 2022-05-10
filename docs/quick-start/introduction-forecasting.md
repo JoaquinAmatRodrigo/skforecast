@@ -48,7 +48,7 @@ Since the value *t(n-1)* is required to predict *t(n)*, and *t(n-1)* is unknown,
 
 ### Direct multi-step forecasting
 
-Direct multi-step forecasting consists of training a different model for each step of the forecast horizon. For example, to predict the next 5 values of a time series, 5 different models are trained, one for each step. As a result, the predictions are independent of each other. This entire process is automated in the `ForecasterAutoregMultiOutput` class. 
+Direct multi-step forecasting consists of training a different model for each step of the forecast horizon. For example, to predict the next 5 values of a time series, 5 different models are trained, one for each step. As a result, the predictions are independent of each other. This entire process is automated in the `ForecasterAutoregDirect` class. 
 
 <p align="center"><img src="../img/diagram-direct-multi-step-forecasting.png" style="width: 700px"></p>
 

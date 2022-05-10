@@ -1,8 +1,8 @@
-# Unit test create_train_X_y ForecasterAutoregMultiOutput
+# Unit test create_train_X_y ForecasterAutoregDirect
 # ==============================================================================
 import numpy as np
 import pandas as pd
-from skforecast.ForecasterAutoregMultiOutput import ForecasterAutoregMultiOutput
+from skforecast.ForecasterAutoregDirect import ForecasterAutoregDirect
 from sklearn.linear_model import LinearRegression
 
 
@@ -11,7 +11,7 @@ def test_create_train_X_y_output_when_lags_3_steps_1_and_exog_is_None():
     Test output of create_train_X_y when regressor is LinearRegression, lags is 3
     and steps is 1.
     '''
-    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=1)
+    forecaster = ForecasterAutoregDirect(LinearRegression(), lags=3, steps=1)
     results = forecaster.create_train_X_y(y=pd.Series(np.arange(10)))
     expected = (pd.DataFrame(
                     data = np.array([[2., 1., 0.],
@@ -39,7 +39,7 @@ def test_create_train_X_y_output_when_lags_3_steps_2_and_exog_is_None():
     Test output of create_train_X_y when regressor is LinearRegression, lags is 3
     and steps is 2.
     '''
-    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=3, steps=2)
+    forecaster = ForecasterAutoregDirect(LinearRegression(), lags=3, steps=2)
     results = forecaster.create_train_X_y(y=pd.Series(np.arange(10)))
     expected = (pd.DataFrame(
                     data = np.array([[2., 1., 0.],
@@ -72,7 +72,7 @@ def test_create_train_X_y_output_when_lags_5_steps_1_and_exog_is_series():
     Test output of create_train_X_y when regressor is LinearRegression, lags is 5,
     steps is 1 and exog is pandas Series.
     '''
-    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=5, steps=1)
+    forecaster = ForecasterAutoregDirect(LinearRegression(), lags=5, steps=1)
     results = forecaster.create_train_X_y(
                     y = pd.Series(np.arange(10)),
                     exog = pd.Series(np.arange(100, 110), name='exog')
@@ -105,7 +105,7 @@ def test_create_train_X_y_output_when_lags_5_steps_2_and_exog_is_series():
     Test output of create_train_X_y when regressor is LinearRegression, lags is 5,
     steps is 2 and exog is pandas Series.
     '''
-    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=5, steps=2)
+    forecaster = ForecasterAutoregDirect(LinearRegression(), lags=5, steps=2)
     results = forecaster.create_train_X_y(
                     y = pd.Series(np.arange(10)),
                     exog = pd.Series(np.arange(100, 110), name='exog')
@@ -146,7 +146,7 @@ def test_create_train_X_y_output_when_lags_5_steps_1_y_is_range_10_and_exog_is_d
     Test output of create_train_X_y when regressor is LinearRegression, lags is 5,
     steps is 2 and exog is pandas dataframe.
     '''
-    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=5, steps=1)
+    forecaster = ForecasterAutoregDirect(LinearRegression(), lags=5, steps=1)
     results = forecaster.create_train_X_y(
                 y = pd.Series(np.arange(10)),
                 exog = pd.DataFrame({
@@ -184,7 +184,7 @@ def test_create_train_X_y_output_when_lags_5_steps_3_and_and_exog_is_dataframe()
     Test output of create_train_X_y when regressor is LinearRegression, lags is 5,
     steps is 3 and exog is pandas dataframe.
     '''
-    forecaster = ForecasterAutoregMultiOutput(LinearRegression(), lags=5, steps=3)
+    forecaster = ForecasterAutoregDirect(LinearRegression(), lags=5, steps=3)
     results = forecaster.create_train_X_y(
                 y = pd.Series(np.arange(10)),
                 exog = pd.DataFrame({

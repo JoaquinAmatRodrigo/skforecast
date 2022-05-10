@@ -18,6 +18,7 @@ from statsmodels.tsa.statespace.sarimax import SARIMAX
 from ..model_selection import time_series_splitter
 from ..model_selection.model_selection import _get_metric
 
+
 logging.basicConfig(
     format = '%(asctime)-5s %(name)-10s %(levelname)-5s %(message)s', 
     level  = logging.INFO,

@@ -1,3 +1,5 @@
+# Unit test predict ForecasterAutoregCustom
+# ==============================================================================
 from pytest import approx
 import numpy as np
 import pandas as pd

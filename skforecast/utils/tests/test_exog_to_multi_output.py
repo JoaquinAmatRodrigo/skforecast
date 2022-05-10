@@ -1,3 +1,5 @@
+# Unit test exog_to_multi_output
+# ==============================================================================
 import numpy as np
 from pytest import approx
 from skforecast.utils import exog_to_multi_output
@@ -22,7 +24,6 @@ def test_exog_to_multi_output_when_lags_3_steps_2_exog_numpy_1d():
     assert results == approx(expected)
 
 
-
 def test_exog_to_multi_output_when_lags_3_steps_2_exog_numpy_array_2d():
     '''
     Test exog_to_multi_output results when using lags 3, steps 2 and exog is a  
@@ -41,7 +42,6 @@ def test_exog_to_multi_output_when_lags_3_steps_2_exog_numpy_array_2d():
                         [ 108,  109, 1008, 1009]])
 
     assert results == approx(expected)
-
 
 
 def test_exog_to_multi_output_when_lags_2_steps_3_exog_numpy_array_2d():

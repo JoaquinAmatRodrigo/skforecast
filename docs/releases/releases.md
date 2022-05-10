@@ -20,6 +20,8 @@ All notable changes to this project will be documented in this file.
 
 + `_get_metric` now allows `mean_squared_log_error`.
 
++ `ForecasterAutoregMultiOutput` has been renamed to `ForecasterAutoregDirect`. `ForecasterAutoregMultiOutput` will be removed in version 0.6.0.
+
 **Fixed**
 
 + `fit` now stores `last_window` values with len = forecaster.max_lag in ForecasterAutoreg and ForecasterAutoregCustom.

@@ -1,4 +1,4 @@
-# Unit test set_params
+# Unit test set_params ForecasterAutoreg
 # ==============================================================================
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
 from sklearn.linear_model import LinearRegression
