@@ -1,4 +1,4 @@
-# Unit test set_out_sample_residuals
+# Unit test set_out_sample_residuals ForecasterAutoreg
 # ==============================================================================
 import numpy as np
 import pandas as pd

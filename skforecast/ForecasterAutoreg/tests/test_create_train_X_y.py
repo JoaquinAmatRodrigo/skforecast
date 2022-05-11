@@ -1,6 +1,5 @@
-# Unit test create_train_X_y
+# Unit test create_train_X_y ForecasterAutoreg
 # ==============================================================================
-
 import pytest
 import numpy as np
 import pandas as pd
@@ -60,6 +59,7 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_series():
     assert (results[0] == expected[0]).all().all()
     assert (results[1] == expected[1]).all()
 
+
 def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_dataframe():
     '''
     Test the output of create_train_X_y when y=pd.Series(np.arange(10)) and 
@@ -92,6 +92,7 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_dataframe():
     assert (results[0] == expected[0]).all().all()
     assert (results[1] == expected[1]).all()
 
+
 def test_create_train_X_y_exception_when_y_and_exog_have_different_length():
     '''
     Test exception is raised when length of y and length of exog are different.
@@ -106,7 +107,8 @@ def test_create_train_X_y_exception_when_y_and_exog_have_different_length():
             y=pd.Series(np.arange(10)),
             exog=pd.DataFrame(np.arange(50).reshape(25,2))
         )
-        
+
+  
 def test_create_train_X_y_exception_when_y_and_exog_have_different_index():
     '''
     Test exception is raised when y and exog have different index.

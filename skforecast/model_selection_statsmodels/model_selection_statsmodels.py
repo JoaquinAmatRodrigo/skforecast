@@ -18,6 +18,7 @@ from statsmodels.tsa.statespace.sarimax import SARIMAX
 from ..model_selection import time_series_splitter
 from ..model_selection.model_selection import _get_metric
 
+
 logging.basicConfig(
     format = '%(asctime)-5s %(name)-10s %(levelname)-5s %(message)s', 
     level  = logging.INFO,
@@ -63,7 +64,7 @@ def backtesting_sarimax(
         If string:
             {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
 
-        It callable:
+        If callable:
             Function with arguments y_true, y_pred that returns a float.
 
     initial_train_size: int 
@@ -447,7 +448,7 @@ def cv_sarimax(
         If string:
             {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
 
-        It callable:
+        If callable:
             Function with arguments y_true, y_pred that returns a float.
         
     exog : pandas Series, pandas DataFrame, default `None`
@@ -575,7 +576,7 @@ def grid_search_sarimax(
         If string:
             {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
 
-        It callable:
+        If callable:
             Function with arguments y_true, y_pred that returns a float.
 
     initial_train_size: int 
@@ -606,7 +607,10 @@ def grid_search_sarimax(
     Returns 
     -------
     results: pandas DataFrame
-        Metric value estimated for each combination of parameters.
+        Results for each combination of parameters.
+            column params = lower bound of the interval.
+            column metric = metric value estimated for the combination of parameters.
+            additional n columns with param = value.
 
     '''
 

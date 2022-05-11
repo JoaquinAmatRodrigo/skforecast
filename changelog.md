@@ -1,5 +1,31 @@
 # Change Log
+
 All notable changes to this project will be documented in this file.
+
+## [0.5.0] - [Dev]
+
+**Added**
+
++ Functions `random_search_forecaster`, `_evaluate_grid_hyperparameters`, `bayesian_search_forecaster`, `_bayesian_search_optuna` and `_bayesian_search_skopt` in model_selection.
+
+**Changed**
+
++ `backtesting_forecaster` change default value of argument `fixed_train_size: bool=True`.
+
++ Remove argument `set_out_sample_residuals` in function `backtesting_forecaster` (deprecated since 0.4.2).
+
++ `backtesting_forecaster` verbose now includes fold size.
+
++ Remove `get_coef` method from `ForecasterAutoreg`, `ForecasterAutoregCustom` and `ForecasterAutoregMultiOutput` (deprecated since 0.4.3).
+
++ `_get_metric` now allows `mean_squared_log_error`.
+
++ `ForecasterAutoregMultiOutput` has been renamed to `ForecasterAutoregDirect`. `ForecasterAutoregMultiOutput` will be removed in version 0.6.0.
+
+**Fixed**
+
++ `fit` now stores `last_window` values with len = forecaster.max_lag in ForecasterAutoreg and ForecasterAutoregCustom.
+
 
 ## [0.4.3] - [2022-03-18]
 
@@ -20,6 +46,8 @@ All notable changes to this project will be documented in this file.
 + Change function `set_out_sample_residuals` (ForecasterAutoreg and ForecasterAutoregCustom), `residuals` argument must be `pd.Series` (was `numpy ndarray`).
 
 + Returned value of backtesting functions (model_selection and model_selection_statsmodels) is now a `float` (was `numpy ndarray`).
+
++ `get_coef` and `get_feature_importance` methods unified in `get_feature_importance`.
 
 **Fixed**
 
@@ -142,7 +170,7 @@ Version 0.4 has undergone a huge code refactoring. Main changes are related to i
 
 
 
-## [0.1.9] - 2121-07-27
+## [0.1.9] - [2021-07-27]
 
 **Added**
 
@@ -170,7 +198,7 @@ Version 0.4 has undergone a huge code refactoring. Main changes are related to i
 + Update lags of  `ForecasterAutoregMultiOutput` after `grid_search_forecaster`.
 
 
-## [0.1.8.1] - 2021-05-17
+## [0.1.8.1] - [2021-05-17]
 
 **Added**
 
@@ -197,7 +225,7 @@ Version 0.4 has undergone a huge code refactoring. Main changes are related to i
 + Values stored in `self.last_window` when training `ForecasterAutoregMultiOutput`. 
 
 
-## [0.1.8] - 2021-04-02
+## [0.1.8] - [2021-04-02]
 
 **Added**
 
@@ -211,7 +239,7 @@ Version 0.4 has undergone a huge code refactoring. Main changes are related to i
 **Fixed**
 
 
-## [0.1.7] - 2021-03-19
+## [0.1.7] - [2021-03-19]
 
 **Added**
 
@@ -224,7 +252,7 @@ Version 0.4 has undergone a huge code refactoring. Main changes are related to i
 **Fixed**
  
  
-## [0.1.6] - 2021-03-14
+## [0.1.6] - [2021-03-14]
 
 **Added**
 
@@ -240,7 +268,7 @@ Version 0.4 has undergone a huge code refactoring. Main changes are related to i
  
 **Fixed**
  
-## [0.1.4] - 2021-02-15
+## [0.1.4] - [2021-02-15]
   
 **Added**
 

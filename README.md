@@ -26,7 +26,7 @@ pip install skforecast
 Specific version:
 
 ```bash
-pip install skforecast==0.4.1
+pip install skforecast==0.4.3
 ```
 
 Latest (unstable):
@@ -50,8 +50,10 @@ pip3 install -U scikit-learn
 + numpy>=1.20, <=1.22
 + pandas>=1.2, <=1.4
 + tqdm>=4.57.0, <=4.62
-+ scikit-learn>=1.0
++ scikit-learn>=1.0, <=1.0.2
 + statsmodels>=0.12, <=0.13
++ optuna==2.10.0
++ scikit-optimize==0.9.0
 
 # Features
 
@@ -76,15 +78,15 @@ Recent improvements are highlighted in the [release notes](https://joaquinamatro
 
 + [Introduction to time series and forecasting](https://joaquinamatrodrigo.github.io/skforecast/0.4.3/quick-start/introduction-forecasting.html)
 
-+ [Recursive multi-step forecasting](https://joaquinamatrodrigo.github.io/skforecast/latest/notebooks/autoregresive-forecaster.html)
++ [Recursive multi-step forecasting](https://joaquinamatrodrigo.github.io/skforecast/latest/user_guides/autoregresive-forecaster.html)
 
-+ [Backtesting (validation) of forecasting models](https://joaquinamatrodrigo.github.io/skforecast/latest/notebooks/backtesting.html)
++ [Backtesting (validation) of forecasting models](https://joaquinamatrodrigo.github.io/skforecast/latest/user_guides/backtesting.html)
 
-+ [Grid search of forecasting models](https://joaquinamatrodrigo.github.io/skforecast/latest/notebooks/grid-search-forecaster.html)
++ [Grid search of forecasting models](https://joaquinamatrodrigo.github.io/skforecast/latest/user_guides/grid-search-forecaster.html)
 
-+ [Prediction intervals](https://joaquinamatrodrigo.github.io/skforecast/latest/notebooks/prediction-intervals.html)
++ [Prediction intervals](https://joaquinamatrodrigo.github.io/skforecast/latest/user_guides/prediction-intervals.html)
 
-+ [Using forecaster in production](https://joaquinamatrodrigo.github.io/skforecast/latest/notebooks/forecaster-in-production.html)
++ [Using forecaster in production](https://joaquinamatrodrigo.github.io/skforecast/latest/user_guides/forecaster-in-production.html)
 
 
 # Examples and tutorials 
@@ -118,7 +120,6 @@ Recent improvements are highlighted in the [release notes](https://joaquinamatro
 + [**Workshop predicción de series temporales con machine learning Universidad de Deusto / Deustuko Unibertsitatea**](https://youtu.be/MlktVhReO0E)
 
 + [**Intervalos de predicción en modelos de forecasting**](https://www.cienciadedatos.net/documentos/py42-intervalos-prediccion-modelos-forecasting-machine-learning.html)
-
 
 
 # Donating

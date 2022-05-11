@@ -1,4 +1,4 @@
-# Unit test predict
+# Unit test predict ForecasterAutoregMultiOutput
 # ==============================================================================
 import numpy as np
 import pandas as pd

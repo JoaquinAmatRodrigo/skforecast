@@ -1,10 +1,11 @@
-# Unit test __init__
+# Unit test __init__ ForecasterAutoregMultiOutput
 # ==============================================================================
 import pytest
 import numpy as np
 import pandas as pd
 from skforecast.ForecasterAutoregMultiOutput import ForecasterAutoregMultiOutput
 from sklearn.linear_model import LinearRegression
+
 
 def test_init_lags_when_integer():
     '''

@@ -1,3 +1,5 @@
+# Unit test set_params ForecasterAutoregCustom
+# ==============================================================================
 import pandas as pd
 from skforecast.ForecasterAutoregCustom import ForecasterAutoregCustom
 from sklearn.linear_model import LinearRegression
@@ -11,6 +13,7 @@ def create_predictors(y):
     lags = y[-1:-6:-1]
     
     return lags  
+
 
 def test_set_paramns():
     
