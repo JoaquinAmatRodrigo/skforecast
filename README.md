@@ -55,6 +55,7 @@ pip3 install -U scikit-learn
 + optuna==2.10.0
 + scikit-optimize==0.9.0
 
+
 # Features
 
 + Create recursive autoregressive forecasters from any regressor that follows the scikit-learn API
@@ -67,6 +68,20 @@ pip3 install -U scikit-learn
 + Include custom metrics for model validation
 + Prediction interval estimated by bootstrapping
 + Get predictor importance
+
+## What is coming in the new release?
+
+- [x] Random and Bayesian search for lags and hyperparameter optimization
+- [x] `ForecasterAutoregMultiOutput` has been renamed to `ForecasterAutoregDirect`
+- [x] Minor bugs fixed
+
+To install this version:
+
+```bash
+pip install git+https://github.com/JoaquinAmatRodrigo/skforecast#master
+```
+
+Visit [changelog](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/changelog.md) to view all notable changes.
 
 
 # Documentation
