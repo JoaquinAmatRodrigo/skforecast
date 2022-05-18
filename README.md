@@ -71,11 +71,11 @@ pip3 install -U scikit-learn
 
 ## What is coming in the new release?
 
-- [x] Random and Bayesian search for lags and hyperparameter optimization
-- [x] `ForecasterAutoregMultiOutput` has been renamed to `ForecasterAutoregDirect`
-- [x] Minor bugs fixed
+- [x] Random and Bayesian search (with [**optuna**](https://optuna.org/) or [**skopt**](https://scikit-optimize.github.io/stable/modules/generated/skopt.gp_minimize.html)) for lags and hyperparameter optimization.
+- [x] `ForecasterAutoregMultiOutput` has been renamed to `ForecasterAutoregDirect`.
+- [x] Bug fixes and performance improvements.
 
-To install this version:
+Try it:
 
 ```bash
 pip install git+https://github.com/JoaquinAmatRodrigo/skforecast#master
