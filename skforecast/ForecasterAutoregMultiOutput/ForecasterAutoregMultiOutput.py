@@ -24,8 +24,8 @@ logging.basicConfig(
 class ForecasterAutoregMultiOutput(ForecasterAutoregDirect):
     '''
     This class turns any regressor compatible with the scikit-learn API into a
-    autoregressive multi-output forecaster. A separate model is created for each
-    forecast time step. See Notes for more details.
+    autoregressive direct multi-step forecaster. A separate model is created for
+    each forecast time step. See documentation for more details.
     
     Parameters
     ----------
