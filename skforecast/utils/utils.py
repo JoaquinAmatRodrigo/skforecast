@@ -61,13 +61,14 @@ def check_exog(exog: Any) -> None:
 
 
 def check_predict_input(
+    forecaster_type,
     steps: int,
     fitted: bool,
     included_exog: bool,
     index_type: type,
     index_freq: str,
     window_size: int,
-    last_window: pd.Series=None,
+    last_window: Union[pd.Series, pd.DataFrame]=None,
     exog: Union[pd.Series, pd.DataFrame]=None,
     exog_type: Union[type, None]=None,
     exog_col_names: Union[list, None]=None,
@@ -80,6 +81,10 @@ def check_predict_input(
 
     Parameters
     ----------
+    forecaster_type : ForecasterAutoreg, ForecasterAutoregCustom, 
+    ForecasterAutoregDirect, ForecasterAutoregMultiOutput, ForecasterAutoregMultiSeries
+        Forcaster type.
+
     steps : int
         Number of future steps predicted.
 
@@ -99,7 +104,7 @@ def check_predict_input(
         Size of the window needed to create the predictors. It is equal to
         `max_lag`.
 
-    last_window : pandas Series, default `None`
+    last_window : pandas Series, pandas DataFrame, default `None`
         Values of the series used to create the predictors (lags) need in the 
         first iteration of prediction (t + 1).
 
@@ -186,13 +191,19 @@ def check_predict_input(
         
     if last_window is not None:
         if len(last_window) < window_size:
-            raise Exception(
-                f"`last_window` must have as many values as as needed to "
-                f"calculate the predictors. For this forecaster it is {window_size}."
-            )
-        if not isinstance(last_window, pd.Series):
-            raise Exception('`last_window` must be a pandas Series.')
-        if last_window.isnull().any():
+                raise Exception(
+                    f"`last_window` must have as many values as as needed to "
+                    f"calculate the predictors. For this forecaster it is {window_size}."
+                )
+                
+        if str(forecaster_type).split('.')[1] == 'ForecasterAutoregMultiSeries':
+            if not isinstance(last_window, pd.DataFrame):
+                raise Exception('`last_window` must be a pandas DataFrame.')     
+        else:    
+            if not isinstance(last_window, pd.Series):
+                raise Exception('`last_window` must be a pandas Series.')
+                
+        if last_window.isnull().any().all():
             raise Exception('`last_window` has missing values.')
         _, last_window_index = preprocess_last_window(
                                     last_window = last_window.iloc[:0]
@@ -205,12 +216,12 @@ def check_predict_input(
         if isinstance(last_window_index, pd.DatetimeIndex):
             if not last_window_index.freqstr == index_freq:
                 raise Exception(
-                    f"Expected frequency of type {index_type} for `last_window`. "
+                    f"Expected frequency of type {index_freq} for `last_window`. "
                     f"Got {last_window_index.freqstr}"      
                 )
 
     return
-    
+
 
 def preprocess_y(y: pd.Series) -> Union[np.ndarray, pd.Index]:
     
@@ -267,7 +278,9 @@ def preprocess_y(y: pd.Series) -> Union[np.ndarray, pd.Index]:
     return y_values, y_index
 
 
-def preprocess_last_window(last_window: pd.Series) -> Union[np.ndarray, pd.Index]:
+def preprocess_last_window(
+    last_window:Union[pd.Series, pd.DataFrame]
+ ) -> Union[np.ndarray, pd.Index]:
     
     '''
     Returns values and index of series separately. Index is overwritten 
@@ -281,7 +294,7 @@ def preprocess_last_window(last_window: pd.Series) -> Union[np.ndarray, pd.Index
     
     Parameters
     ----------        
-    last_window : pandas Series
+    last_window : pandas Series, pandas DataFrame
         Time series values
 
     Returns 
@@ -463,3 +476,39 @@ def expand_index(index: Union[pd.Index, None], steps: int) -> pd.Index:
                         stop  = steps
                      )
     return new_index
+
+
+def preprocess_levels(
+    series: pd.DataFrame
+) -> dict:
+    '''
+    Return dict with levels (columns) of series DataFrame, {column_name: new_level_name}.
+    new_level_name will change according to the next rules:
+        If the column names are ints, nothing is changed.
+            new_level_name == column_name
+        If the column names are not ints, a range of ints will be created.
+            new_level_name == int
+    
+    Parameters
+    ----------        
+    series : pandas DataFrame
+             Time series
+
+    Returns 
+    -------
+    levels_dict : dict
+        {column_name: new_level_name}
+    '''
+    
+    levels_dict = {}
+    column_names = list(series.columns)
+    
+    try:
+        levels = [int(x) for x in list(series.columns)]
+    except ValueError:
+        levels = [*range(len(list(series.columns)))]
+    
+    zip_dict = zip(column_names, levels)
+    levels_dict = dict(zip_dict)
+    
+    return levels_dict

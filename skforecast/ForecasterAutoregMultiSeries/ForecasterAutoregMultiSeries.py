@@ -25,6 +25,7 @@ from ..utils import preprocess_last_window
 from ..utils import preprocess_exog
 from ..utils import expand_index
 from ..utils import check_predict_input
+from ..utils import preprocess_levels
 
 logging.basicConfig(
     format = '%(name)-10s %(levelname)-5s %(message)s', 

@@ -438,17 +438,18 @@ class ForecasterAutoregCustom(ForecasterBase):
         '''
 
         check_predict_input(
-            steps          = steps,
-            fitted         = self.fitted,
-            included_exog  = self.included_exog,
-            index_type     = self.index_type,
-            index_freq     = self.index_freq,
-            window_size    = self.window_size,
-            last_window    = last_window,
-            exog           = exog,
-            exog_type      = self.exog_type,
-            exog_col_names = self.exog_col_names,
-            max_steps      = None,
+            forecaster_type = type(self),
+            steps           = steps,
+            fitted          = self.fitted,
+            included_exog   = self.included_exog,
+            index_type      = self.index_type,
+            index_freq      = self.index_freq,
+            window_size     = self.window_size,
+            last_window     = last_window,
+            exog            = exog,
+            exog_type       = self.exog_type,
+            exog_col_names  = self.exog_col_names,
+            max_steps       = None,
         )
      
         if exog is not None:
