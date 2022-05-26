@@ -1,0 +1,30 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: skforecast
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Joaquin
+    name-particle: Amat
+    family-names: Rodrigo
+    email: j.amatrodrigo@gmail.com
+  - given-names: Javier
+    name-particle: Escobar
+    family-names: Ortiz
+    email: javier.escobar.ortiz@gmail.com
+abstract: >-
+  Skforecast is a python library that eases using
+  scikit-learn regressors as multi-step forecasters.
+  It also works with any regressor compatible with
+  the scikit-learn API 
+keywords:
+  - forecasting
+  - machine learning
+  - python
+license: MIT
+version: 0.5.0
+date-released: '2022-03-18'
