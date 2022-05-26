@@ -223,7 +223,9 @@ def check_predict_input(
     return
 
 
-def preprocess_y(y: pd.Series) -> Union[np.ndarray, pd.Index]:
+def preprocess_y(
+    y: pd.Series
+) -> Union[np.ndarray, pd.Index]:
     
     '''
     Returns values and index of series separately. Index is overwritten 
@@ -440,8 +442,10 @@ def exog_to_multi_output(
     return exog_transformed
 
 
-def expand_index(index: Union[pd.Index, None], steps: int) -> pd.Index:
-    
+def expand_index(
+    index: Union[pd.Index, None], 
+    steps: int
+) -> pd.Index:
     '''
     Create a new index of lenght `steps` starting and the end of index.
     

@@ -361,10 +361,17 @@ class ForecasterAutoreg(ForecasterBase):
             residuals = y_train - self.regressor.predict(X_train)
         else:
             residuals = y_train - self.regressor.predict(X_train.to_numpy())
+
+        residuals = pd.Series(
+                        data  = residuals,
+                        index = y_train.index,
+                        name  = 'in_sample_residuals'
+                    )
+
         if len(residuals) > 1000:
             # Only up to 1000 residuals are stored
-            rng = np.random.default_rng(seed=123)
-            residuals = rng.choice(a=residuals, size=1000, replace=False)                                              
+            residuals = residuals.sample(n=1000, random_state=123, replace=False)
+                                                  
         self.in_sample_residuals = residuals
         
         # The last time window of training data is stored so that lags needed as
@@ -614,7 +621,7 @@ class ForecasterAutoreg(ForecasterBase):
                                 steps       = 1,
                                 last_window = last_window_boot,
                                 exog        = exog_boot 
-                            )
+                             )
                 
                 prediction_with_residual  = prediction + sample_residuals[step]
                 boot_predictions[step, i] = prediction_with_residual
@@ -701,17 +708,18 @@ class ForecasterAutoreg(ForecasterBase):
         '''
         
         check_predict_input(
-            steps          = steps,
-            fitted         = self.fitted,
-            included_exog  = self.included_exog,
-            index_type     = self.index_type,
-            index_freq     = self.index_freq,
-            window_size    = self.window_size,
-            last_window    = last_window,
-            exog           = exog,
-            exog_type      = self.exog_type,
-            exog_col_names = self.exog_col_names,
-            max_steps      = None,
+            forecaster_type = type(self),
+            steps           = steps,
+            fitted          = self.fitted,
+            included_exog   = self.included_exog,
+            index_type      = self.index_type,
+            index_freq      = self.index_freq,
+            window_size     = self.window_size,
+            last_window     = last_window,
+            exog            = exog,
+            exog_type       = self.exog_type,
+            exog_col_names  = self.exog_col_names,
+            max_steps       = None,
         ) 
         
         if exog is not None:

@@ -87,9 +87,9 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_mocked():
     lags_grid = [2, 4]
 
     def search_space(trial):
-        search_space  = {'n_estimators' : trial.suggest_int('n_estimators', 10, 20),
-                        'max_depth'    : trial.suggest_float('max_depth', 1, 5, log=True),
-                        'max_features' : trial.suggest_categorical('max_features', ['auto', 'sqrt'])
+        search_space  = {'n_estimators'     : trial.suggest_int('n_estimators', 10, 20),
+                         'min_samples_leaf' : trial.suggest_float('min_samples_leaf', 1., 3.7, log=True),
+                         'max_features'     : trial.suggest_categorical('max_features', ['log2', 'sqrt'])
                         } 
         return search_space
 
@@ -113,45 +113,45 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_mocked():
             'lags'  :[[1, 2], [1, 2], [1, 2], [1, 2], [1, 2], [1, 2], [1, 2], [1, 2], [1, 2], [1, 2],
                       [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4],
                       [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]],
-            'params':[{'n_estimators': 17, 'max_depth': 1.5849034551675116, 'max_features': 'sqrt'}, 
-                      {'n_estimators': 17, 'max_depth': 1.9757806338799633, 'max_features': 'auto'}, 
-                      {'n_estimators': 15, 'max_depth': 1.8796560348402316, 'max_features': 'sqrt'}, 
-                      {'n_estimators': 14, 'max_depth': 1.1008117578626078, 'max_features': 'sqrt'}, 
-                      {'n_estimators': 12, 'max_depth': 1.3262808982725627, 'max_features': 'sqrt'}, 
-                      {'n_estimators': 16, 'max_depth': 3.923985056308672, 'max_features': 'auto'}, 
-                      {'n_estimators': 17, 'max_depth': 1.6816615459597437, 'max_features': 'auto'}, 
-                      {'n_estimators': 13, 'max_depth': 2.760790068786577, 'max_features': 'sqrt'}, 
-                      {'n_estimators': 14, 'max_depth': 2.2134569252046123, 'max_features': 'auto'}, 
-                      {'n_estimators': 14, 'max_depth': 4.211649556832716, 'max_features': 'auto'}, 
-                      {'n_estimators': 17, 'max_depth': 1.5849034551675116, 'max_features': 'sqrt'}, 
-                      {'n_estimators': 17, 'max_depth': 1.9757806338799633, 'max_features': 'auto'}, 
-                      {'n_estimators': 15, 'max_depth': 1.8796560348402316, 'max_features': 'sqrt'}, 
-                      {'n_estimators': 14, 'max_depth': 1.1008117578626078, 'max_features': 'sqrt'}, 
-                      {'n_estimators': 12, 'max_depth': 1.3262808982725627, 'max_features': 'sqrt'}, 
-                      {'n_estimators': 16, 'max_depth': 3.923985056308672, 'max_features': 'auto'}, 
-                      {'n_estimators': 17, 'max_depth': 1.6816615459597437, 'max_features': 'auto'}, 
-                      {'n_estimators': 13, 'max_depth': 2.760790068786577, 'max_features': 'sqrt'}, 
-                      {'n_estimators': 14, 'max_depth': 2.2134569252046123, 'max_features': 'auto'},
-                      {'n_estimators': 14, 'max_depth': 4.211649556832716, 'max_features': 'auto'}],
-            'metric':np.array([0.21615799463348997, 0.22474421769386224, 0.21783651613263622,
-                               0.2179087225230932, 0.21637266491159377, 0.2059816523217619,
-                               0.22474421769386224, 0.22570844556862046, 0.227837004285555, 
-                               0.19088687600216567, 0.2198566352889403, 0.22528691869878895,
-                               0.22451991800112966, 0.22323775188486458, 0.22513141094009306,
-                               0.2215061369598327, 0.22528691869878895, 0.21935612354779513,
-                               0.23578208465562722, 0.20480074634509826]),                                                               
-            'n_estimators' :np.array([17, 17, 15, 14, 12, 16, 17, 13, 14, 14, 17, 17, 15, 14,
-                                      12, 16, 17, 13, 14, 14]),
-            'max_depth' :np.array([1.5849034551675116, 1.9757806338799633, 1.8796560348402316,
-                                   1.1008117578626078, 1.3262808982725627, 3.923985056308672,
-                                   1.6816615459597437, 2.760790068786577, 2.2134569252046123,
-                                   4.211649556832716, 1.5849034551675116, 1.9757806338799633,
-                                   1.8796560348402316, 1.1008117578626078, 1.3262808982725627,
-                                   3.923985056308672, 1.6816615459597437, 2.760790068786577,
-                                   2.2134569252046123, 4.211649556832716]),
-            'max_features' :['sqrt', 'auto', 'sqrt', 'sqrt', 'sqrt', 'auto', 'auto', 'sqrt', 
-                             'auto', 'auto', 'sqrt', 'auto', 'sqrt', 'sqrt', 'sqrt', 'auto',
-                             'auto', 'sqrt', 'auto', 'auto']
+            'params':[{'n_estimators': 17, 'min_samples_leaf': 1.4540684905340955, 'max_features': 'sqrt'}, 
+                      {'n_estimators': 17, 'min_samples_leaf': 1.7394414709444481, 'max_features': 'log2'}, 
+                      {'n_estimators': 15, 'min_samples_leaf': 1.670328340553618, 'max_features': 'sqrt'}, 
+                      {'n_estimators': 14, 'min_samples_leaf': 1.0812075849925713, 'max_features': 'sqrt'}, 
+                      {'n_estimators': 12, 'min_samples_leaf': 1.2580328751834622, 'max_features': 'sqrt'}, 
+                      {'n_estimators': 16, 'min_samples_leaf': 3.038425623453048, 'max_features': 'log2'}, 
+                      {'n_estimators': 17, 'min_samples_leaf': 1.5258288130500341, 'max_features': 'log2'},
+                      {'n_estimators': 13, 'min_samples_leaf': 2.2830831111754475, 'max_features': 'sqrt'},
+                      {'n_estimators': 14, 'min_samples_leaf': 1.9077116138625934, 'max_features': 'log2'},
+                      {'n_estimators': 14, 'min_samples_leaf': 3.2182906443995143, 'max_features': 'log2'},
+                      {'n_estimators': 17, 'min_samples_leaf': 1.4540684905340955, 'max_features': 'sqrt'}, 
+                      {'n_estimators': 17, 'min_samples_leaf': 1.7394414709444481, 'max_features': 'log2'}, 
+                      {'n_estimators': 15, 'min_samples_leaf': 1.670328340553618, 'max_features': 'sqrt'}, 
+                      {'n_estimators': 14, 'min_samples_leaf': 1.0812075849925713, 'max_features': 'sqrt'}, 
+                      {'n_estimators': 12, 'min_samples_leaf': 1.2580328751834622, 'max_features': 'sqrt'}, 
+                      {'n_estimators': 16, 'min_samples_leaf': 3.038425623453048, 'max_features': 'log2'}, 
+                      {'n_estimators': 17, 'min_samples_leaf': 1.5258288130500341, 'max_features': 'log2'}, 
+                      {'n_estimators': 13, 'min_samples_leaf': 2.2830831111754475, 'max_features': 'sqrt'}, 
+                      {'n_estimators': 14, 'min_samples_leaf': 1.9077116138625934, 'max_features': 'log2'}, 
+                      {'n_estimators': 14, 'min_samples_leaf': 3.2182906443995143, 'max_features': 'log2'}],
+            'metric':np.array([0.21433589521377985, 0.21433589521377985, 0.21479600790277778, 
+                               0.21661388810185186, 0.21685103020640437, 0.2152253922034143,
+                               0.21433589521377985, 0.21739975926994304, 0.21661388810185186,
+                               0.21661388810185186, 0.20997867726211075, 0.20997867726211075,
+                               0.20840381228758173, 0.20952958306022407, 0.20980140118464055, 
+                               0.21045872919117656, 0.20997867726211075, 0.20775872275075422,
+                               0.20952958306022407, 0.20952958306022407]),                                                               
+            'n_estimators' :np.array([17, 17, 15, 14, 12, 16, 17, 13, 14, 14,
+                                      17, 17, 15, 14, 12, 16, 17, 13, 14, 14]),
+            'min_samples_leaf' :np.array([1.4540684905340955, 1.7394414709444481, 1.670328340553618, 
+                                          1.0812075849925713, 1.2580328751834622, 3.038425623453048,
+                                          1.5258288130500341, 2.2830831111754475, 1.9077116138625934,
+                                          3.2182906443995143, 1.4540684905340955, 1.7394414709444481, 
+                                          1.670328340553618, 1.0812075849925713, 1.2580328751834622,
+                                          3.038425623453048, 1.5258288130500341, 2.2830831111754475,
+                                          1.9077116138625934, 3.2182906443995143]),
+            'max_features' :['sqrt', 'log2', 'sqrt', 'sqrt', 'sqrt', 'log2', 'log2', 'sqrt', 'log2', 
+                             'log2', 'sqrt', 'log2', 'sqrt', 'sqrt', 'sqrt', 'log2', 'log2', 'sqrt', 
+                             'log2', 'log2']
                                      },
             index=list(range(20))
                                    ).sort_values(by='metric', ascending=True)
@@ -232,8 +232,8 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_mocked_whe
 
     def search_space(trial):
         search_space  = {'n_estimators' : trial.suggest_int('n_estimators', 100, 200),
-                        'max_depth'    : trial.suggest_float('max_depth', 20, 30, log=True),
-                        'max_features' : trial.suggest_categorical('max_features', ['auto', 'sqrt'])
+                         'max_depth'    : trial.suggest_int('max_depth', 20, 35, log=True),
+                         'max_features' : trial.suggest_categorical('max_features', ['log2', 'sqrt'])
                         } 
         return search_space
 
@@ -259,18 +259,17 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_mocked_whe
     
     expected_results = pd.DataFrame({
             'lags'  :[[1, 2], [1, 2], [1, 2], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]],
-            'params':[{'n_estimators': 170, 'max_depth': 22.460355783218294, 'max_features': 'sqrt'},
-                      {'n_estimators': 172, 'max_depth': 23.742986465413857, 'max_features': 'auto'},
-                      {'n_estimators': 148, 'max_depth': 23.44652380848358, 'max_features': 'sqrt'}, 
-                      {'n_estimators': 170, 'max_depth': 22.460355783218294, 'max_features': 'sqrt'}, 
-                      {'n_estimators': 172, 'max_depth': 23.742986465413857, 'max_features': 'auto'}, 
-                      {'n_estimators': 148, 'max_depth': 23.44652380848358, 'max_features': 'sqrt'}],
-            'metric':np.array([0.21698591071568632, 0.2081489004748062, 0.2207701537612612,
-                               0.22227287699019596, 0.22192701497093015, 0.22838451457770267]),                                                               
+            'params':[{'n_estimators': 170, 'max_depth': 23, 'max_features': 'sqrt'},
+                      {'n_estimators': 172, 'max_depth': 25, 'max_features': 'log2'},
+                      {'n_estimators': 148, 'max_depth': 25, 'max_features': 'sqrt'}, 
+                      {'n_estimators': 170, 'max_depth': 23, 'max_features': 'sqrt'}, 
+                      {'n_estimators': 172, 'max_depth': 25, 'max_features': 'log2'}, 
+                      {'n_estimators': 148, 'max_depth': 25, 'max_features': 'sqrt'}],
+            'metric':np.array([0.21698591071568632, 0.21677310983527143, 0.2207701537612612, 
+                               0.22227287699019596, 0.22139945523255808, 0.22838451457770267]),                                                               
             'n_estimators' :np.array([170, 172, 148, 170, 172, 148]),
-            'max_depth' :np.array([22.460355783218294, 23.742986465413857, 23.44652380848358,
-                                   22.460355783218294, 23.742986465413857, 23.44652380848358]),
-            'max_features' :['sqrt', 'auto', 'sqrt', 'sqrt', 'auto', 'sqrt']
+            'max_depth' :np.array([23, 25, 25, 23, 25, 25]),
+            'max_features' :['sqrt', 'log2', 'sqrt', 'sqrt', 'log2', 'sqrt']
                                      },
             index=list(range(6))
                                    ).sort_values(by='metric', ascending=True)
