@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 from skforecast.utils import preprocess_exog
 
+
 def test_output_preprocess_exog_when_exog_index_is_DatetimeIndex_and_has_frequency():
     '''
     Test values returned by when exog is a pandas Series with DatetimeIndex

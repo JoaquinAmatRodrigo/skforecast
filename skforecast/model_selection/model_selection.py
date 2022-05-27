@@ -1,8 +1,8 @@
 ################################################################################
 #                        skforecast.model_selection                            #
 #                                                                              #
-# This work by Joaquin Amat Rodrigo is licensed under a Creative Commons       #
-# Attribution 4.0 International License.                                       #
+# This work by Joaquin Amat Rodrigo and Javier Escobar Ortiz is licensed       #
+# under a Creative Commons Attribution 4.0 International License.              #
 ################################################################################
 # coding=utf-8
 
@@ -30,6 +30,7 @@ from ..ForecasterAutoreg import ForecasterAutoreg
 from ..ForecasterAutoregCustom import ForecasterAutoregCustom
 from ..ForecasterAutoregDirect import ForecasterAutoregDirect
 from ..ForecasterAutoregMultiOutput import ForecasterAutoregMultiOutput
+from ..ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 
 logging.basicConfig(
     format = '%(name)-10s %(levelname)-5s %(message)s', 
@@ -203,7 +204,7 @@ def cv_forecaster(
     Parameters
     ----------
     forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect,
-    ForecasterAutoregMultiOutput
+    ForecasterAutoregMultiOutput, ForecasterAutoregMultiSeries
         Forecaster model.
         
     y : pandas Series
@@ -328,7 +329,7 @@ def _backtesting_forecaster_refit(
     Parameters
     ----------
     forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect,
-    ForecasterAutoregMultiOutput
+    ForecasterAutoregMultiOutput, ForecasterAutoregMultiSeries
         Forecaster model.
         
     y : pandas Series
@@ -599,7 +600,7 @@ def _backtesting_forecaster_no_refit(
     Parameters
     ----------
     forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect,
-    ForecasterAutoregMultiOutput
+    ForecasterAutoregMultiOutput, ForecasterAutoregMultiSeries
         Forecaster model.
         
     y : pandas Series
@@ -866,7 +867,7 @@ def backtesting_forecaster(
     Parameters
     ----------
     forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect,
-    ForecasterAutoregMultiOutput
+    ForecasterAutoregMultiOutput, ForecasterAutoregMultiSeries
         Forecaster model.
         
     y : pandas Series
@@ -1025,7 +1026,7 @@ def grid_search_forecaster(
     Parameters
     ----------
     forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect,
-    ForecasterAutoregMultiOutput
+    ForecasterAutoregMultiOutput, ForecasterAutoregMultiSeries
         Forcaster model.
         
     y : pandas Series
@@ -1125,7 +1126,7 @@ def random_search_forecaster(
     Parameters
     ----------
     forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect,
-    ForecasterAutoregMultiOutput
+    ForecasterAutoregMultiOutput, ForecasterAutoregMultiSeries
         Forcaster model.
         
     y : pandas Series
@@ -1229,7 +1230,7 @@ def _evaluate_grid_hyperparameters(
     Parameters
     ----------
     forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect,
-    ForecasterAutoregMultiOutput
+    ForecasterAutoregMultiOutput, ForecasterAutoregMultiSeries
         Forcaster model.
         
     y : pandas Series
@@ -1388,7 +1389,7 @@ def bayesian_search_forecaster(
     Parameters
     ----------
     forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect,
-    ForecasterAutoregMultiOutput
+    ForecasterAutoregMultiOutput, ForecasterAutoregMultiSeries
         Forcaster model.
         
     y : pandas Series
@@ -1553,7 +1554,7 @@ def _bayesian_search_optuna(
     Parameters
     ----------
     forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect,
-    ForecasterAutoregMultiOutput
+    ForecasterAutoregMultiOutput, ForecasterAutoregMultiSeries
         Forcaster model.
         
     y : pandas Series
@@ -1766,7 +1767,7 @@ def _bayesian_search_skopt(
     Parameters
     ----------
     forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect, 
-    ForecasterAutoregMultiOutput
+    ForecasterAutoregMultiOutput, ForecasterAutoregMultiSeries
         Forcaster model.
         
     y : pandas Series

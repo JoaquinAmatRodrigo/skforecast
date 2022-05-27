@@ -4,6 +4,7 @@ import numpy as np
 from pytest import approx
 from skforecast.utils import exog_to_multi_output
 
+
 def test_exog_to_multi_output_when_lags_3_steps_2_exog_numpy_1d():
     '''
     Test exog_to_multi_output results when using lags 3, steps 2 and exog is a  

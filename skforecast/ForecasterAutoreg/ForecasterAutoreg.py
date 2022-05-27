@@ -93,11 +93,11 @@ class ForecasterAutoreg(ForecasterBase):
     X_train_col_names : list
         Names of columns of the matrix created internally for training.
         
-    in_sample_residuals: numpy ndarray
+    in_sample_residuals: pandas Series
         Residuals of the model when predicting training data. Only stored up to
         1000 values.
         
-    out_sample_residuals: numpy ndarray
+    out_sample_residuals: pandas Series
         Residuals of the model when predicting non training data. Only stored
         up to 1000 values.
 
@@ -765,7 +765,7 @@ class ForecasterAutoreg(ForecasterBase):
                                     n_boot      = n_boot,
                                     random_state = random_state,
                                     in_sample_residuals = in_sample_residuals
-                                )
+                               )
         
         predictions = np.column_stack((predictions, predictions_interval))
 

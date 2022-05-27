@@ -10,6 +10,8 @@ All notable changes to this project will be documented in this file.
 
 + `preprocess_levels` in module utils.
 
++ `ForecasterAutoregMultiSeries` class for multi time series forecasting.
+
 **Changed**
 
 + `backtesting_forecaster` change default value of argument `fixed_train_size: bool=True`.

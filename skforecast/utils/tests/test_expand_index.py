@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 from skforecast.utils import expand_index
 
+
 def test_output_expand_index_when_index_is_DatetimeIndex():
     '''
     Test values returned by expand_index when input is DatetimeIndex.
@@ -16,7 +17,8 @@ def test_output_expand_index_when_index_is_DatetimeIndex():
     results = expand_index(index, steps=3)
     
     assert (results == expected).all()
-    
+
+
 def test_output_expand_index_when_index_is_RangeIndex():
     '''
     Test values returned by expand_index when input is RangeIndex.

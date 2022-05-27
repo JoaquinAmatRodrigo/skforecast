@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 from skforecast.utils import check_exog
 
+
 def test_check_exog_exception_when_exog_not_series_or_dataframe():
     '''
     Check exception is raised when y is not pandas Series

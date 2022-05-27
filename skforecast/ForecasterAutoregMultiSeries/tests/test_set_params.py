@@ -1,12 +1,12 @@
-# Unit test set_params ForecasterAutoreg
+# Unit test set_params ForecasterAutoregMultiSeries
 # ==============================================================================
-from skforecast.ForecasterAutoreg import ForecasterAutoreg
+from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 from sklearn.linear_model import LinearRegression
 
 
 def test_set_params():
     
-    forecaster = ForecasterAutoreg(LinearRegression(fit_intercept=True), lags=3)
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(fit_intercept=True), lags=3)
     new_params = {'fit_intercept': False}
     forecaster.set_params(**new_params)
     expected = {'copy_X': True,

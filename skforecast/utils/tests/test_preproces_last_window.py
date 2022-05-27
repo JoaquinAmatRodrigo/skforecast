@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 from skforecast.utils import preprocess_last_window
 
+
 def test_output_preprocess_last_window_when_last_window_index_is_DatetimeIndex_and_has_frequency():
     '''
     Test values returned by when last_window is a pandas Series with DatetimeIndex
