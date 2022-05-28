@@ -1,8 +1,8 @@
 ################################################################################
 #                         ForecasterAutoregMultiOutput                         #
 #                                                                              #
-# This work by Joaquin Amat Rodrigo is licensed under a Creative Commons       #
-# Attribution 4.0 International License.                                       #
+# This work by Joaquin Amat Rodrigo and Javier Escobar Ortiz is licensed       #
+# under a Creative Commons Attribution 4.0 International License.              #
 ################################################################################
 # coding=utf-8
 

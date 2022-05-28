@@ -1,8 +1,8 @@
 ################################################################################
 #                               skforecast                                     #
 #                                                                              #
-# This work by Joaquin Amat Rodrigo is licensed under a Creative Commons       #
-# Attribution 4.0 International License.                                       #
+# This work by Joaquin Amat Rodrigo and Javier Escobar Ortiz is licensed       #
+# under a Creative Commons Attribution 4.0 International License.              #
 ################################################################################
 
 import setuptools
@@ -21,8 +21,8 @@ def read(fname):
 setuptools.setup(
     name="skforecast",
     version=VERSION,
-    author="Joaquin Amat Rodrigo",
-    author_email="j.amatrodrigo@gmail.com",
+    author="Joaquin Amat Rodrigo and Javier Escobar Ortiz",
+    author_email="j.amatrodrigo@gmail.com, javier.escobar.ortiz@gmail.com",
     description="Forecasting time series with scikitlearn regressors. It also works with any regressor compatible with the scikit-learn API (pipelines, CatBoost, LightGBM, XGBoost, Ranger...).",
     long_description=read("README.md"),
     long_description_content_type="text/markdown",

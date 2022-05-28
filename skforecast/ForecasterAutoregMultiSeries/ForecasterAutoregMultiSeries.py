@@ -6,6 +6,7 @@
 ################################################################################
 # coding=utf-8
 
+from re import X
 from typing import Union, Dict, List, Tuple, Any, Optional
 import warnings
 import logging
@@ -127,18 +128,13 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
     X_train_col_names : list
         Names of columns of the matrix created internally for training.
         
-    in_sample_residuals: pandas DataFrame
+    in_sample_residuals: dict
         Residuals of the model when predicting training data. Only stored up to
-        1000 values.
+        1000 values. `{'level': residuals}`
         
     out_sample_residuals: pandas Series
         Residuals of the model when predicting non training data. Only stored
         up to 1000 values.
-
-    levels_dict : dict
-        dict with levels (columns) of series DataFrame, new_level_name will be
-        set in utils.preprocess_levels
-            {column_name: new_level_name}
 
     creation_date: str
         Date of creation.
@@ -166,7 +162,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.in_sample_residuals  = None
         self.out_sample_residuals = None
         self.fitted               = False
-        self.levels_dict          = None
         self.level                = None
         self.creation_date        = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
         self.fit_date             = None
@@ -293,7 +288,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         Returns 
         -------
-        X_train : pandas DataFrame, shape (len(y) - self.max_lag, len(self.lags))
+        X_train : pandas DataFrame
             Pandas DataFrame with the training values (predictors).
             
         y_train : pandas Series, shape (len(y) - self.max_lag, )
@@ -303,70 +298,74 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         
         if not isinstance(series, pd.DataFrame):
             raise Exception('`series` must be a pandas DataFrame.')
-
-        self.levels_dict = preprocess_levels(series)
         
-        for j, serie in enumerate(list(self.levels_dict.keys())):
+        X_levels = np.array([])
+
+        for j, serie in enumerate(list(series.columns)):
 
             y = series[serie]
             check_y(y=y)
             y_values, y_index = preprocess_y(y=y)
 
-            if j==0 and exog is not None:
-                if len(exog) != len(series):
-                    raise Exception(
-                        "`exog` must have same number of samples as `series`."
-                    )
-                check_exog(exog=exog)
-                exog_values, exog_index = preprocess_exog(exog=exog)
-                if not (exog_index[:len(y_index)] == y_index).all():
-                    raise Exception(
-                        ('Different index for `series` and `exog`. They must be equal '
-                        'to ensure the correct alignment of values.')      
-                    )
+            if j==0:
+                X_train_col_names = [f"lag_{i}" for i in self.lags]
+                if exog is not None:
+                    if len(exog) != len(series):
+                        raise Exception(
+                            "`exog` must have same number of samples as `series`."
+                        )
+                    check_exog(exog=exog)
+                    exog_values, exog_index = preprocess_exog(exog=exog)
+                    if not (exog_index[:len(y_index)] == y_index).all():
+                        raise Exception(
+                            ('Different index for `series` and `exog`. They must be equal '
+                            'to ensure the correct alignment of values.')      
+                        )
+                    col_names_exog = exog.columns if isinstance(exog, pd.DataFrame) else [exog.name]
+                    X_train_col_names.extend(col_names_exog)
 
-            X_train, y_train = self._create_lags(y=y_values)
-            X_train_col_names = [f"lag_{i}" for i in lags]
-
-            X_level = np.full(shape=(len(X_train), 1), fill_value=f'{self.levels_dict[serie]}')
-            X_train_col_names.append('level')
-            X_train = np.column_stack((X_train, X_level))
+            X_train_values, y_train_values = self._create_lags(y=y_values)
 
             if exog is not None:
-                col_names_exog = exog.columns if isinstance(exog, pd.DataFrame) else [exog.name]
-                X_train_col_names.extend(col_names_exog)
                 # The first `self.max_lag` positions have to be removed from exog
                 # since they are not in X_train.
-                X_train = np.column_stack((X_train, exog_values[max_lag:, ]))
+                X_train_values = np.column_stack((X_train_values, exog_values[self.max_lag:, ]))
 
             if j==0:
-                X_train_df = pd.DataFrame(
-                                 data    = X_train,
-                                 columns = X_train_col_names
-                             )
+                X_train = X_train_values
 
-                y_train_df = pd.Series(
-                                data  = y_train,
-                                name  = 'y'
-                             )
+                y_train = pd.Series(
+                            data  = y_train_values,
+                            name  = 'y'
+                          )
             else:
-                X_train_df = pd.concat([X_train_df, 
-                                        pd.DataFrame(
-                                            data    = X_train,
-                                            columns = X_train_col_names
-                                        )
-                                       ]
-                             )
+                X_train = np.vstack((X_train, X_train_values))
 
-                y_train_df = pd.concat([y_train_df, 
-                                        pd.Series(
-                                            data  = y_train,
-                                            name  = 'y'
-                                        )
-                                       ]
-                             )
+                y_train = pd.concat([y_train, 
+                                     pd.Series(
+                                        data  = y_train_values,
+                                        name  = 'y'
+                                     )
+                                    ]
+                          )
 
-        return X_train_df, y_train_df, y_index
+            X_level = np.full(shape=(len(X_train_values), 1), fill_value=f'{serie}', dtype=object)
+            X_levels = np.append(X_levels, X_level)
+
+        X_levels = pd.Series(X_levels)
+        X_levels = pd.get_dummies(X_levels, dtype=float)
+
+        X_train_col_names.extend(list(X_levels.columns))
+        X_train = np.column_stack((X_train, X_levels.values))
+
+        X_train = pd.DataFrame(
+                    data    = X_train,
+                    columns = X_train_col_names
+                  )
+        
+        self.X_train_col_names = X_train_col_names
+
+        return X_train, y_train, y_index
 
         
     def fit(
@@ -405,7 +404,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.X_train_col_names    = None
         self.in_sample_residuals  = None
         self.fitted               = False
-        self.levels_dict          = None
         self.level                = None
         self.training_range       = None
         
@@ -437,20 +435,25 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         else:
             residuals = y_train - self.regressor.predict(X_train.to_numpy())
 
-        residuals = pd.DataFrame(
-                        {'in_sample_residuals': residuals,
-                         'level'              : X_train.level
-                        },
-                        index = y_train.index
-                    )
+        residuals_dict = {}
 
-        if len(residuals) > 1000:
+        for serie in list(series.columns):
+            residuals_values = np.column_stack((residuals.values, X_train[serie].values))
+            residuals_dict[serie] = residuals_values[residuals_values[:, 1] == 1.][:, 0]
+
+        total_n_residuals = len(list(residuals_dict.values())[0])*len(residuals_dict.keys())
+
+        if total_n_residuals > 1000:
             # Only up to 1000 residuals are stored
-            n_samples_per_level = int(1000/residuals['level'].nunique())
+            n_samples_per_level = int(1000/len(list(residuals_dict.keys())))
             
-            residuals = residuals.groupby('level', group_keys=False) \
-                        .apply(lambda x: x.sample(n_samples_per_level))
-            
+            for key in residuals_dict.keys():
+                rng = np.random.default_rng(seed=123)
+                residuals_dict[key] = rng.choice(a= residuals_dict[key], 
+                                                 size=n_samples_per_level, 
+                                                 replace=False
+                                      ) 
+
             if n_samples_per_level < 50:
                 warnings.warn(
                     f'Due to the high number of levels, the size of residues stored in '
@@ -459,7 +462,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                     f'before using `predict_interval`.'
                 )
             
-        self.in_sample_residuals = residuals
+        self.in_sample_residuals = residuals_dict
         
         # The last time window of training data is stored so that lags needed as
         # predictors in the first iteration of `predict()` can be calculated.
@@ -501,7 +504,11 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             X = last_window[-self.lags].reshape(1, -1)
             if exog is not None:
                 X = np.column_stack((X, exog[i, ].reshape(1, -1)))
-            X = np.column_stack((X, np.array(self.levels_dict[self.level]).reshape(1, -1)))
+
+            levels_dummies = np.zeros(shape=(1, len(self.in_sample_residuals.keys())), dtype= float)
+            levels_dummies[0][list(self.in_sample_residuals.keys()).index(self.level)] = 1.
+
+            X = np.column_stack((X, levels_dummies.reshape(1, -1)))
 
             with warnings.catch_warnings():
                 # Suppress scikitlearn warning: "X does not have valid feature names,
@@ -702,9 +709,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 exog_boot = None
  
             if in_sample_residuals:
-                residuals = self.in_sample_residuals[self.in_sample_residuals['level'] \
-                                                     == str(self.levels_dict[self.level])] \
-                                                    ['in_sample_residuals']
+                residuals = self.in_sample_residuals[self.level]
             else:
                 residuals = self.out_sample_residuals
 
