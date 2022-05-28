@@ -480,39 +480,3 @@ def expand_index(
                         stop  = steps
                      )
     return new_index
-
-
-def preprocess_levels(
-    series: pd.DataFrame
-) -> dict:
-    '''
-    Return dict with levels (columns) of series DataFrame, {column_name: new_level_name}.
-    new_level_name will change according to the next rules:
-        If the column names are ints, nothing is changed.
-            new_level_name == column_name
-        If the column names are not ints, a range of ints will be created.
-            new_level_name == int
-    
-    Parameters
-    ----------        
-    series : pandas DataFrame
-             Time series
-
-    Returns 
-    -------
-    levels_dict : dict
-        {column_name: new_level_name}
-    '''
-    
-    levels_dict = {}
-    column_names = list(series.columns)
-    
-    try:
-        levels = [int(x) for x in list(series.columns)]
-    except ValueError:
-        levels = [*range(len(list(series.columns)))]
-    
-    zip_dict = zip(column_names, levels)
-    levels_dict = dict(zip_dict)
-    
-    return levels_dict
