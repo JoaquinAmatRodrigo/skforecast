@@ -38,6 +38,7 @@ def test_output_get_feature_importance_when_regressor_is_RandomForest():
                     'importance': np.array([0.82142857, 0., 0.17857143, 0., 0.])
                 })
     results = forecaster.get_feature_importance()
+
     pd.testing.assert_frame_equal(expected, results)
     
     
@@ -60,6 +61,7 @@ def test_output_get_feature_importance_when_regressor_is_RandomForest_with_exog(
                     'importance': np.array([0.76190476, 0., 0.05952381, 0.17857143, 0., 0.])
                 })
     results = forecaster.get_feature_importance()
+
     pd.testing.assert_frame_equal(expected, results)
 
 
@@ -81,6 +83,7 @@ def test_output_get_feature_importance_when_regressor_is_LinearRegression():
                     'importance': np.array([0.2, 0.2, 0.2, 0.2, 0.2])
                 })
     results = forecaster.get_feature_importance()
+
     pd.testing.assert_frame_equal(expected, results)
 
 
@@ -103,6 +106,7 @@ def test_output_get_feature_importance_when_regressor_is_LinearRegression_with_e
                     'importance': np.array([0.16666667, 0.16666667, 0.16666667, 0.16666667, 0.16666667, 0.16666667])
                 })
     results = forecaster.get_feature_importance()
+
     pd.testing.assert_frame_equal(expected, results)
     
     
@@ -120,6 +124,7 @@ def test_output_get_feature_importance_when_regressor_no_attributes():
     forecaster.fit(y=pd.Series(np.arange(10)))
     expected = None
     results = forecaster.get_feature_importance()
+
     assert results is expected
 
 
@@ -142,4 +147,5 @@ def test_output_get_feature_importance_when_pipeline():
                     'importance': np.array([0.1, 0.1, 0.1, 0.1, 0.1])
                 })
     results = forecaster.get_feature_importance()
+
     pd.testing.assert_frame_equal(expected, results)

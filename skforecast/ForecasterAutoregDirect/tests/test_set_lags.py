@@ -54,4 +54,12 @@ def test_set_lags_when_lags_argument_is_1d_numpy_array():
     forecaster.set_lags(lags=np.array([1,2,3]))
     assert (forecaster.lags == np.array([1, 2, 3])).all()
     assert forecaster.max_lag == 3
-    
+
+
+def test_set_lags_exception_when_lags_argument_is_not_valid_type():
+    '''
+    Test exception is raised when lags argument is not a valid type.
+    '''
+    forecaster = ForecasterAutoregDirect(LinearRegression(), lags=3, steps=2)
+    with pytest.raises(Exception):
+        forecaster.set_lags(lags='not_valid_type')

@@ -150,7 +150,7 @@ def test_results_output_bayesian_search_skopt_ForecasterAutoreg_with_mocked():
             index=list(range(20))
                                    ).sort_values(by='metric', ascending=True)
 
-    pd.testing.assert_frame_equal(results, expected_results)
+    pd.testing.assert_frame_equal(results, expected_results, check_dtype=False)
     
 
 def test_results_output_bayesian_search_skopt_ForecasterAutoreg_with_mocked_when_kwargs_gp_minimize():

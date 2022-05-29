@@ -151,6 +151,7 @@ def test_backtesting_forecaster_exception_when_initial_train_size_None_and_refit
                     regressor = Ridge(random_state=123),
                     lags      = 2
                  )
+    forecaster.fitted = True
 
     initial_train_size = None
     refit = True

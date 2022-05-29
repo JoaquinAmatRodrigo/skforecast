@@ -17,7 +17,8 @@ def test_estimate_boot_interval_output_when_forecaster_is_LinearRegression_steps
     forecaster.fit(y=pd.Series(np.arange(10)))
     forecaster.in_sample_residuals = np.full_like(forecaster.in_sample_residuals, fill_value=10)
     expected = np.array([[20., 20.]])
-    results = forecaster._estimate_boot_interval(steps=1, in_sample_residuals=True)  
+    results = forecaster._estimate_boot_interval(steps=1, in_sample_residuals=True)
+
     assert results == approx(expected)
     
     
@@ -31,7 +32,8 @@ def test_estimate_boot_interval_output_when_forecaster_is_LinearRegression_steps
     forecaster.in_sample_residuals = np.full_like(forecaster.in_sample_residuals, fill_value=10)
     expected = np.array([[20., 20.],
                         [24.33333333, 24.33333333]])
-    results = forecaster._estimate_boot_interval(steps=2, in_sample_residuals=True)  
+    results = forecaster._estimate_boot_interval(steps=2, in_sample_residuals=True)
+
     assert results == approx(expected)
     
     
@@ -42,9 +44,10 @@ def test_estimate_boot_interval_output_when_forecaster_is_LinearRegression_steps
     '''
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
     forecaster.fit(y=pd.Series(np.arange(10)))
-    forecaster.out_sample_residuals = np.full_like(forecaster.in_sample_residuals, fill_value=10)
+    forecaster.out_sample_residuals = pd.Series(np.full_like(forecaster.in_sample_residuals, fill_value=10))
     expected = np.array([[20., 20.]])
-    results = forecaster._estimate_boot_interval(steps=1, in_sample_residuals=False)  
+    results = forecaster._estimate_boot_interval(steps=1, in_sample_residuals=False)
+
     assert results == approx(expected)
     
     
@@ -55,9 +58,10 @@ def test_estimate_boot_interval_output_when_forecaster_is_LinearRegression_steps
     '''
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
     forecaster.fit(y=pd.Series(np.arange(10)))
-    forecaster.out_sample_residuals = np.full_like(forecaster.in_sample_residuals, fill_value=10)
+    forecaster.out_sample_residuals = pd.Series(np.full_like(forecaster.in_sample_residuals, fill_value=10))
     expected = np.array([[20.        , 20.        ],
                         [24.33333333, 24.33333333]])
-    results = forecaster._estimate_boot_interval(steps=2, in_sample_residuals=False)  
+    results = forecaster._estimate_boot_interval(steps=2, in_sample_residuals=False)
+
     assert results == approx(expected)
     

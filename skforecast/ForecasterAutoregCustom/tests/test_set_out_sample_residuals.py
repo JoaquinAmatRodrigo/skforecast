@@ -11,9 +11,9 @@ def create_predictors(y):
     '''
     Create first 5 lags of a time series.
     '''
-    
+
     lags = y[-1:-6:-1]
-    
+
     return lags  
 
 
@@ -40,6 +40,7 @@ def test_set_out_sample_residuals_when_residuals_length_is_greater_than_1000():
                     window_size    = 5
                 )
     forecaster.set_out_sample_residuals(residuals=pd.Series(np.arange(2000)))
+
     assert len(forecaster.out_sample_residuals) == 1000
 
 
@@ -62,6 +63,7 @@ def test_same_out_sample_residuals_stored_when_residuals_length_is_greater_than_
                 )
     forecaster.set_out_sample_residuals(residuals=pd.Series(np.arange(2000)))
     out_sample_residuals_2 = forecaster.out_sample_residuals
+
     assert (out_sample_residuals_1 == out_sample_residuals_2).all()
 
 
@@ -78,6 +80,7 @@ def test_set_out_sample_residuals_when_residuals_length_is_less_than_1000_and_no
     forecaster.set_out_sample_residuals(residuals=pd.Series(np.arange(10)), append=False)
     expected = pd.Series(np.arange(10))
     results = forecaster.out_sample_residuals
+
     assert (results == expected).all()
 
 
@@ -94,6 +97,7 @@ def test_set_out_sample_residuals_when_residuals_length_is_less_than_1000_and_ap
     forecaster.set_out_sample_residuals(residuals=pd.Series(np.arange(10)), append=True)
     expected = pd.Series(np.hstack([np.arange(10), np.arange(10)]))
     results = forecaster.out_sample_residuals
+
     assert (results == expected).all()
 
 
@@ -110,4 +114,5 @@ def test_set_out_sample_residuals_when_residuals_length_is_more_than_1000_and_ap
     forecaster.set_out_sample_residuals(residuals=pd.Series(np.arange(1000)), append=True)
     expected = pd.Series(np.hstack([np.arange(10), np.arange(1200)])[:1000])
     results = forecaster.out_sample_residuals
+
     assert (results == expected).all()

@@ -97,8 +97,8 @@ def test_fit_last_window_stored():
 
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
     forecaster.fit(series=series)
-    expected = pd.DataFrame({'1': pd.Series(np.array([2., 3., 4.])), 
-                             '2': pd.Series(np.array([2., 3., 4.]))
+    expected = pd.DataFrame({'1': pd.Series(np.array([2, 3, 4])), 
+                             '2': pd.Series(np.array([2, 3, 4]))
                             })
     expected.index = pd.RangeIndex(start=2, stop=5, step=1)
 

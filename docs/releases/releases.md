@@ -8,8 +8,6 @@ All notable changes to this project will be documented in this file.
 
 + Functions `random_search_forecaster`, `_evaluate_grid_hyperparameters`, `bayesian_search_forecaster`, `_bayesian_search_optuna` and `_bayesian_search_skopt` in model_selection.
 
-+ `preprocess_levels` in module utils.
-
 + `ForecasterAutoregMultiSeries` class for multi time series forecasting.
 
 **Changed**

@@ -9,6 +9,17 @@ from sklearn.linear_model import LinearRegression
 
 def test_create_train_X_y_output_when_series_and_exog_is_None():
     '''
+    Test exception is raised when series is not a pandas DataFrame.
+    '''
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
+    serie = pd.Series(np.arange(7))
+
+    with pytest.raises(Exception):
+        forecaster.create_train_X_y(series=serie)
+
+
+def test_create_train_X_y_output_when_series_and_exog_is_None():
+    '''
     Test the output of create_train_X_y when series has 2 columns and 
     exog is None.
     '''

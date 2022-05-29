@@ -16,4 +16,5 @@ def test_set_params():
                 'positive': False
                }
     results = forecaster.regressor.get_params()
+    
     assert results == expected

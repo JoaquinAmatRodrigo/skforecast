@@ -31,4 +31,5 @@ def test_estimate_boot_interval_output_when_forecaster_is_LinearRegression_steps
     forecaster.in_sample_residuals = np.full_like(forecaster.in_sample_residuals, fill_value=10)
     expected = np.array([[20., 20.]])
     results = forecaster._estimate_boot_interval(steps=1, in_sample_residuals=True, n_boot=2)  
+    
     assert results == approx(expected)

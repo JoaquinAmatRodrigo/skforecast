@@ -13,6 +13,7 @@ def test_init_lags_when_integer():
     Test creation of attribute lags when integer is passed.
     '''
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=10)
+
     assert (forecaster.lags == np.arange(10) + 1).all()
     
 
@@ -21,6 +22,7 @@ def test_init_lags_when_list():
     Test creation of attribute lags when list is passed.
     '''
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=[1, 2, 3])
+
     assert (forecaster.lags == np.array([1, 2, 3])).all()
 
 
@@ -29,6 +31,7 @@ def test_init_lags_when_range():
     Test creation of attribute lags when range is passed.
     '''
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=range(1, 4))
+
     assert (forecaster.lags == np.array(range(1, 4))).all()
 
 
@@ -37,6 +40,7 @@ def test_init_lags_when_numpy_arange():
     Test creation of attribute lags when numpy arange is passed.
     '''
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=np.arange(1, 10))
+    
     assert (forecaster.lags == np.arange(1, 10)).all()
 
 
@@ -69,3 +73,11 @@ def test_init_exception_when_lags_list_or_numpy_array_with_values_not_int():
             if not isinstance(lag, (int, np.int64, np.int32)):
                 with pytest.raises(Exception):
                     ForecasterAutoregMultiSeries(LinearRegression(), lags=lags)
+
+
+def test_init_exception_when_lags_is_not_valid_type():
+    '''
+    Test exception is raised when lags is not a valid type.
+    '''
+    with pytest.raises(Exception):
+        ForecasterAutoregMultiSeries(LinearRegression(), lags='not_valid_type')
