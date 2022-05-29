@@ -116,6 +116,6 @@ def test_create_train_X_y_exception_when_y_and_exog_have_different_index():
     forecaster = ForecasterAutoreg(LinearRegression(), lags=5)
     with pytest.raises(Exception):
         forecaster.fit(
-            y=pd.Series(np.arange(50)),
-            exog=pd.Series(np.arange(10), index=np.arange(100, 110))
+            y=pd.Series(np.arange(10), index=pd.date_range(start='2022-01-01', periods=10, freq='1D')),
+            exog=pd.Series(np.arange(10), index=pd.RangeIndex(start=0, stop=10, step=1))
         )    

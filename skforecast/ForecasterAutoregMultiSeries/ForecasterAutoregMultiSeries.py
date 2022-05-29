@@ -33,33 +33,6 @@ logging.basicConfig(
 )
 
 
-from typing import Union, Dict, List, Tuple, Any, Optional
-import warnings
-import logging
-import numpy as np
-import pandas as pd
-import sklearn
-import sklearn.pipeline
-from sklearn.base import clone
-from copy import copy
-
-import skforecast
-from skforecast.ForecasterBase import ForecasterBase
-from skforecast.utils import check_y
-from skforecast.utils import check_exog
-from skforecast.utils import preprocess_y
-from skforecast.utils import preprocess_last_window
-from skforecast.utils import preprocess_exog
-from skforecast.utils import expand_index
-from skforecast.utils import check_predict_input
-from skforecast.utils import preprocess_levels
-
-logging.basicConfig(
-    format = '%(name)-10s %(levelname)-5s %(message)s', 
-    level  = logging.INFO,
-)
-
-
 class ForecasterAutoregMultiSeries(ForecasterBase):
     '''
     This class turns any regressor compatible with the scikit-learn API into a
