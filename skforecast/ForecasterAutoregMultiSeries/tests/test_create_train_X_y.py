@@ -7,7 +7,7 @@ from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 from sklearn.linear_model import LinearRegression
 
 
-def test_create_train_X_y_output_when_series_and_exog_is_None():
+def test_create_train_X_y_exception_when_series_not_dataframe():
     '''
     Test exception is raised when series is not a pandas DataFrame.
     '''
@@ -142,7 +142,7 @@ def test_create_train_X_y_exception_when_series_and_exog_have_different_length()
             exog   = pd.DataFrame(np.arange(50).reshape(25,2))
         )
 
-  
+
 def test_create_train_X_y_exception_when_series_and_exog_have_different_index():
     '''
     Test exception is raised when series and exog have different index.

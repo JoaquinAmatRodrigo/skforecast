@@ -71,11 +71,11 @@ pip3 install -U scikit-learn
 
 ## What is coming in the new release?
 
-- [x] Random search and bayesian search (using [**optuna**](https://optuna.org/) or [**skopt**](https://scikit-optimize.github.io/stable/modules/generated/skopt.gp_minimize.html)) for hyperparameter optimization.
+- [x] Random search and bayesian search (using [**optuna**](https://optuna.org/) or [**skopt**](https://scikit-optimize.github.io/stable/modules/generated/skopt.gp_minimize.html)) for hyperparameter optimization. Try `random_search_forecaster()` and `bayesian_search_forecaster()`.
 - [x] `ForecasterAutoregMultiOutput` has been renamed to `ForecasterAutoregDirect`.
-- [x] Bug fixes and performance improvements.
-- [ ] Modeling multiple time series simultaneously.
+- [x] Modeling multiple time series simultaneously. Try `ForecasterAutoregMultiSeries`.
 - [ ] Allow different transformations for each predictor (lags and exogenous).
+- [x] Bug fixes and performance improvements.
 
 Try it:
 
