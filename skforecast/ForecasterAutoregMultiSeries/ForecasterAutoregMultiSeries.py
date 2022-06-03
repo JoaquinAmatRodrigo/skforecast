@@ -1,5 +1,5 @@
 ################################################################################
-#                         ForecasterAutoregMultiSeries                         #
+#                        ForecasterAutoregMultiSeries                          #
 #                                                                              #
 # This work by Joaquin Amat Rodrigo and Javier Escobar Ortiz is licensed       #
 # under a Creative Commons Attribution 4.0 International License.              #
@@ -48,7 +48,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             `int`: include lags from 1 to `lags` (included).
             `list`, `numpy ndarray` or `range`: include only lags present in `lags`,
             all elements must be int.
-
     
     Attributes
     ----------
