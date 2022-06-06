@@ -99,7 +99,7 @@ class ForecasterAutoreg(ForecasterBase):
         
     out_sample_residuals: pandas Series
         Residuals of the model when predicting non training data. Only stored
-        up to 1000 values.
+        up to 1000 values. Use `set_out_sample_residuals` to set values.
 
     creation_date: str
         Date of creation.

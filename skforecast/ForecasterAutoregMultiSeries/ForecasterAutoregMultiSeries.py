@@ -101,11 +101,11 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         
     in_sample_residuals: dict
         Residuals of the model when predicting training data. Only stored up to
-        1000 values. `{'level': residuals}`
+        1000 values in the form `{level: residuals}`.
         
     out_sample_residuals: pandas Series
         Residuals of the model when predicting non training data. Only stored
-        up to 1000 values.
+        up to 1000 values. Use `set_out_sample_residuals` to set values.
 
     creation_date: str
         Date of creation.
@@ -356,7 +356,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             Exogenous variable/s included as predictor/s. Must have the same
             number of observations as `y` and their indexes must be aligned so
             that y[i] is regressed on exog[i].
-
 
         Returns 
         -------
@@ -641,7 +640,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             calculated and stored the residuals within the forecaster (see
             `set_out_sample_residuals()`).
             
-
         Returns 
         -------
         prediction_interval : numpy ndarray, shape (steps, 2)

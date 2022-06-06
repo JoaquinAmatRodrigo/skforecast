@@ -14,10 +14,6 @@ import warnings
 import logging
 from copy import deepcopy
 from tqdm import tqdm
-from sklearn.metrics import mean_squared_error 
-from sklearn.metrics import mean_absolute_error
-from sklearn.metrics import mean_absolute_percentage_error
-from sklearn.metrics import mean_squared_log_error
 from sklearn.model_selection import ParameterGrid
 from sklearn.model_selection import ParameterSampler
 import optuna
@@ -141,12 +137,12 @@ def _backtesting_forecaster_multiseries_refit(
         metric = _get_metric(metric=metric)
     backtest_predictions = []
     
-    folds = int(np.ceil((len(forecaster.index_values) - initial_train_size) / steps))
-    remainder = (len(forecaster.index_values) - initial_train_size) % steps
+    folds = int(np.ceil((len(series.index) - initial_train_size) / steps))
+    remainder = (len(series.index) - initial_train_size) % steps
     
     if verbose:
         _backtesting_forecaster_verbose(
-            index_values       = forecaster.index_values,
+            index_values       = series.index,
             steps              = steps,
             initial_train_size = initial_train_size,
             folds              = folds,
@@ -401,8 +397,6 @@ def _backtesting_forecaster_multiseries_no_refit(
     if isinstance(metric, str):
         metric = _get_metric(metric=metric)
     backtest_predictions = []
-
-    index_values = forecaster.index_values
     
     if initial_train_size is not None:
         if exog is None:
@@ -419,13 +413,13 @@ def _backtesting_forecaster_multiseries_no_refit(
         window_size = forecaster.window_size
         initial_train_size = window_size
 
-    folds     = int(np.ceil((len(index_values) - initial_train_size) / steps))
-    remainder = (len(index_values) - initial_train_size) % steps
+    folds     = int(np.ceil((len(series.index) - initial_train_size) / steps))
+    remainder = (len(series.index) - initial_train_size) % steps
 
 
     if verbose:
         _backtesting_forecaster_verbose(
-            index_values       = index_values,
+            index_values       = series.index,
             steps              = steps,
             initial_train_size = initial_train_size,
             folds              = folds,
@@ -745,10 +739,11 @@ def grid_search_forecaster_multiseries(
     series: pd.DataFrame,
     param_grid: dict,
     steps: int,
-    level: str,
     metric: Union[str, callable],
     initial_train_size: int,
     fixed_train_size: bool=True,
+    levels_list: list=None,
+    levels_weights: dict=None,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Optional[list]=None,
     refit: bool=False,
@@ -773,9 +768,6 @@ def grid_search_forecaster_multiseries(
 
     steps : int
         Number of steps to predict.
-
-    level : str
-        Time series to be predicted.
         
     metric : str, callable
         Metric used to quantify the goodness of fit of the model.
@@ -792,6 +784,15 @@ def grid_search_forecaster_multiseries(
  
     fixed_train_size : bool, default `True`
         If True, train size doesn't increases but moves by `steps` in each iteration.
+
+    levels_list : list, default `None`
+        levels on which the forecaster is optimized. If `None`, all levels are 
+        taken into acount.The resulting metric will be a weighted average of the 
+        optimization of all levels. See also `levels_weights`.
+
+    levels_weights : dict, default `None`
+        Weights associated with levels in the form `{level: weight}`. 
+        If `None`, all levels have the same weight.
 
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
@@ -823,15 +824,16 @@ def grid_search_forecaster_multiseries(
 
     param_grid = list(ParameterGrid(param_grid))
 
-    results = _evaluate_grid_hyperparameters(
+    results = _evaluate_grid_hyperparameters_multiseries(
         forecaster          = forecaster,
         series              = series,
         param_grid          = param_grid,
         steps               = steps,
-        level               = level,
         metric              = metric,
         initial_train_size  = initial_train_size,
         fixed_train_size    = fixed_train_size,
+        levels_list         = levels_list,
+        levels_weights      = levels_weights,
         exog                = exog,
         lags_grid           = lags_grid,
         refit               = refit,
@@ -842,15 +844,16 @@ def grid_search_forecaster_multiseries(
     return results
 
 
-def random_search_forecaster(
+def random_search_forecaster_multiseries(
     forecaster,
     series: pd.DataFrame,
     param_distributions: dict,
     steps: int,
-    level: str,
     metric: Union[str, callable],
     initial_train_size: int,
     fixed_train_size: bool=True,
+    levels_list: list=None,
+    levels_weights: dict=None,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Optional[list]=None,
     refit: bool=False,
@@ -877,9 +880,6 @@ def random_search_forecaster(
 
     steps : int
         Number of steps to predict.
-
-    level : str
-        Time series to be predicted.
         
     metric : str, callable
         Metric used to quantify the goodness of fit of the model.
@@ -896,6 +896,15 @@ def random_search_forecaster(
  
     fixed_train_size : bool, default `True`
         If True, train size doesn't increases but moves by `steps` in each iteration.
+
+    levels_list : list, default `None`
+        levels on which the forecaster is optimized. If `None`, all levels are 
+        taken into acount.The resulting metric will be a weighted average of the 
+        optimization of all levels. See also `levels_weights`.
+
+    levels_weights : dict, default `None`
+        Weights associated with levels in the form `{level: weight}`. 
+        If `None`, all levels have the same weight.
 
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
@@ -934,15 +943,16 @@ def random_search_forecaster(
 
     param_grid = list(ParameterSampler(param_distributions, n_iter=n_iter, random_state=random_state))
 
-    results = _evaluate_grid_hyperparameters(
+    results = _evaluate_grid_hyperparameters_multiseries(
         forecaster          = forecaster,
         series              = series,
         param_grid          = param_grid,
         steps               = steps,
-        level               = level,
         metric              = metric,
         initial_train_size  = initial_train_size,
         fixed_train_size    = fixed_train_size,
+        levels_list         = levels_list,
+        levels_weights      = levels_weights,
         exog                = exog,
         lags_grid           = lags_grid,
         refit               = refit,
@@ -953,15 +963,16 @@ def random_search_forecaster(
     return results
 
 
-def _evaluate_grid_hyperparameters(
+def _evaluate_grid_hyperparameters_multiseries(
     forecaster,
     series: pd.DataFrame,
     param_grid: dict,
     steps: int,
-    level: str,
     metric: Union[str, callable],
     initial_train_size: int,
     fixed_train_size: bool=True,
+    levels_list: list=None,
+    levels_weights: dict=None,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Optional[list]=None,
     refit: bool=False,
@@ -985,9 +996,6 @@ def _evaluate_grid_hyperparameters(
 
     steps : int
         Number of steps to predict.
-
-    level : str
-        Time series to be predicted.
         
     metric : str, callable
         Metric used to quantify the goodness of fit of the model.
@@ -1004,6 +1012,15 @@ def _evaluate_grid_hyperparameters(
  
     fixed_train_size : bool, default `True`
         If True, train size doesn't increases but moves by `steps` in each iteration.
+
+    levels_list : list, default `None`
+        levels on which the forecaster is optimized. If `None`, all levels are 
+        taken into acount.The resulting metric will be a weighted average of the 
+        optimization of all levels. See also `levels_weights`.
+
+    levels_weights : dict, default `None`
+        Weights associated with levels in the form `{level: weight}`. 
+        If `None`, all levels have the same weight.
 
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
@@ -1031,8 +1048,33 @@ def _evaluate_grid_hyperparameters(
             column params = lower bound of the interval.
             column metric = metric value estimated for the combination of parameters.
             additional n columns with param = value.
-
     '''
+
+    if levels_list is not None and not isinstance(levels_list, list):
+        raise Exception(
+            f'`levels_list` must be a list of column names or `None`.'
+        )
+
+    if levels_weights is not None and not isinstance(levels_weights, dict):
+        raise Exception(
+            f'`levels_weights` must be a dict or `None`.'
+        )
+
+    if levels_list is None:
+        levels_list = list(series.columns)
+
+    if levels_weights is None:
+        levels_weights = {col: 1./len(levels_list) for col in levels_list}
+
+    if levels_list != list(levels_weights.keys()):
+        raise Exception(
+            f'`levels_weights` keys must be the same as the column names of series, `levels_list`.'
+        )
+
+    if sum(levels_weights.values()) != 1.0:
+        raise Exception(
+            f'Weights in `levels_weights` must add up to 1.0.'
+        )
 
     if lags_grid is None:
         lags_grid = [forecaster.lags]
@@ -1042,7 +1084,7 @@ def _evaluate_grid_hyperparameters(
     metric_list = []
 
     print(
-        f"Number of models compared: {len(param_grid)*len(lags_grid)}."
+        f"Number of models compared: {len(param_grid)*len(lags_grid)*len(levels_list)}."
     )
 
     for lags in tqdm(lags_grid, desc='loop lags_grid', position=0, ncols=90):
@@ -1053,25 +1095,33 @@ def _evaluate_grid_hyperparameters(
         for params in tqdm(param_grid, desc='loop param_grid', position=1, leave=False, ncols=90):
 
             forecaster.set_params(**params)
-            metrics = backtesting_forecaster_multiseries(
-                            forecaster         = forecaster,
-                            series             = series,
-                            steps              = steps,
-                            level              = level,
-                            metric             = metric,
-                            initial_train_size = initial_train_size,
-                            fixed_train_size   = fixed_train_size,
-                            exog               = exog,
-                            refit              = refit,
-                            interval           = None,
-                            verbose            = verbose
-                            )[0]
+
+            metric_level_list = []
+
+            for level in levels_list:
+
+                metric_level = backtesting_forecaster_multiseries(
+                                    forecaster         = forecaster,
+                                    series             = series,
+                                    steps              = steps,
+                                    level              = level,
+                                    metric             = metric,
+                                    initial_train_size = initial_train_size,
+                                    fixed_train_size   = fixed_train_size,
+                                    exog               = exog,
+                                    refit              = refit,
+                                    interval           = None,
+                                    verbose            = verbose
+                               )[0]
+
+                metric_level_list.append(metric_level*levels_weights[level])
 
             lags_list.append(lags)
             params_list.append(params)
-            metric_list.append(metrics)
+            metric_list.append(sum(metric_level_list))
             
     results = pd.DataFrame({
+                'levels': [levels_list]*len(lags_list),
                 'lags'  : lags_list,
                 'params': params_list,
                 'metric': metric_list})
@@ -1094,6 +1144,8 @@ def _evaluate_grid_hyperparameters(
             f"  Lags: {best_lags} \n"
             f"  Parameters: {best_params}\n"
             f"  Backtesting metric: {best_metric}\n"
+            f"  Levels: {results['levels'].iloc[0]} \n"
+            f"  Levels weights: {levels_weights} \n"
         )
             
     return results
