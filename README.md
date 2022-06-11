@@ -51,7 +51,7 @@ pip3 install -U scikit-learn
 + pandas>=1.2, <=1.4
 + tqdm>=4.57.0, <=4.62
 + scikit-learn>=1.0, <=1.1.1
-+ statsmodels>=0.12, <=0.13
++ statsmodels>=0.12, <=0.13.2
 + optuna==2.10.0
 + scikit-optimize==0.9.0
 
