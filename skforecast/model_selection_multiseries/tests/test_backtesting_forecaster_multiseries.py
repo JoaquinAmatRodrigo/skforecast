@@ -4,6 +4,7 @@ import pytest
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import Ridge
+from skforecast.ForecasterAutoreg import ForecasterAutoreg
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 from skforecast.model_selection_multiseries import backtesting_forecaster_multiseries
 
@@ -157,6 +158,35 @@ def test_backtesting_forecaster_multiseries_exception_when_initial_train_size_No
             metric              = 'mean_absolute_error',
             initial_train_size  = initial_train_size,
             refit               = refit,
+            fixed_train_size    = False,
+            exog                = None,
+            interval            = None,
+            n_boot              = 500,
+            random_state        = 123,
+            in_sample_residuals = True,
+            verbose             = False
+        )
+
+
+def test_backtesting_forecaster_multiseries_exception_when_forecaster_not_ForecasterAutoregMultiSeries():
+    '''
+    Test Exception is raised in backtesting_forecaster_multiseries when forecaster is not of type
+    ForecasterAutoregMultiSeries.
+    '''
+    forecaster = ForecasterAutoreg(
+                    regressor = Ridge(random_state=123),
+                    lags      = 2
+                 )
+    
+    with pytest.raises(Exception):
+        backtesting_forecaster_multiseries(
+            forecaster          = forecaster,
+            series              = series,
+            steps               = 4,
+            level               = '1',
+            metric              = 'mean_absolute_error',
+            initial_train_size  = 12,
+            refit               = False,
             fixed_train_size    = False,
             exog                = None,
             interval            = None,

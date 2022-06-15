@@ -30,6 +30,7 @@ from ..ForecasterAutoreg import ForecasterAutoreg
 from ..ForecasterAutoregCustom import ForecasterAutoregCustom
 from ..ForecasterAutoregDirect import ForecasterAutoregDirect
 from ..ForecasterAutoregMultiOutput import ForecasterAutoregMultiOutput
+from ..ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 
 logging.basicConfig(
     format = '%(name)-10s %(levelname)-5s %(message)s', 
@@ -1024,6 +1025,12 @@ def backtesting_forecaster(
         raise Exception(
             ('Interval prediction is only available when forecaster is of type '
             'ForecasterAutoreg or ForecasterAutoregCustom.')
+        )
+    
+    if isinstance(forecaster, ForecasterAutoregMultiSeries):
+        raise Exception(
+            ('For `forecaster` of type `ForecasterAutoregMultiSeries`, use the '
+             'functions available in the model_selection_multiseries module.')
         )
     
     if refit:

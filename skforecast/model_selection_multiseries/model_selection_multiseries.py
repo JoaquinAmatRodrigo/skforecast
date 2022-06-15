@@ -698,6 +698,12 @@ def backtesting_forecaster_multiseries(
         raise Exception(
             f'`refit` is only allowed when there is a initial_train_size.'
         )
+
+    if not isinstance(forecaster, ForecasterAutoregMultiSeries):
+        raise Exception(
+            ('`forecaster` must be of type `ForecasterAutoregMultiSeries`, for all other '
+             'types of forecasters use the functions in `model_selection` module.')
+        )
     
     if refit:
         metric_value, backtest_predictions = _backtesting_forecaster_multiseries_refit(
