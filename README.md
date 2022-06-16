@@ -150,12 +150,12 @@ If you found skforecast useful, you can support us with a donation. Your contrib
 
 If you use this software, please cite it using the following metadata.
 
-APA:
+**APA**:
 ```
 Amat Rodrigo, J., & Escobar Ortiz, J. skforecast (Version 0.5.0) [Computer software]
 ```
 
-BibTeX:
+**BibTeX**:
 ```
 @software{Amat_Rodrigo_skforecast,
 author = {Amat Rodrigo, Joaquin and Escobar Ortiz, Javier},
@@ -165,7 +165,7 @@ version = {0.5.0}
 }
 ```
 
-View citation [file](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/CITATION.cff).
+View [citation file](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/CITATION.cff).
 
 
 # License
