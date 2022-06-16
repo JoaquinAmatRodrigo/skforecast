@@ -79,7 +79,7 @@ pip3 install -U scikit-learn
 
 Try it:
 
-``` bash
+```bash
 pip install git+https://github.com/JoaquinAmatRodrigo/skforecast#master
 ```
 
