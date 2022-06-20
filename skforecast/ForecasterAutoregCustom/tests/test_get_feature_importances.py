@@ -11,7 +11,7 @@ from sklearn.neural_network import MLPRegressor
 from sklearn.ensemble import RandomForestRegressor
 
 
-def create_predictors(y):
+def create_predictors(y): # pragma: no cover
     '''
     Create first 5 lags of a time series.
     '''

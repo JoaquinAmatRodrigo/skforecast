@@ -11,13 +11,13 @@ def test_check_exog_exception_when_exog_not_series_or_dataframe():
     Check exception is raised when y is not pandas Series
     '''
     with pytest.raises(Exception):
-        check_exog(y=10)
+        check_exog(exog=10)
     
     with pytest.raises(Exception):
-        check_exog(y=[1, 2, 3])
+        check_exog(exog=[1, 2, 3])
     
     with pytest.raises(Exception):
-        check_exog(y=np.arange(10).reshape(-1, 2))
+        check_exog(exog=np.arange(10).reshape(-1, 2))
 
 
 def test_check_exog_exception_when_exog_has_missing_values():

@@ -8,7 +8,7 @@ from sklearn.linear_model import LinearRegression
 from xgboost import XGBRegressor
 
 
-def create_predictors(y):
+def create_predictors(y): # pragma: no cover
     '''
     Create first 5 lags of a time series.
     '''

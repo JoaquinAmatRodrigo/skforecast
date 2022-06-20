@@ -28,3 +28,14 @@ def test_output_expand_index_when_index_is_RangeIndex():
     results = expand_index(index, steps=3)
     
     assert (results == expected).all()
+
+
+def test_output_expand_index_when_index_is_not_pandas_index():
+    '''
+    Test values returned by expand_index when input is not a pandas index.
+    '''
+    index = ['0', '1', '2']
+    expected = pd.RangeIndex(start=0, stop=3, step=1)
+    results = expand_index(index, steps=3)
+    
+    assert (results == expected).all()
