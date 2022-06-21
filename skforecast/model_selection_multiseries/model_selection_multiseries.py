@@ -174,42 +174,57 @@ def _backtesting_forecaster_multiseries_refit(
 
             if i < folds - 1:
                 if exog is None:
-                    forecaster.fit(series=series.iloc[train_idx_start:train_idx_end, ])
+                    forecaster.fit(
+                        series = series.iloc[train_idx_start:train_idx_end, ],
+                        store_in_sample_residuals = False
+                    )
                     pred = forecaster.predict(steps=steps, level=level)
                 else:
                     forecaster.fit(
                         series = series.iloc[train_idx_start:train_idx_end, ], 
-                        exog = exog.iloc[train_idx_start:train_idx_end, ]
+                        exog = exog.iloc[train_idx_start:train_idx_end, ],
+                        store_in_sample_residuals = False
                     )
                     pred = forecaster.predict(steps=steps, level=level, exog=next_window_exog)
             else:    
                 if remainder == 0:
                     if exog is None:
-                        forecaster.fit(series=series.iloc[train_idx_start:train_idx_end, ])
+                        forecaster.fit(
+                            series = series.iloc[train_idx_start:train_idx_end, ],
+                            store_in_sample_residuals = False
+                        )
                         pred = forecaster.predict(steps=steps, level=level)
                     else:
                         forecaster.fit(
                             series = series.iloc[train_idx_start:train_idx_end, ], 
-                            exog = exog.iloc[train_idx_start:train_idx_end, ]
+                            exog = exog.iloc[train_idx_start:train_idx_end, ],
+                            store_in_sample_residuals = False
                         )
                         pred = forecaster.predict(steps=steps, level=level, exog=next_window_exog)
                 else:
                     # Only the remaining steps need to be predicted
                     steps = remainder
                     if exog is None:
-                        forecaster.fit(series=series.iloc[train_idx_start:train_idx_end])
+                        forecaster.fit(
+                            series = series.iloc[train_idx_start:train_idx_end],
+                            store_in_sample_residuals = False
+                        )
                         pred = forecaster.predict(steps=steps, level=level)
                     else:
                         forecaster.fit(
                             series = series.iloc[train_idx_start:train_idx_end], 
-                            exog = exog.iloc[train_idx_start:train_idx_end, ]
+                            exog = exog.iloc[train_idx_start:train_idx_end, ],
+                            store_in_sample_residuals = False
                         )
                         pred = forecaster.predict(steps=steps, level=level, exog=next_window_exog)
         else:
 
             if i < folds - 1:
                 if exog is None:
-                    forecaster.fit(series=series.iloc[train_idx_start:train_idx_end])
+                    forecaster.fit(
+                        series = series.iloc[train_idx_start:train_idx_end],
+                        store_in_sample_residuals = True
+                    )
                     pred = forecaster.predict_interval(
                                 steps        = steps,
                                 level        = level,
@@ -217,11 +232,12 @@ def _backtesting_forecaster_multiseries_refit(
                                 n_boot       = n_boot,
                                 random_state = random_state,
                                 in_sample_residuals = in_sample_residuals
-                            )
+                           )
                 else:
                     forecaster.fit(
                         series = series.iloc[train_idx_start:train_idx_end], 
-                        exog = exog.iloc[train_idx_start:train_idx_end, ]
+                        exog = exog.iloc[train_idx_start:train_idx_end, ],
+                        store_in_sample_residuals = True
                     )
                     pred = forecaster.predict_interval(
                                 steps        = steps,
@@ -235,7 +251,10 @@ def _backtesting_forecaster_multiseries_refit(
             else:    
                 if remainder == 0:
                     if exog is None:
-                        forecaster.fit(series=series.iloc[train_idx_start:train_idx_end])
+                        forecaster.fit(
+                            series = series.iloc[train_idx_start:train_idx_end],
+                            store_in_sample_residuals = True
+                        )
                         pred = forecaster.predict_interval(
                                 steps        = steps,
                                 level        = level,
@@ -247,7 +266,8 @@ def _backtesting_forecaster_multiseries_refit(
                     else:
                         forecaster.fit(
                             series = series.iloc[train_idx_start:train_idx_end], 
-                            exog = exog.iloc[train_idx_start:train_idx_end, ]
+                            exog = exog.iloc[train_idx_start:train_idx_end, ],
+                            store_in_sample_residuals = True
                         )
                         pred = forecaster.predict_interval(
                                 steps        = steps,
@@ -262,7 +282,10 @@ def _backtesting_forecaster_multiseries_refit(
                     # Only the remaining steps need to be predicted
                     steps = remainder
                     if exog is None:
-                        forecaster.fit(series=series.iloc[train_idx_start:train_idx_end])
+                        forecaster.fit(
+                            series = series.iloc[train_idx_start:train_idx_end],
+                            store_in_sample_residuals = True
+                        )
                         pred = forecaster.predict_interval(
                                 steps        = steps,
                                 level        = level,
@@ -274,7 +297,8 @@ def _backtesting_forecaster_multiseries_refit(
                     else:
                         forecaster.fit(
                             series = series.iloc[train_idx_start:train_idx_end], 
-                            exog = exog.iloc[train_idx_start:train_idx_end, ]
+                            exog = exog.iloc[train_idx_start:train_idx_end, ],
+                            store_in_sample_residuals = True
                         )
                         pred = forecaster.predict_interval(
                                 steps        = steps,
@@ -400,11 +424,15 @@ def _backtesting_forecaster_multiseries_no_refit(
     
     if initial_train_size is not None:
         if exog is None:
-            forecaster.fit(series=series.iloc[:initial_train_size, ])      
+            forecaster.fit(
+                series = series.iloc[:initial_train_size, ],
+                store_in_sample_residuals = True
+            )      
         else:
             forecaster.fit(
                 series = series.iloc[:initial_train_size, ],
-                exog = exog.iloc[:initial_train_size, ]
+                exog = exog.iloc[:initial_train_size, ],
+                store_in_sample_residuals = True
             )
         window_size = forecaster.window_size
     else:
@@ -415,7 +443,6 @@ def _backtesting_forecaster_multiseries_no_refit(
 
     folds     = int(np.ceil((len(series.index) - initial_train_size) / steps))
     remainder = (len(series.index) - initial_train_size) % steps
-
 
     if verbose:
         _backtesting_forecaster_verbose(
@@ -1143,7 +1170,7 @@ def _evaluate_grid_hyperparameters_multiseries(
         
         forecaster.set_lags(best_lags)
         forecaster.set_params(**best_params)
-        forecaster.fit(series=series, exog=exog)
+        forecaster.fit(series=series, exog=exog, store_in_sample_residuals=True)
         
         print(
             f"`Forecaster` refitted using the best-found lags and parameters, and the whole data set: \n"

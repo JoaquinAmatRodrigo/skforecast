@@ -232,7 +232,7 @@ class ForecasterAutoregDirect(ForecasterBase):
 
         n_splits = len(y) - self.max_lag - (self.steps -1)
         X_data  = np.full(shape=(n_splits, self.max_lag), fill_value=np.nan, dtype=float)
-        y_data  = np.full(shape=(n_splits, self.steps), fill_value=np.nan, dtype= float)
+        y_data  = np.full(shape=(n_splits, self.steps), fill_value=np.nan, dtype=float)
 
         for i in range(n_splits):
             X_index = np.arange(i, self.max_lag + i)

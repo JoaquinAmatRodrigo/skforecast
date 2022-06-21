@@ -28,14 +28,15 @@ def test_forecaster_index_freq_stored():
 
 def test_fit_in_sample_residuals_stored():
     '''
-    Test that values of in_sample_residuals are stored after fitting.
+    Test that values of in_sample_residuals are stored after fitting
+    when `store_in_sample_residuals=True`.
     '''
     series = pd.DataFrame({'1': pd.Series(np.arange(5)), 
                            '2': pd.Series(np.arange(5))
                            })
 
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
-    forecaster.fit(series=series)
+    forecaster.fit(series=series, store_in_sample_residuals=True)
     expected = {'1': np.array([0, 0]),
                 '2': np.array([0, 0]),
                }
@@ -55,7 +56,7 @@ def test_fit_in_sample_residuals_stored_XGBRegressor():
                            })
 
     forecaster = ForecasterAutoregMultiSeries(XGBRegressor(random_state=123), lags=3)
-    forecaster.fit(series=series)
+    forecaster.fit(series=series, store_in_sample_residuals=True)
     expected = {'1': np.array([-0.00049472,  0.00049543]),
                 '2': np.array([-0.00049472,  0.00049543]),
                }
@@ -76,15 +77,36 @@ def test_fit_same_residuals_when_residuals_greater_than_1000():
                            })
 
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
-    forecaster.fit(series=series)
+    forecaster.fit(series=series, store_in_sample_residuals=True)
     results_1 = forecaster.in_sample_residuals
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
-    forecaster.fit(series=series)
+    forecaster.fit(series=series, store_in_sample_residuals=True)
     results_2 = forecaster.in_sample_residuals
 
     assert results_1.keys() == results_2.keys()
     assert list(results_1.values())[0] == approx(list(results_2.values())[0])
     assert list(results_1.values())[1] == approx(list(results_2.values())[1])
+
+
+def test_fit_in_sample_residuals_not_stored():
+    '''
+    Test that values of in_sample_residuals are not stored after fitting
+    when `store_in_sample_residuals=False`.
+    '''
+    series = pd.DataFrame({'1': pd.Series(np.arange(5)), 
+                           '2': pd.Series(np.arange(5))
+                           })
+
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
+    forecaster.fit(series=series, store_in_sample_residuals=False)
+    expected = {'1': np.array([None]),
+                '2': np.array([None])
+               }
+    results = forecaster.in_sample_residuals
+
+    assert results.keys() == expected.keys()
+    assert list(results.values())[0] == list(expected.values())[0]
+    assert list(results.values())[1] == list(expected.values())[1]
 
 
 def test_fit_last_window_stored():

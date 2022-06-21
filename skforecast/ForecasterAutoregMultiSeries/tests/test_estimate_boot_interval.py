@@ -18,7 +18,7 @@ def test_estimate_boot_interval_output_when_forecaster_is_LinearRegression_steps
                           })
 
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
-    forecaster.fit(series=series)
+    forecaster.fit(series=series, store_in_sample_residuals=True)
 
     forecaster.level = '1'
     forecaster.in_sample_residuals['1'] = np.full_like(forecaster.in_sample_residuals['1'], fill_value=10)
@@ -44,7 +44,7 @@ def test_estimate_boot_interval_output_when_forecaster_is_LinearRegression_steps
                           })
 
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
-    forecaster.fit(series=series)
+    forecaster.fit(series=series, store_in_sample_residuals=True)
 
     forecaster.level = '1'
     forecaster.in_sample_residuals['1'] = np.full_like(forecaster.in_sample_residuals['1'], fill_value=10)
@@ -72,7 +72,7 @@ def test_estimate_boot_interval_output_when_forecaster_is_LinearRegression_steps
                           })
 
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
-    forecaster.fit(series=series)
+    forecaster.fit(series=series, store_in_sample_residuals=True)
 
     forecaster.level = '1'
     forecaster.out_sample_residuals = pd.Series(np.full_like(forecaster.in_sample_residuals['1'], fill_value=10))
@@ -98,7 +98,7 @@ def test_estimate_boot_interval_output_when_forecaster_is_LinearRegression_steps
                           })
 
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
-    forecaster.fit(series=series)
+    forecaster.fit(series=series, store_in_sample_residuals=True)
 
     forecaster.level = '1'
     forecaster.out_sample_residuals = pd.Series(np.full_like(forecaster.in_sample_residuals['1'], fill_value=10))

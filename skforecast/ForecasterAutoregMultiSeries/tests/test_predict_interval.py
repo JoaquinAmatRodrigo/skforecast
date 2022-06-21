@@ -1,9 +1,26 @@
 # Unit test set_out_sample_residuals ForecasterAutoregMultiSeries
 # ==============================================================================
+import pytest
 import numpy as np
 import pandas as pd
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 from sklearn.linear_model import LinearRegression
+
+
+def test_predict_interval_exception_when_forecaster_in_sample_residuals_are_not_stored():
+    '''
+    Test exception is raised when forecaster.in_sample_residuals are not stored 
+    during fit method.
+    '''
+    series = pd.DataFrame({'1': pd.Series(np.arange(10)), 
+                           '2': pd.Series(np.arange(10))
+                          })
+
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
+    forecaster.fit(series=series, store_in_sample_residuals=False)
+
+    with pytest.raises(Exception):
+        forecaster.predict_interval(steps=1, level='1', in_sample_residuals=True)
 
 
 def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_1_in_sample_residuals_is_True():
@@ -16,7 +33,7 @@ def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_1_
                           })
 
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
-    forecaster.fit(series=series)
+    forecaster.fit(series=series, store_in_sample_residuals=True)
 
     forecaster.in_sample_residuals['1'] = np.full_like(forecaster.in_sample_residuals['1'], fill_value=10)
     expected_1 = pd.DataFrame(
@@ -48,7 +65,7 @@ def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_2_
                           })
 
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
-    forecaster.fit(series=series)
+    forecaster.fit(series=series, store_in_sample_residuals=True)
 
     forecaster.in_sample_residuals['1'] = np.full_like(forecaster.in_sample_residuals['1'], fill_value=10)
     expected_1 = pd.DataFrame(
@@ -84,7 +101,7 @@ def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_1_
                           })
 
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
-    forecaster.fit(series=series)
+    forecaster.fit(series=series, store_in_sample_residuals=True)
 
     forecaster.out_sample_residuals = pd.Series(np.full_like(forecaster.in_sample_residuals['1'], fill_value=10))
     expected_1 = pd.DataFrame(
@@ -116,7 +133,7 @@ def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_2_
                           })
 
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
-    forecaster.fit(series=series)
+    forecaster.fit(series=series, store_in_sample_residuals=True)
 
     forecaster.out_sample_residuals = pd.Series(np.full_like(forecaster.in_sample_residuals['1'], fill_value=10))
     expected_1 = pd.DataFrame(

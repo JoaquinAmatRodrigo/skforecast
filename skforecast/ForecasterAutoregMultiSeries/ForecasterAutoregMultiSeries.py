@@ -225,7 +225,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
           
         n_splits = len(y) - self.max_lag
         X_data   = np.full(shape=(n_splits, self.max_lag), fill_value=np.nan, dtype=float)
-        y_data   = np.full(shape=(n_splits, 1), fill_value=np.nan, dtype= float)
+        y_data   = np.full(shape=(n_splits, 1), fill_value=np.nan, dtype=float)
 
         for i in range(n_splits):
             X_index = np.arange(i, self.max_lag + i)
@@ -266,7 +266,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             Values (target) of the time series related to each row of `X_train`.
         
         '''
-        
+
         if not isinstance(series, pd.DataFrame):
             raise Exception('`series` must be a pandas DataFrame.')
         
@@ -342,7 +342,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
     def fit(
         self,
         series: pd.DataFrame,
-        exog: Optional[Union[pd.Series, pd.DataFrame]]=None
+        exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+        store_in_sample_residuals: bool=True
     ) -> None:
         '''
         Training Forecaster.
@@ -356,6 +357,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             Exogenous variable/s included as predictor/s. Must have the same
             number of observations as `y` and their indexes must be aligned so
             that y[i] is regressed on exog[i].
+
+        store_in_sample_residuals : bool, default `True`
+            if True, in_sample_residuals are stored.
 
         Returns 
         -------
@@ -382,7 +386,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             self.exog_type = type(exog)
             self.exog_col_names = \
                  exog.columns.to_list() if isinstance(exog, pd.DataFrame) else exog.name
- 
+
         X_train, y_train, y_index = self.create_train_X_y(series=series, exog=exog)
 
         if not str(type(self.regressor)) == "<class 'xgboost.sklearn.XGBRegressor'>":
@@ -399,45 +403,51 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         else: 
             self.index_freq = y_index.step
         self.index_values = y_index
-        
-        if not str(type(self.regressor)) == "<class 'xgboost.sklearn.XGBRegressor'>":
-            residuals = y_train - self.regressor.predict(X_train)
-        else:
-            residuals = y_train - self.regressor.predict(X_train.to_numpy())
 
         residuals_dict = {}
-
-        for serie in list(series.columns):
-            residuals_values = np.column_stack((residuals.values, X_train[serie].values))
-            residuals_dict[serie] = residuals_values[residuals_values[:, 1] == 1.][:, 0]
-
-        total_n_residuals = len(list(residuals_dict.values())[0])*len(residuals_dict.keys())
-
-        if total_n_residuals > 1000:
-            # Only up to 1000 residuals are stored
-            n_samples_per_level = int(1000/len(list(residuals_dict.keys())))
-            
-            for key in residuals_dict.keys():
-                rng = np.random.default_rng(seed=123)
-                residuals_dict[key] = rng.choice(a= residuals_dict[key], 
-                                                 size=n_samples_per_level, 
-                                                 replace=False
-                                      ) 
-
-            if n_samples_per_level < 50:
-                warnings.warn(
-                    f'Due to the high number of levels, the size of residues stored in '
-                    f'`in_sample_residuals` for each level is less than 50. '
-                    f'Consider setting other residues using `set_out_sample_residuals` '
-                    f'before using `predict_interval`.'
-                )
-            
-        self.in_sample_residuals = residuals_dict
         
+        # This is done to save time during fit in functions such as backtesting()
+        if store_in_sample_residuals:
+
+            if not str(type(self.regressor)) == "<class 'xgboost.sklearn.XGBRegressor'>":
+                residuals = y_train - self.regressor.predict(X_train)
+            else:
+                residuals = y_train - self.regressor.predict(X_train.to_numpy())
+
+            for serie in list(series.columns):
+                residuals_values = np.column_stack((residuals.values, X_train[serie].values))
+                residuals_dict[serie] = residuals_values[residuals_values[:, 1] == 1.][:, 0]
+
+            total_n_residuals = len(list(residuals_dict.values())[0])*len(residuals_dict.keys())
+
+            if total_n_residuals > 1000:
+                # Only up to 1000 residuals are stored
+                n_samples_per_level = int(1000/len(list(residuals_dict.keys())))
+                
+                for key in residuals_dict.keys():
+                    rng = np.random.default_rng(seed=123)
+                    residuals_dict[key] = rng.choice(a= residuals_dict[key], 
+                                                    size=n_samples_per_level, 
+                                                    replace=False
+                                          ) 
+
+                if n_samples_per_level < 50:
+                    warnings.warn(
+                        f'Due to the high number of levels, the size of residues stored in '
+                        f'`in_sample_residuals` for each level is less than 50. '
+                        f'Consider setting other residues using `set_out_sample_residuals` '
+                        f'before using `predict_interval`.'
+                    )
+        else:
+            for serie in list(series.columns):
+                residuals_dict[serie] = np.array([None])
+
+        self.in_sample_residuals = residuals_dict
+
         # The last time window of training data is stored so that lags needed as
         # predictors in the first iteration of `predict()` can be calculated.
         self.last_window = series.iloc[-self.max_lag:, ].copy()
-    
+
 
     def _recursive_predict(
         self,
@@ -475,7 +485,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             if exog is not None:
                 X = np.column_stack((X, exog[i, ].reshape(1, -1)))
 
-            levels_dummies = np.zeros(shape=(1, len(self.in_sample_residuals.keys())), dtype= float)
+            levels_dummies = np.zeros(shape=(1, len(self.in_sample_residuals.keys())), dtype=float)
             levels_dummies[0][list(self.in_sample_residuals.keys()).index(self.level)] = 1.
 
             X = np.column_stack((X, levels_dummies.reshape(1, -1)))
@@ -784,6 +794,14 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             
         '''
         
+        if in_sample_residuals and (self.in_sample_residuals[level] == None).any():
+            raise Exception(
+                ('`forecaster.in_sample_residuals[level]` contains `None` values. '
+                 'Try using `fit` method with `in_sample_residuals=True` or set in '
+                 '`predict_interval` method `in_sample_residuals=False` and use '
+                 '`out_sample_residuals` (see `set_out_sample_residuals()`).')
+            )
+
         self.level = level
         
         check_predict_input(
