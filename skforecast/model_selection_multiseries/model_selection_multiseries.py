@@ -1117,8 +1117,14 @@ def _evaluate_grid_hyperparameters_multiseries(
     metric_list = []
 
     print(
-        f"Number of models compared: {len(param_grid)*len(lags_grid)*len(levels_list)}."
+        f'{len(param_grid)*len(lags_grid)} models compared for {len(levels_list)} level(s). '
+        f'Number of iterations: {len(param_grid)*len(lags_grid)*len(levels_list)}.'
     )
+
+    if len(levels_list) >= 2:
+        print(
+            f'Level weights for metric evaluation: {levels_weights}'
+        )
 
     for lags in tqdm(lags_grid, desc='loop lags_grid', position=0, ncols=90):
         
