@@ -157,7 +157,7 @@ Amat Rodrigo, J., & Escobar Ortiz, J. skforecast (Version 0.5.0) [Computer softw
 
 **BibTeX**:
 ```
-@software{Amat_Rodrigo_skforecast,
+@software{skforecast,
 author = {Amat Rodrigo, Joaquin and Escobar Ortiz, Javier},
 license = {MIT},
 title = {{skforecast}},

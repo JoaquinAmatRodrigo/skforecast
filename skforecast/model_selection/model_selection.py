@@ -309,18 +309,7 @@ def _backtesting_forecaster_verbose(
     fixed_train_size: bool=True
 ) -> None:
     '''
-    Backtesting of forecaster model with a re-fitting strategy. A copy of the  
-    original forecaster is created so it is not modified during the process.
-    
-    In each iteration:
-        - Fit forecaster with the training set.
-        - A number of `steps` ahead are predicted.
-        - The training set increases with `steps` observations.
-        - The model is re-fitted using the new training set.
-
-    In order to apply backtesting with re-fit, an initial training set must be
-    available, otherwise it would not be possible to increase the training set 
-    after each iteration. `initial_train_size` must be provided.
+    Verbose for backtesting_forecaster functions.
     
     Parameters
     ----------        
