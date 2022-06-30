@@ -57,9 +57,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
     lags : numpy ndarray
         Lags used as predictors.
 
-    level : str
-        Time series to be predicted.
-
     max_lag : int
         Maximum value of lag included in `lags`.
 
@@ -133,7 +130,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.in_sample_residuals  = None
         self.out_sample_residuals = None
         self.fitted               = False
-        self.level                = None
         self.creation_date        = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
         self.fit_date             = None
         self.skforcast_version    = skforecast.__version__
@@ -270,16 +266,16 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         if not isinstance(series, pd.DataFrame):
             raise Exception('`series` must be a pandas DataFrame.')
         
-        X_levels = np.array([])
+        X_levels = []
 
-        for j, serie in enumerate(list(series.columns)):
+        for i, serie in enumerate(series.columns):
 
             y = series[serie]
             check_y(y=y)
             y_values, y_index = preprocess_y(y=y)
 
-            if j==0:
-                X_train_col_names = [f"lag_{i}" for i in self.lags]
+            if i==0:
+                X_train_col_names = [f"lag_{j}" for j in self.lags]
                 if exog is not None:
                     if len(exog) != len(series):
                         raise Exception(
@@ -302,7 +298,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 # since they are not in X_train.
                 X_train_values = np.column_stack((X_train_values, exog_values[self.max_lag:, ]))
 
-            if j==0:
+            if i==0:
                 X_train = X_train_values
 
                 y_train = pd.Series(
@@ -320,13 +316,13 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                                     ]
                           )
 
-            X_level = np.full(shape=(len(X_train_values), 1), fill_value=f'{serie}', dtype=object)
-            X_levels = np.append(X_levels, X_level)
+            X_level = [serie]*len(X_train_values)
+            X_levels.extend(X_level)
 
         X_levels = pd.Series(X_levels)
         X_levels = pd.get_dummies(X_levels, dtype=float)
 
-        X_train_col_names.extend(list(X_levels.columns))
+        X_train_col_names.extend(X_levels.columns)
         X_train = np.column_stack((X_train, X_levels.values))
 
         X_train = pd.DataFrame(
@@ -378,7 +374,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.X_train_col_names    = None
         self.in_sample_residuals  = None
         self.fitted               = False
-        self.level                = None
         self.training_range       = None
         
         if exog is not None:
@@ -414,15 +409,15 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             else:
                 residuals = y_train - self.regressor.predict(X_train.to_numpy())
 
-            for serie in list(series.columns):
+            for serie in series.columns:
                 residuals_values = np.column_stack((residuals.values, X_train[serie].values))
                 residuals_dict[serie] = residuals_values[residuals_values[:, 1] == 1.][:, 0]
 
-            total_n_residuals = len(list(residuals_dict.values())[0])*len(residuals_dict.keys())
+            total_n_residuals = len(list(residuals_dict.values())[0])*len(residuals_dict)
 
             if total_n_residuals > 1000:
                 # Only up to 1000 residuals are stored
-                n_samples_per_level = int(1000/len(list(residuals_dict.keys())))
+                n_samples_per_level = int(1000/len(residuals_dict))
                 
                 for key in residuals_dict.keys():
                     rng = np.random.default_rng(seed=123)
@@ -439,7 +434,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                         f'before using `predict_interval`.'
                     )
         else:
-            for serie in list(series.columns):
+            for serie in series.columns:
                 residuals_dict[serie] = np.array([None])
 
         self.in_sample_residuals = residuals_dict
@@ -452,6 +447,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
     def _recursive_predict(
         self,
         steps: int,
+        level: str,
         last_window: np.array,
         exog: np.array
     ) -> pd.Series:
@@ -463,6 +459,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         ----------
         steps : int
             Number of future steps predicted.
+            
+        level : str
+            Time series to be predicted.
         
         last_window : numpy ndarray
             Values of the series used to create the predictors (lags) need in the 
@@ -486,7 +485,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 X = np.column_stack((X, exog[i, ].reshape(1, -1)))
 
             levels_dummies = np.zeros(shape=(1, len(self.in_sample_residuals.keys())), dtype=float)
-            levels_dummies[0][list(self.in_sample_residuals.keys()).index(self.level)] = 1.
+            levels_dummies[0][list(self.in_sample_residuals.keys()).index(level)] = 1.
 
             X = np.column_stack((X, levels_dummies.reshape(1, -1)))
 
@@ -541,8 +540,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             
         '''
         
-        self.level = level
-        
         check_predict_input(
             forecaster_type = type(self),
             steps           = steps,
@@ -583,6 +580,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             
         predictions = self._recursive_predict(
                         steps       = steps,
+                        level       = level,
                         last_window = copy(last_window_values),
                         exog        = copy(exog_values)
                       )
@@ -602,6 +600,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
     def _estimate_boot_interval(
         self,
         steps: int,
+        level: str,
         last_window: Optional[np.ndarray]=None,
         exog: Optional[np.ndarray]=None,
         interval: list=[5, 95],
@@ -619,6 +618,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         ----------   
         steps : int
             Number of future steps predicted.
+            
+        level : str
+            Time series to be predicted.
             
         last_window : 1d numpy ndarray shape (, max_lag), default `None`
             Values of the series used to create the predictors (lags) needed in the 
@@ -667,7 +669,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         '''
         
         if last_window is None:
-            last_window = self.last_window[self.level]
+            last_window = self.last_window[level]
             last_window = last_window.values
 
         boot_predictions = np.full(
@@ -688,7 +690,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 exog_boot = None
 
             if in_sample_residuals:
-                residuals = self.in_sample_residuals[self.level]
+                residuals = self.in_sample_residuals[level]
             else:
                 residuals = self.out_sample_residuals
 
@@ -702,6 +704,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             for step in range(steps):
                 prediction = self._recursive_predict(
                                 steps       = 1,
+                                level       = level,
                                 last_window = last_window_boot,
                                 exog        = exog_boot 
                              )
@@ -801,8 +804,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                  '`predict_interval` method `in_sample_residuals=False` and use '
                  '`out_sample_residuals` (see `set_out_sample_residuals()`).')
             )
-
-        self.level = level
         
         check_predict_input(
             forecaster_type = type(self),
@@ -852,12 +853,14 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
               
         predictions = self._recursive_predict(
                             steps       = steps,
+                            level       = level,
                             last_window = last_window_values,
                             exog        = exog_values
                       )
 
         predictions_interval = self._estimate_boot_interval(
                                     steps       = steps,
+                                    level       = level,
                                     last_window = copy(last_window_values_original),
                                     exog        = copy(exog_values_original),
                                     interval    = interval,
