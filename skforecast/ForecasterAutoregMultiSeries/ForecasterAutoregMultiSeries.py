@@ -93,6 +93,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         Names of columns of `exog` if `exog` used in training was a pandas
         DataFrame.
 
+    series_levels : list
+        Names of the columns (levels) that can be predicted.
+
     X_train_col_names : list
         Names of columns of the matrix created internally for training.
         
@@ -126,6 +129,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.included_exog        = False
         self.exog_type            = None
         self.exog_col_names       = None
+        self.series_levels        = None
         self.X_train_col_names    = None
         self.in_sample_residuals  = None
         self.out_sample_residuals = None
@@ -180,6 +184,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             f"Regressor: {self.regressor} \n"
             f"Lags: {self.lags} \n"
             f"Window size: {self.window_size} \n"
+            f"Series levels: {self.series_levels} \n"
             f"Included exogenous: {self.included_exog} \n"
             f"Type of exogenous variable: {self.exog_type} \n"
             f"Exogenous variables names: {self.exog_col_names} \n"
@@ -371,6 +376,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.included_exog        = False
         self.exog_type            = None
         self.exog_col_names       = None
+        self.series_levels        = None
         self.X_train_col_names    = None
         self.in_sample_residuals  = None
         self.fitted               = False
@@ -818,6 +824,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             exog_type       = self.exog_type,
             exog_col_names  = self.exog_col_names,
             max_steps       = None,
+            level           = level,
+            series_levels   = self.series_levels
         ) 
         
         if exog is not None:

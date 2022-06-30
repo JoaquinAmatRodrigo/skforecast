@@ -775,7 +775,7 @@ def grid_search_forecaster_multiseries(
     metric: Union[str, callable],
     initial_train_size: int,
     fixed_train_size: bool=True,
-    levels_list: list=None,
+    levels_list: Union[str, list]=None,
     levels_weights: dict=None,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Optional[list]=None,
@@ -818,10 +818,10 @@ def grid_search_forecaster_multiseries(
     fixed_train_size : bool, default `True`
         If True, train size doesn't increases but moves by `steps` in each iteration.
 
-    levels_list : list, default `None`
-        levels on which the forecaster is optimized. If `None`, all levels are 
-        taken into acount.The resulting metric will be a weighted average of the 
-        optimization of all levels. See also `levels_weights`.
+    levels_list : str, list, default `None`
+        level (`str`) or levels (`list`) on which the forecaster is optimized. 
+        If `None`, all levels are taken into acount.The resulting metric will be
+        a weighted average of the optimization of all levels. See also `levels_weights`.
 
     levels_weights : dict, default `None`
         Weights associated with levels in the form `{level: weight}`. 
@@ -885,7 +885,7 @@ def random_search_forecaster_multiseries(
     metric: Union[str, callable],
     initial_train_size: int,
     fixed_train_size: bool=True,
-    levels_list: list=None,
+    levels_list: Union[str, list]=None,
     levels_weights: dict=None,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Optional[list]=None,
@@ -930,10 +930,10 @@ def random_search_forecaster_multiseries(
     fixed_train_size : bool, default `True`
         If True, train size doesn't increases but moves by `steps` in each iteration.
 
-    levels_list : list, default `None`
-        levels on which the forecaster is optimized. If `None`, all levels are 
-        taken into acount.The resulting metric will be a weighted average of the 
-        optimization of all levels. See also `levels_weights`.
+    levels_list : str, list, default `None`
+        level (`str`) or levels (`list`) on which the forecaster is optimized. 
+        If `None`, all levels are taken into acount.The resulting metric will be
+        a weighted average of the optimization of all levels. See also `levels_weights`.
 
     levels_weights : dict, default `None`
         Weights associated with levels in the form `{level: weight}`. 
@@ -1004,7 +1004,7 @@ def _evaluate_grid_hyperparameters_multiseries(
     metric: Union[str, callable],
     initial_train_size: int,
     fixed_train_size: bool=True,
-    levels_list: list=None,
+    levels_list: Union[str, list]=None,
     levels_weights: dict=None,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Optional[list]=None,
@@ -1046,10 +1046,10 @@ def _evaluate_grid_hyperparameters_multiseries(
     fixed_train_size : bool, default `True`
         If True, train size doesn't increases but moves by `steps` in each iteration.
 
-    levels_list : list, default `None`
-        levels on which the forecaster is optimized. If `None`, all levels are 
-        taken into acount.The resulting metric will be a weighted average of the 
-        optimization of all levels. See also `levels_weights`.
+    levels_list : str, list, default `None`
+        level (`str`) or levels (`list`) on which the forecaster is optimized. 
+        If `None`, all levels are taken into acount.The resulting metric will be
+        a weighted average of the optimization of all levels. See also `levels_weights`.
 
     levels_weights : dict, default `None`
         Weights associated with levels in the form `{level: weight}`. 
@@ -1083,18 +1083,20 @@ def _evaluate_grid_hyperparameters_multiseries(
             additional n columns with param = value.
     '''
 
-    if levels_list is not None and not isinstance(levels_list, list):
+    if levels_list is not None and not isinstance(levels_list, (str, list)):
         raise Exception(
-            f'`levels_list` must be a list of column names or `None`.'
+            f'`levels_list` must be a `list` of column names, a `str` of a column name or `None`.'
         )
 
     if levels_weights is not None and not isinstance(levels_weights, dict):
         raise Exception(
-            f'`levels_weights` must be a dict or `None`.'
+            f'`levels_weights` must be a `dict` or `None`.'
         )
 
     if levels_list is None:
         levels_list = list(series.columns)
+    elif isinstance(levels_list, str):
+        levels_list = [levels_list]
 
     if levels_weights is None:
         levels_weights = {col: 1./len(levels_list) for col in levels_list}

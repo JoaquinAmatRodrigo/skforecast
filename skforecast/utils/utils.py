@@ -72,7 +72,9 @@ def check_predict_input(
     exog: Union[pd.Series, pd.DataFrame]=None,
     exog_type: Union[type, None]=None,
     exog_col_names: Union[list, None]=None,
-    max_steps: int=None
+    max_steps: int=None,
+    level: str=None,
+    series_levels: list=None
 ) -> None:
     '''
     Check all inputs of predict method. This is a helper function to validate
@@ -120,6 +122,12 @@ def check_predict_input(
 
     max_steps: int
         Maximum number of steps allowed.
+            
+    level : str
+        Time series to be predicted.
+
+    series_levels : list
+        Names of the columns (levels) that can be predicted.
     '''
 
     if not fitted:
@@ -141,6 +149,9 @@ def check_predict_input(
                 f"is {max_steps}."
             )
     
+    if str(forecaster_type).split('.')[1] == 'ForecasterAutoregMultiSeries':
+        pass #comprobar level esta en series_levls
+
     if exog is None and included_exog:
         raise Exception(
             'Forecaster trained with exogenous variable/s. '
