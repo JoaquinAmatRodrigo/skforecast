@@ -272,68 +272,69 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             raise Exception('`series` must be a pandas DataFrame.')
         
         X_levels = []
+        X_train_col_names = [f"lag_{lag}" for lag in self.lags]
 
         for i, serie in enumerate(series.columns):
 
             y = series[serie]
             check_y(y=y)
             y_values, y_index = preprocess_y(y=y)
-
-            if i==0:
-                X_train_col_names = [f"lag_{j}" for j in self.lags]
-                if exog is not None:
-                    if len(exog) != len(series):
-                        raise Exception(
-                            "`exog` must have same number of samples as `series`."
-                        )
-                    check_exog(exog=exog)
-                    exog_values, exog_index = preprocess_exog(exog=exog)
-                    if not (exog_index[:len(y_index)] == y_index).all():
-                        raise Exception(
-                            ('Different index for `series` and `exog`. They must be equal '
-                            'to ensure the correct alignment of values.')      
-                        )
-                    col_names_exog = exog.columns if isinstance(exog, pd.DataFrame) else [exog.name]
-                    X_train_col_names.extend(col_names_exog)
-
             X_train_values, y_train_values = self._create_lags(y=y_values)
 
-            if exog is not None:
-                # The first `self.max_lag` positions have to be removed from exog
-                # since they are not in X_train.
-                X_train_values = np.column_stack((X_train_values, exog_values[self.max_lag:, ]))
-
-            if i==0:
+            if i == 0:
                 X_train = X_train_values
-
-                y_train = pd.Series(
-                            data  = y_train_values,
-                            name  = 'y'
-                          )
+                y_train = y_train_values
             else:
                 X_train = np.vstack((X_train, X_train_values))
-
-                y_train = pd.concat([y_train, 
-                                     pd.Series(
-                                        data  = y_train_values,
-                                        name  = 'y'
-                                     )
-                                    ]
-                          )
+                y_train = np.append(y_train, y_train_values)
 
             X_level = [serie]*len(X_train_values)
             X_levels.extend(X_level)
 
+        if exog is not None:
+            if len(exog) != len(series):
+                raise Exception(
+                    "`exog` must have same number of samples as `series`."
+                )
+            check_exog(exog=exog)
+            exog_values, exog_index = preprocess_exog(exog=exog)
+            if not (exog_index[:len(y_index)] == y_index).all():
+                raise Exception(
+                    ('Different index for `series` and `exog`. They must be equal '
+                    'to ensure the correct alignment of values.')      
+                )
+            col_names_exog = exog.columns if isinstance(exog, pd.DataFrame) else [exog.name]
+            X_train_col_names.extend(col_names_exog)
+
+            # The first `self.max_lag` positions have to be removed from exog
+            # since they are not in X_train. Then exog is cloned as many times
+            # as series.
+            if exog_values.ndim == 1:
+                X_train = np.column_stack((
+                            X_train,
+                            np.tile(exog_values[self.max_lag:, ], series.shape[1])
+                          )) 
+
+            else:
+                X_train = np.column_stack((
+                            X_train,
+                            np.tile(exog_values[self.max_lag:, ], [series.shape[1], 1])
+                          ))
+
         X_levels = pd.Series(X_levels)
         X_levels = pd.get_dummies(X_levels, dtype=float)
-
         X_train_col_names.extend(X_levels.columns)
         X_train = np.column_stack((X_train, X_levels.values))
 
         X_train = pd.DataFrame(
                     data    = X_train,
                     columns = X_train_col_names
-                  )
+                )
+
+        y_train = pd.Series(
+                    data  = y_train,
+                    name  = 'y'
+                )
         
         self.X_train_col_names = X_train_col_names
 
@@ -382,6 +383,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.fitted               = False
         self.training_range       = None
         
+        self.series_levels = list(series.columns)
+
         if exog is not None:
             self.included_exog = True
             self.exog_type = type(exog)
@@ -416,29 +419,15 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 residuals = y_train - self.regressor.predict(X_train.to_numpy())
 
             for serie in series.columns:
-                residuals_values = np.column_stack((residuals.values, X_train[serie].values))
-                residuals_dict[serie] = residuals_values[residuals_values[:, 1] == 1.][:, 0]
-
-            total_n_residuals = len(list(residuals_dict.values())[0])*len(residuals_dict)
-
-            if total_n_residuals > 1000:
-                # Only up to 1000 residuals are stored
-                n_samples_per_level = int(1000/len(residuals_dict))
-                
-                for key in residuals_dict.keys():
+                residuals_dict[serie] = residuals.values[X_train[serie] == 1.]
+                if len(residuals_dict[serie]) > 1000:
+                    # Only up to 1000 residuals are stored
                     rng = np.random.default_rng(seed=123)
-                    residuals_dict[key] = rng.choice(a= residuals_dict[key], 
-                                                    size=n_samples_per_level, 
-                                                    replace=False
-                                          ) 
-
-                if n_samples_per_level < 50:
-                    warnings.warn(
-                        f'Due to the high number of levels, the size of residues stored in '
-                        f'`in_sample_residuals` for each level is less than 50. '
-                        f'Consider setting other residues using `set_out_sample_residuals` '
-                        f'before using `predict_interval`.'
-                    )
+                    residuals_dict[serie] = rng.choice(
+                                                a       = residuals_dict[serie], 
+                                                size    = 1000, 
+                                                replace = False
+                                            )
         else:
             for serie in series.columns:
                 residuals_dict[serie] = np.array([None])
@@ -489,9 +478,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             X = last_window[-self.lags].reshape(1, -1)
             if exog is not None:
                 X = np.column_stack((X, exog[i, ].reshape(1, -1)))
-
-            levels_dummies = np.zeros(shape=(1, len(self.in_sample_residuals.keys())), dtype=float)
-            levels_dummies[0][list(self.in_sample_residuals.keys()).index(level)] = 1.
+            
+            levels_dummies = np.zeros(shape=(1, len(self.series_levels)), dtype=float)
+            levels_dummies[0][self.series_levels.index(level)] = 1.
 
             X = np.column_stack((X, levels_dummies.reshape(1, -1)))
 
@@ -559,7 +548,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             exog_type       = self.exog_type,
             exog_col_names  = self.exog_col_names,
             max_steps       = None,
-        ) 
+            level           = level,
+            series_levels   = self.series_levels
+        )
 
         if exog is not None:
             if isinstance(exog, pd.DataFrame):

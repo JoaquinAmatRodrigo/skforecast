@@ -150,7 +150,10 @@ def check_predict_input(
             )
     
     if str(forecaster_type).split('.')[1] == 'ForecasterAutoregMultiSeries':
-        pass #comprobar level esta en series_levls
+        if level not in series_levels:
+            raise Exception(
+                f'`level` must be one of the `series_levels` : {series_levels}'
+            )
 
     if exog is None and included_exog:
         raise Exception(

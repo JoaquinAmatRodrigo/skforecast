@@ -72,8 +72,8 @@ def test_fit_same_residuals_when_residuals_greater_than_1000():
     Test fit return same residuals when residuals len is greater than 1000.
     Testing with two different forecaster.
     '''
-    series = pd.DataFrame({'1': pd.Series(np.arange(520)), 
-                           '2': pd.Series(np.arange(520))
+    series = pd.DataFrame({'1': pd.Series(np.arange(1010)), 
+                           '2': pd.Series(np.arange(1010))
                            })
 
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)

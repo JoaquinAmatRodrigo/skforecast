@@ -42,8 +42,9 @@ def test_create_train_X_y_output_when_series_and_exog_is_None():
                     columns = ['lag_1', 'lag_2', 'lag_3', '1', '2']
                 ),
                 pd.Series(
-                    np.array([3, 4, 5, 6, 3, 4, 5, 6]),
-                    index = np.array([0, 1, 2, 3, 0, 1, 2, 3]))
+                    np.array([3., 4., 5., 6., 3., 4., 5., 6.]),
+                    index = np.array([0, 1, 2, 3, 4, 5, 6, 7]),
+                    name = 'y')
                )
 
     pd.testing.assert_frame_equal(results[0], expected[0])
@@ -78,8 +79,9 @@ def test_create_train_X_y_output_when_series_10_and_exog_is_series():
                     columns = ['lag_1', 'lag_2', 'lag_3', 'exog', '1', '2']
                 ),
                 pd.Series(
-                    np.array([3, 4, 5, 6, 3, 4, 5, 6]),
-                    index = np.array([0, 1, 2, 3, 0, 1, 2, 3]))
+                    np.array([3., 4., 5., 6., 3., 4., 5., 6.]),
+                    index = np.array([0, 1, 2, 3, 4, 5, 6, 7]),
+                    name = 'y')
                )
 
     pd.testing.assert_frame_equal(results[0], expected[0])
@@ -117,8 +119,9 @@ def test_create_train_X_y_output_when_series_10_and_exog_is_dataframe():
                     columns = ['lag_1', 'lag_2', 'lag_3', 'exog_1', 'exog_2', '1', '2']
                 ),
                 pd.Series(
-                    np.array([3, 4, 5, 6, 3, 4, 5, 6]),
-                    index = np.array([0, 1, 2, 3, 0, 1, 2, 3]))
+                    np.array([3., 4., 5., 6., 3., 4., 5., 6.]),
+                    index = np.array([0, 1, 2, 3, 4, 5, 6, 7]),
+                    name = 'y')
                )
 
     pd.testing.assert_frame_equal(results[0], expected[0])

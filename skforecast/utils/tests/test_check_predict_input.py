@@ -29,7 +29,7 @@ def test_check_input_predict_exception_when_fitted_is_False():
         
 def test_check_input_predict_exception_when_steps_is_lower_than_1():
     '''
-    Test exception is steps is a value lower than 1.
+    Test exception is raised when steps is a value lower than 1.
     '''
     with pytest.raises(Exception):
         check_predict_input(
@@ -50,6 +50,7 @@ def test_check_input_predict_exception_when_steps_is_lower_than_1():
 
 def test_check_input_predict_exception_when_steps_is_greater_than_max_steps():
     '''
+    Test exception is raised when steps > max_steps.
     '''
     with pytest.raises(Exception):
         check_predict_input(
@@ -65,6 +66,30 @@ def test_check_input_predict_exception_when_steps_is_greater_than_max_steps():
             exog_type       = None,
             exog_col_names  = None,
             max_steps       = 10,
+        )
+
+
+def test_check_input_predict_exception_when_ForecasterAutoregMultiSeries_and_level_not_in_series_levels():
+    '''
+    Test exception is raised when `level` is not in `self.series_levels` in a 
+    ForecasterAutoregMultiSeries.
+    '''
+    with pytest.raises(Exception):
+        check_predict_input(
+            forecaster_type = 'class.ForecasterAutoregMultiSeries',
+            steps           = 5,
+            fitted          = True,
+            included_exog   = False,
+            index_type      = None,
+            index_freq      = None,
+            window_size     = None,
+            last_window     = None,
+            exog            = None,
+            exog_type       = None,
+            exog_col_names  = None,
+            max_steps       = 10,
+            level           = '1',
+            series_levels   = ['2', '3']
         )
 
 
