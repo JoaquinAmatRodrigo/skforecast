@@ -6,7 +6,7 @@ from skforecast.ForecasterAutoregCustom import ForecasterAutoregCustom
 from sklearn.linear_model import LinearRegression
 
 
-def create_predictors(y):
+def create_predictors(y): # pragma: no cover
     '''
     Create first 5 lags of a time series.
     '''
@@ -70,7 +70,7 @@ def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_1_
                         window_size    = 5
                     )
     forecaster.fit(y=pd.Series(np.arange(10)))
-    forecaster.out_sample_residuals = np.full_like(forecaster.in_sample_residuals, fill_value=10)
+    forecaster.out_sample_residuals = pd.Series(np.full_like(forecaster.in_sample_residuals, fill_value=10))
     expected = pd.DataFrame(
                    np.array([[10., 20., 20.]]),
                    columns = ['pred', 'lower_bound', 'upper_bound'],
@@ -91,7 +91,7 @@ def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_2_
                         window_size    = 5
                     )
     forecaster.fit(y=pd.Series(np.arange(10)))
-    forecaster.out_sample_residuals = np.full_like(forecaster.in_sample_residuals, fill_value=10)
+    forecaster.out_sample_residuals = pd.Series(np.full_like(forecaster.in_sample_residuals, fill_value=10))
     expected = pd.DataFrame(
                    np.array([[10., 20., 20.],
                          [11., 23., 23.]]),

@@ -10,10 +10,10 @@ def test_set_params():
     new_params = {'fit_intercept': False}
     forecaster.set_params(**new_params)
     expected = {'copy_X': True,
-                 'fit_intercept': False,
-                 'n_jobs': None,
-                 'normalize': 'deprecated',
-                 'positive': False
-                }
+                'fit_intercept': False,
+                'n_jobs': None,
+                'normalize': 'deprecated',
+                'positive': False
+               }
     results = forecaster.regressor.get_params()
     assert results == expected

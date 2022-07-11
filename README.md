@@ -50,8 +50,8 @@ pip3 install -U scikit-learn
 + numpy>=1.20, <=1.22
 + pandas>=1.2, <=1.4
 + tqdm>=4.57.0, <=4.62
-+ scikit-learn>=1.0, <=1.0.2
-+ statsmodels>=0.12, <=0.13
++ scikit-learn>=1.0, <=1.1.1
++ statsmodels>=0.12, <=0.13.2
 + optuna==2.10.0
 + scikit-optimize==0.9.0
 
@@ -71,11 +71,11 @@ pip3 install -U scikit-learn
 
 ## What is coming in the new release?
 
-- [x] Random search and bayesian search (using [**optuna**](https://optuna.org/) or [**skopt**](https://scikit-optimize.github.io/stable/modules/generated/skopt.gp_minimize.html)) for hyperparameter optimization.
+- [x] Random search and bayesian search (using [**optuna**](https://optuna.org/) or [**skopt**](https://scikit-optimize.github.io/stable/modules/generated/skopt.gp_minimize.html)) for hyperparameter optimization. Try `random_search_forecaster()` and `bayesian_search_forecaster()`.
 - [x] `ForecasterAutoregMultiOutput` has been renamed to `ForecasterAutoregDirect`.
-- [x] Bug fixes and performance improvements.
-- [ ] Modeling multiple time series simultaneously.
+- [x] Modeling multiple time series simultaneously. Try `ForecasterAutoregMultiSeries` and the new functions availables in `model_selection_multiseries`.
 - [ ] Allow different transformations for each predictor (lags and exogenous).
+- [x] Bug fixes and performance improvements.
 
 Try it:
 
@@ -144,6 +144,28 @@ Recent improvements are highlighted in the [release notes](https://joaquinamatro
 If you found skforecast useful, you can support us with a donation. Your contribution will help to continue developing and improving this project. Many thanks!
 
 [![paypal](https://www.paypalobjects.com/en_US/ES/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate/?hosted_button_id=D2JZSWRLTZDL6)
+
+
+# Citation
+
+If you use this software, please cite it using the following metadata.
+
+**APA**:
+```
+Amat Rodrigo, J., & Escobar Ortiz, J. skforecast (Version 0.5.0) [Computer software]
+```
+
+**BibTeX**:
+```
+@software{skforecast,
+author = {Amat Rodrigo, Joaquin and Escobar Ortiz, Javier},
+license = {MIT},
+title = {{skforecast}},
+version = {0.5.0}
+}
+```
+
+View [citation file](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/CITATION.cff).
 
 
 # License

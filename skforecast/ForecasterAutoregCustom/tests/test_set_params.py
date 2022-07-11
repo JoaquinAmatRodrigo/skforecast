@@ -5,7 +5,7 @@ from skforecast.ForecasterAutoregCustom import ForecasterAutoregCustom
 from sklearn.linear_model import LinearRegression
 
 
-def create_predictors(y):
+def create_predictors(y): # pragma: no cover
     '''
     Create first 5 lags of a time series.
     '''

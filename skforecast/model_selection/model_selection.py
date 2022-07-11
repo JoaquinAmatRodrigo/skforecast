@@ -1,8 +1,8 @@
 ################################################################################
 #                        skforecast.model_selection                            #
 #                                                                              #
-# This work by Joaquin Amat Rodrigo is licensed under a Creative Commons       #
-# Attribution 4.0 International License.                                       #
+# This work by Joaquin Amat Rodrigo and Javier Escobar Ortiz is licensed       #
+# under a Creative Commons Attribution 4.0 International License.              #
 ################################################################################
 # coding=utf-8
 
@@ -30,6 +30,7 @@ from ..ForecasterAutoreg import ForecasterAutoreg
 from ..ForecasterAutoregCustom import ForecasterAutoregCustom
 from ..ForecasterAutoregDirect import ForecasterAutoregDirect
 from ..ForecasterAutoregMultiOutput import ForecasterAutoregMultiOutput
+from ..ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 
 logging.basicConfig(
     format = '%(name)-10s %(levelname)-5s %(message)s', 
@@ -54,7 +55,7 @@ def time_series_splitter(
     y : 1d numpy ndarray, pandas Series
         Training time series values. 
     
-    initial_train_size: int 
+    initial_train_size : int 
         Number of samples in the initial train split.
         
     steps : int
@@ -209,7 +210,7 @@ def cv_forecaster(
     y : pandas Series
         Training time series values. 
     
-    initial_train_size: int 
+    initial_train_size : int 
         Number of samples in the initial train split.
         
     steps : int
@@ -219,7 +220,8 @@ def cv_forecaster(
         Metric used to quantify the goodness of fit of the model.
         
         If string:
-            {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
+            {'mean_squared_error', 'mean_absolute_error',
+             'mean_absolute_percentage_error', 'mean_squared_log_error'}
 
         It callable:
             Function with arguments y_true, y_pred that returns a float.
@@ -238,10 +240,10 @@ def cv_forecaster(
 
     Returns 
     -------
-    cv_metrics: 1d numpy ndarray
+    cv_metrics : 1d numpy ndarray
         Value of the metric for each fold.
 
-    cv_predictions: pandas DataFrame
+    cv_predictions : pandas DataFrame
         Predictions.
 
     '''
@@ -297,6 +299,78 @@ def cv_forecaster(
     return cv_metrics, cv_predictions
 
 
+def _backtesting_forecaster_verbose(
+    index_values: pd.Index,
+    steps: int,
+    initial_train_size: int,
+    folds: int,
+    remainder: int,
+    refit: bool=False,
+    fixed_train_size: bool=True
+) -> None:
+    '''
+    Verbose for backtesting_forecaster functions.
+    
+    Parameters
+    ----------        
+    index_values : pandas Index
+        Values of the index of the series.
+    
+    steps : int
+        Number of steps to predict.
+
+    initial_train_size : int
+        Number of samples in the initial train split. The backtest forecaster is
+        trained using the first `initial_train_size` observations.
+        
+    folds : int
+        Number of backtesting stages.
+
+    remainder : int
+        Number of observations in the last backtesting stage. 
+
+    refit : bool, default `False`
+        Whether to re-fit the forecaster in each iteration.
+
+    fixed_train_size : bool, default `True`
+        If True, train size doesn't increases but moves by `steps` in each iteration.
+    '''
+
+    print(f"Information of backtesting process")
+    print(f"----------------------------------")
+    print(f"Number of observations used for initial training: {initial_train_size}")
+    print(f"Number of observations used for backtesting: {len(index_values) - initial_train_size}")
+    print(f"    Number of folds: {folds}")
+    print(f"    Number of steps per fold: {steps}")
+    if remainder != 0:
+        print(f"    Last fold only includes {remainder} observations.")
+    print("")
+    for i in range(folds):
+        if refit:
+            if fixed_train_size:
+                # The train size doesn't increase but moves by `steps` in each iteration.
+                train_idx_start = i * steps
+            else:
+                # The train size increases by `steps` in each iteration.
+                train_idx_start = 0
+            train_idx_end = initial_train_size + i * steps
+        else:
+            # The train size doesn't increase and doesn't move
+            train_idx_start = 0
+            train_idx_end = initial_train_size
+        last_window_end = initial_train_size + i * steps
+        print(f"Data partition in fold: {i}")
+        if i < folds - 1:
+            print(f"    Training:   {index_values[train_idx_start]} -- {index_values[train_idx_end - 1]}  (n={len(index_values[train_idx_start:train_idx_end])})")
+            print(f"    Validation: {index_values[last_window_end]} -- {index_values[last_window_end + steps - 1]}  (n={len(index_values[last_window_end:last_window_end + steps])})")
+        else:
+            print(f"    Training:   {index_values[train_idx_start]} -- {index_values[train_idx_end - 1]}  (n={len(index_values[train_idx_start:train_idx_end])})")
+            print(f"    Validation: {index_values[last_window_end]} -- {index_values[-1]}  (n={len(index_values[last_window_end:])})")
+    print("")
+
+    return
+
+
 def _backtesting_forecaster_refit(
     forecaster,
     y: pd.Series,
@@ -332,14 +406,7 @@ def _backtesting_forecaster_refit(
         Forecaster model.
         
     y : pandas Series
-        Training time series values. 
-    
-    initial_train_size: int
-        Number of samples in the initial train split. The backtest forecaster is
-        trained using the first `initial_train_size` observations.
-        
-    fixed_train_size: bool, default `True`
-        If True, train size doesn't increases but moves by `steps` in each iteration.
+        Training time series values.
         
     steps : int
         Number of steps to predict.
@@ -348,31 +415,39 @@ def _backtesting_forecaster_refit(
         Metric used to quantify the goodness of fit of the model.
         
         If string:
-            {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
-
+            {'mean_squared_error', 'mean_absolute_error',
+             'mean_absolute_percentage_error', 'mean_squared_log_error'}
+    
         If callable:
             Function with arguments y_true, y_pred that returns a float.
+    
+    initial_train_size : int
+        Number of samples in the initial train split. The backtest forecaster is
+        trained using the first `initial_train_size` observations.
         
-    exog :panda Series, pandas DataFrame, default `None`
+    fixed_train_size : bool, default `True`
+        If True, train size doesn't increases but moves by `steps` in each iteration.
+        
+    exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
 
-    interval: list, default `None`
+    interval : list, default `None`
         Confidence of the prediction interval estimated. Sequence of percentiles
         to compute, which must be between 0 and 100 inclusive. If `None`, no
         intervals are estimated. Only available for forecaster of type ForecasterAutoreg
         and ForecasterAutoregCustom.
             
-    n_boot: int, default `500`
+    n_boot : int, default `500`
         Number of bootstrapping iterations used to estimate prediction
         intervals.
 
-    random_state: int, default `123`
+    random_state : int, default `123`
         Sets a seed to the random generator, so that boot intervals are always 
         deterministic.
 
-    in_sample_residuals: bool, default `True`
+    in_sample_residuals : bool, default `True`
         If `True`, residuals from the training data are used as proxy of
         prediction error to create prediction intervals. If `False`, out_sample_residuals
         are used if they are already stored inside the forecaster.
@@ -382,15 +457,14 @@ def _backtesting_forecaster_refit(
 
     Returns 
     -------
-    metric_value: float
+    metric_value : float
         Value of the metric.
 
-    backtest_predictions: pandas Dataframe
+    backtest_predictions : pandas Dataframe
         Value of predictions and their estimated interval if `interval` is not `None`.
             column pred = predictions.
             column lower_bound = lower bound of the interval.
             column upper_bound = upper bound interval of the interval.
-
     '''
 
     forecaster = deepcopy(forecaster)
@@ -402,32 +476,15 @@ def _backtesting_forecaster_refit(
     remainder = (len(y) - initial_train_size) % steps
     
     if verbose:
-        print(f"Information of backtesting process")
-        print(f"----------------------------------")
-        print(f"Number of observations used for initial training: {initial_train_size}")
-        print(f"Number of observations used for backtesting: {len(y) - initial_train_size}")
-        print(f"    Number of folds: {folds}")
-        print(f"    Number of steps per fold: {steps}")
-        if remainder != 0:
-            print(f"    Last fold only includes {remainder} observations.")
-        print("")
-        for i in range(folds):
-            if fixed_train_size:
-                # The train size doesn't increase but moves by `steps` in each iteration.
-                train_idx_start = i * steps
-                train_idx_end = initial_train_size + i * steps
-            else:
-                # The train size increases by `steps` in each iteration.
-                train_idx_start = 0
-                train_idx_end = initial_train_size + i * steps
-            print(f"Data partition in fold: {i}")
-            if i < folds - 1:
-                print(f"    Training:   {y.index[train_idx_start]} -- {y.index[train_idx_end - 1]}  (n={len(y.index[train_idx_start:train_idx_end])})")
-                print(f"    Validation: {y.index[train_idx_end]} -- {y.index[train_idx_end + steps - 1]}  (n={len(y.index[train_idx_end:train_idx_end + steps])})")
-            else:
-                print(f"    Training:   {y.index[train_idx_start]} -- {y.index[train_idx_end - 1]}  (n={len(y.index[train_idx_start:train_idx_end])})")
-                print(f"    Validation: {y.index[train_idx_end]} -- {y.index[-1]}  (n={len(y.index[train_idx_end:])})")
-        print("")
+        _backtesting_forecaster_verbose(
+            index_values       = y.index,
+            steps              = steps,
+            initial_train_size = initial_train_size,
+            folds              = folds,
+            remainder          = remainder,
+            refit              = True,
+            fixed_train_size   = fixed_train_size
+        )
         
     if folds > 50:
         print(
@@ -440,11 +497,10 @@ def _backtesting_forecaster_refit(
         if fixed_train_size:
             # The train size doesn't increases but moves by `steps` in each iteration.
             train_idx_start = i * steps
-            train_idx_end = initial_train_size + i * steps
         else:
             # The train size increases by `steps` in each iteration.
             train_idx_start = 0
-            train_idx_end = initial_train_size + i * steps
+        train_idx_end = initial_train_size + i * steps
             
         if exog is not None:
             next_window_exog = exog.iloc[train_idx_end:train_idx_end + steps, ]
@@ -588,7 +644,7 @@ def _backtesting_forecaster_no_refit(
 ) -> Tuple[float, pd.DataFrame]:
     '''
     Backtesting of forecaster without iterative re-fitting. In each iteration,
-    a number of `steps` are predicted. A copy of the  original forecaster is
+    a number of `steps` are predicted. A copy of the original forecaster is
     created so it is not modified during the process.
 
     If `forecaster` is already trained and `initial_train_size` is `None`,
@@ -603,46 +659,47 @@ def _backtesting_forecaster_no_refit(
         Forecaster model.
         
     y : pandas Series
-        Training time series values. 
-    
-    initial_train_size: int, default `None`
-        Number of samples in the initial train split. If `None` and `forecaster` is already
-        trained, no initial train is done and all data is used to evaluate the model. However, 
-        the first `len(forecaster.last_window)` observations are needed to create the 
-        initial predictors, so no predictions are calculated for them.
+        Training time series values.
         
-    steps : int, None
+    steps : int
         Number of steps to predict.
         
     metric : str, callable
         Metric used to quantify the goodness of fit of the model.
         
-        If string:
-            {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
+        If string: 
+            {'mean_squared_error', 'mean_absolute_error',
+             'mean_absolute_percentage_error', 'mean_squared_log_error'}
 
         If callable:
             Function with arguments y_true, y_pred that returns a float.
+    
+    initial_train_size : int, default `None`
+        Number of samples in the initial train split. If `None` and `forecaster` is already
+        trained, no initial train is done and all data is used to evaluate the model. However, 
+        the first `len(forecaster.last_window)` observations are needed to create the 
+        initial predictors, so no predictions are calculated for them.
         
-    exog :panda Series, pandas DataFrame, default `None`
+    exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
 
-    interval: list, default `None`
+    interval : list, default `None`
         Confidence of the prediction interval estimated. Sequence of percentiles
         to compute, which must be between 0 and 100 inclusive. If `None`, no
         intervals are estimated. Only available for forecaster of type ForecasterAutoreg
         and ForecasterAutoregCustom.
             
-    n_boot: int, default `500`
+    n_boot : int, default `500`
         Number of bootstrapping iterations used to estimate prediction
         intervals.
 
-    random_state: int, default `123`
+    random_state : int, default `123`
         Sets a seed to the random generator, so that boot intervals are always 
         deterministic.
 
-    in_sample_residuals: bool, default `True`
+    in_sample_residuals : bool, default `True`
         If `True`, residuals from the training data are used as proxy of
         prediction error to create prediction intervals.  If `False`, out_sample_residuals
         are used if they are already stored inside the forecaster.
@@ -652,15 +709,14 @@ def _backtesting_forecaster_no_refit(
 
     Returns 
     -------
-    metric_value: float
+    metric_value : float
         Value of the metric.
 
-    backtest_predictions: pandas DataFrame
+    backtest_predictions : pandas DataFrame
         Value of predictions and their estimated interval if `interval` is not `None`.
             column pred = predictions.
             column lower_bound = lower bound of the interval.
             column upper_bound = upper bound interval of the interval.
-
     '''
 
     forecaster = deepcopy(forecaster)
@@ -687,25 +743,14 @@ def _backtesting_forecaster_no_refit(
     remainder = (len(y) - initial_train_size) % steps
     
     if verbose:
-        print(f"Information of backtesting process")
-        print(f"----------------------------------")
-        print(f"Number of observations used for initial training or as initial window: {initial_train_size}")
-        print(f"Number of observations used for backtesting: {len(y) - initial_train_size}")
-        print(f"    Number of folds: {folds}")
-        print(f"    Number of steps per fold: {steps}")
-        if remainder != 0:
-            print(f"    Last fold only includes {remainder} observations")
-        print("")
-        for i in range(folds):
-            last_window_end = initial_train_size + i * steps
-            print(f"Data partition in fold: {i}")
-            if i < folds - 1:
-                print(f"    Training:   {y.index[0]} -- {y.index[initial_train_size - 1]}  (n={len(y.index[:initial_train_size])})")
-                print(f"    Validation: {y.index[last_window_end]} -- {y.index[last_window_end + steps -1]}  (n={len(y.index[last_window_end:last_window_end + steps])})")
-            else:
-                print(f"    Training:   {y.index[0]} -- {y.index[initial_train_size - 1]}  (n={len(y.index[:initial_train_size])})")
-                print(f"    Validation: {y.index[last_window_end]} -- {y.index[-1]}  (n={len(y.index[last_window_end:])})")
-        print("")
+        _backtesting_forecaster_verbose(
+            index_values       = y.index,
+            steps              = steps,
+            initial_train_size = initial_train_size,
+            folds              = folds,
+            remainder          = remainder,
+            refit              = False
+        )
 
     for i in range(folds):
         # Since the model is only fitted with the initial_train_size, last_window
@@ -724,26 +769,26 @@ def _backtesting_forecaster_no_refit(
                     pred = forecaster.predict(
                                 steps       = steps,
                                 last_window = last_window_y
-                            )
+                           )
                 else:
                     pred = forecaster.predict(
                                 steps       = steps,
                                 last_window = last_window_y,
                                 exog        = next_window_exog
-                            )            
+                           )            
             else:    
                 if remainder == 0:
                     if exog is None:
                         pred = forecaster.predict(
                                     steps       = steps,
                                     last_window = last_window_y
-                                )
+                               )
                     else:
                         pred = forecaster.predict(
                                     steps       = steps,
                                     last_window = last_window_y,
                                     exog        = next_window_exog
-                                )
+                               )
                 else:
                     # Only the remaining steps need to be predicted
                     steps = remainder
@@ -751,13 +796,13 @@ def _backtesting_forecaster_no_refit(
                         pred = forecaster.predict(
                                     steps       = steps,
                                     last_window = last_window_y
-                                )
+                               )
                     else:
                         pred = forecaster.predict(
                                     steps       = steps,
                                     last_window = last_window_y,
                                     exog        = next_window_exog
-                                )
+                               )
             
             backtest_predictions.append(pred)
 
@@ -771,7 +816,7 @@ def _backtesting_forecaster_no_refit(
                                 n_boot       = n_boot,
                                 random_state = random_state,
                                 in_sample_residuals = in_sample_residuals
-                            )
+                           )
                 else:
                     pred = forecaster.predict_interval(
                                 steps        = steps,
@@ -781,7 +826,7 @@ def _backtesting_forecaster_no_refit(
                                 n_boot       = n_boot,
                                 random_state = random_state,
                                 in_sample_residuals = in_sample_residuals
-                            )            
+                           )            
             else:    
                 if remainder == 0:
                     if exog is None:
@@ -792,7 +837,7 @@ def _backtesting_forecaster_no_refit(
                                     n_boot       = n_boot,
                                     random_state = random_state,
                                     in_sample_residuals = in_sample_residuals
-                                )
+                               )
                     else:
                         pred = forecaster.predict_interval(
                                     steps        = steps,
@@ -802,7 +847,7 @@ def _backtesting_forecaster_no_refit(
                                     n_boot       = n_boot,
                                     random_state = random_state,
                                     in_sample_residuals = in_sample_residuals
-                                )
+                               )
                 else:
                     # Only the remaining steps need to be predicted
                     steps = remainder
@@ -814,7 +859,7 @@ def _backtesting_forecaster_no_refit(
                                     n_boot       = n_boot,
                                     random_state = random_state,
                                     in_sample_residuals = in_sample_residuals
-                                )
+                               )
                     else:
                         pred = forecaster.predict_interval(
                                     steps        = steps,
@@ -824,7 +869,7 @@ def _backtesting_forecaster_no_refit(
                                     n_boot       = n_boot,
                                     random_state = random_state,
                                     in_sample_residuals = in_sample_residuals
-                                )
+                               )
             
             backtest_predictions.append(pred)
 
@@ -870,18 +915,7 @@ def backtesting_forecaster(
         Forecaster model.
         
     y : pandas Series
-        Training time series values. 
-    
-    initial_train_size: int, default `None`
-        Number of samples in the initial train split. If `None` and `forecaster` is already 
-        trained, no initial train is done and all data is used to evaluate the model. However, 
-        the first `len(forecaster.last_window)` observations are needed to create the 
-        initial predictors, so no predictions are calculated for them.
-
-        `None` is only allowed when `refit` is `False`.
-    
-    fixed_train_size: bool, default `True`
-        If True, train size doesn't increases but moves by `steps` in each iteration.
+        Training time series values.
         
     steps : int
         Number of steps to predict.
@@ -890,34 +924,46 @@ def backtesting_forecaster(
         Metric used to quantify the goodness of fit of the model.
         
         If string:
-            {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
+            {'mean_squared_error', 'mean_absolute_error',
+             'mean_absolute_percentage_error', 'mean_squared_log_error'}
 
         If callable:
             Function with arguments y_true, y_pred that returns a float.
+    
+    initial_train_size : int, default `None`
+        Number of samples in the initial train split. If `None` and `forecaster` is already 
+        trained, no initial train is done and all data is used to evaluate the model. However, 
+        the first `len(forecaster.last_window)` observations are needed to create the 
+        initial predictors, so no predictions are calculated for them.
+
+        `None` is only allowed when `refit` is `False`.
+    
+    fixed_train_size : bool, default `True`
+        If True, train size doesn't increases but moves by `steps` in each iteration.
         
-    exog :panda Series, pandas DataFrame, default `None`
+    exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
 
-    refit: bool, default `False`
+    refit : bool, default `False`
         Whether to re-fit the forecaster in each iteration.
 
-    interval: list, default `None`
+    interval : list, default `None`
         Confidence of the prediction interval estimated. Sequence of percentiles
         to compute, which must be between 0 and 100 inclusive. If `None`, no
         intervals are estimated. Only available for forecaster of type ForecasterAutoreg
         and ForecasterAutoregCustom.
             
-    n_boot: int, default `500`
+    n_boot : int, default `500`
         Number of bootstrapping iterations used to estimate prediction
         intervals.
 
-    random_state: int, default `123`
+    random_state : int, default `123`
         Sets a seed to the random generator, so that boot intervals are always 
         deterministic.
 
-    in_sample_residuals: bool, default `True`
+    in_sample_residuals : bool, default `True`
         If `True`, residuals from the training data are used as proxy of
         prediction error to create prediction intervals.  If `False`, out_sample_residuals
         are used if they are already stored inside the forecaster.
@@ -927,15 +973,14 @@ def backtesting_forecaster(
 
     Returns 
     -------
-    metric_value: float
+    metric_value : float
         Value of the metric.
 
-    backtest_predictions: pandas DataFrame
+    backtest_predictions : pandas DataFrame
         Value of predictions and their estimated interval if `interval` is not `None`.
             column pred = predictions.
             column lower_bound = lower bound of the interval.
             column upper_bound = upper bound interval of the interval.
-
     '''
 
     if initial_train_size is not None and initial_train_size > len(y):
@@ -969,6 +1014,12 @@ def backtesting_forecaster(
         raise Exception(
             ('Interval prediction is only available when forecaster is of type '
             'ForecasterAutoreg or ForecasterAutoregCustom.')
+        )
+    
+    if isinstance(forecaster, ForecasterAutoregMultiSeries):
+        raise Exception(
+            ('For `forecaster` of type `ForecasterAutoregMultiSeries`, use the '
+             'functions available in the model_selection_multiseries module.')
         )
     
     if refit:
@@ -1042,15 +1093,16 @@ def grid_search_forecaster(
         Metric used to quantify the goodness of fit of the model.
         
         If string:
-            {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
+            {'mean_squared_error', 'mean_absolute_error',
+             'mean_absolute_percentage_error', 'mean_squared_log_error'}
 
         If callable:
             Function with arguments y_true, y_pred that returns a float.
 
-    initial_train_size: int 
+    initial_train_size : int 
         Number of samples in the initial train split.
  
-    fixed_train_size: bool, default `True`
+    fixed_train_size : bool, default `True`
         If True, train size doesn't increases but moves by `steps` in each iteration.
 
     exog : pandas Series, pandas DataFrame, default `None`
@@ -1062,7 +1114,7 @@ def grid_search_forecaster(
         Lists of `lags` to try. Only used if forecaster is an instance of 
         `ForecasterAutoreg`, `ForecasterAutoregDirect` or `ForecasterAutoregMultiOutput`.
         
-    refit: bool, default `False`
+    refit : bool, default `False`
         Whether to re-fit the forecaster in each iteration of backtesting.
         
     return_best : bool, default `True`
@@ -1073,13 +1125,12 @@ def grid_search_forecaster(
 
     Returns 
     -------
-    results: pandas DataFrame
+    results : pandas DataFrame
         Results for each combination of parameters.
             column lags = predictions.
             column params = lower bound of the interval.
             column metric = metric value estimated for the combination of parameters.
             additional n columns with param = value.
-
     '''
 
     param_grid = list(ParameterGrid(param_grid))
@@ -1142,15 +1193,16 @@ def random_search_forecaster(
         Metric used to quantify the goodness of fit of the model.
         
         If string:
-            {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
+            {'mean_squared_error', 'mean_absolute_error',
+             'mean_absolute_percentage_error', 'mean_squared_log_error'}
 
         If callable:
             Function with arguments y_true, y_pred that returns a float.
 
-    initial_train_size: int 
+    initial_train_size : int 
         Number of samples in the initial train split.
  
-    fixed_train_size: bool, default `True`
+    fixed_train_size : bool, default `True`
         If True, train size doesn't increases but moves by `steps` in each iteration.
 
     exog : pandas Series, pandas DataFrame, default `None`
@@ -1162,14 +1214,14 @@ def random_search_forecaster(
         Lists of `lags` to try. Only used if forecaster is an instance of 
         `ForecasterAutoreg`, `ForecasterAutoregDirect` or `ForecasterAutoregMultiOutput`.
         
-    refit: bool, default `False`
+    refit : bool, default `False`
         Whether to re-fit the forecaster in each iteration of backtesting.
 
-    n_iter: int, default `10`
+    n_iter : int, default `10`
         Number of parameter settings that are sampled. 
         n_iter trades off runtime vs quality of the solution.
 
-    random_state: int, default `123`
+    random_state : int, default `123`
         Sets a seed to the random sampling for reproducible output.
 
     return_best : bool, default `True`
@@ -1180,13 +1232,12 @@ def random_search_forecaster(
 
     Returns 
     -------
-    results: pandas DataFrame
+    results : pandas DataFrame
         Results for each combination of parameters.
             column lags = predictions.
             column params = lower bound of the interval.
             column metric = metric value estimated for the combination of parameters.
             additional n columns with param = value.
-
     '''
 
     param_grid = list(ParameterSampler(param_distributions, n_iter=n_iter, random_state=random_state))
@@ -1246,15 +1297,16 @@ def _evaluate_grid_hyperparameters(
         Metric used to quantify the goodness of fit of the model.
         
         If string:
-            {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
+            {'mean_squared_error', 'mean_absolute_error',
+             'mean_absolute_percentage_error', 'mean_squared_log_error'}
 
         If callable:
             Function with arguments y_true, y_pred that returns a float.
 
-    initial_train_size: int 
+    initial_train_size : int 
         Number of samples in the initial train split.
  
-    fixed_train_size: bool, default `True`
+    fixed_train_size : bool, default `True`
         If True, train size doesn't increases but moves by `steps` in each iteration.
 
     exog : pandas Series, pandas DataFrame, default `None`
@@ -1266,7 +1318,7 @@ def _evaluate_grid_hyperparameters(
         Lists of `lags` to try. Only used if forecaster is an instance of 
         `ForecasterAutoreg`, `ForecasterAutoregDirect` or `ForecasterAutoregMultiOutput`.
         
-    refit: bool, default `False`
+    refit : bool, default `False`
         Whether to re-fit the forecaster in each iteration of backtesting.
         
     return_best : bool, default `True`
@@ -1277,13 +1329,12 @@ def _evaluate_grid_hyperparameters(
 
     Returns 
     -------
-    results: pandas DataFrame
+    results : pandas DataFrame
         Results for each combination of parameters.
             column lags = predictions.
             column params = lower bound of the interval.
             column metric = metric value estimated for the combination of parameters.
             additional n columns with param = value.
-
     '''
 
     if isinstance(forecaster, ForecasterAutoregCustom):
@@ -1317,11 +1368,11 @@ def _evaluate_grid_hyperparameters(
             metrics = backtesting_forecaster(
                             forecaster         = forecaster,
                             y                  = y,
-                            exog               = exog,
                             steps              = steps,
                             metric             = metric,
                             initial_train_size = initial_train_size,
                             fixed_train_size   = fixed_train_size,
+                            exog               = exog,
                             refit              = refit,
                             interval           = None,
                             verbose            = verbose
@@ -1411,15 +1462,16 @@ def bayesian_search_forecaster(
         Metric used to quantify the goodness of fit of the model.
         
         If string:
-            {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
+            {'mean_squared_error', 'mean_absolute_error',
+             'mean_absolute_percentage_error', 'mean_squared_log_error'}
 
         If callable:
             Function with arguments y_true, y_pred that returns a float.
 
-    initial_train_size: int 
+    initial_train_size : int 
         Number of samples in the initial train split.
  
-    fixed_train_size: bool, default `True`
+    fixed_train_size : bool, default `True`
         If True, train size doesn't increases but moves by `steps` in each iteration.
 
     exog : pandas Series, pandas DataFrame, default `None`
@@ -1431,13 +1483,13 @@ def bayesian_search_forecaster(
         Lists of `lags` to try. Only used if forecaster is an instance of 
         `ForecasterAutoreg`, `ForecasterAutoregDirect` or `ForecasterAutoregMultiOutput`.
         
-    refit: bool, default `False`
+    refit : bool, default `False`
         Whether to re-fit the forecaster in each iteration of backtesting.
         
-    n_trials: int, default `10`
+    n_trials : int, default `10`
         Number of parameter settings that are sampled in each lag configuration.
 
-    random_state: int, default `123`
+    random_state : int, default `123`
         Sets a seed to the sampling for reproducible output.
 
     return_best : bool, default `True`
@@ -1467,14 +1519,14 @@ def bayesian_search_forecaster(
 
     Returns 
     -------
-    results: pandas DataFrame
+    results : pandas DataFrame
         Results for each combination of parameters.
             column lags = predictions.
             column params = lower bound of the interval.
             column metric = metric value estimated for the combination of parameters.
             additional n columns with param = value.
 
-    results_opt_best: optuna object (optuna), scipy object (skopt)   
+    results_opt_best : optuna object (optuna), scipy object (skopt)   
         If optuna engine:
             The best optimization result returned as a FrozenTrial optuna object.
 
@@ -1571,15 +1623,16 @@ def _bayesian_search_optuna(
         Metric used to quantify the goodness of fit of the model.
         
         If string:
-            {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
+            {'mean_squared_error', 'mean_absolute_error',
+             'mean_absolute_percentage_error', 'mean_squared_log_error'}
 
         If callable:
             Function with arguments y_true, y_pred that returns a float.
 
-    initial_train_size: int 
+    initial_train_size : int 
         Number of samples in the initial train split.
  
-    fixed_train_size: bool, default `True`
+    fixed_train_size : bool, default `True`
         If True, train size doesn't increases but moves by `steps` in each iteration.
 
     exog : pandas Series, pandas DataFrame, default `None`
@@ -1591,13 +1644,13 @@ def _bayesian_search_optuna(
         Lists of `lags` to try. Only used if forecaster is an instance of 
         `ForecasterAutoreg`, `ForecasterAutoregDirect` or `ForecasterAutoregMultiOutput`.
         
-    refit: bool, default `False`
+    refit : bool, default `False`
         Whether to re-fit the forecaster in each iteration of backtesting.
         
-    n_trials: int, default `10`
+    n_trials : int, default `10`
         Number of parameter settings that are sampled in each lag configuration.
 
-    random_state: int, default `123`
+    random_state : int, default `123`
         Sets a seed to the sampling for reproducible output.
 
     return_best : bool, default `True`
@@ -1614,14 +1667,14 @@ def _bayesian_search_optuna(
 
     Returns 
     -------
-    results: pandas DataFrame
+    results : pandas DataFrame
         Results for each combination of parameters.
             column lags = predictions.
             column params = lower bound of the interval.
             column metric = metric value estimated for the combination of parameters.
             additional n columns with param = value.
 
-    results_opt_best: optuna object
+    results_opt_best : optuna object
         The best optimization result returned as a FrozenTrial optuna object.
     '''
 
@@ -1783,15 +1836,16 @@ def _bayesian_search_skopt(
         Metric used to quantify the goodness of fit of the model.
         
         If string:
-            {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
+            {'mean_squared_error', 'mean_absolute_error',
+             'mean_absolute_percentage_error', 'mean_squared_log_error'}
 
         It callable:
             Function with arguments y_true, y_pred that returns a float.
 
-    initial_train_size: int 
+    initial_train_size : int 
         Number of samples in the initial train split.
  
-    fixed_train_size: bool, default `True`
+    fixed_train_size : bool, default `True`
         If True, train size doesn't increases but moves by `steps` in each iteration.
 
     exog : pandas Series, pandas DataFrame, default `None`
@@ -1803,13 +1857,13 @@ def _bayesian_search_skopt(
         Lists of `lags` to try. Only used if forecaster is an instance of 
         `ForecasterAutoreg`, `ForecasterAutoregDirect` or `ForecasterAutoregMultiOutput`.
         
-    refit: bool, default `False`
+    refit : bool, default `False`
         Whether to re-fit the forecaster in each iteration of backtesting.
         
-    n_trials: int, default `10`
+    n_trials : int, default `10`
         Number of parameter settings that are sampled in each lag configuration.
 
-    random_state: int, default `123`
+    random_state : int, default `123`
         Sets a seed to the sampling for reproducible output.
 
     return_best : bool, default `True`
@@ -1823,14 +1877,14 @@ def _bayesian_search_skopt(
 
     Returns 
     -------
-    results: pandas DataFrame
+    results : pandas DataFrame
         Results for each combination of parameters.
             column lags = predictions.
             column params = lower bound of the interval.
             column metric = metric value estimated for the combination of parameters.
             additional n columns with param = value.
 
-    results_opt_best: scipy object
+    results_opt_best : scipy object
         The best optimization result returned as a OptimizeResult object.
     '''
 

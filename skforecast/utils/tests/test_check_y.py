@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 from skforecast.utils import check_y
 
+
 def test_check_y_exception_when_y_not_series():
     '''
     Check exception is raised when y is not pandas Series

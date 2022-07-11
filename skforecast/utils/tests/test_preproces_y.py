@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 from skforecast.utils import preprocess_y
 
+
 def test_output_preprocess_y_when_y_index_is_DatetimeIndex_and_has_frequency():
     '''
     Test values returned by when y is a pandas Series DatetimeIndex and freq is
@@ -60,7 +61,7 @@ def test_output_preprocess_y_when_y_index_is_not_DatetimeIndex_or_RangeIndex():
     '''
     Test values returned by when y is a pandas Series without DatetimeIndex or RangeIndex.
     '''
-    y = pd.Series(data=np.arange(3))
+    y = pd.Series(data=np.arange(3), index=['0', '1', '2'])
     results = preprocess_y(y)
     expected = (np.arange(3),
                 pd.RangeIndex(start=0, stop=3, step=1)

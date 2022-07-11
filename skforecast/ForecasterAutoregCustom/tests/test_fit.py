@@ -8,7 +8,7 @@ from sklearn.linear_model import LinearRegression
 from xgboost import XGBRegressor
 
 
-def create_predictors(y):
+def create_predictors(y): # pragma: no cover
     '''
     Create first 5 lags of a time series.
     '''
@@ -69,8 +69,8 @@ def test_fit_in_sample_residuals_stored_XGBRegressor():
 
 def test_fit_same_residuals_when_residuals_greater_than_1000():
     '''
-    Test fit return same residuals when residuals len is greater than 100.
-    Testing with two different models.
+    Test fit return same residuals when residuals len is greater than 1000.
+    Testing with two different forecaster.
     '''
     forecaster = ForecasterAutoregCustom(
                     regressor      = LinearRegression(),

@@ -6,7 +6,11 @@ All notable changes to this project will be documented in this file.
 
 **Added**
 
-+ Functions `random_search_forecaster`, `_evaluate_grid_hyperparameters`, `bayesian_search_forecaster`, `_bayesian_search_optuna` and `_bayesian_search_skopt` in model_selection.
++ Functions `_backtesting_forecaster_verbose`, `random_search_forecaster`, `_evaluate_grid_hyperparameters`, `bayesian_search_forecaster`, `_bayesian_search_optuna` and `_bayesian_search_skopt` in model_selection.
+
++ Created `ForecasterAutoregMultiSeries` class for multi time series forecasting.
+
++ Created module `model_selection_multiseries`. Functions: `_backtesting_forecaster_multiseries_refit`, `_backtesting_forecaster_multiseries_no_refit`, `backtesting_forecaster_multiseries`, `grid_search_forecaster_multiseries`, `random_search_forecaster_multiseries` and `_evaluate_grid_hyperparameters_multiseries`.
 
 **Changed**
 
@@ -22,9 +26,13 @@ All notable changes to this project will be documented in this file.
 
 + `ForecasterAutoregMultiOutput` has been renamed to `ForecasterAutoregDirect`. `ForecasterAutoregMultiOutput` will be removed in version 0.6.0.
 
++ `check_predict_input` updated to check `ForecasterAutoregMultiSeries` inputs.
+
 **Fixed**
 
 + `fit` now stores `last_window` values with len = forecaster.max_lag in ForecasterAutoreg and ForecasterAutoregCustom.
+
++ `in_sample_residuals` stored as a `pd.Series` when `len(residuals) > 1000`.
 
 
 ## [0.4.3] - [2022-03-18]
