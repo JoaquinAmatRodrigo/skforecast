@@ -69,3 +69,11 @@ def test_init_exception_when_lags_list_or_numpy_array_with_values_not_int():
             if not isinstance(lag, (int, np.int64, np.int32)):
                 with pytest.raises(Exception):
                     ForecasterAutoreg(LinearRegression(), lags=lags)
+
+
+def test_init_exception_when_lags_is_not_valid_type():
+    '''
+    Test exception is raised when lags is not a valid type.
+    '''
+    with pytest.raises(Exception):
+        ForecasterAutoreg(LinearRegression(), lags='not_valid_type')

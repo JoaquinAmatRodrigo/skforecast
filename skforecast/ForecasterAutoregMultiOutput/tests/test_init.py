@@ -61,4 +61,4 @@ def test_init_exception_when_lags_list_or_numpy_array_with_values_not_int():
         for lag in lags:
             if not isinstance(lag, (int, np.int64, np.int32)):
                 with pytest.raises(Exception):
-                    ForecasterAutoregMultiOutput(LinearRegression(), lags=lags)
+                    ForecasterAutoregMultiOutput(LinearRegression(), lags=lags, steps=2)

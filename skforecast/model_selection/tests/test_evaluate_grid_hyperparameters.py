@@ -36,7 +36,7 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoreg_with_mocked():
     forecaster = ForecasterAutoreg(
                     regressor = Ridge(random_state=123),
                     lags      = 2 # Placeholder, the value will be overwritten
-                    )
+                 )
 
     steps = 3
     n_validation = 12
@@ -57,7 +57,7 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoreg_with_mocked():
                             fixed_train_size   = False,
                             return_best = False,
                             verbose     = False
-                             )
+              )
     
     expected_results = pd.DataFrame({
             'lags'  :[[1, 2], [1, 2], [1, 2], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]],
@@ -79,7 +79,7 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoreg_lags_grid_is_Non
     forecaster = ForecasterAutoreg(
                     regressor = Ridge(random_state=123),
                     lags      = 2
-                    )
+                 )
 
     steps = 3
     n_validation = 12
@@ -99,7 +99,7 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoreg_lags_grid_is_Non
                             fixed_train_size   = False,
                             return_best = False,
                             verbose     = False
-                             )
+              )
     
     expected_results = pd.DataFrame({
             'lags'  :[[1, 2], [1, 2], [1, 2]],
@@ -131,7 +131,7 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregCustom_with_mocke
                         regressor      = Ridge(random_state=123),
                         fun_predictors = create_predictors,
                         window_size    = 4
-                        )
+                 )
 
     steps = 3
     n_validation = 12
@@ -150,7 +150,7 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregCustom_with_mocke
                             fixed_train_size   = False,
                             return_best = False,
                             verbose     = False
-                            )
+              )
     
     expected_results = pd.DataFrame({
             'lags'  :['custom predictors', 'custom predictors', 'custom predictors'],
@@ -171,7 +171,7 @@ def test_evaluate_grid_hyperparameters_when_return_best():
     forecaster = ForecasterAutoreg(
                     regressor = Ridge(random_state=123),
                     lags      = 2 # Placeholder, the value will be overwritten
-                    )
+                 )
 
     steps = 3
     n_validation = 12
@@ -191,7 +191,7 @@ def test_evaluate_grid_hyperparameters_when_return_best():
             fixed_train_size   = False,
             return_best = True,
             verbose     = False
-            )
+    )
     
     expected_lags = np.array([1, 2])
     expected_alpha = 0.01

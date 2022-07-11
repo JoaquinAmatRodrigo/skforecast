@@ -1,8 +1,8 @@
 ################################################################################
 #                                 utils                                        #
 #                                                                              #
-# This work by Joaquin Amat Rodrigo is licensed under a Creative Commons       #
-# Attribution 4.0 International License.    
+# This work by Joaquin Amat Rodrigo and Javier Escobar Ortiz is licensed       #
+# under a Creative Commons Attribution 4.0 International License.              #
 ################################################################################
 # coding=utf-8
 
@@ -61,17 +61,20 @@ def check_exog(exog: Any) -> None:
 
 
 def check_predict_input(
+    forecaster_type,
     steps: int,
     fitted: bool,
     included_exog: bool,
     index_type: type,
     index_freq: str,
     window_size: int,
-    last_window: pd.Series=None,
+    last_window: Union[pd.Series, pd.DataFrame]=None,
     exog: Union[pd.Series, pd.DataFrame]=None,
     exog_type: Union[type, None]=None,
     exog_col_names: Union[list, None]=None,
-    max_steps: int=None
+    max_steps: int=None,
+    level: str=None,
+    series_levels: list=None
 ) -> None:
     '''
     Check all inputs of predict method. This is a helper function to validate
@@ -80,6 +83,10 @@ def check_predict_input(
 
     Parameters
     ----------
+    forecaster_type : ForecasterAutoreg, ForecasterAutoregCustom, 
+    ForecasterAutoregDirect, ForecasterAutoregMultiOutput, ForecasterAutoregMultiSeries
+        Forcaster type.
+
     steps : int
         Number of future steps predicted.
 
@@ -99,7 +106,7 @@ def check_predict_input(
         Size of the window needed to create the predictors. It is equal to
         `max_lag`.
 
-    last_window : pandas Series, default `None`
+    last_window : pandas Series, pandas DataFrame, default `None`
         Values of the series used to create the predictors (lags) need in the 
         first iteration of prediction (t + 1).
 
@@ -115,6 +122,12 @@ def check_predict_input(
 
     max_steps: int
         Maximum number of steps allowed.
+            
+    level : str
+        Time series to be predicted.
+
+    series_levels : list
+        Names of the columns (levels) that can be predicted.
     '''
 
     if not fitted:
@@ -136,6 +149,12 @@ def check_predict_input(
                 f"is {max_steps}."
             )
     
+    if str(forecaster_type).split('.')[1] == 'ForecasterAutoregMultiSeries':
+        if level not in series_levels:
+            raise Exception(
+                f'`level` must be one of the `series_levels` : {series_levels}'
+            )
+
     if exog is None and included_exog:
         raise Exception(
             'Forecaster trained with exogenous variable/s. '
@@ -186,13 +205,19 @@ def check_predict_input(
         
     if last_window is not None:
         if len(last_window) < window_size:
-            raise Exception(
-                f"`last_window` must have as many values as as needed to "
-                f"calculate the predictors. For this forecaster it is {window_size}."
-            )
-        if not isinstance(last_window, pd.Series):
-            raise Exception('`last_window` must be a pandas Series.')
-        if last_window.isnull().any():
+                raise Exception(
+                    f"`last_window` must have as many values as as needed to "
+                    f"calculate the predictors. For this forecaster it is {window_size}."
+                )
+                
+        if str(forecaster_type).split('.')[1] == 'ForecasterAutoregMultiSeries':
+            if not isinstance(last_window, pd.DataFrame):
+                raise Exception('`last_window` must be a pandas DataFrame.')     
+        else:    
+            if not isinstance(last_window, pd.Series):
+                raise Exception('`last_window` must be a pandas Series.')
+                
+        if last_window.isnull().any().all():
             raise Exception('`last_window` has missing values.')
         _, last_window_index = preprocess_last_window(
                                     last_window = last_window.iloc[:0]
@@ -205,14 +230,16 @@ def check_predict_input(
         if isinstance(last_window_index, pd.DatetimeIndex):
             if not last_window_index.freqstr == index_freq:
                 raise Exception(
-                    f"Expected frequency of type {index_type} for `last_window`. "
+                    f"Expected frequency of type {index_freq} for `last_window`. "
                     f"Got {last_window_index.freqstr}"      
                 )
 
     return
-    
 
-def preprocess_y(y: pd.Series) -> Union[np.ndarray, pd.Index]:
+
+def preprocess_y(
+    y: pd.Series
+) -> Union[np.ndarray, pd.Index]:
     
     '''
     Returns values and index of series separately. Index is overwritten 
@@ -267,7 +294,9 @@ def preprocess_y(y: pd.Series) -> Union[np.ndarray, pd.Index]:
     return y_values, y_index
 
 
-def preprocess_last_window(last_window: pd.Series) -> Union[np.ndarray, pd.Index]:
+def preprocess_last_window(
+    last_window:Union[pd.Series, pd.DataFrame]
+ ) -> Union[np.ndarray, pd.Index]:
     
     '''
     Returns values and index of series separately. Index is overwritten 
@@ -281,7 +310,7 @@ def preprocess_last_window(last_window: pd.Series) -> Union[np.ndarray, pd.Index
     
     Parameters
     ----------        
-    last_window : pandas Series
+    last_window : pandas Series, pandas DataFrame
         Time series values
 
     Returns 
@@ -427,8 +456,10 @@ def exog_to_multi_output(
     return exog_transformed
 
 
-def expand_index(index: Union[pd.Index, None], steps: int) -> pd.Index:
-    
+def expand_index(
+    index: Union[pd.Index, None], 
+    steps: int
+) -> pd.Index:
     '''
     Create a new index of lenght `steps` starting and the end of index.
     

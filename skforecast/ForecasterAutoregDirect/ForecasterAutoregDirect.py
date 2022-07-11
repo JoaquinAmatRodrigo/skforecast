@@ -1,8 +1,8 @@
 ################################################################################
 #                         ForecasterAutoregDirect                              #
 #                                                                              #
-# This work by Joaquin Amat Rodrigo is licensed under a Creative Commons       #
-# Attribution 4.0 International License.                                       #
+# This work by Joaquin Amat Rodrigo and Javier Escobar Ortiz is licensed       #
+# under a Creative Commons Attribution 4.0 International License.              #
 ################################################################################
 # coding=utf-8
 
@@ -232,7 +232,7 @@ class ForecasterAutoregDirect(ForecasterBase):
 
         n_splits = len(y) - self.max_lag - (self.steps -1)
         X_data  = np.full(shape=(n_splits, self.max_lag), fill_value=np.nan, dtype=float)
-        y_data  = np.full(shape=(n_splits, self.steps), fill_value=np.nan, dtype= float)
+        y_data  = np.full(shape=(n_splits, self.steps), fill_value=np.nan, dtype=float)
 
         for i in range(n_splits):
             X_index = np.arange(i, self.max_lag + i)
@@ -489,17 +489,18 @@ class ForecasterAutoregDirect(ForecasterBase):
             steps = self.steps
 
         check_predict_input(
-            steps          = steps,
-            fitted         = self.fitted,
-            included_exog  = self.included_exog,
-            index_type     = self.index_type,
-            index_freq     = self.index_freq,
-            window_size    = self.window_size,
-            last_window    = last_window,
-            exog           = exog,
-            exog_type      = self.exog_type,
-            exog_col_names = self.exog_col_names,
-            max_steps      = self.steps,
+            forecaster_type = type(self),
+            steps           = steps,
+            fitted          = self.fitted,
+            included_exog   = self.included_exog,
+            index_type      = self.index_type,
+            index_freq      = self.index_freq,
+            window_size     = self.window_size,
+            last_window     = last_window,
+            exog            = exog,
+            exog_type       = self.exog_type,
+            exog_col_names  = self.exog_col_names,
+            max_steps       = self.steps,
         ) 
 
         if exog is not None:

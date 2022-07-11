@@ -1,8 +1,8 @@
 ################################################################################
 #                        ForecasterAutoregCustom                               #
 #                                                                              #
-# This work by Joaquin Amat Rodrigo is licensed under a Creative Commons       #
-# Attribution 4.0 International License.                                       #
+# This work by Joaquin Amat Rodrigo and Javier Escobar Ortiz is licensed       #
+# under a Creative Commons Attribution 4.0 International License.              #
 ################################################################################
 # coding=utf-8
 
@@ -99,13 +99,13 @@ class ForecasterAutoregCustom(ForecasterBase):
     X_train_col_names : list
         Names of columns of the matrix created internally for training.
         
-    in_sample_residuals: numpy ndarray
+    in_sample_residuals: pandas Series
         Residuals of the model when predicting training data. Only stored up to
         1000 values.
         
-    out_sample_residuals: numpy ndarray
+    out_sample_residuals: pandas Series
         Residuals of the model when predicting non training data. Only stored
-        up to 1000 values.
+        up to 1000 values. Use `set_out_sample_residuals` to set values.
 
     creation_date: str
         Date of creation.
@@ -339,10 +339,17 @@ class ForecasterAutoregCustom(ForecasterBase):
             residuals = y_train - self.regressor.predict(X_train)
         else:
             residuals = y_train - self.regressor.predict(X_train.to_numpy())
+            
+        residuals = pd.Series(
+                        data  = residuals,
+                        index = y_train.index,
+                        name  = 'in_sample_residuals'
+                    )
+
         if len(residuals) > 1000:
             # Only up to 1000 residuals are stored
-            rng = np.random.default_rng(seed=123)
-            residuals = rng.choice(a=residuals, size=1000, replace=False)                                              
+            residuals = residuals.sample(n=1000, random_state=123, replace=False)
+                                                  
         self.in_sample_residuals = residuals
         
         # The last time window of training data is stored so that predictors in
@@ -438,17 +445,18 @@ class ForecasterAutoregCustom(ForecasterBase):
         '''
 
         check_predict_input(
-            steps          = steps,
-            fitted         = self.fitted,
-            included_exog  = self.included_exog,
-            index_type     = self.index_type,
-            index_freq     = self.index_freq,
-            window_size    = self.window_size,
-            last_window    = last_window,
-            exog           = exog,
-            exog_type      = self.exog_type,
-            exog_col_names = self.exog_col_names,
-            max_steps      = None,
+            forecaster_type = type(self),
+            steps           = steps,
+            fitted          = self.fitted,
+            included_exog   = self.included_exog,
+            index_type      = self.index_type,
+            index_freq      = self.index_freq,
+            window_size     = self.window_size,
+            last_window     = last_window,
+            exog            = exog,
+            exog_type       = self.exog_type,
+            exog_col_names  = self.exog_col_names,
+            max_steps       = None,
         )
      
         if exog is not None:
@@ -597,7 +605,7 @@ class ForecasterAutoregCustom(ForecasterBase):
                                 steps       = 1,
                                 last_window = last_window_boot,
                                 exog        = exog_boot 
-                            )
+                             )
                 
                 prediction_with_residual  = prediction + sample_residuals[step]
                 boot_predictions[step, i] = prediction_with_residual
@@ -684,17 +692,18 @@ class ForecasterAutoregCustom(ForecasterBase):
         '''
         
         check_predict_input(
-            steps          = steps,
-            fitted         = self.fitted,
-            included_exog  = self.included_exog,
-            index_type     = self.index_type,
-            index_freq     = self.index_freq,
-            window_size    = self.window_size,
-            last_window    = last_window,
-            exog           = exog,
-            exog_type      = self.exog_type,
-            exog_col_names = self.exog_col_names,
-            max_steps      = None,
+            forecaster_type = type(self),
+            steps           = steps,
+            fitted          = self.fitted,
+            included_exog   = self.included_exog,
+            index_type      = self.index_type,
+            index_freq      = self.index_freq,
+            window_size     = self.window_size,
+            last_window     = last_window,
+            exog            = exog,
+            exog_type       = self.exog_type,
+            exog_col_names  = self.exog_col_names,
+            max_steps       = None,
         )
         
         if exog is not None:
@@ -740,7 +749,7 @@ class ForecasterAutoregCustom(ForecasterBase):
                                     n_boot      = n_boot,
                                     random_state = random_state,
                                     in_sample_residuals = in_sample_residuals
-                                )
+                               )
         
         predictions = np.column_stack((predictions, predictions_interval))
 
