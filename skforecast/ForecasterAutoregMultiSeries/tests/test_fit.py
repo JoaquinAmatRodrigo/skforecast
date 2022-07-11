@@ -70,7 +70,8 @@ def test_fit_in_sample_residuals_stored_XGBRegressor():
 def test_fit_same_residuals_when_residuals_greater_than_1000():
     '''
     Test fit return same residuals when residuals len is greater than 1000.
-    Testing with two different forecaster.
+    Testing with two different forecaster. Residuals shouldn't be more than 
+    1000 values.
     '''
     series = pd.DataFrame({'1': pd.Series(np.arange(1010)), 
                            '2': pd.Series(np.arange(1010))
@@ -83,6 +84,8 @@ def test_fit_same_residuals_when_residuals_greater_than_1000():
     forecaster.fit(series=series, store_in_sample_residuals=True)
     results_2 = forecaster.in_sample_residuals
 
+    assert len(results_1['1']) == 1000
+    assert len(results_2['2']) == 1000
     assert results_1.keys() == results_2.keys()
     assert list(results_1.values())[0] == approx(list(results_2.values())[0])
     assert list(results_1.values())[1] == approx(list(results_2.values())[1])
