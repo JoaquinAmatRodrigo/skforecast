@@ -23,7 +23,10 @@ def test_check_input_predict_exception_when_fitted_is_False():
             exog            = None,
             exog_type       = None,
             exog_col_names  = None,
+            interval        = None,
             max_steps       = None,
+            level           = None,
+            series_levels   = None
         )
         
         
@@ -44,7 +47,10 @@ def test_check_input_predict_exception_when_steps_is_lower_than_1():
             exog            = None,
             exog_type       = None,
             exog_col_names  = None,
+            interval        = None,
             max_steps       = None,
+            level           = None,
+            series_levels   = None
         )
 
 
@@ -65,7 +71,10 @@ def test_check_input_predict_exception_when_steps_is_greater_than_max_steps():
             exog            = None,
             exog_type       = None,
             exog_col_names  = None,
+            interval        = None,
             max_steps       = 10,
+            level           = None,
+            series_levels   = None
         )
 
 
@@ -87,6 +96,7 @@ def test_check_input_predict_exception_when_ForecasterAutoregMultiSeries_and_lev
             exog            = None,
             exog_type       = None,
             exog_col_names  = None,
+            interval        = None,
             max_steps       = 10,
             level           = '1',
             series_levels   = ['2', '3']
@@ -109,6 +119,7 @@ def test_check_input_predict_exception_when_exog_is_not_none_and_included_exog_i
             exog            = np.arange(10),
             exog_type       = None,
             exog_col_names  = None,
+            interval        = None,
             max_steps       = None,
         )
 
@@ -129,7 +140,10 @@ def test_check_input_predict_exception_when_exog_is_none_and_included_exog_is_tr
             exog            = None,
             exog_type       = None,
             exog_col_names  = None,
+            interval        = None,
             max_steps       = None,
+            level           = None,
+            series_levels   = None
         )
 
 
@@ -149,14 +163,17 @@ def test_check_input_predict_exception_when_len_exog_is_less_than_steps():
             exog            = np.arange(5),
             exog_type       = None,
             exog_col_names  = None,
+            interval        = None,
             max_steps       = None,
+            level           = None,
+            series_levels   = None
         )
 
 
 def test_check_input_predict_exception_when_exog_is_not_pandas_series_or_dataframe():
     '''
     '''
-    with pytest.raises(Exception):
+    with pytest.raises(TypeError):
         check_predict_input(
             forecaster_type = 'class.ForecasterAutoreg',
             steps           = 10,
@@ -169,7 +186,10 @@ def test_check_input_predict_exception_when_exog_is_not_pandas_series_or_datafra
             exog            = np.arange(10),
             exog_type       = None,
             exog_col_names  = None,
+            interval        = None,
             max_steps       = None,
+            level           = None,
+            series_levels   = None
         )
 
 
@@ -189,14 +209,17 @@ def test_check_input_predict_exception_when_exog_has_missing_values():
             exog            = pd.Series([1, 2, 3, np.nan]),
             exog_type       = None,
             exog_col_names  = None,
+            interval        = None,
             max_steps       = None,
+            level           = None,
+            series_levels   = None
         )
 
 
 def test_check_input_predict_exception_when_exog_is_not_of_exog_type():
     '''
     '''
-    with pytest.raises(Exception):
+    with pytest.raises(TypeError):
         check_predict_input(
             forecaster_type = 'class.ForecasterAutoreg',
             steps           = 5,
@@ -209,7 +232,10 @@ def test_check_input_predict_exception_when_exog_is_not_of_exog_type():
             exog            = pd.Series(np.arange(10)),
             exog_type       = pd.DataFrame,
             exog_col_names  = None,
+            interval        = None,
             max_steps       = None,
+            level           = None,
+            series_levels   = None
         )
 
 
@@ -229,14 +255,17 @@ def test_check_input_predict_exception_when_exog_is_dataframe_without_columns_in
             exog            = pd.DataFrame(np.arange(10).reshape(5,2), columns=['col1', 'col2']),
             exog_type       = pd.DataFrame,
             exog_col_names  = ['col1', 'col3'],
+            interval        = None,
             max_steps       = None,
+            level           = None,
+            series_levels   = None
         )
 
 
 def test_check_input_predict_exception_when_exog_index_is_not_of_index_type():
     '''
     '''
-    with pytest.raises(Exception):
+    with pytest.raises(TypeError):
         check_predict_input(
             forecaster_type = 'class.ForecasterAutoreg',
             steps           = 10,
@@ -249,14 +278,17 @@ def test_check_input_predict_exception_when_exog_index_is_not_of_index_type():
             exog            = pd.Series(np.arange(10)),
             exog_type       = pd.Series,
             exog_col_names  = None,
+            interval        = None,
             max_steps       = None,
+            level           = None,
+            series_levels   = None
         )
 
 
 def test_check_input_predict_exception_when_exog_index_frequency_is_not_index_freq():
     '''
     '''
-    with pytest.raises(Exception):
+    with pytest.raises(TypeError):
         check_predict_input(
             forecaster_type = 'class.ForecasterAutoreg',
             steps           = 10,
@@ -269,7 +301,10 @@ def test_check_input_predict_exception_when_exog_index_frequency_is_not_index_fr
             exog            = pd.Series(np.arange(10), index=pd.date_range(start='1/1/2018', periods=10)),
             exog_type       = pd.Series,
             exog_col_names  = None,
+            interval        = None,
             max_steps       = None,
+            level           = None,
+            series_levels   = None
         )
 
 
@@ -289,14 +324,17 @@ def test_check_input_predict_exception_when_length_last_window_is_lower_than_win
             exog            = pd.Series(np.arange(10)),
             exog_type       = pd.Series,
             exog_col_names  = None,
+            interval        = None,
             max_steps       = None,
+            level           = None,
+            series_levels   = None
         )
 
 
 def test_check_input_predict_exception_when_last_window_is_not_pandas_series():
     '''
     '''
-    with pytest.raises(Exception):
+    with pytest.raises(TypeError):
         check_predict_input(
             forecaster_type = 'class.ForecasterAutoreg',
             steps           = 10,
@@ -309,14 +347,17 @@ def test_check_input_predict_exception_when_last_window_is_not_pandas_series():
             exog            = pd.Series(np.arange(10)),
             exog_type       = pd.Series,
             exog_col_names  = None,
+            interval        = None,
             max_steps       = None,
+            level           = None,
+            series_levels   = None
         )
 
 
 def test_check_input_predict_exception_when_last_window_is_not_pandas_dataframe_ForecasterAutoregMultiSeries():
     '''
     '''
-    with pytest.raises(Exception):
+    with pytest.raises(TypeError):
         check_predict_input(
             forecaster_type = 'class.ForecasterAutoregMultiSeries',
             steps           = 10,
@@ -329,7 +370,10 @@ def test_check_input_predict_exception_when_last_window_is_not_pandas_dataframe_
             exog            = pd.Series(np.arange(10)),
             exog_type       = pd.Series,
             exog_col_names  = None,
+            interval        = None,
             max_steps       = None,
+            level           = None,
+            series_levels   = None
         )
 
 
@@ -349,14 +393,17 @@ def test_check_input_predict_exception_when_last_window_has_missing_values():
             exog            = pd.Series(np.arange(10)),
             exog_type       = pd.Series,
             exog_col_names  = None,
+            interval        = None,
             max_steps       = None,
+            level           = None,
+            series_levels   = None
         )
 
 
 def test_check_input_predict_exception_when_last_window_index_is_not_of_index_type():
     '''
     '''
-    with pytest.raises(Exception):
+    with pytest.raises(TypeError):
         check_predict_input(
             forecaster_type = 'class.ForecasterAutoreg',
             steps           = 10,
@@ -369,14 +416,17 @@ def test_check_input_predict_exception_when_last_window_index_is_not_of_index_ty
             exog            = None,
             exog_type       = None,
             exog_col_names  = None,
+            interval        = None,
             max_steps       = None,
+            level           = None,
+            series_levels   = None
         )
 
 
 def test_check_input_predict_exception_when_last_window_index_frequency_is_not_index_freq():
     '''
     '''
-    with pytest.raises(Exception):
+    with pytest.raises(TypeError):
         check_predict_input(
             forecaster_type = 'class.ForecasterAutoreg',
             steps           = 10,
@@ -389,5 +439,8 @@ def test_check_input_predict_exception_when_last_window_index_frequency_is_not_i
             exog            = None,
             exog_type       = None,
             exog_col_names  = None,
+            interval        = None,
             max_steps       = None,
+            level           = None,
+            series_levels   = None
         )

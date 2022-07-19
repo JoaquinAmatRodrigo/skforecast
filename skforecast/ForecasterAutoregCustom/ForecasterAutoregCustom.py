@@ -456,7 +456,10 @@ class ForecasterAutoregCustom(ForecasterBase):
             exog            = exog,
             exog_type       = self.exog_type,
             exog_col_names  = self.exog_col_names,
+            interval        = None,
             max_steps       = None,
+            level           = None,
+            series_levels   = None
         )
      
         if exog is not None:
@@ -540,8 +543,9 @@ class ForecasterAutoregCustom(ForecasterBase):
             deterministic.
             
         interval: list, default `[5, 95]`
-            Confidence of the prediction interval estimated. Sequence of percentiles
-            to compute, which must be between 0 and 100 inclusive.
+            Confidence of the prediction interval estimated. Sequence of 
+            percentiles to compute, which must be between 0 and 100 inclusive. 
+            For example, interval of 95% should be as `interval = [2.5, 97.5]`.
             
         in_sample_residuals: bool, default `True`
             If `True`, residuals from the training data are used as proxy of
@@ -656,8 +660,9 @@ class ForecasterAutoregCustom(ForecasterBase):
             Exogenous variable/s included as predictor/s.
             
         interval: list, default `[5, 95]`
-            Confidence of the prediction interval estimated. Sequence of percentiles
-            to compute, which must be between 0 and 100 inclusive.
+            Confidence of the prediction interval estimated. Sequence of 
+            percentiles to compute, which must be between 0 and 100 inclusive. 
+            For example, interval of 95% should be as `interval = [2.5, 97.5]`.
             
         n_boot: int, default `500`
             Number of bootstrapping iterations used to estimate prediction
@@ -703,7 +708,10 @@ class ForecasterAutoregCustom(ForecasterBase):
             exog            = exog,
             exog_type       = self.exog_type,
             exog_col_names  = self.exog_col_names,
+            interval        = interval,
             max_steps       = None,
+            level           = None,
+            series_levels   = None
         )
         
         if exog is not None:

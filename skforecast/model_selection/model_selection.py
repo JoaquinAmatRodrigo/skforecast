@@ -435,10 +435,11 @@ def _backtesting_forecaster_refit(
 
     interval : list, default `None`
         Confidence of the prediction interval estimated. Sequence of percentiles
-        to compute, which must be between 0 and 100 inclusive. If `None`, no
-        intervals are estimated. Only available for forecaster of type ForecasterAutoreg
-        and ForecasterAutoregCustom.
-            
+        to compute, which must be between 0 and 100 inclusive. For example, 
+        interval of 95% should be as `interval = [2.5, 97.5]`. If `None`, no
+        intervals are estimated. Only available for forecaster of type 
+        ForecasterAutoreg and ForecasterAutoregCustom.
+    
     n_boot : int, default `500`
         Number of bootstrapping iterations used to estimate prediction
         intervals.
@@ -687,9 +688,10 @@ def _backtesting_forecaster_no_refit(
 
     interval : list, default `None`
         Confidence of the prediction interval estimated. Sequence of percentiles
-        to compute, which must be between 0 and 100 inclusive. If `None`, no
-        intervals are estimated. Only available for forecaster of type ForecasterAutoreg
-        and ForecasterAutoregCustom.
+        to compute, which must be between 0 and 100 inclusive. For example, 
+        interval of 95% should be as `interval = [2.5, 97.5]`. If `None`, no
+        intervals are estimated. Only available for forecaster of type 
+        ForecasterAutoreg and ForecasterAutoregCustom.
             
     n_boot : int, default `500`
         Number of bootstrapping iterations used to estimate prediction
@@ -951,9 +953,10 @@ def backtesting_forecaster(
 
     interval : list, default `None`
         Confidence of the prediction interval estimated. Sequence of percentiles
-        to compute, which must be between 0 and 100 inclusive. If `None`, no
-        intervals are estimated. Only available for forecaster of type ForecasterAutoreg
-        and ForecasterAutoregCustom.
+        to compute, which must be between 0 and 100 inclusive. For example, 
+        interval of 95% should be as `interval = [2.5, 97.5]`. If `None`, no
+        intervals are estimated. Only available for forecaster of type 
+        ForecasterAutoreg and ForecasterAutoregCustom.
             
     n_boot : int, default `500`
         Number of bootstrapping iterations used to estimate prediction

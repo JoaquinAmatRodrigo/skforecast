@@ -500,7 +500,10 @@ class ForecasterAutoregDirect(ForecasterBase):
             exog            = exog,
             exog_type       = self.exog_type,
             exog_col_names  = self.exog_col_names,
+            interval        = None,
             max_steps       = self.steps,
+            level           = None,
+            series_levels   = None
         ) 
 
         if exog is not None:
