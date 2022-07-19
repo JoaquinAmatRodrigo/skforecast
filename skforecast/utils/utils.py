@@ -60,6 +60,52 @@ def check_exog(exog: Any) -> None:
     return
 
 
+def _check_interval(
+    interval: list
+) -> None:
+    """
+    Check provided confidence interval sequence is valid.
+
+    Parameters
+    ----------
+    interval : list, default `None`
+        Confidence of the prediction interval estimated. Sequence of percentiles
+        to compute, which must be between 0 and 100 inclusive. For example, 
+        interval of 95% should be as `interval = [2.5, 97.5]`.
+    """
+
+    if not isinstance(interval, list):
+        raise TypeError(
+            ('`interval` must be a `list`. For example, interval of 95% '
+             'should be as `interval = [2.5, 97.5]`.')
+        )
+
+    if len(interval) != 2:
+        raise ValueError(
+            ('`interval` must contain exactly 2 values, respectively the '
+             'lower and upper interval bounds. For example, interval of 95% '
+             'should be as `interval = [2.5, 97.5]`.')
+        )
+
+    if (interval[0] < 0.) or (interval[0] >= 100.):
+        raise ValueError(
+            f'Lower interval bound ({interval[0]}) must be >= 0 and < 100.'
+        )
+
+    if (interval[1] <= 0.) or (interval[1] > 100.):
+        raise ValueError(
+            f'Upper interval bound ({interval[1]}) must be > 0 and <= 100.'
+        )
+
+    if interval[0] >= interval[1]:
+        raise ValueError(
+            f'Lower interval bound ({interval[0]}) must be less than the '
+            f'upper interval bound ({interval[1]}.'
+        )
+
+    return
+
+
 def check_predict_input(
     forecaster_type,
     steps: int,
@@ -72,6 +118,7 @@ def check_predict_input(
     exog: Union[pd.Series, pd.DataFrame]=None,
     exog_type: Union[type, None]=None,
     exog_col_names: Union[list, None]=None,
+    interval: list=None,
     max_steps: int=None,
     level: str=None,
     series_levels: list=None
@@ -113,20 +160,25 @@ def check_predict_input(
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s.
 
-    exog_type : type
+    exog_type : type, default `None`
         Type of exogenous variable/s used in training.
         
-    exog_col_names : list
+    exog_col_names : list, default `None`
         Names of columns of `exog` if `exog` used in training was a pandas
         DataFrame.
 
-    max_steps: int
+    interval : list, default `None`
+        Confidence of the prediction interval estimated. Sequence of percentiles
+        to compute, which must be between 0 and 100 inclusive. For example, 
+        interval of 95% should be as `interval = [2.5, 97.5]`.
+
+    max_steps: int, default `None`
         Maximum number of steps allowed.
             
-    level : str
+    level : str, default `None`
         Time series to be predicted.
 
-    series_levels : list
+    series_levels : list, default `None`
         Names of the columns (levels) that can be predicted.
     '''
 
@@ -148,6 +200,9 @@ def check_predict_input(
                 f"when initializing the forecaster. Got {steps} but the maximum "
                 f"is {max_steps}."
             )
+
+    if interval is not None:
+        _check_interval(interval = interval)
     
     if str(forecaster_type).split('.')[1] == 'ForecasterAutoregMultiSeries':
         if level not in series_levels:
@@ -173,11 +228,11 @@ def check_predict_input(
                 '`exog` must have at least as many values as `steps` predicted.'
             )
         if not isinstance(exog, (pd.Series, pd.DataFrame)):
-            raise Exception('`exog` must be a pandas Series or DataFrame.')
+            raise TypeError('`exog` must be a pandas Series or DataFrame.')
         if exog.isnull().values.any():
             raise Exception('`exog` has missing values.')
         if not isinstance(exog, exog_type):
-            raise Exception(
+            raise TypeError(
                 f"Expected type for `exog`: {exog_type}. Got {type(exog)}"      
             )
         if isinstance(exog, pd.DataFrame):
@@ -191,14 +246,14 @@ def check_predict_input(
         _, exog_index = preprocess_exog(exog=exog.iloc[:0, ])
         
         if not isinstance(exog_index, index_type):
-            raise Exception(
+            raise TypeError(
                 f"Expected index of type {index_type} for `exog`. "
                 f"Got {type(exog_index)}"      
             )
         
         if isinstance(exog_index, pd.DatetimeIndex):
             if not exog_index.freqstr == index_freq:
-                raise Exception(
+                raise TypeError(
                     f"Expected frequency of type {index_freq} for `exog`. "
                     f"Got {exog_index.freqstr}"      
                 )
@@ -212,10 +267,10 @@ def check_predict_input(
                 
         if str(forecaster_type).split('.')[1] == 'ForecasterAutoregMultiSeries':
             if not isinstance(last_window, pd.DataFrame):
-                raise Exception('`last_window` must be a pandas DataFrame.')     
+                raise TypeError('`last_window` must be a pandas DataFrame.')     
         else:    
             if not isinstance(last_window, pd.Series):
-                raise Exception('`last_window` must be a pandas Series.')
+                raise TypeError('`last_window` must be a pandas Series.')
                 
         if last_window.isnull().any().all():
             raise Exception('`last_window` has missing values.')
@@ -223,13 +278,13 @@ def check_predict_input(
                                     last_window = last_window.iloc[:0]
                                 ) 
         if not isinstance(last_window_index, index_type):
-            raise Exception(
+            raise TypeError(
                 f"Expected index of type {index_type} for `last_window`. "
                 f"Got {type(last_window_index)}"      
             )
         if isinstance(last_window_index, pd.DatetimeIndex):
             if not last_window_index.freqstr == index_freq:
-                raise Exception(
+                raise TypeError(
                     f"Expected frequency of type {index_freq} for `last_window`. "
                     f"Got {last_window_index.freqstr}"      
                 )
