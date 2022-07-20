@@ -551,20 +551,20 @@ class ForecasterAutoreg(ForecasterBase):
         exog : numpy ndarray, default `None`
             Exogenous variable/s included as predictor/s.
             
-        n_boot: int, default `500`
+        n_boot : int, default `500`
             Number of bootstrapping iterations used to estimate prediction
             intervals.
 
-        random_state: int
+        random_state : int
             Sets a seed to the random generator, so that boot intervals are always 
             deterministic.
             
-        interval: list, default `[5, 95]`
+        interval : list, default `[5, 95]`
             Confidence of the prediction interval estimated. Sequence of 
             percentiles to compute, which must be between 0 and 100 inclusive. 
             For example, interval of 95% should be as `interval = [2.5, 97.5]`.
             
-        in_sample_residuals: bool, default `True`
+        in_sample_residuals : bool, default `True`
             If `True`, residuals from the training data are used as proxy of
             prediction error to create prediction intervals. If `False`, out of
             sample residuals are used. In the latter case, the user should have
@@ -675,20 +675,20 @@ class ForecasterAutoreg(ForecasterBase):
         exog : pandas Series, pandas DataFrame, default `None`
             Exogenous variable/s included as predictor/s.
             
-        interval: list, default `[5, 95]`
+        interval : list, default `[5, 95]`
             Confidence of the prediction interval estimated. Sequence of 
             percentiles to compute, which must be between 0 and 100 inclusive. 
             For example, interval of 95% should be as `interval = [2.5, 97.5]`.
             
-        n_boot: int, default `500`
+        n_boot : int, default `500`
             Number of bootstrapping iterations used to estimate prediction
             intervals.
 
-        random_state: int, default 123
+        random_state : int, default 123
             Sets a seed to the random generator, so that boot intervals are always 
             deterministic.
             
-        in_sample_residuals: bool, default `True`
+        in_sample_residuals : bool, default `True`
             If `True`, residuals from the training data are used as proxy of
             prediction error to create prediction intervals. If `False`, out of
             sample residuals are used. In the latter case, the user should have
