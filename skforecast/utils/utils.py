@@ -10,6 +10,7 @@ from typing import Union, List, Tuple, Any
 import warnings
 import numpy as np
 import pandas as pd
+import sklearn
 
 
 def check_y(y: Any) -> None:
@@ -549,3 +550,109 @@ def expand_index(
                         stop  = steps
                      )
     return new_index
+
+
+def transform_series(series, transformer, fit=False, inverse_transform=False):
+    '''      
+    Transform raw values of pandas Series with a scikit-learn alike transformer
+    (preprocessor). The transformer used must have the following methods: fit, transform,
+    fit_transform and inverse_transform.
+
+    Parameters
+    ----------
+    series : pandas Series
+
+    transformer : scikit-learn alike transformer (preprocessor).
+        scikit-learn alike transformer (preprocessor) with methods: fit, transform,
+        fit_transform and inverse_transform.
+
+    fit : bool, default `False`
+        Train the transformer before applying it.
+
+    inverse_transform : bool, default `False`
+        Transform back the data to the original representation.
+
+    Returns
+    -------
+    series_transformed : pandas Series
+        Transformed Series
+    '''
+
+    if transformer is None:
+        return series
+    
+    if not inverse_transform:
+        if fit:
+            values_transformed = transformer.fit_transform(series.to_numpy().reshape(-1, 1))
+        else:
+            values_transformed = transformer.transform(series.to_numpy().reshape(-1, 1))        
+    else:
+        values_transformed = transformer.inverse_transform(series.to_numpy().reshape(-1, 1))
+
+    series_transformed = pd.Series(
+                                data = values_transformed.flatten(),
+                                index = series.index,
+                                name = series.name
+                          )
+
+    return series_transformed
+
+
+def transform_dataframe(df, transformer, fit=False, inverse_transform=False):
+    '''      
+    Transform raw values of pandas DataFrame with a scikit-learn alike
+    transformer, preprocessor or ColumnTransformer. `inverse_transform` is not available
+    when using ColumnTransformers.
+
+    Parameters
+    ----------
+    series : pandas DataFrame
+
+    transformer : scikit-learn alike transformer, preprocessor or ColumnTransformer.
+        scikit-learn alike transformer, preprocessor or ColumnTransformer with methods:
+        fit, transform, fit_transform and inverse_transform.
+
+    fit : bool, default `False`
+        Train the transformer before applying it.
+
+    inverse_transform : bool, default `False`
+        Transform back the data to the original representation. This is not available
+        when using transformers of class scikit-learn ColumnTransformers.
+
+    Returns
+    -------
+    series_transformed : pandas DataFrame
+        Transformed DataFrame.
+    '''
+
+    if transformer is None:
+        return df
+
+    if inverse_transform and\
+    isinstance(transformer, sklearn.compose._column_transformer.ColumnTransformer):
+        raise Exception(
+            '`inverse_transform` is not available when using ColumnTransformers.'
+        )
+    
+    if not inverse_transform:
+        if fit:
+            values_transformed = transformer.fit_transform(df)
+        else:
+            values_transformed = transformer.transform(df)
+    else:
+        values_transformed = transformer.inverse_transform(df)
+
+    if hasattr(transformer, 'get_feature_names_out'):
+        feature_names_out = transformer.get_feature_names_out()
+    elif hasattr(transformer, 'categories_'):   
+        feature_names_out = transformer.categories_
+    else:
+        feature_names_out = df.columns
+        
+    df_transformed = pd.DataFrame(
+                        data = values_transformed,
+                        index = df.index,
+                        columns = feature_names_out
+                      )
+
+    return df_transformed
