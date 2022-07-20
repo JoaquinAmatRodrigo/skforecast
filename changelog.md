@@ -12,7 +12,7 @@ All notable changes to this project will be documented in this file.
 
 + Created module `model_selection_multiseries`. Functions: `_backtesting_forecaster_multiseries_refit`, `_backtesting_forecaster_multiseries_no_refit`, `backtesting_forecaster_multiseries`, `grid_search_forecaster_multiseries`, `random_search_forecaster_multiseries` and `_evaluate_grid_hyperparameters_multiseries`.
 
-+ Function `_check_interval` in utils. 
++ Function `_check_interval` in utils. (suggested by Thomas Karaouzene https://github.com/tkaraouzene)
 
 **Changed**
 
