@@ -24,7 +24,7 @@ from ..utils import preprocess_y
 from ..utils import preprocess_last_window
 from ..utils import preprocess_exog
 from ..utils import expand_index
-from ..utils import check_predict_input
+from ..utils import check_predict_input, check_interval
 
 logging.basicConfig(
     format = '%(name)-10s %(levelname)-5s %(message)s', 
@@ -671,19 +671,19 @@ class ForecasterAutoreg(ForecasterBase):
         exog : pandas Series, pandas DataFrame, default `None`
             Exogenous variable/s included as predictor/s.
             
-        interval: list, default `[5, 95]`
+        interval : list, default `[5, 95]`
             Confidence of the prediction interval estimated. Sequence of percentiles
             to compute, which must be between 0 and 100 inclusive.
             
-        n_boot: int, default `500`
+        n_boot : int, default `500`
             Number of bootstrapping iterations used to estimate prediction
             intervals.
 
-        random_state: int, default 123
+        random_state : int, default 123
             Sets a seed to the random generator, so that boot intervals are always 
             deterministic.
             
-        in_sample_residuals: bool, default `True`
+        in_sample_residuals : bool, default `True`
             If `True`, residuals from the training data are used as proxy of
             prediction error to create prediction intervals. If `False`, out of
             sample residuals are used. In the latter case, the user should have
@@ -721,7 +721,9 @@ class ForecasterAutoreg(ForecasterBase):
             exog_col_names  = self.exog_col_names,
             max_steps       = None,
         ) 
-        
+
+        check_interval(interval=interval)
+
         if exog is not None:
             if isinstance(exog, pd.DataFrame):
                 exog_values, _ = preprocess_exog(

@@ -12,6 +12,8 @@ All notable changes to this project will be documented in this file.
 
 + Created module `model_selection_multiseries`. Functions: `_backtesting_forecaster_multiseries_refit`, `_backtesting_forecaster_multiseries_no_refit`, `backtesting_forecaster_multiseries`, `grid_search_forecaster_multiseries`, `random_search_forecaster_multiseries` and `_evaluate_grid_hyperparameters_multiseries`.
 
++ Check if provided interval is correct when using `ForecasterAutoreg.predict_interval`.
+
 **Changed**
 
 + `backtesting_forecaster` change default value of argument `fixed_train_size: bool=True`.

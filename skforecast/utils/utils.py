@@ -237,6 +237,47 @@ def check_predict_input(
     return
 
 
+def check_interval(interval: list[float]) -> None:
+    """Check provided confidence interval sequence is valid.
+
+    Basically, the interval sequence must fulfill following rules:
+
+        - Contain exactly two values (lower and upper bounds)
+        - Lower bound has to be the first value and upper bound the second one
+        - 0 >= lower_bound < upper_bound
+        - lower_bound < upper_bound <= 100
+
+    Parameters
+    ----------
+    interval : list[float]
+        Sequence of percentiles to check.
+
+    Raises
+    ------
+    ValueError
+        If any of interval constraint is not fulfilled.
+    """
+    if len(interval) != 2:
+        raise ValueError(
+            "Interval sequence should contain exactly 2 values, respectively lower and upper interval bounds."
+        )
+
+    lower_bound = interval[0]
+    upper_bound = interval[1]
+
+    if lower_bound >= upper_bound:
+        raise ValueError(
+            f"Lower interval bound ({lower_bound}) has to be strictly smaller than upper interval bound "
+            f"({upper_bound})."
+        )
+
+    if lower_bound < 0:
+        raise ValueError(f"Lower interval bound ({lower_bound}) has to be >= 0.")
+
+    if upper_bound > 100:
+        raise ValueError(f"Upper interval bound ({upper_bound}) has to be <= 100.")
+
+
 def preprocess_y(
     y: pd.Series
 ) -> Union[np.ndarray, pd.Index]:
