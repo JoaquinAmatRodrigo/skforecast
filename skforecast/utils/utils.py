@@ -552,7 +552,12 @@ def expand_index(
     return new_index
 
 
-def transform_series(series, transformer, fit=False, inverse_transform=False):
+def transform_series(
+    series: pd.Series,
+    transformer,
+    fit: bool=False,
+    inverse_transform: bool=False
+) -> pd.Series:
     '''      
     Transform raw values of pandas Series with a scikit-learn alike transformer
     (preprocessor). The transformer used must have the following methods: fit, transform,
@@ -590,15 +595,20 @@ def transform_series(series, transformer, fit=False, inverse_transform=False):
         values_transformed = transformer.inverse_transform(series.to_numpy().reshape(-1, 1))
 
     series_transformed = pd.Series(
-                                data = values_transformed.flatten(),
-                                index = series.index,
-                                name = series.name
+                            data  = values_transformed.flatten(),
+                            index = series.index,
+                            name  = series.name
                           )
 
     return series_transformed
 
 
-def transform_dataframe(df, transformer, fit=False, inverse_transform=False):
+def transform_dataframe(
+    df: pd.DataFrame,
+    transformer,
+    fit: bool=False,
+    inverse_transform: bool=False
+) -> pd.DataFrame:
     '''      
     Transform raw values of pandas DataFrame with a scikit-learn alike
     transformer, preprocessor or ColumnTransformer. `inverse_transform` is not available

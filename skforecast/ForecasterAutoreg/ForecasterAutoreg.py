@@ -147,8 +147,8 @@ class ForecasterAutoreg(ForecasterBase):
     ) -> None:
         
         self.regressor            = regressor
-        self.transformer_y       = transformer_y
-        self.transformer_exog    = transformer_exog
+        self.transformer_y        = transformer_y
+        self.transformer_exog     = transformer_exog
         self.index_type           = None
         self.index_freq           = None
         self.training_range       = None
@@ -971,8 +971,8 @@ class ForecasterAutoreg(ForecasterBase):
         self,
         residuals: pd.Series,
         append: bool=True,
-        transform=False
-    )-> None:
+        transform: bool=False
+    ) -> None:
         '''
         Set new values to the attribute `out_sample_residuals`. Out of sample
         residuals are meant to be calculated using observations that did not
