@@ -53,14 +53,15 @@ class ForecasterAutoreg(ForecasterBase):
     transformer_y : transformer (preprocessor) compatible with the scikit-learn
                     preprocessing API, default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
-        preprocessing API. The transformation is applied to `y` before training the
-        forecaster.
+        preprocessing API with methods: fit, transform, fit_transform and inverse_transform.
+        ColumnTransformers are not allowed since they do not have inverse_transform method.
+        The transformation is applied to `y` before training the forecaster.
 
     transformer_exog : transformer (preprocessor) compatible with the scikit-learn
                        preprocessing API, default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API. The transformation is applied to `exog` before training the
-        forecaster.
+        forecaster. `inverse_transform` is not available when using ColumnTransformers.
 
     
     Attributes
@@ -74,14 +75,15 @@ class ForecasterAutoreg(ForecasterBase):
     transformer_y : transformer (preprocessor) compatible with the scikit-learn
                     preprocessing API, default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
-        preprocessing API. The transformation is applied to `y` before training the
-        forecaster.
+        preprocessing API with methods: fit, transform, fit_transform and inverse_transform.
+        ColumnTransformers are not allowed since they do not have inverse_transform method.
+        The transformation is applied to `y` before training the forecaster.
 
     transformer_exog : transformer (preprocessor) compatible with the scikit-learn
                     preprocessing API, default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API. The transformation is applied to `exog` before training the
-        forecaster.
+        forecaster. `inverse_transform` is not available when using ColumnTransformers.
         
     max_lag : int
         Maximum value of lag included in `lags`.

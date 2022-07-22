@@ -623,8 +623,7 @@ def transform_dataframe(
     series : pandas DataFrame
 
     transformer : scikit-learn alike transformer, preprocessor or ColumnTransformer.
-        scikit-learn alike transformer, preprocessor or ColumnTransformer with methods:
-        fit, transform, fit_transform and inverse_transform.
+        scikit-learn alike transformer, preprocessor or ColumnTransformer.
 
     fit : bool, default `False`
         Train the transformer before applying it.
