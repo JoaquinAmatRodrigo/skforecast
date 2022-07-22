@@ -1,10 +1,9 @@
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/Naereen/StrapDown.js/graphs/commit-activity)
-![Python](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10-blue)
+![Lifecycle](https://img.shields.io/badge/lifecycle-maturing-blue)
+![Python](https://img.shields.io/badge/python-3.7%20%7C%203.8%20%7C%203.9-blue)
 ![Licence](https://img.shields.io/badge/Licence-MIT-green)
 [![Downloads](https://static.pepy.tech/personalized-badge/skforecast?period=total&units=international_system&left_color=grey&right_color=blue&left_text=Downloads)](https://pepy.tech/project/skforecast)
 ![PyPI](https://img.shields.io/pypi/v/skforecast)
-
-![Build status](https://github.com/JoaquinAmatRodrigo/skforecast/workflows/unit-tests.yml/badge.svg)
 
 
 
@@ -37,6 +36,15 @@ Latest (unstable):
 pip install git+https://github.com/JoaquinAmatRodrigo/skforecast#master
 ```
 
+The most common error when importing the library is:
+
+ `'cannot import name 'mean_absolute_percentage_error' from 'sklearn.metrics'`.
+ 
+ This is because the scikit-learn installation is lower than 0.24. Try to upgrade scikit-learn with:
+ 
+ ```bash
+pip3 install -U scikit-learn
+```
 
 # Dependencies
 
