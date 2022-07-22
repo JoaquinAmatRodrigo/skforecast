@@ -479,12 +479,12 @@ def exog_to_multi_output(
     exog : numpy ndarray, shape(samples,)
         Time series values
 
-    steps: int.
+    steps : int.
         Number of steps that will be predicted using this exog.
 
     Returns 
     -------
-    exog_transformed: numpy ndarray
+    exog_transformed : numpy ndarray
     '''
 
     exog_transformed = []
@@ -523,7 +523,7 @@ def expand_index(
     ----------        
     index : pd.Index, None
         Index of last window
-    steps: int
+    steps : int
         Number of steps to expand.
 
     Returns 
@@ -561,7 +561,8 @@ def transform_series(
     '''      
     Transform raw values of pandas Series with a scikit-learn alike transformer
     (preprocessor). The transformer used must have the following methods: fit, transform,
-    fit_transform and inverse_transform.
+    fit_transform and inverse_transform. ColumnTransformers are not allowed since they
+    do not have inverse_transform method.
 
     Parameters
     ----------
@@ -569,7 +570,8 @@ def transform_series(
 
     transformer : scikit-learn alike transformer (preprocessor).
         scikit-learn alike transformer (preprocessor) with methods: fit, transform,
-        fit_transform and inverse_transform.
+        fit_transform and inverse_transform. ColumnTransformers are not allowed since they
+        do not have inverse_transform method.
 
     fit : bool, default `False`
         Train the transformer before applying it.
@@ -585,19 +587,21 @@ def transform_series(
 
     if transformer is None:
         return series
-    
+
+    series = series.to_frame()
+
     if not inverse_transform:
         if fit:
-            values_transformed = transformer.fit_transform(series.to_numpy().reshape(-1, 1))
+            values_transformed = transformer.fit_transform(series)
         else:
-            values_transformed = transformer.transform(series.to_numpy().reshape(-1, 1))        
+            values_transformed = transformer.transform(series)        
     else:
-        values_transformed = transformer.inverse_transform(series.to_numpy().reshape(-1, 1))
+        values_transformed = transformer.inverse_transform(series)
 
     series_transformed = pd.Series(
                             data  = values_transformed.flatten(),
                             index = series.index,
-                            name  = series.name
+                            name  = series.columns[0]
                           )
 
     return series_transformed
@@ -652,13 +656,17 @@ def transform_dataframe(
     else:
         values_transformed = transformer.inverse_transform(df)
 
+    if hasattr(values_transformed, 'toarray'):
+        # If the returned values are in sparse matrix format, it is converted to dense
+        values_transformed = values_transformed.toarray()
+
     if hasattr(transformer, 'get_feature_names_out'):
         feature_names_out = transformer.get_feature_names_out()
     elif hasattr(transformer, 'categories_'):   
         feature_names_out = transformer.categories_
     else:
         feature_names_out = df.columns
-        
+    
     df_transformed = pd.DataFrame(
                         data = values_transformed,
                         index = df.index,
