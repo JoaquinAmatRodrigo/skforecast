@@ -479,12 +479,12 @@ def exog_to_multi_output(
     exog : numpy ndarray, shape(samples,)
         Time series values
 
-    steps: int.
+    steps : int.
         Number of steps that will be predicted using this exog.
 
     Returns 
     -------
-    exog_transformed: numpy ndarray
+    exog_transformed : numpy ndarray
     '''
 
     exog_transformed = []
@@ -523,7 +523,7 @@ def expand_index(
     ----------        
     index : pd.Index, None
         Index of last window
-    steps: int
+    steps : int
         Number of steps to expand.
 
     Returns 
@@ -585,19 +585,21 @@ def transform_series(
 
     if transformer is None:
         return series
-    
+
+    series = series.to_frame()
+
     if not inverse_transform:
         if fit:
-            values_transformed = transformer.fit_transform(series.to_numpy().reshape(-1, 1))
+            values_transformed = transformer.fit_transform(series)
         else:
-            values_transformed = transformer.transform(series.to_numpy().reshape(-1, 1))        
+            values_transformed = transformer.transform(series)        
     else:
-        values_transformed = transformer.inverse_transform(series.to_numpy().reshape(-1, 1))
+        values_transformed = transformer.inverse_transform(series)
 
     series_transformed = pd.Series(
                             data  = values_transformed.flatten(),
                             index = series.index,
-                            name  = series.name
+                            name  = series.columns[0]
                           )
 
     return series_transformed
