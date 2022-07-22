@@ -10,6 +10,7 @@ from typing import Union, List, Tuple, Any
 import warnings
 import numpy as np
 import pandas as pd
+import sklearn
 
 
 def check_y(y: Any) -> None:
@@ -478,12 +479,12 @@ def exog_to_multi_output(
     exog : numpy ndarray, shape(samples,)
         Time series values
 
-    steps: int.
+    steps : int.
         Number of steps that will be predicted using this exog.
 
     Returns 
     -------
-    exog_transformed: numpy ndarray
+    exog_transformed : numpy ndarray
     '''
 
     exog_transformed = []
@@ -522,7 +523,7 @@ def expand_index(
     ----------        
     index : pd.Index, None
         Index of last window
-    steps: int
+    steps : int
         Number of steps to expand.
 
     Returns 
@@ -549,3 +550,126 @@ def expand_index(
                         stop  = steps
                      )
     return new_index
+
+
+def transform_series(
+    series: pd.Series,
+    transformer,
+    fit: bool=False,
+    inverse_transform: bool=False
+) -> pd.Series:
+    '''      
+    Transform raw values of pandas Series with a scikit-learn alike transformer
+    (preprocessor). The transformer used must have the following methods: fit, transform,
+    fit_transform and inverse_transform. ColumnTransformers are not allowed since they
+    do not have inverse_transform method.
+
+    Parameters
+    ----------
+    series : pandas Series
+
+    transformer : scikit-learn alike transformer (preprocessor).
+        scikit-learn alike transformer (preprocessor) with methods: fit, transform,
+        fit_transform and inverse_transform. ColumnTransformers are not allowed since they
+        do not have inverse_transform method.
+
+    fit : bool, default `False`
+        Train the transformer before applying it.
+
+    inverse_transform : bool, default `False`
+        Transform back the data to the original representation.
+
+    Returns
+    -------
+    series_transformed : pandas Series
+        Transformed Series
+    '''
+
+    if transformer is None:
+        return series
+
+    series = series.to_frame()
+
+    if not inverse_transform:
+        if fit:
+            values_transformed = transformer.fit_transform(series)
+        else:
+            values_transformed = transformer.transform(series)        
+    else:
+        values_transformed = transformer.inverse_transform(series)
+
+    series_transformed = pd.Series(
+                            data  = values_transformed.flatten(),
+                            index = series.index,
+                            name  = series.columns[0]
+                          )
+
+    return series_transformed
+
+
+def transform_dataframe(
+    df: pd.DataFrame,
+    transformer,
+    fit: bool=False,
+    inverse_transform: bool=False
+) -> pd.DataFrame:
+    '''      
+    Transform raw values of pandas DataFrame with a scikit-learn alike
+    transformer, preprocessor or ColumnTransformer. `inverse_transform` is not available
+    when using ColumnTransformers.
+
+    Parameters
+    ----------
+    series : pandas DataFrame
+
+    transformer : scikit-learn alike transformer, preprocessor or ColumnTransformer.
+        scikit-learn alike transformer, preprocessor or ColumnTransformer.
+
+    fit : bool, default `False`
+        Train the transformer before applying it.
+
+    inverse_transform : bool, default `False`
+        Transform back the data to the original representation. This is not available
+        when using transformers of class scikit-learn ColumnTransformers.
+
+    Returns
+    -------
+    series_transformed : pandas DataFrame
+        Transformed DataFrame.
+    '''
+
+    if transformer is None:
+        return df
+
+    if inverse_transform and\
+    isinstance(transformer, sklearn.compose._column_transformer.ColumnTransformer):
+        raise Exception(
+            '`inverse_transform` is not available when using ColumnTransformers.'
+        )
+    
+    if not inverse_transform:
+        if fit:
+            values_transformed = transformer.fit_transform(df)
+        else:
+            values_transformed = transformer.transform(df)
+    else:
+        values_transformed = transformer.inverse_transform(df)
+
+    if hasattr(values_transformed, 'toarray'):
+        # If the returned values are in sparse matrix format, it is converted to dense
+        values_transformed = values_transformed.toarray()
+
+    if hasattr(transformer, 'get_feature_names_out'):
+        feature_names_out = transformer.get_feature_names_out()
+    elif hasattr(transformer, 'categories_'):   
+        feature_names_out = transformer.categories_
+    else:
+        feature_names_out = df.columns
+    
+    df_transformed = pd.DataFrame(
+                        data = values_transformed,
+                        index = df.index,
+                        columns = feature_names_out
+                      )
+
+    return df_transformed
