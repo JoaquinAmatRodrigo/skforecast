@@ -231,8 +231,8 @@ class ForecasterAutoregCustom(ForecasterBase):
             exog_values, exog_index = preprocess_exog(exog=exog)
             if not (exog_index[:len(y_index)] == y_index).all():
                 raise Exception(
-                ('Different index for `y` and `exog`. They must be equal '
-                'to ensure the correct alignment of values.')      
+                    ('Different index for `y` and `exog`. They must be equal '
+                    'to ensure the correct alignment of values.')      
                 )
        
         X_train  = []
