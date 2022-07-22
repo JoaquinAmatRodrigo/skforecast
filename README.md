@@ -43,6 +43,8 @@ pip install git+https://github.com/JoaquinAmatRodrigo/skforecast#master
 + tqdm>=4.57.0, <=4.62
 + scikit-learn>=1.0, <=1.1.1
 + statsmodels>=0.12, <=0.13.2
++ matplotlib==3.5.2
++ seaborn==0.11.2
 + optuna==2.10.0
 + scikit-optimize==0.9.0
 
