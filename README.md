@@ -6,6 +6,7 @@
 ![PyPI](https://img.shields.io/pypi/v/skforecast)
 
 
+
 # skforecast
 
 <p><img src="./images/logo_skforecast_no_background.png" alt="logo-skforecast" title="logo-skforecast" width="200" align="right"></p>
