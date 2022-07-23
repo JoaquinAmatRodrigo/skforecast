@@ -1,5 +1,6 @@
 # Unit test transform_dataframe
 # ==============================================================================
+import pytest
 import pandas as pd
 from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
@@ -102,3 +103,33 @@ def test_transform_dataframe_when_transformer_is_ColumnTransformer():
                     inverse_transform = False
                 )
     pd.testing.assert_frame_equal(results, expected)
+
+
+def test_transform_dataframe_exception_when_transformer_is_ColumnTransformer_and_inverse_transform_in_true():
+    """
+    Test that transform_dataframe raise exception when transformer is ColumnTransformer
+    ans argument inverse_transform is True.
+    """
+    input = pd.DataFrame({
+                'col_1': [7.5, 24.4, 60.3, 57.3, 50.7, 41.4, 87.2, 47.4],
+                'col_2': ['a', 'a', 'a', 'a', 'b', 'b', 'b', 'b']
+            })
+    expected = pd.DataFrame({
+              'col_1': [-1.76425513, -1.00989936, 0.59254869, 0.45863938,
+                          0.1640389 , -0.25107995, 1.79326881, 0.01673866],
+              'col_2_a': [1., 1., 1., 1., 0., 0., 0., 0.],
+              'col_2_b': [0., 0., 0., 0., 1., 1., 1., 1.]
+           })
+    transformer = ColumnTransformer(
+                    [('scale', StandardScaler(), ['col_1']),
+                    ('onehot', OneHotEncoder(), ['col_2'])],
+                    remainder = 'passthrough',
+                    verbose_feature_names_out = False
+                  )
+    with pytest.raises(Exception):
+        results =  transform_dataframe(
+                        df = input,
+                        transformer = transformer,
+                        fit = True,
+                        inverse_transform = True
+                    )
