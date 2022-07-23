@@ -899,13 +899,10 @@ class ForecasterAutoreg(ForecasterBase):
                                 ),
                         columns = ['pred', 'lower_bound', 'upper_bound']
                       )
-
-        predictions = transform_dataframe(
-                            df                = predictions,
-                            transformer       = self.transformer_y,
-                            fit               = False,
-                            inverse_transform = True
-                       )
+                      
+        if self.transformer_y:
+            for col in predictions.columns:
+                predictions[col] = self.transformer_y.inverse_transform(predictions[[col]])
 
         return predictions
 
