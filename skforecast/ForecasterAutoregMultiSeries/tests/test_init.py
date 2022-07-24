@@ -12,13 +12,18 @@ from sklearn.linear_model import LinearRegression
                         [(10              , np.arange(10) + 1), 
                          ([1, 2, 3]       , np.array([1, 2, 3])), 
                          (range(1, 4)     , np.array(range(1, 4))), 
-                         (np.arange(1, 10), np.arange(1, 10))
-                        ])
+                         (np.arange(1, 10), np.arange(1, 10))], 
+                        ids = lambda values : f'values: {values}'
+                        )
 def test_init_input_lags_parameter(lags, expected):
     """
     Test creation of attribute lags with different arguments.
     This test could replace the next 4 tests.
     """
+    # Example how to skip one part of the test
+    if isinstance(lags, int): 
+        pytest.skip('Not of interest.')
+    
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=lags)
 
     assert (forecaster.lags == expected).all()
