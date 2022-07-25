@@ -13,8 +13,8 @@ tqdm.__init__ = partialmethod(tqdm.__init__, disable=True) # hide progress bar
 
 # Fixtures
 # np.random.seed(123)
-# a = np.random.rand(50)
-# b = np.random.rand(50)
+# series_1 = np.random.rand(50)
+# series_2 = np.random.rand(50)
 series = pd.DataFrame({'1': pd.Series(np.array(
                                 [0.69646919, 0.28613933, 0.22685145, 0.55131477, 0.71946897,
                                  0.42310646, 0.9807642 , 0.68482974, 0.4809319 , 0.39211752,

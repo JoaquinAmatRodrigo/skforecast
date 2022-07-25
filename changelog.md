@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file.
 
 **Added**
 
-+ New arguments `transformer_y` and `transformer_exog` for transforming (scaling, max-min, ...) the modeled time series and exogenous variables.
++ New arguments `transformer_y` (`transformer_series` for multiseries) and `transformer_exog` for transforming (scaling, max-min, ...) the modeled time series and exogenous variables inside the forecaster.
 
 + Functions `_backtesting_forecaster_verbose`, `random_search_forecaster`, `_evaluate_grid_hyperparameters`, `bayesian_search_forecaster`, `_bayesian_search_optuna` and `_bayesian_search_skopt` in model_selection.
 
