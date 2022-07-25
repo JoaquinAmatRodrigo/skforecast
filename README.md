@@ -3,8 +3,7 @@
 ![Licence](https://img.shields.io/badge/Licence-MIT-green)
 [![Downloads](https://static.pepy.tech/personalized-badge/skforecast?period=total&units=international_system&left_color=grey&right_color=blue&left_text=Downloads)](https://pepy.tech/project/skforecast)
 ![PyPI](https://img.shields.io/pypi/v/skforecast)
-
-![Build status](https://github.com/JoaquinAmatRodrigo/skforecast/workflows/unit-tests.yml/badge.svg)
+![Build status](https://github.com/JoaquinAmatRodrigo/skforecast/workflows/Unit%20Tests/badge.svg)
 
 # skforecast
 
