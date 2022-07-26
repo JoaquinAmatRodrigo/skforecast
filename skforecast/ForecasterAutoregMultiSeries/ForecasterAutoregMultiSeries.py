@@ -238,7 +238,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         return info
 
     
-    def _create_lags(self, y: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    def _create_lags(
+        self, 
+        y: np.ndarray
+    ) -> Tuple[np.ndarray, np.ndarray]:
         """       
         Transforms a 1d array into a 2d array (X) and a 1d array (y). Each row
         in X is associated with a value of y and it represents the lags that
@@ -515,9 +518,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self,
         steps: int,
         level: str,
-        last_window: np.array,
-        exog: np.array
-    ) -> pd.Series:
+        last_window: np.ndarray,
+        exog: np.ndarray
+    ) -> np.ndarray:
         """
         Predict n steps ahead. It is an iterative process in which, each prediction,
         is used as a predictor for the next step.
@@ -993,7 +996,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         return predictions
 
     
-    def set_params(self, **params: dict) -> None:
+    def set_params(
+        self, 
+        **params: dict
+    ) -> None:
         """
         Set new values to the parameters of the scikit learn model stored in the
         ForecasterAutoreg.
@@ -1013,7 +1019,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.regressor.set_params(**params)
         
         
-    def set_lags(self, lags: Union[int, list, np.ndarray, range]) -> None:
+    def set_lags(
+        self, 
+        lags: Union[int, list, np.ndarray, range]
+    ) -> None:
         """      
         Set new value to the attribute `lags`.
         Attributes `max_lag` and `window_size` are also updated.
@@ -1128,7 +1137,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.out_sample_residuals = pd.Series(residuals)
 
     
-    def get_feature_importance(self) -> pd.DataFrame:
+    def get_feature_importance(
+        self
+    ) -> pd.DataFrame:
         """      
         Return feature importance of the regressor stored in the
         forecaster. Only valid when regressor stores internally the feature

@@ -80,7 +80,7 @@ def test_transform_dataframe_when_transformer_is_OneHotEncoder():
     pd.testing.assert_frame_equal(results, expected)
 
 
-@pytest.mark.skip(reason="work ni progress")
+@pytest.mark.skip(reason="work in progress")
 def test_transform_dataframe_when_transformer_is_OneHotEncoder_and_inverse_transform():
     """
     Test the output of transform_dataframe when transformer is OneHotEncoder and
