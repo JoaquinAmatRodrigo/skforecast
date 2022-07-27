@@ -1,5 +1,6 @@
 # Unit test predict ForecasterAutoregDirect
 # ==============================================================================
+import pytest
 import numpy as np
 import pandas as pd
 from skforecast.ForecasterAutoregDirect import ForecasterAutoregDirect
