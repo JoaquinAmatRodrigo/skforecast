@@ -574,6 +574,7 @@ class ForecasterAutoregDirect(ForecasterBase):
             exog_values, _ = preprocess_exog(
                                 exog = exog.iloc[:steps, ]
                              )
+            exog_values = exog_to_multi_output(exog=exog_values, steps=steps)
         else:
             exog_values = None
 

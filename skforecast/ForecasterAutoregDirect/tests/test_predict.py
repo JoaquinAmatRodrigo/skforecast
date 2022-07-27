@@ -53,18 +53,20 @@ def test_predict_output_when_regressor_is_LinearRegression_with_transform_y():
     pd.testing.assert_series_equal(predictions, expected)
 
 
-@pytest.mark.skip(reason="work in progress")
 def test_predict_output_when_regressor_is_LinearRegression_with_transform_y_and_transform_exog():
     """
     Test predict output when using LinearRegression as regressor, StandardScaler
     as transformer_y and transformer_exog as transformer_exog.
     """
     y = pd.Series(
-            np.array([-0.59,  0.02, -0.9 ,  1.09, -3.61,  0.72, -0.11, -0.4])
+            np.array([-0.59,  0.02, -0.9 ,  1.09, -3.61,  0.72, -0.11, -0.4 ,  0.49,
+                       0.67,  0.54, -0.17,  0.54,  1.49, -2.26, -0.41, -0.64, -0.8 ,
+                      -0.61, -0.88])
         )
     exog = pd.DataFrame({
-                'col_1': [7.5, 24.4, 60.3, 57.3, 50.7, 41.4, 87.2, 47.4],
-                'col_2': ['a', 'a', 'a', 'a', 'b', 'b', 'b', 'b']}
+                'col_1': [7.5, 24.4, 60.3, 57.3, 50.7, 41.4, 87.2, 47.4, 60.3, 87.2,
+                        7.5, 60.4, 50.3, 57.3, 24.7, 87.4, 87.2, 60.4, 50.7, 7.5],
+                'col_2': ['a']*10 + ['b']*10}
            )
 
     transformer_y = StandardScaler()
@@ -84,10 +86,9 @@ def test_predict_output_when_regressor_is_LinearRegression_with_transform_y_and_
     forecaster.fit(y=y, exog=exog)
     predictions = forecaster.predict(exog=exog)
     expected = pd.Series(
-                data = np.array([0.50619336, -0.09630298,  0.05254973,  0.12281153,  0.00221741]),
-                index = pd.RangeIndex(start=8, stop=13, step=1),
+                data = np.array([1.10855119, -0.83442443, 0.9434436 , 0.6676508 , 0.58666266]),
+                index = pd.RangeIndex(start=20, stop=25, step=1),
                 name = 'pred'
                )
     
     pd.testing.assert_series_equal(predictions, expected)
-    

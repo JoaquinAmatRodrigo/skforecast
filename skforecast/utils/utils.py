@@ -13,20 +13,22 @@ import pandas as pd
 import sklearn
 
 
-def check_y(y: Any) -> None:
-    '''
+def check_y(
+    y: Any
+) -> None:
+    """
     Raise Exception if `y` is not pandas Series or if it has missing values.
     
     Parameters
     ----------        
     y : Any
-        Time series values
+        Time series values.
         
     Returns
     ----------
     None
     
-    '''
+    """
     
     if not isinstance(y, pd.Series):
         raise Exception('`y` must be a pandas Series.')
@@ -37,8 +39,10 @@ def check_y(y: Any) -> None:
     return
     
     
-def check_exog(exog: Any) -> None:
-    '''
+def check_exog(
+    exog: Any
+) -> None:
+    """
     Raise Exception if `exog` is not pandas Series or DataFrame, or
     if it has missing values.
     
@@ -50,7 +54,8 @@ def check_exog(exog: Any) -> None:
     Returns
     ----------
     None
-    '''
+
+    """
         
     if not isinstance(exog, (pd.Series, pd.DataFrame)):
         raise Exception('`exog` must be `pd.Series` or `pd.DataFrame`.')
@@ -73,6 +78,7 @@ def _check_interval(
         Confidence of the prediction interval estimated. Sequence of percentiles
         to compute, which must be between 0 and 100 inclusive. For example, 
         interval of 95% should be as `interval = [2.5, 97.5]`.
+    
     """
 
     if not isinstance(interval, list):
@@ -124,7 +130,7 @@ def check_predict_input(
     level: str=None,
     series_levels: list=None
 ) -> None:
-    '''
+    """
     Check all inputs of predict method. This is a helper function to validate
     that inputs used in predict method match attributes of a forecaster already
     trained.
@@ -181,7 +187,8 @@ def check_predict_input(
 
     series_levels : list, default `None`
         Names of the columns (levels) that can be predicted.
-    '''
+    
+    """
 
     if not fitted:
         raise Exception(
@@ -296,8 +303,7 @@ def check_predict_input(
 def preprocess_y(
     y: pd.Series
 ) -> Union[np.ndarray, pd.Index]:
-    
-    '''
+    """
     Returns values and index of series separately. Index is overwritten 
     according to the next rules:
         If index is of type DatetimeIndex and has frequency, nothing is 
@@ -310,7 +316,7 @@ def preprocess_y(
     Parameters
     ----------        
     y : pandas Series
-        Time series
+        Time series.
 
     Returns 
     -------
@@ -319,7 +325,8 @@ def preprocess_y(
 
     y_index : pandas Index
         Index of `y` modified according to the rules.
-    '''
+    
+    """
     
     if isinstance(y.index, pd.DatetimeIndex) and y.index.freq is not None:
         y_index = y.index
@@ -353,8 +360,7 @@ def preprocess_y(
 def preprocess_last_window(
     last_window:Union[pd.Series, pd.DataFrame]
  ) -> Union[np.ndarray, pd.Index]:
-    
-    '''
+    """
     Returns values and index of series separately. Index is overwritten 
     according to the next rules:
         If index is of type DatetimeIndex and has frequency, nothing is 
@@ -367,7 +373,7 @@ def preprocess_last_window(
     Parameters
     ----------        
     last_window : pandas Series, pandas DataFrame
-        Time series values
+        Time series values.
 
     Returns 
     -------
@@ -376,7 +382,8 @@ def preprocess_last_window(
 
     last_window_index : pandas Index
         Index of `last_window` modified according to the rules.
-    '''
+    
+    """
     
     if isinstance(last_window.index, pd.DatetimeIndex) and last_window.index.freq is not None:
         last_window_index = last_window.index
@@ -410,8 +417,7 @@ def preprocess_last_window(
 def preprocess_exog(
     exog: Union[pd.Series, pd.DataFrame]
 ) -> Union[np.ndarray, pd.Index]:
-    
-    '''
+    """
     Returns values ​​and index of series separately. Index is overwritten 
     according to the next rules:
         If index is of type DatetimeIndex and has frequency, nothing is 
@@ -424,7 +430,7 @@ def preprocess_exog(
     Parameters
     ----------        
     exog : pandas Series, pandas DataFrame
-        Exogenous variables
+        Exogenous variables.
 
     Returns 
     -------
@@ -433,7 +439,8 @@ def preprocess_exog(
 
     exog_index : pandas Index
         Index of `exog` modified according to the rules.
-    '''
+
+    """
     
     if isinstance(exog.index, pd.DatetimeIndex) and exog.index.freq is not None:
         exog_index = exog.index
@@ -469,15 +476,14 @@ def exog_to_multi_output(
     exog: np.ndarray,
     steps: int
 )-> np.ndarray:
-    
-    '''
+    """
     Transforms `exog` to `np.ndarray` with the shape needed for multioutput
     regresors.
     
     Parameters
     ----------        
     exog : numpy ndarray, shape(samples,)
-        Time series values
+        Time series values.
 
     steps : int.
         Number of steps that will be predicted using this exog.
@@ -485,7 +491,8 @@ def exog_to_multi_output(
     Returns 
     -------
     exog_transformed : numpy ndarray
-    '''
+
+    """
 
     exog_transformed = []
 
@@ -516,20 +523,21 @@ def expand_index(
     index: Union[pd.Index, None], 
     steps: int
 ) -> pd.Index:
-    '''
+    """
     Create a new index of lenght `steps` starting and the end of index.
     
     Parameters
     ----------        
     index : pd.Index, None
-        Index of last window
+        Index of last window.
     steps : int
         Number of steps to expand.
 
     Returns 
     -------
     new_index : pd.Index
-    '''
+
+    """
     
     if isinstance(index, pd.Index):
         
@@ -558,7 +566,7 @@ def transform_series(
     fit: bool=False,
     inverse_transform: bool=False
 ) -> pd.Series:
-    '''      
+    """      
     Transform raw values of pandas Series with a scikit-learn alike transformer
     (preprocessor). The transformer used must have the following methods: fit, transform,
     fit_transform and inverse_transform. ColumnTransformers are not allowed since they
@@ -582,8 +590,9 @@ def transform_series(
     Returns
     -------
     series_transformed : pandas Series
-        Transformed Series
-    '''
+        Transformed Series.
+
+    """
 
     if transformer is None:
         return series
@@ -613,7 +622,7 @@ def transform_dataframe(
     fit: bool=False,
     inverse_transform: bool=False
 ) -> pd.DataFrame:
-    '''      
+    """      
     Transform raw values of pandas DataFrame with a scikit-learn alike
     transformer, preprocessor or ColumnTransformer. `inverse_transform` is not available
     when using ColumnTransformers.
@@ -636,7 +645,8 @@ def transform_dataframe(
     -------
     series_transformed : pandas DataFrame
         Transformed DataFrame.
-    '''
+    
+    """
 
     if transformer is None:
         return df
