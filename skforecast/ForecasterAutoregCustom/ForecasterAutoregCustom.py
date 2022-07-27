@@ -188,7 +188,9 @@ class ForecasterAutoregCustom(ForecasterBase):
         self.source_code_create_predictors = getsource(fun_predictors)
                 
         
-    def __repr__(self) -> str:
+    def __repr__(
+        self
+    ) -> str:
         """
         Information displayed when a ForecasterAutoregCustom object is printed.
         """

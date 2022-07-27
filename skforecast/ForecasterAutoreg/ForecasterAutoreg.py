@@ -193,7 +193,9 @@ class ForecasterAutoreg(ForecasterBase):
         self.window_size = self.max_lag
 
 
-    def __repr__(self) -> str:
+    def __repr__(
+        self
+    ) -> str:
         """
         Information displayed when a ForecasterAutoreg object is printed.
         """
@@ -253,7 +255,7 @@ class ForecasterAutoreg(ForecasterBase):
         
         y_data : 1d np.ndarray, shape (samples - max(self.lags),)
             Values of the time series related to each row of `X_data`.
-            
+        
         """
           
         n_splits = len(y) - self.max_lag

@@ -201,7 +201,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.window_size = self.max_lag
 
 
-    def __repr__(self) -> str:
+    def __repr__(
+        self
+    ) -> str:
         """
         Information displayed when a ForecasterAutoregMultiSeries object is printed.
         """
