@@ -67,6 +67,7 @@ pip install git+https://github.com/JoaquinAmatRodrigo/skforecast#master
 - [x] `ForecasterAutoregMultiOutput` has been renamed to `ForecasterAutoregDirect`.
 - [x] Modeling multiple time series simultaneously. Try `ForecasterAutoregMultiSeries` and the new functions availables in `model_selection_multiseries`.
 - [ ] Allow different transformations for each predictor (lags and exogenous).
+- [ ] Multiple metrics in `backtesting_forecaster`.
 - [x] Bug fixes and performance improvements.
 
 Try it:
