@@ -46,10 +46,10 @@ series = pd.DataFrame({'1': pd.Series(np.array(
 
 
 def test_evaluate_grid_hyperparameters_multiseries_exception_when_levels_list_not_list_str_None():
-    '''
+    """
     Test Exception is raised in _evaluate_grid_hyperparameters_multiseries when 
     levels_list is not a list or str or None.
-    '''
+    """
     forecaster = ForecasterAutoregMultiSeries(
                     regressor = Ridge(random_state=123),
                     lags      = 3
@@ -77,10 +77,10 @@ def test_evaluate_grid_hyperparameters_multiseries_exception_when_levels_list_no
 
 
 def test_evaluate_grid_hyperparameters_multiseries_exception_when_levels_weights_not_dict():
-    '''
+    """
     Test Exception is raised in _evaluate_grid_hyperparameters_multiseries when 
     levels_weights is not a dict.
-    '''
+    """
     forecaster = ForecasterAutoregMultiSeries(
                     regressor = Ridge(random_state=123),
                     lags      = 3
@@ -108,10 +108,10 @@ def test_evaluate_grid_hyperparameters_multiseries_exception_when_levels_weights
 
 
 def test_evaluate_grid_hyperparameters_multiseries_exception_when_levels_list_and_levels_weights_not_match():
-    '''
+    """
     Test Exception is raised in _evaluate_grid_hyperparameters_multiseries when 
     levels_weights are different from column names of series, `levels_list`.
-    '''
+    """
     forecaster = ForecasterAutoregMultiSeries(
                     regressor = Ridge(random_state=123),
                     lags      = 3
@@ -140,10 +140,10 @@ def test_evaluate_grid_hyperparameters_multiseries_exception_when_levels_list_an
 
 
 def test_evaluate_grid_hyperparameters_multiseries_exception_when_levels_weights_not_sum_1():
-    '''
+    """
     Test Exception is raised in _evaluate_grid_hyperparameters_multiseries when 
     levels_weights do not add up to 1.0.
-    '''
+    """
     forecaster = ForecasterAutoregMultiSeries(
                     regressor = Ridge(random_state=123),
                     lags      = 3
@@ -171,10 +171,10 @@ def test_evaluate_grid_hyperparameters_multiseries_exception_when_levels_weights
 
 
 def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMultiSeries_with_mocked():
-    '''
+    """
     Test output of _evaluate_grid_hyperparameters_multiseries in ForecasterAutoregMultiSeries with mocked
-    (mocked done in Skforecast v0.5.0)
-    '''
+    (mocked done in Skforecast v0.5.0).
+    """
     forecaster = ForecasterAutoregMultiSeries(
                     regressor = Ridge(random_state=123),
                     lags      = 2 # Placeholder, the value will be overwritten
@@ -217,11 +217,11 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
 
 
 def test_output_evaluate_grid_hyperparameters_ForecasterAutoregMultiSeries_lags_grid_is_None_with_mocked():
-    '''
+    """
     Test output of _evaluate_grid_hyperparameters in ForecasterAutoregMultiSeries 
     when lags_grid is None with mocked (mocked done in Skforecast v0.5.0), 
     should use forecaster.lags as lags_grid.
-    '''
+    """
     forecaster = ForecasterAutoregMultiSeries(
                     regressor = Ridge(random_state=123),
                     lags      = 2
@@ -263,10 +263,10 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregMultiSeries_lags_
 
 
 def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMultiSeries_levels_list_str_with_mocked():
-    '''
+    """
     Test output of _evaluate_grid_hyperparameters_multiseries in ForecasterAutoregMultiSeries with mocked
-    when levels_list str (mocked done in Skforecast v0.5.0)
-    '''
+    when levels_list str (mocked done in Skforecast v0.5.0).
+    """
     forecaster = ForecasterAutoregMultiSeries(
                     regressor = Ridge(random_state=123),
                     lags      = 2 # Placeholder, the value will be overwritten
@@ -310,10 +310,10 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
 
 
 def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMultiSeries_levels_list_list_with_mocked():
-    '''
+    """
     Test output of _evaluate_grid_hyperparameters_multiseries in ForecasterAutoregMultiSeries with mocked
-    when levels_list list (mocked done in Skforecast v0.5.0)
-    '''
+    when levels_list list (mocked done in Skforecast v0.5.0).
+    """
     forecaster = ForecasterAutoregMultiSeries(
                     regressor = Ridge(random_state=123),
                     lags      = 2 # Placeholder, the value will be overwritten
@@ -357,10 +357,10 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
 
 
 def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMultiSeries_levels_weights_with_mocked():
-    '''
+    """
     Test output of _evaluate_grid_hyperparameters_multiseries in ForecasterAutoregMultiSeries with mocked
-    when levels_weights (mocked done in Skforecast v0.5.0)
-    '''
+    when levels_weights (mocked done in Skforecast v0.5.0).
+    """
     forecaster = ForecasterAutoregMultiSeries(
                     regressor = Ridge(random_state=123),
                     lags      = 2 # Placeholder, the value will be overwritten

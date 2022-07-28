@@ -45,8 +45,7 @@ def time_series_splitter(
     allow_incomplete_fold: bool=True,
     verbose: bool=True
 ) -> Union[np.ndarray, np.ndarray]:
-    '''
-    
+    """
     Split indices of a time series into multiple train-test pairs. The order of
     is maintained and the training set increases in each iteration.
     
@@ -75,8 +74,8 @@ def time_series_splitter(
         
     test : 1d numpy ndarray
         Test indices.
-        
-    '''
+    
+    """
     
     if not isinstance(y, (np.ndarray, pd.Series)):
 
@@ -153,7 +152,7 @@ def time_series_splitter(
         
         
 def _get_metric(metric:str) -> callable:
-    '''
+    """
     Get the corresponding scikitlearn function to calculate the metric.
     
     Parameters
@@ -166,7 +165,8 @@ def _get_metric(metric:str) -> callable:
     -------
     metric : callable
         scikitlearn function to calculate the desired metric.
-    '''
+    
+    """
     
     if metric not in ['mean_squared_error', 'mean_absolute_error',
                       'mean_absolute_percentage_error', 'mean_squared_log_error']:
@@ -197,7 +197,7 @@ def cv_forecaster(
     allow_incomplete_fold: bool=True,
     verbose: bool=True
 ) -> Tuple[np.array, pd.DataFrame]:
-    '''
+    """
     Cross-validation of forecaster. The order of data is maintained and the
     training set increases in each iteration.
     
@@ -246,7 +246,7 @@ def cv_forecaster(
     cv_predictions : pandas DataFrame
         Predictions.
 
-    '''
+    """
 
     if initial_train_size > len(y):
         raise Exception(
@@ -308,7 +308,7 @@ def _backtesting_forecaster_verbose(
     refit: bool=False,
     fixed_train_size: bool=True
 ) -> None:
-    '''
+    """
     Verbose for backtesting_forecaster functions.
     
     Parameters
@@ -334,7 +334,8 @@ def _backtesting_forecaster_verbose(
 
     fixed_train_size : bool, default `True`
         If True, train size doesn't increases but moves by `steps` in each iteration.
-    '''
+    
+    """
 
     print(f"Information of backtesting process")
     print(f"----------------------------------")
@@ -375,7 +376,7 @@ def _backtesting_forecaster_refit(
     forecaster,
     y: pd.Series,
     steps: int,
-    metric: Union[str, callable],
+    metric: Union[str, callable, list],
     initial_train_size: int,
     fixed_train_size: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
@@ -385,7 +386,7 @@ def _backtesting_forecaster_refit(
     in_sample_residuals: bool=True,
     verbose: bool=False
 ) -> Tuple[float, pd.DataFrame]:
-    '''
+    """
     Backtesting of forecaster model with a re-fitting strategy. A copy of the  
     original forecaster is created so it is not modified during the process.
     
@@ -411,7 +412,7 @@ def _backtesting_forecaster_refit(
     steps : int
         Number of steps to predict.
         
-    metric : str, callable
+    metric : str, callable, list
         Metric used to quantify the goodness of fit of the model.
         
         If string:
@@ -420,6 +421,9 @@ def _backtesting_forecaster_refit(
     
         If callable:
             Function with arguments y_true, y_pred that returns a float.
+
+        If list:
+            List containing several strings and/or callable.
     
     initial_train_size : int
         Number of samples in the initial train split. The backtest forecaster is
@@ -458,19 +462,26 @@ def _backtesting_forecaster_refit(
 
     Returns 
     -------
-    metric_value : float
-        Value of the metric.
+    metrics_value : float | list
+        Value(s) of the metric(s).
 
     backtest_predictions : pandas Dataframe
         Value of predictions and their estimated interval if `interval` is not `None`.
             column pred = predictions.
             column lower_bound = lower bound of the interval.
             column upper_bound = upper bound interval of the interval.
-    '''
+    
+    """
 
     forecaster = deepcopy(forecaster)
+
     if isinstance(metric, str):
-        metric = _get_metric(metric=metric)
+        metrics = _get_metric(metric=metric)
+    elif isinstance(metric, list):
+        metrics = [_get_metric(metric=m) if isinstance(m, str) else m for m in metric]
+    else:
+        metrics = metric
+
     backtest_predictions = []
     
     folds = int(np.ceil((len(y) - initial_train_size) / steps))
@@ -622,19 +633,26 @@ def _backtesting_forecaster_refit(
     if isinstance(backtest_predictions, pd.Series):
         backtest_predictions = pd.DataFrame(backtest_predictions)
 
-    metric_value = metric(
-                    y_true = y.iloc[initial_train_size: initial_train_size + len(backtest_predictions)],
-                    y_pred = backtest_predictions['pred']
-                   )
+    if isinstance(metric, list):
+        metrics_values = [m(
+                            y_true = y.iloc[initial_train_size: initial_train_size + len(backtest_predictions)],
+                            y_pred = backtest_predictions['pred']
+                          ) for m in metrics
+                         ]
+    else:
+        metrics_values = metrics(
+                            y_true = y.iloc[initial_train_size: initial_train_size + len(backtest_predictions)],
+                            y_pred = backtest_predictions['pred']
+                         )
 
-    return metric_value, backtest_predictions
+    return metrics_values, backtest_predictions
 
 
 def _backtesting_forecaster_no_refit(
     forecaster,
     y: pd.Series,
     steps: int,
-    metric: Union[str, callable],
+    metric: Union[str, callable, list],
     initial_train_size: Optional[int]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     interval: Optional[list]=None,
@@ -643,7 +661,7 @@ def _backtesting_forecaster_no_refit(
     in_sample_residuals: bool=True,
     verbose: bool=False
 ) -> Tuple[float, pd.DataFrame]:
-    '''
+    """
     Backtesting of forecaster without iterative re-fitting. In each iteration,
     a number of `steps` are predicted. A copy of the original forecaster is
     created so it is not modified during the process.
@@ -665,15 +683,18 @@ def _backtesting_forecaster_no_refit(
     steps : int
         Number of steps to predict.
         
-    metric : str, callable
+    metric : str, callable, list
         Metric used to quantify the goodness of fit of the model.
         
-        If string: 
+        If string:
             {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
-
+    
         If callable:
             Function with arguments y_true, y_pred that returns a float.
+
+        If list:
+            List containing several strings and/or callable.
     
     initial_train_size : int, default `None`
         Number of samples in the initial train split. If `None` and `forecaster` is already
@@ -711,19 +732,26 @@ def _backtesting_forecaster_no_refit(
 
     Returns 
     -------
-    metric_value : float
-        Value of the metric.
+    metrics_value : float | list
+        Value(s) of the metric(s).
 
     backtest_predictions : pandas DataFrame
         Value of predictions and their estimated interval if `interval` is not `None`.
             column pred = predictions.
             column lower_bound = lower bound of the interval.
             column upper_bound = upper bound interval of the interval.
-    '''
+    
+    """
 
     forecaster = deepcopy(forecaster)
+
     if isinstance(metric, str):
-        metric = _get_metric(metric=metric)
+        metrics = _get_metric(metric=metric)
+    elif isinstance(metric, list):
+        metrics = [_get_metric(metric=m) if isinstance(m, str) else m for m in metric]
+    else:
+        metrics = metric
+    
     backtest_predictions = []
 
     if initial_train_size is not None:
@@ -879,19 +907,26 @@ def _backtesting_forecaster_no_refit(
     if isinstance(backtest_predictions, pd.Series):
         backtest_predictions = pd.DataFrame(backtest_predictions)
 
-    metric_value = metric(
-                    y_true = y.iloc[initial_train_size : initial_train_size + len(backtest_predictions)],
-                    y_pred = backtest_predictions['pred']
-                   )
+    if isinstance(metric, list):
+        metrics_values = [m(
+                            y_true = y.iloc[initial_train_size: initial_train_size + len(backtest_predictions)],
+                            y_pred = backtest_predictions['pred']
+                          ) for m in metrics
+                         ]
+    else:
+        metrics_values = metrics(
+                            y_true = y.iloc[initial_train_size: initial_train_size + len(backtest_predictions)],
+                            y_pred = backtest_predictions['pred']
+                         )
 
-    return metric_value, backtest_predictions
+    return metrics_values, backtest_predictions
 
 
 def backtesting_forecaster(
     forecaster,
     y: pd.Series,
     steps: int,
-    metric: Union[str, callable],
+    metric: Union[str, callable, list],
     initial_train_size: Optional[int],
     fixed_train_size: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
@@ -902,7 +937,7 @@ def backtesting_forecaster(
     in_sample_residuals: bool=True,
     verbose: bool=False
 ) -> Tuple[float, pd.DataFrame]:
-    '''
+    """
     Backtesting of forecaster model.
 
     If `refit` is False, the model is trained only once using the `initial_train_size`
@@ -922,15 +957,18 @@ def backtesting_forecaster(
     steps : int
         Number of steps to predict.
         
-    metric : str, callable
+    metric : str, callable, list
         Metric used to quantify the goodness of fit of the model.
         
         If string:
             {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
-
+    
         If callable:
             Function with arguments y_true, y_pred that returns a float.
+
+        If list:
+            List containing several strings and/or callable.
     
     initial_train_size : int, default `None`
         Number of samples in the initial train split. If `None` and `forecaster` is already 
@@ -976,15 +1014,16 @@ def backtesting_forecaster(
 
     Returns 
     -------
-    metric_value : float
-        Value of the metric.
+    metrics_value : float | list
+        Value(s) of the metric(s).
 
     backtest_predictions : pandas DataFrame
         Value of predictions and their estimated interval if `interval` is not `None`.
             column pred = predictions.
             column lower_bound = lower bound of the interval.
             column upper_bound = upper bound interval of the interval.
-    '''
+    
+    """
 
     if initial_train_size is not None and initial_train_size > len(y):
         raise Exception(
@@ -1026,7 +1065,7 @@ def backtesting_forecaster(
         )
     
     if refit:
-        metric_value, backtest_predictions = _backtesting_forecaster_refit(
+        metrics_values, backtest_predictions = _backtesting_forecaster_refit(
             forecaster          = forecaster,
             y                   = y,
             steps               = steps,
@@ -1041,7 +1080,7 @@ def backtesting_forecaster(
             verbose             = verbose
         )
     else:
-        metric_value, backtest_predictions = _backtesting_forecaster_no_refit(
+        metrics_values, backtest_predictions = _backtesting_forecaster_no_refit(
             forecaster          = forecaster,
             y                   = y,
             steps               = steps,
@@ -1055,7 +1094,7 @@ def backtesting_forecaster(
             verbose             = verbose
         )
 
-    return metric_value, backtest_predictions
+    return metrics_values, backtest_predictions
 
 
 def grid_search_forecaster(
@@ -1072,7 +1111,7 @@ def grid_search_forecaster(
     return_best: bool=True,
     verbose: bool=True
 ) -> pd.DataFrame:
-    '''
+    """
     Exhaustive search over specified parameter values for a Forecaster object.
     Validation is done using time series backtesting.
     
@@ -1134,7 +1173,8 @@ def grid_search_forecaster(
             column params = lower bound of the interval.
             column metric = metric value estimated for the combination of parameters.
             additional n columns with param = value.
-    '''
+    
+    """
 
     param_grid = list(ParameterGrid(param_grid))
 
@@ -1172,7 +1212,7 @@ def random_search_forecaster(
     return_best: bool=True,
     verbose: bool=True
 ) -> pd.DataFrame:
-    '''
+    """
     Random search over specified parameter values or distributions for a Forecaster object.
     Validation is done using time series backtesting.
     
@@ -1241,7 +1281,8 @@ def random_search_forecaster(
             column params = lower bound of the interval.
             column metric = metric value estimated for the combination of parameters.
             additional n columns with param = value.
-    '''
+    
+    """
 
     param_grid = list(ParameterSampler(param_distributions, n_iter=n_iter, random_state=random_state))
 
@@ -1277,7 +1318,7 @@ def _evaluate_grid_hyperparameters(
     return_best: bool=True,
     verbose: bool=True
 ) -> pd.DataFrame:
-    '''
+    """
     Evaluate parameter values for a Forecaster object using time series backtesting.
     
     Parameters
@@ -1338,7 +1379,8 @@ def _evaluate_grid_hyperparameters(
             column params = lower bound of the interval.
             column metric = metric value estimated for the combination of parameters.
             additional n columns with param = value.
-    '''
+    
+    """
 
     if isinstance(forecaster, ForecasterAutoregCustom):
         if lags_grid is not None:
@@ -1435,7 +1477,7 @@ def bayesian_search_forecaster(
     kwargs_study_optimize: dict={},
     kwargs_gp_minimize: dict={},
 ) -> Tuple[pd.DataFrame, object]:
-    '''
+    """
     Bayesian optimization for a Forecaster object using time series backtesting and 
     optuna or skopt library.
     
@@ -1535,11 +1577,12 @@ def bayesian_search_forecaster(
 
         If skopt engine:
             The best optimization result returned as a OptimizeResult object.
-    '''
+    
+    """
 
     if engine not in ['optuna', 'skopt']:
         raise Exception(
-                f'''`engine` only allows 'optuna' or 'skopt', got {engine}.'''
+                f"""`engine` only allows 'optuna' or 'skopt', got {engine}."""
               )
 
     if engine == 'optuna':
@@ -1601,7 +1644,7 @@ def _bayesian_search_optuna(
     kwargs_create_study: dict={},
     kwargs_study_optimize: dict={}
 ) -> Tuple[pd.DataFrame, object]:
-    '''
+    """
     Bayesian optimization for a Forecaster object using time series backtesting 
     and optuna library.
     
@@ -1679,7 +1722,8 @@ def _bayesian_search_optuna(
 
     results_opt_best : optuna object
         The best optimization result returned as a FrozenTrial optuna object.
-    '''
+
+    """
 
     if isinstance(forecaster, ForecasterAutoregCustom):
         if lags_grid is not None:
@@ -1728,7 +1772,7 @@ def _bayesian_search_optuna(
         return abs(metric)
 
     print(
-        f'''Number of models compared: {n_trials*len(lags_grid)}, {n_trials} bayesian search in each lag configuration.'''
+        f"""Number of models compared: {n_trials*len(lags_grid)}, {n_trials} bayesian search in each lag configuration."""
     )
 
     for lags in tqdm(lags_grid, desc='loop lags_grid', position=0, ncols=90):
@@ -1753,9 +1797,9 @@ def _bayesian_search_optuna(
 
         if search_space(best_trial).keys() != best_trial.params.keys():
             raise Exception(
-                f'''Some of the key values do not match the search_space key names.
+                f"""Some of the key values do not match the search_space key names.
                 Dict keys     : {list(search_space(best_trial).keys())}
-                Trial objects : {list(best_trial.params.keys())}.'''
+                Trial objects : {list(best_trial.params.keys())}."""
                 )
 
         for trial in study.get_trials():
@@ -1816,7 +1860,7 @@ def _bayesian_search_skopt(
     verbose: bool=True,
     kwargs_gp_minimize: dict={}
 ) -> Tuple[pd.DataFrame, object]:
-    '''
+    """
     Bayesian optimization for a Forecaster object using time series backtesting and skopt library.
     
     Parameters
@@ -1889,7 +1933,8 @@ def _bayesian_search_skopt(
 
     results_opt_best : scipy object
         The best optimization result returned as a OptimizeResult object.
-    '''
+    
+    """
 
     if isinstance(forecaster, ForecasterAutoregCustom):
         if lags_grid is not None:
@@ -1909,8 +1954,8 @@ def _bayesian_search_skopt(
     for key in search_space.keys():
         if key != search_space[key].name:
             raise Exception(
-                f'''Some of the key values do not match the Space object name from skopt.
-                    {key} != {search_space[key].name}.'''
+                f"""Some of the key values do not match the Space object name from skopt.
+                    {key} != {search_space[key].name}."""
             )
 
     search_space = list(search_space.values())
@@ -1947,7 +1992,7 @@ def _bayesian_search_skopt(
         return abs(metric)
 
     print(
-        f'''Number of models compared: {n_trials*len(lags_grid)}, {n_trials} bayesian search in each lag configuration.'''
+        f"""Number of models compared: {n_trials*len(lags_grid)}, {n_trials} bayesian search in each lag configuration."""
     )
 
     for lags in tqdm(lags_grid, desc='loop lags_grid', position=0, ncols=90):

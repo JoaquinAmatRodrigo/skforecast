@@ -38,7 +38,7 @@ def _backtesting_forecaster_multiseries_refit(
     series: pd.DataFrame,
     steps: int,
     level: str,
-    metric: Union[str, callable],
+    metric: Union[str, callable, list],
     initial_train_size: int,
     fixed_train_size: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
@@ -48,7 +48,7 @@ def _backtesting_forecaster_multiseries_refit(
     in_sample_residuals: bool=True,
     verbose: bool=False
 ) -> Tuple[float, pd.DataFrame]:
-    '''
+    """
     Backtesting of forecaster model with a re-fitting strategy. A copy of the  
     original forecaster is created so it is not modified during the process.
     
@@ -76,15 +76,18 @@ def _backtesting_forecaster_multiseries_refit(
     level : str
         Time series to be predicted.
         
-    metric : str, callable
+    metric : str, callable, list
         Metric used to quantify the goodness of fit of the model.
         
         If string:
             {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
-
+    
         If callable:
             Function with arguments y_true, y_pred that returns a float.
+
+        If list:
+            List containing several strings and/or callable.
     
     initial_train_size : int
         Number of samples in the initial train split. The backtest forecaster is
@@ -122,19 +125,26 @@ def _backtesting_forecaster_multiseries_refit(
 
     Returns 
     -------
-    metric_value : float
-        Value of the metric.
+    metrics_value : float | list
+        Value(s) of the metric(s).
 
     backtest_predictions : pandas Dataframe
         Value of predictions and their estimated interval if `interval` is not `None`.
             column pred = predictions.
             column lower_bound = lower bound of the interval.
             column upper_bound = upper bound interval of the interval.
-    '''
+    
+    """
 
     forecaster = deepcopy(forecaster)
+
     if isinstance(metric, str):
-        metric = _get_metric(metric=metric)
+        metrics = _get_metric(metric=metric)
+    elif isinstance(metric, list):
+        metrics = [_get_metric(metric=m) if isinstance(m, str) else m for m in metric]
+    else:
+        metrics = metric
+    
     backtest_predictions = []
     
     folds = int(np.ceil((len(series.index) - initial_train_size) / steps))
@@ -316,12 +326,19 @@ def _backtesting_forecaster_multiseries_refit(
     if isinstance(backtest_predictions, pd.Series):
         backtest_predictions = pd.DataFrame(backtest_predictions)
 
-    metric_value = metric(
-                    y_true = series[level].iloc[initial_train_size: initial_train_size + len(backtest_predictions)],
-                    y_pred = backtest_predictions['pred']
-                   )
+    if isinstance(metric, list):
+        metrics_values = [m(
+                            y_true = series[level].iloc[initial_train_size:initial_train_size + len(backtest_predictions)],
+                            y_pred = backtest_predictions['pred']
+                          ) for m in metrics
+                         ]
+    else:
+        metrics_values = metrics(
+                            y_true = series[level].iloc[initial_train_size:initial_train_size + len(backtest_predictions)],
+                            y_pred = backtest_predictions['pred']
+                         )
 
-    return metric_value, backtest_predictions
+    return metrics_values, backtest_predictions
 
 
 def _backtesting_forecaster_multiseries_no_refit(
@@ -329,7 +346,7 @@ def _backtesting_forecaster_multiseries_no_refit(
     series: pd.DataFrame,
     steps: int,
     level: str,
-    metric: Union[str, callable],
+    metric: Union[str, callable, list],
     initial_train_size: Optional[int]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     interval: Optional[list]=None,
@@ -338,7 +355,7 @@ def _backtesting_forecaster_multiseries_no_refit(
     in_sample_residuals: bool=True,
     verbose: bool=False
 ) -> Tuple[float, pd.DataFrame]:
-    '''
+    """
     Backtesting of forecaster without iterative re-fitting. In each iteration,
     a number of `steps` are predicted. A copy of the original forecaster is
     created so it is not modified during the process.
@@ -362,15 +379,18 @@ def _backtesting_forecaster_multiseries_no_refit(
     level : str
         Time series to be predicted.
         
-    metric : str, callable
+    metric : str, callable, list
         Metric used to quantify the goodness of fit of the model.
         
         If string:
             {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
-
+    
         If callable:
             Function with arguments y_true, y_pred that returns a float.
+
+        If list:
+            List containing several strings and/or callable.
     
     initial_train_size : int, default `None`
         Number of samples in the initial train split. If `None` and `forecaster` is already
@@ -407,19 +427,26 @@ def _backtesting_forecaster_multiseries_no_refit(
 
     Returns 
     -------
-    metric_value : float
-        Value of the metric.
+    metrics_value : float | list
+        Value(s) of the metric(s).
 
     backtest_predictions : pandas DataFrame
         Value of predictions and their estimated interval if `interval` is not `None`.
             column pred = predictions.
             column lower_bound = lower bound of the interval.
             column upper_bound = upper bound interval of the interval.
-    '''
+    
+    """
 
     forecaster = deepcopy(forecaster)
+
     if isinstance(metric, str):
-        metric = _get_metric(metric=metric)
+        metrics = _get_metric(metric=metric)
+    elif isinstance(metric, list):
+        metrics = [_get_metric(metric=m) if isinstance(m, str) else m for m in metric]
+    else:
+        metrics = metric
+    
     backtest_predictions = []
     
     if initial_train_size is not None:
@@ -591,12 +618,19 @@ def _backtesting_forecaster_multiseries_no_refit(
     if isinstance(backtest_predictions, pd.Series):
         backtest_predictions = pd.DataFrame(backtest_predictions)
 
-    metric_value = metric(
-                    y_true = series[level].iloc[initial_train_size : initial_train_size + len(backtest_predictions)],
-                    y_pred = backtest_predictions['pred']
-                   )
+    if isinstance(metric, list):
+        metrics_values = [m(
+                            y_true = series[level].iloc[initial_train_size:initial_train_size + len(backtest_predictions)],
+                            y_pred = backtest_predictions['pred']
+                          ) for m in metrics
+                         ]
+    else:
+        metrics_values = metrics(
+                            y_true = series[level].iloc[initial_train_size:initial_train_size + len(backtest_predictions)],
+                            y_pred = backtest_predictions['pred']
+                         )
 
-    return metric_value, backtest_predictions
+    return metrics_values, backtest_predictions
 
 
 def backtesting_forecaster_multiseries(
@@ -604,7 +638,7 @@ def backtesting_forecaster_multiseries(
     series: pd.DataFrame,
     steps: int,
     level: str,
-    metric: Union[str, callable],
+    metric: Union[str, callable, list],
     initial_train_size: Optional[int],
     fixed_train_size: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
@@ -615,7 +649,7 @@ def backtesting_forecaster_multiseries(
     in_sample_residuals: bool=True,
     verbose: bool=False
 ) -> Tuple[float, pd.DataFrame]:
-    '''
+    """
     Backtesting of forecaster multi-series model.
 
     If `refit` is False, the model is trained only once using the `initial_train_size`
@@ -637,15 +671,18 @@ def backtesting_forecaster_multiseries(
     level : str
         Time series to be predicted.
         
-    metric : str, callable
+    metric : str, callable, list
         Metric used to quantify the goodness of fit of the model.
         
         If string:
             {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
-
+    
         If callable:
             Function with arguments y_true, y_pred that returns a float.
+
+        If list:
+            List containing several strings and/or callable.
     
     initial_train_size : int, default `None`
         Number of samples in the initial train split. If `None` and `forecaster` is already 
@@ -698,7 +735,8 @@ def backtesting_forecaster_multiseries(
             column pred = predictions.
             column lower_bound = lower bound of the interval.
             column upper_bound = upper bound interval of the interval.
-    '''
+    
+    """
 
     if initial_train_size is not None and initial_train_size > len(series):
         raise Exception(
@@ -733,7 +771,7 @@ def backtesting_forecaster_multiseries(
         )
     
     if refit:
-        metric_value, backtest_predictions = _backtesting_forecaster_multiseries_refit(
+        metrics_values, backtest_predictions = _backtesting_forecaster_multiseries_refit(
             forecaster          = forecaster,
             series              = series,
             steps               = steps,
@@ -749,7 +787,7 @@ def backtesting_forecaster_multiseries(
             verbose             = verbose
         )
     else:
-        metric_value, backtest_predictions = _backtesting_forecaster_multiseries_no_refit(
+        metrics_values, backtest_predictions = _backtesting_forecaster_multiseries_no_refit(
             forecaster          = forecaster,
             series              = series,
             steps               = steps,
@@ -764,7 +802,7 @@ def backtesting_forecaster_multiseries(
             verbose             = verbose
         )
 
-    return metric_value, backtest_predictions
+    return metrics_values, backtest_predictions
 
 
 def grid_search_forecaster_multiseries(
@@ -783,7 +821,7 @@ def grid_search_forecaster_multiseries(
     return_best: bool=True,
     verbose: bool=True
 ) -> pd.DataFrame:
-    '''
+    """
     Exhaustive search over specified parameter values for a Forecaster object.
     Validation is done using multi-series backtesting.
     
@@ -853,7 +891,8 @@ def grid_search_forecaster_multiseries(
             column params = lower bound of the interval.
             column metric = metric value estimated for the combination of parameters.
             additional n columns with param = value.
-    '''
+    
+    """
 
     param_grid = list(ParameterGrid(param_grid))
 
@@ -895,7 +934,7 @@ def random_search_forecaster_multiseries(
     return_best: bool=True,
     verbose: bool=True
 ) -> pd.DataFrame:
-    '''
+    """
     Random search over specified parameter values or distributions for a Forecaster object.
     Validation is done using multi-series backtesting.
     
@@ -972,7 +1011,8 @@ def random_search_forecaster_multiseries(
             column params = lower bound of the interval.
             column metric = metric value estimated for the combination of parameters.
             additional n columns with param = value.
-    '''
+    
+    """
 
     param_grid = list(ParameterSampler(param_distributions, n_iter=n_iter, random_state=random_state))
 
@@ -1012,7 +1052,7 @@ def _evaluate_grid_hyperparameters_multiseries(
     return_best: bool=True,
     verbose: bool=True
 ) -> pd.DataFrame:
-    '''
+    """
     Evaluate parameter values for a Forecaster object using multi-series backtesting.
     
     Parameters
@@ -1081,7 +1121,8 @@ def _evaluate_grid_hyperparameters_multiseries(
             column params = lower bound of the interval.
             column metric = metric value estimated for the combination of parameters.
             additional n columns with param = value.
-    '''
+    
+    """
 
     if levels_list is not None and not isinstance(levels_list, (str, list)):
         raise Exception(
