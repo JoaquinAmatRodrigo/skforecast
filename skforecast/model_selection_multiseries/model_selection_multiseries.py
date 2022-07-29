@@ -47,7 +47,7 @@ def _backtesting_forecaster_multiseries_refit(
     random_state: int=123,
     in_sample_residuals: bool=True,
     verbose: bool=False
-) -> Tuple[float, pd.DataFrame]:
+) -> Tuple[Union[float, list], pd.DataFrame]:
     """
     Backtesting of forecaster model with a re-fitting strategy. A copy of the  
     original forecaster is created so it is not modified during the process.
@@ -354,7 +354,7 @@ def _backtesting_forecaster_multiseries_no_refit(
     random_state: int=123,
     in_sample_residuals: bool=True,
     verbose: bool=False
-) -> Tuple[float, pd.DataFrame]:
+) -> Tuple[Union[float, list], pd.DataFrame]:
     """
     Backtesting of forecaster without iterative re-fitting. In each iteration,
     a number of `steps` are predicted. A copy of the original forecaster is
@@ -648,7 +648,7 @@ def backtesting_forecaster_multiseries(
     random_state: int=123,
     in_sample_residuals: bool=True,
     verbose: bool=False
-) -> Tuple[float, pd.DataFrame]:
+) -> Tuple[Union[float, list], pd.DataFrame]:
     """
     Backtesting of forecaster multi-series model.
 
@@ -727,8 +727,8 @@ def backtesting_forecaster_multiseries(
 
     Returns 
     -------
-    metric_value : float
-        Value of the metric.
+    metrics_value : float | list
+        Value(s) of the metric(s).
 
     backtest_predictions : pandas DataFrame
         Value of predictions and their estimated interval if `interval` is not `None`.
@@ -846,7 +846,7 @@ def grid_search_forecaster_multiseries(
         If string:
             {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
-
+    
         If callable:
             Function with arguments y_true, y_pred that returns a float.
 
@@ -959,7 +959,7 @@ def random_search_forecaster_multiseries(
         If string:
             {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
-
+    
         If callable:
             Function with arguments y_true, y_pred that returns a float.
 
@@ -1076,7 +1076,7 @@ def _evaluate_grid_hyperparameters_multiseries(
         If string:
             {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
-
+    
         If callable:
             Function with arguments y_true, y_pred that returns a float.
 
@@ -1125,13 +1125,19 @@ def _evaluate_grid_hyperparameters_multiseries(
     """
 
     if levels_list is not None and not isinstance(levels_list, (str, list)):
-        raise Exception(
+        raise TypeError(
             f'`levels_list` must be a `list` of column names, a `str` of a column name or `None`.'
         )
 
     if levels_weights is not None and not isinstance(levels_weights, dict):
-        raise Exception(
+        raise TypeError(
             f'`levels_weights` must be a `dict` or `None`.'
+        )
+
+    if isinstance(metric, list):
+        raise TypeError(
+            (f'The calculation of a list of metrics is not yet implemented '
+             f'in the multi-series forecast hyperparameter search.')
         )
 
     if levels_list is None:
@@ -1143,12 +1149,12 @@ def _evaluate_grid_hyperparameters_multiseries(
         levels_weights = {col: 1./len(levels_list) for col in levels_list}
 
     if levels_list != list(levels_weights.keys()):
-        raise Exception(
+        raise ValueError(
             f'`levels_weights` keys must be the same as the column names of series, `levels_list`.'
         )
 
     if sum(levels_weights.values()) != 1.0:
-        raise Exception(
+        raise ValueError(
             f'Weights in `levels_weights` must add up to 1.0.'
         )
 

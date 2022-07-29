@@ -385,7 +385,7 @@ def _backtesting_forecaster_refit(
     random_state: int=123,
     in_sample_residuals: bool=True,
     verbose: bool=False
-) -> Tuple[float, pd.DataFrame]:
+) -> Tuple[Union[float, list], pd.DataFrame]:
     """
     Backtesting of forecaster model with a re-fitting strategy. A copy of the  
     original forecaster is created so it is not modified during the process.
@@ -660,7 +660,7 @@ def _backtesting_forecaster_no_refit(
     random_state: int=123,
     in_sample_residuals: bool=True,
     verbose: bool=False
-) -> Tuple[float, pd.DataFrame]:
+) -> Tuple[Union[float, list], pd.DataFrame]:
     """
     Backtesting of forecaster without iterative re-fitting. In each iteration,
     a number of `steps` are predicted. A copy of the original forecaster is
@@ -936,7 +936,7 @@ def backtesting_forecaster(
     random_state: int=123,
     in_sample_residuals: bool=True,
     verbose: bool=False
-) -> Tuple[float, pd.DataFrame]:
+) -> Tuple[Union[float, list], pd.DataFrame]:
     """
     Backtesting of forecaster model.
 
@@ -1102,7 +1102,7 @@ def grid_search_forecaster(
     y: pd.Series,
     param_grid: dict,
     steps: int,
-    metric: Union[str, callable],
+    metric: Union[str, callable, list],
     initial_train_size: int,
     fixed_train_size: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
@@ -1131,15 +1131,18 @@ def grid_search_forecaster(
     steps : int
         Number of steps to predict.
         
-    metric : str, callable
+    metric : str, callable, list
         Metric used to quantify the goodness of fit of the model.
         
         If string:
             {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
-
+    
         If callable:
             Function with arguments y_true, y_pred that returns a float.
+
+        If list:
+            List containing several strings and/or callable.
 
     initial_train_size : int 
         Number of samples in the initial train split.
@@ -1201,7 +1204,7 @@ def random_search_forecaster(
     y: pd.Series,
     param_distributions: dict,
     steps: int,
-    metric: Union[str, callable],
+    metric: Union[str, callable, list],
     initial_train_size: int,
     fixed_train_size: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
@@ -1232,15 +1235,18 @@ def random_search_forecaster(
     steps : int
         Number of steps to predict.
         
-    metric : str, callable
+    metric : str, callable, list
         Metric used to quantify the goodness of fit of the model.
         
         If string:
             {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
-
+    
         If callable:
             Function with arguments y_true, y_pred that returns a float.
+
+        If list:
+            List containing several strings and/or callable.
 
     initial_train_size : int 
         Number of samples in the initial train split.
@@ -1309,7 +1315,7 @@ def _evaluate_grid_hyperparameters(
     y: pd.Series,
     param_grid: dict,
     steps: int,
-    metric: Union[str, callable],
+    metric: Union[str, callable, list],
     initial_train_size: int,
     fixed_train_size: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
@@ -1337,15 +1343,18 @@ def _evaluate_grid_hyperparameters(
     steps : int
         Number of steps to predict.
         
-    metric : str, callable
+    metric : str, callable, list
         Metric used to quantify the goodness of fit of the model.
         
         If string:
             {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
-
+    
         If callable:
             Function with arguments y_true, y_pred that returns a float.
+
+        If list:
+            List containing several strings and/or callable.
 
     initial_train_size : int 
         Number of samples in the initial train split.
@@ -1394,11 +1403,17 @@ def _evaluate_grid_hyperparameters(
    
     lags_list = []
     params_list = []
-    metric_list = []
+    if not isinstance(metric, list):
+        metric_list = [] 
+    else: 
+        metric_list = {(m if isinstance(m, str) else m.__name__): [] for m in metric}
 
-    print(
-        f"Number of models compared: {len(param_grid)*len(lags_grid)}."
-    )
+    if isinstance(metric_list, dict) and len(metric_list.keys()) != len(metric):
+        raise ValueError(
+            'When `metrics` is a `list`, each metric name must be unique.'
+        )
+
+    print(f"Number of models compared: {len(param_grid)*len(lags_grid)}.")
 
     for lags in tqdm(lags_grid, desc='loop lags_grid', position=0, ncols=90):
         
@@ -1410,36 +1425,54 @@ def _evaluate_grid_hyperparameters(
         for params in tqdm(param_grid, desc='loop param_grid', position=1, leave=False, ncols=90):
 
             forecaster.set_params(**params)
-            metrics = backtesting_forecaster(
-                            forecaster         = forecaster,
-                            y                  = y,
-                            steps              = steps,
-                            metric             = metric,
-                            initial_train_size = initial_train_size,
-                            fixed_train_size   = fixed_train_size,
-                            exog               = exog,
-                            refit              = refit,
-                            interval           = None,
-                            verbose            = verbose
-                            )[0]
+            metrics_values = backtesting_forecaster(
+                                forecaster         = forecaster,
+                                y                  = y,
+                                steps              = steps,
+                                metric             = metric,
+                                initial_train_size = initial_train_size,
+                                fixed_train_size   = fixed_train_size,
+                                exog               = exog,
+                                refit              = refit,
+                                interval           = None,
+                                verbose            = verbose
+                             )[0]
 
             lags_list.append(lags)
             params_list.append(params)
-            metric_list.append(metrics)
-            
-    results = pd.DataFrame({
-                'lags'  : lags_list,
-                'params': params_list,
-                'metric': metric_list})
-    
-    results = results.sort_values(by='metric', ascending=True)
+            if isinstance(metric, list):
+                for m, m_value in zip(metric, metrics_values):
+                    if isinstance(m, str):
+                        m_name = m
+                    else:
+                        m_name = m.__name__
+                    metric_list[m_name].append(m_value)
+            else:
+                metric_list.append(metrics_values)
+
+    if isinstance(metric, list):
+        results = pd.DataFrame({
+                    'lags'  : lags_list,
+                    'params': params_list,
+                    **metric_list})
+        results = results.sort_values(by=list(metric_list.keys())[0], ascending=True)
+    else:
+        results = pd.DataFrame({
+                    'lags'  : lags_list,
+                    'params': params_list,
+                    'metric': metric_list})
+        results = results.sort_values(by='metric', ascending=True)
+
     results = pd.concat([results, results['params'].apply(pd.Series)], axis=1)
     
     if return_best:
         
         best_lags = results['lags'].iloc[0]
         best_params = results['params'].iloc[0]
-        best_metric = results['metric'].iloc[0]
+        if isinstance(metric, list):
+            best_metric = results[list(metric_list.keys())[0]].iloc[0]
+        else:
+            best_metric = results['metric'].iloc[0]
         
         if isinstance(forecaster, (ForecasterAutoreg, ForecasterAutoregDirect, 
         ForecasterAutoregMultiOutput)):
