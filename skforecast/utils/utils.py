@@ -192,21 +192,21 @@ def check_predict_input(
 
     if not fitted:
         raise Exception(
-            'This Forecaster instance is not fitted yet. Call `fit` with'
+            'This Forecaster instance is not fitted yet. Call `fit` with '
             'appropriate arguments before using predict.'
         )
     
     if steps < 1:
-        raise Exception(
-            f"`steps` must be integer greater than 0. Got {steps}."
+        raise ValueError(
+            f'`steps` must be integer greater than 0. Got {steps}.'
         )
 
     if max_steps is not None:
         if steps > max_steps:
-            raise Exception(
-                f"`steps` must be lower or equal to the value of steps defined "
-                f"when initializing the forecaster. Got {steps} but the maximum "
-                f"is {max_steps}."
+            raise ValueError(
+                f'`steps` must be lower or equal to the value of steps defined '
+                f'when initializing the forecaster. Got {steps} but the maximum '
+                f'is {max_steps}.'
             )
 
     if interval is not None:
@@ -214,7 +214,7 @@ def check_predict_input(
     
     if str(forecaster_type).split('.')[1] == 'ForecasterAutoregMultiSeries':
         if level not in series_levels:
-            raise Exception(
+            raise ValueError(
                 f'`level` must be one of the `series_levels` : {series_levels}'
             )
 
@@ -232,45 +232,45 @@ def check_predict_input(
     
     if exog is not None:
         if len(exog) < steps:
-            raise Exception(
+            raise ValueError(
                 '`exog` must have at least as many values as `steps` predicted.'
             )
         if not isinstance(exog, (pd.Series, pd.DataFrame)):
             raise TypeError('`exog` must be a pandas Series or DataFrame.')
         if exog.isnull().values.any():
-            raise Exception('`exog` has missing values.')
+            raise ValueError('`exog` has missing values.')
         if not isinstance(exog, exog_type):
             raise TypeError(
-                f"Expected type for `exog`: {exog_type}. Got {type(exog)}"      
+                f'Expected type for `exog`: {exog_type}. Got {type(exog)}'     
             )
         if isinstance(exog, pd.DataFrame):
             col_missing = set(exog_col_names).difference(set(exog.columns))
             if col_missing:
-                raise Exception(
-                    f"Missing columns in `exog`. Expected {exog_col_names}. "
-                    f"Got {exog.columns.to_list()}"      
+                raise ValueError(
+                    f'Missing columns in `exog`. Expected {exog_col_names}. '
+                    f'Got {exog.columns.to_list()}'     
                 )
         check_exog(exog = exog)
         _, exog_index = preprocess_exog(exog=exog.iloc[:0, ])
         
         if not isinstance(exog_index, index_type):
             raise TypeError(
-                f"Expected index of type {index_type} for `exog`. "
-                f"Got {type(exog_index)}"      
+                f'Expected index of type {index_type} for `exog`. '
+                f'Got {type(exog_index)}'
             )
         
         if isinstance(exog_index, pd.DatetimeIndex):
             if not exog_index.freqstr == index_freq:
                 raise TypeError(
-                    f"Expected frequency of type {index_freq} for `exog`. "
-                    f"Got {exog_index.freqstr}"      
+                    f'Expected frequency of type {index_freq} for `exog`. '
+                    f'Got {exog_index.freqstr}'
                 )
         
     if last_window is not None:
         if len(last_window) < window_size:
-                raise Exception(
-                    f"`last_window` must have as many values as as needed to "
-                    f"calculate the predictors. For this forecaster it is {window_size}."
+                raise ValueError(
+                    f'`last_window` must have as many values as as needed to '
+                    f'calculate the predictors. For this forecaster it is {window_size}.'
                 )
                 
         if str(forecaster_type).split('.')[1] == 'ForecasterAutoregMultiSeries':
@@ -281,20 +281,20 @@ def check_predict_input(
                 raise TypeError('`last_window` must be a pandas Series.')
                 
         if last_window.isnull().any().all():
-            raise Exception('`last_window` has missing values.')
+            raise ValueError('`last_window` has missing values.')
         _, last_window_index = preprocess_last_window(
                                     last_window = last_window.iloc[:0]
                                 ) 
         if not isinstance(last_window_index, index_type):
             raise TypeError(
-                f"Expected index of type {index_type} for `last_window`. "
-                f"Got {type(last_window_index)}"      
+                f'Expected index of type {index_type} for `last_window`. '
+                f'Got {type(last_window_index)}'
             )
         if isinstance(last_window_index, pd.DatetimeIndex):
             if not last_window_index.freqstr == index_freq:
                 raise TypeError(
-                    f"Expected frequency of type {index_freq} for `last_window`. "
-                    f"Got {last_window_index.freqstr}"      
+                    f'Expected frequency of type {index_freq} for `last_window`. '
+                    f'Got {last_window_index.freqstr}'
                 )
 
     return
