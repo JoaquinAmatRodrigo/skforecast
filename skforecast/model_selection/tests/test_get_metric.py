@@ -1,5 +1,6 @@
 # Unit test _get_metric
 # ==============================================================================
+import re
 import pytest
 from pytest import approx
 import numpy as np
@@ -12,18 +13,23 @@ from sklearn.metrics import mean_squared_log_error
 
 
 def test_get_metric_exception_when_metric_not_in_metrics_allowed():
-    '''
-    Test exception is raised when metric is not in metrics allowed
-    '''
+    """
+    Test exception is raised when metric is not in metrics allowed.
+    """
     metric = 'not_a_metric'
-    with pytest.raises(Exception):
+    
+    err_msg = re.escape(
+                (f"Allowed metrics are: 'mean_squared_error', 'mean_absolute_error', "
+                 f"'mean_absolute_percentage_error' and 'mean_squared_log_error'. Got {metric}.")
+              )
+    with pytest.raises(ValueError, match = err_msg):
         _get_metric(metric)
 
 
 def test_get_metric_import_and_calculate_mean_squared_error_correctly():
-    '''
-    Test get_metric import and calculate mean_squared_error correctly
-    '''
+    """
+    Test get_metric import and calculate mean_squared_error correctly.
+    """
     metric_str = 'mean_squared_error'
     metric = _get_metric(metric_str)
     y_true = [3, -0.5, 2, 7]
@@ -33,9 +39,9 @@ def test_get_metric_import_and_calculate_mean_squared_error_correctly():
 
 
 def test_get_metric_import_and_calculate_mean_absolute_error_correctly():
-    '''
-    Test get_metric import and calculate mean_absolute_error correctly
-    '''
+    """
+    Test get_metric import and calculate mean_absolute_error correctly.
+    """
     metric_str = 'mean_absolute_error'
     metric = _get_metric(metric_str)
     y_true = [3, -0.5, 2, 7]
@@ -45,9 +51,9 @@ def test_get_metric_import_and_calculate_mean_absolute_error_correctly():
 
 
 def test_get_metric_import_and_calculate_mean_absolute_percentage_error_correctly():
-    '''
-    Test get_metric import and calculate mean_absolute_percentage_error correctly
-    '''
+    """
+    Test get_metric import and calculate mean_absolute_percentage_error correctly.
+    """
     metric_str = 'mean_absolute_percentage_error'
     metric = _get_metric(metric_str)
     y_true = [3, -0.5, 2, 7]
@@ -57,9 +63,9 @@ def test_get_metric_import_and_calculate_mean_absolute_percentage_error_correctl
 
 
 def test_get_metric_import_and_calculate_mean_squared_log_error_correctly():
-    '''
-    Test get_metric import and calculate mean_squared_log_error correctly
-    '''
+    """
+    Test get_metric import and calculate mean_squared_log_error correctly.
+    """
     metric_str = 'mean_squared_log_error'
     metric = _get_metric(metric_str)
     y_true = [3, 5, 2.5, 7]

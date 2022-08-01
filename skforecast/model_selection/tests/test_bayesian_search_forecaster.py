@@ -1,9 +1,11 @@
 # Unit test bayesian_search_forecaster
 # ==============================================================================
+import re
 import pytest
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import Ridge
+from sklearn.metrics import mean_squared_error 
 from skopt.space import Real
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
 from skforecast.ForecasterAutoregCustom import ForecasterAutoregCustom
@@ -27,10 +29,10 @@ y = pd.Series(
 
 
 def test_bayesian_search_forecaster_exception_when_engine_not_optuna_or_skopt():
-    '''
+    """
     Test Exception in bayesian_search_forecaster is raised when engine is not 'optuna' 
     or 'skopt'.
-    '''
+    """
     forecaster = ForecasterAutoreg(
                     regressor = Ridge(random_state=123),
                     lags      = 2
@@ -38,7 +40,8 @@ def test_bayesian_search_forecaster_exception_when_engine_not_optuna_or_skopt():
 
     engine = 'not_optuna_or_skopt'
     
-    with pytest.raises(Exception):
+    err_msg = re.escape(f"""`engine` only allows 'optuna' or 'skopt', got {engine}.""")
+    with pytest.raises(ValueError, match = err_msg):
         bayesian_search_forecaster(
             forecaster            = forecaster,
             y                     = y,
@@ -57,15 +60,48 @@ def test_bayesian_search_forecaster_exception_when_engine_not_optuna_or_skopt():
         )
 
 
+def test_bayesian_search_forecaster_exception_when_metric_is_a_list():
+    """
+    Test Exception in bayesian_search_forecaster is raised when `metric` is a 
+    `list`.
+    """
+    forecaster = ForecasterAutoreg(
+                    regressor = Ridge(random_state=123),
+                    lags      = 2
+                 )
+    
+    err_msg = re.escape(
+                (f'The calculation of a list of metrics is not yet implemented '
+                 f'in `bayesian_search_forecaster`.')
+              )
+    with pytest.raises(TypeError, match = err_msg):
+        bayesian_search_forecaster(
+            forecaster            = forecaster,
+            y                     = y,
+            lags_grid             = [2, 4],
+            search_space          = {'not_alpha': Real(0.01, 1.0, "log-uniform", name='alpha')},
+            steps                 = 3,
+            metric                = ['mean_absolute_error', mean_squared_error], 
+            refit                 = True,
+            initial_train_size    = len(y[:-12]),
+            fixed_train_size      = True,
+            n_trials              = 10,
+            random_state          = 123,
+            return_best           = False,
+            verbose               = False,
+            engine                = 'optuna'
+        )
+
+
 def test_results_output_bayesian_search_forecaster_optuna_engine_ForecasterAutoregCustom_with_mocked():
-    '''
+    """
     Test output of bayesian_search_forecaster in ForecasterAutoregCustom with mocked
     using optuna engine (mocked done in Skforecast v0.4.3).
-    '''
+    """
     def create_predictors(y):
-        '''
+        """
         Create first 4 lags of a time series, used in ForecasterAutoregCustom.
-        '''
+        """
 
         lags = y[-1:-5:-1]
 
@@ -126,14 +162,14 @@ def test_results_output_bayesian_search_forecaster_optuna_engine_ForecasterAutor
 
 
 def test_results_output_bayesian_search_forecaster_skopt_engine_ForecasterAutoregCustom_with_mocked():
-    '''
+    """
     Test output of bayesian_search_forecaster in ForecasterAutoregCustom with mocked
     using skopt engine (mocked done in Skforecast v0.4.3).
-    '''
+    """
     def create_predictors(y):
-        '''
+        """
         Create first 4 lags of a time series, used in ForecasterAutoregCustom.
-        '''
+        """
 
         lags = y[-1:-5:-1]
 

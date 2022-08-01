@@ -170,7 +170,7 @@ def _get_metric(metric:str) -> callable:
     
     if metric not in ['mean_squared_error', 'mean_absolute_error',
                       'mean_absolute_percentage_error', 'mean_squared_log_error']:
-        raise Exception(
+        raise ValueError(
             f"Allowed metrics are: 'mean_squared_error', 'mean_absolute_error', "
             f"'mean_absolute_percentage_error' and 'mean_squared_log_error'. Got {metric}."
         )
@@ -1614,9 +1614,15 @@ def bayesian_search_forecaster(
     """
 
     if engine not in ['optuna', 'skopt']:
-        raise Exception(
+        raise ValueError(
                 f"""`engine` only allows 'optuna' or 'skopt', got {engine}."""
               )
+
+    if isinstance(metric, list):
+        raise TypeError(
+            (f'The calculation of a list of metrics is not yet implemented '
+             f'in `bayesian_search_forecaster`.')
+        )
 
     if engine == 'optuna':
         results, results_opt_best = _bayesian_search_optuna(
