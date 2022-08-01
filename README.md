@@ -66,8 +66,8 @@ pip install git+https://github.com/JoaquinAmatRodrigo/skforecast#master
 - [x] Random search and bayesian search (using [**optuna**](https://optuna.org/) or [**skopt**](https://scikit-optimize.github.io/stable/modules/generated/skopt.gp_minimize.html)) for hyperparameter optimization. Try `random_search_forecaster()` and `bayesian_search_forecaster()`.
 - [x] `ForecasterAutoregMultiOutput` has been renamed to `ForecasterAutoregDirect`.
 - [x] Modeling multiple time series simultaneously. Try `ForecasterAutoregMultiSeries` and the new functions availables in `model_selection_multiseries`.
-- [ ] Allow different transformations for each predictor (lags and exogenous).
-- [ ] Multiple metrics in `backtesting_forecaster`.
+- [x] Allow different transformations for each predictor (lags and exogenous).
+- [x] Multiple metrics in `backtesting_forecaster`, `grid_search_forecaster`, `random_search_forecaster`, and `backtesting_forecaster_multiseries`.
 - [x] Bug fixes and performance improvements.
 
 Try it:
