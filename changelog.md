@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file.
 
 **Added**
 
-+ New arguments `transformer_y` (`transformer_series` for multiseries) and `transformer_exog` in all forecaster types. It is for transforming (scaling, max-min, ...) the modeled time series and exogenous variables inside the forecaster.
++ New arguments `transformer_y` (`transformer_series` for multiseries) and `transformer_exog` in all forecaster classes. It is for transforming (scaling, max-min, ...) the modeled time series and exogenous variables inside the forecaster.
 
 + Functions in utils `transform_series` and `transform_dataframe` to carry out the transformation of the modeled time series and exogenous variables.
 
