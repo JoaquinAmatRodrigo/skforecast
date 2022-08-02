@@ -9,15 +9,16 @@ def test_transform_series_when_transformer_is_None():
     """
     Test the output of transform_series when transformer is None.
     """
-    input = pd.Series([1.16, -0.28, 0.07, 2.4, 0.25, -0.56, -1.42, 1.26, 1.78, -1.49])
-    expected = input
+    input_series = pd.Series([1.16, -0.28, 0.07, 2.4, 0.25, -0.56, -1.42, 1.26, 1.78, -1.49])
+    expected = input_series
     transformer = None
     results =  transform_series(
-                    series = input,
+                    series = input_series,
                     transformer = transformer,
                     fit = True,
                     inverse_transform = False
-                )
+               )
+    
     pd.testing.assert_series_equal(results, expected)
 
 
@@ -25,23 +26,26 @@ def test_transform_series_when_transformer_is_StandardScaler():
     """
     Test the output of transform_series when transformer is StandardScaler.
     """
-    input = pd.Series([1.16, -0.28, 0.07, 2.4, 0.25, -0.56, -1.42, 1.26, 1.78, -1.49],
-                      name = 'y')
+    input_series = pd.Series([1.16, -0.28, 0.07, 2.4, 0.25, -0.56, -1.42, 1.26, 1.78, -1.49],
+                             name = 'y')
     expected = pd.Series([0.67596768, -0.47871021, -0.19805933,  1.67027365, -0.0537246,
                          -0.70323091, -1.39283021,  0.75615365,  1.17312067, -1.44896038],
                          name = 'y')
     transformer = StandardScaler()
     results =  transform_series(
-                    series = input,
+                    series = input_series,
                     transformer = transformer,
                     fit = True,
                     inverse_transform = False
-                )
+               )
+    
     pd.testing.assert_series_equal(results, expected)
+
 
 def test_transform_series_when_transformer_is_StandardScaler_and_inverse_transform_is_True():
     """
-    Test the output of transform_series when transformer is StandardScaler.
+    Test the output of transform_series when transformer is StandardScaler and
+    inverse_transform is True.
     """
     input_1 = pd.Series([1.16, -0.28, 0.07, 2.4, 0.25, -0.56, -1.42, 1.26, 1.78, -1.49],
                       name = 'y')
@@ -56,4 +60,5 @@ def test_transform_series_when_transformer_is_StandardScaler_and_inverse_transfo
                     fit = False,
                     inverse_transform = True
                 )
+    
     pd.testing.assert_series_equal(results, expected)

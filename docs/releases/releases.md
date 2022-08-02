@@ -6,13 +6,19 @@ All notable changes to this project will be documented in this file.
 
 **Added**
 
++ New arguments `transformer_y` (`transformer_series` for multiseries) and `transformer_exog` in all forecaster classes. It is for transforming (scaling, max-min, ...) the modeled time series and exogenous variables inside the forecaster.
+
++ Functions in utils `transform_series` and `transform_dataframe` to carry out the transformation of the modeled time series and exogenous variables.
+
 + Functions `_backtesting_forecaster_verbose`, `random_search_forecaster`, `_evaluate_grid_hyperparameters`, `bayesian_search_forecaster`, `_bayesian_search_optuna` and `_bayesian_search_skopt` in model_selection.
 
-+ Created `ForecasterAutoregMultiSeries` class for multi time series forecasting.
++ Created `ForecasterAutoregMultiSeries` class for modeling multiple time series simultaneously.
 
 + Created module `model_selection_multiseries`. Functions: `_backtesting_forecaster_multiseries_refit`, `_backtesting_forecaster_multiseries_no_refit`, `backtesting_forecaster_multiseries`, `grid_search_forecaster_multiseries`, `random_search_forecaster_multiseries` and `_evaluate_grid_hyperparameters_multiseries`.
 
 + Function `_check_interval` in utils. (suggested by Thomas Karaouzene https://github.com/tkaraouzene)
+
++ `metric` can be a list in `backtesting_forecaster`, `grid_search_forecaster`, `random_search_forecaster`, `backtesting_forecaster_multiseries`. If `metric` is a `list`, multiple metrics will be calculated. (suggested by Pablo Dávila Herrero https://github.com/Pablo-Davila)
 
 **Changed**
 
@@ -29,6 +35,8 @@ All notable changes to this project will be documented in this file.
 + `ForecasterAutoregMultiOutput` has been renamed to `ForecasterAutoregDirect`. `ForecasterAutoregMultiOutput` will be removed in version 0.6.0.
 
 + `check_predict_input` updated to check `ForecasterAutoregMultiSeries` inputs.
+
++ `set_out_sample_residuals` has a new argument `transform` to transform the residuals before being stored.
 
 **Fixed**
 

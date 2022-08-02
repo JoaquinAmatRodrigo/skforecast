@@ -35,7 +35,7 @@ logging.basicConfig(
 
 
 class ForecasterAutoreg(ForecasterBase):
-    '''
+    """
     This class turns any regressor compatible with the scikit-learn API into a
     recursive autoregressive (multi-step) forecaster.
     
@@ -138,7 +138,7 @@ class ForecasterAutoreg(ForecasterBase):
     skforcast_version: str
         Version of skforecast library used to create the forecaster.
      
-    '''
+    """
     
     def __init__(
         self,
@@ -193,10 +193,12 @@ class ForecasterAutoreg(ForecasterBase):
         self.window_size = self.max_lag
 
 
-    def __repr__(self) -> str:
-        '''
+    def __repr__(
+        self
+    ) -> str:
+        """
         Information displayed when a ForecasterAutoreg object is printed.
-        '''
+        """
 
         if isinstance(self.regressor, sklearn.pipeline.Pipeline):
             name_pipe_steps = tuple(name + "__" for name in self.regressor.named_steps.keys())
@@ -229,8 +231,11 @@ class ForecasterAutoreg(ForecasterBase):
         return info
 
     
-    def _create_lags(self, y: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
-        '''       
+    def _create_lags(
+        self, 
+        y: np.ndarray
+    ) -> Tuple[np.ndarray, np.ndarray]:
+        """       
         Transforms a 1d array into a 2d array (X) and a 1d array (y). Each row
         in X is associated with a value of y and it represents the lags that
         precede it.
@@ -250,8 +255,8 @@ class ForecasterAutoreg(ForecasterBase):
         
         y_data : 1d np.ndarray, shape (samples - max(self.lags),)
             Values of the time series related to each row of `X_data`.
-            
-        '''
+        
+        """
           
         n_splits = len(y) - self.max_lag
         X_data   = np.full(shape=(n_splits, self.max_lag), fill_value=np.nan, dtype=float)
@@ -274,7 +279,7 @@ class ForecasterAutoreg(ForecasterBase):
         y: pd.Series,
         exog: Optional[Union[pd.Series, pd.DataFrame]]=None
     ) -> Tuple[pd.DataFrame, pd.Series]:
-        '''
+        """
         Create training matrices from univariate time series and exogenous
         variables.
         
@@ -295,7 +300,7 @@ class ForecasterAutoreg(ForecasterBase):
         y_train : pandas Series, shape (len(y) - self.max_lag, )
             Values (target) of the time series related to each row of `X_train`.
         
-        '''
+        """
         
         check_y(y=y)
         y = transform_series(
@@ -318,20 +323,20 @@ class ForecasterAutoreg(ForecasterBase):
                             transformer       = self.transformer_exog,
                             fit               = True,
                             inverse_transform = False
-                        )
+                       )
             else:
                 exog = transform_dataframe(
                             df                = exog,
                             transformer       = self.transformer_exog,
                             fit               = True,
                             inverse_transform = False
-                        )
+                       )
             exog_values, exog_index = preprocess_exog(exog=exog)
             
             if not (exog_index[:len(y_index)] == y_index).all():
                 raise Exception(
-                ('Different index for `y` and `exog`. They must be equal '
-                'to ensure the correct alignment of values.')      
+                    ('Different index for `y` and `exog`. They must be equal '
+                    'to ensure the correct alignment of values.')      
                 )
         
         X_train, y_train = self._create_lags(y=y_values)
@@ -363,7 +368,7 @@ class ForecasterAutoreg(ForecasterBase):
         y: pd.Series,
         exog: Optional[Union[pd.Series, pd.DataFrame]]=None
     ) -> None:
-        '''
+        """
         Training Forecaster.
         
         Parameters
@@ -381,7 +386,7 @@ class ForecasterAutoreg(ForecasterBase):
         -------
         None
         
-        '''
+        """
         
         # Reset values in case the forecaster has already been fitted.
         self.index_type           = None
@@ -407,6 +412,7 @@ class ForecasterAutoreg(ForecasterBase):
             self.regressor.fit(X=X_train, y=y_train)
         else:
             self.regressor.fit(X=X_train.to_numpy(), y=y_train.to_numpy())
+        
         self.fitted = True
         self.fit_date = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
         self.training_range = preprocess_y(y=y)[1][[0, -1]]
@@ -441,10 +447,10 @@ class ForecasterAutoreg(ForecasterBase):
     def _recursive_predict(
         self,
         steps: int,
-        last_window: np.array,
-        exog: np.array
-    ) -> pd.Series:
-        '''
+        last_window: np.ndarray,
+        exog: np.ndarray
+    ) -> np.ndarray:
+        """
         Predict n steps ahead. It is an iterative process in which, each prediction,
         is used as a predictor for the next step.
         
@@ -464,8 +470,8 @@ class ForecasterAutoreg(ForecasterBase):
         -------
         predictions : numpy ndarray
             Predicted values.
-            
-        '''
+        
+        """
 
         predictions = np.full(shape=steps, fill_value=np.nan)
 
@@ -494,7 +500,7 @@ class ForecasterAutoreg(ForecasterBase):
         last_window: Optional[pd.Series]=None,
         exog: Optional[Union[pd.Series, pd.DataFrame]]=None
     ) -> pd.Series:
-        '''
+        """
         Predict n steps ahead. It is an recursive process in which, each prediction,
         is used as a predictor for the next step.
         
@@ -507,7 +513,7 @@ class ForecasterAutoreg(ForecasterBase):
             Values of the series used to create the predictors (lags) need in the 
             first iteration of prediction (t + 1).
     
-            If `last_window = None`, the values stored in` self.last_window` are
+            If `last_window = None`, the values stored in `self.last_window` are
             used to calculate the initial predictors, and the predictions start
             right after training data.
             
@@ -519,7 +525,7 @@ class ForecasterAutoreg(ForecasterBase):
         predictions : pandas Series
             Predicted values.
             
-        '''
+        """
 
         check_predict_input(
             forecaster_type = type(self),
@@ -547,9 +553,6 @@ class ForecasterAutoreg(ForecasterBase):
                             fit               = False,
                             inverse_transform = False
                        )
-                exog_values, _ = preprocess_exog(
-                                    exog = exog.iloc[:steps, :]
-                                 )
             else:
                 exog = transform_series(
                             series            = exog,
@@ -557,32 +560,25 @@ class ForecasterAutoreg(ForecasterBase):
                             fit               = False,
                             inverse_transform = False
                        )
-                exog_values, _ = preprocess_exog(
-                                    exog = exog.iloc[:steps, ]
-                                 )
+            
+            exog_values, _ = preprocess_exog(
+                                exog = exog.iloc[:steps, ]
+                             )
         else:
             exog_values = None
             
-        if last_window is not None:
-            last_window = transform_series(
-                                series            = last_window,
-                                transformer       = self.transformer_y,
-                                fit               = False,
-                                inverse_transform = False
-                          )
-            last_window_values, last_window_index = preprocess_last_window(
-                                                        last_window = last_window
-                                                    )  
-        else:
-            last_window = transform_series(
-                                series            = self.last_window.copy(),
-                                transformer       = self.transformer_y,
-                                fit               = False,
-                                inverse_transform = False
-                          )
-            last_window_values, last_window_index = preprocess_last_window(
-                                                        last_window = last_window
-                                                    )
+        if last_window is None:
+            last_window = self.last_window.copy()
+        
+        last_window = transform_series(
+                            series            = last_window,
+                            transformer       = self.transformer_y,
+                            fit               = False,
+                            inverse_transform = False
+                      )
+        last_window_values, last_window_index = preprocess_last_window(
+                                                    last_window = last_window
+                                                )
             
         predictions = self._recursive_predict(
                         steps       = steps,
@@ -619,7 +615,7 @@ class ForecasterAutoreg(ForecasterBase):
         random_state: int=123,
         in_sample_residuals: bool=True
     ) -> np.ndarray:
-        '''
+        """
         Iterative process in which, each prediction, is used as a predictor
         for the next step and bootstrapping is used to estimate prediction
         intervals. This method only returns prediction intervals.
@@ -676,7 +672,7 @@ class ForecasterAutoreg(ForecasterBase):
         Forecasting: Principles and Practice (2nd ed) Rob J Hyndman and
         George Athanasopoulos.
             
-        '''
+        """
         
         if last_window is None:
             last_window = self.last_window.values
@@ -744,7 +740,7 @@ class ForecasterAutoreg(ForecasterBase):
         random_state: int=123,
         in_sample_residuals: bool=True
     ) -> pd.DataFrame:
-        '''
+        """
         Iterative process in which, each prediction, is used as a predictor
         for the next step and bootstrapping is used to estimate prediction
         intervals. Both, predictions and intervals, are returned.
@@ -800,7 +796,7 @@ class ForecasterAutoreg(ForecasterBase):
         Forecasting: Principles and Practice (2nd ed) Rob J Hyndman and
         George Athanasopoulos.
             
-        '''
+        """
         
         check_predict_input(
             forecaster_type = type(self),
@@ -828,43 +824,33 @@ class ForecasterAutoreg(ForecasterBase):
                             fit               = False,
                             inverse_transform = False
                        )
-                exog_values, _ = preprocess_exog(
-                                    exog = exog.iloc[:steps, :]
-                                 )
             else:
                 exog = transform_series(
                             series            = exog,
                             transformer       = self.transformer_exog,
                             fit               = False,
                             inverse_transform = False
-                       ) 
-                exog_values, _ = preprocess_exog(
-                                    exog = exog.iloc[:steps, ]
-                                 )
+                       )
+            
+            exog_values, _ = preprocess_exog(
+                                exog = exog.iloc[:steps, ]
+                             )
         else:
             exog_values = None
-            
-        if last_window is not None:
-            last_window = transform_series(
-                                series            = last_window,
-                                transformer       = self.transformer_y,
-                                fit               = False,
-                                inverse_transform = False
-                          )
-            last_window_values, last_window_index = preprocess_last_window(
-                                                        last_window = last_window
-                                                    )  
-        else:
-            last_window = transform_series(
-                                series            = self.last_window.copy(),
-                                transformer       = self.transformer_y,
-                                fit               = False,
-                                inverse_transform = False
-                          )
-            last_window_values, last_window_index = preprocess_last_window(
-                                                        last_window = last_window
-                                                    )
         
+        if last_window is None:
+            last_window = self.last_window.copy()
+        
+        last_window = transform_series(
+                            series            = last_window,
+                            transformer       = self.transformer_y,
+                            fit               = False,
+                            inverse_transform = False
+                      )
+        last_window_values, last_window_index = preprocess_last_window(
+                                                    last_window = last_window
+                                                )
+
         # Since during predict() `last_window_values` and `exog_values` are modified,
         # the originals are stored to be used later.
         last_window_values_original = last_window_values.copy()
@@ -907,8 +893,11 @@ class ForecasterAutoreg(ForecasterBase):
         return predictions
 
     
-    def set_params(self, **params: dict) -> None:
-        '''
+    def set_params(
+        self, 
+        **params: dict
+    ) -> None:
+        """
         Set new values to the parameters of the scikit learn model stored in the
         ForecasterAutoreg.
         
@@ -921,13 +910,17 @@ class ForecasterAutoreg(ForecasterBase):
         -------
         self
         
-        '''
+        """
+
         self.regressor = clone(self.regressor)
         self.regressor.set_params(**params)
         
         
-    def set_lags(self, lags: Union[int, list, np.ndarray, range]) -> None:
-        '''      
+    def set_lags(
+        self, 
+        lags: Union[int, list, np.ndarray, range]
+    ) -> None:
+        """      
         Set new value to the attribute `lags`.
         Attributes `max_lag` and `window_size` are also updated.
         
@@ -942,7 +935,7 @@ class ForecasterAutoreg(ForecasterBase):
         -------
         None
         
-        '''
+        """
         
         if isinstance(lags, int) and lags < 1:
             raise Exception('min value of lags allowed is 1')
@@ -970,9 +963,9 @@ class ForecasterAutoreg(ForecasterBase):
         self,
         residuals: pd.Series,
         append: bool=True,
-        transform: bool=False
+        transform: bool=True
     ) -> None:
-        '''
+        """
         Set new values to the attribute `out_sample_residuals`. Out of sample
         residuals are meant to be calculated using observations that did not
         participate in the training process. If a transformer is used on `y` during
@@ -996,7 +989,8 @@ class ForecasterAutoreg(ForecasterBase):
         Returns 
         -------
         self
-        '''
+
+        """
 
         if not isinstance(residuals, pd.Series):
             raise Exception(
@@ -1032,8 +1026,10 @@ class ForecasterAutoreg(ForecasterBase):
         self.out_sample_residuals = pd.Series(residuals)
 
     
-    def get_feature_importance(self) -> pd.DataFrame:
-        '''      
+    def get_feature_importance(
+        self
+    ) -> pd.DataFrame:
+        """      
         Return feature importance of the regressor stored in the
         forecaster. Only valid when regressor stores internally the feature
         importance in the attribute `feature_importances_` or `coef_`.
@@ -1046,7 +1042,8 @@ class ForecasterAutoreg(ForecasterBase):
         -------
         feature_importance : pandas DataFrame
             Feature importance associated with each predictor.
-        '''
+
+        """
 
         if isinstance(self.regressor, sklearn.pipeline.Pipeline):
             estimator = self.regressor[-1]

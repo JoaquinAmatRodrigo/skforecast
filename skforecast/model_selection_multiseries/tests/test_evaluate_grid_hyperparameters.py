@@ -1,9 +1,11 @@
 # Unit test _evaluate_grid_hyperparameters_multiseries
 # ==============================================================================
+import re
 import pytest
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import Ridge
+from sklearn.metrics import mean_squared_error 
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 from skforecast.model_selection_multiseries.model_selection_multiseries import _evaluate_grid_hyperparameters_multiseries
 
@@ -13,8 +15,8 @@ tqdm.__init__ = partialmethod(tqdm.__init__, disable=True) # hide progress bar
 
 # Fixtures
 # np.random.seed(123)
-# a = np.random.rand(50)
-# b = np.random.rand(50)
+# series_1 = np.random.rand(50)
+# series_2 = np.random.rand(50)
 series = pd.DataFrame({'1': pd.Series(np.array(
                                 [0.69646919, 0.28613933, 0.22685145, 0.55131477, 0.71946897,
                                  0.42310646, 0.9807642 , 0.68482974, 0.4809319 , 0.39211752,
@@ -46,10 +48,10 @@ series = pd.DataFrame({'1': pd.Series(np.array(
 
 
 def test_evaluate_grid_hyperparameters_multiseries_exception_when_levels_list_not_list_str_None():
-    '''
+    """
     Test Exception is raised in _evaluate_grid_hyperparameters_multiseries when 
     levels_list is not a list or str or None.
-    '''
+    """
     forecaster = ForecasterAutoregMultiSeries(
                     regressor = Ridge(random_state=123),
                     lags      = 3
@@ -57,7 +59,11 @@ def test_evaluate_grid_hyperparameters_multiseries_exception_when_levels_list_no
 
     levels_list = 1
     
-    with pytest.raises(Exception):
+    err_msg = re.escape(
+                (f'`levels_list` must be a `list` of column names, a `str` '
+                 f'of a column name or `None`.')
+              )
+    with pytest.raises(TypeError, match = err_msg):
         _evaluate_grid_hyperparameters_multiseries(
             forecaster          = forecaster,
             series              = series,
@@ -77,10 +83,10 @@ def test_evaluate_grid_hyperparameters_multiseries_exception_when_levels_list_no
 
 
 def test_evaluate_grid_hyperparameters_multiseries_exception_when_levels_weights_not_dict():
-    '''
+    """
     Test Exception is raised in _evaluate_grid_hyperparameters_multiseries when 
     levels_weights is not a dict.
-    '''
+    """
     forecaster = ForecasterAutoregMultiSeries(
                     regressor = Ridge(random_state=123),
                     lags      = 3
@@ -88,7 +94,8 @@ def test_evaluate_grid_hyperparameters_multiseries_exception_when_levels_weights
 
     levels_weights = 'not_a_dict'
     
-    with pytest.raises(Exception):
+    err_msg = re.escape(f'`levels_weights` must be a `dict` or `None`.')
+    with pytest.raises(TypeError, match = err_msg):
         _evaluate_grid_hyperparameters_multiseries(
             forecaster          = forecaster,
             series              = series,
@@ -107,11 +114,44 @@ def test_evaluate_grid_hyperparameters_multiseries_exception_when_levels_weights
         )
 
 
+def test_evaluate_grid_hyperparameters_multiseries_exception_when_metric_is_a_list():
+    """
+    Test Exception is raised in _evaluate_grid_hyperparameters_multiseries when 
+    metric is a list (Not implemented yet).
+    """
+    forecaster = ForecasterAutoregMultiSeries(
+                    regressor = Ridge(random_state=123),
+                    lags      = 3
+                 )
+    
+    err_msg = re.escape(
+                (f'The calculation of a list of metrics is not yet implemented '
+                 f'in the multi-series forecast hyperparameter search.')
+              )
+    with pytest.raises(TypeError, match = err_msg):
+        _evaluate_grid_hyperparameters_multiseries(
+            forecaster          = forecaster,
+            series              = series,
+            param_grid          = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}],
+            steps               = 4,
+            metric              = ['mean_absolute_error', mean_squared_error],
+            initial_train_size  = 12,
+            fixed_train_size    = False,
+            levels_list         = '1',
+            levels_weights      = None,
+            exog                = None,
+            lags_grid           = [2, 4],
+            refit               = False,
+            return_best         = False,
+            verbose             = False
+        )
+
+
 def test_evaluate_grid_hyperparameters_multiseries_exception_when_levels_list_and_levels_weights_not_match():
-    '''
+    """
     Test Exception is raised in _evaluate_grid_hyperparameters_multiseries when 
     levels_weights are different from column names of series, `levels_list`.
-    '''
+    """
     forecaster = ForecasterAutoregMultiSeries(
                     regressor = Ridge(random_state=123),
                     lags      = 3
@@ -120,7 +160,11 @@ def test_evaluate_grid_hyperparameters_multiseries_exception_when_levels_list_an
     levels_list = ['1', '2']
     levels_weights = {'1': 0.5, 'not_2': 0.5}
     
-    with pytest.raises(Exception):
+    err_msg = re.escape(
+                (f'`levels_weights` keys must be the same as the column '
+                 f'names of series, `levels_list`.')
+              )
+    with pytest.raises(ValueError, match = err_msg):
         _evaluate_grid_hyperparameters_multiseries(
             forecaster          = forecaster,
             series              = series,
@@ -140,10 +184,10 @@ def test_evaluate_grid_hyperparameters_multiseries_exception_when_levels_list_an
 
 
 def test_evaluate_grid_hyperparameters_multiseries_exception_when_levels_weights_not_sum_1():
-    '''
+    """
     Test Exception is raised in _evaluate_grid_hyperparameters_multiseries when 
     levels_weights do not add up to 1.0.
-    '''
+    """
     forecaster = ForecasterAutoregMultiSeries(
                     regressor = Ridge(random_state=123),
                     lags      = 3
@@ -151,7 +195,8 @@ def test_evaluate_grid_hyperparameters_multiseries_exception_when_levels_weights
 
     levels_weights = {'1': 0.5, '2': 0.6}
     
-    with pytest.raises(Exception):
+    err_msg = re.escape(f'Weights in `levels_weights` must add up to 1.0.')
+    with pytest.raises(ValueError,  match = err_msg):
         _evaluate_grid_hyperparameters_multiseries(
             forecaster          = forecaster,
             series              = series,
@@ -171,10 +216,10 @@ def test_evaluate_grid_hyperparameters_multiseries_exception_when_levels_weights
 
 
 def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMultiSeries_with_mocked():
-    '''
+    """
     Test output of _evaluate_grid_hyperparameters_multiseries in ForecasterAutoregMultiSeries with mocked
-    (mocked done in Skforecast v0.5.0)
-    '''
+    (mocked done in Skforecast v0.5.0).
+    """
     forecaster = ForecasterAutoregMultiSeries(
                     regressor = Ridge(random_state=123),
                     lags      = 2 # Placeholder, the value will be overwritten
@@ -217,11 +262,11 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
 
 
 def test_output_evaluate_grid_hyperparameters_ForecasterAutoregMultiSeries_lags_grid_is_None_with_mocked():
-    '''
+    """
     Test output of _evaluate_grid_hyperparameters in ForecasterAutoregMultiSeries 
     when lags_grid is None with mocked (mocked done in Skforecast v0.5.0), 
     should use forecaster.lags as lags_grid.
-    '''
+    """
     forecaster = ForecasterAutoregMultiSeries(
                     regressor = Ridge(random_state=123),
                     lags      = 2
@@ -263,10 +308,10 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregMultiSeries_lags_
 
 
 def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMultiSeries_levels_list_str_with_mocked():
-    '''
+    """
     Test output of _evaluate_grid_hyperparameters_multiseries in ForecasterAutoregMultiSeries with mocked
-    when levels_list str (mocked done in Skforecast v0.5.0)
-    '''
+    when levels_list str (mocked done in Skforecast v0.5.0).
+    """
     forecaster = ForecasterAutoregMultiSeries(
                     regressor = Ridge(random_state=123),
                     lags      = 2 # Placeholder, the value will be overwritten
@@ -310,10 +355,10 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
 
 
 def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMultiSeries_levels_list_list_with_mocked():
-    '''
+    """
     Test output of _evaluate_grid_hyperparameters_multiseries in ForecasterAutoregMultiSeries with mocked
-    when levels_list list (mocked done in Skforecast v0.5.0)
-    '''
+    when levels_list list (mocked done in Skforecast v0.5.0).
+    """
     forecaster = ForecasterAutoregMultiSeries(
                     regressor = Ridge(random_state=123),
                     lags      = 2 # Placeholder, the value will be overwritten
@@ -357,10 +402,10 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
 
 
 def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMultiSeries_levels_weights_with_mocked():
-    '''
+    """
     Test output of _evaluate_grid_hyperparameters_multiseries in ForecasterAutoregMultiSeries with mocked
-    when levels_weights (mocked done in Skforecast v0.5.0)
-    '''
+    when levels_weights (mocked done in Skforecast v0.5.0).
+    """
     forecaster = ForecasterAutoregMultiSeries(
                     regressor = Ridge(random_state=123),
                     lags      = 2 # Placeholder, the value will be overwritten
@@ -401,3 +446,43 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
                                    )
 
     pd.testing.assert_frame_equal(results, expected_results)
+
+
+def test_evaluate_grid_hyperparameters_multiseries_when_return_best():
+    """
+    Test forecaster is refited when return_best=True in _evaluate_grid_hyperparameters_multiseries.
+    """
+    forecaster = ForecasterAutoregMultiSeries(
+                    regressor = Ridge(random_state=123),
+                    lags      = 2 # Placeholder, the value will be overwritten
+                 )
+
+    steps = 3
+    n_validation = 12
+    lags_grid = [2, 4]
+    param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
+
+    _evaluate_grid_hyperparameters_multiseries(
+        forecaster          = forecaster,
+        series              = series,
+        param_grid          = param_grid,
+        steps               = steps,
+        metric              = 'mean_absolute_error',
+        initial_train_size  = len(series) - n_validation,
+        fixed_train_size    = False,
+        levels_list         = None,
+        levels_weights      = None,
+        exog                = None,
+        lags_grid           = lags_grid,
+        refit               = False,
+        return_best         = True,
+        verbose             = False
+    )
+
+    expected_lags = np.array([1, 2, 3, 4])
+    expected_alpha = 0.01
+    expected_series_levels = ['1', '2']
+    
+    assert (expected_lags == forecaster.lags).all()
+    assert expected_alpha == forecaster.regressor.alpha
+    assert expected_series_levels ==  forecaster.series_levels

@@ -1,11 +1,39 @@
 # Unit test fit ForecasterAutoregMultiSeries
 # ==============================================================================
+import re
+import pytest
 from pytest import approx
 import numpy as np
 import pandas as pd
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
+from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LinearRegression
 from xgboost import XGBRegressor
+
+
+def test_fit_exception_when_levels_of_transformer_series_not_equal_to_series_levels():
+    """
+    Test exception is raised when `transformer_series` is a dict and its keys are
+    not the same as forecaster.series_levels.
+    """
+    series = pd.DataFrame({'1': pd.Series(np.arange(5)), 
+                           '2': pd.Series(np.arange(5))
+                           })
+
+    dict_transformers = {'1': StandardScaler(), 
+                         '3': StandardScaler()
+                        }
+    forecaster = ForecasterAutoregMultiSeries(regressor          = LinearRegression(), 
+                                              lags               = 3,
+                                              transformer_series = dict_transformers)
+    forecaster.series_levels = ['1', '2']
+    
+    err_msg = re.escape(
+                (f'When `transformer_series` parameter is a `dict`, its keys '
+                 f'must be the same as `series_levels` : {forecaster.series_levels}')
+              )
+    with pytest.raises(ValueError, match = err_msg):
+        forecaster.fit(series=series)
 
 
 def test_forecaster_index_freq_stored():
