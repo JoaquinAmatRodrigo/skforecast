@@ -491,7 +491,7 @@ def test_list_metrics_backtesting_forecaster_refit_no_exog_no_remainder_with_moc
                                         verbose             = False
                                    )
 
-    assert expected_metrics == metrics
+    assert expected_metrics == approx(metrics)
     pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
 
 
