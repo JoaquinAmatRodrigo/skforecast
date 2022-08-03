@@ -26,7 +26,8 @@ from ..utils import preprocess_last_window
 from ..utils import preprocess_exog
 from ..utils import expand_index
 from ..utils import check_predict_input
-
+from ..utils import transform_series
+from ..utils import transform_dataframe
 
 logging.basicConfig(
     format = '%(name)-10s %(levelname)-5s %(message)s', 
@@ -50,6 +51,19 @@ class ForecasterAutoregCustom(ForecasterBase):
         
     window_size: int
         Size of the window needed by `fun_predictors` to create the predictors.
+
+    transformer_y : transformer (preprocessor) compatible with the scikit-learn
+                    preprocessing API, default `None`
+        An instance of a transformer (preprocessor) compatible with the scikit-learn
+        preprocessing API with methods: fit, transform, fit_transform and inverse_transform.
+        ColumnTransformers are not allowed since they do not have inverse_transform method.
+        The transformation is applied to `y` before training the forecaster.
+
+    transformer_exog : transformer (preprocessor) compatible with the scikit-learn
+                       preprocessing API, default `None`
+        An instance of a transformer (preprocessor) compatible with the scikit-learn
+        preprocessing API. The transformation is applied to `exog` before training the
+        forecaster. `inverse_transform` is not available when using ColumnTransformers.
     
     
     Attributes
@@ -66,6 +80,19 @@ class ForecasterAutoregCustom(ForecasterBase):
         
     window_size: int
         Size of the window needed by `fun_predictors` to create the predictors.
+
+    transformer_y : transformer (preprocessor) compatible with the scikit-learn
+                    preprocessing API, default `None`
+        An instance of a transformer (preprocessor) compatible with the scikit-learn
+        preprocessing API with methods: fit, transform, fit_transform and inverse_transform.
+        ColumnTransformers are not allowed since they do not have inverse_transform method.
+        The transformation is applied to `y` before training the forecaster.
+
+    transformer_exog : transformer (preprocessor) compatible with the scikit-learn
+                    preprocessing API, default `None`
+        An instance of a transformer (preprocessor) compatible with the scikit-learn
+        preprocessing API. The transformation is applied to `exog` before training the
+        forecaster. `inverse_transform` is not available when using ColumnTransformers.
         
     last_window : pandas Series
         Last window the forecaster has seen during trained. It stores the
@@ -118,25 +145,35 @@ class ForecasterAutoregCustom(ForecasterBase):
      
     '''
     
-    def __init__(self, regressor, fun_predictors: callable, window_size: int) -> None:
+    def __init__(
+        self, 
+        regressor, 
+        fun_predictors: callable, 
+        window_size: int,
+        transformer_y = None,
+        transformer_exog = None,
+    ) -> None:
         
-        self.regressor            = regressor
-        self.create_predictors    = fun_predictors
-        self.window_size          = window_size
-        self.index_type           = None
-        self.index_freq           = None
-        self.training_range       = None
-        self.last_window          = None
-        self.included_exog        = False
-        self.exog_type            = None
-        self.exog_col_names       = None
-        self.X_train_col_names    = None
-        self.in_sample_residuals  = None
-        self.out_sample_residuals = None
-        self.fitted               = False
-        self.creation_date        = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
-        self.fit_date             = None
-        self.skforcast_version    = skforecast.__version__
+        self.regressor                     = regressor
+        self.create_predictors             = fun_predictors
+        self.source_code_create_predictors = None
+        self.window_size                   = window_size
+        self.transformer_y                 = transformer_y
+        self.transformer_exog              = transformer_exog
+        self.index_type                    = None
+        self.index_freq                    = None
+        self.training_range                = None
+        self.last_window                   = None
+        self.included_exog                 = False
+        self.exog_type                     = None
+        self.exog_col_names                = None
+        self.X_train_col_names             = None
+        self.in_sample_residuals           = None
+        self.out_sample_residuals          = None
+        self.fitted                        = False
+        self.creation_date                 = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
+        self.fit_date                      = None
+        self.skforcast_version             = skforecast.__version__
         
         if not isinstance(window_size, int):
             raise Exception(
@@ -147,13 +184,16 @@ class ForecasterAutoregCustom(ForecasterBase):
             raise Exception(
                 f'`fun_predictors` must be callable, got {type(fun_predictors)}.'
             )
+    
         self.source_code_create_predictors = getsource(fun_predictors)
                 
         
-    def __repr__(self) -> str:
-        '''
+    def __repr__(
+        self
+    ) -> str:
+        """
         Information displayed when a ForecasterAutoregCustom object is printed.
-        '''
+        """
 
         if isinstance(self.regressor, sklearn.pipeline.Pipeline):
             name_pipe_steps = tuple(name + "__" for name in self.regressor.named_steps.keys())
@@ -169,6 +209,8 @@ class ForecasterAutoregCustom(ForecasterBase):
             f"Regressor: {self.regressor} \n"
             f"Predictors created with function: {self.create_predictors.__name__} \n"
             f"Window size: {self.window_size} \n"
+            f"Transformer for y: {self.transformer_y} \n"
+            f"Transformer for exog: {self.transformer_exog} \n"
             f"Included exogenous: {self.included_exog} \n"
             f"Type of exogenous variable: {self.exog_type} \n"
             f"Exogenous variables names: {self.exog_col_names} \n"
@@ -189,7 +231,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         y: pd.Series,
         exog: Optional[Union[pd.Series, pd.DataFrame]]=None
     ) -> Tuple[pd.DataFrame, pd.Series]:
-        '''
+        """
         Create training matrices from univariate time series.
         
         Parameters
@@ -210,7 +252,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         y_train : pandas Series
             Values (target) of the time series related to each row of `X_train`.
         
-        '''
+        """
         
         if len(y) < self.window_size + 1:
             raise Exception(
@@ -220,6 +262,12 @@ class ForecasterAutoregCustom(ForecasterBase):
             )
 
         check_y(y=y)
+        y = transform_series(
+                series            = y,
+                transformer       = self.transformer_y,
+                fit               = True,
+                inverse_transform = False
+            )
         y_values, y_index = preprocess_y(y=y)
         
         if exog is not None:
@@ -228,6 +276,20 @@ class ForecasterAutoregCustom(ForecasterBase):
                     "`exog` must have same number of samples as `y`."
                 )
             check_exog(exog=exog)
+            if isinstance(exog, pd.Series):
+                exog = transform_series(
+                            series            = exog,
+                            transformer       = self.transformer_exog,
+                            fit               = True,
+                            inverse_transform = False
+                       )
+            else:
+                exog = transform_dataframe(
+                            df                = exog,
+                            transformer       = self.transformer_exog,
+                            fit               = True,
+                            inverse_transform = False
+                       )
             exog_values, exog_index = preprocess_exog(exog=exog)
             if not (exog_index[:len(y_index)] == y_index).all():
                 raise Exception(
@@ -279,10 +341,10 @@ class ForecasterAutoregCustom(ForecasterBase):
         
     def fit(
         self,
-        y: Union[np.ndarray, pd.Series],
+        y: pd.Series,
         exog: Optional[Union[np.ndarray, pd.Series, pd.DataFrame]]=None
     ) -> None:
-        '''
+        """
         Training Forecaster.
         
         Parameters
@@ -300,7 +362,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         -------
         None
         
-        '''
+        """
         
         # Reset values in case the forecaster has already been fitted.
         self.index_type           = None
@@ -326,6 +388,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             self.regressor.fit(X=X_train, y=y_train)
         else:
             self.regressor.fit(X=X_train.to_numpy(), y=y_train.to_numpy())
+        
         self.fitted = True
         self.fit_date = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
         self.training_range = preprocess_y(y=y)[1][[0, -1]]
@@ -360,10 +423,10 @@ class ForecasterAutoregCustom(ForecasterBase):
     def _recursive_predict(
         self,
         steps: int,
-        last_window: np.array,
-        exog: np.array
-    ) -> pd.Series:
-        '''
+        last_window: np.ndarray,
+        exog: np.ndarray
+    ) -> np.array:
+        """
         Predict n steps ahead. It is an iterative process in which, each prediction,
         is used as a predictor for the next step.
         
@@ -384,7 +447,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         predictions : numpy ndarray
             Predicted values.
             
-        '''
+        """
 
         predictions = np.full(shape=steps, fill_value=np.nan)
 
@@ -417,7 +480,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         last_window: Optional[pd.Series]=None,
         exog: Optional[Union[pd.Series, pd.DataFrame]]=None
     ) -> pd.Series:
-        '''
+        """
         Predict n steps ahead. It is an recursive process in which, each prediction,
         is used as a predictor for the next step.
         
@@ -442,7 +505,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         predictions : pandas Series
             Predicted values.
             
-        '''
+        """
 
         check_predict_input(
             forecaster_type = type(self),
@@ -464,24 +527,38 @@ class ForecasterAutoregCustom(ForecasterBase):
      
         if exog is not None:
             if isinstance(exog, pd.DataFrame):
-                exog_values, _ = preprocess_exog(
-                                    exog = exog[self.exog_col_names].iloc[:steps, ]
-                                 )
-            else: 
-                exog_values, _ = preprocess_exog(
-                                    exog = exog.iloc[:steps, ]
-                                 )
+                exog = transform_dataframe(
+                            df                = exog,
+                            transformer       = self.transformer_exog,
+                            fit               = False,
+                            inverse_transform = False
+                       )
+            else:
+                exog = transform_series(
+                            series            = exog,
+                            transformer       = self.transformer_exog,
+                            fit               = False,
+                            inverse_transform = False
+                       )
+            
+            exog_values, _ = preprocess_exog(
+                                exog = exog.iloc[:steps, ]
+                             )
         else:
             exog_values = None
         
-        if last_window is not None:
-            last_window_values, last_window_index = preprocess_last_window(
-                                                        last_window = last_window
-                                                    )  
-        else:
-            last_window_values, last_window_index = preprocess_last_window(
-                                                        last_window = self.last_window
-                                                    )
+        if last_window is None:
+            last_window = self.last_window.copy()
+        
+        last_window = transform_series(
+                            series            = last_window,
+                            transformer       = self.transformer_y,
+                            fit               = False,
+                            inverse_transform = False
+                      )
+        last_window_values, last_window_index = preprocess_last_window(
+                                                    last_window = last_window
+                                                )
             
         predictions = self._recursive_predict(
                         steps       = steps,
@@ -498,6 +575,13 @@ class ForecasterAutoregCustom(ForecasterBase):
                         name = 'pred'
                       )
 
+        predictions = transform_series(
+                        series            = predictions,
+                        transformer       = self.transformer_y,
+                        fit               = False,
+                        inverse_transform = True
+                      )
+
         return predictions
 
     
@@ -512,7 +596,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         random_state: int=123,
         in_sample_residuals: bool=True
     ) -> np.ndarray:
-        '''
+        """
         Iterative process in which, each prediction, is used as a predictor
         for the next step and bootstrapping is used to estimate prediction
         intervals. This method only returns prediction intervals.
@@ -569,7 +653,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         Forecasting: Principles and Practice (2nd ed) Rob J Hyndman and
         George Athanasopoulos.
             
-        '''
+        """
 
         if last_window is None:
             last_window = self.last_window.values
@@ -638,7 +722,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         random_state: int=123,
         in_sample_residuals: bool=True
     ) -> pd.DataFrame:
-        '''
+        """
         Iterative process in which, each prediction, is used as a predictor
         for the next step and bootstrapping is used to estimate prediction
         intervals. Both, predictions and intervals, are returned.
@@ -694,7 +778,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         Forecasting: Principles and Practice (2nd ed) Rob J Hyndman and
         George Athanasopoulos.
             
-        '''
+        """
         
         check_predict_input(
             forecaster_type = type(self),
@@ -716,24 +800,38 @@ class ForecasterAutoregCustom(ForecasterBase):
         
         if exog is not None:
             if isinstance(exog, pd.DataFrame):
-                exog_values, _ = preprocess_exog(
-                                    exog = exog[self.exog_col_names].iloc[:steps, ]
-                                 )
-            else: 
-                exog_values, _ = preprocess_exog(
-                                    exog = exog.iloc[:steps, ]
-                                 )
+                exog = transform_dataframe(
+                            df                = exog,
+                            transformer       = self.transformer_exog,
+                            fit               = False,
+                            inverse_transform = False
+                       )
+            else:
+                exog = transform_series(
+                            series            = exog,
+                            transformer       = self.transformer_exog,
+                            fit               = False,
+                            inverse_transform = False
+                       )
+            
+            exog_values, _ = preprocess_exog(
+                                exog = exog.iloc[:steps, ]
+                             )
         else:
             exog_values = None
             
-        if last_window is not None:
-            last_window_values, last_window_index = preprocess_last_window(
-                                                        last_window = last_window
-                                                    )  
-        else:
-            last_window_values, last_window_index = preprocess_last_window(
-                                                        last_window = self.last_window
-                                                    )
+        if last_window is None:
+            last_window = self.last_window.copy()
+        
+        last_window = transform_series(
+                            series            = last_window,
+                            transformer       = self.transformer_y,
+                            fit               = False,
+                            inverse_transform = False
+                      )
+        last_window_values, last_window_index = preprocess_last_window(
+                                                    last_window = last_window
+                                                )
         
         # Since during predict() `last_window` and `exog` are modified, the
         # originals are stored to be used later
@@ -769,12 +867,19 @@ class ForecasterAutoregCustom(ForecasterBase):
                                 ),
                         columns = ['pred', 'lower_bound', 'upper_bound']
                       )
+                      
+        if self.transformer_y:
+            for col in predictions.columns:
+                predictions[col] = self.transformer_y.inverse_transform(predictions[[col]])
 
         return predictions
 
     
-    def set_params(self, **params: dict) -> None:
-        '''
+    def set_params(
+        self, 
+        **params: dict
+    ) -> None:
+        """
         Set new values to the parameters of the scikit learn model stored in the
         ForecasterAutoregCustom.
         
@@ -787,14 +892,19 @@ class ForecasterAutoregCustom(ForecasterBase):
         -------
         self
         
-        '''
+        """
         
         self.regressor = clone(self.regressor)
         self.regressor.set_params(**params)
         
     
-    def set_out_sample_residuals(self, residuals: pd.Series, append: bool=True)-> None:
-        '''
+    def set_out_sample_residuals(
+        self, 
+        residuals: pd.Series, 
+        append: bool=True,
+        transform: bool=True
+    )-> None:
+        """
         Set new values to the attribute `out_sample_residuals`. Out of sample
         residuals are meant to be calculated using observations that did not
         participate in the training process.
@@ -810,16 +920,28 @@ class ForecasterAutoregCustom(ForecasterBase):
             attribute `out_sample_residuals`. Once the limit of 1000 values is
             reached, no more values are appended. If False, `out_sample_residuals`
             is overwritten with the new residuals.
+
+        transform : bool, default `True`
+            If `True`, new residuals are transformed using self.transformer_y.
             
         Returns 
         -------
         self
-        '''
+
+        """
 
         if not isinstance(residuals, pd.Series):
             raise Exception(
                 f"`residuals` argument must be `pd.Series`. Got {type(residuals)}"
             )
+
+        if transform and self.transformer_y is not None:
+            residuals = transform_series(
+                            series            = residuals,
+                            transformer       = self.transformer_y,
+                            fit               = False,
+                            inverse_transform = False
+                        ) 
             
         if len(residuals) > 1000:
             rng = np.random.default_rng(seed=123)
@@ -842,8 +964,10 @@ class ForecasterAutoregCustom(ForecasterBase):
         self.out_sample_residuals = pd.Series(residuals)
 
     
-    def get_feature_importance(self) -> pd.DataFrame:
-        '''      
+    def get_feature_importance(
+        self
+    ) -> pd.DataFrame:
+        """      
         Return feature importance of the regressor stored in the
         forecaster. Only valid when regressor stores internally the feature
         importance in the attribute `feature_importances_` or `coef_`.
@@ -856,7 +980,8 @@ class ForecasterAutoregCustom(ForecasterBase):
         -------
         feature_importance : pandas DataFrame
             Feature importance associated with each predictor.
-        '''
+
+        """
 
         if isinstance(self.regressor, sklearn.pipeline.Pipeline):
             estimator = self.regressor[-1]

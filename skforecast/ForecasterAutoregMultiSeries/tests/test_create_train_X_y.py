@@ -1,5 +1,6 @@
 # Unit test create_train_X_y ForecasterAutoregMultiSeries
 # ==============================================================================
+import re
 import pytest
 import numpy as np
 import pandas as pd
@@ -8,25 +9,27 @@ from sklearn.linear_model import LinearRegression
 
 
 def test_create_train_X_y_exception_when_series_not_dataframe():
-    '''
+    """
     Test exception is raised when series is not a pandas DataFrame.
-    '''
+    """
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
     serie = pd.Series(np.arange(7))
 
-    with pytest.raises(Exception):
+    err_msg = re.escape('`series` must be a pandas DataFrame.')
+    with pytest.raises(TypeError, match = err_msg):
         forecaster.create_train_X_y(series=serie)
 
 
 def test_create_train_X_y_output_when_series_and_exog_is_None():
-    '''
+    """
     Test the output of create_train_X_y when series has 2 columns and 
     exog is None.
-    '''
+    """
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
     series = pd.DataFrame({'1': pd.Series(np.arange(7)), 
                            '2': pd.Series(np.arange(7))
                           })
+    forecaster.transformer_series = {col: None for col in series}
 
     results = forecaster.create_train_X_y(series=series)
     expected = (pd.DataFrame(
@@ -52,14 +55,15 @@ def test_create_train_X_y_output_when_series_and_exog_is_None():
 
 
 def test_create_train_X_y_output_when_series_10_and_exog_is_series():
-    '''
+    """
     Test the output of create_train_X_y when series has 2 columns and 
     exog is a pandas series.
-    '''
+    """
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
     series = pd.DataFrame({'1': pd.Series(np.arange(7)), 
                            '2': pd.Series(np.arange(7))
                           })
+    forecaster.transformer_series = {col: None for col in series}
 
     results = forecaster.create_train_X_y(
                             series = series,
@@ -89,14 +93,15 @@ def test_create_train_X_y_output_when_series_10_and_exog_is_series():
 
 
 def test_create_train_X_y_output_when_series_10_and_exog_is_dataframe():
-    '''
+    """
     Test the output of create_train_X_y when series has 2 columns and 
     exog is a pandas dataframe with two columns.
-    '''
+    """
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
     series = pd.DataFrame({'1': pd.Series(np.arange(7)), 
                            '2': pd.Series(np.arange(7))
                           })
+    forecaster.transformer_series = {col: None for col in series}
 
     results = forecaster.create_train_X_y(
                             series = series,
@@ -129,17 +134,18 @@ def test_create_train_X_y_output_when_series_10_and_exog_is_dataframe():
 
 
 def test_create_train_X_y_exception_when_series_and_exog_have_different_length():
-    '''
+    """
     Test exception is raised when length of series and length of exog are different.
-    '''
+    """
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5)
     series = pd.DataFrame({'1': pd.Series(np.arange(7)), 
                            '2': pd.Series(np.arange(7))
                           })
 
-    with pytest.raises(Exception):
+    err_msg = re.escape('`exog` must have same number of samples as `series`.')
+    with pytest.raises(ValueError, match = err_msg):
         forecaster.fit(series=series, exog=pd.Series(np.arange(10)))
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError, match = err_msg):
         forecaster.fit(
             series = series,
             exog   = pd.DataFrame(np.arange(50).reshape(25,2))
@@ -147,9 +153,9 @@ def test_create_train_X_y_exception_when_series_and_exog_have_different_length()
 
 
 def test_create_train_X_y_exception_when_series_and_exog_have_different_index():
-    '''
+    """
     Test exception is raised when series and exog have different index.
-    '''
+    """
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5)
     series = pd.DataFrame({'1': pd.Series(np.arange(7)), 
                            '2': pd.Series(np.arange(7))
@@ -157,7 +163,11 @@ def test_create_train_X_y_exception_when_series_and_exog_have_different_index():
 
     series.index = pd.date_range(start='2022-01-01', periods=7, freq='1D')
 
-    with pytest.raises(Exception):
+    err_msg = re.escape(
+                ('Different index for `series` and `exog`. They must be equal '
+                 'to ensure the correct alignment of values.')
+              )
+    with pytest.raises(ValueError, match = err_msg):
         forecaster.fit(
             series = series,
             exog   = pd.Series(np.arange(7), index=pd.RangeIndex(start=0, stop=7, step=1))

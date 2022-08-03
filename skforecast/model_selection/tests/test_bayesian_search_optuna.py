@@ -71,6 +71,11 @@ def test_bayesian_search_optuna_exception_when_search_space_names_do_not_match()
         )
 
 
+# This mark allows to only run test with "slow" label or all except this, "not slow".
+# The mark should be included in the pytest.ini file
+# pytest -m slow --verbose
+# pytest -m "not slow" --verbose
+@pytest.mark.slow
 def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_mocked():
     '''
     Test output of _bayesian_search_optuna in ForecasterAutoreg with mocked

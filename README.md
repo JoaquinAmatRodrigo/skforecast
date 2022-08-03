@@ -3,8 +3,7 @@
 ![Licence](https://img.shields.io/badge/Licence-MIT-green)
 [![Downloads](https://static.pepy.tech/personalized-badge/skforecast?period=total&units=international_system&left_color=grey&right_color=blue&left_text=Downloads)](https://pepy.tech/project/skforecast)
 ![PyPI](https://img.shields.io/pypi/v/skforecast)
-
-![Build status](https://github.com/JoaquinAmatRodrigo/skforecast/workflows/unit-tests.yml/badge.svg)
+[![Build status](https://github.com/JoaquinAmatRodrigo/skforecast/workflows/Unit%20Tests/badge.svg)](https://github.com/{github_id}/{repository}/workflows/{workflow_name}/badge.svg)
 
 # skforecast
 
@@ -67,7 +66,8 @@ pip install git+https://github.com/JoaquinAmatRodrigo/skforecast#master
 - [x] Random search and bayesian search (using [**optuna**](https://optuna.org/) or [**skopt**](https://scikit-optimize.github.io/stable/modules/generated/skopt.gp_minimize.html)) for hyperparameter optimization. Try `random_search_forecaster()` and `bayesian_search_forecaster()`.
 - [x] `ForecasterAutoregMultiOutput` has been renamed to `ForecasterAutoregDirect`.
 - [x] Modeling multiple time series simultaneously. Try `ForecasterAutoregMultiSeries` and the new functions availables in `model_selection_multiseries`.
-- [ ] Allow different transformations for each predictor (lags and exogenous).
+- [x] Allow different transformations for each predictor (lags and exogenous).
+- [x] Multiple metrics in `backtesting_forecaster`, `grid_search_forecaster`, `random_search_forecaster`, and `backtesting_forecaster_multiseries`.
 - [x] Bug fixes and performance improvements.
 
 Try it:
