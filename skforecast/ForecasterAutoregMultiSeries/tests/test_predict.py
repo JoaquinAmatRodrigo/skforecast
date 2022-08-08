@@ -65,7 +65,7 @@ exog = pd.DataFrame({'col_1': pd.Series(np.array(
 
 @pytest.fixture(params=[('1', [50., 51., 52., 53., 54.]), 
                         ('2', [100., 101., 102., 103., 104.])],
-                        ids=lambda d: f"level: {d[0]}, preds: {d[1]}")
+                        ids=lambda d: f'level: {d[0]}, preds: {d[1]}')
 def expected_pandas_series(request):
     """
     This is a pytest fixture. It's a function that can be passed to a

@@ -259,6 +259,12 @@ class ForecasterAutoreg(ForecasterBase):
         """
           
         n_splits = len(y) - self.max_lag
+        if n_splits <= 0:
+            raise ValueError(
+                f'The maximum lag ({self.max_lag}) must be less than the length '
+                f'of the series ({len(y)}).'
+            )
+        
         X_data   = np.full(shape=(n_splits, self.max_lag), fill_value=np.nan, dtype=float)
         y_data   = np.full(shape=(n_splits, 1), fill_value=np.nan, dtype=float)
 
@@ -313,8 +319,9 @@ class ForecasterAutoreg(ForecasterBase):
         
         if exog is not None:
             if len(exog) != len(y):
-                raise Exception(
-                    "`exog` must have same number of samples as `y`."
+                raise ValueError(
+                    f'`exog` must have same number of samples as `y`. '
+                    f'length `exog`: ({len(exog)}), length `y`: ({len(y)})'
                 )
             check_exog(exog=exog)
             if isinstance(exog, pd.Series):
@@ -334,9 +341,9 @@ class ForecasterAutoreg(ForecasterBase):
             exog_values, exog_index = preprocess_exog(exog=exog)
             
             if not (exog_index[:len(y_index)] == y_index).all():
-                raise Exception(
+                raise ValueError(
                     ('Different index for `y` and `exog`. They must be equal '
-                    'to ensure the correct alignment of values.')      
+                     'to ensure the correct alignment of values.')      
                 )
         
         X_train, y_train = self._create_lags(y=y_values)

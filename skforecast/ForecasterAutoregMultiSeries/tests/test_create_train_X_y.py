@@ -133,23 +133,23 @@ def test_create_train_X_y_output_when_series_10_and_exog_is_dataframe():
     assert (results[1] == expected[1]).all()
 
 
-def test_create_train_X_y_exception_when_series_and_exog_have_different_length():
+@pytest.mark.parametrize("exog", [pd.Series(np.arange(10)), pd.DataFrame(np.arange(50).reshape(25,2))])
+def test_create_train_X_y_exception_when_series_and_exog_have_different_length(exog):
     """
-    Test exception is raised when length of series and length of exog are different.
+    Test exception is raised when length of series is not equal to length exog.
     """
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5)
     series = pd.DataFrame({'1': pd.Series(np.arange(7)), 
                            '2': pd.Series(np.arange(7))
                           })
-
-    err_msg = re.escape('`exog` must have same number of samples as `series`.')
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5)
+    forecaster.transformer_series = {'1': None, '2': None}
+    
+    err_msg = re.escape(
+                (f'`exog` must have same number of samples as `series`. '
+                 f'length `exog`: ({len(exog)}), length `series`: ({len(series)})')
+              )
     with pytest.raises(ValueError, match = err_msg):
-        forecaster.fit(series=series, exog=pd.Series(np.arange(10)))
-    with pytest.raises(ValueError, match = err_msg):
-        forecaster.fit(
-            series = series,
-            exog   = pd.DataFrame(np.arange(50).reshape(25,2))
-        )
+        forecaster.create_train_X_y(series=series, exog=exog)
 
 
 def test_create_train_X_y_exception_when_series_and_exog_have_different_index():

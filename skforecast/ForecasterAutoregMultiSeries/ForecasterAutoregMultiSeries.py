@@ -268,6 +268,12 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         """
           
         n_splits = len(y) - self.max_lag
+        if n_splits <= 0:
+            raise ValueError(
+                f'The maximum lag ({self.max_lag}) must be less than the length '
+                f'of the series ({len(y)}).'
+            )
+        
         X_data   = np.full(shape=(n_splits, self.max_lag), fill_value=np.nan, dtype=float)
         y_data   = np.full(shape=(n_splits, 1), fill_value=np.nan, dtype=float)
 
@@ -343,7 +349,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         if exog is not None:
             if len(exog) != len(series):
                 raise ValueError(
-                    "`exog` must have same number of samples as `series`."
+                    f'`exog` must have same number of samples as `series`. '
+                    f'length `exog`: ({len(exog)}), length `series`: ({len(series)})'
                 )
             check_exog(exog=exog)
             if isinstance(exog, pd.Series):
