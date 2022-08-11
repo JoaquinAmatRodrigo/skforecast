@@ -1408,7 +1408,7 @@ def _evaluate_grid_hyperparameters(
     else: 
         metric_list = {(m if isinstance(m, str) else m.__name__): [] for m in metric}
 
-    if isinstance(metric_list, dict) and len(metric_list.keys()) != len(metric):
+    if isinstance(metric_list, dict) and len(metric_list) != len(metric):
         raise ValueError(
             'When `metrics` is a `list`, each metric name must be unique.'
         )
@@ -1455,7 +1455,7 @@ def _evaluate_grid_hyperparameters(
                     'lags'  : lags_list,
                     'params': params_list,
                     **metric_list})
-        results = results.sort_values(by=list(metric_list.keys())[0], ascending=True)
+        results = results.sort_values(by=list(metric_list)[0], ascending=True)
     else:
         results = pd.DataFrame({
                     'lags'  : lags_list,
@@ -1470,7 +1470,7 @@ def _evaluate_grid_hyperparameters(
         best_lags = results['lags'].iloc[0]
         best_params = results['params'].iloc[0]
         if isinstance(metric, list):
-            best_metric = results[list(metric_list.keys())[0]].iloc[0]
+            best_metric = results[list(metric_list)[0]].iloc[0]
         else:
             best_metric = results['metric'].iloc[0]
         
