@@ -260,7 +260,8 @@ class ForecasterAutoregDirect(ForecasterBase):
         
         """
 
-        n_splits = len(y) - self.max_lag - (self.steps -1)
+        n_splits = len(y) - self.max_lag - (self.steps - 1)
+        
         X_data  = np.full(shape=(n_splits, self.max_lag), fill_value=np.nan, dtype=float)
         y_data  = np.full(shape=(n_splits, self.steps), fill_value=np.nan, dtype=float)
 
@@ -301,7 +302,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         X_train : pandas DataFrame, shape (len(y) - self.max_lag, len(self.lags) + exog.shape[1]*steps)
             Pandas DataFrame with the training values (predictors) for each step.
             
-        y_train : pd.DataFrame, shape (len(y) - self.max_lag, )
+        y_train : pandas DataFrame, shape (len(y) - self.max_lag, )
             Values (target) of the time series related to each row of `X_train` 
             for each step.
         
@@ -317,14 +318,15 @@ class ForecasterAutoregDirect(ForecasterBase):
         y_values, y_index = preprocess_y(y=y)
 
         if len(y_values) < self.max_lag + self.steps:
-            raise Exception(
-                f"Minimum length of `y` for training this forecaster is "
-                f"{self.max_lag + self.steps}. Got {len(y_values)}"
+            raise ValueError(
+                f'Minimum length of `y` for training this forecaster is '
+                f'{self.max_lag + self.steps}. Got {len(y_values)}.'
             )
         if exog is not None:
             if len(exog) != len(y):
-                raise Exception(
-                    "`exog` must have same number of samples as `y`."
+                raise ValueError(
+                    f'`exog` must have same number of samples as `y`. '
+                    f'length `exog`: ({len(exog)}), length `y`: ({len(y)})'
                 )
             check_exog(exog=exog)
             if isinstance(exog, pd.Series):
@@ -345,8 +347,8 @@ class ForecasterAutoregDirect(ForecasterBase):
 
             if not (exog_index[:len(y_index)] == y_index).all():
                 raise Exception(
-                ('Different index for `y` and `exog`. They must be equal '
-                'to ensure the correct alignment of values.')      
+                    ('Different index for `y` and `exog`. They must be equal '
+                     'to ensure the correct alignment of values.')      
                 )
       
         X_lags, y_train = self._create_lags(y=y_values)

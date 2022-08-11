@@ -6,18 +6,7 @@ import pandas as pd
 from skforecast.ForecasterAutoregDirect import ForecasterAutoregDirect
 from sklearn.linear_model import LinearRegression
 
-    
-def test_create_lags_exception_when_len_of_y_is_lower_than_maximum_lag():
-    '''
-    Test exception is raised when length of y is lower than maximum lag included
-    in the forecaster.
-    '''
-    forecaster = ForecasterAutoregDirect(LinearRegression(), lags=10, steps=2)
-    with pytest.raises(Exception):
-        forecaster._create_lags(y=np.arange(5))
-
-
-        
+  
 def test_create_lags_when_lags_is_3_steps_1_and_y_is_numpy_arange_10():
     '''
     Test matrix of lags created properly when langs is 3, steps is 1 and y is

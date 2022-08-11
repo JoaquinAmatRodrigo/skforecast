@@ -8,7 +8,7 @@ from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 from sklearn.linear_model import LinearRegression
 
 
-@pytest.mark.parametrize("lags            , expected", 
+@pytest.mark.parametrize("lags             , expected", 
                          [(10              , np.arange(10) + 1), 
                           ([1, 2, 3]       , np.array([1, 2, 3])), 
                           (range(1, 4)     , np.array(range(1, 4))), 
