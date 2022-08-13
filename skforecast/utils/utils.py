@@ -561,11 +561,11 @@ def expand_index(
 
 
 def transform_series(
-    series: pd.Series,
+    series: Union[pd.Series, pd.DataFrame],
     transformer,
     fit: bool=False,
     inverse_transform: bool=False
-) -> pd.Series:
+) -> Union[pd.Series, pd.DataFrame]:
     """      
     Transform raw values of pandas Series with a scikit-learn alike transformer
     (preprocessor). The transformer used must have the following methods: fit, transform,
@@ -589,29 +589,46 @@ def transform_series(
 
     Returns
     -------
-    series_transformed : pandas Series
+    series_transformed : pandas Series, pandas Dataframe
         Transformed Series.
 
     """
 
+    if isinstance(series, pd.DataFrame) and inverse_transform is False:
+        raise Exception(
+            "Using Pandas DataFrame as input is only allowed for inverse transformation."
+        )
+
     if transformer is None:
         return series
 
-    series = series.to_frame()
+    if isinstance(series, pd.Series):
+        series = series.to_frame()
 
-    if not inverse_transform:
-        if fit:
-            values_transformed = transformer.fit_transform(series)
-        else:
-            values_transformed = transformer.transform(series)        
-    else:
+    if fit:
+        transformer.fit(series)
+
+    if inverse_transform:
         values_transformed = transformer.inverse_transform(series)
+    else:
+        values_transformed = transformer.transform(series)   
 
-    series_transformed = pd.Series(
-                            data  = values_transformed.flatten(),
-                            index = series.index,
-                            name  = series.columns[0]
-                          )
+    if hasattr(values_transformed, 'toarray'):
+        # If the returned values are in sparse matrix format, it is converted to dense
+        values_transformed = values_transformed.toarray()
+        
+    if values_transformed.shape[1] == 1:
+        series_transformed = pd.Series(
+                                data  = values_transformed.flatten(),
+                                index = series.index,
+                                name  = transformer.feature_names_in_[0]
+                            )
+    else:
+        series_transformed = pd.DataFrame(
+                                data = values_transformed,
+                                index = series.index,
+                                columns = transformer.get_feature_names_out()
+                            )
 
     return series_transformed
 
