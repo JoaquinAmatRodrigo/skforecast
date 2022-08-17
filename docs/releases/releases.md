@@ -20,6 +20,8 @@ All notable changes to this project will be documented in this file.
 
 + `metric` can be a list in `backtesting_forecaster`, `grid_search_forecaster`, `random_search_forecaster`, `backtesting_forecaster_multiseries`. If `metric` is a `list`, multiple metrics will be calculated. (suggested by Pablo Dávila Herrero https://github.com/Pablo-Davila)
 
++ Skforecast works with python 3.10.
+
 **Changed**
 
 + `backtesting_forecaster` change default value of argument `fixed_train_size: bool=True`.
