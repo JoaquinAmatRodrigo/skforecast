@@ -3,6 +3,7 @@
 import pytest
 import numpy as np
 import pandas as pd
+import sys
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import Ridge
 from skopt.space import Categorical, Real, Integer
@@ -68,11 +69,13 @@ def test_bayesian_search_skopt_exception_when_search_space_names_do_not_match():
         )
 
 
+@pytest.mark.skipif(sys.version_info < (3, 8), reason="requires python3.8 or higher")
 def test_results_output_bayesian_search_skopt_ForecasterAutoreg_with_mocked():
     '''
     Test output of _bayesian_search_skopt in ForecasterAutoreg with mocked
     (mocked done in Skforecast v0.4.3).
     '''
+    
     forecaster = ForecasterAutoreg(
                     regressor = RandomForestRegressor(random_state=123),
                     lags      = 2 # Placeholder, the value will be overwritten
