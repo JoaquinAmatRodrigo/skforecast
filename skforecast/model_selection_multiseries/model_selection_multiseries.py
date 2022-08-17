@@ -125,7 +125,7 @@ def _backtesting_forecaster_multiseries_refit(
 
     Returns 
     -------
-    metrics_value : float | list
+    metrics_value : float, list
         Value(s) of the metric(s).
 
     backtest_predictions : pandas Dataframe
@@ -427,7 +427,7 @@ def _backtesting_forecaster_multiseries_no_refit(
 
     Returns 
     -------
-    metrics_value : float | list
+    metrics_value : float, list
         Value(s) of the metric(s).
 
     backtest_predictions : pandas DataFrame
@@ -727,7 +727,7 @@ def backtesting_forecaster_multiseries(
 
     Returns 
     -------
-    metrics_value : float | list
+    metrics_value : float, list
         Value(s) of the metric(s).
 
     backtest_predictions : pandas DataFrame
