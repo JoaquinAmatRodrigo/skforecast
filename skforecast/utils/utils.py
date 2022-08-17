@@ -276,25 +276,25 @@ def check_predict_input(
         if str(forecaster_type).split('.')[1] == 'ForecasterAutoregMultiSeries':
             if isinstance(last_window, pd.DataFrame) and level not in last_window.columns:
                 raise ValueError(
-                    f"""
+                    f'''
                     Level {level} not found in `last_window`. If `last_window` is a pandas
                     DataFrame, it must contain a column named as level.
-                    """
+                    '''
                 )
             elif isinstance(last_window, pd.Series):
                 if last_window.name is None:
                     Warning.warn(
-                        f"""
+                        f'''
                         Provided `last_window` has no name, ensure that it contains data
                         for {level}.
-                        """
+                        '''
                     )
                 if last_window.name != level:
                     Warning.warn(
-                        f"""
+                        f'''
                         Provided `last_window` has name {last_window.name} and predicted
                         level is {level}. Ensure that it contains data for {level}.
-                        """
+                        '''
                     )
             else:
                 raise TypeError('`last_window` must be a pandas Series or DataFrame.')
@@ -617,6 +617,7 @@ def transform_series(
         or a DataFrame.
 
     """
+    
     if not isinstance(series, pd.Series):
         raise Exception(
             "Series argument must be a pandas Series object."
