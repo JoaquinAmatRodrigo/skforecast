@@ -561,7 +561,7 @@ def expand_index(
 
 
 def transform_series(
-    series: Union[pd.Series, pd.DataFrame],
+    series: pd.Series,
     transformer,
     fit: bool=False,
     inverse_transform: bool=False
@@ -589,21 +589,20 @@ def transform_series(
 
     Returns
     -------
-    series_transformed : pandas Series, pandas Dataframe
-        Transformed Series.
+    series_transformed : pandas Series, pandas DataFrame
+        Transformed Series. Depending on the transformer used, the output may be a Series
+        or a DataFrame.
 
     """
-
-    if isinstance(series, pd.DataFrame) and inverse_transform is False:
+    if not isinstance(series, pd.Series):
         raise Exception(
-            "Using Pandas DataFrame as input is only allowed for inverse transformation."
+            "Series argument must be a pandas Series object."
         )
-
+        
     if transformer is None:
         return series
 
-    if isinstance(series, pd.Series):
-        series = series.to_frame()
+    series = series.to_frame()
 
     if fit:
         transformer.fit(series)
@@ -621,7 +620,7 @@ def transform_series(
         series_transformed = pd.Series(
                                 data  = values_transformed.flatten(),
                                 index = series.index,
-                                name  = transformer.feature_names_in_[0]
+                                name  = series.columns[0]
                             )
     else:
         series_transformed = pd.DataFrame(
