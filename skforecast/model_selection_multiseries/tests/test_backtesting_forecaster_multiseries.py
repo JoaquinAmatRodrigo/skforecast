@@ -4,6 +4,7 @@ import pytest
 import numpy as np
 import pandas as pd
 from pytest import approx
+import sys
 from sklearn.linear_model import Ridge
 from sklearn.metrics import mean_absolute_error
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
@@ -228,11 +229,13 @@ def test_backtesting_forecaster_multiseries_exception_when_forecaster_not_Foreca
             verbose             = False
         )
 
+@pytest.mark.skipif(sys.version_info < (3, 8), reason="requires python3.8 or higher")
 def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_with_mocked():
     """
     Test output of backtesting_forecaster_multiseries in ForecasterAutoregMultiSeries 
     with mocked (mocked done in Skforecast v0.5.0).
     """
+
     forecaster = ForecasterAutoregMultiSeries(
                     regressor = Ridge(random_state=123),
                     lags      = 2
@@ -270,11 +273,14 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
     pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
 
 
+@pytest.mark.skipif(sys.version_info < (3, 8), reason="requires python3.8 or higher")
 def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_with_mocked_metrics():
     """
     Test output of backtesting_forecaster_multiseries in ForecasterAutoregMultiSeries 
-    with mocked and list of metrics (mocked done in Skforecast v0.5.0).
+    with mocked and list of metrics (mocked done in Skforecast v0.5.0). Only valid for
+    python > 3.7.
     """
+
     forecaster = ForecasterAutoregMultiSeries(
                     regressor = Ridge(random_state=123),
                     lags      = 2

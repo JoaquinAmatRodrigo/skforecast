@@ -274,8 +274,31 @@ def check_predict_input(
                 )
                 
         if str(forecaster_type).split('.')[1] == 'ForecasterAutoregMultiSeries':
-            if not isinstance(last_window, pd.DataFrame):
-                raise TypeError('`last_window` must be a pandas DataFrame.')     
+            if isinstance(last_window, pd.DataFrame) and level not in last_window.columns:
+                raise ValueError(
+                    f'''
+                    Level {level} not found in `last_window`. If `last_window` is a pandas
+                    DataFrame, it must contain a column named as level.
+                    '''
+                )
+            elif isinstance(last_window, pd.Series):
+                if last_window.name is None:
+                    Warning.warn(
+                        f'''
+                        Provided `last_window` has no name, ensure that it contains data
+                        for {level}.
+                        '''
+                    )
+                if last_window.name != level:
+                    Warning.warn(
+                        f'''
+                        Provided `last_window` has name {last_window.name} and predicted
+                        level is {level}. Ensure that it contains data for {level}.
+                        '''
+                    )
+            else:
+                raise TypeError('`last_window` must be a pandas Series or DataFrame.')
+
         else:    
             if not isinstance(last_window, pd.Series):
                 raise TypeError('`last_window` must be a pandas Series.')
@@ -565,7 +588,7 @@ def transform_series(
     transformer,
     fit: bool=False,
     inverse_transform: bool=False
-) -> pd.Series:
+) -> Union[pd.Series, pd.DataFrame]:
     """      
     Transform raw values of pandas Series with a scikit-learn alike transformer
     (preprocessor). The transformer used must have the following methods: fit, transform,
@@ -589,29 +612,46 @@ def transform_series(
 
     Returns
     -------
-    series_transformed : pandas Series
-        Transformed Series.
+    series_transformed : pandas Series, pandas DataFrame
+        Transformed Series. Depending on the transformer used, the output may be a Series
+        or a DataFrame.
 
     """
-
+    
+    if not isinstance(series, pd.Series):
+        raise Exception(
+            "Series argument must be a pandas Series object."
+        )
+        
     if transformer is None:
         return series
 
     series = series.to_frame()
 
-    if not inverse_transform:
-        if fit:
-            values_transformed = transformer.fit_transform(series)
-        else:
-            values_transformed = transformer.transform(series)        
-    else:
-        values_transformed = transformer.inverse_transform(series)
+    if fit:
+        transformer.fit(series)
 
-    series_transformed = pd.Series(
-                            data  = values_transformed.flatten(),
-                            index = series.index,
-                            name  = series.columns[0]
-                          )
+    if inverse_transform:
+        values_transformed = transformer.inverse_transform(series)
+    else:
+        values_transformed = transformer.transform(series)   
+
+    if hasattr(values_transformed, 'toarray'):
+        # If the returned values are in sparse matrix format, it is converted to dense
+        values_transformed = values_transformed.toarray()
+        
+    if values_transformed.shape[1] == 1:
+        series_transformed = pd.Series(
+                                data  = values_transformed.flatten(),
+                                index = series.index,
+                                name  = series.columns[0]
+                            )
+    else:
+        series_transformed = pd.DataFrame(
+                                data = values_transformed,
+                                index = series.index,
+                                columns = transformer.get_feature_names_out()
+                            )
 
     return series_transformed
 

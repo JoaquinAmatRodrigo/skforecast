@@ -80,30 +80,6 @@ def test_transform_dataframe_when_transformer_is_OneHotEncoder():
     pd.testing.assert_frame_equal(results, expected)
 
 
-@pytest.mark.skip(reason="work in progress")
-def test_transform_dataframe_when_transformer_is_OneHotEncoder_and_inverse_transform():
-    """
-    Test the output of transform_dataframe when transformer is OneHotEncoder and
-    inverse_transform is True.
-    """
-    df_input = pd.DataFrame({
-                'col_1': ['a', 'a', 'a', 'a', 'b', 'b', 'b', 'b'],
-                'col_2': ['a', 'a', 'a', 'a', 'b', 'b', 'b', 'b']
-            })
-    transformer = OneHotEncoder()
-    transformer.fit(df_input)
-    df_input_2 = transformer.transform(df_input)
-
-    results =  transform_dataframe(
-                    df = df_input_2,
-                    transformer = transformer,
-                    fit = False,
-                    inverse_transform = True
-               )
-    
-    pd.testing.assert_frame_equal(results, df_input)
-
-
 def test_transform_dataframe_when_transformer_is_ColumnTransformer():
     """
     Test the output of transform_dataframe when transformer is ColumnTransformer.
