@@ -403,7 +403,7 @@ def test_check_input_predict_exception_when_length_last_window_is_lower_than_win
 def test_check_input_predict_exception_when_last_window_is_not_pandas_dataframe_ForecasterAutoregMultiSeries():
     """
     """
-    err_msg = re.escape('`last_window` must be a pandas DataFrame.')
+    err_msg = re.escape('`last_window` must be a pandas Series or DataFrame.')
     with pytest.raises(TypeError, match = err_msg):
         check_predict_input(
             forecaster_type = 'class.ForecasterAutoregMultiSeries',

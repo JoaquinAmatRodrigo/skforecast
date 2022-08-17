@@ -1,7 +1,9 @@
 # Unit test transform_series
 # ==============================================================================
 import pandas as pd
+import numpy as np
 from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import OneHotEncoder
 from skforecast.utils import transform_series
 
 
@@ -62,3 +64,36 @@ def test_transform_series_when_transformer_is_StandardScaler_and_inverse_transfo
                 )
     
     pd.testing.assert_series_equal(results, expected)
+
+
+def test_transform_series_when_transformer_is_OneHotEncoder():
+    """
+    Test the output of transform_series when transformer is OneHotEncoder.
+    """
+    input_series = pd.Series(["A"] * 5 + ["B"] * 5, name='exog')
+    transformer = OneHotEncoder(sparse=False)
+    transformer.fit(input_series.to_frame())
+    results = transform_series(
+                series = input_series,
+                transformer = transformer,
+                fit = False,
+                inverse_transform = False
+            )
+
+    expected = pd.DataFrame(
+                data = np.array(
+                            [[1., 0.],
+                            [1., 0.],
+                            [1., 0.],
+                            [1., 0.],
+                            [1., 0.],
+                            [0., 1.],
+                            [0., 1.],
+                            [0., 1.],
+                            [0., 1.],
+                            [0., 1.]]
+                       ),
+                columns = ['exog_A', 'exog_B']
+    )
+    
+    pd.testing.assert_frame_equal(results, expected)
