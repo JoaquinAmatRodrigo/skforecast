@@ -70,11 +70,11 @@ def test_transform_series_when_transformer_is_OneHotEncoder():
     """
     Test the output of transform_series when transformer is OneHotEncoder.
     """
-    input = pd.Series(["A"] * 5 + ["B"] * 5, name='exog')
+    input_series = pd.Series(["A"] * 5 + ["B"] * 5, name='exog')
     transformer = OneHotEncoder(sparse=False)
-    transformer.fit(input.to_frame())
+    transformer.fit(input_series.to_frame())
     results = transform_series(
-                series = input,
+                series = input_series,
                 transformer = transformer,
                 fit = False,
                 inverse_transform = False
