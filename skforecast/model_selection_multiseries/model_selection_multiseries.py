@@ -487,7 +487,7 @@ def _backtesting_forecaster_multiseries_no_refit(
         # predictions.
         last_window_end   = initial_train_size + i * steps
         last_window_start = last_window_end - window_size 
-        last_window_y     = series[[level]].iloc[last_window_start:last_window_end, ]
+        last_window_y     = series[level].iloc[last_window_start:last_window_end, ]
         if exog is not None:
             next_window_exog = exog.iloc[last_window_end:last_window_end + steps, ]
     
