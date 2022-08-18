@@ -1,4 +1,4 @@
-name: Skforecast Unit Tests
+name: Unit Tests
 
 on:
   pull_request:
