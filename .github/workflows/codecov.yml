@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v1
       - name: Set up Python 3.10
         uses: actions/setup-python@v2
         with:
@@ -20,6 +20,6 @@ jobs:
           python -m pip install -r requirements.txt
           python -m pip install -r test_requirements.txt
       - name: Run tests and collect coverage
-        run: pytest --cov app
+        run: pytest --cov
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
