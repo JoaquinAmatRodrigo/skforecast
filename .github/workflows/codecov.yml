@@ -1,4 +1,4 @@
-name: Workflow for Codecov coverage report
+name: Codecov coverage report
 on:
   pull_request:
     branches:
