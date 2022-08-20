@@ -967,16 +967,15 @@ class ForecasterAutoreg(ForecasterBase):
         
         
     def set_out_sample_residuals(
-        self,
-        residuals: pd.Series,
+        self, 
+        residuals: pd.Series, 
         append: bool=True,
         transform: bool=True
-    ) -> None:
+    )-> None:
         """
         Set new values to the attribute `out_sample_residuals`. Out of sample
         residuals are meant to be calculated using observations that did not
-        participate in the training process. If a transformer is used on `y` during
-        the training, new residuals must be transformed (`transform=True`).
+        participate in the training process.
         
         Parameters
         ----------
@@ -1004,19 +1003,37 @@ class ForecasterAutoreg(ForecasterBase):
                 f"`residuals` argument must be `pd.Series`. Got {type(residuals)}"
             )
 
+        if not transform and self.transformer_y is not None:
+            warnings.warn(
+                f'''
+                Argument `transform` is set to `False` but forecaster was trained
+                using a transformer {self.transformer_y}. Ensure that new residuals 
+                are already transformed or set `transform=True`.
+                '''
+            )
+
+        if transform and self.transformer_y is not None:
+            warnings.warn(
+                f'''
+                Residuals will be transformed using the same transformer used 
+                when training the forecaster ({self.transformer_y}). Ensure that
+                new residuals are in the same scale as the original time series.
+                '''
+            )
+
         if transform and self.transformer_y is not None:
             residuals = transform_series(
                             series            = residuals,
                             transformer       = self.transformer_y,
                             fit               = False,
                             inverse_transform = False
-                        ) 
-
+                        )
+            
         if len(residuals) > 1000:
             rng = np.random.default_rng(seed=123)
             residuals = rng.choice(a=residuals, size=1000, replace=False)
             residuals = pd.Series(residuals)   
-      
+    
         if append and self.out_sample_residuals is not None:
             free_space = max(0, 1000 - len(self.out_sample_residuals))
             if len(residuals) < free_space:
