@@ -14,6 +14,8 @@
 
 ## Installation
 
+Latest (stable)
+
 ```
 pip install skforecast
 ```
@@ -24,7 +26,7 @@ Specific version:
 pip install skforecast==0.4.3
 ```
 
-Latest (unstable):
+Development (unstable):
 
 ```
 pip install git+https://github.com/JoaquinAmatRodrigo/skforecast#master
