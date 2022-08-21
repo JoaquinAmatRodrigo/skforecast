@@ -7,6 +7,8 @@
 
 import setuptools
 import os
+import sys
+import warnings
 import skforecast
 
 VERSION = skforecast.__version__
@@ -16,7 +18,16 @@ with open('requirements.txt') as f:
 
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
-        
+
+if sys.version_info[:2] < (3, 7):
+    raise RuntimeError("Python version >= 3.7 required.")
+
+if sys.version_info[:2] > (3, 10):
+    fmt = "Skforecast {} may not yet support Python {}.{}."
+    warnings.warn(
+        fmt.format(VERSION, *sys.version_info[:2]),
+        RuntimeWarning)
+    del fmt
         
 setuptools.setup(
     name="skforecast",
