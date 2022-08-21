@@ -1126,7 +1126,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 '''
             )
 
-        if transform and self.transformer_series[level] is not None:
+        if transform and self.transformer_series and self.transformer_series[level]:
             warnings.warn(
                 f'''
                 Residuals will be transformed using the same transformer used 
