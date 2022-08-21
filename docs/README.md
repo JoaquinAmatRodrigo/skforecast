@@ -14,6 +14,8 @@
 
 ## Installation
 
+Latest (stable)
+
 ```
 pip install skforecast
 ```
@@ -24,7 +26,7 @@ Specific version:
 pip install skforecast==0.4.3
 ```
 
-Latest (unstable):
+Development (unstable):
 
 ```
 pip install git+https://github.com/JoaquinAmatRodrigo/skforecast#master
@@ -33,11 +35,13 @@ pip install git+https://github.com/JoaquinAmatRodrigo/skforecast#master
 ## Dependencies
 
 ```
-numpy>=1.20, <=1.22
+numpy>=1.20, <=1.23
 pandas>=1.2, <=1.4
-tqdm>=4.57.0, <=4.62
-scikit-learn>=1.0, <=1.1.1
+tqdm>=4.57.0, <=4.64
+scikit-learn>=1.0, <=1.1.2
 statsmodels>=0.12, <=0.13.2
+matplotlib>=3.3, <=3.5
+seaborn==0.11.2
 optuna==2.10.0
 scikit-optimize==0.9.0
 ```

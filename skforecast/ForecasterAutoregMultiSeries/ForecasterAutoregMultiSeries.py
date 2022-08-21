@@ -1117,6 +1117,25 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 f'`level` must be one of the `series_levels` : {self.series_levels}'
             )
 
+        if not transform and self.transformer_series[level] is not None:
+            warnings.warn(
+                f'''
+                Argument `transform` is set to `False` but forecaster was trained
+                using a transformer {self.transformer_series[level]} for level {level}.
+                Ensure that new residuals are already transformed or set `transform=True`.
+                '''
+            )
+
+        if transform and self.transformer_series and self.transformer_series[level]:
+            warnings.warn(
+                f'''
+                Residuals will be transformed using the same transformer used 
+                when training the forecaster for level {level} ({self.transformer_y}).
+                Ensure that new residuals are in the same scale as the original time
+                series.
+                '''
+            )
+
         if transform and self.transformer_series is not None:
             residuals = transform_series(
                             series            = residuals,

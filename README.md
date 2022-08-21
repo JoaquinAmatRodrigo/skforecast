@@ -39,12 +39,12 @@ pip install git+https://github.com/JoaquinAmatRodrigo/skforecast#master
 
 # Dependencies
 
-+ numpy>=1.20, <=1.22
++ numpy>=1.20, <=1.23
 + pandas>=1.2, <=1.4
-+ tqdm>=4.57.0, <=4.62
-+ scikit-learn>=1.0, <=1.1.1
++ tqdm>=4.57.0, <=4.64
++ scikit-learn>=1.0, <=1.1.2
 + statsmodels>=0.12, <=0.13.2
-+ matplotlib==3.5.2
++ matplotlib>=3.3, <=3.5
 + seaborn==0.11.2
 + optuna==2.10.0
 + scikit-optimize==0.9.0
@@ -90,15 +90,15 @@ Recent improvements are highlighted in the [release notes](https://joaquinamatro
 
 + [Introduction to time series and forecasting](https://joaquinamatrodrigo.github.io/skforecast/0.4.3/quick-start/introduction-forecasting.html)
 
-+ [Recursive multi-step forecasting](https://joaquinamatrodrigo.github.io/skforecast/latest/user_guides/autoregresive-forecaster.html)
++ [Recursive multi-step forecasting](https://joaquinamatrodrigo.github.io/skforecast/latest/notebooks/autoregresive-forecaster.html)
 
-+ [Backtesting (validation) of forecasting models](https://joaquinamatrodrigo.github.io/skforecast/latest/user_guides/backtesting.html)
++ [Backtesting (validation) of forecasting models](https://joaquinamatrodrigo.github.io/skforecast/latest/notebooks/backtesting.html)
 
-+ [Grid search of forecasting models](https://joaquinamatrodrigo.github.io/skforecast/latest/user_guides/grid-search-forecaster.html)
++ [Grid search of forecasting models](https://joaquinamatrodrigo.github.io/skforecast/latest/notebooks/grid-search-forecaster.html)
 
-+ [Prediction intervals](https://joaquinamatrodrigo.github.io/skforecast/latest/user_guides/prediction-intervals.html)
++ [Prediction intervals](https://joaquinamatrodrigo.github.io/skforecast/latest/notebooks/prediction-intervals.html)
 
-+ [Using forecaster in production](https://joaquinamatrodrigo.github.io/skforecast/latest/user_guides/forecaster-in-production.html)
++ [Using forecaster in production](https://joaquinamatrodrigo.github.io/skforecast/latest/notebooks/forecaster-in-production.html)
 
 
 # Examples and tutorials 
