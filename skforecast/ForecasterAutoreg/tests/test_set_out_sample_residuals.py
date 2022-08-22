@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
 from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import StandardScaler
 
 
 def test_set_out_sample_residuals_exception_when_residuals_is_not_pd_Series():
@@ -79,3 +80,23 @@ def test_set_out_sample_residuals_when_residuals_length_is_more_than_1000_and_ap
     results = forecaster.out_sample_residuals
 
     assert (results == expected).all()
+
+
+def test_set_out_sample_residuals_when_transform_is_True():
+    '''
+    Test residuals stored when using a StandardScaler() as transformer.
+    '''
+
+    forecaster = ForecasterAutoreg(LinearRegression(), lags=3, transformer_y=StandardScaler())
+    y = pd.Series(
+            np.array([
+                12.5, 10.3,  9.9, 10.4,  9.9,  8.5, 10.6, 11.4, 10. ,  9.5, 10.1,
+                11.5, 11.4, 11.3, 10.5,  9.6, 10.4, 11.7,  8.7, 10.6])
+        )
+    forecaster.fit(y=y)
+    new_residuals = pd.Series(np.random.normal(size=100), name='residuals')
+    new_residuals_transformed = forecaster.transformer_y.transform(new_residuals.to_frame())
+    new_residuals_transformed = pd.Series(new_residuals_transformed.flatten(), name='residuals')
+    forecaster.set_out_sample_residuals(residuals=new_residuals, transform=True)
+
+    pd.testing.assert_series_equal(new_residuals_transformed, forecaster.out_sample_residuals)
