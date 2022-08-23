@@ -10,6 +10,7 @@ from re import X
 from typing import Union, Dict, List, Tuple, Any, Optional
 import warnings
 import logging
+import sys
 import numpy as np
 import pandas as pd
 import sklearn
@@ -143,6 +144,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
     skforcast_version: str
         Version of skforecast library used to create the forecaster.
+
+    python_version: str
+        Version of python used to create the forecaster.
     
     """
     
@@ -173,6 +177,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.creation_date        = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
         self.fit_date             = None
         self.skforcast_version    = skforecast.__version__
+        self.python_version       = sys.version.split(" ")[0]
         
         if isinstance(lags, int) and lags < 1:
             raise Exception('Minimum value of lags allowed is 1.')
@@ -235,6 +240,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             f"Creation date: {self.creation_date} \n"
             f"Last fit date: {self.fit_date} \n"
             f"Skforecast version: {self.skforcast_version} \n"
+            f"Python version: {self.python_version} \n"
         )
 
         return info
