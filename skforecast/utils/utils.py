@@ -8,6 +8,7 @@
 
 from typing import Union, List, Tuple, Any
 import warnings
+from joblib import dump, load
 import numpy as np
 import pandas as pd
 import sklearn
@@ -723,3 +724,57 @@ def transform_dataframe(
                       )
 
     return df_transformed
+
+def save_forecaster(forecaster, file_name: str, verbose: bool=True) -> None:
+    '''
+    Save forecaster model using joblib.
+
+    Parameters
+    ----------
+    forecaster: forecaster object from skforecast library.
+        Model created with skforecast library.
+
+    file_name: str
+        File name given to the object.
+        
+    verbose: bool, default True
+        Print info about the forecaster saved
+
+    Returns 
+    -------
+    None
+    '''
+
+    dump(forecaster, filename=file_name)
+
+    if verbose:
+        forecaster.summary()
+
+
+def load_forecaster(file_name: str, verbose: bool=True):
+    '''
+    Save forecaster model using joblib.
+
+    Parameters
+    ----------
+    forecaster: forecaster object from skforecast library.
+        Forecaster created with skforecast library.
+
+    file_name: str
+        File name given to the object.
+
+    verbose: bool, default True
+        Print summary about the forecaster loaded.
+
+    Returns 
+    -------
+    Forecaster
+        Forecaster created with skforecast library.
+    '''
+
+    forecaster = load(filename=file_name)
+
+    if verbose:
+        forecaster.summary()
+
+    return forecaster
