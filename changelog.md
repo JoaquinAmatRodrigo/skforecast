@@ -22,6 +22,8 @@ All notable changes to this project will be documented in this file.
 
 + Skforecast works with python 3.10.
 
++ Functions `save_forecaster` and `load_forecaster` to module utils.
+
 **Changed**
 
 + `backtesting_forecaster` change default value of argument `fixed_train_size: bool=True`.
