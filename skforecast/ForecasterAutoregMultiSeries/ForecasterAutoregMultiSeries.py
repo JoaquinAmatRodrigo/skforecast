@@ -1136,7 +1136,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 '''
             )
 
-        if transform and self.transformer_series is not None:
             residuals = transform_series(
                             series            = residuals,
                             transformer       = self.transformer_series[level],

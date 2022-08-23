@@ -953,7 +953,6 @@ class ForecasterAutoregCustom(ForecasterBase):
                 '''
             )
 
-        if transform and self.transformer_y is not None:
             residuals = transform_series(
                             series            = residuals,
                             transformer       = self.transformer_y,
