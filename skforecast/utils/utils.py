@@ -6,9 +6,9 @@
 ################################################################################
 # coding=utf-8
 
-from typing import Union, List, Tuple, Any
+from typing import Union, Any
 import warnings
-from joblib import dump, load
+import joblib
 import numpy as np
 import pandas as pd
 import sklearn
@@ -745,7 +745,7 @@ def save_forecaster(forecaster, file_name: str, verbose: bool=True) -> None:
     None
     '''
 
-    dump(forecaster, filename=file_name)
+    joblib.dump(forecaster, filename=file_name)
 
     if verbose:
         forecaster.summary()
@@ -772,7 +772,7 @@ def load_forecaster(file_name: str, verbose: bool=True):
         Forecaster created with skforecast library.
     '''
 
-    forecaster = load(filename=file_name)
+    forecaster = joblib.load(filename=file_name)
 
     if verbose:
         forecaster.summary()
