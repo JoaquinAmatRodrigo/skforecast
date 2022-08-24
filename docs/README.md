@@ -8,10 +8,6 @@
 
 **Skforecast** is a python library that eases using scikit-learn regressors as multi-step forecasters. It also works with any regressor compatible with the scikit-learn API (pipelines, CatBoost, LightGBM, XGBoost, Ranger...).
 
-!!! info
-
-     **Version 0.4** has undergone huge code refactoring. Major changes are related to input-output formats (only pandas series and dataframes are allowed although internally numpy arrays are used for performance) and model validation methods (unified into backtesting with and without refit). All notable changes are listed in [Releases](./releases/releases.md).
-
 ## Installation
 
 Latest (stable)
@@ -50,13 +46,14 @@ joblib==1.1.0
 ## Features
 
 + Create recursive autoregressive forecasters from any regressor that follows the scikit-learn API
-+ Create multi-output autoregressive forecasters from any regressor that follows the scikit-learn API
++ Create direct autoregressive forecasters from any regressor that follows the scikit-learn API
++ Create multi-series autoregressive forecasters from any regressor that follows the scikit-learn API
 + Include exogenous variables as predictors
 + Include custom predictors (rolling mean, rolling variance ...)
 + Multiple backtesting methods for model validation
-+ Grid search to find optimal lags (predictors) and best hyperparameters
++ Grid search, random search and bayesian search to find optimal lags (predictors) and best hyperparameters
 + Include custom metrics for model validation and grid search
-+ Prediction interval estimated by bootstrapping
++ Prediction interval estimated by bootstrapping and quantile regression
 + Get predictor importance
 + Forecaster in production
 
