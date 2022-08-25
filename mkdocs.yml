@@ -23,6 +23,7 @@ nav:
       - Input data: user_guides/input-data.ipynb
       - Recursive multi-step forecasting: user_guides/autoregresive-forecaster.ipynb
       - Direct multi-step forecasting: user_guides/direct-multi-step-forecasting.ipynb
+      - Multi series forecasting: user_guides/multi-series-forecasting.ipynb
       - Exogenous variables: user_guides/autoregresive-forecaster-exogenous.ipynb
       - Custom predictors: user_guides/custom-predictors.ipynb
       - Backtesting forecaster: user_guides/backtesting.ipynb
@@ -35,6 +36,7 @@ nav:
       - Forecaster in production: user_guides/forecaster-in-production.ipynb
       - Grid search SARIMAX and ARIMA models: user_guides/grid-search-sarimax-arima.ipynb
       - Backtesting SARIMAX and ARIMA models: user_guides/backtesting-sarimax-arima.ipynb
+      - Plot forecaster residuals: user_guides/plot-forecaster-residuals.ipynb
 
   - Examples and tutorials:
       - Examples and tutorials: examples/examples.md
@@ -43,8 +45,11 @@ nav:
       - ForecasterAutoreg: api/ForecasterAutoreg.md
       - ForecasterAutoregCustom: api/ForecasterAutoregCustom.md
       - ForecasterAutoregDirect: api/ForecasterAutoregDirect.md
+      - ForecasterMultiSeries: api/ForecasterMultiSeries.md
       - model_selection: api/model_selection.md
+      - model_selection_multiseries: api/model_selection_multiseries.md
       - model_selection_statsmodels: api/model_selection_statsmodels.md
+      - plot: api/plot.md
 
   - Releases: releases/releases.md
 
