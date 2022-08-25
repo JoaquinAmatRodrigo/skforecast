@@ -104,6 +104,9 @@ class ForecasterAutoregMultiOutput(ForecasterAutoregDirect):
 
     skforcast_version: str
         Version of skforecast library used to create the forecaster.
+
+    python_version: str
+        Version of python used to create the forecaster.
         
     Notes
     -----
@@ -137,9 +140,9 @@ class ForecasterAutoregMultiOutput(ForecasterAutoregDirect):
             params = self.regressor.get_params()
 
         info = (
-            f"{'=' * len(str(type(forecaster)).split('.')[-1].replace(''''>''', ''))} \n"
-            f"{str(type(forecaster)).split('.')[-1].replace(''''>''', '')} \n"
-            f"{'=' * len(str(type(forecaster)).split('.')[-1].replace(''''>''', ''))} \n"
+            f"{'=' * len(str(type(self)).split('.')[-1].replace(''''>''', ''))} \n"
+            f"{str(type(self)).split('.')[-1].replace(''''>''', '')} \n"
+            f"{'=' * len(str(type(self)).split('.')[-1].replace(''''>''', ''))} \n"
             f"Regressor: {self.regressor} \n"
             f"Lags: {self.lags} \n"
             f"Window size: {self.window_size} \n"
@@ -154,6 +157,7 @@ class ForecasterAutoregMultiOutput(ForecasterAutoregDirect):
             f"Creation date: {self.creation_date} \n"
             f"Last fit date: {self.fit_date} \n"
             f"Skforecast version: {self.skforcast_version} \n"
+            f"Python version: {self.python_version} \n"
         )
         
         return info

@@ -1,10 +1,10 @@
-[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/Naereen/StrapDown.js/graphs/commit-activity)
 ![Python](https://img.shields.io/badge/python-3.7%20%7C%203.8%20%7C%203.9%20%7C%203.10-blue)
-![Licence](https://img.shields.io/badge/Licence-MIT-green)
-[![Downloads](https://static.pepy.tech/personalized-badge/skforecast?period=total&units=international_system&left_color=grey&right_color=blue&left_text=Downloads)](https://pepy.tech/project/skforecast)
 ![PyPI](https://img.shields.io/pypi/v/skforecast)
 [![codecov](https://codecov.io/gh/JoaquinAmatRodrigo/skforecast/branch/master/graph/badge.svg)](https://codecov.io/gh/JoaquinAmatRodrigo/skforecast)
 [![Build status](https://github.com/JoaquinAmatRodrigo/skforecast/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/JoaquinAmatRodrigo/skforecast/actions/workflows/unit-tests.yml/badge.svg)
+[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/Naereen/StrapDown.js/graphs/commit-activity)
+![Licence](https://img.shields.io/badge/Licence-MIT-green)
+[![Downloads](https://static.pepy.tech/personalized-badge/skforecast?period=total&units=international_system&left_color=grey&right_color=blue&left_text=Downloads)](https://pepy.tech/project/skforecast)
 
 
 # skforecast
@@ -48,20 +48,22 @@ pip install git+https://github.com/JoaquinAmatRodrigo/skforecast#master
 + seaborn==0.11.2
 + optuna==2.10.0
 + scikit-optimize==0.9.0
++ joblib==1.1.0
 
 
 # Features
 
 + Create recursive autoregressive forecasters from any regressor that follows the scikit-learn API
-+ Create multi-output autoregressive forecasters from any regressor that follows the scikit-learn API
-+ Grid search to find optimal hyperparameters
-+ Grid search to find optimal lags (predictors)
++ Create direct autoregressive forecasters from any regressor that follows the scikit-learn API
++ Create multi-series autoregressive forecasters from any regressor that follows the scikit-learn API
 + Include exogenous variables as predictors
 + Include custom predictors (rolling mean, rolling variance ...)
 + Multiple backtesting methods for model validation
-+ Include custom metrics for model validation
-+ Prediction interval estimated by bootstrapping
++ Grid search, random search and bayesian search to find optimal lags (predictors) and best hyperparameters
++ Include custom metrics for model validation and grid search
++ Prediction interval estimated by bootstrapping and quantile regression
 + Get predictor importance
++ Forecaster in production
 
 ## What is coming in the new release?
 
