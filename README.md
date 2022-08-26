@@ -107,7 +107,7 @@ Recent improvements are highlighted in the [release notes](https://joaquinamatro
 
 **English**
 
-+ [**Skforecast: time series forecasting with Python and Scikit-learn**](https://www.cienciadedatos.net/documentos/py27-time-series-forecasting-python-scikitlearn.html)
++ [**Skforecast: time series forecasting with Python and Scikit-learn**](https://www.cienciadedatos.net/documentos/py27-time-series-forecasting-python-scikitlearn.html)      [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JoaquinAmatRodrigo/skforecast/feature_docs_plot_module?labpath=examples%2FTime-series-forecasting-python-scikitlearn.ipynb)
 
 + [**Forecasting electricity demand with Python**](https://www.cienciadedatos.net/documentos/py29-forecasting-electricity-power-demand-python.html)
 
