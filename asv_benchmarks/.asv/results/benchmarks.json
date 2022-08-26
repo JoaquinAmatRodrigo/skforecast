@@ -1,0 +1,19 @@
+{
+    "ForecasterAutoreg.Suite.time_create_train_X_y": {
+        "code": "class Suite:\n    def time_create_train_X_y(self):\n        '''\n        Benchmark method create_train_X_y\n        '''\n        X, y = self.forecaster.create_train_X_y(self.time_series)\n\n    def setup(self):\n        # Create forecaster and data.\n        # setup is excluded from the timing\n        forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=24)\n        time_series = pd.Series(np.arange(10000))\n    \n        self.forecaster = forecaster\n        self.time_series = time_series",
+        "min_run_count": 2,
+        "name": "ForecasterAutoreg.Suite.time_create_train_X_y",
+        "number": 0,
+        "param_names": [],
+        "params": [],
+        "repeat": 0,
+        "rounds": 2,
+        "sample_time": 0.01,
+        "timeout": 60.0,
+        "type": "time",
+        "unit": "seconds",
+        "version": "bbd6aad134f153f7f13a00e9cabe3980a6398cac07c28bd87c6e71214c8a8577",
+        "warmup_time": -1
+    },
+    "version": 2
+}
