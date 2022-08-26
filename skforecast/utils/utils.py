@@ -753,7 +753,7 @@ def save_forecaster(forecaster, file_name: str, verbose: bool=True) -> None:
 
 def load_forecaster(file_name: str, verbose: bool=True):
     '''
-    Save forecaster model using joblib.
+    Load forecaster model from disc using joblib.
 
     Parameters
     ----------
