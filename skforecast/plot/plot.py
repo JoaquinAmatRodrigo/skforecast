@@ -41,8 +41,8 @@ def plot_residuals(
     '''
     
     if residuals is None and (y_true is None or y_pred is None):
-        raise Exception(
-            "If `residuals` argument is None then, y_true and y_pred must be provided."
+        raise ValueError(
+            "If `residuals` argument is None then, `y_true` and `y_pred` must be provided."
         )
         
     if residuals is None:
