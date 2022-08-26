@@ -1,3 +1,3 @@
-# `ForecasterAutoreg`
+# `ForecasterMultiSeries`
 
 ::: skforecast.ForecasterMultiSeries.ForecasterMultiSeries.ForecasterMultiSeries
