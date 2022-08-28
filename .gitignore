@@ -132,6 +132,9 @@ dmypy.json
 # PyCharm
 .idea/
 
+# Visual Studio Code settings
+.vscode/
+
 # RStudio project files
 **.Rproj.user/
 **.Rproj.user*
