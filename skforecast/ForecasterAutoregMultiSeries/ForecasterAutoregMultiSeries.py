@@ -268,7 +268,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         X_data : 2d numpy ndarray, shape (samples - max(self.lags), len(self.lags))
             2d numpy array with the lagged values (predictors).
         
-        y_data : 1d np.ndarray, shape (samples - max(self.lags),)
+        y_data : 1d numpy ndarray, shape (samples - max(self.lags),)
             Values of the time series related to each row of `X_data`.
         
         """

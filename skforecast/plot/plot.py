@@ -1,3 +1,11 @@
+################################################################################
+#                                   Plot                                       #
+#                                                                              #
+# This work by Joaquin Amat Rodrigo and Javier Escobar Ortiz is licensed       #
+# under a Creative Commons Attribution 4.0 International License.              #
+################################################################################
+# coding=utf-8
+ 
 from typing import Union
 import matplotlib
 import matplotlib.pyplot as plt
@@ -6,6 +14,7 @@ import numpy as np
 import pandas as pd
 from statsmodels.graphics.tsaplots import plot_acf
 
+
 def plot_residuals(
     residuals: Union[np.array, pd.Series]=None,
     y_true: Union[np.array, pd.Series]=None,
@@ -13,8 +22,7 @@ def plot_residuals(
     fig: matplotlib.figure.Figure=None,
     **kwargs
 ) -> None:
-    '''
-    
+    """
     Parameters
     ----------
     residuals: pandas series, np.array, default `None`.
@@ -38,7 +46,7 @@ def plot_residuals(
     -------
         None
     
-    '''
+    """
     
     if residuals is None and (y_true is None or y_pred is None):
         raise ValueError(

@@ -725,8 +725,13 @@ def transform_dataframe(
 
     return df_transformed
 
-def save_forecaster(forecaster, file_name: str, verbose: bool=True) -> None:
-    '''
+
+def save_forecaster(
+    forecaster, 
+    file_name: str, 
+    verbose: bool=True
+) -> None:
+    """
     Save forecaster model using joblib.
 
     Parameters
@@ -737,13 +742,14 @@ def save_forecaster(forecaster, file_name: str, verbose: bool=True) -> None:
     file_name: str
         File name given to the object.
         
-    verbose: bool, default True
+    verbose: bool, default `True`
         Print info about the forecaster saved
 
     Returns 
     -------
     None
-    '''
+
+    """
 
     joblib.dump(forecaster, filename=file_name)
 
@@ -751,8 +757,11 @@ def save_forecaster(forecaster, file_name: str, verbose: bool=True) -> None:
         forecaster.summary()
 
 
-def load_forecaster(file_name: str, verbose: bool=True):
-    '''
+def load_forecaster(
+    file_name: str,
+    verbose: bool=True
+):
+    """
     Load forecaster model from disc using joblib.
 
     Parameters
@@ -763,14 +772,15 @@ def load_forecaster(file_name: str, verbose: bool=True):
     file_name: str
         File name given to the object.
 
-    verbose: bool, default True
+    verbose: bool, default `True`
         Print summary about the forecaster loaded.
 
     Returns 
     -------
     Forecaster
         Forecaster created with skforecast library.
-    '''
+    
+    """
 
     forecaster = joblib.load(filename=file_name)
 

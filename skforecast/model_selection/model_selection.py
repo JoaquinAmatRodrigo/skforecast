@@ -1155,7 +1155,7 @@ def grid_search_forecaster(
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
            
-    lags_grid : list of int, lists, np.narray or range, default `None`
+    lags_grid : list of int, lists, numpy ndarray or range, default `None`
         Lists of `lags` to try. Only used if forecaster is an instance of 
         `ForecasterAutoreg`, `ForecasterAutoregDirect` or `ForecasterAutoregMultiOutput`.
         
@@ -1259,7 +1259,7 @@ def random_search_forecaster(
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
            
-    lags_grid : list of int, lists, np.narray or range, default `None`
+    lags_grid : list of int, lists, numpy ndarray or range, default `None`
         Lists of `lags` to try. Only used if forecaster is an instance of 
         `ForecasterAutoreg`, `ForecasterAutoregDirect` or `ForecasterAutoregMultiOutput`.
         
@@ -1367,7 +1367,7 @@ def _evaluate_grid_hyperparameters(
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
            
-    lags_grid : list of int, lists, np.narray or range, default `None`
+    lags_grid : list of int, lists, numpy ndarray or range, default `None`
         Lists of `lags` to try. Only used if forecaster is an instance of 
         `ForecasterAutoreg`, `ForecasterAutoregDirect` or `ForecasterAutoregMultiOutput`.
         
@@ -1557,7 +1557,7 @@ def bayesian_search_forecaster(
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
            
-    lags_grid : list of int, lists, np.narray or range, default `None`
+    lags_grid : list of int, lists, numpy ndarray or range, default `None`
         Lists of `lags` to try. Only used if forecaster is an instance of 
         `ForecasterAutoreg`, `ForecasterAutoregDirect` or `ForecasterAutoregMultiOutput`.
         
@@ -1725,7 +1725,7 @@ def _bayesian_search_optuna(
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
            
-    lags_grid : list of int, lists, np.narray or range, default `None`
+    lags_grid : list of int, lists, numpy ndarray or range, default `None`
         Lists of `lags` to try. Only used if forecaster is an instance of 
         `ForecasterAutoreg`, `ForecasterAutoregDirect` or `ForecasterAutoregMultiOutput`.
         
@@ -1839,7 +1839,7 @@ def _bayesian_search_optuna(
                 f"""Some of the key values do not match the search_space key names.
                 Dict keys     : {list(search_space(best_trial).keys())}
                 Trial objects : {list(best_trial.params.keys())}."""
-                )
+            )
 
         for trial in study.get_trials():
             params_list.append(trial.params)
@@ -1855,7 +1855,8 @@ def _bayesian_search_optuna(
     results = pd.DataFrame({
                 'lags'  : lags_list,
                 'params': params_list,
-                'metric': metric_list})
+                'metric': metric_list
+              })
     
     results = results.sort_values(by='metric', ascending=True)
     results = pd.concat([results, results['params'].apply(pd.Series)], axis=1)
@@ -2049,11 +2050,10 @@ def _bayesian_search_skopt(
                         **kwargs_gp_minimize
                       )
 
-        for i, x in enumerate(results_opt.x_iters):
-            params = {}
-            for j, x in enumerate(search_space):
-                params[x.name] = results_opt.x_iters[i][j]
-            
+        for i in range(len(results_opt.x_iters)):
+            params = {param.name: results_opt.x_iters[i][j] 
+                      for j, param in enumerate(search_space)}
+ 
             params_list.append(params)
             lags_list.append(lags)
             metric_list.append(results_opt.func_vals[i])
@@ -2067,7 +2067,8 @@ def _bayesian_search_skopt(
     results = pd.DataFrame({
                 'lags'  : lags_list,
                 'params': params_list,
-                'metric': metric_list})
+                'metric': metric_list
+              })
     
     results = results.sort_values(by='metric', ascending=True)
     results = pd.concat([results, results['params'].apply(pd.Series)], axis=1)
