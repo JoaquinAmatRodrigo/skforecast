@@ -1,4 +1,3 @@
- 
 # Unit test save_forecaster and load_forecaster
 # ==============================================================================
 import os
@@ -10,11 +9,11 @@ from skforecast.utils import save_forecaster
 from skforecast.utils import load_forecaster
 from sklearn.linear_model import LinearRegression
 
-def test_save_and_load_forecaster_persistence():
-    ''' 
-    Test if a loaded forecaster is exactly the same as the original one.
-    '''
 
+def test_save_and_load_forecaster_persistence():
+    """ 
+    Test if a loaded forecaster is exactly the same as the original one.
+    """
     forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3)
     rng = np.random.default_rng(12345)
     y = pd.Series(rng.normal(size=100))
@@ -29,7 +28,6 @@ def test_save_and_load_forecaster_persistence():
 
         if key == 'regressor':
             assert joblib.hash(attribute_forecaster) == joblib.hash(attribute_forecaster_loaded)
-        
         elif isinstance(attribute_forecaster, (np.ndarray, pd.Series, pd.DataFrame, pd.Index)):
             assert (attribute_forecaster == attribute_forecaster_loaded).all()
         else:
