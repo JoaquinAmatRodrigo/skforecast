@@ -1390,6 +1390,11 @@ def _evaluate_grid_hyperparameters(
             additional n columns with param = value.
     """
 
+    if isinstance(metric, list) and len(metric) != len(set(metric)):
+            raise ValueError(
+                'When `metrics` is a `list`, each metric name must be unique.'
+            )
+
     if isinstance(forecaster, ForecasterAutoregCustom):
         if lags_grid is not None:
             warnings.warn(
@@ -1403,14 +1408,8 @@ def _evaluate_grid_hyperparameters(
     lags_list = []
     params_list = []
     if not isinstance(metric, list):
-        metric_list = [] 
-    else: 
-        metric_list = {(m if isinstance(m, str) else m.__name__): [] for m in metric}
-
-    if isinstance(metric_list, dict) and len(metric_list) != len(metric):
-        raise ValueError(
-            'When `metrics` is a `list`, each metric name must be unique.'
-        )
+        metric = [metric] 
+    metric_dict = {(m if isinstance(m, str) else m.__name__): [] for m in metric}
 
     print(f"Number of models compared: {len(param_grid)*len(lags_grid)}.")
 
@@ -1445,33 +1444,23 @@ def _evaluate_grid_hyperparameters(
                         m_name = m
                     else:
                         m_name = m.__name__
-                    metric_list[m_name].append(m_value)
+                    metric_dict[m_name].append(m_value)
             else:
-                metric_list.append(metrics_values)
+                metric_dict.append(metrics_values)
 
-    if isinstance(metric, list):
-        results = pd.DataFrame({
-                    'lags'  : lags_list,
-                    'params': params_list,
-                    **metric_list})
-        results = results.sort_values(by=list(metric_list)[0], ascending=True)
-    else:
-        results = pd.DataFrame({
-                    'lags'  : lags_list,
-                    'params': params_list,
-                    'metric': metric_list})
-        results = results.sort_values(by='metric', ascending=True)
-
+    results = pd.DataFrame({
+                'lags'  : lags_list,
+                'params': params_list,
+                **metric_dict
+               })
+    results = results.sort_values(by=metric[0], ascending=True)
     results = pd.concat([results, results['params'].apply(pd.Series)], axis=1)
     
     if return_best:
         
         best_lags = results['lags'].iloc[0]
         best_params = results['params'].iloc[0]
-        if isinstance(metric, list):
-            best_metric = results[list(metric_list)[0]].iloc[0]
-        else:
-            best_metric = results['metric'].iloc[0]
+        best_metric = results[metric[0]].iloc[0]
         
         if isinstance(forecaster, (ForecasterAutoreg, ForecasterAutoregDirect, 
         ForecasterAutoregMultiOutput)):
