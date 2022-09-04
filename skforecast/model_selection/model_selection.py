@@ -1390,11 +1390,6 @@ def _evaluate_grid_hyperparameters(
             additional n columns with param = value.
     """
 
-    if isinstance(metric, list) and len(metric) != len(set(metric)):
-            raise ValueError(
-                'When `metrics` is a `list`, each metric name must be unique.'
-            )
-
     if isinstance(forecaster, ForecasterAutoregCustom):
         if lags_grid is not None:
             warnings.warn(
@@ -1410,6 +1405,11 @@ def _evaluate_grid_hyperparameters(
     if not isinstance(metric, list):
         metric = [metric] 
     metric_dict = {(m if isinstance(m, str) else m.__name__): [] for m in metric}
+    
+    if len(metric_dict) != len(metric):
+        raise ValueError(
+            'When `metrics` is a `list`, each metric name must be unique.'
+        )
 
     print(f"Number of models compared: {len(param_grid)*len(lags_grid)}.")
 

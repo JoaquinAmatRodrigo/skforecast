@@ -66,7 +66,7 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoreg_with_mocked():
     expected_results = pd.DataFrame({
             'lags'  :[[1, 2], [1, 2], [1, 2], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]],
             'params':[{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}, {'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}],
-            'metric':np.array([0.06464646, 0.06502362, 0.06745534, 0.06779272, 0.06802481, 0.06948609]),                                                               
+            'mean_squared_error':np.array([0.06464646, 0.06502362, 0.06745534, 0.06779272, 0.06802481, 0.06948609]),                                                               
             'alpha' :np.array([0.01, 0.1 , 1.  , 0.01, 0.1 , 1.  ])
                                      },
             index=np.arange(idx)
@@ -108,7 +108,7 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoreg_lags_grid_is_Non
     expected_results = pd.DataFrame({
             'lags'  :[[1, 2], [1, 2], [1, 2]],
             'params':[{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}],
-            'metric':np.array([0.06464646, 0.06502362, 0.06745534]),                                                               
+            'mean_squared_error':np.array([0.06464646, 0.06502362, 0.06745534]),                                                               
             'alpha' :np.array([0.01, 0.1 , 1.])
                                      },
             index=[0, 1, 2]
@@ -233,7 +233,7 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregCustom_with_mocke
     expected_results = pd.DataFrame({
             'lags'  :['custom predictors', 'custom predictors', 'custom predictors'],
             'params':[{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}],
-            'metric':np.array([0.06779272, 0.06802481, 0.06948609]),                                                               
+            'mean_squared_error':np.array([0.06779272, 0.06802481, 0.06948609]),                                                               
             'alpha' :np.array([0.01, 0.1 , 1.])
                                      },
             index=np.arange(idx)
