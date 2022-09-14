@@ -32,6 +32,8 @@ All notable changes to this project will be documented in this file.
 
 + `backtesting_forecaster` verbose now includes fold size.
 
++ `backtesting_forecaster` and `grid_search_forecaster` results include the name of the used metric as column name.
+
 + Remove `get_coef` method from `ForecasterAutoreg`, `ForecasterAutoregCustom` and `ForecasterAutoregMultiOutput` (deprecated since 0.4.3).
 
 + `_get_metric` now allows `mean_squared_log_error`.
