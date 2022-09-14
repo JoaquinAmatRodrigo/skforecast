@@ -1452,14 +1452,14 @@ def _evaluate_grid_hyperparameters(
                 'params': params_list,
                 **metric_dict
                })
-    results = results.sort_values(by=list(metric_dict)[0], ascending=True)
+    results = results.sort_values(by=list(metric_dict.keys())[0], ascending=True)
     results = pd.concat([results, results['params'].apply(pd.Series)], axis=1)
     
     if return_best:
         
         best_lags = results['lags'].iloc[0]
         best_params = results['params'].iloc[0]
-        best_metric = results[list(metric_dict)[0]].iloc[0]
+        best_metric = results[list(metric_dict.keys())[0]].iloc[0]
         
         if isinstance(forecaster, (ForecasterAutoreg, ForecasterAutoregDirect, 
         ForecasterAutoregMultiOutput)):
@@ -1609,12 +1609,6 @@ def bayesian_search_forecaster(
                 f"""`engine` only allows 'optuna' or 'skopt', got {engine}."""
               )
 
-    if isinstance(metric, list):
-        raise TypeError(
-            (f'The calculation of a list of metrics is not yet implemented '
-             f'in `bayesian_search_forecaster`.')
-        )
-
     if engine == 'optuna':
         results, results_opt_best = _bayesian_search_optuna(
                                         forecaster            = forecaster,
@@ -1758,10 +1752,6 @@ def _bayesian_search_optuna(
 
     """
 
-    if isinstance(metric, list) and len(metric) != len(set(metric)):
-            raise ValueError(
-                'When `metrics` is a `list`, each metric name must be unique.'
-            )
     if isinstance(forecaster, ForecasterAutoregCustom):
         if lags_grid is not None:
             warnings.warn(
@@ -1778,9 +1768,11 @@ def _bayesian_search_optuna(
     if not isinstance(metric, list):
         metric = [metric] 
     metric_dict = {(m if isinstance(m, str) else m.__name__): [] for m in metric}
-    metric_values = [] # This variable will be modified inside _objective function. 
-    # It is a trick to extract multiple values from _objective function since
-    # only the optimized value can be returned.
+    
+    if len(metric_dict) != len(metric):
+        raise ValueError(
+            'When `metrics` is a `list`, each metric name must be unique.'
+        )
 
     # Objective function using backtesting_forecaster
     def _objective(
@@ -1822,7 +1814,11 @@ def _bayesian_search_optuna(
     )
 
     for lags in tqdm(lags_grid, desc='loop lags_grid', position=0, ncols=90):
-        
+                
+        metric_values = [] # This variable will be modified inside _objective function. 
+        # It is a trick to extract multiple values from _objective function since
+        # only the optimized value can be returned.
+
         if isinstance(forecaster, (ForecasterAutoreg, ForecasterAutoregDirect, 
         ForecasterAutoregMultiOutput)):
             forecaster.set_lags(lags)
@@ -1842,12 +1838,12 @@ def _bayesian_search_optuna(
         best_trial = study.best_trial
 
         if search_space(best_trial).keys() != best_trial.params.keys():
-            raise Exception(
+            raise ValueError(
                 f"""Some of the key values do not match the search_space key names.
                 Dict keys     : {list(search_space(best_trial).keys())}
                 Trial objects : {list(best_trial.params.keys())}."""
             )
-        print(metric_values)
+        
         for i, trial in enumerate(study.get_trials()):
             params_list.append(trial.params)
             lags_list.append(lags)
@@ -1869,14 +1865,14 @@ def _bayesian_search_optuna(
                 'lags'  : lags_list,
                 'params': params_list,
                 **metric_dict})
-    results = results.sort_values(by=list(metric_dict)[0], ascending=True)
+    results = results.sort_values(by=list(metric_dict.keys())[0], ascending=True)
     results = pd.concat([results, results['params'].apply(pd.Series)], axis=1)
     
     if return_best:
         
         best_lags = results['lags'].iloc[0]
         best_params = results['params'].iloc[0]
-        best_metric = results['metric'].iloc[0]
+        best_metric = results[list(metric_dict.keys())[0]].iloc[0]
         
         if isinstance(forecaster, (ForecasterAutoreg, ForecasterAutoregDirect, 
         ForecasterAutoregMultiOutput)):

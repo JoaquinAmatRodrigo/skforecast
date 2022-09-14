@@ -60,6 +60,7 @@ def test_bayesian_search_forecaster_exception_when_engine_not_optuna_or_skopt():
         )
 
 
+@pytest.mark.skip(reason='Deprecated')
 def test_bayesian_search_forecaster_exception_when_metric_is_a_list():
     """
     Test Exception in bayesian_search_forecaster is raised when `metric` is a 
