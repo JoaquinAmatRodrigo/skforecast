@@ -1388,7 +1388,7 @@ def _evaluate_grid_hyperparameters(
             column params = lower bound of the interval.
             column metric = metric value estimated for the combination of parameters.
             additional n columns with param = value.
-
+    
     """
 
     if isinstance(forecaster, ForecasterAutoregCustom):
@@ -1404,10 +1404,11 @@ def _evaluate_grid_hyperparameters(
     lags_list = []
     params_list = []
     if not isinstance(metric, list):
-        metric = [metric] 
-    metric_dict = {(m if isinstance(m, str) else m.__name__): [] for m in metric}
-    
-    if len(metric_dict) != len(metric):
+        metric_list = [] 
+    else: 
+        metric_list = {(m if isinstance(m, str) else m.__name__): [] for m in metric}
+
+    if isinstance(metric_list, dict) and len(metric_list) != len(metric):
         raise ValueError(
             'When `metrics` is a `list`, each metric name must be unique.'
         )
@@ -1439,27 +1440,39 @@ def _evaluate_grid_hyperparameters(
 
             lags_list.append(lags)
             params_list.append(params)
-            for m, m_value in zip(metric, metrics_values):
-                if isinstance(m, str):
-                    m_name = m
-                else:
-                    m_name = m.__name__
-                metric_dict[m_name].append(m_value)
+            if isinstance(metric, list):
+                for m, m_value in zip(metric, metrics_values):
+                    if isinstance(m, str):
+                        m_name = m
+                    else:
+                        m_name = m.__name__
+                    metric_list[m_name].append(m_value)
+            else:
+                metric_list.append(metrics_values)
 
+    if isinstance(metric, list):
+        results = pd.DataFrame({
+                    'lags'  : lags_list,
+                    'params': params_list,
+                    **metric_list})
+        results = results.sort_values(by=list(metric_list)[0], ascending=True)
+    else:
+        results = pd.DataFrame({
+                    'lags'  : lags_list,
+                    'params': params_list,
+                    'metric': metric_list})
+        results = results.sort_values(by='metric', ascending=True)
 
-    results = pd.DataFrame({
-                'lags'  : lags_list,
-                'params': params_list,
-                **metric_dict
-               })
-    results = results.sort_values(by=list(metric_dict)[0], ascending=True)
     results = pd.concat([results, results['params'].apply(pd.Series)], axis=1)
     
     if return_best:
         
         best_lags = results['lags'].iloc[0]
         best_params = results['params'].iloc[0]
-        best_metric = results[list(metric_dict)[0]].iloc[0]
+        if isinstance(metric, list):
+            best_metric = results[list(metric_list)[0]].iloc[0]
+        else:
+            best_metric = results['metric'].iloc[0]
         
         if isinstance(forecaster, (ForecasterAutoreg, ForecasterAutoregDirect, 
         ForecasterAutoregMultiOutput)):
@@ -1482,7 +1495,7 @@ def bayesian_search_forecaster(
     y: pd.Series,
     search_space: Union[callable, dict],
     steps: int,
-    metric: Union[str, callable, list],
+    metric: Union[str, callable],
     initial_train_size: int,
     fixed_train_size: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
@@ -1523,19 +1536,15 @@ def bayesian_search_forecaster(
     steps : int
         Number of steps to predict.
         
-    metric : str, callable, list
+    metric : str, callable
         Metric used to quantify the goodness of fit of the model.
         
         If string:
             {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
-    
+
         If callable:
             Function with arguments y_true, y_pred that returns a float.
-
-        If list:
-            List containing several strings and/or callable.
-
 
     initial_train_size : int 
         Number of samples in the initial train split.
@@ -1661,7 +1670,7 @@ def _bayesian_search_optuna(
     y: pd.Series,
     search_space: callable,
     steps: int,
-    metric: Union[str, callable, list],
+    metric: Union[str, callable],
     initial_train_size: int,
     fixed_train_size: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
@@ -1695,18 +1704,15 @@ def _bayesian_search_optuna(
     steps : int
         Number of steps to predict.
         
-    metric : str, callable, list
+    metric : str, callable
         Metric used to quantify the goodness of fit of the model.
         
         If string:
             {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
-    
+
         If callable:
             Function with arguments y_true, y_pred that returns a float.
-
-        If list:
-            List containing several strings and/or callable.
 
     initial_train_size : int 
         Number of samples in the initial train split.
@@ -1758,10 +1764,6 @@ def _bayesian_search_optuna(
 
     """
 
-    if isinstance(metric, list) and len(metric) != len(set(metric)):
-            raise ValueError(
-                'When `metrics` is a `list`, each metric name must be unique.'
-            )
     if isinstance(forecaster, ForecasterAutoregCustom):
         if lags_grid is not None:
             warnings.warn(
@@ -1774,13 +1776,8 @@ def _bayesian_search_optuna(
    
     lags_list = []
     params_list = []
+    metric_list = []
     results_opt_best = None
-    if not isinstance(metric, list):
-        metric = [metric] 
-    metric_dict = {(m if isinstance(m, str) else m.__name__): [] for m in metric}
-    metric_values = [] # This variable will be modified inside _objective function. 
-    # It is a trick to extract multiple values from _objective function since
-    # only the optimized value can be returned.
 
     # Objective function using backtesting_forecaster
     def _objective(
@@ -1799,26 +1796,22 @@ def _bayesian_search_optuna(
         
         forecaster.set_params(**search_space(trial))
         
-        metrics, _ = backtesting_forecaster(
-                                forecaster         = forecaster,
-                                y                  = y,
-                                exog               = exog,
-                                steps              = steps,
-                                metric             = metric,
-                                initial_train_size = initial_train_size,
-                                fixed_train_size   = fixed_train_size,
-                                refit              = refit,
-                                verbose            = verbose
-                            )
-        # Store metrics in the variable metrics_values defined outside _objective.
-        nonlocal metric_values
-        metric_values.append(metrics)
+        metric, _ = backtesting_forecaster(
+                        forecaster         = forecaster,
+                        y                  = y,
+                        exog               = exog,
+                        steps              = steps,
+                        metric             = metric,
+                        initial_train_size = initial_train_size,
+                        fixed_train_size   = fixed_train_size,
+                        refit              = refit,
+                        verbose            = verbose
+                        )
 
-        return abs(metrics[0])
+        return abs(metric)
 
     print(
-        f"""Number of models compared: {n_trials*len(lags_grid)},
-         {n_trials} bayesian search in each lag configuration."""
+        f"""Number of models compared: {n_trials*len(lags_grid)}, {n_trials} bayesian search in each lag configuration."""
     )
 
     for lags in tqdm(lags_grid, desc='loop lags_grid', position=0, ncols=90):
@@ -1847,17 +1840,11 @@ def _bayesian_search_optuna(
                 Dict keys     : {list(search_space(best_trial).keys())}
                 Trial objects : {list(best_trial.params.keys())}."""
             )
-        print(metric_values)
-        for i, trial in enumerate(study.get_trials()):
+
+        for trial in study.get_trials():
             params_list.append(trial.params)
             lags_list.append(lags)
-
-            for m, m_values in zip(metric, metric_values[i]):
-                if isinstance(m, str):
-                    m_name = m
-                else:
-                    m_name = m.__name__
-                metric_dict[m_name].append(m_values)
+            metric_list.append(trial.value)
         
         if results_opt_best is None:
             results_opt_best = best_trial
@@ -1868,8 +1855,10 @@ def _bayesian_search_optuna(
     results = pd.DataFrame({
                 'lags'  : lags_list,
                 'params': params_list,
-                **metric_dict})
-    results = results.sort_values(by=list(metric_dict)[0], ascending=True)
+                'metric': metric_list
+              })
+    
+    results = results.sort_values(by='metric', ascending=True)
     results = pd.concat([results, results['params'].apply(pd.Series)], axis=1)
     
     if return_best:
