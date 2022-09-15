@@ -29,7 +29,7 @@ nav:
       - Custom predictors: user_guides/custom-predictors.ipynb
       - Backtesting forecaster: user_guides/backtesting.ipynb
       - Grid search forecaster: user_guides/grid-search-forecaster.ipynb
-      - Scikit-learn Pipeline: user_guides/sklearn-pipeline.ipynb
+      - Scikit-learn Transformers and Pipelines: user_guides/sklearn-transformers-and-pipeline.ipynb
       - Prediction intervals: user_guides/prediction-intervals.ipynb
       - Feature importance: user_guides/feature-importance.ipynb
       - Forecasting with XGBoost: user_guides/forecasting-xgboost.ipynb
