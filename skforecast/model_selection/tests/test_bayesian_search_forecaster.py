@@ -60,6 +60,7 @@ def test_bayesian_search_forecaster_exception_when_engine_not_optuna_or_skopt():
         )
 
 
+@pytest.mark.skip(reason='Deprecated')
 def test_bayesian_search_forecaster_exception_when_metric_is_a_list():
     """
     Test Exception in bayesian_search_forecaster is raised when `metric` is a 
@@ -146,7 +147,7 @@ def test_results_output_bayesian_search_forecaster_optuna_engine_ForecasterAutor
                       {'alpha': 0.274750150868112}, {'alpha': 0.07017992831138445}, 
                       {'alpha': 0.9152261002780916}, {'alpha': 0.23423914662544418},
                       {'alpha': 0.09159332036121723}, {'alpha': 0.06084642077147053}],
-            'metric':np.array([0.216456292811124, 0.21668294660495988, 0.2166890437876308, 
+            'mean_absolute_error':np.array([0.216456292811124, 0.21668294660495988, 0.2166890437876308, 
                                0.21660255096339978, 0.21641897881909822, 0.2166571743908303, 
                                0.21548741275543748, 0.21647334161791013, 0.2166378443581651,
                                0.21666500432810773]),                                                               
@@ -156,7 +157,7 @@ def test_results_output_bayesian_search_forecaster_optuna_engine_ForecasterAutor
                                0.06084642077147053])
                                      },
             index=list(range(10))
-                                   ).sort_values(by='metric', ascending=True)
+                                   ).sort_values(by='mean_absolute_error', ascending=True)
 
     pd.testing.assert_frame_equal(results, expected_results)
 
@@ -209,7 +210,7 @@ def test_results_output_bayesian_search_forecaster_skopt_engine_ForecasterAutore
                       {'alpha': 0.0959926247515687}, {'alpha': 0.3631244766604131},
                       {'alpha': 0.06635119445083354}, {'alpha': 0.14434062917737708},
                       {'alpha': 0.019050287104581624}, {'alpha': 0.0633920962590419}],
-            'metric':np.array([0.21643005790510492, 0.21665565996188138, 0.2164646190462156,
+            'mean_absolute_error':np.array([0.21643005790510492, 0.21665565996188138, 0.2164646190462156,
                                0.21641953058020516, 0.21663365234334242, 0.2162939165190013, 
                                0.21666043214039407, 0.21658325961136823, 0.21669499028423744, 
                                0.21666290650172168]),                                                               
@@ -219,6 +220,6 @@ def test_results_output_bayesian_search_forecaster_skopt_engine_ForecasterAutore
                                0.0633920962590419])
                                      },
             index=list(range(10))
-                                   ).sort_values(by='metric', ascending=True)
+                                   ).sort_values(by='mean_absolute_error', ascending=True)
 
     pd.testing.assert_frame_equal(results, expected_results)
