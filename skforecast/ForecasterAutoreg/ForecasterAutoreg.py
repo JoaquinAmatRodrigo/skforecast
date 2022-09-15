@@ -56,13 +56,15 @@ class ForecasterAutoreg(ForecasterBase):
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API with methods: fit, transform, fit_transform and inverse_transform.
         ColumnTransformers are not allowed since they do not have inverse_transform method.
-        The transformation is applied to `y` before training the forecaster.
+        The transformation is applied to `y` before training the forecaster. 
+        **New in version 0.5.0**
 
     transformer_exog : transformer (preprocessor) compatible with the scikit-learn
                        preprocessing API, default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API. The transformation is applied to `exog` before training the
         forecaster. `inverse_transform` is not available when using ColumnTransformers.
+        **New in version 0.5.0**
 
     
     Attributes
@@ -79,12 +81,14 @@ class ForecasterAutoreg(ForecasterBase):
         preprocessing API with methods: fit, transform, fit_transform and inverse_transform.
         ColumnTransformers are not allowed since they do not have inverse_transform method.
         The transformation is applied to `y` before training the forecaster.
+        **New in version 0.5.0**
 
     transformer_exog : transformer (preprocessor) compatible with the scikit-learn
                     preprocessing API, default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API. The transformation is applied to `exog` before training the
         forecaster. `inverse_transform` is not available when using ColumnTransformers.
+        **New in version 0.5.0**
         
     max_lag : int
         Maximum value of lag included in `lags`.
@@ -93,11 +97,11 @@ class ForecasterAutoreg(ForecasterBase):
         Last window the forecaster has seen during trained. It stores the
         values needed to predict the next `step` right after the training data.
         
-    window_size: int
+    window_size : int
         Size of the window needed to create the predictors. It is equal to
         `max_lag`.
         
-    fitted: Bool
+    fitted : Bool
         Tag to identify if the regressor has been fitted (trained).
         
     index_type : type
@@ -106,7 +110,7 @@ class ForecasterAutoreg(ForecasterBase):
     index_freq : str
         Frequency of Index of the input used in training.
         
-    training_range: pandas Index
+    training_range : pandas Index
         First and last values of index of the data used during training.
         
     included_exog : bool
@@ -122,25 +126,26 @@ class ForecasterAutoreg(ForecasterBase):
     X_train_col_names : list
         Names of columns of the matrix created internally for training.
         
-    in_sample_residuals: pandas Series
+    in_sample_residuals : pandas Series
         Residuals of the model when predicting training data. Only stored up to
         1000 values.
         
-    out_sample_residuals: pandas Series
+    out_sample_residuals : pandas Series
         Residuals of the model when predicting non training data. Only stored
         up to 1000 values. Use `set_out_sample_residuals` to set values.
 
-    creation_date: str
+    creation_date : str
         Date of creation.
 
-    fit_date: str
+    fit_date : str
         Date of last fit.
 
     skforcast_version: str
         Version of skforecast library used to create the forecaster.
 
-    python_version: str
+    python_version : str
         Version of python used to create the forecaster.
+        **New in version 0.5.0**
      
     """
     
@@ -675,8 +680,9 @@ class ForecasterAutoreg(ForecasterBase):
         -------
         prediction_interval : numpy ndarray, shape (steps, 2)
             Interval estimated for each prediction by bootstrapping:
-                first column = lower bound of the interval.
-                second column= upper bound interval of the interval.
+            
+            - lower_bound: lower bound of the interval.
+            - upper_bound: upper bound interval of the interval.
 
         Notes
         -----
@@ -798,9 +804,10 @@ class ForecasterAutoreg(ForecasterBase):
         -------
         predictions : pandas DataFrame
             Values predicted by the forecaster and their estimated interval:
-                column pred = predictions.
-                column lower_bound = lower bound of the interval.
-                column upper_bound = upper bound interval of the interval.
+
+            - pred: predictions.
+            - lower_bound: lower bound of the interval.
+            - upper_bound: upper bound interval of the interval.
 
         Notes
         -----
