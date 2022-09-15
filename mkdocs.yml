@@ -13,7 +13,7 @@ nav:
     - User Guides: user_guides/input-data.ipynb
     - Examples and tutorials: examples/examples.md
     - API Reference: api/ForecasterAutoreg.md
-    - FAQ and Tips: api/faq.md
+    - FAQ and Tips: faq/faq.md
     - Releases: releases/releases.md
 
   - Quick start:
@@ -53,7 +53,7 @@ nav:
       - plot: api/plot.md
       - utils: api/utils.md
 
-  - FAQ and Tips: api/faq.md
+  - FAQ and Tips: faq/faq.md
 
   - Releases: releases/releases.md
 
