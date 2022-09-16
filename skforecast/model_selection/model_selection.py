@@ -2013,9 +2013,9 @@ def _bayesian_search_skopt(
 
     for key in search_space.keys():
         if key != search_space[key].name:
-            raise Exception(
+            raise ValueError(
                 f"""Some of the key values do not match the Space object name from skopt.
-                    {key} != {search_space[key].name}."""
+                    {key} != {search_space[key].name}"""
             )
 
     search_space = list(search_space.values())

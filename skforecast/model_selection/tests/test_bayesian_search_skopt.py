@@ -1,11 +1,13 @@
 # Unit test _bayesian_search_skopt
 # ==============================================================================
+import re
 import pytest
 import numpy as np
 import pandas as pd
 import sys
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import Ridge
+from sklearn.metrics import mean_absolute_error
 from skopt.space import Categorical, Real, Integer
 from skopt.utils import use_named_args
 from skopt import gp_minimize
@@ -35,11 +37,46 @@ y = pd.Series(
               0.25045537, 0.48303426, 0.98555979, 0.51948512, 0.61289453]))
 
 
+def test_exception_bayesian_search_skopt_metric_list_duplicate_names():
+    """
+    Test exception is raised in _bayesian_search_optuna when a `list` of 
+    metrics is used with duplicate names.
+    """
+    forecaster = ForecasterAutoreg(
+                    regressor = Ridge(random_state=123),
+                    lags      = 2 # Placeholder, the value will be overwritten
+                 )
+
+    steps = 3
+    n_validation = 12
+    y_train = y[:-n_validation]
+    lags_grid = [2, 4]
+    search_space = {'not_alpha': Real(0.01, 1.0, "log-uniform", name='alpha')}
+
+    err_msg = re.escape('When `metrics` is a `list`, each metric name must be unique.')
+    with pytest.raises(ValueError, match = err_msg):
+        _bayesian_search_skopt(
+            forecaster         = forecaster,
+            y                  = y,
+            lags_grid          = lags_grid,
+            search_space       = search_space,
+            steps              = steps,
+            metric             = ['mean_absolute_error', mean_absolute_error],
+            refit              = True,
+            initial_train_size = len(y_train),
+            fixed_train_size   = True,
+            n_trials           = 10,
+            random_state       = 123,
+            return_best        = False,
+            verbose            = False,
+        )
+
+
 def test_bayesian_search_skopt_exception_when_search_space_names_do_not_match():
-    '''
+    """
     Test Exception is raised when search_space key name do not match the Space 
     object name from skopt.
-    '''
+    """
     forecaster = ForecasterAutoreg(
                     regressor = Ridge(random_state=123),
                     lags      = 2 # Placeholder, the value will be overwritten
@@ -51,7 +88,10 @@ def test_bayesian_search_skopt_exception_when_search_space_names_do_not_match():
     lags_grid = [2, 4]
     search_space = {'not_alpha': Real(0.01, 1.0, "log-uniform", name='alpha')}
     
-    with pytest.raises(Exception):
+    err_msg = re.escape(
+                f"""Some of the key values do not match the Space object name from skopt.
+                    not_alpha != alpha""")
+    with pytest.raises(ValueError, match = err_msg):
         _bayesian_search_skopt(
             forecaster         = forecaster,
             y                  = y,
@@ -71,10 +111,10 @@ def test_bayesian_search_skopt_exception_when_search_space_names_do_not_match():
 
 @pytest.mark.skipif(sys.version_info < (3, 8), reason="requires python3.8 or higher")
 def test_results_output_bayesian_search_skopt_ForecasterAutoreg_with_mocked():
-    '''
+    """
     Test output of _bayesian_search_skopt in ForecasterAutoreg with mocked
     (mocked done in Skforecast v0.4.3).
-    '''
+    """
     
     forecaster = ForecasterAutoreg(
                     regressor = RandomForestRegressor(random_state=123),
@@ -157,10 +197,10 @@ def test_results_output_bayesian_search_skopt_ForecasterAutoreg_with_mocked():
     
 
 def test_results_output_bayesian_search_skopt_ForecasterAutoreg_with_mocked_when_kwargs_gp_minimize():
-    '''
+    """
     Test output of _bayesian_search_skopt in ForecasterAutoreg when kwargs_gp_minimize with mocked
     (mocked done in Skforecast v0.4.3).
-    '''
+    """
     forecaster = ForecasterAutoreg(
                     regressor = Ridge(random_state=123),
                     lags      = 2 # Placeholder, the value will be overwritten
@@ -230,10 +270,10 @@ def test_results_output_bayesian_search_skopt_ForecasterAutoreg_with_mocked_when
 
 
 def test_results_output_bayesian_search_skopt_ForecasterAutoreg_with_mocked_when_lags_grid_is_None():
-    '''
+    """
     Test output of _bayesian_search_skopt in ForecasterAutoreg when lags_grid is None with mocked
     (mocked done in Skforecast v0.4.3), should use forecaster.lags as lags_grid.
-    '''
+    """
     forecaster = ForecasterAutoreg(
                     regressor = Ridge(random_state=123),
                     lags      = 4
@@ -285,14 +325,14 @@ def test_results_output_bayesian_search_skopt_ForecasterAutoreg_with_mocked_when
 
 
 def test_results_output_bayesian_search_skopt_ForecasterAutoregCustom_with_mocked():
-    '''
+    """
     Test output of _bayesian_search_skopt in ForecasterAutoregCustom with mocked
     (mocked done in Skforecast v0.4.3).
-    '''
+    """
     def create_predictors(y):
-        '''
+        """
         Create first 4 lags of a time series, used in ForecasterAutoregCustom.
-        '''
+        """
 
         lags = y[-1:-5:-1]
 
@@ -350,9 +390,9 @@ def test_results_output_bayesian_search_skopt_ForecasterAutoregCustom_with_mocke
     
 
 def test_evaluate_bayesian_search_skopt_when_return_best():
-    '''
+    """
     Test forecaster is refited when return_best=True in _bayesian_search_skopt.
-    '''
+    """
     forecaster = ForecasterAutoreg(
                     regressor = Ridge(random_state=123),
                     lags      = 2 # Placeholder, the value will be overwritten
@@ -388,9 +428,9 @@ def test_evaluate_bayesian_search_skopt_when_return_best():
 
 
 def test_results_opt_best_output_bayesian_search_skopt_with_output_gp_minimize_skopt():
-    '''
+    """
     Test results_opt_best output of _bayesian_search_skopt with output gp_minimize() skopt.
-    '''
+    """
     forecaster = ForecasterAutoreg(
                     regressor = Ridge(random_state=123),
                     lags      = 2
