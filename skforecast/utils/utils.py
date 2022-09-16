@@ -648,7 +648,7 @@ def transform_series(
                                 name  = series.columns[0]
                             )
     elif isinstance(values_transformed, pd.DataFrame) and values_transformed.shape[1] == 1:
-        series_transformed = series_transformed.squeeze()
+        series_transformed = values_transformed.squeeze()
     else:
         series_transformed = pd.DataFrame(
                                 data = values_transformed,
