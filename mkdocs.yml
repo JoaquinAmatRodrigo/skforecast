@@ -54,6 +54,7 @@ nav:
       - utils: api/utils.md
 
   - FAQ and Tips: faq/faq.md
+      - Avoid negative predictions when forecasting: non_negative_predictions.ipynb
 
   - Releases: releases/releases.md
 
