@@ -46,10 +46,10 @@ series = pd.DataFrame({'1': pd.Series(np.array(
 
 
 def test_output_grid_search_forecaster_multiseries_ForecasterAutoregMultiSeries_with_mocked():
-    '''
+    """
     Test output of grid_search_forecaster_multiseries in ForecasterAutoregMultiSeries with mocked
     (mocked done in Skforecast v0.5.0)
-    '''
+    """
     forecaster = ForecasterAutoregMultiSeries(
                     regressor = Ridge(random_state=123),
                     lags      = 2 # Placeholder, the value will be overwritten
@@ -74,15 +74,15 @@ def test_output_grid_search_forecaster_multiseries_ForecasterAutoregMultiSeries_
                     lags_grid           = lags_grid,
                     refit               = False,
                     return_best         = False,
-                    verbose             = False
+                    verbose             = True
               )
     
     expected_results = pd.DataFrame({
             'levels':[['1', '2'], ['1', '2'], ['1', '2'], ['1', '2'], ['1', '2'], ['1', '2']],
             'lags'  :[[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2], [1, 2], [1, 2]],
             'params':[{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}, {'alpha': 1}, {'alpha': 0.1}, {'alpha': 0.01}],
-            'metric':np.array([0.20968100463227382, 0.20969259779858337, 0.20977945312386406, 
-                               0.21077344827205086, 0.21078653113227208, 0.21078779824759553]),                                                               
+            'mean_absolute_error':np.array([0.20968100463227382, 0.20969259779858337, 0.20977945312386406, 
+                                            0.21077344827205086, 0.21078653113227208, 0.21078779824759553]),                                                               
             'alpha' :np.array([0.01, 0.1, 1., 1., 0.1, 0.01])
                                      },
             index=[3, 4, 5, 2, 1, 0]

@@ -1155,7 +1155,7 @@ def grid_search_forecaster(
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
            
-    lags_grid : list of int, lists, np.narray or range, default `None`
+    lags_grid : list of int, lists, numpy ndarray or range, default `None`
         Lists of `lags` to try. Only used if forecaster is an instance of 
         `ForecasterAutoreg`, `ForecasterAutoregDirect` or `ForecasterAutoregMultiOutput`.
         
@@ -1259,7 +1259,7 @@ def random_search_forecaster(
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
            
-    lags_grid : list of int, lists, np.narray or range, default `None`
+    lags_grid : list of int, lists, numpy ndarray or range, default `None`
         Lists of `lags` to try. Only used if forecaster is an instance of 
         `ForecasterAutoreg`, `ForecasterAutoregDirect` or `ForecasterAutoregMultiOutput`.
         
@@ -1367,7 +1367,7 @@ def _evaluate_grid_hyperparameters(
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
            
-    lags_grid : list of int, lists, np.narray or range, default `None`
+    lags_grid : list of int, lists, numpy ndarray or range, default `None`
         Lists of `lags` to try. Only used if forecaster is an instance of 
         `ForecasterAutoreg`, `ForecasterAutoregDirect` or `ForecasterAutoregMultiOutput`.
         
@@ -1388,7 +1388,7 @@ def _evaluate_grid_hyperparameters(
             column params = lower bound of the interval.
             column metric = metric value estimated for the combination of parameters.
             additional n columns with param = value.
-    
+
     """
 
     if isinstance(forecaster, ForecasterAutoregCustom):
@@ -1404,11 +1404,10 @@ def _evaluate_grid_hyperparameters(
     lags_list = []
     params_list = []
     if not isinstance(metric, list):
-        metric_list = [] 
-    else: 
-        metric_list = {(m if isinstance(m, str) else m.__name__): [] for m in metric}
-
-    if isinstance(metric_list, dict) and len(metric_list) != len(metric):
+        metric = [metric] 
+    metric_dict = {(m if isinstance(m, str) else m.__name__): [] for m in metric}
+    
+    if len(metric_dict) != len(metric):
         raise ValueError(
             'When `metrics` is a `list`, each metric name must be unique.'
         )
@@ -1440,39 +1439,27 @@ def _evaluate_grid_hyperparameters(
 
             lags_list.append(lags)
             params_list.append(params)
-            if isinstance(metric, list):
-                for m, m_value in zip(metric, metrics_values):
-                    if isinstance(m, str):
-                        m_name = m
-                    else:
-                        m_name = m.__name__
-                    metric_list[m_name].append(m_value)
-            else:
-                metric_list.append(metrics_values)
+            for m, m_value in zip(metric, metrics_values):
+                if isinstance(m, str):
+                    m_name = m
+                else:
+                    m_name = m.__name__
+                metric_dict[m_name].append(m_value)
 
-    if isinstance(metric, list):
-        results = pd.DataFrame({
-                    'lags'  : lags_list,
-                    'params': params_list,
-                    **metric_list})
-        results = results.sort_values(by=list(metric_list)[0], ascending=True)
-    else:
-        results = pd.DataFrame({
-                    'lags'  : lags_list,
-                    'params': params_list,
-                    'metric': metric_list})
-        results = results.sort_values(by='metric', ascending=True)
 
+    results = pd.DataFrame({
+                'lags'  : lags_list,
+                'params': params_list,
+                **metric_dict
+               })
+    results = results.sort_values(by=list(metric_dict.keys())[0], ascending=True)
     results = pd.concat([results, results['params'].apply(pd.Series)], axis=1)
     
     if return_best:
         
         best_lags = results['lags'].iloc[0]
         best_params = results['params'].iloc[0]
-        if isinstance(metric, list):
-            best_metric = results[list(metric_list)[0]].iloc[0]
-        else:
-            best_metric = results['metric'].iloc[0]
+        best_metric = results[list(metric_dict.keys())[0]].iloc[0]
         
         if isinstance(forecaster, (ForecasterAutoreg, ForecasterAutoregDirect, 
         ForecasterAutoregMultiOutput)):
@@ -1495,7 +1482,7 @@ def bayesian_search_forecaster(
     y: pd.Series,
     search_space: Union[callable, dict],
     steps: int,
-    metric: Union[str, callable],
+    metric: Union[str, callable, list],
     initial_train_size: int,
     fixed_train_size: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
@@ -1536,15 +1523,19 @@ def bayesian_search_forecaster(
     steps : int
         Number of steps to predict.
         
-    metric : str, callable
+    metric : str, callable, list
         Metric used to quantify the goodness of fit of the model.
         
         If string:
             {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
-
+    
         If callable:
             Function with arguments y_true, y_pred that returns a float.
+
+        If list:
+            List containing several strings and/or callable.
+
 
     initial_train_size : int 
         Number of samples in the initial train split.
@@ -1557,7 +1548,7 @@ def bayesian_search_forecaster(
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
            
-    lags_grid : list of int, lists, np.narray or range, default `None`
+    lags_grid : list of int, lists, numpy ndarray or range, default `None`
         Lists of `lags` to try. Only used if forecaster is an instance of 
         `ForecasterAutoreg`, `ForecasterAutoregDirect` or `ForecasterAutoregMultiOutput`.
         
@@ -1566,6 +1557,7 @@ def bayesian_search_forecaster(
         
     n_trials : int, default `10`
         Number of parameter settings that are sampled in each lag configuration.
+        When using engine "skopt", the minimum value is 10.
 
     random_state : int, default `123`
         Sets a seed to the sampling for reproducible output.
@@ -1618,12 +1610,6 @@ def bayesian_search_forecaster(
                 f"""`engine` only allows 'optuna' or 'skopt', got {engine}."""
               )
 
-    if isinstance(metric, list):
-        raise TypeError(
-            (f'The calculation of a list of metrics is not yet implemented '
-             f'in `bayesian_search_forecaster`.')
-        )
-
     if engine == 'optuna':
         results, results_opt_best = _bayesian_search_optuna(
                                         forecaster            = forecaster,
@@ -1670,7 +1656,7 @@ def _bayesian_search_optuna(
     y: pd.Series,
     search_space: callable,
     steps: int,
-    metric: Union[str, callable],
+    metric: Union[str, callable, list],
     initial_train_size: int,
     fixed_train_size: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
@@ -1704,15 +1690,18 @@ def _bayesian_search_optuna(
     steps : int
         Number of steps to predict.
         
-    metric : str, callable
+    metric : str, callable, list
         Metric used to quantify the goodness of fit of the model.
         
         If string:
             {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
-
+    
         If callable:
             Function with arguments y_true, y_pred that returns a float.
+
+        If list:
+            List containing several strings and/or callable.
 
     initial_train_size : int 
         Number of samples in the initial train split.
@@ -1725,7 +1714,7 @@ def _bayesian_search_optuna(
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
            
-    lags_grid : list of int, lists, np.narray or range, default `None`
+    lags_grid : list of int, lists, numpy ndarray or range, default `None`
         Lists of `lags` to try. Only used if forecaster is an instance of 
         `ForecasterAutoreg`, `ForecasterAutoregDirect` or `ForecasterAutoregMultiOutput`.
         
@@ -1776,8 +1765,15 @@ def _bayesian_search_optuna(
    
     lags_list = []
     params_list = []
-    metric_list = []
     results_opt_best = None
+    if not isinstance(metric, list):
+        metric = [metric] 
+    metric_dict = {(m if isinstance(m, str) else m.__name__): [] for m in metric}
+    
+    if len(metric_dict) != len(metric):
+        raise ValueError(
+            'When `metrics` is a `list`, each metric name must be unique.'
+        )
 
     # Objective function using backtesting_forecaster
     def _objective(
@@ -1796,26 +1792,34 @@ def _bayesian_search_optuna(
         
         forecaster.set_params(**search_space(trial))
         
-        metric, _ = backtesting_forecaster(
-                        forecaster         = forecaster,
-                        y                  = y,
-                        exog               = exog,
-                        steps              = steps,
-                        metric             = metric,
-                        initial_train_size = initial_train_size,
-                        fixed_train_size   = fixed_train_size,
-                        refit              = refit,
-                        verbose            = verbose
-                        )
+        metrics, _ = backtesting_forecaster(
+                                forecaster         = forecaster,
+                                y                  = y,
+                                exog               = exog,
+                                steps              = steps,
+                                metric             = metric,
+                                initial_train_size = initial_train_size,
+                                fixed_train_size   = fixed_train_size,
+                                refit              = refit,
+                                verbose            = verbose
+                            )
+        # Store metrics in the variable metric_values defined outside _objective.
+        nonlocal metric_values
+        metric_values.append(metrics)
 
-        return abs(metric)
+        return abs(metrics[0])
 
     print(
-        f"""Number of models compared: {n_trials*len(lags_grid)}, {n_trials} bayesian search in each lag configuration."""
+        f"""Number of models compared: {n_trials*len(lags_grid)},
+         {n_trials} bayesian search in each lag configuration."""
     )
 
     for lags in tqdm(lags_grid, desc='loop lags_grid', position=0, ncols=90):
-        
+                
+        metric_values = [] # This variable will be modified inside _objective function. 
+        # It is a trick to extract multiple values from _objective function since
+        # only the optimized value can be returned.
+
         if isinstance(forecaster, (ForecasterAutoreg, ForecasterAutoregDirect, 
         ForecasterAutoregMultiOutput)):
             forecaster.set_lags(lags)
@@ -1835,16 +1839,22 @@ def _bayesian_search_optuna(
         best_trial = study.best_trial
 
         if search_space(best_trial).keys() != best_trial.params.keys():
-            raise Exception(
+            raise ValueError(
                 f"""Some of the key values do not match the search_space key names.
                 Dict keys     : {list(search_space(best_trial).keys())}
                 Trial objects : {list(best_trial.params.keys())}."""
-                )
-
-        for trial in study.get_trials():
+            )
+        
+        for i, trial in enumerate(study.get_trials()):
             params_list.append(trial.params)
             lags_list.append(lags)
-            metric_list.append(trial.value)
+
+            for m, m_values in zip(metric, metric_values[i]):
+                if isinstance(m, str):
+                    m_name = m
+                else:
+                    m_name = m.__name__
+                metric_dict[m_name].append(m_values)
         
         if results_opt_best is None:
             results_opt_best = best_trial
@@ -1855,16 +1865,16 @@ def _bayesian_search_optuna(
     results = pd.DataFrame({
                 'lags'  : lags_list,
                 'params': params_list,
-                'metric': metric_list})
-    
-    results = results.sort_values(by='metric', ascending=True)
+                **metric_dict})
+
+    results = results.sort_values(by=list(metric_dict.keys())[0], ascending=True)
     results = pd.concat([results, results['params'].apply(pd.Series)], axis=1)
     
     if return_best:
         
         best_lags = results['lags'].iloc[0]
         best_params = results['params'].iloc[0]
-        best_metric = results['metric'].iloc[0]
+        best_metric = results[list(metric_dict.keys())[0]].iloc[0]
         
         if isinstance(forecaster, (ForecasterAutoreg, ForecasterAutoregDirect, 
         ForecasterAutoregMultiOutput)):
@@ -1887,7 +1897,7 @@ def _bayesian_search_skopt(
     y: pd.Series,
     search_space: dict,
     steps: int,
-    metric: Union[str, callable],
+    metric: Union[str, callable, list],
     initial_train_size: int,
     fixed_train_size: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
@@ -1918,15 +1928,18 @@ def _bayesian_search_skopt(
     steps : int
         Number of steps to predict.
         
-    metric : str, callable
+    metric : str, callable, list
         Metric used to quantify the goodness of fit of the model.
         
         If string:
             {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
-
-        It callable:
+    
+        If callable:
             Function with arguments y_true, y_pred that returns a float.
+
+        If list:
+            List containing several strings and/or callable.
 
     initial_train_size : int 
         Number of samples in the initial train split.
@@ -1948,6 +1961,7 @@ def _bayesian_search_skopt(
         
     n_trials : int, default `10`
         Number of parameter settings that are sampled in each lag configuration.
+        When using engine "skopt", the minimum value is 10.
 
     random_state : int, default `123`
         Sets a seed to the sampling for reproducible output.
@@ -1987,14 +2001,21 @@ def _bayesian_search_skopt(
    
     lags_list = []
     params_list = []
-    metric_list = []
     results_opt_best = None
+    if not isinstance(metric, list):
+        metric = [metric] 
+    metric_dict = {(m if isinstance(m, str) else m.__name__): [] for m in metric}
+    
+    if len(metric_dict) != len(metric):
+        raise ValueError(
+            'When `metrics` is a `list`, each metric name must be unique.'
+        )
 
     for key in search_space.keys():
         if key != search_space[key].name:
-            raise Exception(
+            raise ValueError(
                 f"""Some of the key values do not match the Space object name from skopt.
-                    {key} != {search_space[key].name}."""
+                    {key} != {search_space[key].name}"""
             )
 
     search_space = list(search_space.values())
@@ -2016,7 +2037,7 @@ def _bayesian_search_skopt(
         
         forecaster.set_params(**params)
         
-        metric, _ = backtesting_forecaster(
+        metrics, _ = backtesting_forecaster(
                         forecaster         = forecaster,
                         y                  = y,
                         exog               = exog,
@@ -2027,14 +2048,22 @@ def _bayesian_search_skopt(
                         refit              = refit,
                         verbose            = verbose
                     )
+        # Store metrics in the variable metric_values defined outside _objective.
+        nonlocal metric_values
+        metric_values.append(metrics)
 
-        return abs(metric)
+        return abs(metrics[0])
 
     print(
-        f"""Number of models compared: {n_trials*len(lags_grid)}, {n_trials} bayesian search in each lag configuration."""
+        f"""Number of models compared: {n_trials*len(lags_grid)},
+         {n_trials} bayesian search in each lag configuration."""
     )
 
     for lags in tqdm(lags_grid, desc='loop lags_grid', position=0, ncols=90):
+
+        metric_values = [] # This variable will be modified inside _objective function. 
+        # It is a trick to extract multiple values from _objective function since
+        # only the optimized value can be returned.
         
         if isinstance(forecaster, (ForecasterAutoreg, ForecasterAutoregDirect, 
         ForecasterAutoregMultiOutput)):
@@ -2049,14 +2078,21 @@ def _bayesian_search_skopt(
                         **kwargs_gp_minimize
                       )
 
-        for i, x in enumerate(results_opt.x_iters):
-            params = {}
-            for j, x in enumerate(search_space):
-                params[x.name] = results_opt.x_iters[i][j]
-            
+        for i in range(len(results_opt.x_iters)):
+            params = {param.name: results_opt.x_iters[i][j] 
+                      for j, param in enumerate(search_space)}
+ 
             params_list.append(params)
             lags_list.append(lags)
-            metric_list.append(results_opt.func_vals[i])
+
+            for m, m_values in zip(metric, metric_values[i]):
+                if isinstance(m, str):
+                    m_name = m
+                else:
+                    m_name = m.__name__
+                metric_dict[m_name].append(m_values)
+
+            #metric_list.append(results_opt.func_vals[i])
 
         if results_opt_best is None:
             results_opt_best = results_opt
@@ -2067,16 +2103,16 @@ def _bayesian_search_skopt(
     results = pd.DataFrame({
                 'lags'  : lags_list,
                 'params': params_list,
-                'metric': metric_list})
-    
-    results = results.sort_values(by='metric', ascending=True)
+                **metric_dict})
+
+    results = results.sort_values(by=list(metric_dict.keys())[0], ascending=True)
     results = pd.concat([results, results['params'].apply(pd.Series)], axis=1)
     
     if return_best:
         
         best_lags = results['lags'].iloc[0]
         best_params = results['params'].iloc[0]
-        best_metric = results['metric'].iloc[0]
+        best_metric = results[list(metric_dict.keys())[0]].iloc[0]
         
         if isinstance(forecaster, (ForecasterAutoreg, ForecasterAutoregDirect, 
         ForecasterAutoregMultiOutput)):

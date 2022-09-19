@@ -1,3 +1,11 @@
+################################################################################
+#                                   Plot                                       #
+#                                                                              #
+# This work by Joaquin Amat Rodrigo and Javier Escobar Ortiz is licensed       #
+# under a Creative Commons Attribution 4.0 International License.              #
+################################################################################
+# coding=utf-8
+ 
 from typing import Union
 import matplotlib
 import matplotlib.pyplot as plt
@@ -6,25 +14,25 @@ import numpy as np
 import pandas as pd
 from statsmodels.graphics.tsaplots import plot_acf
 
+
 def plot_residuals(
-    residuals: Union[np.array, pd.Series]=None,
-    y_true: Union[np.array, pd.Series]=None,
-    y_pred: Union[np.array, pd.Series]=None,
+    residuals: Union[np.ndarray, pd.Series]=None,
+    y_true: Union[np.ndarray, pd.Series]=None,
+    y_pred: Union[np.ndarray, pd.Series]=None,
     fig: matplotlib.figure.Figure=None,
     **kwargs
 ) -> None:
-    '''
-    
+    """
     Parameters
     ----------
-    residuals: pandas series, np.array, default `None`.
+    residuals: pandas series, numpy ndarray, default `None`.
         Values of residuals. If `None`, residuals are calculated internally using
         `y_true` and `y_true`.
-        
-    y_true: pandas series, np.array, default `None`.
+
+    y_true: pandas series, numpy ndarray, default `None`.
         Ground truth (correct) values. Ignored if residuals is not `None`.
 
-    y_pred: pandas series, np.array, default `None`. 
+    y_pred: pandas series, numpy ndarray, default `None`. 
         Values of predictions. Ignored if residuals is not `None`.
         
     fig: matplotlib.figure.Figure, default `None`. 
@@ -38,11 +46,11 @@ def plot_residuals(
     -------
         None
     
-    '''
+    """
     
     if residuals is None and (y_true is None or y_pred is None):
-        raise Exception(
-            "If `residuals` argument is None then, y_true and y_pred must be provided."
+        raise ValueError(
+            "If `residuals` argument is None then, `y_true` and `y_pred` must be provided."
         )
         
     if residuals is None:

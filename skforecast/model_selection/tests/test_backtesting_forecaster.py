@@ -27,9 +27,9 @@ y = pd.Series(
 
 
 def test_backtesting_forecaster_exception_when_initial_train_size_more_than_len_y():
-    '''
+    """
     Test Exception is raised in backtesting_forecaster when initial_train_size > len(y).
-    '''
+    """
     forecaster = ForecasterAutoreg(
                     regressor = Ridge(random_state=123),
                     lags      = 2
@@ -56,9 +56,9 @@ def test_backtesting_forecaster_exception_when_initial_train_size_more_than_len_
 
 
 def test_backtesting_forecaster_exception_when_initial_train_size_less_than_forecaster_window_size():
-    '''
+    """
     Test Exception is raised in backtesting_forecaster when initial_train_size < forecaster.window_size.
-    '''
+    """
     forecaster = ForecasterAutoreg(
                     regressor = Ridge(random_state=123),
                     lags      = 2
@@ -85,10 +85,10 @@ def test_backtesting_forecaster_exception_when_initial_train_size_less_than_fore
 
 
 def test_backtesting_forecaster_exception_when_initial_train_size_None_and_forecaster_not_fitted():
-    '''
+    """
     Test Exception is raised in backtesting_forecaster when initial_train_size is None and
     forecaster is not fitted.
-    '''
+    """
     forecaster = ForecasterAutoreg(
                     regressor = Ridge(random_state=123),
                     lags      = 2
@@ -115,9 +115,9 @@ def test_backtesting_forecaster_exception_when_initial_train_size_None_and_forec
 
 
 def test_backtesting_forecaster_exception_when_refit_not_bool():
-    '''
+    """
     Test Exception is raised in backtesting_forecaster when refit is not bool.
-    '''
+    """
     forecaster = ForecasterAutoreg(
                     regressor = Ridge(random_state=123),
                     lags      = 2
@@ -144,10 +144,10 @@ def test_backtesting_forecaster_exception_when_refit_not_bool():
 
 
 def test_backtesting_forecaster_exception_when_initial_train_size_None_and_refit_True():
-    '''
+    """
     Test Exception is raised in backtesting_forecaster when initial_train_size is None
     and refit is True.
-    '''
+    """
     forecaster = ForecasterAutoreg(
                     regressor = Ridge(random_state=123),
                     lags      = 2
@@ -176,10 +176,10 @@ def test_backtesting_forecaster_exception_when_initial_train_size_None_and_refit
 
 
 def test_backtesting_forecaster_exception_when_interval_not_None_and_ForecasterAutoregDirect():
-    '''
+    """
     Test Exception is raised in backtesting_forecaster when interval is not None and
     forecaster is a ForecasterAutoregDirect.
-    '''
+    """
     forecaster = ForecasterAutoregDirect(
                     regressor = Ridge(random_state=123),
                     steps     = 3,
@@ -207,10 +207,10 @@ def test_backtesting_forecaster_exception_when_interval_not_None_and_ForecasterA
 
 
 def test_backtesting_forecaster_exception_when_forecaster_ForecasterAutoregMultiSeries():
-    '''
+    """
     Test Exception is raised in backtesting_forecaster when forecaster is of type
     ForecasterAutoregMultiSeries.
-    '''
+    """
     forecaster = ForecasterAutoregMultiSeries(
                     regressor = Ridge(random_state=123),
                     lags      = 2

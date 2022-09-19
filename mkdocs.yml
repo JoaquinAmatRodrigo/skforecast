@@ -13,6 +13,7 @@ nav:
     - User Guides: user_guides/input-data.ipynb
     - Examples and tutorials: examples/examples.md
     - API Reference: api/ForecasterAutoreg.md
+    - FAQ and Tips: faq/faq.md
     - Releases: releases/releases.md
 
   - Quick start:
@@ -23,11 +24,12 @@ nav:
       - Input data: user_guides/input-data.ipynb
       - Recursive multi-step forecasting: user_guides/autoregresive-forecaster.ipynb
       - Direct multi-step forecasting: user_guides/direct-multi-step-forecasting.ipynb
+      - Multi series forecasting: user_guides/multi-series-forecasting.ipynb
       - Exogenous variables: user_guides/autoregresive-forecaster-exogenous.ipynb
       - Custom predictors: user_guides/custom-predictors.ipynb
       - Backtesting forecaster: user_guides/backtesting.ipynb
-      - Grid search forecaster: user_guides/grid-search-forecaster.ipynb
-      - Scikit-learn Pipeline: user_guides/sklearn-pipeline.ipynb
+      - Hyperparameter tuning and lags selection: user_guides/hyperparameter-tuning-and-lags-selection.ipynb
+      - Scikit-learn Transformers and Pipelines: user_guides/sklearn-transformers-and-pipeline.ipynb
       - Prediction intervals: user_guides/prediction-intervals.ipynb
       - Feature importance: user_guides/feature-importance.ipynb
       - Forecasting with XGBoost: user_guides/forecasting-xgboost.ipynb
@@ -35,6 +37,7 @@ nav:
       - Forecaster in production: user_guides/forecaster-in-production.ipynb
       - Grid search SARIMAX and ARIMA models: user_guides/grid-search-sarimax-arima.ipynb
       - Backtesting SARIMAX and ARIMA models: user_guides/backtesting-sarimax-arima.ipynb
+      - Plot forecaster residuals: user_guides/plot-forecaster-residuals.ipynb
 
   - Examples and tutorials:
       - Examples and tutorials: examples/examples.md
@@ -43,8 +46,15 @@ nav:
       - ForecasterAutoreg: api/ForecasterAutoreg.md
       - ForecasterAutoregCustom: api/ForecasterAutoregCustom.md
       - ForecasterAutoregDirect: api/ForecasterAutoregDirect.md
+      - ForecasterMultiSeries: api/ForecasterMultiSeries.md
       - model_selection: api/model_selection.md
+      - model_selection_multiseries: api/model_selection_multiseries.md
       - model_selection_statsmodels: api/model_selection_statsmodels.md
+      - plot: api/plot.md
+      - utils: api/utils.md
+
+  - FAQ and Tips:
+      - Avoid negative predictions when forecasting: faq/non_negative_predictions.ipynb
 
   - Releases: releases/releases.md
 
@@ -57,7 +67,7 @@ plugins:
             filters:
               - "!^_"  # exclude all members starting with _
           rendering:
-            show_root_heading: yes
+            show_root_heading: False
             docstring_section_style: table
   - mkdocs-jupyter:
       include_source: False
@@ -103,3 +113,13 @@ markdown_extensions:
 extra:
   version:
     provider: mike
+  analytics:
+    provider: google
+    property: G-GR8X9Z9LKL
+  consent:
+    title: Cookie consent
+    description: >- 
+      We use cookies to recognize your repeated visits and preferences, as well
+      as to measure the effectiveness of our documentation and whether users
+      find what they're searching for. With your consent, you're helping us to
+      make our documentation better.

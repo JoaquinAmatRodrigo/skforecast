@@ -1,11 +1,13 @@
 # Unit test _bayesian_search_skopt
 # ==============================================================================
+import re
 import pytest
 import numpy as np
 import pandas as pd
 import sys
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import Ridge
+from sklearn.metrics import mean_absolute_error
 from skopt.space import Categorical, Real, Integer
 from skopt.utils import use_named_args
 from skopt import gp_minimize
@@ -35,11 +37,46 @@ y = pd.Series(
               0.25045537, 0.48303426, 0.98555979, 0.51948512, 0.61289453]))
 
 
+def test_exception_bayesian_search_skopt_metric_list_duplicate_names():
+    """
+    Test exception is raised in _bayesian_search_optuna when a `list` of 
+    metrics is used with duplicate names.
+    """
+    forecaster = ForecasterAutoreg(
+                    regressor = Ridge(random_state=123),
+                    lags      = 2 # Placeholder, the value will be overwritten
+                 )
+
+    steps = 3
+    n_validation = 12
+    y_train = y[:-n_validation]
+    lags_grid = [2, 4]
+    search_space = {'not_alpha': Real(0.01, 1.0, "log-uniform", name='alpha')}
+
+    err_msg = re.escape('When `metrics` is a `list`, each metric name must be unique.')
+    with pytest.raises(ValueError, match = err_msg):
+        _bayesian_search_skopt(
+            forecaster         = forecaster,
+            y                  = y,
+            lags_grid          = lags_grid,
+            search_space       = search_space,
+            steps              = steps,
+            metric             = ['mean_absolute_error', mean_absolute_error],
+            refit              = True,
+            initial_train_size = len(y_train),
+            fixed_train_size   = True,
+            n_trials           = 10,
+            random_state       = 123,
+            return_best        = False,
+            verbose            = False,
+        )
+
+
 def test_bayesian_search_skopt_exception_when_search_space_names_do_not_match():
-    '''
+    """
     Test Exception is raised when search_space key name do not match the Space 
     object name from skopt.
-    '''
+    """
     forecaster = ForecasterAutoreg(
                     regressor = Ridge(random_state=123),
                     lags      = 2 # Placeholder, the value will be overwritten
@@ -51,7 +88,10 @@ def test_bayesian_search_skopt_exception_when_search_space_names_do_not_match():
     lags_grid = [2, 4]
     search_space = {'not_alpha': Real(0.01, 1.0, "log-uniform", name='alpha')}
     
-    with pytest.raises(Exception):
+    err_msg = re.escape(
+                f"""Some of the key values do not match the Space object name from skopt.
+                    not_alpha != alpha""")
+    with pytest.raises(ValueError, match = err_msg):
         _bayesian_search_skopt(
             forecaster         = forecaster,
             y                  = y,
@@ -71,10 +111,10 @@ def test_bayesian_search_skopt_exception_when_search_space_names_do_not_match():
 
 @pytest.mark.skipif(sys.version_info < (3, 8), reason="requires python3.8 or higher")
 def test_results_output_bayesian_search_skopt_ForecasterAutoreg_with_mocked():
-    '''
+    """
     Test output of _bayesian_search_skopt in ForecasterAutoreg with mocked
     (mocked done in Skforecast v0.4.3).
-    '''
+    """
     
     forecaster = ForecasterAutoreg(
                     regressor = RandomForestRegressor(random_state=123),
@@ -130,13 +170,13 @@ def test_results_output_bayesian_search_skopt_ForecasterAutoreg_with_mocked():
                       {'n_estimators': 15, 'min_samples_leaf': 2.634132917484797, 'max_features': 'log2'}, 
                       {'n_estimators': 14, 'min_samples_leaf': 2.3551239865216638, 'max_features': 'log2'},
                       {'n_estimators': 12, 'min_samples_leaf': 3.6423411901787532, 'max_features': 'sqrt'}],
-            'metric':np.array([0.21433589521377985, 0.21433589521377985, 0.21661388810185186, 
-                               0.21661388810185186, 0.21685103020640437, 0.2152253922034143, 
-                               0.21433589521377985, 0.21479600790277778, 0.21661388810185186,
-                               0.21685103020640437, 0.20997867726211075, 0.20997867726211075,
-                               0.20952958306022407, 0.20952958306022407, 0.20980140118464055,
-                               0.21045872919117656, 0.20997867726211075, 0.20840381228758173, 
-                               0.20952958306022407, 0.20980140118464055]),                                                               
+            'mean_absolute_error':np.array([0.21433589521377985, 0.21433589521377985, 0.21661388810185186, 
+                                            0.21661388810185186, 0.21685103020640437, 0.2152253922034143, 
+                                            0.21433589521377985, 0.21479600790277778, 0.21661388810185186,
+                                            0.21685103020640437, 0.20997867726211075, 0.20997867726211075,
+                                            0.20952958306022407, 0.20952958306022407, 0.20980140118464055,
+                                            0.21045872919117656, 0.20997867726211075, 0.20840381228758173, 
+                                            0.20952958306022407, 0.20980140118464055]),                                                               
             'n_estimators' :np.array([17, 17, 14, 14, 12, 16, 17, 15, 14, 12, 
                                       17, 17, 14, 14, 12, 16, 17, 15, 14, 12]),
             'min_samples_leaf' :np.array([1.7516926954624357, 1.901317408816101, 2.134928323868993, 
@@ -151,16 +191,16 @@ def test_results_output_bayesian_search_skopt_ForecasterAutoreg_with_mocked():
                              'log2', 'sqrt']
                                      },
             index=list(range(20))
-                                   ).sort_values(by='metric', ascending=True)
+                                   ).sort_values(by='mean_absolute_error', ascending=True)
 
     pd.testing.assert_frame_equal(results, expected_results, check_dtype=False)
     
 
 def test_results_output_bayesian_search_skopt_ForecasterAutoreg_with_mocked_when_kwargs_gp_minimize():
-    '''
+    """
     Test output of _bayesian_search_skopt in ForecasterAutoreg when kwargs_gp_minimize with mocked
     (mocked done in Skforecast v0.4.3).
-    '''
+    """
     forecaster = ForecasterAutoreg(
                     regressor = Ridge(random_state=123),
                     lags      = 2 # Placeholder, the value will be overwritten
@@ -208,13 +248,13 @@ def test_results_output_bayesian_search_skopt_ForecasterAutoreg_with_mocked_when
                       {'alpha': 0.06431449919265146}, {'alpha': 0.04428828255962529},
                       {'alpha': 0.7862467218336935}, {'alpha': 0.21382904045131165},
                       {'alpha': 0.4646709105348175}, {'alpha': 0.01124059864722814}],
-            'metric':np.array([0.21183497939493612, 0.2120677429498087, 0.2125445833833647,
-                               0.21185973952472195, 0.21197085675244506, 0.21191472647731882, 
-                               0.2132707683116569, 0.21234254975249803, 0.21282383637032143, 
-                               0.21181829991953996, 0.21669632191054566, 0.21662944006267573,
-                               0.21637019858109752, 0.2166911187311533, 0.2166621393072383,
-                               0.21667792427267493, 0.21566880163156743, 0.21649975575675726, 
-                               0.21614409053015884, 0.21669956732317974]),                                                               
+            'mean_absolute_error':np.array([0.21183497939493612, 0.2120677429498087, 0.2125445833833647,
+                                            0.21185973952472195, 0.21197085675244506, 0.21191472647731882, 
+                                            0.2132707683116569, 0.21234254975249803, 0.21282383637032143, 
+                                            0.21181829991953996, 0.21669632191054566, 0.21662944006267573,
+                                            0.21637019858109752, 0.2166911187311533, 0.2166621393072383,
+                                            0.21667792427267493, 0.21566880163156743, 0.21649975575675726, 
+                                            0.21614409053015884, 0.21669956732317974]),                                                               
             'alpha' :np.array([0.016838723959617538, 0.10033990027966379, 0.30984231371002086,
                                0.02523894961617201, 0.06431449919265146, 0.04428828255962529,
                                0.7862467218336935, 0.21382904045131165, 0.4646709105348175,
@@ -224,16 +264,16 @@ def test_results_output_bayesian_search_skopt_ForecasterAutoreg_with_mocked_when
                                0.4646709105348175, 0.01124059864722814])
                                      },
             index=list(range(20))
-                                   ).sort_values(by='metric', ascending=True)
+                                   ).sort_values(by='mean_absolute_error', ascending=True)
 
     pd.testing.assert_frame_equal(results, expected_results)
 
 
 def test_results_output_bayesian_search_skopt_ForecasterAutoreg_with_mocked_when_lags_grid_is_None():
-    '''
+    """
     Test output of _bayesian_search_skopt in ForecasterAutoreg when lags_grid is None with mocked
     (mocked done in Skforecast v0.4.3), should use forecaster.lags as lags_grid.
-    '''
+    """
     forecaster = ForecasterAutoreg(
                     regressor = Ridge(random_state=123),
                     lags      = 4
@@ -269,30 +309,30 @@ def test_results_output_bayesian_search_skopt_ForecasterAutoreg_with_mocked_when
                       {'alpha': 0.0959926247515687}, {'alpha': 0.3631244766604131},
                       {'alpha': 0.06635119445083354}, {'alpha': 0.14434062917737708},
                       {'alpha': 0.019050287104581624}, {'alpha': 0.0633920962590419}],
-            'metric':np.array([0.21643005790510492, 0.21665565996188138, 0.2164646190462156,
-                               0.21641953058020516, 0.21663365234334242, 0.2162939165190013, 
-                               0.21666043214039407, 0.21658325961136823, 0.21669499028423744, 
-                               0.21666290650172168]),                                                               
+            'mean_absolute_error':np.array([0.21643005790510492, 0.21665565996188138, 0.2164646190462156,
+                                            0.21641953058020516, 0.21663365234334242, 0.2162939165190013, 
+                                            0.21666043214039407, 0.21658325961136823, 0.21669499028423744, 
+                                            0.21666290650172168]),                                                               
             'alpha' :np.array([0.26663099972129245, 0.07193526575307788, 0.24086278856848584, 
                                0.27434725570656354, 0.0959926247515687, 0.3631244766604131,
                                0.06635119445083354, 0.14434062917737708, 0.019050287104581624, 
                                0.0633920962590419])
                                      },
             index=list(range(10))
-                                   ).sort_values(by='metric', ascending=True)
+                                   ).sort_values(by='mean_absolute_error', ascending=True)
 
     pd.testing.assert_frame_equal(results, expected_results)
 
 
 def test_results_output_bayesian_search_skopt_ForecasterAutoregCustom_with_mocked():
-    '''
+    """
     Test output of _bayesian_search_skopt in ForecasterAutoregCustom with mocked
     (mocked done in Skforecast v0.4.3).
-    '''
+    """
     def create_predictors(y):
-        '''
+        """
         Create first 4 lags of a time series, used in ForecasterAutoregCustom.
-        '''
+        """
 
         lags = y[-1:-5:-1]
 
@@ -334,25 +374,25 @@ def test_results_output_bayesian_search_skopt_ForecasterAutoregCustom_with_mocke
                       {'alpha': 0.0959926247515687}, {'alpha': 0.3631244766604131},
                       {'alpha': 0.06635119445083354}, {'alpha': 0.14434062917737708},
                       {'alpha': 0.019050287104581624}, {'alpha': 0.0633920962590419}],
-            'metric':np.array([0.21643005790510492, 0.21665565996188138, 0.2164646190462156,
-                               0.21641953058020516, 0.21663365234334242, 0.2162939165190013, 
-                               0.21666043214039407, 0.21658325961136823, 0.21669499028423744, 
-                               0.21666290650172168]),                                                               
+            'mean_absolute_error':np.array([0.21643005790510492, 0.21665565996188138, 0.2164646190462156,
+                                            0.21641953058020516, 0.21663365234334242, 0.2162939165190013, 
+                                            0.21666043214039407, 0.21658325961136823, 0.21669499028423744, 
+                                            0.21666290650172168]),                                                               
             'alpha' :np.array([0.26663099972129245, 0.07193526575307788, 0.24086278856848584, 
                                0.27434725570656354, 0.0959926247515687, 0.3631244766604131,
                                0.06635119445083354, 0.14434062917737708, 0.019050287104581624, 
                                0.0633920962590419])
                                      },
             index=list(range(10))
-                                   ).sort_values(by='metric', ascending=True)
+                                   ).sort_values(by='mean_absolute_error', ascending=True)
 
     pd.testing.assert_frame_equal(results, expected_results)
     
 
 def test_evaluate_bayesian_search_skopt_when_return_best():
-    '''
+    """
     Test forecaster is refited when return_best=True in _bayesian_search_skopt.
-    '''
+    """
     forecaster = ForecasterAutoreg(
                     regressor = Ridge(random_state=123),
                     lags      = 2 # Placeholder, the value will be overwritten
@@ -388,9 +428,9 @@ def test_evaluate_bayesian_search_skopt_when_return_best():
 
 
 def test_results_opt_best_output_bayesian_search_skopt_with_output_gp_minimize_skopt():
-    '''
+    """
     Test results_opt_best output of _bayesian_search_skopt with output gp_minimize() skopt.
-    '''
+    """
     forecaster = ForecasterAutoreg(
                     regressor = Ridge(random_state=123),
                     lags      = 2

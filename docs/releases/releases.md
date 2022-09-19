@@ -22,6 +22,8 @@ All notable changes to this project will be documented in this file.
 
 + Skforecast works with python 3.10.
 
++ Functions `save_forecaster` and `load_forecaster` to module utils.
+
 **Changed**
 
 + `backtesting_forecaster` change default value of argument `fixed_train_size: bool=True`.
@@ -29,6 +31,8 @@ All notable changes to this project will be documented in this file.
 + Remove argument `set_out_sample_residuals` in function `backtesting_forecaster` (deprecated since 0.4.2).
 
 + `backtesting_forecaster` verbose now includes fold size.
+
++ `grid_search_forecaster` results include the name of the used metric as column name.
 
 + Remove `get_coef` method from `ForecasterAutoreg`, `ForecasterAutoregCustom` and `ForecasterAutoregMultiOutput` (deprecated since 0.4.3).
 

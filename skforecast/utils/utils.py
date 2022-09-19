@@ -6,8 +6,9 @@
 ################################################################################
 # coding=utf-8
 
-from typing import Union, List, Tuple, Any
+from typing import Union, Any
 import warnings
+import joblib
 import numpy as np
 import pandas as pd
 import sklearn
@@ -628,7 +629,7 @@ def transform_series(
 
     series = series.to_frame()
 
-    if fit:
+    if fit and not isinstance(transformer, sklearn.preprocessing._function_transformer.FunctionTransformer):
         transformer.fit(series)
 
     if inverse_transform:
@@ -637,21 +638,23 @@ def transform_series(
         values_transformed = transformer.transform(series)   
 
     if hasattr(values_transformed, 'toarray'):
-        # If the returned values are in sparse matrix format, it is converted to dense
+        # If the returned values are in sparse matrix format, it is converted to dense array.
         values_transformed = values_transformed.toarray()
-        
-    if values_transformed.shape[1] == 1:
+    
+    if isinstance(values_transformed, np.ndarray) and values_transformed.shape[1] == 1:
         series_transformed = pd.Series(
                                 data  = values_transformed.flatten(),
                                 index = series.index,
                                 name  = series.columns[0]
                             )
+    elif isinstance(values_transformed, pd.DataFrame) and values_transformed.shape[1] == 1:
+        series_transformed = values_transformed.squeeze()
     else:
         series_transformed = pd.DataFrame(
                                 data = values_transformed,
                                 index = series.index,
                                 columns = transformer.get_feature_names_out()
-                            )
+                             )
 
     return series_transformed
 
@@ -723,3 +726,67 @@ def transform_dataframe(
                       )
 
     return df_transformed
+
+
+def save_forecaster(
+    forecaster, 
+    file_name: str, 
+    verbose: bool=True
+) -> None:
+    """
+    Save forecaster model using joblib.
+
+    Parameters
+    ----------
+    forecaster: forecaster object from skforecast library.
+        Model created with skforecast library.
+
+    file_name: str
+        File name given to the object.
+        
+    verbose: bool, default `True`
+        Print info about the forecaster saved
+
+    Returns 
+    -------
+    None
+
+    """
+
+    joblib.dump(forecaster, filename=file_name)
+
+    if verbose:
+        forecaster.summary()
+
+
+def load_forecaster(
+    file_name: str,
+    verbose: bool=True
+):
+    """
+    Load forecaster model from disc using joblib.
+
+    Parameters
+    ----------
+    forecaster: forecaster object from skforecast library.
+        Forecaster created with skforecast library.
+
+    file_name: str
+        File name given to the object.
+
+    verbose: bool, default `True`
+        Print summary about the forecaster loaded.
+
+    Returns 
+    -------
+    Forecaster
+        Forecaster created with skforecast library.
+    
+    """
+
+    forecaster = joblib.load(filename=file_name)
+
+    if verbose:
+        forecaster.summary()
+
+    return forecaster

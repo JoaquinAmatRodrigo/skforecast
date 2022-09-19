@@ -1,5 +1,7 @@
 mike==1.1.2
-mkdocs==1.2.3
+mkdocs==1.2.4
+pytkdocs==0.16.1
+pytkdocs[numpy-style]
 mkdocs-jupyter==0.20.0
 mkdocs-material==8.2.5
 mkdocstrings==0.18.1

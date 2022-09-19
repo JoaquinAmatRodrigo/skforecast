@@ -5,7 +5,8 @@ import pytest
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import Ridge
-from sklearn.metrics import mean_squared_error 
+from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import mean_squared_error
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 from skforecast.model_selection_multiseries.model_selection_multiseries import _evaluate_grid_hyperparameters_multiseries
 
@@ -251,8 +252,8 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
             'levels':[['1', '2'], ['1', '2'], ['1', '2'], ['1', '2'], ['1', '2'], ['1', '2']],
             'lags'  :[[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2], [1, 2], [1, 2]],
             'params':[{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}, {'alpha': 1}, {'alpha': 0.1}, {'alpha': 0.01}],
-            'metric':np.array([0.20968100463227382, 0.20969259779858337, 0.20977945312386406, 
-                               0.21077344827205086, 0.21078653113227208, 0.21078779824759553]),                                                               
+            'mean_absolute_error':np.array([0.20968100463227382, 0.20969259779858337, 0.20977945312386406, 
+                                            0.21077344827205086, 0.21078653113227208, 0.21078779824759553]),                                                               
             'alpha' :np.array([0.01, 0.1, 1., 1., 0.1, 0.01])
                                      },
             index=[3, 4, 5, 2, 1, 0]
@@ -282,7 +283,7 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregMultiSeries_lags_
                     series              = series,
                     param_grid          = param_grid,
                     steps               = steps,
-                    metric              = 'mean_absolute_error',
+                    metric              = mean_absolute_error,
                     initial_train_size  = len(series) - n_validation,
                     fixed_train_size    = False,
                     levels_list         = None,
@@ -298,7 +299,7 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregMultiSeries_lags_
             'levels':[['1', '2'], ['1', '2'], ['1', '2']],
             'lags'  :[[1, 2], [1, 2], [1, 2]],
             'params':[{'alpha': 1}, {'alpha': 0.1}, {'alpha': 0.01}],
-            'metric':np.array([0.21077344827205086, 0.21078653113227208, 0.21078779824759553]),                                                               
+            'mean_absolute_error':np.array([0.21077344827205086, 0.21078653113227208, 0.21078779824759553]),                                                               
             'alpha' :np.array([1., 0.1 , 0.01])
                                      },
             index=[2, 1, 0]
@@ -344,8 +345,8 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
             'levels':[['1'], ['1'], ['1'], ['1'], ['1'], ['1']],
             'lags'  :[[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2], [1, 2], [1, 2]],
             'params':[{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}, {'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}],
-            'metric':np.array([0.20669393332187616, 0.20671040715338015, 0.20684013292264494, 
-                               0.2073988652614679, 0.20741562577568792, 0.2075484707375347]),                                                               
+            'mean_absolute_error':np.array([0.20669393332187616, 0.20671040715338015, 0.20684013292264494, 
+                                            0.2073988652614679, 0.20741562577568792, 0.2075484707375347]),                                                               
             'alpha' :np.array([0.01, 0.1, 1., 0.01, 0.1, 1.])
                                      },
             index=[3, 4, 5, 0, 1, 2]
@@ -391,8 +392,8 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
             'levels':[['1'], ['1'], ['1'], ['1'], ['1'], ['1']],
             'lags'  :[[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2], [1, 2], [1, 2]],
             'params':[{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}, {'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}],
-            'metric':np.array([0.20669393332187616, 0.20671040715338015, 0.20684013292264494, 
-                               0.2073988652614679, 0.20741562577568792, 0.2075484707375347]),                                                               
+            'mean_absolute_error':np.array([0.20669393332187616, 0.20671040715338015, 0.20684013292264494, 
+                                            0.2073988652614679, 0.20741562577568792, 0.2075484707375347]),                                                               
             'alpha' :np.array([0.01, 0.1, 1., 0.01, 0.1, 1.])
                                      },
             index=[3, 4, 5, 0, 1, 2]
@@ -438,8 +439,8 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
             'levels':[['1', '2'], ['1', '2'], ['1', '2'], ['1', '2'], ['1', '2'], ['1', '2']],
             'lags'  :[[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2], [1, 2], [1, 2]],
             'params':[{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}, {'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}],
-            'metric':np.array([0.20908359037019428, 0.20909615966954273, 0.20919158908362023,
-                               0.21011001165037002, 0.21011235006095524, 0.21012845276514763]),                                                               
+            'mean_absolute_error':np.array([0.20908359037019428, 0.20909615966954273, 0.20919158908362023,
+                                            0.21011001165037002, 0.21011235006095524, 0.21012845276514763]),                                                               
             'alpha' :np.array([0.01, 0.1, 1., 0.01, 0.1, 1.])
                                      },
             index=[3, 4, 5, 0, 1, 2]
