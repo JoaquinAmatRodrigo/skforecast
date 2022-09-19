@@ -86,7 +86,7 @@ def test_output_backtesting_forecaster_refit_no_exog_no_remainder_with_mocked():
                                         n_boot              = 500,
                                         random_state        = 123,
                                         in_sample_residuals = True,
-                                        verbose             = False
+                                        verbose             = True
                                    )
                                    
     assert expected_metric == approx(metric)

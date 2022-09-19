@@ -1207,21 +1207,26 @@ def _evaluate_grid_hyperparameters_multiseries(
             lags_list.append(lags)
             params_list.append(params)
             metric_list.append(sum(metric_level_list))
-            
+    
+    if isinstance(metric, str):
+        m_name = metric
+    else:
+        m_name = metric.__name__
+
     results = pd.DataFrame({
                 'levels': [levels_list]*len(lags_list),
                 'lags'  : lags_list,
                 'params': params_list,
-                'metric': metric_list})
+                m_name  : metric_list})
     
-    results = results.sort_values(by='metric', ascending=True)
+    results = results.sort_values(by=m_name, ascending=True)
     results = pd.concat([results, results['params'].apply(pd.Series)], axis=1)
     
     if return_best:
         
         best_lags = results['lags'].iloc[0]
         best_params = results['params'].iloc[0]
-        best_metric = results['metric'].iloc[0]
+        best_metric = results[m_name].iloc[0]
         
         forecaster.set_lags(best_lags)
         forecaster.set_params(**best_params)

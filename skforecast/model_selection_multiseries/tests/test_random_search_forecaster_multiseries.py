@@ -46,10 +46,10 @@ series = pd.DataFrame({'1': pd.Series(np.array(
 
 
 def test_output_random_search_forecaster_multiseries_ForecasterAutoregMultiSeries_with_mocked():
-    '''
+    """
     Test output of random_search_forecaster_multiseries in ForecasterAutoregMultiSeries with mocked
     (mocked done in Skforecast v0.5.0)
-    '''
+    """
     forecaster = ForecasterAutoregMultiSeries(
                     regressor = Ridge(random_state=123),
                     lags      = 2 # Placeholder, the value will be overwritten
@@ -84,8 +84,8 @@ def test_output_random_search_forecaster_multiseries_ForecasterAutoregMultiSerie
             'lags'  :[[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2], [1, 2], [1, 2]],
             'params':[{'alpha': 1e-05}, {'alpha': 0.03593813663804626}, {'alpha': 16.681005372000556}, 
                       {'alpha': 16.681005372000556}, {'alpha': 0.03593813663804626}, {'alpha': 1e-05}],
-            'metric':np.array([0.20967967565103562, 0.20968441516920436, 0.20988932397621246,
-                               0.2104645379335131, 0.2107874324738886, 0.2107879393001434]),                                                               
+            'mean_absolute_error':np.array([0.20967967565103562, 0.20968441516920436, 0.20988932397621246,
+                                            0.2104645379335131, 0.2107874324738886, 0.2107879393001434]),                                                               
             'alpha' :np.array([1e-05, 0.03593813663804626, 16.681005372000556, 
                                16.681005372000556, 0.03593813663804626, 1e-05])
                                      },
