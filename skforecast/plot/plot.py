@@ -16,23 +16,23 @@ from statsmodels.graphics.tsaplots import plot_acf
 
 
 def plot_residuals(
-    residuals: Union[np.array, pd.Series]=None,
-    y_true: Union[np.array, pd.Series]=None,
-    y_pred: Union[np.array, pd.Series]=None,
+    residuals: Union[np.ndarray, pd.Series]=None,
+    y_true: Union[np.ndarray, pd.Series]=None,
+    y_pred: Union[np.ndarray, pd.Series]=None,
     fig: matplotlib.figure.Figure=None,
     **kwargs
 ) -> None:
     """
     Parameters
     ----------
-    residuals: pandas series, np.array, default `None`.
+    residuals: pandas series, numpy ndarray, default `None`.
         Values of residuals. If `None`, residuals are calculated internally using
         `y_true` and `y_true`.
-        
-    y_true: pandas series, np.array, default `None`.
+
+    y_true: pandas series, numpy ndarray, default `None`.
         Ground truth (correct) values. Ignored if residuals is not `None`.
 
-    y_pred: pandas series, np.array, default `None`. 
+    y_pred: pandas series, numpy ndarray, default `None`. 
         Values of predictions. Ignored if residuals is not `None`.
         
     fig: matplotlib.figure.Figure, default `None`. 

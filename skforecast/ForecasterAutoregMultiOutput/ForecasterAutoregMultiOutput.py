@@ -10,6 +10,7 @@ from typing import Union, Dict, List, Tuple, Any, Optional
 import warnings
 import logging
 import numpy as np
+import sklearn
 
 import skforecast
 from ..ForecasterAutoregDirect import ForecasterAutoregDirect

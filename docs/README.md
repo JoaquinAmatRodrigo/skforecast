@@ -40,7 +40,7 @@ matplotlib>=3.3, <=3.5
 seaborn==0.11.2
 optuna==2.10.0
 scikit-optimize==0.9.0
-joblib==1.1.0
+joblib>=1.1.0, <=1.2.0
 ```
 
 ## Features
