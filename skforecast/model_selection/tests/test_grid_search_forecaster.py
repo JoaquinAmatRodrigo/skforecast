@@ -27,11 +27,12 @@ y = pd.Series(
               0.62395295, 0.1156184 , 0.31728548, 0.41482621, 0.86630916,
               0.25045537, 0.48303426, 0.98555979, 0.51948512, 0.61289453]))
 
+
 def test_output_grid_search_forecaster_ForecasterAutoreg_with_mocked():
-    '''
+    """
     Test output of grid_search_forecaster in ForecasterAutoreg with mocked
     (mocked done in Skforecast v0.4.3)
-    '''
+    """
     forecaster = ForecasterAutoreg(
                     regressor = Ridge(random_state=123),
                     lags      = 2 # Placeholder, the value will be overwritten

@@ -10,9 +10,9 @@ from sklearn.linear_model import LinearRegression
 
 
 def create_predictors(y): # pragma: no cover
-    '''
+    """
     Create first 5 lags of a time series.
-    '''
+    """
     
     lags = y[-1:-6:-1]
     
@@ -20,10 +20,10 @@ def create_predictors(y): # pragma: no cover
     
 
 def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_1_in_sample_residuals_is_True():
-    '''
+    """
     Test output when regressor is LinearRegression and one step ahead is predicted
     using in sample residuals.
-    '''
+    """
     forecaster = ForecasterAutoregCustom(
                         regressor      = LinearRegression(),
                         fun_predictors = create_predictors,
@@ -41,10 +41,10 @@ def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_1_
 
 
 def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_2_in_sample_residuals_is_True():
-    '''
+    """
     Test output when regressor is LinearRegression and two step ahead is predicted
     using in sample residuals.
-    '''
+    """
     forecaster = ForecasterAutoregCustom(
                         regressor      = LinearRegression(),
                         fun_predictors = create_predictors,
@@ -63,10 +63,10 @@ def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_2_
     
     
 def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_1_in_sample_residuals_is_False():
-    '''
+    """
     Test output when regressor is LinearRegression and one step ahead is predicted
     using out sample residuals.
-    '''
+    """
     forecaster = ForecasterAutoregCustom(
                         regressor      = LinearRegression(),
                         fun_predictors = create_predictors,
@@ -84,10 +84,10 @@ def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_1_
 
     
 def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_2_in_sample_residuals_is_False():
-    '''
+    """
     Test output when regressor is LinearRegression and two step ahead is predicted
     using out sample residuals.
-    '''
+    """
     forecaster = ForecasterAutoregCustom(
                         regressor      = LinearRegression(),
                         fun_predictors = create_predictors,

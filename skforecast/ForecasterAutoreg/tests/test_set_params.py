@@ -5,7 +5,8 @@ from sklearn.linear_model import LinearRegression
 
 
 def test_set_params():
-    
+    """
+    """
     forecaster = ForecasterAutoreg(LinearRegression(fit_intercept=True), lags=3)
     new_params = {'fit_intercept': False}
     forecaster.set_params(**new_params)

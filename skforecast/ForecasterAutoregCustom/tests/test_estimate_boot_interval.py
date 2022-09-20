@@ -8,9 +8,9 @@ from sklearn.linear_model import LinearRegression
 
 
 def create_predictors(y): # pragma: no cover
-    '''
+    """
     Create first 5 lags of a time series.
-    '''
+    """
     
     lags = y[-1:-6:-1]
     
@@ -18,10 +18,10 @@ def create_predictors(y): # pragma: no cover
     
 
 def test_estimate_boot_interval_output_when_forecaster_is_LinearRegression_steps_is_1_in_sample_residuals_is_True():
-    '''
+    """
     Test output of _estimate_boot_interval when regressor is LinearRegression and
     1 step is predicted using in-sample residuals.
-    '''
+    """
     forecaster = ForecasterAutoregCustom(
                         regressor      = LinearRegression(),
                         fun_predictors = create_predictors,

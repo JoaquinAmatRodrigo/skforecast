@@ -36,11 +36,12 @@ exog = pd.Series(
               0.6917018 , 0.15112745, 0.39887629, 0.2408559 , 0.34345601]), 
     name='exog')
 
+
 def test_output_backtesting_sarimax_no_refit_no_exog_with_mocked():
-    '''
+    """
     Test output of backtesting_sarimax with backtesting mocked, Series y is mocked, no exog, 
     no refit, 12 observations to backtest, steps=4 (no remainder), metric='mean_squared_error'
-    '''
+    """
     steps = 3
     n_backtest = 12
     y_train = y[:-n_backtest]
@@ -65,15 +66,16 @@ def test_output_backtesting_sarimax_no_refit_no_exog_with_mocked():
     'upper y':np.array([1.3269739 , 1.4134024 , 1.44447391, 1.0894362 , 1.20398675, 1.25985094,
                         0.90506794, 1.04144582, 1.11655321, 0.96520085, 1.09445961, 1.1632907 ])                                                                
                                                                          }, index=np.arange(38, 50))
+
     assert expected_metric == approx(metric)
     pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions)
 
 
 def test_output_backtesting_sarimax_yes_refit_no_exog_with_mocked():
-    '''
+    """
     Test output of backtesting_sarimax with backtesting mocked, Series y is mocked, no exog, 
     yes refit, 12 observations to backtest, steps=4 (no remainder), metric='mean_squared_error'
-    '''
+    """
     steps = 3
     n_backtest = 12
     y_train = y[:-n_backtest]
@@ -98,15 +100,16 @@ def test_output_backtesting_sarimax_yes_refit_no_exog_with_mocked():
     'upper y':np.array([1.3269739 , 1.4134024 , 1.44447391, 1.08103006, 1.18945132, 1.2400909 , 
                         0.89452583, 1.01706922, 1.07902799, 0.97399153, 1.08845327, 1.14076121])                                                                
                                                                          }, index=np.arange(38, 50))
+
     assert expected_metric == approx(metric)
     pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions)
 
 
 def test_output_backtesting_sarimax_no_refit_yes_exog_with_mocked():
-    '''
+    """
     Test output of backtesting_sarimax with backtesting mocked, Series y is mocked, yes exog, 
     no refit, 12 observations to backtest, steps=4 (no remainder), metric='mean_squared_error'
-    '''
+    """
     steps = 3
     n_backtest = 12
     y_train = y[:-n_backtest]
@@ -132,15 +135,16 @@ def test_output_backtesting_sarimax_no_refit_yes_exog_with_mocked():
     'upper y':np.array([1.30504807, 1.4022235 , 1.41504195, 1.04867188, 1.2582836 , 1.27179848, 
                         0.91921374, 1.04808309, 1.20250537, 0.93335683, 1.09729036, 1.16749093])                                                                
                                                                          }, index=np.arange(38, 50))
+
     assert expected_metric == approx(metric)
     pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions)
 
 
 def test_output_backtesting_sarimax_yes_refit_yes_exog_with_mocked():
-    '''
+    """
     Test output of backtesting_sarimax with backtesting mocked, Series y is mocked, yes exog, 
     yes refit, 12 observations to backtest, steps=4 (no remainder), metric='mean_squared_error'
-    '''
+    """
     steps = 3
     n_backtest = 12
     y_train = y[:-n_backtest]
@@ -166,24 +170,25 @@ def test_output_backtesting_sarimax_yes_refit_yes_exog_with_mocked():
     'upper y':np.array([1.30504807, 1.4022235 , 1.41504195, 1.0482601 , 1.24116743, 1.25685401,
                         0.91075403, 1.02850588, 1.174583  , 0.93593015, 1.09968035, 1.15769851])                                                                
                                                                          }, index=np.arange(38, 50))
+
     assert expected_metric == approx(metric)
     pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions, rtol=1e-4)
 
 
 def my_metric(y_true, y_pred):
-    '''
+    """
     Calleable metric
-    '''
+    """
     metric = ((y_true - y_pred)/len(y_true)).mean()
     
     return metric
 
 
 def test_output_backtesting_sarimax_no_refit_no_exog_calleable_metric_with_mocked():
-    '''
+    """
     Test output of backtesting_sarimax with backtesting mocked, Series y is mocked, no exog, 
     no refit, 12 observations to backtest, steps=4 (no remainder), calleable metric
-    '''
+    """
     steps = 3
     n_backtest = 12
     y_train = y[:-n_backtest]
@@ -208,16 +213,17 @@ def test_output_backtesting_sarimax_no_refit_no_exog_calleable_metric_with_mocke
     'upper y':np.array([1.3269739 , 1.4134024 , 1.44447391, 1.0894362 , 1.20398675, 1.25985094, 
                         0.90506794, 1.04144582, 1.11655321, 0.96520085, 1.09445961, 1.1632907 ])                                                                
                                                                          }, index=np.arange(38, 50))
+
     assert expected_metric == approx(metric)
     pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions)
 
 
 def test_output_backtesting_sarimax_yes_refit_no_exog_fixed_train_size_with_mocked():
-    '''
+    """
     Test output of backtesting_sarimax with backtesting mocked, Series y is mocked, no exog, 
     yes refit, 12 observations to backtest, steps=4 (no remainder), metric='mean_squared_error',
     fixed train size
-    '''
+    """
     steps = 3
     n_backtest = 12
     y_train = y[:-n_backtest]
@@ -242,16 +248,17 @@ def test_output_backtesting_sarimax_yes_refit_no_exog_fixed_train_size_with_mock
     'upper y':np.array([1.3269739 , 1.4134024 , 1.44447391, 1.07631765, 1.18312815, 1.23273858,
                         0.89067769, 1.02547342, 1.10104854, 0.95899756, 1.06042944, 1.10176172])                                                                
                                                                          }, index=np.arange(38, 50))
+
     assert expected_metric == approx(metric)
     pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions)
 
 
 def test_output_backtesting_sarimax_yes_refit_yes_exog_fixed_train_size_with_mocked():
-    '''
+    """
     Test output of backtesting_sarimax with backtesting mocked, Series y is mocked, yes exog, 
     yes refit, 12 observations to backtest, steps=4 (no remainder), metric='mean_squared_error',
     fixed train size
-    '''
+    """
     steps = 3
     n_backtest = 12
     y_train = y[:-n_backtest]
@@ -277,5 +284,6 @@ def test_output_backtesting_sarimax_yes_refit_yes_exog_fixed_train_size_with_moc
     'upper y':np.array([1.30504807, 1.4022235 , 1.41504195, 1.06016252, 1.21310503, 1.24440491,
                         0.90503984, 1.03592617, 1.18247947, 0.93341534, 1.07589771, 1.12372107])                                                                
                                                                          }, index=np.arange(38, 50))
+
     assert expected_metric == approx(metric)
     pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions)

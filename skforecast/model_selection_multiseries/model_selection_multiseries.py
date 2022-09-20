@@ -858,7 +858,7 @@ def grid_search_forecaster_multiseries(
 
     levels_list : str, list, default `None`
         level (`str`) or levels (`list`) on which the forecaster is optimized. 
-        If `None`, all levels are taken into acount.The resulting metric will be
+        If `None`, all levels are taken into acount. The resulting metric will be
         a weighted average of the optimization of all levels. See also `levels_weights`.
 
     levels_weights : dict, default `None`
@@ -971,7 +971,7 @@ def random_search_forecaster_multiseries(
 
     levels_list : str, list, default `None`
         level (`str`) or levels (`list`) on which the forecaster is optimized. 
-        If `None`, all levels are taken into acount.The resulting metric will be
+        If `None`, all levels are taken into acount. The resulting metric will be
         a weighted average of the optimization of all levels. See also `levels_weights`.
 
     levels_weights : dict, default `None`
@@ -1088,7 +1088,7 @@ def _evaluate_grid_hyperparameters_multiseries(
 
     levels_list : str, list, default `None`
         level (`str`) or levels (`list`) on which the forecaster is optimized. 
-        If `None`, all levels are taken into acount.The resulting metric will be
+        If `None`, all levels are taken into acount. The resulting metric will be
         a weighted average of the optimization of all levels. See also `levels_weights`.
 
     levels_weights : dict, default `None`

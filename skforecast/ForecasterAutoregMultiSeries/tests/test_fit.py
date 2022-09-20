@@ -37,9 +37,9 @@ def test_fit_exception_when_levels_of_transformer_series_not_equal_to_series_lev
 
 
 def test_forecaster_index_freq_stored():
-    '''
+    """
     Test series.index.freqstr is stored in forecaster.index_freq.
-    '''
+    """
     series = pd.DataFrame({'1': pd.Series(np.arange(5)), 
                            '2': pd.Series(np.arange(5))
                           })
@@ -55,10 +55,10 @@ def test_forecaster_index_freq_stored():
 
 
 def test_fit_in_sample_residuals_stored():
-    '''
+    """
     Test that values of in_sample_residuals are stored after fitting
     when `store_in_sample_residuals=True`.
-    '''
+    """
     series = pd.DataFrame({'1': pd.Series(np.arange(5)), 
                            '2': pd.Series(np.arange(5))
                            })
@@ -76,9 +76,9 @@ def test_fit_in_sample_residuals_stored():
 
 
 def test_fit_in_sample_residuals_stored_XGBRegressor():
-    '''
+    """
     Test that values of in_sample_residuals are stored after fitting with XGBRegressor.
-    '''
+    """
     series = pd.DataFrame({'1': pd.Series(np.arange(5)), 
                            '2': pd.Series(np.arange(5))
                            })
@@ -96,11 +96,11 @@ def test_fit_in_sample_residuals_stored_XGBRegressor():
 
 
 def test_fit_same_residuals_when_residuals_greater_than_1000():
-    '''
+    """
     Test fit return same residuals when residuals len is greater than 1000.
     Testing with two different forecaster. Residuals shouldn't be more than 
     1000 values.
-    '''
+    """
     series = pd.DataFrame({'1': pd.Series(np.arange(1010)), 
                            '2': pd.Series(np.arange(1010))
                            })
@@ -120,10 +120,10 @@ def test_fit_same_residuals_when_residuals_greater_than_1000():
 
 
 def test_fit_in_sample_residuals_not_stored():
-    '''
+    """
     Test that values of in_sample_residuals are not stored after fitting
     when `store_in_sample_residuals=False`.
-    '''
+    """
     series = pd.DataFrame({'1': pd.Series(np.arange(5)), 
                            '2': pd.Series(np.arange(5))
                            })
@@ -141,9 +141,9 @@ def test_fit_in_sample_residuals_not_stored():
 
 
 def test_fit_last_window_stored():
-    '''
+    """
     Test that values of last window are stored after fitting.
-    '''
+    """
     series = pd.DataFrame({'1': pd.Series(np.arange(5)), 
                            '2': pd.Series(np.arange(5))
                           })

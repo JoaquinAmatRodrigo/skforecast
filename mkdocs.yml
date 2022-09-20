@@ -24,7 +24,7 @@ nav:
       - Input data: user_guides/input-data.ipynb
       - Recursive multi-step forecasting: user_guides/autoregresive-forecaster.ipynb
       - Direct multi-step forecasting: user_guides/direct-multi-step-forecasting.ipynb
-      - Multi series forecasting: user_guides/multi-series-forecasting.ipynb
+      - Multi-time series forecasting: user_guides/multi-time-series-multi-step-forecasting.ipynb
       - Exogenous variables: user_guides/autoregresive-forecaster-exogenous.ipynb
       - Custom predictors: user_guides/custom-predictors.ipynb
       - Backtesting forecaster: user_guides/backtesting.ipynb
