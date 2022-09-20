@@ -9,9 +9,9 @@ from xgboost import XGBRegressor
 
 
 def create_predictors(y): # pragma: no cover
-    '''
+    """
     Create first 5 lags of a time series.
-    '''
+    """
     
     lags = y[-1:-6:-1]
     
@@ -19,9 +19,9 @@ def create_predictors(y): # pragma: no cover
 
 
 def test_forecaster_index_freq_stored():
-    '''
+    """
     Test serie_with_DatetimeIndex.index.freqstr is stored in forecaster.index_freq.
-    '''
+    """
     serie_with_DatetimeIndex = pd.Series(
                 data  = np.arange(10),
                 index = pd.date_range(start='2022-01-01', periods=10)
@@ -38,9 +38,9 @@ def test_forecaster_index_freq_stored():
 
 
 def test_fit_in_sample_residuals_stored():
-    '''
+    """
     Test that values of in_sample_residuals are stored after fitting.
-    '''
+    """
     forecaster = ForecasterAutoregCustom(
                     regressor      = LinearRegression(),
                     fun_predictors = create_predictors,
@@ -53,9 +53,9 @@ def test_fit_in_sample_residuals_stored():
 
 
 def test_fit_in_sample_residuals_stored_XGBRegressor():
-    '''
+    """
     Test that values of in_sample_residuals are stored after fitting with XGBRegressor.
-    '''
+    """
     forecaster = ForecasterAutoregCustom(
                     regressor      = XGBRegressor(random_state=123),
                     fun_predictors = create_predictors,
@@ -68,10 +68,10 @@ def test_fit_in_sample_residuals_stored_XGBRegressor():
 
 
 def test_fit_same_residuals_when_residuals_greater_than_1000():
-    '''
+    """
     Test fit return same residuals when residuals len is greater than 1000.
     Testing with two different forecaster.
-    '''
+    """
     forecaster = ForecasterAutoregCustom(
                     regressor      = LinearRegression(),
                     fun_predictors = create_predictors,
@@ -90,9 +90,9 @@ def test_fit_same_residuals_when_residuals_greater_than_1000():
 
 
 def test_fit_last_window_stored():
-    '''
+    """
     Test that values of last window are stored after fitting.
-    '''   
+    """   
     forecaster = ForecasterAutoregCustom(
                         regressor      = LinearRegression(),
                         fun_predictors = create_predictors,

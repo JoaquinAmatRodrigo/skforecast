@@ -11,9 +11,9 @@ from sklearn.linear_model import LinearRegression
 
         
 def test_predict_output_when_regressor_is_LinearRegression():
-    '''
+    """
     Test predict output when using LinearRegression as regressor.
-    '''
+    """
     forecaster = ForecasterAutoregDirect(LinearRegression(), lags=3, steps=3)
     forecaster.fit(y=pd.Series(np.arange(50)))
     results = forecaster.predict()

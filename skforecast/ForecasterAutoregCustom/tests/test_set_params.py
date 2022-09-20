@@ -6,9 +6,9 @@ from sklearn.linear_model import LinearRegression
 
 
 def create_predictors(y): # pragma: no cover
-    '''
+    """
     Create first 5 lags of a time series.
-    '''
+    """
     
     lags = y[-1:-6:-1]
     
@@ -16,7 +16,8 @@ def create_predictors(y): # pragma: no cover
 
 
 def test_set_paramns():
-    
+    """
+    """
     forecaster = ForecasterAutoregCustom(
                         regressor      = LinearRegression(fit_intercept=True),
                         fun_predictors = create_predictors,

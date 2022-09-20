@@ -8,10 +8,10 @@ from sklearn.linear_model import LinearRegression
 
   
 def test_create_lags_when_lags_is_3_steps_1_and_y_is_numpy_arange_10():
-    '''
+    """
     Test matrix of lags created properly when langs is 3, steps is 1 and y is
     np.arange(10).
-    '''
+    """
     forecaster = ForecasterAutoregDirect(LinearRegression(), lags=3, steps=1)
     results = forecaster._create_lags(y=np.arange(10))
     expected = (np.array([[2., 1., 0.],
@@ -34,10 +34,10 @@ def test_create_lags_when_lags_is_3_steps_1_and_y_is_numpy_arange_10():
 
 
 def test_create_lags_when_lags_is_3_steps_2_and_y_is_numpy_arange_10():
-    '''
+    """
     Test matrix of lags created properly when langs is 3, steps is 2 and y is
     np.arange(10).
-    '''
+    """
     forecaster = ForecasterAutoregDirect(LinearRegression(), lags=3, steps=2)
     results = forecaster._create_lags(y=np.arange(10))
     expected = (np.array([[2., 1., 0.],
@@ -58,10 +58,10 @@ def test_create_lags_when_lags_is_3_steps_2_and_y_is_numpy_arange_10():
 
 
 def test_create_lags_when_lags_is_3_steps_5_and_y_is_numpy_arange_10():
-    '''
+    """
     Test matrix of lags created properly when langs is 3, steps is 5 and y is
     np.arange(10).
-    '''
+    """
     forecaster = ForecasterAutoregDirect(LinearRegression(), lags=3, steps=5)
     results = forecaster._create_lags(y=np.arange(10))
     expected = (np.array([[2., 1., 0.],
