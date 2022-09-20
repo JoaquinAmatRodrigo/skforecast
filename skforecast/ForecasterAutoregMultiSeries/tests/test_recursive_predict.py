@@ -8,9 +8,9 @@ from sklearn.linear_model import LinearRegression
 
 
 def test_recursive_predict_output_when_regressor_is_LinearRegression():
-    '''
+    """
     Test _recursive_predict output when using LinearRegression as regressor.
-    '''
+    """
     series = pd.DataFrame({'1': pd.Series(np.arange(start=0, stop=50)), 
                            '2': pd.Series(np.arange(start=50, stop=100))
                           })

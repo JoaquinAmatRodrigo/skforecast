@@ -8,9 +8,9 @@ from sklearn.linear_model import LinearRegression
 
 
 def create_predictors(y): # pragma: no cover
-    '''
+    """
     Create first 5 lags of a time series.
-    '''
+    """
     
     lags = y[-1:-6:-1]
     
@@ -18,10 +18,10 @@ def create_predictors(y): # pragma: no cover
 
 
 def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_None():
-    '''
+    """
     Test the output of create_train_X_y when y=pd.Series(np.arange(10)) and 
     exog is None.
-    '''
+    """
     forecaster = ForecasterAutoregCustom(
                     regressor      = LinearRegression(),
                     fun_predictors = create_predictors,
@@ -49,10 +49,10 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_None():
 
 
 def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_series():
-    '''
+    """
     Test the output of create_train_X_y when y=pd.Series(np.arange(10)) and 
     exog is a pandas series
-    '''
+    """
     forecaster = ForecasterAutoregCustom(
                     regressor      = LinearRegression(),
                     fun_predictors = create_predictors,
@@ -83,10 +83,10 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_series():
 
 
 def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_dataframe():
-    '''
+    """
     Test the output of create_train_X_y when y=pd.Series(np.arange(10)) and 
     exog is a pandas dataframe with two columns.
-    '''
+    """
     forecaster = ForecasterAutoregCustom(
                     regressor      = LinearRegression(),
                     fun_predictors = create_predictors,
@@ -121,9 +121,9 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_dataframe():
 
     
 def test_create_train_X_y_exception_when_y_and_exog_have_different_length():
-    '''
+    """
     Test exception is raised when length of y and length of exog are different.
-    '''
+    """
     forecaster = ForecasterAutoregCustom(
                     regressor      = LinearRegression(),
                     fun_predictors = create_predictors,
@@ -141,9 +141,9 @@ def test_create_train_X_y_exception_when_y_and_exog_have_different_length():
 
 
 def test_create_train_X_y_exception_when_y_and_exog_have_different_index():
-    '''
+    """
     Test exception is raised when y and exog have different index.
-    '''
+    """
     forecaster = ForecasterAutoregCustom(
                     regressor      = LinearRegression(),
                     fun_predictors = create_predictors,

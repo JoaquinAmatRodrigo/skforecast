@@ -9,10 +9,10 @@ from sklearn.linear_model import LinearRegression
         
 
 def test_estimate_boot_interval_output_when_forecaster_is_LinearRegression_steps_is_1_in_sample_residuals_is_True():
-    '''
+    """
     Test output of _estimate_boot_interval when regressor is LinearRegression and
     1 step is predicted using in-sample residuals.
-    '''
+    """
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
     forecaster.fit(y=pd.Series(np.arange(10)))
     forecaster.in_sample_residuals = np.full_like(forecaster.in_sample_residuals, fill_value=10)
@@ -23,10 +23,10 @@ def test_estimate_boot_interval_output_when_forecaster_is_LinearRegression_steps
     
     
 def test_estimate_boot_interval_output_when_forecaster_is_LinearRegression_steps_is_2_in_sample_residuals_is_True():
-    '''
+    """
     Test output of _estimate_boot_interval when regressor is LinearRegression and
     2 steps are predicted using in-sample residuals.
-    '''
+    """
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
     forecaster.fit(y=pd.Series(np.arange(10)))
     forecaster.in_sample_residuals = np.full_like(forecaster.in_sample_residuals, fill_value=10)
@@ -38,10 +38,10 @@ def test_estimate_boot_interval_output_when_forecaster_is_LinearRegression_steps
     
     
 def test_estimate_boot_interval_output_when_forecaster_is_LinearRegression_steps_is_1_in_sample_residuals_is_False():
-    '''
+    """
     Test output of _estimate_boot_interval when regressor is LinearRegression and
     1 step is predicted using out-sample residuals.
-    '''
+    """
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
     forecaster.fit(y=pd.Series(np.arange(10)))
     forecaster.out_sample_residuals = pd.Series(np.full_like(forecaster.in_sample_residuals, fill_value=10))
@@ -52,10 +52,10 @@ def test_estimate_boot_interval_output_when_forecaster_is_LinearRegression_steps
     
     
 def test_estimate_boot_interval_output_when_forecaster_is_LinearRegression_steps_is_2_in_sample_residuals_is_False():
-    '''
+    """
     Test output of _estimate_boot_interval when regressor is LinearRegression and
     2 steps are predicted using out-sample residuals.
-    '''
+    """
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
     forecaster.fit(y=pd.Series(np.arange(10)))
     forecaster.out_sample_residuals = pd.Series(np.full_like(forecaster.in_sample_residuals, fill_value=10))

@@ -7,9 +7,9 @@ from sklearn.linear_model import LinearRegression
 
 
 def create_predictors(y): # pragma: no cover
-    '''
+    """
     Create first 5 lags of a time series.
-    '''
+    """
     
     lags = y[-1:-6:-1]
     
@@ -17,8 +17,8 @@ def create_predictors(y): # pragma: no cover
 
 
 def test_init_exception_when_window_size_argument_is_string():
-   '''
-   '''
+   """
+   """
    with pytest.raises(Exception):
         forecaster = ForecasterAutoregCustom(
                         regressor      = LinearRegression(),
@@ -27,8 +27,8 @@ def test_init_exception_when_window_size_argument_is_string():
                     )
 
 def test_init_exception_when_fun_predictors_argument_is_string():
-   '''
-   '''
+   """
+   """
    with pytest.raises(Exception):
         forecaster = ForecasterAutoregCustom(
                         regressor      = LinearRegression(),

@@ -1081,6 +1081,12 @@ class ForecasterAutoreg(ForecasterBase):
 
         """
 
+        if self.fitted == False:
+            raise sklearn.exceptions.NotFittedError(
+                "This forecaster is not fitted yet. Call `fit` with appropriate "
+                "arguments before using `get_feature_importance()`."
+            )
+
         if isinstance(self.regressor, sklearn.pipeline.Pipeline):
             estimator = self.regressor[-1]
         else:
