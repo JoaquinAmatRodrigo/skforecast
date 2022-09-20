@@ -729,6 +729,12 @@ class ForecasterAutoregDirect(ForecasterBase):
         
         """
         
+        if self.fitted == False:
+            raise sklearn.exceptions.NotFittedError(
+                "This forecaster is not fitted yet. Call `fit` with appropriate "
+                "arguments before using `get_feature_importance()`."
+            )
+
         if step > self.steps:
             raise Exception(
                 f"Forecaster trained for {self.steps} steps. Got step={step}."
