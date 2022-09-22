@@ -69,7 +69,7 @@ pip install git+https://github.com/JoaquinAmatRodrigo/skforecast#master
 
 - [x] Random search and bayesian search (using [**optuna**](https://optuna.org/) or [**skopt**](https://scikit-optimize.github.io/stable/modules/generated/skopt.gp_minimize.html)) for hyperparameter optimization. Try `random_search_forecaster()` and `bayesian_search_forecaster()`.
 - [x] `ForecasterAutoregMultiOutput` has been renamed to `ForecasterAutoregDirect`.
-- [x] Modeling multiple time series simultaneously. Try `ForecasterAutoregMultiSeries` and the new functions availables in `model_selection_multiseries`.
+- [x] Modeling multiple time series simultaneously. Try `ForecasterAutoregMultiSeries` and the new functions available in `model_selection_multiseries`.
 - [x] Allow different transformations for each predictor (lags and exogenous).
 - [x] Multiple metrics in `backtesting_forecaster`, `grid_search_forecaster`, `random_search_forecaster`, and `backtesting_forecaster_multiseries`.
 - [x] Bug fixes and performance improvements.
@@ -90,17 +90,19 @@ The documentation for the latest release is at [skforecast docs
 
 Recent improvements are highlighted in the [release notes](https://joaquinamatrodrigo.github.io/skforecast/latest/releases/releases.html).
 
-+ [Introduction to time series and forecasting](https://joaquinamatrodrigo.github.io/skforecast/0.4.3/quick-start/introduction-forecasting.html)
++ [Introduction to time series and forecasting](https://joaquinamatrodrigo.github.io/skforecast/latest/quick-start/introduction-forecasting.html)
 
-+ [Recursive multi-step forecasting](https://joaquinamatrodrigo.github.io/skforecast/latest/notebooks/autoregresive-forecaster.html)
++ [Recursive multi-step forecasting](https://joaquinamatrodrigo.github.io/skforecast/latest/user_guides/autoregresive-forecaster.html)
 
-+ [Backtesting (validation) of forecasting models](https://joaquinamatrodrigo.github.io/skforecast/latest/notebooks/backtesting.html)
++ [Multi-time series forecasting](https://joaquinamatrodrigo.github.io/skforecast/latest/user_guides/multi-time-series-forecasting.html)
 
-+ [Grid search of forecasting models](https://joaquinamatrodrigo.github.io/skforecast/latest/notebooks/grid-search-forecaster.html)
++ [Backtesting (validation) of forecasting models](https://joaquinamatrodrigo.github.io/skforecast/latest/user_guides/backtesting.html)
 
-+ [Prediction intervals](https://joaquinamatrodrigo.github.io/skforecast/latest/notebooks/prediction-intervals.html)
++ [Hyperparameter tuning and lags selection of forecasting models](https://joaquinamatrodrigo.github.io/skforecast/latest/user_guides/hyperparameter-tuning-and-lags-selection.html)
 
-+ [Using forecaster in production](https://joaquinamatrodrigo.github.io/skforecast/latest/notebooks/forecaster-in-production.html)
++ [Prediction intervals](https://joaquinamatrodrigo.github.io/skforecast/latest/user_guides/prediction-intervals.html)
+
++ [Using forecaster in production](https://joaquinamatrodrigo.github.io/skforecast/latest/user_guides/forecaster-in-production.html)
 
 
 # Examples and tutorials 
