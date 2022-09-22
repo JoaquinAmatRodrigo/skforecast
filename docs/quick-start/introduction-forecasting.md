@@ -67,16 +67,15 @@ A single model is trained, but each time series remains independent of the other
 
 <p align="center"><img src="../img/forecaster_multi_series_train_matrix_diagram.png" style="width: 800px"></p>
 
+In order to predict the next *n* steps, the [recursive multi-step forecasting](https://joaquinamatrodrigo.github.io/skforecast/latest/quick-start/introduction-forecasting.html#multi-step-forecasting) is applied as in univariate forecasting. The only difference is that, the series name for which to estimate the predictions, needs to be indicated.
+
+<p align="center"><img src="../img/forecaster_multi_series_prediction_diagram.png" style="width: 800px"></p>
+
 ### Multivariate time series
 
 All series are modeled in a single model considering that each time series depends not only on its past values but also on the past values of the other series. The forecaster is expected not only to learn the information of each series separately but also to relate them. For example, the measurements made by all the sensors (flow, temperature, pressure...) installed on an industrial machine such as a compressor.
 
 <p align="center"><img src="../img/forecaster_multivariate_train_matrix_diagram.png" style="width: 800px"></p>
-
-In both strategies, in order to predict the next *n* steps, the [recursive multi-step forecasting](https://joaquinamatrodrigo.github.io/skforecast/latest/quick-start/introduction-forecasting.html#multi-step-forecasting) is applied as in univariate forecasting. The only difference is that, the series name for which to estimate the predictions needs to be indicated.
-
-<p align="center"><img src="../img/forecaster_multi_series_prediction_diagram.png" style="width: 800px"></p>
-
 
 ## Backtesting forecasting models
 
