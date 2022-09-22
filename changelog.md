@@ -24,6 +24,8 @@ All notable changes to this project will be documented in this file.
 
 + Functions `save_forecaster` and `load_forecaster` to module utils.
 
++ `get_feature_importance()` method checks if the forecast is fitted.
+
 **Changed**
 
 + `backtesting_forecaster` change default value of argument `fixed_train_size: bool=True`.
