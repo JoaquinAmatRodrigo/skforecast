@@ -65,7 +65,7 @@ pip install git+https://github.com/JoaquinAmatRodrigo/skforecast#master
 + Get predictor importance
 + Forecaster in production
 
-## What is coming in the new release?
+## What is new in skforecast 0.5.0?
 
 - [x] Random search and bayesian search (using [**optuna**](https://optuna.org/) or [**skopt**](https://scikit-optimize.github.io/stable/modules/generated/skopt.gp_minimize.html)) for hyperparameter optimization. Try `random_search_forecaster()` and `bayesian_search_forecaster()`.
 - [x] `ForecasterAutoregMultiOutput` has been renamed to `ForecasterAutoregDirect`.
