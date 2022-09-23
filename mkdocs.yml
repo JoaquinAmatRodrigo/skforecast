@@ -55,7 +55,7 @@ nav:
 
   - FAQ and Tips:
       - Avoid negative predictions when forecasting: faq/non-negative-predictions.ipynb
-      - Single series vs multi series forecasting: faq/single-vs-multi-series-forecasting.ipynb
+      #- Single series vs multi series forecasting: faq/single-vs-multi-series-forecasting.ipynb
 
   - Releases: releases/releases.md
 
