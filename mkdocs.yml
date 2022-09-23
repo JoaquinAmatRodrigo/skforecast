@@ -71,9 +71,10 @@ plugins:
             show_root_heading: False
             docstring_section_style: table
   - mkdocs-jupyter:
-      include_source: False
       ignore_h1_titles: True
       include_source: True
+      execute: False
+      allow_errors: False
   - search
 copyright: 
 theme:
