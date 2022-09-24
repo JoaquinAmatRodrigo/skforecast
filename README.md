@@ -159,8 +159,10 @@ Amat Rodrigo, J., & Escobar Ortiz, J. skforecast (Version 0.5.0) [Computer softw
 @software{skforecast,
 author = {Amat Rodrigo, Joaquin and Escobar Ortiz, Javier},
 license = {MIT},
+month = {9},
 title = {{skforecast}},
-version = {0.5.0}
+version = {0.5.0},
+year = {2022}
 }
 ```
 
