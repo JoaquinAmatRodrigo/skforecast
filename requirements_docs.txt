@@ -3,7 +3,7 @@ mkdocs==1.2.4
 pytkdocs==0.16.1
 pytkdocs[numpy-style]
 mkdocs-jupyter==0.20.0
-mkdocs-material==8.2.5
+mkdocs-material==8.5.3
 mkdocstrings==0.18.1
 jupyter==1.0.0
 jupyter_contrib_nbextensions==0.5.1
