@@ -54,6 +54,7 @@ nav:
       - utils: api/utils.md
 
   - FAQ and Tips:
+      #- Is Skforecast slow?: faq/is-skforecast.slow.ipynb
       - Avoid negative predictions when forecasting: faq/non-negative-predictions.ipynb
       #- Single series vs multi series forecasting: faq/single-vs-multi-series-forecasting.ipynb
 
