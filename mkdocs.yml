@@ -69,7 +69,8 @@ plugins:
             filters:
               - "!^_"  # exclude all members starting with _
           rendering:
-            show_root_heading: False
+            show_root_heading: True
+            show_root_full_path: False
             docstring_section_style: table
   - mkdocs-jupyter:
       ignore_h1_titles: True
