@@ -1029,21 +1029,21 @@
       
         <li class="md-nav__item">
   <a href="#skforecast.model_selection_statsmodels.model_selection_statsmodels.backtesting_sarimax" class="md-nav__link">
-    skforecast.model_selection_statsmodels.model_selection_statsmodels.backtesting_sarimax
+    backtesting_sarimax()
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#skforecast.model_selection_statsmodels.model_selection_statsmodels.cv_sarimax" class="md-nav__link">
-    skforecast.model_selection_statsmodels.model_selection_statsmodels.cv_sarimax
+    cv_sarimax()
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#skforecast.model_selection_statsmodels.model_selection_statsmodels.grid_search_sarimax" class="md-nav__link">
-    skforecast.model_selection_statsmodels.model_selection_statsmodels.grid_search_sarimax
+    grid_search_sarimax()
   </a>
   
 </li>
@@ -1182,21 +1182,21 @@
       
         <li class="md-nav__item">
   <a href="#skforecast.model_selection_statsmodels.model_selection_statsmodels.backtesting_sarimax" class="md-nav__link">
-    skforecast.model_selection_statsmodels.model_selection_statsmodels.backtesting_sarimax
+    backtesting_sarimax()
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#skforecast.model_selection_statsmodels.model_selection_statsmodels.cv_sarimax" class="md-nav__link">
-    skforecast.model_selection_statsmodels.model_selection_statsmodels.cv_sarimax
+    cv_sarimax()
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#skforecast.model_selection_statsmodels.model_selection_statsmodels.grid_search_sarimax" class="md-nav__link">
-    skforecast.model_selection_statsmodels.model_selection_statsmodels.grid_search_sarimax
+    grid_search_sarimax()
   </a>
   
 </li>
@@ -1226,7 +1226,14 @@
 
   <div class="doc doc-object doc-function">
 
-<a id="skforecast.model_selection_statsmodels.model_selection_statsmodels.backtesting_sarimax"></a>
+
+
+<h2 id="skforecast.model_selection_statsmodels.model_selection_statsmodels.backtesting_sarimax" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">backtesting_sarimax</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">initial_train_size</span><span class="p">,</span> <span class="n">fixed_train_size</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">refit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">seasonal_order</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">trend</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sarimax_kwargs</span><span class="o">=</span><span class="p">{},</span> <span class="n">fit_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;disp&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">},</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+
+
+<a href="#skforecast.model_selection_statsmodels.model_selection_statsmodels.backtesting_sarimax" class="headerlink" title="Permanent link">&para;</a></h2>
+
     <div class="doc doc-contents first">
 
       <p>Backtesting (validation) of <code>SARIMAX</code> model from statsmodels &gt;= 0.12. The model</p>
@@ -1738,7 +1745,14 @@ regressed on exog[i].</p></td>
 
   <div class="doc doc-object doc-function">
 
-<a id="skforecast.model_selection_statsmodels.model_selection_statsmodels.cv_sarimax"></a>
+
+
+<h2 id="skforecast.model_selection_statsmodels.model_selection_statsmodels.cv_sarimax" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">cv_sarimax</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">initial_train_size</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">seasonal_order</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">trend</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">allow_incomplete_fold</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">sarimax_kwargs</span><span class="o">=</span><span class="p">{},</span> <span class="n">fit_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;disp&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">},</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+
+
+<a href="#skforecast.model_selection_statsmodels.model_selection_statsmodels.cv_sarimax" class="headerlink" title="Permanent link">&para;</a></h2>
+
     <div class="doc doc-contents first">
 
       <p>Cross-validation of <code>SARIMAX</code> model from statsmodels &gt;= 0.12. The order of data</p>
@@ -2038,7 +2052,14 @@ regressed on exog[i].</p></td>
 
   <div class="doc doc-object doc-function">
 
-<a id="skforecast.model_selection_statsmodels.model_selection_statsmodels.grid_search_sarimax"></a>
+
+
+<h2 id="skforecast.model_selection_statsmodels.model_selection_statsmodels.grid_search_sarimax" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">grid_search_sarimax</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">param_grid</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">initial_train_size</span><span class="p">,</span> <span class="n">fixed_train_size</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">refit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">sarimax_kwargs</span><span class="o">=</span><span class="p">{},</span> <span class="n">fit_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;disp&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">},</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+
+
+<a href="#skforecast.model_selection_statsmodels.model_selection_statsmodels.grid_search_sarimax" class="headerlink" title="Permanent link">&para;</a></h2>
+
     <div class="doc doc-contents first">
 
       <p>Exhaustive search over specified parameter values for a <code>SARIMAX</code> model from</p>

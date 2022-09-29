@@ -1001,28 +1001,28 @@
       
         <li class="md-nav__item">
   <a href="#skforecast.model_selection.model_selection.backtesting_forecaster" class="md-nav__link">
-    skforecast.model_selection.model_selection.backtesting_forecaster
+    backtesting_forecaster()
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#skforecast.model_selection.model_selection.grid_search_forecaster" class="md-nav__link">
-    skforecast.model_selection.model_selection.grid_search_forecaster
+    grid_search_forecaster()
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#skforecast.model_selection.model_selection.random_search_forecaster" class="md-nav__link">
-    skforecast.model_selection.model_selection.random_search_forecaster
+    random_search_forecaster()
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#skforecast.model_selection.model_selection.bayesian_search_forecaster" class="md-nav__link">
-    skforecast.model_selection.model_selection.bayesian_search_forecaster
+    bayesian_search_forecaster()
   </a>
   
 </li>
@@ -1189,28 +1189,28 @@
       
         <li class="md-nav__item">
   <a href="#skforecast.model_selection.model_selection.backtesting_forecaster" class="md-nav__link">
-    skforecast.model_selection.model_selection.backtesting_forecaster
+    backtesting_forecaster()
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#skforecast.model_selection.model_selection.grid_search_forecaster" class="md-nav__link">
-    skforecast.model_selection.model_selection.grid_search_forecaster
+    grid_search_forecaster()
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#skforecast.model_selection.model_selection.random_search_forecaster" class="md-nav__link">
-    skforecast.model_selection.model_selection.random_search_forecaster
+    random_search_forecaster()
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#skforecast.model_selection.model_selection.bayesian_search_forecaster" class="md-nav__link">
-    skforecast.model_selection.model_selection.bayesian_search_forecaster
+    bayesian_search_forecaster()
   </a>
   
 </li>
@@ -1240,7 +1240,14 @@
 
   <div class="doc doc-object doc-function">
 
-<a id="skforecast.model_selection.model_selection.backtesting_forecaster"></a>
+
+
+<h2 id="skforecast.model_selection.model_selection.backtesting_forecaster" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">backtesting_forecaster</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">initial_train_size</span><span class="p">,</span> <span class="n">fixed_train_size</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">refit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_boot</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span> <span class="n">in_sample_residuals</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+
+
+<a href="#skforecast.model_selection.model_selection.backtesting_forecaster" class="headerlink" title="Permanent link">&para;</a></h2>
+
     <div class="doc doc-contents first">
 
       <p>Backtesting of forecaster model.</p>
@@ -1567,7 +1574,14 @@ are used if they are already stored inside the forecaster.</p></td>
 
   <div class="doc doc-object doc-function">
 
-<a id="skforecast.model_selection.model_selection.grid_search_forecaster"></a>
+
+
+<h2 id="skforecast.model_selection.model_selection.grid_search_forecaster" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">grid_search_forecaster</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">param_grid</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">initial_train_size</span><span class="p">,</span> <span class="n">fixed_train_size</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lags_grid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">refit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">return_best</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
+
+
+<a href="#skforecast.model_selection.model_selection.grid_search_forecaster" class="headerlink" title="Permanent link">&para;</a></h2>
+
     <div class="doc doc-contents first">
 
       <p>Exhaustive search over specified parameter values for a Forecaster object.</p>
@@ -1806,7 +1820,14 @@ regressed on exog[i].</p></td>
 
   <div class="doc doc-object doc-function">
 
-<a id="skforecast.model_selection.model_selection.random_search_forecaster"></a>
+
+
+<h2 id="skforecast.model_selection.model_selection.random_search_forecaster" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">random_search_forecaster</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">param_distributions</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">initial_train_size</span><span class="p">,</span> <span class="n">fixed_train_size</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lags_grid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">refit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">n_iter</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span> <span class="n">return_best</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
+
+
+<a href="#skforecast.model_selection.model_selection.random_search_forecaster" class="headerlink" title="Permanent link">&para;</a></h2>
+
     <div class="doc doc-contents first">
 
       <p>Random search over specified parameter values or distributions for a Forecaster object.</p>
@@ -2067,7 +2088,14 @@ n_iter trades off runtime vs quality of the solution.</p></td>
 
   <div class="doc doc-object doc-function">
 
-<a id="skforecast.model_selection.model_selection.bayesian_search_forecaster"></a>
+
+
+<h2 id="skforecast.model_selection.model_selection.bayesian_search_forecaster" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">bayesian_search_forecaster</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">search_space</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">initial_train_size</span><span class="p">,</span> <span class="n">fixed_train_size</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lags_grid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">refit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">n_trials</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span> <span class="n">return_best</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="s1">&#39;skopt&#39;</span><span class="p">,</span> <span class="n">kwargs_create_study</span><span class="o">=</span><span class="p">{},</span> <span class="n">kwargs_study_optimize</span><span class="o">=</span><span class="p">{},</span> <span class="n">kwargs_gp_minimize</span><span class="o">=</span><span class="p">{})</span></code>
+
+
+<a href="#skforecast.model_selection.model_selection.bayesian_search_forecaster" class="headerlink" title="Permanent link">&para;</a></h2>
+
     <div class="doc doc-contents first">
 
       <p>Bayesian optimization for a Forecaster object using time series backtesting and </p>
