@@ -499,7 +499,7 @@ class ForecasterAutoreg(ForecasterBase):
                 X = np.column_stack((X, exog[i, ].reshape(1, -1)))
 
             with warnings.catch_warnings():
-                # Suppress scikitlearn warning: "X does not have valid feature names,
+                # Suppress scikit-learn warning: "X does not have valid feature names,
                 # but NoOpTransformer was fitted with feature names".
                 warnings.simplefilter("ignore")
                 prediction = self.regressor.predict(X)
