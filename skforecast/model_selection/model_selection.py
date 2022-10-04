@@ -126,7 +126,7 @@ def time_series_splitter(
             print(f"Number of folds: {folds - 1}")
             print(
                 f"Since `allow_incomplete_fold=False`, "
-                f"last {remainder} observations are descarted."
+                f"last {remainder} observations are discarded."
             )
 
     if folds == 1:
@@ -153,7 +153,7 @@ def time_series_splitter(
         
 def _get_metric(metric:str) -> callable:
     """
-    Get the corresponding scikitlearn function to calculate the metric.
+    Get the corresponding scikit-learn function to calculate the metric.
     
     Parameters
     ----------
@@ -164,7 +164,7 @@ def _get_metric(metric:str) -> callable:
     Returns 
     -------
     metric : callable
-        scikitlearn function to calculate the desired metric.
+        scikit-learn function to calculate the desired metric.
     
     """
     
@@ -1391,6 +1391,12 @@ def _evaluate_grid_hyperparameters(
 
     """
 
+    if return_best and exog is not None and (len(exog) != len(y)):
+        raise ValueError(
+            f'`exog` must have same number of samples as `y`. '
+            f'length `exog`: ({len(exog)}), length `y`: ({len(y)})'
+        )
+
     if isinstance(forecaster, ForecasterAutoregCustom):
         if lags_grid is not None:
             warnings.warn(
@@ -1604,6 +1610,12 @@ def bayesian_search_forecaster(
             The best optimization result returned as a OptimizeResult object.
     
     """
+
+    if return_best and exog is not None and (len(exog) != len(y)):
+        raise ValueError(
+            f'`exog` must have same number of samples as `y`. '
+            f'length `exog`: ({len(exog)}), length `y`: ({len(y)})'
+        )
 
     if engine not in ['optuna', 'skopt']:
         raise ValueError(
