@@ -32,6 +32,65 @@ y = pd.Series(
               0.25045537, 0.48303426, 0.98555979, 0.51948512, 0.61289453]))
 
 
+def test_exception_evaluate_grid_hyperparameters_when_return_best_and_len_y_exog_different():
+    """
+    Test exception is raised in _evaluate_grid_hyperparameters when return_best 
+    and length of `y` and `exog` do not match.
+    """
+    forecaster = ForecasterAutoreg(
+                    regressor = Ridge(random_state=123),
+                    lags      = 2
+                 )
+    exog = y[:30]
+
+    err_msg = re.escape(
+            f'`exog` must have same number of samples as `y`. '
+            f'length `exog`: ({len(exog)}), length `y`: ({len(y)})'
+        )
+    with pytest.raises(ValueError, match = err_msg):
+        _evaluate_grid_hyperparameters(
+            forecaster  = forecaster,
+            y           = y,
+            exog        = exog,
+            lags_grid   = [2, 4],
+            param_grid  = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}],
+            steps       = 3,
+            refit       = False,
+            metric      = 'mean_absolute_error',
+            initial_train_size = len(y[:-12]),
+            fixed_train_size   = False,
+            return_best = True,
+            verbose     = False
+        )
+
+
+def test_exception_evaluate_grid_hyperparameters_metric_list_duplicate_names():
+    """
+    Test exception is raised in _evaluate_grid_hyperparameters when a `list` of 
+    metrics is used with duplicate names.
+    """
+    forecaster = ForecasterAutoreg(
+                    regressor = Ridge(random_state=123),
+                    lags      = 2
+                 )
+
+    err_msg = re.escape('When `metrics` is a `list`, each metric name must be unique.')
+    with pytest.raises(ValueError, match = err_msg):
+        _evaluate_grid_hyperparameters(
+            forecaster  = forecaster,
+            y           = y,
+            lags_grid   = [2, 4],
+            param_grid  = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}],
+            steps       = 3,
+            refit       = False,
+            metric      = ['mean_absolute_error', mean_absolute_error],
+            initial_train_size = len(y[:-12]),
+            fixed_train_size   = False,
+            return_best = False,
+            verbose     = False
+        )
+
+
 def test_output_evaluate_grid_hyperparameters_ForecasterAutoreg_with_mocked():
     """
     Test output of _evaluate_grid_hyperparameters in ForecasterAutoreg with mocked
@@ -115,33 +174,6 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoreg_lags_grid_is_Non
                                    )
 
     pd.testing.assert_frame_equal(results, expected_results)
-
-
-def test_exception_evaluate_grid_hyperparameters_metric_list_duplicate_names():
-    """
-    Test exception is raised in _evaluate_grid_hyperparameters when a `list` of 
-    metrics is used with duplicate names.
-    """
-    forecaster = ForecasterAutoreg(
-                    regressor = Ridge(random_state=123),
-                    lags      = 2 # Placeholder, the value will be overwritten
-                 )
-
-    err_msg = re.escape('When `metrics` is a `list`, each metric name must be unique.')
-    with pytest.raises(ValueError, match = err_msg):
-        _evaluate_grid_hyperparameters(
-            forecaster  = forecaster,
-            y           = y,
-            lags_grid   = [2, 4],
-            param_grid  = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}],
-            steps       = 3,
-            refit       = False,
-            metric      = ['mean_absolute_error', mean_absolute_error],
-            initial_train_size = len(y[:-12]),
-            fixed_train_size   = False,
-            return_best = False,
-            verbose     = False
-        )
 
 
 def test_output_evaluate_grid_hyperparameters_ForecasterAutoreg_metric_list_with_mocked():

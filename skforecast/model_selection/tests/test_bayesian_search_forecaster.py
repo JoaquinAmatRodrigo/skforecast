@@ -28,6 +28,41 @@ y = pd.Series(
               0.25045537, 0.48303426, 0.98555979, 0.51948512, 0.61289453]))
 
 
+def test_exception_bayesian_search_forecaster_when_return_best_and_len_y_exog_different():
+    """
+    Test exception is raised in _evaluate_grid_hyperparameters when return_best 
+    and length of `y` and `exog` do not match.
+    """
+    forecaster = ForecasterAutoreg(
+                    regressor = Ridge(random_state=123),
+                    lags      = 2
+                 )
+    exog = y[:30]
+
+    err_msg = re.escape(
+            f'`exog` must have same number of samples as `y`. '
+            f'length `exog`: ({len(exog)}), length `y`: ({len(y)})'
+        )
+    with pytest.raises(ValueError, match = err_msg):
+        bayesian_search_forecaster(
+            forecaster         = forecaster,
+            y                  = y,
+            exog               = exog,
+            lags_grid          = [2, 4],
+            search_space       = {'alpha': Real(0.01, 1.0, "log-uniform", name='alpha')},
+            steps              = 3,
+            metric             = 'mean_absolute_error',
+            refit              = True,
+            initial_train_size = len(y[:-12]),
+            fixed_train_size   = True,
+            n_trials           = 10,
+            random_state       = 123,
+            return_best        = True,
+            verbose            = False,
+            engine             = 'skopt'
+        )
+
+
 def test_bayesian_search_forecaster_exception_when_engine_not_optuna_or_skopt():
     """
     Test Exception in bayesian_search_forecaster is raised when engine is not 'optuna' 
@@ -43,54 +78,20 @@ def test_bayesian_search_forecaster_exception_when_engine_not_optuna_or_skopt():
     err_msg = re.escape(f"""`engine` only allows 'optuna' or 'skopt', got {engine}.""")
     with pytest.raises(ValueError, match = err_msg):
         bayesian_search_forecaster(
-            forecaster            = forecaster,
-            y                     = y,
-            lags_grid             = [2, 4],
-            search_space          = {'not_alpha': Real(0.01, 1.0, "log-uniform", name='alpha')},
-            steps                 = 3,
-            metric                = 'mean_absolute_error',
-            refit                 = True,
-            initial_train_size    = len(y[:-12]),
-            fixed_train_size      = True,
-            n_trials              = 10,
-            random_state          = 123,
-            return_best           = False,
-            verbose               = False,
-            engine                = engine
-        )
-
-
-@pytest.mark.skip(reason='Deprecated')
-def test_bayesian_search_forecaster_exception_when_metric_is_a_list():
-    """
-    Test Exception in bayesian_search_forecaster is raised when `metric` is a 
-    `list`.
-    """
-    forecaster = ForecasterAutoreg(
-                    regressor = Ridge(random_state=123),
-                    lags      = 2
-                 )
-    
-    err_msg = re.escape(
-                (f'The calculation of a list of metrics is not yet implemented '
-                 f'in `bayesian_search_forecaster`.')
-              )
-    with pytest.raises(TypeError, match = err_msg):
-        bayesian_search_forecaster(
-            forecaster            = forecaster,
-            y                     = y,
-            lags_grid             = [2, 4],
-            search_space          = {'not_alpha': Real(0.01, 1.0, "log-uniform", name='alpha')},
-            steps                 = 3,
-            metric                = ['mean_absolute_error', mean_squared_error], 
-            refit                 = True,
-            initial_train_size    = len(y[:-12]),
-            fixed_train_size      = True,
-            n_trials              = 10,
-            random_state          = 123,
-            return_best           = False,
-            verbose               = False,
-            engine                = 'optuna'
+            forecaster         = forecaster,
+            y                  = y,
+            lags_grid          = [2, 4],
+            search_space       = {'alpha': Real(0.01, 1.0, "log-uniform", name='alpha')},
+            steps              = 3,
+            metric             = 'mean_absolute_error',
+            refit              = True,
+            initial_train_size = len(y[:-12]),
+            fixed_train_size   = True,
+            n_trials           = 10,
+            random_state       = 123,
+            return_best        = False,
+            verbose            = False,
+            engine             = engine
         )
 
 
@@ -122,19 +123,19 @@ def test_results_output_bayesian_search_forecaster_optuna_engine_ForecasterAutor
     engine = 'optuna'
 
     results = bayesian_search_forecaster(
-                    forecaster            = forecaster,
-                    y                     = y,
-                    search_space          = search_space,
-                    steps                 = 3,
-                    metric                = 'mean_absolute_error',
-                    refit                 = True,
-                    initial_train_size    = len(y[:-12]),
-                    fixed_train_size      = True,
-                    n_trials              = 10,
-                    random_state          = 123,
-                    return_best           = False,
-                    verbose               = False,
-                    engine                = engine
+                    forecaster         = forecaster,
+                    y                  = y,
+                    search_space       = search_space,
+                    steps              = 3,
+                    metric             = 'mean_absolute_error',
+                    refit              = True,
+                    initial_train_size = len(y[:-12]),
+                    fixed_train_size   = True,
+                    n_trials           = 10,
+                    random_state       = 123,
+                    return_best        = False,
+                    verbose            = False,
+                    engine             = engine
               )[0]
     
     expected_results = pd.DataFrame({
@@ -185,19 +186,19 @@ def test_results_output_bayesian_search_forecaster_skopt_engine_ForecasterAutore
     engine = 'skopt'
 
     results = bayesian_search_forecaster(
-                    forecaster            = forecaster,
-                    y                     = y,
-                    search_space = {'alpha': Real(0.01, 1.0, "log-uniform", name='alpha')},
-                    steps                 = 3,
-                    metric                = 'mean_absolute_error',
-                    refit                 = True,
-                    initial_train_size    = len(y[:-12]),
-                    fixed_train_size      = True,
-                    n_trials              = 10,
-                    random_state          = 123,
-                    return_best           = False,
-                    verbose               = False,
-                    engine                = engine
+                    forecaster         = forecaster,
+                    y                  = y,
+                    search_space       = {'alpha': Real(0.01, 1.0, "log-uniform", name='alpha')},
+                    steps              = 3,
+                    metric             = 'mean_absolute_error',
+                    refit              = True,
+                    initial_train_size = len(y[:-12]),
+                    fixed_train_size   = True,
+                    n_trials           = 10,
+                    random_state       = 123,
+                    return_best        = False,
+                    verbose            = False,
+                    engine             = engine
               )[0]
     
     expected_results = pd.DataFrame({
