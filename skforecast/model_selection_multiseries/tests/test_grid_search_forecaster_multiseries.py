@@ -68,7 +68,7 @@ def test_output_grid_search_forecaster_multiseries_ForecasterAutoregMultiSeries_
                     metric              = 'mean_absolute_error',
                     initial_train_size  = len(series) - n_validation,
                     fixed_train_size    = False,
-                    levels_list         = None,
+                    levels         = None,
                     levels_weights      = None,
                     exog                = None,
                     lags_grid           = lags_grid,

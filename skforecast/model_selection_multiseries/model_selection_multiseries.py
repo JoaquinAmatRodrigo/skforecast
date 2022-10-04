@@ -813,7 +813,7 @@ def grid_search_forecaster_multiseries(
     metric: Union[str, callable],
     initial_train_size: int,
     fixed_train_size: bool=True,
-    levels_list: Union[str, list]=None,
+    levels: Union[str, list]=None,
     levels_weights: dict=None,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Optional[list]=None,
@@ -856,7 +856,7 @@ def grid_search_forecaster_multiseries(
     fixed_train_size : bool, default `True`
         If True, train size doesn't increases but moves by `steps` in each iteration.
 
-    levels_list : str, list, default `None`
+    levels : str, list, default `None`
         level (`str`) or levels (`list`) on which the forecaster is optimized. 
         If `None`, all levels are taken into acount. The resulting metric will be
         a weighted average of the optimization of all levels. See also `levels_weights`.
@@ -904,7 +904,7 @@ def grid_search_forecaster_multiseries(
         metric              = metric,
         initial_train_size  = initial_train_size,
         fixed_train_size    = fixed_train_size,
-        levels_list         = levels_list,
+        levels         = levels,
         levels_weights      = levels_weights,
         exog                = exog,
         lags_grid           = lags_grid,
@@ -924,7 +924,7 @@ def random_search_forecaster_multiseries(
     metric: Union[str, callable],
     initial_train_size: int,
     fixed_train_size: bool=True,
-    levels_list: Union[str, list]=None,
+    levels: Union[str, list]=None,
     levels_weights: dict=None,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Optional[list]=None,
@@ -969,7 +969,7 @@ def random_search_forecaster_multiseries(
     fixed_train_size : bool, default `True`
         If True, train size doesn't increases but moves by `steps` in each iteration.
 
-    levels_list : str, list, default `None`
+    levels : str, list, default `None`
         level (`str`) or levels (`list`) on which the forecaster is optimized. 
         If `None`, all levels are taken into acount. The resulting metric will be
         a weighted average of the optimization of all levels. See also `levels_weights`.
@@ -1024,7 +1024,7 @@ def random_search_forecaster_multiseries(
         metric              = metric,
         initial_train_size  = initial_train_size,
         fixed_train_size    = fixed_train_size,
-        levels_list         = levels_list,
+        levels         = levels,
         levels_weights      = levels_weights,
         exog                = exog,
         lags_grid           = lags_grid,
@@ -1044,7 +1044,7 @@ def _evaluate_grid_hyperparameters_multiseries(
     metric: Union[str, callable],
     initial_train_size: int,
     fixed_train_size: bool=True,
-    levels_list: Union[str, list]=None,
+    levels: Union[str, list]=None,
     levels_weights: dict=None,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Optional[list]=None,
@@ -1086,7 +1086,7 @@ def _evaluate_grid_hyperparameters_multiseries(
     fixed_train_size : bool, default `True`
         If True, train size doesn't increases but moves by `steps` in each iteration.
 
-    levels_list : str, list, default `None`
+    levels : str, list, default `None`
         level (`str`) or levels (`list`) on which the forecaster is optimized. 
         If `None`, all levels are taken into acount. The resulting metric will be
         a weighted average of the optimization of all levels. See also `levels_weights`.
@@ -1124,9 +1124,15 @@ def _evaluate_grid_hyperparameters_multiseries(
     
     """
 
-    if levels_list is not None and not isinstance(levels_list, (str, list)):
+    if return_best and exog and (len(exog) != len(series)):
+        raise ValueError(
+            f'`exog` must have same number of samples as `series`. '
+            f'length `exog`: ({len(exog)}), length `series`: ({len(series)})'
+        )
+
+    if levels is not None and not isinstance(levels, (str, list)):
         raise TypeError(
-            f'`levels_list` must be a `list` of column names, a `str` of a column name or `None`.'
+            f'`levels` must be a `list` of column names, a `str` of a column name or `None`.'
         )
 
     if levels_weights is not None and not isinstance(levels_weights, dict):
@@ -1140,20 +1146,20 @@ def _evaluate_grid_hyperparameters_multiseries(
              f'in the multi-series forecast hyperparameter search.')
         )
 
-    if levels_list is None:
-        levels_list = list(series.columns)
-    elif isinstance(levels_list, str):
-        levels_list = [levels_list]
+    if levels is None:
+        levels = list(series.columns)
+    elif isinstance(levels, str):
+        levels = [levels]
 
     if levels_weights is None:
-        levels_weights = {col: 1./len(levels_list) for col in levels_list}
+        levels_weights = {col: 1./len(levels) for col in levels}
 
-    if levels_list != list(levels_weights.keys()):
+    if levels != list(levels_weights.keys()):
         raise ValueError(
-            f'`levels_weights` keys must be the same as the column names of series, `levels_list`.'
+            f'`levels_weights` keys must be the same as the column names of series, `levels`.'
         )
 
-    if sum(levels_weights.values()) != 1.0:
+    if not np.isclose(sum(levels_weights.values()), 1.0):
         raise ValueError(
             f'Weights in `levels_weights` must add up to 1.0.'
         )
@@ -1166,11 +1172,11 @@ def _evaluate_grid_hyperparameters_multiseries(
     metric_list = []
 
     print(
-        f'{len(param_grid)*len(lags_grid)} models compared for {len(levels_list)} level(s). '
-        f'Number of iterations: {len(param_grid)*len(lags_grid)*len(levels_list)}.'
+        f'{len(param_grid)*len(lags_grid)} models compared for {len(levels)} level(s). '
+        f'Number of iterations: {len(param_grid)*len(lags_grid)*len(levels)}.'
     )
 
-    if len(levels_list) >= 2:
+    if len(levels) >= 2:
         print(
             f'Level weights for metric evaluation: {levels_weights}'
         )
@@ -1186,7 +1192,7 @@ def _evaluate_grid_hyperparameters_multiseries(
 
             metric_level_list = []
 
-            for level in levels_list:
+            for level in levels:
 
                 metric_level = backtesting_forecaster_multiseries(
                                     forecaster         = forecaster,
@@ -1214,7 +1220,7 @@ def _evaluate_grid_hyperparameters_multiseries(
         m_name = metric.__name__
 
     results = pd.DataFrame({
-                'levels': [levels_list]*len(lags_list),
+                'levels': [levels]*len(lags_list),
                 'lags'  : lags_list,
                 'params': params_list,
                 m_name  : metric_list})

@@ -325,6 +325,25 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         if not isinstance(series, pd.DataFrame):
             raise TypeError('`series` must be a pandas DataFrame.')
+
+        # TODO: move this part to an auxiliar function
+        #-------------------------------------------------------------------------------
+        self.series_levels = list(series.columns)
+
+        if self.transformer_series is None:
+            dict_transformers = {level: None for level in self.series_levels}
+            self.transformer_series = dict_transformers
+        elif not isinstance(self.transformer_series, dict):
+            dict_transformers = {level: clone(self.transformer_series) 
+                                 for level in self.series_levels}
+            self.transformer_series = dict_transformers
+        else:
+            if list(self.transformer_series.keys()) != self.series_levels:
+                raise ValueError(
+                    (f'When `transformer_series` parameter is a `dict`, its keys '
+                     f'must be the same as `series_levels` : {self.series_levels}')
+                )
+        #-------------------------------------------------------------------------------
         
         X_levels = []
         X_train_col_names = [f"lag_{lag}" for lag in self.lags]

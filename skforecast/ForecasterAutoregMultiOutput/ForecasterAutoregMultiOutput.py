@@ -42,6 +42,20 @@ class ForecasterAutoregMultiOutput(ForecasterAutoregDirect):
         Maximum number of future steps the forecaster will predict when using
         method `predict()`. Since a different model is created for each step,
         this value should be defined before training.
+
+    transformer_y : transformer (preprocessor) compatible with the scikit-learn
+                    preprocessing API, default `None`
+        An instance of a transformer (preprocessor) compatible with the scikit-learn
+        preprocessing API with methods: fit, transform, fit_transform and inverse_transform.
+        ColumnTransformers are not allowed since they do not have inverse_transform method.
+        The transformation is applied to `y` before training the forecaster.
+
+    transformer_exog : transformer (preprocessor) compatible with the scikit-learn
+                       preprocessing API, default `None`
+        An instance of a transformer (preprocessor) compatible with the scikit-learn
+        preprocessing API. The transformation is applied to `exog` before training the
+        forecaster. `inverse_transform` is not available when using ColumnTransformers.
+
     
     Attributes
     ----------
@@ -118,10 +132,12 @@ class ForecasterAutoregMultiOutput(ForecasterAutoregDirect):
     '''
 
     def __init__(self, regressor, steps: int,
-                 lags: Union[int, np.ndarray, list]) -> None:
+                 lags: Union[int, np.ndarray, list],
+                 transformer_y = None,
+                 transformer_exog = None) -> None:
     
         # Add warning to __init__ ForecasterAutoregDirect
-        ForecasterAutoregDirect.__init__(self, regressor, steps, lags)
+        ForecasterAutoregDirect.__init__(self, regressor, steps, lags, transformer_y, transformer_exog)
 
         warnings.warn(
             f'ForecasterAutoregMultiOutput has been renamed to ForecasterAutoregDirect.'
@@ -146,6 +162,8 @@ class ForecasterAutoregMultiOutput(ForecasterAutoregDirect):
             f"{'=' * len(str(type(self)).split('.')[-1].replace(''''>''', ''))} \n"
             f"Regressor: {self.regressor} \n"
             f"Lags: {self.lags} \n"
+            f"Transformer for y: {self.transformer_y} \n"
+            f"Transformer for exog: {self.transformer_exog} \n"
             f"Window size: {self.window_size} \n"
             f"Maximum steps predicted: {self.steps} \n"
             f"Included exogenous: {self.included_exog} \n"

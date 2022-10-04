@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.1] - [2022-10-04]
+
+**Added**
+
++ Check that `exog` and `series` has the same length in ............
+
+**Changed**
+
++ Argument `levels_list` in `grid_search_forecaster_multiseries`, `random_search_forecaster_multiseries` and `_evaluate_grid_hyperparameters_multiseries` renamed to `levels`.
+
+**Fixed**
+
++ ForecasterAutoregMultiOutput updated to match ForecasterAutoregDirect
+
++ Rise Error when `level_weights` is not 1 in ``grid_search_forecaster_multiseries`, `random_search_forecaster_multiseries` and `_evaluate_grid_hyperparameters_multiseries`.
+
+
 ## [0.5.0] - [2022-09-23]
 
 **Added**
