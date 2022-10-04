@@ -47,7 +47,7 @@ joblib>=1.1.0, <=1.2.0
 
 + Create recursive autoregressive forecasters from any regressor that follows the scikit-learn API
 + Create direct autoregressive forecasters from any regressor that follows the scikit-learn API
-+ Create multi-series autoregressive forecasters from any regressor that follows the scikit-learn API
++ Create multi-time series autoregressive forecasters from any regressor that follows the scikit-learn API
 + Include exogenous variables as predictors
 + Include custom predictors (rolling mean, rolling variance ...)
 + Multiple backtesting methods for model validation

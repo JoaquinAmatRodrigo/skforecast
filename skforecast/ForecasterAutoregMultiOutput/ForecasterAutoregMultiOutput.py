@@ -23,7 +23,7 @@ logging.basicConfig(
 
 
 class ForecasterAutoregMultiOutput(ForecasterAutoregDirect):
-    '''
+    """
     This class turns any regressor compatible with the scikit-learn API into a
     autoregressive direct multi-step forecaster. A separate model is created for
     each forecast time step. See documentation for more details.
@@ -61,7 +61,7 @@ class ForecasterAutoregMultiOutput(ForecasterAutoregDirect):
     ----------
     regressor : regressor or pipeline compatible with the scikit-learn API
         An instance of a regressor or pipeline compatible with the scikit-learn API.
-        One instance of this regressor is trainned for each step. All
+        One instance of this regressor is trained for each step. All
         them are stored in `self.regressors_`.
         
     regressors_ : dict
@@ -129,12 +129,16 @@ class ForecasterAutoregMultiOutput(ForecasterAutoregDirect):
     note that all models share the same configuration of parameters and
     hyperparameters.
      
-    '''
+    """
 
-    def __init__(self, regressor, steps: int,
-                 lags: Union[int, np.ndarray, list],
-                 transformer_y = None,
-                 transformer_exog = None) -> None:
+    def __init__(
+        self, 
+        regressor, 
+        steps: int,
+        lags: Union[int, np.ndarray, list],
+        transformer_y = None,
+        transformer_exog = None
+    ) -> None:
     
         # Add warning to __init__ ForecasterAutoregDirect
         ForecasterAutoregDirect.__init__(self, regressor, steps, lags, transformer_y, transformer_exog)
@@ -145,9 +149,9 @@ class ForecasterAutoregMultiOutput(ForecasterAutoregDirect):
         )
         
     def __repr__(self) -> str:
-        '''
+        """
         Information displayed when a ForecasterAutoregMultiOutput object is printed.
-        '''
+        """
            
         if isinstance(self.regressor, sklearn.pipeline.Pipeline):
             name_pipe_steps = tuple(name + "__" for name in self.regressor.named_steps.keys())

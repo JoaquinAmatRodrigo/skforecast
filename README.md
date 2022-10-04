@@ -3,7 +3,7 @@
 [![codecov](https://codecov.io/gh/JoaquinAmatRodrigo/skforecast/branch/master/graph/badge.svg)](https://codecov.io/gh/JoaquinAmatRodrigo/skforecast)
 [![Build status](https://github.com/JoaquinAmatRodrigo/skforecast/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/JoaquinAmatRodrigo/skforecast/actions/workflows/unit-tests.yml/badge.svg)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/Naereen/StrapDown.js/graphs/commit-activity)
-![Licence](https://img.shields.io/badge/Licence-MIT-green)
+![License](https://img.shields.io/badge/Licence-MIT-green)
 [![Downloads](https://static.pepy.tech/personalized-badge/skforecast?period=total&units=international_system&left_color=grey&right_color=blue&left_text=Downloads)](https://pepy.tech/project/skforecast)
 
 
@@ -65,13 +65,13 @@ pip install git+https://github.com/JoaquinAmatRodrigo/skforecast#master
 + Get predictor importance
 + Forecaster in production
 
-## What is new in skforecast 0.5.0?
+## What is new in skforecast 0.5.1?
 
-- [x] Random search and bayesian search (using [**optuna**](https://optuna.org/) or [**skopt**](https://scikit-optimize.github.io/stable/modules/generated/skopt.gp_minimize.html)) for hyperparameter optimization. Try `random_search_forecaster()` and `bayesian_search_forecaster()`.
+- [x] Random search and bayesian search (using [**optuna**](https://optuna.org/) or [**skopt**](https://scikit-optimize.github.io/stable/modules/generated/skopt.gp_minimize.html)) for [hyperparameter optimization](https://joaquinamatrodrigo.github.io/skforecast/latest/user_guides/hyperparameter-tuning-and-lags-selection.html). Try `random_search_forecaster()` and `bayesian_search_forecaster()`.
 - [x] `ForecasterAutoregMultiOutput` has been renamed to `ForecasterAutoregDirect`.
-- [x] Modeling multiple time series simultaneously. Try `ForecasterAutoregMultiSeries` and the new functions available in `model_selection_multiseries`.
-- [x] Allow different transformations for each predictor (lags and exogenous).
-- [x] Multiple metrics in `backtesting_forecaster`, `grid_search_forecaster`, `random_search_forecaster`, and `backtesting_forecaster_multiseries`.
+- [x] Modeling [multiple time series simultaneously](https://joaquinamatrodrigo.github.io/skforecast/latest/user_guides/multi-time-series-forecasting.html). Try `ForecasterAutoregMultiSeries` and the new functions available in `model_selection_multiseries`.
+- [x] Allow [different transformations](https://joaquinamatrodrigo.github.io/skforecast/latest/user_guides/sklearn-transformers-and-pipeline.html) for each predictor (lags and exogenous).
+- [x] Multiple metrics in `backtesting_forecaster`, `grid_search_forecaster`, `random_search_forecaster`, `bayesian_search_forecaster` and `backtesting_forecaster_multiseries`.
 - [x] Bug fixes and performance improvements.
 
 Visit [changelog](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/changelog.md) to view all notable changes.
@@ -145,7 +145,7 @@ If you use this software, please cite it using the following metadata.
 
 **APA**:
 ```
-Amat Rodrigo, J., & Escobar Ortiz, J. skforecast (Version 0.5.0) [Computer software]
+Amat Rodrigo, J., & Escobar Ortiz, J. skforecast (Version 0.5.1) [Computer software]
 ```
 
 **BibTeX**:
@@ -153,9 +153,9 @@ Amat Rodrigo, J., & Escobar Ortiz, J. skforecast (Version 0.5.0) [Computer softw
 @software{skforecast,
 author = {Amat Rodrigo, Joaquin and Escobar Ortiz, Javier},
 license = {MIT},
-month = {9},
+month = {10},
 title = {{skforecast}},
-version = {0.5.0},
+version = {0.5.1},
 year = {2022}
 }
 ```

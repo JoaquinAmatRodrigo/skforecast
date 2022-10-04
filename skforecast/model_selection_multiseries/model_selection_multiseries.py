@@ -857,8 +857,8 @@ def grid_search_forecaster_multiseries(
         If True, train size doesn't increases but moves by `steps` in each iteration.
 
     levels : str, list, default `None`
-        level (`str`) or levels (`list`) on which the forecaster is optimized. 
-        If `None`, all levels are taken into acount. The resulting metric will be
+        level (`str`) or levels (`list`) at which the forecaster is optimized. 
+        If `None`, all levels are taken into account. The resulting metric will be
         a weighted average of the optimization of all levels. See also `levels_weights`.
 
     levels_weights : dict, default `None`
@@ -970,8 +970,8 @@ def random_search_forecaster_multiseries(
         If True, train size doesn't increases but moves by `steps` in each iteration.
 
     levels : str, list, default `None`
-        level (`str`) or levels (`list`) on which the forecaster is optimized. 
-        If `None`, all levels are taken into acount. The resulting metric will be
+        level (`str`) or levels (`list`) at which the forecaster is optimized. 
+        If `None`, all levels are taken into account. The resulting metric will be
         a weighted average of the optimization of all levels. See also `levels_weights`.
 
     levels_weights : dict, default `None`
@@ -1087,8 +1087,8 @@ def _evaluate_grid_hyperparameters_multiseries(
         If True, train size doesn't increases but moves by `steps` in each iteration.
 
     levels : str, list, default `None`
-        level (`str`) or levels (`list`) on which the forecaster is optimized. 
-        If `None`, all levels are taken into acount. The resulting metric will be
+        level (`str`) or levels (`list`) at which the forecaster is optimized. 
+        If `None`, all levels are taken into account. The resulting metric will be
         a weighted average of the optimization of all levels. See also `levels_weights`.
 
     levels_weights : dict, default `None`
@@ -1124,7 +1124,7 @@ def _evaluate_grid_hyperparameters_multiseries(
     
     """
 
-    if return_best and exog and (len(exog) != len(series)):
+    if return_best and exog is not None and (len(exog) != len(series)):
         raise ValueError(
             f'`exog` must have same number of samples as `series`. '
             f'length `exog`: ({len(exog)}), length `series`: ({len(series)})'
@@ -1143,7 +1143,7 @@ def _evaluate_grid_hyperparameters_multiseries(
     if isinstance(metric, list):
         raise TypeError(
             (f'The calculation of a list of metrics is not yet implemented '
-             f'in the multi-series forecast hyperparameter search.')
+             f'in the multi-time series forecast hyperparameter search.')
         )
 
     if levels is None:

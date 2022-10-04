@@ -74,7 +74,7 @@ class ForecasterAutoregDirect(ForecasterBase):
     ----------
     regressor : regressor or pipeline compatible with the scikit-learn API
         An instance of a regressor or pipeline compatible with the scikit-learn API.
-        One instance of this regressor is trainned for each step. All
+        One instance of this regressor is trained for each step. All
         them are stored in `self.regressors_`.
         
     regressors_ : dict
@@ -610,7 +610,7 @@ class ForecasterAutoregDirect(ForecasterBase):
                 # Only columns from exog related with the current step are selected.
                 X = np.hstack([X_lags, exog_values[0][step::steps].reshape(1, -1)])
             with warnings.catch_warnings():
-                # Suppress scikitlearn warning: "X does not have valid feature names,
+                # Suppress scikit-learn warning: "X does not have valid feature names,
                 # but NoOpTransformer was fitted with feature names".
                 warnings.simplefilter("ignore")
                 predictions[step] = regressor.predict(X)

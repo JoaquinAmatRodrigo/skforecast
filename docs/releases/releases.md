@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.1] - [2022-10-05]
+
+**Added**
+
++ Check that `exog` and `y` have the same length in `_evaluate_grid_hyperparameters` and `bayesian_search_forecaster` to avoid fit exception when `return_best`.
+
++ Check that `exog` and `series` have the same length in `_evaluate_grid_hyperparameters_multiseries` to avoid fit exception when `return_best`.
+
+**Changed**
+
++ Argument `levels_list` in `grid_search_forecaster_multiseries`, `random_search_forecaster_multiseries` and `_evaluate_grid_hyperparameters_multiseries` renamed to `levels`.
+
+**Fixed**
+
++ `ForecasterAutoregMultiOutput` updated to match `ForecasterAutoregDirect`.
+
++ Fix Exception to raise when `level_weights` does not add up to a number close to 1.0 (before was exactly 1.0) in `grid_search_forecaster_multiseries`, `random_search_forecaster_multiseries` and `_evaluate_grid_hyperparameters_multiseries`.
+
++ `Create_train_X_y` in `ForecasterAutoregMultiSeries` now works when the forecaster is not fitted.
+
+
 ## [0.5.0] - [2022-09-23]
 
 **Added**
