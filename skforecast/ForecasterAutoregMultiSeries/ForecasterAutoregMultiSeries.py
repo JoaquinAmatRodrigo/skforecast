@@ -325,6 +325,25 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         if not isinstance(series, pd.DataFrame):
             raise TypeError('`series` must be a pandas DataFrame.')
+
+        # TODO: move this part to an auxiliary function
+        #-------------------------------------------------------------------------------
+        self.series_levels = list(series.columns)
+
+        if self.transformer_series is None:
+            dict_transformers = {level: None for level in self.series_levels}
+            self.transformer_series = dict_transformers
+        elif not isinstance(self.transformer_series, dict):
+            dict_transformers = {level: clone(self.transformer_series) 
+                                 for level in self.series_levels}
+            self.transformer_series = dict_transformers
+        else:
+            if list(self.transformer_series.keys()) != self.series_levels:
+                raise ValueError(
+                    (f'When `transformer_series` parameter is a `dict`, its keys '
+                     f'must be the same as `series_levels` : {self.series_levels}')
+                )
+        #-------------------------------------------------------------------------------
         
         X_levels = []
         X_train_col_names = [f"lag_{lag}" for lag in self.lags]
@@ -575,7 +594,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             X = np.column_stack((X, levels_dummies.reshape(1, -1)))
 
             with warnings.catch_warnings():
-                # Suppress scikitlearn warning: "X does not have valid feature names,
+                # Suppress scikit-learn warning: "X does not have valid feature names,
                 # but NoOpTransformer was fitted with feature names".
                 warnings.simplefilter("ignore")
                 prediction = self.regressor.predict(X)
