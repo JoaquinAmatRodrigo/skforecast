@@ -94,7 +94,7 @@ def _backtesting_forecaster_multiseries_refit(
         trained using the first `initial_train_size` observations.
         
     fixed_train_size : bool, default `True`
-        If True, train size doesn't increases but moves by `steps` in each iteration.
+        If True, train size doesn't increase but moves by `steps` in each iteration.
         
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
@@ -170,7 +170,7 @@ def _backtesting_forecaster_multiseries_refit(
     for i in range(folds):
         # In each iteration (except the last one) the model is fitted before making predictions.
         if fixed_train_size:
-            # The train size doesn't increases but moves by `steps` in each iteration.
+            # The train size doesn't increase but moves by `steps` in each iteration.
             train_idx_start = i * steps
         else:
             # The train size increases by `steps` in each iteration.
@@ -693,7 +693,7 @@ def backtesting_forecaster_multiseries(
         `None` is only allowed when `refit` is `False`.
     
     fixed_train_size : bool, default `True`
-        If True, train size doesn't increases but moves by `steps` in each iteration.
+        If True, train size doesn't increase but moves by `steps` in each iteration.
         
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
@@ -854,7 +854,7 @@ def grid_search_forecaster_multiseries(
         Number of samples in the initial train split.
  
     fixed_train_size : bool, default `True`
-        If True, train size doesn't increases but moves by `steps` in each iteration.
+        If True, train size doesn't increase but moves by `steps` in each iteration.
 
     levels : str, list, default `None`
         level (`str`) or levels (`list`) at which the forecaster is optimized. 
@@ -967,7 +967,7 @@ def random_search_forecaster_multiseries(
         Number of samples in the initial train split.
  
     fixed_train_size : bool, default `True`
-        If True, train size doesn't increases but moves by `steps` in each iteration.
+        If True, train size doesn't increase but moves by `steps` in each iteration.
 
     levels : str, list, default `None`
         level (`str`) or levels (`list`) at which the forecaster is optimized. 
@@ -1084,7 +1084,7 @@ def _evaluate_grid_hyperparameters_multiseries(
         Number of samples in the initial train split.
  
     fixed_train_size : bool, default `True`
-        If True, train size doesn't increases but moves by `steps` in each iteration.
+        If True, train size doesn't increase but moves by `steps` in each iteration.
 
     levels : str, list, default `None`
         level (`str`) or levels (`list`) at which the forecaster is optimized. 
