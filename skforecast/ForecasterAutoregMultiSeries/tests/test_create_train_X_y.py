@@ -29,7 +29,6 @@ def test_create_train_X_y_output_when_series_and_exog_is_None():
     series = pd.DataFrame({'1': pd.Series(np.arange(7)), 
                            '2': pd.Series(np.arange(7))
                           })
-    forecaster.transformer_series = {col: None for col in series}
 
     results = forecaster.create_train_X_y(series=series)
     expected = (pd.DataFrame(
@@ -63,7 +62,6 @@ def test_create_train_X_y_output_when_series_10_and_exog_is_series():
     series = pd.DataFrame({'1': pd.Series(np.arange(7)), 
                            '2': pd.Series(np.arange(7))
                           })
-    forecaster.transformer_series = {col: None for col in series}
 
     results = forecaster.create_train_X_y(
                             series = series,
@@ -101,7 +99,6 @@ def test_create_train_X_y_output_when_series_10_and_exog_is_dataframe():
     series = pd.DataFrame({'1': pd.Series(np.arange(7)), 
                            '2': pd.Series(np.arange(7))
                           })
-    forecaster.transformer_series = {col: None for col in series}
 
     results = forecaster.create_train_X_y(
                             series = series,
@@ -142,7 +139,6 @@ def test_create_train_X_y_exception_when_series_and_exog_have_different_length(e
                            '2': pd.Series(np.arange(7))
                           })
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5)
-    forecaster.transformer_series = {'1': None, '2': None}
     
     err_msg = re.escape(
                 (f'`exog` must have same number of samples as `series`. '

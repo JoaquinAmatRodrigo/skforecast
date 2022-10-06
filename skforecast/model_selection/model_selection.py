@@ -46,7 +46,7 @@ def time_series_splitter(
     verbose: bool=True
 ) -> Union[np.ndarray, np.ndarray]:
     """
-    Split indices of a time series into multiple train-test pairs. The order of
+    Split indices of a time series into multiple train-test pairs. The order 
     is maintained and the training set increases in each iteration.
     
     Parameters
@@ -333,7 +333,7 @@ def _backtesting_forecaster_verbose(
         Whether to re-fit the forecaster in each iteration.
 
     fixed_train_size : bool, default `True`
-        If True, train size doesn't increases but moves by `steps` in each iteration.
+        If True, train size doesn't increase but moves by `steps` in each iteration.
     
     """
 
@@ -352,7 +352,7 @@ def _backtesting_forecaster_verbose(
                 # The train size doesn't increase but moves by `steps` in each iteration.
                 train_idx_start = i * steps
             else:
-                # The train size increases by `steps` in each iteration.
+                # The train size increase by `steps` in each iteration.
                 train_idx_start = 0
             train_idx_end = initial_train_size + i * steps
         else:
@@ -430,7 +430,7 @@ def _backtesting_forecaster_refit(
         trained using the first `initial_train_size` observations.
         
     fixed_train_size : bool, default `True`
-        If True, train size doesn't increases but moves by `steps` in each iteration.
+        If True, train size doesn't increase but moves by `steps` in each iteration.
         
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
@@ -507,7 +507,7 @@ def _backtesting_forecaster_refit(
     for i in range(folds):
         # In each iteration (except the last one) the model is fitted before making predictions.
         if fixed_train_size:
-            # The train size doesn't increases but moves by `steps` in each iteration.
+            # The train size doesn't increase but moves by `steps` in each iteration.
             train_idx_start = i * steps
         else:
             # The train size increases by `steps` in each iteration.
@@ -979,7 +979,7 @@ def backtesting_forecaster(
         `None` is only allowed when `refit` is `False`.
     
     fixed_train_size : bool, default `True`
-        If True, train size doesn't increases but moves by `steps` in each iteration.
+        If True, train size doesn't increase but moves by `steps` in each iteration.
         
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
@@ -1148,7 +1148,7 @@ def grid_search_forecaster(
         Number of samples in the initial train split.
  
     fixed_train_size : bool, default `True`
-        If True, train size doesn't increases but moves by `steps` in each iteration.
+        If True, train size doesn't increase but moves by `steps` in each iteration.
 
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
@@ -1252,7 +1252,7 @@ def random_search_forecaster(
         Number of samples in the initial train split.
  
     fixed_train_size : bool, default `True`
-        If True, train size doesn't increases but moves by `steps` in each iteration.
+        If True, train size doesn't increase but moves by `steps` in each iteration.
 
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
@@ -1360,7 +1360,7 @@ def _evaluate_grid_hyperparameters(
         Number of samples in the initial train split.
  
     fixed_train_size : bool, default `True`
-        If True, train size doesn't increases but moves by `steps` in each iteration.
+        If True, train size doesn't increase but moves by `steps` in each iteration.
 
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
@@ -1547,7 +1547,7 @@ def bayesian_search_forecaster(
         Number of samples in the initial train split.
  
     fixed_train_size : bool, default `True`
-        If True, train size doesn't increases but moves by `steps` in each iteration.
+        If True, train size doesn't increase but moves by `steps` in each iteration.
 
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
@@ -1719,7 +1719,7 @@ def _bayesian_search_optuna(
         Number of samples in the initial train split.
  
     fixed_train_size : bool, default `True`
-        If True, train size doesn't increases but moves by `steps` in each iteration.
+        If True, train size doesn't increase but moves by `steps` in each iteration.
 
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
@@ -1957,7 +1957,7 @@ def _bayesian_search_skopt(
         Number of samples in the initial train split.
  
     fixed_train_size : bool, default `True`
-        If True, train size doesn't increases but moves by `steps` in each iteration.
+        If True, train size doesn't increase but moves by `steps` in each iteration.
 
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
