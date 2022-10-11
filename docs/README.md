@@ -19,7 +19,7 @@ pip install skforecast
 Specific version:
 
 ```
-pip install skforecast==0.4.3
+pip install skforecast==0.5.1
 ```
 
 Development (unstable):
