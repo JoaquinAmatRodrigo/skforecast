@@ -871,8 +871,7 @@ def grid_search_forecaster_multiseries(
         regressed on exog[i].
            
     lags_grid : list of int, lists, np.narray or range, default `None`
-        Lists of `lags` to try. Only used if forecaster is an instance of 
-        `ForecasterAutoreg`, `ForecasterAutoregDirect` or `ForecasterAutoregMultiOutput`.
+        Lists of `lags` to try.
         
     refit : bool, default `False`
         Whether to re-fit the forecaster in each iteration of backtesting.
@@ -984,8 +983,7 @@ def random_search_forecaster_multiseries(
         regressed on exog[i].
            
     lags_grid : list of int, lists, np.narray or range, default `None`
-        Lists of `lags` to try. Only used if forecaster is an instance of 
-        `ForecasterAutoreg`, `ForecasterAutoregDirect` or `ForecasterAutoregMultiOutput`.
+        Lists of `lags` to try.
         
     refit : bool, default `False`
         Whether to re-fit the forecaster in each iteration of backtesting.
@@ -1101,8 +1099,7 @@ def _evaluate_grid_hyperparameters_multiseries(
         regressed on exog[i].
            
     lags_grid : list of int, lists, np.narray or range, default `None`
-        Lists of `lags` to try. Only used if forecaster is an instance of 
-        `ForecasterAutoreg`, `ForecasterAutoregDirect` or `ForecasterAutoregMultiOutput`.
+        Lists of `lags` to try.
         
     refit : bool, default `False`
         Whether to re-fit the forecaster in each iteration of backtesting.
