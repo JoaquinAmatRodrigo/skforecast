@@ -494,13 +494,18 @@ def _backtesting_forecaster_refit(
             refit              = True,
             fixed_train_size   = fixed_train_size
         )
-        
-    if folds > 50:
+    
+    if not isinstance(forecaster, ForecasterAutoregDirect) and folds > 50:
         print(
             f"Forecaster will be fit {folds} times. This can take substantial amounts of time. "
             f"If not feasible, try with `refit = False`. \n"
         )
-
+    elif isinstance(forecaster, ForecasterAutoregDirect) and folds*forecaster.steps > 50:
+        print(
+            f"Forecaster will be fit {folds*forecaster.steps} times. This can take substantial amounts of time. "
+            f"If not feasible, try with `refit = False`. \n"
+        )
+    
     for i in range(folds):
         # In each iteration (except the last one) the model is fitted before making predictions.
         if fixed_train_size:
