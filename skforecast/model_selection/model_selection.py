@@ -20,6 +20,7 @@ from sklearn.metrics import mean_absolute_percentage_error
 from sklearn.metrics import mean_squared_log_error
 from sklearn.model_selection import ParameterGrid
 from sklearn.model_selection import ParameterSampler
+from sklearn.exceptions import NotFittedError
 import optuna
 from optuna.samplers import TPESampler, RandomSampler
 optuna.logging.set_verbosity(optuna.logging.WARNING) # disable optuna logs
@@ -484,6 +485,17 @@ def _backtesting_forecaster_refit(
     folds = int(np.ceil((len(y) - initial_train_size) / steps))
     remainder = (len(y) - initial_train_size) % steps
     
+    if not isinstance(forecaster, ForecasterAutoregDirect) and folds > 50:
+        print(
+            f"The forecaster will be fit {folds} times. This can take substantial amounts of time. "
+            f"If not feasible, try with `refit = False`. \n"
+        )
+    elif isinstance(forecaster, ForecasterAutoregDirect) and folds*forecaster.steps > 50:
+        print(
+            f"The forecaster will be fit {folds*forecaster.steps} times ({folds} folds * {forecaster.steps} regressors). "
+            f"This can take substantial amounts of time. If not feasible, try with `refit = False`. \n"
+        )
+    
     if verbose:
         _backtesting_forecaster_verbose(
             index_values       = y.index,
@@ -493,17 +505,6 @@ def _backtesting_forecaster_refit(
             remainder          = remainder,
             refit              = True,
             fixed_train_size   = fixed_train_size
-        )
-    
-    if not isinstance(forecaster, ForecasterAutoregDirect) and folds > 50:
-        print(
-            f"Forecaster will be fit {folds} times. This can take substantial amounts of time. "
-            f"If not feasible, try with `refit = False`. \n"
-        )
-    elif isinstance(forecaster, ForecasterAutoregDirect) and folds*forecaster.steps > 50:
-        print(
-            f"Forecaster will be fit {folds*forecaster.steps} times. This can take substantial amounts of time. "
-            f"If not feasible, try with `refit = False`. \n"
         )
     
     for i in range(folds):
@@ -1025,40 +1026,40 @@ def backtesting_forecaster(
     
     """
 
-    if initial_train_size is not None and initial_train_size > len(y):
-        raise Exception(
+    if initial_train_size is not None and initial_train_size >= len(y):
+        raise ValueError(
             'If used, `initial_train_size` must be smaller than length of `y`.'
         )
         
     if initial_train_size is not None and initial_train_size < forecaster.window_size:
-        raise Exception(
+        raise ValueError(
             f"`initial_train_size` must be greater than "
             f"forecaster's window_size ({forecaster.window_size})."
         )
 
     if initial_train_size is None and not forecaster.fitted:
-        raise Exception(
+        raise NotFittedError(
             '`forecaster` must be already trained if no `initial_train_size` is provided.'
         )
 
     if not isinstance(refit, bool):
-        raise Exception(
-            f'`refit` must be boolean: True, False.'
+        raise TypeError(
+            f'`refit` must be boolean: `True`, `False`.'
         )
 
     if initial_train_size is None and refit:
-        raise Exception(
-            f'`refit` is only allowed when there is a initial_train_size.'
+        raise ValueError(
+            f'`refit` is only allowed when `initial_train_size` is not `None`.'
         )
 
     if interval is not None and isinstance(forecaster, ForecasterAutoregDirect):
-        raise Exception(
+        raise TypeError(
             ('Interval prediction is only available when forecaster is of type '
             'ForecasterAutoreg or ForecasterAutoregCustom.')
         )
     
     if isinstance(forecaster, ForecasterAutoregMultiSeries):
-        raise Exception(
+        raise TypeError(
             ('For `forecaster` of type `ForecasterAutoregMultiSeries`, use the '
              'functions available in the model_selection_multiseries module.')
         )
