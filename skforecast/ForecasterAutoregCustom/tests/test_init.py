@@ -1,5 +1,6 @@
 # Unit test __init__ ForecasterAutoregCustom
 # ==============================================================================
+import re
 import pytest
 import pandas as pd
 from skforecast.ForecasterAutoregCustom import ForecasterAutoregCustom
@@ -19,19 +20,27 @@ def create_predictors(y): # pragma: no cover
 def test_init_exception_when_window_size_argument_is_string():
    """
    """
-   with pytest.raises(Exception):
+   window_size = '5'
+   err_msg = re.escape(
+                f'`window_size` must be int, got {type(window_size)}'
+            )
+   with pytest.raises(TypeError, match = err_msg):
         forecaster = ForecasterAutoregCustom(
                         regressor      = LinearRegression(),
                         fun_predictors = create_predictors,
-                        window_size    = '5'
+                        window_size    = window_size
                     )
 
 def test_init_exception_when_fun_predictors_argument_is_string():
    """
    """
-   with pytest.raises(Exception):
+   fun_predictors = 'create_predictors'
+   err_msg = re.escape(
+                f'`fun_predictors` must be callable, got {type(fun_predictors)}.'
+            )
+   with pytest.raises(TypeError, match = err_msg):
         forecaster = ForecasterAutoregCustom(
-                        regressor      = LinearRegression(),
-                        fun_predictors = 'create_predictors',
-                        window_size    = 5
-                    )
+                         regressor      = LinearRegression(),
+                         fun_predictors = fun_predictors,
+                         window_size    = 5
+                     )

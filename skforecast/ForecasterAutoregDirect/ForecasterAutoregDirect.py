@@ -173,15 +173,15 @@ class ForecasterAutoregDirect(ForecasterBase):
         self.python_version       = sys.version.split(" ")[0]
 
         if isinstance(lags, int) and lags < 1:
-            raise Exception('Minimum value of lags allowed is 1')
-            
-        if isinstance(lags, (list, range, np.ndarray)) and min(lags) < 1:
-            raise Exception('Minimum value of lags allowed is 1')
+            raise ValueError('Minimum value of lags allowed is 1.')
 
         if isinstance(lags, (list, np.ndarray)):
             for lag in lags:
                 if not isinstance(lag, (int, np.int64, np.int32)):
-                    raise Exception('Values in lags must be int.')
+                    raise TypeError('All values in `lags` must be int.')
+            
+        if isinstance(lags, (list, range, np.ndarray)) and min(lags) < 1:
+            raise ValueError('Minimum value of lags allowed is 1.')
             
         if isinstance(lags, int):
             self.lags = np.arange(lags) + 1
@@ -190,7 +190,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         elif isinstance(lags, np.ndarray):
             self.lags = lags
         else:
-            raise Exception(
+            raise TypeError(
                 '`lags` argument must be int, 1d numpy ndarray, range or list. '
                 f"Got {type(lags)}"
             )
