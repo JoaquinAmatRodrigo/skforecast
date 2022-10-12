@@ -311,20 +311,20 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             
         exog : pandas Series, pandas DataFrame, default `None`
             Exogenous variable/s included as predictor/s. Must have the same
-            number of observations as `y` and their indexes must be aligned.
+            number of observations as `series` and their indexes must be aligned.
 
         Returns 
         -------
         X_train : pandas DataFrame
             Pandas DataFrame with the training values (predictors).
             
-        y_train : pandas Series, shape (len(y) - self.max_lag, )
+        y_train : pandas Series, shape (len(series) - self.max_lag, )
             Values (target) of the time series related to each row of `X_train`.
         
         """
 
         if not isinstance(series, pd.DataFrame):
-            raise TypeError('`series` must be a pandas DataFrame.')
+            raise TypeError(f'`series` must be a pandas DataFrame. Got {type(series)}.')
         
         self.series_levels = list(series.columns)
 
@@ -339,7 +339,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             if list(self.transformer_series.keys()) != self.series_levels:
                 raise ValueError(
                     (f'When `transformer_series` parameter is a `dict`, its keys '
-                     f'must be the same as `series_levels` : {self.series_levels}')
+                     f'must be the same as `series_levels` : {self.series_levels}.')
                 )
         
         X_levels = []
@@ -449,8 +449,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             
         exog : pandas Series, pandas DataFrame, default `None`
             Exogenous variable/s included as predictor/s. Must have the same
-            number of observations as `y` and their indexes must be aligned so
-            that y[i] is regressed on exog[i].
+            number of observations as `series` and their indexes must be aligned so
+            that series[i] is regressed on exog[i].
 
         store_in_sample_residuals : bool, default `True`
             if True, in_sample_residuals are stored.
