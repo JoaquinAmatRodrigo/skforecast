@@ -14,7 +14,7 @@
 
 <i class="fa-light fa-chart-line fa" style="font-size: 25px; color:#f26e1d;"></i>  [**Prediction intervals in forecasting models**](https://www.cienciadedatos.net/documentos/py42-forecasting-prediction-intervals-machine-learning.html) [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JoaquinAmatRodrigo/skforecast/master?labpath=examples%2Fforecasting-prediction-intervals-machine-learning.ipynb)
 
-<i class="fa-duotone fa-water" style="font-size: 25px;"></i> [**Multi-series-forecasting**](https://www.cienciadedatos.net/documentos/py44-multi-series-forecasting-skforecast.html)[**Multi-series-forecasting**](https://www.cienciadedatos.net/documentos/py44-multi-series-forecasting-skforecast.html) [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JoaquinAmatRodrigo/skforecast/master?labpath=examples%2Fmulti-series-forecasting.ipynb)
+<i class="fa-duotone fa-water fa" style="font-size: 25px; color:teal;"></i> [**Multi-series-forecasting**](https://www.cienciadedatos.net/documentos/py44-multi-series-forecasting-skforecast.html) [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JoaquinAmatRodrigo/skforecast/master?labpath=examples%2Fmulti-series-forecasting.ipynb)
 
 
 <br>
