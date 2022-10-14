@@ -1,5 +1,6 @@
 # Unit test __init__ ForecasterAutoregDirect
 # ==============================================================================
+import re
 import pytest
 import numpy as np
 import pandas as pd
@@ -43,17 +44,9 @@ def test_init_exception_when_lags_is_int_lower_than_1():
     """
     Test exception is raised when lags is initialized with int lower than 1.
     """
-    with pytest.raises(Exception):
+    err_msg = re.escape('Minimum value of lags allowed is 1.')
+    with pytest.raises(ValueError, match = err_msg):
         ForecasterAutoregDirect(LinearRegression(), lags=-10, steps=2)
-
- 
-def test_init_exception_when_lags_has_values_lower_than_1():
-    """
-    Test exception is raised when lags is initialized with any value lower than 1.
-    """
-    for lags in [[0, 1], range(0, 2), np.arange(0, 2)]:
-        with pytest.raises(Exception):
-            ForecasterAutoregDirect(LinearRegression(), lags=lags, steps=2)
 
 
 def test_init_exception_when_lags_list_or_numpy_array_with_values_not_int():
@@ -62,17 +55,31 @@ def test_init_exception_when_lags_list_or_numpy_array_with_values_not_int():
     """
     lags_list = [1, 1.5, [1, 2], range(5)]
     lags_np_array = np.array([1.2, 1.5])
+    err_msg = re.escape('All values in `lags` must be int.')
     
     for lags in [lags_list, lags_np_array]:
-        for lag in lags:
-            if not isinstance(lag, (int, np.int64, np.int32)):
-                with pytest.raises(Exception):
-                    ForecasterAutoregDirect(LinearRegression(), lags=lags, steps=2)
+        with pytest.raises(TypeError, match = err_msg):
+            ForecasterAutoregDirect(LinearRegression(), lags=lags, steps=2)
+
+ 
+def test_init_exception_when_lags_has_values_lower_than_1():
+    """
+    Test exception is raised when lags is initialized with any value lower than 1.
+    """
+    err_msg = re.escape('Minimum value of lags allowed is 1.')
+    for lags in [[0, 1], range(0, 2), np.arange(0, 2)]:
+        with pytest.raises(ValueError, match = err_msg):
+            ForecasterAutoregDirect(LinearRegression(), lags=lags, steps=2)
 
 
 def test_init_exception_when_lags_is_not_valid_type():
     """
     Test exception is raised when lags is not a valid type.
     """
-    with pytest.raises(Exception):
-        ForecasterAutoregDirect(LinearRegression(), lags='not_valid_type', steps=2)
+    lags = 'not_valid_type'
+    err_msg = re.escape(
+                f"`lags` argument must be int, 1d numpy ndarray, range or list. "
+                f"Got {type(lags)}"
+            )
+    with pytest.raises(TypeError, match = err_msg):
+        ForecasterAutoregDirect(LinearRegression(), lags=lags, steps=2)

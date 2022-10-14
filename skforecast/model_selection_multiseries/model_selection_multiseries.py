@@ -16,6 +16,7 @@ from copy import deepcopy
 from tqdm import tqdm
 from sklearn.model_selection import ParameterGrid
 from sklearn.model_selection import ParameterSampler
+from sklearn.exceptions import NotFittedError
 import optuna
 from optuna.samplers import TPESampler, RandomSampler
 optuna.logging.set_verbosity(optuna.logging.WARNING) # disable optuna logs
@@ -149,6 +150,12 @@ def _backtesting_forecaster_multiseries_refit(
     
     folds = int(np.ceil((len(series.index) - initial_train_size) / steps))
     remainder = (len(series.index) - initial_train_size) % steps
+        
+    if folds > 50:
+        warnings.warn(
+            f"The forecaster will be fit {folds} times. This can take substantial amounts of time. "
+            f"If not feasible, try with `refit = False`. \n"
+        )
     
     if verbose:
         _backtesting_forecaster_verbose(
@@ -159,12 +166,6 @@ def _backtesting_forecaster_multiseries_refit(
             remainder          = remainder,
             refit              = True,
             fixed_train_size   = fixed_train_size
-        )
-        
-    if folds > 50:
-        print(
-            f"Forecaster will be fit {folds} times. This can take substantial amounts of time. "
-            f"If not feasible, try with `refit = False`. \n"
         )
 
     for i in range(folds):
@@ -738,34 +739,34 @@ def backtesting_forecaster_multiseries(
     
     """
 
-    if initial_train_size is not None and initial_train_size > len(series):
-        raise Exception(
+    if initial_train_size is not None and initial_train_size >= len(series):
+        raise ValueError(
             'If used, `initial_train_size` must be smaller than length of `series`.'
         )
         
     if initial_train_size is not None and initial_train_size < forecaster.window_size:
-        raise Exception(
+        raise ValueError(
             f"`initial_train_size` must be greater than "
             f"forecaster's window_size ({forecaster.window_size})."
         )
 
     if initial_train_size is None and not forecaster.fitted:
-        raise Exception(
+        raise NotFittedError(
             '`forecaster` must be already trained if no `initial_train_size` is provided.'
         )
 
     if not isinstance(refit, bool):
-        raise Exception(
-            f'`refit` must be boolean: True, False.'
+        raise TypeError(
+            f'`refit` must be boolean: `True`, `False`.'
         )
 
     if initial_train_size is None and refit:
-        raise Exception(
-            f'`refit` is only allowed when there is a initial_train_size.'
+        raise ValueError(
+            f'`refit` is only allowed when `initial_train_size` is not `None`.'
         )
 
     if not isinstance(forecaster, ForecasterAutoregMultiSeries):
-        raise Exception(
+        raise TypeError(
             ('`forecaster` must be of type `ForecasterAutoregMultiSeries`, for all other '
              'types of forecasters use the functions in `model_selection` module.')
         )
@@ -871,8 +872,7 @@ def grid_search_forecaster_multiseries(
         regressed on exog[i].
            
     lags_grid : list of int, lists, np.narray or range, default `None`
-        Lists of `lags` to try. Only used if forecaster is an instance of 
-        `ForecasterAutoreg`, `ForecasterAutoregDirect` or `ForecasterAutoregMultiOutput`.
+        Lists of `lags` to try.
         
     refit : bool, default `False`
         Whether to re-fit the forecaster in each iteration of backtesting.
@@ -984,8 +984,7 @@ def random_search_forecaster_multiseries(
         regressed on exog[i].
            
     lags_grid : list of int, lists, np.narray or range, default `None`
-        Lists of `lags` to try. Only used if forecaster is an instance of 
-        `ForecasterAutoreg`, `ForecasterAutoregDirect` or `ForecasterAutoregMultiOutput`.
+        Lists of `lags` to try.
         
     refit : bool, default `False`
         Whether to re-fit the forecaster in each iteration of backtesting.
@@ -1101,8 +1100,7 @@ def _evaluate_grid_hyperparameters_multiseries(
         regressed on exog[i].
            
     lags_grid : list of int, lists, np.narray or range, default `None`
-        Lists of `lags` to try. Only used if forecaster is an instance of 
-        `ForecasterAutoreg`, `ForecasterAutoregDirect` or `ForecasterAutoregMultiOutput`.
+        Lists of `lags` to try.
         
     refit : bool, default `False`
         Whether to re-fit the forecaster in each iteration of backtesting.

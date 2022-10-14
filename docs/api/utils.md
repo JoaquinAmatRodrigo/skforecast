@@ -8,7 +8,7 @@
 ::: skforecast.utils.utils.preprocess_y
 ::: skforecast.utils.utils.preprocess_last_window
 ::: skforecast.utils.utils.preprocess_exog
-::: skforecast.utils.utils.exog_to_multi_output
+::: skforecast.utils.utils.exog_to_direct
 ::: skforecast.utils.utils.expand_index
 ::: skforecast.utils.utils.transform_series
 ::: skforecast.utils.utils.transform_dataframe
