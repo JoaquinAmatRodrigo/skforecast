@@ -152,7 +152,7 @@ def _backtesting_forecaster_multiseries_refit(
     remainder = (len(series.index) - initial_train_size) % steps
         
     if folds > 50:
-        print(
+        warnings.warn(
             f"The forecaster will be fit {folds} times. This can take substantial amounts of time. "
             f"If not feasible, try with `refit = False`. \n"
         )

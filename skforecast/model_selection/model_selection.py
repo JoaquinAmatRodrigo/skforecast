@@ -486,12 +486,12 @@ def _backtesting_forecaster_refit(
     remainder = (len(y) - initial_train_size) % steps
     
     if not isinstance(forecaster, ForecasterAutoregDirect) and folds > 50:
-        print(
+        warnings.warn(
             f"The forecaster will be fit {folds} times. This can take substantial amounts of time. "
             f"If not feasible, try with `refit = False`. \n"
         )
     elif isinstance(forecaster, ForecasterAutoregDirect) and folds*forecaster.steps > 50:
-        print(
+        warnings.warn(
             f"The forecaster will be fit {folds*forecaster.steps} times ({folds} folds * {forecaster.steps} regressors). "
             f"This can take substantial amounts of time. If not feasible, try with `refit = False`. \n"
         )
