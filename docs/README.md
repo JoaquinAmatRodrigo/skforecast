@@ -75,7 +75,7 @@ joblib>=1.1.0, <=1.2.0
 <i class="fa-light fa-chart-line fa" style="font-size: 25px; color:#f26e1d;"></i>  [**Prediction intervals in forecasting models**](https://www.cienciadedatos.net/documentos/py42-forecasting-prediction-intervals-machine-learning.html)
 
 
-<i class="fa-duotone fa-water fa" style="font-size: 25px; color:teal;"></i> [**Multi-series-forecasting**](https://www.cienciadedatos.net/documentos/py44-multi-series-forecasting-skforecast.html)[**Multi-series-forecasting**](https://www.cienciadedatos.net/documentos/py44-multi-series-forecasting-skforecast.html)
+<i class="fa-duotone fa-water fa" style="font-size: 25px; color:teal;"></i> [**Multi-series-forecasting**](https://www.cienciadedatos.net/documentos/py44-multi-series-forecasting-skforecast.html)
 
 ### Español
 
