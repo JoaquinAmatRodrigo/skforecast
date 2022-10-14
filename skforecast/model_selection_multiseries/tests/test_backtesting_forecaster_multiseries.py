@@ -1,5 +1,6 @@
 # Unit test backtesting_forecaster_multiseries
 # ==============================================================================
+import re
 import pytest
 import numpy as np
 import pandas as pd
@@ -7,6 +8,7 @@ from pytest import approx
 import sys
 from sklearn.linear_model import Ridge
 from sklearn.metrics import mean_absolute_error
+from sklearn.exceptions import NotFittedError
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 from skforecast.model_selection_multiseries import backtesting_forecaster_multiseries
@@ -47,18 +49,20 @@ series = pd.DataFrame({'1': pd.Series(np.array(
          )
 
 
-def test_backtesting_forecaster_multiseries_exception_when_initial_train_size_more_than_len_y():
+@pytest.mark.parametrize("initial_train_size", 
+                         [(len(series)), (len(series) + 1)], 
+                         ids = lambda value : f'len: {value}' )
+def test_backtesting_forecaster_multiseries_exception_when_initial_train_size_more_than_or_equal_to_len_series(initial_train_size):
     """
-    Test Exception is raised in backtesting_forecaster_multiseries when initial_train_size > len(series).
+    Test Exception is raised in backtesting_forecaster_multiseries when initial_train_size >= len(series).
     """
     forecaster = ForecasterAutoregMultiSeries(
                     regressor = Ridge(random_state=123),
                     lags      = 3
                  )
-
-    initial_train_size = len(series) + 1
     
-    with pytest.raises(Exception):
+    err_msg = re.escape('If used, `initial_train_size` must be smaller than length of `series`.')
+    with pytest.raises(ValueError, match = err_msg):
         backtesting_forecaster_multiseries(
             forecaster          = forecaster,
             series              = series,
@@ -88,7 +92,11 @@ def test_backtesting_forecaster_multiseries_exception_when_initial_train_size_le
 
     initial_train_size = forecaster.window_size - 1
     
-    with pytest.raises(Exception):
+    err_msg = re.escape(
+            f"`initial_train_size` must be greater than "
+            f"forecaster's window_size ({forecaster.window_size})."
+        )
+    with pytest.raises(ValueError, match = err_msg):
         backtesting_forecaster_multiseries(
             forecaster          = forecaster,
             series              = series,
@@ -119,7 +127,8 @@ def test_backtesting_forecaster_multiseries_exception_when_initial_train_size_No
 
     initial_train_size = None
     
-    with pytest.raises(Exception):
+    err_msg = re.escape('`forecaster` must be already trained if no `initial_train_size` is provided.')
+    with pytest.raises(NotFittedError, match = err_msg):
         backtesting_forecaster_multiseries(
             forecaster          = forecaster,
             series              = series,
@@ -149,7 +158,8 @@ def test_backtesting_forecaster_multiseries_exception_when_refit_not_bool():
 
     refit = 'not_bool'
     
-    with pytest.raises(Exception):
+    err_msg = re.escape( f'`refit` must be boolean: `True`, `False`.')
+    with pytest.raises(TypeError, match = err_msg):
         backtesting_forecaster_multiseries(
             forecaster          = forecaster,
             series              = series,
@@ -182,7 +192,8 @@ def test_backtesting_forecaster_multiseries_exception_when_initial_train_size_No
     initial_train_size = None
     refit = True
     
-    with pytest.raises(Exception):
+    err_msg = re.escape(f'`refit` is only allowed when `initial_train_size` is not `None`.')
+    with pytest.raises(ValueError, match = err_msg):
         backtesting_forecaster_multiseries(
             forecaster          = forecaster,
             series              = series,
@@ -211,7 +222,11 @@ def test_backtesting_forecaster_multiseries_exception_when_forecaster_not_Foreca
                     lags      = 2
                  )
     
-    with pytest.raises(Exception):
+    err_msg = re.escape(
+            ('`forecaster` must be of type `ForecasterAutoregMultiSeries`, for all other '
+             'types of forecasters use the functions in `model_selection` module.')
+        )
+    with pytest.raises(TypeError, match = err_msg):
         backtesting_forecaster_multiseries(
             forecaster          = forecaster,
             series              = series,

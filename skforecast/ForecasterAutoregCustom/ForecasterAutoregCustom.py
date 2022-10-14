@@ -185,12 +185,12 @@ class ForecasterAutoregCustom(ForecasterBase):
         self.python_version                = sys.version.split(" ")[0]
         
         if not isinstance(window_size, int):
-            raise Exception(
+            raise TypeError(
                 f'`window_size` must be int, got {type(window_size)}'
             )
 
         if not callable(fun_predictors):
-            raise Exception(
+            raise TypeError(
                 f'`fun_predictors` must be callable, got {type(fun_predictors)}.'
             )
     

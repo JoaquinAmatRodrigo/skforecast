@@ -154,7 +154,7 @@ def test_predict_output_when_regressor_is_LinearRegression_with_transform_series
 def test_predict_output_when_regressor_is_LinearRegression_with_transform_series_as_dict():
     """
     Test predict output when using LinearRegression as regressor and transformer_series
-    is a dict with 2 diferent transformers.
+    is a dict with 2 different transformers.
     """
     forecaster = ForecasterAutoregMultiSeries(
                     regressor = LinearRegression(),

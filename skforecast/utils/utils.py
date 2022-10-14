@@ -139,7 +139,7 @@ def check_predict_input(
     Parameters
     ----------
     forecaster_type : ForecasterAutoreg, ForecasterAutoregCustom, 
-    ForecasterAutoregDirect, ForecasterAutoregMultiOutput, ForecasterAutoregMultiSeries
+    ForecasterAutoregDirect, ForecasterAutoregMultiSeries
         Forcaster type.
 
     steps : int
@@ -277,25 +277,25 @@ def check_predict_input(
         if str(forecaster_type).split('.')[1] == 'ForecasterAutoregMultiSeries':
             if isinstance(last_window, pd.DataFrame) and level not in last_window.columns:
                 raise ValueError(
-                    f'''
+                    f"""
                     Level {level} not found in `last_window`. If `last_window` is a pandas
                     DataFrame, it must contain a column named as level.
-                    '''
+                    """
                 )
             elif isinstance(last_window, pd.Series):
                 if last_window.name is None:
                     Warning.warn(
-                        f'''
+                        f"""
                         Provided `last_window` has no name, ensure that it contains data
                         for {level}.
-                        '''
+                        """
                     )
                 if last_window.name != level:
                     Warning.warn(
-                        f'''
+                        f"""
                         Provided `last_window` has name {last_window.name} and predicted
                         level is {level}. Ensure that it contains data for {level}.
-                        '''
+                        """
                     )
             else:
                 raise TypeError('`last_window` must be a pandas Series or DataFrame.')
@@ -496,13 +496,13 @@ def preprocess_exog(
     return exog_values, exog_index
 
 
-def exog_to_multi_output(
+def exog_to_direct(
     exog: np.ndarray,
     steps: int
 )-> np.ndarray:
     """
-    Transforms `exog` to `np.ndarray` with the shape needed for multioutput
-    regresors.
+    Transforms `exog` to `np.ndarray` with the shape needed for direct
+    forecasting.
     
     Parameters
     ----------        
@@ -548,7 +548,7 @@ def expand_index(
     steps: int
 ) -> pd.Index:
     """
-    Create a new index of lenght `steps` starting and the end of index.
+    Create a new index of length `steps` starting at the end of the index.
     
     Parameters
     ----------        
