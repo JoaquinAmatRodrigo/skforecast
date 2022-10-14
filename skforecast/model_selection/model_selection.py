@@ -20,6 +20,7 @@ from sklearn.metrics import mean_absolute_percentage_error
 from sklearn.metrics import mean_squared_log_error
 from sklearn.model_selection import ParameterGrid
 from sklearn.model_selection import ParameterSampler
+from sklearn.exceptions import NotFittedError
 import optuna
 from optuna.samplers import TPESampler, RandomSampler
 optuna.logging.set_verbosity(optuna.logging.WARNING) # disable optuna logs
@@ -29,7 +30,6 @@ from skopt import gp_minimize
 from ..ForecasterAutoreg import ForecasterAutoreg
 from ..ForecasterAutoregCustom import ForecasterAutoregCustom
 from ..ForecasterAutoregDirect import ForecasterAutoregDirect
-from ..ForecasterAutoregMultiOutput import ForecasterAutoregMultiOutput
 from ..ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 
 logging.basicConfig(
@@ -203,8 +203,7 @@ def cv_forecaster(
     
     Parameters
     ----------
-    forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect,
-    ForecasterAutoregMultiOutput
+    forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect
         Forecaster model.
         
     y : pandas Series
@@ -402,8 +401,7 @@ def _backtesting_forecaster_refit(
     
     Parameters
     ----------
-    forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect,
-    ForecasterAutoregMultiOutput
+    forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect
         Forecaster model.
         
     y : pandas Series
@@ -487,6 +485,17 @@ def _backtesting_forecaster_refit(
     folds = int(np.ceil((len(y) - initial_train_size) / steps))
     remainder = (len(y) - initial_train_size) % steps
     
+    if not isinstance(forecaster, ForecasterAutoregDirect) and folds > 50:
+        warnings.warn(
+            f"The forecaster will be fit {folds} times. This can take substantial amounts of time. "
+            f"If not feasible, try with `refit = False`. \n"
+        )
+    elif isinstance(forecaster, ForecasterAutoregDirect) and folds*forecaster.steps > 50:
+        warnings.warn(
+            f"The forecaster will be fit {folds*forecaster.steps} times ({folds} folds * {forecaster.steps} regressors). "
+            f"This can take substantial amounts of time. If not feasible, try with `refit = False`. \n"
+        )
+    
     if verbose:
         _backtesting_forecaster_verbose(
             index_values       = y.index,
@@ -497,13 +506,7 @@ def _backtesting_forecaster_refit(
             refit              = True,
             fixed_train_size   = fixed_train_size
         )
-        
-    if folds > 50:
-        print(
-            f"Forecaster will be fit {folds} times. This can take substantial amounts of time. "
-            f"If not feasible, try with `refit = False`. \n"
-        )
-
+    
     for i in range(folds):
         # In each iteration (except the last one) the model is fitted before making predictions.
         if fixed_train_size:
@@ -673,8 +676,7 @@ def _backtesting_forecaster_no_refit(
     
     Parameters
     ----------
-    forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect,
-    ForecasterAutoregMultiOutput
+    forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect
         Forecaster model.
         
     y : pandas Series
@@ -947,8 +949,7 @@ def backtesting_forecaster(
 
     Parameters
     ----------
-    forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect,
-    ForecasterAutoregMultiOutput
+    forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect
         Forecaster model.
         
     y : pandas Series
@@ -1025,41 +1026,40 @@ def backtesting_forecaster(
     
     """
 
-    if initial_train_size is not None and initial_train_size > len(y):
-        raise Exception(
+    if initial_train_size is not None and initial_train_size >= len(y):
+        raise ValueError(
             'If used, `initial_train_size` must be smaller than length of `y`.'
         )
         
     if initial_train_size is not None and initial_train_size < forecaster.window_size:
-        raise Exception(
+        raise ValueError(
             f"`initial_train_size` must be greater than "
             f"forecaster's window_size ({forecaster.window_size})."
         )
 
     if initial_train_size is None and not forecaster.fitted:
-        raise Exception(
+        raise NotFittedError(
             '`forecaster` must be already trained if no `initial_train_size` is provided.'
         )
 
     if not isinstance(refit, bool):
-        raise Exception(
-            f'`refit` must be boolean: True, False.'
+        raise TypeError(
+            f'`refit` must be boolean: `True`, `False`.'
         )
 
     if initial_train_size is None and refit:
-        raise Exception(
-            f'`refit` is only allowed when there is a initial_train_size.'
+        raise ValueError(
+            f'`refit` is only allowed when `initial_train_size` is not `None`.'
         )
 
-    if interval is not None and isinstance(forecaster, (ForecasterAutoregDirect,
-    ForecasterAutoregMultiOutput)):
-        raise Exception(
+    if interval is not None and isinstance(forecaster, ForecasterAutoregDirect):
+        raise TypeError(
             ('Interval prediction is only available when forecaster is of type '
             'ForecasterAutoreg or ForecasterAutoregCustom.')
         )
     
     if isinstance(forecaster, ForecasterAutoregMultiSeries):
-        raise Exception(
+        raise TypeError(
             ('For `forecaster` of type `ForecasterAutoregMultiSeries`, use the '
              'functions available in the model_selection_multiseries module.')
         )
@@ -1117,8 +1117,7 @@ def grid_search_forecaster(
     
     Parameters
     ----------
-    forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect,
-    ForecasterAutoregMultiOutput
+    forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect
         Forcaster model.
         
     y : pandas Series
@@ -1157,7 +1156,7 @@ def grid_search_forecaster(
            
     lags_grid : list of int, lists, numpy ndarray or range, default `None`
         Lists of `lags` to try. Only used if forecaster is an instance of 
-        `ForecasterAutoreg`, `ForecasterAutoregDirect` or `ForecasterAutoregMultiOutput`.
+        `ForecasterAutoreg` or `ForecasterAutoregDirect`.
         
     refit : bool, default `False`
         Whether to re-fit the forecaster in each iteration of backtesting.
@@ -1221,8 +1220,7 @@ def random_search_forecaster(
     
     Parameters
     ----------
-    forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect,
-    ForecasterAutoregMultiOutput
+    forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect
         Forcaster model.
         
     y : pandas Series
@@ -1261,7 +1259,7 @@ def random_search_forecaster(
            
     lags_grid : list of int, lists, numpy ndarray or range, default `None`
         Lists of `lags` to try. Only used if forecaster is an instance of 
-        `ForecasterAutoreg`, `ForecasterAutoregDirect` or `ForecasterAutoregMultiOutput`.
+        `ForecasterAutoreg` or `ForecasterAutoregDirect`.
         
     refit : bool, default `False`
         Whether to re-fit the forecaster in each iteration of backtesting.
@@ -1329,8 +1327,7 @@ def _evaluate_grid_hyperparameters(
     
     Parameters
     ----------
-    forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect,
-    ForecasterAutoregMultiOutput
+    forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect
         Forcaster model.
         
     y : pandas Series
@@ -1369,7 +1366,7 @@ def _evaluate_grid_hyperparameters(
            
     lags_grid : list of int, lists, numpy ndarray or range, default `None`
         Lists of `lags` to try. Only used if forecaster is an instance of 
-        `ForecasterAutoreg`, `ForecasterAutoregDirect` or `ForecasterAutoregMultiOutput`.
+        `ForecasterAutoreg` or `ForecasterAutoregDirect`.
         
     refit : bool, default `False`
         Whether to re-fit the forecaster in each iteration of backtesting.
@@ -1422,8 +1419,7 @@ def _evaluate_grid_hyperparameters(
 
     for lags in tqdm(lags_grid, desc='loop lags_grid', position=0, ncols=90):
         
-        if isinstance(forecaster, (ForecasterAutoreg, ForecasterAutoregDirect, 
-        ForecasterAutoregMultiOutput)):
+        if isinstance(forecaster, (ForecasterAutoreg, ForecasterAutoregDirect)):
             forecaster.set_lags(lags)
             lags = forecaster.lags.copy()
         
@@ -1467,8 +1463,7 @@ def _evaluate_grid_hyperparameters(
         best_params = results['params'].iloc[0]
         best_metric = results[list(metric_dict.keys())[0]].iloc[0]
         
-        if isinstance(forecaster, (ForecasterAutoreg, ForecasterAutoregDirect, 
-        ForecasterAutoregMultiOutput)):
+        if isinstance(forecaster, (ForecasterAutoreg, ForecasterAutoregDirect)):
             forecaster.set_lags(best_lags)
         forecaster.set_params(**best_params)
         forecaster.fit(y=y, exog=exog)
@@ -1509,8 +1504,7 @@ def bayesian_search_forecaster(
     
     Parameters
     ----------
-    forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect,
-    ForecasterAutoregMultiOutput
+    forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect
         Forcaster model.
         
     y : pandas Series
@@ -1556,7 +1550,7 @@ def bayesian_search_forecaster(
            
     lags_grid : list of int, lists, numpy ndarray or range, default `None`
         Lists of `lags` to try. Only used if forecaster is an instance of 
-        `ForecasterAutoreg`, `ForecasterAutoregDirect` or `ForecasterAutoregMultiOutput`.
+        `ForecasterAutoreg` or `ForecasterAutoregDirect`.
         
     refit : bool, default `False`
         Whether to re-fit the forecaster in each iteration of backtesting.
@@ -1687,8 +1681,7 @@ def _bayesian_search_optuna(
     
     Parameters
     ----------
-    forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect,
-    ForecasterAutoregMultiOutput
+    forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect
         Forcaster model.
         
     y : pandas Series
@@ -1728,7 +1721,7 @@ def _bayesian_search_optuna(
            
     lags_grid : list of int, lists, numpy ndarray or range, default `None`
         Lists of `lags` to try. Only used if forecaster is an instance of 
-        `ForecasterAutoreg`, `ForecasterAutoregDirect` or `ForecasterAutoregMultiOutput`.
+        `ForecasterAutoreg` or `ForecasterAutoregDirect`.
         
     refit : bool, default `False`
         Whether to re-fit the forecaster in each iteration of backtesting.
@@ -1832,8 +1825,7 @@ def _bayesian_search_optuna(
         # It is a trick to extract multiple values from _objective function since
         # only the optimized value can be returned.
 
-        if isinstance(forecaster, (ForecasterAutoreg, ForecasterAutoregDirect, 
-        ForecasterAutoregMultiOutput)):
+        if isinstance(forecaster, (ForecasterAutoreg, ForecasterAutoregDirect)):
             forecaster.set_lags(lags)
             lags = forecaster.lags.copy()
         
@@ -1888,8 +1880,7 @@ def _bayesian_search_optuna(
         best_params = results['params'].iloc[0]
         best_metric = results[list(metric_dict.keys())[0]].iloc[0]
         
-        if isinstance(forecaster, (ForecasterAutoreg, ForecasterAutoregDirect, 
-        ForecasterAutoregMultiOutput)):
+        if isinstance(forecaster, (ForecasterAutoreg, ForecasterAutoregDirect)):
             forecaster.set_lags(best_lags)
         forecaster.set_params(**best_params)
         forecaster.fit(y=y, exog=exog)
@@ -1926,8 +1917,7 @@ def _bayesian_search_skopt(
     
     Parameters
     ----------
-    forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect, 
-    ForecasterAutoregMultiOutput
+    forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect
         Forcaster model.
         
     y : pandas Series
@@ -1966,7 +1956,7 @@ def _bayesian_search_skopt(
            
     lags_grid : list of int, lists, np.narray or range, default `None`
         Lists of `lags` to try. Only used if forecaster is an instance of 
-        `ForecasterAutoreg`, `ForecasterAutoregDirect` or `ForecasterAutoregMultiOutput`.
+        `ForecasterAutoreg` or `ForecasterAutoregDirect`.
         
     refit : bool, default `False`
         Whether to re-fit the forecaster in each iteration of backtesting.
@@ -2077,8 +2067,7 @@ def _bayesian_search_skopt(
         # It is a trick to extract multiple values from _objective function since
         # only the optimized value can be returned.
         
-        if isinstance(forecaster, (ForecasterAutoreg, ForecasterAutoregDirect, 
-        ForecasterAutoregMultiOutput)):
+        if isinstance(forecaster, (ForecasterAutoreg, ForecasterAutoregDirect)):
             forecaster.set_lags(lags)
             lags = forecaster.lags.copy()
         
@@ -2126,8 +2115,7 @@ def _bayesian_search_skopt(
         best_params = results['params'].iloc[0]
         best_metric = results[list(metric_dict.keys())[0]].iloc[0]
         
-        if isinstance(forecaster, (ForecasterAutoreg, ForecasterAutoregDirect, 
-        ForecasterAutoregMultiOutput)):
+        if isinstance(forecaster, (ForecasterAutoreg, ForecasterAutoregDirect)):
             forecaster.set_lags(best_lags)
         forecaster.set_params(**best_params)
         forecaster.fit(y=y, exog=exog)

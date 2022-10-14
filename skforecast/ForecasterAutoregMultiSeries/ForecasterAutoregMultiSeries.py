@@ -180,15 +180,15 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.python_version       = sys.version.split(" ")[0]
         
         if isinstance(lags, int) and lags < 1:
-            raise Exception('Minimum value of lags allowed is 1.')
-            
-        if isinstance(lags, (list, range, np.ndarray)) and min(lags) < 1:
-            raise Exception('Minimum value of lags allowed is 1.')
+            raise ValueError('Minimum value of lags allowed is 1.')
 
         if isinstance(lags, (list, np.ndarray)):
             for lag in lags:
                 if not isinstance(lag, (int, np.int64, np.int32)):
-                    raise Exception('Values in lags must be int.')
+                    raise TypeError('All values in `lags` must be int.')
+        
+        if isinstance(lags, (list, range, np.ndarray)) and min(lags) < 1:
+            raise ValueError('Minimum value of lags allowed is 1.')
             
         if isinstance(lags, int):
             self.lags = np.arange(lags) + 1
@@ -197,8 +197,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         elif isinstance(lags, np.ndarray):
             self.lags = lags
         else:
-            raise Exception(
-                '`lags` argument must be int, 1d numpy ndarray, range or list. '
+            raise TypeError(
+                f"`lags` argument must be int, 1d numpy ndarray, range or list. "
                 f"Got {type(lags)}"
             )
             
@@ -311,23 +311,21 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             
         exog : pandas Series, pandas DataFrame, default `None`
             Exogenous variable/s included as predictor/s. Must have the same
-            number of observations as `y` and their indexes must be aligned.
+            number of observations as `series` and their indexes must be aligned.
 
         Returns 
         -------
         X_train : pandas DataFrame
             Pandas DataFrame with the training values (predictors).
             
-        y_train : pandas Series, shape (len(y) - self.max_lag, )
+        y_train : pandas Series, shape (len(series) - self.max_lag, )
             Values (target) of the time series related to each row of `X_train`.
         
         """
 
         if not isinstance(series, pd.DataFrame):
-            raise TypeError('`series` must be a pandas DataFrame.')
-
-        # TODO: move this part to an auxiliary function
-        #-------------------------------------------------------------------------------
+            raise TypeError(f'`series` must be a pandas DataFrame. Got {type(series)}.')
+        
         self.series_levels = list(series.columns)
 
         if self.transformer_series is None:
@@ -341,9 +339,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             if list(self.transformer_series.keys()) != self.series_levels:
                 raise ValueError(
                     (f'When `transformer_series` parameter is a `dict`, its keys '
-                     f'must be the same as `series_levels` : {self.series_levels}')
+                     f'must be the same as `series_levels` : {self.series_levels}.')
                 )
-        #-------------------------------------------------------------------------------
         
         X_levels = []
         X_train_col_names = [f"lag_{lag}" for lag in self.lags]
@@ -452,8 +449,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             
         exog : pandas Series, pandas DataFrame, default `None`
             Exogenous variable/s included as predictor/s. Must have the same
-            number of observations as `y` and their indexes must be aligned so
-            that y[i] is regressed on exog[i].
+            number of observations as `series` and their indexes must be aligned so
+            that series[i] is regressed on exog[i].
 
         store_in_sample_residuals : bool, default `True`
             if True, in_sample_residuals are stored.
@@ -477,22 +474,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.in_sample_residuals  = None
         self.fitted               = False
         self.training_range       = None
-        
-        self.series_levels = list(series.columns)
-
-        if self.transformer_series is None:
-            dict_transformers = {level: None for level in self.series_levels}
-            self.transformer_series = dict_transformers
-        elif not isinstance(self.transformer_series, dict):
-            dict_transformers = {level: clone(self.transformer_series) 
-                                 for level in self.series_levels}
-            self.transformer_series = dict_transformers
-        else:
-            if list(self.transformer_series.keys()) != self.series_levels:
-                raise ValueError(
-                    (f'When `transformer_series` parameter is a `dict`, its keys '
-                     f'must be the same as `series_levels` : {self.series_levels}')
-                )
 
         if exog is not None:
             self.included_exog = True

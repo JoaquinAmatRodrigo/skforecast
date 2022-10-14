@@ -23,7 +23,7 @@ from ..utils import check_exog
 from ..utils import preprocess_y
 from ..utils import preprocess_last_window
 from ..utils import preprocess_exog
-from ..utils import exog_to_multi_output
+from ..utils import exog_to_direct
 from ..utils import expand_index
 from ..utils import check_predict_input
 from ..utils import transform_series
@@ -173,15 +173,15 @@ class ForecasterAutoregDirect(ForecasterBase):
         self.python_version       = sys.version.split(" ")[0]
 
         if isinstance(lags, int) and lags < 1:
-            raise Exception('Minimum value of lags allowed is 1')
-            
-        if isinstance(lags, (list, range, np.ndarray)) and min(lags) < 1:
-            raise Exception('Minimum value of lags allowed is 1')
+            raise ValueError('Minimum value of lags allowed is 1.')
 
         if isinstance(lags, (list, np.ndarray)):
             for lag in lags:
                 if not isinstance(lag, (int, np.int64, np.int32)):
-                    raise Exception('Values in lags must be int.')
+                    raise TypeError('All values in `lags` must be int.')
+            
+        if isinstance(lags, (list, range, np.ndarray)) and min(lags) < 1:
+            raise ValueError('Minimum value of lags allowed is 1.')
             
         if isinstance(lags, int):
             self.lags = np.arange(lags) + 1
@@ -190,7 +190,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         elif isinstance(lags, np.ndarray):
             self.lags = lags
         else:
-            raise Exception(
+            raise TypeError(
                 '`lags` argument must be int, 1d numpy ndarray, range or list. '
                 f"Got {type(lags)}"
             )
@@ -365,8 +365,8 @@ class ForecasterAutoregDirect(ForecasterBase):
             X_train = X_lags
         else:
             col_names_exog = exog.columns if isinstance(exog, pd.DataFrame) else [exog.name]
-            # Transform exog to match multi output format
-            X_exog = exog_to_multi_output(exog=exog_values, steps=self.steps)
+            # Transform exog to match direct format
+            X_exog = exog_to_direct(exog=exog_values, steps=self.steps)
             col_names_exog = [f"{col_name}_step_{i+1}" for col_name in col_names_exog for i in range(self.steps)]
             X_train_col_names.extend(col_names_exog)
             # The first `self.max_lag` positions have to be removed from X_exog
@@ -582,7 +582,7 @@ class ForecasterAutoregDirect(ForecasterBase):
             exog_values, _ = preprocess_exog(
                                 exog = exog.iloc[:steps, ]
                              )
-            exog_values = exog_to_multi_output(exog=exog_values, steps=steps)
+            exog_values = exog_to_direct(exog=exog_values, steps=steps)
         else:
             exog_values = None
 

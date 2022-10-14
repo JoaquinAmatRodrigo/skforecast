@@ -41,8 +41,7 @@ def backtesting_sarimax(
         fit_kwargs: dict={'disp':0},
         verbose: bool=False
 ) -> Tuple[float, pd.DataFrame]:
-    '''
-    
+    """
     Backtesting (validation) of `SARIMAX` model from statsmodels >= 0.12. The model
     is trained using the `initial_train_size` first observations, then, in each
     iteration, a number of `steps` predictions are evaluated. If refit is `True`,
@@ -132,7 +131,8 @@ def backtesting_sarimax(
                 column pred   = predictions.
                 column lower  = lower bound of the interval.
                 column upper  = upper bound interval of the interval.
-    '''
+    
+    """
 
     if isinstance(metric, str):
         metric = _get_metric(metric=metric)
@@ -395,9 +395,7 @@ def cv_sarimax(
         fit_kwargs: dict={'disp':0},
         verbose: bool=False
 ) -> Tuple[np.array, np.array]:
-
-    '''
-    
+    """
     Cross-validation of `SARIMAX` model from statsmodels >= 0.12. The order of data
     is maintained and the training set increases in each iteration.
     
@@ -477,7 +475,8 @@ def cv_sarimax(
                 column pred   = predictions.
                 column lower  = lower bound of the interval.
                 column upper  = upper bound interval of the interval.
-    '''
+    
+    """
     
     if isinstance(metric, str):
         metric = _get_metric(metric=metric)
@@ -551,8 +550,7 @@ def grid_search_sarimax(
         fit_kwargs: dict={'disp':0},
         verbose: bool=False
 ) -> pd.DataFrame:
-    '''
-
+    """
     Exhaustive search over specified parameter values for a `SARIMAX` model from
     statsmodels >= 0.12. Validation is done using time series cross-validation or
     backtesting.
@@ -612,7 +610,7 @@ def grid_search_sarimax(
             column metric = metric value estimated for the combination of parameters.
             additional n columns with param = value.
 
-    '''
+    """
 
     params_list = []
     metric_list = []

@@ -18,10 +18,10 @@ logging.basicConfig(
 
 
 class ForecasterBase(ABC):
-    '''
+    """
     Base class for all forecasters in skforecast. All forecasters should specify
     all the parameters that can be set at the class level in their ``__init__``.     
-    '''
+    """
 
     @abstractmethod
     def create_train_X_y(
@@ -29,7 +29,7 @@ class ForecasterBase(ABC):
         y: pd.Series,
         exog: Optional[Union[pd.Series, pd.DataFrame]]=None
     ) -> Tuple[pd.DataFrame, pd.Series]:
-        '''
+        """
         Create training matrices from univariate time series and exogenous
         variables.
         
@@ -50,7 +50,7 @@ class ForecasterBase(ABC):
         y_train : pandas Series, shape (len(y) - self.max_lag, )
             Values (target) of the time series related to each row of `X_train`.
         
-        '''
+        """
         
         pass
 
@@ -61,7 +61,7 @@ class ForecasterBase(ABC):
         y: pd.Series,
         exog: Optional[Union[pd.Series, pd.DataFrame]]=None
     ) -> None:
-        '''
+        """
         Training Forecaster.
         
         Parameters
@@ -79,7 +79,7 @@ class ForecasterBase(ABC):
         -------
         None
         
-        '''
+        """
         
         pass
 
@@ -91,7 +91,7 @@ class ForecasterBase(ABC):
         last_window: Optional[pd.Series]=None,
         exog: Optional[Union[pd.Series, pd.DataFrame]]=None
     ) -> pd.Series:
-        '''
+        """
         Predict n steps ahead.
         
         Parameters
@@ -115,14 +115,14 @@ class ForecasterBase(ABC):
         predictions : pandas Series
             Predicted values.
             
-        '''
+        """
 
         pass
         
 
     @abstractmethod
     def set_params(self, **params: dict) -> None:
-        '''
+        """
         Set new values to the parameters of the scikit learn model stored in the
         ForecasterAutoreg.
         
@@ -135,13 +135,13 @@ class ForecasterBase(ABC):
         -------
         self
         
-        '''
+        """
         
         pass
         
    
     def set_lags(self, lags: int) -> None:
-        '''      
+        """      
         Set new value to the attribute `lags`.
         Attributes `max_lag` and `window_size` are also updated.
         
@@ -156,14 +156,14 @@ class ForecasterBase(ABC):
         -------
         self
         
-        '''
+        """
         
         pass
 
     def summary(self) -> None:
-        '''      
+        """      
         Show forecaster information.
-        '''
+        """
         
         print(self)
         
