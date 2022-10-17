@@ -103,6 +103,9 @@ class ForecasterAutoreg(ForecasterBase):
         
     fitted : Bool
         Tag to identify if the regressor has been fitted (trained).
+
+    weights : callable
+        Function that define the individual weights for each sample.
         
     index_type : type
         Type of index of the input used in training.
@@ -167,6 +170,7 @@ class ForecasterAutoreg(ForecasterBase):
         self.included_exog        = False
         self.exog_type            = None
         self.exog_col_names       = None
+        self.weights              = None
         self.X_train_col_names    = None
         self.in_sample_residuals  = None
         self.out_sample_residuals = None
@@ -225,6 +229,7 @@ class ForecasterAutoreg(ForecasterBase):
             f"Lags: {self.lags} \n"
             f"Transformer for y: {self.transformer_y} \n"
             f"Transformer for exog: {self.transformer_exog} \n"
+            f"Series weights: {self.weights} \n"
             f"Window size: {self.window_size} \n"
             f"Included exogenous: {self.included_exog} \n"
             f"Type of exogenous variable: {self.exog_type} \n"
@@ -384,7 +389,8 @@ class ForecasterAutoreg(ForecasterBase):
     def fit(
         self,
         y: pd.Series,
-        exog: Optional[Union[pd.Series, pd.DataFrame]]=None
+        exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+        series_weights: Optional[callable]=None,
     ) -> None:
         """
         Training Forecaster.
@@ -398,6 +404,9 @@ class ForecasterAutoreg(ForecasterBase):
             Exogenous variable/s included as predictor/s. Must have the same
             number of observations as `y` and their indexes must be aligned so
             that y[i] is regressed on exog[i].
+
+        weights : callable
+            Function that define the individual weights for each sample.
 
 
         Returns 
@@ -413,6 +422,7 @@ class ForecasterAutoreg(ForecasterBase):
         self.included_exog        = False
         self.exog_type            = None
         self.exog_col_names       = None
+        self.weights              = None
         self.X_train_col_names    = None
         self.in_sample_residuals  = None
         self.fitted               = False
