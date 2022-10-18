@@ -13,7 +13,7 @@ nav:
     - User Guides: user_guides/input-data.ipynb
     - Examples and tutorials: examples/examples.md
     - API Reference: api/ForecasterAutoreg.md
-    - FAQ and Tips: faq/faq.md
+    - FAQ and Tips: faq/profiling-skforecast.ipynb
     - Releases: releases/releases.md
 
   - Quick start:
@@ -56,7 +56,6 @@ nav:
   - FAQ and Tips:
       - Profiling skforecast: faq/profiling-skforecast.ipynb
       - Avoid negative predictions when forecasting: faq/non-negative-predictions.ipynb
-      #- Single series vs multi series forecasting: faq/single-vs-multi-series-forecasting.ipynb
 
   - Releases: releases/releases.md
 
