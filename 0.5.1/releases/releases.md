@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.0] - [Dev]
+
+**Added**
+
++ 
+
+**Changed**
+
++ Remove `ForecasterAutoregMultiOutput` in favor of `ForecasterAutoregDirect`, (deprecated since 0.5.0).
+
++ Rename `exog_to_multi_output` to `exog_to_direct` in `utils`.
+
+**Fixed**
+
++
+
+
 ## [0.5.1] - [2022-10-05]
 
 **Added**
