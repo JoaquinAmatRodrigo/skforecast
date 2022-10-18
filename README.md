@@ -27,7 +27,7 @@ pip install skforecast
 Specific version:
 
 ```bash
-pip install skforecast==0.4.3
+pip install skforecast==0.5.1
 ```
 
 Latest (unstable):
@@ -65,22 +65,23 @@ pip install git+https://github.com/JoaquinAmatRodrigo/skforecast#master
 + Get predictor importance
 + Forecaster in production
 
-## What is new in skforecast 0.5.1?
+## What is coming in the new release?
 
-- [x] Random search and bayesian search (using [**optuna**](https://optuna.org/) or [**skopt**](https://scikit-optimize.github.io/stable/modules/generated/skopt.gp_minimize.html)) for [hyperparameter optimization](https://joaquinamatrodrigo.github.io/skforecast/latest/user_guides/hyperparameter-tuning-and-lags-selection.html). Try `random_search_forecaster()` and `bayesian_search_forecaster()`.
-- [x] `ForecasterAutoregMultiOutput` has been renamed to `ForecasterAutoregDirect`.
-- [x] Modeling [multiple time series simultaneously](https://joaquinamatrodrigo.github.io/skforecast/latest/user_guides/multi-time-series-forecasting.html). Try `ForecasterAutoregMultiSeries` and the new functions available in `model_selection_multiseries`.
-- [x] Allow [different transformations](https://joaquinamatrodrigo.github.io/skforecast/latest/user_guides/sklearn-transformers-and-pipeline.html) for each predictor (lags and exogenous).
-- [x] Multiple metrics in `backtesting_forecaster`, `grid_search_forecaster`, `random_search_forecaster`, `bayesian_search_forecaster` and `backtesting_forecaster_multiseries`.
-- [x] Bug fixes and performance improvements.
+- [] Modeling multivariate time series `ForecasterAutoregMultivariate`.
+- [] Bug fixes and performance improvements.
 
-Visit [changelog](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/changelog.md) to view all notable changes.
+Try it:
+
+```bash
+pip install git+https://github.com/JoaquinAmatRodrigo/skforecast@0.6.x
+```
+
+Visit [changelog](https://github.com/JoaquinAmatRodrigo/skforecast/blob/0.6.x/changelog.md) to view all notable changes.
 
 
 # Documentation
 
-The documentation for the latest release is at [skforecast docs
-](https://joaquinamatrodrigo.github.io/skforecast/).
+The documentation for the latest release is at [skforecast docs](https://joaquinamatrodrigo.github.io/skforecast/).
 
 Recent improvements are highlighted in the [release notes](https://joaquinamatrodrigo.github.io/skforecast/latest/releases/releases.html).
 
@@ -115,6 +116,8 @@ Recent improvements are highlighted in the [release notes](https://joaquinamatro
 
 + [**Prediction intervals in forecasting models**](https://www.cienciadedatos.net/documentos/py42-forecasting-prediction-intervals-machine-learning.html) [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JoaquinAmatRodrigo/skforecast/master?labpath=examples%2Fforecasting-prediction-intervals-machine-learning.ipynb)
 
++ [**Multi-series forecasting**](https://www.cienciadedatos.net/documentos/py44-multi-series-forecasting-skforecast.html) [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JoaquinAmatRodrigo/skforecast/master?labpath=examples%2Fmulti-series-forecasting.ipynb)
+
 **Español**
 
 + [**Skforecast: forecasting series temporales con Python y Scikit-learn**](https://www.cienciadedatos.net/documentos/py27-forecasting-series-temporales-python-scikitlearn.html)      [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JoaquinAmatRodrigo/skforecast/master?labpath=examples%2Fforecasting-series-temporales-python-scikitlearn.ipynb)
@@ -132,6 +135,9 @@ Recent improvements are highlighted in the [release notes](https://joaquinamatro
 + [**Intervalos de predicción en modelos de forecasting**](https://www.cienciadedatos.net/documentos/py42-intervalos-prediccion-modelos-forecasting-machine-learning.html)      [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JoaquinAmatRodrigo/skforecast/master?labpath=examples%2Fintervalos-prediccion-modelos-forecasting-machine-learning.ipynb)
 
 
++ [**Multi-series forecasting**](https://www.cienciadedatos.net/documentos/py44-multi-series-forecasting-skforecast-español.html)   [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JoaquinAmatRodrigo/skforecast/master?labpath=examples%2Fmulti-series-forecasting-español.ipynb)
+
+
 # Donating
 
 If you found skforecast useful, you can support us with a donation. Your contribution will help to continue developing and improving this project. Many thanks!
@@ -145,7 +151,7 @@ If you use this software, please cite it using the following metadata.
 
 **APA**:
 ```
-Amat Rodrigo, J., & Escobar Ortiz, J. skforecast (Version 0.5.1) [Computer software]
+Amat Rodrigo, J., & Escobar Ortiz, J. skforecast (Version 0.6.0) [Computer software]
 ```
 
 **BibTeX**:
@@ -153,10 +159,10 @@ Amat Rodrigo, J., & Escobar Ortiz, J. skforecast (Version 0.5.1) [Computer softw
 @software{skforecast,
 author = {Amat Rodrigo, Joaquin and Escobar Ortiz, Javier},
 license = {MIT},
-month = {10},
+month = {},
 title = {{skforecast}},
-version = {0.5.1},
-year = {2022}
+version = {0.6.0},
+year = {}
 }
 ```
 
