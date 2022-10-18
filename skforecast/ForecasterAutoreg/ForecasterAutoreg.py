@@ -10,6 +10,7 @@ from typing import Union, Dict, List, Tuple, Any, Optional
 import warnings
 import logging
 import sys
+import inspect
 import numpy as np
 import pandas as pd
 import sklearn
@@ -66,6 +67,12 @@ class ForecasterAutoreg(ForecasterBase):
         forecaster. `inverse_transform` is not available when using ColumnTransformers.
         **New in version 0.5.0**
 
+    weight_func : callable
+        Function that defines the individual weights for each sample based on the
+        index. For example, a function that assigns a lower weight to certain dates.
+        Ignored if `regressor` does not have the argument `sample_weight` in its `fit`
+        method.
+        **New in version 0.6.0**
     
     Attributes
     ----------
@@ -104,8 +111,12 @@ class ForecasterAutoreg(ForecasterBase):
     fitted : Bool
         Tag to identify if the regressor has been fitted (trained).
 
-    weights : callable
-        Function that define the individual weights for each sample.
+    weight_func : callable
+        Function that defines the individual weights for each sample based on the
+        index. For example, a function that assigns a lower weight to certain dates.
+        Ignored if `regressor` does not have the argument `sample_weight` in its `fit`
+        method.
+        **New in version 0.6.0**
         
     index_type : type
         Type of index of the input used in training.
@@ -149,20 +160,21 @@ class ForecasterAutoreg(ForecasterBase):
     python_version : str
         Version of python used to create the forecaster.
         **New in version 0.5.0**
-     
     """
     
     def __init__(
         self,
         regressor,
         lags: Union[int, np.ndarray, list],
-        transformer_y = None,
-        transformer_exog = None,
+        transformer_y: object= None,
+        transformer_exog: object= None,
+        weight_func: callable= None
     ) -> None:
         
         self.regressor            = regressor
         self.transformer_y        = transformer_y
         self.transformer_exog     = transformer_exog
+        self.weight_func          = weight_func
         self.index_type           = None
         self.index_freq           = None
         self.training_range       = None
@@ -170,7 +182,6 @@ class ForecasterAutoreg(ForecasterBase):
         self.included_exog        = False
         self.exog_type            = None
         self.exog_col_names       = None
-        self.weights              = None
         self.X_train_col_names    = None
         self.in_sample_residuals  = None
         self.out_sample_residuals = None
@@ -202,6 +213,15 @@ class ForecasterAutoreg(ForecasterBase):
                 '`lags` argument must be int, 1d numpy ndarray, range or list. '
                 f"Got {type(lags)}"
             )
+
+        if 'sample_weight' not in inspect.getfullargspec(self.regressor.fit)[0]:
+            Warning(
+                f"""
+                Argument `weight_func` is ignored since regressor {self.regressor}
+                does not accept `sample_weight` in its `fit` method.
+                """
+            )
+            self.weight_func = None
             
         self.max_lag  = max(self.lags)
         self.window_size = self.max_lag
@@ -229,7 +249,7 @@ class ForecasterAutoreg(ForecasterBase):
             f"Lags: {self.lags} \n"
             f"Transformer for y: {self.transformer_y} \n"
             f"Transformer for exog: {self.transformer_exog} \n"
-            f"Series weights: {self.weights} \n"
+            f"Weights function: {self.weight_func} \n"
             f"Window size: {self.window_size} \n"
             f"Included exogenous: {self.included_exog} \n"
             f"Type of exogenous variable: {self.exog_type} \n"
@@ -389,8 +409,7 @@ class ForecasterAutoreg(ForecasterBase):
     def fit(
         self,
         y: pd.Series,
-        exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-        series_weights: Optional[callable]=None,
+        exog: Optional[Union[pd.Series, pd.DataFrame]]=None
     ) -> None:
         """
         Training Forecaster.
@@ -405,10 +424,6 @@ class ForecasterAutoreg(ForecasterBase):
             number of observations as `y` and their indexes must be aligned so
             that y[i] is regressed on exog[i].
 
-        weights : callable
-            Function that define the individual weights for each sample.
-
-
         Returns 
         -------
         None
@@ -422,7 +437,6 @@ class ForecasterAutoreg(ForecasterBase):
         self.included_exog        = False
         self.exog_type            = None
         self.exog_col_names       = None
-        self.weights              = None
         self.X_train_col_names    = None
         self.in_sample_residuals  = None
         self.fitted               = False
@@ -436,11 +450,18 @@ class ForecasterAutoreg(ForecasterBase):
 
         X_train, y_train = self.create_train_X_y(y=y, exog=exog)
 
-        if not str(type(self.regressor)) == "<class 'xgboost.sklearn.XGBRegressor'>":
-            self.regressor.fit(X=X_train, y=y_train)
+        if self.weight_func is not None:
+            weights = self.weight_func(X_train.index)
+            if not str(type(self.regressor)) == "<class 'xgboost.sklearn.XGBRegressor'>":
+                self.regressor.fit(X=X_train, y=y_train, sample_weight=weights)
+            else:
+                self.regressor.fit(X=X_train.to_numpy(), y=y_train.to_numpy(), sample_weight=weights)
         else:
-            self.regressor.fit(X=X_train.to_numpy(), y=y_train.to_numpy())
-        
+            if not str(type(self.regressor)) == "<class 'xgboost.sklearn.XGBRegressor'>":
+                self.regressor.fit(X=X_train, y=y_train)
+            else:
+                self.regressor.fit(X=X_train.to_numpy(), y=y_train.to_numpy())
+
         self.fitted = True
         self.fit_date = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
         self.training_range = preprocess_y(y=y)[1][[0, -1]]
