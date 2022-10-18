@@ -10,6 +10,8 @@ from typing import Union, Dict, List, Tuple, Any, Optional
 import warnings
 import logging
 import sys
+import inspect
+from inspect import getsource
 import numpy as np
 import pandas as pd
 import sklearn
@@ -66,6 +68,12 @@ class ForecasterAutoreg(ForecasterBase):
         forecaster. `inverse_transform` is not available when using ColumnTransformers.
         **New in version 0.5.0**
 
+    weight_func : callable
+        Function that defines the individual weights for each sample based on the
+        index. For example, a function that assigns a lower weight to certain dates.
+        Ignored if `regressor` does not have the argument `sample_weight` in its `fit`
+        method.
+        **New in version 0.6.0**
     
     Attributes
     ----------
@@ -103,6 +111,17 @@ class ForecasterAutoreg(ForecasterBase):
         
     fitted : Bool
         Tag to identify if the regressor has been fitted (trained).
+
+    weight_func : callable
+        Function that defines the individual weights for each sample based on the
+        index. For example, a function that assigns a lower weight to certain dates.
+        Ignored if `regressor` does not have the argument `sample_weight` in its `fit`
+        method.
+        **New in version 0.6.0**
+        
+    source_code_weight_func : str
+        Source code of the custom function used to create weights.
+        **New in version 0.6.0**
         
     index_type : type
         Type of index of the input used in training.
@@ -140,41 +159,43 @@ class ForecasterAutoreg(ForecasterBase):
     fit_date : str
         Date of last fit.
 
-    skforcast_version: str
+    skforcast_version : str
         Version of skforecast library used to create the forecaster.
 
     python_version : str
         Version of python used to create the forecaster.
-        **New in version 0.5.0**
-     
+        **New in version 0.5.0**     
     """
     
     def __init__(
         self,
-        regressor,
+        regressor: object,
         lags: Union[int, np.ndarray, list],
-        transformer_y = None,
-        transformer_exog = None,
+        transformer_y: Optional[object]= None,
+        transformer_exog: Optional[object]= None,
+        weight_func: callable= None
     ) -> None:
         
-        self.regressor            = regressor
-        self.transformer_y        = transformer_y
-        self.transformer_exog     = transformer_exog
-        self.index_type           = None
-        self.index_freq           = None
-        self.training_range       = None
-        self.last_window          = None
-        self.included_exog        = False
-        self.exog_type            = None
-        self.exog_col_names       = None
-        self.X_train_col_names    = None
-        self.in_sample_residuals  = None
-        self.out_sample_residuals = None
-        self.fitted               = False
-        self.creation_date        = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
-        self.fit_date             = None
-        self.skforcast_version    = skforecast.__version__
-        self.python_version       = sys.version.split(" ")[0]
+        self.regressor               = regressor
+        self.transformer_y           = transformer_y
+        self.transformer_exog        = transformer_exog
+        self.weight_func             = weight_func
+        self.source_code_weight_func = None
+        self.index_freq              = None
+        self.training_range          = None
+        self.last_window             = None
+        self.included_exog           = False
+        self.exog_type               = None
+        self.exog_col_names          = None
+        self.X_train_col_names       = None
+        self.in_sample_residuals     = None
+        self.out_sample_residuals    = None
+        self.fitted                  = False
+        self.creation_date           = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
+        self.fit_date                = None
+        self.skforcast_version       = skforecast.__version__
+        self.python_version          = sys.version.split(" ")[0]
+        self.index_type              = None
         
         if isinstance(lags, int) and lags < 1:
             raise ValueError('Minimum value of lags allowed is 1.')
@@ -199,6 +220,18 @@ class ForecasterAutoreg(ForecasterBase):
                 f"Got {type(lags)}"
             )
             
+        if weight_func is not None:
+            self.source_code_weight_func = getsource(weight_func)
+            if 'sample_weight' not in inspect.getfullargspec(self.regressor.fit)[0]:
+                Warning(
+                    f"""
+                    Argument `weight_func` is ignored since regressor {self.regressor}
+                    does not accept `sample_weight` in its `fit` method.
+                    """
+                )
+                self.weight_func = None
+                self.source_code_weight_func = None
+
         self.max_lag  = max(self.lags)
         self.window_size = self.max_lag
 
@@ -225,6 +258,7 @@ class ForecasterAutoreg(ForecasterBase):
             f"Lags: {self.lags} \n"
             f"Transformer for y: {self.transformer_y} \n"
             f"Transformer for exog: {self.transformer_exog} \n"
+            f"Included weights function: {True if self.weight_func is not None else False} \n"
             f"Window size: {self.window_size} \n"
             f"Included exogenous: {self.included_exog} \n"
             f"Type of exogenous variable: {self.exog_type} \n"
@@ -276,8 +310,8 @@ class ForecasterAutoreg(ForecasterBase):
                 f'of the series ({len(y)}).'
             )
         
-        X_data   = np.full(shape=(n_splits, self.max_lag), fill_value=np.nan, dtype=float)
-        y_data   = np.full(shape=(n_splits, 1), fill_value=np.nan, dtype=float)
+        X_data = np.full(shape=(n_splits, self.max_lag), fill_value=np.nan, dtype=float)
+        y_data = np.full(shape=(n_splits, 1), fill_value=np.nan, dtype=float)
 
         for i in range(n_splits):
             X_index = np.arange(i, self.max_lag + i)
@@ -399,7 +433,6 @@ class ForecasterAutoreg(ForecasterBase):
             number of observations as `y` and their indexes must be aligned so
             that y[i] is regressed on exog[i].
 
-
         Returns 
         -------
         None
@@ -426,11 +459,18 @@ class ForecasterAutoreg(ForecasterBase):
 
         X_train, y_train = self.create_train_X_y(y=y, exog=exog)
 
-        if not str(type(self.regressor)) == "<class 'xgboost.sklearn.XGBRegressor'>":
-            self.regressor.fit(X=X_train, y=y_train)
+        if self.weight_func is not None:
+            weights = self.weight_func(X_train.index)
+            if not str(type(self.regressor)) == "<class 'xgboost.sklearn.XGBRegressor'>":
+                self.regressor.fit(X=X_train, y=y_train, sample_weight=weights)
+            else:
+                self.regressor.fit(X=X_train.to_numpy(), y=y_train.to_numpy(), sample_weight=weights)
         else:
-            self.regressor.fit(X=X_train.to_numpy(), y=y_train.to_numpy())
-        
+            if not str(type(self.regressor)) == "<class 'xgboost.sklearn.XGBRegressor'>":
+                self.regressor.fit(X=X_train, y=y_train)
+            else:
+                self.regressor.fit(X=X_train.to_numpy(), y=y_train.to_numpy())
+
         self.fitted = True
         self.fit_date = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
         self.training_range = preprocess_y(y=y)[1][[0, -1]]
@@ -648,7 +688,7 @@ class ForecasterAutoreg(ForecasterBase):
             Values of the series used to create the predictors (lags) needed in the 
             first iteration of prediction (t + 1).
     
-            If `last_window = `None`, the values stored in` self.last_window` are
+            If `last_window = None`, the values stored in` self.last_window` are
             used to calculate the initial predictors, and the predictions start
             right after training data.
             
