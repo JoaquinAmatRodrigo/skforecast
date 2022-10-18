@@ -122,6 +122,10 @@ class ForecasterAutoregCustom(ForecasterBase):
         Ignored if `regressor` does not have the argument `sample_weight` in its `fit`
         method.
         **New in version 0.6.0**
+
+    source_code_weight_func : str
+        Source code of the custom function used to create weights.
+        **New in version 0.6.0**
         
     index_type : type
         Type of index of the input used in training.
@@ -164,8 +168,7 @@ class ForecasterAutoregCustom(ForecasterBase):
 
     python_version : str
         Version of python used to create the forecaster.
-        **New in version 0.5.0**
-     
+        **New in version 0.5.0**     
     """
     
     def __init__(
@@ -181,6 +184,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         self.regressor                     = regressor
         self.create_predictors             = fun_predictors
         self.source_code_create_predictors = None
+        self.source_code_weight_func       = None
         self.window_size                   = window_size
         self.transformer_y                 = transformer_y
         self.transformer_exog              = transformer_exog
@@ -213,13 +217,18 @@ class ForecasterAutoregCustom(ForecasterBase):
     
         self.source_code_create_predictors = getsource(fun_predictors)
 
-        if 'sample_weight' not in inspect.getfullargspec(self.regressor.fit)[0]:
-            Warning(
-                f"""
-                Argument `weight_func` is ignored since regressor {self.regressor}
-                does not accept `sample_weight` in its `fit` method.
-                """
-            )
+        if weight_func is not None:
+            self.source_code_weight_func = getsource(weight_func)
+
+            if 'sample_weight' not in inspect.getfullargspec(self.regressor.fit)[0]:
+                Warning(
+                    f"""
+                    Argument `weight_func` is ignored since regressor {self.regressor}
+                    does not accept `sample_weight` in its `fit` method.
+                    """
+                )
+                self.weight_func = None
+                self.source_code_weight_func = None
                 
         
     def __repr__(
@@ -245,7 +254,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             f"Window size: {self.window_size} \n"
             f"Transformer for y: {self.transformer_y} \n"
             f"Transformer for exog: {self.transformer_exog} \n"
-            f"Weights function: {self.weight_func} \n"
+            f"Included weights function: {True if self.weight_func is not None else False} \n"
             f"Included exogenous: {self.included_exog} \n"
             f"Type of exogenous variable: {self.exog_type} \n"
             f"Exogenous variables names: {self.exog_col_names} \n"

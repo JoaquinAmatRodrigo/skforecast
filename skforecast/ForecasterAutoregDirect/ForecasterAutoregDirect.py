@@ -11,6 +11,7 @@ import warnings
 import logging
 import sys
 import inspect
+from inspect import getsource
 import numpy as np
 import pandas as pd
 import sklearn
@@ -185,25 +186,26 @@ class ForecasterAutoregDirect(ForecasterBase):
         weight_func: callable= None
     ) -> None:
         
-        self.regressor            = regressor
-        self.steps                = steps
-        self.regressors_          = {step: clone(self.regressor) for step in range(steps)}
-        self.transformer_y        = transformer_y
-        self.transformer_exog     = transformer_exog
-        self.weight_func          = weight_func
-        self.index_type           = None
-        self.index_freq           = None
-        self.training_range       = None
-        self.last_window          = None
-        self.included_exog        = False
-        self.exog_type            = None
-        self.exog_col_names       = None
-        self.X_train_col_names    = None
-        self.fitted               = False
-        self.creation_date        = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
-        self.fit_date             = None
-        self.skforcast_version    = skforecast.__version__
-        self.python_version       = sys.version.split(" ")[0]
+        self.regressor               = regressor
+        self.steps                   = steps
+        self.regressors_             = {step: clone(self.regressor) for step in range(steps)}
+        self.transformer_y           = transformer_y
+        self.transformer_exog        = transformer_exog
+        self.weight_func             = weight_func
+        self.source_code_weight_func = None
+        self.index_type              = None
+        self.index_freq              = None
+        self.training_range          = None
+        self.last_window             = None
+        self.included_exog           = False
+        self.exog_type               = None
+        self.exog_col_names          = None
+        self.X_train_col_names       = None
+        self.fitted                  = False
+        self.creation_date           = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
+        self.fit_date                = None
+        self.skforcast_version       = skforecast.__version__
+        self.python_version          = sys.version.split(" ")[0]
 
         if isinstance(lags, int) and lags < 1:
             raise ValueError('Minimum value of lags allowed is 1.')
@@ -227,15 +229,18 @@ class ForecasterAutoregDirect(ForecasterBase):
                 '`lags` argument must be int, 1d numpy ndarray, range or list. '
                 f"Got {type(lags)}"
             )
-            
-        if 'sample_weight' not in inspect.getfullargspec(self.regressor.fit)[0]:
-            Warning(
-                f"""
-                Argument `weight_func` is ignored since regressor {self.regressor}
-                does not accept `sample_weight` in its `fit` method.
-                """
-            )
-            self.weight_func = None
+
+        if weight_func is not None:
+            self.source_code_weight_func = getsource(weight_func)
+            if 'sample_weight' not in inspect.getfullargspec(self.regressor.fit)[0]:
+                Warning(
+                    f"""
+                    Argument `weight_func` is ignored since regressor {self.regressor}
+                    does not accept `sample_weight` in its `fit` method.
+                    """
+                )
+                self.weight_func = None
+                self.source_code_weight_func = None
             
         self.max_lag  = max(self.lags)
         self.window_size = self.max_lag
@@ -263,7 +268,7 @@ class ForecasterAutoregDirect(ForecasterBase):
             f"Lags: {self.lags} \n"
             f"Transformer for y: {self.transformer_y} \n"
             f"Transformer for exog: {self.transformer_exog} \n"
-            f"Weights function: {self.weight_func} \n"
+            f"Included weights function: {True if self.weight_func is not None else False} \n"
             f"Window size: {self.window_size} \n"
             f"Maximum steps predicted: {self.steps} \n"
             f"Included exogenous: {self.included_exog} \n"
