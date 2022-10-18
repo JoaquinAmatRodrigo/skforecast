@@ -135,6 +135,9 @@ Recent improvements are highlighted in the [release notes](https://joaquinamatro
 + [**Intervalos de predicción en modelos de forecasting**](https://www.cienciadedatos.net/documentos/py42-intervalos-prediccion-modelos-forecasting-machine-learning.html)      [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JoaquinAmatRodrigo/skforecast/master?labpath=examples%2Fintervalos-prediccion-modelos-forecasting-machine-learning.ipynb)
 
 
++ [**Multi-series forecasting**](https://www.cienciadedatos.net/documentos/py44-multi-series-forecasting-skforecast-español.html)   [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JoaquinAmatRodrigo/skforecast/master?labpath=examples%2Fmulti-series-forecasting-español.ipynb)
+
+
 # Donating
 
 If you found skforecast useful, you can support us with a donation. Your contribution will help to continue developing and improving this project. Many thanks!
