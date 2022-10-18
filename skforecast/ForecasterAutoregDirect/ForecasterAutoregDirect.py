@@ -10,6 +10,7 @@ from typing import Union, Dict, List, Tuple, Any, Optional
 import warnings
 import logging
 import sys
+import inspect
 import numpy as np
 import pandas as pd
 import sklearn
@@ -62,13 +63,21 @@ class ForecasterAutoregDirect(ForecasterBase):
         preprocessing API with methods: fit, transform, fit_transform and inverse_transform.
         ColumnTransformers are not allowed since they do not have inverse_transform method.
         The transformation is applied to `y` before training the forecaster.
+        **New in version 0.5.0**
 
     transformer_exog : transformer (preprocessor) compatible with the scikit-learn
                        preprocessing API, default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API. The transformation is applied to `exog` before training the
         forecaster. `inverse_transform` is not available when using ColumnTransformers.
+        **New in version 0.5.0**
 
+    weight_func : callable
+        Function that defines the individual weights for each sample based on the
+        index. For example, a function that assigns a lower weight to certain dates.
+        Ignored if `regressor` does not have the argument `sample_weight` in its `fit`
+        method.
+        **New in version 0.6.0**
     
     Attributes
     ----------
@@ -88,6 +97,21 @@ class ForecasterAutoregDirect(ForecasterBase):
     lags : numpy ndarray
         Lags used as predictors.
         
+    transformer_y : transformer (preprocessor) compatible with the scikit-learn
+                    preprocessing API, default `None`
+        An instance of a transformer (preprocessor) compatible with the scikit-learn
+        preprocessing API with methods: fit, transform, fit_transform and inverse_transform.
+        ColumnTransformers are not allowed since they do not have inverse_transform method.
+        The transformation is applied to `y` before training the forecaster.
+        **New in version 0.5.0**
+
+    transformer_exog : transformer (preprocessor) compatible with the scikit-learn
+                    preprocessing API, default `None`
+        An instance of a transformer (preprocessor) compatible with the scikit-learn
+        preprocessing API. The transformation is applied to `exog` before training the
+        forecaster. `inverse_transform` is not available when using ColumnTransformers.
+        **New in version 0.5.0**
+        
     max_lag : int
         Maximum value of lag included in `lags`.
 
@@ -95,12 +119,19 @@ class ForecasterAutoregDirect(ForecasterBase):
         Last window the forecaster has seen during trained. It stores the
         values needed to predict the next `step` right after the training data.
         
-    window_size: int
+    window_size : int
         Size of the window needed to create the predictors. It is equal to
         `max_lag`.
         
-    fitted: Bool
+    fitted : Bool
         Tag to identify if the regressor has been fitted (trained).
+        
+    weight_func : callable
+        Function that defines the individual weights for each sample based on the
+        index. For example, a function that assigns a lower weight to certain dates.
+        Ignored if `regressor` does not have the argument `sample_weight` in its `fit`
+        method.
+        **New in version 0.6.0**
         
     index_type : type
         Type of index of the input used in training.
@@ -108,8 +139,8 @@ class ForecasterAutoregDirect(ForecasterBase):
     index_freq : str
         Frequency of Index of the input used in training.
         
-    training_range: pandas Index
-        First and last index of samples used during training.
+    training_range : pandas Index
+        First and last values of index of the data used during training.
         
     included_exog : bool
         If the forecaster has been trained using exogenous variable/s.
@@ -117,23 +148,23 @@ class ForecasterAutoregDirect(ForecasterBase):
     exog_type : type
         Type of exogenous variable/s used in training.
         
-    exog_col_names : tuple
+    exog_col_names : list
         Names of columns of `exog` if `exog` used in training was a pandas
         DataFrame.
 
-    X_train_col_names : tuple
+    X_train_col_names : list
         Names of columns of the matrix created internally for training.
 
     creation_date: str
         Date of creation.
 
-    fit_date: str
+    fit_date : str
         Date of last fit.
 
-    skforcast_version: str
+    skforcast_version : str
         Version of skforecast library used to create the forecaster.
 
-    python_version: str
+    python_version : str
         Version of python used to create the forecaster.
         
     Notes
@@ -146,11 +177,12 @@ class ForecasterAutoregDirect(ForecasterBase):
     
     def __init__(
         self, 
-        regressor, 
+        regressor: object,
         steps: int,
         lags: Union[int, np.ndarray, list],
-        transformer_y = None,
-        transformer_exog = None,
+        transformer_y: Optional[object]= None,
+        transformer_exog: Optional[object]= None,
+        weight_func: callable= None
     ) -> None:
         
         self.regressor            = regressor
@@ -158,6 +190,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         self.regressors_          = {step: clone(self.regressor) for step in range(steps)}
         self.transformer_y        = transformer_y
         self.transformer_exog     = transformer_exog
+        self.weight_func          = weight_func
         self.index_type           = None
         self.index_freq           = None
         self.training_range       = None
@@ -195,6 +228,15 @@ class ForecasterAutoregDirect(ForecasterBase):
                 f"Got {type(lags)}"
             )
             
+        if 'sample_weight' not in inspect.getfullargspec(self.regressor.fit)[0]:
+            Warning(
+                f"""
+                Argument `weight_func` is ignored since regressor {self.regressor}
+                does not accept `sample_weight` in its `fit` method.
+                """
+            )
+            self.weight_func = None
+            
         self.max_lag  = max(self.lags)
         self.window_size = self.max_lag
                 
@@ -221,6 +263,7 @@ class ForecasterAutoregDirect(ForecasterBase):
             f"Lags: {self.lags} \n"
             f"Transformer for y: {self.transformer_y} \n"
             f"Transformer for exog: {self.transformer_exog} \n"
+            f"Weights function: {self.weight_func} \n"
             f"Window size: {self.window_size} \n"
             f"Maximum steps predicted: {self.steps} \n"
             f"Included exogenous: {self.included_exog} \n"
@@ -261,15 +304,15 @@ class ForecasterAutoregDirect(ForecasterBase):
         X_data : 2d numpy ndarray, shape (samples - max(self.lags), len(self.lags))
             2d numpy array with the lagged values (predictors).
         
-        y_data : 2d numpy ndarray, shape (samples - max(self.lags),)
-            Values of the time series related to each row of `X_data` for each step.
+        y_data : 1d numpy ndarray, shape (samples - max(self.lags),)
+            Values of the time series related to each row of `X_data`.
         
         """
 
         n_splits = len(y) - self.max_lag - (self.steps - 1)
         
-        X_data  = np.full(shape=(n_splits, self.max_lag), fill_value=np.nan, dtype=float)
-        y_data  = np.full(shape=(n_splits, self.steps), fill_value=np.nan, dtype=float)
+        X_data = np.full(shape=(n_splits, self.max_lag), fill_value=np.nan, dtype=float)
+        y_data = np.full(shape=(n_splits, self.steps), fill_value=np.nan, dtype=float)
 
         for i in range(n_splits):
             X_index = np.arange(i, self.max_lag + i)
@@ -301,7 +344,6 @@ class ForecasterAutoregDirect(ForecasterBase):
         exog : pandas Series, pandas DataFrame, default `None`
             Exogenous variable/s included as predictor/s. Must have the same
             number of observations as `y` and their indexes must be aligned.
-
 
         Returns 
         -------
@@ -352,7 +394,7 @@ class ForecasterAutoregDirect(ForecasterBase):
             exog_values, exog_index = preprocess_exog(exog=exog)
 
             if not (exog_index[:len(y_index)] == y_index).all():
-                raise Exception(
+                raise ValueError(
                     ('Different index for `y` and `exog`. They must be equal '
                      'to ensure the correct alignment of values.')      
                 )
@@ -396,7 +438,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         y_train: pd.Series
     ) -> Tuple[pd.DataFrame, pd.Series]:
         """
-        Select columns needed to train a forcaster for a specific step. The input
+        Select columns needed to train a forecaster for a specific step. The input
         matrices should be created with created with `create_train_X_y()`.         
 
         Parameters
@@ -457,7 +499,6 @@ class ForecasterAutoregDirect(ForecasterBase):
             number of observations as `y` and their indexes must be aligned so
             that y[i] is regressed on exog[i].
 
-
         Returns 
         -------
         None
@@ -491,10 +532,18 @@ class ForecasterAutoregDirect(ForecasterBase):
                                             X_train = X_train,
                                             y_train = y_train
                                          )
-            if not str(type(self.regressor)) == "<class 'xgboost.sklearn.XGBRegressor'>":
-                self.regressors_[step].fit(X_train_step, y_train_step)
+
+            if self.weight_func is not None:
+                weights = self.weight_func(X_train_step.index)
+                if not str(type(self.regressor)) == "<class 'xgboost.sklearn.XGBRegressor'>":
+                    self.regressors_[step].fit(X=X_train_step, y=y_train_step, sample_weight=weights)
+                else:
+                    self.regressors_[step].fit(X=X_train_step.to_numpy(), y=y_train_step.to_numpy(), sample_weight=weights)
             else:
-                self.regressors_[step].fit(X_train_step.to_numpy(), y_train_step.to_numpy())
+                if not str(type(self.regressor)) == "<class 'xgboost.sklearn.XGBRegressor'>":
+                    self.regressors_[step].fit(X=X_train_step, y=y_train_step)
+                else:
+                    self.regressors_[step].fit(X=X_train_step.to_numpy(), y=y_train_step.to_numpy())
         
         self.fitted = True
         self.fit_date = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')

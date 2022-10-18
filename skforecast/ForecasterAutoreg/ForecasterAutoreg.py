@@ -154,7 +154,7 @@ class ForecasterAutoreg(ForecasterBase):
     fit_date : str
         Date of last fit.
 
-    skforcast_version: str
+    skforcast_version : str
         Version of skforecast library used to create the forecaster.
 
     python_version : str
@@ -164,10 +164,10 @@ class ForecasterAutoreg(ForecasterBase):
     
     def __init__(
         self,
-        regressor,
+        regressor: object,
         lags: Union[int, np.ndarray, list],
-        transformer_y: object= None,
-        transformer_exog: object= None,
+        transformer_y: Optional[object]= None,
+        transformer_exog: Optional[object]= None,
         weight_func: callable= None
     ) -> None:
         
@@ -301,8 +301,8 @@ class ForecasterAutoreg(ForecasterBase):
                 f'of the series ({len(y)}).'
             )
         
-        X_data   = np.full(shape=(n_splits, self.max_lag), fill_value=np.nan, dtype=float)
-        y_data   = np.full(shape=(n_splits, 1), fill_value=np.nan, dtype=float)
+        X_data = np.full(shape=(n_splits, self.max_lag), fill_value=np.nan, dtype=float)
+        y_data = np.full(shape=(n_splits, 1), fill_value=np.nan, dtype=float)
 
         for i in range(n_splits):
             X_index = np.arange(i, self.max_lag + i)
@@ -679,7 +679,7 @@ class ForecasterAutoreg(ForecasterBase):
             Values of the series used to create the predictors (lags) needed in the 
             first iteration of prediction (t + 1).
     
-            If `last_window = `None`, the values stored in` self.last_window` are
+            If `last_window = None`, the values stored in` self.last_window` are
             used to calculate the initial predictors, and the predictions start
             right after training data.
             
