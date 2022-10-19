@@ -15,12 +15,13 @@ def test_set_out_sample_residuals_exception_when_residuals_is_not_pd_Series():
     """
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
     forecaster.series_levels = ['1', '2', '3']
+    residuals=[1, 2, 3]
 
     err_msg = re.escape(
-                f"`residuals` argument must be `pd.Series`. Got {type([1, 2, 3])}"
+                f"`residuals` argument must be `pd.Series`. Got {type(residuals)}."
               )
     with pytest.raises(TypeError, match = err_msg):
-        forecaster.set_out_sample_residuals(residuals=[1, 2, 3], level='1')
+        forecaster.set_out_sample_residuals(residuals=residuals, level='1')
 
 
 def test_set_out_sample_residuals_exception_when_level_not_in_series_levels():
@@ -31,7 +32,7 @@ def test_set_out_sample_residuals_exception_when_level_not_in_series_levels():
     forecaster.series_levels = ['1', '2', '3']
 
     err_msg = re.escape(
-                f'`level` must be one of the `series_levels` : {forecaster.series_levels}'
+                f'`level` must be one of the `series_levels` : {forecaster.series_levels}.'
               )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.set_out_sample_residuals(residuals = pd.Series(np.arange(10)), 

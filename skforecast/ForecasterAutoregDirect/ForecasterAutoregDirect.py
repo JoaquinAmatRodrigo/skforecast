@@ -6,6 +6,7 @@
 ################################################################################
 # coding=utf-8
 
+from multiprocessing.sharedctypes import Value
 from typing import Union, Dict, List, Tuple, Any, Optional
 import warnings
 import logging
@@ -73,7 +74,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         forecaster. `inverse_transform` is not available when using ColumnTransformers.
         **New in version 0.5.0**
 
-    weight_func : callable
+    weight_func : callable, default `None`
         Function that defines the individual weights for each sample based on the
         index. For example, a function that assigns a lower weight to certain dates.
         Ignored if `regressor` does not have the argument `sample_weight` in its `fit`
@@ -133,6 +134,10 @@ class ForecasterAutoregDirect(ForecasterBase):
         Ignored if `regressor` does not have the argument `sample_weight` in its `fit`
         method.
         **New in version 0.6.0**
+
+    source_code_weight_func : str
+        Source code of the custom function used to create weights.
+        **New in version 0.6.0**
         
     index_type : type
         Type of index of the input used in training.
@@ -167,6 +172,7 @@ class ForecasterAutoregDirect(ForecasterBase):
 
     python_version : str
         Version of python used to create the forecaster.
+        **New in version 0.5.0**   
         
     Notes
     -----
@@ -181,9 +187,9 @@ class ForecasterAutoregDirect(ForecasterBase):
         regressor: object,
         steps: int,
         lags: Union[int, np.ndarray, list],
-        transformer_y: Optional[object]= None,
-        transformer_exog: Optional[object]= None,
-        weight_func: callable= None
+        transformer_y: Optional[object]=None,
+        transformer_exog: Optional[object]=None,
+        weight_func: callable=None
     ) -> None:
         
         self.regressor               = regressor
@@ -723,10 +729,10 @@ class ForecasterAutoregDirect(ForecasterBase):
         
         Parameters
         ----------
-        lags : int, list, 1D np.array, range
+        lags : int, list, 1D np.ndarray, range
             Lags used as predictors. Index starts at 1, so lag 1 is equal to t-1.
                 `int`: include lags from 1 to `lags`.
-                `list` or `np.array`: include only lags present in `lags`.
+                `list` or `np.ndarray`: include only lags present in `lags`.
 
         Returns 
         -------
@@ -735,10 +741,10 @@ class ForecasterAutoregDirect(ForecasterBase):
         """
         
         if isinstance(lags, int) and lags < 1:
-            raise Exception('min value of lags allowed is 1')
+            raise ValueError('Minimum value of lags allowed is 1.')
             
         if isinstance(lags, (list, range, np.ndarray)) and min(lags) < 1:
-            raise Exception('min value of lags allowed is 1')
+            raise ValueError('Minimum value of lags allowed is 1.')
             
         if isinstance(lags, int):
             self.lags = np.arange(lags) + 1
@@ -747,9 +753,9 @@ class ForecasterAutoregDirect(ForecasterBase):
         elif isinstance(lags, np.ndarray):
             self.lags = lags
         else:
-            raise Exception(
+            raise TypeError(
                 f"`lags` argument must be `int`, `1D np.ndarray`, `range` or `list`. "
-                f"Got {type(lags)}"
+                f"Got {type(lags)}."
             )
             
         self.max_lag  = max(self.lags)
@@ -790,11 +796,11 @@ class ForecasterAutoregDirect(ForecasterBase):
             )
 
         if step > self.steps:
-            raise Exception(
+            raise ValueError(
                 f"Forecaster trained for {self.steps} steps. Got step={step}."
             )
         if step < 1:
-            raise Exception("Minimum step is 1.")
+            raise ValueError("Minimum step is 1.")
 
         # Stored regressors start at index 0
         step = step - 1

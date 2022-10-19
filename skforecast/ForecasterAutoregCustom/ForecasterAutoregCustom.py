@@ -69,7 +69,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         forecaster. `inverse_transform` is not available when using ColumnTransformers.
         **New in version 0.5.0**
     
-    weight_func : callable
+    weight_func : callable, default `None`
         Function that defines the individual weights for each sample based on the
         index. For example, a function that assigns a lower weight to certain dates.
         Ignored if `regressor` does not have the argument `sample_weight` in its `fit`
@@ -168,7 +168,8 @@ class ForecasterAutoregCustom(ForecasterBase):
 
     python_version : str
         Version of python used to create the forecaster.
-        **New in version 0.5.0**     
+        **New in version 0.5.0**
+    
     """
     
     def __init__(
@@ -176,9 +177,9 @@ class ForecasterAutoregCustom(ForecasterBase):
         regressor: object, 
         fun_predictors: callable, 
         window_size: int,
-        transformer_y: Optional[object]= None,
-        transformer_exog: Optional[object]= None,
-        weight_func: callable= None
+        transformer_y: Optional[object]=None,
+        transformer_exog: Optional[object]=None,
+        weight_func: callable=None
     ) -> None:
         
         self.regressor                     = regressor
@@ -477,7 +478,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         self,
         steps: int,
         last_window: np.ndarray,
-        exog: np.ndarray
+        exog: Optional[np.ndarray]=None
     ) -> np.ndarray:
         """
         Predict n steps ahead. It is an iterative process in which, each prediction,
@@ -492,7 +493,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             Values of the series used to create the predictors (lags) need in the 
             first iteration of prediction (t + 1).
             
-        exog : numpy ndarray, pandas DataFrame
+        exog : numpy ndarray, default `None`
             Exogenous variable/s included as predictor/s.
 
         Returns 
@@ -984,8 +985,8 @@ class ForecasterAutoregCustom(ForecasterBase):
         """
 
         if not isinstance(residuals, pd.Series):
-            raise Exception(
-                f"`residuals` argument must be `pd.Series`. Got {type(residuals)}"
+            raise TypeError(
+                f"`residuals` argument must be `pd.Series`. Got {type(residuals)}."
             )
 
         if not transform and self.transformer_y is not None:

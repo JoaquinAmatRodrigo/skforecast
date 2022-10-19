@@ -164,9 +164,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self,
         regressor,
         lags: Union[int, np.ndarray, list],
-        transformer_series: Optional[object]= None,
-        transformer_exog: Optional[object]= None,
-        series_weights: Optional[dict]= None
+        transformer_series: Optional[object]=None,
+        transformer_exog: Optional[object]=None,
+        series_weights: Optional[dict]=None
     ) -> None:
         
         self.regressor            = regressor
@@ -192,15 +192,15 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.python_version       = sys.version.split(" ")[0]
         
         if isinstance(lags, int) and lags < 1:
-            raise Exception('Minimum value of lags allowed is 1.')
-            
-        if isinstance(lags, (list, range, np.ndarray)) and min(lags) < 1:
-            raise Exception('Minimum value of lags allowed is 1.')
+            raise ValueError('Minimum value of lags allowed is 1.')
 
         if isinstance(lags, (list, np.ndarray)):
             for lag in lags:
                 if not isinstance(lag, (int, np.int64, np.int32)):
-                    raise Exception('Values in lags must be int.')
+                    raise TypeError('All values in `lags` must be int.')
+            
+        if isinstance(lags, (list, range, np.ndarray)) and min(lags) < 1:
+            raise ValueError('Minimum value of lags allowed is 1.')
             
         if isinstance(lags, int):
             self.lags = np.arange(lags) + 1
@@ -209,7 +209,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         elif isinstance(lags, np.ndarray):
             self.lags = lags
         else:
-            raise Exception(
+            raise TypeError(
                 '`lags` argument must be int, 1d numpy ndarray, range or list. '
                 f"Got {type(lags)}"
             )
@@ -334,14 +334,14 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             
         exog : pandas Series, pandas DataFrame, default `None`
             Exogenous variable/s included as predictor/s. Must have the same
-            number of observations as `y` and their indexes must be aligned.
+            number of observations as `series` and their indexes must be aligned.
 
         Returns 
         -------
         X_train : pandas DataFrame
             Pandas DataFrame with the training values (predictors).
             
-        y_train : pandas Series, shape (len(y) - self.max_lag, )
+        y_train : pandas Series, shape (len(series) - self.max_lag, )
             Values (target) of the time series related to each row of `X_train`.
 
         y_index : pandas Index
@@ -350,7 +350,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         """
 
         if not isinstance(series, pd.DataFrame):
-            raise TypeError('`series` must be a pandas DataFrame.')
+            raise TypeError(f'`series` must be a pandas DataFrame. Got {type(series)}.')
 
         series_levels = list(series.columns)
 
@@ -365,7 +365,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             if list(self.transformer_series.keys()) != series_levels:
                 raise ValueError(
                     (f'When `transformer_series` parameter is a `dict`, its keys '
-                     f'must be the same as `series_levels` : {series_levels}')
+                     f'must be the same as `series_levels` : {series_levels}.')
                 )
         
         X_levels = []
@@ -475,8 +475,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             
         exog : pandas Series, pandas DataFrame, default `None`
             Exogenous variable/s included as predictor/s. Must have the same
-            number of observations as `y` and their indexes must be aligned so
-            that y[i] is regressed on exog[i].
+            number of observations as `series` and their indexes must be aligned so
+            that series[i] is regressed on exog[i].
 
         store_in_sample_residuals : bool, default `True`
             if True, in_sample_residuals are stored.
@@ -525,9 +525,15 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             sample_weight = [np.repeat(self.series_weights[serie], sum(X_train[serie])) 
                             for serie in series.columns]
             sample_weight = np.concatenate(sample_weight)
-            self.regressor.fit(X=X_train, y=y_train, sample_weight=sample_weight)
+            if not str(type(self.regressor)) == "<class 'xgboost.sklearn.XGBRegressor'>":
+                self.regressor.fit(X=X_train, y=y_train, sample_weight=sample_weight)
+            else:
+                self.regressor.fit(X=X_train.to_numpy(), y=y_train.to_numpy(), sample_weight=sample_weight)
         else:
-            self.regressor.fit(X=X_train, y=y_train)
+            if not str(type(self.regressor)) == "<class 'xgboost.sklearn.XGBRegressor'>":
+                self.regressor.fit(X=X_train, y=y_train)
+            else:
+                self.regressor.fit(X=X_train.to_numpy(), y=y_train.to_numpy())
             
         self.fitted = True
         self.fit_date = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
@@ -544,7 +550,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         # This is done to save time during fit in functions such as backtesting()
         if store_in_sample_residuals:
 
-            residuals = y_train - self.regressor.predict(X_train)
+            if not str(type(self.regressor)) == "<class 'xgboost.sklearn.XGBRegressor'>":
+                residuals = y_train - self.regressor.predict(X_train)
+            else:
+                residuals = y_train - self.regressor.predict(X_train.to_numpy())
 
             for serie in series.columns:
                 residuals_dict[serie] = residuals.values[X_train[serie] == 1.]
@@ -572,7 +581,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         steps: int,
         level: str,
         last_window: np.ndarray,
-        exog: np.ndarray
+        exog: Optional[np.ndarray]=None
     ) -> np.ndarray:
         """
         Predict n steps ahead. It is an iterative process in which, each prediction,
@@ -590,7 +599,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             Values of the series used to create the predictors (lags) need in the 
             first iteration of prediction (t + 1).
             
-        exog : numpy ndarray, pandas DataFrame
+        exog : numpy ndarray, default `None`
             Exogenous variable/s included as predictor/s.
 
         Returns 
@@ -802,9 +811,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         -------
         prediction_interval : numpy ndarray, shape (steps, 2)
             Interval estimated for each prediction by bootstrapping:
-            
-            - lower_bound: lower bound of the interval.
-            - upper_bound: upper bound interval of the interval.
+                lower_bound: lower bound of the interval.
+                upper_bound: upper bound interval of the interval.
 
         Notes
         -----
@@ -932,10 +940,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         -------
         predictions : pandas DataFrame
             Values predicted by the forecaster and their estimated interval:
-
-            - pred: predictions.
-            - lower_bound: lower bound of the interval.
-            - upper_bound: upper bound interval of the interval.
+                pred: predictions.
+                lower_bound: lower bound of the interval.
+                upper_bound: upper bound interval of the interval.
 
         Notes
         -----
@@ -1096,10 +1103,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         """
         
         if isinstance(lags, int) and lags < 1:
-            raise Exception('min value of lags allowed is 1')
+            raise ValueError('Minimum value of lags allowed is 1.')
             
         if isinstance(lags, (list, range, np.ndarray)) and min(lags) < 1:
-            raise Exception('min value of lags allowed is 1')
+            raise ValueError('Minimum value of lags allowed is 1.')
             
         if isinstance(lags, int):
             self.lags = np.arange(lags) + 1
@@ -1108,9 +1115,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         elif isinstance(lags, np.ndarray):
             self.lags = lags
         else:
-            raise Exception(
+            raise TypeError(
                 f"`lags` argument must be `int`, `1D np.ndarray`, `range` or `list`. "
-                f"Got {type(lags)}"
+                f"Got {type(lags)}."
             )
             
         self.max_lag  = max(self.lags)
@@ -1155,12 +1162,12 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         if not isinstance(residuals, pd.Series):
             raise TypeError(
-                f"`residuals` argument must be `pd.Series`. Got {type(residuals)}"
+                f"`residuals` argument must be `pd.Series`. Got {type(residuals)}."
             )
 
         if level not in self.series_levels:
             raise ValueError(
-                f'`level` must be one of the `series_levels` : {self.series_levels}'
+                f'`level` must be one of the `series_levels` : {self.series_levels}.'
             )
 
         if not transform and self.transformer_series[level] is not None:
