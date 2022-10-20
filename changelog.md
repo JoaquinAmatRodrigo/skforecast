@@ -6,17 +6,30 @@ All notable changes to this project will be documented in this file.
 
 **Added**
 
-+ `weight_func`
++ `weight_func` in all forecasters
 
++ `set_out_sample_residuals` added argument `random_state`.
+  
 **Changed**
 
 + Remove `ForecasterAutoregMultiOutput` in favor of `ForecasterAutoregDirect`, (deprecated since 0.5.0).
 
 + Rename `exog_to_multi_output` to `exog_to_direct` in `utils`.
 
++ `out_sample_residuals` is a `dict` of np.arrays `ForecasterAutoregMultiSeries`.
+
++ `set_out_sample_residuals` delete argument `level`.
+
++ predict y predict_interval return df and column names
+
++ predict y predict_interval argument `level` change to `levels`
+
++ `check_predict_input` argument `level` change to `levels`
+
+
 **Fixed**
 
-+ 
++ last_window in `ForecasterAutoregMultiSeries` now works when is a df
 
 
 ## [0.5.1] - [2022-10-05]
