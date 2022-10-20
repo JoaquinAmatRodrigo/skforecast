@@ -27,6 +27,7 @@ nav:
       - Multi-time series forecasting: user_guides/multi-time-series-forecasting.ipynb
       - Exogenous variables: user_guides/autoregresive-forecaster-exogenous.ipynb
       - Custom predictors: user_guides/custom-predictors.ipynb
+      - Forecasting with weights: user_guides/forecasting-with-weights.ipynb
       - Backtesting forecaster: user_guides/backtesting.ipynb
       - Hyperparameter tuning and lags selection: user_guides/hyperparameter-tuning-and-lags-selection.ipynb
       - Scikit-learn Transformers and Pipelines: user_guides/sklearn-transformers-and-pipeline.ipynb
