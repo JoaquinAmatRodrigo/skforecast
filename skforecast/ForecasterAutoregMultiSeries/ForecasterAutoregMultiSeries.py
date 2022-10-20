@@ -142,9 +142,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         Residuals of the model when predicting training data. Only stored up to
         1000 values in the form `{level: residuals}`.
         
-    out_sample_residuals : pandas Series
+    out_sample_residuals : dict
         Residuals of the model when predicting non training data. Only stored
-        up to 1000 values. Use `set_out_sample_residuals` to set values.
+        up to 1000 values in the form `{level: residuals}`. Use 
+        `set_out_sample_residuals` to set values.
 
     creation_date : str
         Date of creation.
@@ -545,7 +546,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             self.index_freq = y_index.step
         self.index_values = y_index
 
-        residuals_dict = {}
+        in_sample_residuals = {}
         
         # This is done to save time during fit in functions such as backtesting()
         if store_in_sample_residuals:
@@ -556,20 +557,20 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 residuals = y_train - self.regressor.predict(X_train.to_numpy())
 
             for serie in series.columns:
-                residuals_dict[serie] = residuals.values[X_train[serie] == 1.]
-                if len(residuals_dict[serie]) > 1000:
+                in_sample_residuals[serie] = residuals.values[X_train[serie] == 1.]
+                if len(in_sample_residuals[serie]) > 1000:
                     # Only up to 1000 residuals are stored
                     rng = np.random.default_rng(seed=123)
-                    residuals_dict[serie] = rng.choice(
-                                                a       = residuals_dict[serie], 
+                    in_sample_residuals[serie] = rng.choice(
+                                                a       = in_sample_residuals[serie], 
                                                 size    = 1000, 
                                                 replace = False
                                             )
         else:
             for serie in series.columns:
-                residuals_dict[serie] = np.array([None])
+                in_sample_residuals[serie] = np.array([None])
 
-        self.in_sample_residuals = residuals_dict
+        self.in_sample_residuals = in_sample_residuals
 
         # The last time window of training data is stored so that lags needed as
         # predictors in the first iteration of `predict()` can be calculated.
@@ -638,39 +639,44 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
     def predict(
         self,
         steps: int,
-        level: str,
+        levels: Optional[Union[str, list]]=None,
         last_window: Optional[pd.DataFrame]=None,
         exog: Optional[Union[pd.Series, pd.DataFrame]]=None
-    ) -> pd.Series:
+    ) -> pd.DataFrame:
         """
         Predict n steps ahead. It is an recursive process in which, each prediction,
         is used as a predictor for the next step.
-        
+
         Parameters
         ----------
         steps : int
             Number of future steps predicted.
-            
-        level : str
-            Time series to be predicted.
-            
+
+        levels : str, list, default `None`
+            Time series to be predicted. If `None` all levels will be predicted.
+
         last_window : pandas DataFrame, default `None`
-            Values of the series used to create the predictors (lags) need in the 
+            Values of the series used to create the predictors (lags) need in the
             first iteration of prediction (t + 1).
-    
+
             If `last_window = None`, the values stored in `self.last_window` are
             used to calculate the initial predictors, and the predictions start
             right after training data.
-            
+
         exog : pandas Series, pandas DataFrame, default `None`
             Exogenous variable/s included as predictor/s.
 
-        Returns 
+        Returns
         -------
-        predictions : pandas Series
-            Predicted values.
-        
+        predictions : pandas DataFrame
+            Predicted values, one column for each level.
+
         """
+        
+        if levels is None:
+            levels = self.series_levels
+        elif isinstance(levels, str):
+            levels = [levels]
         
         check_predict_input(
             forecaster_type = type(self),
@@ -686,67 +692,75 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             exog_col_names  = self.exog_col_names,
             interval        = None,
             max_steps       = None,
-            level           = level,
+            levels          = levels,
             series_levels   = self.series_levels
         )
-
+        
         if exog is not None:
             if isinstance(exog, pd.DataFrame):
                 exog = transform_dataframe(
-                            df                = exog,
-                            transformer       = self.transformer_exog,
-                            fit               = False,
-                            inverse_transform = False
+                           df                = exog,
+                           transformer       = self.transformer_exog,
+                           fit               = False,
+                           inverse_transform = False
                        )
             else:
                 exog = transform_series(
-                            series            = exog,
-                            transformer       = self.transformer_exog,
-                            fit               = False,
-                            inverse_transform = False
+                           series            = exog,
+                           transformer       = self.transformer_exog,
+                           fit               = False,
+                           inverse_transform = False
                        )
             
             exog_values, _ = preprocess_exog(
-                                exog = exog.iloc[:steps, ]
+                                 exog = exog.iloc[:steps, ]
                              )
         else:
             exog_values = None
-            
-        if last_window is None:
-            last_window = self.last_window[level]
 
-        last_window = transform_series(
-                            series            = last_window,
-                            transformer       = self.transformer_series[level],
-                            fit               = False,
-                            inverse_transform = False
-                      )
-        last_window_values, last_window_index = preprocess_last_window(
-                                                    last_window = last_window
-                                                )
-            
-        predictions = self._recursive_predict(
-                        steps       = steps,
-                        level       = level,
-                        last_window = copy(last_window_values),
-                        exog        = copy(exog_values)
-                      )
+        predictions = []
 
-        predictions = pd.Series(
-                        data  = predictions,
-                        index = expand_index(
-                                    index = last_window_index,
-                                    steps = steps
-                                ),
-                        name = 'pred'
-                      )
+        for level in levels:
 
-        predictions = transform_series(
-                        series            = predictions,
-                        transformer       = self.transformer_series[level],
-                        fit               = False,
-                        inverse_transform = True
-                      )
+            if last_window is None:
+                last_window = self.last_window.copy()
+
+            last_window_level = transform_series(
+                                    series            = last_window[level],
+                                    transformer       = self.transformer_series[level],
+                                    fit               = False,
+                                    inverse_transform = False
+                                )
+            last_window_values, last_window_index = preprocess_last_window(
+                                                        last_window = last_window_level
+                                                    )
+                
+            preds_level = self._recursive_predict(
+                              steps       = steps,
+                              level       = level,
+                              last_window = copy(last_window_values),
+                              exog        = copy(exog_values)
+                          )
+
+            preds_level = pd.Series(
+                              data  = preds_level,
+                              index = expand_index(
+                                          index = last_window_index,
+                                          steps = steps
+                                      ),
+                              name = level
+                          )
+
+            preds_level = transform_series(
+                              series            = preds_level,
+                              transformer       = self.transformer_series[level],
+                              fit               = False,
+                              inverse_transform = True
+                          )
+
+            predictions.append(preds_level)    
+
+        predictions = pd.concat(predictions, axis=1)
 
         return predictions
     
@@ -847,7 +861,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             if in_sample_residuals:
                 residuals = self.in_sample_residuals[level]
             else:
-                residuals = self.out_sample_residuals
+                residuals = self.out_sample_residuals[level]
 
             rng = np.random.default_rng(seed=seeds[i])
             sample_residuals = rng.choice(
@@ -884,7 +898,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
     def predict_interval(
         self,
         steps: int,
-        level: str,
+        levels: Optional[Union[str, list]]=None,
         last_window: Optional[pd.DataFrame]=None,
         exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
         interval: list=[5, 95],
@@ -901,9 +915,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         ---------- 
         steps : int
             Number of future steps predicted.
-        
-        level : str
-            Time series to be predicted.        
+
+        levels : str, list, default `None`
+            Time series to be predicted. If `None` all levels will be predicted.    
             
         last_window : pandas DataFrame, default `None`
             Values of the series used to create the predictors (lags) needed in the 
@@ -939,10 +953,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         Returns 
         -------
         predictions : pandas DataFrame
-            Values predicted by the forecaster and their estimated interval:
-                pred: predictions.
-                lower_bound: lower bound of the interval.
-                upper_bound: upper bound interval of the interval.
+            Values predicted by the forecaster and their estimated interval.
+                level: predictions.
+                level_lower_bound: lower bound of the interval.
+                level_upper_bound: upper bound interval of the interval.
 
         Notes
         -----
@@ -953,12 +967,33 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         """
         
-        if in_sample_residuals and (self.in_sample_residuals[level] == None).any():
+        if levels is None:
+            levels = self.series_levels
+        elif isinstance(levels, str):
+            levels = [levels]
+
+        for level in levels:
+            if in_sample_residuals and (self.in_sample_residuals[level] == None).any():
+                raise ValueError(
+                    (f'`forecaster.in_sample_residuals[{level}]` contains `None` values. '
+                    'Try using `fit` method with `in_sample_residuals=True` or set in '
+                    '`predict_interval` method `in_sample_residuals=False` and use '
+                    '`out_sample_residuals` (see `set_out_sample_residuals()`).')
+                )
+        
+        if not in_sample_residuals and self.out_sample_residuals is None:
             raise ValueError(
-                ('`forecaster.in_sample_residuals[level]` contains `None` values. '
-                 'Try using `fit` method with `in_sample_residuals=True` or set in '
-                 '`predict_interval` method `in_sample_residuals=False` and use '
-                 '`out_sample_residuals` (see `set_out_sample_residuals()`).')
+                ('`forecaster.out_sample_residuals` is `None`. Use '
+                 '`in_sample_residuals=True` or method `set_out_sample_residuals()` '
+                 'before `predict_interval()`.')
+            )
+
+        if not in_sample_residuals and len(set(levels) - set(self.out_sample_residuals.keys())) != 0:
+            raise ValueError(
+                f"""
+                Not `forecaster.out_sample_residuals` for levels: {set(levels) - set(self.out_sample_residuals.keys())}. 
+                Use method `set_out_sample_residuals()`.
+                """
             )
         
         check_predict_input(
@@ -975,7 +1010,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             exog_col_names  = self.exog_col_names,
             interval        = interval,
             max_steps       = None,
-            level           = level,
+            levels          = levels,
             series_levels   = self.series_levels
         ) 
         
@@ -1000,60 +1035,68 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                                 )
         else:
             exog_values = None
+        
+        predictions = []
+
+        for level in levels:
+
+            if last_window is None:
+                last_window = self.last_window.copy()
             
-        if last_window is None:
-            last_window = self.last_window[level]
-        
-        last_window = transform_series(
-                            series            = last_window,
-                            transformer       = self.transformer_series[level],
-                            fit               = False,
-                            inverse_transform = False
-                      )
-        last_window_values, last_window_index = preprocess_last_window(
-                                                    last_window = last_window
-                                                )
-        
-        # Since during predict() `last_window_values` and `exog_values` are modified,
-        # the originals are stored to be used later.
-        last_window_values_original = last_window_values.copy()
-        if exog is not None:
-            exog_values_original = exog_values.copy()
-        else:
-            exog_values_original = None
-              
-        predictions = self._recursive_predict(
-                            steps       = steps,
-                            level       = level,
-                            last_window = last_window_values,
-                            exog        = exog_values
-                      )
+            last_window_level = transform_series(
+                                    series            = last_window[level],
+                                    transformer       = self.transformer_series[level],
+                                    fit               = False,
+                                    inverse_transform = False
+                                )
+            last_window_values, last_window_index = preprocess_last_window(
+                                                        last_window = last_window_level
+                                                    )
+            
+            # Since during predict() `last_window_values` and `exog_values` are modified,
+            # the originals are stored to be used later.
+            last_window_values_original = last_window_values.copy()
+            if exog is not None:
+                exog_values_original = exog_values.copy()
+            else:
+                exog_values_original = None
+                
+            preds_level = self._recursive_predict(
+                              steps       = steps,
+                              level       = level,
+                              last_window = last_window_values,
+                              exog        = exog_values
+                          )
 
-        predictions_interval = self._estimate_boot_interval(
-                                    steps       = steps,
-                                    level       = level,
-                                    last_window = copy(last_window_values_original),
-                                    exog        = copy(exog_values_original),
-                                    interval    = interval,
-                                    n_boot      = n_boot,
-                                    random_state = random_state,
-                                    in_sample_residuals = in_sample_residuals
-                               )
+            preds_level_interval = self._estimate_boot_interval(
+                                       steps       = steps,
+                                       level       = level,
+                                       last_window = copy(last_window_values_original),
+                                       exog        = copy(exog_values_original),
+                                       interval    = interval,
+                                       n_boot      = n_boot,
+                                       random_state = random_state,
+                                       in_sample_residuals = in_sample_residuals
+                                   )
+            
+            preds_level = np.column_stack((preds_level, preds_level_interval))
+
+            preds_level = pd.DataFrame(
+                              data = preds_level,
+                              index = expand_index(
+                                          index = last_window_index,
+                                          steps = steps
+                                      ),
+                              columns = [level, f'{level}_lower_bound', f'{level}_upper_bound']
+                          )
+
+            if self.transformer_series[level]:
+                for col in preds_level.columns:
+                    preds_level[col] = self.transformer_series[level].inverse_transform(preds_level[[col]])
+
+            predictions.append(preds_level) 
         
-        predictions = np.column_stack((predictions, predictions_interval))
-
-        predictions = pd.DataFrame(
-                        data = predictions,
-                        index = expand_index(
-                                    index = last_window_index,
-                                    steps = steps
-                                ),
-                        columns = ['pred', 'lower_bound', 'upper_bound']
-                      )
-
-        if self.transformer_series[level]:
-            for col in predictions.columns:
-                predictions[col] = self.transformer_series[level].inverse_transform(predictions[[col]])
+        predictions = pd.concat(predictions, axis=1)
 
         return predictions
 
@@ -1126,10 +1169,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         
     def set_out_sample_residuals(
         self, 
-        residuals: pd.Series,
-        level: str,
+        residuals: pd.DataFrame,
         append: bool=True,
-        transform: bool=True
+        transform: bool=True,
+        random_state: int=123
     )-> None:
         """
         Set new values to the attribute `out_sample_residuals`. Out of sample
@@ -1138,12 +1181,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         
         Parameters
         ----------
-        residuals : pd.Series
+        residuals : pandas DataFrame
             Values of residuals. If len(residuals) > 1000, only a random sample
-            of 1000 values are stored.
-            
-        level : str
-            Time series to which the out sample residues belong.
+            of 1000 values are stored. Columns must be the same as `levels`.
             
         append : bool, default `True`
             If `True`, new residuals are added to the once already stored in the
@@ -1153,6 +1193,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         transform : bool, default `True`
             If `True`, new residuals are transformed using self.transformer_series.
+
+        random_state : int, default `123`
+            Sets a seed to the random sampling for reproducible output.
         
         Returns 
         -------
@@ -1160,61 +1203,79 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         """
 
-        if not isinstance(residuals, pd.Series):
+        if not isinstance(residuals, pd.DataFrame):
             raise TypeError(
-                f"`residuals` argument must be `pd.Series`. Got {type(residuals)}."
+                f"`residuals` argument must be a pandas DataFrame. Got {type(residuals)}."
             )
 
-        if level not in self.series_levels:
-            raise ValueError(
-                f'`level` must be one of the `series_levels` : {self.series_levels}.'
+        if not self.fitted:
+            raise sklearn.exceptions.NotFittedError(
+                "This forecaster is not fitted yet. Call `fit` with appropriate "
+                "arguments before using `set_out_sample_residuals()`."
             )
+        
+        out_sample_residuals = {}
 
-        if not transform and self.transformer_series[level] is not None:
-            warnings.warn(
-                f'''
-                Argument `transform` is set to `False` but forecaster was trained
-                using a transformer {self.transformer_series[level]} for level {level}.
-                Ensure that new residuals are already transformed or set `transform=True`.
-                '''
-            )
+        for level in residuals.columns:
 
-        if transform and self.transformer_series and self.transformer_series[level]:
-            warnings.warn(
-                f'''
-                Residuals will be transformed using the same transformer used 
-                when training the forecaster for level {level} ({self.transformer_y}).
-                Ensure that new residuals are in the same scale as the original time
-                series.
-                '''
-            )
+            if not level in self.series_levels:
+                continue
+            else:      
 
-            residuals = transform_series(
-                            series            = residuals,
-                            transformer       = self.transformer_series[level],
-                            fit               = False,
-                            inverse_transform = False
-                        ) 
+                residuals_level = residuals[level]
 
-        if len(residuals) > 1000:
-            rng = np.random.default_rng(seed=123)
-            residuals = rng.choice(a=residuals, size=1000, replace=False)
-            residuals = pd.Series(residuals)   
-      
-        if append and self.out_sample_residuals is not None:
-            free_space = max(0, 1000 - len(self.out_sample_residuals))
-            if len(residuals) < free_space:
-                residuals = np.hstack((
-                                self.out_sample_residuals,
-                                residuals
-                            ))
-            else:
-                residuals = np.hstack((
-                                self.out_sample_residuals,
-                                residuals[:free_space]
-                            ))
+                if not transform and self.transformer_series[level] is not None:
+                    warnings.warn(
+                        f'''
+                        Argument `transform` is set to `False` but forecaster was trained
+                        using a transformer {self.transformer_series[level]} for level {level}.
+                        Ensure that the new residuals are already transformed or set `transform=True`.
+                        '''
+                    )
 
-        self.out_sample_residuals = pd.Series(residuals)
+                if transform and self.transformer_series and self.transformer_series[level]:
+                    warnings.warn(
+                        f'''
+                        Residuals will be transformed using the same transformer used 
+                        when training the forecaster for level {level} : ({self.transformer_series[level]}).
+                        Ensure that the new residuals are on the same scale as the 
+                        original time series.
+                        '''
+                    )
+
+                    residuals_level = transform_series(
+                                          series            = residuals_level,
+                                          transformer       = self.transformer_series[level],
+                                          fit               = False,
+                                          inverse_transform = False
+                                      )
+
+                if len(residuals_level) > 1000:
+                    rng = np.random.default_rng(seed=random_state)
+                    residuals_level = rng.choice(a=residuals_level, size=1000, replace=False)
+        
+                if append and self.out_sample_residuals is not None:
+
+                    if not level in self.out_sample_residuals.keys():
+                        raise ValueError(
+                            f'{level} does not exists in `forecaster.out_sample_residuals` keys: {list(self.out_sample_residuals.keys())}'
+                        )
+
+                    free_space = max(0, 1000 - len(self.out_sample_residuals[level]))
+                    if len(residuals_level) < free_space:
+                        residuals_level = np.hstack((
+                                              self.out_sample_residuals[level],
+                                              residuals_level
+                                          ))
+                    else:
+                        residuals_level = np.hstack((
+                                              self.out_sample_residuals[level],
+                                              residuals_level[:free_space]
+                                          ))
+
+                out_sample_residuals[level] = np.array(residuals_level)
+
+        self.out_sample_residuals = out_sample_residuals
 
     
     def get_feature_importance(

@@ -76,14 +76,60 @@ def test_predict_interval_exception_when_forecaster_in_sample_residuals_are_not_
     forecaster.fit(series=series, store_in_sample_residuals=False)
 
     err_msg = re.escape(
-                ('`forecaster.in_sample_residuals[level]` contains `None` values. '
+                ("`forecaster.in_sample_residuals['1']` contains `None` values. "
                  'Try using `fit` method with `in_sample_residuals=True` or set in '
                  '`predict_interval` method `in_sample_residuals=False` and use '
                  '`out_sample_residuals` (see `set_out_sample_residuals()`).')
               )
-    
     with pytest.raises(ValueError, match = err_msg):
-        forecaster.predict_interval(steps=1, level='1', in_sample_residuals=True)
+        forecaster.predict_interval(steps=1, levels='1', in_sample_residuals=True)
+
+
+def test_predict_interval_exception_when_out_sample_residuals_is_None():
+    """
+    Test exception is raised when in_sample_residuals=False and
+    forecaster.out_sample_residuals is None.
+    """
+    series = pd.DataFrame({'1': pd.Series(np.arange(10)), 
+                           '2': pd.Series(np.arange(10))
+                          })
+
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
+    forecaster.fit(series=series)
+
+    err_msg = re.escape(
+                ('`forecaster.out_sample_residuals` is `None`. Use '
+                 '`in_sample_residuals=True` or method `set_out_sample_residuals()` '
+                 'before `predict_interval()`.')
+              )
+    with pytest.raises(ValueError, match = err_msg):
+        forecaster.predict_interval(steps=1, levels='1', in_sample_residuals=False)
+
+
+def test_predict_interval_exception_when_out_sample_residuals_is_None():
+    """
+    Test exception is raised when in_sample_residuals=False and
+    forecaster.out_sample_residuals is None.
+    """
+    series = pd.DataFrame({'1': pd.Series(np.arange(10)), 
+                           '2': pd.Series(np.arange(10))
+                          })
+
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
+    forecaster.fit(series=series)
+    residuals = pd.DataFrame({'2': [1, 2, 3, 4, 5], 
+                              '3': [1, 2, 3, 4, 5]})
+    forecaster.set_out_sample_residuals(residuals = residuals)
+    levels = '1'
+
+    err_msg = re.escape(
+                f"""
+                Not `forecaster.out_sample_residuals` for levels: {set(levels) - set(forecaster.out_sample_residuals.keys())}. 
+                Use method `set_out_sample_residuals()`.
+                """
+            )
+    with pytest.raises(ValueError, match = err_msg):
+        forecaster.predict_interval(steps=1, levels=levels, in_sample_residuals=False)
 
 
 def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_1_in_sample_residuals_is_True():
