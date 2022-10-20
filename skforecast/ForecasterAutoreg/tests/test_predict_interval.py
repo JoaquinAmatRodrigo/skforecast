@@ -1,5 +1,7 @@
 # Unit test set_out_sample_residuals ForecasterAutoreg
 # ==============================================================================
+import re
+import pytest
 import numpy as np
 import pandas as pd
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
@@ -7,6 +9,23 @@ from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.linear_model import LinearRegression
+
+
+def test_predict_interval_exception_when_out_sample_residuals_is_None():
+    """
+    Test exception is raised when in_sample_residuals=False and
+    forecaster.out_sample_residuals is None.
+    """
+    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
+    forecaster.fit(y=pd.Series(np.arange(10)))
+
+    err_msg = re.escape(
+                ('`forecaster.out_sample_residuals` is `None`. Use '
+                 '`in_sample_residuals=True` or method `set_out_sample_residuals()` '
+                 'before `predict_interval()`.')
+              )
+    with pytest.raises(ValueError, match = err_msg):
+        forecaster.predict_interval(steps=1, in_sample_residuals=False)
 
 
 def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_1_in_sample_residuals_is_True():

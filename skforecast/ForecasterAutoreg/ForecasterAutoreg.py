@@ -599,7 +599,7 @@ class ForecasterAutoreg(ForecasterBase):
             exog_col_names  = self.exog_col_names,
             interval        = None,
             max_steps       = None,
-            level           = None,
+            levels          = None,
             series_levels   = None
         ) 
 
@@ -858,6 +858,13 @@ class ForecasterAutoreg(ForecasterBase):
             
         """
         
+        if not in_sample_residuals and self.out_sample_residuals is None:
+            raise ValueError(
+                ('`forecaster.out_sample_residuals` is `None`. Use '
+                 '`in_sample_residuals=True` or method `set_out_sample_residuals()` '
+                 'before `predict_interval()`.')
+            )
+
         check_predict_input(
             forecaster_type = type(self),
             steps           = steps,
@@ -872,7 +879,7 @@ class ForecasterAutoreg(ForecasterBase):
             exog_col_names  = self.exog_col_names,
             interval        = interval,
             max_steps       = None,
-            level           = None,
+            levels          = None,
             series_levels   = None
         ) 
         
@@ -1023,7 +1030,8 @@ class ForecasterAutoreg(ForecasterBase):
         self, 
         residuals: pd.Series, 
         append: bool=True,
-        transform: bool=True
+        transform: bool=True,
+        random_state: int=123
     )-> None:
         """
         Set new values to the attribute `out_sample_residuals`. Out of sample
@@ -1044,6 +1052,9 @@ class ForecasterAutoreg(ForecasterBase):
 
         transform : bool, default `True`
             If `True`, new residuals are transformed using self.transformer_y.
+
+        random_state : int, default `123`
+            Sets a seed to the random sampling for reproducible output.
             
         Returns 
         -------
@@ -1060,7 +1071,7 @@ class ForecasterAutoreg(ForecasterBase):
             warnings.warn(
                 f'''
                 Argument `transform` is set to `False` but forecaster was trained
-                using a transformer {self.transformer_y}. Ensure that new residuals 
+                using a transformer {self.transformer_y}. Ensure that the new residuals 
                 are already transformed or set `transform=True`.
                 '''
             )
@@ -1069,8 +1080,8 @@ class ForecasterAutoreg(ForecasterBase):
             warnings.warn(
                 f'''
                 Residuals will be transformed using the same transformer used 
-                when training the forecaster ({self.transformer_y}). Ensure that
-                new residuals are in the same scale as the original time series.
+                when training the forecaster ({self.transformer_y}). Ensure that the
+                new residuals are on the same scale as the original time series.
                 '''
             )
 
@@ -1082,7 +1093,7 @@ class ForecasterAutoreg(ForecasterBase):
                         )
             
         if len(residuals) > 1000:
-            rng = np.random.default_rng(seed=123)
+            rng = np.random.default_rng(seed=random_state)
             residuals = rng.choice(a=residuals, size=1000, replace=False)
             residuals = pd.Series(residuals)   
     

@@ -619,7 +619,7 @@ class ForecasterAutoregDirect(ForecasterBase):
             exog_col_names  = self.exog_col_names,
             interval        = None,
             max_steps       = self.steps,
-            level           = None,
+            levels          = None,
             series_levels   = None
         ) 
 
