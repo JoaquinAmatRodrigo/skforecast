@@ -4,6 +4,7 @@ import re
 import pytest
 import numpy as np
 import pandas as pd
+from sklearn.exceptions import NotFittedError
 from skforecast.utils import check_predict_input
 from skforecast.utils import check_exog
 from skforecast.utils import preprocess_exog
@@ -18,7 +19,7 @@ def test_check_input_predict_exception_when_fitted_is_False():
                 ('This Forecaster instance is not fitted yet. Call `fit` with '
                  'appropriate arguments before using predict.')
               )
-    with pytest.raises(Exception, match = err_msg):
+    with pytest.raises(NotFittedError, match = err_msg):
         check_predict_input(
             forecaster_type = 'class.ForecasterAutoreg',
             steps           = 5,
@@ -134,7 +135,7 @@ def test_check_input_predict_exception_when_exog_is_none_and_included_exog_is_tr
                 ('Forecaster trained with exogenous variable/s. '
                  'Same variable/s must be provided in `predict()`.')
               )   
-    with pytest.raises(Exception, match = err_msg):
+    with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
             forecaster_type = 'class.ForecasterAutoreg',
             steps           = 5,
@@ -161,7 +162,7 @@ def test_check_input_predict_exception_when_exog_is_not_none_and_included_exog_i
                 ('Forecaster trained without exogenous variable/s. '
                  '`exog` must be `None` in `predict()`.')
               )   
-    with pytest.raises(Exception, match = err_msg):
+    with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
             forecaster_type = 'class.ForecasterAutoreg',
             steps           = 5,
@@ -408,11 +409,9 @@ def test_check_input_predict_exception_when_last_window_is_not_pandas_dataframe_
     """
     last_window = np.arange(5)
     err_msg = re.escape(
-                    f"""
-                    In ForecasterAutoregMultiSeries `last_window` must be a pandas DataFrame. 
-                        Got {type(last_window)}.
-                    """
-              )
+                    (f'In ForecasterAutoregMultiSeries `last_window` must be a pandas DataFrame. ' 
+                     f'Got {type(last_window)}.')
+                )
     with pytest.raises(TypeError, match = err_msg):
         check_predict_input(
             forecaster_type = 'class.ForecasterAutoregMultiSeries',
@@ -443,12 +442,10 @@ def test_check_input_predict_exception_when_levels_not_in_last_window_Forecaster
     """
     """
     err_msg = re.escape(
-                    f"""
-                    `last_window` must contain a column(s) named as the level(s) to be predicted.
-                        `levels` : {levels}.
-                        `last_window` columns : {list(last_window.columns)}.
-                    """
-              )
+                    (f'`last_window` must contain a column(s) named as the level(s) to be predicted.\n'
+                     f'    `levels` : {levels}.\n'
+                     f'    `last_window` columns : {list(last_window.columns)}.')
+                )
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
             forecaster_type = 'class.ForecasterAutoregMultiSeries',

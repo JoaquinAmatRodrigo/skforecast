@@ -217,7 +217,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         if series_weights is not None:
             if 'sample_weight' not in inspect.getfullargspec(self.regressor.fit)[0]:
-                Warning(
+                warnings.warm(
                     f"""
                     Argument `series_weights` is ignored since regressor {self.regressor}
                     does not accept `sample_weight` in its `fit` method.
@@ -225,7 +225,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 )
                 self.series_weights = None
             
-        self.max_lag  = max(self.lags)
+        self.max_lag = max(self.lags)
         self.window_size = self.max_lag
 
 
@@ -507,24 +507,30 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         if self.series_weights is not None:
             if list(self.series_weights.keys()) != self.series_levels:
                 raise ValueError(
-                    f"""
-                    `series_weights` must include all series levels (column names of series).
-                    `series_levels` = {self.series_levels}
-                    `series_weights` = {list(self.series_weights.keys())}
-                    """
+                    (f'`series_weights` must include all series levels (column names of series).\n'
+                     f'    `series_levels`  = {self.series_levels}.\n'
+                     f'    `series_weights` = {list(self.series_weights.keys())}.')
                 )
 
         if exog is not None:
             self.included_exog = True
             self.exog_type = type(exog)
             self.exog_col_names = \
-                 exog.columns.to_list() if isinstance(exog, pd.DataFrame) else exog.name
+                 exog.columns.to_list() if isinstance(exog, pd.DataFrame) else [exog.name]
+
+            if len(set(self.exog_col_names) - set(self.series_levels)) != len(self.exog_col_names):
+                raise ValueError(
+                    (f'`exog` cannot contain a column named the same as one of the series levels (column names of series).\n'
+                     f'    `series_levels` : {self.series_levels}.\n'
+                     f'    `exog` columns  : {self.exog_col_names}.')
+                )
+            
 
         X_train, y_train, y_index = self.create_train_X_y(series=series, exog=exog)
 
         if self.series_weights is not None:
             sample_weight = [np.repeat(self.series_weights[serie], sum(X_train[serie])) 
-                            for serie in series.columns]
+                             for serie in series.columns]
             sample_weight = np.concatenate(sample_weight)
             if not str(type(self.regressor)) == "<class 'xgboost.sklearn.XGBRegressor'>":
                 self.regressor.fit(X=X_train, y=y_train, sample_weight=sample_weight)
@@ -975,10 +981,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         for level in levels:
             if in_sample_residuals and (self.in_sample_residuals[level] == None).any():
                 raise ValueError(
-                    (f'`forecaster.in_sample_residuals[{level}]` contains `None` values. '
-                    'Try using `fit` method with `in_sample_residuals=True` or set in '
-                    '`predict_interval` method `in_sample_residuals=False` and use '
-                    '`out_sample_residuals` (see `set_out_sample_residuals()`).')
+                    (f"`forecaster.in_sample_residuals['{level}']` contains `None` values. "
+                      "Try using `fit` method with `in_sample_residuals=True` or set in "
+                      "`predict_interval` method `in_sample_residuals=False` and use "
+                      "`out_sample_residuals` (see `set_out_sample_residuals()`).")
                 )
         
         if not in_sample_residuals and self.out_sample_residuals is None:
@@ -990,10 +996,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         if not in_sample_residuals and len(set(levels) - set(self.out_sample_residuals.keys())) != 0:
             raise ValueError(
-                f"""
-                Not `forecaster.out_sample_residuals` for levels: {set(levels) - set(self.out_sample_residuals.keys())}. 
-                Use method `set_out_sample_residuals()`.
-                """
+                ('Not `forecaster.out_sample_residuals` for levels: {set(levels) - set(self.out_sample_residuals.keys())}. '
+                 'Use method `set_out_sample_residuals()`.')
             )
         
         check_predict_input(
@@ -1210,8 +1214,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         if not self.fitted:
             raise sklearn.exceptions.NotFittedError(
-                "This forecaster is not fitted yet. Call `fit` with appropriate "
-                "arguments before using `set_out_sample_residuals()`."
+                ("This forecaster is not fitted yet. Call `fit` with appropriate "
+                 "arguments before using `set_out_sample_residuals()`.")
             )
         
         out_sample_residuals = {}
@@ -1226,21 +1230,17 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
                 if not transform and self.transformer_series[level] is not None:
                     warnings.warn(
-                        f'''
-                        Argument `transform` is set to `False` but forecaster was trained
-                        using a transformer {self.transformer_series[level]} for level {level}.
-                        Ensure that the new residuals are already transformed or set `transform=True`.
-                        '''
+                        ('Argument `transform` is set to `False` but forecaster was trained '
+                         f'using a transformer {self.transformer_series[level]} for level {level}. '
+                         'Ensure that the new residuals are already transformed or set `transform=True`.')
                     )
 
                 if transform and self.transformer_series and self.transformer_series[level]:
                     warnings.warn(
-                        f'''
-                        Residuals will be transformed using the same transformer used 
-                        when training the forecaster for level {level} : ({self.transformer_series[level]}).
-                        Ensure that the new residuals are on the same scale as the 
-                        original time series.
-                        '''
+                        ('Residuals will be transformed using the same transformer used '
+                         f'when training the forecaster for level {level} : ({self.transformer_series[level]}). '
+                         'Ensure that the new residuals are on the same scale as the '
+                         'original time series. ')
                     )
 
                     residuals_level = transform_series(
@@ -1299,8 +1299,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         if self.fitted == False:
             raise sklearn.exceptions.NotFittedError(
-                "This forecaster is not fitted yet. Call `fit` with appropriate "
-                "arguments before using `get_feature_importance()`."
+                ("This forecaster is not fitted yet. Call `fit` with appropriate "
+                 "arguments before using `get_feature_importance()`.")
             )
 
         if isinstance(self.regressor, sklearn.pipeline.Pipeline):
