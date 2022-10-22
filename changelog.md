@@ -8,7 +8,11 @@ All notable changes to this project will be documented in this file.
 
 + `weight_func` in all forecasters
 
-+ `set_out_sample_residuals` added argument `random_state`.
++ In all forecasters `set_out_sample_residuals` added argument `random_state`.
+
++ In `ForecasterAutoregMultiSeries`, `predict` and `predict_interval` allow the prediction of multiple levels.
+
++ `backtesting_forecaster_multiseries` allows multiple levels.
   
 **Changed**
 
@@ -20,16 +24,16 @@ All notable changes to this project will be documented in this file.
 
 + `set_out_sample_residuals` delete argument `level`.
 
-+ predict y predict_interval return df and column names
-
-+ predict y predict_interval argument `level` change to `levels`
++ In `ForecasterAutoregMultiSeries`, `predict` and `predict_interval` argument `level` change to `levels`
 
 + `check_predict_input` argument `level` change to `levels`
+
++ `backtesting_forecaster_multiseries` metric output is now a pandas DataFrame.
 
 
 **Fixed**
 
-+ last_window in `ForecasterAutoregMultiSeries` now works when is a df
++ last_window in `ForecasterAutoregMultiSeries` now works when is a pandas DataFrame.
 
 
 ## [0.5.1] - [2022-10-05]
