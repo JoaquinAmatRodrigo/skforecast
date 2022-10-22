@@ -223,7 +223,7 @@ class ForecasterAutoreg(ForecasterBase):
         if weight_func is not None:
             self.source_code_weight_func = getsource(weight_func)
             if 'sample_weight' not in inspect.getfullargspec(self.regressor.fit)[0]:
-                Warning(
+                warnings.warm(
                     f"""
                     Argument `weight_func` is ignored since regressor {self.regressor}
                     does not accept `sample_weight` in its `fit` method.
@@ -232,7 +232,7 @@ class ForecasterAutoreg(ForecasterBase):
                 self.weight_func = None
                 self.source_code_weight_func = None
 
-        self.max_lag  = max(self.lags)
+        self.max_lag = max(self.lags)
         self.window_size = self.max_lag
 
 

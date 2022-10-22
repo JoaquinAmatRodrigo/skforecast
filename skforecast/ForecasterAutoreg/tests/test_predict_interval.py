@@ -1,4 +1,4 @@
-# Unit test set_out_sample_residuals ForecasterAutoreg
+# Unit test predict_interval ForecasterAutoreg
 # ==============================================================================
 import re
 import pytest

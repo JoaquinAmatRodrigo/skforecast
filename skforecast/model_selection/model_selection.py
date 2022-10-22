@@ -917,8 +917,8 @@ def _backtesting_forecaster_no_refit(
                          ]
     else:
         metrics_values = metrics(
-                            y_true = y.iloc[initial_train_size: initial_train_size + len(backtest_predictions)],
-                            y_pred = backtest_predictions['pred']
+                             y_true = y.iloc[initial_train_size: initial_train_size + len(backtest_predictions)],
+                             y_pred = backtest_predictions['pred']
                          )
 
     return metrics_values, backtest_predictions
@@ -1450,10 +1450,10 @@ def _evaluate_grid_hyperparameters(
 
 
     results = pd.DataFrame({
-                'lags'  : lags_list,
-                'params': params_list,
-                **metric_dict
-               })
+                 'lags'  : lags_list,
+                 'params': params_list,
+                 **metric_dict
+              })
     results = results.sort_values(by=list(metric_dict.keys())[0], ascending=True)
     results = pd.concat([results, results['params'].apply(pd.Series)], axis=1)
     

@@ -222,7 +222,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             self.source_code_weight_func = getsource(weight_func)
 
             if 'sample_weight' not in inspect.getfullargspec(self.regressor.fit)[0]:
-                Warning(
+                warnings.warm(
                     f"""
                     Argument `weight_func` is ignored since regressor {self.regressor}
                     does not accept `sample_weight` in its `fit` method.

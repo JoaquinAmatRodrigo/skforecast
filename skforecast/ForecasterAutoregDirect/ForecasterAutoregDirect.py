@@ -239,7 +239,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         if weight_func is not None:
             self.source_code_weight_func = getsource(weight_func)
             if 'sample_weight' not in inspect.getfullargspec(self.regressor.fit)[0]:
-                Warning(
+                warnings.warm(
                     f"""
                     Argument `weight_func` is ignored since regressor {self.regressor}
                     does not accept `sample_weight` in its `fit` method.
@@ -248,7 +248,7 @@ class ForecasterAutoregDirect(ForecasterBase):
                 self.weight_func = None
                 self.source_code_weight_func = None
             
-        self.max_lag  = max(self.lags)
+        self.max_lag = max(self.lags)
         self.window_size = self.max_lag
                 
         
@@ -262,7 +262,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         if isinstance(self.regressor, sklearn.pipeline.Pipeline):
             name_pipe_steps = tuple(name + "__" for name in self.regressor.named_steps.keys())
             params = {key : value for key, value in self.regressor.get_params().items() \
-                     if key.startswith(name_pipe_steps)}
+                      if key.startswith(name_pipe_steps)}
         else:
             params = self.regressor.get_params()
 
@@ -390,17 +390,17 @@ class ForecasterAutoregDirect(ForecasterBase):
             check_exog(exog=exog)
             if isinstance(exog, pd.Series):
                 exog = transform_series(
-                            series            = exog,
-                            transformer       = self.transformer_exog,
-                            fit               = True,
-                            inverse_transform = False
+                           series            = exog,
+                           transformer       = self.transformer_exog,
+                           fit               = True,
+                           inverse_transform = False
                        )
             else:
                 exog = transform_dataframe(
-                            df                = exog,
-                            transformer       = self.transformer_exog,
-                            fit               = True,
-                            inverse_transform = False
+                           df                = exog,
+                           transformer       = self.transformer_exog,
+                           fit               = True,
+                           inverse_transform = False
                        )
             exog_values, exog_index = preprocess_exog(exog=exog)
 
@@ -428,16 +428,16 @@ class ForecasterAutoregDirect(ForecasterBase):
             X_train = np.column_stack((X_lags, X_exog))
 
         X_train = pd.DataFrame(
-                    data    = X_train,
-                    columns = X_train_col_names,
-                    index   = y_index[self.max_lag + (self.steps -1): ]
+                      data    = X_train,
+                      columns = X_train_col_names,
+                      index   = y_index[self.max_lag + (self.steps -1): ]
                   )
         self.X_train_col_names = X_train_col_names
         y_train = pd.DataFrame(
-                    data    = y_train,
-                    index   = y_index[self.max_lag + (self.steps -1): ],
-                    columns = y_train_col_names,
-                 )
+                      data    = y_train,
+                      index   = y_index[self.max_lag + (self.steps -1): ],
+                      columns = y_train_col_names,
+                  )
                         
         return X_train, y_train
 
@@ -539,9 +539,9 @@ class ForecasterAutoregDirect(ForecasterBase):
         for step in range(self.steps):
 
             X_train_step, y_train_step = self.filter_train_X_y_for_step(
-                                            step    = step,
-                                            X_train = X_train,
-                                            y_train = y_train
+                                             step    = step,
+                                             X_train = X_train,
+                                             y_train = y_train
                                          )
 
             if self.weight_func is not None:

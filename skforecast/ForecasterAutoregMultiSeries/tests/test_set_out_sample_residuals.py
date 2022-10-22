@@ -33,9 +33,9 @@ def test_set_out_sample_residuals_exception_when_forecaster_not_fitted():
                               '2': [1, 2, 3, 4, 5]})
 
     err_msg = re.escape(
-                "This forecaster is not fitted yet. Call `fit` with appropriate "
-                "arguments before using `set_out_sample_residuals()`."
-              )
+                ("This forecaster is not fitted yet. Call `fit` with appropriate "
+                 "arguments before using `set_out_sample_residuals()`.")
+            )
     with pytest.raises(NotFittedError, match = err_msg):
         forecaster.set_out_sample_residuals(residuals=residuals)
 
