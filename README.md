@@ -67,11 +67,12 @@ pip install git+https://github.com/JoaquinAmatRodrigo/skforecast#master
 
 ## What is coming in the new release?
 
-- [ ] Define individual weights for the series. 
-- [ ] Predict and Backtest all series at the same time with `ForecasterAutoregMultiSeries`.
-- [ ] `ForecasterAutoregCustomMultiSeries`
-- [ ] Modeling multivariate time series `ForecasterAutoregMultivariate`.
-- [ ] Bug fixes and performance improvements.
+- [x] Define individual time based weights for the series, `ForecasterAutoreg`, `ForecasterAutoregCustom`, `ForecasterAutoregDirect`. 
+- [x] Define individual weights for the series, `ForecasterAutoregMultiSeries`. 
+- [x] Predict and Backtest all series at the same time with `ForecasterAutoregMultiSeries`.
+- [x] Multiple metrics in `grid_search_forecaster_multiseries` and `random_search_forecaster_multiseries`, `ForecasterAutoregMultiSeries`.
+- [ ] Modeling multivariate time series, `ForecasterAutoregMultivariate`.
+- [x] Bug fixes and performance improvements.
 
 Try it:
 
