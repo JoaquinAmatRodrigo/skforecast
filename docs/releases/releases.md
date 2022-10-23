@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file.
 
 **Added**
 
-+ 
++ Argument `weights_func` in all Forecasters to allow weighted time series forecasting.
 
 **Changed**
 

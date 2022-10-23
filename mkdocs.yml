@@ -9,6 +9,7 @@ use_directory_urls: false
 nav:
   - Home:
     - Welcome to skforecast: README.md
+    - Introduction to forecasting: user_guides/quick-start-skforecast.ipynb
     - Quick start: quick-start/introduction-forecasting.md
     - User Guides: user_guides/input-data.ipynb
     - Examples and tutorials: examples/examples.md
@@ -16,9 +17,9 @@ nav:
     - FAQ and Tips: faq/profiling-skforecast.ipynb
     - Releases: releases/releases.md
 
-  - Quick start:
-    - Introduction to forecasting: quick-start/introduction-forecasting.md
-    - Quick start skforecast: user_guides/quick-start-skforecast.ipynb
+  - Introduction to forecasting: introduction-forecasting/introduction-forecasting.md
+
+  - Quick start: user_guides/quick-start-skforecast.ipynb
 
   - User Guides:
       - Input data: user_guides/input-data.ipynb

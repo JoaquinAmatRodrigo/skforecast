@@ -67,8 +67,9 @@ pip install git+https://github.com/JoaquinAmatRodrigo/skforecast#master
 
 ## What is coming in the new release?
 
-- [] Modeling multivariate time series `ForecasterAutoregMultivariate`.
-- [] Bug fixes and performance improvements.
+- [ ] Weighted time series forecasting.
+- [ ] Modeling multivariate time series `ForecasterAutoregMultivariate`.
+- [ ] Bug fixes and performance improvements.
 
 Try it:
 
