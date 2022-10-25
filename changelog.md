@@ -6,13 +6,15 @@ All notable changes to this project will be documented in this file.
 
 **Added**
 
-+ `weight_func` in all forecasters
++ Argument `weights_func` in all Forecasters to allow weighted time series forecasting. Individual time based weights for the series in `ForecasterAutoreg`, `ForecasterAutoregCustom`, `ForecasterAutoregDirect` and individual weights for the series in `ForecasterAutoregMultiSeries`.
 
-+ In all forecasters `set_out_sample_residuals` added argument `random_state`.
++ Include argument `random_state` in all Forecasters `set_out_sample_residuals` methods for random sampling with reproducible output.
 
 + In `ForecasterAutoregMultiSeries`, `predict` and `predict_interval` allow the prediction of multiple levels.
 
-+ `backtesting_forecaster_multiseries` allows multiple levels.
++ `backtesting_forecaster_multiseries` allows the calculation of multiple levels, `level` argument changes to `levels`.
+
++ `metric` can be a list in `grid_search_forecaster_multiseries`, `random_search_forecaster_multiseries`. If `metric` is a `list`, multiple metrics will be calculated. (suggested by Pablo Dávila Herrero https://github.com/Pablo-Davila)
   
 **Changed**
 
@@ -20,20 +22,21 @@ All notable changes to this project will be documented in this file.
 
 + Rename `exog_to_multi_output` to `exog_to_direct` in `utils`.
 
-+ `out_sample_residuals` is a `dict` of np.arrays `ForecasterAutoregMultiSeries`.
++ In `ForecasterAutoregMultiSeries` change type of `out_sample_residuals` to a `dict` of numpy ndarrays.
 
 + `set_out_sample_residuals` delete argument `level`.
 
-+ In `ForecasterAutoregMultiSeries`, `predict` and `predict_interval` argument `level` change to `levels`
++ In `ForecasterAutoregMultiSeries`, `level` argument of `predict` and `predict_interval` changes to `levels`.
 
-+ `check_predict_input` argument `level` change to `levels`
++ The `level` argument of `check_predict_input` changes to `levels`, module `utils`.
 
-+ `backtesting_forecaster_multiseries` metric output is now a pandas DataFrame.
++ `backtesting_forecaster_multiseries` metrics_levels output is now a pandas DataFrame.
 
++ `grid_search_forecaster_multiseries` and `random_search_forecaster_multiseries` argument `levels_weights` is deprecated since version 0.6.0, and will be removed in version 0.7.0. Use `series_weights` when creating the forecaster instead.
 
 **Fixed**
 
-+ last_window in `ForecasterAutoregMultiSeries` now works when is a pandas DataFrame.
++ The `last_window` argument in the `ForecasterAutoregMultiSeries` predict method now works when it is a pandas DataFrame.
 
 
 ## [0.5.1] - [2022-10-05]
@@ -124,7 +127,7 @@ All notable changes to this project will be documented in this file.
 
 + Functions in model_selection_statsmodels module allow custom metrics.
 
-+ Change function `set_out_sample_residuals` (ForecasterAutoreg and ForecasterAutoregCustom), `residuals` argument must be `pd.Series` (was `numpy ndarray`).
++ Change function `set_out_sample_residuals` (ForecasterAutoreg and ForecasterAutoregCustom), `residuals` argument must be a `pandas Series` (was `numpy ndarray`).
 
 + Returned value of backtesting functions (model_selection and model_selection_statsmodels) is now a `float` (was `numpy ndarray`).
 
