@@ -911,9 +911,11 @@ def grid_search_forecaster_multiseries(
     -------
     results : pandas DataFrame
         Results for each combination of parameters.
+            column levels = levels.
             column lags = predictions.
             column params = lower bound of the interval.
-            column metric = metric value estimated for the combination of parameters.
+            column metric = metric(s) value(s) estimated for each combination of parameters. The resulting metric will be
+                            the average of the optimization of all levels.
             additional n columns with param = value.
     
     """
@@ -1040,9 +1042,11 @@ def random_search_forecaster_multiseries(
     -------
     results : pandas DataFrame
         Results for each combination of parameters.
+            column levels = levels.
             column lags = predictions.
             column params = lower bound of the interval.
-            column metric = metric value estimated for the combination of parameters.
+            column metric = metric(s) value(s) estimated for each combination of parameters. The resulting metric will be
+                            the average of the optimization of all levels.
             additional n columns with param = value.
     
     """
@@ -1153,9 +1157,11 @@ def _evaluate_grid_hyperparameters_multiseries(
     -------
     results : pandas DataFrame
         Results for each combination of parameters.
+            column levels = levels.
             column lags = predictions.
             column params = lower bound of the interval.
-            column metric = metric value estimated for the combination of parameters.
+            column metric = metric(s) value(s) estimated for each combination of parameters. The resulting metric will be
+                            the average of the optimization of all levels.
             additional n columns with param = value.
     
     """
@@ -1192,7 +1198,7 @@ def _evaluate_grid_hyperparameters_multiseries(
 
     print(
         f'{len(param_grid)*len(lags_grid)} models compared for {len(levels)} level(s). '
-        f'Number of iterations: {len(param_grid)*len(lags_grid)*len(levels)}.'
+        f'Number of iterations: {len(param_grid)*len(lags_grid)}.'
     )
 
     for lags in tqdm(lags_grid, desc='loop lags_grid', position=0, ncols=90):
@@ -1245,10 +1251,10 @@ def _evaluate_grid_hyperparameters_multiseries(
         
         print(
             f"`Forecaster` refitted using the best-found lags and parameters, and the whole data set: \n"
-            f"  Lags: {best_lags} \n"
+            f"  Lags: {best_lags}\n"
             f"  Parameters: {best_params}\n"
             f"  Backtesting metric: {best_metric}\n"
-            f"  Levels: {results['levels'].iloc[0]} \n"
+            f"  Levels: {results['levels'].iloc[0]}\n"
         )
             
     return results

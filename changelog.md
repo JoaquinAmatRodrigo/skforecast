@@ -34,6 +34,8 @@ All notable changes to this project will be documented in this file.
 
 + `grid_search_forecaster_multiseries` and `random_search_forecaster_multiseries` argument `levels_weights` is deprecated since version 0.6.0, and will be removed in version 0.7.0. Use `series_weights` when creating the forecaster instead.
 
++ Refactor `_create_lags_` in `ForecasterAutoreg` and `ForecasterAutoregMultiSeries`. (suggested by Bennett https://github.com/Bennett561)
+
 **Fixed**
 
 + The `last_window` argument in the `ForecasterAutoregMultiSeries` predict method now works when it is a pandas DataFrame.

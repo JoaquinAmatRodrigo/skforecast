@@ -306,17 +306,12 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 f'of the series ({len(y)}).'
             )
         
-        X_data   = np.full(shape=(n_splits, self.max_lag), fill_value=np.nan, dtype=float)
-        y_data   = np.full(shape=(n_splits, 1), fill_value=np.nan, dtype=float)
+        X_data = np.full(shape=(n_splits, len(self.lags)), fill_value=np.nan, dtype=float)
 
-        for i in range(n_splits):
-            X_index = np.arange(i, self.max_lag + i)
-            y_index = [self.max_lag + i]
-            X_data[i, :] = y[X_index]
-            y_data[i]    = y[y_index]
-            
-        X_data = X_data[:, -self.lags] # Only keep needed lags
-        y_data = y_data.ravel()
+        for i, lag in enumerate(self.lags):
+            X_data[:, i] = y[self.max_lag - lag: -lag]
+
+        y_data = y[self.max_lag:]
             
         return X_data, y_data
 

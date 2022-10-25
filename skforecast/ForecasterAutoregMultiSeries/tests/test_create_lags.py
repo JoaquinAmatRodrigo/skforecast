@@ -6,6 +6,21 @@ import numpy as np
 import pandas as pd
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 from sklearn.linear_model import LinearRegression
+    
+    
+def test_create_lags_exception_when_len_of_y_is_lower_than_maximum_lag():
+    """
+    Test exception is raised when length of y is lower than maximum lag included
+    in the forecaster.
+    """
+    y = pd.Series(np.arange(5), name='y')
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=10)
+    err_msg = re.escape(
+                (f'The maximum lag ({forecaster.max_lag}) must be less than the length '
+                 f'of the series ({len(y)}).')
+              )
+    with pytest.raises(ValueError, match = err_msg):
+        forecaster._create_lags(y=y)
 
 
 def test_create_lags_output():
@@ -25,18 +40,3 @@ def test_create_lags_output():
 
     assert (results[0] == expected[0]).all()
     assert (results[1] == expected[1]).all()
-    
-    
-def test_create_lags_exception_when_len_of_y_is_lower_than_maximum_lag():
-    """
-    Test exception is raised when length of y is lower than maximum lag included
-    in the forecaster.
-    """
-    y = pd.Series(np.arange(5), name='y')
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=10)
-    err_msg = re.escape(
-                (f'The maximum lag ({forecaster.max_lag}) must be less than the length '
-                 f'of the series ({len(y)}).')
-              )
-    with pytest.raises(ValueError, match = err_msg):
-        forecaster._create_lags(y=y)
