@@ -241,6 +241,43 @@ def test_backtesting_forecaster_multiseries_exception_when_forecaster_not_Foreca
         )
 
 
+@pytest.mark.parametrize("levels, refit", 
+                         [(1    , True), 
+                          (1    , False)],
+                         ids=lambda d: f'levels: {d}')
+def test_backtesting_forecaster_multiseries_exception_when_levels_not_list_str_None(levels, refit):
+    """
+    Test Exception is raised in backtesting_forecaster_multiseries when 
+    `levels` is not a `list`, `str` or `None`.
+    """
+    forecaster = ForecasterAutoregMultiSeries(
+                     regressor = Ridge(random_state=123),
+                     lags      = 2
+                 )
+    
+    err_msg = re.escape(
+                (f'`levels` must be a `list` of column names, a `str` '
+                 f'of a column name or `None`.')
+              )
+    with pytest.raises(TypeError, match = err_msg):
+        backtesting_forecaster_multiseries(
+            forecaster          = forecaster,
+            series              = series,
+            steps               = 4,
+            levels              = levels,
+            metric              = 'mean_absolute_error',
+            initial_train_size  = 12,
+            refit               = refit,
+            fixed_train_size    = False,
+            exog                = None,
+            interval            = None,
+            n_boot              = 500,
+            random_state        = 123,
+            in_sample_residuals = True,
+            verbose             = False
+        )
+
+
 def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_not_refit_with_mocked():
     """
     Test output of backtesting_forecaster_multiseries in ForecasterAutoregMultiSeries without refit

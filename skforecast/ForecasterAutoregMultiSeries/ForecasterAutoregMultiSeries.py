@@ -68,6 +68,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         Weights associated with each series, used during training. It is only 
         applied if the `regressor` used accepts sample_weight in it's fit method. 
         If `None`, all levels have the same weight.
+        **New in version 0.6.0**
     
     Attributes
     ----------
@@ -134,6 +135,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         Weights associated with each series, used during training. It is only 
         applied if the `regressor` used accepts sample_weight in it's fit method. 
         If `None`, all levels have the same weight.
+        **New in version 0.6.0**
 
     X_train_col_names : list
         Names of columns of the matrix created internally for training.
@@ -660,6 +662,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         levels : str, list, default `None`
             Time series to be predicted. If `None` all levels will be predicted.
+            **New in version 0.6.0**
 
         last_window : pandas DataFrame, default `None`
             Values of the series used to create the predictors (lags) need in the
@@ -923,7 +926,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             Number of future steps predicted.
 
         levels : str, list, default `None`
-            Time series to be predicted. If `None` all levels will be predicted.    
+            Time series to be predicted. If `None` all levels will be predicted.  
+            **New in version 0.6.0**  
             
         last_window : pandas DataFrame, default `None`
             Values of the series used to create the predictors (lags) needed in the 
