@@ -6,7 +6,7 @@
 ################################################################################
 # coding=utf-8
 
-from typing import Union, Any
+from typing import Union, Any, Optional
 import warnings
 import joblib
 import numpy as np
@@ -128,7 +128,7 @@ def check_predict_input(
     exog_col_names: Union[list, None]=None,
     interval: list=None,
     max_steps: int=None,
-    level: str=None,
+    levels: Optional[Union[str, list]]=None,
     series_levels: list=None
 ) -> None:
     """
@@ -183,8 +183,8 @@ def check_predict_input(
     max_steps: int, default `None`
         Maximum number of steps allowed.
             
-    level : str, default `None`
-        Time series to be predicted.
+    levels : str, list, default `None`
+        Time series to be predicted (`ForecasterAutoregMultiSeries`).
 
     series_levels : list, default `None`
         Names of the columns (levels) that can be predicted.
@@ -192,9 +192,9 @@ def check_predict_input(
     """
 
     if not fitted:
-        raise Exception(
-            'This Forecaster instance is not fitted yet. Call `fit` with '
-            'appropriate arguments before using predict.'
+        raise sklearn.exceptions.NotFittedError(
+            ('This Forecaster instance is not fitted yet. Call `fit` with '
+             'appropriate arguments before using predict.')
         )
     
     if steps < 1:
@@ -205,30 +205,35 @@ def check_predict_input(
     if max_steps is not None:
         if steps > max_steps:
             raise ValueError(
-                f'`steps` must be lower or equal to the value of steps defined '
-                f'when initializing the forecaster. Got {steps} but the maximum '
-                f'is {max_steps}.'
+                (f'`steps` must be lower or equal to the value of steps defined '
+                 f'when initializing the forecaster. Got {steps} but the maximum '
+                 f'is {max_steps}.')
             )
 
     if interval is not None:
         _check_interval(interval = interval)
     
     if str(forecaster_type).split('.')[1] == 'ForecasterAutoregMultiSeries':
-        if level not in series_levels:
+        if levels is not None and not isinstance(levels, (str, list)):
+            raise TypeError(
+                f'`levels` must be a `list` of column names, a `str` of a column name or `None`.'
+            )
+
+        if len(set(levels) - set(series_levels)) != 0:
             raise ValueError(
-                f'`level` must be one of the `series_levels` : {series_levels}'
+                f'`levels` must be in `series_levels` : {series_levels}.'
             )
 
     if exog is None and included_exog:
-        raise Exception(
-            'Forecaster trained with exogenous variable/s. '
-            'Same variable/s must be provided in `predict()`.'
+        raise ValueError(
+            ('Forecaster trained with exogenous variable/s. '
+             'Same variable/s must be provided in `predict()`.')
         )
         
     if exog is not None and not included_exog:
-        raise Exception(
-            'Forecaster trained without exogenous variable/s. '
-            '`exog` must be `None` in `predict()`.'
+        raise ValueError(
+            ('Forecaster trained without exogenous variable/s. '
+             '`exog` must be `None` in `predict()`.')
         )
     
     if exog is not None:
@@ -242,64 +247,51 @@ def check_predict_input(
             raise ValueError('`exog` has missing values.')
         if not isinstance(exog, exog_type):
             raise TypeError(
-                f'Expected type for `exog`: {exog_type}. Got {type(exog)}'     
+                f'Expected type for `exog`: {exog_type}. Got {type(exog)}.'     
             )
         if isinstance(exog, pd.DataFrame):
             col_missing = set(exog_col_names).difference(set(exog.columns))
             if col_missing:
                 raise ValueError(
-                    f'Missing columns in `exog`. Expected {exog_col_names}. '
-                    f'Got {exog.columns.to_list()}'     
+                    (f'Missing columns in `exog`. Expected {exog_col_names}. '
+                     f'Got {exog.columns.to_list()}.') 
                 )
         check_exog(exog = exog)
         _, exog_index = preprocess_exog(exog=exog.iloc[:0, ])
         
         if not isinstance(exog_index, index_type):
             raise TypeError(
-                f'Expected index of type {index_type} for `exog`. '
-                f'Got {type(exog_index)}'
+                (f'Expected index of type {index_type} for `exog`. '
+                 f'Got {type(exog_index)}.')
             )
         
         if isinstance(exog_index, pd.DatetimeIndex):
             if not exog_index.freqstr == index_freq:
                 raise TypeError(
-                    f'Expected frequency of type {index_freq} for `exog`. '
-                    f'Got {exog_index.freqstr}'
+                    (f'Expected frequency of type {index_freq} for `exog`. '
+                     f'Got {exog_index.freqstr}.')
                 )
         
     if last_window is not None:
         if len(last_window) < window_size:
-                raise ValueError(
-                    f'`last_window` must have as many values as as needed to '
-                    f'calculate the predictors. For this forecaster it is {window_size}.'
-                )
+            raise ValueError(
+                (f'`last_window` must have as many values as as needed to '
+                 f'calculate the predictors. For this forecaster it is {window_size}.')
+            )
                 
         if str(forecaster_type).split('.')[1] == 'ForecasterAutoregMultiSeries':
-            if isinstance(last_window, pd.DataFrame) and level not in last_window.columns:
-                raise ValueError(
-                    f"""
-                    Level {level} not found in `last_window`. If `last_window` is a pandas
-                    DataFrame, it must contain a column named as level.
-                    """
+            if not isinstance(last_window, pd.DataFrame):
+                raise TypeError(
+                    (f'In ForecasterAutoregMultiSeries `last_window` must be a pandas DataFrame. ' 
+                     f'Got {type(last_window)}.')
                 )
-            elif isinstance(last_window, pd.Series):
-                if last_window.name is None:
-                    Warning.warn(
-                        f"""
-                        Provided `last_window` has no name, ensure that it contains data
-                        for {level}.
-                        """
-                    )
-                if last_window.name != level:
-                    Warning.warn(
-                        f"""
-                        Provided `last_window` has name {last_window.name} and predicted
-                        level is {level}. Ensure that it contains data for {level}.
-                        """
-                    )
-            else:
-                raise TypeError('`last_window` must be a pandas Series or DataFrame.')
-
+            
+            if len(set(levels) - set(last_window.columns)) != 0:
+                raise ValueError(
+                    (f'`last_window` must contain a column(s) named as the level(s) to be predicted.\n'
+                     f'    `levels` : {levels}.\n'
+                     f'    `last_window` columns : {list(last_window.columns)}.')
+                )
         else:    
             if not isinstance(last_window, pd.Series):
                 raise TypeError('`last_window` must be a pandas Series.')
@@ -312,13 +304,13 @@ def check_predict_input(
         if not isinstance(last_window_index, index_type):
             raise TypeError(
                 f'Expected index of type {index_type} for `last_window`. '
-                f'Got {type(last_window_index)}'
+                f'Got {type(last_window_index)}.'
             )
         if isinstance(last_window_index, pd.DatetimeIndex):
             if not last_window_index.freqstr == index_freq:
                 raise TypeError(
                     f'Expected frequency of type {index_freq} for `last_window`. '
-                    f'Got {last_window_index.freqstr}'
+                    f'Got {last_window_index.freqstr}.'
                 )
 
     return

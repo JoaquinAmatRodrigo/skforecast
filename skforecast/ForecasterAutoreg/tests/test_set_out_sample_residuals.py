@@ -1,5 +1,6 @@
 # Unit test set_out_sample_residuals ForecasterAutoreg
 # ==============================================================================
+import re
 import pytest
 from pytest import approx
 import numpy as np
@@ -14,8 +15,13 @@ def test_set_out_sample_residuals_exception_when_residuals_is_not_pd_Series():
     Test exception is raised when residuals argument is not pd.Series.
     """
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
-    with pytest.raises(Exception):
-        forecaster.set_out_sample_residuals(residuals=[1, 2, 3])
+    residuals=[1, 2, 3]
+
+    err_msg = re.escape(
+                f"`residuals` argument must be `pd.Series`. Got {type(residuals)}."
+            )
+    with pytest.raises(TypeError, match = err_msg):
+        forecaster.set_out_sample_residuals(residuals=residuals)
 
 
 def test_set_out_sample_residuals_when_residuals_length_is_greater_than_1000():

@@ -6,6 +6,7 @@
 ################################################################################
 # coding=utf-8
 
+from multiprocessing.sharedctypes import Value
 from typing import Union, Dict, List, Tuple, Any, Optional
 import warnings
 import logging
@@ -73,7 +74,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         forecaster. `inverse_transform` is not available when using ColumnTransformers.
         **New in version 0.5.0**
 
-    weight_func : callable
+    weight_func : callable, default `None`
         Function that defines the individual weights for each sample based on the
         index. For example, a function that assigns a lower weight to certain dates.
         Ignored if `regressor` does not have the argument `sample_weight` in its `fit`
@@ -133,6 +134,10 @@ class ForecasterAutoregDirect(ForecasterBase):
         Ignored if `regressor` does not have the argument `sample_weight` in its `fit`
         method.
         **New in version 0.6.0**
+
+    source_code_weight_func : str
+        Source code of the custom function used to create weights.
+        **New in version 0.6.0**
         
     index_type : type
         Type of index of the input used in training.
@@ -167,6 +172,7 @@ class ForecasterAutoregDirect(ForecasterBase):
 
     python_version : str
         Version of python used to create the forecaster.
+        **New in version 0.5.0**   
         
     Notes
     -----
@@ -181,9 +187,9 @@ class ForecasterAutoregDirect(ForecasterBase):
         regressor: object,
         steps: int,
         lags: Union[int, np.ndarray, list],
-        transformer_y: Optional[object]= None,
-        transformer_exog: Optional[object]= None,
-        weight_func: callable= None
+        transformer_y: Optional[object]=None,
+        transformer_exog: Optional[object]=None,
+        weight_func: callable=None
     ) -> None:
         
         self.regressor               = regressor
@@ -233,7 +239,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         if weight_func is not None:
             self.source_code_weight_func = getsource(weight_func)
             if 'sample_weight' not in inspect.getfullargspec(self.regressor.fit)[0]:
-                Warning(
+                warnings.warm(
                     f"""
                     Argument `weight_func` is ignored since regressor {self.regressor}
                     does not accept `sample_weight` in its `fit` method.
@@ -242,7 +248,7 @@ class ForecasterAutoregDirect(ForecasterBase):
                 self.weight_func = None
                 self.source_code_weight_func = None
             
-        self.max_lag  = max(self.lags)
+        self.max_lag = max(self.lags)
         self.window_size = self.max_lag
                 
         
@@ -256,7 +262,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         if isinstance(self.regressor, sklearn.pipeline.Pipeline):
             name_pipe_steps = tuple(name + "__" for name in self.regressor.named_steps.keys())
             params = {key : value for key, value in self.regressor.get_params().items() \
-                     if key.startswith(name_pipe_steps)}
+                      if key.startswith(name_pipe_steps)}
         else:
             params = self.regressor.get_params()
 
@@ -384,17 +390,17 @@ class ForecasterAutoregDirect(ForecasterBase):
             check_exog(exog=exog)
             if isinstance(exog, pd.Series):
                 exog = transform_series(
-                            series            = exog,
-                            transformer       = self.transformer_exog,
-                            fit               = True,
-                            inverse_transform = False
+                           series            = exog,
+                           transformer       = self.transformer_exog,
+                           fit               = True,
+                           inverse_transform = False
                        )
             else:
                 exog = transform_dataframe(
-                            df                = exog,
-                            transformer       = self.transformer_exog,
-                            fit               = True,
-                            inverse_transform = False
+                           df                = exog,
+                           transformer       = self.transformer_exog,
+                           fit               = True,
+                           inverse_transform = False
                        )
             exog_values, exog_index = preprocess_exog(exog=exog)
 
@@ -422,16 +428,16 @@ class ForecasterAutoregDirect(ForecasterBase):
             X_train = np.column_stack((X_lags, X_exog))
 
         X_train = pd.DataFrame(
-                    data    = X_train,
-                    columns = X_train_col_names,
-                    index   = y_index[self.max_lag + (self.steps -1): ]
+                      data    = X_train,
+                      columns = X_train_col_names,
+                      index   = y_index[self.max_lag + (self.steps -1): ]
                   )
         self.X_train_col_names = X_train_col_names
         y_train = pd.DataFrame(
-                    data    = y_train,
-                    index   = y_index[self.max_lag + (self.steps -1): ],
-                    columns = y_train_col_names,
-                 )
+                      data    = y_train,
+                      index   = y_index[self.max_lag + (self.steps -1): ],
+                      columns = y_train_col_names,
+                  )
                         
         return X_train, y_train
 
@@ -533,9 +539,9 @@ class ForecasterAutoregDirect(ForecasterBase):
         for step in range(self.steps):
 
             X_train_step, y_train_step = self.filter_train_X_y_for_step(
-                                            step    = step,
-                                            X_train = X_train,
-                                            y_train = y_train
+                                             step    = step,
+                                             X_train = X_train,
+                                             y_train = y_train
                                          )
 
             if self.weight_func is not None:
@@ -613,7 +619,7 @@ class ForecasterAutoregDirect(ForecasterBase):
             exog_col_names  = self.exog_col_names,
             interval        = None,
             max_steps       = self.steps,
-            level           = None,
+            levels          = None,
             series_levels   = None
         ) 
 
@@ -723,10 +729,10 @@ class ForecasterAutoregDirect(ForecasterBase):
         
         Parameters
         ----------
-        lags : int, list, 1D np.array, range
+        lags : int, list, 1D np.ndarray, range
             Lags used as predictors. Index starts at 1, so lag 1 is equal to t-1.
                 `int`: include lags from 1 to `lags`.
-                `list` or `np.array`: include only lags present in `lags`.
+                `list` or `np.ndarray`: include only lags present in `lags`.
 
         Returns 
         -------
@@ -735,10 +741,10 @@ class ForecasterAutoregDirect(ForecasterBase):
         """
         
         if isinstance(lags, int) and lags < 1:
-            raise Exception('min value of lags allowed is 1')
+            raise ValueError('Minimum value of lags allowed is 1.')
             
         if isinstance(lags, (list, range, np.ndarray)) and min(lags) < 1:
-            raise Exception('min value of lags allowed is 1')
+            raise ValueError('Minimum value of lags allowed is 1.')
             
         if isinstance(lags, int):
             self.lags = np.arange(lags) + 1
@@ -747,9 +753,9 @@ class ForecasterAutoregDirect(ForecasterBase):
         elif isinstance(lags, np.ndarray):
             self.lags = lags
         else:
-            raise Exception(
+            raise TypeError(
                 f"`lags` argument must be `int`, `1D np.ndarray`, `range` or `list`. "
-                f"Got {type(lags)}"
+                f"Got {type(lags)}."
             )
             
         self.max_lag  = max(self.lags)
@@ -790,11 +796,11 @@ class ForecasterAutoregDirect(ForecasterBase):
             )
 
         if step > self.steps:
-            raise Exception(
+            raise ValueError(
                 f"Forecaster trained for {self.steps} steps. Got step={step}."
             )
         if step < 1:
-            raise Exception("Minimum step is 1.")
+            raise ValueError("Minimum step is 1.")
 
         # Stored regressors start at index 0
         step = step - 1

@@ -69,7 +69,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         forecaster. `inverse_transform` is not available when using ColumnTransformers.
         **New in version 0.5.0**
     
-    weight_func : callable
+    weight_func : callable, default `None`
         Function that defines the individual weights for each sample based on the
         index. For example, a function that assigns a lower weight to certain dates.
         Ignored if `regressor` does not have the argument `sample_weight` in its `fit`
@@ -168,7 +168,8 @@ class ForecasterAutoregCustom(ForecasterBase):
 
     python_version : str
         Version of python used to create the forecaster.
-        **New in version 0.5.0**     
+        **New in version 0.5.0**
+    
     """
     
     def __init__(
@@ -176,9 +177,9 @@ class ForecasterAutoregCustom(ForecasterBase):
         regressor: object, 
         fun_predictors: callable, 
         window_size: int,
-        transformer_y: Optional[object]= None,
-        transformer_exog: Optional[object]= None,
-        weight_func: callable= None
+        transformer_y: Optional[object]=None,
+        transformer_exog: Optional[object]=None,
+        weight_func: callable=None
     ) -> None:
         
         self.regressor                     = regressor
@@ -221,7 +222,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             self.source_code_weight_func = getsource(weight_func)
 
             if 'sample_weight' not in inspect.getfullargspec(self.regressor.fit)[0]:
-                Warning(
+                warnings.warm(
                     f"""
                     Argument `weight_func` is ignored since regressor {self.regressor}
                     does not accept `sample_weight` in its `fit` method.
@@ -477,7 +478,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         self,
         steps: int,
         last_window: np.ndarray,
-        exog: np.ndarray
+        exog: Optional[np.ndarray]=None
     ) -> np.ndarray:
         """
         Predict n steps ahead. It is an iterative process in which, each prediction,
@@ -492,7 +493,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             Values of the series used to create the predictors (lags) need in the 
             first iteration of prediction (t + 1).
             
-        exog : numpy ndarray, pandas DataFrame
+        exog : numpy ndarray, default `None`
             Exogenous variable/s included as predictor/s.
 
         Returns 
@@ -574,7 +575,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             exog_col_names  = self.exog_col_names,
             interval        = None,
             max_steps       = None,
-            level           = None,
+            levels          = None,
             series_levels   = None
         )
      
@@ -833,6 +834,13 @@ class ForecasterAutoregCustom(ForecasterBase):
             
         """
         
+        if not in_sample_residuals and self.out_sample_residuals is None:
+            raise ValueError(
+                ('`forecaster.out_sample_residuals` is `None`. Use '
+                 '`in_sample_residuals=True` or method `set_out_sample_residuals()` '
+                 'before `predict_interval()`.')
+            )
+
         check_predict_input(
             forecaster_type = type(self),
             steps           = steps,
@@ -847,7 +855,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             exog_col_names  = self.exog_col_names,
             interval        = interval,
             max_steps       = None,
-            level           = None,
+            levels          = None,
             series_levels   = None
         )
         
@@ -955,7 +963,8 @@ class ForecasterAutoregCustom(ForecasterBase):
         self, 
         residuals: pd.Series, 
         append: bool=True,
-        transform: bool=True
+        transform: bool=True,
+        random_state: int=123
     )-> None:
         """
         Set new values to the attribute `out_sample_residuals`. Out of sample
@@ -976,6 +985,9 @@ class ForecasterAutoregCustom(ForecasterBase):
 
         transform : bool, default `True`
             If `True`, new residuals are transformed using self.transformer_y.
+
+        random_state : int, default `123`
+            Sets a seed to the random sampling for reproducible output.
             
         Returns 
         -------
@@ -984,15 +996,15 @@ class ForecasterAutoregCustom(ForecasterBase):
         """
 
         if not isinstance(residuals, pd.Series):
-            raise Exception(
-                f"`residuals` argument must be `pd.Series`. Got {type(residuals)}"
+            raise TypeError(
+                f"`residuals` argument must be `pd.Series`. Got {type(residuals)}."
             )
 
         if not transform and self.transformer_y is not None:
             warnings.warn(
                 f'''
                 Argument `transform` is set to `False` but forecaster was trained
-                using a transformer {self.transformer_y}. Ensure that new residuals 
+                using a transformer {self.transformer_y}. Ensure that the new residuals 
                 are already transformed or set `transform=True`.
                 '''
             )
@@ -1001,8 +1013,8 @@ class ForecasterAutoregCustom(ForecasterBase):
             warnings.warn(
                 f'''
                 Residuals will be transformed using the same transformer used 
-                when training the forecaster ({self.transformer_y}). Ensure that
-                new residuals are in the same scale as the original time series.
+                when training the forecaster ({self.transformer_y}). Ensure that the
+                new residuals are on the same scale as the original time series.
                 '''
             )
 
@@ -1014,7 +1026,7 @@ class ForecasterAutoregCustom(ForecasterBase):
                         )
             
         if len(residuals) > 1000:
-            rng = np.random.default_rng(seed=123)
+            rng = np.random.default_rng(seed=random_state)
             residuals = rng.choice(a=residuals, size=1000, replace=False)
             residuals = pd.Series(residuals)   
     

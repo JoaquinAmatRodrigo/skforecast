@@ -34,6 +34,44 @@ def test_exception_is_raised_when_forecaster_is_not_fitted():
         forecaster.get_feature_importance(step=1)
 
 
+def test_exception_is_raised_when_step_is_greater_than_forecaster_steps():
+    """
+    Test exception is raised when calling get_feature_importance() step is 
+    greater than the forecaster.steps.
+    """
+    forecaster = ForecasterAutoregDirect(
+                    regressor = RandomForestRegressor(random_state=123),
+                    lags = 3,
+                    steps = 1
+                 )
+    forecaster.fit(y=pd.Series(np.arange(5)))
+    step = 2
+
+    err_msg = re.escape(
+                f"Forecaster trained for {forecaster.steps} steps. Got step={step}."
+            )
+    with pytest.raises(ValueError, match = err_msg):         
+        forecaster.get_feature_importance(step=step)
+
+
+def test_exception_is_raised_when_step_is_less_than_1():
+    """
+    Test exception is raised when calling get_feature_importance() step is 
+    less than 1.
+    """
+    forecaster = ForecasterAutoregDirect(
+                    regressor = RandomForestRegressor(random_state=123),
+                    lags = 3,
+                    steps = 1
+                 )
+    forecaster.fit(y=pd.Series(np.arange(5)))
+    step = -1
+
+    err_msg = re.escape("Minimum step is 1.")
+    with pytest.raises(ValueError, match = err_msg):         
+        forecaster.get_feature_importance(step=step)
+
+
 def test_output_get_feature_importance_when_regressor_is_RandomForestRegressor_lags_3_step_1():
     """
     Test output of get_feature_importance for step 1, when regressor is RandomForestRegressor with lags=3
