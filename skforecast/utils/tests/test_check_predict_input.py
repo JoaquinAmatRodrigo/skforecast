@@ -98,6 +98,33 @@ def test_check_input_predict_exception_when_steps_is_greater_than_max_steps():
         )
 
 
+def test_check_input_predict_exception_when_ForecasterAutoregMultiSeries_and_level_not_str_list_or_None():
+    """
+    Test exception is raised when `levels` is not a str, a list or None.
+    """
+    levels = 5
+
+    err_msg = re.escape(f'`levels` must be a `list` of column names, a `str` of a column name or `None`.')   
+    with pytest.raises(TypeError, match = err_msg):
+        check_predict_input(
+            forecaster_type = 'class.ForecasterAutoregMultiSeries',
+            steps           = 5,
+            fitted          = True,
+            included_exog   = False,
+            index_type      = None,
+            index_freq      = None,
+            window_size     = None,
+            last_window     = None,
+            exog            = None,
+            exog_type       = None,
+            exog_col_names  = None,
+            interval        = None,
+            max_steps       = 10,
+            levels          = levels,
+            series_levels   = ['1', '2']
+        )
+
+
 @pytest.mark.parametrize("levels     , series_levels", 
                          [('1'       , ['2', '3']), 
                           (['1']     , ['2', '3']), 

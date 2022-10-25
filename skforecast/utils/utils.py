@@ -214,6 +214,11 @@ def check_predict_input(
         _check_interval(interval = interval)
     
     if str(forecaster_type).split('.')[1] == 'ForecasterAutoregMultiSeries':
+        if levels is not None and not isinstance(levels, (str, list)):
+            raise TypeError(
+                f'`levels` must be a `list` of column names, a `str` of a column name or `None`.'
+            )
+
         if len(set(levels) - set(series_levels)) != 0:
             raise ValueError(
                 f'`levels` must be in `series_levels` : {series_levels}.'
