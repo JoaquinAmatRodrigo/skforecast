@@ -56,7 +56,7 @@ def test_exception_bayesian_search_optuna_metric_list_duplicate_names():
                         }
         return search_space
 
-    err_msg = re.escape('When `metrics` is a `list`, each metric name must be unique.')
+    err_msg = re.escape('When `metric` is a `list`, each metric name must be unique.')
     with pytest.raises(ValueError, match = err_msg):
         _bayesian_search_optuna(
             forecaster         = forecaster,

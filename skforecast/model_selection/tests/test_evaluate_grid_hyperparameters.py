@@ -74,7 +74,7 @@ def test_exception_evaluate_grid_hyperparameters_metric_list_duplicate_names():
                     lags      = 2
                  )
 
-    err_msg = re.escape('When `metrics` is a `list`, each metric name must be unique.')
+    err_msg = re.escape('When `metric` is a `list`, each metric name must be unique.')
     with pytest.raises(ValueError, match = err_msg):
         _evaluate_grid_hyperparameters(
             forecaster  = forecaster,
@@ -312,7 +312,7 @@ def test_evaluate_grid_hyperparameters_when_return_best():
 
 def test_evaluate_grid_hyperparameters_when_return_best_and_list_metrics():
     """
-    Test forecaster is refited when return_best=True in _evaluate_grid_hyperparameters
+    Test forecaster is refitted when return_best=True in _evaluate_grid_hyperparameters
     and multiple metrics.
     """
     forecaster = ForecasterAutoreg(

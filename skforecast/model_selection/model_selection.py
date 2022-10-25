@@ -1412,7 +1412,7 @@ def _evaluate_grid_hyperparameters(
     
     if len(metric_dict) != len(metric):
         raise ValueError(
-            'When `metrics` is a `list`, each metric name must be unique.'
+            'When `metric` is a `list`, each metric name must be unique.'
         )
 
     print(f"Number of models compared: {len(param_grid)*len(lags_grid)}.")
@@ -1442,18 +1442,15 @@ def _evaluate_grid_hyperparameters(
             lags_list.append(lags)
             params_list.append(params)
             for m, m_value in zip(metric, metrics_values):
-                if isinstance(m, str):
-                    m_name = m
-                else:
-                    m_name = m.__name__
+                m_name = m if isinstance(m, str) else m.__name__
                 metric_dict[m_name].append(m_value)
-
 
     results = pd.DataFrame({
                  'lags'  : lags_list,
                  'params': params_list,
                  **metric_dict
               })
+    
     results = results.sort_values(by=list(metric_dict.keys())[0], ascending=True)
     results = pd.concat([results, results['params'].apply(pd.Series)], axis=1)
     
@@ -1777,7 +1774,7 @@ def _bayesian_search_optuna(
     
     if len(metric_dict) != len(metric):
         raise ValueError(
-            'When `metrics` is a `list`, each metric name must be unique.'
+            'When `metric` is a `list`, each metric name must be unique.'
         )
 
     # Objective function using backtesting_forecaster
@@ -1854,10 +1851,7 @@ def _bayesian_search_optuna(
             lags_list.append(lags)
 
             for m, m_values in zip(metric, metric_values[i]):
-                if isinstance(m, str):
-                    m_name = m
-                else:
-                    m_name = m.__name__
+                m_name = m if isinstance(m, str) else m.__name__
                 metric_dict[m_name].append(m_values)
         
         if results_opt_best is None:
@@ -2010,7 +2004,7 @@ def _bayesian_search_skopt(
     
     if len(metric_dict) != len(metric):
         raise ValueError(
-            'When `metrics` is a `list`, each metric name must be unique.'
+            'When `metric` is a `list`, each metric name must be unique.'
         )
 
     for key in search_space.keys():
@@ -2087,10 +2081,7 @@ def _bayesian_search_skopt(
             lags_list.append(lags)
 
             for m, m_values in zip(metric, metric_values[i]):
-                if isinstance(m, str):
-                    m_name = m
-                else:
-                    m_name = m.__name__
+                m_name = m if isinstance(m, str) else m.__name__
                 metric_dict[m_name].append(m_values)
 
             #metric_list.append(results_opt.func_vals[i])
