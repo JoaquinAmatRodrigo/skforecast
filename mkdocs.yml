@@ -9,6 +9,7 @@ use_directory_urls: false
 nav:
   - Home:
     - Welcome to skforecast: README.md
+    - Introduction to forecasting: user_guides/quick-start-skforecast.ipynb
     - Quick start: quick-start/introduction-forecasting.md
     - User Guides: user_guides/input-data.ipynb
     - Examples and tutorials: examples/examples.md
@@ -16,9 +17,9 @@ nav:
     - FAQ and Tips: faq/profiling-skforecast.ipynb
     - Releases: releases/releases.md
 
-  - Quick start:
-    - Introduction to forecasting: quick-start/introduction-forecasting.md
-    - Quick start skforecast: user_guides/quick-start-skforecast.ipynb
+  - Introduction to forecasting: introduction-forecasting/introduction-forecasting.md
+
+  - Quick start: user_guides/quick-start-skforecast.ipynb
 
   - User Guides:
       - Input data: user_guides/input-data.ipynb
@@ -27,6 +28,7 @@ nav:
       - Multi-time series forecasting: user_guides/multi-time-series-forecasting.ipynb
       - Exogenous variables: user_guides/autoregresive-forecaster-exogenous.ipynb
       - Custom predictors: user_guides/custom-predictors.ipynb
+      - Weighted time series forecasting: user_guides/weighted-time-series-forecasting.ipynb
       - Backtesting forecaster: user_guides/backtesting.ipynb
       - Hyperparameter tuning and lags selection: user_guides/hyperparameter-tuning-and-lags-selection.ipynb
       - Scikit-learn Transformers and Pipelines: user_guides/sklearn-transformers-and-pipeline.ipynb
@@ -34,6 +36,7 @@ nav:
       - Feature importance: user_guides/feature-importance.ipynb
       - Forecasting with XGBoost: user_guides/forecasting-xgboost.ipynb
       - Save and load forecaster: user_guides/save-load-forecaster.ipynb
+      - Shap-values: user_guides/shap-values-skforecast.ipynb
       - Forecaster in production: user_guides/forecaster-in-production.ipynb
       - Grid search SARIMAX and ARIMA models: user_guides/grid-search-sarimax-arima.ipynb
       - Backtesting SARIMAX and ARIMA models: user_guides/backtesting-sarimax-arima.ipynb
