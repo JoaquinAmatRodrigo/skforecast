@@ -1,12 +1,12 @@
 # Unit test set_out_sample_residuals ForecasterAutoregCustom
 # ==============================================================================
+import re
 import pytest
 import numpy as np
 import pandas as pd
 from skforecast.ForecasterAutoregCustom import ForecasterAutoregCustom
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
-
 
 
 def create_predictors(y): # pragma: no cover
@@ -28,8 +28,13 @@ def test_set_out_sample_residuals_exception_when_residuals_is_not_pd_Series():
                     fun_predictors = create_predictors,
                     window_size    = 5
                 )
-    with pytest.raises(Exception):
-        forecaster.set_out_sample_residuals(residuals=[1, 2, 3])
+    residuals=[1, 2, 3]
+
+    err_msg = re.escape(
+                f"`residuals` argument must be `pd.Series`. Got {type(residuals)}."
+            )
+    with pytest.raises(TypeError, match = err_msg):
+        forecaster.set_out_sample_residuals(residuals=residuals)
 
 
 def test_set_out_sample_residuals_when_residuals_length_is_greater_than_1000():

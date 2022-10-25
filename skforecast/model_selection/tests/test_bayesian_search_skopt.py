@@ -53,7 +53,7 @@ def test_exception_bayesian_search_skopt_metric_list_duplicate_names():
     lags_grid = [2, 4]
     search_space = {'not_alpha': Real(0.01, 1.0, "log-uniform", name='alpha')}
 
-    err_msg = re.escape('When `metrics` is a `list`, each metric name must be unique.')
+    err_msg = re.escape('When `metric` is a `list`, each metric name must be unique.')
     with pytest.raises(ValueError, match = err_msg):
         _bayesian_search_skopt(
             forecaster         = forecaster,

@@ -153,10 +153,11 @@ def test_create_train_X_y_output_when_exog_is_None_and_transformer_exog_is_not_N
                     columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5']
                 ),
                 pd.Series(
-                    np.array([5., 6., 7., 8., 9.]),
+                    np.array([5, 6, 7, 8, 9]),
                     index = pd.RangeIndex(start=5, stop=10, step=1),
                     name = 'y'
-                ))    
+                ))
+    
     pd.testing.assert_frame_equal(results[0], expected[0])
     pd.testing.assert_series_equal(results[1], expected[1])
 
@@ -205,7 +206,7 @@ def test_create_train_X_y_output_when_transformer_y_and_transformer_exog():
     transformer_y = StandardScaler()
     transformer_exog = ColumnTransformer(
                             [('scale', StandardScaler(), ['col_1']),
-                            ('onehot', OneHotEncoder(), ['col_2'])],
+                             ('onehot', OneHotEncoder(), ['col_2'])],
                             remainder = 'passthrough',
                             verbose_feature_names_out = False
                         )

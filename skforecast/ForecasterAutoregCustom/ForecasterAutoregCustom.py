@@ -10,6 +10,7 @@ from typing import Union, Dict, List, Tuple, Any, Optional
 import warnings
 import logging
 import sys
+import inspect
 import numpy as np
 import pandas as pd
 import sklearn
@@ -37,7 +38,7 @@ logging.basicConfig(
 
 
 class ForecasterAutoregCustom(ForecasterBase):
-    '''
+    """
     This class turns any regressor compatible with the scikit-learn API into a
     recursive (multi-step) forecaster with a custom function to create predictors.
     
@@ -67,6 +68,13 @@ class ForecasterAutoregCustom(ForecasterBase):
         preprocessing API. The transformation is applied to `exog` before training the
         forecaster. `inverse_transform` is not available when using ColumnTransformers.
         **New in version 0.5.0**
+    
+    weight_func : callable, default `None`
+        Function that defines the individual weights for each sample based on the
+        index. For example, a function that assigns a lower weight to certain dates.
+        Ignored if `regressor` does not have the argument `sample_weight` in its `fit`
+        method.
+        **New in version 0.6.0**
     
     Attributes
     ----------
@@ -107,6 +115,17 @@ class ForecasterAutoregCustom(ForecasterBase):
         
     fitted : Bool
         Tag to identify if the regressor has been fitted (trained).
+        
+    weight_func : callable
+        Function that defines the individual weights for each sample based on the
+        index. For example, a function that assigns a lower weight to certain dates.
+        Ignored if `regressor` does not have the argument `sample_weight` in its `fit`
+        method.
+        **New in version 0.6.0**
+
+    source_code_weight_func : str
+        Source code of the custom function used to create weights.
+        **New in version 0.6.0**
         
     index_type : type
         Type of index of the input used in training.
@@ -150,24 +169,27 @@ class ForecasterAutoregCustom(ForecasterBase):
     python_version : str
         Version of python used to create the forecaster.
         **New in version 0.5.0**
-     
-    '''
+    
+    """
     
     def __init__(
         self, 
-        regressor, 
+        regressor: object, 
         fun_predictors: callable, 
         window_size: int,
-        transformer_y = None,
-        transformer_exog = None,
+        transformer_y: Optional[object]=None,
+        transformer_exog: Optional[object]=None,
+        weight_func: callable=None
     ) -> None:
         
         self.regressor                     = regressor
         self.create_predictors             = fun_predictors
         self.source_code_create_predictors = None
+        self.source_code_weight_func       = None
         self.window_size                   = window_size
         self.transformer_y                 = transformer_y
         self.transformer_exog              = transformer_exog
+        self.weight_func                   = weight_func
         self.index_type                    = None
         self.index_freq                    = None
         self.training_range                = None
@@ -195,6 +217,19 @@ class ForecasterAutoregCustom(ForecasterBase):
             )
     
         self.source_code_create_predictors = getsource(fun_predictors)
+
+        if weight_func is not None:
+            self.source_code_weight_func = getsource(weight_func)
+
+            if 'sample_weight' not in inspect.getfullargspec(self.regressor.fit)[0]:
+                warnings.warm(
+                    f"""
+                    Argument `weight_func` is ignored since regressor {self.regressor}
+                    does not accept `sample_weight` in its `fit` method.
+                    """
+                )
+                self.weight_func = None
+                self.source_code_weight_func = None
                 
         
     def __repr__(
@@ -220,6 +255,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             f"Window size: {self.window_size} \n"
             f"Transformer for y: {self.transformer_y} \n"
             f"Transformer for exog: {self.transformer_exog} \n"
+            f"Included weights function: {True if self.weight_func is not None else False} \n"
             f"Included exogenous: {self.included_exog} \n"
             f"Type of exogenous variable: {self.exog_type} \n"
             f"Exogenous variables names: {self.exog_col_names} \n"
@@ -242,7 +278,8 @@ class ForecasterAutoregCustom(ForecasterBase):
         exog: Optional[Union[pd.Series, pd.DataFrame]]=None
     ) -> Tuple[pd.DataFrame, pd.Series]:
         """
-        Create training matrices from univariate time series.
+        Create training matrices from univariate time series and exogenous
+        variables.
         
         Parameters
         ----------        
@@ -282,8 +319,9 @@ class ForecasterAutoregCustom(ForecasterBase):
         
         if exog is not None:
             if len(exog) != len(y):
-                raise Exception(
-                    "`exog` must have same number of samples as `y`."
+                raise ValueError(
+                    f'`exog` must have same number of samples as `y`. '
+                    f'length `exog`: ({len(exog)}), length `y`: ({len(y)})'
                 )
             check_exog(exog=exog)
             if isinstance(exog, pd.Series):
@@ -302,7 +340,7 @@ class ForecasterAutoregCustom(ForecasterBase):
                        )
             exog_values, exog_index = preprocess_exog(exog=exog)
             if not (exog_index[:len(y_index)] == y_index).all():
-                raise Exception(
+                raise ValueError(
                     ('Different index for `y` and `exog`. They must be equal '
                      'to ensure the correct alignment of values.')      
                 )
@@ -352,7 +390,7 @@ class ForecasterAutoregCustom(ForecasterBase):
     def fit(
         self,
         y: pd.Series,
-        exog: Optional[Union[np.ndarray, pd.Series, pd.DataFrame]]=None
+        exog: Optional[Union[pd.Series, pd.DataFrame]]=None
     ) -> None:
         """
         Training Forecaster.
@@ -366,7 +404,6 @@ class ForecasterAutoregCustom(ForecasterBase):
             Exogenous variable/s included as predictor/s. Must have the same
             number of observations as `y` and their indexes must be aligned so
             that y[i] is regressed on exog[i].
-
 
         Returns 
         -------
@@ -394,10 +431,17 @@ class ForecasterAutoregCustom(ForecasterBase):
         
         X_train, y_train = self.create_train_X_y(y=y, exog=exog)
         
-        if not str(type(self.regressor)) == "<class 'xgboost.sklearn.XGBRegressor'>":
-            self.regressor.fit(X=X_train, y=y_train)
+        if self.weight_func is not None:
+            weights = self.weight_func(X_train.index)
+            if not str(type(self.regressor)) == "<class 'xgboost.sklearn.XGBRegressor'>":
+                self.regressor.fit(X=X_train, y=y_train, sample_weight=weights)
+            else:
+                self.regressor.fit(X=X_train.to_numpy(), y=y_train.to_numpy(), sample_weight=weights)
         else:
-            self.regressor.fit(X=X_train.to_numpy(), y=y_train.to_numpy())
+            if not str(type(self.regressor)) == "<class 'xgboost.sklearn.XGBRegressor'>":
+                self.regressor.fit(X=X_train, y=y_train)
+            else:
+                self.regressor.fit(X=X_train.to_numpy(), y=y_train.to_numpy())
         
         self.fitted = True
         self.fit_date = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
@@ -434,8 +478,8 @@ class ForecasterAutoregCustom(ForecasterBase):
         self,
         steps: int,
         last_window: np.ndarray,
-        exog: np.ndarray
-    ) -> np.array:
+        exog: Optional[np.ndarray]=None
+    ) -> np.ndarray:
         """
         Predict n steps ahead. It is an iterative process in which, each prediction,
         is used as a predictor for the next step.
@@ -449,7 +493,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             Values of the series used to create the predictors (lags) need in the 
             first iteration of prediction (t + 1).
             
-        exog : numpy ndarray, pandas DataFrame
+        exog : numpy ndarray, default `None`
             Exogenous variable/s included as predictor/s.
 
         Returns 
@@ -503,7 +547,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             Values of the series used to create the predictors (lags) need in the 
             first iteration of prediction (t + 1).
     
-            If `last_window = None`, the values stored in` self.last_window` are
+            If `last_window = None`, the values stored in `self.last_window` are
             used to calculate the initial predictors, and the predictions start
             right after training data.
             
@@ -531,7 +575,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             exog_col_names  = self.exog_col_names,
             interval        = None,
             max_steps       = None,
-            level           = None,
+            levels          = None,
             series_levels   = None
         )
      
@@ -593,7 +637,6 @@ class ForecasterAutoregCustom(ForecasterBase):
                       )
 
         return predictions
-
     
     
     def _estimate_boot_interval(
@@ -678,7 +721,6 @@ class ForecasterAutoregCustom(ForecasterBase):
         seeds = rng.integers(low=0, high=10000, size=n_boot)
 
         for i in range(n_boot):
-
             # In each bootstraping iteration the initial last_window and exog 
             # need to be restored.
             last_window_boot = last_window.copy()
@@ -792,6 +834,13 @@ class ForecasterAutoregCustom(ForecasterBase):
             
         """
         
+        if not in_sample_residuals and self.out_sample_residuals is None:
+            raise ValueError(
+                ('`forecaster.out_sample_residuals` is `None`. Use '
+                 '`in_sample_residuals=True` or method `set_out_sample_residuals()` '
+                 'before `predict_interval()`.')
+            )
+
         check_predict_input(
             forecaster_type = type(self),
             steps           = steps,
@@ -806,7 +855,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             exog_col_names  = self.exog_col_names,
             interval        = interval,
             max_steps       = None,
-            level           = None,
+            levels          = None,
             series_levels   = None
         )
         
@@ -845,8 +894,8 @@ class ForecasterAutoregCustom(ForecasterBase):
                                                     last_window = last_window
                                                 )
         
-        # Since during predict() `last_window` and `exog` are modified, the
-        # originals are stored to be used later
+        # Since during predict() `last_window_values` and `exog_values` are modified,
+        # the originals are stored to be used later.
         last_window_values_original = last_window_values.copy()
         if exog is not None:
             exog_values_original = exog_values.copy()
@@ -914,7 +963,8 @@ class ForecasterAutoregCustom(ForecasterBase):
         self, 
         residuals: pd.Series, 
         append: bool=True,
-        transform: bool=True
+        transform: bool=True,
+        random_state: int=123
     )-> None:
         """
         Set new values to the attribute `out_sample_residuals`. Out of sample
@@ -935,6 +985,9 @@ class ForecasterAutoregCustom(ForecasterBase):
 
         transform : bool, default `True`
             If `True`, new residuals are transformed using self.transformer_y.
+
+        random_state : int, default `123`
+            Sets a seed to the random sampling for reproducible output.
             
         Returns 
         -------
@@ -943,15 +996,15 @@ class ForecasterAutoregCustom(ForecasterBase):
         """
 
         if not isinstance(residuals, pd.Series):
-            raise Exception(
-                f"`residuals` argument must be `pd.Series`. Got {type(residuals)}"
+            raise TypeError(
+                f"`residuals` argument must be `pd.Series`. Got {type(residuals)}."
             )
 
         if not transform and self.transformer_y is not None:
             warnings.warn(
                 f'''
                 Argument `transform` is set to `False` but forecaster was trained
-                using a transformer {self.transformer_y}. Ensure that new residuals 
+                using a transformer {self.transformer_y}. Ensure that the new residuals 
                 are already transformed or set `transform=True`.
                 '''
             )
@@ -960,8 +1013,8 @@ class ForecasterAutoregCustom(ForecasterBase):
             warnings.warn(
                 f'''
                 Residuals will be transformed using the same transformer used 
-                when training the forecaster ({self.transformer_y}). Ensure that
-                new residuals are in the same scale as the original time series.
+                when training the forecaster ({self.transformer_y}). Ensure that the
+                new residuals are on the same scale as the original time series.
                 '''
             )
 
@@ -973,7 +1026,7 @@ class ForecasterAutoregCustom(ForecasterBase):
                         )
             
         if len(residuals) > 1000:
-            rng = np.random.default_rng(seed=123)
+            rng = np.random.default_rng(seed=random_state)
             residuals = rng.choice(a=residuals, size=1000, replace=False)
             residuals = pd.Series(residuals)   
     

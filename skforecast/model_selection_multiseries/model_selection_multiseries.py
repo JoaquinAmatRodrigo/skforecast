@@ -38,17 +38,17 @@ def _backtesting_forecaster_multiseries_refit(
     forecaster,
     series: pd.DataFrame,
     steps: int,
-    level: str,
     metric: Union[str, callable, list],
     initial_train_size: int,
     fixed_train_size: bool=True,
+    levels: Optional[Union[str, list]]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     interval: Optional[list]=None,
     n_boot: int=500,
     random_state: int=123,
     in_sample_residuals: bool=True,
     verbose: bool=False
-) -> Tuple[Union[float, list], pd.DataFrame]:
+) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
     Backtesting of forecaster model with a re-fitting strategy. A copy of the  
     original forecaster is created so it is not modified during the process.
@@ -73,9 +73,6 @@ def _backtesting_forecaster_multiseries_refit(
         
     steps : int
         Number of steps to predict.
-
-    level : str
-        Time series to be predicted.
         
     metric : str, callable, list
         Metric used to quantify the goodness of fit of the model.
@@ -96,7 +93,10 @@ def _backtesting_forecaster_multiseries_refit(
         
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
-        
+
+    levels : str, list, default `None`
+        Time series to be predicted. If `None` all levels will be predicted.
+
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
@@ -126,8 +126,8 @@ def _backtesting_forecaster_multiseries_refit(
 
     Returns 
     -------
-    metrics_value : float, list
-        Value(s) of the metric(s).
+    metrics_levels : pd.DataFrame
+        Value(s) of the metric(s). Index are the levels and columns the metrics.
 
     backtest_predictions : pandas Dataframe
         Value of predictions and their estimated interval if `interval` is not `None`.
@@ -139,12 +139,17 @@ def _backtesting_forecaster_multiseries_refit(
 
     forecaster = deepcopy(forecaster)
 
+    if levels is None:
+        levels = list(series.columns) # Forecaster can be not fitted, so cannot use self.series_levels
+    elif isinstance(levels, str):
+        levels = [levels]
+
     if isinstance(metric, str):
-        metrics = _get_metric(metric=metric)
+        metrics = [_get_metric(metric=metric)]
     elif isinstance(metric, list):
         metrics = [_get_metric(metric=m) if isinstance(m, str) else m for m in metric]
     else:
-        metrics = metric
+        metrics = [metric]
     
     backtest_predictions = []
     
@@ -189,14 +194,14 @@ def _backtesting_forecaster_multiseries_refit(
                         series = series.iloc[train_idx_start:train_idx_end, ],
                         store_in_sample_residuals = False
                     )
-                    pred = forecaster.predict(steps=steps, level=level)
+                    pred = forecaster.predict(steps=steps, levels=levels)
                 else:
                     forecaster.fit(
                         series = series.iloc[train_idx_start:train_idx_end, ], 
                         exog = exog.iloc[train_idx_start:train_idx_end, ],
                         store_in_sample_residuals = False
                     )
-                    pred = forecaster.predict(steps=steps, level=level, exog=next_window_exog)
+                    pred = forecaster.predict(steps=steps, levels=levels, exog=next_window_exog)
             else:    
                 if remainder == 0:
                     if exog is None:
@@ -204,14 +209,14 @@ def _backtesting_forecaster_multiseries_refit(
                             series = series.iloc[train_idx_start:train_idx_end, ],
                             store_in_sample_residuals = False
                         )
-                        pred = forecaster.predict(steps=steps, level=level)
+                        pred = forecaster.predict(steps=steps, levels=levels)
                     else:
                         forecaster.fit(
                             series = series.iloc[train_idx_start:train_idx_end, ], 
                             exog = exog.iloc[train_idx_start:train_idx_end, ],
                             store_in_sample_residuals = False
                         )
-                        pred = forecaster.predict(steps=steps, level=level, exog=next_window_exog)
+                        pred = forecaster.predict(steps=steps, levels=levels, exog=next_window_exog)
                 else:
                     # Only the remaining steps need to be predicted
                     steps = remainder
@@ -220,14 +225,14 @@ def _backtesting_forecaster_multiseries_refit(
                             series = series.iloc[train_idx_start:train_idx_end],
                             store_in_sample_residuals = False
                         )
-                        pred = forecaster.predict(steps=steps, level=level)
+                        pred = forecaster.predict(steps=steps, levels=levels)
                     else:
                         forecaster.fit(
                             series = series.iloc[train_idx_start:train_idx_end], 
                             exog = exog.iloc[train_idx_start:train_idx_end, ],
                             store_in_sample_residuals = False
                         )
-                        pred = forecaster.predict(steps=steps, level=level, exog=next_window_exog)
+                        pred = forecaster.predict(steps=steps, levels=levels, exog=next_window_exog)
         else:
 
             if i < folds - 1:
@@ -238,7 +243,7 @@ def _backtesting_forecaster_multiseries_refit(
                     )
                     pred = forecaster.predict_interval(
                                 steps        = steps,
-                                level        = level,
+                                levels       = levels,
                                 interval     = interval,
                                 n_boot       = n_boot,
                                 random_state = random_state,
@@ -252,7 +257,7 @@ def _backtesting_forecaster_multiseries_refit(
                     )
                     pred = forecaster.predict_interval(
                                 steps        = steps,
-                                level        = level,
+                                levels       = levels,
                                 exog         = next_window_exog,
                                 interval     = interval,
                                 n_boot       = n_boot,
@@ -268,7 +273,7 @@ def _backtesting_forecaster_multiseries_refit(
                         )
                         pred = forecaster.predict_interval(
                                 steps        = steps,
-                                level        = level,
+                                levels       = levels,
                                 interval     = interval,
                                 n_boot       = n_boot,
                                 random_state = random_state,
@@ -282,7 +287,7 @@ def _backtesting_forecaster_multiseries_refit(
                         )
                         pred = forecaster.predict_interval(
                                 steps        = steps,
-                                level        = level,
+                                levels       = levels,
                                 exog         = next_window_exog,
                                 interval     = interval,
                                 n_boot       = n_boot,
@@ -299,7 +304,7 @@ def _backtesting_forecaster_multiseries_refit(
                         )
                         pred = forecaster.predict_interval(
                                 steps        = steps,
-                                level        = level,
+                                levels       = levels,
                                 interval     = interval,
                                 n_boot       = n_boot,
                                 random_state = random_state,
@@ -313,7 +318,7 @@ def _backtesting_forecaster_multiseries_refit(
                         )
                         pred = forecaster.predict_interval(
                                 steps        = steps,
-                                level        = level,
+                                levels       = levels,
                                 exog         = next_window_exog,
                                 interval     = interval,
                                 n_boot       = n_boot,
@@ -324,38 +329,40 @@ def _backtesting_forecaster_multiseries_refit(
         backtest_predictions.append(pred)
     
     backtest_predictions = pd.concat(backtest_predictions)
-    if isinstance(backtest_predictions, pd.Series):
-        backtest_predictions = pd.DataFrame(backtest_predictions)
 
-    if isinstance(metric, list):
+    metrics_levels = []
+
+    for level in levels:
         metrics_values = [m(
                             y_true = series[level].iloc[initial_train_size:initial_train_size + len(backtest_predictions)],
-                            y_pred = backtest_predictions['pred']
+                            y_pred = backtest_predictions[level]
                           ) for m in metrics
                          ]
-    else:
-        metrics_values = metrics(
-                            y_true = series[level].iloc[initial_train_size:initial_train_size + len(backtest_predictions)],
-                            y_pred = backtest_predictions['pred']
-                         )
+ 
+        metrics_levels.append(metrics_values)
 
-    return metrics_values, backtest_predictions
+    metrics_levels = pd.concat([pd.DataFrame({'levels': levels}), 
+                                pd.DataFrame(data    = metrics_levels,
+                                             columns = [m if isinstance(m, str) else m.__name__ for m in metrics])],
+                               axis=1)
+
+    return metrics_levels, backtest_predictions
 
 
 def _backtesting_forecaster_multiseries_no_refit(
     forecaster,
     series: pd.DataFrame,
     steps: int,
-    level: str,
     metric: Union[str, callable, list],
     initial_train_size: Optional[int]=None,
+    levels: Optional[Union[str, list]]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     interval: Optional[list]=None,
     n_boot: int=500,
     random_state: int=123,
     in_sample_residuals: bool=True,
     verbose: bool=False
-) -> Tuple[Union[float, list], pd.DataFrame]:
+) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
     Backtesting of forecaster without iterative re-fitting. In each iteration,
     a number of `steps` are predicted. A copy of the original forecaster is
@@ -376,9 +383,6 @@ def _backtesting_forecaster_multiseries_no_refit(
         
     steps : int
         Number of steps to predict.
-
-    level : str
-        Time series to be predicted.
         
     metric : str, callable, list
         Metric used to quantify the goodness of fit of the model.
@@ -398,6 +402,9 @@ def _backtesting_forecaster_multiseries_no_refit(
         trained, no initial train is done and all data is used to evaluate the model. However, 
         the first `len(forecaster.last_window)` observations are needed to create the 
         initial predictors, so no predictions are calculated for them.
+
+    levels : str, list, default `None`
+        Time series to be predicted. If `None` all levels will be predicted.
         
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
@@ -428,8 +435,8 @@ def _backtesting_forecaster_multiseries_no_refit(
 
     Returns 
     -------
-    metrics_value : float, list
-        Value(s) of the metric(s).
+    metrics_levels : pd.DataFrame
+        Value(s) of the metric(s). Index are the levels and columns the metrics.
 
     backtest_predictions : pandas DataFrame
         Value of predictions and their estimated interval if `interval` is not `None`.
@@ -441,12 +448,17 @@ def _backtesting_forecaster_multiseries_no_refit(
 
     forecaster = deepcopy(forecaster)
 
+    if levels is None:
+        levels = list(series.columns) # Forecaster can be not fitted, so cannot use self.series_levels
+    elif isinstance(levels, str):
+        levels = [levels]
+
     if isinstance(metric, str):
-        metrics = _get_metric(metric=metric)
+        metrics = [_get_metric(metric=metric)]
     elif isinstance(metric, list):
         metrics = [_get_metric(metric=m) if isinstance(m, str) else m for m in metric]
     else:
-        metrics = metric
+        metrics = [metric]
     
     backtest_predictions = []
     
@@ -488,7 +500,7 @@ def _backtesting_forecaster_multiseries_no_refit(
         # predictions.
         last_window_end   = initial_train_size + i * steps
         last_window_start = last_window_end - window_size 
-        last_window_y     = series[level].iloc[last_window_start:last_window_end, ]
+        last_window_y     = series.iloc[last_window_start:last_window_end, ]
         if exog is not None:
             next_window_exog = exog.iloc[last_window_end:last_window_end + steps, ]
     
@@ -497,47 +509,47 @@ def _backtesting_forecaster_multiseries_no_refit(
             if i < folds - 1: 
                 if exog is None:
                     pred = forecaster.predict(
-                                steps       = steps,
-                                level       = level,
-                                last_window = last_window_y
+                               steps       = steps,
+                               levels      = levels,
+                               last_window = last_window_y
                            )
                 else:
                     pred = forecaster.predict(
-                                steps       = steps,
-                                level       = level,
-                                last_window = last_window_y,
-                                exog        = next_window_exog
+                               steps       = steps,
+                               levels      = levels,
+                               last_window = last_window_y,
+                               exog        = next_window_exog
                            )            
             else:    
                 if remainder == 0:
                     if exog is None:
                         pred = forecaster.predict(
-                                    steps       = steps,
-                                    level       = level,
-                                    last_window = last_window_y
+                                   steps       = steps,
+                                   levels      = levels,
+                                   last_window = last_window_y
                                )
                     else:
                         pred = forecaster.predict(
-                                    steps       = steps,
-                                    level       = level,
-                                    last_window = last_window_y,
-                                    exog        = next_window_exog
+                                   steps       = steps,
+                                   levels      = levels,
+                                   last_window = last_window_y,
+                                   exog        = next_window_exog
                                )
                 else:
                     # Only the remaining steps need to be predicted
                     steps = remainder
                     if exog is None:
                         pred = forecaster.predict(
-                                    steps       = steps,
-                                    level       = level,
-                                    last_window = last_window_y
+                                   steps       = steps,
+                                   levels      = levels,
+                                   last_window = last_window_y
                                )
                     else:
                         pred = forecaster.predict(
-                                    steps       = steps,
-                                    level       = level,
-                                    last_window = last_window_y,
-                                    exog        = next_window_exog
+                                   steps       = steps,
+                                   levels      = levels,
+                                   last_window = last_window_y,
+                                   exog        = next_window_exog
                                )
             
             backtest_predictions.append(pred)
@@ -546,102 +558,104 @@ def _backtesting_forecaster_multiseries_no_refit(
             if i < folds - 1:
                 if exog is None:
                     pred = forecaster.predict_interval(
-                                steps        = steps,
-                                level        = level,
-                                last_window  = last_window_y,
-                                interval     = interval,
-                                n_boot       = n_boot,
-                                random_state = random_state,
-                                in_sample_residuals = in_sample_residuals
+                               steps        = steps,
+                               levels       = levels,
+                               last_window  = last_window_y,
+                               interval     = interval,
+                               n_boot       = n_boot,
+                               random_state = random_state,
+                               in_sample_residuals = in_sample_residuals
                            )
                 else:
                     pred = forecaster.predict_interval(
-                                steps        = steps,
-                                level        = level,
-                                last_window  = last_window_y,
-                                exog         = next_window_exog,
-                                interval     = interval,
-                                n_boot       = n_boot,
-                                random_state = random_state,
-                                in_sample_residuals = in_sample_residuals
+                               steps        = steps,
+                               levels       = levels,
+                               last_window  = last_window_y,
+                               exog         = next_window_exog,
+                               interval     = interval,
+                               n_boot       = n_boot,
+                               random_state = random_state,
+                               in_sample_residuals = in_sample_residuals
                            )            
             else:    
                 if remainder == 0:
                     if exog is None:
                         pred = forecaster.predict_interval(
-                                    steps        = steps,
-                                    level        = level,
-                                    last_window  = last_window_y,
-                                    interval     = interval,
-                                    n_boot       = n_boot,
-                                    random_state = random_state,
-                                    in_sample_residuals = in_sample_residuals
+                                   steps        = steps,
+                                   levels       = levels,
+                                   last_window  = last_window_y,
+                                   interval     = interval,
+                                   n_boot       = n_boot,
+                                   random_state = random_state,
+                                   in_sample_residuals = in_sample_residuals
                                )
                     else:
                         pred = forecaster.predict_interval(
-                                    steps        = steps,
-                                    level        = level,
-                                    last_window  = last_window_y,
-                                    exog         = next_window_exog,
-                                    interval     = interval,
-                                    n_boot       = n_boot,
-                                    random_state = random_state,
-                                    in_sample_residuals = in_sample_residuals
+                                   steps        = steps,
+                                   levels       = levels,
+                                   last_window  = last_window_y,
+                                   exog         = next_window_exog,
+                                   interval     = interval,
+                                   n_boot       = n_boot,
+                                   random_state = random_state,
+                                   in_sample_residuals = in_sample_residuals
                                )
                 else:
                     # Only the remaining steps need to be predicted
                     steps = remainder
                     if exog is None:
                         pred = forecaster.predict_interval(
-                                    steps        = steps,
-                                    level        = level,
-                                    last_window  = last_window_y,
-                                    interval     = interval,
-                                    n_boot       = n_boot,
-                                    random_state = random_state,
-                                    in_sample_residuals = in_sample_residuals
+                                   steps        = steps,
+                                   levels       = levels,
+                                   last_window  = last_window_y,
+                                   interval     = interval,
+                                   n_boot       = n_boot,
+                                   random_state = random_state,
+                                   in_sample_residuals = in_sample_residuals
                                )
                     else:
                         pred = forecaster.predict_interval(
-                                    steps        = steps,
-                                    level        = level,
-                                    last_window  = last_window_y,
-                                    exog         = next_window_exog,
-                                    interval     = interval,
-                                    n_boot       = n_boot,
-                                    random_state = random_state,
-                                    in_sample_residuals = in_sample_residuals
+                                   steps        = steps,
+                                   levels       = levels,
+                                   last_window  = last_window_y,
+                                   exog         = next_window_exog,
+                                   interval     = interval,
+                                   n_boot       = n_boot,
+                                   random_state = random_state,
+                                   in_sample_residuals = in_sample_residuals
                                )
             
             backtest_predictions.append(pred)
 
     backtest_predictions = pd.concat(backtest_predictions)
-    if isinstance(backtest_predictions, pd.Series):
-        backtest_predictions = pd.DataFrame(backtest_predictions)
 
-    if isinstance(metric, list):
+    metrics_levels = []
+
+    for level in levels:
         metrics_values = [m(
                             y_true = series[level].iloc[initial_train_size:initial_train_size + len(backtest_predictions)],
-                            y_pred = backtest_predictions['pred']
+                            y_pred = backtest_predictions[level]
                           ) for m in metrics
                          ]
-    else:
-        metrics_values = metrics(
-                            y_true = series[level].iloc[initial_train_size:initial_train_size + len(backtest_predictions)],
-                            y_pred = backtest_predictions['pred']
-                         )
+ 
+        metrics_levels.append(metrics_values)
 
-    return metrics_values, backtest_predictions
+    metrics_levels = pd.concat([pd.DataFrame({'levels': levels}), 
+                                pd.DataFrame(data    = metrics_levels,
+                                             columns = [m if isinstance(m, str) else m.__name__ for m in metrics])],
+                               axis=1)                 
+
+    return metrics_levels, backtest_predictions
 
 
 def backtesting_forecaster_multiseries(
     forecaster,
     series: pd.DataFrame,
     steps: int,
-    level: str,
     metric: Union[str, callable, list],
     initial_train_size: Optional[int],
     fixed_train_size: bool=True,
+    levels: Optional[Union[str, list]]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     refit: bool=False,
     interval: Optional[list]=None,
@@ -649,7 +663,7 @@ def backtesting_forecaster_multiseries(
     random_state: int=123,
     in_sample_residuals: bool=True,
     verbose: bool=False
-) -> Tuple[Union[float, list], pd.DataFrame]:
+) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
     Backtesting of forecaster multi-series model.
 
@@ -668,9 +682,6 @@ def backtesting_forecaster_multiseries(
         
     steps : int
         Number of steps to predict.
-
-    level : str
-        Time series to be predicted.
         
     metric : str, callable, list
         Metric used to quantify the goodness of fit of the model.
@@ -695,6 +706,10 @@ def backtesting_forecaster_multiseries(
     
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
+
+    levels : str, list, default `None`
+        Time series to be predicted. If `None` all levels will be predicted.
+        **New in version 0.6.0**
         
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
@@ -728,8 +743,8 @@ def backtesting_forecaster_multiseries(
 
     Returns 
     -------
-    metrics_value : float, list
-        Value(s) of the metric(s).
+    metrics_levels : pd.DataFrame
+        Value(s) of the metric(s). Index are the levels and columns the metrics.
 
     backtest_predictions : pandas DataFrame
         Value of predictions and their estimated interval if `interval` is not `None`.
@@ -770,13 +785,18 @@ def backtesting_forecaster_multiseries(
             ('`forecaster` must be of type `ForecasterAutoregMultiSeries`, for all other '
              'types of forecasters use the functions in `model_selection` module.')
         )
+
+    if levels is not None and not isinstance(levels, (str, list)):
+        raise TypeError(
+            f'`levels` must be a `list` of column names, a `str` of a column name or `None`.'
+        )
     
     if refit:
-        metrics_values, backtest_predictions = _backtesting_forecaster_multiseries_refit(
+        metrics_levels, backtest_predictions = _backtesting_forecaster_multiseries_refit(
             forecaster          = forecaster,
             series              = series,
             steps               = steps,
-            level               = level,
+            levels              = levels,
             metric              = metric,
             initial_train_size  = initial_train_size,
             fixed_train_size    = fixed_train_size,
@@ -788,11 +808,11 @@ def backtesting_forecaster_multiseries(
             verbose             = verbose
         )
     else:
-        metrics_values, backtest_predictions = _backtesting_forecaster_multiseries_no_refit(
+        metrics_levels, backtest_predictions = _backtesting_forecaster_multiseries_no_refit(
             forecaster          = forecaster,
             series              = series,
             steps               = steps,
-            level               = level,
+            levels              = levels,
             metric              = metric,
             initial_train_size  = initial_train_size,
             exog                = exog,
@@ -803,7 +823,7 @@ def backtesting_forecaster_multiseries(
             verbose             = verbose
         )
 
-    return metrics_values, backtest_predictions
+    return metrics_levels, backtest_predictions
 
 
 def grid_search_forecaster_multiseries(
@@ -811,16 +831,16 @@ def grid_search_forecaster_multiseries(
     series: pd.DataFrame,
     param_grid: dict,
     steps: int,
-    metric: Union[str, callable],
+    metric: Union[str, callable, list],
     initial_train_size: int,
     fixed_train_size: bool=True,
-    levels: Union[str, list]=None,
-    levels_weights: dict=None,
+    levels: Optional[Union[str, list]]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Optional[list]=None,
     refit: bool=False,
     return_best: bool=True,
-    verbose: bool=True
+    verbose: bool=True,
+    levels_weights: Any='deprecated'
 ) -> pd.DataFrame:
     """
     Exhaustive search over specified parameter values for a Forecaster object.
@@ -841,7 +861,7 @@ def grid_search_forecaster_multiseries(
     steps : int
         Number of steps to predict.
         
-    metric : str, callable
+    metric : str, callable, list
         Metric used to quantify the goodness of fit of the model.
         
         If string:
@@ -850,6 +870,9 @@ def grid_search_forecaster_multiseries(
     
         If callable:
             Function with arguments y_true, y_pred that returns a float.
+
+        If list:
+            List containing several strings and/or callable.
 
     initial_train_size : int 
         Number of samples in the initial train split.
@@ -860,11 +883,12 @@ def grid_search_forecaster_multiseries(
     levels : str, list, default `None`
         level (`str`) or levels (`list`) at which the forecaster is optimized. 
         If `None`, all levels are taken into account. The resulting metric will be
-        a weighted average of the optimization of all levels. See also `levels_weights`.
+        the average of the optimization of all levels.
 
     levels_weights : dict, default `None`
         Weights associated with levels in the form `{level: weight}`. 
         If `None`, all levels have the same weight.
+        **Deprecated in version 0.6.0**
 
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
@@ -887,12 +911,21 @@ def grid_search_forecaster_multiseries(
     -------
     results : pandas DataFrame
         Results for each combination of parameters.
+            column levels = levels.
             column lags = predictions.
             column params = lower bound of the interval.
-            column metric = metric value estimated for the combination of parameters.
+            column metric = metric(s) value(s) estimated for each combination of parameters. The resulting metric will be
+                            the average of the optimization of all levels.
             additional n columns with param = value.
     
     """
+
+    if levels_weights != 'deprecated':
+        warnings.warn(
+            ('`levels_weights` is deprecated since version 0.6.0, and '
+             'will be removed in version 0.7.0. Use `series_weights` when '
+             'creating the forecaster instead.')
+        )
 
     param_grid = list(ParameterGrid(param_grid))
 
@@ -904,8 +937,7 @@ def grid_search_forecaster_multiseries(
         metric              = metric,
         initial_train_size  = initial_train_size,
         fixed_train_size    = fixed_train_size,
-        levels         = levels,
-        levels_weights      = levels_weights,
+        levels              = levels,
         exog                = exog,
         lags_grid           = lags_grid,
         refit               = refit,
@@ -921,18 +953,18 @@ def random_search_forecaster_multiseries(
     series: pd.DataFrame,
     param_distributions: dict,
     steps: int,
-    metric: Union[str, callable],
+    metric: Union[str, callable, list],
     initial_train_size: int,
     fixed_train_size: bool=True,
-    levels: Union[str, list]=None,
-    levels_weights: dict=None,
+    levels: Optional[Union[str, list]]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Optional[list]=None,
     refit: bool=False,
     n_iter: int=10,
     random_state: int=123,
     return_best: bool=True,
-    verbose: bool=True
+    verbose: bool=True,
+    levels_weights: Any='deprecated'
 ) -> pd.DataFrame:
     """
     Random search over specified parameter values or distributions for a Forecaster object.
@@ -953,7 +985,7 @@ def random_search_forecaster_multiseries(
     steps : int
         Number of steps to predict.
         
-    metric : str, callable
+    metric : str, callable, list
         Metric used to quantify the goodness of fit of the model.
         
         If string:
@@ -962,6 +994,9 @@ def random_search_forecaster_multiseries(
     
         If callable:
             Function with arguments y_true, y_pred that returns a float.
+
+        If list:
+            List containing several strings and/or callable.
 
     initial_train_size : int 
         Number of samples in the initial train split.
@@ -972,11 +1007,12 @@ def random_search_forecaster_multiseries(
     levels : str, list, default `None`
         level (`str`) or levels (`list`) at which the forecaster is optimized. 
         If `None`, all levels are taken into account. The resulting metric will be
-        a weighted average of the optimization of all levels. See also `levels_weights`.
+        the average of the optimization of all levels.
 
     levels_weights : dict, default `None`
         Weights associated with levels in the form `{level: weight}`. 
         If `None`, all levels have the same weight.
+        **Deprecated in version 0.6.0**
 
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
@@ -1006,12 +1042,21 @@ def random_search_forecaster_multiseries(
     -------
     results : pandas DataFrame
         Results for each combination of parameters.
+            column levels = levels.
             column lags = predictions.
             column params = lower bound of the interval.
-            column metric = metric value estimated for the combination of parameters.
+            column metric = metric(s) value(s) estimated for each combination of parameters. The resulting metric will be
+                            the average of the optimization of all levels.
             additional n columns with param = value.
     
     """
+
+    if levels_weights != 'deprecated':
+        warnings.warn(
+            ('`levels_weights` is deprecated since version 0.6.0, and '
+             'will be removed in version 0.7.0. Use `series_weights` when '
+             'creating the forecaster instead.')
+        )
 
     param_grid = list(ParameterSampler(param_distributions, n_iter=n_iter, random_state=random_state))
 
@@ -1023,8 +1068,7 @@ def random_search_forecaster_multiseries(
         metric              = metric,
         initial_train_size  = initial_train_size,
         fixed_train_size    = fixed_train_size,
-        levels         = levels,
-        levels_weights      = levels_weights,
+        levels              = levels,
         exog                = exog,
         lags_grid           = lags_grid,
         refit               = refit,
@@ -1040,11 +1084,10 @@ def _evaluate_grid_hyperparameters_multiseries(
     series: pd.DataFrame,
     param_grid: dict,
     steps: int,
-    metric: Union[str, callable],
+    metric: Union[str, callable, list],
     initial_train_size: int,
     fixed_train_size: bool=True,
-    levels: Union[str, list]=None,
-    levels_weights: dict=None,
+    levels: Optional[Union[str, list]]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Optional[list]=None,
     refit: bool=False,
@@ -1069,7 +1112,7 @@ def _evaluate_grid_hyperparameters_multiseries(
     steps : int
         Number of steps to predict.
         
-    metric : str, callable
+    metric : str, callable, list
         Metric used to quantify the goodness of fit of the model.
         
         If string:
@@ -1078,6 +1121,9 @@ def _evaluate_grid_hyperparameters_multiseries(
     
         If callable:
             Function with arguments y_true, y_pred that returns a float.
+
+        If list:
+            List containing several strings and/or callable.
 
     initial_train_size : int 
         Number of samples in the initial train split.
@@ -1088,11 +1134,7 @@ def _evaluate_grid_hyperparameters_multiseries(
     levels : str, list, default `None`
         level (`str`) or levels (`list`) at which the forecaster is optimized. 
         If `None`, all levels are taken into account. The resulting metric will be
-        a weighted average of the optimization of all levels. See also `levels_weights`.
-
-    levels_weights : dict, default `None`
-        Weights associated with levels in the form `{level: weight}`. 
-        If `None`, all levels have the same weight.
+        the average of the optimization of all levels.
 
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
@@ -1115,9 +1157,11 @@ def _evaluate_grid_hyperparameters_multiseries(
     -------
     results : pandas DataFrame
         Results for each combination of parameters.
+            column levels = levels.
             column lags = predictions.
             column params = lower bound of the interval.
-            column metric = metric value estimated for the combination of parameters.
+            column metric = metric(s) value(s) estimated for each combination of parameters. The resulting metric will be
+                            the average of the optimization of all levels.
             additional n columns with param = value.
     
     """
@@ -1133,51 +1177,29 @@ def _evaluate_grid_hyperparameters_multiseries(
             f'`levels` must be a `list` of column names, a `str` of a column name or `None`.'
         )
 
-    if levels_weights is not None and not isinstance(levels_weights, dict):
-        raise TypeError(
-            f'`levels_weights` must be a `dict` or `None`.'
-        )
-
-    if isinstance(metric, list):
-        raise TypeError(
-            (f'The calculation of a list of metrics is not yet implemented '
-             f'in the multi-time series forecast hyperparameter search.')
-        )
-
     if levels is None:
-        levels = list(series.columns)
+        levels = list(series.columns) # Forecaster can be not fitted, so cannot use self.series_levels
     elif isinstance(levels, str):
         levels = [levels]
-
-    if levels_weights is None:
-        levels_weights = {col: 1./len(levels) for col in levels}
-
-    if levels != list(levels_weights.keys()):
-        raise ValueError(
-            f'`levels_weights` keys must be the same as the column names of series, `levels`.'
-        )
-
-    if not np.isclose(sum(levels_weights.values()), 1.0):
-        raise ValueError(
-            f'Weights in `levels_weights` must add up to 1.0.'
-        )
 
     if lags_grid is None:
         lags_grid = [forecaster.lags]
    
     lags_list = []
     params_list = []
-    metric_list = []
+    if not isinstance(metric, list):
+        metric = [metric] 
+    metric_dict = {(m if isinstance(m, str) else m.__name__): [] for m in metric}
+    
+    if len(metric_dict) != len(metric):
+        raise ValueError(
+            'When `metric` is a `list`, each metric name must be unique.'
+        )
 
     print(
         f'{len(param_grid)*len(lags_grid)} models compared for {len(levels)} level(s). '
-        f'Number of iterations: {len(param_grid)*len(lags_grid)*len(levels)}.'
+        f'Number of iterations: {len(param_grid)*len(lags_grid)}.'
     )
-
-    if len(levels) >= 2:
-        print(
-            f'Level weights for metric evaluation: {levels_weights}'
-        )
 
     for lags in tqdm(lags_grid, desc='loop lags_grid', position=0, ncols=90):
         
@@ -1187,50 +1209,41 @@ def _evaluate_grid_hyperparameters_multiseries(
         for params in tqdm(param_grid, desc='loop param_grid', position=1, leave=False, ncols=90):
 
             forecaster.set_params(**params)
-
-            metric_level_list = []
-
-            for level in levels:
-
-                metric_level = backtesting_forecaster_multiseries(
-                                    forecaster         = forecaster,
-                                    series             = series,
-                                    steps              = steps,
-                                    level              = level,
-                                    metric             = metric,
-                                    initial_train_size = initial_train_size,
-                                    fixed_train_size   = fixed_train_size,
-                                    exog               = exog,
-                                    refit              = refit,
-                                    interval           = None,
-                                    verbose            = verbose
-                               )[0]
-
-                metric_level_list.append(metric_level*levels_weights[level])
+            metrics_levels = backtesting_forecaster_multiseries(
+                                 forecaster         = forecaster,
+                                 series             = series,
+                                 steps              = steps,
+                                 levels             = levels,
+                                 metric             = metric,
+                                 initial_train_size = initial_train_size,
+                                 fixed_train_size   = fixed_train_size,
+                                 exog               = exog,
+                                 refit              = refit,
+                                 interval           = None,
+                                 verbose            = verbose
+                             )[0]
 
             lags_list.append(lags)
             params_list.append(params)
-            metric_list.append(sum(metric_level_list))
-    
-    if isinstance(metric, str):
-        m_name = metric
-    else:
-        m_name = metric.__name__
+            for m in metric:
+                m_name = m if isinstance(m, str) else m.__name__
+                metric_dict[m_name].append(metrics_levels[m_name].mean())
 
     results = pd.DataFrame({
-                'levels': [levels]*len(lags_list),
-                'lags'  : lags_list,
-                'params': params_list,
-                m_name  : metric_list})
+                  'levels': [levels]*len(lags_list),
+                  'lags'  : lags_list,
+                  'params': params_list,
+                  **metric_dict
+              })
     
-    results = results.sort_values(by=m_name, ascending=True)
+    results = results.sort_values(by=list(metric_dict.keys())[0], ascending=True)
     results = pd.concat([results, results['params'].apply(pd.Series)], axis=1)
     
     if return_best:
         
         best_lags = results['lags'].iloc[0]
         best_params = results['params'].iloc[0]
-        best_metric = results[m_name].iloc[0]
+        best_metric = results[list(metric_dict.keys())[0]].iloc[0]
         
         forecaster.set_lags(best_lags)
         forecaster.set_params(**best_params)
@@ -1238,11 +1251,10 @@ def _evaluate_grid_hyperparameters_multiseries(
         
         print(
             f"`Forecaster` refitted using the best-found lags and parameters, and the whole data set: \n"
-            f"  Lags: {best_lags} \n"
+            f"  Lags: {best_lags}\n"
             f"  Parameters: {best_params}\n"
             f"  Backtesting metric: {best_metric}\n"
-            f"  Levels: {results['levels'].iloc[0]} \n"
-            f"  Levels weights: {levels_weights} \n"
+            f"  Levels: {results['levels'].iloc[0]}\n"
         )
             
     return results

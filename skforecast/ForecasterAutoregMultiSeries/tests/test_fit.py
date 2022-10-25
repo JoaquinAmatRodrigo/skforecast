@@ -1,5 +1,6 @@
 # Unit test fit ForecasterAutoregMultiSeries
 # ==============================================================================
+import re
 import pytest
 from pytest import approx
 import numpy as np
@@ -7,6 +8,55 @@ import pandas as pd
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 from sklearn.linear_model import LinearRegression
 from xgboost import XGBRegressor
+
+
+@pytest.mark.parametrize('series_weights', [{'l3': 1}, {'l1': 1, 'l3': 0.5}])
+def test_fit_exception_when_series_weights_not_the_same_as_series_levels(series_weights):
+    """
+    Test exception is raised when series_weights keys does not include all the
+    series levels.
+    """
+    series = pd.DataFrame({'l1': pd.Series(np.arange(10)), 
+                           'l2': pd.Series(np.arange(10))
+                          })
+
+    forecaster = ForecasterAutoregMultiSeries(
+                     regressor      = LinearRegression(), 
+                     lags           = 3,
+                     series_weights = series_weights
+                 )
+    series_levels = ['l1', 'l2']
+
+    err_msg = re.escape(
+                    (f'`series_weights` must include all series levels (column names of series).\n'
+                     f'    `series_levels`  = {series_levels}.\n'
+                     f'    `series_weights` = {list(series_weights.keys())}.')
+                )
+    with pytest.raises(ValueError, match = err_msg):
+        forecaster.fit(series=series, store_in_sample_residuals=False)
+
+
+@pytest.mark.parametrize('exog', ['l1', ['l1'], ['l1', 'l2']])
+def test_fit_exception_when_exog_columns_same_as_series_levels(exog):
+    """
+    Test exception is raised when an exog column is named the same as
+    the series levels.
+    """
+    series = pd.DataFrame({'l1': pd.Series(np.arange(10)), 
+                           'l2': pd.Series(np.arange(10))
+                          })
+
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
+    series_levels = ['l1', 'l2']
+    exog_col_names = exog if isinstance(exog, list) else [exog]
+
+    err_msg = re.escape(
+                    (f'`exog` cannot contain a column named the same as one of the series levels (column names of series).\n'
+                     f'    `series_levels` : {series_levels}.\n'
+                     f'    `exog` columns  : {exog_col_names}.')
+                )
+    with pytest.raises(ValueError, match = err_msg):
+        forecaster.fit(series=series, exog=series[exog], store_in_sample_residuals=False)
 
 
 def test_forecaster_index_freq_stored():
