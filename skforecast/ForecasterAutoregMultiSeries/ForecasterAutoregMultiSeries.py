@@ -66,8 +66,16 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
     series_weights : dict, default `None`
         Weights associated with each series, used during training. It is only 
-        applied if the `regressor` used accepts sample_weight in it's fit method. 
-        If `None`, all levels have the same weight.
+        applied if the `regressor` used accepts sample_weight in its fit method. 
+        If `None`, all levels have the same weight. See the Notes section for more
+        details on the use of the weights.
+        **New in version 0.6.0**
+
+    weight_func : callable, default `None`
+        Function that defines the individual weights for each sample based on the
+        index. For example, a function that assigns a lower weight to certain dates.
+        Ignored if `regressor` does not have the argument `sample_weight` in its `fit`
+        method. See the Notes section for more details on the use of the weights.
         **New in version 0.6.0**
     
     Attributes
@@ -95,7 +103,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         Maximum value of lag included in `lags`.
 
     last_window : pandas Series
-        Last window the forecaster has seen during trained. It stores the
+        Last window the forecaster has seen during training. It stores the
         values needed to predict the next `step` right after the training data.
         
     window_size : int
@@ -128,13 +136,19 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         DataFrame.
 
     series_levels : list
-        Names of the series (levels) used during training, therefore that can be
-        predicted.
+        Names of the series (levels) used during training.
 
     series_weights : dict, default `None`
         Weights associated with each series, used during training. It is only 
         applied if the `regressor` used accepts sample_weight in it's fit method. 
         If `None`, all levels have the same weight.
+        **New in version 0.6.0**
+
+    weight_func : callable, default `None`
+        Function that defines the individual weights for each sample based on the
+        index. For example, a function that assigns a lower weight to certain dates.
+        Ignored if `regressor` does not have the argument `sample_weight` in its `fit`
+        method. See the Notes section for more details on the use of the weights.
         **New in version 0.6.0**
 
     X_train_col_names : list
@@ -145,7 +159,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         1000 values in the form `{level: residuals}`.
         
     out_sample_residuals : dict
-        Residuals of the model when predicting non training data. Only stored
+        Residuals of the model when predicting non-training data. Only stored
         up to 1000 values in the form `{level: residuals}`. Use 
         `set_out_sample_residuals` to set values.
 
@@ -160,6 +174,24 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
     python_version : str
         Version of python used to create the forecaster.
+
+
+    Notes
+    -----
+
+    The weights are used to control the influence that each observation has on the
+    training of the model. `ForecasterMultiseries` accepts two types of weights:
+
+    + series_weights`: controls the relative importance of each series. If a series has
+    twice as much weight as the others, the observations of that series influence the
+    training twice as much. The higher the weight of a series relative to the others,
+    the more the model will focus on trying to learn that series.
+
+    + weight_func`: controls the relative importance of each observation according to its
+     index value (mainly datetime). 
+
+    If the two types of weights are indicated, they are multiplied to create the final
+    weights.  
     
     """
     
@@ -169,13 +201,15 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         lags: Union[int, np.ndarray, list],
         transformer_series: Optional[object]=None,
         transformer_exog: Optional[object]=None,
-        series_weights: Optional[dict]=None
+        series_weights: Optional[dict]=None,
+        weight_func: callable=None
     ) -> None:
         
         self.regressor            = regressor
         self.transformer_series   = transformer_series
         self.transformer_exog     = transformer_exog
         self.series_weights       = series_weights
+        self.weight_func          = weight_func
         self.index_type           = None
         self.index_freq           = None
         self.index_values         = None
@@ -226,6 +260,18 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                     """
                 )
                 self.series_weights = None
+
+        if weight_func is not None:
+            self.source_code_weight_func = inspect.getsource(weight_func)
+            if 'sample_weight' not in inspect.getfullargspec(self.regressor.fit)[0]:
+                warnings.warm(
+                    f"""
+                    Argument `weight_func` is ignored since regressor {self.regressor}
+                    does not accept `sample_weight` in its `fit` method.
+                    """
+                )
+                self.weight_func = None
+                self.source_code_weight_func = None
             
         self.max_lag = max(self.lags)
         self.window_size = self.max_lag
@@ -256,6 +302,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             f"Window size: {self.window_size} \n"
             f"Series levels (names): {self.series_levels} \n"
             f"Series weights: {self.series_weights} \n"
+            f"Included weights function: {True if self.weight_func is not None else False} \n"
             f"Included exogenous: {self.included_exog} \n"
             f"Type of exogenous variable: {self.exog_type} \n"
             f"Exogenous variables names: {self.exog_col_names} \n"
@@ -524,11 +571,23 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             
 
         X_train, y_train, y_index = self.create_train_X_y(series=series, exog=exog)
+        sample_weight = None
 
         if self.series_weights is not None:
-            sample_weight = [np.repeat(self.series_weights[serie], sum(X_train[serie])) 
-                             for serie in series.columns]
-            sample_weight = np.concatenate(sample_weight)
+            weights = [np.repeat(self.series_weights[serie], sum(X_train[serie])) 
+                       for serie in series.columns]
+            weights = np.concatenate(weights)
+            sample_weight = weights.copy()
+
+        if self.weight_func is not None:
+            weights = self.weight_func(X_train.index)
+            weights = np.repeat(weights, repeats=len(self.series_levels))
+            if sample_weight is not None:
+                sample_weight = sample_weight * weights
+            else:
+                sample_weight = weights.copy()
+
+        if sample_weight is not None:
             if not str(type(self.regressor)) == "<class 'xgboost.sklearn.XGBRegressor'>":
                 self.regressor.fit(X=X_train, y=y_train, sample_weight=sample_weight)
             else:
