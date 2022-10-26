@@ -36,7 +36,6 @@ nav:
       - Feature importance: user_guides/feature-importance.ipynb
       - Forecasting with XGBoost: user_guides/forecasting-xgboost.ipynb
       - Save and load forecaster: user_guides/save-load-forecaster.ipynb
-      - Shap-values: user_guides/shap-values-skforecast.ipynb
       - Forecaster in production: user_guides/forecaster-in-production.ipynb
       - Grid search SARIMAX and ARIMA models: user_guides/grid-search-sarimax-arima.ipynb
       - Backtesting SARIMAX and ARIMA models: user_guides/backtesting-sarimax-arima.ipynb
@@ -59,6 +58,7 @@ nav:
   - FAQ and Tips:
       - Profiling skforecast: faq/profiling-skforecast.ipynb
       - Avoid negative predictions when forecasting: faq/non-negative-predictions.ipynb
+      - Shap-values: faq/shap-values-skforecast.ipynb
       #- Single series vs multi series forecasting: faq/single-vs-multi-series-forecasting.ipynb
 
   - Releases: releases/releases.md

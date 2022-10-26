@@ -80,7 +80,7 @@ Try it:
 pip install git+https://github.com/JoaquinAmatRodrigo/skforecast@0.6.x
 ```
 
-Visit [changelog](https://github.com/JoaquinAmatRodrigo/skforecast/blob/0.6.x/changelog.md) to view all notable changes.
+Visit the [changelog](https://github.com/JoaquinAmatRodrigo/skforecast/blob/0.6.x/changelog.md) to view all notable changes.
 
 
 # Documentation
@@ -101,7 +101,7 @@ Recent improvements are highlighted in the [release notes](https://joaquinamatro
 
 + [Prediction intervals](https://joaquinamatrodrigo.github.io/skforecast/latest/user_guides/prediction-intervals.html)
 
-+ [Using forecaster in production](https://joaquinamatrodrigo.github.io/skforecast/latest/user_guides/forecaster-in-production.html)
++ [Using forecasters in production](https://joaquinamatrodrigo.github.io/skforecast/latest/user_guides/forecaster-in-production.html)
 
 
 # Examples and tutorials 
@@ -170,9 +170,9 @@ year = {2022}
 }
 ```
 
-View [citation file](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/CITATION.cff).
+View the [citation file](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/CITATION.cff).
 
 
 # License
 
-**joaquinAmatRodrigo/skforecast** is licensed under the **MIT License**, a short and simple permissive license with conditions only requiring preservation of copyright and license notices. Licensed works, modifications, and larger works may be distributed under different terms and without source code.
+**joaquinAmatRodrigo/skforecast** is licensed under the **MIT License**, a short and simple permissive license with conditions only requiring preservation of copyright and license notices. Licensed works, modifications and larger works may be distributed under different terms and without source code.
