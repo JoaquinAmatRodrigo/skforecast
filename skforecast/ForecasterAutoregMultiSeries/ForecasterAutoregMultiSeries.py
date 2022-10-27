@@ -146,9 +146,12 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
     weight_func : callable, default `None`
         Function that defines the individual weights for each sample based on the
-        index. For example, a function that assigns a lower weight to certain dates.
-        Ignored if `regressor` does not have the argument `sample_weight` in its `fit`
-        method. See the Notes section for more details on the use of the weights.
+        index. Ignored if `regressor` does not have the argument `sample_weight` in its
+        `fit` method. See the Notes section for more details on the use of the weights.
+        **New in version 0.6.0**
+
+    source_code_weight_func : str
+        Source code of the custom function used to create weights.
         **New in version 0.6.0**
 
     X_train_col_names : list
@@ -188,7 +191,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
     the more the model will focus on trying to learn that series.
 
     + weight_func`: controls the relative importance of each observation according to its
-     index value (mainly datetime). 
+     index value. For example, a function that assigns a lower weight to certain dates.
 
     If the two types of weights are indicated, they are multiplied to create the final
     weights.  
@@ -580,7 +583,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             sample_weight = weights.copy()
 
         if self.weight_func is not None:
-            weights = self.weight_func(X_train.index)
+            weights = self.weight_func(y_index)
             weights = np.repeat(weights, repeats=len(self.series_levels))
             if sample_weight is not None:
                 sample_weight = sample_weight * weights
