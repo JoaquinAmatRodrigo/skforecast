@@ -507,15 +507,58 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 )
 
         y_train_index = pd.Index(
-                                np.repeat(
-                                    y_index[self.max_lag: ].values,
-                                    repeats=len(series_levels)
-                                )
+                            np.repeat(
+                                y_index[self.max_lag: ].values,
+                                repeats = len(series_levels)
                             )
+                        )
         
         self.X_train_col_names = X_train_col_names
 
         return X_train, y_train, y_index, y_train_index
+
+    
+    def create_sample_weights(
+        self,
+        series:pd.DataFrame,
+        X_train:pd.DataFrame,
+        y_train_index:pd.Index,
+    )-> np.ndarray:
+        """
+        Crate weights for each observation according to the forecaster's attributes
+        `series_weights` and `weight_func`.
+
+        Parameters
+        ----------
+        series : pd.DataFrame
+            Time series used to create `X_train` with the method `create_train_X_y`.
+        X_train : pd.DataFrame
+            Data frame generated with the method `create_train_X_y`.
+        y_train_index : pd.Index
+            Index of `y_train` generated with the method `create_train_X_y`.
+
+        Returns
+        -------
+        np.ndarray
+            Weights
+        """
+
+        sample_weight = None
+
+        if self.series_weights is not None:
+            weights = [np.repeat(self.series_weights[serie], sum(X_train[serie])) 
+                       for serie in series.columns]
+            weights = np.concatenate(weights)
+            sample_weight = weights.copy()
+
+        if self.weight_func is not None:
+            weights = self.weight_func(y_train_index)
+            if sample_weight is not None:
+                sample_weight = sample_weight * weights
+            else:
+                sample_weight = weights.copy()
+
+        return sample_weight
 
         
     def fit(
@@ -578,27 +621,19 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
             if len(set(self.exog_col_names) - set(self.series_levels)) != len(self.exog_col_names):
                 raise ValueError(
-                    (f'`exog` cannot contain a column named the same as one of the series levels (column names of series).\n'
+                    (f'`exog` cannot contain a column named the same as one of the series'
+                     f' levels (column names of series).\n'
                      f'    `series_levels` : {self.series_levels}.\n'
                      f'    `exog` columns  : {self.exog_col_names}.')
                 )
             
 
         X_train, y_train, y_index, y_train_index = self.create_train_X_y(series=series, exog=exog)
-        sample_weight = None
-
-        if self.series_weights is not None:
-            weights = [np.repeat(self.series_weights[serie], sum(X_train[serie])) 
-                       for serie in series.columns]
-            weights = np.concatenate(weights)
-            sample_weight = weights.copy()
-
-        if self.weight_func is not None:
-            weights = self.weight_func(y_train_index)
-            if sample_weight is not None:
-                sample_weight = sample_weight * weights
-            else:
-                sample_weight = weights.copy()
+        sample_weight = self.create_sample_weights(
+                            series        = series,
+                            X_train       = X_train,
+                            y_train_index = y_train_index,
+                        )
 
         if sample_weight is not None:
             if not str(type(self.regressor)) == "<class 'xgboost.sklearn.XGBRegressor'>":
