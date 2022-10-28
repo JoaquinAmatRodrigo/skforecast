@@ -370,7 +370,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self,
         series: pd.DataFrame,
         exog: Optional[Union[pd.Series, pd.DataFrame]]=None
-    ) -> Tuple[pd.DataFrame, pd.Series]:
+    ) -> Tuple[pd.DataFrame, pd.Series, pd.Index, pd.Index]:
         """
         Create training matrices from univariate time series and exogenous
         variables.
@@ -393,6 +393,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             Values (target) of the time series related to each row of `X_train`.
 
         y_index : pandas Index
+            Index of `series`.
+
+        y_train_index: pandas Index
             Index of `y_train`.
         
         """
@@ -429,6 +432,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                     fit               = True,
                     inverse_transform = False
                 )
+
             y_values, y_index = preprocess_y(y=y)
             X_train_values, y_train_values = self._create_lags(y=y_values)
 
@@ -501,10 +505,17 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                     data  = y_train,
                     name  = 'y'
                 )
+
+        y_train_index = pd.Index(
+                                np.repeat(
+                                    y_index[self.max_lag: ].values,
+                                    repeats=len(series_levels)
+                                )
+                            )
         
         self.X_train_col_names = X_train_col_names
 
-        return X_train, y_train, y_index
+        return X_train, y_train, y_index, y_train_index
 
         
     def fit(
@@ -573,7 +584,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 )
             
 
-        X_train, y_train, y_index = self.create_train_X_y(series=series, exog=exog)
+        X_train, y_train, y_index, y_train_index = self.create_train_X_y(series=series, exog=exog)
         sample_weight = None
 
         if self.series_weights is not None:
@@ -583,8 +594,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             sample_weight = weights.copy()
 
         if self.weight_func is not None:
-            weights = self.weight_func(y_index)
-            weights = np.repeat(weights, repeats=len(self.series_levels))
+            weights = self.weight_func(y_train_index)
             if sample_weight is not None:
                 sample_weight = sample_weight * weights
             else:
