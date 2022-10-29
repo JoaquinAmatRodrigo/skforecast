@@ -558,6 +558,16 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             else:
                 sample_weight = weights.copy()
 
+        if sample_weight is not None:
+            if np.sum(sample_weight) == 0:
+                raise Exception(
+                    "Weights sum to zero, can't be normalized"
+                )
+            if(np.isnan(sample_weight).any()):
+                raise Exception(
+                    "NaN values in in Weights"
+                )
+
         return sample_weight
 
         
