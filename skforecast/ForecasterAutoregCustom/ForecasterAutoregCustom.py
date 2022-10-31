@@ -244,7 +244,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         if isinstance(self.regressor, sklearn.pipeline.Pipeline):
             name_pipe_steps = tuple(name + "__" for name in self.regressor.named_steps.keys())
             params = {key : value for key, value in self.regressor.get_params().items() \
-                     if key.startswith(name_pipe_steps)}
+                      if key.startswith(name_pipe_steps)}
         else:
             params = self.regressor.get_params()
 
@@ -254,11 +254,11 @@ class ForecasterAutoregCustom(ForecasterBase):
             f"{'=' * len(str(type(self)).split('.')[1])} \n"
             f"Regressor: {self.regressor} \n"
             f"Predictors created with function: {self.create_predictors.__name__} \n"
-            f"Window size: {self.window_size} \n"
             f"Transformer for y: {self.transformer_y} \n"
             f"Transformer for exog: {self.transformer_exog} \n"
-            f"Included weights function: {True if self.weight_func is not None else False} \n"
-            f"Included exogenous: {self.included_exog} \n"
+            f"Window size: {self.window_size} \n"
+            f"Weight function included: {True if self.weight_func is not None else False} \n"
+            f"Exogenous included: {self.included_exog} \n"
             f"Type of exogenous variable: {self.exog_type} \n"
             f"Exogenous variables names: {self.exog_col_names} \n"
             f"Training range: {self.training_range.to_list() if self.fitted else None} \n"

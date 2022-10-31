@@ -20,6 +20,7 @@ from copy import copy
 
 import skforecast
 from ..ForecasterBase import ForecasterBase
+from ..utils import generate_lags_ndarray
 from ..utils import check_y
 from ..utils import check_exog
 from ..utils import preprocess_y
@@ -99,14 +100,14 @@ class ForecasterAutoreg(ForecasterBase):
         
     max_lag : int
         Maximum value of lag included in `lags`.
+   
+    window_size : int
+        Size of the window needed to create the predictors. It is equal to
+        `max_lag`.
 
     last_window : pandas Series
         Last window the forecaster has seen during trained. It stores the
         values needed to predict the next `step` right after the training data.
-        
-    window_size : int
-        Size of the window needed to create the predictors. It is equal to
-        `max_lag`.
         
     fitted : Bool
         Tag to identify if the regressor has been fitted (trained).
@@ -197,28 +198,7 @@ class ForecasterAutoreg(ForecasterBase):
         self.python_version          = sys.version.split(" ")[0]
         self.index_type              = None
         
-        if isinstance(lags, int) and lags < 1:
-            raise ValueError('Minimum value of lags allowed is 1.')
-
-        if isinstance(lags, (list, np.ndarray)):
-            for lag in lags:
-                if not isinstance(lag, (int, np.int64, np.int32)):
-                    raise TypeError('All values in `lags` must be int.')
-            
-        if isinstance(lags, (list, range, np.ndarray)) and min(lags) < 1:
-            raise ValueError('Minimum value of lags allowed is 1.')
-            
-        if isinstance(lags, int):
-            self.lags = np.arange(lags) + 1
-        elif isinstance(lags, (list, range)):
-            self.lags = np.array(lags)
-        elif isinstance(lags, np.ndarray):
-            self.lags = lags
-        else:
-            raise TypeError(
-                '`lags` argument must be int, 1d numpy ndarray, range or list. '
-                f"Got {type(lags)}"
-            )
+        self.lags = generate_lags_ndarray(type(self), lags)
             
         if weight_func is not None:
             if not isinstance(weight_func, Callable):
@@ -250,7 +230,7 @@ class ForecasterAutoreg(ForecasterBase):
         if isinstance(self.regressor, sklearn.pipeline.Pipeline):
             name_pipe_steps = tuple(name + "__" for name in self.regressor.named_steps.keys())
             params = {key : value for key, value in self.regressor.get_params().items() \
-                     if key.startswith(name_pipe_steps)}
+                      if key.startswith(name_pipe_steps)}
         else:
             params = self.regressor.get_params()
 
@@ -262,9 +242,9 @@ class ForecasterAutoreg(ForecasterBase):
             f"Lags: {self.lags} \n"
             f"Transformer for y: {self.transformer_y} \n"
             f"Transformer for exog: {self.transformer_exog} \n"
-            f"Included weights function: {True if self.weight_func is not None else False} \n"
             f"Window size: {self.window_size} \n"
-            f"Included exogenous: {self.included_exog} \n"
+            f"Weight function included: {True if self.weight_func is not None else False} \n"
+            f"Exogenous included: {self.included_exog} \n"
             f"Type of exogenous variable: {self.exog_type} \n"
             f"Exogenous variables names: {self.exog_col_names} \n"
             f"Training range: {self.training_range.to_list() if self.fitted else None} \n"
@@ -1046,24 +1026,7 @@ class ForecasterAutoreg(ForecasterBase):
         
         """
         
-        if isinstance(lags, int) and lags < 1:
-            raise ValueError('Minimum value of lags allowed is 1.')
-            
-        if isinstance(lags, (list, range, np.ndarray)) and min(lags) < 1:
-            raise ValueError('Minimum value of lags allowed is 1.')
-            
-        if isinstance(lags, int):
-            self.lags = np.arange(lags) + 1
-        elif isinstance(lags, (list, range)):
-            self.lags = np.array(lags)
-        elif isinstance(lags, np.ndarray):
-            self.lags = lags
-        else:
-            raise TypeError(
-                f"`lags` argument must be `int`, `1D np.ndarray`, `range` or `list`. "
-                f"Got {type(lags)}."
-            )
-            
+        self.lags = generate_lags_ndarray(type(self), lags)
         self.max_lag  = max(self.lags)
         self.window_size = max(self.lags)
         

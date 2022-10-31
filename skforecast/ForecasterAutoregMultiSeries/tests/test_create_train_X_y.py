@@ -39,7 +39,7 @@ def test_create_train_X_y_exception_when_levels_of_transformer_series_not_equal_
     
     err_msg = re.escape(
                     ("When `transformer_series` parameter is a `dict`, its keys "
-                     "must be the same as `series_levels` : ['1', '2'].")
+                     "must be the same as `series` column names : ['1', '2'].")
                 )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.create_train_X_y(series=series)

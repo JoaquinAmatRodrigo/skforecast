@@ -20,6 +20,7 @@ from sklearn.base import clone
 
 import skforecast
 from ..ForecasterBase import ForecasterBase
+from ..utils import generate_lags_ndarray
 from ..utils import check_y
 from ..utils import check_exog
 from ..utils import preprocess_y
@@ -113,20 +114,6 @@ class ForecasterAutoregDirect(ForecasterBase):
         forecaster. `inverse_transform` is not available when using ColumnTransformers.
         **New in version 0.5.0**
         
-    max_lag : int
-        Maximum value of lag included in `lags`.
-
-    last_window : pandas Series
-        Last window the forecaster has seen during trained. It stores the
-        values needed to predict the next `step` right after the training data.
-        
-    window_size : int
-        Size of the window needed to create the predictors. It is equal to
-        `max_lag`.
-        
-    fitted : Bool
-        Tag to identify if the regressor has been fitted (trained).
-        
     weight_func : callable
         Function that defines the individual weights for each sample based on the
         index. For example, a function that assigns a lower weight to certain dates.
@@ -137,6 +124,17 @@ class ForecasterAutoregDirect(ForecasterBase):
     source_code_weight_func : str
         Source code of the custom function used to create weights.
         **New in version 0.6.0**
+        
+    max_lag : int
+        Maximum value of lag included in `lags`.
+        
+    window_size : int
+        Size of the window needed to create the predictors. It is equal to
+        `max_lag`.
+
+    last_window : pandas Series
+        Last window the forecaster has seen during trained. It stores the
+        values needed to predict the next `step` right after the training data.
         
     index_type : type
         Type of index of the input used in training.
@@ -159,6 +157,9 @@ class ForecasterAutoregDirect(ForecasterBase):
 
     X_train_col_names : list
         Names of columns of the matrix created internally for training.
+        
+    fitted : Bool
+        Tag to identify if the regressor has been fitted (trained).
 
     creation_date: str
         Date of creation.
@@ -193,7 +194,6 @@ class ForecasterAutoregDirect(ForecasterBase):
         
         self.regressor               = regressor
         self.steps                   = steps
-        self.regressors_             = {step: clone(self.regressor) for step in range(steps)}
         self.transformer_y           = transformer_y
         self.transformer_exog        = transformer_exog
         self.weight_func             = weight_func
@@ -212,28 +212,20 @@ class ForecasterAutoregDirect(ForecasterBase):
         self.skforcast_version       = skforecast.__version__
         self.python_version          = sys.version.split(" ")[0]
 
-        if isinstance(lags, int) and lags < 1:
-            raise ValueError('Minimum value of lags allowed is 1.')
-
-        if isinstance(lags, (list, np.ndarray)):
-            for lag in lags:
-                if not isinstance(lag, (int, np.int64, np.int32)):
-                    raise TypeError('All values in `lags` must be int.')
-            
-        if isinstance(lags, (list, range, np.ndarray)) and min(lags) < 1:
-            raise ValueError('Minimum value of lags allowed is 1.')
-            
-        if isinstance(lags, int):
-            self.lags = np.arange(lags) + 1
-        elif isinstance(lags, (list, range)):
-            self.lags = np.array(lags)
-        elif isinstance(lags, np.ndarray):
-            self.lags = lags
-        else:
+        if not isinstance(steps, int):
             raise TypeError(
-                '`lags` argument must be int, 1d numpy ndarray, range or list. '
-                f"Got {type(lags)}"
+                f"`steps` argument must be an int greater than or equal to 1. "
+                f"Got {type(steps)}."
             )
+
+        if steps < 1:
+            raise ValueError(
+                f"`steps` argument must be greater than or equal to 1. Got {steps}."
+            )
+        
+        self.regressors_ = {step: clone(self.regressor) for step in range(steps)}
+
+        self.lags = generate_lags_ndarray(type(self), lags)
 
         if weight_func is not None:
             if not isinstance(weight_func, Callable):
@@ -280,7 +272,8 @@ class ForecasterAutoregDirect(ForecasterBase):
             f"Included weights function: {True if self.weight_func is not None else False} \n"
             f"Window size: {self.window_size} \n"
             f"Maximum steps predicted: {self.steps} \n"
-            f"Included exogenous: {self.included_exog} \n"
+            f"Weight function included: {True if self.weight_func is not None else False} \n"
+            f"Exogenous included: {self.included_exog} \n"
             f"Type of exogenous variable: {self.exog_type} \n"
             f"Exogenous variables names: {self.exog_col_names} \n"
             f"Training range: {self.training_range.to_list() if self.fitted else None} \n"
@@ -348,7 +341,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         """
         Create training matrices from univariate time series and exogenous
         variables. The resulting matrices contain the target variable and predictors
-        needed to train all the forecaster (one per step).      
+        needed to train all the regressors (one per step).
         
         Parameters
         ----------        
@@ -370,6 +363,12 @@ class ForecasterAutoregDirect(ForecasterBase):
         
         """
 
+        if len(y) < self.max_lag + self.steps:
+            raise ValueError(
+                f'Minimum length of `y` for training this forecaster is '
+                f'{self.max_lag + self.steps}. Got {len(y)}.'
+            )
+
         check_y(y=y)
         y = transform_series(
                 series            = y,
@@ -379,11 +378,6 @@ class ForecasterAutoregDirect(ForecasterBase):
             )
         y_values, y_index = preprocess_y(y=y)
 
-        if len(y_values) < self.max_lag + self.steps:
-            raise ValueError(
-                f'Minimum length of `y` for training this forecaster is '
-                f'{self.max_lag + self.steps}. Got {len(y_values)}.'
-            )
         if exog is not None:
             if len(exog) != len(y):
                 raise ValueError(
@@ -793,24 +787,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         
         """
         
-        if isinstance(lags, int) and lags < 1:
-            raise ValueError('Minimum value of lags allowed is 1.')
-            
-        if isinstance(lags, (list, range, np.ndarray)) and min(lags) < 1:
-            raise ValueError('Minimum value of lags allowed is 1.')
-            
-        if isinstance(lags, int):
-            self.lags = np.arange(lags) + 1
-        elif isinstance(lags, (list, range)):
-            self.lags = np.array(lags)
-        elif isinstance(lags, np.ndarray):
-            self.lags = lags
-        else:
-            raise TypeError(
-                f"`lags` argument must be `int`, `1D np.ndarray`, `range` or `list`. "
-                f"Got {type(lags)}."
-            )
-            
+        self.lags = generate_lags_ndarray(type(self), lags)
         self.max_lag  = max(self.lags)
         self.window_size = max(self.lags)
 

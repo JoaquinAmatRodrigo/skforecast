@@ -14,6 +14,61 @@ import pandas as pd
 import sklearn
 
 
+def generate_lags_ndarray(
+    forecaster_type,
+    lags: Any
+) -> None:
+    """
+    Check lags argument input and generate the corresponding numpy ndarray.
+    
+    Parameters
+    ----------
+    forecaster_type : ForecasterAutoreg, ForecasterAutoregCustom, 
+    ForecasterAutoregDirect, ForecasterAutoregMultiSeries, ForecasterAutoregMultiVariate
+        Forcaster type.
+
+    lags : Any
+        Lags used as predictors.
+        
+    Returns
+    ----------
+    lags : numpy ndarray
+        Lags used as predictors.
+    
+    """
+
+    if isinstance(lags, int) and lags < 1:
+        raise ValueError('Minimum value of lags allowed is 1.')
+
+    if isinstance(lags, (list, np.ndarray)):
+        for lag in lags:
+            if not isinstance(lag, (int, np.int64, np.int32)):
+                raise TypeError('All values in `lags` must be int.')
+        
+    if isinstance(lags, (list, range, np.ndarray)) and min(lags) < 1:
+        raise ValueError('Minimum value of lags allowed is 1.')
+
+    if isinstance(lags, int):
+        lags = np.arange(lags) + 1
+    elif isinstance(lags, (list, range)):
+        lags = np.array(lags)
+    elif isinstance(lags, np.ndarray):
+        lags = lags
+    else:
+        if not str(forecaster_type).split('.')[1] == 'ForecasterAutoregMultiVariate':
+            raise TypeError(
+                '`lags` argument must be an int, 1d numpy ndarray, range or list. '
+                f"Got {type(lags)}."
+            )
+        else:
+            raise TypeError(
+                '`lags` argument must be a dict, int, 1d numpy ndarray, range or list. '
+                f"Got {type(lags)}."
+            )
+
+    return lags
+
+
 def check_y(
     y: Any
 ) -> None:
@@ -32,10 +87,10 @@ def check_y(
     """
     
     if not isinstance(y, pd.Series):
-        raise Exception('`y` must be a pandas Series.')
+        raise TypeError('`y` must be a pandas Series.')
         
     if y.isnull().any():
-        raise Exception('`y` has missing values.')
+        raise ValueError('`y` has missing values.')
     
     return
     
@@ -44,7 +99,7 @@ def check_exog(
     exog: Any
 ) -> None:
     """
-    Raise Exception if `exog` is not pandas Series or DataFrame, or
+    Raise Exception if `exog` is not pandas Series or pandas DataFrame, or
     if it has missing values.
     
     Parameters
@@ -59,10 +114,10 @@ def check_exog(
     """
         
     if not isinstance(exog, (pd.Series, pd.DataFrame)):
-        raise Exception('`exog` must be `pd.Series` or `pd.DataFrame`.')
+        raise TypeError('`exog` must be `pd.Series` or `pd.DataFrame`.')
 
     if exog.isnull().any().any():
-        raise Exception('`exog` has missing values.')
+        raise ValueError('`exog` has missing values.')
                 
     return
 
@@ -139,7 +194,7 @@ def check_predict_input(
     Parameters
     ----------
     forecaster_type : ForecasterAutoreg, ForecasterAutoregCustom, 
-    ForecasterAutoregDirect, ForecasterAutoregMultiSeries
+    ForecasterAutoregDirect, ForecasterAutoregMultiSeries, ForecasterAutoregMultiVariate
         Forcaster type.
 
     steps : int
