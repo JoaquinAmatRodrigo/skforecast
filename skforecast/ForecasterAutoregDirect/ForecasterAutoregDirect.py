@@ -7,12 +7,11 @@
 # coding=utf-8
 
 from multiprocessing.sharedctypes import Value
-from typing import Union, Dict, List, Tuple, Any, Optional
+from typing import Union, Dict, List, Tuple, Any, Optional, Callable
 import warnings
 import logging
 import sys
 import inspect
-from inspect import getsource
 import numpy as np
 import pandas as pd
 import sklearn
@@ -78,7 +77,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         Function that defines the individual weights for each sample based on the
         index. For example, a function that assigns a lower weight to certain dates.
         Ignored if `regressor` does not have the argument `sample_weight` in its `fit`
-        method.
+        method. The resulting `sample_weight` cannot have negative values.
         **New in version 0.6.0**
     
     Attributes
@@ -189,7 +188,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         lags: Union[int, np.ndarray, list],
         transformer_y: Optional[object]=None,
         transformer_exog: Optional[object]=None,
-        weight_func: callable=None
+        weight_func: Optional[callable]=None
     ) -> None:
         
         self.regressor               = regressor
@@ -237,7 +236,11 @@ class ForecasterAutoregDirect(ForecasterBase):
             )
 
         if weight_func is not None:
-            self.source_code_weight_func = getsource(weight_func)
+            if not isinstance(weight_func, Callable):
+                raise TypeError(
+                    f"Argument `weight_func` must be a callable. Got {type(weight_func)}."
+                )
+            self.source_code_weight_func = inspect.getsource(weight_func)
             if 'sample_weight' not in inspect.getfullargspec(self.regressor.fit)[0]:
                 warnings.warm(
                     f"""
@@ -502,28 +505,34 @@ class ForecasterAutoregDirect(ForecasterBase):
 
         Parameters
         ----------
-        X_train : pd.DataFrame
-            Data frame generated with the method `create_train_X_y`.
+        X_train : pandas DataFrame
+            Dataframe generated with the method `create_train_X_y`, first return.
 
         Returns
         -------
-        np.ndarray
-            Weights
+        sample_weight : numpy ndarray
+            Weights to use in `fit` method.
+
         """
 
         sample_weight = None
 
         if self.weight_func is not None:
             sample_weight = self.weight_func(X_train.index)
-        
+
         if sample_weight is not None:
-            if np.sum(sample_weight) == 0:
-                raise Exception(
-                    "Weights sum to zero, can't be normalized"
+            if np.isnan(sample_weight).any():
+                raise ValueError(
+                    "The resulting `sample_weight` cannot have NaN values."
                 )
-            if(np.isnan(sample_weight).any()):
-                raise Exception(
-                    "NaN values in in Weights"
+            if np.any(sample_weight < 0):
+                raise ValueError(
+                    "The resulting `sample_weight` cannot have negative values."
+                )
+            if np.sum(sample_weight) == 0:
+                raise ValueError(
+                    ("The resulting `sample_weight` cannot be normalized because "
+                     "the sum of the weights is zero.")
                 )
 
         return sample_weight

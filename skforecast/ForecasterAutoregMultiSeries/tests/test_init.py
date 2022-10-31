@@ -105,7 +105,17 @@ def test_init_exception_when_lags_is_not_valid_type():
     lags = 'not_valid_type'
     err_msg = re.escape(
                 f"`lags` argument must be int, 1d numpy ndarray, range or list. "
-                f"Got {type(lags)}"
+                f"Got {type(lags)}."
             )
     with pytest.raises(TypeError, match = err_msg):
         ForecasterAutoregMultiSeries(LinearRegression(), lags=lags)
+
+
+def test_init_exception_when_weight_func_is_not_a_callable_or_dict():
+    """
+    Test exception is raised when weight_func is not a callable or a dict.
+    """
+    weight_func = 'not_callable_or_dict'
+    err_msg = re.escape(f"Argument `weight_func` must be a callable or a dict of callables. Got {type(weight_func)}.")
+    with pytest.raises(TypeError, match = err_msg):
+        ForecasterAutoregMultiSeries(LinearRegression(), lags=3, weight_func=weight_func)

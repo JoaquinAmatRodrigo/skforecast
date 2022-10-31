@@ -42,7 +42,7 @@ series = pd.DataFrame({'l1': pd.Series(np.array(
                                   0.6917018 , 0.15112745, 0.39887629, 0.2408559 , 0.34345601]
                                        )
                              )
-                       })
+         })
 
 
 @pytest.mark.parametrize("initial_train_size", 
@@ -325,8 +325,8 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
 
 def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_refit_fixed_train_size_with_mocked():
     """
-    Test output of backtesting_forecaster_multiseries in ForecasterAutoregMultiSeries with refit and
-    fixed_train_size with mocked (mocked done in Skforecast v0.5.0).
+    Test output of backtesting_forecaster_multiseries in ForecasterAutoregMultiSeries with refit,
+    fixed_train_size and custom metric with mocked (mocked done in Skforecast v0.5.0).
     """
 
     forecaster = ForecasterAutoregMultiSeries(
@@ -337,12 +337,19 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
     steps = 3
     n_validation = 12
 
+    def custom_metric(y_true, y_pred):
+        """
+        """
+        metric = mean_absolute_error(y_true, y_pred)
+        
+        return metric
+
     metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
                                                forecaster          = forecaster,
                                                series              = series,
                                                steps               = steps,
                                                levels              = ['l1'],
-                                               metric              = 'mean_absolute_error',
+                                               metric              = custom_metric,
                                                initial_train_size  = len(series) - n_validation,
                                                refit               = True,
                                                fixed_train_size    = True, 
@@ -355,7 +362,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                            )
     
     expected_metric = pd.DataFrame({'levels': ['l1'],
-                                    'mean_absolute_error': [0.21651617115803679]})
+                                    'custom_metric': [0.21651617115803679]})
     expected_predictions = pd.DataFrame({
                                'l1':np.array([0.4978839 , 0.46288427, 0.48433446, 
                                               0.50853803, 0.50006415, 0.50105623,
@@ -477,7 +484,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                forecaster          = forecaster,
                                                series              = series,
                                                steps               = steps,
-                                               levels              = ['l1', 'l2'],
+                                               levels              = None,
                                                metric              = ['mean_absolute_error', mean_absolute_error],
                                                initial_train_size  = len(series) - n_validation,
                                                refit               = False,

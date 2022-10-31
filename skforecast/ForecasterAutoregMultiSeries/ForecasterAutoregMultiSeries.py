@@ -6,7 +6,7 @@
 ################################################################################
 # coding=utf-8
 
-from typing import Union, Dict, List, Tuple, Any, Optional
+from typing import Union, Dict, List, Tuple, Any, Optional, Callable
 import warnings
 import logging
 import sys
@@ -68,7 +68,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         Weights associated with each series, used during training. It is only 
         applied if the `regressor` used accepts sample_weight in its fit method. 
         If `None`, all levels have the same weight. See the Notes section for more
-        details on the use of the weights.
+        details on the use of the weights. {level : float}.
         **New in version 0.6.0**
 
     weight_func : callable, default `None`
@@ -183,53 +183,54 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
     -----
 
     The weights are used to control the influence that each observation has on the
-    training of the model. `ForecasterMultiseries` accepts two types of weights:
+    training of the model. `ForecasterAutoregMultiseries` accepts two types of weights:
 
-    + series_weights`: controls the relative importance of each series. If a series has
+    + series_weights : controls the relative importance of each series. If a series has
     twice as much weight as the others, the observations of that series influence the
     training twice as much. The higher the weight of a series relative to the others,
     the more the model will focus on trying to learn that series.
 
-    + weight_func`: controls the relative importance of each observation according to its
-     index value. For example, a function that assigns a lower weight to certain dates.
+    + weight_func : controls the relative importance of each observation according to its
+    index value. For example, a function that assigns a lower weight to certain dates.
 
     If the two types of weights are indicated, they are multiplied to create the final
-    weights.  
+    weights. The resulting `sample_weight` cannot have negative values.
     
     """
     
     def __init__(
         self,
-        regressor,
+        regressor: object,
         lags: Union[int, np.ndarray, list],
-        transformer_series: Optional[object]=None,
-        transformer_exog: Optional[object]=None,
-        series_weights: Optional[dict]=None,
-        weight_func: callable=None
+        transformer_series: Optional[Union[object, dict[str, object]]]=None,
+        transformer_exog: Optional[Union[object, dict[str, object]]]=None,
+        series_weights: Optional[dict[str, float]]=None,
+        weight_func: Optional[Union[callable, dict[str, callable]]]=None
     ) -> None:
         
-        self.regressor            = regressor
-        self.transformer_series   = transformer_series
-        self.transformer_exog     = transformer_exog
-        self.series_weights       = series_weights
-        self.weight_func          = weight_func
-        self.index_type           = None
-        self.index_freq           = None
-        self.index_values         = None
-        self.training_range       = None
-        self.last_window          = None
-        self.included_exog        = False
-        self.exog_type            = None
-        self.exog_col_names       = None
-        self.series_levels        = None
-        self.X_train_col_names    = None
-        self.in_sample_residuals  = None
-        self.out_sample_residuals = None
-        self.fitted               = False
-        self.creation_date        = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
-        self.fit_date             = None
-        self.skforcast_version    = skforecast.__version__
-        self.python_version       = sys.version.split(" ")[0]
+        self.regressor               = regressor
+        self.transformer_series      = transformer_series
+        self.transformer_exog        = transformer_exog
+        self.series_weights          = series_weights
+        self.weight_func             = weight_func
+        self.source_code_weight_func = None
+        self.index_type              = None
+        self.index_freq              = None
+        self.index_values            = None
+        self.training_range          = None
+        self.last_window             = None
+        self.included_exog           = False
+        self.exog_type               = None
+        self.exog_col_names          = None
+        self.series_levels           = None
+        self.X_train_col_names       = None
+        self.in_sample_residuals     = None
+        self.out_sample_residuals    = None
+        self.fitted                  = False
+        self.creation_date           = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
+        self.fit_date                = None
+        self.skforcast_version       = skforecast.__version__
+        self.python_version          = sys.version.split(" ")[0]
         
         if isinstance(lags, int) and lags < 1:
             raise ValueError('Minimum value of lags allowed is 1.')
@@ -251,7 +252,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         else:
             raise TypeError(
                 '`lags` argument must be int, 1d numpy ndarray, range or list. '
-                f"Got {type(lags)}"
+                f"Got {type(lags)}."
             )
 
         if series_weights is not None:
@@ -265,6 +266,11 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 self.series_weights = None
 
         if weight_func is not None:
+            if not isinstance(weight_func, (Callable, dict)):
+                raise TypeError(
+                    f"Argument `weight_func` must be a callable or a dict of "
+                    f"callables. Got {type(weight_func)}."
+                )
             self.source_code_weight_func = inspect.getsource(weight_func)
             if 'sample_weight' not in inspect.getfullargspec(self.regressor.fit)[0]:
                 warnings.warm(
@@ -520,27 +526,29 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
     
     def create_sample_weights(
         self,
-        series:pd.DataFrame,
-        X_train:pd.DataFrame,
-        y_train_index:pd.Index,
+        series: pd.DataFrame,
+        X_train: pd.DataFrame,
+        y_train_index: pd.Index,
     )-> np.ndarray:
         """
         Crate weights for each observation according to the forecaster's attributes
-        `series_weights` and `weight_func`.
+        `series_weights` and `weight_func`. The resulting weights are the 
+        multiplication of both attribute returns.
 
         Parameters
         ----------
-        series : pd.DataFrame
+        series : pandas DataFrame
             Time series used to create `X_train` with the method `create_train_X_y`.
-        X_train : pd.DataFrame
-            Data frame generated with the method `create_train_X_y`.
-        y_train_index : pd.Index
-            Index of `y_train` generated with the method `create_train_X_y`.
+        X_train : pandas DataFrame
+            Dataframe generated with the method `create_train_X_y`, first return.
+        y_train_index : pandas Index
+            Index of `y_train` generated with the method `create_train_X_y`, fourth return.
 
         Returns
         -------
-        np.ndarray
-            Weights
+        sample_weight : numpy ndarray
+            Weights to use in `fit` method.
+        
         """
 
         sample_weight = None
@@ -559,13 +567,18 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 sample_weight = weights.copy()
 
         if sample_weight is not None:
-            if np.sum(sample_weight) == 0:
-                raise Exception(
-                    "Weights sum to zero, can't be normalized"
+            if np.isnan(sample_weight).any():
+                raise ValueError(
+                    "The resulting `sample_weight` cannot have NaN values."
                 )
-            if(np.isnan(sample_weight).any()):
-                raise Exception(
-                    "NaN values in in Weights"
+            if np.any(sample_weight < 0):
+                raise ValueError(
+                    "The resulting `sample_weight` cannot have negative values."
+                )
+            if np.sum(sample_weight) == 0:
+                raise ValueError(
+                    ("The resulting `sample_weight` cannot be normalized because "
+                     "the sum of the weights is zero.")
                 )
 
         return sample_weight
