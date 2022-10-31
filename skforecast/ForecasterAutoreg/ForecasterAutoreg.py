@@ -409,6 +409,39 @@ class ForecasterAutoreg(ForecasterBase):
                         
         return X_train, y_train
 
+
+    def create_sample_weights(
+        self,
+        X_train: pd.DataFrame,
+    )-> np.ndarray:
+        """
+        Crate weights for each observation according to the forecaster's attribute
+        `weight_func`.
+
+        Parameters
+        ----------
+        X_train : pd.DataFrame
+            Data frame generated with the method `create_train_X_y`.
+
+        Returns
+        -------
+        np.ndarray
+            Weights
+        """
+
+        sample_weight = None
+
+        if self.weight_func is not None:
+            sample_weight = self.weight_func(X_train.index)
+
+        if sample_weight is not None:
+            if np.sum(sample_weight) == 0:
+                raise Exception("Weights sum to zero, can't be normalized")
+            if(np.isnan(sample_weight).any()):
+                raise Exception("NaN values in in Weights")
+
+        return sample_weight
+
         
     def fit(
         self,
@@ -453,13 +486,13 @@ class ForecasterAutoreg(ForecasterBase):
                  exog.columns.to_list() if isinstance(exog, pd.DataFrame) else exog.name
 
         X_train, y_train = self.create_train_X_y(y=y, exog=exog)
+        sample_weight = self.create_sample_weights(X_train=X_train)
 
-        if self.weight_func is not None:
-            weights = self.weight_func(X_train.index)
+        if sample_weight is not None:
             if not str(type(self.regressor)) == "<class 'xgboost.sklearn.XGBRegressor'>":
-                self.regressor.fit(X=X_train, y=y_train, sample_weight=weights)
+                self.regressor.fit(X=X_train, y=y_train, sample_weight=sample_weight)
             else:
-                self.regressor.fit(X=X_train.to_numpy(), y=y_train.to_numpy(), sample_weight=weights)
+                self.regressor.fit(X=X_train.to_numpy(), y=y_train.to_numpy(), sample_weight=sample_weight)
         else:
             if not str(type(self.regressor)) == "<class 'xgboost.sklearn.XGBRegressor'>":
                 self.regressor.fit(X=X_train, y=y_train)
