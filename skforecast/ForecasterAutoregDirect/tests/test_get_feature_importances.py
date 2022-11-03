@@ -15,15 +15,33 @@ from sklearn.neural_network import MLPRegressor
 from sklearn.ensemble import RandomForestRegressor
 
 
+def test_exception_is_raised_when_step_is_not_int():
+    """
+    Test exception is raised when calling get_feature_importance() and step is 
+    not an int.
+    """
+    forecaster = ForecasterAutoregDirect(
+                     regressor = RandomForestRegressor(random_state=123),
+                     lags = 3,
+                     steps = 1
+                 )
+    forecaster.fit(y=pd.Series(np.arange(5)))
+    step = 'not_an_int'
+
+    err_msg = re.escape(f'`step` must be an integer. Got {type(step)}.')
+    with pytest.raises(TypeError, match = err_msg):         
+        forecaster.get_feature_importance(step=step)
+
+
 def test_exception_is_raised_when_forecaster_is_not_fitted():
     """
     Test exception is raised when calling get_feature_importance() and 
     forecaster is not fitted.
     """
     forecaster = ForecasterAutoregDirect(
-                    regressor = RandomForestRegressor(random_state=123),
-                    lags = 3,
-                    steps = 1
+                     regressor = RandomForestRegressor(random_state=123),
+                     lags = 3,
+                     steps = 1
                  )
 
     err_msg = re.escape(
@@ -34,40 +52,23 @@ def test_exception_is_raised_when_forecaster_is_not_fitted():
         forecaster.get_feature_importance(step=1)
 
 
-def test_exception_is_raised_when_step_is_greater_than_forecaster_steps():
+@pytest.mark.parametrize("step", [0, 2], ids=lambda step: f'step: {step}')
+def test_exception_is_raised_when_step_is_greater_than_forecaster_steps(step):
     """
-    Test exception is raised when calling get_feature_importance() step is 
-    greater than the forecaster.steps.
+    Test exception is raised when calling get_feature_importance() and step is 
+    less than 1 or greater than the forecaster.steps.
     """
     forecaster = ForecasterAutoregDirect(
-                    regressor = RandomForestRegressor(random_state=123),
-                    lags = 3,
-                    steps = 1
+                     regressor = RandomForestRegressor(random_state=123),
+                     lags = 3,
+                     steps = 1
                  )
     forecaster.fit(y=pd.Series(np.arange(5)))
-    step = 2
 
     err_msg = re.escape(
-                f"Forecaster trained for {forecaster.steps} steps. Got step={step}."
+                f"The step must have a value from 1 to the maximum number of steps "
+                f"({forecaster.steps}). Got {step}."
             )
-    with pytest.raises(ValueError, match = err_msg):         
-        forecaster.get_feature_importance(step=step)
-
-
-def test_exception_is_raised_when_step_is_less_than_1():
-    """
-    Test exception is raised when calling get_feature_importance() step is 
-    less than 1.
-    """
-    forecaster = ForecasterAutoregDirect(
-                    regressor = RandomForestRegressor(random_state=123),
-                    lags = 3,
-                    steps = 1
-                 )
-    forecaster.fit(y=pd.Series(np.arange(5)))
-    step = -1
-
-    err_msg = re.escape("Minimum step is 1.")
     with pytest.raises(ValueError, match = err_msg):         
         forecaster.get_feature_importance(step=step)
 
@@ -78,9 +79,9 @@ def test_output_get_feature_importance_when_regressor_is_RandomForestRegressor_l
     and it is trained with y=pd.Series(np.arange(5)).
     """
     forecaster = ForecasterAutoregDirect(
-                    regressor = RandomForestRegressor(random_state=123),
-                    lags = 3,
-                    steps = 1
+                     regressor = RandomForestRegressor(random_state=123),
+                     lags = 3,
+                     steps = 1
                  )
     forecaster.fit(y=pd.Series(np.arange(5)))
     results = forecaster.get_feature_importance(step=1)
@@ -99,9 +100,9 @@ def test_output_get_feature_importance_when_regressor_is_RandomForestRegressor_l
     exog=pd.Series(np.arange(5), name='exog').
     """
     forecaster = ForecasterAutoregDirect(
-                    regressor = RandomForestRegressor(random_state=123),
-                    lags = 3,
-                    steps = 1
+                     regressor = RandomForestRegressor(random_state=123),
+                     lags = 3,
+                     steps = 1
                  )
     forecaster.fit(y=pd.Series(np.arange(5)), exog=pd.Series(np.arange(5), name='exog'))
     results = forecaster.get_feature_importance(step=1)
@@ -154,9 +155,9 @@ def test_output_get_feature_importance_when_regressor_no_attributes():
     `feature_importances_` or `coef_, results = None and a warning is raised`
     """
     forecaster = ForecasterAutoregDirect(
-                    regressor = MLPRegressor(solver = 'lbfgs', max_iter= 50, random_state=123),
-                    lags      = 5,
-                    steps     = 1
+                     regressor = MLPRegressor(solver = 'lbfgs', max_iter= 50, random_state=123),
+                     lags      = 5,
+                     steps     = 1
                  )
     forecaster.fit(y=pd.Series(np.arange(10)))
     results = forecaster.get_feature_importance(step=1)
@@ -172,9 +173,9 @@ def test_output_get_feature_importance_when_pipeline():
     it is trained with y=pd.Series(np.arange(5)).
     """
     forecaster = ForecasterAutoregDirect(
-                    regressor = make_pipeline(StandardScaler(), LinearRegression()),
-                    lags      = 3,
-                    steps     = 1
+                     regressor = make_pipeline(StandardScaler(), LinearRegression()),
+                     lags      = 3,
+                     steps     = 1
                  )
     forecaster.fit(y=pd.Series(np.arange(5)))
     expected = pd.DataFrame({

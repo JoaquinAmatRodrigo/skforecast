@@ -39,13 +39,13 @@ def test_check_input_predict_exception_when_fitted_is_False():
         )
         
         
-def test_check_input_predict_exception_when_steps_is_lower_than_1():
+def test_check_input_predict_exception_when_steps_int_lower_than_1():
     """
     Test exception is raised when steps is a value lower than 1.
     """
     steps = -5
 
-    err_msg = re.escape(f'`steps` must be integer greater than 0. Got {steps}.')
+    err_msg = re.escape(f'`steps` must be an integer greater than or equal to 1. Got {steps}.')
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
             forecaster_type = 'class.ForecasterAutoreg',
@@ -64,23 +64,55 @@ def test_check_input_predict_exception_when_steps_is_lower_than_1():
             levels          = None,
             series_levels   = None
         )
-
-
-def test_check_input_predict_exception_when_steps_is_greater_than_max_steps():
+        
+        
+def test_check_input_predict_exception_when_steps_list_lower_than_0():
     """
-    Test exception is raised when steps > max_steps.
+    Test exception is raised when steps is a list with a value lower than 0. 
+    (`ForecasterAutoregDirect` and `ForecasterAutoregMultiVariate`).
     """
-    steps = 20
-    max_steps = 10
+    steps = [-1, 0, 1]
 
     err_msg = re.escape(
-                (f'`steps` must be lower or equal to the value of steps defined '
-                 f'when initializing the forecaster. Got {steps} but the maximum '
-                 f'is {max_steps}.')
+                  (f"The minimum value of `steps` must be equal to or greater than 1. "
+                   f"Got {min(steps) + 1}.")
               )
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
-            forecaster_type = 'class.ForecasterAutoreg',
+            forecaster_type = 'class.ForecasterAutoregDirect',
+            steps           = steps,
+            fitted          = True,
+            included_exog   = False,
+            index_type      = None,
+            index_freq      = None,
+            window_size     = None,
+            last_window     = None,
+            exog            = None,
+            exog_type       = None,
+            exog_col_names  = None,
+            interval        = None,
+            max_steps       = None,
+            levels          = None,
+            series_levels   = None
+        )
+
+
+def test_check_input_predict_exception_when_max_steps_greater_than_max_steps():
+    """
+    Test exception is raised when max(steps) > max_steps. (`ForecasterAutoregDirect` 
+    and `ForecasterAutoregMultiVariate`).
+    """
+    steps = list(range(20))
+    max_steps = 10
+
+    err_msg = re.escape(
+                (f"The maximum value of `steps` must be less than or equal to "
+                 f"the value of steps defined when initializing the forecaster. "
+                 f"Got {max(steps)}, but the maximum is {max_steps}.")
+              )
+    with pytest.raises(ValueError, match = err_msg):
+        check_predict_input(
+            forecaster_type = 'class.ForecasterAutoregMultiVariate',
             steps           = steps,
             fitted          = True,
             included_exog   = False,
@@ -119,7 +151,7 @@ def test_check_input_predict_exception_when_ForecasterAutoregMultiSeries_and_lev
             exog_type       = None,
             exog_col_names  = None,
             interval        = None,
-            max_steps       = 10,
+            max_steps       = None,
             levels          = levels,
             series_levels   = ['1', '2']
         )
@@ -149,7 +181,7 @@ def test_check_input_predict_exception_when_ForecasterAutoregMultiSeries_and_lev
             exog_type       = None,
             exog_col_names  = None,
             interval        = None,
-            max_steps       = 10,
+            max_steps       = None,
             levels          = levels,
             series_levels   = series_levels
         )

@@ -612,16 +612,16 @@ class ForecasterAutoregDirect(ForecasterBase):
         self.training_range = preprocess_y(y=y)[1][[0, -1]]
         self.index_type = type(X_train.index)
         if isinstance(X_train.index, pd.DatetimeIndex):
-            self.index_freq = y_train.index.freqstr
-            self.last_window = y.loc[y_train.index[-1] - self.max_lag * y_train.index.freq: ]
+            self.index_freq = X_train.index.freqstr
         else: 
-            self.index_freq = y_train.index.step
-            self.last_window = y.loc[y_train.index[-1] - self.max_lag * y_train.index.step: ]
+            self.index_freq = X_train.index.step
+
+        self.last_window = y.iloc[-self.max_lag:].copy()
 
 
     def predict(
         self,
-        steps: Optional[Union[int, None]]=None,
+        steps: Optional[Union[int, list]]=None,
         last_window: Optional[pd.Series]=None,
         exog: Optional[Union[pd.Series, pd.DataFrame]]=None
     ) -> pd.Series:
@@ -631,9 +631,9 @@ class ForecasterAutoregDirect(ForecasterBase):
         Parameters
         ----------
         steps : int, None, default `None`
-            Predict n steps ahead. `steps` must lower or equal to the value of
-            steps defined when initializing the forecaster. If `None`, as many
-            steps as defined in the initialization are predicted.
+            Predict n steps. The value of `steps` must be less than or equal to 
+            the value of steps defined when initializing the forecaster. If `None`, 
+            as many steps are predicted as were defined at initialization.
 
         last_window : pandas Series, default `None`
             Values of the series used to create the predictors (lags) need in the 
@@ -677,21 +677,21 @@ class ForecasterAutoregDirect(ForecasterBase):
         if exog is not None:
             if isinstance(exog, pd.DataFrame):
                 exog = transform_dataframe(
-                            df                = exog,
-                            transformer       = self.transformer_exog,
-                            fit               = False,
-                            inverse_transform = False
+                           df                = exog,
+                           transformer       = self.transformer_exog,
+                           fit               = False,
+                           inverse_transform = False
                        )
             else:
                 exog = transform_series(
-                            series            = exog,
-                            transformer       = self.transformer_exog,
-                            fit               = False,
-                            inverse_transform = False
+                           series            = exog,
+                           transformer       = self.transformer_exog,
+                           fit               = False,
+                           inverse_transform = False
                        )
             
             exog_values, _ = preprocess_exog(
-                                exog = exog.iloc[:steps, ]
+                                 exog = exog.iloc[:steps, ]
                              )
             exog_values = exog_to_direct(exog=exog_values, steps=steps)
         else:
@@ -701,10 +701,10 @@ class ForecasterAutoregDirect(ForecasterBase):
             last_window = self.last_window.copy()
         
         last_window = transform_series(
-                            series            = last_window,
-                            transformer       = self.transformer_y,
-                            fit               = False,
-                            inverse_transform = False
+                          series            = last_window,
+                          transformer       = self.transformer_y,
+                          fit               = False,
+                          inverse_transform = False
                       )
         last_window_values, last_window_index = preprocess_last_window(
                                                     last_window = last_window
@@ -727,22 +727,22 @@ class ForecasterAutoregDirect(ForecasterBase):
                 predictions[step] = regressor.predict(X)
 
         predictions = pd.Series(
-                        data  = predictions.reshape(-1),
-                        index = expand_index(
+                          data  = predictions.reshape(-1),
+                          index = expand_index(
                                     index = last_window_index,
                                     steps = steps
                                 ),
-                        name = 'pred'
+                          name = 'pred'
                       )
 
         predictions = transform_series(
-                        series            = predictions,
-                        transformer       = self.transformer_y,
-                        fit               = False,
-                        inverse_transform = True
+                          series            = predictions,
+                          transformer       = self.transformer_y,
+                          fit               = False,
+                          inverse_transform = True
                       )
 
-        return predictions    
+        return predictions
     
     
     def set_params(
@@ -798,30 +798,32 @@ class ForecasterAutoregDirect(ForecasterBase):
 
     def get_feature_importance(
         self, 
-        step
+        step: int
     ) -> pd.DataFrame:
         """      
         Return impurity-based feature importance of the model stored in
         the forecaster for a specific step. Since a separate model is created for
         each forecast time step, it is necessary to select the model from which
-        retrieve information.
-
-        Only valid when the forecaster has been trained using 
-        `GradientBoostingRegressor`, `RandomForestRegressor` or 
-        `HistGradientBoostingRegressor` as regressor.
+        retrieve information. Only valid when regressor stores internally the 
+        feature importance in the attribute `feature_importances_` or `coef_`.
 
         Parameters
         ----------
         step : int
-            Model from which retrieve information (a separate model is created for
-            each forecast time step). First step is 1.
+            Model from which retrieve information (a separate model is created 
+            for each forecast time step). First step is 1.
 
         Returns 
         -------
         feature_importance : pandas DataFrame
-            Impurity-based feature importance associated with each predictor.
+            Feature importance associated with each predictor.
         
         """
+
+        if not isinstance(step, int):
+            raise TypeError(
+                f'`step` must be an integer. Got {type(step)}.'
+            )
         
         if self.fitted == False:
             raise sklearn.exceptions.NotFittedError(
@@ -829,12 +831,11 @@ class ForecasterAutoregDirect(ForecasterBase):
                 "arguments before using `get_feature_importance()`."
             )
 
-        if step > self.steps:
+        if (step < 1) or (step > self.steps):
             raise ValueError(
-                f"Forecaster trained for {self.steps} steps. Got step={step}."
+                f"The step must have a value from 1 to the maximum number of steps "
+                f"({self.steps}). Got {step}."
             )
-        if step < 1:
-            raise ValueError("Minimum step is 1.")
 
         # Stored regressors start at index 0
         step = step - 1
@@ -844,37 +845,31 @@ class ForecasterAutoregDirect(ForecasterBase):
         else:
             estimator = self.regressors_[step]
 
+        idx_columns_lags = np.arange(len(self.lags))
+        idx_columns_exog = np.array([], dtype=int)
+        if self.included_exog:
+            idx_columns_exog = np.arange(len(self.X_train_col_names))[len(self.lags) + step::self.steps]
+        idx_columns = np.hstack((idx_columns_lags, idx_columns_exog))
+        feature_names = [self.X_train_col_names[i] for i in idx_columns]
+        feature_names = [name.replace(f"_step_{step+1}", "") for name in feature_names]
+
         try:
-            idx_columns_lags = np.arange(len(self.lags))
-            idx_columns_exog = np.array([], dtype=int)
-            if self.included_exog:
-                idx_columns_exog = np.arange(len(self.X_train_col_names))[len(self.lags) + step::self.steps]
-            idx_columns = np.hstack((idx_columns_lags, idx_columns_exog))
-            feature_names = [self.X_train_col_names[i] for i in idx_columns]
-            feature_names = [name.replace(f"_step_{step+1}", "") for name in feature_names]
             feature_importance = pd.DataFrame({
-                                    'feature': feature_names,
-                                    'importance' : estimator.feature_importances_
+                                     'feature': feature_names,
+                                     'importance' : estimator.feature_importances_
                                  })
         except:   
             try:
-                idx_columns_lags = np.arange(len(self.lags))
-                idx_columns_exog = np.array([], dtype=int)
-                if self.included_exog:
-                    idx_columns_exog = np.arange(len(self.X_train_col_names))[len(self.lags) + step::self.steps]
-                idx_columns = np.hstack((idx_columns_lags, idx_columns_exog))
-                feature_names = [self.X_train_col_names[i] for i in idx_columns]
-                feature_names = [name.replace(f"_step_{step+1}", "") for name in feature_names]
                 feature_importance = pd.DataFrame({
-                                        'feature': feature_names,
-                                        'importance' : estimator.coef_
+                                         'feature': feature_names,
+                                         'importance' : estimator.coef_
                                      })
             except:
                 warnings.warn(
-                    f"Impossible to access feature importance for regressor of type {type(estimator)}. "
-                    f"This method is only valid when the regressor stores internally "
-                    f"the feature importance in the attribute `feature_importances_` "
-                    f"or `coef_`."
+                    f"Impossible to access feature importance for regressor of type "
+                    f"{type(estimator)}. This method is only valid when the "
+                    f"regressor stores internally the feature importance in the "
+                    f"attribute `feature_importances_` or `coef_`."
                 )
 
                 feature_importance = None

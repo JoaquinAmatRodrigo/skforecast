@@ -236,7 +236,8 @@ def check_predict_input(
         interval of 95% should be as `interval = [2.5, 97.5]`.
 
     max_steps: int, default `None`
-        Maximum number of steps allowed.
+        Maximum number of steps allowed (`ForecasterAutoregDirect` and 
+        `ForecasterAutoregMultiVariate`).
             
     levels : str, list, default `None`
         Time series to be predicted (`ForecasterAutoregMultiSeries`).
@@ -252,17 +253,23 @@ def check_predict_input(
              'appropriate arguments before using predict.')
         )
     
-    if steps < 1:
+    if isinstance(steps, int) and steps < 1:
         raise ValueError(
-            f'`steps` must be integer greater than 0. Got {steps}.'
+            f'`steps` must be an integer greater than or equal to 1. Got {steps}.'
+        )
+
+    if isinstance(steps, list) and min(steps) < 0:
+        raise ValueError(
+           (f"The minimum value of `steps` must be equal to or greater than 1. "
+            f"Got {min(steps) + 1}.")
         )
 
     if max_steps is not None:
-        if steps > max_steps:
+        if max(steps) > max_steps:
             raise ValueError(
-                (f'`steps` must be lower or equal to the value of steps defined '
-                 f'when initializing the forecaster. Got {steps} but the maximum '
-                 f'is {max_steps}.')
+                (f"The maximum value of `steps` must be less than or equal to "
+                 f"the value of steps defined when initializing the forecaster. "
+                 f"Got {max(steps)}, but the maximum is {max_steps}.")
             )
 
     if interval is not None:
@@ -690,17 +697,17 @@ def transform_series(
     
     if isinstance(values_transformed, np.ndarray) and values_transformed.shape[1] == 1:
         series_transformed = pd.Series(
-                                data  = values_transformed.flatten(),
-                                index = series.index,
-                                name  = series.columns[0]
-                            )
+                                 data  = values_transformed.flatten(),
+                                 index = series.index,
+                                 name  = series.columns[0]
+                             )
     elif isinstance(values_transformed, pd.DataFrame) and values_transformed.shape[1] == 1:
         series_transformed = values_transformed.squeeze()
     else:
         series_transformed = pd.DataFrame(
-                                data = values_transformed,
-                                index = series.index,
-                                columns = transformer.get_feature_names_out()
+                                 data = values_transformed,
+                                 index = series.index,
+                                 columns = transformer.get_feature_names_out()
                              )
 
     return series_transformed
@@ -767,10 +774,10 @@ def transform_dataframe(
         feature_names_out = df.columns
     
     df_transformed = pd.DataFrame(
-                        data = values_transformed,
-                        index = df.index,
-                        columns = feature_names_out
-                      )
+                         data = values_transformed,
+                         index = df.index,
+                         columns = feature_names_out
+                     )
 
     return df_transformed
 

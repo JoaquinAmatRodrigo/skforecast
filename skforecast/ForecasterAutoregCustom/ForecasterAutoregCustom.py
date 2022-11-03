@@ -987,7 +987,7 @@ class ForecasterAutoregCustom(ForecasterBase):
     ) -> None:
         """
         Set new values to the parameters of the scikit learn model stored in the
-        ForecasterAutoregCustom.
+        forecaster.
         
         Parameters
         ----------
