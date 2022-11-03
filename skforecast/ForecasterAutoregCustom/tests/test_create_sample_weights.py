@@ -49,7 +49,7 @@ def custom_weights_negative(index):
     Return -1 if index is one of '2022-01-05', '2022-01-06', 1 otherwise.
     """
     weights = np.where(
-                  (index >= '2022-01-08') & (index <= '2022-01-10'),
+                  (index >= '2022-01-05') & (index <= '2022-01-06'),
                    -1,
                    1
               )
