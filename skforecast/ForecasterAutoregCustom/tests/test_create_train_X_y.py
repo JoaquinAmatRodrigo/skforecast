@@ -27,25 +27,32 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_None():
                     fun_predictors = create_predictors,
                     window_size    = 5
                 )
-    results = forecaster.create_train_X_y(y=pd.Series(np.arange(10)))
+    results = forecaster.create_train_X_y(y=pd.Series(np.arange(10, dtype=float)))
     expected = (pd.DataFrame(
-                    data = np.array([[4, 3, 2, 1, 0],
-                                    [5, 4, 3, 2, 1],
-                                    [6, 5, 4, 3, 2],
-                                    [7, 6, 5, 4, 3],
-                                    [8, 7, 6, 5, 4]]),
+                    data = np.array([[4., 3., 2., 1., 0.],
+                                     [5., 4., 3., 2., 1.],
+                                     [6., 5., 4., 3., 2.],
+                                     [7., 6., 5., 4., 3.],
+                                     [8., 7., 6., 5., 4.]]),
                     index   = np.array([5, 6, 7, 8, 9]),
                     columns = ['custom_predictor_0', 'custom_predictor_1',
                                'custom_predictor_2', 'custom_predictor_3',
                                'custom_predictor_4']
                 ),
                 pd.Series(
-                    np.array([5, 6, 7, 8, 9]),
-                    index = np.array([5, 6, 7, 8, 9]))
+                    np.array([5., 6., 7., 8., 9.]),
+                    index = np.array([5, 6, 7, 8, 9]),
+                    name = 'y'
+                )
                )     
 
-    assert (results[0] == expected[0]).all().all()
-    assert (results[1] == expected[1]).all()
+    for i in range(len(expected)):
+        if isinstance(expected[i], pd.DataFrame):
+            pd.testing.assert_frame_equal(results[i], expected[i])
+        elif isinstance(expected[i], pd.Series):
+            pd.testing.assert_series_equal(results[i], expected[i])
+        else:
+            assert (results[i] == expected[i]).all()
 
 
 def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_series():
@@ -59,27 +66,34 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_series():
                     window_size    = 5
                 )
     results = forecaster.create_train_X_y(
-                y = pd.Series(np.arange(10)),
-                exog =  pd.Series(np.arange(100, 110), name='exog')
+                y = pd.Series(np.arange(10, dtype=float)),
+                exog =  pd.Series(np.arange(100, 110, dtype=float), name='exog')
               )
     expected = (pd.DataFrame(
-                    data = np.array([[4, 3, 2, 1, 0, 105],
-                                    [5, 4, 3, 2, 1, 106],
-                                    [6, 5, 4, 3, 2, 107],
-                                    [7, 6, 5, 4, 3, 108],
-                                    [8, 7, 6, 5, 4, 109]]),
+                    data = np.array([[4., 3., 2., 1., 0., 105.],
+                                     [5., 4., 3., 2., 1., 106.],
+                                     [6., 5., 4., 3., 2., 107.],
+                                     [7., 6., 5., 4., 3., 108.],
+                                     [8., 7., 6., 5., 4., 109.]]),
                     index   = np.array([5, 6, 7, 8, 9]),
                     columns = ['custom_predictor_0', 'custom_predictor_1',
                                'custom_predictor_2', 'custom_predictor_3',
                                'custom_predictor_4', 'exog']
                 ),
                 pd.Series(
-                    np.array([5, 6, 7, 8, 9]),
-                    index = np.array([5, 6, 7, 8, 9]))
+                    np.array([5., 6., 7., 8., 9.]),
+                    index = np.array([5, 6, 7, 8, 9]),
+                    name = 'y'
+                )
                )       
 
-    assert (results[0] == expected[0]).all().all()
-    assert (results[1] == expected[1]).all()
+    for i in range(len(expected)):
+        if isinstance(expected[i], pd.DataFrame):
+            pd.testing.assert_frame_equal(results[i], expected[i])
+        elif isinstance(expected[i], pd.Series):
+            pd.testing.assert_series_equal(results[i], expected[i])
+        else:
+            assert (results[i] == expected[i]).all()
 
 
 def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_dataframe():
@@ -93,31 +107,37 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_dataframe():
                     window_size    = 5
                 )
     results = forecaster.create_train_X_y(
-                y = pd.Series(np.arange(10)),
+                y = pd.Series(np.arange(10, dtype=float)),
                 exog = pd.DataFrame({
-                            'exog_1' : np.arange(100, 110),
-                            'exog_2' : np.arange(1000, 1010)
+                            'exog_1' : np.arange(100, 110, dtype=float),
+                            'exog_2' : np.arange(1000, 1010, dtype=float)
                 })
               )
     expected = (pd.DataFrame(
-                    data = np.array([[4, 3, 2, 1, 0, 105, 1005],
-                                  [5, 4, 3, 2, 1, 106, 1006],
-                                  [6, 5, 4, 3, 2, 107, 1007],
-                                  [7, 6, 5, 4, 3, 108, 1008],
-                                  [8, 7, 6, 5, 4, 109, 1009]]),
+                    data = np.array([[4., 3., 2., 1., 0., 105., 1005.],
+                                     [5., 4., 3., 2., 1., 106., 1006.],
+                                     [6., 5., 4., 3., 2., 107., 1007.],
+                                     [7., 6., 5., 4., 3., 108., 1008.],
+                                     [8., 7., 6., 5., 4., 109., 1009.]]),
                     index   = np.array([5, 6, 7, 8, 9]),
                     columns = ['custom_predictor_0', 'custom_predictor_1',
                                'custom_predictor_2', 'custom_predictor_3',
                                'custom_predictor_4', 'exog_1', 'exog_2']
                 ),
                 pd.Series(
-                    np.array([5, 6, 7, 8, 9]),
-                    index = np.array([5, 6, 7, 8, 9])
+                    np.array([5., 6., 7., 8., 9.]),
+                    index = np.array([5, 6, 7, 8, 9]),
+                    name = 'y'
                 )
                )        
 
-    assert (results[0] == expected[0]).all().all()
-    assert (results[1] == expected[1]).all()
+    for i in range(len(expected)):
+        if isinstance(expected[i], pd.DataFrame):
+            pd.testing.assert_frame_equal(results[i], expected[i])
+        elif isinstance(expected[i], pd.Series):
+            pd.testing.assert_series_equal(results[i], expected[i])
+        else:
+            assert (results[i] == expected[i]).all()
 
     
 def test_create_train_X_y_exception_when_y_and_exog_have_different_length():

@@ -10,7 +10,7 @@ from sklearn.linear_model import LinearRegression
 
 def custom_weights(index):
     """
-    Return 0 if index is one of '2022-01-08', '2022-01-10', 1 otherwise.
+    Return 0 if index is between '2022-01-08', '2022-01-10', 1 otherwise.
     """
     weights = np.where(
                   (index >= '2022-01-08') & (index <= '2022-01-10'),
@@ -19,11 +19,24 @@ def custom_weights(index):
               )
     
     return weights
+    
+
+def custom_weights_2(index):
+    """
+    Return 1 if index is between '2022-01-11', '2022-01-13', 2 otherwise.
+    """
+    weights = np.where(
+                  (index >= '2022-01-11') & (index <= '2022-01-13'),
+                   3,
+                   2
+              )
+    
+    return weights
 
 
 def custom_weights_nan(index):
     """
-    Return np.nan if index is one of '2022-01-05', '2022-01-06', 1 otherwise.
+    Return np.nan f index is between '2022-01-08', '2022-01-10', 1 otherwise.
     """
     weights = np.where(
                   (index >= '2022-01-08') & (index <= '2022-01-10'),
@@ -36,7 +49,7 @@ def custom_weights_nan(index):
 
 def custom_weights_negative(index):
     """
-    Return -1 if index is one of '2022-01-05', '2022-01-06', 1 otherwise.
+    Return -1 f index is between '2022-01-08', '2022-01-10', 1 otherwise.
     """
     weights = np.where(
                   (index >= '2022-01-08') & (index <= '2022-01-10'),
@@ -88,10 +101,10 @@ X_train = pd.DataFrame(
           )
 
 y_train_index = pd.DatetimeIndex(
-                    ['2022-01-07', '2022-01-07', '2022-01-08', '2022-01-08',
-                     '2022-01-09', '2022-01-09', '2022-01-10', '2022-01-10',
-                     '2022-01-11', '2022-01-11', '2022-01-12', '2022-01-12',
-                     '2022-01-13', '2022-01-13'],
+                    ['2022-01-07', '2022-01-08', '2022-01-09', '2022-01-10',
+                     '2022-01-11', '2022-01-12', '2022-01-13',
+                     '2022-01-07', '2022-01-08', '2022-01-09', '2022-01-10',
+                     '2022-01-11', '2022-01-12', '2022-01-13'],
                      dtype='datetime64[ns]', freq=None
                 )
 
@@ -101,10 +114,10 @@ def test_create_sample_weights_output_using_series_weights():
     Test `sample_weights` creation using `series_weights`.
     """
     forecaster = ForecasterAutoregMultiSeries(
-                    regressor      = LinearRegression,
-                    lags           = 3,
-                    series_weights = {'series_1': 1., 'series_2': 2.}
-                )
+                     regressor      = LinearRegression(),
+                     lags           = 3,
+                     series_weights = {'series_1': 1., 'series_2': 2.}
+                 )
 
     expected = np.array([1., 1., 1., 1., 1., 1., 1., 2., 2., 2., 2., 2., 2., 2.])
     results = forecaster.create_sample_weights(series=series, X_train=X_train, y_train_index=y_train_index)
@@ -117,12 +130,39 @@ def test_create_sample_weights_output_using_weight_func():
     Test `sample_weights` creation using `weight_func`.
     """
     forecaster = ForecasterAutoregMultiSeries(
-                    regressor   = LinearRegression,
-                    lags        = 3,
-                    weight_func = custom_weights
-                )
+                     regressor   = LinearRegression(),
+                     lags        = 3,
+                     weight_func = custom_weights
+                 )
 
-    expected = np.array([1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1])
+    expected = np.array([1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1])
+    results = forecaster.create_sample_weights(series=series, X_train=X_train, y_train_index=y_train_index)
+    
+    assert np.array_equal(results, expected)
+
+
+@pytest.mark.parametrize("weight_func, expected", 
+                         [({'series_1': None, 
+                            'series_2': custom_weights_2}, 
+                           np.array([1, 1, 1, 1, 1, 1, 1, 2, 3, 3, 3, 2, 2, 2])), 
+                          ({'series_1': custom_weights, 
+                            'series_2': None}, 
+                           np.array([1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])), 
+                          ({'series_1': custom_weights, 
+                            'series_2': custom_weights_2}, 
+                           np.array([1, 0, 0, 0, 1, 1, 1, 2, 3, 3, 3, 2, 2, 2]))], 
+                         ids = lambda values : f'levels: {values}'
+                        )
+def test_create_sample_weights_output_using_weight_func_dict(weight_func, expected):
+    """
+    Test `sample_weights` creation using `weight_func`.
+    """
+    forecaster = ForecasterAutoregMultiSeries(
+                     regressor   = LinearRegression(),
+                     lags        = 3,
+                     weight_func = weight_func
+                 )
+
     results = forecaster.create_sample_weights(series=series, X_train=X_train, y_train_index=y_train_index)
     
     assert np.array_equal(results, expected)
@@ -133,13 +173,13 @@ def test_create_sample_weights_output_using_series_weights_and_weight_func():
     Test `sample_weights` creation using `series_weights` and `weight_func`.
     """
     forecaster = ForecasterAutoregMultiSeries(
-                    regressor      = LinearRegression,
-                    lags           = 3,
-                    series_weights = {'series_1': 1., 'series_2': 2.},
-                    weight_func    = custom_weights
-                )
+                     regressor      = LinearRegression(),
+                     lags           = 3,
+                     series_weights = {'series_1': 1., 'series_2': 2.},
+                     weight_func    = custom_weights
+                 )
 
-    expected = np.array([1., 1., 0, 0, 0, 0, 0, 0, 2., 2., 2., 2., 2., 2.])
+    expected = np.array([1, 0, 0, 0, 1, 1, 1, 2, 0, 0, 0, 2, 2, 2], dtype=float)
     results = forecaster.create_sample_weights(series=series, X_train=X_train, y_train_index=y_train_index)
     
     assert np.array_equal(results, expected)
@@ -150,10 +190,10 @@ def test_create_sample_weights_exceptions_when_weights_has_nan():
     Test sample_weights exception when sample_weight contains NaNs.
     """
     forecaster = ForecasterAutoregMultiSeries(
-                    regressor   = LinearRegression,
-                    lags        = 3,
-                    weight_func = custom_weights_nan
-                )
+                     regressor   = LinearRegression(),
+                     lags        = 3,
+                     weight_func = custom_weights_nan
+                 )
 
     err_msg = re.escape("The resulting `sample_weight` cannot have NaN values.")
     with pytest.raises(ValueError, match=err_msg):
@@ -165,10 +205,10 @@ def test_create_sample_weights_exceptions_when_weights_has_negative_values():
     Test sample_weights exception when sample_weight contains negative values.
     """
     forecaster = ForecasterAutoregMultiSeries(
-                    regressor   = LinearRegression,
-                    lags        = 3,
-                    weight_func = custom_weights_negative
-                )
+                     regressor   = LinearRegression(),
+                     lags        = 3,
+                     weight_func = custom_weights_negative
+                 )
 
     err_msg = re.escape("The resulting `sample_weight` cannot have negative values.")
     with pytest.raises(ValueError, match=err_msg):
@@ -180,10 +220,10 @@ def test_create_sample_weights_exceptions_when_weights_all_zeros():
     Test sample_weights exception when the sum of the weights is zero.
     """
     forecaster = ForecasterAutoregMultiSeries(
-                    regressor      = LinearRegression,
-                    lags           = 3,
-                    series_weights = {'series_1': 0, 'series_2': 0}
-                )
+                     regressor      = LinearRegression(),
+                     lags           = 3,
+                     series_weights = {'series_1': 0, 'series_2': 0}
+                 )
     
     err_msg = re.escape(
                     ("The resulting `sample_weight` cannot be normalized because "

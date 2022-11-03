@@ -1,10 +1,26 @@
 # Unit test _create_lags ForecasterAutoregDirect
 # ==============================================================================
+import re
 import pytest
 import numpy as np
 import pandas as pd
 from skforecast.ForecasterAutoregDirect import ForecasterAutoregDirect
 from sklearn.linear_model import LinearRegression
+
+
+def test_check_create_lags_exception_when_n_splits_less_than_0():
+    """
+    Check exception is raised when n_splits in _create_lags is less than 0.
+    """
+    forecaster = ForecasterAutoregDirect(LinearRegression(), lags=8, steps=3)
+    y = pd.Series(np.arange(10))
+
+    err_msg = re.escape(
+                f'The maximum lag ({forecaster.max_lag}) must be less than the length '
+                f'of the series minus the number of steps ({len(y)-(forecaster.steps-1)}).'
+            )
+    with pytest.raises(ValueError, match = err_msg):
+        forecaster._create_lags(y=y)
 
   
 def test_create_lags_when_lags_is_3_steps_1_and_y_is_numpy_arange_10():

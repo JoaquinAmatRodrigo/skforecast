@@ -316,19 +316,22 @@ class ForecasterAutoregDirect(ForecasterBase):
         
         """
 
-        n_splits = len(y) - self.max_lag - (self.steps - 1)
+        n_splits = len(y) - self.max_lag - (self.steps - 1) # rows of y_data
+        if n_splits <= 0:
+            raise ValueError(
+                f'The maximum lag ({self.max_lag}) must be less than the length '
+                f'of the series minus the number of steps ({len(y)-(self.steps-1)}).'
+            )
         
         X_data = np.full(shape=(n_splits, self.max_lag), fill_value=np.nan, dtype=float)
+
+        for i, lag in enumerate(self.lags):
+            X_data[:, i] = y[self.max_lag - lag : -(lag + self.steps - 1)] 
+
         y_data = np.full(shape=(n_splits, self.steps), fill_value=np.nan, dtype=float)
 
-        for i in range(n_splits):
-            X_index = np.arange(i, self.max_lag + i)
-            y_index = np.arange(self.max_lag + i, self.max_lag + i + self.steps)
-
-            X_data[i, :] = y[X_index]
-            y_data[i, :] = y[y_index]
-            
-        X_data = X_data[:, -self.lags] # Only keep needed lags
+        for step in range(self.steps):
+            y_data[:, step] = y[self.max_lag + step : self.max_lag + step + n_splits]
             
         return X_data, y_data
 
@@ -378,6 +381,10 @@ class ForecasterAutoregDirect(ForecasterBase):
             )
         y_values, y_index = preprocess_y(y=y)
 
+        X_train, y_train = self._create_lags(y=y_values)
+        y_train_col_names = [f"y_step_{i+1}" for i in range(self.steps)]
+        X_train_col_names = [f"lag_{i}" for i in self.lags]
+
         if exog is not None:
             if len(exog) != len(y):
                 raise ValueError(
@@ -385,6 +392,8 @@ class ForecasterAutoregDirect(ForecasterBase):
                     f'length `exog`: ({len(exog)}), length `y`: ({len(y)})'
                 )
             check_exog(exog=exog)
+            # Need here for filter_train_X_y_for_step to work without fitting
+            self.included_exog = True 
             if isinstance(exog, pd.Series):
                 exog = transform_series(
                            series            = exog,
@@ -400,29 +409,22 @@ class ForecasterAutoregDirect(ForecasterBase):
                            inverse_transform = False
                        )
             exog_values, exog_index = preprocess_exog(exog=exog)
-
             if not (exog_index[:len(y_index)] == y_index).all():
                 raise ValueError(
                     ('Different index for `y` and `exog`. They must be equal '
                      'to ensure the correct alignment of values.')      
                 )
-      
-        X_lags, y_train = self._create_lags(y=y_values)
-        y_train_col_names = [f"y_step_{i}" for i in range(self.steps)]
-        X_train_col_names = [f"lag_{i}" for i in self.lags]
-
-        if exog is None:
-            X_train = X_lags
-        else:
             col_names_exog = exog.columns if isinstance(exog, pd.DataFrame) else [exog.name]
+
             # Transform exog to match direct format
             X_exog = exog_to_direct(exog=exog_values, steps=self.steps)
             col_names_exog = [f"{col_name}_step_{i+1}" for col_name in col_names_exog for i in range(self.steps)]
             X_train_col_names.extend(col_names_exog)
+
             # The first `self.max_lag` positions have to be removed from X_exog
             # since they are not in X_lags.
-            X_exog = X_exog[-X_lags.shape[0]:, ]
-            X_train = np.column_stack((X_lags, X_exog))
+            X_exog = X_exog[-X_train.shape[0]:, ]
+            X_train = np.column_stack((X_train, X_exog))
 
         X_train = pd.DataFrame(
                       data    = X_train,
@@ -452,7 +454,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         Parameters
         ----------
         step : int
-            step for which columns must be selected selected. Starts at 0.
+            step for which columns must be selected selected. Starts at 1.
 
         X_train : pandas DataFrame
             Pandas DataFrame with the training values (predictors).
@@ -471,10 +473,13 @@ class ForecasterAutoregDirect(ForecasterBase):
 
         """
 
-        if step > self.steps - 1:
-            raise Exception(
-                f"Invalid value `step`. For this forecaster, the maximum step is {self.steps-1}."
+        if (step < 1) or (step > self.steps):
+            raise ValueError(
+                f"Invalid value `step`. For this forecaster, minimum value is 1 "
+                f"and the maximum step is {self.steps}."
             )
+
+        step = step - 1 # To start at 0
 
         y_train_step = y_train.iloc[:, step]
 
@@ -568,7 +573,6 @@ class ForecasterAutoregDirect(ForecasterBase):
         self.training_range       = None
 
         if exog is not None:
-            self.included_exog = True
             self.exog_type = type(exog)
             self.exog_col_names = \
                  exog.columns.to_list() if isinstance(exog, pd.DataFrame) else exog.name
@@ -579,7 +583,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         for step in range(self.steps):
 
             X_train_step, y_train_step = self.filter_train_X_y_for_step(
-                                             step    = step,
+                                             step    = step + 1,
                                              X_train = X_train,
                                              y_train = y_train
                                          )

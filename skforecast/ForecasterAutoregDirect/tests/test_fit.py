@@ -19,6 +19,7 @@ def test_forecaster_index_freq_stored():
     forecaster.fit(y=serie_with_DatetimeIndex)
     expected = serie_with_DatetimeIndex.index.freqstr
     results = forecaster.index_freq
+
     assert results == expected
 
 
@@ -30,4 +31,5 @@ def test_fit_last_window_stored():
     forecaster.fit(y=pd.Series(np.arange(50)))
     expected = pd.Series(np.array([46, 47, 48, 49]), index=[46, 47, 48, 49])
     results = forecaster.last_window
+
     pd.testing.assert_series_equal(expected, results)

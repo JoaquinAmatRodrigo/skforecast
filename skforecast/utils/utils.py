@@ -409,19 +409,19 @@ def preprocess_y(
             'Index is overwritten with a RangeIndex of step 1.'
         )
         y_index = pd.RangeIndex(
-                    start = 0,
-                    stop  = len(y),
-                    step  = 1
-                    )
+                      start = 0,
+                      stop  = len(y),
+                      step  = 1
+                  )
     else:
         warnings.warn(
             '`y` has no DatetimeIndex nor RangeIndex index. Index is overwritten with a RangeIndex.'
         )
         y_index = pd.RangeIndex(
-                    start = 0,
-                    stop  = len(y),
-                    step  = 1
-                    )
+                      start = 0,
+                      stop  = len(y),
+                      step  = 1
+                  )
 
     y_values = y.to_numpy()
 

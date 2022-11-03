@@ -485,14 +485,14 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             # as series.
             if exog_values.ndim == 1:
                 X_train = np.column_stack((
-                            X_train,
-                            np.tile(exog_values[self.max_lag:, ], series.shape[1])
+                              X_train,
+                              np.tile(exog_values[self.max_lag:, ], series.shape[1])
                           )) 
 
             else:
                 X_train = np.column_stack((
-                            X_train,
-                            np.tile(exog_values[self.max_lag:, ], [series.shape[1], 1])
+                              X_train,
+                              np.tile(exog_values[self.max_lag:, ], [series.shape[1], 1])
                           ))
 
         X_levels = pd.Series(X_levels)
@@ -501,19 +501,19 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         X_train = np.column_stack((X_train, X_levels.values))
 
         X_train = pd.DataFrame(
-                    data    = X_train,
-                    columns = X_train_col_names
-                )
+                      data    = X_train,
+                      columns = X_train_col_names
+                  )
 
         y_train = pd.Series(
-                    data  = y_train,
-                    name  = 'y'
-                )
+                      data  = y_train,
+                      name  = 'y'
+                  )
 
         y_train_index = pd.Index(
-                            np.repeat(
+                            np.tile(
                                 y_index[self.max_lag: ].values,
-                                repeats = len(series_levels)
+                                reps = len(series_levels)
                             )
                         )
         

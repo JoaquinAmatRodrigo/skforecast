@@ -1,5 +1,5 @@
 ################################################################################
-#                        ForecasterAutoregMultiVariate                          #
+#                        ForecasterAutoregMultiVariate                         #
 #                                                                              #
 # This work by Joaquin Amat Rodrigo and Javier Escobar Ortiz is licensed       #
 # under a Creative Commons Attribution 4.0 International License.              #
@@ -17,6 +17,7 @@ import sklearn
 import sklearn.pipeline
 from sklearn.base import clone
 from copy import copy
+from itertools import chain
 
 import skforecast
 from ..ForecasterBase import ForecasterBase
@@ -235,9 +236,9 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         if isinstance(lags, dict):
             self.lags = {}
             for key in lags:
-                self.lags[key] = generate_lags_ndarray(lags[key])
+                self.lags[key] = generate_lags_ndarray(forecaster_type=type(self), lags=lags[key])
         else:
-            self.lags = generate_lags_ndarray(lags)
+            self.lags = generate_lags_ndarray(forecaster_type=type(self), lags=lags)
 
         if weight_func is not None:
             if not isinstance(weight_func, (Callable, dict)):
@@ -262,6 +263,9 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                 )
                 self.weight_func = None
                 self.source_code_weight_func = None
+
+        self.max_lag = max(list(chain(*self.lags.values()))) if isinstance(self.lags, dict) else max(self.lags)
+        self.window_size = self.max_lag
     
 
     def __repr__(
@@ -337,19 +341,20 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         
         """
           
-        n_splits = len(y) - self.max_lag[serie]
+        n_splits = len(y) - self.max_lag - (self.steps - 1) # rows of y_data
         if n_splits <= 0:
             raise ValueError(
-                f'The maximum lag ({self.max_lag[serie]}) must be less than the length '
-                f'of the series ({len(y)}).'
+                f'The maximum lag ({self.max_lag}) must be less than the length '
+                f'of the series minus the number of steps ({len(y)-(self.steps-1)}).'
             )
         
-        X_data = np.full(shape=(n_splits, len(self.lags[serie])), fill_value=np.nan, dtype=float)
-
+        X_data = np.full(shape=(n_splits, max(self.lags[serie])), fill_value=np.nan, dtype=float)
         for i, lag in enumerate(self.lags[serie]):
-            X_data[:, i] = y[self.max_lag[serie] - lag: -lag]
+            X_data[:, i] = y[self.max_lag - lag : -(lag + self.steps - 1)] 
 
-        y_data = y[self.max_lag[serie]:]
+        y_data = np.full(shape=(n_splits, self.steps), fill_value=np.nan, dtype=float)
+        for step in range(self.steps):
+            y_data[:, step] = y[self.max_lag + step : self.max_lag + step + n_splits]
             
         return X_data, y_data
 
@@ -375,17 +380,12 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
 
         Returns 
         -------
-        X_train : pandas DataFrame
-            Pandas DataFrame with the training values (predictors).
+        X_train : pandas DataFrame, shape (len(series) - self.max_lag, len(self.lags)*len(series.columns) + exog.shape[1]*steps)
+            Pandas DataFrame with the training values (predictors) for each step.
             
-        y_train : pandas Series, shape (len(series) - self.max_lag, )
-            Values (target) of the time series related to each row of `X_train`.
-
-        y_index : pandas Index
-            Index of `series`.
-
-        y_train_index: pandas Index
-            Index of `y_train`.
+        y_train : pandas DataFrame, shape (len(series) - self.max_lag, )
+            Values (target) of the time series related to each row of `X_train` 
+            for each step.
         
         """
 
@@ -410,9 +410,6 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         else:
             self.lags = {serie: self.lags for serie in multivariate_series}
 
-        self.max_lag = {max(self.lags[lag]) for lag in self.lags}
-        self.window_size = self.max_lag.copy()
-
         if len(series) < self.max_lag + self.steps:
             raise ValueError(
                 f'Minimum length of `series` for training this forecaster is '
@@ -433,6 +430,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                      f'must be the same as `series` column names : {multivariate_series}.')
                 )
         
+        y_train_col_names = [f"{self.level}_step_{i}" for i in range(self.steps)]
         X_train_col_names = [f"{key}_lag_{lag}" for key in self.lags for lag in self.lags[key]]
 
         for i, serie in enumerate(series.columns):
@@ -464,6 +462,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                     f'length `exog`: ({len(exog)}), length `series`: ({len(series)})'
                 )
             check_exog(exog=exog)
+            # Need here for filter_train_X_y_for_step to work without fitting
+            self.included_exog = True 
             if isinstance(exog, pd.Series):
                 exog = transform_series(
                             series            = exog,
@@ -485,48 +485,83 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                      'to ensure the correct alignment of values.')      
                 )
             col_names_exog = exog.columns if isinstance(exog, pd.DataFrame) else [exog.name]
+
+            # Transform exog to match direct format
+            X_exog = exog_to_direct(exog=exog_values, steps=self.steps)
+            col_names_exog = [f"{col_name}_step_{i+1}" for col_name in col_names_exog for i in range(self.steps)]
             X_train_col_names.extend(col_names_exog)
 
-            # The first `self.max_lag` positions have to be removed from exog
-            # since they are not in X_train. Then exog is cloned as many times
-            # as series.
-            if exog_values.ndim == 1:
-                X_train = np.column_stack((
-                            X_train,
-                            np.tile(exog_values[self.max_lag:, ], series.shape[1])
-                          )) 
-
-            else:
-                X_train = np.column_stack((
-                            X_train,
-                            np.tile(exog_values[self.max_lag:, ], [series.shape[1], 1])
-                          ))
-
-        X_levels = pd.Series(X_levels)
-        X_levels = pd.get_dummies(X_levels, dtype=float)
-        X_train_col_names.extend(X_levels.columns)
-        X_train = np.column_stack((X_train, X_levels.values))
+            # The first `self.max_lag` positions have to be removed from X_exog
+            # since they are not in X_lags.
+            X_exog = X_exog[-X_train.shape[0]:, ]
+            X_train = np.column_stack((X_train, X_exog))
 
         X_train = pd.DataFrame(
-                    data    = X_train,
-                    columns = X_train_col_names
-                )
-
-        y_train = pd.Series(
-                    data  = y_train,
-                    name  = 'y'
-                )
-
-        y_train_index = pd.Index(
-                            np.repeat(
-                                y_index[self.max_lag: ].values,
-                                repeats = len(series_levels)
-                            )
-                        )
-        
+                      data    = X_train,
+                      columns = X_train_col_names,
+                      index   = y_index[self.max_lag + (self.steps -1): ]
+                  )
         self.X_train_col_names = X_train_col_names
+        y_train = pd.DataFrame(
+                      data    = y_train,
+                      index   = y_index[self.max_lag + (self.steps -1): ],
+                      columns = y_train_col_names,
+                  )
+                        
+        return X_train, y_train
 
-        return X_train, y_train, y_index, y_train_index
+    
+    def filter_train_X_y_for_step(
+        self,
+        step: int,
+        X_train: pd.DataFrame,
+        y_train: pd.Series
+    ) -> Tuple[pd.DataFrame, pd.Series]:
+        """
+        Select columns needed to train a forecaster for a specific step. The input
+        matrices should be created with created with `create_train_X_y()`.         
+
+        Parameters
+        ----------
+        step : int
+            step for which columns must be selected selected. Starts at 1.
+
+        X_train : pandas DataFrame
+            Pandas DataFrame with the training values (predictors).
+            
+        y_train : pandas Series
+            Values (target) of the time series related to each row of `X_train`.
+
+
+        Returns 
+        -------
+        X_train_step : pandas DataFrame
+            Pandas DataFrame with the training values (predictors) for step.
+            
+        y_train_step : pandas Series, shape (len(y) - self.max_lag)
+            Values (target) of the time series related to each row of `X_train`.
+
+        """
+
+        if (step < 1) or (step > self.steps):
+            raise ValueError(
+                f"Invalid value `step`. For this forecaster, minimum value is 1 "
+                f"and the maximum step is {self.steps}."
+            )
+
+        step = step - 1 # To start at 0
+
+        y_train_step = y_train.iloc[:, step]
+
+        if not self.included_exog:
+            X_train_step = X_train
+        else:
+            idx_columns_lags = np.arange(len(self.lags))
+            idx_columns_exog = np.arange(X_train.shape[1])[len(self.lags) + step::self.steps]
+            idx_columns = np.hstack((idx_columns_lags, idx_columns_exog))
+            X_train_step = X_train.iloc[:, idx_columns]
+
+        return  X_train_step, y_train_step
 
     
     def create_sample_weights(
@@ -557,12 +592,6 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         """
 
         sample_weight = None
-
-        if self.series_weights is not None:
-            weights = [np.repeat(self.series_weights[serie], sum(X_train[serie])) 
-                       for serie in series.columns]
-            weights = np.concatenate(weights)
-            sample_weight = weights.copy()
 
         if self.weight_func is not None:
             weights = self.weight_func(y_train_index)

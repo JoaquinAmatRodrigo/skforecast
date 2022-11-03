@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 ## [0.6.0] - [Dev]
 
++ created `generate_lags_ndarray` in `utils` for the creation of lags values during init (applies to all forecasters).
+
++ `filter_train_X_y_for_step` in `ForecasterAutoregDirect` now starts at 1 (before 0).
+
++ column names in `y_train` pandas DataFrame in `ForecasterAutoregDirect` now start with 1, `y_step_1`.
+
++ `ForecasterAutoregMultivariate`.
+
+
+
 **Added**
 
 + Argument `weights_func` in all Forecasters to allow weighted time series forecasting. Individual time based weights for the series in `ForecasterAutoreg`, `ForecasterAutoregCustom`, `ForecasterAutoregDirect` and individual weights for the series in `ForecasterAutoregMultiSeries`.

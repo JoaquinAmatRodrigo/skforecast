@@ -19,21 +19,28 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_None():
     forecaster = ForecasterAutoreg(LinearRegression(), lags=5)
     results = forecaster.create_train_X_y(y=pd.Series(np.arange(10)))
     expected = (pd.DataFrame(
-                    data = np.array([[4, 3, 2, 1, 0],
-                                     [5, 4, 3, 2, 1],
-                                     [6, 5, 4, 3, 2],
-                                     [7, 6, 5, 4, 3],
-                                     [8, 7, 6, 5, 4]]),
+                    data = np.array([[4., 3., 2., 1., 0.],
+                                     [5., 4., 3., 2., 1.],
+                                     [6., 5., 4., 3., 2.],
+                                     [7., 6., 5., 4., 3.],
+                                     [8., 7., 6., 5., 4.]]),
                     index   = np.array([5, 6, 7, 8, 9]),
                     columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5']
                 ),
                 pd.Series(
                     np.array([5, 6, 7, 8, 9]),
-                    index = np.array([5, 6, 7, 8, 9]))
+                    index = np.array([5, 6, 7, 8, 9]),
+                    name = 'y'
+                )
                )     
 
-    assert (results[0] == expected[0]).all().all()
-    assert (results[1] == expected[1]).all()
+    for i in range(len(expected)):
+        if isinstance(expected[i], pd.DataFrame):
+            pd.testing.assert_frame_equal(results[i], expected[i])
+        elif isinstance(expected[i], pd.Series):
+            pd.testing.assert_series_equal(results[i], expected[i])
+        else:
+            assert (results[i] == expected[i]).all()
 
 
 def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_series():
@@ -47,21 +54,28 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_series():
                 exog =  pd.Series(np.arange(100, 110), name='exog')
               )
     expected = (pd.DataFrame(
-                    data = np.array([[4, 3, 2, 1, 0, 105],
-                                     [5, 4, 3, 2, 1, 106],
-                                     [6, 5, 4, 3, 2, 107],
-                                     [7, 6, 5, 4, 3, 108],
-                                     [8, 7, 6, 5, 4, 109]]),
+                    data = np.array([[4., 3., 2., 1., 0., 105.],
+                                     [5., 4., 3., 2., 1., 106.],
+                                     [6., 5., 4., 3., 2., 107.],
+                                     [7., 6., 5., 4., 3., 108.],
+                                     [8., 7., 6., 5., 4., 109.]]),
                     index   = np.array([5, 6, 7, 8, 9]),
                     columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 'exog']
                 ),
                 pd.Series(
                     np.array([5, 6, 7, 8, 9]),
-                    index = np.array([5, 6, 7, 8, 9]))
+                    index = np.array([5, 6, 7, 8, 9]),
+                    name = 'y'
+                )
                )       
 
-    assert (results[0] == expected[0]).all().all()
-    assert (results[1] == expected[1]).all()
+    for i in range(len(expected)):
+        if isinstance(expected[i], pd.DataFrame):
+            pd.testing.assert_frame_equal(results[i], expected[i])
+        elif isinstance(expected[i], pd.Series):
+            pd.testing.assert_series_equal(results[i], expected[i])
+        else:
+            assert (results[i] == expected[i]).all()
 
 
 def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_dataframe():
@@ -79,22 +93,28 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_dataframe():
               )
         
     expected = (pd.DataFrame(
-                    data = np.array([[4, 3, 2, 1, 0, 105, 1005],
-                                     [5, 4, 3, 2, 1, 106, 1006],
-                                     [6, 5, 4, 3, 2, 107, 1007],
-                                     [7, 6, 5, 4, 3, 108, 1008],
-                                     [8, 7, 6, 5, 4, 109, 1009]]),
+                    data = np.array([[4., 3., 2., 1., 0., 105., 1005.],
+                                     [5., 4., 3., 2., 1., 106., 1006.],
+                                     [6., 5., 4., 3., 2., 107., 1007.],
+                                     [7., 6., 5., 4., 3., 108., 1008.],
+                                     [8., 7., 6., 5., 4., 109., 1009.]]),
                     index   = np.array([5, 6, 7, 8, 9]),
                     columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 'exog_1', 'exog_2']
                 ),
                 pd.Series(
                     np.array([5, 6, 7, 8, 9]),
-                    index = np.array([5, 6, 7, 8, 9])
+                    index = np.array([5, 6, 7, 8, 9]),
+                    name = 'y'
                 )
                )        
 
-    assert (results[0] == expected[0]).all().all()
-    assert (results[1] == expected[1]).all()
+    for i in range(len(expected)):
+        if isinstance(expected[i], pd.DataFrame):
+            pd.testing.assert_frame_equal(results[i], expected[i])
+        elif isinstance(expected[i], pd.Series):
+            pd.testing.assert_series_equal(results[i], expected[i])
+        else:
+            assert (results[i] == expected[i]).all()
 
 
 @pytest.mark.parametrize("y                        , exog", 
@@ -158,8 +178,13 @@ def test_create_train_X_y_output_when_exog_is_None_and_transformer_exog_is_not_N
                     name = 'y'
                 ))
     
-    pd.testing.assert_frame_equal(results[0], expected[0])
-    pd.testing.assert_series_equal(results[1], expected[1])
+    for i in range(len(expected)):
+        if isinstance(expected[i], pd.DataFrame):
+            pd.testing.assert_frame_equal(results[i], expected[i])
+        elif isinstance(expected[i], pd.Series):
+            pd.testing.assert_series_equal(results[i], expected[i])
+        else:
+            assert (results[i] == expected[i]).all()
 
 
 def test_create_train_X_y_output_when_y_is_series_10_and_transformer_y_is_StandardScaler():
@@ -189,8 +214,13 @@ def test_create_train_X_y_output_when_y_is_series_10_and_transformer_y_is_Standa
                     name = 'y'
                 ))
 
-    pd.testing.assert_frame_equal(results[0], expected[0])
-    pd.testing.assert_series_equal(results[1], expected[1])
+    for i in range(len(expected)):
+        if isinstance(expected[i], pd.DataFrame):
+            pd.testing.assert_frame_equal(results[i], expected[i])
+        elif isinstance(expected[i], pd.Series):
+            pd.testing.assert_series_equal(results[i], expected[i])
+        else:
+            assert (results[i] == expected[i]).all()
 
 
 def test_create_train_X_y_output_when_transformer_y_and_transformer_exog():
@@ -237,5 +267,10 @@ def test_create_train_X_y_output_when_transformer_y_and_transformer_exog():
 
     results = forecaster.create_train_X_y(y=y, exog=exog)
 
-    pd.testing.assert_frame_equal(results[0], expected[0])
-    pd.testing.assert_series_equal(results[1], expected[1])
+    for i in range(len(expected)):
+        if isinstance(expected[i], pd.DataFrame):
+            pd.testing.assert_frame_equal(results[i], expected[i])
+        elif isinstance(expected[i], pd.Series):
+            pd.testing.assert_series_equal(results[i], expected[i])
+        else:
+            assert (results[i] == expected[i]).all()

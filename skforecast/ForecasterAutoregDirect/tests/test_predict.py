@@ -18,9 +18,9 @@ def test_predict_output_when_regressor_is_LinearRegression():
     forecaster.fit(y=pd.Series(np.arange(50)))
     results = forecaster.predict()
     expected = pd.Series(
-                data = np.array([50., 51., 52.]),
-                index = pd.RangeIndex(start=50, stop=53, step=1),
-                name = 'pred'
+                   data  = np.array([50., 51., 52.]),
+                   index = pd.RangeIndex(start=50, stop=53, step=1),
+                   name  = 'pred'
                )
     
     pd.testing.assert_series_equal(results, expected)
@@ -37,17 +37,17 @@ def test_predict_output_when_regressor_is_LinearRegression_with_transform_y():
         )
     transformer_y = StandardScaler()
     forecaster = ForecasterAutoregDirect(
-                    regressor = LinearRegression(),
-                    lags = 5,
-                    steps = 5,
-                    transformer_y = transformer_y,
-                )
+                     regressor = LinearRegression(),
+                     lags = 5,
+                     steps = 5,
+                     transformer_y = transformer_y,
+                 )
     forecaster.fit(y=y)
     predictions = forecaster.predict()
     expected = pd.Series(
-                data = np.array([0.27498792, 0.1134674 , 0.3824246 , 0.62852197, 0.44001725]),
-                index = pd.RangeIndex(start=20, stop=25, step=1),
-                name = 'pred'
+                   data  = np.array([0.27498792, 0.1134674 , 0.3824246 , 0.62852197, 0.44001725]),
+                   index = pd.RangeIndex(start=20, stop=25, step=1),
+                   name  = 'pred'
                )
     
     pd.testing.assert_series_equal(predictions, expected)
@@ -86,9 +86,9 @@ def test_predict_output_when_regressor_is_LinearRegression_with_transform_y_and_
     forecaster.fit(y=y, exog=exog)
     predictions = forecaster.predict(exog=exog)
     expected = pd.Series(
-                data = np.array([1.10855119, -0.83442443, 0.9434436 , 0.6676508 , 0.58666266]),
-                index = pd.RangeIndex(start=20, stop=25, step=1),
-                name = 'pred'
+                   data  = np.array([1.10855119, -0.83442443, 0.9434436 , 0.6676508 , 0.58666266]),
+                   index = pd.RangeIndex(start=20, stop=25, step=1),
+                   name  = 'pred'
                )
     
     pd.testing.assert_series_equal(predictions, expected)
