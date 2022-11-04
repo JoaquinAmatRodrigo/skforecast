@@ -12,6 +12,8 @@ All notable changes to this project will be documented in this file.
 
 + `ForecasterAutoregMultivariate`.
 
++ `ForecasterAutoregMultiSeries` fix bug transformers.
+
 
 
 **Added**

@@ -96,6 +96,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         preprocessing API with methods: fit, transform, fit_transform and inverse_transform.
         ColumnTransformers are not allowed since they do not have inverse_transform method.
         The transformation is applied to each `level` before training the forecaster.
+        
+    transformer_series_ : dict
+        Dictionary with the transformer for each series.
 
     transformer_exog : transformer (preprocessor) compatible with the scikit-learn
                        preprocessing API, default `None`
@@ -121,6 +124,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
     source_code_weight_func : str, dict
         Source code of the custom function(s) used to create weights.
         **New in version 0.6.0**
+        
+    weight_func_ : dict
+        Dictionary with the `weight_func` for each series.
 
     max_lag : int
         Maximum value of lag included in `lags`.
@@ -217,10 +223,12 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         
         self.regressor               = regressor
         self.transformer_series      = transformer_series
+        self.transformer_series_     = transformer_series
         self.transformer_exog        = transformer_exog
         self.series_weights          = series_weights
         self.weight_func             = weight_func
         self.source_code_weight_func = None
+        self.weight_func_            = weight_func
         self.index_type              = None
         self.index_freq              = None
         self.index_values            = None
@@ -240,6 +248,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.python_version          = sys.version.split(" ")[0]
         
         self.lags = generate_lags_ndarray(type(self), lags)
+        self.max_lag = max(self.lags)
+        self.window_size = self.max_lag
 
         if series_weights is not None:
             if not isinstance(series_weights, dict):
@@ -279,9 +289,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 )
                 self.weight_func = None
                 self.source_code_weight_func = None
-            
-        self.max_lag = max(self.lags)
-        self.window_size = self.max_lag
+                self.weight_func_ = None
 
 
     def __repr__(
@@ -409,15 +417,16 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         series_levels = list(series.columns)
 
-        if self.transformer_series is None:
+        self.transformer_series_ = self.transformer_series
+        if self.transformer_series_ is None:
             dict_transformers = {level: None for level in series_levels}
-            self.transformer_series = dict_transformers
-        elif not isinstance(self.transformer_series, dict):
-            dict_transformers = {level: clone(self.transformer_series) 
+            self.transformer_series_ = dict_transformers
+        elif not isinstance(self.transformer_series_, dict):
+            dict_transformers = {level: clone(self.transformer_series_) 
                                  for level in series_levels}
-            self.transformer_series = dict_transformers
+            self.transformer_series_ = dict_transformers
         else:
-            if list(self.transformer_series.keys()) != series_levels:
+            if list(self.transformer_series_.keys()) != series_levels:
                 raise ValueError(
                     (f'When `transformer_series` parameter is a `dict`, its keys '
                      f'must be the same as `series` column names : {series_levels}.')
@@ -432,7 +441,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             check_y(y=y)
             y = transform_series(
                     series            = y,
-                    transformer       = self.transformer_series[serie],
+                    transformer       = self.transformer_series_[serie],
                     fit               = True,
                     inverse_transform = False
                 )
@@ -858,7 +867,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
             last_window_level = transform_series(
                                     series            = last_window[level],
-                                    transformer       = self.transformer_series[level],
+                                    transformer       = self.transformer_series_[level],
                                     fit               = False,
                                     inverse_transform = False
                                 )
@@ -884,7 +893,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
             preds_level = transform_series(
                               series            = preds_level,
-                              transformer       = self.transformer_series[level],
+                              transformer       = self.transformer_series_[level],
                               fit               = False,
                               inverse_transform = True
                           )
@@ -1175,7 +1184,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             
             last_window_level = transform_series(
                                     series            = last_window[level],
-                                    transformer       = self.transformer_series[level],
+                                    transformer       = self.transformer_series_[level],
                                     fit               = False,
                                     inverse_transform = False
                                 )
@@ -1220,9 +1229,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                               columns = [level, f'{level}_lower_bound', f'{level}_upper_bound']
                           )
 
-            if self.transformer_series[level]:
+            if self.transformer_series_[level]:
                 for col in preds_level.columns:
-                    preds_level[col] = self.transformer_series[level].inverse_transform(preds_level[[col]])
+                    preds_level[col] = self.transformer_series_[level].inverse_transform(preds_level[[col]])
 
             predictions.append(preds_level) 
         
@@ -1337,24 +1346,24 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
                 residuals_level = residuals[level]
 
-                if not transform and self.transformer_series[level] is not None:
+                if not transform and self.transformer_series_[level] is not None:
                     warnings.warn(
                         ('Argument `transform` is set to `False` but forecaster was trained '
-                         f'using a transformer {self.transformer_series[level]} for level {level}. '
+                         f'using a transformer {self.transformer_series_[level]} for level {level}. '
                          'Ensure that the new residuals are already transformed or set `transform=True`.')
                     )
 
-                if transform and self.transformer_series and self.transformer_series[level]:
+                if transform and self.transformer_series_ and self.transformer_series_[level]:
                     warnings.warn(
                         ('Residuals will be transformed using the same transformer used '
-                         f'when training the forecaster for level {level} : ({self.transformer_series[level]}). '
+                         f'when training the forecaster for level {level} : ({self.transformer_series_[level]}). '
                          'Ensure that the new residuals are on the same scale as the '
                          'original time series. ')
                     )
 
                     residuals_level = transform_series(
                                           series            = residuals_level,
-                                          transformer       = self.transformer_series[level],
+                                          transformer       = self.transformer_series_[level],
                                           fit               = False,
                                           inverse_transform = False
                                       )

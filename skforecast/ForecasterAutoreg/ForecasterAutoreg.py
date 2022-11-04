@@ -199,6 +199,8 @@ class ForecasterAutoreg(ForecasterBase):
         self.index_type              = None
         
         self.lags = generate_lags_ndarray(type(self), lags)
+        self.max_lag = max(self.lags)
+        self.window_size = self.max_lag
             
         if weight_func is not None:
             if not isinstance(weight_func, Callable):
@@ -215,9 +217,6 @@ class ForecasterAutoreg(ForecasterBase):
                 )
                 self.weight_func = None
                 self.source_code_weight_func = None
-
-        self.max_lag = max(self.lags)
-        self.window_size = self.max_lag
 
 
     def __repr__(

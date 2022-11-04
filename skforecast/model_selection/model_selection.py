@@ -1427,16 +1427,16 @@ def _evaluate_grid_hyperparameters(
 
             forecaster.set_params(**params)
             metrics_values = backtesting_forecaster(
-                                forecaster         = forecaster,
-                                y                  = y,
-                                steps              = steps,
-                                metric             = metric,
-                                initial_train_size = initial_train_size,
-                                fixed_train_size   = fixed_train_size,
-                                exog               = exog,
-                                refit              = refit,
-                                interval           = None,
-                                verbose            = verbose
+                                 forecaster         = forecaster,
+                                 y                  = y,
+                                 steps              = steps,
+                                 metric             = metric,
+                                 initial_train_size = initial_train_size,
+                                 fixed_train_size   = fixed_train_size,
+                                 exog               = exog,
+                                 refit              = refit,
+                                 interval           = None,
+                                 verbose            = verbose
                              )[0]
 
             lags_list.append(lags)
@@ -1795,16 +1795,16 @@ def _bayesian_search_optuna(
         forecaster.set_params(**search_space(trial))
         
         metrics, _ = backtesting_forecaster(
-                                forecaster         = forecaster,
-                                y                  = y,
-                                exog               = exog,
-                                steps              = steps,
-                                metric             = metric,
-                                initial_train_size = initial_train_size,
-                                fixed_train_size   = fixed_train_size,
-                                refit              = refit,
-                                verbose            = verbose
-                            )
+                         forecaster         = forecaster,
+                         y                  = y,
+                         exog               = exog,
+                         steps              = steps,
+                         metric             = metric,
+                         initial_train_size = initial_train_size,
+                         fixed_train_size   = fixed_train_size,
+                         refit              = refit,
+                         verbose            = verbose
+                     )
         # Store metrics in the variable metric_values defined outside _objective.
         nonlocal metric_values
         metric_values.append(metrics)
@@ -2034,16 +2034,16 @@ def _bayesian_search_skopt(
         forecaster.set_params(**params)
         
         metrics, _ = backtesting_forecaster(
-                        forecaster         = forecaster,
-                        y                  = y,
-                        exog               = exog,
-                        steps              = steps,
-                        metric             = metric,
-                        initial_train_size = initial_train_size,
-                        fixed_train_size   = fixed_train_size,
-                        refit              = refit,
-                        verbose            = verbose
-                    )
+                         forecaster         = forecaster,
+                         y                  = y,
+                         exog               = exog,
+                         steps              = steps,
+                         metric             = metric,
+                         initial_train_size = initial_train_size,
+                         fixed_train_size   = fixed_train_size,
+                         refit              = refit,
+                         verbose            = verbose
+                     )
         # Store metrics in the variable metric_values defined outside _objective.
         nonlocal metric_values
         metric_values.append(metrics)
@@ -2084,8 +2084,6 @@ def _bayesian_search_skopt(
                 m_name = m if isinstance(m, str) else m.__name__
                 metric_dict[m_name].append(m_values)
 
-            #metric_list.append(results_opt.func_vals[i])
-
         if results_opt_best is None:
             results_opt_best = results_opt
         else:
@@ -2093,9 +2091,9 @@ def _bayesian_search_skopt(
                 results_opt_best = results_opt
         
     results = pd.DataFrame({
-                'lags'  : lags_list,
-                'params': params_list,
-                **metric_dict})
+                  'lags'  : lags_list,
+                  'params': params_list,
+                  **metric_dict})
 
     results = results.sort_values(by=list(metric_dict.keys())[0], ascending=True)
     results = pd.concat([results, results['params'].apply(pd.Series)], axis=1)

@@ -67,11 +67,11 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                 regressors. {'series_column_name': lags}.
 
     transformer_series : transformer (preprocessor) compatible with the scikit-learn
-                         preprocessing API or `dict` {level: transformer}, default `None`
+                         preprocessing API or `dict` {series: transformer}, default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API with methods: fit, transform, fit_transform and inverse_transform.
         ColumnTransformers are not allowed since they do not have inverse_transform method.
-        The transformation is applied to each `level` before training the forecaster.
+        The transformation is applied to each `series` before training the forecaster.
 
     transformer_exog : transformer (preprocessor) compatible with the scikit-learn
                        preprocessing API, default `None`
@@ -81,10 +81,9 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
 
     weight_func : callable, dict, default `None`
         Function that defines the individual weights for each sample based on the
-        index.  If dict: {'series_column_name' : callable}. For example, a function 
-        that assigns a lower weight to certain dates. Ignored if `regressor` does 
-        not have the argument `sample_weight` in its `fit` method. The resulting 
-        `sample_weight` cannot have negative values.
+        index. For example, a function that assigns a lower weight to certain dates.
+        Ignored if `regressor` does not have the argument `sample_weight` in its
+        `fit` method. The resulting `sample_weight` cannot have negative values.
     
     Attributes
     ----------
@@ -102,14 +101,20 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         should be defined before training.
         
     lags : numpy ndarray, dict
-        Lags used as predictors.
+        Lags used as predictors. Store value used when declaring the forecaster.
+        
+    lags_ : dict
+        Dictionary with the configuration of the lags for each series.
 
     transformer_series : transformer (preprocessor) compatible with the scikit-learn
                          preprocessing API, default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API with methods: fit, transform, fit_transform and inverse_transform.
         ColumnTransformers are not allowed since they do not have inverse_transform method.
-        The transformation is applied to each `level` before training the forecaster.
+        The transformation is applied to each `series` before training the forecaster.
+        
+    transformer_series_ : dict
+        Dictionary with the transformer for each series.
 
     transformer_exog : transformer (preprocessor) compatible with the scikit-learn
                        preprocessing API, default `None`
@@ -117,12 +122,11 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         preprocessing API. The transformation is applied to `exog` before training the
         forecaster. `inverse_transform` is not available when using ColumnTransformers.
 
-    weight_func : callable, dict, default `None`
+    weight_func : callable, default `None`
         Function that defines the individual weights for each sample based on the
-        index.  If dict: {'series_column_name' : callable}. For example, a function 
-        that assigns a lower weight to certain dates. Ignored if `regressor` does 
-        not have the argument `sample_weight` in its `fit` method. The resulting 
-        `sample_weight` cannot have negative values.
+        index. For example, a function that assigns a lower weight to certain dates.
+        Ignored if `regressor` does not have the argument `sample_weight` in its
+        `fit` method. The resulting `sample_weight` cannot have negative values.
 
     source_code_weight_func : str
         Source code of the custom function used to create weights.
@@ -188,13 +192,14 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         lags: Union[int, np.ndarray, list, dict[str, Union[int, np.ndarray, list]]],
         transformer_series: Optional[Union[object, dict[str, object]]]=None,
         transformer_exog: Optional[object]=None,
-        weight_func: Optional[Union[callable, dict[str, callable]]]=None
+        weight_func: Optional[callable]=None
     ) -> None:
         
         self.regressor               = regressor
         self.level                   = level
         self.steps                   = steps
         self.transformer_series      = transformer_series
+        self.transformer_series_     = transformer_series
         self.transformer_exog        = transformer_exog
         self.weight_func             = weight_func
         self.source_code_weight_func = None
@@ -232,7 +237,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             )
         
         self.regressors_ = {step: clone(self.regressor) for step in range(steps)}
-        
+
         if isinstance(lags, dict):
             self.lags = {}
             for key in lags:
@@ -240,22 +245,16 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         else:
             self.lags = generate_lags_ndarray(forecaster_type=type(self), lags=lags)
 
-        # self.lags_init = self.lags
+        self.lags_ = self.lags
+        self.max_lag = max(list(chain(*self.lags.values()))) if isinstance(self.lags, dict) else max(self.lags)
+        self.window_size = self.max_lag
 
         if weight_func is not None:
-            if not isinstance(weight_func, (Callable, dict)):
+            if not isinstance(weight_func, Callable, ):
                 raise TypeError(
-                    f"Argument `weight_func` must be a callable or a dict of "
-                    f"callables. Got {type(weight_func)}."
+                    f"Argument `weight_func` must be a callable. Got {type(weight_func)}."
                 )
-
-            if isinstance(weight_func, dict):
-                self.source_code_weight_func = {}
-                for key in weight_func:
-                    self.source_code_weight_func[key] = inspect.getsource(weight_func[key])
-            else:
-                self.source_code_weight_func = inspect.getsource(weight_func)
-
+            self.source_code_weight_func = inspect.getsource(weight_func)
             if 'sample_weight' not in inspect.getfullargspec(self.regressor.fit)[0]:
                 warnings.warm(
                     f"""
@@ -265,9 +264,6 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                 )
                 self.weight_func = None
                 self.source_code_weight_func = None
-
-        self.max_lag = max(list(chain(*self.lags.values()))) if isinstance(self.lags, dict) else max(self.lags)
-        self.window_size = self.max_lag
     
 
     def __repr__(
@@ -350,8 +346,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                 f'of the series minus the number of steps ({len(y)-(self.steps-1)}).'
             )
         
-        X_data = np.full(shape=(n_splits, max(self.lags[serie])), fill_value=np.nan, dtype=float)
-        for i, lag in enumerate(self.lags[serie]):
+        X_data = np.full(shape=(n_splits, max(self.lags_[serie])), fill_value=np.nan, dtype=float)
+        for i, lag in enumerate(self.lags_[serie]):
             X_data[:, i] = y[self.max_lag - lag : -(lag + self.steps - 1)] 
 
         y_data = np.full(shape=(n_splits, self.steps), fill_value=np.nan, dtype=float)
@@ -403,14 +399,15 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                  f'    `series` columns   : {multivariate_series}.')
             )
 
-        if isinstance(self.lags, dict):
-            if list(self.lags.keys()) != multivariate_series:
+        self.lags_ = self.lags
+        if isinstance(self.lags_, dict):
+            if list(self.lags_.keys()) != multivariate_series:
                 raise ValueError(
-                        (f'When `lags` parameter is a `dict`, its keys must be the'
-                         f'same as `series` column names : {multivariate_series}.')
-                    )
+                    (f'When `lags` parameter is a `dict`, its keys must be the '
+                     f'same as `series` column names : {multivariate_series}.')
+                )
         else:
-            self.lags = {serie: self.lags for serie in multivariate_series}
+            self.lags_ = {serie: self.lags_ for serie in multivariate_series}
 
         if len(series) < self.max_lag + self.steps:
             raise ValueError(
@@ -418,22 +415,23 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                 f'{self.max_lag + self.steps}. Got {len(series)}.'
             )
 
-        if self.transformer_series is None:
+        self.transformer_series_ = self.transformer_series
+        if self.transformer_series_ is None:
             dict_transformers = {serie: None for serie in multivariate_series}
-            self.transformer_series = dict_transformers
-        elif not isinstance(self.transformer_series, dict):
-            dict_transformers = {serie: clone(self.transformer_series) 
+            self.transformer_series_ = dict_transformers
+        elif not isinstance(self.transformer_series_, dict):
+            dict_transformers = {serie: clone(self.transformer_series_) 
                                  for serie in multivariate_series}
-            self.transformer_series = dict_transformers
+            self.transformer_series_ = dict_transformers
         else:
-            if list(self.transformer_series.keys()) != multivariate_series:
+            if list(self.transformer_series_.keys()) != multivariate_series:
                 raise ValueError(
                     (f'When `transformer_series` parameter is a `dict`, its keys '
                      f'must be the same as `series` column names : {multivariate_series}.')
                 )
         
         y_train_col_names = [f"{self.level}_step_{i+1}" for i in range(self.steps)]
-        X_train_col_names = [f"{key}_lag_{lag}" for key in self.lags for lag in self.lags[key]]
+        X_train_col_names = [f"{key}_lag_{lag}" for key in self.lags_ for lag in self.lags_[key]]
 
         for i, serie in enumerate(series.columns):
 
@@ -441,7 +439,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             check_y(y=y)
             y = transform_series(
                     series            = y,
-                    transformer       = self.transformer_series[serie],
+                    transformer       = self.transformer_series_[serie],
                     fit               = True,
                     inverse_transform = False
                 )
@@ -558,7 +556,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         if not self.included_exog:
             X_train_step = X_train
         else:
-            len_columns_lags = len(list(chain(*self.lags.values())))
+            len_columns_lags = len(list(chain(*self.lags_.values())))
             idx_columns_lags = np.arange(len_columns_lags)
             idx_columns_exog = np.arange(X_train.shape[1])[len_columns_lags + step::self.steps]
             idx_columns = np.hstack((idx_columns_lags, idx_columns_exog))
@@ -817,7 +815,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         else:
             exog_values = None
 
-        X_lags = np.array([], dtype=float)
+        X_lags = np.array([[]], dtype=float)
 
         if last_window is None:
             last_window = self.last_window.copy()
@@ -826,7 +824,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             
             last_window[serie] = transform_series(
                                      series            = last_window[serie],
-                                     transformer       = self.transformer_series[serie],
+                                     transformer       = self.transformer_series_[serie],
                                      fit               = False,
                                      inverse_transform = False
                                  )
@@ -835,11 +833,11 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                                                         last_window = last_window[serie]
                                                     )
 
-            X_lags = np.append(X_lags, last_window_values[-self.lags[serie]].reshape(1, -1))
+            X_lags = np.hstack([X_lags, last_window_values[-self.lags_[serie]].reshape(1, -1)])
 
         predictions = np.full(shape=len(steps), fill_value=np.nan)
 
-        for step in steps:
+        for i, step in enumerate(steps):
             regressor = self.regressors_[step]
             if exog is None:
                 X = X_lags
@@ -850,7 +848,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                 # Suppress scikit-learn warning: "X does not have valid feature names,
                 # but NoOpTransformer was fitted with feature names".
                 warnings.simplefilter("ignore")
-                predictions[step] = regressor.predict(X)
+                predictions[i] = regressor.predict(X)
 
         idx = expand_index(index=last_window_index, steps=max(steps)+1)
 
@@ -861,8 +859,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                       )
 
         predictions = transform_dataframe(
-                          series            = predictions,
-                          transformer       = self.transformer_series[self.level],
+                          df                = predictions,
+                          transformer       = self.transformer_series_[self.level],
                           fit               = False,
                           inverse_transform = True
                       )
@@ -926,6 +924,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         else:
             self.lags = generate_lags_ndarray(forecaster_type=type(self), lags=lags)
         
+        self.lags_ = self.lags
         self.max_lag = max(list(chain(*self.lags.values()))) if isinstance(self.lags, dict) else max(self.lags)
         self.window_size = self.max_lag
 
@@ -979,7 +978,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         else:
             estimator = self.regressors_[step]
         
-        len_columns_lags = len(list(chain(*self.lags.values())))
+        len_columns_lags = len(list(chain(*self.lags_.values())))
         idx_columns_lags = np.arange(len_columns_lags)
         idx_columns_exog = np.array([], dtype=int)
         if self.included_exog:
@@ -991,13 +990,13 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         try:
             feature_importance = pd.DataFrame({
                                     'feature': feature_names,
-                                    'importance' : estimator.feature_importances_
+                                    'importance': estimator.feature_importances_
                                  })
         except:   
             try:
                 feature_importance = pd.DataFrame({
                                         'feature': feature_names,
-                                        'importance' : estimator.coef_
+                                        'importance': estimator.coef_
                                      })
             except:
                 warnings.warn(
