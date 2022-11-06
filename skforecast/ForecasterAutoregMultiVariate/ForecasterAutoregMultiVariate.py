@@ -565,27 +565,19 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         return  X_train_step, y_train_step
 
     
-    # TODO ---------------------------------------------------------------------
-    # --------------------------------------------------------------------------
     def create_sample_weights(
         self,
-        series: pd.DataFrame,
         X_train: pd.DataFrame,
-        y_train_index: pd.Index,
     )-> np.ndarray:
         """
-        Crate weights for each observation according to the forecaster's attributes
-        `series_weights` and `weight_func`. The resulting weights are the 
-        multiplication of both attribute returns.
+        Crate weights for each observation according to the forecaster's attribute
+        `weight_func`. 
 
         Parameters
         ----------
-        series : pandas DataFrame
-            Time series used to create `X_train` with the method `create_train_X_y`.
         X_train : pandas DataFrame
-            Dataframe generated with the method `create_train_X_y`, first return.
-        y_train_index : pandas Index
-            Index of `y_train` generated with the method `create_train_X_y`, fourth return.
+            Dataframe generated with the methods `create_train_X_y` and 
+            `filter_train_X_y_for_step`, first return.
 
         Returns
         -------
@@ -597,11 +589,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         sample_weight = None
 
         if self.weight_func is not None:
-            weights = self.weight_func(y_train_index)
-            if sample_weight is not None:
-                sample_weight = sample_weight * weights
-            else:
-                sample_weight = weights.copy()
+            sample_weight = self.weight_func(X_train.index)
 
         if sample_weight is not None:
             if np.isnan(sample_weight).any():
@@ -619,8 +607,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                 )
 
         return sample_weight
-    # --------------------------------------------------------------------------
-    # --------------------------------------------------------------------------
+
         
     def fit(
         self,
@@ -684,8 +671,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                                              X_train = X_train,
                                              y_train = y_train
                                          )
-            # sample_weight = self.create_sample_weights(X_train=X_train_step)
-            sample_weight = None
+            sample_weight = self.create_sample_weights(X_train=X_train_step)
             if sample_weight is not None:
                 if not str(type(self.regressor)) == "<class 'xgboost.sklearn.XGBRegressor'>":
                     self.regressors_[step].fit(

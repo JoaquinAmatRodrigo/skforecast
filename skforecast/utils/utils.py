@@ -265,11 +265,11 @@ def check_predict_input(
         )
 
     if max_steps is not None:
-        if max(steps) > max_steps:
+        if max(steps)+1 > max_steps:
             raise ValueError(
                 (f"The maximum value of `steps` must be less than or equal to "
                  f"the value of steps defined when initializing the forecaster. "
-                 f"Got {max(steps)}, but the maximum is {max_steps}.")
+                 f"Got {max(steps)+1}, but the maximum is {max_steps}.")
             )
 
     if interval is not None:
@@ -299,9 +299,11 @@ def check_predict_input(
         )
     
     if exog is not None:
-        if len(exog) < steps:
+        max_step = max(steps)+1 if isinstance(steps, list) else steps
+        if len(exog) < max_step:
             raise ValueError(
-                '`exog` must have at least as many values as `steps` predicted.'
+                f'`exog` must have at least as many values as the distance to '
+                f'the maximum step predicted, {max_step}.'
             )
         if not isinstance(exog, (pd.Series, pd.DataFrame)):
             raise TypeError('`exog` must be a pandas Series or DataFrame.')

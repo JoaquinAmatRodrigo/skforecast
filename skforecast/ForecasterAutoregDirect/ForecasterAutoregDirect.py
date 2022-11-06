@@ -504,7 +504,8 @@ class ForecasterAutoregDirect(ForecasterBase):
         Parameters
         ----------
         X_train : pandas DataFrame
-            Dataframe generated with the method `create_train_X_y`, first return.
+           Dataframe generated with the methods `create_train_X_y` and 
+            `filter_train_X_y_for_step`, first return.
 
         Returns
         -------
@@ -629,10 +630,18 @@ class ForecasterAutoregDirect(ForecasterBase):
 
         Parameters
         ----------
-        steps : int, None, default `None`
-            Predict n steps. The value of `steps` must be less than or equal to 
-            the value of steps defined when initializing the forecaster. If `None`, 
-            as many steps are predicted as were defined at initialization.
+        steps : int, list, None, default `None`
+            Predict n steps. The value of `steps` must be less than or equal to the 
+            value of steps defined when initializing the forecaster. Starts at 1.
+        
+            If int:
+                Only steps within the range of 1 to int are predicted.
+        
+            If list:
+                List of ints. Only the steps contained in the list are predicted.
+
+            If `None`:
+                As many steps are predicted as were defined at initialization.
 
         last_window : pandas Series, default `None`
             Values of the series used to create the predictors (lags) need in the 
@@ -652,8 +661,19 @@ class ForecasterAutoregDirect(ForecasterBase):
 
         """
 
-        if steps is None:
-            steps = self.steps
+        if isinstance(steps, int):
+            steps = list(range(steps))
+        elif steps is None:
+            steps = list(range(self.steps))
+        elif isinstance(steps, list):
+            steps = list(np.array(steps) - 1) # To start at 0 for indexing
+
+        for step in steps:
+            if not isinstance(step, (int, np.int64, np.int32)):
+                raise TypeError(
+                    f"`steps` argument must be an int, a list of ints or `None`. "
+                    f"Got {type(steps)}."
+                )
 
         check_predict_input(
             forecaster_type = type(self),
@@ -690,9 +710,9 @@ class ForecasterAutoregDirect(ForecasterBase):
                        )
             
             exog_values, _ = preprocess_exog(
-                                 exog = exog.iloc[:steps, ]
+                                 exog = exog.iloc[:max(steps)+1, ]
                              )
-            exog_values = exog_to_direct(exog=exog_values, steps=steps)
+            exog_values = exog_to_direct(exog=exog_values, steps=max(steps)+1)
         else:
             exog_values = None
 
@@ -709,28 +729,28 @@ class ForecasterAutoregDirect(ForecasterBase):
                                                     last_window = last_window
                                                 )
 
-        predictions = np.full(shape=steps, fill_value=np.nan)
         X_lags = last_window_values[-self.lags].reshape(1, -1)
+        
+        predictions = np.full(shape=len(steps), fill_value=np.nan)
 
-        for step in range(steps):
+        for i, step in enumerate(steps):
             regressor = self.regressors_[step]
             if exog is None:
                 X = X_lags
             else:
                 # Only columns from exog related with the current step are selected.
-                X = np.hstack([X_lags, exog_values[0][step::steps].reshape(1, -1)])
+                X = np.hstack([X_lags, exog_values[0][step::max(steps)+1].reshape(1, -1)])
             with warnings.catch_warnings():
                 # Suppress scikit-learn warning: "X does not have valid feature names,
                 # but NoOpTransformer was fitted with feature names".
                 warnings.simplefilter("ignore")
-                predictions[step] = regressor.predict(X)
+                predictions[i] = regressor.predict(X)
+
+        idx = expand_index(index=last_window_index, steps=max(steps)+1)
 
         predictions = pd.Series(
                           data  = predictions.reshape(-1),
-                          index = expand_index(
-                                    index = last_window_index,
-                                    steps = steps
-                                ),
+                          index = idx[steps],
                           name = 'pred'
                       )
 

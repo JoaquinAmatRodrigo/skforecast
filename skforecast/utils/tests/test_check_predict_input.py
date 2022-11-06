@@ -108,7 +108,7 @@ def test_check_input_predict_exception_when_max_steps_greater_than_max_steps():
     err_msg = re.escape(
                 (f"The maximum value of `steps` must be less than or equal to "
                  f"the value of steps defined when initializing the forecaster. "
-                 f"Got {max(steps)}, but the maximum is {max_steps}.")
+                 f"Got {max(steps)+1}, but the maximum is {max_steps}.")
               )
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
@@ -231,7 +231,7 @@ def test_check_input_predict_exception_when_exog_is_not_none_and_included_exog_i
             index_freq      = None,
             window_size     = None,
             last_window     = None,
-            exog            = np.arange(10),
+            exog            = pd.Series(np.arange(10)),
             exog_type       = None,
             exog_col_names  = None,
             interval        = None,
@@ -241,21 +241,27 @@ def test_check_input_predict_exception_when_exog_is_not_none_and_included_exog_i
         )
 
 
-def test_check_input_predict_exception_when_len_exog_is_less_than_steps():
+@pytest.mark.parametrize("steps", [10, [1, 2, 3, 4, 5, 6], [2, 6]], 
+                         ids=lambda steps: f'steps: {steps}')
+def test_check_input_predict_exception_when_len_exog_is_less_than_steps(steps):
     """
     """
-    err_msg = re.escape('`exog` must have at least as many values as `steps` predicted.')
+    max_step = max(steps)+1 if isinstance(steps, list) else steps
+    err_msg = re.escape(
+                f'`exog` must have at least as many values as the distance to '
+                f'the maximum step predicted, {max_step}.'
+            )
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
             forecaster_type = 'class.ForecasterAutoreg',
-            steps           = 10,
+            steps           = steps,
             fitted          = True,
             included_exog   = True,
             index_type      = None,
             index_freq      = None,
             window_size     = None,
             last_window     = None,
-            exog            = np.arange(5),
+            exog            = pd.Series(np.arange(5)),
             exog_type       = None,
             exog_col_names  = None,
             interval        = None,
