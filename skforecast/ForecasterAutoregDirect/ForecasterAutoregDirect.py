@@ -322,13 +322,11 @@ class ForecasterAutoregDirect(ForecasterBase):
                 f'of the series minus the number of steps ({len(y)-(self.steps-1)}).'
             )
         
-        X_data = np.full(shape=(n_splits, self.max_lag), fill_value=np.nan, dtype=float)
-
+        X_data = np.full(shape=(n_splits, len(self.lags)), fill_value=np.nan, dtype=float)
         for i, lag in enumerate(self.lags):
             X_data[:, i] = y[self.max_lag - lag : -(lag + self.steps - 1)] 
 
         y_data = np.full(shape=(n_splits, self.steps), fill_value=np.nan, dtype=float)
-
         for step in range(self.steps):
             y_data[:, step] = y[self.max_lag + step : self.max_lag + step + n_splits]
             

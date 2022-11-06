@@ -8,7 +8,7 @@ from skforecast.ForecasterAutoregDirect import ForecasterAutoregDirect
 from sklearn.linear_model import LinearRegression
 
 
-def test_create_train_X_y_exception_when_len_of_y_is_lower_than_maximum_lag_plus_steps():
+def test_create_train_X_y_exception_when_len_y_is_lower_than_maximum_lag_plus_steps():
     """
     Test exception is raised when length of y is lower than maximum lag plus
     number of steps included in the forecaster.
@@ -36,6 +36,26 @@ def test_create_train_X_y_exception_when_len_y_is_different_from_len_exog():
               )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.create_train_X_y(y=y, exog=exog)
+
+
+def test_create_train_X_y_exception_when_y_and_exog_have_different_index():
+    """
+    Test exception is raised when y and exog have different index.
+    """
+    forecaster = ForecasterAutoregDirect(LinearRegression(), lags=3, steps=3)
+    y = pd.Series(np.arange(10), name='y')
+
+    y.index = pd.date_range(start='2022-01-01', periods=10, freq='1D')
+
+    err_msg = re.escape(
+                ('Different index for `y` and `exog`. They must be equal '
+                 'to ensure the correct alignment of values.')
+              )
+    with pytest.raises(ValueError, match = err_msg):
+        forecaster.fit(
+            y    = y,
+            exog = pd.Series(np.arange(10), index=pd.RangeIndex(start=0, stop=10, step=1))
+        )
 
 
 def test_create_train_X_y_output_when_lags_3_steps_1_and_exog_is_None():
@@ -71,22 +91,22 @@ def test_create_train_X_y_output_when_lags_3_steps_1_and_exog_is_None():
             assert (results[i] == expected[i]).all()
 
 
-def test_create_train_X_y_output_when_lags_3_steps_2_and_exog_is_None():
+def test_create_train_X_y_output_when_interspersed_lags_steps_2_and_exog_is_None():
     """
-    Test output of create_train_X_y when regressor is LinearRegression, lags is 3
-    and steps is 2.
+    Test output of create_train_X_y when regressor is LinearRegression, 
+    interspersed_lags and steps is 2.
     """
-    forecaster = ForecasterAutoregDirect(LinearRegression(), lags=3, steps=2)
+    forecaster = ForecasterAutoregDirect(LinearRegression(), lags=[1, 3], steps=2)
     results = forecaster.create_train_X_y(y=pd.Series(np.arange(10)))
     expected = (pd.DataFrame(
-                    data = np.array([[2., 1., 0.],
-                                     [3., 2., 1.],
-                                     [4., 3., 2.],
-                                     [5., 4., 3.],
-                                     [6., 5., 4.],
-                                     [7., 6., 5.]]),
+                    data = np.array([[2., 0.],
+                                     [3., 1.],
+                                     [4., 2.],
+                                     [5., 3.],
+                                     [6., 4.],
+                                     [7., 5.]]),
                     index   = np.array([4, 5, 6, 7, 8, 9]),
-                    columns = ['lag_1', 'lag_2', 'lag_3']
+                    columns = ['lag_1', 'lag_3']
                 ),
                 pd.DataFrame(
                     np.array([[3., 4.],
@@ -116,9 +136,9 @@ def test_create_train_X_y_output_when_lags_5_steps_1_and_exog_is_series():
     """
     forecaster = ForecasterAutoregDirect(LinearRegression(), lags=5, steps=1)
     results = forecaster.create_train_X_y(
-                    y = pd.Series(np.arange(10)),
-                    exog = pd.Series(np.arange(100, 110), name='exog')
-                )
+                  y = pd.Series(np.arange(10)),
+                  exog = pd.Series(np.arange(100, 110), name='exog')
+              )
     expected = (pd.DataFrame(
                     data = np.array([[4., 3., 2., 1., 0., 105.],
                                      [5., 4., 3., 2., 1., 106.],
@@ -154,17 +174,9 @@ def test_create_train_X_y_output_when_lags_5_steps_2_and_exog_is_series():
     """
     forecaster = ForecasterAutoregDirect(LinearRegression(), lags=5, steps=2)
     results = forecaster.create_train_X_y(
-                    y = pd.Series(np.arange(10)),
-                    exog = pd.Series(np.arange(100, 110), name='exog')
-                )
-    expected = (np.array([[4., 3., 2., 1., 0., 105., 106.],
-                          [5., 4., 3., 2., 1., 106., 107.],
-                          [6., 5., 4., 3., 2., 107., 108.],
-                          [7., 6., 5., 4., 3., 108., 109.]]),
-                np.array([[5., 6.],
-                          [6., 7.],
-                          [7., 8.],
-                          [8., 9.]]))   
+                  y = pd.Series(np.arange(10)),
+                  exog = pd.Series(np.arange(100, 110), name='exog')
+              )  
  
     expected = (pd.DataFrame(
                     data = np.array([[4., 3., 2., 1., 0., 105., 106.],
@@ -193,18 +205,18 @@ def test_create_train_X_y_output_when_lags_5_steps_2_and_exog_is_series():
             assert (results[i] == expected[i]).all()
     
 
-def test_create_train_X_y_output_when_lags_5_steps_1_y_is_range_10_and_exog_is_dataframe():
+def test_create_train_X_y_output_when_lags_5_steps_1_and_exog_is_dataframe():
     """
     Test output of create_train_X_y when regressor is LinearRegression, lags is 5,
     steps is 2 and exog is pandas dataframe.
     """
     forecaster = ForecasterAutoregDirect(LinearRegression(), lags=5, steps=1)
     results = forecaster.create_train_X_y(
-                y = pd.Series(np.arange(10)),
-                exog = pd.DataFrame({
-                           'exog_1' : np.arange(100, 110),
-                           'exog_2' : np.arange(1000, 1010)
-                       })
+                  y = pd.Series(np.arange(10)),
+                  exog = pd.DataFrame({
+                             'exog_1' : np.arange(100, 110),
+                             'exog_2' : np.arange(1000, 1010)
+                         })
               )  
 
     expected = (pd.DataFrame(
@@ -243,11 +255,11 @@ def test_create_train_X_y_output_when_lags_5_steps_3_and_and_exog_is_dataframe()
     """
     forecaster = ForecasterAutoregDirect(LinearRegression(), lags=5, steps=3)
     results = forecaster.create_train_X_y(
-                y = pd.Series(np.arange(10)),
-                exog = pd.DataFrame({
-                           'exog_1' : np.arange(100, 110),
-                           'exog_2' : np.arange(1000, 1010)
-                       })
+                  y = pd.Series(np.arange(10)),
+                  exog = pd.DataFrame({
+                             'exog_1' : np.arange(100, 110),
+                             'exog_2' : np.arange(1000, 1010)
+                         })
               )
 
     expected = (pd.DataFrame(

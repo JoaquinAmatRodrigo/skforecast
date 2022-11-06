@@ -29,6 +29,7 @@ def test_create_train_X_y_exception_when_levels_of_transformer_series_not_equal_
     series = pd.DataFrame({'1': pd.Series(np.arange(5)),  
                            '2': pd.Series(np.arange(5))
                            })
+    series_levels = list(series.columns)
 
     dict_transformers = {'1': StandardScaler(), 
                          '3': StandardScaler()
@@ -38,14 +39,16 @@ def test_create_train_X_y_exception_when_levels_of_transformer_series_not_equal_
                                               transformer_series = dict_transformers)
     
     err_msg = re.escape(
-                    ("When `transformer_series` parameter is a `dict`, its keys "
-                     "must be the same as `series` column names : ['1', '2'].")
+                    (f'When `transformer_series` parameter is a `dict`, its keys '
+                     f'must be the same as `series` column names.\n'
+                     f'    `transformer_series` keys : {list(forecaster.transformer_series_.keys())}.\n'
+                     f'    `series` columns          : {series_levels}.')
                 )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.create_train_X_y(series=series)
 
 
-@pytest.mark.parametrize("exog", [pd.Series(np.arange(10)), pd.DataFrame(np.arange(50).reshape(25,2))])
+@pytest.mark.parametrize("exog", [pd.Series(np.arange(10)), pd.DataFrame(np.arange(50).reshape(25, 2))])
 def test_create_train_X_y_exception_when_series_and_exog_have_different_length(exog):
     """
     Test exception is raised when length of series is not equal to length exog.

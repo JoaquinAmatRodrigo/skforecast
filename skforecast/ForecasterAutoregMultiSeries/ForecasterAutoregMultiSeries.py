@@ -429,7 +429,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             if list(self.transformer_series_.keys()) != series_levels:
                 raise ValueError(
                     (f'When `transformer_series` parameter is a `dict`, its keys '
-                     f'must be the same as `series` column names : {series_levels}.')
+                     f'must be the same as `series` column names.\n'
+                     f'    `transformer_series` keys : {list(self.transformer_series_.keys())}.\n'
+                     f'    `series` columns          : {series_levels}.')
                 )
         
         X_levels = []

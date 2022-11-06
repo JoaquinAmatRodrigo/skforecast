@@ -26,7 +26,7 @@ def test_set_lags_when_lags_argument_is_list():
     of positive integers.
     """
     forecaster = ForecasterAutoregDirect(LinearRegression(), lags=3, steps=2)
-    forecaster.set_lags(lags=[1,2,3])
+    forecaster.set_lags(lags=[1, 2, 3])
 
     assert (forecaster.lags == np.array([1, 2, 3])).all()
     assert forecaster.max_lag == 3
@@ -38,7 +38,7 @@ def test_set_lags_when_lags_argument_is_1d_numpy_array():
     array of positive integers.
     """
     forecaster = ForecasterAutoregDirect(LinearRegression(), lags=3, steps=2)
-    forecaster.set_lags(lags=np.array([1,2,3]))
+    forecaster.set_lags(lags=np.array([1, 2, 3]))
     
     assert (forecaster.lags == np.array([1, 2, 3])).all()
     assert forecaster.max_lag == 3

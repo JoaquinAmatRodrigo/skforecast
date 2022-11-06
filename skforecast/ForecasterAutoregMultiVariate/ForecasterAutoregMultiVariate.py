@@ -250,7 +250,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         self.window_size = self.max_lag
 
         if weight_func is not None:
-            if not isinstance(weight_func, Callable, ):
+            if not isinstance(weight_func, Callable):
                 raise TypeError(
                     f"Argument `weight_func` must be a callable. Got {type(weight_func)}."
                 )
@@ -311,7 +311,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
     def _create_lags(
         self, 
         y: np.ndarray,
-        serie: str,
+        lags: np.ndarray,
     ) -> Tuple[np.ndarray, np.ndarray]:
         """       
         Transforms a 1d array into a 2d array (X) and a 1d array (y). Each row
@@ -326,8 +326,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         y : 1d numpy ndarray
             Training time series.
 
-        serie : str
-            key of the training time series in lags dict.
+        lags : 1d numpy ndarray
+            lags to create.
 
         Returns 
         -------
@@ -346,8 +346,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                 f'of the series minus the number of steps ({len(y)-(self.steps-1)}).'
             )
         
-        X_data = np.full(shape=(n_splits, max(self.lags_[serie])), fill_value=np.nan, dtype=float)
-        for i, lag in enumerate(self.lags_[serie]):
+        X_data = np.full(shape=(n_splits, len(lags)), fill_value=np.nan, dtype=float)
+        for i, lag in enumerate(lags):
             X_data[:, i] = y[self.max_lag - lag : -(lag + self.steps - 1)] 
 
         y_data = np.full(shape=(n_splits, self.steps), fill_value=np.nan, dtype=float)
@@ -361,7 +361,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         self,
         series: pd.DataFrame,
         exog: Optional[Union[pd.Series, pd.DataFrame]]=None
-    ) -> Tuple[pd.DataFrame, pd.Series, pd.Index, pd.Index]:
+    ) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """
         Create training matrices from multiple time series and exogenous
         variables. The resulting matrices contain the target variable and predictors
@@ -404,7 +404,9 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             if list(self.lags_.keys()) != multivariate_series:
                 raise ValueError(
                     (f'When `lags` parameter is a `dict`, its keys must be the '
-                     f'same as `series` column names : {multivariate_series}.')
+                     f'same as `series` column names.\n'
+                     f'    Lags keys        : {list(self.lags_.keys())}.\n'
+                     f'    `series` columns : {multivariate_series}.')
                 )
         else:
             self.lags_ = {serie: self.lags_ for serie in multivariate_series}
@@ -427,7 +429,9 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             if list(self.transformer_series_.keys()) != multivariate_series:
                 raise ValueError(
                     (f'When `transformer_series` parameter is a `dict`, its keys '
-                     f'must be the same as `series` column names : {multivariate_series}.')
+                     f'must be the same as `series` column names.\n'
+                     f'    `transformer_series` keys : {list(self.transformer_series_.keys())}.\n'
+                     f'    `series` columns          : {multivariate_series}.')
                 )
         
         y_train_col_names = [f"{self.level}_step_{i+1}" for i in range(self.steps)]
@@ -445,7 +449,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                 )
 
             y_values, y_index = preprocess_y(y=y)
-            X_train_values, y_train_values = self._create_lags(y=y_values, serie=serie)
+            X_train_values, y_train_values = self._create_lags(y=y_values, lags=self.lags_[serie])
 
             if i == 0:
                 X_train = X_train_values
@@ -653,7 +657,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             self.exog_col_names = \
                  exog.columns.to_list() if isinstance(exog, pd.DataFrame) else [exog.name]
 
-            if len(set(self.exog_col_names) - set(self.series_levels)) != len(self.exog_col_names):
+            if len(set(self.exog_col_names) - set(self.multivariate_series)) != len(self.exog_col_names):
                 raise ValueError(
                     (f'`exog` cannot contain a column named the same as one of the series'
                      f' (column names of series).\n'

@@ -1,4 +1,4 @@
-# Unit test create_sample_weights ForecasterAutoreg
+# Unit test create_sample_weights ForecasterAutoregDirect
 # ==============================================================================
 import re
 import pytest
@@ -81,7 +81,7 @@ def test_create_sample_weights_output():
     """
     forecaster = ForecasterAutoregDirect(
                      lags        = 3,
-                     steps       = 5,    
+                     steps       = 1,    
                      regressor   = LinearRegression(),
                      weight_func = custom_weights
                  )
@@ -98,7 +98,7 @@ def test_create_sample_weights_exceptions_when_weights_has_nan():
     """
     forecaster = ForecasterAutoregDirect(
                      lags        = 3,
-                     steps       = 5,    
+                     steps       = 1,    
                      regressor   = LinearRegression(),
                      weight_func = custom_weights_nan
                  )
@@ -114,7 +114,7 @@ def test_create_sample_weights_exceptions_when_weights_has_negative_values():
     """
     forecaster = ForecasterAutoregDirect(
                      lags        = 3,
-                     steps       = 5,    
+                     steps       = 1,    
                      regressor   = LinearRegression(),
                      weight_func = custom_weights_negative
                  )
@@ -130,7 +130,7 @@ def test_create_sample_weights_exceptions_when_weights_all_zeros():
     """
     forecaster = ForecasterAutoregDirect(
                      lags        = 3,
-                     steps       = 5,    
+                     steps       = 1,    
                      regressor   = LinearRegression(),
                      weight_func = custom_weights_zeros
                  )

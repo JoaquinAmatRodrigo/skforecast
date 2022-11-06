@@ -27,8 +27,8 @@ def test_filter_train_X_y_for_step_exception_when_step_not_in_steps(step):
 
 def test_filter_train_X_y_for_step_output_when_lags_3_steps_2_exog_is_None_for_step_1():
     """
-    Test output of filter_train_X_y_for_step when regressor is LinearRegression, lags is 3
-    and steps is 2 for step 1.
+    Test output of filter_train_X_y_for_step when regressor is LinearRegression, 
+    lags is 3 and steps is 2 for step 1.
     """
     forecaster = ForecasterAutoregDirect(LinearRegression(), lags=3, steps=2)
     X_train, y_train = forecaster.create_train_X_y(y=pd.Series(np.arange(10)))
@@ -56,8 +56,8 @@ def test_filter_train_X_y_for_step_output_when_lags_3_steps_2_exog_is_None_for_s
 
 def test_filter_train_X_y_for_step_output_when_lags_3_steps_2_and_exog_for_step_2():
     """
-    Test output of filter_train_X_y_for_step when regressor is LinearRegression, lags is 3
-    and steps is 2 with exog for step 2.
+    Test output of filter_train_X_y_for_step when regressor is LinearRegression, 
+    lags is 3 and steps is 2 with exog for step 2.
     """
     forecaster = ForecasterAutoregDirect(LinearRegression(), lags=3, steps=2)
     X_train, y_train = forecaster.create_train_X_y(

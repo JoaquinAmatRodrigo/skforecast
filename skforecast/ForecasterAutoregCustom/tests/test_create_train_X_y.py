@@ -14,7 +14,24 @@ def create_predictors(y): # pragma: no cover
     
     lags = y[-1:-6:-1]
     
-    return lags 
+    return lags
+
+
+def test_create_train_X_y_exception_when_y_and_exog_have_different_index():
+    """
+    Test exception is raised when y and exog have different index.
+    """
+    forecaster = ForecasterAutoregCustom(
+                    regressor      = LinearRegression(),
+                    fun_predictors = create_predictors,
+                    window_size    = 5
+                )
+
+    with pytest.raises(Exception):
+        forecaster.fit(
+            y=pd.Series(np.arange(10), index=pd.date_range(start='2022-01-01', periods=10, freq='1D')),
+            exog=pd.Series(np.arange(10), index=pd.RangeIndex(start=0, stop=10, step=1))
+        ) 
 
 
 def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_None():
@@ -158,20 +175,3 @@ def test_create_train_X_y_exception_when_y_and_exog_have_different_length():
             y=pd.Series(np.arange(10)),
             exog=pd.DataFrame(np.arange(50).reshape(25,2))
         )
-
-
-def test_create_train_X_y_exception_when_y_and_exog_have_different_index():
-    """
-    Test exception is raised when y and exog have different index.
-    """
-    forecaster = ForecasterAutoregCustom(
-                    regressor      = LinearRegression(),
-                    fun_predictors = create_predictors,
-                    window_size    = 5
-                )
-
-    with pytest.raises(Exception):
-        forecaster.fit(
-            y=pd.Series(np.arange(10), index=pd.date_range(start='2022-01-01', periods=10, freq='1D')),
-            exog=pd.Series(np.arange(10), index=pd.RangeIndex(start=0, stop=10, step=1))
-        ) 

@@ -1,4 +1,4 @@
-# Unit test create_sample_weights ForecasterAutoreg
+# Unit test create_sample_weights ForecasterAutoregMultiSeries
 # ==============================================================================
 import re
 import pytest
