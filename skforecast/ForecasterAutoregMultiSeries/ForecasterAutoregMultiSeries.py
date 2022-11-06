@@ -227,8 +227,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.transformer_exog        = transformer_exog
         self.series_weights          = series_weights
         self.weight_func             = weight_func
-        self.source_code_weight_func = None
         self.weight_func_            = weight_func
+        self.source_code_weight_func = None
         self.index_type              = None
         self.index_freq              = None
         self.index_values            = None
@@ -288,8 +288,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                     """
                 )
                 self.weight_func = None
-                self.source_code_weight_func = None
                 self.weight_func_ = None
+                self.source_code_weight_func = None
 
 
     def __repr__(

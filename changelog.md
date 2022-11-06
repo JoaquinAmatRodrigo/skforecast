@@ -12,13 +12,17 @@ All notable changes to this project will be documented in this file.
 
 + `ForecasterAutoregMultivariate`.
 
-+ `ForecasterAutoregMultiSeries` fix bug transformers.
++ `ForecasterAutoregMultiSeries` fix bug transformers init. `self.transformer_series_`
+
++ `ForecasterAutoregDirect` specific predictions.
 
 
 
 **Added**
 
-+ Argument `weights_func` in all Forecasters to allow weighted time series forecasting. Individual time based weights for the series in `ForecasterAutoreg`, `ForecasterAutoregCustom`, `ForecasterAutoregDirect` and individual weights for the series in `ForecasterAutoregMultiSeries`.
++ Argument `weights_func` in all Forecasters to allow weighted time series forecasting. Individual time based weights for the series.
+
++ Argument `series_weights` in `ForecasterAutoregMultiSeries` to define individual weights for the series.
 
 + Include argument `random_state` in all Forecasters `set_out_sample_residuals` methods for random sampling with reproducible output.
 
@@ -46,7 +50,7 @@ All notable changes to this project will be documented in this file.
 
 + `grid_search_forecaster_multiseries` and `random_search_forecaster_multiseries` argument `levels_weights` is deprecated since version 0.6.0, and will be removed in version 0.7.0. Use `series_weights` when creating the forecaster instead.
 
-+ Refactor `_create_lags_` in `ForecasterAutoreg` and `ForecasterAutoregMultiSeries`. (suggested by Bennett https://github.com/Bennett561)
++ Refactor `_create_lags_` in `ForecasterAutoreg`, `ForecasterAutoregDirect` and `ForecasterAutoregMultiSeries`. (suggested by Bennett https://github.com/Bennett561)
 
 **Fixed**
 
