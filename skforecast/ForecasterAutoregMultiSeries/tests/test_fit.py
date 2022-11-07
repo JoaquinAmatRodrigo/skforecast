@@ -51,17 +51,18 @@ def test_fit_exception_when_exog_columns_same_as_series_levels(exog):
     exog_col_names = exog if isinstance(exog, list) else [exog]
 
     err_msg = re.escape(
-                    (f'`exog` cannot contain a column named the same as one of the series levels (column names of series).\n'
-                     f'    `series_levels` : {series_levels}.\n'
-                     f'    `exog` columns  : {exog_col_names}.')
+                    (f'`exog` cannot contain a column named the same as one of the series'
+                     f' (column names of series).\n'
+                     f'    `series` columns : {series_levels}.\n'
+                     f'    `exog`   columns : {exog_col_names}.')
                 )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.fit(series=series, exog=series[exog], store_in_sample_residuals=False)
 
 
-def test_forecaster_index_freq_stored():
+def test_forecaster_DatetimeIndex_index_freq_stored():
     """
-    Test series.index.freqstr is stored in forecaster.index_freq.
+    Test serie_with_DatetimeIndex.index.freqstr is stored in forecaster.index_freq.
     """
     series = pd.DataFrame({'1': pd.Series(np.arange(5)), 
                            '2': pd.Series(np.arange(5))
@@ -72,6 +73,21 @@ def test_forecaster_index_freq_stored():
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
     forecaster.fit(series=series)
     expected = series.index.freqstr
+    results = forecaster.index_freq
+
+    assert results == expected
+
+
+def test_forecaster_index_step_stored():
+    """
+    Test serie without DatetimeIndex, step is stored in forecaster.index_freq.
+    """
+    series = pd.DataFrame({'1': pd.Series(np.arange(5)), 
+                           '2': pd.Series(np.arange(5))
+                          })
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
+    forecaster.fit(series=series)
+    expected = series.index.step
     results = forecaster.index_freq
 
     assert results == expected

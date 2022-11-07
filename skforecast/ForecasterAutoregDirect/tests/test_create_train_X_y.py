@@ -8,7 +8,7 @@ from skforecast.ForecasterAutoregDirect import ForecasterAutoregDirect
 from sklearn.linear_model import LinearRegression
 
 
-def test_create_train_X_y_exception_when_len_of_y_is_lower_than_maximum_lag_plus_steps():
+def test_create_train_X_y_exception_when_len_y_is_lower_than_maximum_lag_plus_steps():
     """
     Test exception is raised when length of y is lower than maximum lag plus
     number of steps included in the forecaster.
@@ -38,6 +38,26 @@ def test_create_train_X_y_exception_when_len_y_is_different_from_len_exog():
         forecaster.create_train_X_y(y=y, exog=exog)
 
 
+def test_create_train_X_y_exception_when_y_and_exog_have_different_index():
+    """
+    Test exception is raised when y and exog have different index.
+    """
+    forecaster = ForecasterAutoregDirect(LinearRegression(), lags=3, steps=3)
+    y = pd.Series(np.arange(10), name='y')
+
+    y.index = pd.date_range(start='2022-01-01', periods=10, freq='1D')
+
+    err_msg = re.escape(
+                ('Different index for `y` and `exog`. They must be equal '
+                 'to ensure the correct alignment of values.')
+              )
+    with pytest.raises(ValueError, match = err_msg):
+        forecaster.fit(
+            y    = y,
+            exog = pd.Series(np.arange(10), index=pd.RangeIndex(start=0, stop=10, step=1))
+        )
+
+
 def test_create_train_X_y_output_when_lags_3_steps_1_and_exog_is_None():
     """
     Test output of create_train_X_y when regressor is LinearRegression, lags is 3
@@ -47,55 +67,65 @@ def test_create_train_X_y_output_when_lags_3_steps_1_and_exog_is_None():
     results = forecaster.create_train_X_y(y=pd.Series(np.arange(10)))
     expected = (pd.DataFrame(
                     data = np.array([[2., 1., 0.],
-                                    [3., 2., 1.],
-                                    [4., 3., 2.],
-                                    [5., 4., 3.],
-                                    [6., 5., 4.],
-                                    [7., 6., 5.],
-                                    [8., 7., 6.]]),
+                                     [3., 2., 1.],
+                                     [4., 3., 2.],
+                                     [5., 4., 3.],
+                                     [6., 5., 4.],
+                                     [7., 6., 5.],
+                                     [8., 7., 6.]]),
                     index   = np.array([3, 4, 5, 6, 7, 8, 9]),
                     columns = ['lag_1', 'lag_2', 'lag_3']
                 ),
                 pd.DataFrame(
                     np.array([3., 4., 5., 6., 7., 8., 9.]),
                     index = np.array([3, 4, 5, 6, 7, 8, 9]),
-                    columns = ['y_step_0'])
+                    columns = ['y_step_1'])
                )  
  
-    pd.testing.assert_frame_equal(results[0], expected[0])
-    pd.testing.assert_frame_equal(results[1], expected[1])
+    for i in range(len(expected)):
+        if isinstance(expected[i], pd.DataFrame):
+            pd.testing.assert_frame_equal(results[i], expected[i])
+        elif isinstance(expected[i], pd.Series):
+            pd.testing.assert_series_equal(results[i], expected[i])
+        else:
+            assert (results[i] == expected[i]).all()
 
 
-def test_create_train_X_y_output_when_lags_3_steps_2_and_exog_is_None():
+def test_create_train_X_y_output_when_interspersed_lags_steps_2_and_exog_is_None():
     """
-    Test output of create_train_X_y when regressor is LinearRegression, lags is 3
-    and steps is 2.
+    Test output of create_train_X_y when regressor is LinearRegression, 
+    interspersed_lags and steps is 2.
     """
-    forecaster = ForecasterAutoregDirect(LinearRegression(), lags=3, steps=2)
+    forecaster = ForecasterAutoregDirect(LinearRegression(), lags=[1, 3], steps=2)
     results = forecaster.create_train_X_y(y=pd.Series(np.arange(10)))
     expected = (pd.DataFrame(
-                    data = np.array([[2., 1., 0.],
-                                    [3., 2., 1.],
-                                    [4., 3., 2.],
-                                    [5., 4., 3.],
-                                    [6., 5., 4.],
-                                    [7., 6., 5.]]),
+                    data = np.array([[2., 0.],
+                                     [3., 1.],
+                                     [4., 2.],
+                                     [5., 3.],
+                                     [6., 4.],
+                                     [7., 5.]]),
                     index   = np.array([4, 5, 6, 7, 8, 9]),
-                    columns = ['lag_1', 'lag_2', 'lag_3']
+                    columns = ['lag_1', 'lag_3']
                 ),
                 pd.DataFrame(
                     np.array([[3., 4.],
-                             [4., 5.],
-                             [5., 6.],
-                             [6., 7.],
-                             [7., 8.],
-                             [8., 9.]]),
+                              [4., 5.],
+                              [5., 6.],
+                              [6., 7.],
+                              [7., 8.],
+                              [8., 9.]]),
                     index = np.array([4, 5, 6, 7, 8, 9]),
-                    columns = ['y_step_0', 'y_step_1'])
+                    columns = ['y_step_1', 'y_step_2'])
                )  
  
-    pd.testing.assert_frame_equal(results[0], expected[0])
-    pd.testing.assert_frame_equal(results[1], expected[1])
+    for i in range(len(expected)):
+        if isinstance(expected[i], pd.DataFrame):
+            pd.testing.assert_frame_equal(results[i], expected[i])
+        elif isinstance(expected[i], pd.Series):
+            pd.testing.assert_series_equal(results[i], expected[i])
+        else:
+            assert (results[i] == expected[i]).all()
     
     
 
@@ -106,9 +136,9 @@ def test_create_train_X_y_output_when_lags_5_steps_1_and_exog_is_series():
     """
     forecaster = ForecasterAutoregDirect(LinearRegression(), lags=5, steps=1)
     results = forecaster.create_train_X_y(
-                    y = pd.Series(np.arange(10)),
-                    exog = pd.Series(np.arange(100, 110), name='exog')
-                )
+                  y = pd.Series(np.arange(10)),
+                  exog = pd.Series(np.arange(100, 110), name='exog')
+              )
     expected = (pd.DataFrame(
                     data = np.array([[4., 3., 2., 1., 0., 105.],
                                      [5., 4., 3., 2., 1., 106.],
@@ -120,16 +150,21 @@ def test_create_train_X_y_output_when_lags_5_steps_1_and_exog_is_series():
                 ),
                 pd.DataFrame(
                     np.array([[5.],
-                             [6.],
-                             [7.],
-                             [8.],
-                             [9.]]),
+                              [6.],
+                              [7.],
+                              [8.],
+                              [9.]]),
                     index = np.array([5, 6, 7, 8, 9]),
-                    columns = ['y_step_0'])
+                    columns = ['y_step_1'])
                )    
 
-    pd.testing.assert_frame_equal(results[0], expected[0])
-    pd.testing.assert_frame_equal(results[1], expected[1])
+    for i in range(len(expected)):
+        if isinstance(expected[i], pd.DataFrame):
+            pd.testing.assert_frame_equal(results[i], expected[i])
+        elif isinstance(expected[i], pd.Series):
+            pd.testing.assert_series_equal(results[i], expected[i])
+        else:
+            assert (results[i] == expected[i]).all()
 
 
 def test_create_train_X_y_output_when_lags_5_steps_2_and_exog_is_series():
@@ -139,76 +174,78 @@ def test_create_train_X_y_output_when_lags_5_steps_2_and_exog_is_series():
     """
     forecaster = ForecasterAutoregDirect(LinearRegression(), lags=5, steps=2)
     results = forecaster.create_train_X_y(
-                    y = pd.Series(np.arange(10)),
-                    exog = pd.Series(np.arange(100, 110), name='exog')
-                )
-    expected = (np.array([[  4., 3., 2., 1., 0., 105., 106.],
-                        [  5., 4., 3., 2., 1., 106., 107.],
-                        [  6., 5., 4., 3., 2., 107., 108.],
-                        [  7., 6., 5., 4., 3., 108., 109.]]),
-                np.array([[5., 6.],
-                        [6., 7.],
-                        [7., 8.],
-                        [8., 9.]]))   
-
+                  y = pd.Series(np.arange(10)),
+                  exog = pd.Series(np.arange(100, 110), name='exog')
+              )  
+ 
     expected = (pd.DataFrame(
-                    data = np.array([[  4., 3., 2., 1., 0., 105., 106.],
-                                    [  5., 4., 3., 2., 1., 106., 107.],
-                                    [  6., 5., 4., 3., 2., 107., 108.],
-                                    [  7., 6., 5., 4., 3., 108., 109.]]),
+                    data = np.array([[4., 3., 2., 1., 0., 105., 106.],
+                                     [5., 4., 3., 2., 1., 106., 107.],
+                                     [6., 5., 4., 3., 2., 107., 108.],
+                                     [7., 6., 5., 4., 3., 108., 109.]]),
                     index = np.array([6, 7, 8, 9]),
                     columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5',
                                'exog_step_1', 'exog_step_2']
                 ),
                 pd.DataFrame(
                     np.array([[5., 6.],
-                            [6., 7.],
-                            [7., 8.],
-                            [8., 9.]]),
+                              [6., 7.],
+                              [7., 8.],
+                              [8., 9.]]),
                     index = np.array([6, 7, 8, 9]),
-                    columns = ['y_step_0', 'y_step_1'])
+                    columns = ['y_step_1', 'y_step_2'])
                )    
 
-    pd.testing.assert_frame_equal(results[0], expected[0])
-    pd.testing.assert_frame_equal(results[1], expected[1])
+    for i in range(len(expected)):
+        if isinstance(expected[i], pd.DataFrame):
+            pd.testing.assert_frame_equal(results[i], expected[i])
+        elif isinstance(expected[i], pd.Series):
+            pd.testing.assert_series_equal(results[i], expected[i])
+        else:
+            assert (results[i] == expected[i]).all()
     
 
-def test_create_train_X_y_output_when_lags_5_steps_1_y_is_range_10_and_exog_is_dataframe():
+def test_create_train_X_y_output_when_lags_5_steps_1_and_exog_is_dataframe():
     """
     Test output of create_train_X_y when regressor is LinearRegression, lags is 5,
     steps is 2 and exog is pandas dataframe.
     """
     forecaster = ForecasterAutoregDirect(LinearRegression(), lags=5, steps=1)
     results = forecaster.create_train_X_y(
-                y = pd.Series(np.arange(10)),
-                exog = pd.DataFrame({
-                            'exog_1' : np.arange(100, 110),
-                            'exog_2' : np.arange(1000, 1010)
-                        })
+                  y = pd.Series(np.arange(10)),
+                  exog = pd.DataFrame({
+                             'exog_1' : np.arange(100, 110),
+                             'exog_2' : np.arange(1000, 1010)
+                         })
               )  
 
     expected = (pd.DataFrame(
-                    data = np.array([[4, 3, 2, 1, 0, 105, 1005],
-                                    [5, 4, 3, 2, 1, 106, 1006],
-                                    [6, 5, 4, 3, 2, 107, 1007],
-                                    [7, 6, 5, 4, 3, 108, 1008],
-                                    [8, 7, 6, 5, 4, 109, 1009]], dtype=float),
+                    data = np.array([[4., 3., 2., 1., 0., 105., 1005.],
+                                     [5., 4., 3., 2., 1., 106., 1006.],
+                                     [6., 5., 4., 3., 2., 107., 1007.],
+                                     [7., 6., 5., 4., 3., 108., 1008.],
+                                     [8., 7., 6., 5., 4., 109., 1009.]], dtype=float),
                     index = np.array([5, 6, 7, 8, 9]),
                     columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5',
                                'exog_1_step_1', 'exog_2_step_1']
                 ),
                 pd.DataFrame(
                     np.array([[5.],
-                             [6.],
-                             [7.],
-                             [8.],
-                             [9.]]),
+                              [6.],
+                              [7.],
+                              [8.],
+                              [9.]]),
                     index = np.array([5, 6, 7, 8, 9]),
-                    columns = ['y_step_0'])
+                    columns = ['y_step_1'])
                )    
 
-    pd.testing.assert_frame_equal(results[0], expected[0])
-    pd.testing.assert_frame_equal(results[1], expected[1])
+    for i in range(len(expected)):
+        if isinstance(expected[i], pd.DataFrame):
+            pd.testing.assert_frame_equal(results[i], expected[i])
+        elif isinstance(expected[i], pd.Series):
+            pd.testing.assert_series_equal(results[i], expected[i])
+        else:
+            assert (results[i] == expected[i]).all()
 
     
 def test_create_train_X_y_output_when_lags_5_steps_3_and_and_exog_is_dataframe():
@@ -218,17 +255,17 @@ def test_create_train_X_y_output_when_lags_5_steps_3_and_and_exog_is_dataframe()
     """
     forecaster = ForecasterAutoregDirect(LinearRegression(), lags=5, steps=3)
     results = forecaster.create_train_X_y(
-                y = pd.Series(np.arange(10)),
-                exog = pd.DataFrame({
-                            'exog_1' : np.arange(100, 110),
-                            'exog_2' : np.arange(1000, 1010)
-                        })
+                  y = pd.Series(np.arange(10)),
+                  exog = pd.DataFrame({
+                             'exog_1' : np.arange(100, 110),
+                             'exog_2' : np.arange(1000, 1010)
+                         })
               )
 
     expected = (pd.DataFrame(
-                    data = np.array([[4, 3, 2, 1, 0, 105, 106, 107, 1005, 1006, 1007],
-                                    [5, 4, 3, 2, 1, 106, 107, 108, 1006, 1007, 1008],
-                                    [6, 5, 4, 3, 2, 107, 108, 109, 1007, 1008, 1009]],
+                    data = np.array([[4., 3., 2., 1., 0., 105., 106., 107., 1005., 1006., 1007.],
+                                     [5., 4., 3., 2., 1., 106., 107., 108., 1006., 1007., 1008.],
+                                     [6., 5., 4., 3., 2., 107., 108., 109., 1007., 1008., 1009.]],
                                     dtype=float),
                     index = np.array([7, 8, 9]),
                     columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5',
@@ -236,12 +273,17 @@ def test_create_train_X_y_output_when_lags_5_steps_3_and_and_exog_is_dataframe()
                                'exog_2_step_1', 'exog_2_step_2', 'exog_2_step_3']
                 ),
                 pd.DataFrame(
-                    np.array([[5, 6, 7],
-                             [6, 7, 8],
-                             [7, 8, 9]], dtype=float),
+                    np.array([[5., 6., 7.],
+                              [6., 7., 8.],
+                              [7., 8., 9.]], dtype=float),
                     index = np.array([7, 8, 9]),
-                    columns = ['y_step_0', 'y_step_1', 'y_step_2'])
-               )    
-
-    pd.testing.assert_frame_equal(results[0], expected[0])
-    pd.testing.assert_frame_equal(results[1], expected[1])
+                    columns = ['y_step_1', 'y_step_2', 'y_step_3'])
+               )
+    
+    for i in range(len(expected)):
+        if isinstance(expected[i], pd.DataFrame):
+            pd.testing.assert_frame_equal(results[i], expected[i])
+        elif isinstance(expected[i], pd.Series):
+            pd.testing.assert_series_equal(results[i], expected[i])
+        else:
+            assert (results[i] == expected[i]).all()

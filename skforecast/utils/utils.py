@@ -14,6 +14,61 @@ import pandas as pd
 import sklearn
 
 
+def initialize_lags(
+    forecaster_type,
+    lags: Any
+) -> None:
+    """
+    Check lags argument input and generate the corresponding numpy ndarray.
+    
+    Parameters
+    ----------
+    forecaster_type : ForecasterAutoreg, ForecasterAutoregCustom, 
+    ForecasterAutoregDirect, ForecasterAutoregMultiSeries, ForecasterAutoregMultiVariate
+        Forcaster type.
+
+    lags : Any
+        Lags used as predictors.
+        
+    Returns
+    ----------
+    lags : numpy ndarray
+        Lags used as predictors.
+    
+    """
+
+    if isinstance(lags, int) and lags < 1:
+        raise ValueError('Minimum value of lags allowed is 1.')
+
+    if isinstance(lags, (list, np.ndarray)):
+        for lag in lags:
+            if not isinstance(lag, (int, np.int64, np.int32)):
+                raise TypeError('All values in `lags` must be int.')
+        
+    if isinstance(lags, (list, range, np.ndarray)) and min(lags) < 1:
+        raise ValueError('Minimum value of lags allowed is 1.')
+
+    if isinstance(lags, int):
+        lags = np.arange(lags) + 1
+    elif isinstance(lags, (list, range)):
+        lags = np.array(lags)
+    elif isinstance(lags, np.ndarray):
+        lags = lags
+    else:
+        if not str(forecaster_type).split('.')[1] == 'ForecasterAutoregMultiVariate':
+            raise TypeError(
+                '`lags` argument must be an int, 1d numpy ndarray, range or list. '
+                f"Got {type(lags)}."
+            )
+        else:
+            raise TypeError(
+                '`lags` argument must be a dict, int, 1d numpy ndarray, range or list. '
+                f"Got {type(lags)}."
+            )
+
+    return lags
+
+
 def check_y(
     y: Any
 ) -> None:
@@ -32,10 +87,10 @@ def check_y(
     """
     
     if not isinstance(y, pd.Series):
-        raise Exception('`y` must be a pandas Series.')
+        raise TypeError('`y` must be a pandas Series.')
         
     if y.isnull().any():
-        raise Exception('`y` has missing values.')
+        raise ValueError('`y` has missing values.')
     
     return
     
@@ -44,7 +99,7 @@ def check_exog(
     exog: Any
 ) -> None:
     """
-    Raise Exception if `exog` is not pandas Series or DataFrame, or
+    Raise Exception if `exog` is not pandas Series or pandas DataFrame, or
     if it has missing values.
     
     Parameters
@@ -59,10 +114,10 @@ def check_exog(
     """
         
     if not isinstance(exog, (pd.Series, pd.DataFrame)):
-        raise Exception('`exog` must be `pd.Series` or `pd.DataFrame`.')
+        raise TypeError('`exog` must be `pd.Series` or `pd.DataFrame`.')
 
     if exog.isnull().any().any():
-        raise Exception('`exog` has missing values.')
+        raise ValueError('`exog` has missing values.')
                 
     return
 
@@ -139,7 +194,7 @@ def check_predict_input(
     Parameters
     ----------
     forecaster_type : ForecasterAutoreg, ForecasterAutoregCustom, 
-    ForecasterAutoregDirect, ForecasterAutoregMultiSeries
+    ForecasterAutoregDirect, ForecasterAutoregMultiSeries, ForecasterAutoregMultiVariate
         Forcaster type.
 
     steps : int
@@ -181,7 +236,8 @@ def check_predict_input(
         interval of 95% should be as `interval = [2.5, 97.5]`.
 
     max_steps: int, default `None`
-        Maximum number of steps allowed.
+        Maximum number of steps allowed (`ForecasterAutoregDirect` and 
+        `ForecasterAutoregMultiVariate`).
             
     levels : str, list, default `None`
         Time series to be predicted (`ForecasterAutoregMultiSeries`).
@@ -197,17 +253,23 @@ def check_predict_input(
              'appropriate arguments before using predict.')
         )
     
-    if steps < 1:
+    if isinstance(steps, int) and steps < 1:
         raise ValueError(
-            f'`steps` must be integer greater than 0. Got {steps}.'
+            f'`steps` must be an integer greater than or equal to 1. Got {steps}.'
+        )
+
+    if isinstance(steps, list) and min(steps) < 0:
+        raise ValueError(
+           (f"The minimum value of `steps` must be equal to or greater than 1. "
+            f"Got {min(steps) + 1}.")
         )
 
     if max_steps is not None:
-        if steps > max_steps:
+        if max(steps)+1 > max_steps:
             raise ValueError(
-                (f'`steps` must be lower or equal to the value of steps defined '
-                 f'when initializing the forecaster. Got {steps} but the maximum '
-                 f'is {max_steps}.')
+                (f"The maximum value of `steps` must be less than or equal to "
+                 f"the value of steps defined when initializing the forecaster. "
+                 f"Got {max(steps)+1}, but the maximum is {max_steps}.")
             )
 
     if interval is not None:
@@ -237,9 +299,11 @@ def check_predict_input(
         )
     
     if exog is not None:
-        if len(exog) < steps:
+        max_step = max(steps)+1 if isinstance(steps, list) else steps
+        if len(exog) < max_step:
             raise ValueError(
-                '`exog` must have at least as many values as `steps` predicted.'
+                f'`exog` must have at least as many values as the distance to '
+                f'the maximum step predicted, {max_step}.'
             )
         if not isinstance(exog, (pd.Series, pd.DataFrame)):
             raise TypeError('`exog` must be a pandas Series or DataFrame.')
@@ -279,19 +343,29 @@ def check_predict_input(
                  f'calculate the predictors. For this forecaster it is {window_size}.')
             )
                 
-        if str(forecaster_type).split('.')[1] == 'ForecasterAutoregMultiSeries':
+        if str(forecaster_type).split('.')[1] in \
+           ['ForecasterAutoregMultiSeries', 'ForecasterAutoregMultiVariate']:
             if not isinstance(last_window, pd.DataFrame):
                 raise TypeError(
-                    (f'In ForecasterAutoregMultiSeries `last_window` must be a pandas DataFrame. ' 
-                     f'Got {type(last_window)}.')
+                    f'`last_window` must be a pandas DataFrame. Got {type(last_window)}.'
                 )
             
-            if len(set(levels) - set(last_window.columns)) != 0:
+            if (str(forecaster_type).split('.')[1] == 'ForecasterAutoregMultiSeries') and \
+               (len(set(levels) - set(last_window.columns)) != 0):
                 raise ValueError(
                     (f'`last_window` must contain a column(s) named as the level(s) to be predicted.\n'
                      f'    `levels` : {levels}.\n'
                      f'    `last_window` columns : {list(last_window.columns)}.')
                 )
+            
+            if (str(forecaster_type).split('.')[1] == 'ForecasterAutoregMultiVariate') and \
+               (series_levels != list(last_window.columns)):
+                raise ValueError(
+                    (f'`last_window` columns must be the same as `series` column names.\n'
+                     f'    `last_window` columns : {list(last_window.columns)}.\n'
+                     f'    `series` columns      : {series_levels}.')
+                )
+        
         else:    
             if not isinstance(last_window, pd.Series):
                 raise TypeError('`last_window` must be a pandas Series.')
@@ -354,19 +428,19 @@ def preprocess_y(
             'Index is overwritten with a RangeIndex of step 1.'
         )
         y_index = pd.RangeIndex(
-                    start = 0,
-                    stop  = len(y),
-                    step  = 1
-                    )
+                      start = 0,
+                      stop  = len(y),
+                      step  = 1
+                  )
     else:
         warnings.warn(
             '`y` has no DatetimeIndex nor RangeIndex index. Index is overwritten with a RangeIndex.'
         )
         y_index = pd.RangeIndex(
-                    start = 0,
-                    stop  = len(y),
-                    step  = 1
-                    )
+                      start = 0,
+                      stop  = len(y),
+                      step  = 1
+                  )
 
     y_values = y.to_numpy()
 
@@ -612,8 +686,8 @@ def transform_series(
     """
     
     if not isinstance(series, pd.Series):
-        raise Exception(
-            "Series argument must be a pandas Series object."
+        raise TypeError(
+            "`series` argument must be a pandas Series."
         )
         
     if transformer is None:
@@ -635,17 +709,17 @@ def transform_series(
     
     if isinstance(values_transformed, np.ndarray) and values_transformed.shape[1] == 1:
         series_transformed = pd.Series(
-                                data  = values_transformed.flatten(),
-                                index = series.index,
-                                name  = series.columns[0]
-                            )
+                                 data  = values_transformed.flatten(),
+                                 index = series.index,
+                                 name  = series.columns[0]
+                             )
     elif isinstance(values_transformed, pd.DataFrame) and values_transformed.shape[1] == 1:
         series_transformed = values_transformed.squeeze()
     else:
         series_transformed = pd.DataFrame(
-                                data = values_transformed,
-                                index = series.index,
-                                columns = transformer.get_feature_names_out()
+                                 data = values_transformed,
+                                 index = series.index,
+                                 columns = transformer.get_feature_names_out()
                              )
 
     return series_transformed
@@ -682,6 +756,11 @@ def transform_dataframe(
         Transformed DataFrame.
     
     """
+    
+    if not isinstance(df, pd.DataFrame):
+        raise TypeError(
+            "`df` argument must be a pandas DataFrame."
+        )
 
     if transformer is None:
         return df
@@ -712,10 +791,10 @@ def transform_dataframe(
         feature_names_out = df.columns
     
     df_transformed = pd.DataFrame(
-                        data = values_transformed,
-                        index = df.index,
-                        columns = feature_names_out
-                      )
+                         data = values_transformed,
+                         index = df.index,
+                         columns = feature_names_out
+                     )
 
     return df_transformed
 

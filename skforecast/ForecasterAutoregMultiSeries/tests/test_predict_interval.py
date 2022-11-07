@@ -215,7 +215,7 @@ def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_1_
                     columns = ['1', '1_lower_bound', '1_upper_bound', '2', '2_lower_bound', '2_upper_bound'],
                     index = pd.RangeIndex(start=10, stop=11, step=1)
                  )
-    results_3 = forecaster.predict_interval(steps=1, levels=['1', '2'], in_sample_residuals=True)
+    results_3 = forecaster.predict_interval(steps=1, levels=None, in_sample_residuals=True)
 
     pd.testing.assert_frame_equal(results_1, expected_1)
     pd.testing.assert_frame_equal(results_2, expected_2)

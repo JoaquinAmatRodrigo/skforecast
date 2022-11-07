@@ -40,3 +40,18 @@ def test_create_lags_output():
 
     assert (results[0] == expected[0]).all()
     assert (results[1] == expected[1]).all()
+
+
+def test_create_lags_output_interspersed_lags():
+    """
+    Test matrix of lags is is a list with interspersed lags.
+    """
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=[4, 7])
+    results = forecaster._create_lags(y=np.arange(10))
+    expected = (np.array([[3., 0.],
+                          [4., 1.],
+                          [5., 2.]]),
+               np.array([7., 8., 9.]))
+
+    assert (results[0] == expected[0]).all()
+    assert (results[1] == expected[1]).all()

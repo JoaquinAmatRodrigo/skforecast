@@ -6,7 +6,7 @@
 ################################################################################
 # coding=utf-8
 
-from typing import Union, Dict, List, Tuple, Any, Optional
+from typing import Union, Dict, List, Tuple, Any, Optional, Callable
 import warnings
 import logging
 import sys
@@ -17,7 +17,6 @@ import sklearn
 import sklearn.pipeline
 from sklearn.base import clone
 from copy import copy
-from inspect import getsource
 
 import skforecast
 from ..ForecasterBase import ForecasterBase
@@ -73,7 +72,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         Function that defines the individual weights for each sample based on the
         index. For example, a function that assigns a lower weight to certain dates.
         Ignored if `regressor` does not have the argument `sample_weight` in its `fit`
-        method.
+        method. The resulting `sample_weight` cannot have negative values.
         **New in version 0.6.0**
     
     Attributes
@@ -179,17 +178,17 @@ class ForecasterAutoregCustom(ForecasterBase):
         window_size: int,
         transformer_y: Optional[object]=None,
         transformer_exog: Optional[object]=None,
-        weight_func: callable=None
+        weight_func: Optional[callable]=None
     ) -> None:
         
         self.regressor                     = regressor
         self.create_predictors             = fun_predictors
         self.source_code_create_predictors = None
-        self.source_code_weight_func       = None
         self.window_size                   = window_size
         self.transformer_y                 = transformer_y
         self.transformer_exog              = transformer_exog
         self.weight_func                   = weight_func
+        self.source_code_weight_func       = None
         self.index_type                    = None
         self.index_freq                    = None
         self.training_range                = None
@@ -208,19 +207,22 @@ class ForecasterAutoregCustom(ForecasterBase):
         
         if not isinstance(window_size, int):
             raise TypeError(
-                f'`window_size` must be int, got {type(window_size)}'
+                f'Argument `window_size` must be an int. Got {type(window_size)}.'
             )
 
         if not callable(fun_predictors):
             raise TypeError(
-                f'`fun_predictors` must be callable, got {type(fun_predictors)}.'
+                f'Argument `fun_predictors` must be a callable. Got {type(fun_predictors)}.'
             )
     
-        self.source_code_create_predictors = getsource(fun_predictors)
+        self.source_code_create_predictors = inspect.getsource(fun_predictors)
 
         if weight_func is not None:
-            self.source_code_weight_func = getsource(weight_func)
-
+            if not isinstance(weight_func, Callable):
+                raise TypeError(
+                    f"Argument `weight_func` must be a callable. Got {type(weight_func)}."
+                )
+            self.source_code_weight_func = inspect.getsource(weight_func)
             if 'sample_weight' not in inspect.getfullargspec(self.regressor.fit)[0]:
                 warnings.warm(
                     f"""
@@ -242,7 +244,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         if isinstance(self.regressor, sklearn.pipeline.Pipeline):
             name_pipe_steps = tuple(name + "__" for name in self.regressor.named_steps.keys())
             params = {key : value for key, value in self.regressor.get_params().items() \
-                     if key.startswith(name_pipe_steps)}
+                      if key.startswith(name_pipe_steps)}
         else:
             params = self.regressor.get_params()
 
@@ -252,11 +254,11 @@ class ForecasterAutoregCustom(ForecasterBase):
             f"{'=' * len(str(type(self)).split('.')[1])} \n"
             f"Regressor: {self.regressor} \n"
             f"Predictors created with function: {self.create_predictors.__name__} \n"
-            f"Window size: {self.window_size} \n"
             f"Transformer for y: {self.transformer_y} \n"
             f"Transformer for exog: {self.transformer_exog} \n"
-            f"Included weights function: {True if self.weight_func is not None else False} \n"
-            f"Included exogenous: {self.included_exog} \n"
+            f"Window size: {self.window_size} \n"
+            f"Weight function included: {True if self.weight_func is not None else False} \n"
+            f"Exogenous included: {self.included_exog} \n"
             f"Type of exogenous variable: {self.exog_type} \n"
             f"Exogenous variables names: {self.exog_col_names} \n"
             f"Training range: {self.training_range.to_list() if self.fitted else None} \n"
@@ -397,13 +399,14 @@ class ForecasterAutoregCustom(ForecasterBase):
 
         Parameters
         ----------
-        X_train : pd.DataFrame
-            Data frame generated with the method `create_train_X_y`.
+        X_train : pandas DataFrame
+            Dataframe generated with the method `create_train_X_y`, first return.
 
         Returns
         -------
-        np.ndarray
-            Weights
+        sample_weight : numpy ndarray
+            Weights to use in `fit` method.
+
         """
 
         sample_weight = None
@@ -412,13 +415,18 @@ class ForecasterAutoregCustom(ForecasterBase):
             sample_weight = self.weight_func(X_train.index)
 
         if sample_weight is not None:
-            if np.sum(sample_weight) == 0:
-                raise Exception(
-                    "Weights sum to zero, can't be normalized"
+            if np.isnan(sample_weight).any():
+                raise ValueError(
+                    "The resulting `sample_weight` cannot have NaN values."
                 )
-            if(np.isnan(sample_weight).any()):
-                raise Exception(
-                    "NaN values in in Weights"
+            if np.any(sample_weight < 0):
+                raise ValueError(
+                    "The resulting `sample_weight` cannot have negative values."
+                )
+            if np.sum(sample_weight) == 0:
+                raise ValueError(
+                    ("The resulting `sample_weight` cannot be normalized because "
+                     "the sum of the weights is zero.")
                 )
 
         return sample_weight
@@ -979,7 +987,7 @@ class ForecasterAutoregCustom(ForecasterBase):
     ) -> None:
         """
         Set new values to the parameters of the scikit learn model stored in the
-        ForecasterAutoregCustom.
+        forecaster.
         
         Parameters
         ----------

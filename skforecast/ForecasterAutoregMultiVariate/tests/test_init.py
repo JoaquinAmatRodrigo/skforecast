@@ -1,11 +1,22 @@
-# Unit test __init__ ForecasterAutoregDirect
+# Unit test __init__ ForecasterAutoregMultiVariate
 # ==============================================================================
 import re
 import pytest
+from pytest import approx
 import numpy as np
 import pandas as pd
-from skforecast.ForecasterAutoregDirect import ForecasterAutoregDirect
+from skforecast.ForecasterAutoregMultiVariate import ForecasterAutoregMultiVariate
 from sklearn.linear_model import LinearRegression
+
+
+def test_init_exception_when_level_is_not_a_str():
+    """
+    Test exception is raised when level is not a str.
+    """
+    level = 5
+    err_msg = re.escape(f"`level` argument must be a str. Got {type(level)}.")
+    with pytest.raises(TypeError, match = err_msg):
+        ForecasterAutoregMultiVariate(LinearRegression(), level=level, lags=2, steps=3)
 
 
 def test_init_exception_when_steps_is_not_int():
@@ -18,7 +29,7 @@ def test_init_exception_when_steps_is_not_int():
                 f"Got {type(steps)}."
             )
     with pytest.raises(TypeError, match = err_msg):
-        ForecasterAutoregDirect(LinearRegression(), lags=2, steps=steps)
+        ForecasterAutoregMultiVariate(LinearRegression(), level='l1', lags=2, steps=steps)
 
 
 def test_init_exception_when_steps_is_less_than_1():
@@ -28,7 +39,7 @@ def test_init_exception_when_steps_is_less_than_1():
     steps = 0
     err_msg = re.escape(f"`steps` argument must be greater than or equal to 1. Got {steps}.")
     with pytest.raises(ValueError, match = err_msg):
-        ForecasterAutoregDirect(LinearRegression(), lags=2, steps=steps)
+        ForecasterAutoregMultiVariate(LinearRegression(), level='l1', lags=2, steps=steps)
 
 
 def test_init_exception_when_weight_func_is_not_a_callable():
@@ -38,4 +49,5 @@ def test_init_exception_when_weight_func_is_not_a_callable():
     weight_func = 'not_callable'
     err_msg = re.escape(f"Argument `weight_func` must be a callable. Got {type(weight_func)}.")
     with pytest.raises(TypeError, match = err_msg):
-        ForecasterAutoregDirect(LinearRegression(), lags=3, steps=2, weight_func=weight_func)
+        ForecasterAutoregMultiVariate(LinearRegression(), level='l1', lags=3, 
+                                      steps=2, weight_func=weight_func)
