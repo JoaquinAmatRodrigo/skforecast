@@ -13,9 +13,9 @@ from sklearn.linear_model import LinearRegression
 
 @pytest.mark.parametrize("steps", [[1, 2.0, 3], [1, 4.]], 
                          ids=lambda steps: f'steps: {steps}')
-def test_predict_exception_when_steps_list_contain_(steps):
+def test_predict_exception_when_steps_list_contain_floats(steps):
     """
-    Test predict output when using LinearRegression as regressor.
+    Test predict exception when steps is a list with floats.
     """
     forecaster = ForecasterAutoregDirect(LinearRegression(), lags=3, steps=5)
     forecaster.fit(y=pd.Series(np.arange(10)))
@@ -48,7 +48,8 @@ def test_predict_output_when_regressor_is_LinearRegression(steps):
 
 def test_predict_output_when_regressor_is_LinearRegression_with_list():
     """
-    Test predict output when using LinearRegression as regressor.
+    Test predict output when using LinearRegression as regressor and steps is
+    a list.
     """
     forecaster = ForecasterAutoregDirect(LinearRegression(), lags=3, steps=5)
     forecaster.fit(y=pd.Series(np.arange(50)))
