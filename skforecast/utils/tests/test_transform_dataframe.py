@@ -1,12 +1,28 @@
 # Unit test transform_dataframe
 # ==============================================================================
+import re
 import pytest
 import re
+import numpy as np
 import pandas as pd
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import OneHotEncoder
 from skforecast.utils import transform_dataframe
+
+
+def test_transform_dataframe_exception_when_df_is_not_pandas_DataFrame():
+    """
+    Test exception is raised when df is not a pandas DataFrame.
+    """
+    err_msg = re.escape("`df` argument must be a pandas DataFrame.")
+    with pytest.raises(TypeError, match = err_msg):
+        transform_dataframe(
+            df                = pd.Series(np.arange(10), name='y'),
+            transformer       = None,
+            fit               = True,
+            inverse_transform = False
+        )
 
 
 def test_transform_dataframe_when_transformer_is_None():

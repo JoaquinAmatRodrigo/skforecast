@@ -686,8 +686,8 @@ def transform_series(
     """
     
     if not isinstance(series, pd.Series):
-        raise Exception(
-            "Series argument must be a pandas Series object."
+        raise TypeError(
+            "`series` argument must be a pandas Series."
         )
         
     if transformer is None:
@@ -756,6 +756,11 @@ def transform_dataframe(
         Transformed DataFrame.
     
     """
+    
+    if not isinstance(df, pd.DataFrame):
+        raise TypeError(
+            "`df` argument must be a pandas DataFrame."
+        )
 
     if transformer is None:
         return df
