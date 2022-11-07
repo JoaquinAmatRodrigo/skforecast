@@ -1,10 +1,11 @@
-# Unit test predict ForecasterAutoregMultiSeries
+# Unit test predict ForecasterAutoregMultiVariate
 # ==============================================================================
+import re
 import pytest
 from pytest import approx
 import numpy as np
 import pandas as pd
-from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
+from skforecast.ForecasterAutoregMultiVariate import ForecasterAutoregMultiVariate
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import MinMaxScaler
@@ -14,10 +15,10 @@ from sklearn.linear_model import LinearRegression
 
 # Fixtures
 # np.random.seed(123)
-# series_1 = np.random.rand(50)
-# series_2 = np.random.rand(50)
-# exog = np.random.rand(50)
-series = pd.DataFrame({'1': pd.Series(np.array(
+# l1 = np.random.rand(50)
+# l2 = np.random.rand(50)
+# exog_1 = np.random.rand(50)
+series = pd.DataFrame({'l1': pd.Series(np.array(
                                 [0.69646919, 0.28613933, 0.22685145, 0.55131477, 0.71946897,
                                  0.42310646, 0.9807642 , 0.68482974, 0.4809319 , 0.39211752,
                                  0.34317802, 0.72904971, 0.43857224, 0.0596779 , 0.39804426,
@@ -30,7 +31,7 @@ series = pd.DataFrame({'1': pd.Series(np.array(
                                  0.25045537, 0.48303426, 0.98555979, 0.51948512, 0.61289453]
                                 )
                             ), 
-                       '2': pd.Series(np.array(
+                       'l2': pd.Series(np.array(
                                 [0.12062867, 0.8263408 , 0.60306013, 0.54506801, 0.34276383,
                                  0.30412079, 0.41702221, 0.68130077, 0.87545684, 0.51042234,
                                  0.66931378, 0.58593655, 0.6249035 , 0.67468905, 0.84234244,
@@ -46,7 +47,7 @@ series = pd.DataFrame({'1': pd.Series(np.array(
                       }
          )
     
-exog = pd.DataFrame({'col_1': pd.Series(np.array(
+exog = pd.DataFrame({'exog_1': pd.Series(np.array(
                                 [0.51312815, 0.66662455, 0.10590849, 0.13089495, 0.32198061,
                                  0.66156434, 0.84650623, 0.55325734, 0.85445249, 0.38483781,
                                  0.3167879 , 0.35426468, 0.17108183, 0.82911263, 0.33867085,
@@ -59,162 +60,144 @@ exog = pd.DataFrame({'col_1': pd.Series(np.array(
                                  0.75352599, 0.74186215, 0.04857903, 0.7086974 , 0.83924335]
                                 )
                               ),
-                     'col_2': ['a']*25 + ['b']*25}
+                     'exog_2': ['a']*25 + ['b']*25}
        )
 
 
-@pytest.fixture(params=[('1'  , [50., 51., 52., 53., 54.]), 
-                        (['2'], [100., 101., 102., 103., 104.]),
-                        (['1', '2'], [[50., 100.],
-                                      [51., 101.],
-                                      [52., 102.],
-                                      [53., 103.],
-                                      [54., 104.]])
-                        ],
-                        ids=lambda d: f'levels: {d[0]}, preds: {d[1]}')
-def expected_pandas_dataframe(request):
+@pytest.mark.parametrize("steps", [[1, 2.0, 3], [1, 4.]], 
+                         ids=lambda steps: f'steps: {steps}')
+def test_predict_exception_when_steps_list_contain_floats(steps):
     """
-    This is a pytest fixture. It's a function that can be passed to a
-    test so that we have a single block of code that can generate testing
-    examples.
-
-    We're using `params` in the call to declare that we want multiple versions
-    to be generated. This is similar to the parametrize decorator, but it's difference
-    because we can re-use `pd.Series` in multiple tests.
+    Test predict exception when steps is a list with floats.
     """
-    levels = request.param[0]
-    levels_names = [levels] if isinstance(levels, str) else levels
-        
-    expected_df = pd.DataFrame(
-                      data    = request.param[1],
-                      columns = levels_names,
-                      index   = pd.RangeIndex(start=50, stop=55, step=1)
-                  )
-
-    return levels, expected_df
-
-
-def test_predict_output_when_regressor_is_LinearRegression_with_fixture(expected_pandas_dataframe):
-    """
-    Test predict output when using LinearRegression as regressor with pytest fixture.
-    This test is equivalent to the next one.
-    """
-    series = pd.DataFrame({'1': pd.Series(np.arange(start=0, stop=50)), 
-                           '2': pd.Series(np.arange(start=50, stop=100))
-                          })
-
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5)
+    forecaster = ForecasterAutoregMultiVariate(LinearRegression(), level='l1',
+                                               lags=3, steps=3)
     forecaster.fit(series=series)
-    predictions = forecaster.predict(steps=5, levels=expected_pandas_dataframe[0])
-    expected = expected_pandas_dataframe[1]
 
-    pd.testing.assert_frame_equal(predictions, expected)
+    err_msg = re.escape(
+                    f"`steps` argument must be an int, a list of ints or `None`. "
+                    f"Got {type(steps)}."
+                )
+    with pytest.raises(TypeError, match = err_msg):
+        forecaster.predict(steps=steps)
 
 
-def test_predict_output_when_regressor_is_LinearRegression():
+@pytest.mark.parametrize("steps", [3, [1, 2, 3], None], 
+                         ids=lambda steps: f'steps: {steps}')
+def test_predict_output_when_regressor_is_LinearRegression(steps):
     """
     Test predict output when using LinearRegression as regressor.
     """
-    series = pd.DataFrame({'1': pd.Series(np.arange(start=0, stop=50)), 
-                           '2': pd.Series(np.arange(start=50, stop=100))
-                          })
-
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5)
+    forecaster = ForecasterAutoregMultiVariate(LinearRegression(), level='l1',
+                                               lags=3, steps=3)
     forecaster.fit(series=series)
-    predictions_1 = forecaster.predict(steps=5, levels='1')
-    expected_1 = pd.DataFrame(
-                     data    = np.array([50., 51., 52., 53., 54.]),
-                     index   = pd.RangeIndex(start=50, stop=55, step=1),
-                     columns = ['1']
-                 )
-
-    predictions_2 = forecaster.predict(steps=5, levels=['2'])
-    expected_2 = pd.DataFrame(
-                     data    = np.array([100., 101., 102., 103., 104.]),
-                     index   = pd.RangeIndex(start=50, stop=55, step=1),
-                     columns = ['2']
-                 )
-
-    predictions_3 = forecaster.predict(steps=5, levels=None)
-    expected_3 = pd.DataFrame(
-                     data    = np.array([[50., 100.],
-                                         [51., 101.],
-                                         [52., 102.],
-                                         [53., 103.],
-                                         [54., 104.]]),
-                     index   = pd.RangeIndex(start=50, stop=55, step=1),
-                     columns = ['1', '2']
-                 )
-
-    pd.testing.assert_frame_equal(predictions_1, expected_1)
-    pd.testing.assert_frame_equal(predictions_2, expected_2)
-    pd.testing.assert_frame_equal(predictions_3, expected_3)
+    results = forecaster.predict(steps=steps)
+    expected = pd.DataFrame(
+                   data    = np.array([0.63114259, 0.3800417, 0.33255977]),
+                   index   = pd.RangeIndex(start=50, stop=53, step=1),
+                   columns = ['l1']
+               )
+    
+    pd.testing.assert_frame_equal(results, expected)
 
 
-def test_predict_output_when_regressor_is_LinearRegression_with_last_window():
+def test_predict_output_when_regressor_is_LinearRegression_with_list_interspersed():
     """
-    Test predict output when using LinearRegression as regressor.
+    Test predict output when using LinearRegression as regressor and steps is
+    a list with interspersed steps.
     """
-    series = pd.DataFrame({'1': pd.Series(np.arange(start=0, stop=50)), 
-                           '2': pd.Series(np.arange(start=50, stop=100))
-                          })
+    forecaster = ForecasterAutoregMultiVariate(LinearRegression(), level='l2',
+                                               lags=3, steps=5)
+    forecaster.fit(series=series)
+    results = forecaster.predict(steps=[1, 4])
+    expected = pd.DataFrame(
+                   data    = np.array([0.61048324, 0.53962565]),
+                   index   = pd.RangeIndex(start=50, stop=55, step=1)[[0, 3]],
+                   columns = ['l2']
+               )
+    
+    pd.testing.assert_frame_equal(results, expected)
+
+
+def test_predict_output_when_regressor_is_LinearRegression_with_different_lags():
+    """
+    Test predict output when using LinearRegression as regressor and different
+    lags configuration for each series.
+    """
+    forecaster = ForecasterAutoregMultiVariate(LinearRegression(), level='l2',
+                                               lags={'l1': 5, 'l2': [1, 7]}, steps=3)
+    forecaster.fit(series=series)
+    results = forecaster.predict(steps=3)
+    expected = pd.DataFrame(
+                   data    = np.array([0.58053278, 0.43052971, 0.60582844]),
+                   index   = pd.RangeIndex(start=50, stop=53, step=1),
+                   columns = ['l2']
+               )
+    
+    pd.testing.assert_frame_equal(results, expected)
+
+
+def test_predict_output_when_regressor_is_LinearRegression_using_last_window():
+    """
+    Test predict output when using LinearRegression as regressor and last_window.
+    """
+    forecaster = ForecasterAutoregMultiVariate(LinearRegression(), level='l1',
+                                               lags=3, steps=3)
+    forecaster.fit(series=series)
     last_window = pd.DataFrame(
-                      {'1': [45, 46, 47, 48, 49], 
-                       '2': [95, 96, 97, 98, 99], 
-                       '3': [1, 2, 3, 4, 5]}, 
-                      index = pd.RangeIndex(start=45, stop=50, step=1)
+                      data    = np.array([[0.98555979, 0.39887629],
+                                          [0.51948512, 0.2408559 ],
+                                          [0.61289453, 0.34345601]]),
+                      index   = pd.RangeIndex(start=47, stop=50, step=1),
+                      columns = ['l1', 'l2']
                   )
+    results = forecaster.predict(steps=[1, 2], last_window=last_window)
+    expected = pd.DataFrame(
+                   data    = np.array([0.63114259, 0.3800417]),
+                   index   = pd.RangeIndex(start=50, stop=52, step=1),
+                   columns = ['l1']
+               )
+    
+    pd.testing.assert_frame_equal(results, expected)
 
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5)
-    forecaster.fit(series=series)
-    predictions_1 = forecaster.predict(steps=5, levels='1', last_window=last_window)
-    expected_1 = pd.DataFrame(
-                     data    = np.array([50., 51., 52., 53., 54.]),
-                     index   = pd.RangeIndex(start=50, stop=55, step=1),
-                     columns = ['1']
-                 )
 
-    predictions_2 = forecaster.predict(steps=5, levels=['2'], last_window=last_window)
-    expected_2 = pd.DataFrame(
-                     data    = np.array([100., 101., 102., 103., 104.]),
-                     index   = pd.RangeIndex(start=50, stop=55, step=1),
-                     columns = ['2']
-                 )
-
-    predictions_3 = forecaster.predict(steps=5, levels=['1', '2'], last_window=last_window)
-    expected_3 = pd.DataFrame(
-                     data    = np.array([[50., 100.],
-                                         [51., 101.],
-                                         [52., 102.],
-                                         [53., 103.],
-                                         [54., 104.]]),
-                     index   = pd.RangeIndex(start=50, stop=55, step=1),
-                     columns = ['1', '2']
-                 )
-
-    pd.testing.assert_frame_equal(predictions_1, expected_1)
-    pd.testing.assert_frame_equal(predictions_2, expected_2)
-    pd.testing.assert_frame_equal(predictions_3, expected_3)
+def test_predict_output_when_regressor_is_LinearRegression_using_exog():
+    """
+    Test predict output when using LinearRegression as regressor and exog.
+    """
+    forecaster = ForecasterAutoregMultiVariate(LinearRegression(), level='l1',
+                                               lags=3, steps=3)
+    forecaster.fit(series=series.iloc[:40,], exog=exog.iloc[:40, 0])
+    results = forecaster.predict(steps=None, exog=exog.iloc[40:43, 0])
+    expected = pd.DataFrame(
+                   data    = np.array([0.57243323, 0.56121924, 0.38879785]),
+                   index   = pd.RangeIndex(start=40, stop=43, step=1),
+                   columns = ['l1']
+               )
+    
+    pd.testing.assert_frame_equal(results, expected)
 
 
 def test_predict_output_when_regressor_is_LinearRegression_with_transform_series():
     """
     Test predict output when using LinearRegression as regressor and StandardScaler.
     """
-    forecaster = ForecasterAutoregMultiSeries(
-                     regressor = LinearRegression(),
-                     lags = 5,
+    forecaster = ForecasterAutoregMultiVariate(
+                     regressor          = LinearRegression(),
+                     level              = 'l1',
+                     lags               = 5,
+                     steps              = 5,
                      transformer_series = StandardScaler()
                  )
-    forecaster.fit(series = series)
-    predictions = forecaster.predict(steps=5, levels='1')
+    forecaster.fit(series=series)
+    results = forecaster.predict()
     expected = pd.DataFrame(
-                   data    = np.array([0.52791431, 0.44509712, 0.42176045, 0.48087237, 0.48268008]),
+                   data    = np.array([0.60056539, 0.42924504, 0.34173573, 0.44231236, 0.40133213]),
                    index   = pd.RangeIndex(start=50, stop=55, step=1),
-                   columns = ['1']
+                   columns = ['l1']
                )
     
-    pd.testing.assert_frame_equal(predictions, expected)
+    pd.testing.assert_frame_equal(results, expected)
 
 
 def test_predict_output_when_regressor_is_LinearRegression_with_transform_series_as_dict():
@@ -222,20 +205,22 @@ def test_predict_output_when_regressor_is_LinearRegression_with_transform_series
     Test predict output when using LinearRegression as regressor and transformer_series
     is a dict with 2 different transformers.
     """
-    forecaster = ForecasterAutoregMultiSeries(
-                     regressor = LinearRegression(),
-                     lags = 5,
-                     transformer_series = {'1': StandardScaler(), '2': MinMaxScaler()}
+    forecaster = ForecasterAutoregMultiVariate(
+                     regressor          = LinearRegression(),
+                     level              = 'l2',
+                     lags               = 5,
+                     steps              = 5,
+                     transformer_series = {'l1': StandardScaler(), 'l2': MinMaxScaler()}
                  )
-    forecaster.fit(series = series)
-    predictions = forecaster.predict(steps=5, levels=['1'])
+    forecaster.fit(series=series)
+    results = forecaster.predict()
     expected = pd.DataFrame(
-                   data    = np.array([0.59619193, 0.46282914, 0.41738496, 0.48522676, 0.47525733]),
+                   data    = np.array([0.65049981, 0.57548048, 0.64278726, 0.54421867, 0.7851753 ]),
                    index   = pd.RangeIndex(start=50, stop=55, step=1),
-                   columns = ['1']
+                   columns = ['l2']
                )
     
-    pd.testing.assert_frame_equal(predictions, expected)
+    pd.testing.assert_frame_equal(results, expected)
 
 
 def test_predict_output_when_regressor_is_LinearRegression_with_transform_series_and_transform_exog():
@@ -244,23 +229,25 @@ def test_predict_output_when_regressor_is_LinearRegression_with_transform_series
     as transformer_series and transformer_exog as transformer_exog.
     """
     transformer_exog = ColumnTransformer(
-                           [('scale', StandardScaler(), ['col_1']),
-                            ('onehot', OneHotEncoder(), ['col_2'])],
-                           remainder = 'passthrough',
-                           verbose_feature_names_out = False
+                            [('scale', StandardScaler(), ['exog_1']),
+                             ('onehot', OneHotEncoder(), ['exog_2'])],
+                            remainder = 'passthrough',
+                            verbose_feature_names_out = False
                        )
-    forecaster = ForecasterAutoregMultiSeries(
-                     regressor = LinearRegression(),
-                     lags = 5,
+    forecaster = ForecasterAutoregMultiVariate(
+                     regressor          = LinearRegression(),
+                     level              = 'l1',
+                     lags               = 5,
+                     steps              = 5,
                      transformer_series = StandardScaler(),
-                     transformer_exog = transformer_exog,
+                     transformer_exog   = transformer_exog
                  )
     forecaster.fit(series=series, exog=exog)
-    predictions = forecaster.predict(steps=5, levels='1', exog=exog)
+    results = forecaster.predict(steps=[1, 2, 3, 4, 5], exog=exog)
     expected = pd.DataFrame(
-                   data    = np.array([0.53267333, 0.44478046, 0.52579563, 0.57391142, 0.54633594]),
+                   data    = np.array([0.61043227, 0.46658137, 0.54994519, 0.52561227, 0.46596527]),
                    index   = pd.RangeIndex(start=50, stop=55, step=1),
-                   columns = ['1']
+                   columns = ['l1']
                )
     
-    pd.testing.assert_frame_equal(predictions, expected)
+    pd.testing.assert_frame_equal(results, expected)

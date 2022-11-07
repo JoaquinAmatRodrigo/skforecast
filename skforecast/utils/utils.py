@@ -343,19 +343,29 @@ def check_predict_input(
                  f'calculate the predictors. For this forecaster it is {window_size}.')
             )
                 
-        if str(forecaster_type).split('.')[1] == 'ForecasterAutoregMultiSeries':
+        if str(forecaster_type).split('.')[1] in \
+           ['ForecasterAutoregMultiSeries', 'ForecasterAutoregMultiVariate']:
             if not isinstance(last_window, pd.DataFrame):
                 raise TypeError(
-                    (f'In ForecasterAutoregMultiSeries `last_window` must be a pandas DataFrame. ' 
-                     f'Got {type(last_window)}.')
+                    f'`last_window` must be a pandas DataFrame. Got {type(last_window)}.'
                 )
             
-            if len(set(levels) - set(last_window.columns)) != 0:
+            if (str(forecaster_type).split('.')[1] == 'ForecasterAutoregMultiSeries') and \
+               (len(set(levels) - set(last_window.columns)) != 0):
                 raise ValueError(
                     (f'`last_window` must contain a column(s) named as the level(s) to be predicted.\n'
                      f'    `levels` : {levels}.\n'
                      f'    `last_window` columns : {list(last_window.columns)}.')
                 )
+            
+            if (str(forecaster_type).split('.')[1] == 'ForecasterAutoregMultiVariate') and \
+               (series_levels != list(last_window.columns)):
+                raise ValueError(
+                    (f'`last_window` columns must be the same as `series` column names.\n'
+                     f'    `last_window` columns : {list(last_window.columns)}.\n'
+                     f'    `series` columns      : {series_levels}.')
+                )
+        
         else:    
             if not isinstance(last_window, pd.Series):
                 raise TypeError('`last_window` must be a pandas Series.')

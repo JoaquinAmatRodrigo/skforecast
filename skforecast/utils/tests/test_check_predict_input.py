@@ -469,17 +469,19 @@ def test_check_input_predict_exception_when_length_last_window_is_lower_than_win
         )
 
 
-def test_check_input_predict_exception_when_last_window_is_not_pandas_dataframe_ForecasterAutoregMultiSeries():
+@pytest.mark.parametrize("forecaster_type", 
+                         ['class.ForecasterAutoregMultiSeries',
+                          'class.ForecasterAutoregMultiVariate'], 
+                         ids=lambda ft: f'forecaster_type: {ft}')
+def test_check_input_predict_exception_when_last_window_is_not_pandas_dataframe(forecaster_type):
     """
+    `ForecasterAutoregMultiSeries` and `ForecasterAutoregMultiVariate`.
     """
     last_window = np.arange(5)
-    err_msg = re.escape(
-                    (f'In ForecasterAutoregMultiSeries `last_window` must be a pandas DataFrame. ' 
-                     f'Got {type(last_window)}.')
-                )
+    err_msg = re.escape(f'`last_window` must be a pandas DataFrame. Got {type(last_window)}.')
     with pytest.raises(TypeError, match = err_msg):
         check_predict_input(
-            forecaster_type = 'class.ForecasterAutoregMultiSeries',
+            forecaster_type = forecaster_type,
             steps           = 10,
             fitted          = True,
             included_exog   = True,
@@ -528,6 +530,38 @@ def test_check_input_predict_exception_when_levels_not_in_last_window_Forecaster
             max_steps       = None,
             levels          = levels,
             series_levels   = ['1', '2']
+        )
+
+
+def test_check_input_predict_exception_when_series_levels_not_last_window_ForecasterAutoregMultiVariate():
+    """
+    Check exception is raised when column names of series using during fit do not
+    match with last_window column names.
+    """
+    last_window = pd.DataFrame({'l1': [1, 2, 3], '4': [1, 2, 3]})
+    series_levels = ['l1', 'l2']
+    err_msg = re.escape(
+                    (f'`last_window` columns must be the same as `series` column names.\n'
+                     f'    `last_window` columns : {list(last_window.columns)}.\n'
+                     f'    `series` columns      : {series_levels}.')
+                )
+    with pytest.raises(ValueError, match = err_msg):
+        check_predict_input(
+            forecaster_type = 'class.ForecasterAutoregMultiVariate',
+            steps           = 10,
+            fitted          = True,
+            included_exog   = True,
+            index_type      = pd.RangeIndex,
+            index_freq      = None,
+            window_size     = 2,
+            last_window     = last_window,
+            exog            = pd.Series(np.arange(10)),
+            exog_type       = pd.Series,
+            exog_col_names  = None,
+            interval        = None,
+            max_steps       = None,
+            levels          = None,
+            series_levels   = series_levels
         )
 
 

@@ -155,7 +155,7 @@ def test_output_get_feature_importance_when_regressor_no_attributes():
     `feature_importances_` or `coef_, results = None and a warning is raised`
     """
     forecaster = ForecasterAutoregDirect(
-                     regressor = MLPRegressor(solver = 'lbfgs', max_iter= 50, random_state=123),
+                     regressor = MLPRegressor(solver='lbfgs', max_iter=50, random_state=123),
                      lags      = 5,
                      steps     = 1
                  )

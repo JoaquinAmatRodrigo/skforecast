@@ -46,17 +46,17 @@ def test_predict_output_when_regressor_is_LinearRegression(steps):
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_predict_output_when_regressor_is_LinearRegression_with_list():
+def test_predict_output_when_regressor_is_LinearRegression_with_list_interspersed():
     """
     Test predict output when using LinearRegression as regressor and steps is
-    a list.
+    a list with interspersed steps.
     """
     forecaster = ForecasterAutoregDirect(LinearRegression(), lags=3, steps=5)
     forecaster.fit(y=pd.Series(np.arange(50)))
     results = forecaster.predict(steps=[1, 4])
     expected = pd.Series(
                    data  = np.array([50., 53.]),
-                   index = pd.RangeIndex(start=50, stop=54, step=1)[[0, 3]],
+                   index = pd.RangeIndex(start=50, stop=55, step=1)[[0, 3]],
                    name  = 'pred'
                )
     

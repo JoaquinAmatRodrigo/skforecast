@@ -779,7 +779,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             interval        = None,
             max_steps       = self.steps,
             levels          = None,
-            series_levels   = None
+            series_levels   = self.multivariate_series
         )
         
         if exog is not None:
