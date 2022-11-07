@@ -20,7 +20,7 @@ from sklearn.base import clone
 
 import skforecast
 from ..ForecasterBase import ForecasterBase
-from ..utils import generate_lags_ndarray
+from ..utils import initialize_lags
 from ..utils import check_y
 from ..utils import check_exog
 from ..utils import preprocess_y
@@ -225,7 +225,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         
         self.regressors_ = {step: clone(self.regressor) for step in range(steps)}
 
-        self.lags = generate_lags_ndarray(type(self), lags)
+        self.lags = initialize_lags(type(self), lags)
         self.max_lag = max(self.lags)
         self.window_size = self.max_lag
 
@@ -808,7 +808,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         
         """
         
-        self.lags = generate_lags_ndarray(type(self), lags)
+        self.lags = initialize_lags(type(self), lags)
         self.max_lag  = max(self.lags)
         self.window_size = max(self.lags)
 

@@ -14,7 +14,7 @@ import pandas as pd
 import sklearn
 
 
-def generate_lags_ndarray(
+def initialize_lags(
     forecaster_type,
     lags: Any
 ) -> None:

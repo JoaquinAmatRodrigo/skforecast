@@ -21,7 +21,7 @@ from itertools import chain
 
 import skforecast
 from ..ForecasterBase import ForecasterBase
-from ..utils import generate_lags_ndarray
+from ..utils import initialize_lags
 from ..utils import check_y
 from ..utils import check_exog
 from ..utils import preprocess_y
@@ -241,9 +241,9 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         if isinstance(lags, dict):
             self.lags = {}
             for key in lags:
-                self.lags[key] = generate_lags_ndarray(forecaster_type=type(self), lags=lags[key])
+                self.lags[key] = initialize_lags(forecaster_type=type(self), lags=lags[key])
         else:
-            self.lags = generate_lags_ndarray(forecaster_type=type(self), lags=lags)
+            self.lags = initialize_lags(forecaster_type=type(self), lags=lags)
 
         self.lags_ = self.lags
         self.max_lag = max(list(chain(*self.lags.values()))) if isinstance(self.lags, dict) else max(self.lags)
@@ -910,9 +910,9 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         if isinstance(lags, dict):
             self.lags = {}
             for key in lags:
-                self.lags[key] = generate_lags_ndarray(forecaster_type=type(self), lags=lags[key])
+                self.lags[key] = initialize_lags(forecaster_type=type(self), lags=lags[key])
         else:
-            self.lags = generate_lags_ndarray(forecaster_type=type(self), lags=lags)
+            self.lags = initialize_lags(forecaster_type=type(self), lags=lags)
         
         self.lags_ = self.lags
         self.max_lag = max(list(chain(*self.lags.values()))) if isinstance(self.lags, dict) else max(self.lags)
