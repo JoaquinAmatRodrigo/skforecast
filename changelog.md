@@ -8,7 +8,7 @@ All notable changes to this project will be documented in this file.
 
 + `filter_train_X_y_for_step` in `ForecasterAutoregDirect` now starts at 1 (before 0).
 
-+ column names in `y_train` pandas DataFrame in `ForecasterAutoregDirect` now start with 1, `y_step_1`.
++ column names in `y_train` pandas DataFrame in `ForecasterAutoregDirect` now start with 1, `y_step_1`, (before `y_step_0`).
 
 + `ForecasterAutoregMultivariate`.
 
