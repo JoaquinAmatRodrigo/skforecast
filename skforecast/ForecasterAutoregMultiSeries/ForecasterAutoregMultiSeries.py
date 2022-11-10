@@ -821,7 +821,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             levels = [levels]
         
         check_predict_input(
-            forecaster_type = type(self),
+            forecaster_type = type(self).__name__,
             steps           = steps,
             fitted          = self.fitted,
             included_exog   = self.included_exog,
@@ -835,7 +835,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             interval        = None,
             max_steps       = None,
             levels          = levels,
-            series_levels   = self.series_levels
+            series_columns  = self.series_levels
         )
         
         if exog is not None:
@@ -1138,7 +1138,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             )
         
         check_predict_input(
-            forecaster_type = type(self),
+            forecaster_type = type(self).__name__,
             steps           = steps,
             fitted          = self.fitted,
             included_exog   = self.included_exog,
@@ -1152,7 +1152,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             interval        = interval,
             max_steps       = None,
             levels          = levels,
-            series_levels   = self.series_levels
+            series_columns  = self.series_levels
         ) 
         
         if exog is not None:

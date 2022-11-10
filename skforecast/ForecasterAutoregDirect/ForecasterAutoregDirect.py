@@ -674,7 +674,7 @@ class ForecasterAutoregDirect(ForecasterBase):
                 )
 
         check_predict_input(
-            forecaster_type = type(self),
+            forecaster_type = type(self).__name__,
             steps           = steps,
             fitted          = self.fitted,
             included_exog   = self.included_exog,
@@ -688,7 +688,7 @@ class ForecasterAutoregDirect(ForecasterBase):
             interval        = None,
             max_steps       = self.steps,
             levels          = None,
-            series_levels   = None
+            series_columns  = None
         ) 
 
         if exog is not None:
