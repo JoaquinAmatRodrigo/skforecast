@@ -184,7 +184,7 @@ def check_predict_input(
     interval: list=None,
     max_steps: int=None,
     levels: Optional[Union[str, list]]=None,
-    series_columns: list=None
+    series_col_names: list=None
 ) -> None:
     """
     Check all inputs of predict method. This is a helper function to validate
@@ -242,7 +242,7 @@ def check_predict_input(
     levels : str, list, default `None`
         Time series to be predicted (`ForecasterAutoregMultiSeries`).
 
-    series_columns : list, default `None`
+    series_col_names : list, default `None`
         Names of the columns used during fit (`ForecasterAutoregMultiSeries` and 
         `ForecasterAutoregMultiVariate`).
     
@@ -282,9 +282,9 @@ def check_predict_input(
                 f'`levels` must be a `list` of column names, a `str` of a column name or `None`.'
             )
 
-        if len(set(levels) - set(series_columns)) != 0:
+        if len(set(levels) - set(series_col_names)) != 0:
             raise ValueError(
-                f'`levels` must be in `series_levels` : {series_columns}.'
+                f'`levels` must be in `series_col_names` : {series_col_names}.'
             )
 
     if exog is None and included_exog:
@@ -359,11 +359,11 @@ def check_predict_input(
                 )
             
             if forecaster_type == 'ForecasterAutoregMultiVariate' and \
-               series_columns != list(last_window.columns):
+               (series_col_names != list(last_window.columns)):
                 raise ValueError(
                     (f'`last_window` columns must be the same as `series` column names.\n'
                      f'    `last_window` columns : {list(last_window.columns)}.\n'
-                     f'    `series` columns      : {series_columns}.')
+                     f'    `series` columns      : {series_col_names}.')
                 )
         
         else:    
