@@ -79,7 +79,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         preprocessing API. The transformation is applied to `exog` before training the
         forecaster. `inverse_transform` is not available when using ColumnTransformers.
 
-    weight_func : callable, dict, default `None`
+    weight_func : callable, default `None`
         Function that defines the individual weights for each sample based on the
         index. For example, a function that assigns a lower weight to certain dates.
         Ignored if `regressor` does not have the argument `sample_weight` in its
