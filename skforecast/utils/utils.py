@@ -184,7 +184,7 @@ def check_predict_input(
     interval: list=None,
     max_steps: int=None,
     levels: Optional[Union[str, list]]=None,
-    series_levels: list=None
+    series_columns: list=None
 ) -> None:
     """
     Check all inputs of predict method. This is a helper function to validate
@@ -242,8 +242,9 @@ def check_predict_input(
     levels : str, list, default `None`
         Time series to be predicted (`ForecasterAutoregMultiSeries`).
 
-    series_levels : list, default `None`
-        Names of the columns (levels) that can be predicted.
+    series_columns : list, default `None`
+        Names of the columns used during fit (`ForecasterAutoregMultiSeries` and 
+        `ForecasterAutoregMultiVariate`).
     
     """
 
@@ -275,15 +276,15 @@ def check_predict_input(
     if interval is not None:
         _check_interval(interval = interval)
     
-    if str(forecaster_type).split('.')[1] == 'ForecasterAutoregMultiSeries':
+    if forecaster_type == 'ForecasterAutoregMultiSeries':
         if levels is not None and not isinstance(levels, (str, list)):
             raise TypeError(
                 f'`levels` must be a `list` of column names, a `str` of a column name or `None`.'
             )
 
-        if len(set(levels) - set(series_levels)) != 0:
+        if len(set(levels) - set(series_columns)) != 0:
             raise ValueError(
-                f'`levels` must be in `series_levels` : {series_levels}.'
+                f'`levels` must be in `series_levels` : {series_columns}.'
             )
 
     if exog is None and included_exog:
@@ -343,27 +344,26 @@ def check_predict_input(
                  f'calculate the predictors. For this forecaster it is {window_size}.')
             )
                 
-        if str(forecaster_type).split('.')[1] in \
-           ['ForecasterAutoregMultiSeries', 'ForecasterAutoregMultiVariate']:
+        if forecaster_type in ['ForecasterAutoregMultiSeries', 'ForecasterAutoregMultiVariate']:
             if not isinstance(last_window, pd.DataFrame):
                 raise TypeError(
                     f'`last_window` must be a pandas DataFrame. Got {type(last_window)}.'
                 )
             
-            if (str(forecaster_type).split('.')[1] == 'ForecasterAutoregMultiSeries') and \
-               (len(set(levels) - set(last_window.columns)) != 0):
+            if forecaster_type == 'ForecasterAutoregMultiSeries' and \
+               len(set(levels) - set(last_window.columns)) != 0:
                 raise ValueError(
                     (f'`last_window` must contain a column(s) named as the level(s) to be predicted.\n'
                      f'    `levels` : {levels}.\n'
                      f'    `last_window` columns : {list(last_window.columns)}.')
                 )
             
-            if (str(forecaster_type).split('.')[1] == 'ForecasterAutoregMultiVariate') and \
-               (series_levels != list(last_window.columns)):
+            if forecaster_type == 'ForecasterAutoregMultiVariate' and \
+               series_columns != list(last_window.columns):
                 raise ValueError(
                     (f'`last_window` columns must be the same as `series` column names.\n'
                      f'    `last_window` columns : {list(last_window.columns)}.\n'
-                     f'    `series` columns      : {series_levels}.')
+                     f'    `series` columns      : {series_columns}.')
                 )
         
         else:    

@@ -765,7 +765,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                 )
         
         check_predict_input(
-            forecaster_type = type(self),
+            forecaster_type = type(self).__name__,
             steps           = steps,
             fitted          = self.fitted,
             included_exog   = self.included_exog,
@@ -779,7 +779,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             interval        = None,
             max_steps       = self.steps,
             levels          = None,
-            series_levels   = self.multivariate_series
+            series_columns  = self.multivariate_series
         )
         
         if exog is not None:
