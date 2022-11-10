@@ -21,21 +21,21 @@ def test_check_input_predict_exception_when_fitted_is_False():
               )
     with pytest.raises(NotFittedError, match = err_msg):
         check_predict_input(
-            forecaster_type = 'class.ForecasterAutoreg',
-            steps           = 5,
-            fitted          = False,
-            included_exog   = False,
-            index_type      = None,
-            index_freq      = None,
-            window_size     = None,
-            last_window     = None,
-            exog            = None,
-            exog_type       = None,
-            exog_col_names  = None,
-            interval        = None,
-            max_steps       = None,
-            levels          = None,
-            series_levels   = None
+            forecaster_type    = 'class.ForecasterAutoreg',
+            steps              = 5,
+            fitted             = False,
+            included_exog      = False,
+            index_type         = None,
+            index_freq         = None,
+            window_size        = None,
+            last_window        = None,
+            exog               = None,
+            exog_type          = None,
+            exog_col_names     = None,
+            interval           = None,
+            max_steps          = None,
+            levels             = None,
+            series_col_names   = None
         )
         
         
@@ -62,7 +62,7 @@ def test_check_input_predict_exception_when_steps_int_lower_than_1():
             interval        = None,
             max_steps       = None,
             levels          = None,
-            series_levels   = None
+            series_col_names   = None
         )
         
         
@@ -93,7 +93,7 @@ def test_check_input_predict_exception_when_steps_list_lower_than_0():
             interval        = None,
             max_steps       = None,
             levels          = None,
-            series_levels   = None
+            series_col_names   = None
         )
 
 
@@ -126,7 +126,7 @@ def test_check_input_predict_exception_when_max_steps_greater_than_max_steps():
             interval        = None,
             max_steps       = max_steps,
             levels          = None,
-            series_levels   = None
+            series_col_names   = None
         )
 
 
@@ -153,20 +153,20 @@ def test_check_input_predict_exception_when_ForecasterAutoregMultiSeries_and_lev
             interval        = None,
             max_steps       = None,
             levels          = levels,
-            series_levels   = ['1', '2']
+            series_col_names   = ['1', '2']
         )
 
 
-@pytest.mark.parametrize("levels     , series_levels", 
+@pytest.mark.parametrize("levels     , series_col_names", 
                          [('1'       , ['2', '3']), 
                           (['1']     , ['2', '3']), 
                           (['1', '2'], ['2', '3'])])
-def test_check_input_predict_exception_when_ForecasterAutoregMultiSeries_and_level_not_in_series_levels(levels, series_levels):
+def test_check_input_predict_exception_when_ForecasterAutoregMultiSeries_and_level_not_in_series_col_names(levels, series_col_names):
     """
-    Test exception is raised when `levels` is not in `self.series_levels` in a 
+    Test exception is raised when `levels` is not in `self.series_col_names` in a 
     ForecasterAutoregMultiSeries.
     """
-    err_msg = re.escape(f'`levels` must be in `series_levels` : {series_levels}.')
+    err_msg = re.escape(f'`levels` must be in `series_col_names` : {series_col_names}.')
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
             forecaster_type = 'class.ForecasterAutoregMultiSeries',
@@ -183,7 +183,7 @@ def test_check_input_predict_exception_when_ForecasterAutoregMultiSeries_and_lev
             interval        = None,
             max_steps       = None,
             levels          = levels,
-            series_levels   = series_levels
+            series_col_names   = series_col_names
         )
 
 
@@ -210,7 +210,7 @@ def test_check_input_predict_exception_when_exog_is_none_and_included_exog_is_tr
             interval        = None,
             max_steps       = None,
             levels          = None,
-            series_levels   = None
+            series_col_names   = None
         )
 
 
@@ -237,7 +237,7 @@ def test_check_input_predict_exception_when_exog_is_not_none_and_included_exog_i
             interval        = None,
             max_steps       = None,
             levels          = None,
-            series_levels   = None
+            series_col_names   = None
         )
 
 
@@ -267,7 +267,7 @@ def test_check_input_predict_exception_when_len_exog_is_less_than_steps(steps):
             interval        = None,
             max_steps       = None,
             levels          = None,
-            series_levels   = None
+            series_col_names   = None
         )
 
 
@@ -291,7 +291,7 @@ def test_check_input_predict_exception_when_exog_is_not_pandas_series_or_datafra
             interval        = None,
             max_steps       = None,
             levels          = None,
-            series_levels   = None
+            series_col_names   = None
         )
 
 
@@ -315,7 +315,7 @@ def test_check_input_predict_exception_when_exog_has_missing_values():
             interval        = None,
             max_steps       = None,
             levels          = None,
-            series_levels   = None
+            series_col_names   = None
         )
 
 
@@ -342,7 +342,7 @@ def test_check_input_predict_exception_when_exog_is_not_of_exog_type():
             interval        = None,
             max_steps       = None,
             levels          = None,
-            series_levels   = None
+            series_col_names   = None
         )
 
 
@@ -372,7 +372,7 @@ def test_check_input_predict_exception_when_exog_is_dataframe_without_columns_in
             interval        = None,
             max_steps       = None,
             levels          = None,
-            series_levels   = None
+            series_col_names   = None
         )
 
 
@@ -404,7 +404,7 @@ def test_check_input_predict_exception_when_exog_index_is_not_of_index_type():
             interval        = None,
             max_steps       = None,
             levels          = None,
-            series_levels   = None
+            series_col_names   = None
         )
 
 
@@ -436,7 +436,7 @@ def test_check_input_predict_exception_when_exog_index_frequency_is_not_index_fr
             interval        = None,
             max_steps       = None,
             levels          = None,
-            series_levels   = None
+            series_col_names   = None
         )
 
 
@@ -465,7 +465,7 @@ def test_check_input_predict_exception_when_length_last_window_is_lower_than_win
             interval        = None,
             max_steps       = None,
             levels          = None,
-            series_levels   = None
+            series_col_names   = None
         )
 
 
@@ -495,7 +495,7 @@ def test_check_input_predict_exception_when_last_window_is_not_pandas_dataframe(
             interval        = None,
             max_steps       = None,
             levels          = '1',
-            series_levels   = ['1', '2']
+            series_col_names   = ['1', '2']
         )
 
 
@@ -529,21 +529,21 @@ def test_check_input_predict_exception_when_levels_not_in_last_window_Forecaster
             interval        = None,
             max_steps       = None,
             levels          = levels,
-            series_levels   = ['1', '2']
+            series_col_names   = ['1', '2']
         )
 
 
-def test_check_input_predict_exception_when_series_levels_not_last_window_ForecasterAutoregMultiVariate():
+def test_check_input_predict_exception_when_series_col_names_not_last_window_ForecasterAutoregMultiVariate():
     """
     Check exception is raised when column names of series using during fit do not
     match with last_window column names.
     """
     last_window = pd.DataFrame({'l1': [1, 2, 3], '4': [1, 2, 3]})
-    series_levels = ['l1', 'l2']
+    series_col_names = ['l1', 'l2']
     err_msg = re.escape(
                     (f'`last_window` columns must be the same as `series` column names.\n'
                      f'    `last_window` columns : {list(last_window.columns)}.\n'
-                     f'    `series` columns      : {series_levels}.')
+                     f'    `series` columns      : {series_col_names}.')
                 )
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
@@ -561,7 +561,7 @@ def test_check_input_predict_exception_when_series_levels_not_last_window_Foreca
             interval        = None,
             max_steps       = None,
             levels          = None,
-            series_levels   = series_levels
+            series_col_names   = series_col_names
         )
 
 
@@ -585,7 +585,7 @@ def test_check_input_predict_exception_when_last_window_is_not_pandas_series():
             interval        = None,
             max_steps       = None,
             levels          = None,
-            series_levels   = None
+            series_col_names   = None
         )
 
 
@@ -609,7 +609,7 @@ def test_check_input_predict_exception_when_last_window_has_missing_values():
             interval        = None,
             max_steps       = None,
             levels          = None,
-            series_levels   = None
+            series_col_names   = None
         )
 
 
@@ -642,7 +642,7 @@ def test_check_input_predict_exception_when_last_window_index_is_not_of_index_ty
             interval        = None,
             max_steps       = None,
             levels          = None,
-            series_levels   = None
+            series_col_names   = None
         )
 
 
@@ -675,5 +675,5 @@ def test_check_input_predict_exception_when_last_window_index_frequency_is_not_i
             interval        = None,
             max_steps       = None,
             levels          = None,
-            series_levels   = None
+            series_col_names   = None
         )
