@@ -215,10 +215,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self,
         regressor: object,
         lags: Union[int, np.ndarray, list],
-        transformer_series: Optional[Union[object, dict[str, object]]]=None,
+        transformer_series: Optional[Union[object, dict]]=None,
         transformer_exog: Optional[object]=None,
-        series_weights: Optional[dict[str, float]]=None,
-        weight_func: Optional[Union[callable, dict[str, callable]]]=None
+        series_weights: Optional[dict]=None,
+        weight_func: Optional[Union[callable, dict]]=None
     ) -> None:
         
         self.regressor               = regressor

@@ -195,8 +195,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         regressor: object,
         level: str,
         steps: int,
-        lags: Union[int, np.ndarray, list, dict[str, Union[int, np.ndarray, list]]],
-        transformer_series: Optional[Union[object, dict[str, object]]]=None,
+        lags: Union[int, np.ndarray, list, dict],
+        transformer_series: Optional[Union[object, dict]]=None,
         transformer_exog: Optional[object]=None,
         weight_func: Optional[callable]=None
     ) -> None:
@@ -889,7 +889,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         
     def set_lags(
         self, 
-        lags: Union[int, np.ndarray, list, dict[str, Union[int, np.ndarray, list]]]
+        lags: Union[int, np.ndarray, list, dict]
     ) -> None:
         """      
         Set new value to the attribute `lags`.

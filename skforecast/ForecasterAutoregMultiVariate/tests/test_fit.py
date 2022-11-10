@@ -11,7 +11,7 @@ from xgboost import XGBRegressor
 
 
 @pytest.mark.parametrize('exog', ['l1', ['l1'], ['l1', 'l2']])
-def test_fit_exception_when_exog_columns_same_as_series_columns(exog):
+def test_fit_exception_when_exog_columns_same_as_series_col_names(exog):
     """
     Test exception is raised when an exog column is named the same as
     the series columns.
@@ -21,13 +21,13 @@ def test_fit_exception_when_exog_columns_same_as_series_columns(exog):
                           })
 
     forecaster = ForecasterAutoregMultiVariate(LinearRegression(), level='l1', lags=3, steps=2)
-    multivariate_series = list(series.columns)
+    series_col_names = list(series.columns)
     exog_col_names = exog if isinstance(exog, list) else [exog]
 
     err_msg = re.escape(
                     (f'`exog` cannot contain a column named the same as one of the series'
                      f' (column names of series).\n'
-                     f'    `series` columns : {multivariate_series}.\n'
+                     f'    `series` columns : {series_col_names}.\n'
                      f'    `exog`   columns : {exog_col_names}.')
                 )
     with pytest.raises(ValueError, match = err_msg):

@@ -621,7 +621,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             interval        = None,
             max_steps       = None,
             levels          = None,
-            series_columns  = None
+            series_col_names  = None
         )
      
         if exog is not None:
@@ -901,7 +901,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             interval        = interval,
             max_steps       = None,
             levels          = None,
-            series_columns  = None
+            series_col_names  = None
         )
         
         if exog is not None:

@@ -29,12 +29,12 @@ def test_create_train_X_y_exception_when_level_not_in_series():
     series = pd.DataFrame({'1': pd.Series(np.arange(5)),  
                            'l2': pd.Series(np.arange(5))
                            })
-    multivariate_series = list(series.columns)
+    series_col_names = list(series.columns)
 
     err_msg = re.escape(
                 (f'One of the `series` columns must be named as the `level` of the forecaster.\n'
                  f'    forecaster `level` : {forecaster.level}.\n'
-                 f'    `series` columns   : {multivariate_series}.')
+                 f'    `series` columns   : {series_col_names}.')
             )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.create_train_X_y(series=series)
@@ -49,13 +49,13 @@ def test_create_train_X_y_exception_when_lags_keys_not_in_series():
     series = pd.DataFrame({'l1': pd.Series(np.arange(10)),  
                            'l2': pd.Series(np.arange(10))
                            })
-    multivariate_series = list(series.columns)
+    series_col_names = list(series.columns)
 
     err_msg = re.escape(
                     (f'When `lags` parameter is a `dict`, its keys must be the '
                      f'same as `series` column names.\n'
                      f'    Lags keys        : {list(forecaster.lags_.keys())}.\n'
-                     f'    `series` columns : {multivariate_series}.')
+                     f'    `series` columns : {series_col_names}.')
                 )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.create_train_X_y(series=series)
@@ -80,7 +80,7 @@ def test_create_train_X_y_exception_when_len_series_is_lower_than_maximum_lag_pl
         forecaster.create_train_X_y(series=series)
 
 
-def test_create_train_X_y_exception_when_levels_of_transformer_series_not_equal_to_series_levels():
+def test_create_train_X_y_exception_when_levels_of_transformer_series_not_equal_to_series_col_names():
     """
     Test exception is raised when `transformer_series` is a dict and its keys 
     are not the same as series column names.
@@ -88,7 +88,7 @@ def test_create_train_X_y_exception_when_levels_of_transformer_series_not_equal_
     series = pd.DataFrame({'l1': pd.Series(np.arange(10)),  
                            'l2': pd.Series(np.arange(10))
                            })
-    multivariate_series = list(series.columns)
+    series_col_names = list(series.columns)
 
     dict_transformers = {'l1': StandardScaler(), 
                          'l3': StandardScaler()
@@ -102,8 +102,8 @@ def test_create_train_X_y_exception_when_levels_of_transformer_series_not_equal_
     err_msg = re.escape(
                     (f'When `transformer_series` parameter is a `dict`, its keys '
                      f'must be the same as `series` column names.\n'
-                     f'    `transformer_series` keys : {list(forecaster.transformer_series_.keys())}.\n'
-                     f'    `series` columns          : {multivariate_series}.')
+                     f'    `transformer_series` keys : {list(forecaster.transformer_series.keys())}.\n'
+                     f'    `series` columns          : {series_col_names}.')
                 )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.create_train_X_y(series=series)

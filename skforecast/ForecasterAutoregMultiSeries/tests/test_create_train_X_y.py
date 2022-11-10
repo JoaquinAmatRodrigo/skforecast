@@ -21,15 +21,15 @@ def test_create_train_X_y_exception_when_series_not_dataframe():
         forecaster.create_train_X_y(series=series)
 
 
-def test_create_train_X_y_exception_when_levels_of_transformer_series_not_equal_to_series_levels():
+def test_create_train_X_y_exception_when_levels_of_transformer_series_not_equal_to_series_col_names():
     """
     Test exception is raised when `transformer_series` is a dict and its keys are
-    not the same as forecaster.series_levels.
+    not the same as forecaster.series_col_names.
     """
     series = pd.DataFrame({'1': pd.Series(np.arange(5)),  
                            '2': pd.Series(np.arange(5))
                            })
-    series_levels = list(series.columns)
+    series_col_names = list(series.columns)
 
     dict_transformers = {'1': StandardScaler(), 
                          '3': StandardScaler()
@@ -41,8 +41,8 @@ def test_create_train_X_y_exception_when_levels_of_transformer_series_not_equal_
     err_msg = re.escape(
                     (f'When `transformer_series` parameter is a `dict`, its keys '
                      f'must be the same as `series` column names.\n'
-                     f'    `transformer_series` keys : {list(forecaster.transformer_series_.keys())}.\n'
-                     f'    `series` columns          : {series_levels}.')
+                     f'    `transformer_series` keys : {list(forecaster.transformer_series.keys())}.\n'
+                     f'    `series` columns          : {series_col_names}.')
                 )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.create_train_X_y(series=series)

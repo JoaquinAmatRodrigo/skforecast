@@ -688,7 +688,7 @@ class ForecasterAutoregDirect(ForecasterBase):
             interval        = None,
             max_steps       = self.steps,
             levels          = None,
-            series_columns  = None
+            series_col_names  = None
         ) 
 
         if exog is not None:
