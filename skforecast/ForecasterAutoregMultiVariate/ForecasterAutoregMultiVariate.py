@@ -16,7 +16,7 @@ import pandas as pd
 import sklearn
 import sklearn.pipeline
 from sklearn.base import clone
-from copy import copy
+from copy import deepcopy
 from itertools import chain
 
 import skforecast
@@ -61,17 +61,18 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
     lags : int, list, 1d numpy ndarray, range, dict
         Lags used as predictors. Index starts at 1, so lag 1 is equal to t-1.
             `int`: include lags from 1 to `lags` (included).
-            `list`, `numpy ndarray` or `range`: include only lags present in `lags`,
+            `list`: `numpy ndarray` or `range`: include only lags present in `lags`,
                 all elements must be int.
             `dict`: generate different lags for each series used to fit the 
                 regressors. {'series_column_name': lags}.
 
-    transformer_series : transformer (preprocessor) compatible with the scikit-learn
-                         preprocessing API or `dict` {series: transformer}, default `None`
+    transformer_series : transformer (preprocessor) or dict of transformers, default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API with methods: fit, transform, fit_transform and inverse_transform.
+        If a single transformer is passed, it is cloned and applied to all series. If a
+        dict, a different transformer can be used for each series. Transformation is
+        applied to each `series` before training the forecaster.
         ColumnTransformers are not allowed since they do not have inverse_transform method.
-        The transformation is applied to each `series` before training the forecaster.
 
     transformer_exog : transformer (preprocessor) compatible with the scikit-learn
                        preprocessing API, default `None`
@@ -79,12 +80,12 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         preprocessing API. The transformation is applied to `exog` before training the
         forecaster. `inverse_transform` is not available when using ColumnTransformers.
 
-    weight_func : callable, dict, default `None`
+    weight_func : callable, default `None`
         Function that defines the individual weights for each sample based on the
         index. For example, a function that assigns a lower weight to certain dates.
         Ignored if `regressor` does not have the argument `sample_weight` in its
         `fit` method. The resulting `sample_weight` cannot have negative values.
-    
+
     Attributes
     ----------
     regressor : regressor or pipeline compatible with the scikit-learn API
@@ -93,7 +94,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         them are stored in `self.regressors_`.
 
     regressors_ : dict
-        Dictionary with regressors trained for each step.
+        Dictionary with regressors trained for each step. They are initialized as a copy
+        of `regressor`.
         
     steps : int
         Number of future steps the forecaster will predict when using method
@@ -106,15 +108,17 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
     lags_ : dict
         Dictionary with the configuration of the lags for each series.
 
-    transformer_series : transformer (preprocessor) compatible with the scikit-learn
-                         preprocessing API, default `None`
+    transformer_series : transformer (preprocessor) or dict of transformers, default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API with methods: fit, transform, fit_transform and inverse_transform.
+        If a single transformer is passed, it is cloned and applied to all series. If a
+        dict, a different transformer can be used for each series. Transformation is
+        applied to each `series` before training the forecaster.
         ColumnTransformers are not allowed since they do not have inverse_transform method.
-        The transformation is applied to each `series` before training the forecaster.
         
     transformer_series_ : dict
-        Dictionary with the transformer for each series.
+        Dictionary with the transformer for each series. It is created cloning the objects
+        in `transformer_series` and is used internally to avoid overwriting.
 
     transformer_exog : transformer (preprocessor) compatible with the scikit-learn
                        preprocessing API, default `None`
@@ -161,8 +165,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         Names of columns of `exog` if `exog` used in training was a pandas
         DataFrame.
 
-    multivariate_series : list
-        Names of the series used during training that are multivariate.
+    series_names : list
+        Names of the series used during training.
 
     X_train_col_names : list
         Names of columns of the matrix created internally for training.
@@ -199,7 +203,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         self.level                   = level
         self.steps                   = steps
         self.transformer_series      = transformer_series
-        self.transformer_series_     = transformer_series
+        self.transformer_series_     = deepcopy(transformer_series)
         self.transformer_exog        = transformer_exog
         self.weight_func             = weight_func
         self.source_code_weight_func = None
@@ -212,7 +216,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         self.included_exog           = False
         self.exog_type               = None
         self.exog_col_names          = None
-        self.multivariate_series     = None
+        self.series_names            = None
         self.X_train_col_names       = None
         self.fitted                  = False
         self.creation_date           = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
@@ -289,7 +293,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             f"Transformer for series: {self.transformer_series} \n"
             f"Transformer for exog: {self.transformer_exog} \n"
             f"Window size: {self.window_size} \n"
-            f"Multivariate series (names): {self.multivariate_series} \n"
+            f"Multivariate series (names): {self.series_names} \n"
             f"Maximum steps predicted: {self.steps} \n"
             f"Weight function included: {True if self.weight_func is not None else False} \n"
             f"Exogenous included: {self.included_exog} \n"
@@ -390,26 +394,26 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         if not isinstance(series, pd.DataFrame):
             raise TypeError(f'`series` must be a pandas DataFrame. Got {type(series)}.')
         
-        multivariate_series = list(series.columns)
+        series_names = list(series.columns)
 
-        if self.level not in multivariate_series:
+        if self.level not in series_names:
             raise ValueError(
                 (f'One of the `series` columns must be named as the `level` of the forecaster.\n'
                  f'    forecaster `level` : {self.level}.\n'
-                 f'    `series` columns   : {multivariate_series}.')
+                 f'    `series` columns   : {series_names}.')
             )
 
         self.lags_ = self.lags
         if isinstance(self.lags_, dict):
-            if list(self.lags_.keys()) != multivariate_series:
+            if list(self.lags_.keys()) != series_names:
                 raise ValueError(
                     (f'When `lags` parameter is a `dict`, its keys must be the '
                      f'same as `series` column names.\n'
                      f'    Lags keys        : {list(self.lags_.keys())}.\n'
-                     f'    `series` columns : {multivariate_series}.')
+                     f'    `series` columns : {series_names}.')
                 )
         else:
-            self.lags_ = {serie: self.lags_ for serie in multivariate_series}
+            self.lags_ = {serie: self.lags_ for serie in series_names}
 
         if len(series) < self.max_lag + self.steps:
             raise ValueError(
@@ -417,21 +421,18 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                 f'{self.max_lag + self.steps}. Got {len(series)}.'
             )
 
-        self.transformer_series_ = self.transformer_series
-        if self.transformer_series_ is None:
-            dict_transformers = {serie: None for serie in multivariate_series}
-            self.transformer_series_ = dict_transformers
-        elif not isinstance(self.transformer_series_, dict):
-            dict_transformers = {serie: clone(self.transformer_series_) 
-                                 for serie in multivariate_series}
-            self.transformer_series_ = dict_transformers
+        if self.transformer_series is None:
+            self.transformer_series_ = {serie: None for serie in series_names}
+        elif not isinstance(self.transformer_series, dict):
+            self.transformer_series_ = {serie: clone(self.transformer_series) 
+                                        for serie in series_names}
         else:
-            if list(self.transformer_series_.keys()) != multivariate_series:
+            if list(self.transformer_series.keys()) != series_names:
                 raise ValueError(
                     (f'When `transformer_series` parameter is a `dict`, its keys '
                      f'must be the same as `series` column names.\n'
-                     f'    `transformer_series` keys : {list(self.transformer_series_.keys())}.\n'
-                     f'    `series` columns          : {multivariate_series}.')
+                     f'    `transformer_series` keys : {list(self.transformer_series.keys())}.\n'
+                     f'    `series` columns          : {series_names}.')
                 )
         
         y_train_col_names = [f"{self.level}_step_{i+1}" for i in range(self.steps)]
@@ -644,12 +645,12 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         self.included_exog       = False
         self.exog_type           = None
         self.exog_col_names      = None
-        self.multivariate_series = None
+        self.series_names        = None
         self.X_train_col_names   = None
         self.fitted              = False
         self.training_range      = None
         
-        self.multivariate_series = list(series.columns)
+        self.series_names = list(series.columns)
 
         if exog is not None:
             self.included_exog = True
@@ -657,11 +658,11 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             self.exog_col_names = \
                  exog.columns.to_list() if isinstance(exog, pd.DataFrame) else [exog.name]
 
-            if len(set(self.exog_col_names) - set(self.multivariate_series)) != len(self.exog_col_names):
+            if len(set(self.exog_col_names) - set(self.series_names)) != len(self.exog_col_names):
                 raise ValueError(
                     (f'`exog` cannot contain a column named the same as one of the series'
                      f' (column names of series).\n'
-                     f'    `series` columns : {self.multivariate_series}.\n'
+                     f'    `series` columns : {self.series_names}.\n'
                      f'    `exog`   columns : {self.exog_col_names}.')
                 )
 
@@ -779,7 +780,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             interval        = None,
             max_steps       = self.steps,
             levels          = None,
-            series_levels   = self.multivariate_series
+            series_levels   = self.series_names
         )
         
         if exog is not None:
@@ -810,7 +811,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         if last_window is None:
             last_window = self.last_window.copy()
         
-        for serie in self.multivariate_series:
+        for serie in self.series_names:
             
             last_window[serie] = transform_series(
                                      series            = last_window[serie],
