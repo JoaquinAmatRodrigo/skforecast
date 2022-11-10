@@ -16,6 +16,8 @@ All notable changes to this project will be documented in this file.
 
 + `ForecasterAutoregDirect` specific predictions.
 
++ `series_levels` rename to `series_columns` in `check_predict_input`.
+
 
 
 **Added**
