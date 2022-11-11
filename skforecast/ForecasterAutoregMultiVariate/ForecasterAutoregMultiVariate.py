@@ -262,7 +262,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                 )
             self.source_code_weight_func = inspect.getsource(weight_func)
             if 'sample_weight' not in inspect.getfullargspec(self.regressor.fit)[0]:
-                warnings.warm(
+                warnings.warn(
                     f"""
                     Argument `weight_func` is ignored since regressor {self.regressor}
                     does not accept `sample_weight` in its `fit` method.

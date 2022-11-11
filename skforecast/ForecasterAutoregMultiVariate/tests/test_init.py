@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 from skforecast.ForecasterAutoregMultiVariate import ForecasterAutoregMultiVariate
 from sklearn.linear_model import LinearRegression
+from sklearn.neighbors import KNeighborsRegressor
 
 
 def test_init_exception_when_level_is_not_a_str():
@@ -51,3 +52,31 @@ def test_init_exception_when_weight_func_is_not_a_callable():
     with pytest.raises(TypeError, match = err_msg):
         ForecasterAutoregMultiVariate(LinearRegression(), level='l1', lags=3, 
                                       steps=2, weight_func=weight_func)
+
+
+def test_init_when_weight_func_is_provided_and_regressor_has_not_sample_weights():
+    """
+    Test warning is created when weight_func is provided but the regressor has no argument
+    sample_weights in his fit method.
+    """
+
+    def weight_func():
+        pass
+
+    warn_msg = re.escape(
+                    f"""
+                    Argument `weight_func` is ignored since regressor KNeighborsRegressor()
+                    does not accept `sample_weight` in its `fit` method.
+                    """
+                )
+    with pytest.warns(UserWarning, match = warn_msg):
+        forecaster = ForecasterAutoregMultiVariate(
+                        regressor      = KNeighborsRegressor(),
+                        level          = 'l1',
+                        lags           = 3,
+                        steps          = 2,
+                        weight_func    = weight_func
+                     )
+    
+    assert forecaster.weight_func is None
+    assert forecaster.source_code_weight_func is None

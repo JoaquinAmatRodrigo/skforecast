@@ -5,6 +5,7 @@ import pytest
 import pandas as pd
 from skforecast.ForecasterAutoregCustom import ForecasterAutoregCustom
 from sklearn.linear_model import LinearRegression
+from sklearn.neighbors import KNeighborsRegressor
 
 
 def create_predictors(y): # pragma: no cover
@@ -60,3 +61,30 @@ def test_init_exception_when_weight_func_is_not_a_callable():
             fun_predictors = create_predictors,
             window_size    = 5,
             weight_func    = weight_func)
+
+
+def test_init_when_weight_func_is_provided_and_regressor_has_not_sample_weights():
+    """
+    Test warning is created when weight_func is provided but the regressor has no argument
+    sample_weights in his fit method.
+    """
+
+    def weight_func():
+        pass
+
+    warn_msg = re.escape(
+                    f"""
+                    Argument `weight_func` is ignored since regressor KNeighborsRegressor()
+                    does not accept `sample_weight` in its `fit` method.
+                    """
+                )
+    with pytest.warns(UserWarning, match = warn_msg):
+        forecaster = ForecasterAutoregCustom(
+                        regressor      = KNeighborsRegressor(),
+                        fun_predictors = create_predictors,
+                        window_size    = 5,
+                        weight_func    = weight_func
+                     )
+    
+    assert forecaster.weight_func is None
+    assert forecaster.source_code_weight_func is None

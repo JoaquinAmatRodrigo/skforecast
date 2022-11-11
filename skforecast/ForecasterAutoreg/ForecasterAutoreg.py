@@ -53,16 +53,14 @@ class ForecasterAutoreg(ForecasterBase):
             `list`, `numpy ndarray` or `range`: include only lags present in `lags`,
             all elements must be int.
 
-    transformer_y : transformer (preprocessor) compatible with the scikit-learn
-                    preprocessing API, default `None`
+    transformer_y : object transformer (preprocessor), default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API with methods: fit, transform, fit_transform and inverse_transform.
         ColumnTransformers are not allowed since they do not have inverse_transform method.
         The transformation is applied to `y` before training the forecaster. 
         **New in version 0.5.0**
 
-    transformer_exog : transformer (preprocessor) compatible with the scikit-learn
-                       preprocessing API, default `None`
+    transformer_exog : object transformer (preprocessor), default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API. The transformation is applied to `exog` before training the
         forecaster. `inverse_transform` is not available when using ColumnTransformers.
@@ -83,16 +81,14 @@ class ForecasterAutoreg(ForecasterBase):
     lags : numpy ndarray
         Lags used as predictors.
 
-    transformer_y : transformer (preprocessor) compatible with the scikit-learn
-                    preprocessing API, default `None`
+    transformer_y : object transformer (preprocessor), default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API with methods: fit, transform, fit_transform and inverse_transform.
         ColumnTransformers are not allowed since they do not have inverse_transform method.
         The transformation is applied to `y` before training the forecaster.
         **New in version 0.5.0**
 
-    transformer_exog : transformer (preprocessor) compatible with the scikit-learn
-                    preprocessing API, default `None`
+    transformer_exog : object transformer (preprocessor), default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API. The transformation is applied to `exog` before training the
         forecaster. `inverse_transform` is not available when using ColumnTransformers.
@@ -209,7 +205,7 @@ class ForecasterAutoreg(ForecasterBase):
                 )
             self.source_code_weight_func = inspect.getsource(weight_func)
             if 'sample_weight' not in inspect.getfullargspec(self.regressor.fit)[0]:
-                warnings.warm(
+                warnings.warn(
                     f"""
                     Argument `weight_func` is ignored since regressor {self.regressor}
                     does not accept `sample_weight` in its `fit` method.

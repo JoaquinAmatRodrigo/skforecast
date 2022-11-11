@@ -66,9 +66,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         forecaster. `inverse_transform` is not available when using ColumnTransformers.
 
     series_weights : dict, default `None`
-        Weights associated with each series {'series_column_name' : float}. It is only applied if the `regressor` used
-        accepts sample_weight in its fit method. If `None`, all levels have the same weight.
-        See the Notes section for more details on the use of the weights. 
+        Weights associated with each series {'series_column_name' : float}. It is only
+        applied if the `regressor` used accepts `sample_weight` in its `fit` method. If
+        `None`, all levels have the same weight. See Notes section for more details on
+        the use of the weights. 
         **New in version 0.6.0**
 
     weight_func : callable, dict, default `None`
@@ -77,7 +78,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         If dict {'series_column_name' : callable} a different function can be
         used for each series.
         Ignored if `regressor` does not have the argument `sample_weight` in its `fit`
-        method. See the Notes section for more details on the use of the weights.
+        method. See Notes section for more details on the use of the weights.
         **New in version 0.6.0**
     
     Attributes
@@ -100,15 +101,15 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         Dictionary with the transformer for each series. It is created cloning the objects
         in `transformer_series` and is used internally to avoid overwriting.
 
-    transformer_exog : transformer, default `None`
+    transformer_exog : transformer (preprocessor), default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API. The transformation is applied to `exog` before training the
         forecaster. `inverse_transform` is not available when using ColumnTransformers.
 
     series_weights : dict, default `None`
         Weights associated with each series, used during training. It is only 
-        applied if the `regressor` used accepts sample_weight in its fit method. 
-        If `None`, all levels have the same weight. See the Notes section for more
+        applied if the `regressor` used accepts `sample_weight` in its `fit` method. 
+        If `None`, all levels have the same weight. See Notes section for more
         details on the use of the weights. {'series_column_name' : float}.
         **New in version 0.6.0**
 
@@ -118,15 +119,16 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         If dict {'series_column_name' : callable} a different function can be
         used for each series.
         Ignored if `regressor` does not have the argument `sample_weight` in its `fit`
-        method. See the Notes section for more details on the use of the weights.
+        method. See Notes section for more details on the use of the weights.
         **New in version 0.6.0**
+
+    weight_func_ : dict
+        Dictionary with the `weight_func` for each series. It is created cloning the objects
+        in `weight_func` and is used internally to avoid overwriting.
 
     source_code_weight_func : str, dict
         Source code of the custom function(s) used to create weights.
         **New in version 0.6.0**
-        
-    weight_func_ : dict
-        Dictionary with the `weight_func` for each series.
 
     max_lag : int
         Maximum value of lag included in `lags`.
@@ -281,7 +283,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 self.source_code_weight_func = inspect.getsource(weight_func)
 
             if 'sample_weight' not in inspect.getfullargspec(self.regressor.fit)[0]:
-                warnings.warm(
+                warnings.warn(
                     f"""
                     Argument `weight_func` is ignored since regressor {self.regressor}
                     does not accept `sample_weight` in its `fit` method.
