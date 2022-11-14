@@ -574,7 +574,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         weights_series = None
 
         if self.series_weights is not None:
-            # Series not present in series_weights have a weight of 1 in all their samples
+            # Series not present in series_weights have a weight of 1 in all their samples.
+            # Keys in series_weights not present in series are ignored.
             series_not_in_series_weights = set(series.columns) - set(self.series_weights.keys())
             if series_not_in_series_weights:
                     logging.warning(
@@ -582,7 +583,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                         f" A weight of 1 is given to all their samples."
                     )
             self.series_weights_ = dict.fromkeys(series.columns, 1.)
-            self.series_weights_.update(self.series_weights)
+            self.series_weights_.update((k, v) for k, v in self.series_weights.items() if k in self.series_weights_)
             weights_series = [np.repeat(self.series_weights_[serie], sum(X_train[serie])) 
                              for serie in series.columns]
             weights_series = np.concatenate(weights_series)
@@ -600,7 +601,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                     )
                     print(series_not_in_weight_func)
                 self.weight_func_ = dict.fromkeys(series.columns, lambda index: np.ones_like(index, dtype=float))
-                self.weight_func_.update(self.weight_func)
+                self.weight_func_.update((k, v) for k, v in self.weight_func.items() if k in self.weight_func_)
                 
             weights_samples = []
             for key in self.weight_func_.keys():
