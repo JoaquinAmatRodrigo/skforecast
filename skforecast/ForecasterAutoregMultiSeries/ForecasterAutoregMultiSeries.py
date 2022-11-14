@@ -555,42 +555,66 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         Returns
         -------
-        sample_weight : numpy ndarray
+        weights : numpy ndarray
             Weights to use in `fit` method.
         
         """
 
-        sample_weight = None
+        weights = None
+        weights_samples = None
+        weights_series = None
 
         if self.series_weights is not None:
-            weights = [np.repeat(self.series_weights[serie], sum(X_train[serie])) 
-                       for serie in series.columns]
-            weights = np.concatenate(weights)
-            sample_weight = weights.copy()
+            weights_series = [np.repeat(self.series_weights[serie], sum(X_train[serie])) 
+                             for serie in series.columns]
+            weights_series = np.concatenate(weights_series)
 
         if self.weight_func is not None:
-            weights = self.weight_func(y_train_index)
-            if sample_weight is not None:
-                sample_weight = sample_weight * weights
+            if isinstance(self.weight_func, Callable):
+                self.weight_func_ = dict.fromkeys(series.columns, self.weight_func)
             else:
-                sample_weight = weights.copy()
+                # Series not present in weight_func have a weight of 1 in all their samples
+                series_not_in_weight_func = set(series.columns) - set(self.weight_func.keys())
+                if series_not_in_weight_func:
+                    logging.warning(
+                        f"{series_not_in_weight_func} are not present in `weight_func`."
+                        f"A weight of 1 is guiven to all their samples"
+                    )
+                    print(series_not_in_weight_func)
+                self.weight_func_ = dict.fromkeys(series.columns, lambda index: np.ones_like(index, dtype=float))
+                self.weight_func_.update(self.weight_func)
+                
+            weights_samples = []
+            for key in self.weight_func_.keys():
+                print(key)
+                index = y_train_index[X_train[X_train[key] == 1.0].index]
+                weights_samples.append(self.weight_func_[key](index))
+            weights_samples = np.concatenate(weights_samples)
 
-        if sample_weight is not None:
-            if np.isnan(sample_weight).any():
+        if weights_series is not None:
+            weights = weights_series
+            if weights_samples is not None:
+                weights = weights * weights_samples
+        else:
+            if weights_samples is not None:
+                weights = weights_samples
+
+        if weights is not None:
+            if np.isnan(weights).any():
                 raise ValueError(
-                    "The resulting `sample_weight` cannot have NaN values."
+                    "The resulting `weights` cannot have NaN values."
                 )
-            if np.any(sample_weight < 0):
+            if np.any(weights < 0):
                 raise ValueError(
-                    "The resulting `sample_weight` cannot have negative values."
+                    "The resulting `weights` cannot have negative values."
                 )
-            if np.sum(sample_weight) == 0:
+            if np.sum(weights) == 0:
                 raise ValueError(
-                    ("The resulting `sample_weight` cannot be normalized because "
+                    ("The resulting `weights` cannot be normalized because "
                      "the sum of the weights is zero.")
                 )
 
-        return sample_weight
+        return weights
 
         
     def fit(

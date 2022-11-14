@@ -10,7 +10,7 @@ from sklearn.linear_model import LinearRegression
 
 def custom_weights(index):
     """
-    Return 0 if index is between '2022-01-08', '2022-01-10', 1 otherwise.
+    Return 0 if index is between '2022-01-08' and '2022-01-10', 1 otherwise.
     """
     weights = np.where(
                   (index >= '2022-01-08') & (index <= '2022-01-10'),
@@ -23,12 +23,12 @@ def custom_weights(index):
 
 def custom_weights_2(index):
     """
-    Return 1 if index is between '2022-01-11', '2022-01-13', 2 otherwise.
+    Return 2 if index is between '2022-01-11' and '2022-01-13', 3 otherwise.
     """
     weights = np.where(
                   (index >= '2022-01-11') & (index <= '2022-01-13'),
-                   3,
-                   2
+                   2,
+                   3
               )
     
     return weights
@@ -36,7 +36,7 @@ def custom_weights_2(index):
 
 def custom_weights_nan(index):
     """
-    Return np.nan f index is between '2022-01-08', '2022-01-10', 1 otherwise.
+    Return np.nan if index is between '2022-01-08' and '2022-01-10', 1 otherwise.
     """
     weights = np.where(
                   (index >= '2022-01-08') & (index <= '2022-01-10'),
@@ -49,7 +49,7 @@ def custom_weights_nan(index):
 
 def custom_weights_negative(index):
     """
-    Return -1 f index is between '2022-01-08', '2022-01-10', 1 otherwise.
+    Return -1 if index is between '2022-01-08' and '2022-01-10', 1 otherwise.
     """
     weights = np.where(
                   (index >= '2022-01-08') & (index <= '2022-01-10'),
@@ -142,15 +142,13 @@ def test_create_sample_weights_output_using_weight_func():
 
 
 @pytest.mark.parametrize("weight_func, expected", 
-                         [({'series_1': None, 
-                            'series_2': custom_weights_2}, 
-                           np.array([1, 1, 1, 1, 1, 1, 1, 2, 3, 3, 3, 2, 2, 2])), 
-                          ({'series_1': custom_weights, 
-                            'series_2': None}, 
-                           np.array([1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])), 
+                         [({'series_1': custom_weights}, 
+                           np.array([1., 0., 0., 0., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1.])),                            
+                          ({'series_2': custom_weights_2}, 
+                           np.array([1., 1., 1., 1., 1., 1., 1., 3., 3., 3., 3., 2., 2., 2.])), 
                           ({'series_1': custom_weights, 
                             'series_2': custom_weights_2}, 
-                           np.array([1, 0, 0, 0, 1, 1, 1, 2, 3, 3, 3, 2, 2, 2]))], 
+                           np.array([1, 0, 0, 0, 1, 1, 1, 3, 3, 3, 3, 2, 2, 2]))], 
                          ids = lambda values : f'levels: {values}'
                         )
 def test_create_sample_weights_output_using_weight_func_dict(weight_func, expected):
@@ -195,7 +193,7 @@ def test_create_sample_weights_exceptions_when_weights_has_nan():
                      weight_func = custom_weights_nan
                  )
 
-    err_msg = re.escape("The resulting `sample_weight` cannot have NaN values.")
+    err_msg = re.escape("The resulting `weights` cannot have NaN values.")
     with pytest.raises(ValueError, match=err_msg):
         forecaster.create_sample_weights(series=series, X_train=X_train, y_train_index=y_train_index)
 
@@ -210,7 +208,7 @@ def test_create_sample_weights_exceptions_when_weights_has_negative_values():
                      weight_func = custom_weights_negative
                  )
 
-    err_msg = re.escape("The resulting `sample_weight` cannot have negative values.")
+    err_msg = re.escape("The resulting `weights` cannot have negative values.")
     with pytest.raises(ValueError, match=err_msg):
         forecaster.create_sample_weights(series=series, X_train=X_train, y_train_index=y_train_index)
    
@@ -226,7 +224,7 @@ def test_create_sample_weights_exceptions_when_weights_all_zeros():
                  )
     
     err_msg = re.escape(
-                    ("The resulting `sample_weight` cannot be normalized because "
+                    ("The resulting `weights` cannot be normalized because "
                      "the sum of the weights is zero.")
                 )
     with pytest.raises(ValueError, match=err_msg):
