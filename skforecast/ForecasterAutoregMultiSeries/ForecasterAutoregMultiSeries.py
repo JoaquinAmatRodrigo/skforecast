@@ -67,9 +67,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
     series_weights : dict, default `None`
         Weights associated with each series {'series_column_name' : float}. It is only
-        applied if the `regressor` used accepts `sample_weight` in its `fit` method. If
-        `None`, all levels have the same weight. See Notes section for more details on
-        the use of the weights. 
+        applied if the `regressor` used accepts `sample_weight` in its `fit` method.
+        If `series_weights` is provided, a weight of 1 is given to all series not present
+        in `series_weights`. If `None`, all levels have the same weight. See Notes section
+        for more details on the use of the weights.
         **New in version 0.6.0**
 
     weight_func : callable, dict, default `None`
@@ -107,10 +108,16 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         forecaster. `inverse_transform` is not available when using ColumnTransformers.
 
     series_weights : dict, default `None`
-        Weights associated with each series, used during training. It is only 
-        applied if the `regressor` used accepts `sample_weight` in its `fit` method. 
-        If `None`, all levels have the same weight. See Notes section for more
-        details on the use of the weights. {'series_column_name' : float}.
+        Weights associated with each series {'series_column_name' : float}. It is only
+        applied if the `regressor` used accepts `sample_weight` in its `fit` method.
+        If `series_weights` is provided, a weight of 1 is given to all series not present
+        in `series_weights`. If `None`, all levels have the same weight. See Notes section
+        for more details on the use of the weights.
+        **New in version 0.6.0**
+
+    series_weights_ : dict
+        Weights associated with each series.It is created as a clone of `series_weights`
+        and is used internally to avoid overwriting.
         **New in version 0.6.0**
 
     weight_func : callable, dict, default `None`
@@ -125,6 +132,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
     weight_func_ : dict
         Dictionary with the `weight_func` for each series. It is created cloning the objects
         in `weight_func` and is used internally to avoid overwriting.
+        **New in version 0.6.0**
 
     source_code_weight_func : str, dict
         Source code of the custom function(s) used to create weights.
@@ -228,6 +236,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.transformer_series_     = None
         self.transformer_exog        = transformer_exog
         self.series_weights          = series_weights
+        self.series_weights_         = None
         self.weight_func             = weight_func
         self.weight_func_            = None
         self.source_code_weight_func = None
@@ -256,7 +265,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         if series_weights is not None:
             if not isinstance(series_weights, dict):
                 raise TypeError(
-                    f"Argument `series_weights` must be a dict of floats. "
+                    f"Argument `series_weights` must be a dict of floats or ints."
                     f"Got {type(series_weights)}."
                 )
             if 'sample_weight' not in inspect.getfullargspec(self.regressor.fit)[0]:
@@ -541,8 +550,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
     )-> np.ndarray:
         """
         Crate weights for each observation according to the forecaster's attributes
-        `series_weights` and `weight_func`. The resulting weights are the 
-        multiplication of both attribute returns.
+        `series_weights` and `weight_func`. The resulting weights are product of both
+        types of weights.
 
         Parameters
         ----------
@@ -565,7 +574,16 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         weights_series = None
 
         if self.series_weights is not None:
-            weights_series = [np.repeat(self.series_weights[serie], sum(X_train[serie])) 
+            # Series not present in series_weights have a weight of 1 in all their samples
+            series_not_in_series_weights = set(series.columns) - set(self.series_weights.keys())
+            if series_not_in_series_weights:
+                    logging.warning(
+                        f"{series_not_in_series_weights} not present in `series_weights`."
+                        f" A weight of 1 is given to all their samples."
+                    )
+            self.series_weights_ = dict.fromkeys(series.columns, 1.)
+            self.series_weights_.update(self.series_weights)
+            weights_series = [np.repeat(self.series_weights_[serie], sum(X_train[serie])) 
                              for serie in series.columns]
             weights_series = np.concatenate(weights_series)
 
@@ -577,8 +595,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 series_not_in_weight_func = set(series.columns) - set(self.weight_func.keys())
                 if series_not_in_weight_func:
                     logging.warning(
-                        f"{series_not_in_weight_func} are not present in `weight_func`."
-                        f"A weight of 1 is guiven to all their samples"
+                        f"{series_not_in_weight_func} not present in `weight_func`."
+                        f" A weight of 1 is given to all their samples."
                     )
                     print(series_not_in_weight_func)
                 self.weight_func_ = dict.fromkeys(series.columns, lambda index: np.ones_like(index, dtype=float))
