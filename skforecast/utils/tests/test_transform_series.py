@@ -1,10 +1,26 @@
 # Unit test transform_series
 # ==============================================================================
-import pandas as pd
+import re
+import pytest
 import numpy as np
+import pandas as pd
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import OneHotEncoder
 from skforecast.utils import transform_series
+
+
+def test_transform_series_exception_when_series_is_not_pandas_series():
+    """
+    Test exception is raised when series is not a pandas series.
+    """
+    err_msg = re.escape("`series` argument must be a pandas Series.")
+    with pytest.raises(TypeError, match = err_msg):
+        transform_series(
+            series            = np.arange(10),
+            transformer       = None,
+            fit               = True,
+            inverse_transform = False
+        )
 
 
 def test_transform_series_when_transformer_is_None():
@@ -14,12 +30,12 @@ def test_transform_series_when_transformer_is_None():
     input_series = pd.Series([1.16, -0.28, 0.07, 2.4, 0.25, -0.56, -1.42, 1.26, 1.78, -1.49])
     expected = input_series
     transformer = None
-    results =  transform_series(
-                    series = input_series,
-                    transformer = transformer,
-                    fit = True,
-                    inverse_transform = False
-               )
+    results = transform_series(
+                  series = input_series,
+                  transformer = transformer,
+                  fit = True,
+                  inverse_transform = False
+              )
     
     pd.testing.assert_series_equal(results, expected)
 

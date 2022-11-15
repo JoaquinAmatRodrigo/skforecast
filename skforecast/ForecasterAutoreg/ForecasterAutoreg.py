@@ -6,12 +6,11 @@
 ################################################################################
 # coding=utf-8
 
-from typing import Union, Dict, List, Tuple, Any, Optional
+from typing import Union, Dict, List, Tuple, Any, Optional, Callable
 import warnings
 import logging
 import sys
 import inspect
-from inspect import getsource
 import numpy as np
 import pandas as pd
 import sklearn
@@ -21,6 +20,7 @@ from copy import copy
 
 import skforecast
 from ..ForecasterBase import ForecasterBase
+from ..utils import initialize_lags
 from ..utils import check_y
 from ..utils import check_exog
 from ..utils import preprocess_y
@@ -53,16 +53,14 @@ class ForecasterAutoreg(ForecasterBase):
             `list`, `numpy ndarray` or `range`: include only lags present in `lags`,
             all elements must be int.
 
-    transformer_y : transformer (preprocessor) compatible with the scikit-learn
-                    preprocessing API, default `None`
+    transformer_y : object transformer (preprocessor), default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API with methods: fit, transform, fit_transform and inverse_transform.
         ColumnTransformers are not allowed since they do not have inverse_transform method.
         The transformation is applied to `y` before training the forecaster. 
         **New in version 0.5.0**
 
-    transformer_exog : transformer (preprocessor) compatible with the scikit-learn
-                       preprocessing API, default `None`
+    transformer_exog : object transformer (preprocessor), default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API. The transformation is applied to `exog` before training the
         forecaster. `inverse_transform` is not available when using ColumnTransformers.
@@ -72,7 +70,7 @@ class ForecasterAutoreg(ForecasterBase):
         Function that defines the individual weights for each sample based on the
         index. For example, a function that assigns a lower weight to certain dates.
         Ignored if `regressor` does not have the argument `sample_weight` in its `fit`
-        method.
+        method. The resulting `sample_weight` cannot have negative values.
         **New in version 0.6.0**
     
     Attributes
@@ -83,16 +81,14 @@ class ForecasterAutoreg(ForecasterBase):
     lags : numpy ndarray
         Lags used as predictors.
 
-    transformer_y : transformer (preprocessor) compatible with the scikit-learn
-                    preprocessing API, default `None`
+    transformer_y : object transformer (preprocessor), default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API with methods: fit, transform, fit_transform and inverse_transform.
         ColumnTransformers are not allowed since they do not have inverse_transform method.
         The transformation is applied to `y` before training the forecaster.
         **New in version 0.5.0**
 
-    transformer_exog : transformer (preprocessor) compatible with the scikit-learn
-                    preprocessing API, default `None`
+    transformer_exog : object transformer (preprocessor), default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API. The transformation is applied to `exog` before training the
         forecaster. `inverse_transform` is not available when using ColumnTransformers.
@@ -100,14 +96,14 @@ class ForecasterAutoreg(ForecasterBase):
         
     max_lag : int
         Maximum value of lag included in `lags`.
+   
+    window_size : int
+        Size of the window needed to create the predictors. It is equal to
+        `max_lag`.
 
     last_window : pandas Series
         Last window the forecaster has seen during trained. It stores the
         values needed to predict the next `step` right after the training data.
-        
-    window_size : int
-        Size of the window needed to create the predictors. It is equal to
-        `max_lag`.
         
     fitted : Bool
         Tag to identify if the regressor has been fitted (trained).
@@ -164,7 +160,8 @@ class ForecasterAutoreg(ForecasterBase):
 
     python_version : str
         Version of python used to create the forecaster.
-        **New in version 0.5.0**     
+        **New in version 0.5.0**
+     
     """
     
     def __init__(
@@ -173,7 +170,7 @@ class ForecasterAutoreg(ForecasterBase):
         lags: Union[int, np.ndarray, list],
         transformer_y: Optional[object]=None,
         transformer_exog: Optional[object]=None,
-        weight_func: callable=None
+        weight_func: Optional[callable]=None
     ) -> None:
         
         self.regressor               = regressor
@@ -197,33 +194,18 @@ class ForecasterAutoreg(ForecasterBase):
         self.python_version          = sys.version.split(" ")[0]
         self.index_type              = None
         
-        if isinstance(lags, int) and lags < 1:
-            raise ValueError('Minimum value of lags allowed is 1.')
-
-        if isinstance(lags, (list, np.ndarray)):
-            for lag in lags:
-                if not isinstance(lag, (int, np.int64, np.int32)):
-                    raise TypeError('All values in `lags` must be int.')
-            
-        if isinstance(lags, (list, range, np.ndarray)) and min(lags) < 1:
-            raise ValueError('Minimum value of lags allowed is 1.')
-            
-        if isinstance(lags, int):
-            self.lags = np.arange(lags) + 1
-        elif isinstance(lags, (list, range)):
-            self.lags = np.array(lags)
-        elif isinstance(lags, np.ndarray):
-            self.lags = lags
-        else:
-            raise TypeError(
-                '`lags` argument must be int, 1d numpy ndarray, range or list. '
-                f"Got {type(lags)}"
-            )
+        self.lags = initialize_lags(type(self), lags)
+        self.max_lag = max(self.lags)
+        self.window_size = self.max_lag
             
         if weight_func is not None:
-            self.source_code_weight_func = getsource(weight_func)
+            if not isinstance(weight_func, Callable):
+                raise TypeError(
+                    f"Argument `weight_func` must be a callable. Got {type(weight_func)}."
+                )
+            self.source_code_weight_func = inspect.getsource(weight_func)
             if 'sample_weight' not in inspect.getfullargspec(self.regressor.fit)[0]:
-                warnings.warm(
+                warnings.warn(
                     f"""
                     Argument `weight_func` is ignored since regressor {self.regressor}
                     does not accept `sample_weight` in its `fit` method.
@@ -231,9 +213,6 @@ class ForecasterAutoreg(ForecasterBase):
                 )
                 self.weight_func = None
                 self.source_code_weight_func = None
-
-        self.max_lag = max(self.lags)
-        self.window_size = self.max_lag
 
 
     def __repr__(
@@ -246,7 +225,7 @@ class ForecasterAutoreg(ForecasterBase):
         if isinstance(self.regressor, sklearn.pipeline.Pipeline):
             name_pipe_steps = tuple(name + "__" for name in self.regressor.named_steps.keys())
             params = {key : value for key, value in self.regressor.get_params().items() \
-                     if key.startswith(name_pipe_steps)}
+                      if key.startswith(name_pipe_steps)}
         else:
             params = self.regressor.get_params()
 
@@ -258,9 +237,9 @@ class ForecasterAutoreg(ForecasterBase):
             f"Lags: {self.lags} \n"
             f"Transformer for y: {self.transformer_y} \n"
             f"Transformer for exog: {self.transformer_exog} \n"
-            f"Included weights function: {True if self.weight_func is not None else False} \n"
             f"Window size: {self.window_size} \n"
-            f"Included exogenous: {self.included_exog} \n"
+            f"Weight function included: {True if self.weight_func is not None else False} \n"
+            f"Exogenous included: {self.included_exog} \n"
             f"Type of exogenous variable: {self.exog_type} \n"
             f"Exogenous variables names: {self.exog_col_names} \n"
             f"Training range: {self.training_range.to_list() if self.fitted else None} \n"
@@ -420,13 +399,14 @@ class ForecasterAutoreg(ForecasterBase):
 
         Parameters
         ----------
-        X_train : pd.DataFrame
-            Data frame generated with the method `create_train_X_y`.
+        X_train : pandas DataFrame
+            Dataframe generated with the method `create_train_X_y`, first return.
 
         Returns
         -------
-        np.ndarray
-            Weights
+        sample_weight : numpy ndarray
+            Weights to use in `fit` method.
+
         """
 
         sample_weight = None
@@ -435,10 +415,19 @@ class ForecasterAutoreg(ForecasterBase):
             sample_weight = self.weight_func(X_train.index)
 
         if sample_weight is not None:
+            if np.isnan(sample_weight).any():
+                raise ValueError(
+                    "The resulting `sample_weight` cannot have NaN values."
+                )
+            if np.any(sample_weight < 0):
+                raise ValueError(
+                    "The resulting `sample_weight` cannot have negative values."
+                )
             if np.sum(sample_weight) == 0:
-                raise Exception("Weights sum to zero, can't be normalized")
-            if(np.isnan(sample_weight).any()):
-                raise Exception("NaN values in in Weights")
+                raise ValueError(
+                    ("The resulting `sample_weight` cannot be normalized because "
+                     "the sum of the weights is zero.")
+                )
 
         return sample_weight
 
@@ -614,7 +603,7 @@ class ForecasterAutoreg(ForecasterBase):
         """
 
         check_predict_input(
-            forecaster_type = type(self),
+            forecaster_type = type(self).__name__,
             steps           = steps,
             fitted          = self.fitted,
             included_exog   = self.included_exog,
@@ -628,7 +617,7 @@ class ForecasterAutoreg(ForecasterBase):
             interval        = None,
             max_steps       = None,
             levels          = None,
-            series_levels   = None
+            series_col_names  = None
         ) 
 
         if exog is not None:
@@ -894,7 +883,7 @@ class ForecasterAutoreg(ForecasterBase):
             )
 
         check_predict_input(
-            forecaster_type = type(self),
+            forecaster_type = type(self).__name__,
             steps           = steps,
             fitted          = self.fitted,
             included_exog   = self.included_exog,
@@ -908,7 +897,7 @@ class ForecasterAutoreg(ForecasterBase):
             interval        = interval,
             max_steps       = None,
             levels          = None,
-            series_levels   = None
+            series_col_names  = None
         ) 
         
         if exog is not None:
@@ -994,7 +983,7 @@ class ForecasterAutoreg(ForecasterBase):
     ) -> None:
         """
         Set new values to the parameters of the scikit learn model stored in the
-        ForecasterAutoreg.
+        forecaster.
         
         Parameters
         ----------
@@ -1032,24 +1021,7 @@ class ForecasterAutoreg(ForecasterBase):
         
         """
         
-        if isinstance(lags, int) and lags < 1:
-            raise ValueError('Minimum value of lags allowed is 1.')
-            
-        if isinstance(lags, (list, range, np.ndarray)) and min(lags) < 1:
-            raise ValueError('Minimum value of lags allowed is 1.')
-            
-        if isinstance(lags, int):
-            self.lags = np.arange(lags) + 1
-        elif isinstance(lags, (list, range)):
-            self.lags = np.array(lags)
-        elif isinstance(lags, np.ndarray):
-            self.lags = lags
-        else:
-            raise TypeError(
-                f"`lags` argument must be `int`, `1D np.ndarray`, `range` or `list`. "
-                f"Got {type(lags)}."
-            )
-            
+        self.lags = initialize_lags(type(self), lags)
         self.max_lag  = max(self.lags)
         self.window_size = max(self.lags)
         

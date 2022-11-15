@@ -135,7 +135,7 @@ def test_predict_output_when_regressor_is_LinearRegression():
                      columns = ['2']
                  )
 
-    predictions_3 = forecaster.predict(steps=5, levels=['1', '2'])
+    predictions_3 = forecaster.predict(steps=5, levels=None)
     expected_3 = pd.DataFrame(
                      data    = np.array([[50., 100.],
                                          [51., 101.],

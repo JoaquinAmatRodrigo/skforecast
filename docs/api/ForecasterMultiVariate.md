@@ -1,0 +1,3 @@
+# `ForecasterAutoregMultiVariate`
+
+::: skforecast.ForecasterAutoregMultiVariate.ForecasterAutoregMultiVariate.ForecasterAutoregMultiVariate

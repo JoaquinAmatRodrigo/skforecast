@@ -361,8 +361,8 @@ def test_evaluate_grid_hyperparameters_multiseries_when_return_best():
 
     expected_lags = np.array([1, 2, 3, 4])
     expected_alpha = 0.01
-    expected_series_levels = ['l1', 'l2']
+    expected_series_col_names = ['l1', 'l2']
     
     assert (expected_lags == forecaster.lags).all()
     assert expected_alpha == forecaster.regressor.alpha
-    assert expected_series_levels ==  forecaster.series_levels
+    assert expected_series_col_names ==  forecaster.series_col_names

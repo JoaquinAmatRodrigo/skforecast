@@ -43,11 +43,11 @@ def test_set_out_sample_residuals_exception_when_forecaster_not_fitted():
 def test_set_out_sample_residuals_exception_when_append_and_column_not_in_keys():
     """
     Test exception is raised when `append = True` but a column from residuals is in
-    self.series_levels but not in out_sample_residuals keys.
+    self.series_col_names but not in out_sample_residuals keys.
     """
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
     level = '1'
-    forecaster.series_levels = ['1']
+    forecaster.series_col_names = ['1']
     forecaster.out_sample_residuals = {'2': np.arange(5)}
     forecaster.fitted = True
     residuals = pd.DataFrame({'1': [1, 2, 3, 4, 5], 
@@ -63,7 +63,7 @@ def test_set_out_sample_residuals_when_residuals_length_is_greater_than_1000():
     Test len residuals stored when its length is greater than 1000.
     """
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
-    forecaster.series_levels = ['1']
+    forecaster.series_col_names = ['1']
     forecaster.fitted = True
     forecaster.set_out_sample_residuals(residuals = pd.DataFrame({'1': np.arange(2000), 
                                                                   '2': np.arange(2000)}))
@@ -77,14 +77,14 @@ def test_same_out_sample_residuals_stored_when_residuals_length_is_greater_than_
     executing function two times.
     """
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
-    forecaster.series_levels = ['1']
+    forecaster.series_col_names = ['1']
     forecaster.fitted = True
     forecaster.set_out_sample_residuals(residuals = pd.DataFrame({'1': np.arange(2000), 
                                                                   '2': np.arange(2000)}))
     out_sample_residuals_1 = forecaster.out_sample_residuals['1']
 
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
-    forecaster.series_levels = ['1']
+    forecaster.series_col_names = ['1']
     forecaster.fitted = True
     forecaster.set_out_sample_residuals(residuals = pd.DataFrame({'1': np.arange(2000)}))
     out_sample_residuals_2 = forecaster.out_sample_residuals['1']
@@ -100,7 +100,7 @@ def test_set_out_sample_residuals_when_residuals_length_is_less_than_1000_and_no
     Test residuals stored when new residuals length is less than 1000 and append is False.
     """
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
-    forecaster.series_levels = ['1', '2']
+    forecaster.series_col_names = ['1', '2']
     forecaster.fitted = True
     residuals = pd.DataFrame({'1': np.arange(10), 
                               '2': np.arange(10)})
@@ -121,7 +121,7 @@ def test_set_out_sample_residuals_when_residuals_length_is_less_than_1000_and_ap
     Test residuals stored when new residuals length is less than 1000 and append is True.
     """
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
-    forecaster.series_levels = ['1', '2']
+    forecaster.series_col_names = ['1', '2']
     forecaster.fitted = True
     residuals = pd.DataFrame({'1': np.arange(10), 
                               '2': np.arange(10)})
@@ -141,7 +141,7 @@ def test_set_out_sample_residuals_when_residuals_length_is_more_than_1000_and_ap
     Test residuals stored when new residuals length is more than 1000 and append is True.
     """
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
-    forecaster.series_levels = ['1', '2']
+    forecaster.series_col_names = ['1', '2']
     forecaster.fitted = True
     residuals = pd.DataFrame({'1': np.arange(10), 
                               '2': np.arange(10)})

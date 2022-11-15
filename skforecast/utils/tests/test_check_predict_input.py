@@ -21,34 +21,34 @@ def test_check_input_predict_exception_when_fitted_is_False():
               )
     with pytest.raises(NotFittedError, match = err_msg):
         check_predict_input(
-            forecaster_type = 'class.ForecasterAutoreg',
-            steps           = 5,
-            fitted          = False,
-            included_exog   = False,
-            index_type      = None,
-            index_freq      = None,
-            window_size     = None,
-            last_window     = None,
-            exog            = None,
-            exog_type       = None,
-            exog_col_names  = None,
-            interval        = None,
-            max_steps       = None,
-            levels          = None,
-            series_levels   = None
+            forecaster_type    = 'ForecasterAutoreg',
+            steps              = 5,
+            fitted             = False,
+            included_exog      = False,
+            index_type         = None,
+            index_freq         = None,
+            window_size        = None,
+            last_window        = None,
+            exog               = None,
+            exog_type          = None,
+            exog_col_names     = None,
+            interval           = None,
+            max_steps          = None,
+            levels             = None,
+            series_col_names   = None
         )
         
         
-def test_check_input_predict_exception_when_steps_is_lower_than_1():
+def test_check_input_predict_exception_when_steps_int_lower_than_1():
     """
     Test exception is raised when steps is a value lower than 1.
     """
     steps = -5
 
-    err_msg = re.escape(f'`steps` must be integer greater than 0. Got {steps}.')
+    err_msg = re.escape(f'`steps` must be an integer greater than or equal to 1. Got {steps}.')
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
-            forecaster_type = 'class.ForecasterAutoreg',
+            forecaster_type = 'ForecasterAutoreg',
             steps           = steps,
             fitted          = True,
             included_exog   = False,
@@ -62,25 +62,57 @@ def test_check_input_predict_exception_when_steps_is_lower_than_1():
             interval        = None,
             max_steps       = None,
             levels          = None,
-            series_levels   = None
+            series_col_names   = None
         )
-
-
-def test_check_input_predict_exception_when_steps_is_greater_than_max_steps():
+        
+        
+def test_check_input_predict_exception_when_steps_list_lower_than_0():
     """
-    Test exception is raised when steps > max_steps.
+    Test exception is raised when steps is a list with a value lower than 0. 
+    (`ForecasterAutoregDirect` and `ForecasterAutoregMultiVariate`).
     """
-    steps = 20
-    max_steps = 10
+    steps = [-1, 0, 1]
 
     err_msg = re.escape(
-                (f'`steps` must be lower or equal to the value of steps defined '
-                 f'when initializing the forecaster. Got {steps} but the maximum '
-                 f'is {max_steps}.')
+                  (f"The minimum value of `steps` must be equal to or greater than 1. "
+                   f"Got {min(steps) + 1}.")
               )
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
-            forecaster_type = 'class.ForecasterAutoreg',
+            forecaster_type = 'ForecasterAutoregDirect',
+            steps           = steps,
+            fitted          = True,
+            included_exog   = False,
+            index_type      = None,
+            index_freq      = None,
+            window_size     = None,
+            last_window     = None,
+            exog            = None,
+            exog_type       = None,
+            exog_col_names  = None,
+            interval        = None,
+            max_steps       = None,
+            levels          = None,
+            series_col_names   = None
+        )
+
+
+def test_check_input_predict_exception_when_max_steps_greater_than_max_steps():
+    """
+    Test exception is raised when max(steps) > max_steps. (`ForecasterAutoregDirect` 
+    and `ForecasterAutoregMultiVariate`).
+    """
+    steps = list(range(20))
+    max_steps = 10
+
+    err_msg = re.escape(
+                (f"The maximum value of `steps` must be less than or equal to "
+                 f"the value of steps defined when initializing the forecaster. "
+                 f"Got {max(steps)+1}, but the maximum is {max_steps}.")
+              )
+    with pytest.raises(ValueError, match = err_msg):
+        check_predict_input(
+            forecaster_type = 'ForecasterAutoregMultiVariate',
             steps           = steps,
             fitted          = True,
             included_exog   = False,
@@ -94,7 +126,7 @@ def test_check_input_predict_exception_when_steps_is_greater_than_max_steps():
             interval        = None,
             max_steps       = max_steps,
             levels          = None,
-            series_levels   = None
+            series_col_names   = None
         )
 
 
@@ -107,7 +139,7 @@ def test_check_input_predict_exception_when_ForecasterAutoregMultiSeries_and_lev
     err_msg = re.escape(f'`levels` must be a `list` of column names, a `str` of a column name or `None`.')   
     with pytest.raises(TypeError, match = err_msg):
         check_predict_input(
-            forecaster_type = 'class.ForecasterAutoregMultiSeries',
+            forecaster_type = 'ForecasterAutoregMultiSeries',
             steps           = 5,
             fitted          = True,
             included_exog   = False,
@@ -119,25 +151,25 @@ def test_check_input_predict_exception_when_ForecasterAutoregMultiSeries_and_lev
             exog_type       = None,
             exog_col_names  = None,
             interval        = None,
-            max_steps       = 10,
+            max_steps       = None,
             levels          = levels,
-            series_levels   = ['1', '2']
+            series_col_names   = ['1', '2']
         )
 
 
-@pytest.mark.parametrize("levels     , series_levels", 
+@pytest.mark.parametrize("levels     , series_col_names", 
                          [('1'       , ['2', '3']), 
                           (['1']     , ['2', '3']), 
                           (['1', '2'], ['2', '3'])])
-def test_check_input_predict_exception_when_ForecasterAutoregMultiSeries_and_level_not_in_series_levels(levels, series_levels):
+def test_check_input_predict_exception_when_ForecasterAutoregMultiSeries_and_level_not_in_series_col_names(levels, series_col_names):
     """
-    Test exception is raised when `levels` is not in `self.series_levels` in a 
+    Test exception is raised when `levels` is not in `self.series_col_names` in a 
     ForecasterAutoregMultiSeries.
     """
-    err_msg = re.escape(f'`levels` must be in `series_levels` : {series_levels}.')
+    err_msg = re.escape(f'`levels` must be in `series_col_names` : {series_col_names}.')
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
-            forecaster_type = 'class.ForecasterAutoregMultiSeries',
+            forecaster_type = 'ForecasterAutoregMultiSeries',
             steps           = 5,
             fitted          = True,
             included_exog   = False,
@@ -149,9 +181,9 @@ def test_check_input_predict_exception_when_ForecasterAutoregMultiSeries_and_lev
             exog_type       = None,
             exog_col_names  = None,
             interval        = None,
-            max_steps       = 10,
+            max_steps       = None,
             levels          = levels,
-            series_levels   = series_levels
+            series_col_names   = series_col_names
         )
 
 
@@ -164,7 +196,7 @@ def test_check_input_predict_exception_when_exog_is_none_and_included_exog_is_tr
               )   
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
-            forecaster_type = 'class.ForecasterAutoreg',
+            forecaster_type = 'ForecasterAutoreg',
             steps           = 5,
             fitted          = True,
             included_exog   = True,
@@ -178,7 +210,7 @@ def test_check_input_predict_exception_when_exog_is_none_and_included_exog_is_tr
             interval        = None,
             max_steps       = None,
             levels          = None,
-            series_levels   = None
+            series_col_names   = None
         )
 
 
@@ -191,7 +223,7 @@ def test_check_input_predict_exception_when_exog_is_not_none_and_included_exog_i
               )   
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
-            forecaster_type = 'class.ForecasterAutoreg',
+            forecaster_type = 'ForecasterAutoreg',
             steps           = 5,
             fitted          = True,
             included_exog   = False,
@@ -199,37 +231,43 @@ def test_check_input_predict_exception_when_exog_is_not_none_and_included_exog_i
             index_freq      = None,
             window_size     = None,
             last_window     = None,
-            exog            = np.arange(10),
+            exog            = pd.Series(np.arange(10)),
             exog_type       = None,
             exog_col_names  = None,
             interval        = None,
             max_steps       = None,
             levels          = None,
-            series_levels   = None
+            series_col_names   = None
         )
 
 
-def test_check_input_predict_exception_when_len_exog_is_less_than_steps():
+@pytest.mark.parametrize("steps", [10, [1, 2, 3, 4, 5, 6], [2, 6]], 
+                         ids=lambda steps: f'steps: {steps}')
+def test_check_input_predict_exception_when_len_exog_is_less_than_steps(steps):
     """
     """
-    err_msg = re.escape('`exog` must have at least as many values as `steps` predicted.')
+    max_step = max(steps)+1 if isinstance(steps, list) else steps
+    err_msg = re.escape(
+                f'`exog` must have at least as many values as the distance to '
+                f'the maximum step predicted, {max_step}.'
+            )
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
-            forecaster_type = 'class.ForecasterAutoreg',
-            steps           = 10,
+            forecaster_type = 'ForecasterAutoreg',
+            steps           = steps,
             fitted          = True,
             included_exog   = True,
             index_type      = None,
             index_freq      = None,
             window_size     = None,
             last_window     = None,
-            exog            = np.arange(5),
+            exog            = pd.Series(np.arange(5)),
             exog_type       = None,
             exog_col_names  = None,
             interval        = None,
             max_steps       = None,
             levels          = None,
-            series_levels   = None
+            series_col_names   = None
         )
 
 
@@ -239,7 +277,7 @@ def test_check_input_predict_exception_when_exog_is_not_pandas_series_or_datafra
     err_msg = re.escape('`exog` must be a pandas Series or DataFrame.')
     with pytest.raises(TypeError, match = err_msg):
         check_predict_input(
-            forecaster_type = 'class.ForecasterAutoreg',
+            forecaster_type = 'ForecasterAutoreg',
             steps           = 10,
             fitted          = True,
             included_exog   = True,
@@ -253,7 +291,7 @@ def test_check_input_predict_exception_when_exog_is_not_pandas_series_or_datafra
             interval        = None,
             max_steps       = None,
             levels          = None,
-            series_levels   = None
+            series_col_names   = None
         )
 
 
@@ -263,7 +301,7 @@ def test_check_input_predict_exception_when_exog_has_missing_values():
     err_msg = re.escape('`exog` has missing values.')
     with pytest.raises(Exception, match = err_msg):
         check_predict_input(
-            forecaster_type = 'class.ForecasterAutoreg',
+            forecaster_type = 'ForecasterAutoreg',
             steps           = 3,
             fitted          = True,
             included_exog   = True,
@@ -277,7 +315,7 @@ def test_check_input_predict_exception_when_exog_has_missing_values():
             interval        = None,
             max_steps       = None,
             levels          = None,
-            series_levels   = None
+            series_col_names   = None
         )
 
 
@@ -290,7 +328,7 @@ def test_check_input_predict_exception_when_exog_is_not_of_exog_type():
     err_msg = re.escape(f'Expected type for `exog`: {exog_type}. Got {type(exog)}.')
     with pytest.raises(TypeError, match = err_msg):
         check_predict_input(
-            forecaster_type = 'class.ForecasterAutoreg',
+            forecaster_type = 'ForecasterAutoreg',
             steps           = 5,
             fitted          = True,
             included_exog   = True,
@@ -304,7 +342,7 @@ def test_check_input_predict_exception_when_exog_is_not_of_exog_type():
             interval        = None,
             max_steps       = None,
             levels          = None,
-            series_levels   = None
+            series_col_names   = None
         )
 
 
@@ -320,7 +358,7 @@ def test_check_input_predict_exception_when_exog_is_dataframe_without_columns_in
               )
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
-            forecaster_type = 'class.ForecasterAutoreg',
+            forecaster_type = 'ForecasterAutoreg',
             steps           = 2,
             fitted          = True,
             included_exog   = True,
@@ -334,7 +372,7 @@ def test_check_input_predict_exception_when_exog_is_dataframe_without_columns_in
             interval        = None,
             max_steps       = None,
             levels          = None,
-            series_levels   = None
+            series_col_names   = None
         )
 
 
@@ -352,7 +390,7 @@ def test_check_input_predict_exception_when_exog_index_is_not_of_index_type():
               )
     with pytest.raises(TypeError, match = err_msg):
         check_predict_input(
-            forecaster_type = 'class.ForecasterAutoreg',
+            forecaster_type = 'ForecasterAutoreg',
             steps           = 10,
             fitted          = True,
             included_exog   = True,
@@ -366,7 +404,7 @@ def test_check_input_predict_exception_when_exog_index_is_not_of_index_type():
             interval        = None,
             max_steps       = None,
             levels          = None,
-            series_levels   = None
+            series_col_names   = None
         )
 
 
@@ -384,7 +422,7 @@ def test_check_input_predict_exception_when_exog_index_frequency_is_not_index_fr
               )
     with pytest.raises(TypeError, match = err_msg):
         check_predict_input(
-            forecaster_type = 'class.ForecasterAutoreg',
+            forecaster_type = 'ForecasterAutoreg',
             steps           = 10,
             fitted          = True,
             included_exog   = True,
@@ -398,7 +436,7 @@ def test_check_input_predict_exception_when_exog_index_frequency_is_not_index_fr
             interval        = None,
             max_steps       = None,
             levels          = None,
-            series_levels   = None
+            series_col_names   = None
         )
 
 
@@ -413,7 +451,7 @@ def test_check_input_predict_exception_when_length_last_window_is_lower_than_win
               )
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
-            forecaster_type = 'class.ForecasterAutoreg',
+            forecaster_type = 'ForecasterAutoreg',
             steps           = 10,
             fitted          = True,
             included_exog   = True,
@@ -427,21 +465,23 @@ def test_check_input_predict_exception_when_length_last_window_is_lower_than_win
             interval        = None,
             max_steps       = None,
             levels          = None,
-            series_levels   = None
+            series_col_names   = None
         )
 
 
-def test_check_input_predict_exception_when_last_window_is_not_pandas_dataframe_ForecasterAutoregMultiSeries():
+@pytest.mark.parametrize("forecaster_type", 
+                         ['ForecasterAutoregMultiSeries',
+                          'ForecasterAutoregMultiVariate'], 
+                         ids=lambda ft: f'forecaster_type: {ft}')
+def test_check_input_predict_exception_when_last_window_is_not_pandas_dataframe(forecaster_type):
     """
+    `ForecasterAutoregMultiSeries` and `ForecasterAutoregMultiVariate`.
     """
     last_window = np.arange(5)
-    err_msg = re.escape(
-                    (f'In ForecasterAutoregMultiSeries `last_window` must be a pandas DataFrame. ' 
-                     f'Got {type(last_window)}.')
-                )
+    err_msg = re.escape(f'`last_window` must be a pandas DataFrame. Got {type(last_window)}.')
     with pytest.raises(TypeError, match = err_msg):
         check_predict_input(
-            forecaster_type = 'class.ForecasterAutoregMultiSeries',
+            forecaster_type = forecaster_type,
             steps           = 10,
             fitted          = True,
             included_exog   = True,
@@ -455,7 +495,7 @@ def test_check_input_predict_exception_when_last_window_is_not_pandas_dataframe_
             interval        = None,
             max_steps       = None,
             levels          = '1',
-            series_levels   = ['1', '2']
+            series_col_names   = ['1', '2']
         )
 
 
@@ -475,7 +515,7 @@ def test_check_input_predict_exception_when_levels_not_in_last_window_Forecaster
                 )
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
-            forecaster_type = 'class.ForecasterAutoregMultiSeries',
+            forecaster_type = 'ForecasterAutoregMultiSeries',
             steps           = 10,
             fitted          = True,
             included_exog   = True,
@@ -489,7 +529,39 @@ def test_check_input_predict_exception_when_levels_not_in_last_window_Forecaster
             interval        = None,
             max_steps       = None,
             levels          = levels,
-            series_levels   = ['1', '2']
+            series_col_names   = ['1', '2']
+        )
+
+
+def test_check_input_predict_exception_when_series_col_names_not_last_window_ForecasterAutoregMultiVariate():
+    """
+    Check exception is raised when column names of series using during fit do not
+    match with last_window column names.
+    """
+    last_window = pd.DataFrame({'l1': [1, 2, 3], '4': [1, 2, 3]})
+    series_col_names = ['l1', 'l2']
+    err_msg = re.escape(
+                    (f'`last_window` columns must be the same as `series` column names.\n'
+                     f'    `last_window` columns : {list(last_window.columns)}.\n'
+                     f'    `series` columns      : {series_col_names}.')
+                )
+    with pytest.raises(ValueError, match = err_msg):
+        check_predict_input(
+            forecaster_type = 'ForecasterAutoregMultiVariate',
+            steps           = 10,
+            fitted          = True,
+            included_exog   = True,
+            index_type      = pd.RangeIndex,
+            index_freq      = None,
+            window_size     = 2,
+            last_window     = last_window,
+            exog            = pd.Series(np.arange(10)),
+            exog_type       = pd.Series,
+            exog_col_names  = None,
+            interval        = None,
+            max_steps       = None,
+            levels          = None,
+            series_col_names   = series_col_names
         )
 
 
@@ -499,7 +571,7 @@ def test_check_input_predict_exception_when_last_window_is_not_pandas_series():
     err_msg = re.escape('`last_window` must be a pandas Series.')
     with pytest.raises(TypeError, match = err_msg):
         check_predict_input(
-            forecaster_type = 'class.ForecasterAutoreg',
+            forecaster_type = 'ForecasterAutoreg',
             steps           = 10,
             fitted          = True,
             included_exog   = True,
@@ -513,7 +585,7 @@ def test_check_input_predict_exception_when_last_window_is_not_pandas_series():
             interval        = None,
             max_steps       = None,
             levels          = None,
-            series_levels   = None
+            series_col_names   = None
         )
 
 
@@ -523,7 +595,7 @@ def test_check_input_predict_exception_when_last_window_has_missing_values():
     err_msg = re.escape('`last_window` has missing values.')
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
-            forecaster_type = 'class.ForecasterAutoreg',
+            forecaster_type = 'ForecasterAutoreg',
             steps           = 10,
             fitted          = True,
             included_exog   = True,
@@ -537,7 +609,7 @@ def test_check_input_predict_exception_when_last_window_has_missing_values():
             interval        = None,
             max_steps       = None,
             levels          = None,
-            series_levels   = None
+            series_col_names   = None
         )
 
 
@@ -556,7 +628,7 @@ def test_check_input_predict_exception_when_last_window_index_is_not_of_index_ty
               )
     with pytest.raises(TypeError, match = err_msg):
         check_predict_input(
-            forecaster_type = 'class.ForecasterAutoreg',
+            forecaster_type = 'ForecasterAutoreg',
             steps           = 10,
             fitted          = True,
             included_exog   = False,
@@ -570,7 +642,7 @@ def test_check_input_predict_exception_when_last_window_index_is_not_of_index_ty
             interval        = None,
             max_steps       = None,
             levels          = None,
-            series_levels   = None
+            series_col_names   = None
         )
 
 
@@ -589,7 +661,7 @@ def test_check_input_predict_exception_when_last_window_index_frequency_is_not_i
               )
     with pytest.raises(TypeError, match = err_msg):
         check_predict_input(
-            forecaster_type = 'class.ForecasterAutoreg',
+            forecaster_type = 'ForecasterAutoreg',
             steps           = 10,
             fitted          = True,
             included_exog   = False,
@@ -603,5 +675,5 @@ def test_check_input_predict_exception_when_last_window_index_frequency_is_not_i
             interval        = None,
             max_steps       = None,
             levels          = None,
-            series_levels   = None
+            series_col_names   = None
         )
