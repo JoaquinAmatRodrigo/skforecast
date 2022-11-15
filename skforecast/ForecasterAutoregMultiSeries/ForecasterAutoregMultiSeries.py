@@ -578,7 +578,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             # Keys in series_weights not present in series are ignored.
             series_not_in_series_weights = set(series.columns) - set(self.series_weights.keys())
             if series_not_in_series_weights:
-                    logging.warning(
+                    warnings.warn(
                         f"{series_not_in_series_weights} not present in `series_weights`."
                         f" A weight of 1 is given to all their samples."
                     )
@@ -595,7 +595,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 # Series not present in weight_func have a weight of 1 in all their samples
                 series_not_in_weight_func = set(series.columns) - set(self.weight_func.keys())
                 if series_not_in_weight_func:
-                    logging.warning(
+                    warnings.warn(
                         f"{series_not_in_weight_func} not present in `weight_func`."
                         f" A weight of 1 is given to all their samples."
                     )
