@@ -269,7 +269,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                     f"Got {type(series_weights)}."
                 )
             if 'sample_weight' not in inspect.getfullargspec(self.regressor.fit)[0]:
-                warnings.warm(
+                warnings.warn(
                     f"""
                     Argument `series_weights` is ignored since regressor {self.regressor}
                     does not accept `sample_weight` in its `fit` method.
@@ -428,20 +428,19 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         series_col_names = list(series.columns)
 
-        self.transformer_series_ = deepcopy(self.transformer_series)
-        if self.transformer_series is None:
-            self.transformer_series_ = {serie: None for serie in series_col_names}
-        elif not isinstance(self.transformer_series, dict):
+        if isinstance(self.transformer_series, Callable):
             self.transformer_series_ = {serie: clone(self.transformer_series) 
                                         for serie in series_col_names}
         else:
-            if list(self.transformer_series_.keys()) != series_col_names:
-                raise ValueError(
-                    (f'When `transformer_series` parameter is a `dict`, its keys '
-                     f'must be the same as `series` column names.\n'
-                     f'    `transformer_series` keys : {list(self.transformer_series_.keys())}.\n'
-                     f'    `series` columns          : {series_col_names}.')
-                )
+            self.transformer_series_ = {serie: None for serie in series_col_names}
+            if isinstance(self.transformer_series, dict):
+                self.transformer_series_.update(deepcopy(self.transformer_series))
+                series_not_in_transformer_series = set(series.columns) - set(self.transformer_series.keys())
+                if series_not_in_transformer_series:
+                        warnings.warn(
+                            f"{series_not_in_transformer_series} not present in `transformer_series`."
+                            f" No transformation is applied to them."
+                        )
         
         X_levels = []
         X_train_col_names = [f"lag_{lag}" for lag in self.lags]
