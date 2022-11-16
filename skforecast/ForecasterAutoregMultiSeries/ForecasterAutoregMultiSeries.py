@@ -443,7 +443,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             if series_not_in_transformer_series:
                     warnings.warn(
                         f"{series_not_in_transformer_series} not present in `transformer_series`."
-                        f" No transformation is applied to them."
+                        f" No transformation is applied to these series."
                     )
         
         X_levels = []

@@ -438,7 +438,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             if series_not_in_transformer_series:
                     warnings.warn(
                         f"{series_not_in_transformer_series} not present in `transformer_series`."
-                        f" No transformation is applied to them."
+                        f" No transformation is applied to these series."
                     )
         
         y_train_col_names = [f"{self.level}_step_{i+1}" for i in range(self.steps)]
