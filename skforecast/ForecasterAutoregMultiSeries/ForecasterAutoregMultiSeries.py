@@ -258,7 +258,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.skforcast_version       = skforecast.__version__
         self.python_version          = sys.version.split(" ")[0]
         
-        self.lags = initialize_lags(type(self), lags)
+        self.lags = initialize_lags(type(self).__name__, lags)
         self.max_lag = max(self.lags)
         self.window_size = self.max_lag
 
@@ -435,7 +435,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                                         for serie in series_col_names}
         else:
             self.transformer_series_ = {serie: None for serie in series_col_names}
-            self.transformer_series_.update(deepcopy(self.transformer_series))
+            # Only elements already present in transformer_series_ are updated
+            self.transformer_series_.update(
+                (k, v) for k, v in deepcopy(self.transformer_series).items() if k in self.transformer_series_
+            )
             series_not_in_transformer_series = set(series.columns) - set(self.transformer_series.keys())
             if series_not_in_transformer_series:
                     warnings.warn(
@@ -1329,7 +1332,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         
         """
         
-        self.lags = initialize_lags(type(self), lags)            
+        self.lags = initialize_lags(type(self).__name__, lags)            
         self.max_lag  = max(self.lags)
         self.window_size = max(self.lags)
         

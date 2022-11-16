@@ -430,7 +430,10 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                                         for serie in series_col_names}
         else:
             self.transformer_series_ = {serie: None for serie in series_col_names}
-            self.transformer_series_.update(deepcopy(self.transformer_series))
+            # Only elements already present in transformer_series_ are updated
+            self.transformer_series_.update(
+                (k, v) for k, v in deepcopy(self.transformer_series).items() if k in self.transformer_series_
+            )
             series_not_in_transformer_series = set(series.columns) - set(self.transformer_series.keys())
             if series_not_in_transformer_series:
                     warnings.warn(
@@ -620,7 +623,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
     def fit(
         self,
         series: pd.DataFrame,
-        exog: Optional[Union[pd.Series, pd.DataFrame]]=None
+        exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+        store_in_sample_residuals: Any=None
     ) -> None:
         """
         Training Forecaster.
@@ -634,6 +638,9 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             Exogenous variable/s included as predictor/s. Must have the same
             number of observations as `series` and their indexes must be aligned so
             that series[i] is regressed on exog[i].
+
+        store_in_sample_residuals : Ignored
+            Not used, present here for API consistency by convention.
 
         Returns 
         -------

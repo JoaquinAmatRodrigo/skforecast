@@ -194,7 +194,7 @@ class ForecasterAutoreg(ForecasterBase):
         self.python_version          = sys.version.split(" ")[0]
         self.index_type              = None
         
-        self.lags = initialize_lags(type(self), lags)
+        self.lags = initialize_lags(type(self).__name__, lags)
         self.max_lag = max(self.lags)
         self.window_size = self.max_lag
             
@@ -1021,7 +1021,7 @@ class ForecasterAutoreg(ForecasterBase):
         
         """
         
-        self.lags = initialize_lags(type(self), lags)
+        self.lags = initialize_lags(type(self).__name__, lags)
         self.max_lag  = max(self.lags)
         self.window_size = max(self.lags)
         

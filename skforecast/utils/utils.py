@@ -55,7 +55,7 @@ def initialize_lags(
     elif isinstance(lags, np.ndarray):
         lags = lags
     else:
-        if not str(forecaster_type).split('.')[1] == 'ForecasterAutoregMultiVariate':
+        if not forecaster_type == 'ForecasterAutoregMultiVariate':
             raise TypeError(
                 '`lags` argument must be an int, 1d numpy ndarray, range or list. '
                 f"Got {type(lags)}."
