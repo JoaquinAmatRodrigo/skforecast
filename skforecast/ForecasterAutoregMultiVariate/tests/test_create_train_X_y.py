@@ -80,9 +80,9 @@ def test_create_train_X_y_exception_when_len_series_is_lower_than_maximum_lag_pl
         forecaster.create_train_X_y(series=series)
 
 
-def test_create_train_X_y_exception_when_levels_of_transformer_series_not_equal_to_series_col_names():
+def test_create_train_X_y_warning_when_levels_of_transformer_series_not_equal_to_series_col_names():
     """
-    Test exception is raised when `transformer_series` is a dict and its keys 
+    Test warning is raised when `transformer_series` is a dict and its keys 
     are not the same as series column names.
     """
     series = pd.DataFrame({'l1': pd.Series(np.arange(10)),  
@@ -99,13 +99,12 @@ def test_create_train_X_y_exception_when_levels_of_transformer_series_not_equal_
                                                steps              = 3,
                                                transformer_series = dict_transformers)
     
-    err_msg = re.escape(
-                    (f'When `transformer_series` parameter is a `dict`, its keys '
-                     f'must be the same as `series` column names.\n'
-                     f'    `transformer_series` keys : {list(forecaster.transformer_series.keys())}.\n'
-                     f'    `series` columns          : {series_col_names}.')
+    series_not_in_transformer_series = set(series.columns) - set(forecaster.transformer_series.keys())
+    warn_msg = re.escape(
+                    (f"{series_not_in_transformer_series} not present in `transformer_series`."
+                     f" No transformation is applied to them.")
                 )
-    with pytest.raises(ValueError, match = err_msg):
+    with pytest.warns(UserWarning, match = warn_msg):
         forecaster.create_train_X_y(series=series)
 
 

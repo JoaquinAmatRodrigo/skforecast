@@ -428,19 +428,20 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         series_col_names = list(series.columns)
 
-        if isinstance(self.transformer_series, Callable):
+        if self.transformer_series is None:
+            self.transformer_series_ = {serie: None for serie in series_col_names}
+        elif not isinstance(self.transformer_series, dict):
             self.transformer_series_ = {serie: clone(self.transformer_series) 
                                         for serie in series_col_names}
         else:
             self.transformer_series_ = {serie: None for serie in series_col_names}
-            if isinstance(self.transformer_series, dict):
-                self.transformer_series_.update(deepcopy(self.transformer_series))
-                series_not_in_transformer_series = set(series.columns) - set(self.transformer_series.keys())
-                if series_not_in_transformer_series:
-                        warnings.warn(
-                            f"{series_not_in_transformer_series} not present in `transformer_series`."
-                            f" No transformation is applied to them."
-                        )
+            self.transformer_series_.update(deepcopy(self.transformer_series))
+            series_not_in_transformer_series = set(series.columns) - set(self.transformer_series.keys())
+            if series_not_in_transformer_series:
+                    warnings.warn(
+                        f"{series_not_in_transformer_series} not present in `transformer_series`."
+                        f" No transformation is applied to them."
+                    )
         
         X_levels = []
         X_train_col_names = [f"lag_{lag}" for lag in self.lags]
