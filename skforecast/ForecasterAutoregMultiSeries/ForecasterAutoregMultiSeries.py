@@ -20,7 +20,7 @@ from copy import copy, deepcopy
 import skforecast
 from ..ForecasterBase import ForecasterBase
 from ..utils import initialize_lags
-from ..utils import check_weights
+from ..utils import initialize_weights
 from ..utils import check_y
 from ..utils import check_exog
 from ..utils import preprocess_y
@@ -262,7 +262,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.max_lag = max(self.lags)
         self.window_size = self.max_lag
 
-        self.weight_func, self.source_code_weight_func, self.series_weights = check_weights(
+        self.weight_func, self.source_code_weight_func, self.series_weights = initialize_weights(
             forecaster_type = type(self).__name__, 
             regressor       = regressor, 
             weight_func     = weight_func, 

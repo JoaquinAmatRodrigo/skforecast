@@ -20,7 +20,7 @@ from copy import copy
 
 import skforecast
 from ..ForecasterBase import ForecasterBase
-from ..utils import check_weights
+from ..utils import initialize_weights
 from ..utils import check_y
 from ..utils import check_exog
 from ..utils import preprocess_y
@@ -214,7 +214,7 @@ class ForecasterAutoregCustom(ForecasterBase):
     
         self.source_code_create_predictors = inspect.getsource(fun_predictors)
 
-        self.weight_func, self.source_code_weight_func, _ = check_weights(
+        self.weight_func, self.source_code_weight_func, _ = initialize_weights(
             forecaster_type = type(self).__name__, 
             regressor       = regressor, 
             weight_func     = weight_func, 

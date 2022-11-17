@@ -71,7 +71,7 @@ def initialize_lags(
     return lags
 
 
-def check_weights(
+def initialize_weights(
     forecaster_type: str,
     regressor: object,
     weight_func: Union[callable, dict],
