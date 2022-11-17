@@ -46,20 +46,18 @@ def _backtesting_multiseries_fit_predict(
     in_sample_residuals: bool=True
 ) -> pd.DataFrame:
     """
-    Backtesting of forecaster multi-series model.
-
-    If `refit` is False, the model is trained only once using the `initial_train_size`
-    first observations. If `refit` is True, the model is trained in each iteration
-    increasing the training set. A copy of the original forecaster is created so 
-    it is not modified during the process.
-
+    Fit forecaster and predict n steps ahead. This is an auxiliar function used in
+    `_backtesting_forecaster_multiseries_refit` and `_backtesting_forecaster_multiseries_no_refit`
+    functions.  
+    
     Parameters
     ----------
     forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiVariate
         Forecaster model.
 
     refit : bool
-        Whether to fit the forecaster or not.
+        Whether to fit the forecaster or not. If `refit` is ``True``, the model is
+        trained with values from `train_idx_start` to `train_idx_end`.
 
     series : pandas DataFrame
         Training time series.
@@ -67,25 +65,27 @@ def _backtesting_multiseries_fit_predict(
     steps : int
         Number of steps to predict.
     
-    initial_train_size : int, default `None`
-        Number of samples in the initial train split. If `None` and `forecaster` is already 
-        trained, no initial train is done and all data is used to evaluate the model. However, 
-        the first `len(forecaster.last_window)` observations are needed to create the 
-        initial predictors, so no predictions are calculated for them.
+    train_idx_start : int, default None
+        Index position to start the training process.
 
-        `None` is only allowed when `refit` is `False`.
-    
-    fixed_train_size : bool, default `True`
-        If True, train size doesn't increase but moves by `steps` in each iteration.
+    train_idx_end : int, default None
+        Index position to finish the training process.
 
     levels : str, list, default `None`
         Time series to be predicted. If `None` all levels will be predicted.
         **New in version 0.6.0**
+
+    last_window_series : numpy ndarray
+        Values of the series used to create the predictors (lags) need in the 
+        first iteration (t + 1) of prediction process.
         
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
+
+    next_window_exog: 
+        Values of the exog variables need to predict the next `steps`.
 
     interval : list, default `None`
         Confidence of the prediction interval estimated. Sequence of percentiles
@@ -105,9 +105,6 @@ def _backtesting_multiseries_fit_predict(
         If `True`, residuals from the training data are used as proxy of
         prediction error to create prediction intervals.  If `False`, out_sample_residuals
         are used if they are already stored inside the forecaster.
-                  
-    verbose : bool, default `False`
-        Print number of folds and index of training and validation sets used for backtesting.
 
     Returns 
     -------
@@ -120,7 +117,6 @@ def _backtesting_multiseries_fit_predict(
     """
     
     if refit:
-
         exog_train_values = exog.iloc[train_idx_start:train_idx_end, ] if exog is not None else None
         store_in_sample_residuals_value = False if interval is None else True
 
