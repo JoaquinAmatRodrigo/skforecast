@@ -12,9 +12,7 @@ def create_predictors(y): # pragma: no cover
     """
     Create first 5 lags of a time series.
     """
-    
     lags = y[-1:-6:-1]
-    
     return lags
 
 
@@ -34,7 +32,7 @@ def test_create_train_X_y_exception_when_len_y_is_less_than_window_size():
                  f'minimum length is {forecaster.window_size + 1}')
             )
     with pytest.raises(ValueError, match = err_msg):
-        forecaster.create_train_X_y(y=pd.Series(np.arange(10)))
+        forecaster.create_train_X_y(y=pd.Series(np.arange(5)))
 
 
 @pytest.mark.parametrize("y                        , exog", 
@@ -212,12 +210,44 @@ def test_create_train_X_y_exception_when_y_and_exog_have_different_length():
                     fun_predictors = create_predictors,
                     window_size    = 5
                 )
-    with pytest.raises(Exception):
-        forecaster.fit(y=pd.Series(np.arange(50)), exog=pd.Series(np.arange(10)))
-    with pytest.raises(Exception):
-        forecaster.fit(y=pd.Series(np.arange(10)), exog=pd.Series(np.arange(50)))
-    with pytest.raises(Exception):
-        forecaster.fit(
-            y=pd.Series(np.arange(10)),
-            exog=pd.DataFrame(np.arange(50).reshape(25,2))
-        )
+
+    y = pd.Series(np.arange(50))
+    exog = pd.Series(np.arange(10))
+    err_msg = re.escape((
+                f'`exog` must have same number of samples as `y`. '
+                f'length `exog`: ({len(exog)}), length `y`: ({len(y)})'
+              ))
+    with pytest.raises(ValueError, match = err_msg):
+        forecaster.fit(y=y, exog=exog)
+
+    y = pd.Series(np.arange(10))
+    exog = pd.Series(np.arange(50))
+    err_msg = re.escape((
+                f'`exog` must have same number of samples as `y`. '
+                f'length `exog`: ({len(exog)}), length `y`: ({len(y)})'
+              ))
+    with pytest.raises(ValueError, match = err_msg):
+        forecaster.fit(y=y, exog=exog)
+
+    y = pd.Series(np.arange(10))
+    exog = pd.DataFrame(np.arange(50).reshape(25,2))
+    err_msg = re.escape((
+                f'`exog` must have same number of samples as `y`. '
+                f'length `exog`: ({len(exog)}), length `y`: ({len(y)})'
+              ))
+    with pytest.raises(ValueError, match = err_msg):
+        forecaster.fit(y=y, exog=exog)
+
+
+def test_create_train_X_y_exception_fun_predictors_return_nan_values():
+    """
+    Test exception is raised when length of y and length of exog are different.
+    """
+    forecaster = ForecasterAutoregCustom(
+                    regressor      = LinearRegression(),
+                    fun_predictors = lambda y: np.array([np.nan, np.nan]),
+                    window_size    = 5
+                )
+    err_msg = re.escape("`create_predictors()` is returning `NaN` values.")
+    with pytest.raises(Exception, match = err_msg):
+        forecaster.fit(y=pd.Series(np.arange(50)))

@@ -3,6 +3,7 @@
 import re
 import pytest
 import pandas as pd
+import numpy as np
 from skforecast.ForecasterAutoregCustom import ForecasterAutoregCustom
 from sklearn.linear_model import LinearRegression
 from sklearn.neighbors import KNeighborsRegressor
@@ -46,4 +47,38 @@ def test_init_exception_when_fun_predictors_argument_is_string():
             regressor      = LinearRegression(),
             fun_predictors = fun_predictors,
             window_size    = 5
+        )
+
+def test_init_exception_when_weight_func_argument_is_not_callable():
+   """
+   """
+   weight_func = '---'
+   err_msg = re.escape(
+                f"Argument `weight_func` must be a callable. Got {type(weight_func)}."
+            )
+   with pytest.raises(TypeError, match = err_msg):
+        ForecasterAutoregCustom(
+            regressor      = LinearRegression(),
+            fun_predictors = create_predictors,
+            window_size    = 5,
+            weight_func    = weight_func
+        )
+
+
+def test_init_exception_when_weight_func_argument_is_not_callable():
+   """
+   """
+   def weight_func(index):
+        return np.ones_like(index)
+
+   warn_msg = re.escape(
+                f"Argument `weight_func` is ignored since regressor KNeighborsRegressor()"
+                f" does not accept `sample_weight` in its `fit` method."
+            )
+   with pytest.warns(UserWarning, match = warn_msg):
+        ForecasterAutoregCustom(
+            regressor      = KNeighborsRegressor(),
+            fun_predictors = create_predictors,
+            window_size    = 5,
+            weight_func    = weight_func
         )
