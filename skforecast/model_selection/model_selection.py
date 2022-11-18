@@ -27,11 +27,6 @@ optuna.logging.set_verbosity(optuna.logging.WARNING) # disable optuna logs
 from skopt.utils import use_named_args
 from skopt import gp_minimize
 
-from ..ForecasterAutoreg import ForecasterAutoreg
-from ..ForecasterAutoregCustom import ForecasterAutoregCustom
-from ..ForecasterAutoregDirect import ForecasterAutoregDirect
-from ..ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
-
 logging.basicConfig(
     format = '%(name)-10s %(levelname)-5s %(message)s', 
     level  = logging.INFO,
@@ -298,6 +293,116 @@ def cv_forecaster(
     return cv_metrics, cv_predictions
 
 
+def _backtesting_fit_predict(
+    forecaster,
+    refit: bool,
+    y: pd.Series,
+    steps: int,
+    train_idx_start: Optional[int]=None,
+    train_idx_end: Optional[int]=None,
+    last_window_y: Optional[pd.Series]=None,
+    exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+    next_window_exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+    interval: Optional[list]=None,
+    n_boot: int=500,
+    random_state: int=123,
+    in_sample_residuals: bool=True
+) -> Union[pd.Series, pd.DataFrame]:
+    """
+    Fit the forecaster and predict n steps ahead. This is an auxiliary function 
+    used in `_backtesting_forecaster_refit` and 
+    `_backtesting_forecaster_no_refit` functions.
+    
+    Parameters
+    ----------
+    forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect
+        Forecaster model.
+
+    refit : bool
+        Whether to fit the forecaster or not. If `refit` is ``True``, the model is
+        trained with values from `train_idx_start` to `train_idx_end`.
+
+    y : pandas Series
+        Training time series.
+        
+    steps : int
+        Number of steps to predict.
+    
+    train_idx_start : int, default `None`
+        Index position to start the training process.
+
+    train_idx_end : int, default `None`
+        Index position to finish the training process.
+
+    last_window_y : pandas Series, default `None`
+        Values of the series used to create the predictors (lags) need in the 
+        first iteration (t + 1) of prediction process.
+        
+    exog : pandas Series, pandas DataFrame, default `None`
+        Exogenous variable/s included as predictor/s. Must have the same
+        number of observations as `y` and should be aligned so that y[i] is
+        regressed on exog[i].
+
+    next_window_exog: pandas Series, pandas DataFrame, default `None`
+        Values of the exog variables needed to predict the next `steps`.
+
+    interval : list, default `None`
+        Confidence of the prediction interval estimated. Sequence of percentiles
+        to compute, which must be between 0 and 100 inclusive. If `None`, no
+        intervals are estimated. Only available for forecaster of type ForecasterAutoreg
+        and ForecasterAutoregCustom.
+            
+    n_boot : int, default `500`
+        Number of bootstrapping iterations used to estimate prediction
+        intervals.
+
+    random_state : int, default `123`
+        Sets a seed to the random generator, so that boot intervals are always 
+        deterministic.
+
+    in_sample_residuals : bool, default `True`
+        If `True`, residuals from the training data are used as proxy of
+        prediction error to create prediction intervals.  If `False`, out_sample_residuals
+        are used if they are already stored inside the forecaster.
+
+    Returns 
+    -------
+    pred : pandas Series, pandas DataFrame
+        Value of predictions and their estimated interval if `interval` is not `None`.
+            column pred = predictions.
+            column lower_bound = lower bound of the interval.
+            column upper_bound = upper bound interval of the interval.
+
+    """
+    
+    if refit:
+        exog_train_values = exog.iloc[train_idx_start:train_idx_end, ] if exog is not None else None
+
+        forecaster.fit(
+            y    = y.iloc[train_idx_start:train_idx_end, ], 
+            exog = exog_train_values,
+        )
+
+    if interval is None:
+        pred = forecaster.predict(
+                   steps       = steps,
+                   last_window = last_window_y,
+                   exog        = next_window_exog
+               )
+    else:
+        pred = forecaster.predict_interval(
+                   steps               = steps,
+                   last_window         = last_window_y,
+                   exog                = next_window_exog,
+                   interval            = interval,
+                   n_boot              = n_boot,
+                   random_state        = random_state,
+                   in_sample_residuals = in_sample_residuals
+               )
+
+    return pred
+
+
 def _backtesting_forecaster_verbose(
     index_values: pd.Index,
     steps: int,
@@ -405,7 +510,7 @@ def _backtesting_forecaster_refit(
         Forecaster model.
         
     y : pandas Series
-        Training time series values.
+        Training time series.
         
     steps : int
         Number of steps to predict.
@@ -485,12 +590,12 @@ def _backtesting_forecaster_refit(
     folds = int(np.ceil((len(y) - initial_train_size) / steps))
     remainder = (len(y) - initial_train_size) % steps
     
-    if not isinstance(forecaster, ForecasterAutoregDirect) and folds > 50:
+    if type(forecaster).__name__ != 'ForecasterAutoregDirect' and folds > 50:
         warnings.warn(
             f"The forecaster will be fit {folds} times. This can take substantial amounts of time. "
             f"If not feasible, try with `refit = False`. \n"
         )
-    elif isinstance(forecaster, ForecasterAutoregDirect) and folds*forecaster.steps > 50:
+    elif type(forecaster).__name__ == 'ForecasterAutoregDirect' and folds*forecaster.steps > 50:
         warnings.warn(
             f"The forecaster will be fit {folds*forecaster.steps} times ({folds} folds * {forecaster.steps} regressors). "
             f"This can take substantial amounts of time. If not feasible, try with `refit = False`. \n"
@@ -517,119 +622,28 @@ def _backtesting_forecaster_refit(
             train_idx_start = 0
         train_idx_end = initial_train_size + i * steps
             
-        if exog is not None:
-            next_window_exog = exog.iloc[train_idx_end:train_idx_end + steps, ]
+        next_window_exog = exog.iloc[train_idx_end:train_idx_end + steps, ] if exog is not None else None
 
-        if interval is None:
+        if i == folds - 1: # last fold
+            # If remainder > 0, only the remaining steps need to be predicted
+            steps = steps if remainder == 0 else remainder
 
-            if i < folds - 1:
-                if exog is None:
-                    forecaster.fit(y=y.iloc[train_idx_start:train_idx_end])
-                    pred = forecaster.predict(steps=steps)
-                else:
-                    forecaster.fit(
-                        y = y.iloc[train_idx_start:train_idx_end], 
-                        exog = exog.iloc[train_idx_start:train_idx_end, ]
-                    )
-                    pred = forecaster.predict(steps=steps, exog=next_window_exog)
-            else:    
-                if remainder == 0:
-                    if exog is None:
-                        forecaster.fit(y=y.iloc[train_idx_start:train_idx_end])
-                        pred = forecaster.predict(steps=steps)
-                    else:
-                        forecaster.fit(
-                            y = y.iloc[train_idx_start:train_idx_end], 
-                            exog = exog.iloc[train_idx_start:train_idx_end, ]
-                        )
-                        pred = forecaster.predict(steps=steps, exog=next_window_exog)
-                else:
-                    # Only the remaining steps need to be predicted
-                    steps = remainder
-                    if exog is None:
-                        forecaster.fit(y=y.iloc[train_idx_start:train_idx_end])
-                        pred = forecaster.predict(steps=steps)
-                    else:
-                        forecaster.fit(
-                            y = y.iloc[train_idx_start:train_idx_end], 
-                            exog = exog.iloc[train_idx_start:train_idx_end, ]
-                        )
-                        pred = forecaster.predict(steps=steps, exog=next_window_exog)
-        else:
-
-            if i < folds - 1:
-                if exog is None:
-                    forecaster.fit(y=y.iloc[train_idx_start:train_idx_end])
-                    pred = forecaster.predict_interval(
-                                steps        = steps,
-                                interval     = interval,
-                                n_boot       = n_boot,
-                                random_state = random_state,
-                                in_sample_residuals = in_sample_residuals
-                            )
-                else:
-                    forecaster.fit(
-                        y = y.iloc[train_idx_start:train_idx_end], 
-                        exog = exog.iloc[train_idx_start:train_idx_end, ]
-                    )
-                    pred = forecaster.predict_interval(
-                                steps        = steps,
-                                exog         = next_window_exog,
-                                interval     = interval,
-                                n_boot       = n_boot,
-                                random_state = random_state,
-                                in_sample_residuals = in_sample_residuals
-                           )
-            else:    
-                if remainder == 0:
-                    if exog is None:
-                        forecaster.fit(y=y.iloc[train_idx_start:train_idx_end])
-                        pred = forecaster.predict_interval(
-                                steps        = steps,
-                                interval     = interval,
-                                n_boot       = n_boot,
-                                random_state = random_state,
-                                in_sample_residuals = in_sample_residuals
-                            )
-                    else:
-                        forecaster.fit(
-                            y = y.iloc[train_idx_start:train_idx_end], 
-                            exog = exog.iloc[train_idx_start:train_idx_end, ]
-                        )
-                        pred = forecaster.predict_interval(
-                                steps        = steps,
-                                exog         = next_window_exog,
-                                interval     = interval,
-                                n_boot       = n_boot,
-                                random_state = random_state,
-                                in_sample_residuals = in_sample_residuals
-                           )
-                else:
-                    # Only the remaining steps need to be predicted
-                    steps = remainder
-                    if exog is None:
-                        forecaster.fit(y=y.iloc[train_idx_start:train_idx_end])
-                        pred = forecaster.predict_interval(
-                                steps        = steps,
-                                interval     = interval,
-                                n_boot       = n_boot,
-                                random_state = random_state,
-                                in_sample_residuals = in_sample_residuals
-                            )
-                    else:
-                        forecaster.fit(
-                            y = y.iloc[train_idx_start:train_idx_end], 
-                            exog = exog.iloc[train_idx_start:train_idx_end, ]
-                        )
-                        pred = forecaster.predict_interval(
-                                steps        = steps,
-                                exog         = next_window_exog,
-                                interval     = interval,
-                                n_boot       = n_boot,
-                                random_state = random_state,
-                                in_sample_residuals = in_sample_residuals
-                           )
-
+        pred = _backtesting_fit_predict(
+                    forecaster          = forecaster,
+                    refit               = True,
+                    y                   = y,
+                    steps               = steps,
+                    train_idx_start     = train_idx_start,
+                    train_idx_end       = train_idx_end,
+                    last_window_y       = None,
+                    exog                = exog,
+                    next_window_exog    = next_window_exog,
+                    interval            = interval,
+                    n_boot              = n_boot,
+                    random_state        = random_state,
+                    in_sample_residuals = in_sample_residuals
+                )
+            
         backtest_predictions.append(pred)
     
     backtest_predictions = pd.concat(backtest_predictions)
@@ -680,7 +694,7 @@ def _backtesting_forecaster_no_refit(
         Forecaster model.
         
     y : pandas Series
-        Training time series values.
+        Training time series.
         
     steps : int
         Number of steps to predict.
@@ -791,119 +805,30 @@ def _backtesting_forecaster_no_refit(
         last_window_end   = initial_train_size + i * steps
         last_window_start = last_window_end - window_size 
         last_window_y     = y.iloc[last_window_start:last_window_end]
-        if exog is not None:
-            next_window_exog = exog.iloc[last_window_end:last_window_end + steps, ]
+
+        next_window_exog = exog.iloc[last_window_end:last_window_end + steps, ] if exog is not None else None
     
-        if interval is None:  
-
-            if i < folds - 1: 
-                if exog is None:
-                    pred = forecaster.predict(
-                                steps       = steps,
-                                last_window = last_window_y
-                           )
-                else:
-                    pred = forecaster.predict(
-                                steps       = steps,
-                                last_window = last_window_y,
-                                exog        = next_window_exog
-                           )            
-            else:    
-                if remainder == 0:
-                    if exog is None:
-                        pred = forecaster.predict(
-                                    steps       = steps,
-                                    last_window = last_window_y
-                               )
-                    else:
-                        pred = forecaster.predict(
-                                    steps       = steps,
-                                    last_window = last_window_y,
-                                    exog        = next_window_exog
-                               )
-                else:
-                    # Only the remaining steps need to be predicted
-                    steps = remainder
-                    if exog is None:
-                        pred = forecaster.predict(
-                                    steps       = steps,
-                                    last_window = last_window_y
-                               )
-                    else:
-                        pred = forecaster.predict(
-                                    steps       = steps,
-                                    last_window = last_window_y,
-                                    exog        = next_window_exog
-                               )
+        if i == folds - 1: # last fold
+            # If remainder > 0, only the remaining steps need to be predicted
+            steps = steps if remainder == 0 else remainder
+        
+        pred = _backtesting_fit_predict(
+                    forecaster          = forecaster,
+                    refit               = False,
+                    y                   = y,
+                    steps               = steps,
+                    train_idx_start     = None,
+                    train_idx_end       = None,
+                    last_window_y       = last_window_y,
+                    exog                = exog,
+                    next_window_exog    = next_window_exog,
+                    interval            = interval,
+                    n_boot              = n_boot,
+                    random_state        = random_state,
+                    in_sample_residuals = in_sample_residuals
+                )
             
-            backtest_predictions.append(pred)
-
-        else:
-            if i < folds - 1:
-                if exog is None:
-                    pred = forecaster.predict_interval(
-                                steps        = steps,
-                                last_window  = last_window_y,
-                                interval     = interval,
-                                n_boot       = n_boot,
-                                random_state = random_state,
-                                in_sample_residuals = in_sample_residuals
-                           )
-                else:
-                    pred = forecaster.predict_interval(
-                                steps        = steps,
-                                last_window  = last_window_y,
-                                exog         = next_window_exog,
-                                interval     = interval,
-                                n_boot       = n_boot,
-                                random_state = random_state,
-                                in_sample_residuals = in_sample_residuals
-                           )            
-            else:    
-                if remainder == 0:
-                    if exog is None:
-                        pred = forecaster.predict_interval(
-                                    steps        = steps,
-                                    last_window  = last_window_y,
-                                    interval     = interval,
-                                    n_boot       = n_boot,
-                                    random_state = random_state,
-                                    in_sample_residuals = in_sample_residuals
-                               )
-                    else:
-                        pred = forecaster.predict_interval(
-                                    steps        = steps,
-                                    last_window  = last_window_y,
-                                    exog         = next_window_exog,
-                                    interval     = interval,
-                                    n_boot       = n_boot,
-                                    random_state = random_state,
-                                    in_sample_residuals = in_sample_residuals
-                               )
-                else:
-                    # Only the remaining steps need to be predicted
-                    steps = remainder
-                    if exog is None:
-                        pred = forecaster.predict_interval(
-                                    steps        = steps,
-                                    last_window  = last_window_y,
-                                    interval     = interval,
-                                    n_boot       = n_boot,
-                                    random_state = random_state,
-                                    in_sample_residuals = in_sample_residuals
-                               )
-                    else:
-                        pred = forecaster.predict_interval(
-                                    steps        = steps,
-                                    last_window  = last_window_y,
-                                    exog         = next_window_exog,
-                                    interval     = interval,
-                                    n_boot       = n_boot,
-                                    random_state = random_state,
-                                    in_sample_residuals = in_sample_residuals
-                               )
-            
-            backtest_predictions.append(pred)
+        backtest_predictions.append(pred)
 
     backtest_predictions = pd.concat(backtest_predictions)
     if isinstance(backtest_predictions, pd.Series):
@@ -953,8 +878,8 @@ def backtesting_forecaster(
         Forecaster model.
         
     y : pandas Series
-        Training time series values.
-        
+        Training time series.
+    
     steps : int
         Number of steps to predict.
         
@@ -1052,16 +977,17 @@ def backtesting_forecaster(
             f'`refit` is only allowed when `initial_train_size` is not `None`.'
         )
 
-    if interval is not None and isinstance(forecaster, ForecasterAutoregDirect):
+    if interval is not None and type(forecaster).__name__ == 'ForecasterAutoregDirect':
         raise TypeError(
             ('Interval prediction is only available when forecaster is of type '
-            'ForecasterAutoreg or ForecasterAutoregCustom.')
+             'ForecasterAutoreg or ForecasterAutoregCustom.')
         )
     
-    if isinstance(forecaster, ForecasterAutoregMultiSeries):
+    if type(forecaster).__name__ not in ['ForecasterAutoreg', 'ForecasterAutoregCustom', 'ForecasterAutoregDirect']:
         raise TypeError(
-            ('For `forecaster` of type `ForecasterAutoregMultiSeries`, use the '
-             'functions available in the model_selection_multiseries module.')
+            ('`forecaster` must be of type `ForecasterAutoreg`, `ForecasterAutoregCustom` '
+             'or `ForecasterAutoregDirect`, for all other types of forecasters '
+             'use the functions available in the `model_selection` module.')
         )
     
     if refit:
@@ -1224,7 +1150,7 @@ def random_search_forecaster(
         Forcaster model.
         
     y : pandas Series
-        Training time series values. 
+        Training time series. 
         
     param_distributions : dict
         Dictionary with parameters names (`str`) as keys and 
@@ -1394,7 +1320,7 @@ def _evaluate_grid_hyperparameters(
             f'length `exog`: ({len(exog)}), length `y`: ({len(y)})'
         )
 
-    if isinstance(forecaster, ForecasterAutoregCustom):
+    if type(forecaster).__name__ == 'ForecasterAutoregCustom':
         if lags_grid is not None:
             warnings.warn(
                 '`lags_grid` ignored if forecaster is an instance of `ForecasterAutoregCustom`.'
@@ -1419,7 +1345,7 @@ def _evaluate_grid_hyperparameters(
 
     for lags in tqdm(lags_grid, desc='loop lags_grid', position=0, ncols=90):
         
-        if isinstance(forecaster, (ForecasterAutoreg, ForecasterAutoregDirect)):
+        if type(forecaster).__name__ in ['ForecasterAutoreg', 'ForecasterAutoregDirect']:
             forecaster.set_lags(lags)
             lags = forecaster.lags.copy()
         
@@ -1460,7 +1386,7 @@ def _evaluate_grid_hyperparameters(
         best_params = results['params'].iloc[0]
         best_metric = results[list(metric_dict.keys())[0]].iloc[0]
         
-        if isinstance(forecaster, (ForecasterAutoreg, ForecasterAutoregDirect)):
+        if type(forecaster).__name__ in ['ForecasterAutoreg', 'ForecasterAutoregDirect']:
             forecaster.set_lags(best_lags)
         forecaster.set_params(**best_params)
         forecaster.fit(y=y, exog=exog)
@@ -1505,7 +1431,7 @@ def bayesian_search_forecaster(
         Forcaster model.
         
     y : pandas Series
-        Training time series values. 
+        Training time series. 
         
     search_space : callable (optuna), dict (skopt)
         If optuna engine: callable
@@ -1682,7 +1608,7 @@ def _bayesian_search_optuna(
         Forcaster model.
         
     y : pandas Series
-        Training time series values. 
+        Training time series. 
         
     search_space : callable
         Function with argument `trial` which returns a dictionary with parameters names 
@@ -1755,7 +1681,7 @@ def _bayesian_search_optuna(
 
     """
 
-    if isinstance(forecaster, ForecasterAutoregCustom):
+    if type(forecaster).__name__ == 'ForecasterAutoregCustom':
         if lags_grid is not None:
             warnings.warn(
                 '`lags_grid` ignored if forecaster is an instance of `ForecasterAutoregCustom`.'
@@ -1822,7 +1748,7 @@ def _bayesian_search_optuna(
         # It is a trick to extract multiple values from _objective function since
         # only the optimized value can be returned.
 
-        if isinstance(forecaster, (ForecasterAutoreg, ForecasterAutoregDirect)):
+        if type(forecaster).__name__ in ['ForecasterAutoreg', 'ForecasterAutoregDirect']:
             forecaster.set_lags(lags)
             lags = forecaster.lags.copy()
         
@@ -1874,7 +1800,7 @@ def _bayesian_search_optuna(
         best_params = results['params'].iloc[0]
         best_metric = results[list(metric_dict.keys())[0]].iloc[0]
         
-        if isinstance(forecaster, (ForecasterAutoreg, ForecasterAutoregDirect)):
+        if type(forecaster).__name__ in ['ForecasterAutoreg', 'ForecasterAutoregDirect']:
             forecaster.set_lags(best_lags)
         forecaster.set_params(**best_params)
         forecaster.fit(y=y, exog=exog)
@@ -1915,7 +1841,7 @@ def _bayesian_search_skopt(
         Forcaster model.
         
     y : pandas Series
-        Training time series values. 
+        Training time series. 
         
     search_space : dict
         Dictionary with parameters names (`str`) as keys and Space object from skopt 
@@ -1985,7 +1911,7 @@ def _bayesian_search_skopt(
     
     """
 
-    if isinstance(forecaster, ForecasterAutoregCustom):
+    if type(forecaster).__name__ == 'ForecasterAutoregCustom':
         if lags_grid is not None:
             warnings.warn(
                 '`lags_grid` ignored if forecaster is an instance of `ForecasterAutoregCustom`.'
@@ -2061,7 +1987,7 @@ def _bayesian_search_skopt(
         # It is a trick to extract multiple values from _objective function since
         # only the optimized value can be returned.
         
-        if isinstance(forecaster, (ForecasterAutoreg, ForecasterAutoregDirect)):
+        if type(forecaster).__name__ in ['ForecasterAutoreg', 'ForecasterAutoregDirect']:
             forecaster.set_lags(lags)
             lags = forecaster.lags.copy()
         
@@ -2104,7 +2030,7 @@ def _bayesian_search_skopt(
         best_params = results['params'].iloc[0]
         best_metric = results[list(metric_dict.keys())[0]].iloc[0]
         
-        if isinstance(forecaster, (ForecasterAutoreg, ForecasterAutoregDirect)):
+        if type(forecaster).__name__ in ['ForecasterAutoreg', 'ForecasterAutoregDirect']:
             forecaster.set_lags(best_lags)
         forecaster.set_params(**best_params)
         forecaster.fit(y=y, exog=exog)

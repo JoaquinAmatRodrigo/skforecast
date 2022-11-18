@@ -11,6 +11,7 @@ from sklearn.metrics import mean_absolute_error
 from sklearn.exceptions import NotFittedError
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
+from skforecast.ForecasterAutoregMultiVariate import ForecasterAutoregMultiVariate
 from skforecast.model_selection_multiseries import backtesting_forecaster_multiseries
 
 # Fixtures
@@ -208,6 +209,43 @@ def test_backtesting_forecaster_multiseries_exception_when_initial_train_size_No
         )
 
 
+def test_backtesting_forecaster_exception_when_interval_not_None_and_ForecasterAutoregMultivariate():
+    """
+    Test Exception is raised in backtesting_forecaster when interval is not None 
+    and forecaster is a ForecasterAutoregMultivariate.
+    """
+    forecaster = ForecasterAutoregMultiVariate(
+                    regressor = Ridge(random_state=123),
+                    level     = 'l1',
+                    steps     = 3,
+                    lags      = 2
+                 )
+
+    interval = [10, 90]
+    
+    err_msg = re.escape(
+            ('Interval prediction is only available when forecaster is of type '
+             'ForecasterAutoregMultiSeries.')
+        )
+    with pytest.raises(TypeError, match = err_msg):
+        backtesting_forecaster_multiseries(
+            forecaster          = forecaster,
+            series              = series,
+            steps               = 4,
+            levels              = None,
+            metric              = 'mean_absolute_error',
+            initial_train_size  = 12,
+            refit               = False,
+            fixed_train_size    = False,
+            exog                = None,
+            interval            = interval,
+            n_boot              = 500,
+            random_state        = 123,
+            in_sample_residuals = True,
+            verbose             = False
+        )
+
+
 def test_backtesting_forecaster_multiseries_exception_when_forecaster_not_ForecasterAutoregMultiSeries():
     """
     Test Exception is raised in backtesting_forecaster_multiseries when forecaster is not of type
@@ -219,8 +257,9 @@ def test_backtesting_forecaster_multiseries_exception_when_forecaster_not_Foreca
                  )
     
     err_msg = re.escape(
-            ('`forecaster` must be of type `ForecasterAutoregMultiSeries`, for all other '
-             'types of forecasters use the functions in `model_selection` module.')
+            ('`forecaster` must be of type `ForecasterAutoregMultiSeries` or '
+             '`ForecasterAutoregMultiVariate`, for all other types of '
+             'forecasters use the functions available in the `model_selection` module.')
         )
     with pytest.raises(TypeError, match = err_msg):
         backtesting_forecaster_multiseries(
@@ -256,9 +295,10 @@ def test_backtesting_forecaster_multiseries_exception_when_levels_not_list_str_N
                  )
     
     err_msg = re.escape(
-                (f'`levels` must be a `list` of column names, a `str` '
-                 f'of a column name or `None`.')
-              )
+            (f'`levels` must be a `list` of column names, a `str` of a column name or `None` '
+             f'when using a ForecasterAutoregMultiSeries. If the forecaster is of type '
+             f'ForecasterAutoregMultiVariate, this argument is ignored.')
+        )
     with pytest.raises(TypeError, match = err_msg):
         backtesting_forecaster_multiseries(
             forecaster          = forecaster,
@@ -317,6 +357,59 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                               0.49341916, 0.48967772, 0.48517846, 
                                               0.49868447, 0.4859614 , 0.48480032])},
                                index=np.arange(38, 50)
+                           )
+                                   
+    pd.testing.assert_frame_equal(expected_metric, metrics_levels)
+    pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
+
+
+def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_not_refit_not_initial_train_size_with_mocked():
+    """
+    Test output of backtesting_forecaster_multiseries in ForecasterAutoregMultiSeries 
+    without refit and initial_train_size is None with mocked, forecaster must be fitted,
+    (mocked done in Skforecast v0.5.0).
+    """
+
+    forecaster = ForecasterAutoregMultiSeries(
+                    regressor = Ridge(random_state=123),
+                    lags      = 2
+                 )
+    forecaster.fit(series=series)
+
+    steps = 1
+    initial_train_size = None
+
+    metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
+                                               forecaster          = forecaster,
+                                               series              = series,
+                                               steps               = steps,
+                                               levels              = 'l1',
+                                               metric              = mean_absolute_error,
+                                               initial_train_size  = initial_train_size,
+                                               refit               = False,
+                                               fixed_train_size    = False,
+                                               exog                = None,
+                                               interval            = None,
+                                               n_boot              = 500,
+                                               random_state        = 123,
+                                               in_sample_residuals = True,
+                                               verbose             = False
+                                           )
+    
+    expected_metric = pd.DataFrame({'levels': ['l1'],
+                                    'mean_absolute_error': [0.18616882305307128]})
+    expected_predictions = pd.DataFrame({
+                               'l1':np.array([0.48459053, 0.49259742, 0.51314434, 0.51387387, 0.49192289,
+                                              0.53266761, 0.49986433, 0.496257  , 0.49677997, 0.49641078,
+                                              0.52024409, 0.49255581, 0.47860725, 0.50888892, 0.51923275,
+                                              0.4773962 , 0.49249923, 0.51342903, 0.50350073, 0.50946515,
+                                              0.51912045, 0.50583902, 0.50272475, 0.51237963, 0.48600893,
+                                              0.49942566, 0.49056705, 0.49810661, 0.51591527, 0.47512221,
+                                              0.51005943, 0.5003548 , 0.50409177, 0.49838669, 0.49366925,
+                                              0.50348344, 0.52748975, 0.51740335, 0.49023212, 0.50969436,
+                                              0.47668736, 0.50262471, 0.50267211, 0.52623492, 0.47776998,
+                                              0.50850968, 0.53127329, 0.49010354])},
+                               index=pd.RangeIndex(start=2, stop=50, step=1)
                            )
                                    
     pd.testing.assert_frame_equal(expected_metric, metrics_levels)
@@ -420,11 +513,11 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
     pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
 
 
-def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_with_mocked_metrics():
+def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_refit_list_metrics_with_mocked_metrics():
     """
     Test output of backtesting_forecaster_multiseries in ForecasterAutoregMultiSeries 
-    with mocked and list of metrics (mocked done in Skforecast v0.5.0). Only valid for
-    python > 3.7.
+    with refit and list of metrics with mocked and list of metrics 
+    (mocked done in Skforecast v0.5.0).
     """
 
     forecaster = ForecasterAutoregMultiSeries(
@@ -466,10 +559,11 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
     pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
 
 
-def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_no_refit_levels_metrics_with_mocked():
+def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_no_refit_levels_metrics_remainder_with_mocked():
     """
-    Test output of backtesting_forecaster_multiseries in ForecasterAutoregMultiSeries with no refit
-    and multiple levels and metrics with mocked (mocked done in Skforecast v0.5.0).
+    Test output of backtesting_forecaster_multiseries in ForecasterAutoregMultiSeries 
+    with no refit, remainder, multiple levels and metrics with mocked 
+    (mocked done in Skforecast v0.5.0).
     """
 
     forecaster = ForecasterAutoregMultiSeries(
@@ -477,7 +571,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                     lags      = 2
                  )
 
-    steps = 3
+    steps = 5
     n_validation = 12
 
     metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
@@ -497,16 +591,65 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                verbose             = False
                                            )
     
-    expected_metric = pd.DataFrame(data    = [['l1', 0.20754847190853098, 0.20754847190853098],
-                                              ['l2', 0.21399842651788026, 0.21399842651788026]],
+    expected_metric = pd.DataFrame(data    = [['l1', 0.21143995953996186, 0.21143995953996186],
+                                              ['l2', 0.2194174144550234, 0.2194174144550234]],
                                    columns = ['levels', 'mean_absolute_error', 'mean_absolute_error'])
     expected_predictions = pd.DataFrame({
-                               'l1':np.array([0.4978839 , 0.46288427, 0.48433446, 0.48767779, 0.477799  ,
-                                              0.48523814, 0.49341916, 0.48967772, 0.48517846, 0.49868447, 
-                                              0.4859614 , 0.48480032]),
-                               'l2':np.array([0.50266337, 0.53045945, 0.50527774, 0.5150115 , 0.49356802,
-                                              0.50376722, 0.51866166, 0.49041268, 0.50349225, 0.48625798,
-                                              0.52405344, 0.50605782])},
+                               'l1':np.array([0.4978839 , 0.46288427, 0.48433446, 0.48677605, 0.48562473,
+                                              0.50259242, 0.49536197, 0.48478881, 0.48496106, 0.48555902,
+                                              0.49673897, 0.4576795 ]),
+                               'l2':np.array([0.50266337, 0.53045945, 0.50527774, 0.50315834, 0.50452649,
+                                              0.47372756, 0.51226827, 0.50650107, 0.50420766, 0.50448097,
+                                              0.52211914, 0.51092531])},
+                               index=np.arange(38, 50)
+                           )
+                                   
+    pd.testing.assert_frame_equal(expected_metric, metrics_levels)
+    pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
+
+
+def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_refit_levels_metrics_remainder_with_mocked():
+    """
+    Test output of backtesting_forecaster_multiseries in ForecasterAutoregMultiSeries 
+    with refit, remainder, multiple levels and metrics with mocked 
+    (mocked done in Skforecast v0.5.0).
+    """
+
+    forecaster = ForecasterAutoregMultiSeries(
+                    regressor = Ridge(random_state=123),
+                    lags      = 2
+                 )
+
+    steps = 5
+    n_validation = 12
+
+    metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
+                                               forecaster          = forecaster,
+                                               series              = series,
+                                               steps               = steps,
+                                               levels              = None,
+                                               metric              = ['mean_absolute_error', mean_absolute_error],
+                                               initial_train_size  = len(series) - n_validation,
+                                               refit               = True,
+                                               fixed_train_size    = False,
+                                               exog                = None,
+                                               interval            = None,
+                                               n_boot              = 500,
+                                               random_state        = 123,
+                                               in_sample_residuals = True,
+                                               verbose             = False
+                                           )
+    
+    expected_metric = pd.DataFrame(data    = [['l1', 0.20809130188099298, 0.20809130188099298],
+                                              ['l2', 0.22082212805693338, 0.22082212805693338]],
+                                   columns = ['levels', 'mean_absolute_error', 'mean_absolute_error'])
+    expected_predictions = pd.DataFrame({
+                               'l1':np.array([0.4978839 , 0.46288427, 0.48433446, 0.48677605, 0.48562473,
+                                              0.49724331, 0.4990606 , 0.4886555 , 0.48776085, 0.48830266,
+                                              0.52381728, 0.47432451]),
+                               'l2':np.array([0.50266337, 0.53045945, 0.50527774, 0.50315834, 0.50452649,
+                                              0.46847508, 0.5144631 , 0.51135241, 0.50842259, 0.50838289,
+                                              0.52555989, 0.51801796])},
                                index=np.arange(38, 50)
                            )
                                    
@@ -516,8 +659,9 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
 
 def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_not_refit_exog_interval_with_mocked():
     """
-    Test output of backtesting_forecaster_multiseries in ForecasterAutoregMultiSeries without refit
-    with mocked using exog and intervals (mocked done in Skforecast v0.5.0).
+    Test output of backtesting_forecaster_multiseries in ForecasterAutoregMultiSeries 
+    without refit with mocked using exog and intervals 
+    (mocked done in Skforecast v0.5.0).
     """
 
     forecaster = ForecasterAutoregMultiSeries(
