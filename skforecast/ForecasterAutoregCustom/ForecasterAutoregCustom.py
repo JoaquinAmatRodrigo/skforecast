@@ -292,10 +292,10 @@ class ForecasterAutoregCustom(ForecasterBase):
         """
         
         if len(y) < self.window_size + 1:
-            raise Exception(
-                f'`y` must have as many values as the windows_size needed by '
-                f'{self.create_predictors.__name__}. For this Forecaster the '
-                f'minimum length is {self.window_size + 1}'
+            raise ValueError(
+                (f'`y` must have as many values as the windows_size needed by '
+                 f'{self.create_predictors.__name__}. For this Forecaster the '
+                 f'minimum length is {self.window_size + 1}')
             )
 
         check_y(y=y)
