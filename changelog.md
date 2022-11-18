@@ -4,11 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ## [0.6.0] - [Dev]
 
-+ created `generate_lags_ndarray` in `utils` for the creation of lags values during init (applies to all forecasters).
++ Created `initialize_lags` in `utils` for the creation of lags values during init (applies to all forecasters).
+
++ Created `initialize_weights` in `utils` for the check and initialize of arguments `series_weights`and `weight_func` (applies to all forecasters).
 
 + `filter_train_X_y_for_step` in `ForecasterAutoregDirect` now starts at 1 (before 0).
 
-+ column names in `y_train` pandas DataFrame in `ForecasterAutoregDirect` now start with 1, `y_step_1`, (before `y_step_0`).
++ Column names in `y_train` pandas DataFrame in `ForecasterAutoregDirect` now start with 1, `y_step_1`, (before `y_step_0`).
 
 + `ForecasterAutoregMultivariate`.
 
@@ -16,8 +18,11 @@ All notable changes to this project will be documented in this file.
 
 + `ForecasterAutoregDirect` specific predictions.
 
-+ `series_levels` rename to `series_columns` in `check_predict_input`.
++ `series_levels` rename to `series_col_names` in `check_predict_input`.
 
++ Create `_backtesting_fit_predict`, auxiliary function used in `_backtesting_forecaster_refit` and `_backtesting_forecaster_no_refit` functions in `model_selection`. 
+
++ Create `_backtesting_multiseries_fit_predict`, auxiliary function used in `_backtesting_forecaster_multiseries_refit` and `_backtesting_forecaster_multiseries_no_refit` functions in `model_selection_multiseries`.  
 
 
 **Added**
