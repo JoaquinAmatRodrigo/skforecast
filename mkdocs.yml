@@ -49,6 +49,7 @@ nav:
       - ForecasterAutoregCustom: api/ForecasterAutoregCustom.md
       - ForecasterAutoregDirect: api/ForecasterAutoregDirect.md
       - ForecasterMultiSeries: api/ForecasterMultiSeries.md
+      - ForecasterMultiVariate: api/ForecasterMultiVariate.md
       - model_selection: api/model_selection.md
       - model_selection_multiseries: api/model_selection_multiseries.md
       - model_selection_statsmodels: api/model_selection_statsmodels.md
