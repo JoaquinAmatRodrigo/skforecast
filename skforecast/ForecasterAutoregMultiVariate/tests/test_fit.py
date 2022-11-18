@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 from skforecast.ForecasterAutoregMultiVariate import ForecasterAutoregMultiVariate
 from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import StandardScaler
 from xgboost import XGBRegressor
 
 
@@ -32,6 +33,35 @@ def test_fit_exception_when_exog_columns_same_as_series_col_names(exog):
                 )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.fit(series=series, exog=series[exog])
+
+
+def test_fit_correct_dict_create_weight_func_transformer_series():
+    """
+    Test fit method creates correctly all the auxiliary dicts transformer_series_.
+    """
+    series = pd.DataFrame({'l1': pd.Series(np.arange(10)), 
+                           'l2': pd.Series(np.arange(10)), 
+                           'l3': pd.Series(np.arange(10))})
+
+    transformer_series = {'l1': StandardScaler(), 'l3': StandardScaler(), 'l4': StandardScaler()}
+
+    forecaster = ForecasterAutoregMultiVariate(
+                     regressor          = LinearRegression(), 
+                     level              = 'l1',
+                     lags               = 3,
+                     steps              = 2,
+                     transformer_series = transformer_series
+                 )
+    
+    forecaster.fit(series=series, store_in_sample_residuals=False)
+    expected_transformer_series_ = {'l1': forecaster.transformer_series_['l1'], 'l2': None, 'l3': forecaster.transformer_series_['l3']}
+
+    assert forecaster.transformer_series_ == expected_transformer_series_
+
+    forecaster.fit(series=series[['l1', 'l2']], store_in_sample_residuals=False)
+    expected_transformer_series_ = {'l1': forecaster.transformer_series_['l1'], 'l2': None}
+
+    assert forecaster.transformer_series_ == expected_transformer_series_
 
 
 def test_forecaster_index_freq_stored():

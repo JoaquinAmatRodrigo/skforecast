@@ -548,10 +548,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             # Keys in series_weights not present in series are ignored.
             series_not_in_series_weights = set(series.columns) - set(self.series_weights.keys())
             if series_not_in_series_weights:
-                    warnings.warn(
-                        f"{series_not_in_series_weights} not present in `series_weights`."
-                        f" A weight of 1 is given to all their samples."
-                    )
+                warnings.warn(
+                    f"{series_not_in_series_weights} not present in `series_weights`."
+                    f" A weight of 1 is given to all their samples."
+                )
             self.series_weights_ = dict.fromkeys(series.columns, 1.)
             self.series_weights_.update((k, v) for k, v in self.series_weights.items() if k in self.series_weights_)
             weights_series = [np.repeat(self.series_weights_[serie], sum(X_train[serie])) 
@@ -569,13 +569,11 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                         f"{series_not_in_weight_func} not present in `weight_func`."
                         f" A weight of 1 is given to all their samples."
                     )
-                    print(series_not_in_weight_func)
                 self.weight_func_ = dict.fromkeys(series.columns, lambda index: np.ones_like(index, dtype=float))
                 self.weight_func_.update((k, v) for k, v in self.weight_func.items() if k in self.weight_func_)
                 
             weights_samples = []
             for key in self.weight_func_.keys():
-                print(key)
                 index = y_train_index[X_train[X_train[key] == 1.0].index]
                 weights_samples.append(self.weight_func_[key](index))
             weights_samples = np.concatenate(weights_samples)
@@ -649,14 +647,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.training_range      = None
         
         self.series_col_names = list(series.columns)
-
-        if self.series_weights is not None:
-            if list(self.series_weights.keys()) != self.series_col_names:
-                raise ValueError(
-                    (f'`series_weights` must include all series levels (column names of series).\n'
-                     f'    `series_col_names`  = {self.series_col_names}.\n'
-                     f'    `series_weights` = {list(self.series_weights.keys())}.')
-                )
 
         if exog is not None:
             self.included_exog = True

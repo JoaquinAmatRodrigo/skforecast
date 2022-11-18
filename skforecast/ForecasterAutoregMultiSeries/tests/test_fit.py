@@ -7,33 +7,8 @@ import numpy as np
 import pandas as pd
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import StandardScaler
 from xgboost import XGBRegressor
-
-
-@pytest.mark.parametrize('series_weights', [{'l3': 1}, {'l1': 1, 'l3': 0.5}])
-def test_fit_exception_when_series_weights_not_the_same_as_series_col_names(series_weights):
-    """
-    Test exception is raised when series_weights keys does not include all the
-    series levels.
-    """
-    series = pd.DataFrame({'l1': pd.Series(np.arange(10)), 
-                           'l2': pd.Series(np.arange(10))
-                          })
-
-    forecaster = ForecasterAutoregMultiSeries(
-                     regressor      = LinearRegression(), 
-                     lags           = 3,
-                     series_weights = series_weights
-                 )
-    series_col_names = ['l1', 'l2']
-
-    err_msg = re.escape(
-                    (f'`series_weights` must include all series levels (column names of series).\n'
-                     f'    `series_col_names`  = {series_col_names}.\n'
-                     f'    `series_weights` = {list(series_weights.keys())}.')
-                )
-    with pytest.raises(ValueError, match = err_msg):
-        forecaster.fit(series=series, store_in_sample_residuals=False)
 
 
 @pytest.mark.parametrize('exog', ['l1', ['l1'], ['l1', 'l2']])
@@ -58,6 +33,71 @@ def test_fit_exception_when_exog_columns_same_as_series_col_names(exog):
                 )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.fit(series=series, exog=series[exog], store_in_sample_residuals=False)
+
+
+def test_fit_correct_dict_create_series_weights_weight_func_transformer_series():
+    """
+    Test fit method creates correctly all the auxiliary dicts, series_weights_,
+    weight_func_, transformer_series_.
+    """
+    series = pd.DataFrame({'l1': pd.Series(np.arange(10)), 
+                           'l2': pd.Series(np.arange(10)), 
+                           'l3': pd.Series(np.arange(10))})
+                    
+    series.index = pd.DatetimeIndex(
+                       ['2022-01-04', '2022-01-05', '2022-01-06', 
+                        '2022-01-07', '2022-01-08', '2022-01-09', 
+                        '2022-01-10', '2022-01-11', '2022-01-12', 
+                        '2022-01-13'], dtype='datetime64[ns]', freq='D' 
+                   )
+
+    def custom_weights(index):
+        """
+        Return 0 if index is between '2022-01-08' and '2022-01-10', 1 otherwise.
+        """
+        weights = np.where(
+                    (index >= '2022-01-08') & (index <= '2022-01-10'),
+                    0,
+                    1
+                )
+        
+        return weights
+
+    transformer_series = {'l1': StandardScaler()}
+    weight_func = {'l2': custom_weights}    
+    series_weights = {'l1': 3., 'l3': 0.5, 'l4': 2.}
+
+    forecaster = ForecasterAutoregMultiSeries(
+                     regressor          = LinearRegression(), 
+                     lags               = 3,
+                     transformer_series = transformer_series,
+                     weight_func        = weight_func,
+                     series_weights     = series_weights
+                 )
+    
+    forecaster.fit(series=series, store_in_sample_residuals=False)
+
+    expected_transformer_series_ = {'l1': forecaster.transformer_series_['l1'], 'l2': None, 'l3': None}
+    expected_weight_func_ = {'l1': lambda index: np.ones_like(index, dtype=float), 'l2': custom_weights, 'l3': lambda index: np.ones_like(index, dtype=float)}
+    expected_series_weights_ = {'l1': 3., 'l2': 1., 'l3': 0.5}
+
+    assert forecaster.transformer_series_ == expected_transformer_series_
+    assert forecaster.weight_func_.keys() == expected_weight_func_.keys()
+    for key in forecaster.weight_func_.keys():
+        assert forecaster.weight_func_[key].__code__.co_code == expected_weight_func_[key].__code__.co_code
+    assert forecaster.series_weights_ == expected_series_weights_
+
+    forecaster.fit(series=series[['l1', 'l2']], store_in_sample_residuals=False)
+
+    expected_transformer_series_ = {'l1': forecaster.transformer_series_['l1'], 'l2': None}
+    expected_weight_func_ = {'l1': lambda index: np.ones_like(index, dtype=float), 'l2': custom_weights}
+    expected_series_weights_ = {'l1': 3., 'l2': 1.}
+
+    assert forecaster.transformer_series_ == expected_transformer_series_
+    assert forecaster.weight_func_.keys() == expected_weight_func_.keys()
+    for key in forecaster.weight_func_.keys():
+        assert forecaster.weight_func_[key].__code__.co_code == expected_weight_func_[key].__code__.co_code
+    assert forecaster.series_weights_ == expected_series_weights_
 
 
 def test_forecaster_DatetimeIndex_index_freq_stored():

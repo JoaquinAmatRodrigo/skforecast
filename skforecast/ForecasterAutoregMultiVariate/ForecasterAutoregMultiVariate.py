@@ -714,7 +714,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         self,
         steps: Optional[Union[int, list]]=None,
         last_window: Optional[pd.DataFrame]=None,
-        exog: Optional[Union[pd.Series, pd.DataFrame]]=None
+        exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+        levels: Any=None
     ) -> pd.DataFrame:
         """
         Predict n steps ahead
@@ -744,6 +745,9 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
 
         exog : pandas Series, pandas DataFrame, default `None`
             Exogenous variable/s included as predictor/s.
+
+        levels : Ignored
+            Not used, present here for API consistency by convention.
 
         Returns
         -------
@@ -814,15 +818,15 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         
         for serie in self.series_col_names:
             
-            last_window[serie] = transform_series(
-                                     series            = last_window[serie],
-                                     transformer       = self.transformer_series_[serie],
-                                     fit               = False,
-                                     inverse_transform = False
-                                 )
+            last_window_serie = transform_series(
+                                    series            = last_window[serie],
+                                    transformer       = self.transformer_series_[serie],
+                                    fit               = False,
+                                    inverse_transform = False
+                                )
         
             last_window_values, last_window_index = preprocess_last_window(
-                                                        last_window = last_window[serie]
+                                                        last_window = last_window_serie
                                                     )
 
             X_lags = np.hstack([X_lags, last_window_values[-self.lags_[serie]].reshape(1, -1)])
