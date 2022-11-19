@@ -4,64 +4,67 @@ All notable changes to this project will be documented in this file.
 
 ## [0.6.0] - [Dev]
 
-+ Created `initialize_lags` in `utils` for the creation of lags values during init (applies to all forecasters).
-
-+ Created `initialize_weights` in `utils` for the check and initialize of arguments `series_weights`and `weight_func` (applies to all forecasters).
-
-+ `filter_train_X_y_for_step` in `ForecasterAutoregDirect` now starts at 1 (before 0).
-
-+ Column names in `y_train` pandas DataFrame in `ForecasterAutoregDirect` now start with 1, `y_step_1`, (before `y_step_0`).
-
-+ `ForecasterAutoregMultivariate`.
-
-+ `ForecasterAutoregMultiSeries` fix bug transformers init. `self.transformer_series_`
-
-+ `ForecasterAutoregDirect` specific predictions.
-
-+ `series_levels` rename to `series_col_names` in `check_predict_input`.
-
-+ Create `_backtesting_fit_predict`, auxiliary function used in `_backtesting_forecaster_refit` and `_backtesting_forecaster_no_refit` functions in `model_selection`. 
-
-+ Create `_backtesting_multiseries_fit_predict`, auxiliary function used in `_backtesting_forecaster_multiseries_refit` and `_backtesting_forecaster_multiseries_no_refit` functions in `model_selection_multiseries`.  
-
-
 **Added**
 
-+ Argument `weights_func` in all Forecasters to allow weighted time series forecasting. Individual time based weights for the series.
++ Class `ForecasterAutoregMultivariate`.
 
-+ Argument `series_weights` in `ForecasterAutoregMultiSeries` to define individual weights for the series.
++ Function `initialize_lags` in `utils` module  to create lags values in the initialization of forecasters (applies to all forecasters).
+
++ Function `initialize_weights` in `utils` module to check and initialize arguments `series_weights`and `weight_func` (applies to all forecasters).
+
++ Function `initialize_weights` in `utils` module to check and initialize arguments `series_weights`and `weight_func` (applies to all forecasters).
+
++ Function `_backtesting_fit_predict` in `model_selection` module. 
+
++ Function `_backtesting_multiseries_fit_predict` in `model_selection_multiseries` module. 
+
++ Argument `weights_func` in all Forecasters to allow weighted time series forecasting. Individual time based weights can be assigned to each value of the series during the model training.
+
++ Argument `series_weights` in `ForecasterAutoregMultiSeries` to define individual weights each series.
 
 + Include argument `random_state` in all Forecasters `set_out_sample_residuals` methods for random sampling with reproducible output.
 
-+ In `ForecasterAutoregMultiSeries`, `predict` and `predict_interval` allow the prediction of multiple levels.
++ In `ForecasterAutoregMultiSeries`, `predict` and `predict_interval` methods allow the simultaneous prediction of multiple levels.
 
-+ `backtesting_forecaster_multiseries` allows the calculation of multiple levels, `level` argument changes to `levels`.
++ `backtesting_forecaster_multiseries` allows backtesting multiple levels simultaneously.
 
-+ `metric` can be a list in `grid_search_forecaster_multiseries`, `random_search_forecaster_multiseries`. If `metric` is a `list`, multiple metrics will be calculated. (suggested by Pablo Dávila Herrero https://github.com/Pablo-Davila)
++ `metric` argument can be a list in `grid_search_forecaster_multiseries`, `random_search_forecaster_multiseries`. If `metric` is a `list`, multiple metrics will be calculated. (suggested by Pablo Dávila Herrero https://github.com/Pablo-Davila)
   
 **Changed**
 
++ `ForecasterAutoregDirect` allows to predict specific steps.
+
 + Remove `ForecasterAutoregMultiOutput` in favor of `ForecasterAutoregDirect`, (deprecated since 0.5.0).
 
-+ Rename `exog_to_multi_output` to `exog_to_direct` in `utils`.
++ Rename function `exog_to_multi_output` to `exog_to_direct` in `utils` module.
 
 + In `ForecasterAutoregMultiSeries` change type of `out_sample_residuals` to a `dict` of numpy ndarrays.
 
 + `set_out_sample_residuals` delete argument `level`.
 
-+ In `ForecasterAutoregMultiSeries`, `level` argument of `predict` and `predict_interval` changes to `levels`.
++ In `ForecasterAutoregMultiSeries`, `level` argument of `predict` and `predict_interval` renamed to `levels`.
 
-+ The `level` argument of `check_predict_input` changes to `levels`, module `utils`.
++ In `backtesting_forecaster_multiseries`, `level` argument of `predict` and `predict_interval` renamed to `levels`.
 
-+ `backtesting_forecaster_multiseries` metrics_levels output is now a pandas DataFrame.
++ In `check_predict_input` function, argument `level` of  renamed to `levels`.
 
-+ `grid_search_forecaster_multiseries` and `random_search_forecaster_multiseries` argument `levels_weights` is deprecated since version 0.6.0, and will be removed in version 0.7.0. Use `series_weights` when creating the forecaster instead.
++ In `backtesting_forecaster_multiseries` metrics_levels output is now a pandas DataFrame.
+
++ In `grid_search_forecaster_multiseries` and `random_search_forecaster_multiseries`, argument `levels_weights` is deprecated since version 0.6.0, and will be removed in version 0.7.0. Use `series_weights` when creating the forecaster instead.
 
 + Refactor `_create_lags_` in `ForecasterAutoreg`, `ForecasterAutoregDirect` and `ForecasterAutoregMultiSeries`. (suggested by Bennett https://github.com/Bennett561)
 
++  In `ForecasterAutoregDirect`, `filter_train_X_y_for_step` now starts at 1 (before 0).
+
++ In `ForecasterAutoregDirect`, DataFrame `y_train` now start with 1, `y_step_1` (before `y_step_0`).
+
++ In  `check_predict_input`, `series_levels` rename to `series_col_names`.
+
 **Fixed**
 
-+ The `last_window` argument in the `ForecasterAutoregMultiSeries` predict method now works when it is a pandas DataFrame.
++ In in the`ForecasterAutoregMultiSeries`, argument `last_window`   predict method now works when it is a pandas DataFrame.
+
++ In `ForecasterAutoregMultiSeries`, fix bug transformers initialization.
 
 
 ## [0.5.1] - [2022-10-05]
