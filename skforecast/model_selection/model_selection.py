@@ -452,12 +452,9 @@ def _backtesting_forecaster_verbose(
     print("")
     for i in range(folds):
         if refit:
-            if fixed_train_size:
-                # The train size doesn't increase but moves by `steps` in each iteration.
-                train_idx_start = i * steps
-            else:
-                # The train size increase by `steps` in each iteration.
-                train_idx_start = 0
+            # if fixed_train_size the train size doesn't increase but moves by `steps` in each iteration.
+            # if false the train size increases by `steps` in each iteration.
+            train_idx_start = i * steps if fixed_train_size else 0
             train_idx_end = initial_train_size + i * steps
         else:
             # The train size doesn't increase and doesn't move
@@ -613,36 +610,32 @@ def _backtesting_forecaster_refit(
         )
     
     for i in range(folds):
-        # In each iteration (except the last one) the model is fitted before making predictions.
-        if fixed_train_size:
-            # The train size doesn't increase but moves by `steps` in each iteration.
-            train_idx_start = i * steps
-        else:
-            # The train size increases by `steps` in each iteration.
-            train_idx_start = 0
+        # In each iteration the model is fitted before making predictions.
+        # if fixed_train_size the train size doesn't increase but moves by `steps` in each iteration.
+        # if false the train size increases by `steps` in each iteration.
+        train_idx_start = i * steps if fixed_train_size else 0
         train_idx_end = initial_train_size + i * steps
-            
+
+        exog_train_values = exog.iloc[train_idx_start:train_idx_end, ] if exog is not None else None
         next_window_exog = exog.iloc[train_idx_end:train_idx_end + steps, ] if exog is not None else None
+
+        forecaster.fit(y=y.iloc[train_idx_start:train_idx_end, ], exog=exog_train_values)
 
         if i == folds - 1: # last fold
             # If remainder > 0, only the remaining steps need to be predicted
             steps = steps if remainder == 0 else remainder
 
-        pred = _backtesting_fit_predict(
-                    forecaster          = forecaster,
-                    refit               = True,
-                    y                   = y,
-                    steps               = steps,
-                    train_idx_start     = train_idx_start,
-                    train_idx_end       = train_idx_end,
-                    last_window_y       = None,
-                    exog                = exog,
-                    next_window_exog    = next_window_exog,
-                    interval            = interval,
-                    n_boot              = n_boot,
-                    random_state        = random_state,
-                    in_sample_residuals = in_sample_residuals
-                )
+        if interval is None:
+            pred = forecaster.predict(steps=steps, exog=next_window_exog)
+        else:
+            pred = forecaster.predict_interval(
+                       steps               = steps,
+                       exog                = next_window_exog,
+                       interval            = interval,
+                       n_boot              = n_boot,
+                       random_state        = random_state,
+                       in_sample_residuals = in_sample_residuals
+                   )
             
         backtest_predictions.append(pred)
     
@@ -812,21 +805,22 @@ def _backtesting_forecaster_no_refit(
             # If remainder > 0, only the remaining steps need to be predicted
             steps = steps if remainder == 0 else remainder
         
-        pred = _backtesting_fit_predict(
-                    forecaster          = forecaster,
-                    refit               = False,
-                    y                   = y,
-                    steps               = steps,
-                    train_idx_start     = None,
-                    train_idx_end       = None,
-                    last_window_y       = last_window_y,
-                    exog                = exog,
-                    next_window_exog    = next_window_exog,
-                    interval            = interval,
-                    n_boot              = n_boot,
-                    random_state        = random_state,
-                    in_sample_residuals = in_sample_residuals
-                )
+        if interval is None:
+            pred = forecaster.predict(
+                       steps       = steps,
+                       last_window = last_window_y,
+                       exog        = next_window_exog
+                   )
+        else:
+            pred = forecaster.predict_interval(
+                       steps               = steps,
+                       last_window         = last_window_y,
+                       exog                = next_window_exog,
+                       interval            = interval,
+                       n_boot              = n_boot,
+                       random_state        = random_state,
+                       in_sample_residuals = in_sample_residuals
+                   )
             
         backtest_predictions.append(pred)
 

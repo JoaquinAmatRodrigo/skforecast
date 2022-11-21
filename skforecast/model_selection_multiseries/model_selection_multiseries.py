@@ -296,13 +296,10 @@ def _backtesting_forecaster_multiseries_refit(
         )
 
     for i in range(folds):
-        # In each iteration (except the last one) the model is fitted before making predictions.
-        if fixed_train_size:
-            # The train size doesn't increase but moves by `steps` in each iteration.
-            train_idx_start = i * steps
-        else:
-            # The train size increases by `steps` in each iteration.
-            train_idx_start = 0
+        # In each iteration the model is fitted before making predictions.
+        # if fixed_train_size the train size doesn't increase but moves by `steps` in each iteration.
+        # if false the train size increases by `steps` in each iteration.
+        train_idx_start = i * steps if fixed_train_size else 0
         train_idx_end = initial_train_size + i * steps
             
         next_window_exog = exog.iloc[train_idx_end:train_idx_end + steps, ] if exog is not None else None
