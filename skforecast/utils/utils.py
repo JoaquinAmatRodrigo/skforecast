@@ -12,6 +12,7 @@ import joblib
 import numpy as np
 import pandas as pd
 import sklearn
+from sklearn.compose import ColumnTransformer
 import inspect
 
 
@@ -854,7 +855,7 @@ def transform_dataframe(
         return df
 
     if inverse_transform and\
-    isinstance(transformer, sklearn.compose._column_transformer.ColumnTransformer):
+    isinstance(transformer, ColumnTransformer):
         raise Exception(
             '`inverse_transform` is not available when using ColumnTransformers.'
         )
