@@ -13,6 +13,7 @@ import numpy as np
 import pandas as pd
 import sklearn
 from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import FunctionTransformer
 import inspect
 
 
@@ -784,7 +785,7 @@ def transform_series(
 
     series = series.to_frame()
 
-    if fit and not isinstance(transformer, sklearn.preprocessing._function_transformer.FunctionTransformer):
+    if fit and not isinstance(transformer, FunctionTransformer):
         transformer.fit(series)
 
     if inverse_transform:
@@ -854,8 +855,7 @@ def transform_dataframe(
     if transformer is None:
         return df
 
-    if inverse_transform and\
-    isinstance(transformer, ColumnTransformer):
+    if inverse_transform and isinstance(transformer, ColumnTransformer):
         raise Exception(
             '`inverse_transform` is not available when using ColumnTransformers.'
         )
