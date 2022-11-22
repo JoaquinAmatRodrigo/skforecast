@@ -60,7 +60,7 @@ nav:
       - Profiling skforecast: faq/profiling-skforecast.ipynb
       - Avoid negative predictions when forecasting: faq/non-negative-predictions.ipynb
       - Shap-values: faq/shap-values-skforecast.ipynb
-      #- Single series vs multi series forecasting: faq/single-vs-multi-series-forecasting.ipynb
+      - Forecasting time series with missing values: faq/forecasting-time-series-with-missing-values.ipynb
 
   - Releases: releases/releases.md
 
