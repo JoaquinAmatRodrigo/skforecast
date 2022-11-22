@@ -12,10 +12,6 @@ All notable changes to this project will be documented in this file.
 
 + Function `initialize_weights` in `utils` module to check and initialize arguments `series_weights`and `weight_func` (applies to all forecasters).
 
-+ Function `_backtesting_fit_predict` in `model_selection` module. 
-
-+ Function `_backtesting_multiseries_fit_predict` in `model_selection_multiseries` module. 
-
 + Argument `weights_func` in all Forecasters to allow weighted time series forecasting. Individual time based weights can be assigned to each value of the series during the model training.
 
 + Argument `series_weights` in `ForecasterAutoregMultiSeries` to define individual weights each series.

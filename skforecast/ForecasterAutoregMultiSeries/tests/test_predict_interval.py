@@ -106,10 +106,10 @@ def test_predict_interval_exception_when_out_sample_residuals_is_None():
         forecaster.predict_interval(steps=1, levels='1', in_sample_residuals=False)
 
 
-def test_predict_interval_exception_when_out_sample_residuals_is_None():
+def test_predict_interval_exception_when_not_out_sample_residuals_for_all_levels():
     """
     Test exception is raised when in_sample_residuals=False and
-    forecaster.out_sample_residuals is None.
+    forecaster.out_sample_residuals is not available for all levels.
     """
     series = pd.DataFrame({'1': pd.Series(np.arange(10)), 
                            '2': pd.Series(np.arange(10))
@@ -123,8 +123,8 @@ def test_predict_interval_exception_when_out_sample_residuals_is_None():
     levels = '1'
 
     err_msg = re.escape(
-                ('Not `forecaster.out_sample_residuals` for levels: {set(levels) - set(self.out_sample_residuals.keys())}. '
-                 'Use method `set_out_sample_residuals()`.')
+                (f'Not `forecaster.out_sample_residuals` for levels: {set(levels) - set(forecaster.out_sample_residuals.keys())}. '
+                 f'Use method `set_out_sample_residuals()`.')
             )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.predict_interval(steps=1, levels=levels, in_sample_residuals=False)

@@ -1136,8 +1136,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         if not in_sample_residuals and len(set(levels) - set(self.out_sample_residuals.keys())) != 0:
             raise ValueError(
-                ('Not `forecaster.out_sample_residuals` for levels: {set(levels) - set(self.out_sample_residuals.keys())}. '
-                 'Use method `set_out_sample_residuals()`.')
+                (f'Not `forecaster.out_sample_residuals` for levels: {set(levels) - set(self.out_sample_residuals.keys())}. '
+                 f'Use method `set_out_sample_residuals()`.')
             )
         
         check_predict_input(

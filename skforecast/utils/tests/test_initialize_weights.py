@@ -70,7 +70,7 @@ def test_init_when_weight_func_is_provided_and_regressor_has_not_sample_weights(
     sample_weights in his fit method.
     """
 
-    def weight_func():
+    def weight_func(): # pragma: no cover
         pass
 
     warn_msg = re.escape(
@@ -116,7 +116,7 @@ def test_output_initialize_weights_source_code_weight_func_when_weight_func_not_
     Test source_code_weight_func output of initialize_weights when 
     weight_func is a callable.
     """
-    def test_weight_func():
+    def test_weight_func(): # pragma: no cover
         """
         test
         """
@@ -137,13 +137,13 @@ def test_output_initialize_weights_source_code_weight_func_when_weight_func_dict
     Test source_code_weight_func output of initialize_weights when 
     weight_func is a dict.
     """
-    def test_weight_func():
+    def test_weight_func(): # pragma: no cover
         """
         test
         """
         pass
 
-    def test_weight_func_2():
+    def test_weight_func_2(): # pragma: no cover
         """
         test2
         """
