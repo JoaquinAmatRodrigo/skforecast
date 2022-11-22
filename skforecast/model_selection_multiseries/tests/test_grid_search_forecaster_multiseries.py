@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 from sklearn.linear_model import Ridge
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
+from skforecast.ForecasterAutoregMultiVariate import ForecasterAutoregMultiVariate
 from skforecast.model_selection_multiseries import grid_search_forecaster_multiseries
 
 from tqdm import tqdm
@@ -13,9 +14,9 @@ tqdm.__init__ = partialmethod(tqdm.__init__, disable=True) # hide progress bar
 
 # Fixtures
 # np.random.seed(123)
-# series_1 = np.random.rand(50)
-# series_2 = np.random.rand(50)
-series = pd.DataFrame({'1': pd.Series(np.array(
+# l1 = np.random.rand(50)
+# l2 = np.random.rand(50)
+series = pd.DataFrame({'l1': pd.Series(np.array(
                                 [0.69646919, 0.28613933, 0.22685145, 0.55131477, 0.71946897,
                                  0.42310646, 0.9807642 , 0.68482974, 0.4809319 , 0.39211752,
                                  0.34317802, 0.72904971, 0.43857224, 0.0596779 , 0.39804426,
@@ -28,7 +29,7 @@ series = pd.DataFrame({'1': pd.Series(np.array(
                                  0.25045537, 0.48303426, 0.98555979, 0.51948512, 0.61289453]
                                       )
                             ), 
-                       '2': pd.Series(np.array(
+                       'l2': pd.Series(np.array(
                                 [0.12062867, 0.8263408 , 0.60306013, 0.54506801, 0.34276383,
                                  0.30412079, 0.41702221, 0.68130077, 0.87545684, 0.51042234,
                                  0.66931378, 0.58593655, 0.6249035 , 0.67468905, 0.84234244,
@@ -51,8 +52,8 @@ def test_output_grid_search_forecaster_multiseries_ForecasterAutoregMultiSeries_
     (mocked done in Skforecast v0.5.0)
     """
     forecaster = ForecasterAutoregMultiSeries(
-                    regressor = Ridge(random_state=123),
-                    lags      = 2 # Placeholder, the value will be overwritten
+                     regressor = Ridge(random_state=123),
+                     lags      = 2 # Placeholder, the value will be overwritten
                  )
 
     steps = 3
@@ -68,7 +69,7 @@ def test_output_grid_search_forecaster_multiseries_ForecasterAutoregMultiSeries_
                     metric              = 'mean_absolute_error',
                     initial_train_size  = len(series) - n_validation,
                     fixed_train_size    = False,
-                    levels         = None,
+                    levels              = None,
                     levels_weights      = None,
                     exog                = None,
                     lags_grid           = lags_grid,
@@ -78,7 +79,7 @@ def test_output_grid_search_forecaster_multiseries_ForecasterAutoregMultiSeries_
               )
     
     expected_results = pd.DataFrame({
-            'levels':[['1', '2'], ['1', '2'], ['1', '2'], ['1', '2'], ['1', '2'], ['1', '2']],
+            'levels':[['l1', 'l2'], ['l1', 'l2'], ['l1', 'l2'], ['l1', 'l2'], ['l1', 'l2'], ['l1', 'l2']],
             'lags'  :[[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2], [1, 2], [1, 2]],
             'params':[{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}, {'alpha': 1}, {'alpha': 0.1}, {'alpha': 0.01}],
             'mean_absolute_error':np.array([0.20968100463227382, 0.20969259779858337, 0.20977945312386406, 
@@ -86,6 +87,53 @@ def test_output_grid_search_forecaster_multiseries_ForecasterAutoregMultiSeries_
             'alpha' :np.array([0.01, 0.1, 1., 1., 0.1, 0.01])
                                      },
             index=[3, 4, 5, 2, 1, 0]
+                                   )
+
+    pd.testing.assert_frame_equal(results, expected_results)
+
+
+def test_output_grid_search_forecaster_multiseries_ForecasterAutoregMultiVariate_with_mocked():
+    """
+    Test output of grid_search_forecaster_multiseries in ForecasterAutoregMultiVariate with mocked
+    (mocked done in Skforecast v0.6.0)
+    """
+    forecaster = ForecasterAutoregMultiVariate(
+                     regressor = Ridge(random_state=123),
+                     level     = 'l1',
+                     lags      = 2,
+                     steps     = 3
+                 )
+
+    steps = 3
+    n_validation = 12
+    lags_grid = [2, 4]
+    param_grid = {'alpha': [0.01, 0.1, 1]}
+
+    results = grid_search_forecaster_multiseries(
+                    forecaster          = forecaster,
+                    series              = series,
+                    param_grid          = param_grid,
+                    steps               = steps,
+                    metric              = 'mean_absolute_error',
+                    initial_train_size  = len(series) - n_validation,
+                    fixed_train_size    = False,
+                    levels              = None,
+                    levels_weights      = None,
+                    exog                = None,
+                    lags_grid           = lags_grid,
+                    refit               = False,
+                    return_best         = False,
+                    verbose             = True
+              )
+    
+    expected_results = pd.DataFrame({
+            'levels': [['l1'], ['l1'], ['l1'], ['l1'], ['l1'], ['l1']],
+            'lags'  : [[1, 2], [1, 2], [1, 2], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]],
+            'params': [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}, {'alpha': 1}, {'alpha': 0.1}, {'alpha': 0.01}],
+            'mean_absolute_error': np.array([0.20115194, 0.20183032, 0.20566862, 0.22224269, 0.22625017, 0.22644284]),                                                               
+            'alpha' : np.array([0.01, 0.1, 1., 1., 0.1, 0.01])
+                                     },
+            index=[0, 1, 2, 5, 4, 3]
                                    )
 
     pd.testing.assert_frame_equal(results, expected_results)

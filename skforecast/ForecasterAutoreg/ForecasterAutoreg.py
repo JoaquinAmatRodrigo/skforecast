@@ -6,11 +6,10 @@
 ################################################################################
 # coding=utf-8
 
-from typing import Union, Dict, List, Tuple, Any, Optional, Callable
+from typing import Union, Dict, List, Tuple, Any, Optional
 import warnings
 import logging
 import sys
-import inspect
 import numpy as np
 import pandas as pd
 import sklearn
@@ -21,6 +20,7 @@ from copy import copy
 import skforecast
 from ..ForecasterBase import ForecasterBase
 from ..utils import initialize_lags
+from ..utils import initialize_weights
 from ..utils import check_y
 from ..utils import check_exog
 from ..utils import preprocess_y
@@ -198,21 +198,12 @@ class ForecasterAutoreg(ForecasterBase):
         self.max_lag = max(self.lags)
         self.window_size = self.max_lag
             
-        if weight_func is not None:
-            if not isinstance(weight_func, Callable):
-                raise TypeError(
-                    f"Argument `weight_func` must be a callable. Got {type(weight_func)}."
-                )
-            self.source_code_weight_func = inspect.getsource(weight_func)
-            if 'sample_weight' not in inspect.getfullargspec(self.regressor.fit)[0]:
-                warnings.warn(
-                    f"""
-                    Argument `weight_func` is ignored since regressor {self.regressor}
-                    does not accept `sample_weight` in its `fit` method.
-                    """
-                )
-                self.weight_func = None
-                self.source_code_weight_func = None
+        self.weight_func, self.source_code_weight_func, _ = initialize_weights(
+            forecaster_type = type(self).__name__, 
+            regressor       = regressor, 
+            weight_func     = weight_func, 
+            series_weights  = None
+        )
 
 
     def __repr__(

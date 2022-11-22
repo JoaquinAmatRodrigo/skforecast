@@ -6,26 +6,30 @@
 ################################################################################
 # coding=utf-8
 
-from typing import Union, Any, Optional
+from typing import Union, Any, Optional, Tuple, Callable
 import warnings
 import joblib
 import numpy as np
 import pandas as pd
 import sklearn
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import FunctionTransformer
+import inspect
 
 
 def initialize_lags(
-    forecaster_type,
+    forecaster_type: str,
     lags: Any
-) -> None:
+) -> np.ndarray:
     """
     Check lags argument input and generate the corresponding numpy ndarray.
     
     Parameters
     ----------
-    forecaster_type : ForecasterAutoreg, ForecasterAutoregCustom, 
-    ForecasterAutoregDirect, ForecasterAutoregMultiSeries, ForecasterAutoregMultiVariate
-        Forcaster type.
+    forecaster_type : str
+        Forcaster type. ForecasterAutoreg, ForecasterAutoregCustom, 
+        ForecasterAutoregDirect, ForecasterAutoregMultiSeries, 
+        ForecasterAutoregMultiVariate.
 
     lags : Any
         Lags used as predictors.
@@ -67,6 +71,91 @@ def initialize_lags(
             )
 
     return lags
+
+
+def initialize_weights(
+    forecaster_type: str,
+    regressor: object,
+    weight_func: Union[callable, dict],
+    series_weights: dict
+) -> Tuple[Union[callable, dict], Union[callable, dict], dict]:
+    """
+    Check weights arguments, `weight_func` and `series_weights` for the different 
+    forecasters. Create `source_code_weight_func`, source code of the custom 
+    function(s) used to create weights.
+    
+    Parameters
+    ----------
+    forecaster_type : str
+        Forcaster type. ForecasterAutoreg, ForecasterAutoregCustom, 
+        ForecasterAutoregDirect, ForecasterAutoregMultiSeries, 
+        ForecasterAutoregMultiVariate.
+
+    regressor : regressor or pipeline compatible with the scikit-learn API
+        Regressor of the forecaster.
+
+    weight_func : callable, dict
+        Argument `weight_func` of the forecaster.
+
+    series_weights : dict
+        Argument `series_weights` of the forecaster.
+        
+        
+    Returns
+    ----------
+    weight_func : callable, dict
+        Argument `weight_func` of the forecaster.
+
+    source_code_weight_func : str, dict
+        Argument `source_code_weight_func` of the forecaster.
+
+    series_weights : dict
+        Argument `series_weights` of the forecaster.
+    
+    """
+
+    source_code_weight_func = None
+
+    if weight_func is not None:
+        if not isinstance(weight_func, Callable) and not forecaster_type == 'ForecasterAutoregMultiSeries':
+            raise TypeError(
+                f"Argument `weight_func` must be a callable. Got {type(weight_func)}."
+            )
+        elif not isinstance(weight_func, (Callable, dict)) and forecaster_type == 'ForecasterAutoregMultiSeries':
+            raise TypeError(
+                f"Argument `weight_func` must be a callable or a dict of "
+                f"callables. Got {type(weight_func)}."
+            )
+        
+        if isinstance(weight_func, dict):
+            source_code_weight_func = {}
+            for key in weight_func:
+                source_code_weight_func[key] = inspect.getsource(weight_func[key])
+        else:
+            source_code_weight_func = inspect.getsource(weight_func)
+
+        if 'sample_weight' not in inspect.getfullargspec(regressor.fit)[0]:
+            warnings.warn(
+                (f'Argument `weight_func` is ignored since regressor {regressor} '
+                 f'does not accept `sample_weight` in its `fit` method.')
+            )
+            weight_func = None
+            source_code_weight_func = None
+
+    if series_weights is not None:
+        if not isinstance(series_weights, dict):
+            raise TypeError(
+                f"Argument `series_weights` must be a dict of floats or ints."
+                f"Got {type(series_weights)}."
+            )
+        if 'sample_weight' not in inspect.getfullargspec(regressor.fit)[0]:
+            warnings.warn(
+                (f'Argument `series_weights` is ignored since regressor {regressor} '
+                 f'does not accept `sample_weight` in its `fit` method.')
+            )
+            series_weights = None
+
+    return weight_func, source_code_weight_func, series_weights
 
 
 def check_y(
@@ -170,7 +259,7 @@ def _check_interval(
 
 
 def check_predict_input(
-    forecaster_type,
+    forecaster_type: str,
     steps: int,
     fitted: bool,
     included_exog: bool,
@@ -193,9 +282,10 @@ def check_predict_input(
 
     Parameters
     ----------
-    forecaster_type : ForecasterAutoreg, ForecasterAutoregCustom, 
-    ForecasterAutoregDirect, ForecasterAutoregMultiSeries, ForecasterAutoregMultiVariate
-        Forcaster type.
+    forecaster_type : str
+        Forcaster type. ForecasterAutoreg, ForecasterAutoregCustom, 
+        ForecasterAutoregDirect, ForecasterAutoregMultiSeries, 
+        ForecasterAutoregMultiVariate.
 
     steps : int
         Number of future steps predicted.
@@ -695,7 +785,7 @@ def transform_series(
 
     series = series.to_frame()
 
-    if fit and not isinstance(transformer, sklearn.preprocessing._function_transformer.FunctionTransformer):
+    if fit and not isinstance(transformer, FunctionTransformer):
         transformer.fit(series)
 
     if inverse_transform:
@@ -765,8 +855,7 @@ def transform_dataframe(
     if transformer is None:
         return df
 
-    if inverse_transform and\
-    isinstance(transformer, sklearn.compose._column_transformer.ColumnTransformer):
+    if inverse_transform and isinstance(transformer, ColumnTransformer):
         raise Exception(
             '`inverse_transform` is not available when using ColumnTransformers.'
         )

@@ -49,6 +49,7 @@ nav:
       - ForecasterAutoregCustom: api/ForecasterAutoregCustom.md
       - ForecasterAutoregDirect: api/ForecasterAutoregDirect.md
       - ForecasterMultiSeries: api/ForecasterMultiSeries.md
+      - ForecasterMultiVariate: api/ForecasterMultiVariate.md
       - model_selection: api/model_selection.md
       - model_selection_multiseries: api/model_selection_multiseries.md
       - model_selection_statsmodels: api/model_selection_statsmodels.md
@@ -59,7 +60,7 @@ nav:
       - Profiling skforecast: faq/profiling-skforecast.ipynb
       - Avoid negative predictions when forecasting: faq/non-negative-predictions.ipynb
       - Shap-values: faq/shap-values-skforecast.ipynb
-      #- Single series vs multi series forecasting: faq/single-vs-multi-series-forecasting.ipynb
+      - Forecasting time series with missing values: faq/forecasting-time-series-with-missing-values.ipynb
 
   - Releases: releases/releases.md
 

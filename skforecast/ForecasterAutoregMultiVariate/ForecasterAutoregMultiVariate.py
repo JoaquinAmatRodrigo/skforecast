@@ -6,11 +6,10 @@
 ################################################################################
 # coding=utf-8
 
-from typing import Union, Dict, List, Tuple, Any, Optional, Callable
+from typing import Union, Dict, List, Tuple, Any, Optional
 import warnings
 import logging
 import sys
-import inspect
 import numpy as np
 import pandas as pd
 import sklearn
@@ -22,6 +21,7 @@ from itertools import chain
 import skforecast
 from ..ForecasterBase import ForecasterBase
 from ..utils import initialize_lags
+from ..utils import initialize_weights
 from ..utils import check_y
 from ..utils import check_exog
 from ..utils import preprocess_y
@@ -254,22 +254,13 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         self.lags_ = self.lags
         self.max_lag = max(list(chain(*self.lags.values()))) if isinstance(self.lags, dict) else max(self.lags)
         self.window_size = self.max_lag
-
-        if weight_func is not None:
-            if not isinstance(weight_func, Callable):
-                raise TypeError(
-                    f"Argument `weight_func` must be a callable. Got {type(weight_func)}."
-                )
-            self.source_code_weight_func = inspect.getsource(weight_func)
-            if 'sample_weight' not in inspect.getfullargspec(self.regressor.fit)[0]:
-                warnings.warn(
-                    f"""
-                    Argument `weight_func` is ignored since regressor {self.regressor}
-                    does not accept `sample_weight` in its `fit` method.
-                    """
-                )
-                self.weight_func = None
-                self.source_code_weight_func = None
+            
+        self.weight_func, self.source_code_weight_func, _ = initialize_weights(
+            forecaster_type = type(self).__name__, 
+            regressor       = regressor, 
+            weight_func     = weight_func, 
+            series_weights  = None
+        )
     
 
     def __repr__(
@@ -649,16 +640,16 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         """
         
         # Reset values in case the forecaster has already been fitted.
-        self.index_type          = None
-        self.index_freq          = None
-        self.last_window         = None
-        self.included_exog       = False
-        self.exog_type           = None
-        self.exog_col_names      = None
-        self.series_col_names    = None
-        self.X_train_col_names   = None
-        self.fitted              = False
-        self.training_range      = None
+        self.index_type        = None
+        self.index_freq        = None
+        self.last_window       = None
+        self.included_exog     = False
+        self.exog_type         = None
+        self.exog_col_names    = None
+        self.series_col_names  = None
+        self.X_train_col_names = None
+        self.fitted            = False
+        self.training_range    = None
         
         self.series_col_names = list(series.columns)
 
@@ -666,7 +657,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             self.included_exog = True
             self.exog_type = type(exog)
             self.exog_col_names = \
-                 exog.columns.to_list() if isinstance(exog, pd.DataFrame) else [exog.name]
+                exog.columns.to_list() if isinstance(exog, pd.DataFrame) else [exog.name]
 
             if len(set(self.exog_col_names) - set(self.series_col_names)) != len(self.exog_col_names):
                 raise ValueError(
@@ -723,7 +714,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         self,
         steps: Optional[Union[int, list]]=None,
         last_window: Optional[pd.DataFrame]=None,
-        exog: Optional[Union[pd.Series, pd.DataFrame]]=None
+        exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+        levels: Any=None
     ) -> pd.DataFrame:
         """
         Predict n steps ahead
@@ -753,6 +745,9 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
 
         exog : pandas Series, pandas DataFrame, default `None`
             Exogenous variable/s included as predictor/s.
+
+        levels : Ignored
+            Not used, present here for API consistency by convention.
 
         Returns
         -------
@@ -823,15 +818,15 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         
         for serie in self.series_col_names:
             
-            last_window[serie] = transform_series(
-                                     series            = last_window[serie],
-                                     transformer       = self.transformer_series_[serie],
-                                     fit               = False,
-                                     inverse_transform = False
-                                 )
+            last_window_serie = transform_series(
+                                    series            = last_window[serie],
+                                    transformer       = self.transformer_series_[serie],
+                                    fit               = False,
+                                    inverse_transform = False
+                                )
         
             last_window_values, last_window_index = preprocess_last_window(
-                                                        last_window = last_window[serie]
+                                                        last_window = last_window_serie
                                                     )
 
             X_lags = np.hstack([X_lags, last_window_values[-self.lags_[serie]].reshape(1, -1)])

@@ -8,4 +8,4 @@ mkdocstrings==0.18.1
 jupyter==1.0.0
 jupyter_contrib_nbextensions==0.5.1
 # jupyter contrib nbextension install
-# skforecast (version to use)
+# skforecast (version to use) 

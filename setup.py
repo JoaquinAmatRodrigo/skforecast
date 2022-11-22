@@ -14,7 +14,28 @@ import skforecast
 VERSION = skforecast.__version__
 
 with open('requirements.txt') as f:
-    requirements = f.read().splitlines()
+    requirements_base = f.read().splitlines()
+
+with open('requirements_optional.txt') as f:
+    requirements_optional = f.read()
+
+with open("requirements_test.txt") as f:
+    requirements_test = f.read().splitlines()
+
+extras_require = {
+    "statsmodels": requirements_optional.split("\n\n")[0].splitlines(),
+    "bayesian": requirements_optional.split("\n\n")[1].splitlines(),
+    "plotting": requirements_optional.split("\n\n")[2].splitlines(),
+    "test": requirements_test
+}
+
+extras_require["full"] = (
+    extras_require["statsmodels"]
+    + extras_require["bayesian"]
+    + extras_require["plotting"]
+    + extras_require["test"]
+)
+
 
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
@@ -28,7 +49,8 @@ if sys.version_info[:2] > (3, 10):
         fmt.format(VERSION, *sys.version_info[:2]),
         RuntimeWarning)
     del fmt
-        
+
+
 setuptools.setup(
     name="skforecast",
     version=VERSION,
@@ -47,5 +69,7 @@ setuptools.setup(
         "Programming Language :: Python :: 3.10",
         "License :: OSI Approved :: MIT License"
     ],
-    install_requires=requirements
+    install_requires=requirements_base,
+    extras_require=extras_require,
+    tests_require=requirements_test,
 )

@@ -102,7 +102,7 @@ def test_create_train_X_y_warning_when_levels_of_transformer_series_not_equal_to
     series_not_in_transformer_series = set(series.columns) - set(forecaster.transformer_series.keys())
     warn_msg = re.escape(
                     (f"{series_not_in_transformer_series} not present in `transformer_series`."
-                     f" No transformation is applied to them.")
+                     f" No transformation is applied to these series.")
                 )
     with pytest.warns(UserWarning, match = warn_msg):
         forecaster.create_train_X_y(series=series)
