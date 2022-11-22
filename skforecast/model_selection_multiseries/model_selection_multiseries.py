@@ -592,6 +592,13 @@ def backtesting_forecaster_multiseries(
              f'when using a ForecasterAutoregMultiSeries. If the forecaster is of type '
              f'ForecasterAutoregMultiVariate, this argument is ignored.')
         )
+
+    if type(forecaster).__name__ == 'ForecasterAutoregMultiVariate' and levels and levels != forecaster.level and levels != [forecaster.level]:
+        warnings.warn(
+            (f"`levels` argument have no use when the forecaster is of type ForecasterAutoregMultiVariate. "
+             f"The level of this forecaster is {forecaster.level}, to predict another level, change the `level` "
+             f"argument when initializing the forecaster. \n")
+        )
     
     if refit:
         metrics_levels, backtest_predictions = _backtesting_forecaster_multiseries_refit(
@@ -980,6 +987,12 @@ def _evaluate_grid_hyperparameters_multiseries(
         )
 
     if type(forecaster).__name__ == 'ForecasterAutoregMultiVariate':
+        if levels and levels != forecaster.level and levels != [forecaster.level]:
+            warnings.warn(
+                (f"`levels` argument have no use when the forecaster is of type ForecasterAutoregMultiVariate. "
+                 f"The level of this forecaster is {forecaster.level}, to predict another level, change the `level` "
+                 f"argument when initializing the forecaster. \n")
+            )
         levels = [forecaster.level]
     else:
         if levels is None:
