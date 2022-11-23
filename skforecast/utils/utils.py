@@ -973,13 +973,13 @@ def _find_optional_dependency(package_name: str):
 
     """
 
-    optional_dependences = {
+    optional_dependencies = {
         "statsmodels": ['statsmodels>=0.12, <0.14'],
         "bayesian": ['optuna==2.10.0', 'scikit-optimize==0.9.0'],
         "plotting": ['matplotlib>=3.3, <3.7', 'seaborn==0.11']
     }
 
-    for extra, packages in optional_dependences.items():
+    for extra, packages in optional_dependencies.items():
         package_version = [package for package in packages if package_name in package]
         if package_version:
             return extra, package_version[0]
