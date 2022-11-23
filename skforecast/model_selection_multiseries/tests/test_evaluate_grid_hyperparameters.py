@@ -365,7 +365,7 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
     pd.testing.assert_frame_equal(results, expected_results)
 
 
-def test_evaluate_grid_hyperparameters_multiseries_when_return_best():
+def test_evaluate_grid_hyperparameters_multiseries_when_return_best_ForecasterAutoregMultiSeries():
     """
     Test forecaster is refitted when `return_best = True` in 
     _evaluate_grid_hyperparameters_multiseries.
@@ -605,7 +605,7 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
     pd.testing.assert_frame_equal(results, expected_results)
 
 
-def test_evaluate_grid_hyperparameters_multiseries_when_return_best():
+def test_evaluate_grid_hyperparameters_multiseries_when_return_best_ForecasterAutoregMultiVariate():
     """
     Test forecaster is refitted when `return_best = True` in 
     _evaluate_grid_hyperparameters_multiseries.

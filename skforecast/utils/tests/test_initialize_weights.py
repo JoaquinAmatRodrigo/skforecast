@@ -16,7 +16,7 @@ from sklearn.neighbors import KNeighborsRegressor
                          ['ForecasterAutoreg', 'ForecasterAutoregCustom',
                           'ForecasterAutoregDirect', 'ForecasterAutoregMultiVariate'], 
                          ids=lambda ft: f'forecaster_type: {ft}')
-def test_init_exception_when_weight_func_is_not_a_callable(forecaster_type):
+def test_exception_initialize_weights_when_weight_func_is_not_a_callable(forecaster_type):
     """
     Test exception is raised when weight_func is not a callable.
     """
@@ -31,7 +31,7 @@ def test_init_exception_when_weight_func_is_not_a_callable(forecaster_type):
         )
 
 
-def test_init_exception_when_weight_func_is_not_a_callable_or_dict():
+def test_exception_initialize_weights_when_weight_func_is_not_a_callable_or_dict():
     """
     Test exception is raised when weight_func is not a callable or a dict.
     """
@@ -46,7 +46,7 @@ def test_init_exception_when_weight_func_is_not_a_callable_or_dict():
         )
 
 
-def test_init_exception_when_series_weights_is_not_a_dict():
+def test_exception_initialize_weights_when_series_weights_is_not_a_dict():
     """
     Test exception is raised when series_weights is not a dict.
     """
@@ -64,7 +64,7 @@ def test_init_exception_when_series_weights_is_not_a_dict():
         )
 
 
-def test_init_when_weight_func_is_provided_and_regressor_has_not_sample_weights():
+def test_exception_initialize_weights_when_weight_func_is_provided_and_regressor_has_not_sample_weights():
     """
     Test warning is created when weight_func is provided but the regressor has no argument
     sample_weights in his fit method.
@@ -89,7 +89,7 @@ def test_init_when_weight_func_is_provided_and_regressor_has_not_sample_weights(
     assert source_code_weight_func is None
 
 
-def test_init_when_series_weights_is_provided_and_regressor_has_not_sample_weights():
+def test_exception_initialize_weights_when_series_weights_is_provided_and_regressor_has_not_sample_weights():
     """
     Test warning is created when series_weights is provided but the regressor has no argument
     sample_weights in his fit method.
