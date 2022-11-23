@@ -3,6 +3,7 @@
 import re
 import pytest
 import pandas as pd
+import numpy as np
 from skforecast.ForecasterAutoregCustom import ForecasterAutoregCustom
 from sklearn.linear_model import LinearRegression
 from sklearn.neighbors import KNeighborsRegressor
@@ -48,43 +49,36 @@ def test_init_exception_when_fun_predictors_argument_is_string():
             window_size    = 5
         )
 
-
-def test_init_exception_when_weight_func_is_not_a_callable():
-    """
-    Test exception is raised when weight_func is not a callable.
-    """
-    weight_func = 'not_callable'
-    err_msg = re.escape(f"Argument `weight_func` must be a callable. Got {type(weight_func)}.")
-    with pytest.raises(TypeError, match = err_msg):
+def test_init_exception_when_weight_func_argument_is_not_callable():
+   """
+   """
+   weight_func = '---'
+   err_msg = re.escape(
+                f"Argument `weight_func` must be a callable. Got {type(weight_func)}."
+            )
+   with pytest.raises(TypeError, match = err_msg):
         ForecasterAutoregCustom(
             regressor      = LinearRegression(),
             fun_predictors = create_predictors,
             window_size    = 5,
-            weight_func    = weight_func)
+            weight_func    = weight_func
+        )
 
 
-def test_init_when_weight_func_is_provided_and_regressor_has_not_sample_weights():
-    """
-    Test warning is created when weight_func is provided but the regressor has no argument
-    sample_weights in his fit method.
-    """
+def test_init_exception_when_weight_func_argument_is_not_callable():
+   """
+   """
+   def weight_func(index):
+        return np.ones_like(index)
 
-    def weight_func():
-        pass
-
-    warn_msg = re.escape(
-                    f"""
-                    Argument `weight_func` is ignored since regressor KNeighborsRegressor()
-                    does not accept `sample_weight` in its `fit` method.
-                    """
-                )
-    with pytest.warns(UserWarning, match = warn_msg):
-        forecaster = ForecasterAutoregCustom(
-                        regressor      = KNeighborsRegressor(),
-                        fun_predictors = create_predictors,
-                        window_size    = 5,
-                        weight_func    = weight_func
-                     )
-    
-    assert forecaster.weight_func is None
-    assert forecaster.source_code_weight_func is None
+   warn_msg = re.escape(
+                f"Argument `weight_func` is ignored since regressor KNeighborsRegressor()"
+                f" does not accept `sample_weight` in its `fit` method."
+            )
+   with pytest.warns(UserWarning, match = warn_msg):
+        ForecasterAutoregCustom(
+            regressor      = KNeighborsRegressor(),
+            fun_predictors = create_predictors,
+            window_size    = 5,
+            weight_func    = weight_func
+        )

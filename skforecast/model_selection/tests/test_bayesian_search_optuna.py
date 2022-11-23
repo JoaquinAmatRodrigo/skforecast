@@ -51,7 +51,7 @@ def test_exception_bayesian_search_optuna_metric_list_duplicate_names():
     n_validation = 12
     y_train = y[:-n_validation]
     lags_grid = [2, 4]
-    def search_space(trial):
+    def search_space(trial): # pragma: no cover
         search_space  = {'alpha' : trial.suggest_loguniform('not_alpha', 1e-2, 1.0)
                         }
         return search_space

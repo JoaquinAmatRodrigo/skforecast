@@ -10,7 +10,6 @@ from typing import Union, Dict, List, Tuple, Any, Optional, Callable
 import warnings
 import logging
 import sys
-import inspect
 import numpy as np
 import pandas as pd
 import sklearn
@@ -21,6 +20,7 @@ from copy import copy, deepcopy
 import skforecast
 from ..ForecasterBase import ForecasterBase
 from ..utils import initialize_lags
+from ..utils import initialize_weights
 from ..utils import check_y
 from ..utils import check_exog
 from ..utils import preprocess_y
@@ -65,14 +65,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         preprocessing API. The transformation is applied to `exog` before training the
         forecaster. `inverse_transform` is not available when using ColumnTransformers.
 
-    series_weights : dict, default `None`
-        Weights associated with each series {'series_column_name' : float}. It is only
-        applied if the `regressor` used accepts `sample_weight` in its `fit` method.
-        If `series_weights` is provided, a weight of 1 is given to all series not present
-        in `series_weights`. If `None`, all levels have the same weight. See Notes section
-        for more details on the use of the weights.
-        **New in version 0.6.0**
-
     weight_func : callable, dict, default `None`
         Function that defines the individual weights for each sample based on the
         index. For example, a function that assigns a lower weight to certain dates.
@@ -80,6 +72,14 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         used for each series.
         Ignored if `regressor` does not have the argument `sample_weight` in its `fit`
         method. See Notes section for more details on the use of the weights.
+        **New in version 0.6.0**
+
+    series_weights : dict, default `None`
+        Weights associated with each series {'series_column_name' : float}. It is only
+        applied if the `regressor` used accepts `sample_weight` in its `fit` method.
+        If `series_weights` is provided, a weight of 1 is given to all series not present
+        in `series_weights`. If `None`, all levels have the same weight. See Notes section
+        for more details on the use of the weights.
         **New in version 0.6.0**
     
     Attributes
@@ -107,19 +107,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         preprocessing API. The transformation is applied to `exog` before training the
         forecaster. `inverse_transform` is not available when using ColumnTransformers.
 
-    series_weights : dict, default `None`
-        Weights associated with each series {'series_column_name' : float}. It is only
-        applied if the `regressor` used accepts `sample_weight` in its `fit` method.
-        If `series_weights` is provided, a weight of 1 is given to all series not present
-        in `series_weights`. If `None`, all levels have the same weight. See Notes section
-        for more details on the use of the weights.
-        **New in version 0.6.0**
-
-    series_weights_ : dict
-        Weights associated with each series.It is created as a clone of `series_weights`
-        and is used internally to avoid overwriting.
-        **New in version 0.6.0**
-
     weight_func : callable, dict, default `None`
         Function that defines the individual weights for each sample based on the
         index. For example, a function that assigns a lower weight to certain dates.
@@ -136,6 +123,19 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
     source_code_weight_func : str, dict
         Source code of the custom function(s) used to create weights.
+        **New in version 0.6.0**
+
+    series_weights : dict, default `None`
+        Weights associated with each series {'series_column_name' : float}. It is only
+        applied if the `regressor` used accepts `sample_weight` in its `fit` method.
+        If `series_weights` is provided, a weight of 1 is given to all series not present
+        in `series_weights`. If `None`, all levels have the same weight. See Notes section
+        for more details on the use of the weights.
+        **New in version 0.6.0**
+
+    series_weights_ : dict
+        Weights associated with each series.It is created as a clone of `series_weights`
+        and is used internally to avoid overwriting.
         **New in version 0.6.0**
 
     max_lag : int
@@ -227,19 +227,19 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         lags: Union[int, np.ndarray, list],
         transformer_series: Optional[Union[object, dict]]=None,
         transformer_exog: Optional[object]=None,
-        series_weights: Optional[dict]=None,
-        weight_func: Optional[Union[callable, dict]]=None
+        weight_func: Optional[Union[callable, dict]]=None,
+        series_weights: Optional[dict]=None
     ) -> None:
         
         self.regressor               = regressor
         self.transformer_series      = transformer_series
         self.transformer_series_     = None
         self.transformer_exog        = transformer_exog
-        self.series_weights          = series_weights
-        self.series_weights_         = None
         self.weight_func             = weight_func
         self.weight_func_            = None
         self.source_code_weight_func = None
+        self.series_weights          = series_weights
+        self.series_weights_         = None
         self.index_type              = None
         self.index_freq              = None
         self.index_values            = None
@@ -258,49 +258,16 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.skforcast_version       = skforecast.__version__
         self.python_version          = sys.version.split(" ")[0]
         
-        self.lags = initialize_lags(type(self), lags)
+        self.lags = initialize_lags(type(self).__name__, lags)
         self.max_lag = max(self.lags)
         self.window_size = self.max_lag
 
-        if series_weights is not None:
-            if not isinstance(series_weights, dict):
-                raise TypeError(
-                    f"Argument `series_weights` must be a dict of floats or ints."
-                    f"Got {type(series_weights)}."
-                )
-            if 'sample_weight' not in inspect.getfullargspec(self.regressor.fit)[0]:
-                warnings.warm(
-                    f"""
-                    Argument `series_weights` is ignored since regressor {self.regressor}
-                    does not accept `sample_weight` in its `fit` method.
-                    """
-                )
-                self.series_weights = None
-
-        if weight_func is not None:
-            if not isinstance(weight_func, (Callable, dict)):
-                raise TypeError(
-                    f"Argument `weight_func` must be a callable or a dict of "
-                    f"callables. Got {type(weight_func)}."
-                )
-
-            if isinstance(weight_func, dict):
-                self.source_code_weight_func = {}
-                for key in weight_func:
-                    self.source_code_weight_func[key] = inspect.getsource(weight_func[key])
-            else:
-                self.source_code_weight_func = inspect.getsource(weight_func)
-
-            if 'sample_weight' not in inspect.getfullargspec(self.regressor.fit)[0]:
-                warnings.warn(
-                    f"""
-                    Argument `weight_func` is ignored since regressor {self.regressor}
-                    does not accept `sample_weight` in its `fit` method.
-                    """
-                )
-                self.weight_func = None
-                self.weight_func_ = None
-                self.source_code_weight_func = None
+        self.weight_func, self.source_code_weight_func, self.series_weights = initialize_weights(
+            forecaster_type = type(self).__name__, 
+            regressor       = regressor, 
+            weight_func     = weight_func, 
+            series_weights  = series_weights
+        )
 
 
     def __repr__(
@@ -428,20 +395,23 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         series_col_names = list(series.columns)
 
-        self.transformer_series_ = deepcopy(self.transformer_series)
         if self.transformer_series is None:
             self.transformer_series_ = {serie: None for serie in series_col_names}
         elif not isinstance(self.transformer_series, dict):
             self.transformer_series_ = {serie: clone(self.transformer_series) 
                                         for serie in series_col_names}
         else:
-            if list(self.transformer_series_.keys()) != series_col_names:
-                raise ValueError(
-                    (f'When `transformer_series` parameter is a `dict`, its keys '
-                     f'must be the same as `series` column names.\n'
-                     f'    `transformer_series` keys : {list(self.transformer_series_.keys())}.\n'
-                     f'    `series` columns          : {series_col_names}.')
-                )
+            self.transformer_series_ = {serie: None for serie in series_col_names}
+            # Only elements already present in transformer_series_ are updated
+            self.transformer_series_.update(
+                (k, v) for k, v in deepcopy(self.transformer_series).items() if k in self.transformer_series_
+            )
+            series_not_in_transformer_series = set(series.columns) - set(self.transformer_series.keys())
+            if series_not_in_transformer_series:
+                    warnings.warn(
+                        f"{series_not_in_transformer_series} not present in `transformer_series`."
+                        f" No transformation is applied to these series."
+                    )
         
         X_levels = []
         X_train_col_names = [f"lag_{lag}" for lag in self.lags]
@@ -578,14 +548,14 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             # Keys in series_weights not present in series are ignored.
             series_not_in_series_weights = set(series.columns) - set(self.series_weights.keys())
             if series_not_in_series_weights:
-                    warnings.warn(
-                        f"{series_not_in_series_weights} not present in `series_weights`."
-                        f" A weight of 1 is given to all their samples."
-                    )
+                warnings.warn(
+                    f"{series_not_in_series_weights} not present in `series_weights`."
+                    f" A weight of 1 is given to all their samples."
+                )
             self.series_weights_ = dict.fromkeys(series.columns, 1.)
             self.series_weights_.update((k, v) for k, v in self.series_weights.items() if k in self.series_weights_)
             weights_series = [np.repeat(self.series_weights_[serie], sum(X_train[serie])) 
-                             for serie in series.columns]
+                              for serie in series.columns]
             weights_series = np.concatenate(weights_series)
 
         if self.weight_func is not None:
@@ -599,13 +569,11 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                         f"{series_not_in_weight_func} not present in `weight_func`."
                         f" A weight of 1 is given to all their samples."
                     )
-                    print(series_not_in_weight_func)
                 self.weight_func_ = dict.fromkeys(series.columns, lambda index: np.ones_like(index, dtype=float))
                 self.weight_func_.update((k, v) for k, v in self.weight_func.items() if k in self.weight_func_)
                 
             weights_samples = []
             for key in self.weight_func_.keys():
-                print(key)
                 index = y_train_index[X_train[X_train[key] == 1.0].index]
                 weights_samples.append(self.weight_func_[key](index))
             weights_samples = np.concatenate(weights_samples)
@@ -679,14 +647,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.training_range      = None
         
         self.series_col_names = list(series.columns)
-
-        if self.series_weights is not None:
-            if list(self.series_weights.keys()) != self.series_col_names:
-                raise ValueError(
-                    (f'`series_weights` must include all series levels (column names of series).\n'
-                     f'    `series_col_names`  = {self.series_col_names}.\n'
-                     f'    `series_weights` = {list(self.series_weights.keys())}.')
-                )
 
         if exog is not None:
             self.included_exog = True
@@ -1176,8 +1136,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         if not in_sample_residuals and len(set(levels) - set(self.out_sample_residuals.keys())) != 0:
             raise ValueError(
-                ('Not `forecaster.out_sample_residuals` for levels: {set(levels) - set(self.out_sample_residuals.keys())}. '
-                 'Use method `set_out_sample_residuals()`.')
+                (f'Not `forecaster.out_sample_residuals` for levels: {set(levels) - set(self.out_sample_residuals.keys())}. '
+                 f'Use method `set_out_sample_residuals()`.')
             )
         
         check_predict_input(
@@ -1329,7 +1289,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         
         """
         
-        self.lags = initialize_lags(type(self), lags)            
+        self.lags = initialize_lags(type(self).__name__, lags)            
         self.max_lag  = max(self.lags)
         self.window_size = max(self.lags)
         

@@ -189,8 +189,8 @@ def test_backtesting_forecaster_exception_when_initial_train_size_None_and_refit
 
 def test_backtesting_forecaster_exception_when_interval_not_None_and_ForecasterAutoregDirect():
     """
-    Test Exception is raised in backtesting_forecaster when interval is not None and
-    forecaster is a ForecasterAutoregDirect.
+    Test Exception is raised in backtesting_forecaster when interval is not None 
+    and forecaster is a ForecasterAutoregDirect.
     """
     forecaster = ForecasterAutoregDirect(
                     regressor = Ridge(random_state=123),
@@ -202,7 +202,7 @@ def test_backtesting_forecaster_exception_when_interval_not_None_and_ForecasterA
     
     err_msg = re.escape(
             ('Interval prediction is only available when forecaster is of type '
-            'ForecasterAutoreg or ForecasterAutoregCustom.')
+             'ForecasterAutoreg or ForecasterAutoregCustom.')
         )
     with pytest.raises(TypeError, match = err_msg):
         backtesting_forecaster(
@@ -233,8 +233,9 @@ def test_backtesting_forecaster_exception_when_forecaster_ForecasterAutoregMulti
                  )
 
     err_msg = re.escape(
-            ('For `forecaster` of type `ForecasterAutoregMultiSeries`, use the '
-             'functions available in the model_selection_multiseries module.')
+            ('`forecaster` must be of type `ForecasterAutoreg`, `ForecasterAutoregCustom` '
+             'or `ForecasterAutoregDirect`, for all other types of forecasters '
+             'use the functions available in the `model_selection` module.')
         )
     with pytest.raises(TypeError, match = err_msg):
         backtesting_forecaster(
