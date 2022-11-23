@@ -30,7 +30,6 @@ extras_require = {
 
 extras_require["full"] = (
     extras_require["statsmodels"]
-    + extras_require["bayesian"]
     + extras_require["plotting"]
     + extras_require["test"]
 )
