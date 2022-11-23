@@ -17,6 +17,10 @@ from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import FunctionTransformer
 import inspect
 
+optional_dependencies = {
+        "statsmodels": ['statsmodels>=0.12, <0.14'],
+        "plotting": ['matplotlib>=3.3, <3.7', 'seaborn==0.11', 'statsmodels>=0.12, <0.14']
+    }
 
 def initialize_lags(
     forecaster_type: str,
@@ -954,7 +958,7 @@ def load_forecaster(
 
 
 
-def _find_optional_dependency(package_name: str):
+def _find_optional_dependency(package_name: str, optional_dependencies=optional_dependencies):
     """
     Find if a package is an optional dependency. If true, find the version and the 
     extension it belongs to.
@@ -972,11 +976,6 @@ def _find_optional_dependency(package_name: str):
         Name and versions of the dependency.
 
     """
-
-    optional_dependencies = {
-        "statsmodels": ['statsmodels>=0.12, <0.14'],
-        "plotting": ['matplotlib>=3.3, <3.7', 'seaborn==0.11', 'statsmodels>=0.12, <0.14']
-    }
 
     for extra, packages in optional_dependencies.items():
         package_version = [package for package in packages if package_name in package]
@@ -999,7 +998,7 @@ def check_optional_dependency(package_name):
         try:
             extra, package_version = _find_optional_dependency(package_name=package_name)
             msg = (
-                f"\n'{package_name}' is an optional dependency and not included in the "
+                f"\n'{package_name}' is an optional dependency not included in the default "
                 f"skforecast installation. Please run: `pip install \"{package_version}\"` to install."
                 f"\nAlternately, you can install this by running `pip install skforecast[{extra}]`"
             )
