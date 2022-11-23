@@ -8,6 +8,7 @@
 
 from typing import Union, Any, Optional, Tuple, Callable
 import warnings
+import importlib
 import joblib
 import numpy as np
 import pandas as pd
@@ -950,3 +951,60 @@ def load_forecaster(
         forecaster.summary()
 
     return forecaster
+
+
+
+def _find_optional_dependency(package_name: str):
+    """
+    Find if a package is an optional dependency. If true, find the version and the 
+    extension it belongs to.
+
+    Parameters
+    ----------
+    package_name : str
+        Name of the package
+
+    Return
+    ------
+    extra: str
+        Name of the extra extension where the optional dependency is needed.
+    package_version: srt
+        Name and versions of the dependency.
+
+    """
+
+    optional_dependences = {
+        "statsmodels": ['statsmodels>=0.12, <0.14'],
+        "bayesian": ['optuna==2.10.0', 'scikit-optimize==0.9.0'],
+        "plotting": ['matplotlib>=3.3, <3.7', 'seaborn==0.11']
+    }
+
+    for extra, packages in optional_dependences.items():
+        package_version = [package for package in packages if package_name in package]
+        if package_version:
+            return extra, package_version[0]
+
+
+def check_optional_dependency(package_name):
+    """
+    Check if an optional dependency is stalled and raise a ImportError with installation
+    instructions.
+
+    Parameters
+    ----------
+    package_name : str
+        Name of the package
+    """
+
+    if importlib.util.find_spec(package_name) is None:
+        try:
+            extra, package_version = _find_optional_dependency(package_name=package_name)
+            msg = (
+                f"\n'{package_name}' is an optional dependency and not included in the "
+                f"skforecast installation. Please run: `pip install \"{package_version}\"` to install."
+                f"\nAlternately, you can install this by running `pip install skforecast[{extra}]`"
+            )
+        except:
+            msg = f"\n'{package_name}' is needed but not installed. Please install it."
+        
+        raise ImportError(msg)
