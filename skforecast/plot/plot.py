@@ -7,12 +7,18 @@
 # coding=utf-8
  
 from typing import Union
-import matplotlib
-import matplotlib.pyplot as plt
-import seaborn as sns
-import numpy as np
-import pandas as pd
-from statsmodels.graphics.tsaplots import plot_acf
+from ..utils import check_optional_dependency
+
+try:
+    import matplotlib
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+    import numpy as np
+    import pandas as pd
+    from statsmodels.graphics.tsaplots import plot_acf
+except Exception as e:
+    package_name = str(e).split(" ")[-1].replace("'", "")
+    check_optional_dependency(package_name=package_name)
 
 
 def plot_residuals(

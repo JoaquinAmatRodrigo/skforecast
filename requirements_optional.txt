@@ -1,10 +1,6 @@
 # Module model_selection_statsmodels
 statsmodels>=0.12, <0.14
 
-# Bayesian search in model_selection
-optuna==2.10.0
-scikit-optimize==0.9.0
-
 # Plotting
 matplotlib>=3.3, <3.7
 seaborn==0.11
