@@ -4,3 +4,4 @@ statsmodels>=0.12, <0.14
 # Plotting
 matplotlib>=3.3, <3.7
 seaborn==0.11
+statsmodels>=0.12, <0.14
