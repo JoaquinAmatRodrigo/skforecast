@@ -65,10 +65,10 @@ def test_init_exception_when_weight_func_argument_is_not_callable():
         )
 
 
-def test_init_exception_when_weight_func_argument_is_not_callable():
+def test_init_exception_when_series_weights_is_provided_and_regressor_has_not_sample_weights():
    """
    """
-   def weight_func(index):
+   def weight_func(index): # pragma: no cover
         return np.ones_like(index)
 
    warn_msg = re.escape(
