@@ -28,7 +28,7 @@ Latest (unstable):
 pip install git+https://github.com/JoaquinAmatRodrigo/skforecast#master
 ```
 
-Install the full version:
+Install the full version (all dependencies):
 
 ```bash
 pip install skforecast[full]
