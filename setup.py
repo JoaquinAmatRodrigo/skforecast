@@ -24,8 +24,7 @@ with open("requirements_test.txt") as f:
 
 extras_require = {
     "statsmodels": requirements_optional.split("\n\n")[0].splitlines(),
-    "bayesian": requirements_optional.split("\n\n")[1].splitlines(),
-    "plotting": requirements_optional.split("\n\n")[2].splitlines(),
+    "plotting": requirements_optional.split("\n\n")[1].splitlines(),
     "test": requirements_test
 }
 
