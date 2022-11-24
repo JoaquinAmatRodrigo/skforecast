@@ -6,18 +6,21 @@
 ################################################################################
 # coding=utf-8
 
-
 from typing import Union, Tuple, Optional
+import logging
 import numpy as np
 import pandas as pd
-import logging
 from tqdm import tqdm
-from sklearn.model_selection import ParameterGrid
-from statsmodels.tsa.statespace.sarimax import SARIMAX
-
+from ..utils import check_optional_dependency
 from ..model_selection import time_series_splitter
 from ..model_selection.model_selection import _get_metric
 
+try:
+    from sklearn.model_selection import ParameterGrid
+    from statsmodels.tsa.statespace.sarimax import SARIMAX
+except Exception as e:
+    package_name = str(e).split(" ")[-1].replace("'", "")
+    check_optional_dependency(package_name=package_name)
 
 logging.basicConfig(
     format = '%(asctime)-5s %(name)-10s %(levelname)-5s %(message)s', 

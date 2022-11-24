@@ -24,14 +24,12 @@ with open("requirements_test.txt") as f:
 
 extras_require = {
     "statsmodels": requirements_optional.split("\n\n")[0].splitlines(),
-    "bayesian": requirements_optional.split("\n\n")[1].splitlines(),
-    "plotting": requirements_optional.split("\n\n")[2].splitlines(),
+    "plotting": requirements_optional.split("\n\n")[1].splitlines(),
     "test": requirements_test
 }
 
 extras_require["full"] = (
     extras_require["statsmodels"]
-    + extras_require["bayesian"]
     + extras_require["plotting"]
     + extras_require["test"]
 )
