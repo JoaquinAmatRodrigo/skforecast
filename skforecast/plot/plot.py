@@ -77,3 +77,40 @@ def plot_residuals(
     ax1.set_title("Residuals")
     ax2.set_title("Distribution")
     ax3.set_title("Autocorrelation")
+
+
+def plot_multivariate_time_series_corr(
+    corr: pd.DataFrame,
+    ax: matplotlib.axes.Axes=None,
+    **fig_kw
+) -> None:
+    """
+    Heatmap plot of a correlation matrix.
+
+    Parameters
+    ----------
+    corr : pd.DataFrame
+        correlation matrix
+    ax : matplotlib.axes.Axes, default `None`. 
+        Pre-existing ax for the plot. Otherwise, call matplotlib.pyplot.subplots()
+        internally.
+    fig_kw : dict
+        Other keyword arguments are passed to matplotlib.pyplot.subplots()
+    
+    Returns
+    -------
+    None
+    """
+
+    if ax is None:
+        fig, ax = plt.subplots(1, 1, **fig_kw)
+
+    sns.heatmap(
+        corr,
+        annot=True,
+        linewidths=.5,
+        ax=ax,
+        cmap=sns.color_palette("viridis", as_cmap=True)
+    )
+    ax.set_xlabel('Time series')
+    fig.show()
