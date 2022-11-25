@@ -1006,3 +1006,63 @@ def check_optional_dependency(package_name):
             msg = f"\n'{package_name}' is needed but not installed. Please install it."
         
         raise ImportError(msg)
+
+    
+def multivariate_time_series_corr(
+    time_series: pd.Series,
+    other: pd.DataFrame,
+    lags: Union[int, list, np.array],
+    method: str='pearson'
+)-> pd.DataFrame:
+    """
+    Compute pairwise correlation.
+
+    Pairwise correlation is computed between a time_series and the lagged values of other
+    time series. 
+
+    Parameters
+    ----------
+    time_series : pd.Series
+        Target time series
+    other : pd.DataFrame
+        Time series whose lagged values are correlated to `time_series`.
+    lags : Union[int, list, np.array]
+        Lags to be included in the correlation analysis.
+    method : str, default 'pearson'
+
+        pearson : standard correlation coefficient
+
+        kendall : Kendall Tau correlation coefficient
+
+        spearman : Spearman rank correlation
+        
+    Returns
+    -------
+    pd.DataFrame
+        Correlation values.
+    """
+
+    if not len(time_series) == len(other):
+        raise Exception("time_series and other must have the same length.")
+
+    if not (time_series.index == other.index).all():
+        raise Exception("time_series and other must have the same index.")
+
+    if isinstance(lags, int):
+        lags = range(lags)
+
+    corr = {}
+    for col in other.columns:
+        lag_values = {}
+        for lag in lags:
+            lag_values[lag] = other[col].shift(lag)
+
+        lag_values = pd.DataFrame(lag_values)
+        lag_values.insert(0, None, time_series)
+        corr[col] = lag_values.corr(method=method).iloc[1:, 0]
+
+    corr = pd.DataFrame(corr)
+    corr.index = corr.index.astype(int)
+    corr.index.name="lag"
+    
+    return corr
