@@ -1030,11 +1030,9 @@ def multivariate_time_series_corr(
         Lags to be included in the correlation analysis.
     method : str, default 'pearson'
 
-        pearson : standard correlation coefficient
-
-        kendall : Kendall Tau correlation coefficient
-
-        spearman : Spearman rank correlation
+        - pearson : standard correlation coefficient
+        - kendall : Kendall Tau correlation coefficient
+        - spearman : Spearman rank correlation
         
     Returns
     -------
