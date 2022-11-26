@@ -1,12 +1,10 @@
-
 # Unit test check_optional_dependency
 # ==============================================================================
-
 from skforecast.utils import optional_dependencies
 
 def test_skforecast_utils_optional_dependencies_match_requirements_optional():
     """
-    Test that check_optional_dependency has the same dependecies than the file
+    Test that check_optional_dependency has the same dependencies than the file
     requirements_optional.txt
     """
 
