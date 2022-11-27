@@ -1,6 +1,5 @@
 # Unit test multivariate_time_series_corr
 # ==============================================================================
-
 import pandas as pd
 from skforecast.utils.utils import multivariate_time_series_corr
 
@@ -24,10 +23,10 @@ def test_output_multivariate_time_series_corr():
             )
     expected.index.name = 'lag'
 
-    results =  multivariate_time_series_corr(
-                time_series = time_series,
-                other       = other,
-                lags        = 5
+    results = multivariate_time_series_corr(
+                  time_series = time_series,
+                  other       = other,
+                  lags        = 5
               )
 
     pd.testing.assert_frame_equal(results, expected)
