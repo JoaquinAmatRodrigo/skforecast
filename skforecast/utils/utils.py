@@ -18,9 +18,10 @@ from sklearn.preprocessing import FunctionTransformer
 import inspect
 
 optional_dependencies = {
-        "statsmodels": ['statsmodels>=0.12, <0.14'],
-        "plotting": ['matplotlib>=3.3, <3.7', 'seaborn==0.11', 'statsmodels>=0.12, <0.14']
-    }
+    "statsmodels": ['statsmodels>=0.12, <0.14'],
+    "plotting": ['matplotlib>=3.3, <3.7', 'seaborn==0.11', 'statsmodels>=0.12, <0.14']
+}
+
 
 def initialize_lags(
     forecaster_type: str,
@@ -487,7 +488,7 @@ def check_predict_input(
 
 def preprocess_y(
     y: pd.Series
-) -> Union[np.ndarray, pd.Index]:
+) -> Tuple[np.ndarray, pd.Index]:
     """
     Returns values and index of series separately. Index is overwritten 
     according to the next rules:
@@ -544,7 +545,7 @@ def preprocess_y(
 
 def preprocess_last_window(
     last_window:Union[pd.Series, pd.DataFrame]
- ) -> Union[np.ndarray, pd.Index]:
+ ) -> Tuple[np.ndarray, pd.Index]:
     """
     Returns values and index of series separately. Index is overwritten 
     according to the next rules:
@@ -601,7 +602,7 @@ def preprocess_last_window(
 
 def preprocess_exog(
     exog: Union[pd.Series, pd.DataFrame]
-) -> Union[np.ndarray, pd.Index]:
+) -> Tuple[np.ndarray, pd.Index]:
     """
     Returns values ​​and index of series separately. Index is overwritten 
     according to the next rules:
@@ -927,7 +928,7 @@ def save_forecaster(
 def load_forecaster(
     file_name: str,
     verbose: bool=True
-):
+) -> object:
     """
     Load forecaster model from disc using joblib.
 
@@ -957,21 +958,27 @@ def load_forecaster(
     return forecaster
 
 
-
-def _find_optional_dependency(package_name: str, optional_dependencies=optional_dependencies):
+def _find_optional_dependency(
+    package_name: str, 
+    optional_dependencies: dict=optional_dependencies
+) -> Tuple[str, str]:
     """
-    Find if a package is an optional dependency. If true, find the version and the 
-    extension it belongs to.
+    Find if a package is an optional dependency. If true, find the version and 
+    the extension it belongs to.
 
     Parameters
     ----------
     package_name : str
-        Name of the package
+        Name of the package to check.
+
+    optional_dependencies : dict, default optional_dependencies
+        Skforecast optional dependencies.
 
     Return
     ------
     extra: str
         Name of the extra extension where the optional dependency is needed.
+
     package_version: srt
         Name and versions of the dependency.
 
@@ -983,15 +990,18 @@ def _find_optional_dependency(package_name: str, optional_dependencies=optional_
             return extra, package_version[0]
 
 
-def check_optional_dependency(package_name):
+def check_optional_dependency(
+    package_name: str
+) -> None:
     """
-    Check if an optional dependency is stalled and raise a ImportError with installation
-    instructions.
+    Check if an optional dependency is installed, if not raise an ImportError  
+    with installation instructions.
 
     Parameters
     ----------
     package_name : str
-        Name of the package
+        Name of the package to check.
+    
     """
 
     if importlib.util.find_spec(package_name) is None:
@@ -999,10 +1009,71 @@ def check_optional_dependency(package_name):
             extra, package_version = _find_optional_dependency(package_name=package_name)
             msg = (
                 f"\n'{package_name}' is an optional dependency not included in the default "
-                f"skforecast installation. Please run: `pip install \"{package_version}\"` to install."
-                f"\nAlternately, you can install this by running `pip install skforecast[{extra}]`"
+                f"skforecast installation. Please run: `pip install \"{package_version}\"` to install it."
+                f"\nAlternately, you can install it by running `pip install skforecast[{extra}]`"
             )
         except:
             msg = f"\n'{package_name}' is needed but not installed. Please install it."
         
         raise ImportError(msg)
+
+    
+def multivariate_time_series_corr(
+    time_series: pd.Series,
+    other: pd.DataFrame,
+    lags: Union[int, list, np.array],
+    method: str='pearson'
+)-> pd.DataFrame:
+    """
+    Compute pairwise correlation.
+
+    Pairwise correlation is computed between a time_series and the 
+    lagged values of other time series. 
+
+    Parameters
+    ----------
+    time_series : pandas Series
+        Target time series.
+
+    other : pandas DataFrame
+        Time series whose lagged values are correlated to `time_series`.
+
+    lags : Union[int, list, numpy ndarray]
+        Lags to be included in the correlation analysis.
+    
+    method : str, default 'pearson'
+        - pearson : standard correlation coefficient.
+        - kendall : Kendall Tau correlation coefficient.
+        - spearman : Spearman rank correlation.
+        
+    Returns
+    -------
+    corr : pandas DataFrame
+        Correlation values.
+
+    """
+
+    if not len(time_series) == len(other):
+        raise ValueError("`time_series` and `other` must have the same length.")
+
+    if not (time_series.index == other.index).all():
+        raise ValueError("`time_series` and `other` must have the same index.")
+
+    if isinstance(lags, int):
+        lags = range(lags)
+
+    corr = {}
+    for col in other.columns:
+        lag_values = {}
+        for lag in lags:
+            lag_values[lag] = other[col].shift(lag)
+
+        lag_values = pd.DataFrame(lag_values)
+        lag_values.insert(0, None, time_series)
+        corr[col] = lag_values.corr(method=method).iloc[1:, 0]
+
+    corr = pd.DataFrame(corr)
+    corr.index = corr.index.astype(int)
+    corr.index.name="lag"
+    
+    return corr

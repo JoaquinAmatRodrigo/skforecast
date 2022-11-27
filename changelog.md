@@ -23,6 +23,10 @@ All notable changes to this project will be documented in this file.
 + `backtesting_forecaster_multiseries` allows backtesting multiple levels simultaneously.
 
 + `metric` argument can be a list in `grid_search_forecaster_multiseries`, `random_search_forecaster_multiseries`. If `metric` is a `list`, multiple metrics will be calculated. (suggested by Pablo Dávila Herrero https://github.com/Pablo-Davila)
+
++ Function `multivariate_time_series_corr` in module `utils`.
+
++ Function `plot_multivariate_time_series_corr` in module `plot`.
   
 **Changed**
 
@@ -55,6 +59,8 @@ All notable changes to this project will be documented in this file.
 + In `ForecasterAutoregDirect`, `filter_train_X_y_for_step` now starts at 1 (before 0).
 
 + In `ForecasterAutoregDirect`, DataFrame `y_train` now start with 1, `y_step_1` (before `y_step_0`).
+
++ Remove `cv_forecaster` from module `model_selection`.
 
 **Fixed**
 

@@ -13,3 +13,4 @@
 ::: skforecast.utils.utils.expand_index
 ::: skforecast.utils.utils.transform_series
 ::: skforecast.utils.utils.transform_dataframe
+::: skforecast.utils.utils.multivariate_time_series_corr

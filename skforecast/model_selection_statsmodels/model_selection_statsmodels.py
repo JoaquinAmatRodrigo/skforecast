@@ -10,13 +10,13 @@ from typing import Union, Tuple, Optional
 import logging
 import numpy as np
 import pandas as pd
+from sklearn.model_selection import ParameterGrid
 from tqdm import tqdm
 from ..utils import check_optional_dependency
 from ..model_selection import time_series_splitter
 from ..model_selection.model_selection import _get_metric
 
 try:
-    from sklearn.model_selection import ParameterGrid
     from statsmodels.tsa.statespace.sarimax import SARIMAX
 except Exception as e:
     package_name = str(e).split(" ")[-1].replace("'", "")
