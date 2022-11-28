@@ -1025,10 +1025,8 @@ def multivariate_time_series_corr(
     method: str='pearson'
 )-> pd.DataFrame:
     """
-    Compute pairwise correlation.
-
-    Pairwise correlation is computed between a time_series and the 
-    lagged values of other time series. 
+    Compute correlation between a time_series and the lagged values of other 
+    time series. 
 
     Parameters
     ----------
