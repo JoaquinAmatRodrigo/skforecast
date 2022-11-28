@@ -176,7 +176,7 @@ If you use this software, please cite it using the following metadata.
 
 **APA**:
 ```
-Amat Rodrigo, J., & Escobar Ortiz, J. skforecast (Version 0.5.1) [Computer software]
+Amat Rodrigo, J., & Escobar Ortiz, J. skforecast (Version 0.6.0) [Computer software]
 ```
 
 **BibTeX**:
@@ -184,9 +184,9 @@ Amat Rodrigo, J., & Escobar Ortiz, J. skforecast (Version 0.5.1) [Computer softw
 @software{skforecast,
 author = {Amat Rodrigo, Joaquin and Escobar Ortiz, Javier},
 license = {MIT},
-month = {10},
+month = {11},
 title = {{skforecast}},
-version = {0.5.1},
+version = {0.6.0},
 year = {2022}
 }
 ```
