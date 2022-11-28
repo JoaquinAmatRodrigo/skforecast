@@ -1010,7 +1010,7 @@ def check_optional_dependency(
             msg = (
                 f"\n'{package_name}' is an optional dependency not included in the default "
                 f"skforecast installation. Please run: `pip install \"{package_version}\"` to install it."
-                f"\nAlternately, you can install it by running `pip install skforecast[{extra}]`"
+                f"\n\nAlternately, you can install it by running `pip install skforecast[{extra}]`"
             )
         except:
             msg = f"\n'{package_name}' is needed but not installed. Please install it."
