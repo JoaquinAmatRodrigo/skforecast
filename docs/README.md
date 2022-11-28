@@ -48,19 +48,19 @@ pip install skforecast[plotting]
 
 ### Hard dependencies
 
-+ numpy>=1.20, <=1.23
-+ pandas>=1.2, <=1.4
-+ tqdm>=4.57.0, <=4.64
-+ scikit-learn>=1.0, <=1.1.2
-+ optuna==2.10.0
++ numpy>=1.20, <1.24
++ pandas>=1.2, <1.6
++ tqdm>=4.57.0, <4.65
++ scikit-learn>=1.0, <1.2
++ optuna>=2.10.0, <3.1
 + scikit-optimize==0.9.0
-+ joblib>=1.1.0, <=1.2.0
++ joblib>=1.1.0, <1.3.0
 
 ### Optional dependencies
 
-+ matplotlib>=3.3, <=3.5
-+ seaborn==0.11.2
-+ statsmodels>=0.12, <=0.13.2
++ matplotlib>=3.3, <3.7
++ seaborn==0.11
++ statsmodels>=0.12, <0.14
 
 ## Features
 
@@ -125,4 +125,4 @@ If you found skforecast useful, you can support us with a donation. Your contrib
 
 ## License
 
-**joaquinAmatRodrigo/skforecast** is licensed under the **MIT License**, a short and simple permissive license with conditions only requiring preservation of copyright and license notices. Licensed works, modifications, and larger works may be distributed under different terms and without source code.
+**joaquinAmatRodrigo/skforecast** is licensed under the **MIT License**, a short and simple permissive license with conditions only requiring the preservation of copyright and license notices. Licensed works, modifications and larger works may be distributed under different terms and without source code.
