@@ -1,6 +1,8 @@
 # Unit test multivariate_time_series_corr
 # ==============================================================================
 import pandas as pd
+import pytest
+import re
 from skforecast.utils.utils import multivariate_time_series_corr
 
 def test_output_multivariate_time_series_corr():
@@ -30,3 +32,45 @@ def test_output_multivariate_time_series_corr():
               )
 
     pd.testing.assert_frame_equal(results, expected)
+
+
+def test_exception_multivariate_when_inputs_have_different_index():
+    """
+    Test that an exception is raised when `time_Series` and `other` have different index.
+    """
+
+    time_series = pd.Series(range(5), name='series_1')
+    other = pd.DataFrame(
+                {'series_2': range(5),
+                'series_3': [9, 2, 3, 8, 2]},
+                index = [10, 11, 12, 13, 14]
+            )
+
+    err_msg = re.escape("`time_series` and `other` must have the same index.")
+    with pytest.raises(ValueError, match = err_msg):
+        multivariate_time_series_corr(
+            time_series = time_series,
+            other       = other,
+            lags        = 5
+        )
+
+
+def test_exception_multivariate_when_inputs_have_different_length():
+    """
+    Test that an exception is raised when `time_Series` and `other` have different lenth.
+    """
+
+    time_series = pd.Series(range(10), name='series_1')
+    other = pd.DataFrame({
+                'series_2': range(5),
+                'series_3': [9, 2, 3, 8, 2]
+            })
+
+    err_msg = re.escape("`time_series` and `other` must have the same length.")
+    with pytest.raises(ValueError, match = err_msg):
+        multivariate_time_series_corr(
+            time_series = time_series,
+            other       = other,
+            lags        = 5
+        )
+    
