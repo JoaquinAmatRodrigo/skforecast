@@ -958,7 +958,7 @@ def random_search_forecaster(
         Whether to re-fit the forecaster in each iteration of backtesting.
 
     n_iter : int, default `10`
-        Number of parameter settings that are sampled. 
+        Number of parameter settings that are sampled per lags configuration. 
         n_iter trades off runtime vs quality of the solution.
 
     random_state : int, default `123`

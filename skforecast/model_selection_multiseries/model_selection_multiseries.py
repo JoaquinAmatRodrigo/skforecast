@@ -118,7 +118,7 @@ def _backtesting_forecaster_multiseries_refit(
 
     Returns 
     -------
-    metrics_levels : pd.DataFrame
+    metrics_levels : pandas DataFrame
         Value(s) of the metric(s). Index are the levels and columns the metrics.
 
     backtest_predictions : pandas Dataframe
@@ -323,7 +323,7 @@ def _backtesting_forecaster_multiseries_no_refit(
 
     Returns 
     -------
-    metrics_levels : pd.DataFrame
+    metrics_levels : pandas DataFrame
         Value(s) of the metric(s). Index are the levels and columns the metrics.
 
     backtest_predictions : pandas DataFrame
@@ -534,7 +534,7 @@ def backtesting_forecaster_multiseries(
 
     Returns 
     -------
-    metrics_levels : pd.DataFrame
+    metrics_levels : pandas DataFrame
         Value(s) of the metric(s). Index are the levels and columns the metrics.
 
     backtest_predictions : pandas DataFrame
@@ -834,7 +834,7 @@ def random_search_forecaster_multiseries(
         Whether to re-fit the forecaster in each iteration of backtesting.
 
     n_iter : int, default `10`
-        Number of parameter settings that are sampled. 
+        Number of parameter settings that are sampled per lags configuration. 
         n_iter trades off runtime vs quality of the solution.
 
     random_state : int, default `123`
