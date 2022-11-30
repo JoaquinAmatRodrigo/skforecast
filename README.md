@@ -86,20 +86,14 @@ pip install skforecast[plotting]
 + Get predictor importance
 + Forecaster in production
 
-## What is coming in the new release?
+## What is new in skforecast 0.6.0?
 
 - [x] Define individual time-based weights for the series, `ForecasterAutoreg`, `ForecasterAutoregCustom`, `ForecasterAutoregDirect`. 
 - [x] Define individual weights for the series, `ForecasterAutoregMultiSeries`. 
-- [x] Predict and Backtest all series at the same time with `ForecasterAutoregMultiSeries`.
+- [x] Predict and backtest all series at the same time with `ForecasterAutoregMultiSeries`.
 - [x] Multiple metrics in `grid_search_forecaster_multiseries` and `random_search_forecaster_multiseries`, `ForecasterAutoregMultiSeries`.
 - [x] Modeling multivariate time series, `ForecasterAutoregMultivariate`.
 - [x] Bug fixes and performance improvements.
-
-Try it:
-
-```bash
-pip install git+https://github.com/JoaquinAmatRodrigo/skforecast@0.6.x
-```
 
 Visit the [changelog](https://github.com/JoaquinAmatRodrigo/skforecast/blob/0.6.x/changelog.md) to view all notable changes.
 
