@@ -155,13 +155,15 @@ def _backtesting_forecaster_multiseries_refit(
 
     if type(forecaster).__name__ != 'ForecasterAutoregMultiVariate' and folds > 50:
         warnings.warn(
-            f"The forecaster will be fit {folds} times. This can take substantial amounts of time. "
-            f"If not feasible, try with `refit = False`. \n"
+            (f"The forecaster will be fit {folds} times. This can take substantial amounts of time. "
+             f"If not feasible, try with `refit = False`. \n"),
+            RuntimeWarning
         )
     elif type(forecaster).__name__ == 'ForecasterAutoregMultiVariate' and folds*forecaster.steps > 50:
         warnings.warn(
-            f"The forecaster will be fit {folds*forecaster.steps} times ({folds} folds * {forecaster.steps} regressors). "
-            f"This can take substantial amounts of time. If not feasible, try with `refit = False`. \n"
+            (f"The forecaster will be fit {folds*forecaster.steps} times ({folds} folds * {forecaster.steps} regressors). "
+             f"This can take substantial amounts of time. If not feasible, try with `refit = False`. \n"),
+             RuntimeWarning
         )
     
     if verbose:
@@ -1040,7 +1042,7 @@ def _evaluate_grid_hyperparameters_multiseries(
                                  interval           = None,
                                  verbose            = verbose
                              )[0]
-
+            warnings.filterwarnings('ignore', category=RuntimeWarning, message= "The forecaster will be fit.*")
             lags_list.append(lags)
             params_list.append(params)
             for m in metric:
