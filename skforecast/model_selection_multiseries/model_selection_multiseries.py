@@ -118,7 +118,7 @@ def _backtesting_forecaster_multiseries_refit(
 
     Returns 
     -------
-    metrics_levels : pandas DataFrame
+    metrics_levels : pd.DataFrame
         Value(s) of the metric(s). Index are the levels and columns the metrics.
 
     backtest_predictions : pandas Dataframe
@@ -155,13 +155,15 @@ def _backtesting_forecaster_multiseries_refit(
 
     if type(forecaster).__name__ != 'ForecasterAutoregMultiVariate' and folds > 50:
         warnings.warn(
-            f"The forecaster will be fit {folds} times. This can take substantial amounts of time. "
-            f"If not feasible, try with `refit = False`. \n"
+            (f"The forecaster will be fit {folds} times. This can take substantial amounts of time. "
+             f"If not feasible, try with `refit = False`. \n"),
+            RuntimeWarning
         )
     elif type(forecaster).__name__ == 'ForecasterAutoregMultiVariate' and folds*forecaster.steps > 50:
         warnings.warn(
-            f"The forecaster will be fit {folds*forecaster.steps} times ({folds} folds * {forecaster.steps} regressors). "
-            f"This can take substantial amounts of time. If not feasible, try with `refit = False`. \n"
+            (f"The forecaster will be fit {folds*forecaster.steps} times ({folds} folds * {forecaster.steps} regressors). "
+             f"This can take substantial amounts of time. If not feasible, try with `refit = False`. \n"),
+             RuntimeWarning
         )
     
     if verbose:
@@ -323,7 +325,7 @@ def _backtesting_forecaster_multiseries_no_refit(
 
     Returns 
     -------
-    metrics_levels : pandas DataFrame
+    metrics_levels : pd.DataFrame
         Value(s) of the metric(s). Index are the levels and columns the metrics.
 
     backtest_predictions : pandas DataFrame
@@ -534,7 +536,7 @@ def backtesting_forecaster_multiseries(
 
     Returns 
     -------
-    metrics_levels : pandas DataFrame
+    metrics_levels : pd.DataFrame
         Value(s) of the metric(s). Index are the levels and columns the metrics.
 
     backtest_predictions : pandas DataFrame
@@ -834,7 +836,7 @@ def random_search_forecaster_multiseries(
         Whether to re-fit the forecaster in each iteration of backtesting.
 
     n_iter : int, default `10`
-        Number of parameter settings that are sampled per lags configuration. 
+        Number of parameter settings that are sampled. 
         n_iter trades off runtime vs quality of the solution.
 
     random_state : int, default `123`
@@ -1040,7 +1042,7 @@ def _evaluate_grid_hyperparameters_multiseries(
                                  interval           = None,
                                  verbose            = verbose
                              )[0]
-
+            warnings.filterwarnings('ignore', category=RuntimeWarning, message= "The forecaster will be fit.*")
             lags_list.append(lags)
             params_list.append(params)
             for m in metric:
