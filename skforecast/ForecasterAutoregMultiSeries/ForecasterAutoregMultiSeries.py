@@ -69,9 +69,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         Function that defines the individual weights for each sample based on the
         index. For example, a function that assigns a lower weight to certain dates.
         If dict {'series_column_name' : callable} a different function can be
-        used for each series.
-        Ignored if `regressor` does not have the argument `sample_weight` in its `fit`
-        method. See Notes section for more details on the use of the weights.
+        used for each series, a weight of 1 is given to all series not present
+        in `weight_func`. Ignored if `regressor` does not have the argument 
+        `sample_weight` in its `fit` method. See Notes section for more details 
+        on the use of the weights.
         **New in version 0.6.0**
 
     series_weights : dict, default `None`
@@ -108,12 +109,13 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         forecaster. `inverse_transform` is not available when using ColumnTransformers.
 
     weight_func : callable, dict, default `None`
-        Function that defines the individual weights for each sample based on the
+        Function that defines the individual weights of each sample based on the
         index. For example, a function that assigns a lower weight to certain dates.
-        If dict {'series_column_name' : callable} a different function can be
-        used for each series.
-        Ignored if `regressor` does not have the argument `sample_weight` in its `fit`
-        method. See Notes section for more details on the use of the weights.
+        If dict {'series_column_name': callable} a different function can be
+        used for each series, a weight of 1 is given to all series not present
+        in `weight_func`. Ignored if `regressor` does not have the argument 
+        `sample_weight` in its `fit` method. See Notes section for more details 
+        on the use of the weights.
         **New in version 0.6.0**
 
     weight_func_ : dict
@@ -126,7 +128,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         **New in version 0.6.0**
 
     series_weights : dict, default `None`
-        Weights associated with each series {'series_column_name' : float}. It is only
+        Weights associated with each series {'series_column_name': float}. It is only
         applied if the `regressor` used accepts `sample_weight` in its `fit` method.
         If `series_weights` is provided, a weight of 1 is given to all series not present
         in `series_weights`. If `None`, all levels have the same weight. See Notes section
