@@ -357,12 +357,12 @@ class ForecasterSarimax():
                 self.regressor.arima_res_ = self.regressor.arima_res_.apply(
                                                 endog = last_window,
                                                 exog  = last_window_exog,
-                                                refit  = False
+                                                refit = False
                                             )
             else:
                 self.regressor.arima_res_ = self.regressor.arima_res_.apply(
                                                 endog = last_window,
-                                                refit  = False
+                                                refit = False
                                             )
             
             predictions = self.regressor.predict(

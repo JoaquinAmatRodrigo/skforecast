@@ -423,14 +423,14 @@ def _backtesting_sarimax_no_refit(
             pred = forecaster.predict(
                        steps            = steps,
                        last_window      = last_window_y,
-                       last_window_exog = last_window_y,
+                       last_window_exog = last_window_exog,
                        exog             = next_window_exog
                    )
         else:
             pred = forecaster.predict_interval(
                        steps            = steps,
                        last_window      = last_window_y,
-                       last_window_exog = last_window_y,
+                       last_window_exog = last_window_exog,
                        exog             = next_window_exog,
                        alpha            = alpha
                    )
