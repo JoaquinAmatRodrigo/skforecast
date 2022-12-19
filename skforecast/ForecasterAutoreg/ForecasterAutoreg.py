@@ -852,7 +852,6 @@ class ForecasterAutoreg(ForecasterBase):
                                 steps        =  steps,
                                 last_window  = last_window,
                                 exog         = exog,
-                                interval     = interval,
                                 n_boot       = n_boot,
                                 random_state = random_state,
                                 in_sample_residuals = in_sample_residuals
