@@ -466,15 +466,9 @@ class ForecasterAutoregCustom(ForecasterBase):
         sample_weight = self.create_sample_weights(X_train=X_train)
         
         if sample_weight is not None:
-            if not str(type(self.regressor)) == "<class 'xgboost.sklearn.XGBRegressor'>":
-                self.regressor.fit(X=X_train, y=y_train, sample_weight=sample_weight)
-            else:
-                self.regressor.fit(X=X_train.to_numpy(), y=y_train.to_numpy(), sample_weight=sample_weight)
+            self.regressor.fit(X=X_train, y=y_train, sample_weight=sample_weight)
         else:
-            if not str(type(self.regressor)) == "<class 'xgboost.sklearn.XGBRegressor'>":
-                self.regressor.fit(X=X_train, y=y_train)
-            else:
-                self.regressor.fit(X=X_train.to_numpy(), y=y_train.to_numpy())
+            self.regressor.fit(X=X_train, y=y_train)
         
         self.fitted = True
         self.fit_date = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
@@ -485,10 +479,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         else: 
             self.index_freq = X_train.index.step
 
-        if not str(type(self.regressor)) == "<class 'xgboost.sklearn.XGBRegressor'>":
-            residuals = y_train - self.regressor.predict(X_train)
-        else:
-            residuals = y_train - self.regressor.predict(X_train.to_numpy())
+        residuals = y_train - self.regressor.predict(X_train)
             
         residuals = pd.Series(
                         data  = residuals,
