@@ -548,15 +548,22 @@ def backtesting_forecaster_multiseries(
     
     """
 
+    if initial_train_size is not None and not isinstance(initial_train_size, (int, np.int64, np.int32)):
+        raise TypeError(
+            (f'If used, `initial_train_size` must be an integer greater than '
+             f'the window_size of the forecaster. Got {type(initial_train_size)}.')
+        )
+
     if initial_train_size is not None and initial_train_size >= len(series):
         raise ValueError(
-            'If used, `initial_train_size` must be smaller than length of `series`.'
+            (f'If used, `initial_train_size` must be an integer '
+             f'smaller than the length of `series` ({len(series)}).')
         )
         
     if initial_train_size is not None and initial_train_size < forecaster.window_size:
         raise ValueError(
-            f"`initial_train_size` must be greater than "
-            f"forecaster's window_size ({forecaster.window_size})."
+            (f'If used, `initial_train_size` must be an integer greater than '
+             f'the window_size of the forecaster ({forecaster.window_size}).')
         )
 
     if initial_train_size is None and not forecaster.fitted:
@@ -649,8 +656,7 @@ def grid_search_forecaster_multiseries(
     lags_grid: Optional[list]=None,
     refit: bool=False,
     return_best: bool=True,
-    verbose: bool=True,
-    levels_weights: Any='deprecated'
+    verbose: bool=True
 ) -> pd.DataFrame:
     """
     Exhaustive search over specified parameter values for a Forecaster object.
@@ -695,11 +701,6 @@ def grid_search_forecaster_multiseries(
         If `None`, all levels are taken into account. The resulting metric will be
         the average of the optimization of all levels.
 
-    levels_weights : dict, default `None`
-        Weights associated with levels in the form `{level: weight}`. 
-        If `None`, all levels have the same weight.
-        **Deprecated in version 0.6.0**
-
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
@@ -729,13 +730,6 @@ def grid_search_forecaster_multiseries(
             additional n columns with param = value.
     
     """
-
-    if levels_weights != 'deprecated':
-        warnings.warn(
-            ('`levels_weights` is deprecated since version 0.6.0, and '
-             'will be removed in version 0.7.0. Use `series_weights` when '
-             'creating the forecaster instead.')
-        )
 
     param_grid = list(ParameterGrid(param_grid))
 
@@ -773,8 +767,7 @@ def random_search_forecaster_multiseries(
     n_iter: int=10,
     random_state: int=123,
     return_best: bool=True,
-    verbose: bool=True,
-    levels_weights: Any='deprecated'
+    verbose: bool=True
 ) -> pd.DataFrame:
     """
     Random search over specified parameter values or distributions for a Forecaster object.
@@ -819,11 +812,6 @@ def random_search_forecaster_multiseries(
         If `None`, all levels are taken into account. The resulting metric will be
         the average of the optimization of all levels.
 
-    levels_weights : dict, default `None`
-        Weights associated with levels in the form `{level: weight}`. 
-        If `None`, all levels have the same weight.
-        **Deprecated in version 0.6.0**
-
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
@@ -860,13 +848,6 @@ def random_search_forecaster_multiseries(
             additional n columns with param = value.
     
     """
-
-    if levels_weights != 'deprecated':
-        warnings.warn(
-            ('`levels_weights` is deprecated since version 0.6.0, and '
-             'will be removed in version 0.7.0. Use `series_weights` when '
-             'creating the forecaster instead.')
-        )
 
     param_grid = list(ParameterSampler(param_distributions, n_iter=n_iter, random_state=random_state))
 
