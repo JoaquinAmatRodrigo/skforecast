@@ -6,7 +6,6 @@
 ################################################################################
 # coding=utf-8
 
-from multiprocessing.sharedctypes import Value
 from typing import Union, Dict, List, Tuple, Any, Optional
 import warnings
 import logging
@@ -158,7 +157,15 @@ class ForecasterAutoregDirect(ForecasterBase):
     fitted : Bool
         Tag to identify if the regressor has been fitted (trained).
 
-    creation_date: str
+    in_sample_residuals : dict
+        Residuals of the models when predicting training data. Only stored up to
+        1000 values per model (step).
+        
+    out_sample_residuals : dict
+        Residuals of the models when predicting non training data. Only stored
+        up to 1000 values per model (step). Use `set_out_sample_residuals` to set values.
+
+    creation_date : str
         Date of creation.
 
     fit_date : str
@@ -174,8 +181,7 @@ class ForecasterAutoregDirect(ForecasterBase):
     Notes
     -----
     A separate model is created for each forecast time step. It is important to
-    note that all models share the same configuration of parameters and
-    hyperparameters.
+    note that all models share the same configuration of parameters and hyperparameters.
      
     """
     
@@ -203,6 +209,8 @@ class ForecasterAutoregDirect(ForecasterBase):
         self.exog_type               = None
         self.exog_col_names          = None
         self.X_train_col_names       = None
+        self.in_sample_residuals     = {step: None for step in range(1, steps + 1)}
+        self.out_sample_residuals    = {step: None for step in range(1, steps + 1)}
         self.fitted                  = False
         self.creation_date           = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
         self.fit_date                = None
@@ -220,7 +228,7 @@ class ForecasterAutoregDirect(ForecasterBase):
                 f"`steps` argument must be greater than or equal to 1. Got {steps}."
             )
         
-        self.regressors_ = {step: clone(self.regressor) for step in range(steps)}
+        self.regressors_ = {step: clone(self.regressor) for step in range(1, steps + 1)}
 
         self.lags = initialize_lags(type(self).__name__, lags)
         self.max_lag = max(self.lags)
@@ -439,7 +447,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         Parameters
         ----------
         step : int
-            step for which columns must be selected selected. Starts at 1.
+            Step for which columns must be selected selected. Starts at 1.
 
         X_train : pandas DataFrame
             Pandas DataFrame with the training values (predictors).
@@ -555,10 +563,12 @@ class ForecasterAutoregDirect(ForecasterBase):
         self.exog_type            = None
         self.exog_col_names       = None
         self.X_train_col_names    = None
+        self.in_sample_residuals  = {step: None for step in range(1, self.steps + 1)}
         self.fitted               = False
         self.training_range       = None
 
         if exog is not None:
+            self.included_exog = True
             self.exog_type = type(exog)
             self.exog_col_names = \
                  exog.columns.to_list() if isinstance(exog, pd.DataFrame) else exog.name
@@ -566,33 +576,35 @@ class ForecasterAutoregDirect(ForecasterBase):
         X_train, y_train = self.create_train_X_y(y=y, exog=exog)
         
         # Train one regressor for each step 
-        for step in range(self.steps):
+        for step in range(1, self.steps + 1):
 
             X_train_step, y_train_step = self.filter_train_X_y_for_step(
-                                             step    = step + 1,
+                                             step    = step,
                                              X_train = X_train,
                                              y_train = y_train
                                          )
             sample_weight = self.create_sample_weights(X_train=X_train_step)
             if sample_weight is not None:
-                if not str(type(self.regressor)) == "<class 'xgboost.sklearn.XGBRegressor'>":
-                    self.regressors_[step].fit(
-                                            X = X_train_step,
-                                            y = y_train_step,
-                                            sample_weight = sample_weight
-                                          )
-                else:
-                    self.regressors_[step].fit(
-                                            X = X_train_step.to_numpy(),
-                                            y = y_train_step.to_numpy(),
-                                            sample_weight = sample_weight
-                                          )
+                self.regressors_[step].fit(
+                    X = X_train_step,
+                    y = y_train_step,
+                    sample_weight = sample_weight
+                )
             else:
-                if not str(type(self.regressor)) == "<class 'xgboost.sklearn.XGBRegressor'>":
-                    self.regressors_[step].fit(X=X_train_step, y=y_train_step)
-                else:
-                    self.regressors_[step].fit(X=X_train_step.to_numpy(), y=y_train_step.to_numpy())
-        
+                self.regressors_[step].fit(X=X_train_step, y=y_train_step)
+                
+            residuals = y_train_step - self.regressors_[step].predict(X_train_step)
+            residuals = pd.Series(
+                            data  = residuals,
+                            index = y_train.index,
+                            name  = 'in_sample_residuals'
+                        )
+            if len(residuals) > 1000:
+                # Only up to 1000 residuals are stored
+                residuals = residuals.sample(n=1000, random_state=123, replace=False)
+
+            self.in_sample_residuals[step] = residuals
+
         self.fitted = True
         self.fit_date = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
         self.training_range = preprocess_y(y=y)[1][[0, -1]]
@@ -720,7 +732,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         predictions = np.full(shape=len(steps), fill_value=np.nan)
 
         for i, step in enumerate(steps):
-            regressor = self.regressors_[step]
+            regressor = self.regressors_[step + 1]
             if exog is None:
                 X = X_lags
             else:
@@ -801,6 +813,98 @@ class ForecasterAutoregDirect(ForecasterBase):
         self.window_size = max(self.lags)
 
 
+    def set_out_sample_residuals(
+        self, 
+        residuals: dict, 
+        append: bool=True,
+        transform: bool=True,
+        random_state: int=123
+    )-> None:
+        """
+        Set new values to the attribute `out_sample_residuals`. Out of sample
+        residuals are meant to be calculated using observations that did not
+        participate in the training process.
+        
+        Parameters
+        ----------
+        residuals : dict
+            Dictionary of panda.Series with the resudials of each model (step).
+            If len(residuals) > 1000, only a random sample of 1000 values are stored.
+            
+        append : bool, default `True`
+            If `True`, new residuals are added to the once already stored in the
+            attribute `out_sample_residuals`. Once the limit of 1000 values is
+            reached, no more values are appended. If False, `out_sample_residuals`
+            is overwritten with the new residuals.
+
+        transform : bool, default `True`
+            If `True`, new residuals are transformed using self.transformer_y.
+
+        random_state : int, default `123`
+            Sets a seed to the random sampling for reproducible output.
+            
+        Returns 
+        -------
+        self
+
+        """
+
+        if not isinstance(residuals, dict):
+            raise TypeError(
+                f"`residuals` argument must be a dict of `pd.Series`. Got {type(residuals)}."
+            )
+
+        residuals = {key: value for key, value in residuals.items if key in self.out_sample_residuals.keys()}
+
+        if not transform and self.transformer_y is not None:
+            warnings.warn(
+                f'''
+                Argument `transform` is set to `False` but forecaster was trained
+                using a transformer {self.transformer_y}. Ensure that the new residuals 
+                are already transformed or set `transform=True`.
+                '''
+            )
+
+        if transform and self.transformer_y is not None:
+            warnings.warn(
+                f'''
+                Residuals will be transformed using the same transformer used 
+                when training the forecaster ({self.transformer_y}). Ensure that the
+                new residuals are on the same scale as the original time series.
+                '''
+            )
+
+            for key, value in residuals.items():
+                residuals[key] = transform_series(
+                                    series            = value,
+                                    transformer       = self.transformer_y,
+                                    fit               = False,
+                                    inverse_transform = False
+                                )
+           
+        for key, value in residuals.items():
+            if len(value) > 1000:
+                rng = np.random.default_rng(seed=random_state)
+                value = rng.choice(a=value, size=1000, replace=False)
+                value = pd.Series(value)
+                residuals[key] = value   
+    
+        for key, value in residuals.items():
+            if append and self.out_sample_residuals[key] is not None:
+                free_space = max(0, 1000 - len(self.out_sample_residuals[key]))
+                if len(value) < free_space:
+                    value = np.hstack((
+                                self.out_sample_residuals[key],
+                                value
+                            ))
+                else:
+                    value = np.hstack((
+                                self.out_sample_residuals[key],
+                                value[:free_space]
+                            ))
+            self.out_sample_residuals[key] = pd.Series(value)
+
+ 
     def get_feature_importance(
         self, 
         step: int
@@ -841,9 +945,6 @@ class ForecasterAutoregDirect(ForecasterBase):
                 f"The step must have a value from 1 to the maximum number of steps "
                 f"({self.steps}). Got {step}."
             )
-
-        # Stored regressors start at index 0
-        step = step - 1
 
         if isinstance(self.regressor, sklearn.pipeline.Pipeline):
             estimator = self.regressors_[step][-1]
