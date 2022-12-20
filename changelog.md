@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.7.0] - [Dev]
+
+**Added**
+
+**Changed**
+
++ Remove argument `levels_weights` in `grid_search_forecaster_multiseries` and `random_search_forecaster_multiseries`. Use `series_weights` and `weights_func` when creating the forecaster instead, (deprecated since 0.6.0).
+
+**Fixed**
+
+
 ## [0.6.0] - [2022-11-30]
 
 **Added**
@@ -48,7 +59,7 @@ All notable changes to this project will be documented in this file.
 
 + In `check_predict_input` function, argument `level` renamed to `levels` and `series_levels` renamed to `series_col_names`.
 
-+ In `backtesting_forecaster_multiseries` metrics_levels output is now a pandas DataFrame.
++ In `backtesting_forecaster_multiseries`, `metrics_levels` output is now a pandas DataFrame.
 
 + In `grid_search_forecaster_multiseries` and `random_search_forecaster_multiseries`, argument `levels_weights` is deprecated since version 0.6.0, and will be removed in version 0.7.0. Use `series_weights` and `weights_func` when creating the forecaster instead.
 
