@@ -46,9 +46,9 @@ def test_backtesting_forecaster_exception_when_initial_train_size_is_not_an_int_
     
     err_msg = re.escape(
             (f'If used, `initial_train_size` must be an integer greater than '
-             f'the window_size of the forecaster ({forecaster.window_size}).')
+             f'the window_size of the forecaster. Got {type(initial_train_size)}.')
         )
-    with pytest.raises(ValueError, match = err_msg):
+    with pytest.raises(TypeError, match = err_msg):
         backtesting_forecaster(
             forecaster          = forecaster,
             y                   = y,

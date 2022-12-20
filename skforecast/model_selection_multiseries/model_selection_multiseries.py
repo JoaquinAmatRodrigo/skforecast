@@ -548,22 +548,22 @@ def backtesting_forecaster_multiseries(
     
     """
 
-    if initial_train_size is not None and not isinstance(initial_train_size, int):
-        raise ValueError(
+    if initial_train_size is not None and not isinstance(initial_train_size, (int, np.int64, np.int32)):
+        raise TypeError(
             (f'If used, `initial_train_size` must be an integer greater than '
-             f'the window_size of the forecaster ({forecaster.window_size}).')
+             f'the window_size of the forecaster. Got {type(initial_train_size)}.')
         )
 
     if initial_train_size is not None and initial_train_size >= len(series):
         raise ValueError(
             (f'If used, `initial_train_size` must be an integer '
-             f'smaller than the length of `series`({len(series)}).')
+             f'smaller than the length of `series` ({len(series)}).')
         )
         
     if initial_train_size is not None and initial_train_size < forecaster.window_size:
         raise ValueError(
-            (f"If used, `initial_train_size` must be an integer greater than "
-             f"forecaster's window_size ({forecaster.window_size}).")
+            (f'If used, `initial_train_size` must be an integer greater than '
+             f'the window_size of the forecaster ({forecaster.window_size}).')
         )
 
     if initial_train_size is None and not forecaster.fitted:

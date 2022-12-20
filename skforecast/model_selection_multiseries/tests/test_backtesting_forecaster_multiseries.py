@@ -61,9 +61,9 @@ def test_backtesting_forecaster_multiseries_exception_when_initial_train_size_is
     
     err_msg = re.escape(
             (f'If used, `initial_train_size` must be an integer greater than '
-             f'the window_size of the forecaster ({forecaster.window_size}).')
+             f'the window_size of the forecaster. Got {type(initial_train_size)}.')
         )
-    with pytest.raises(ValueError, match = err_msg):
+    with pytest.raises(TypeError, match = err_msg):
         backtesting_forecaster_multiseries(
             forecaster          = forecaster,
             series              = series,
@@ -97,7 +97,7 @@ def test_backtesting_forecaster_multiseries_exception_when_initial_train_size_mo
     
     err_msg = re.escape(
             (f'If used, `initial_train_size` must be an integer '
-             f'smaller than the length of `series`({len(series)}).')
+             f'smaller than the length of `series` ({len(series)}).')
         )
     with pytest.raises(ValueError, match = err_msg):
         backtesting_forecaster_multiseries(

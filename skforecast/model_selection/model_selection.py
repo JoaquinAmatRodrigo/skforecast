@@ -720,10 +720,10 @@ def backtesting_forecaster(
     
     """
 
-    if initial_train_size is not None and not isinstance(initial_train_size, int):
-        raise ValueError(
+    if initial_train_size is not None and not isinstance(initial_train_size, (int, np.int64, np.int32)):
+        raise TypeError(
             (f'If used, `initial_train_size` must be an integer greater than '
-             f'the window_size of the forecaster ({forecaster.window_size}).')
+             f'the window_size of the forecaster. Got {type(initial_train_size)}.')
         )
 
     if initial_train_size is not None and initial_train_size >= len(y):
