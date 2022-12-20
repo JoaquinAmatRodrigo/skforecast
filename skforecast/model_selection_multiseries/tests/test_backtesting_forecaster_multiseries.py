@@ -47,18 +47,58 @@ series = pd.DataFrame({'l1': pd.Series(np.array(
 
 
 @pytest.mark.parametrize("initial_train_size", 
-                         [(len(series)), (len(series) + 1)], 
-                         ids = lambda value : f'len: {value}' )
-def test_backtesting_forecaster_multiseries_exception_when_initial_train_size_more_than_or_equal_to_len_series(initial_train_size):
+                         [20., 21.2, 'not_int'], 
+                         ids = lambda value : f'initial_train_size: {value}' )
+def test_backtesting_forecaster_multiseries_exception_when_initial_train_size_is_not_an_int_or_None(initial_train_size):
     """
-    Test Exception is raised in backtesting_forecaster_multiseries when initial_train_size >= len(series).
+    Test Exception is raised in backtesting_forecaster_multiseries when 
+    initial_train_size is not an integer or None.
     """
     forecaster = ForecasterAutoregMultiSeries(
                      regressor = Ridge(random_state=123),
                      lags      = 3
                  )
     
-    err_msg = re.escape('If used, `initial_train_size` must be smaller than length of `series`.')
+    err_msg = re.escape(
+            (f'If used, `initial_train_size` must be an integer greater than '
+             f'the window_size of the forecaster ({forecaster.window_size}).')
+        )
+    with pytest.raises(ValueError, match = err_msg):
+        backtesting_forecaster_multiseries(
+            forecaster          = forecaster,
+            series              = series,
+            steps               = 4,
+            levels              = 'l1',
+            metric              = 'mean_absolute_error',
+            initial_train_size  = initial_train_size,
+            refit               = False,
+            fixed_train_size    = False,
+            exog                = None,
+            interval            = None,
+            n_boot              = 500,
+            random_state        = 123,
+            in_sample_residuals = True,
+            verbose             = False
+        )
+
+
+@pytest.mark.parametrize("initial_train_size", 
+                         [(len(series)), (len(series) + 1)], 
+                         ids = lambda value : f'len: {value}' )
+def test_backtesting_forecaster_multiseries_exception_when_initial_train_size_more_than_or_equal_to_len_series(initial_train_size):
+    """
+    Test Exception is raised in backtesting_forecaster_multiseries when 
+    initial_train_size >= len(series).
+    """
+    forecaster = ForecasterAutoregMultiSeries(
+                     regressor = Ridge(random_state=123),
+                     lags      = 3
+                 )
+    
+    err_msg = re.escape(
+            (f'If used, `initial_train_size` must be an integer '
+             f'smaller than the length of `series`({len(series)}).')
+        )
     with pytest.raises(ValueError, match = err_msg):
         backtesting_forecaster_multiseries(
             forecaster          = forecaster,
@@ -80,7 +120,8 @@ def test_backtesting_forecaster_multiseries_exception_when_initial_train_size_mo
 
 def test_backtesting_forecaster_multiseries_exception_when_initial_train_size_less_than_forecaster_window_size():
     """
-    Test Exception is raised in backtesting_forecaster_multiseries when initial_train_size < forecaster.window_size.
+    Test Exception is raised in backtesting_forecaster_multiseries when 
+    initial_train_size < forecaster.window_size.
     """
     forecaster = ForecasterAutoregMultiSeries(
                      regressor = Ridge(random_state=123),
@@ -90,8 +131,8 @@ def test_backtesting_forecaster_multiseries_exception_when_initial_train_size_le
     initial_train_size = forecaster.window_size - 1
     
     err_msg = re.escape(
-            f"`initial_train_size` must be greater than "
-            f"forecaster's window_size ({forecaster.window_size})."
+            (f'If used, `initial_train_size` must be an integer greater than '
+             f'the window_size of the forecaster ({forecaster.window_size}).')
         )
     with pytest.raises(ValueError, match = err_msg):
         backtesting_forecaster_multiseries(
@@ -114,8 +155,8 @@ def test_backtesting_forecaster_multiseries_exception_when_initial_train_size_le
 
 def test_backtesting_forecaster_multiseries_exception_when_initial_train_size_None_and_forecaster_not_fitted():
     """
-    Test Exception is raised in backtesting_forecaster_multiseries when initial_train_size is None and
-    forecaster is not fitted.
+    Test Exception is raised in backtesting_forecaster_multiseries when initial_train_size 
+    is None and forecaster is not fitted.
     """
     forecaster = ForecasterAutoregMultiSeries(
                      regressor = Ridge(random_state=123),

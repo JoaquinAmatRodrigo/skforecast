@@ -31,14 +31,14 @@ def plot_residuals(
     """
     Parameters
     ----------
-    residuals: pandas series, numpy ndarray, default `None`.
+    residuals: pandas Series, numpy ndarray, default `None`.
         Values of residuals. If `None`, residuals are calculated internally using
         `y_true` and `y_true`.
 
-    y_true: pandas series, numpy ndarray, default `None`.
+    y_true: pandas Series, numpy ndarray, default `None`.
         Ground truth (correct) values. Ignored if residuals is not `None`.
 
-    y_pred: pandas series, numpy ndarray, default `None`. 
+    y_pred: pandas Series, numpy ndarray, default `None`. 
         Values of predictions. Ignored if residuals is not `None`.
         
     fig: matplotlib.figure.Figure, default `None`. 
@@ -89,22 +89,25 @@ def plot_multivariate_time_series_corr(
 
     Parameters
     ----------
-    corr : pd.DataFrame
+    corr : pandas DataFrame
         correlation matrix
+
     ax : matplotlib.axes.Axes, default `None`. 
         Pre-existing ax for the plot. Otherwise, call matplotlib.pyplot.subplots()
         internally.
+
     fig_kw : dict
         Other keyword arguments are passed to matplotlib.pyplot.subplots()
     
     Returns
     -------
-    None
+        None
+
     """
 
     if ax is None:
         fig, ax = plt.subplots(1, 1, **fig_kw)
-
+    
     sns.heatmap(
         corr,
         annot=True,
@@ -112,5 +115,6 @@ def plot_multivariate_time_series_corr(
         ax=ax,
         cmap=sns.color_palette("viridis", as_cmap=True)
     )
+
     ax.set_xlabel('Time series')
     fig.show()
