@@ -209,8 +209,6 @@ class ForecasterAutoregDirect(ForecasterBase):
         self.exog_type               = None
         self.exog_col_names          = None
         self.X_train_col_names       = None
-        self.in_sample_residuals     = {step: None for step in range(1, steps + 1)}
-        self.out_sample_residuals    = {step: None for step in range(1, steps + 1)}
         self.fitted                  = False
         self.creation_date           = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
         self.fit_date                = None
@@ -228,8 +226,9 @@ class ForecasterAutoregDirect(ForecasterBase):
                 f"`steps` argument must be greater than or equal to 1. Got {steps}."
             )
         
+        self.in_sample_residuals  = {step: None for step in range(1, steps + 1)}
+        self.out_sample_residuals = {step: None for step in range(1, steps + 1)}
         self.regressors_ = {step: clone(self.regressor) for step in range(1, steps + 1)}
-
         self.lags = initialize_lags(type(self).__name__, lags)
         self.max_lag = max(self.lags)
         self.window_size = self.max_lag
@@ -472,8 +471,7 @@ class ForecasterAutoregDirect(ForecasterBase):
                 f"and the maximum step is {self.steps}."
             )
 
-        step = step - 1 # To start at 0
-
+        step = step - 1 # Matrices X_train and y_train start at index 0.
         y_train_step = y_train.iloc[:, step]
 
         if not self.included_exog:
@@ -576,8 +574,9 @@ class ForecasterAutoregDirect(ForecasterBase):
         X_train, y_train = self.create_train_X_y(y=y, exog=exog)
         
         # Train one regressor for each step 
-        for step in range(1, self.steps + 1):
-
+        for step in range(self.steps):
+            step = step + 1 # self.regressors_ and self.filter_train_X_y_for_step expect
+                            # first step to start at value 1
             X_train_step, y_train_step = self.filter_train_X_y_for_step(
                                              step    = step,
                                              X_train = X_train,
@@ -659,12 +658,13 @@ class ForecasterAutoregDirect(ForecasterBase):
 
         """
 
+        # Internally steps are indexed starting at 0
         if isinstance(steps, int):
             steps = list(range(steps))
         elif steps is None:
             steps = list(range(self.steps))
         elif isinstance(steps, list):
-            steps = list(np.array(steps) - 1) # To start at 0 for indexing
+            steps = list(np.array(steps) - 1) 
 
         for step in steps:
             if not isinstance(step, (int, np.int64, np.int32)):
@@ -784,7 +784,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         
         self.regressor = clone(self.regressor)
         self.regressor.set_params(**params)
-        self.regressors_ = {step: clone(self.regressor) for step in range(self.steps)}
+        self.regressors_ = {step: clone(self.regressor) for step in range(1, self.steps + 1)}
 
 
     def set_lags(
@@ -828,7 +828,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         Parameters
         ----------
         residuals : dict
-            Dictionary of panda.Series with the resudials of each model (step).
+            Dictionary of panda.Series with the residuals of each model (step).
             If len(residuals) > 1000, only a random sample of 1000 values are stored.
             
         append : bool, default `True`
@@ -854,7 +854,16 @@ class ForecasterAutoregDirect(ForecasterBase):
                 f"`residuals` argument must be a dict of `pd.Series`. Got {type(residuals)}."
             )
 
-        residuals = {key: value for key, value in residuals.items if key in self.out_sample_residuals.keys()}
+        if not set(self.out_sample_residuals.keys()).issubset(set(residuals.keys())):
+            warnings.warn(
+                f'''
+                Only residuals of models 
+                {set(self.out_sample_residuals.keys()).intersection(set(residuals.keys()))} 
+                are updated.
+                '''
+            )
+
+        residuals = {key: value for key, value in residuals.items() if key in self.out_sample_residuals.keys()}
 
         if not transform and self.transformer_y is not None:
             warnings.warn(
@@ -954,11 +963,10 @@ class ForecasterAutoregDirect(ForecasterBase):
         idx_columns_lags = np.arange(len(self.lags))
         idx_columns_exog = np.array([], dtype=int)
         if self.included_exog:
-            idx_columns_exog = np.arange(len(self.X_train_col_names))[len(self.lags) + step::self.steps]
+            idx_columns_exog = np.arange(len(self.X_train_col_names))[len(self.lags) + step-1::self.steps]
         idx_columns = np.hstack((idx_columns_lags, idx_columns_exog))
         feature_names = [self.X_train_col_names[i] for i in idx_columns]
-        feature_names = [name.replace(f"_step_{step+1}", "") for name in feature_names]
-
+        feature_names = [name.replace(f"_step_{step}", "") for name in feature_names]
         try:
             feature_importance = pd.DataFrame({
                                      'feature': feature_names,
