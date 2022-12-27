@@ -323,9 +323,9 @@ class ForecasterSarimax():
         if last_window is None:
         # Predictions follow directly from the end of the training data
             predictions = self.regressor.predict(
-                          n_periods   = steps,
-                          X           = exog_values
-                      )
+                              n_periods = steps,
+                              X         = exog_values
+                          )
         else:
         # Predictions do not follow directly from the end of the training data. The
         # internal statsmodels SARIMAX model need to be updated using the apply method.
@@ -339,18 +339,18 @@ class ForecasterSarimax():
             if last_window_exog is not None:
                 if isinstance(last_window_exog, pd.DataFrame):
                     exog = transform_dataframe(
-                            df                = last_window_exog,
-                            transformer       = self.transformer_exog,
-                            fit               = False,
-                            inverse_transform = False
-                        )
+                               df                = last_window_exog,
+                               transformer       = self.transformer_exog,
+                               fit               = False,
+                               inverse_transform = False
+                           )
                 else:
                     exog = transform_series(
-                            series            = last_window_exog,
-                            transformer       = self.transformer_exog,
-                            fit               = False,
-                            inverse_transform = False
-                        )
+                               series            = last_window_exog,
+                               transformer       = self.transformer_exog,
+                               fit               = False,
+                               inverse_transform = False
+                           )
                     exog = exog.to_frame(name=exog.name)
 
             if self.included_exog:
@@ -366,9 +366,9 @@ class ForecasterSarimax():
                                             )
             
             predictions = self.regressor.predict(
-                            n_periods   = steps,
-                            X           = exog_values
-                        )
+                              n_periods   = steps,
+                              X           = exog_values
+                          )
 
         # Reverse the transformation if needed
         predictions = transform_series(
@@ -509,11 +509,11 @@ class ForecasterSarimax():
 
         for col in predictions.columns:
             predictions[col] = transform_series(
-                                    series            = predictions[col],
-                                    transformer       = self.transformer_y,
-                                    fit               = False,
-                                    inverse_transform = True
-                                )
+                                   series            = predictions[col],
+                                   transformer       = self.transformer_y,
+                                   fit               = False,
+                                   inverse_transform = True
+                               )
 
         return predictions
 
