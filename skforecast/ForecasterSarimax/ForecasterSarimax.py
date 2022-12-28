@@ -144,10 +144,12 @@ class ForecasterSarimax():
             )
 
         self.params = self.regressor.get_params(deep=True)
+        # =============== pending
         self.window_size = max([
                             self.params['order'][0], self.params['order'][2],
                             self.params['seasonal_order'][0], self.params['seasonal_order'][2]
                            ])
+        self.window_size = 0
 
 
     def __repr__(
@@ -319,7 +321,6 @@ class ForecasterSarimax():
         else:
             exog_values = None
 
-
         if last_window is None:
         # Predictions follow directly from the end of the training data
             predictions = self.regressor.predict(
@@ -330,11 +331,11 @@ class ForecasterSarimax():
         # Predictions do not follow directly from the end of the training data. The
         # internal statsmodels SARIMAX model need to be updated using the apply method.
             last_window = transform_series(
-                            series            = last_window,
-                            transformer       = self.transformer_y,
-                            fit               = False,
-                            inverse_transform = False
-                        )
+                              series            = last_window,
+                              transformer       = self.transformer_y,
+                              fit               = False,
+                              inverse_transform = False
+                          )
 
             if last_window_exog is not None:
                 if isinstance(last_window_exog, pd.DataFrame):
@@ -364,7 +365,7 @@ class ForecasterSarimax():
                                                 endog = last_window,
                                                 refit = False
                                             )
-            
+
             predictions = self.regressor.predict(
                               n_periods   = steps,
                               X           = exog_values
