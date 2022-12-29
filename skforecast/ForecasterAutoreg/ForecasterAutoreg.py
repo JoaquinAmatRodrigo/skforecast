@@ -725,6 +725,11 @@ class ForecasterAutoreg(ForecasterBase):
         rng = np.random.default_rng(seed=random_state)
         seeds = rng.integers(low=0, high=10000, size=n_boot)
 
+        if in_sample_residuals:
+            residuals = self.in_sample_residuals
+        else:
+            residuals = self.out_sample_residuals
+
         for i in range(n_boot):
             # In each bootstraping iteration the initial last_window and exog 
             # need to be restored.
@@ -733,11 +738,6 @@ class ForecasterAutoreg(ForecasterBase):
                 exog_boot = exog.copy()
             else:
                 exog_boot = None
- 
-            if in_sample_residuals:
-                residuals = self.in_sample_residuals
-            else:
-                residuals = self.out_sample_residuals
 
             rng = np.random.default_rng(seed=seeds[i])
             sample_residuals = rng.choice(
