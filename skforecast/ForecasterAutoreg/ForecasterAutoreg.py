@@ -672,8 +672,7 @@ class ForecasterAutoreg(ForecasterBase):
         in_sample_residuals: bool=True
     ) -> np.ndarray:
         """
-        Iterative process in which, each prediction, is used as a predictor
-        for the next step and bootstrapping is to generate multiple samples.
+        Bootstrapping process used to generate multiple forecasting samples.
         
         Parameters
         ----------   
