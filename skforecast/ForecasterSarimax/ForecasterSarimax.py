@@ -17,6 +17,10 @@ import pmdarima
 from pmdarima.arima import ARIMA
 
 import skforecast
+from ..utils import check_y
+from ..utils import check_exog
+from ..utils import check_predict_input
+from ..utils import expand_index
 from ..utils import transform_series
 from ..utils import transform_dataframe
 
@@ -42,7 +46,6 @@ class ForecasterSarimax():
         preprocessing API with methods: fit, transform, fit_transform and inverse_transform.
         ColumnTransformers are not allowed since they do not have inverse_transform method.
         The transformation is applied to `y` before training the forecaster. 
-        **New in version 0.5.0**
 
     transformer_exog : object transformer (preprocessor), default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
@@ -110,7 +113,6 @@ class ForecasterSarimax():
 
     python_version : str
         Version of python used to create the forecaster.
-        **New in version 0.5.0**
      
     """
     
@@ -144,12 +146,12 @@ class ForecasterSarimax():
             )
 
         self.params = self.regressor.get_params(deep=True)
-        # =============== pending
         self.window_size = max([
-                            self.params['order'][0], self.params['order'][2],
-                            self.params['seasonal_order'][0], self.params['seasonal_order'][2]
+                            self.params['order'][0] + self.params['order'][1], 
+                            self.params['order'][2] + self.params['order'][1],
+                            self.params['seasonal_order'][0] + self.params['seasonal_order'][1], 
+                            self.params['seasonal_order'][2] + self.params['seasonal_order'][1]
                            ])
-        self.window_size = 0
 
 
     def __repr__(
@@ -182,7 +184,7 @@ class ForecasterSarimax():
 
         return info
 
-        
+
     def fit(
         self,
         y: pd.Series,
@@ -206,7 +208,16 @@ class ForecasterSarimax():
         None
         
         """
-        
+
+        check_y(y=y)
+        if exog is not None:
+            if len(exog) != len(y):
+                raise ValueError(
+                    f'`exog` must have same number of samples as `y`. '
+                    f'length `exog`: ({len(exog)}), length `y`: ({len(y)})'
+                )
+            check_exog(exog=exog)
+
         # Reset values in case the forecaster has already been fitted.
         self.index_type           = None
         self.index_freq           = None
@@ -234,21 +245,15 @@ class ForecasterSarimax():
 
         if exog is not None:
             if isinstance(exog, pd.Series):
-                exog = transform_series(
-                            series            = exog,
-                            transformer       = self.transformer_exog,
-                            fit               = True,
-                            inverse_transform = False
-                       )
-                # pmdarima.arima.ARIMA only accepts DataFrames or 2d-arrays as exog       
+                # pmdarima.arima.ARIMA only accepts DataFrames or 2d-arrays as exog   
                 exog = exog.to_frame(name=exog.name)
-            else:
-                exog = transform_dataframe(
-                            df                = exog,
-                            transformer       = self.transformer_exog,
-                            fit               = True,
-                            inverse_transform = False
-                       )
+            
+            exog = transform_dataframe(
+                       df                = exog,
+                       transformer       = self.transformer_exog,
+                       fit               = True,
+                       inverse_transform = False
+                   )
 
         self.regressor.fit(y=y, X=exog)
         self.fitted = True
@@ -259,7 +264,7 @@ class ForecasterSarimax():
             self.index_freq = y.index.freqstr
         else: 
             self.index_freq = y.index.step
-        self.last_window = y.iloc[-self.window_size:].copy()
+        self.last_window = y.copy()
     
           
     def predict(
@@ -270,8 +275,11 @@ class ForecasterSarimax():
         exog: Optional[Union[pd.Series, pd.DataFrame]]=None
     ) -> pd.Series:
         """
-        Predict n steps ahead. It is a recursive process in which, each prediction,
-        is used as a predictor for the next step.
+        Forecast future values
+
+        Generate predictions (forecasts) n steps in the future. Note that if 
+        exogenous variables were used in the model fit, they will be expected 
+        for the predict procedure and will fail otherwise.
         
         Parameters
         ----------
@@ -280,14 +288,15 @@ class ForecasterSarimax():
             
         last_window : pandas Series, default `None`
             Values of the series used to create the predictors needed in the 
-            first iteration of prediction (t + 1). This is used when the predictions
-            do not follow directly from the end of the training data.
+            predictions. Used to make predictions unrelated to the original data. 
+            Values have to start at the end of the training data.
 
         last_window_exog : pandas Series, pandas DataFrame, default `None`
             Values of the exogenous variables aligned with `last_window`. Only
-            need when `last_window` is not None and the forecaster has been
-            trained including exogenous variables. This is used when the predictions
-            do not follow directly from the end of the training data.
+            needed when `last_window` is not None and the forecaster has been
+            trained including exogenous variables. Used to make predictions 
+            unrelated to the original data. Values have to start at the end 
+            of the training data.
             
         exog : pandas Series, pandas DataFrame, default `None`
             Value of the exogenous variable/s for the next steps.
@@ -299,37 +308,43 @@ class ForecasterSarimax():
             
         """
 
-        if exog is not None:
-            if isinstance(exog, pd.DataFrame):
-                exog = transform_dataframe(
-                           df                = exog,
-                           transformer       = self.transformer_exog,
-                           fit               = False,
-                           inverse_transform = False
-                       )
-            else:
-                exog = transform_series(
-                           series            = exog,
-                           transformer       = self.transformer_exog,
-                           fit               = False,
-                           inverse_transform = False
-                       )
-                # pmdarima.arima.ARIMA only accepts DataFrames or 2d-arrays as exog
-                exog = exog.to_frame(name=exog.name)
-            
-            exog_values = exog.iloc[:steps, ]
-        else:
-            exog_values = None
+        check_predict_input(
+            forecaster_type  = type(self).__name__,
+            steps            = steps,
+            fitted           = self.fitted,
+            included_exog    = self.included_exog,
+            index_type       = self.index_type,
+            index_freq       = self.index_freq,
+            window_size      = self.window_size,
+            last_window      = last_window,
+            last_window_exog = last_window_exog,
+            exog             = exog,
+            exog_type        = self.exog_type,
+            exog_col_names   = self.exog_col_names,
+            interval         = None,
+            alpha            = None,
+            max_steps        = None,
+            levels           = None,
+            series_col_names = None
+        )
 
-        if last_window is None:
-        # Predictions follow directly from the end of the training data
-            predictions = self.regressor.predict(
-                              n_periods = steps,
-                              X         = exog_values
-                          )
-        else:
-        # Predictions do not follow directly from the end of the training data. The
-        # internal statsmodels SARIMAX model need to be updated using the apply method.
+        if last_window is not None:
+            # If predictions do not follow directly from the end of the training 
+            # data. The internal statsmodels SARIMAX model needs to be updated 
+            # using the append method. The data needs to start at the end of the 
+            # training series.
+
+            # check index last_window
+            expected_index = expand_index(self.last_window.index, 1)[0]
+            if expected_index != last_window.index[0]:
+                raise ValueError(
+                    (f'To make predictions unrelated to the original data, `last_window` '
+                     f'has to start at the end of the training set.\n'
+                     f'    Series last index         : {self.last_window.index[-1]}.\n'
+                     f'    Expected index            : {expected_index}.\n'
+                     f'    `last_window` index start : {last_window.index[0]}.')
+                )
+
             last_window = transform_series(
                               series            = last_window,
                               transformer       = self.transformer_y,
@@ -337,39 +352,54 @@ class ForecasterSarimax():
                               inverse_transform = False
                           )
 
-            if last_window_exog is not None:
-                if isinstance(last_window_exog, pd.DataFrame):
-                    exog = transform_dataframe(
-                               df                = last_window_exog,
-                               transformer       = self.transformer_exog,
-                               fit               = False,
-                               inverse_transform = False
-                           )
-                else:
-                    exog = transform_series(
-                               series            = last_window_exog,
-                               transformer       = self.transformer_exog,
-                               fit               = False,
-                               inverse_transform = False
-                           )
-                    exog = exog.to_frame(name=exog.name)
+            if exog is not None:
 
-            if self.included_exog:
-                self.regressor.arima_res_ = self.regressor.arima_res_.apply(
-                                                endog = last_window,
-                                                exog  = last_window_exog,
-                                                refit = False
-                                            )
-            else:
-                self.regressor.arima_res_ = self.regressor.arima_res_.apply(
-                                                endog = last_window,
-                                                refit = False
-                                            )
+                # last_window_exog
+                # check index last_window_exog
+                if expected_index != last_window_exog.index[0]:
+                    raise ValueError(
+                        (f'To make predictions unrelated to the original data, `last_window_exog` '
+                         f'has to start at the end of the training set.\n'
+                         f'    Series last index              : {self.last_window.index[-1]}.\n'
+                         f'    Expected index                 : {expected_index}.\n'
+                         f'    `last_window_exog` index start : {last_window_exog.index[0]}.')
+                    )
 
-            predictions = self.regressor.predict(
-                              n_periods   = steps,
-                              X           = exog_values
-                          )
+                if isinstance(last_window_exog, pd.Series):
+                    # pmdarima.arima.ARIMA only accepts DataFrames or 2d-arrays as exog 
+                    last_window_exog = last_window_exog.to_frame(name=exog.name)
+            
+                last_window_exog = transform_series(
+                                        series            = last_window_exog,
+                                        transformer       = self.transformer_exog,
+                                        fit               = False,
+                                        inverse_transform = False
+                                    )
+
+            self.regressor.arima_res_ = self.regressor.arima_res_.append(
+                                            endog = last_window,
+                                            exog  = last_window_exog,
+                                            refit = False
+                                        )
+            
+            # Exog
+            if isinstance(exog, pd.Series):
+                # pmdarima.arima.ARIMA only accepts DataFrames or 2d-arrays as exog
+                exog = exog.to_frame(name=exog.name)
+
+            exog = transform_dataframe(
+                       df                = exog,
+                       transformer       = self.transformer_exog,
+                       fit               = False,
+                       inverse_transform = False
+                   )  
+            exog = exog.iloc[:steps, ]
+
+        # Get following n steps predictions
+        predictions = self.regressor.predict(
+                          n_periods = steps,
+                          X         = exog
+                      )
 
         # Reverse the transformation if needed
         predictions = transform_series(
@@ -390,10 +420,14 @@ class ForecasterSarimax():
         last_window_exog: Optional[pd.Series]=None,
         exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
         alpha: float=0.05,
+        interval: list=None,
     ) -> pd.DataFrame:
         """
-        Iterative process in which, each prediction, is used as a predictor
-        for the next step. Both, predictions and intervals, are returned.
+        Forecast future values and their confidence intervals
+
+        Generate predictions (forecasts) n steps in the future with confidence
+        intervals. Note that if exogenous variables were used in the model fit, 
+        they will be expected for the predict procedure and will fail otherwise.
         
         Parameters
         ---------- 
@@ -412,8 +446,16 @@ class ForecasterSarimax():
         exog : pandas Series, pandas DataFrame, default `None`
             Exogenous variable/s included as predictor/s.
             
-        alpha : float, default=0.05
-            The confidence intervals for the forecasts are (1 - alpha) %
+        alpha : float, default `0.05`
+            The confidence intervals for the forecasts are (1 - alpha) %.
+            If both, `alpha` and `interval` are provided, `alpha` will be used.
+            
+        interval : list, default `None`
+            Confidence of the prediction interval estimated. The values must be
+            symmetric. Sequence of percentiles to compute, which must be between 
+            0 and 100 inclusive. For example, interval of 95% should be as 
+            `interval = [2.5, 97.5]`. If both, `alpha` and `interval` are 
+            provided, `alpha` will be used.
 
         Returns 
         -------
@@ -425,7 +467,30 @@ class ForecasterSarimax():
             - upper_bound: upper bound interval of the interval.
 
         """
-        
+
+        check_predict_input(
+            forecaster_type  = type(self).__name__,
+            steps            = steps,
+            fitted           = self.fitted,
+            included_exog    = self.included_exog,
+            index_type       = self.index_type,
+            index_freq       = self.index_freq,
+            window_size      = self.window_size,
+            last_window      = last_window,
+            last_window_exog = last_window_exog,
+            exog             = exog,
+            exog_type        = self.exog_type,
+            exog_col_names   = self.exog_col_names,
+            interval         = interval,
+            alpha            = alpha,
+            max_steps        = None,
+            levels           = None,
+            series_col_names = None
+        )
+
+        # if interval and alpha take alpha ...
+
+
         if exog is not None:
             if isinstance(exog, pd.DataFrame):
                 exog = transform_dataframe(
