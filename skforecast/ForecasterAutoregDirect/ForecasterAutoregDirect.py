@@ -853,36 +853,44 @@ class ForecasterAutoregDirect(ForecasterBase):
                                    size    = n_boot,
                                    replace = True
                                )
-            print(sample_residuals)
-            print(boot_predictions)
             boot_predictions[:, i] = boot_predictions[:, i] + sample_residuals
-            print(boot_predictions)
         
         return boot_predictions
     
 
-    def predict_interval(
+    def _estimate_boot_interval(
         self,
         steps: int,
-        last_window: Optional[pd.Series]=None,
-        exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+        last_window: Optional[np.ndarray]=None,
+        exog: Optional[np.ndarray]=None,
         interval: list=[5, 95],
         n_boot: int=500,
         random_state: int=123,
         in_sample_residuals: bool=True
-    ) -> pd.DataFrame:
+    ) -> np.ndarray:
         """
         Iterative process in which, each prediction, is used as a predictor
         for the next step and bootstrapping is used to estimate prediction
-        intervals. Both, predictions and intervals, are returned.
+        intervals. This method only returns prediction intervals.
+        See predict_intervals() to calculate both, predictions and intervals.
         
         Parameters
-        ---------- 
-        steps : int
-            Number of future steps predicted.
-            
+        ----------   
+        steps : int, list, None, default `None`
+            Predict n steps. The value of `steps` must be less than or equal to the 
+            value of steps defined when initializing the forecaster. Starts at 1.
+        
+            If int:
+                Only steps within the range of 1 to int are predicted.
+        
+            If list:
+                List of ints. Only the steps contained in the list are predicted.
+
+            If `None`:
+                As many steps are predicted as were defined at initialization.
+
         last_window : pandas Series, default `None`
-            Values of the series used to create the predictors (lags) needed in the 
+            Values of the series used to create the predictors (lags) need in the 
             first iteration of prediction (t + 1).
     
             If `last_window = None`, the values stored in` self.last_window` are
@@ -892,18 +900,18 @@ class ForecasterAutoregDirect(ForecasterBase):
         exog : pandas Series, pandas DataFrame, default `None`
             Exogenous variable/s included as predictor/s.
             
-        interval : list, default `[5, 95]`
-            Confidence of the prediction interval estimated. Sequence of 
-            percentiles to compute, which must be between 0 and 100 inclusive. 
-            For example, interval of 95% should be as `interval = [2.5, 97.5]`.
-            
         n_boot : int, default `500`
             Number of bootstrapping iterations used to estimate prediction
             intervals.
 
-        random_state : int, default 123
+        random_state : int
             Sets a seed to the random generator, so that boot intervals are always 
             deterministic.
+            
+        interval : list, default `[5, 95]`
+            Confidence of the prediction interval estimated. Sequence of 
+            percentiles to compute, which must be between 0 and 100 inclusive. 
+            For example, interval of 95% should be as `interval = [2.5, 97.5]`.
             
         in_sample_residuals : bool, default `True`
             If `True`, residuals from the training data are used as proxy of
@@ -911,32 +919,31 @@ class ForecasterAutoregDirect(ForecasterBase):
             sample residuals are used. In the latter case, the user should have
             calculated and stored the residuals within the forecaster (see
             `set_out_sample_residuals()`).
+            
 
         Returns 
         -------
-        predictions : pandas DataFrame
-            Values predicted by the forecaster and their estimated interval:
-
-            - pred: predictions.
+        prediction_interval : numpy ndarray, shape (steps, 2)
+            Interval estimated for each prediction by bootstrapping:
+            
             - lower_bound: lower bound of the interval.
             - upper_bound: upper bound interval of the interval.
-
-        Notes
-        -----
-        More information about prediction intervals in forecasting:
-        https://otexts.com/fpp2/prediction-intervals.html
-        Forecasting: Principles and Practice (2nd ed) Rob J Hyndman and
-        George Athanasopoulos.
-            
         """
         
-        if not in_sample_residuals and self.out_sample_residuals is None:
-            raise ValueError(
-                ('`forecaster.out_sample_residuals` is `None`. Use '
-                 '`in_sample_residuals=True` or method `set_out_sample_residuals()` '
-                 'before `predict_interval()`.')
-            )
-            
+        boot_predictions = self._boot_sampling(
+                                steps        =  steps,
+                                last_window  = last_window,
+                                exog         = exog,
+                                n_boot       = n_boot,
+                                random_state = random_state,
+                                in_sample_residuals = in_sample_residuals
+                           )
+                            
+        prediction_interval = np.percentile(boot_predictions, q=interval, axis=0)
+        prediction_interval = prediction_interval.transpose()
+        
+        return prediction_interval
+
     
     def set_params(
         self, 
