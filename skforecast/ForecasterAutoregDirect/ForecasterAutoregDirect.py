@@ -15,6 +15,7 @@ import pandas as pd
 import sklearn
 import sklearn.pipeline
 from sklearn.base import clone
+import inspect
 
 import skforecast
 from ..ForecasterBase import ForecasterBase
@@ -765,7 +766,7 @@ class ForecasterAutoregDirect(ForecasterBase):
     def _boot_sampling(
         self,
         steps: int,
-        last_window: Optional[np.ndarray]=None,
+        last_window: Optional[pd.Series]=None,
         exog: Optional[np.ndarray]=None,
         n_boot: int=500,
         random_state: int=123,
@@ -837,7 +838,7 @@ class ForecasterAutoregDirect(ForecasterBase):
                         last_window = last_window,
                         exog        = exog 
                       )
-        boot_predictions = np.tile(predictions, n_boot).reshape(-1, steps)
+        boot_predictions = np.tile(predictions.to_numpy(), n_boot).reshape(-1, steps)
         
         if isinstance(steps, int):
             steps = list(np.arange(steps) + 1)
@@ -861,7 +862,7 @@ class ForecasterAutoregDirect(ForecasterBase):
     def _estimate_boot_interval(
         self,
         steps: int,
-        last_window: Optional[np.ndarray]=None,
+        last_window: Optional[pd.Series]=None,
         exog: Optional[np.ndarray]=None,
         interval: list=[5, 95],
         n_boot: int=500,
@@ -869,10 +870,8 @@ class ForecasterAutoregDirect(ForecasterBase):
         in_sample_residuals: bool=True
     ) -> np.ndarray:
         """
-        Iterative process in which, each prediction, is used as a predictor
-        for the next step and bootstrapping is used to estimate prediction
-        intervals. This method only returns prediction intervals.
-        See predict_intervals() to calculate both, predictions and intervals.
+        Bootstrapping based prediction intervals. This method only returns prediction
+        intervals, see predict_intervals() to calculate both, predictions and intervals.
         
         Parameters
         ----------   
@@ -926,8 +925,8 @@ class ForecasterAutoregDirect(ForecasterBase):
         prediction_interval : numpy ndarray, shape (steps, 2)
             Interval estimated for each prediction by bootstrapping:
             
-            - lower_bound: lower bound of the interval.
-            - upper_bound: upper bound interval of the interval.
+            - first column: lower bound of the interval.
+            - second column: upper bound interval of the interval.
         """
         
         boot_predictions = self._boot_sampling(
@@ -943,6 +942,303 @@ class ForecasterAutoregDirect(ForecasterBase):
         prediction_interval = prediction_interval.transpose()
         
         return prediction_interval
+
+    
+    def predict_interval(
+        self,
+        steps: int,
+        last_window: Optional[pd.Series]=None,
+        exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+        interval: list=[5, 95],
+        n_boot: int=500,
+        random_state: int=123,
+        in_sample_residuals: bool=True
+    ) -> pd.DataFrame:
+        """
+        Bootstrapping based prediction intervals.
+        Both, predictions and intervals, are returned.
+        
+        Parameters
+        ---------- 
+        steps : int, list, None, default `None`
+            Predict n steps. The value of `steps` must be less than or equal to the 
+            value of steps defined when initializing the forecaster. Starts at 1.
+        
+            If int:
+                Only steps within the range of 1 to int are predicted.
+        
+            If list:
+                List of ints. Only the steps contained in the list are predicted.
+
+            If `None`:
+                As many steps are predicted as were defined at initialization.
+
+        last_window : pandas Series, default `None`
+            Values of the series used to create the predictors (lags) need in the 
+            first iteration of prediction (t + 1).
+    
+            If `last_window = None`, the values stored in` self.last_window` are
+            used to calculate the initial predictors, and the predictions start
+            right after training data.
+            
+        exog : pandas Series, pandas DataFrame, default `None`
+            Exogenous variable/s included as predictor/s.
+            
+        interval : list, default `[5, 95]`
+            Confidence of the prediction interval estimated. Sequence of 
+            percentiles to compute, which must be between 0 and 100 inclusive. 
+            For example, interval of 95% should be as `interval = [2.5, 97.5]`.
+            
+        n_boot : int, default `500`
+            Number of bootstrapping iterations used to estimate prediction
+            intervals.
+
+        random_state : int, default 123
+            Sets a seed to the random generator, so that boot intervals are always 
+            deterministic.
+            
+        in_sample_residuals : bool, default `True`
+            If `True`, residuals from the training data are used as proxy of
+            prediction error to create prediction intervals. If `False`, out of
+            sample residuals are used. In the latter case, the user should have
+            calculated and stored the residuals within the forecaster (see
+            `set_out_sample_residuals()`).
+
+        Returns 
+        -------
+        predictions : pandas DataFrame
+            Values predicted by the forecaster and their estimated interval:
+
+            - pred: predictions.
+            - lower_bound: lower bound of the interval.
+            - upper_bound: upper bound interval of the interval.
+            
+        """
+        
+        if not in_sample_residuals and self.out_sample_residuals is None:
+            raise ValueError(
+                ('`forecaster.out_sample_residuals` is `None`. Use '
+                 '`in_sample_residuals=True` or method `set_out_sample_residuals()` '
+                 'before `predict_interval()`.')
+            )
+
+        check_predict_input(
+            forecaster_type   = type(self).__name__,
+            steps             = steps,
+            fitted            = self.fitted,
+            included_exog     = self.included_exog,
+            index_type        = self.index_type,
+            index_freq        = self.index_freq,
+            window_size       = self.window_size,
+            last_window       = last_window,
+            exog              = exog,
+            exog_type         = self.exog_type,
+            exog_col_names    = self.exog_col_names,
+            interval          = interval,
+            max_steps         = None,
+            levels            = None,
+            series_col_names  = None
+        ) 
+
+        if exog is not None:
+            if isinstance(exog, pd.DataFrame):
+                exog = transform_dataframe(
+                           df                = exog,
+                           transformer       = self.transformer_exog,
+                           fit               = False,
+                           inverse_transform = False
+                       )
+            else:
+                exog = transform_series(
+                           series            = exog,
+                           transformer       = self.transformer_exog,
+                           fit               = False,
+                           inverse_transform = False
+                       )
+        
+        if last_window is None:
+            last_window = self.last_window.copy()
+        
+        last_window = transform_series(
+                          series            = last_window,
+                          transformer       = self.transformer_y,
+                          fit               = False,
+                          inverse_transform = False
+                      )
+        _, last_window_index = preprocess_last_window(last_window = last_window)
+
+        predictions = self.predict(
+                          steps       = steps,
+                          last_window = last_window,
+                          exog        = exog
+                      )
+
+        predictions_interval = self._estimate_boot_interval(
+                                   steps               = steps,
+                                   last_window         = last_window,
+                                   exog                = exog,
+                                   interval            = interval,
+                                   n_boot              = n_boot,
+                                   random_state        = random_state,
+                                   in_sample_residuals = in_sample_residuals
+                               )
+        
+        predictions = np.column_stack((predictions, predictions_interval))
+
+        predictions = pd.DataFrame(
+                          data = predictions,
+                          index = expand_index(
+                                      index = last_window_index,
+                                      steps = steps
+                                  ),
+                          columns = ['pred', 'lower_bound', 'upper_bound']
+                      )
+                      
+        if self.transformer_y:
+            for col in predictions.columns:
+                predictions[col] = self.transformer_y.inverse_transform(predictions[[col]])
+
+        return predictions
+    
+
+    def predict_dist(
+        self,
+        steps: int,
+        distribution: object,
+        last_window: Optional[pd.Series]=None,
+        exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+        n_boot: int=500,
+        random_state: int=123,
+        in_sample_residuals: bool=True
+    ) -> pd.DataFrame:
+        """
+        Estimate distribution ................
+        
+        Parameters
+        ---------- 
+        steps : int
+            Number of future steps predicted.
+
+        distribution : Object
+            A distribution object from scipy.stats.
+            
+        last_window : pandas Series, default `None`
+            Values of the series used to create the predictors (lags) needed in the 
+            first iteration of prediction (t + 1).
+    
+            If `last_window = None`, the values stored in` self.last_window` are
+            used to calculate the initial predictors, and the predictions start
+            right after training data.
+            
+        exog : pandas Series, pandas DataFrame, default `None`
+            Exogenous variable/s included as predictor/s.
+            
+        n_boot : int, default `500`
+            Number of bootstrapping iterations used to estimate prediction
+            intervals.
+
+        random_state : int, default 123
+            Sets a seed to the random generator, so that boot intervals are always 
+            deterministic.
+            
+        in_sample_residuals : bool, default `True`
+            If `True`, residuals from the training data are used as proxy of
+            prediction error to create prediction intervals. If `False`, out of
+            sample residuals are used. In the latter case, the user should have
+            calculated and stored the residuals within the forecaster (see
+            `set_out_sample_residuals()`).
+
+        Returns 
+        -------
+        predictions : pandas DataFrame
+            Distribution parameters estimated for each step.
+
+        """
+        
+        if not in_sample_residuals and self.out_sample_residuals is None:
+            raise ValueError(
+                ('`forecaster.out_sample_residuals` is `None`. Use '
+                 '`in_sample_residuals=True` or method `set_out_sample_residuals()` '
+                 'before `predict_interval()`.')
+            )
+
+        check_predict_input(
+            forecaster_type   = type(self).__name__,
+            steps             = steps,
+            fitted            = self.fitted,
+            included_exog     = self.included_exog,
+            index_type        = self.index_type,
+            index_freq        = self.index_freq,
+            window_size       = self.window_size,
+            last_window       = last_window,
+            exog              = exog,
+            exog_type         = self.exog_type,
+            exog_col_names    = self.exog_col_names,
+            interval          = None,
+            max_steps         = None,
+            levels            = None,
+            series_col_names  = None
+        ) 
+
+        if exog is not None:
+            if isinstance(exog, pd.DataFrame):
+                exog = transform_dataframe(
+                           df                = exog,
+                           transformer       = self.transformer_exog,
+                           fit               = False,
+                           inverse_transform = False
+                       )
+            else:
+                exog = transform_series(
+                           series            = exog,
+                           transformer       = self.transformer_exog,
+                           fit               = False,
+                           inverse_transform = False
+                       )
+            
+            exog_values, _ = preprocess_exog(
+                                 exog = exog.iloc[:steps, ]
+                             )
+        else:
+            exog_values = None
+        
+        if last_window is None:
+            last_window = self.last_window.copy()
+        
+        last_window = transform_series(
+                          series            = last_window,
+                          transformer       = self.transformer_y,
+                          fit               = False,
+                          inverse_transform = False
+                      )
+        _, last_window_index = preprocess_last_window(last_window = last_window)
+
+        boot_samples = self._boot_sampling(
+                            steps               =  steps,
+                            last_window         = last_window,
+                            exog                = exog,
+                            n_boot              = n_boot,
+                            random_state        = random_state,
+                            in_sample_residuals = in_sample_residuals
+                        )
+
+        if self.transformer_y:
+            boot_samples = self.transformer_y.inverse_transform(boot_samples)           
+
+        param_names = [p for p in inspect.signature(distribution._pdf).parameters if not p=='x'] + ["loc","scale"]
+        param_values = np.apply_along_axis(lambda x: distribution.fit(x), axis=0, arr=boot_samples)
+        predictions = pd.DataFrame(
+                        data    = param_values.transpose(),
+                        columns = param_names,
+                        index   = expand_index(
+                                    index = last_window_index,
+                                    steps = steps
+                                    )
+                      )
+
+        return predictions
+
+
 
     
     def set_params(
