@@ -825,8 +825,8 @@ class ForecasterAutoreg(ForecasterBase):
         prediction_interval : numpy ndarray, shape (steps, 2)
             Interval estimated for each prediction by bootstrapping:
             
-            - lower_bound: lower bound of the interval.
-            - upper_bound: upper bound interval of the interval.
+            - first column: lower bound of the interval.
+            - second column: upper bound interval of the interval.
 
         Notes
         -----
@@ -1085,20 +1085,20 @@ class ForecasterAutoreg(ForecasterBase):
             )
 
         check_predict_input(
-            forecaster_type = type(self).__name__,
-            steps           = steps,
-            fitted          = self.fitted,
-            included_exog   = self.included_exog,
-            index_type      = self.index_type,
-            index_freq      = self.index_freq,
-            window_size     = self.window_size,
-            last_window     = last_window,
-            exog            = exog,
-            exog_type       = self.exog_type,
-            exog_col_names  = self.exog_col_names,
-            interval        = None,
-            max_steps       = None,
-            levels          = None,
+            forecaster_type   = type(self).__name__,
+            steps             = steps,
+            fitted            = self.fitted,
+            included_exog     = self.included_exog,
+            index_type        = self.index_type,
+            index_freq        = self.index_freq,
+            window_size       = self.window_size,
+            last_window       = last_window,
+            exog              = exog,
+            exog_type         = self.exog_type,
+            exog_col_names    = self.exog_col_names,
+            interval          = None,
+            max_steps         = None,
+            levels            = None,
             series_col_names  = None
         ) 
         
