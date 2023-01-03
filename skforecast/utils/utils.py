@@ -792,12 +792,12 @@ def transform_series(
     series = series.to_frame()
 
     if fit and not isinstance(transformer, FunctionTransformer):
-        transformer.fit(series)
+        transformer.fit(series.values)
 
     if inverse_transform:
-        values_transformed = transformer.inverse_transform(series)
+        values_transformed = transformer.inverse_transform(series.values)
     else:
-        values_transformed = transformer.transform(series)   
+        values_transformed = transformer.transform(series.values)   
 
     if hasattr(values_transformed, 'toarray'):
         # If the returned values are in sparse matrix format, it is converted to dense array.
