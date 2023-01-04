@@ -381,18 +381,18 @@ def check_predict_input(
             f'`steps` must be an integer greater than or equal to 1. Got {steps}.'
         )
 
-    if isinstance(steps, list) and min(steps) < 0:
+    if isinstance(steps, list) and min(steps) < 1:
         raise ValueError(
            (f"The minimum value of `steps` must be equal to or greater than 1. "
-            f"Got {min(steps) + 1}.")
+            f"Got {min(steps)}.")
         )
 
     if max_steps is not None:
-        if max(steps)+1 > max_steps:
+        if max(steps) > max_steps:
             raise ValueError(
                 (f"The maximum value of `steps` must be less than or equal to "
                  f"the value of steps defined when initializing the forecaster. "
-                 f"Got {max(steps)+1}, but the maximum is {max_steps}.")
+                 f"Got {max(steps)}, but the maximum is {max_steps}.")
             )
 
     if interval is not None or alpha is not None:
@@ -422,7 +422,7 @@ def check_predict_input(
     
     if exog is not None:
         # Check exog has many values as distance to max step predicted
-        last_step = max(steps)+1 if isinstance(steps, list) else steps
+        last_step = max(steps) if isinstance(steps, list) else steps
         if len(exog) < last_step:
             raise ValueError(
                 f'`exog` must have at least as many values as the distance to '

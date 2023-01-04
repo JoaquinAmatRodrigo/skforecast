@@ -1,4 +1,4 @@
-# Unit test check_input_predict
+# Unit test check_predict_input
 # ==============================================================================
 import re
 import pytest
@@ -11,7 +11,7 @@ from skforecast.utils import preprocess_exog
 from skforecast.utils import preprocess_last_window
 
 
-def test_check_input_predict_exception_when_fitted_is_False():
+def test_check_predict_input_exception_when_fitted_is_False():
     """
     Test exception is raised when fitted is False.
     """
@@ -40,7 +40,7 @@ def test_check_input_predict_exception_when_fitted_is_False():
         )
         
         
-def test_check_input_predict_exception_when_steps_int_lower_than_1():
+def test_check_predict_input_exception_when_steps_int_lower_than_1():
     """
     Test exception is raised when steps is a value lower than 1.
     """
@@ -68,7 +68,7 @@ def test_check_input_predict_exception_when_steps_int_lower_than_1():
         )
         
         
-def test_check_input_predict_exception_when_steps_list_lower_than_0():
+def test_check_predict_input_exception_when_steps_list_lower_than_0():
     """
     Test exception is raised when steps is a list with a value lower than 0. 
     (`ForecasterAutoregDirect` and `ForecasterAutoregMultiVariate`).
@@ -100,7 +100,7 @@ def test_check_input_predict_exception_when_steps_list_lower_than_0():
         )
 
 
-def test_check_input_predict_exception_when_max_steps_greater_than_max_steps():
+def test_check_predict_input_exception_when_max_steps_greater_than_max_steps():
     """
     Test exception is raised when max(steps) > max_steps. (`ForecasterAutoregDirect` 
     and `ForecasterAutoregMultiVariate`).
@@ -134,7 +134,7 @@ def test_check_input_predict_exception_when_max_steps_greater_than_max_steps():
         )
 
 
-def test_check_input_predict_exception_when_ForecasterAutoregMultiSeries_and_level_not_str_list_or_None():
+def test_check_predict_input_exception_when_ForecasterAutoregMultiSeries_and_level_not_str_list_or_None():
     """
     Test exception is raised when `levels` is not a str, a list or None.
     """
@@ -166,7 +166,7 @@ def test_check_input_predict_exception_when_ForecasterAutoregMultiSeries_and_lev
                          [('1'       , ['2', '3']), 
                           (['1']     , ['2', '3']), 
                           (['1', '2'], ['2', '3'])])
-def test_check_input_predict_exception_when_ForecasterAutoregMultiSeries_and_level_not_in_series_col_names(levels, series_col_names):
+def test_check_predict_input_exception_when_ForecasterAutoregMultiSeries_and_level_not_in_series_col_names(levels, series_col_names):
     """
     Test exception is raised when `levels` is not in `self.series_col_names` in a 
     ForecasterAutoregMultiSeries.
@@ -193,7 +193,7 @@ def test_check_input_predict_exception_when_ForecasterAutoregMultiSeries_and_lev
         )
 
 
-def test_check_input_predict_exception_when_exog_is_none_and_included_exog_is_true():
+def test_check_predict_input_exception_when_exog_is_none_and_included_exog_is_true():
     """
     """
     err_msg = re.escape(
@@ -221,7 +221,7 @@ def test_check_input_predict_exception_when_exog_is_none_and_included_exog_is_tr
         )
 
 
-def test_check_input_predict_exception_when_exog_is_not_none_and_included_exog_is_false():
+def test_check_predict_input_exception_when_exog_is_not_none_and_included_exog_is_false():
     """
     """
     err_msg = re.escape(
@@ -251,7 +251,7 @@ def test_check_input_predict_exception_when_exog_is_not_none_and_included_exog_i
 
 @pytest.mark.parametrize("steps", [10, [1, 2, 3, 4, 5, 6], [2, 6]], 
                          ids=lambda steps: f'steps: {steps}')
-def test_check_input_predict_exception_when_len_exog_is_less_than_steps(steps):
+def test_check_predict_input_exception_when_len_exog_is_less_than_steps(steps):
     """
     """
     last_step = max(steps)+1 if isinstance(steps, list) else steps
@@ -280,7 +280,7 @@ def test_check_input_predict_exception_when_len_exog_is_less_than_steps(steps):
         )
 
 
-def test_check_input_predict_exception_when_exog_is_not_pandas_series_or_dataframe():
+def test_check_predict_input_exception_when_exog_is_not_pandas_series_or_dataframe():
     """
     """
     err_msg = re.escape('`exog` must be a pandas Series or DataFrame.')
@@ -305,7 +305,7 @@ def test_check_input_predict_exception_when_exog_is_not_pandas_series_or_datafra
         )
 
 
-def test_check_input_predict_exception_when_exog_has_missing_values():
+def test_check_predict_input_exception_when_exog_has_missing_values():
     """
     """
     err_msg = re.escape('`exog` has missing values.')
@@ -330,7 +330,7 @@ def test_check_input_predict_exception_when_exog_has_missing_values():
         )
 
 
-def test_check_input_predict_exception_when_exog_is_not_of_exog_type():
+def test_check_predict_input_exception_when_exog_is_not_of_exog_type():
     """
     """
     exog = pd.Series(np.arange(10))
@@ -358,7 +358,7 @@ def test_check_input_predict_exception_when_exog_is_not_of_exog_type():
         )
 
 
-def test_check_input_predict_exception_when_exog_is_dataframe_without_columns_in_exog_col_names():
+def test_check_predict_input_exception_when_exog_is_dataframe_without_columns_in_exog_col_names():
     """
     """
     exog = pd.DataFrame(np.arange(10).reshape(5, 2), columns=['col1', 'col2'])
@@ -389,7 +389,7 @@ def test_check_input_predict_exception_when_exog_is_dataframe_without_columns_in
         )
 
 
-def test_check_input_predict_exception_when_exog_index_is_not_of_index_type():
+def test_check_predict_input_exception_when_exog_index_is_not_of_index_type():
     """
     """
     exog = pd.Series(np.arange(10))
@@ -422,7 +422,7 @@ def test_check_input_predict_exception_when_exog_index_is_not_of_index_type():
         )
 
 
-def test_check_input_predict_exception_when_exog_index_frequency_is_not_index_freq():
+def test_check_predict_input_exception_when_exog_index_frequency_is_not_index_freq():
     """
     """
     exog = pd.Series(np.arange(10), index=pd.date_range(start='1/1/2018', periods=10))
@@ -459,7 +459,7 @@ def test_check_input_predict_exception_when_exog_index_frequency_is_not_index_fr
                          ['ForecasterAutoregMultiSeries',
                           'ForecasterAutoregMultiVariate'], 
                          ids=lambda ft: f'forecaster_type: {ft}')
-def test_check_input_predict_exception_when_last_window_is_not_pandas_dataframe(forecaster_type):
+def test_check_predict_input_exception_when_last_window_is_not_pandas_dataframe(forecaster_type):
     """
     `ForecasterAutoregMultiSeries` and `ForecasterAutoregMultiVariate`.
     """
@@ -486,7 +486,7 @@ def test_check_input_predict_exception_when_last_window_is_not_pandas_dataframe(
         )
 
 
-def test_check_input_predict_exception_when_last_window_is_not_pandas_series():
+def test_check_predict_input_exception_when_last_window_is_not_pandas_series():
     """
     """
     last_window = np.arange(5)
@@ -518,7 +518,7 @@ def test_check_input_predict_exception_when_last_window_is_not_pandas_series():
                           (['1', '2'], pd.DataFrame({'3': [1, 2, 3], '4': [1, 2, 3]}))], 
                          ids = lambda values : f'levels: {values}'
                         )
-def test_check_input_predict_exception_when_levels_not_in_last_window_ForecasterAutoregMultiSeries(levels, last_window):
+def test_check_predict_input_exception_when_levels_not_in_last_window_ForecasterAutoregMultiSeries(levels, last_window):
     """
     """
     err_msg = re.escape(
@@ -547,7 +547,7 @@ def test_check_input_predict_exception_when_levels_not_in_last_window_Forecaster
         )
 
 
-def test_check_input_predict_exception_when_series_col_names_not_last_window_ForecasterAutoregMultiVariate():
+def test_check_predict_input_exception_when_series_col_names_not_last_window_ForecasterAutoregMultiVariate():
     """
     Check exception is raised when column names of series using during fit do not
     match with last_window column names.
@@ -580,7 +580,7 @@ def test_check_input_predict_exception_when_series_col_names_not_last_window_For
         )
 
 
-def test_check_input_predict_exception_when_length_last_window_is_lower_than_window_size():
+def test_check_predict_input_exception_when_length_last_window_is_lower_than_window_size():
     """
     """
     window_size = 10
@@ -610,7 +610,7 @@ def test_check_input_predict_exception_when_length_last_window_is_lower_than_win
         )
 
 
-def test_check_input_predict_exception_when_last_window_has_missing_values():
+def test_check_predict_input_exception_when_last_window_has_missing_values():
     """
     """
     err_msg = re.escape('`last_window` has missing values.')
@@ -635,7 +635,7 @@ def test_check_input_predict_exception_when_last_window_has_missing_values():
         )
 
 
-def test_check_input_predict_exception_when_last_window_index_is_not_of_index_type():
+def test_check_predict_input_exception_when_last_window_index_is_not_of_index_type():
     """
     """
     last_window = pd.Series(np.arange(10))
@@ -669,7 +669,7 @@ def test_check_input_predict_exception_when_last_window_index_is_not_of_index_ty
         )
 
 
-def test_check_input_predict_exception_when_last_window_index_frequency_is_not_index_freq():
+def test_check_predict_input_exception_when_last_window_index_frequency_is_not_index_freq():
     """
     """
     last_window = pd.Series(np.arange(10), index=pd.date_range(start='1/1/2018', periods=10))
