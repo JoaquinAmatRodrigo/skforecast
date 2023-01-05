@@ -29,6 +29,7 @@ from ..utils import preprocess_exog
 from ..utils import exog_to_direct
 from ..utils import expand_index
 from ..utils import check_predict_input
+from ..utils import check_interval
 from ..utils import transform_series
 from ..utils import transform_dataframe
 
@@ -665,11 +666,11 @@ class ForecasterAutoregDirect(ForecasterBase):
 
         # Internally steps are indexed starting at 0
         if isinstance(steps, int):
-            steps = list(range(steps))
+            steps = list(np.arange(steps) + 1)
         elif steps is None:
-            steps = list(range(self.steps))
+            steps = list(np.arange(self.steps) + 1)
         elif isinstance(steps, list):
-            steps = list(np.array(steps) - 1) 
+            steps = list(np.array(steps))
 
         for step in steps:
             if not isinstance(step, (int, np.int64, np.int32)):
@@ -713,9 +714,9 @@ class ForecasterAutoregDirect(ForecasterBase):
                        )
             
             exog_values, _ = preprocess_exog(
-                                 exog = exog.iloc[:max(steps)+1, ]
+                                 exog = exog.iloc[:max(steps), ]
                              )
-            exog_values = exog_to_direct(exog=exog_values, steps=max(steps)+1)
+            exog_values = exog_to_direct(exog=exog_values, steps=max(steps))
         else:
             exog_values = None
 
@@ -737,23 +738,23 @@ class ForecasterAutoregDirect(ForecasterBase):
         predictions = np.full(shape=len(steps), fill_value=np.nan)
 
         for i, step in enumerate(steps):
-            regressor = self.regressors_[step + 1]
+            regressor = self.regressors_[step]
             if exog is None:
                 X = X_lags
             else:
                 # Only columns from exog related with the current step are selected.
-                X = np.hstack([X_lags, exog_values[0][step::max(steps)+1].reshape(1, -1)])
+                X = np.hstack([X_lags, exog_values[0][step-1::max(steps)].reshape(1, -1)])
             with warnings.catch_warnings():
                 # Suppress scikit-learn warning: "X does not have valid feature names,
                 # but NoOpTransformer was fitted with feature names".
                 warnings.simplefilter("ignore")
                 predictions[i] = regressor.predict(X)
 
-        idx = expand_index(index=last_window_index, steps=max(steps)+1)
+        idx = expand_index(index=last_window_index, steps=max(steps))
 
         predictions = pd.Series(
                           data  = predictions.reshape(-1),
-                          index = idx[steps],
+                          index = idx[np.array(steps)-1],
                           name = 'pred'
                       )
 
@@ -767,11 +768,11 @@ class ForecasterAutoregDirect(ForecasterBase):
         return predictions
 
 
-    def boot_sampling(
+    def predict_bootstrapping(
         self,
         steps: int,
         last_window: Optional[pd.Series]=None,
-        exog: Optional[np.ndarray]=None,
+        exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
         n_boot: int=500,
         random_state: int=123,
         in_sample_residuals: bool=True
@@ -832,7 +833,7 @@ class ForecasterAutoregDirect(ForecasterBase):
             raise ValueError(
                 ('`forecaster.out_sample_residuals` is `None`. Use '
                  '`in_sample_residuals=True` or method `set_out_sample_residuals()` '
-                 'before `boot_sampling()`.')
+                 'before `predict_bootstrapping()`.')
             )
         
         if in_sample_residuals:
@@ -874,7 +875,7 @@ class ForecasterAutoregDirect(ForecasterBase):
 
         for col in boot_predictions.columns:
             boot_predictions[col] = transform_series(
-                                        series            =  boot_predictions[col],
+                                        series            = boot_predictions[col],
                                         transformer       = self.transformer_y,
                                         fit               = False,
                                         inverse_transform = True
@@ -954,25 +955,26 @@ class ForecasterAutoregDirect(ForecasterBase):
             
         """
 
+        check_interval(interval=interval)
+
         predictions = self.predict(
                           steps       = steps,
                           last_window = last_window,
                           exog        = exog
                       )
 
-        boot_predictions = self.boot_sampling(
-                                steps        =  steps,
-                                last_window  = last_window,
-                                exog         = exog,
-                                n_boot       = n_boot,
-                                random_state = random_state,
+        boot_predictions = self.predict_bootstrapping(
+                                steps               = steps,
+                                last_window         = last_window,
+                                exog                = exog,
+                                n_boot              = n_boot,
+                                random_state        = random_state,
                                 in_sample_residuals = in_sample_residuals
                            )
 
         interval = np.array(interval)/100
         predictions_interval = boot_predictions.quantile(q=interval, axis=1).transpose()
         predictions_interval.columns = ['lower_bound', 'upper_bound']
-        
         predictions = pd.concat((predictions, predictions_interval), axis=1)
 
         return predictions
@@ -1032,7 +1034,7 @@ class ForecasterAutoregDirect(ForecasterBase):
 
         """
         
-        boot_samples = self.boot_sampling(
+        boot_samples = self.predict_bootstrapping(
                             steps               =  steps,
                             last_window         = last_window,
                             exog                = exog,
