@@ -88,7 +88,6 @@ def test_predict_output_when_regressor_is_LinearRegression_with_transform_y_and_
     pd.testing.assert_series_equal(predictions, expected)
 
 
-
 def test_predict_output_when_regressor_is_LinearRegression_and_weight_func():
     """
     Test predict output when using LinearRegression as regressor.
@@ -111,5 +110,3 @@ def test_predict_output_when_regressor_is_LinearRegression_and_weight_func():
                )
     
     pd.testing.assert_series_equal(predictions, expected)
-
-    

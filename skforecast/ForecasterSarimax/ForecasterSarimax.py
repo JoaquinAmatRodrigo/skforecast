@@ -12,9 +12,10 @@ import logging
 import sys
 import numpy as np
 import pandas as pd
-from sklearn.base import clone
 import pmdarima
 from pmdarima.arima import ARIMA
+from sklearn.base import clone
+from sklearn.exceptions import NotFittedError
 
 import skforecast
 from ..utils import check_y
@@ -254,7 +255,7 @@ class ForecasterSarimax():
                        fit               = True,
                        inverse_transform = False
                    )
-
+        
         self.regressor.fit(y=y, X=exog)
         self.fitted = True
         self.fit_date = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
@@ -345,12 +346,16 @@ class ForecasterSarimax():
                      f'    `last_window` index start : {last_window.index[0]}.')
                 )
 
+            print(last_window.head())
+
             last_window = transform_series(
                               series            = last_window,
                               transformer       = self.transformer_y,
                               fit               = False,
                               inverse_transform = False
                           )
+
+            print(last_window.head())
 
             # last_window_exog
             if last_window_exog is not None:
@@ -369,11 +374,11 @@ class ForecasterSarimax():
                     last_window_exog = last_window_exog.to_frame(name=exog.name)
             
                 last_window_exog = transform_dataframe(
-                                        df                = last_window_exog,
-                                        transformer       = self.transformer_exog,
-                                        fit               = False,
-                                        inverse_transform = False
-                                    )
+                                       df                = last_window_exog,
+                                       transformer       = self.transformer_exog,
+                                       fit               = False,
+                                       inverse_transform = False
+                                   )
 
             self.regressor.arima_res_ = self.regressor.arima_res_.append(
                                             endog = last_window,
@@ -382,17 +387,18 @@ class ForecasterSarimax():
                                         )
             
         # Exog
-        if isinstance(exog, pd.Series):
-            # pmdarima.arima.ARIMA only accepts DataFrames or 2d-arrays as exog
-            exog = exog.to_frame(name=exog.name)
+        if exog is not None:
+            if isinstance(exog, pd.Series):
+                # pmdarima.arima.ARIMA only accepts DataFrames or 2d-arrays as exog
+                exog = exog.to_frame(name=exog.name)
 
-        exog = transform_dataframe(
-                   df                = exog,
-                   transformer       = self.transformer_exog,
-                   fit               = False,
-                   inverse_transform = False
-               )  
-        exog = exog.iloc[:steps, ]
+            exog = transform_dataframe(
+                       df                = exog,
+                       transformer       = self.transformer_exog,
+                       fit               = False,
+                       inverse_transform = False
+                   )  
+            exog = exog.iloc[:steps, ]
 
         # Get following n steps predictions
         predictions = self.regressor.predict(
@@ -495,7 +501,7 @@ class ForecasterSarimax():
                      f'For example, interval of 95% should be as `interval = [2.5, 97.5]`. '
                      f'Got {interval}.')
                 )
-            alpha = (100 - interval[1])/100
+            alpha = 2*(100 - interval[1])/100
 
         if last_window is not None:
             # If predictions do not follow directly from the end of the training 
@@ -551,17 +557,18 @@ class ForecasterSarimax():
                                         )
 
         # Exog
-        if isinstance(exog, pd.Series):
-            # pmdarima.arima.ARIMA only accepts DataFrames or 2d-arrays as exog
-            exog = exog.to_frame(name=exog.name)
+        if exog is not None:
+            if isinstance(exog, pd.Series):
+                # pmdarima.arima.ARIMA only accepts DataFrames or 2d-arrays as exog
+                exog = exog.to_frame(name=exog.name)
 
-        exog = transform_dataframe(
-                   df                = exog,
-                   transformer       = self.transformer_exog,
-                   fit               = False,
-                   inverse_transform = False
-               )  
-        exog = exog.iloc[:steps, ]
+            exog = transform_dataframe(
+                       df                = exog,
+                       transformer       = self.transformer_exog,
+                       fit               = False,
+                       inverse_transform = False
+                   )  
+            exog = exog.iloc[:steps, ]
 
         # Get following n steps predictions with intervals
         predicted_mean, conf_int = self.regressor.predict(
@@ -576,12 +583,13 @@ class ForecasterSarimax():
         predictions['upper_bound'] = conf_int[:, 1]
 
         # Reverse the transformation if needed
-        for col in predictions.columns:
-            predictions[col] = transform_series(
-                                   series            = predictions[col],
-                                   transformer       = self.transformer_y,
-                                   fit               = False,
-                                   inverse_transform = True
+        if self.transformer_y:
+            for col in predictions.columns:
+                predictions[col] = transform_series(
+                                    series            = predictions[col],
+                                    transformer       = self.transformer_y,
+                                    fit               = False,
+                                    inverse_transform = True
                                )
 
         return predictions
@@ -627,13 +635,13 @@ class ForecasterSarimax():
 
         """
 
-        try:
-            feature_importance = self.regressor.params().to_frame().reset_index()
-            feature_importance.columns = ['feature', 'importance']
-        except:   
-            warnings.warn(
-                f"Impossible to access feature importance for regressor of type {type(self.regressor)}."
+        if self.fitted == False:
+            raise NotFittedError(
+                ("This forecaster is not fitted yet. Call `fit` with appropriate "
+                 "arguments before using `get_feature_importance()`.")
             )
-            feature_importance = None
+
+        feature_importance = self.regressor.params().to_frame().reset_index()
+        feature_importance.columns = ['feature', 'importance']
 
         return feature_importance

@@ -34,10 +34,10 @@ def test_check_regressor_is_pmdarima_ARIMA_when_initialization():
     assert forecaster.params == expected_params
 
 
-@pytest.mark.parametrize("order     , window_size", 
-                         [((1,4,1)  , 5), 
-                          ((1,4,3)  , 7), 
-                          ((1,1,1)  , 4)], 
+@pytest.mark.parametrize("order   , window_size", 
+                         [((1,4,1), 5), 
+                          ((1,4,3), 7), 
+                          ((1,1,1), 4)], 
                          ids = lambda values : f'order: {values}'
                         )
 def test_check_input_predict_exception_when_len_exog_is_less_than_steps(order, window_size):
