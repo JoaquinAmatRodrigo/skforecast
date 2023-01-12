@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+
+## [0.7.0] - [dev]
+
+**Added**
+
++ Method `predict_dist()` to `ForecasterAutoreg`, `ForecasterAutoregDirect` and `ForecasterAutoregCustom`.
+
++ Method `predict_interval()` to `ForecasterAutoregDirect`.
+
+  
+**Changed**
+
+
+**Fixed**
+
+
 ## [0.6.0] - [2022-11-30]
 
 **Added**
