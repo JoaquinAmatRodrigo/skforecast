@@ -4,7 +4,7 @@ import pytest
 import re
 import numpy as np
 import pandas as pd
-from skforecast.utils.utils import check_interval
+from skforecast.utils.utils import _check_interval
 
 
 def test_check_interval_typeerror_when_interval_is_not_a_list():
@@ -16,7 +16,7 @@ def test_check_interval_typeerror_when_interval_is_not_a_list():
                  'should be as `interval = [2.5, 97.5]`.')
               )
     with pytest.raises(TypeError, match = err_msg):
-        check_interval(interval = 'not_a_list')
+        _check_interval(interval = 'not_a_list')
 
 
 def test_check_interval_valueerror_when_interval_len_is_not_2():
@@ -29,7 +29,7 @@ def test_check_interval_valueerror_when_interval_len_is_not_2():
                  'should be as `interval = [2.5, 97.5]`.')
               )
     with pytest.raises(ValueError, match = err_msg):
-        check_interval(interval = [2.5, 50.0, 97.5])
+        _check_interval(interval = [2.5, 50.0, 97.5])
 
 
 def test_check_interval_valueerror_when_lower_bound_less_than_0():
@@ -40,7 +40,7 @@ def test_check_interval_valueerror_when_lower_bound_less_than_0():
                 ('Lower interval bound (-1.0) must be >= 0 and < 100.')
               )
     with pytest.raises(ValueError, match = err_msg):
-        check_interval(interval = [-1.0, 97.5])
+        _check_interval(interval = [-1.0, 97.5])
 
 
 def test_check_interval_valueerror_when_lower_bound_greater_than_or_equal_to_100():
@@ -51,12 +51,12 @@ def test_check_interval_valueerror_when_lower_bound_greater_than_or_equal_to_100
                 ('Lower interval bound (100.0) must be >= 0 and < 100.')
               )
     with pytest.raises(ValueError, match = err_msg):
-        check_interval(interval = [100.0, 97.5])
+        _check_interval(interval = [100.0, 97.5])
     err_msg = re.escape(
                 ('Lower interval bound (101.0) must be >= 0 and < 100.')
               )
     with pytest.raises(ValueError, match = err_msg):
-        check_interval(interval = [101.0, 97.5])
+        _check_interval(interval = [101.0, 97.5])
 
 
 def test_check_interval_valueerror_when_upper_bound_less_than_or_equal_to_0():
@@ -67,12 +67,12 @@ def test_check_interval_valueerror_when_upper_bound_less_than_or_equal_to_0():
                 ('Upper interval bound (0.0) must be > 0 and <= 100.')
               )
     with pytest.raises(ValueError, match = err_msg):
-        check_interval(interval = [2.5, 0.0])
+        _check_interval(interval = [2.5, 0.0])
     err_msg = re.escape(
                 ('Upper interval bound (-1.0) must be > 0 and <= 100.')
               )
     with pytest.raises(ValueError, match = err_msg):
-        check_interval(interval = [2.5, -1.0])
+        _check_interval(interval = [2.5, -1.0])
 
 
 def test_check_interval_valueerror_when_upper_bound_greater_than_100():
@@ -83,7 +83,7 @@ def test_check_interval_valueerror_when_upper_bound_greater_than_100():
                 ('Upper interval bound (101.0) must be > 0 and <= 100.')
               )
     with pytest.raises(ValueError, match = err_msg):
-        check_interval(interval = [2.5, 101.0])
+        _check_interval(interval = [2.5, 101.0])
 
 
 def test_check_interval_valueerror_when_lower_bound_greater_than_or_equal_to_upper_bound():
@@ -96,10 +96,10 @@ def test_check_interval_valueerror_when_lower_bound_greater_than_or_equal_to_upp
                  'upper interval bound (2.5).')
               )
     with pytest.raises(ValueError, match = err_msg):
-        check_interval(interval = [2.5, 2.5])
+        _check_interval(interval = [2.5, 2.5])
     err_msg = re.escape(
                 ('Lower interval bound (2.5) must be less than the '
                  'upper interval bound (2.0).')
               )
     with pytest.raises(ValueError, match = err_msg):
-        check_interval(interval = [2.5, 2.0])
+        _check_interval(interval = [2.5, 2.0])
