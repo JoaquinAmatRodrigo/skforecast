@@ -14,130 +14,17 @@ import warnings
 import logging
 from copy import deepcopy
 from tqdm import tqdm
-from sklearn.metrics import mean_squared_error 
-from sklearn.metrics import mean_absolute_error
-from sklearn.metrics import mean_absolute_percentage_error
-from sklearn.metrics import mean_squared_log_error
 from sklearn.model_selection import ParameterGrid
 from sklearn.model_selection import ParameterSampler
 from sklearn.exceptions import NotFittedError
-import optuna
-from optuna.samplers import TPESampler, RandomSampler
-optuna.logging.set_verbosity(optuna.logging.WARNING) # disable optuna logs
-from skopt.utils import use_named_args
-from skopt import gp_minimize
+
+from ..model_selection.model_selection import _get_metric
+from ..model_selection.model_selection import _backtesting_forecaster_verbose
 
 logging.basicConfig(
     format = '%(name)-10s %(levelname)-5s %(message)s', 
     level  = logging.INFO,
 )
-
-
-        
-def _get_metric(metric:str) -> callable:
-    """
-    Get the corresponding scikit-learn function to calculate the metric.
-    
-    Parameters
-    ----------
-    metric : {'mean_squared_error', 'mean_absolute_error', 
-              'mean_absolute_percentage_error', 'mean_squared_log_error'}
-        Metric used to quantify the goodness of fit of the model.
-    
-    Returns 
-    -------
-    metric : callable
-        scikit-learn function to calculate the desired metric.
-    
-    """
-    
-    if metric not in ['mean_squared_error', 'mean_absolute_error',
-                      'mean_absolute_percentage_error', 'mean_squared_log_error']:
-        raise ValueError(
-            f"Allowed metrics are: 'mean_squared_error', 'mean_absolute_error', "
-            f"'mean_absolute_percentage_error' and 'mean_squared_log_error'. Got {metric}."
-        )
-    
-    metrics = {
-        'mean_squared_error': mean_squared_error,
-        'mean_absolute_error': mean_absolute_error,
-        'mean_absolute_percentage_error': mean_absolute_percentage_error,
-        'mean_squared_log_error': mean_squared_log_error
-    }
-    
-    metric = metrics[metric]
-    
-    return metric
-
-
-def _backtesting_sarimax_verbose(
-    index_values: pd.Index,
-    steps: int,
-    initial_train_size: int,
-    folds: int,
-    remainder: int,
-    refit: bool=False,
-    fixed_train_size: bool=True
-) -> None:
-    """
-    Verbose for backtesting_sarimax functions.
-    
-    Parameters
-    ----------        
-    index_values : pandas Index
-        Values of the index of the series.
-    
-    steps : int
-        Number of steps to predict.
-
-    initial_train_size : int
-        Number of samples in the initial train split. The backtest forecaster is
-        trained using the first `initial_train_size` observations.
-        
-    folds : int
-        Number of backtesting stages.
-
-    remainder : int
-        Number of observations in the last backtesting stage. 
-
-    refit : bool, default `False`
-        Whether to re-fit the forecaster in each iteration.
-
-    fixed_train_size : bool, default `True`
-        If True, train size doesn't increase but moves by `steps` in each iteration.
-    
-    """
-
-    print(f"Information of backtesting process")
-    print(f"----------------------------------")
-    print(f"Number of observations used for initial training: {initial_train_size}")
-    print(f"Number of observations used for backtesting: {len(index_values) - initial_train_size}")
-    print(f"    Number of folds: {folds}")
-    print(f"    Number of steps per fold: {steps}")
-    if remainder != 0:
-        print(f"    Last fold only includes {remainder} observations.")
-    print("")
-    for i in range(folds):
-        if refit:
-            # if fixed_train_size the train size doesn't increase but moves by `steps` in each iteration.
-            # if false the train size increases by `steps` in each iteration.
-            train_idx_start = i * steps if fixed_train_size else 0
-            train_idx_end = initial_train_size + i * steps
-        else:
-            # The train size doesn't increase and doesn't move
-            train_idx_start = 0
-            train_idx_end = initial_train_size
-        last_window_end = initial_train_size + i * steps
-        print(f"Data partition in fold: {i}")
-        if i < folds - 1:
-            print(f"    Training:   {index_values[train_idx_start]} -- {index_values[train_idx_end - 1]}  (n={len(index_values[train_idx_start:train_idx_end])})")
-            print(f"    Validation: {index_values[last_window_end]} -- {index_values[last_window_end + steps - 1]}  (n={len(index_values[last_window_end:last_window_end + steps])})")
-        else:
-            print(f"    Training:   {index_values[train_idx_start]} -- {index_values[train_idx_end - 1]}  (n={len(index_values[train_idx_start:train_idx_end])})")
-            print(f"    Validation: {index_values[last_window_end]} -- {index_values[-1]}  (n={len(index_values[last_window_end:])})")
-    print("")
-
-    return
 
 
 def _backtesting_sarimax_refit(
@@ -149,6 +36,7 @@ def _backtesting_sarimax_refit(
     fixed_train_size: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     alpha: Optional[float]=None,
+    interval: Optional[list]=None,
     verbose: bool=False
 ) -> Tuple[Union[float, list], pd.DataFrame]:
     """
@@ -161,7 +49,7 @@ def _backtesting_sarimax_refit(
         - The training set increases with `steps` observations.
         - The model is re-fitted using the new training set.
 
-    In order to apply backtesting with re-fit, an initial training set must be
+    In order to apply backtesting with refit, an initial training set must be
     available, otherwise it would not be possible to increase the training set 
     after each iteration. `initial_train_size` must be provided.
     
@@ -200,9 +88,17 @@ def _backtesting_sarimax_refit(
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
-
-    alpha : float, default=None
-            The confidence intervals for the forecasts are (1 - alpha) %
+            
+    alpha : float, default `0.05`
+        The confidence intervals for the forecasts are (1 - alpha) %.
+        If both, `alpha` and `interval` are provided, `alpha` will be used.
+        
+    interval : list, default `None`
+        Confidence of the prediction interval estimated. The values must be
+        symmetric. Sequence of percentiles to compute, which must be between 
+        0 and 100 inclusive. For example, interval of 95% should be as 
+        `interval = [2.5, 97.5]`. If both, `alpha` and `interval` are 
+        provided, `alpha` will be used.
             
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used for backtesting.
@@ -234,14 +130,15 @@ def _backtesting_sarimax_refit(
     folds = int(np.ceil((len(y) - initial_train_size) / steps))
     remainder = (len(y) - initial_train_size) % steps
     
-    if type(forecaster).__name__ != 'ForecasterAutoregDirect' and folds > 50:
+    if folds > 50:
         warnings.warn(
-            f"The forecaster will be fit {folds} times. This can take substantial amounts of time. "
-            f"If not feasible, try with `refit = False`. \n"
+            (f"The forecaster will be fit {folds} times. This can take substantial amounts of time. "
+             f"If not feasible, try with `refit = False`. \n"),
+            RuntimeWarning
         )
     
     if verbose:
-        _backtesting_sarimax_verbose(
+        _backtesting_forecaster_verbose(
             index_values       = y.index,
             steps              = steps,
             initial_train_size = initial_train_size,
@@ -267,13 +164,14 @@ def _backtesting_sarimax_refit(
             # If remainder > 0, only the remaining steps need to be predicted
             steps = steps if remainder == 0 else remainder
 
-        if alpha is None:
+        if alpha is None and interval is None:
             pred = forecaster.predict(steps=steps, exog=next_window_exog)
         else:
             pred = forecaster.predict_interval(
-                       steps               = steps,
-                       exog                = next_window_exog,
-                       alpha               = alpha
+                       steps    = steps,
+                       alpha    = alpha,
+                       interval = interval,
+                       exog     = next_window_exog,
                    )
             
         backtest_predictions.append(pred)
@@ -305,6 +203,7 @@ def _backtesting_sarimax_no_refit(
     initial_train_size: Optional[int]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     alpha: Optional[float]=None,
+    interval: Optional[list]=None,
     verbose: bool=False
 ) -> Tuple[Union[float, list], pd.DataFrame]:
     """
@@ -351,9 +250,17 @@ def _backtesting_sarimax_no_refit(
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
-
-    alpha : float, default=None
-            The confidence intervals for the forecasts are (1 - alpha) %
+            
+    alpha : float, default `0.05`
+        The confidence intervals for the forecasts are (1 - alpha) %.
+        If both, `alpha` and `interval` are provided, `alpha` will be used.
+        
+    interval : list, default `None`
+        Confidence of the prediction interval estimated. The values must be
+        symmetric. Sequence of percentiles to compute, which must be between 
+        0 and 100 inclusive. For example, interval of 95% should be as 
+        `interval = [2.5, 97.5]`. If both, `alpha` and `interval` are 
+        provided, `alpha` will be used.
             
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used for backtesting.
@@ -396,7 +303,7 @@ def _backtesting_sarimax_no_refit(
     remainder = (len(y) - initial_train_size) % steps
     
     if verbose:
-        _backtesting_sarimax_verbose(
+        _backtesting_forecaster_verbose(
             index_values       = y.index,
             steps              = steps,
             initial_train_size = initial_train_size,
@@ -412,14 +319,15 @@ def _backtesting_sarimax_no_refit(
         last_window_end   = initial_train_size + i * steps
         last_window_start = last_window_end - window_size 
         last_window_y     = y.iloc[last_window_start:last_window_end]
-        last_window_exog  = exog.iloc[last_window_start:last_window_end] if exog is not None else None
+
+        last_window_exog  = exog.iloc[last_window_start:last_window_end, ] if exog is not None else None
         next_window_exog  = exog.iloc[last_window_end:last_window_end + steps, ] if exog is not None else None
     
         if i == folds - 1: # last fold
             # If remainder > 0, only the remaining steps need to be predicted
             steps = steps if remainder == 0 else remainder
         
-        if alpha is None:
+        if alpha is None and interval is None:
             pred = forecaster.predict(
                        steps            = steps,
                        last_window      = last_window_y,
@@ -429,10 +337,11 @@ def _backtesting_sarimax_no_refit(
         else:
             pred = forecaster.predict_interval(
                        steps            = steps,
-                       last_window      = last_window_y,
-                       last_window_exog = last_window_exog,
                        exog             = next_window_exog,
-                       alpha            = alpha
+                       alpha            = alpha,
+                       interval         = interval,
+                       last_window      = last_window_y,
+                       last_window_exog = last_window_exog
                    )
             
         backtest_predictions.append(pred)
@@ -461,11 +370,12 @@ def backtesting_sarimax(
     y: pd.Series,
     steps: int,
     metric: Union[str, callable, list],
-    initial_train_size: Optional[int],
+    initial_train_size: Optional[int]=None,
     fixed_train_size: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     refit: bool=False,
     alpha: Optional[float]=None,
+    interval: Optional[list]=None,
     verbose: bool=False
 ) -> Tuple[Union[float, list], pd.DataFrame]:
     """
@@ -518,9 +428,17 @@ def backtesting_sarimax(
 
     refit : bool, default `False`
         Whether to re-fit the forecaster in each iteration.
-
-    alpha : float, default=None
-            The confidence intervals for the forecasts are (1 - alpha) %
+            
+    alpha : float, default `0.05`
+        The confidence intervals for the forecasts are (1 - alpha) %.
+        If both, `alpha` and `interval` are provided, `alpha` will be used.
+        
+    interval : list, default `None`
+        Confidence of the prediction interval estimated. The values must be
+        symmetric. Sequence of percentiles to compute, which must be between 
+        0 and 100 inclusive. For example, interval of 95% should be as 
+        `interval = [2.5, 97.5]`. If both, `alpha` and `interval` are 
+        provided, `alpha` will be used.
                   
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used for backtesting.
@@ -545,8 +463,8 @@ def backtesting_sarimax(
         
     if initial_train_size is not None and initial_train_size < forecaster.window_size:
         raise ValueError(
-            f"`initial_train_size` must be greater than "
-            f"forecaster's window_size ({forecaster.window_size})."
+            (f"`initial_train_size` must be greater than "
+             f"forecaster's window_size ({forecaster.window_size}).")
         )
 
     if initial_train_size is None and not forecaster.fitted:
