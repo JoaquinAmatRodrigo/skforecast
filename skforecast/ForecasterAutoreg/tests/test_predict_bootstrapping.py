@@ -1,4 +1,4 @@
-# Unit test _estimate_boot_interval ForecasterAutoreg
+# Unit test predict_bootstrapping ForecasterAutoreg
 # ==============================================================================
 import pytest
 from pytest import approx
@@ -16,10 +16,14 @@ def test_estimate_boot_interval_output_when_forecaster_is_LinearRegression_steps
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
     forecaster.fit(y=pd.Series(np.arange(10)))
     forecaster.in_sample_residuals = np.full_like(forecaster.in_sample_residuals, fill_value=10)
-    expected = np.array([[20., 20.]])
-    results = forecaster._estimate_boot_interval(steps=1, in_sample_residuals=True)
+    expected = pd.DataFrame(
+                    data    = np.array([[20., 20., 20., 20.]]),
+                    columns = [f"pred_boot_{i}" for i in range(4)],
+                    index   = [10]
+               )
+    results = forecaster.predict_bootstrapping(steps=1, n_boot=4, in_sample_residuals=True)
 
-    assert results == approx(expected)
+    pd.testing.assert_frame_equal(expected, results)
     
     
 def test_estimate_boot_interval_output_when_forecaster_is_LinearRegression_steps_is_2_in_sample_residuals_is_True():
@@ -30,11 +34,15 @@ def test_estimate_boot_interval_output_when_forecaster_is_LinearRegression_steps
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
     forecaster.fit(y=pd.Series(np.arange(10)))
     forecaster.in_sample_residuals = np.full_like(forecaster.in_sample_residuals, fill_value=10)
-    expected = np.array([[20., 20.],
-                        [24.33333333, 24.33333333]])
-    results = forecaster._estimate_boot_interval(steps=2, in_sample_residuals=True)
+    expected = pd.DataFrame(
+                data = np.array([[20., 20., 20., 20.],
+                                 [24.3333, 24.3333, 24.3333, 24.3333]]),
+                columns = [f"pred_boot_{i}" for i in range(4)],
+                index   = [10, 11]
+            )          
+    results = forecaster.predict_bootstrapping(steps=2, n_boot=4, in_sample_residuals=True)
 
-    assert results == approx(expected)
+    pd.testing.assert_frame_equal(expected, results)
     
     
 def test_estimate_boot_interval_output_when_forecaster_is_LinearRegression_steps_is_1_in_sample_residuals_is_False():
@@ -44,11 +52,15 @@ def test_estimate_boot_interval_output_when_forecaster_is_LinearRegression_steps
     """
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
     forecaster.fit(y=pd.Series(np.arange(10)))
-    forecaster.out_sample_residuals = pd.Series(np.full_like(forecaster.in_sample_residuals, fill_value=10))
-    expected = np.array([[20., 20.]])
-    results = forecaster._estimate_boot_interval(steps=1, in_sample_residuals=False)
+    forecaster.out_sample_residuals = np.full_like(forecaster.in_sample_residuals, fill_value=10)
+    expected = pd.DataFrame(
+                    data    = np.array([[20., 20., 20., 20.]]),
+                    columns = [f"pred_boot_{i}" for i in range(4)],
+                    index   = [10]
+               )
+    results = forecaster.predict_bootstrapping(steps=1, n_boot=4, in_sample_residuals=False)
 
-    assert results == approx(expected)
+    pd.testing.assert_frame_equal(expected, results)
     
     
 def test_estimate_boot_interval_output_when_forecaster_is_LinearRegression_steps_is_2_in_sample_residuals_is_False():
@@ -58,10 +70,14 @@ def test_estimate_boot_interval_output_when_forecaster_is_LinearRegression_steps
     """
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
     forecaster.fit(y=pd.Series(np.arange(10)))
-    forecaster.out_sample_residuals = pd.Series(np.full_like(forecaster.in_sample_residuals, fill_value=10))
-    expected = np.array([[20.        , 20.        ],
-                        [24.33333333, 24.33333333]])
-    results = forecaster._estimate_boot_interval(steps=2, in_sample_residuals=False)
+    forecaster.out_sample_residuals = np.full_like(forecaster.in_sample_residuals, fill_value=10)
+    expected = pd.DataFrame(
+                data = np.array([[20., 20., 20., 20.],
+                                 [24.3333, 24.3333, 24.3333, 24.3333]]),
+                columns = [f"pred_boot_{i}" for i in range(4)],
+                index   = [10, 11]
+            )          
+    results = forecaster.predict_bootstrapping(steps=2, n_boot=4, in_sample_residuals=False)
 
-    assert results == approx(expected)
+    pd.testing.assert_frame_equal(expected, results)
     

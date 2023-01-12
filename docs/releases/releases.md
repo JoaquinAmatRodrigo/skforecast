@@ -2,13 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.7.0] - [Dev]
+
+## [0.7.0] - [dev]
 
 **Added**
 
++ Method `predict_dist()` to `ForecasterAutoreg`, `ForecasterAutoregDirect` and `ForecasterAutoregCustom`.
+
++ Method `predict_interval()` to `ForecasterAutoregDirect`.
+
+  
 **Changed**
 
-+ Remove argument `levels_weights` in `grid_search_forecaster_multiseries` and `random_search_forecaster_multiseries`. Use `series_weights` and `weights_func` when creating the forecaster instead, (deprecated since 0.6.0).
 
 **Fixed**
 
