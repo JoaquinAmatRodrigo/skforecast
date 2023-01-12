@@ -884,7 +884,7 @@ def transform_series(
     series = series.to_frame()
 
     if fit and not isinstance(transformer, FunctionTransformer):
-        transformer.fit(series.values)
+        transformer.fit(series)
 
     if inverse_transform:
         values_transformed = transformer.inverse_transform(series.values)
@@ -957,7 +957,7 @@ def transform_dataframe(
         raise Exception(
             '`inverse_transform` is not available when using ColumnTransformers.'
         )
-    
+ 
     if not inverse_transform:
         if fit:
             values_transformed = transformer.fit_transform(df)
@@ -976,7 +976,7 @@ def transform_dataframe(
         feature_names_out = transformer.categories_
     else:
         feature_names_out = df.columns
-    
+
     df_transformed = pd.DataFrame(
                          data    = values_transformed,
                          index   = df.index,
