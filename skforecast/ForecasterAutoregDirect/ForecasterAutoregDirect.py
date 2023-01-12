@@ -65,13 +65,11 @@ class ForecasterAutoregDirect(ForecasterBase):
         preprocessing API with methods: fit, transform, fit_transform and inverse_transform.
         ColumnTransformers are not allowed since they do not have inverse_transform method.
         The transformation is applied to `y` before training the forecaster.
-        **New in version 0.5.0**
 
     transformer_exog : object transformer (preprocessor), default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API. The transformation is applied to `exog` before training the
         forecaster. `inverse_transform` is not available when using ColumnTransformers.
-        **New in version 0.5.0**
 
     weight_func : callable, default `None`
         Function that defines the individual weights for each sample based on the
@@ -104,13 +102,11 @@ class ForecasterAutoregDirect(ForecasterBase):
         preprocessing API with methods: fit, transform, fit_transform and inverse_transform.
         ColumnTransformers are not allowed since they do not have inverse_transform method.
         The transformation is applied to `y` before training the forecaster.
-        **New in version 0.5.0**
 
     transformer_exog : object transformer (preprocessor), default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API. The transformation is applied to `exog` before training the
         forecaster. `inverse_transform` is not available when using ColumnTransformers.
-        **New in version 0.5.0**
         
     weight_func : callable
         Function that defines the individual weights for each sample based on the
@@ -180,8 +176,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         Version of skforecast library used to create the forecaster.
 
     python_version : str
-        Version of python used to create the forecaster.
-        **New in version 0.5.0**   
+        Version of python used to create the forecaster.  
         
     Notes
     -----
@@ -559,16 +554,16 @@ class ForecasterAutoregDirect(ForecasterBase):
         """
 
         # Reset values in case the forecaster has already been fitted.
-        self.index_type           = None
-        self.index_freq           = None
-        self.last_window          = None
-        self.included_exog        = False
-        self.exog_type            = None
-        self.exog_col_names       = None
-        self.X_train_col_names    = None
-        self.in_sample_residuals  = {step: None for step in range(1, self.steps + 1)}
-        self.fitted               = False
-        self.training_range       = None
+        self.index_type          = None
+        self.index_freq          = None
+        self.last_window         = None
+        self.included_exog       = False
+        self.exog_type           = None
+        self.exog_col_names      = None
+        self.X_train_col_names   = None
+        self.in_sample_residuals = {step: None for step in range(1, self.steps + 1)}
+        self.fitted              = False
+        self.training_range      = None
 
         if exog is not None:
             self.included_exog = True
@@ -680,21 +675,21 @@ class ForecasterAutoregDirect(ForecasterBase):
                 )
 
         check_predict_input(
-            forecaster_type = type(self).__name__,
-            steps           = steps,
-            fitted          = self.fitted,
-            included_exog   = self.included_exog,
-            index_type      = self.index_type,
-            index_freq      = self.index_freq,
-            window_size     = self.window_size,
-            last_window     = last_window,
-            exog            = exog,
-            exog_type       = self.exog_type,
-            exog_col_names  = self.exog_col_names,
-            interval        = None,
-            max_steps       = self.steps,
-            levels          = None,
-            series_col_names  = None
+            forecaster_type  = type(self).__name__,
+            steps            = steps,
+            fitted           = self.fitted,
+            included_exog    = self.included_exog,
+            index_type       = self.index_type,
+            index_freq       = self.index_freq,
+            window_size      = self.window_size,
+            last_window      = last_window,
+            exog             = exog,
+            exog_type        = self.exog_type,
+            exog_col_names   = self.exog_col_names,
+            interval         = None,
+            max_steps        = self.steps,
+            levels           = None,
+            series_col_names = None
         ) 
 
         if exog is not None:

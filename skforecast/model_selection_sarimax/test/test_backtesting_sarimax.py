@@ -1,15 +1,19 @@
 # Unit test backtesting_sarimax
 # ==============================================================================
+import re
+import pytest
+from pytest import approx
 import numpy as np
 import pandas as pd
-from pytest import approx
+from sklearn.exceptions import NotFittedError
+from skforecast.ForecasterSarimax import ForecasterSarimax
 from skforecast.model_selection_statsmodels import backtesting_sarimax
+from pmdarima.arima import ARIMA
 
 # Fixtures _backtesting_forecaster_refit Series (skforecast==0.4.2)
 # np.random.seed(123)
 # y = np.random.rand(50)
 # exog = np.random.rand(50)
-# out_sample_residuals = np.random.rand(50)
 
 y = pd.Series(
     np.array([0.69646919, 0.28613933, 0.22685145, 0.55131477, 0.71946897,
@@ -37,24 +41,159 @@ exog = pd.Series(
     name='exog')
 
 
+@pytest.mark.parametrize("initial_train_size", 
+                         [(len(y)), (len(y) + 1)], 
+                         ids = lambda value : f'len: {value}' )
+def test_backtesting_sarimax_ValueError_when_initial_train_size_more_than_or_equal_to_len_y(initial_train_size):
+    """
+    Test ValueError is raised in backtesting_sarimax when initial_train_size >= len(y).
+    """
+    forecaster = ForecasterSarimax(regressor=ARIMA(order=(1,1,1)))
+    
+    err_msg = re.escape('If used, `initial_train_size` must be smaller than length of `series`.')
+    with pytest.raises(ValueError, match = err_msg):
+        backtesting_sarimax(
+            forecaster         = forecaster,
+            y                  = y,
+            steps              = 4,
+            metric             = 'mean_absolute_error',
+            initial_train_size = initial_train_size,
+            refit              = False,
+            fixed_train_size   = False,
+            exog               = None,
+            alpha              = None,
+            interval           = None,
+            verbose            = False
+        )
+
+
+def test_backtesting_sarimax_ValueError_when_initial_train_size_less_than_forecaster_window_size():
+    """
+    Test ValueError is raised in backtesting_sarimax when initial_train_size < forecaster.window_size.
+    """
+    forecaster = ForecasterSarimax(regressor=ARIMA(order=(1,1,1)))
+
+    initial_train_size = forecaster.window_size - 1
+    
+    err_msg = re.escape(
+            f"`initial_train_size` must be greater than "
+            f"forecaster's window_size ({forecaster.window_size})."
+        )
+    with pytest.raises(ValueError, match = err_msg):
+        backtesting_sarimax(
+            forecaster         = forecaster,
+            y                  = y,
+            steps              = 4,
+            metric             = 'mean_absolute_error',
+            initial_train_size = initial_train_size,
+            refit              = False,
+            fixed_train_size   = False,
+            exog               = None,
+            alpha              = None,
+            interval           = None,
+            verbose            = False
+        )
+
+
+def test_backtesting_sarimax_NotFittedError_when_initial_train_size_None_and_forecaster_not_fitted():
+    """
+    Test NotFittedError is raised in backtesting_sarimax when initial_train_size is None and
+    forecaster is not fitted.
+    """
+    forecaster = ForecasterSarimax(regressor=ARIMA(order=(1,1,1)))
+
+    initial_train_size = None
+    
+    err_msg = re.escape('`forecaster` must be already trained if no `initial_train_size` is provided.')
+    with pytest.raises(NotFittedError, match = err_msg):
+        backtesting_sarimax(
+            forecaster         = forecaster,
+            y                  = y,
+            steps              = 4,
+            metric             = 'mean_absolute_error',
+            initial_train_size = initial_train_size,
+            refit              = False,
+            fixed_train_size   = False,
+            exog               = None,
+            alpha              = None,
+            interval           = None,
+            verbose            = False
+        )
+
+
+def test_backtesting_sarimax_TypeError_when_refit_not_bool():
+    """
+    Test TypeError is raised in backtesting_sarimax when refit is not bool.
+    """
+    forecaster = ForecasterSarimax(regressor=ARIMA(order=(1,1,1)))
+
+    refit = 'not_bool'
+    
+    err_msg = re.escape( f'`refit` must be boolean: `True`, `False`.')
+    with pytest.raises(TypeError, match = err_msg):
+        backtesting_sarimax(
+            forecaster         = forecaster,
+            y                  = y,
+            steps              = 4,
+            metric             = 'mean_absolute_error',
+            initial_train_size = 12,
+            refit              = refit,
+            fixed_train_size   = False,
+            exog               = None,
+            alpha              = None,
+            interval           = None,
+            verbose            = False
+        )
+
+
+def test_backtesting_sarimax_ValueError_when_initial_train_size_None_and_refit_True():
+    """
+    Test ValueError is raised in backtesting_sarimax when initial_train_size is None
+    and refit is True.
+    """
+    forecaster = ForecasterSarimax(regressor=ARIMA(order=(1,1,1)))
+    forecaster.fitted = True
+
+    initial_train_size = None
+    refit = True
+    
+    err_msg = re.escape(f'`refit` is only allowed when `initial_train_size` is not `None`.')
+    with pytest.raises(ValueError, match = err_msg):
+        backtesting_sarimax(
+            forecaster         = forecaster,
+            y                  = y,
+            steps              = 4,
+            metric             = 'mean_absolute_error',
+            initial_train_size = initial_train_size,
+            refit              = refit,
+            fixed_train_size   = False,
+            exog               = None,
+            alpha              = None,
+            interval           = None,
+            verbose            = False
+        )
+
+
 def test_output_backtesting_sarimax_no_refit_no_exog_with_mocked():
     """
     Test output of backtesting_sarimax with backtesting mocked, Series y is mocked, no exog, 
     no refit, 12 observations to backtest, steps=4 (no remainder), metric='mean_squared_error'
     """
+    forecaster = ForecasterSarimax(regressor=ARIMA(order=(2,2,2)))
+
     steps = 3
-    n_backtest = 12
-    y_train = y[:-n_backtest]
 
     metric, backtest_predictions = backtesting_sarimax(
-                                        y          = y,
-                                        steps      = steps,
-                                        metric     = 'mean_squared_error',
-                                        initial_train_size = len(y_train),
+                                        forecaster         = forecaster,
+                                        y                  = y,
+                                        steps              = steps,
+                                        metric             = 'mean_squared_error',
+                                        initial_train_size = len(y)-12,
                                         fixed_train_size   = False,
-                                        refit      = False,
-                                        order      = (1, 0, 0),
-                                        verbose    = False
+                                        refit              = False,
+                                        alpha              = None,
+                                        interval           = None,
+                                        verbose            = False
                                    )
     
     expected_metric = 0.0822951336284151

@@ -12,9 +12,9 @@ def test_forecaster_DatetimeIndex_index_freq_stored():
     Test serie_with_DatetimeIndex.index.freqstr is stored in forecaster.index_freq.
     """
     serie_with_DatetimeIndex = pd.Series(
-                data  = np.arange(10),
-                index = pd.date_range(start='2022-01-01', periods=10)
-                )
+        data  = np.arange(10),
+        index = pd.date_range(start='2022-01-01', periods=10)
+    )
     forecaster = ForecasterAutoregDirect(XGBRegressor(random_state=123), lags=3, steps=2)
     forecaster.fit(y=serie_with_DatetimeIndex)
     expected = serie_with_DatetimeIndex.index.freqstr

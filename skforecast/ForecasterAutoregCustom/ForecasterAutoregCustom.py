@@ -59,13 +59,11 @@ class ForecasterAutoregCustom(ForecasterBase):
         preprocessing API with methods: fit, transform, fit_transform and inverse_transform.
         ColumnTransformers are not allowed since they do not have inverse_transform method.
         The transformation is applied to `y` before training the forecaster.
-        **New in version 0.5.0**
 
     transformer_exog : object transformer (preprocessor), default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API. The transformation is applied to `exog` before training the
         forecaster. `inverse_transform` is not available when using ColumnTransformers.
-        **New in version 0.5.0**
     
     weight_func : callable, default `None`
         Function that defines the individual weights for each sample based on the
@@ -94,13 +92,11 @@ class ForecasterAutoregCustom(ForecasterBase):
         preprocessing API with methods: fit, transform, fit_transform and inverse_transform.
         ColumnTransformers are not allowed since they do not have inverse_transform method.
         The transformation is applied to `y` before training the forecaster.
-        **New in version 0.5.0**
 
     transformer_exog : object transformer (preprocessor), default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API. The transformation is applied to `exog` before training the
         forecaster. `inverse_transform` is not available when using ColumnTransformers.
-        **New in version 0.5.0**
 
     last_window : pandas Series
         Last window the forecaster has seen during trained. It stores the
@@ -164,7 +160,6 @@ class ForecasterAutoregCustom(ForecasterBase):
 
     python_version : str
         Version of python used to create the forecaster.
-        **New in version 0.5.0**
     
     """
     

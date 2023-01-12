@@ -1,20 +1,27 @@
-# Unit test set_params ForecasterAutoreg
+# Unit test set_params ForecasterSarimax
 # ==============================================================================
-from skforecast.ForecasterAutoreg import ForecasterAutoreg
-from sklearn.linear_model import LinearRegression
+from skforecast.ForecasterSarimax import ForecasterSarimax
+from pmdarima.arima import ARIMA
 
 
-def test_set_params():
+def test_ForecasterSarimax_set_params():
     """
+    Test set_params() method.
     """
-    forecaster = ForecasterAutoreg(LinearRegression(fit_intercept=True), lags=3)
-    new_params = {'fit_intercept': False}
+    forecaster = ForecasterSarimax(regressor=ARIMA(order=(1,1,1)))
+    new_params = {'order': (2,2,2), 'seasonal_order': (1,1,1,2)}
     forecaster.set_params(**new_params)
-    expected = {'copy_X': True,
-                'fit_intercept': False,
-                'n_jobs': None,
-                'normalize': 'deprecated',
-                'positive': False
-               }
+    expected = {'maxiter'           : 50,
+                'method'            : 'lbfgs',
+                'order'             : (2, 2, 2),
+                'out_of_sample_size': 0,
+                'scoring'           : 'mse',
+                'scoring_args'      : None,
+                'seasonal_order'    : (1, 1, 1, 2),
+                'start_params'      : None,
+                'suppress_warnings' : False,
+                'trend'             : None,
+                'with_intercept'    : True}
     results = forecaster.regressor.get_params()
+
     assert results == expected

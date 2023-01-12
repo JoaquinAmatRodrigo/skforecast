@@ -60,20 +60,17 @@ class ForecasterAutoreg(ForecasterBase):
         preprocessing API with methods: fit, transform, fit_transform and inverse_transform.
         ColumnTransformers are not allowed since they do not have inverse_transform method.
         The transformation is applied to `y` before training the forecaster. 
-        **New in version 0.5.0**
 
     transformer_exog : object transformer (preprocessor), default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API. The transformation is applied to `exog` before training the
         forecaster. `inverse_transform` is not available when using ColumnTransformers.
-        **New in version 0.5.0**
 
     weight_func : callable, default `None`
         Function that defines the individual weights for each sample based on the
         index. For example, a function that assigns a lower weight to certain dates.
         Ignored if `regressor` does not have the argument `sample_weight` in its `fit`
         method. The resulting `sample_weight` cannot have negative values.
-        **New in version 0.6.0**
     
     Attributes
     ----------
@@ -88,13 +85,11 @@ class ForecasterAutoreg(ForecasterBase):
         preprocessing API with methods: fit, transform, fit_transform and inverse_transform.
         ColumnTransformers are not allowed since they do not have inverse_transform method.
         The transformation is applied to `y` before training the forecaster.
-        **New in version 0.5.0**
 
     transformer_exog : object transformer (preprocessor), default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API. The transformation is applied to `exog` before training the
         forecaster. `inverse_transform` is not available when using ColumnTransformers.
-        **New in version 0.5.0**
         
     max_lag : int
         Maximum value of lag included in `lags`.
@@ -165,7 +160,6 @@ class ForecasterAutoreg(ForecasterBase):
 
     python_version : str
         Version of python used to create the forecaster.
-        **New in version 0.5.0**
      
     """
     
@@ -589,21 +583,23 @@ class ForecasterAutoreg(ForecasterBase):
         """
 
         check_predict_input(
-            forecaster_type = type(self).__name__,
-            steps           = steps,
-            fitted          = self.fitted,
-            included_exog   = self.included_exog,
-            index_type      = self.index_type,
-            index_freq      = self.index_freq,
-            window_size     = self.window_size,
-            last_window     = last_window,
-            exog            = exog,
-            exog_type       = self.exog_type,
-            exog_col_names  = self.exog_col_names,
-            interval        = None,
-            max_steps       = None,
-            levels          = None,
-            series_col_names  = None
+            forecaster_type  = type(self).__name__,
+            steps            = steps,
+            fitted           = self.fitted,
+            included_exog    = self.included_exog,
+            index_type       = self.index_type,
+            index_freq       = self.index_freq,
+            window_size      = self.window_size,
+            last_window      = last_window,
+            last_window_exog = None,
+            exog             = exog,
+            exog_type        = self.exog_type,
+            exog_col_names   = self.exog_col_names,
+            interval         = None,
+            alpha            = None,
+            max_steps        = None,
+            levels           = None,
+            series_col_names = None
         ) 
 
         if exog is not None:
@@ -750,7 +746,7 @@ class ForecasterAutoreg(ForecasterBase):
             max_steps         = None,
             levels            = None,
             series_col_names  = None
-        ) 
+        )
 
         if exog is not None:
             if isinstance(exog, pd.DataFrame):
@@ -1177,8 +1173,8 @@ class ForecasterAutoreg(ForecasterBase):
 
         if self.fitted == False:
             raise sklearn.exceptions.NotFittedError(
-                "This forecaster is not fitted yet. Call `fit` with appropriate "
-                "arguments before using `get_feature_importance()`."
+                ("This forecaster is not fitted yet. Call `fit` with appropriate "
+                 "arguments before using `get_feature_importance()`.")
             )
 
         if isinstance(self.regressor, sklearn.pipeline.Pipeline):

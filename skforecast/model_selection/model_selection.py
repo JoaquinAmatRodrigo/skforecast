@@ -145,7 +145,9 @@ def time_series_splitter(
         yield train_indices, test_indices
         
         
-def _get_metric(metric:str) -> callable:
+def _get_metric(
+    metric:str
+) -> callable:
     """
     Get the corresponding scikit-learn function to calculate the metric.
     
@@ -275,7 +277,7 @@ def _backtesting_forecaster_refit(
         - The training set increases with `steps` observations.
         - The model is re-fitted using the new training set.
 
-    In order to apply backtesting with re-fit, an initial training set must be
+    In order to apply backtesting with refit, an initial training set must be
     available, otherwise it would not be possible to increase the training set 
     after each iteration. `initial_train_size` must be provided.
     
@@ -623,7 +625,7 @@ def backtesting_forecaster(
     y: pd.Series,
     steps: int,
     metric: Union[str, callable, list],
-    initial_train_size: Optional[int],
+    initial_train_size: Optional[int]=None,
     fixed_train_size: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     refit: bool=False,

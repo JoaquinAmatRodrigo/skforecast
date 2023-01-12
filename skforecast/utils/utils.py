@@ -218,7 +218,8 @@ def check_exog(
 
 
 def check_interval(
-    interval: list
+    interval: list=None,
+    alpha: float=None
 ) -> None:
     """
     Check provided confidence interval sequence is valid.
@@ -229,37 +230,53 @@ def check_interval(
         Confidence of the prediction interval estimated. Sequence of percentiles
         to compute, which must be between 0 and 100 inclusive. For example, 
         interval of 95% should be as `interval = [2.5, 97.5]`.
+
+    alpha : float, default `None`
+        The confidence intervals used in ForecasterSarimax are (1 - alpha) %.
     
     """
 
-    if not isinstance(interval, list):
-        raise TypeError(
-            ('`interval` must be a `list`. For example, interval of 95% '
-             'should be as `interval = [2.5, 97.5]`.')
-        )
+    if interval is not None:
+        if not isinstance(interval, list):
+            raise TypeError(
+                ('`interval` must be a `list`. For example, interval of 95% '
+                 'should be as `interval = [2.5, 97.5]`.')
+            )
 
-    if len(interval) != 2:
-        raise ValueError(
-            ('`interval` must contain exactly 2 values, respectively the '
-             'lower and upper interval bounds. For example, interval of 95% '
-             'should be as `interval = [2.5, 97.5]`.')
-        )
+        if len(interval) != 2:
+            raise ValueError(
+                ('`interval` must contain exactly 2 values, respectively the '
+                 'lower and upper interval bounds. For example, interval of 95% '
+                 'should be as `interval = [2.5, 97.5]`.')
+            )
 
-    if (interval[0] < 0.) or (interval[0] >= 100.):
-        raise ValueError(
-            f'Lower interval bound ({interval[0]}) must be >= 0 and < 100.'
-        )
+        if (interval[0] < 0.) or (interval[0] >= 100.):
+            raise ValueError(
+                f'Lower interval bound ({interval[0]}) must be >= 0 and < 100.'
+            )
 
-    if (interval[1] <= 0.) or (interval[1] > 100.):
-        raise ValueError(
-            f'Upper interval bound ({interval[1]}) must be > 0 and <= 100.'
-        )
+        if (interval[1] <= 0.) or (interval[1] > 100.):
+            raise ValueError(
+                f'Upper interval bound ({interval[1]}) must be > 0 and <= 100.'
+            )
 
-    if interval[0] >= interval[1]:
-        raise ValueError(
-            f'Lower interval bound ({interval[0]}) must be less than the '
-            f'upper interval bound ({interval[1]}).'
-        )
+        if interval[0] >= interval[1]:
+            raise ValueError(
+                f'Lower interval bound ({interval[0]}) must be less than the '
+                f'upper interval bound ({interval[1]}).'
+            )
+    
+    if alpha is not None:
+        if not isinstance(alpha, float):
+            raise TypeError(
+                ('`alpha` must be a `float`. For example, interval of 95% '
+                 'should be as `alpha = 0.05`.')
+            )
+
+        if (alpha <= 0.) or (alpha >= 1):
+            raise ValueError(
+                f'`alpha` must have a value between 0 and 1. Got {alpha}.'
+            )
 
     return
 
@@ -273,10 +290,12 @@ def check_predict_input(
     index_freq: str,
     window_size: int,
     last_window: Union[pd.Series, pd.DataFrame]=None,
+    last_window_exog: Union[pd.Series, pd.DataFrame]=None,
     exog: Union[pd.Series, pd.DataFrame]=None,
     exog_type: Union[type, None]=None,
     exog_col_names: Union[list, None]=None,
     interval: list=None,
+    alpha: float=None,
     max_steps: int=None,
     levels: Optional[Union[str, list]]=None,
     series_col_names: list=None
@@ -316,6 +335,10 @@ def check_predict_input(
         Values of the series used to create the predictors (lags) need in the 
         first iteration of prediction (t + 1).
 
+    last_window_exog : pandas Series, pandas DataFrame, default `None`
+        Values of the exogenous variables aligned with `last_window` in 
+        ForecasterSarimax predictions.
+
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s.
 
@@ -330,6 +353,9 @@ def check_predict_input(
         Confidence of the prediction interval estimated. Sequence of percentiles
         to compute, which must be between 0 and 100 inclusive. For example, 
         interval of 95% should be as `interval = [2.5, 97.5]`.
+
+    alpha : float, default `None`
+        The confidence intervals used in ForecasterSarimax are (1 - alpha) %.
 
     max_steps: int, default `None`
         Maximum number of steps allowed (`ForecasterAutoregDirect` and 
@@ -369,15 +395,14 @@ def check_predict_input(
                  f"Got {max(steps)}, but the maximum is {max_steps}.")
             )
 
-    if interval is not None:
-        check_interval(interval = interval)
+    if interval is not None or alpha is not None:
+        check_interval(interval=interval, alpha=alpha)
     
     if forecaster_type == 'ForecasterAutoregMultiSeries':
         if levels is not None and not isinstance(levels, (str, list)):
             raise TypeError(
                 f'`levels` must be a `list` of column names, a `str` of a column name or `None`.'
             )
-
         if len(set(levels) - set(series_col_names)) != 0:
             raise ValueError(
                 f'`levels` must be in `series_col_names` : {series_col_names}.'
@@ -386,22 +411,25 @@ def check_predict_input(
     if exog is None and included_exog:
         raise ValueError(
             ('Forecaster trained with exogenous variable/s. '
-             'Same variable/s must be provided in `predict()`.')
+             'Same variable/s must be provided when predicting.')
         )
         
     if exog is not None and not included_exog:
         raise ValueError(
             ('Forecaster trained without exogenous variable/s. '
-             '`exog` must be `None` in `predict()`.')
+             '`exog` must be `None` when predicting.')
         )
     
     if exog is not None:
-        max_step = max(steps) if isinstance(steps, list) else steps
-        if len(exog) < max_step:
+        # Check exog has many values as distance to max step predicted
+        last_step = max(steps) if isinstance(steps, list) else steps
+        if len(exog) < last_step:
             raise ValueError(
                 f'`exog` must have at least as many values as the distance to '
-                f'the maximum step predicted, {max_step}.'
+                f'the maximum step predicted, {last_step}.'
             )
+
+        # Check nulls and index type and freq
         if not isinstance(exog, (pd.Series, pd.DataFrame)):
             raise TypeError('`exog` must be a pandas Series or DataFrame.')
         if exog.isnull().values.any():
@@ -410,6 +438,8 @@ def check_predict_input(
             raise TypeError(
                 f'Expected type for `exog`: {exog_type}. Got {type(exog)}.'     
             )
+
+        # Check all columns are in the pd.DataFrame
         if isinstance(exog, pd.DataFrame):
             col_missing = set(exog_col_names).difference(set(exog.columns))
             if col_missing:
@@ -417,15 +447,15 @@ def check_predict_input(
                     (f'Missing columns in `exog`. Expected {exog_col_names}. '
                      f'Got {exog.columns.to_list()}.') 
                 )
+
+        # Check nulls and index type and freq
         check_exog(exog = exog)
         _, exog_index = preprocess_exog(exog=exog.iloc[:0, ])
-        
         if not isinstance(exog_index, index_type):
             raise TypeError(
                 (f'Expected index of type {index_type} for `exog`. '
                  f'Got {type(exog_index)}.')
-            )
-        
+            )   
         if isinstance(exog_index, pd.DatetimeIndex):
             if not exog_index.freqstr == index_freq:
                 raise TypeError(
@@ -434,12 +464,7 @@ def check_predict_input(
                 )
         
     if last_window is not None:
-        if len(last_window) < window_size:
-            raise ValueError(
-                (f'`last_window` must have as many values as as needed to '
-                 f'calculate the predictors. For this forecaster it is {window_size}.')
-            )
-                
+        # Check last_window type (pd.Series or pd.DataFrame according to forecaster)
         if forecaster_type in ['ForecasterAutoregMultiSeries', 'ForecasterAutoregMultiVariate']:
             if not isinstance(last_window, pd.DataFrame):
                 raise TypeError(
@@ -460,12 +485,19 @@ def check_predict_input(
                     (f'`last_window` columns must be the same as `series` column names.\n'
                      f'    `last_window` columns : {list(last_window.columns)}.\n'
                      f'    `series` columns      : {series_col_names}.')
-                )
-        
+                )    
         else:    
             if not isinstance(last_window, pd.Series):
-                raise TypeError('`last_window` must be a pandas Series.')
-                
+                raise TypeError(
+                    f'`last_window` must be a pandas Series. Got {type(last_window)}.'
+                )
+        
+        # Check last_window len, nulls and index (type and freq)
+        if len(last_window) < window_size:
+            raise ValueError(
+                (f'`last_window` must have as many values as needed to '
+                 f'generate the predictors. For this forecaster it is {window_size}.')
+            )
         if last_window.isnull().any().all():
             raise ValueError('`last_window` has missing values.')
         _, last_window_index = preprocess_last_window(
@@ -482,6 +514,65 @@ def check_predict_input(
                     f'Expected frequency of type {index_freq} for `last_window`. '
                     f'Got {last_window_index.freqstr}.'
                 )
+
+    # Checks ForecasterSarimax
+    if forecaster_type == 'ForecasterSarimax':
+        # Check if forecaster needs exog
+        if last_window is not None and last_window_exog is None and included_exog:
+            raise ValueError(
+                ('Forecaster trained with exogenous variable/s. '
+                 'Same variable/s must be provided using `last_window_exog`.')
+            )   
+        if last_window_exog is not None and not included_exog:
+            raise ValueError(
+                ('Forecaster trained without exogenous variable/s. '
+                 '`last_window_exog` must be `None` when predicting.')
+            )
+
+        # If last_window_exog is provided but no last_window
+        if last_window is None and last_window_exog is not None:
+            raise ValueError(
+                ('To make predictions unrelated to the original data, both '
+                 '`last_window` and `last_window_exog` must be provided.')
+            )
+
+        # Check last_window_exog type, len, nulls and index (type and freq)
+        if last_window_exog is not None:
+            if not isinstance(last_window_exog, (pd.Series, pd.DataFrame)):
+                raise TypeError(
+                    (f'`last_window_exog` must be a pandas Series or a '
+                     f'pandas DataFrame. Got {type(last_window_exog)}.')
+                )
+            if len(last_window_exog) < window_size:
+                raise ValueError(
+                    (f'`last_window_exog` must have as many values as needed to '
+                     f'generate the predictors. For this forecaster it is {window_size}.')
+                )
+            if last_window_exog.isnull().any().all():
+                raise ValueError('`last_window_exog` has missing values.')
+            _, last_window_exog_index = preprocess_last_window(
+                                        last_window = last_window_exog.iloc[:0]
+                                    ) 
+            if not isinstance(last_window_exog_index, index_type):
+                raise TypeError(
+                    (f'Expected index of type {index_type} for `last_window_exog`. '
+                     f'Got {type(last_window_exog_index)}.')
+                )
+            if isinstance(last_window_exog_index, pd.DatetimeIndex):
+                if not last_window_exog_index.freqstr == index_freq:
+                    raise TypeError(
+                        (f'Expected frequency of type {index_freq} for `last_window_exog`. '
+                         f'Got {last_window_exog_index.freqstr}.')
+                    )
+
+            # Check all columns are in the pd.DataFrame, last_window_exog
+            if isinstance(last_window_exog, pd.DataFrame):
+                col_missing = set(exog_col_names).difference(set(last_window_exog.columns))
+                if col_missing:
+                    raise ValueError(
+                        (f'Missing columns in `exog`. Expected {exog_col_names}. '
+                         f'Got {last_window_exog.columns.to_list()}.') 
+                    )
 
     return
 
@@ -742,7 +833,8 @@ def expand_index(
         new_index = pd.RangeIndex(
                         start = 0,
                         stop  = steps
-                     )
+                    )
+    
     return new_index
 
 
@@ -813,8 +905,8 @@ def transform_series(
         series_transformed = values_transformed.squeeze()
     else:
         series_transformed = pd.DataFrame(
-                                 data = values_transformed,
-                                 index = series.index,
+                                 data    = values_transformed,
+                                 index   = series.index,
                                  columns = transformer.get_feature_names_out()
                              )
 
@@ -886,8 +978,8 @@ def transform_dataframe(
         feature_names_out = df.columns
     
     df_transformed = pd.DataFrame(
-                         data = values_transformed,
-                         index = df.index,
+                         data    = values_transformed,
+                         index   = df.index,
                          columns = feature_names_out
                      )
 
