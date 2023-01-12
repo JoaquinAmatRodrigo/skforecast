@@ -672,9 +672,15 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                         )
 
         if sample_weight is not None:
-            self.regressor.fit(X=X_train, y=y_train, sample_weight=sample_weight)
+            if not str(type(self.regressor)) == "<class 'xgboost.sklearn.XGBRegressor'>":
+                self.regressor.fit(X=X_train, y=y_train, sample_weight=sample_weight)
+            else:
+                self.regressor.fit(X=X_train.to_numpy(), y=y_train.to_numpy(), sample_weight=sample_weight)
         else:
-            self.regressor.fit(X=X_train, y=y_train)
+            if not str(type(self.regressor)) == "<class 'xgboost.sklearn.XGBRegressor'>":
+                self.regressor.fit(X=X_train, y=y_train)
+            else:
+                self.regressor.fit(X=X_train.to_numpy(), y=y_train.to_numpy())
             
         self.fitted = True
         self.fit_date = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
@@ -691,7 +697,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         # This is done to save time during fit in functions such as backtesting()
         if store_in_sample_residuals:
 
-            residuals = y_train - self.regressor.predict(X_train)
+            if not str(type(self.regressor)) == "<class 'xgboost.sklearn.XGBRegressor'>":
+                residuals = y_train - self.regressor.predict(X_train)
+            else:
+                residuals = y_train - self.regressor.predict(X_train.to_numpy())
 
             for serie in series.columns:
                 in_sample_residuals[serie] = residuals.values[X_train[serie] == 1.]

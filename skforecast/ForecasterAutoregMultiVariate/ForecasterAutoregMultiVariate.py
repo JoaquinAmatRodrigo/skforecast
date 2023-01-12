@@ -679,13 +679,23 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                                          )
             sample_weight = self.create_sample_weights(X_train=X_train_step)
             if sample_weight is not None:
-                self.regressors_[step].fit(
-                    X = X_train_step,
-                    y = y_train_step,
-                    sample_weight = sample_weight
-                )
+                if not str(type(self.regressor)) == "<class 'xgboost.sklearn.XGBRegressor'>":
+                    self.regressors_[step].fit(
+                                            X = X_train_step,
+                                            y = y_train_step,
+                                            sample_weight = sample_weight
+                                          )
+                else:
+                    self.regressors_[step].fit(
+                                            X = X_train_step.to_numpy(),
+                                            y = y_train_step.to_numpy(),
+                                            sample_weight = sample_weight
+                                          )
             else:
-                self.regressors_[step].fit(X=X_train_step, y=y_train_step)
+                if not str(type(self.regressor)) == "<class 'xgboost.sklearn.XGBRegressor'>":
+                    self.regressors_[step].fit(X=X_train_step, y=y_train_step)
+                else:
+                    self.regressors_[step].fit(X=X_train_step.to_numpy(), y=y_train_step.to_numpy())
         
             
         self.fitted = True

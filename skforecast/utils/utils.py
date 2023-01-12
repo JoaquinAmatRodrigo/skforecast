@@ -217,7 +217,7 @@ def check_exog(
     return
 
 
-def check_interval(
+def _check_interval(
     interval: list
 ) -> None:
     """
@@ -355,22 +355,22 @@ def check_predict_input(
             f'`steps` must be an integer greater than or equal to 1. Got {steps}.'
         )
 
-    if isinstance(steps, list) and min(steps) < 1:
+    if isinstance(steps, list) and min(steps) < 0:
         raise ValueError(
            (f"The minimum value of `steps` must be equal to or greater than 1. "
-            f"Got {min(steps)}.")
+            f"Got {min(steps) + 1}.")
         )
 
     if max_steps is not None:
-        if max(steps) > max_steps:
+        if max(steps)+1 > max_steps:
             raise ValueError(
                 (f"The maximum value of `steps` must be less than or equal to "
                  f"the value of steps defined when initializing the forecaster. "
-                 f"Got {max(steps)}, but the maximum is {max_steps}.")
+                 f"Got {max(steps)+1}, but the maximum is {max_steps}.")
             )
 
     if interval is not None:
-        check_interval(interval = interval)
+        _check_interval(interval = interval)
     
     if forecaster_type == 'ForecasterAutoregMultiSeries':
         if levels is not None and not isinstance(levels, (str, list)):
@@ -396,7 +396,7 @@ def check_predict_input(
         )
     
     if exog is not None:
-        max_step = max(steps) if isinstance(steps, list) else steps
+        max_step = max(steps)+1 if isinstance(steps, list) else steps
         if len(exog) < max_step:
             raise ValueError(
                 f'`exog` must have at least as many values as the distance to '
@@ -792,12 +792,12 @@ def transform_series(
     series = series.to_frame()
 
     if fit and not isinstance(transformer, FunctionTransformer):
-        transformer.fit(series.values)
+        transformer.fit(series)
 
     if inverse_transform:
-        values_transformed = transformer.inverse_transform(series.values)
+        values_transformed = transformer.inverse_transform(series)
     else:
-        values_transformed = transformer.transform(series.values)   
+        values_transformed = transformer.transform(series)   
 
     if hasattr(values_transformed, 'toarray'):
         # If the returned values are in sparse matrix format, it is converted to dense array.

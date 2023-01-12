@@ -8,15 +8,6 @@
 
 **Skforecast** is a python library that eases using scikit-learn regressors as multi-step forecasters. It also works with any regressor compatible with the scikit-learn API (pipelines, CatBoost, LightGBM, XGBoost, Ranger...).
 
-**Why use skforecast?**
-
-Skforecast is developed according to the following priorities:
-
-+ Fast and robust prototyping.
-+ Validation and backtesting methods to have a realistic assessment of model performance.
-+ Models must be deployed in production.
-+ Models must be interpretable.
-
 ## Installation
 
 The default installation of skforecast only installs hard dependencies.
