@@ -574,9 +574,9 @@ class ForecasterAutoregDirect(ForecasterBase):
         X_train, y_train = self.create_train_X_y(y=y, exog=exog)
         
         # Train one regressor for each step 
-        for step in range(self.steps):
-            step = step + 1 # self.regressors_ and self.filter_train_X_y_for_step expect
-                            # first step to start at value 1
+        for step in range(1, self.steps + 1): 
+            # self.regressors_ and self.filter_train_X_y_for_step expect
+            # first step to start at value 1
             X_train_step, y_train_step = self.filter_train_X_y_for_step(
                                              step    = step,
                                              X_train = X_train,
@@ -659,7 +659,6 @@ class ForecasterAutoregDirect(ForecasterBase):
 
         """
 
-        # Internally steps are indexed starting at 0
         if isinstance(steps, int):
             steps = list(np.arange(steps) + 1)
         elif steps is None:
@@ -683,10 +682,12 @@ class ForecasterAutoregDirect(ForecasterBase):
             index_freq       = self.index_freq,
             window_size      = self.window_size,
             last_window      = last_window,
+            last_window_exog = None,
             exog             = exog,
             exog_type        = self.exog_type,
             exog_col_names   = self.exog_col_names,
             interval         = None,
+            alpha            = None,
             max_steps        = self.steps,
             levels           = None,
             series_col_names = None
@@ -750,7 +751,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         predictions = pd.Series(
                           data  = predictions.reshape(-1),
                           index = idx[np.array(steps)-1],
-                          name = 'pred'
+                          name  = 'pred'
                       )
 
         predictions = transform_series(
@@ -1230,8 +1231,8 @@ class ForecasterAutoregDirect(ForecasterBase):
         
         if self.fitted == False:
             raise sklearn.exceptions.NotFittedError(
-                "This forecaster is not fitted yet. Call `fit` with appropriate "
-                "arguments before using `get_feature_importance()`."
+                ("This forecaster is not fitted yet. Call `fit` with appropriate "
+                 "arguments before using `get_feature_importance()`.")
             )
 
         if (step < 1) or (step > self.steps):
