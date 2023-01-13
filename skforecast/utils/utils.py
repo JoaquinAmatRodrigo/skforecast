@@ -16,6 +16,7 @@ import sklearn
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import FunctionTransformer
 import inspect
+from copy import deepcopy
 
 optional_dependencies = {
     "statsmodels": ['statsmodels>=0.12, <0.14'],
@@ -883,13 +884,19 @@ def transform_series(
 
     series = series.to_frame()
 
-    if fit and not isinstance(transformer, FunctionTransformer):
+    if fit and hasattr(transformer, 'fit'):
         transformer.fit(series)
 
+    # If argument feature_names_in_ is overwritten to allow using the transformer on
+    # other series than those that were passed during fit.
+    if hasattr(transformer, 'feature_names_in_') and transformer.feature_names_in_[0] != series.name:
+        transformer = deepcopy(transformer)
+        transformer.feature_names_in_ = np.array([series.name], dtype=object)
+
     if inverse_transform:
-        values_transformed = transformer.inverse_transform(series.values)
+        values_transformed = transformer.inverse_transform(series)
     else:
-        values_transformed = transformer.transform(series.values)   
+        values_transformed = transformer.transform(series)   
 
     if hasattr(values_transformed, 'toarray'):
         # If the returned values are in sparse matrix format, it is converted to dense array.
