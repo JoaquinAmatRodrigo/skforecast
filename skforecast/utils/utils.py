@@ -889,9 +889,9 @@ def transform_series(
 
     # If argument feature_names_in_ is overwritten to allow using the transformer on
     # other series than those that were passed during fit.
-    if hasattr(transformer, 'feature_names_in_') and transformer.feature_names_in_[0] != series.name:
+    if hasattr(transformer, 'feature_names_in_') and transformer.feature_names_in_[0] != series.columns[0]:
         transformer = deepcopy(transformer)
-        transformer.feature_names_in_ = np.array([series.name], dtype=object)
+        transformer.feature_names_in_ = np.array([series.columns[0]], dtype=object)
 
     if inverse_transform:
         values_transformed = transformer.inverse_transform(series)
