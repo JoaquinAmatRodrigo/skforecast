@@ -463,7 +463,11 @@ def check_predict_input(
                     (f'Expected frequency of type {index_freq} for `exog`. '
                      f'Got {exog_index.freqstr}.')
                 )
+
+        # Check exog starts one step ahead of last_window end.
+        if
         
+
     if last_window is not None:
         # Check last_window type (pd.Series or pd.DataFrame according to forecaster)
         if forecaster_type in ['ForecasterAutoregMultiSeries', 'ForecasterAutoregMultiVariate']:
