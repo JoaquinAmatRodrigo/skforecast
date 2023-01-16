@@ -62,6 +62,9 @@ exog = pd.DataFrame({'col_1': pd.Series(np.array(
                      'col_2': ['a']*25 + ['b']*25}
        )
 
+exog_predict = exog.copy()
+exog_predict.index = pd.RangeIndex(start=50, stop=100)
+
 
 def test_predict_interval_exception_when_forecaster_in_sample_residuals_are_not_stored():
     """
@@ -433,7 +436,7 @@ def test_predict_interval_output_when_regressor_is_LinearRegression_with_transfo
                      transformer_exog = transformer_exog,
                  )
     forecaster.fit(series=series, exog=exog)
-    predictions = forecaster.predict_interval(steps=5, levels=['1', '2'], exog=exog)
+    predictions = forecaster.predict_interval(steps=5, levels=['1', '2'], exog=exog_predict)
     expected = pd.DataFrame(
                    data = np.array([[0.53267333, 0.17691231, 0.9399491 , 0.55496412, 0.14714165, 0.9246417],
                                     [0.44478046, 0.04641456, 0.83203647, 0.57787982, 0.14450512, 0.93373637],

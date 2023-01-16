@@ -62,6 +62,9 @@ exog = pd.DataFrame({'col_1': pd.Series(np.array(
                      'col_2': ['a']*25 + ['b']*25}
        )
 
+exog_predict = exog.copy()
+exog_predict.index = pd.RangeIndex(start=50, stop=100)
+
 
 @pytest.fixture(params=[('1'  , [50., 51., 52., 53., 54.]), 
                         (['2'], [100., 101., 102., 103., 104.]),
@@ -256,7 +259,7 @@ def test_predict_output_when_regressor_is_LinearRegression_with_transform_series
                      transformer_exog = transformer_exog,
                  )
     forecaster.fit(series=series, exog=exog)
-    predictions = forecaster.predict(steps=5, levels='1', exog=exog)
+    predictions = forecaster.predict(steps=5, levels='1', exog=exog_predict)
     expected = pd.DataFrame(
                    data    = np.array([0.53267333, 0.44478046, 0.52579563, 0.57391142, 0.54633594]),
                    index   = pd.RangeIndex(start=50, stop=55, step=1),

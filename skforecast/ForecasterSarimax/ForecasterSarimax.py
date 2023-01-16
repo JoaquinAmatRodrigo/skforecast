@@ -247,7 +247,7 @@ class ForecasterSarimax():
         if exog is not None:
             if isinstance(exog, pd.Series):
                 # pmdarima.arima.ARIMA only accepts DataFrames or 2d-arrays as exog   
-                exog = exog.to_frame(name=exog.name)
+                exog = exog.to_frame()
             
             exog = transform_dataframe(
                        df                = exog,
@@ -309,6 +309,9 @@ class ForecasterSarimax():
             
         """
 
+        # Needs to be a new variable to avoid arima_res_.append if not needed
+        last_window_check = last_window if last_window is not None else self.last_window
+
         check_predict_input(
             forecaster_type  = type(self).__name__,
             steps            = steps,
@@ -317,7 +320,7 @@ class ForecasterSarimax():
             index_type       = self.index_type,
             index_freq       = self.index_freq,
             window_size      = self.window_size,
-            last_window      = last_window,
+            last_window      = last_window_check,
             last_window_exog = last_window_exog,
             exog             = exog,
             exog_type        = self.exog_type,
@@ -328,6 +331,21 @@ class ForecasterSarimax():
             levels           = None,
             series_col_names = None
         )
+
+        # If last_window_exog is provided but no last_window
+        if last_window is None and last_window_exog is not None:
+            raise ValueError(
+                ('To make predictions unrelated to the original data, both '
+                 '`last_window` and `last_window_exog` must be provided.')
+            )
+
+        # Check if forecaster needs exog
+        if last_window is not None and last_window_exog is None and self.included_exog:
+            raise ValueError(
+                ('Forecaster trained with exogenous variable/s. To make predictions '
+                 'unrelated to the original data, same variable/s must be provided '
+                 'using `last_window_exog`.')
+            )  
 
         if last_window is not None:
             # If predictions do not follow directly from the end of the training 
@@ -367,7 +385,7 @@ class ForecasterSarimax():
 
                 if isinstance(last_window_exog, pd.Series):
                     # pmdarima.arima.ARIMA only accepts DataFrames or 2d-arrays as exog 
-                    last_window_exog = last_window_exog.to_frame(name=exog.name)
+                    last_window_exog = last_window_exog.to_frame()
             
                 last_window_exog = transform_dataframe(
                                        df                = last_window_exog,
@@ -386,7 +404,7 @@ class ForecasterSarimax():
         if exog is not None:
             if isinstance(exog, pd.Series):
                 # pmdarima.arima.ARIMA only accepts DataFrames or 2d-arrays as exog
-                exog = exog.to_frame(name=exog.name)
+                exog = exog.to_frame()
 
             exog = transform_dataframe(
                        df                = exog,
@@ -469,6 +487,9 @@ class ForecasterSarimax():
 
         """
 
+        # Needs to be a new variable to avoid arima_res_.append if not needed
+        last_window_check = last_window if last_window is not None else self.last_window
+
         check_predict_input(
             forecaster_type  = type(self).__name__,
             steps            = steps,
@@ -477,7 +498,7 @@ class ForecasterSarimax():
             index_type       = self.index_type,
             index_freq       = self.index_freq,
             window_size      = self.window_size,
-            last_window      = last_window,
+            last_window      = last_window_check,
             last_window_exog = last_window_exog,
             exog             = exog,
             exog_type        = self.exog_type,
@@ -488,6 +509,21 @@ class ForecasterSarimax():
             levels           = None,
             series_col_names = None
         )
+
+        # If last_window_exog is provided but no last_window
+        if last_window is None and last_window_exog is not None:
+            raise ValueError(
+                ('To make predictions unrelated to the original data, both '
+                 '`last_window` and `last_window_exog` must be provided.')
+            )
+
+        # Check if forecaster needs exog
+        if last_window is not None and last_window_exog is None and self.included_exog:
+            raise ValueError(
+                ('Forecaster trained with exogenous variable/s. To make predictions '
+                 'unrelated to the original data, same variable/s must be provided '
+                 'using `last_window_exog`.')
+            )  
 
         # If interval and alpha take alpha, if interval transform to alpha
         if alpha is None:
@@ -537,7 +573,7 @@ class ForecasterSarimax():
 
                 if isinstance(last_window_exog, pd.Series):
                     # pmdarima.arima.ARIMA only accepts DataFrames or 2d-arrays as exog 
-                    last_window_exog = last_window_exog.to_frame(name=exog.name)
+                    last_window_exog = last_window_exog.to_frame()
             
                 last_window_exog = transform_dataframe(
                                        df                = last_window_exog,
@@ -556,7 +592,7 @@ class ForecasterSarimax():
         if exog is not None:
             if isinstance(exog, pd.Series):
                 # pmdarima.arima.ARIMA only accepts DataFrames or 2d-arrays as exog
-                exog = exog.to_frame(name=exog.name)
+                exog = exog.to_frame()
 
             exog = transform_dataframe(
                        df                = exog,
