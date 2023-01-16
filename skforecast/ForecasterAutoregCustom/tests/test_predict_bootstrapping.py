@@ -16,9 +16,9 @@ def create_predictors(y):
     return lags 
 
 
-def test_estimate_boot_interval_output_when_forecaster_is_LinearRegression_steps_is_1_in_sample_residuals_is_True():
+def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_steps_is_1_in_sample_residuals_is_True():
     """
-    Test output of _estimate_boot_interval when regressor is LinearRegression and
+    Test output of predict_bootstrapping when regressor is LinearRegression and
     1 step is predicted using in-sample residuals.
     """
     forecaster = ForecasterAutoregCustom(
@@ -38,9 +38,9 @@ def test_estimate_boot_interval_output_when_forecaster_is_LinearRegression_steps
     pd.testing.assert_frame_equal(expected, results)
     
     
-def test_estimate_boot_interval_output_when_forecaster_is_LinearRegression_steps_is_2_in_sample_residuals_is_True():
+def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_steps_is_2_in_sample_residuals_is_True():
     """
-    Test output of _estimate_boot_interval when regressor is LinearRegression and
+    Test output of predict_bootstrapping when regressor is LinearRegression and
     2 steps are predicted using in-sample residuals.
     """
     forecaster = ForecasterAutoregCustom(
@@ -61,9 +61,9 @@ def test_estimate_boot_interval_output_when_forecaster_is_LinearRegression_steps
     pd.testing.assert_frame_equal(expected, results)
     
     
-def test_estimate_boot_interval_output_when_forecaster_is_LinearRegression_steps_is_1_in_sample_residuals_is_False():
+def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_steps_is_1_in_sample_residuals_is_False():
     """
-    Test output of _estimate_boot_interval when regressor is LinearRegression and
+    Test output of predict_bootstrapping when regressor is LinearRegression and
     1 step is predicted using out-sample residuals.
     """
     forecaster = ForecasterAutoregCustom(
@@ -83,9 +83,9 @@ def test_estimate_boot_interval_output_when_forecaster_is_LinearRegression_steps
     pd.testing.assert_frame_equal(expected, results)
     
     
-def test_estimate_boot_interval_output_when_forecaster_is_LinearRegression_steps_is_2_in_sample_residuals_is_False():
+def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_steps_is_2_in_sample_residuals_is_False():
     """
-    Test output of _estimate_boot_interval when regressor is LinearRegression and
+    Test output of predict_bootstrapping when regressor is LinearRegression and
     2 steps are predicted using out-sample residuals.
     """
     forecaster = ForecasterAutoregCustom(
