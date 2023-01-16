@@ -45,6 +45,49 @@ exog = pd.Series(
            name = 'exog'
        )
 
+exog_predict = pd.Series(
+                  data = np.array([0.12062867, 0.8263408 , 0.60306013, 0.54506801, 0.34276383,
+                                   0.30412079, 0.41702221, 0.68130077, 0.87545684, 0.51042234]
+                      ),
+                  name = 'exog',
+                  index = pd.RangeIndex(start=50, stop=60)
+              )
+
+
+def test_predict_ValueError_when_ForecasterSarimax_last_window_exog_is_not_None_and_last_window_is_not_provided():
+    """
+    Check ValueError is raised when last_window_exog is not None, but 
+    last_window is not provided.
+    """
+    forecaster = ForecasterSarimax(regressor=ARIMA(order=(1,1,1)))
+    forecaster.fit(y=y, exog=exog)
+    
+    err_msg = re.escape(
+                ('To make predictions unrelated to the original data, both '
+                 '`last_window` and `last_window_exog` must be provided.')
+              )   
+    with pytest.raises(ValueError, match = err_msg):
+        forecaster.predict(steps=5, exog=exog_predict, last_window=None, last_window_exog=exog)
+
+
+def test_predict_ValueError_when_ForecasterSarimax_last_window_exog_is_None_and_included_exog_is_true():
+    """
+    Check ValueError is raised when last_window_exog is None, but included_exog
+    is True and last_window is provided.
+    """
+    forecaster = ForecasterSarimax(regressor=ARIMA(order=(1,1,1)))
+    forecaster.fit(y=y, exog=exog)
+    lw = pd.Series(np.random.rand(10), index=pd.RangeIndex(start=50, stop=60))
+    exog_predict = pd.Series(np.random.rand(10), index=pd.RangeIndex(start=60, stop=70))
+    
+    err_msg = re.escape(
+                ('Forecaster trained with exogenous variable/s. To make predictions '
+                 'unrelated to the original data, same variable/s must be provided '
+                 'using `last_window_exog`.')
+              )   
+    with pytest.raises(ValueError, match = err_msg):
+        forecaster.predict(steps=5, exog=exog_predict, last_window=lw, last_window_exog=None)
+
 
 @pytest.mark.parametrize("kwargs, data", 
                          [({'order': (1,1,1), 
@@ -84,7 +127,7 @@ def test_predict_output_ForecasterSarimax_with_exog(kwargs, data):
     """
     forecaster = ForecasterSarimax(regressor=ARIMA(**kwargs))
     forecaster.fit(y=y, exog=exog)
-    predictions = forecaster.predict(steps=5, exog=exog)
+    predictions = forecaster.predict(steps=5, exog=exog_predict)
     expected = pd.Series(
                    data  = data,
                    index = pd.RangeIndex(start=50, stop=55, step=1),
@@ -138,6 +181,8 @@ def test_predict_output_ForecasterSarimax_with_transform_y_and_transform_exog(kw
                   'exog_1': exog,
                   'exog_2': ['a']*25+['b']*25}
               )
+    df_exog_predict = df_exog.copy()
+    df_exog_predict.index = pd.RangeIndex(start=50, stop=100)
     transformer_exog = ColumnTransformer(
                            [('scale', StandardScaler(), ['exog_1']),
                             ('onehot', OneHotEncoder(), ['exog_2'])],
@@ -151,7 +196,7 @@ def test_predict_output_ForecasterSarimax_with_transform_y_and_transform_exog(kw
                      transformer_exog = transformer_exog
                  )
     forecaster.fit(y=y, exog=df_exog)
-    predictions = forecaster.predict(steps=5, exog=df_exog)
+    predictions = forecaster.predict(steps=5, exog=df_exog_predict)
     expected = pd.Series(
                    data  = data,
                    index = pd.RangeIndex(start=50, stop=55, step=1),
@@ -193,6 +238,8 @@ def test_exception_predict_when_last_window_exog_index_does_not_follow_training_
     y_datetime.index = pd.date_range(start='2022-01-01', periods=50)
     exog_datetime = pd.Series(data=list(exog))
     exog_datetime.index = pd.date_range(start='2022-01-01', periods=50)
+    exog_pred_datetime = pd.Series(data=list(exog_predict))
+    exog_pred_datetime.index = pd.date_range(start='2022-04-11', periods=10)
 
     lw_datetime = pd.Series(data=np.random.rand(50))
     lw_datetime.index = pd.date_range(start='2022-02-20', periods=50)
@@ -211,7 +258,12 @@ def test_exception_predict_when_last_window_exog_index_does_not_follow_training_
          f'    `last_window_exog` index start : {lw_exog_datetime.index[0]}.')
     )
     with pytest.raises(ValueError, match = err_msg):
-        forecaster.predict(steps=5, exog=exog_datetime, last_window=lw_datetime, last_window_exog=lw_exog_datetime)
+        forecaster.predict(
+            steps            = 5, 
+            exog             = exog_pred_datetime, 
+            last_window      = lw_datetime,
+            last_window_exog = lw_exog_datetime
+        )
 
 
 @pytest.mark.parametrize("kwargs, data", 
@@ -262,6 +314,8 @@ def test_predict_output_ForecasterSarimax_with_last_window_and_exog(kwargs, data
 
     exog_datetime = pd.Series(data=list(exog))
     exog_datetime.index = pd.date_range(start='2000', periods=50, freq='A')
+    exog_pred_datetime = pd.Series(data=list(exog_predict))
+    exog_pred_datetime.index = pd.date_range(start='2100', periods=10, freq='A')
     lw_exog_datetime = pd.Series(data=list(exog))
     lw_exog_datetime.index = pd.date_range(start='2050', periods=50, freq='A')
 
@@ -269,7 +323,7 @@ def test_predict_output_ForecasterSarimax_with_last_window_and_exog(kwargs, data
     forecaster.fit(y=y_datetime, exog=exog_datetime)
     predictions = forecaster.predict(
                       steps            = 5, 
-                      exog             = exog_datetime, 
+                      exog             = exog_pred_datetime, 
                       last_window      = lw_datetime, 
                       last_window_exog = lw_exog_datetime
                   )

@@ -420,14 +420,67 @@ def check_predict_input(
             ('Forecaster trained without exogenous variable/s. '
              '`exog` must be `None` when predicting.')
         )
+        
+    # Checks last_window
+    # Check last_window type (pd.Series or pd.DataFrame according to forecaster)
+    if forecaster_type in ['ForecasterAutoregMultiSeries', 'ForecasterAutoregMultiVariate']:
+        if not isinstance(last_window, pd.DataFrame):
+            raise TypeError(
+                f'`last_window` must be a pandas DataFrame. Got {type(last_window)}.'
+            )
+        
+        if forecaster_type == 'ForecasterAutoregMultiSeries' and \
+            len(set(levels) - set(last_window.columns)) != 0:
+            raise ValueError(
+                (f'`last_window` must contain a column(s) named as the level(s) to be predicted.\n'
+                 f'    `levels` : {levels}.\n'
+                 f'    `last_window` columns : {list(last_window.columns)}.')
+            )
+        
+        if forecaster_type == 'ForecasterAutoregMultiVariate' and \
+            (series_col_names != list(last_window.columns)):
+            raise ValueError(
+                (f'`last_window` columns must be the same as `series` column names.\n'
+                 f'    `last_window` columns : {list(last_window.columns)}.\n'
+                 f'    `series` columns      : {series_col_names}.')
+            )    
+    else:    
+        if not isinstance(last_window, pd.Series):
+            raise TypeError(
+                f'`last_window` must be a pandas Series. Got {type(last_window)}.'
+            )
     
+    # Check last_window len, nulls and index (type and freq)
+    if len(last_window) < window_size:
+        raise ValueError(
+            (f'`last_window` must have as many values as needed to '
+             f'generate the predictors. For this forecaster it is {window_size}.')
+        )
+    if last_window.isnull().any().all():
+        raise ValueError('`last_window` has missing values.')
+    _, last_window_index = preprocess_last_window(
+                                last_window = last_window.iloc[:0]
+                            ) 
+    if not isinstance(last_window_index, index_type):
+        raise TypeError(
+            (f'Expected index of type {index_type} for `last_window`. '
+             f'Got {type(last_window_index)}.')
+        )
+    if isinstance(last_window_index, pd.DatetimeIndex):
+        if not last_window_index.freqstr == index_freq:
+            raise TypeError(
+                (f'Expected frequency of type {index_freq} for `last_window`. '
+                 f'Got {last_window_index.freqstr}.')
+            )
+
+    # Checks exog
     if exog is not None:
         # Check exog has many values as distance to max step predicted
         last_step = max(steps) if isinstance(steps, list) else steps
         if len(exog) < last_step:
             raise ValueError(
-                f'`exog` must have at least as many values as the distance to '
-                f'the maximum step predicted, {last_step}.'
+                (f'`exog` must have at least as many values as the distance to '
+                 f'the maximum step predicted, {last_step}.')
             )
 
         # Check nulls and index type and freq
@@ -469,87 +522,21 @@ def check_predict_input(
         if expected_index != exog.index[0]:
             raise ValueError(
                 (f'To make predictions `exog` must start one step ahead of `last_window` end.\n'
-                    f'    `last_window` ends at : {last_window.index[-1]}.\n'
-                    f'    Expected index        : {expected_index}.\n'
-                    f'    `exog` starts at      : {exog.index[0]}.')
+                 f'    `last_window` ends at : {last_window.index[-1]}.\n'
+                 f'    Expected index        : {expected_index}.\n'
+                 f'    `exog` starts at      : {exog.index[0]}.')
             )
-        
-
-    if last_window is not None:
-        # Check last_window type (pd.Series or pd.DataFrame according to forecaster)
-        if forecaster_type in ['ForecasterAutoregMultiSeries', 'ForecasterAutoregMultiVariate']:
-            if not isinstance(last_window, pd.DataFrame):
-                raise TypeError(
-                    f'`last_window` must be a pandas DataFrame. Got {type(last_window)}.'
-                )
-            
-            if forecaster_type == 'ForecasterAutoregMultiSeries' and \
-               len(set(levels) - set(last_window.columns)) != 0:
-                raise ValueError(
-                    (f'`last_window` must contain a column(s) named as the level(s) to be predicted.\n'
-                     f'    `levels` : {levels}.\n'
-                     f'    `last_window` columns : {list(last_window.columns)}.')
-                )
-            
-            if forecaster_type == 'ForecasterAutoregMultiVariate' and \
-               (series_col_names != list(last_window.columns)):
-                raise ValueError(
-                    (f'`last_window` columns must be the same as `series` column names.\n'
-                     f'    `last_window` columns : {list(last_window.columns)}.\n'
-                     f'    `series` columns      : {series_col_names}.')
-                )    
-        else:    
-            if not isinstance(last_window, pd.Series):
-                raise TypeError(
-                    f'`last_window` must be a pandas Series. Got {type(last_window)}.'
-                )
-        
-        # Check last_window len, nulls and index (type and freq)
-        if len(last_window) < window_size:
-            raise ValueError(
-                (f'`last_window` must have as many values as needed to '
-                 f'generate the predictors. For this forecaster it is {window_size}.')
-            )
-        if last_window.isnull().any().all():
-            raise ValueError('`last_window` has missing values.')
-        _, last_window_index = preprocess_last_window(
-                                    last_window = last_window.iloc[:0]
-                                ) 
-        if not isinstance(last_window_index, index_type):
-            raise TypeError(
-                f'Expected index of type {index_type} for `last_window`. '
-                f'Got {type(last_window_index)}.'
-            )
-        if isinstance(last_window_index, pd.DatetimeIndex):
-            if not last_window_index.freqstr == index_freq:
-                raise TypeError(
-                    f'Expected frequency of type {index_freq} for `last_window`. '
-                    f'Got {last_window_index.freqstr}.'
-                )
 
     # Checks ForecasterSarimax
     if forecaster_type == 'ForecasterSarimax':
-        # Check if forecaster needs exog
-        if last_window is not None and last_window_exog is None and included_exog:
-            raise ValueError(
-                ('Forecaster trained with exogenous variable/s. '
-                 'Same variable/s must be provided using `last_window_exog`.')
-            )   
-        if last_window_exog is not None and not included_exog:
-            raise ValueError(
-                ('Forecaster trained without exogenous variable/s. '
-                 '`last_window_exog` must be `None` when predicting.')
-            )
-
-        # If last_window_exog is provided but no last_window
-        if last_window is None and last_window_exog is not None:
-            raise ValueError(
-                ('To make predictions unrelated to the original data, both '
-                 '`last_window` and `last_window_exog` must be provided.')
-            )
-
         # Check last_window_exog type, len, nulls and index (type and freq)
         if last_window_exog is not None:
+            if not included_exog:
+                raise ValueError(
+                    ('Forecaster trained without exogenous variable/s. '
+                     '`last_window_exog` must be `None` when predicting.')
+                )
+
             if not isinstance(last_window_exog, (pd.Series, pd.DataFrame)):
                 raise TypeError(
                     (f'`last_window_exog` must be a pandas Series or a '

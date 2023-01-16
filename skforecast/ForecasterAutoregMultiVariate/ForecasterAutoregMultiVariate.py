@@ -758,6 +758,9 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                     f"`steps` argument must be an int, a list of ints or `None`. "
                     f"Got {type(steps)}."
                 )
+
+        if last_window is None:
+            last_window = self.last_window.copy()
         
         check_predict_input(
             forecaster_type  = type(self).__name__,
@@ -803,9 +806,6 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             exog_values = None
 
         X_lags = np.array([[]], dtype=float)
-
-        if last_window is None:
-            last_window = self.last_window.copy()
         
         for serie in self.series_col_names:
             

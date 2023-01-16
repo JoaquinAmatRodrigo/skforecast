@@ -815,6 +815,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             levels = self.series_col_names
         elif isinstance(levels, str):
             levels = [levels]
+
+        if last_window is None:
+            last_window = deepcopy(self.last_window)
         
         check_predict_input(
             forecaster_type  = type(self).__name__,
@@ -859,9 +862,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         predictions = []
 
         for level in levels:
-
-            if last_window is None:
-                last_window = self.last_window.copy()
 
             last_window_level = transform_series(
                                     series            = last_window[level],
@@ -1132,6 +1132,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 (f'Not `forecaster.out_sample_residuals` for levels: {set(levels) - set(self.out_sample_residuals.keys())}. '
                  f'Use method `set_out_sample_residuals()`.')
             )
+
+        if last_window is None:
+            last_window = deepcopy(self.last_window)
         
         check_predict_input(
             forecaster_type    = type(self).__name__,
@@ -1174,11 +1177,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             exog_values = None
         
         predictions = []
+        exog_values_original = exog_values.copy() if exog is not None else None
 
         for level in levels:
-
-            if last_window is None:
-                last_window = self.last_window.copy()
             
             last_window_level = transform_series(
                                     series            = last_window[level],
@@ -1193,10 +1194,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             # Since during predict() `last_window_values` and `exog_values` are modified,
             # the originals are stored to be used later.
             last_window_values_original = last_window_values.copy()
-            if exog is not None:
-                exog_values_original = exog_values.copy()
-            else:
-                exog_values_original = None
                 
             preds_level = self._recursive_predict(
                               steps       = steps,
@@ -1206,12 +1203,12 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                           )
 
             preds_level_interval = self._estimate_boot_interval(
-                                       steps       = steps,
-                                       level       = level,
-                                       last_window = copy(last_window_values_original),
-                                       exog        = copy(exog_values_original),
-                                       interval    = interval,
-                                       n_boot      = n_boot,
+                                       steps        = steps,
+                                       level        = level,
+                                       last_window  = copy(last_window_values_original),
+                                       exog         = copy(exog_values_original),
+                                       interval     = interval,
+                                       n_boot       = n_boot,
                                        random_state = random_state,
                                        in_sample_residuals = in_sample_residuals
                                    )

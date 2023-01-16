@@ -838,9 +838,9 @@ class ForecasterAutoregDirect(ForecasterBase):
             residuals = self.out_sample_residuals
 
         predictions = self.predict(
-                        steps       = steps,
-                        last_window = last_window,
-                        exog        = exog 
+                          steps       = steps,
+                          last_window = last_window,
+                          exog        = exog 
                       )
 
         # Predictions must be in the transformed scale before adding residuals
