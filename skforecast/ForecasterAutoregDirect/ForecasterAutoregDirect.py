@@ -673,6 +673,9 @@ class ForecasterAutoregDirect(ForecasterBase):
                     f"Got {type(steps)}."
                 )
 
+        if last_window is None:
+            last_window = self.last_window.copy()
+
         check_predict_input(
             forecaster_type  = type(self).__name__,
             steps            = steps,
@@ -716,9 +719,6 @@ class ForecasterAutoregDirect(ForecasterBase):
         else:
             exog_values = None
 
-        if last_window is None:
-            last_window = self.last_window.copy()
-        
         last_window = transform_series(
                           series            = last_window,
                           transformer       = self.transformer_y,
