@@ -6,13 +6,17 @@ All notable changes to this project will be documented in this file.
 
 **Added**
 
++ Class `ForecasterSarimax` and `model_selection_sarimax`.
+
 + Method `predict_dist()` to `ForecasterAutoreg`, `ForecasterAutoregDirect` and `ForecasterAutoregCustom`.
 
 + Method `predict_interval()` to `ForecasterAutoregDirect`.
 
-  
 **Changed**
 
++ `model_selection_statsmodels` is deprecated in favor of `ForecasterSarimax` and `model_selection_sarimax`.
+
++ Remove `levels_weights` argument in `grid_search_forecaster_multiseries` and `random_search_forecaster_multiseries`, deprecated since version 0.6.0. Use `series_weights` and `weights_func` when creating the forecaster instead.
 
 **Fixed**
 
