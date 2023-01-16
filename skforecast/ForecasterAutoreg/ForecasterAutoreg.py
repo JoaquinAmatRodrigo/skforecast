@@ -582,6 +582,9 @@ class ForecasterAutoreg(ForecasterBase):
             
         """
 
+        if last_window is None:
+            last_window = self.last_window.copy()
+
         check_predict_input(
             forecaster_type  = type(self).__name__,
             steps            = steps,
@@ -623,9 +626,6 @@ class ForecasterAutoreg(ForecasterBase):
                              )
         else:
             exog_values = None
-            
-        if last_window is None:
-            last_window = self.last_window.copy()
         
         last_window = transform_series(
                           series            = last_window,
@@ -730,6 +730,9 @@ class ForecasterAutoreg(ForecasterBase):
                  'before `predict_interval()`.')
             )
 
+        if last_window is None:
+            last_window = self.last_window.copy()
+
         check_predict_input(
             forecaster_type  = type(self).__name__,
             steps            = steps,
@@ -771,9 +774,6 @@ class ForecasterAutoreg(ForecasterBase):
                              )
         else:
             exog_values = None
-            
-        if last_window is None:
-            last_window = self.last_window.copy()
         
         last_window = transform_series(
                           series            = last_window,

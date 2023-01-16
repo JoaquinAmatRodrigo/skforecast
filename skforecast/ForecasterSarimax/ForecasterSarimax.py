@@ -346,16 +346,12 @@ class ForecasterSarimax():
                      f'    `last_window` index start : {last_window.index[0]}.')
                 )
 
-            print(last_window.head())
-
             last_window = transform_series(
                               series            = last_window,
                               transformer       = self.transformer_y,
                               fit               = False,
                               inverse_transform = False
                           )
-
-            print(last_window.head())
 
             # last_window_exog
             if last_window_exog is not None:
