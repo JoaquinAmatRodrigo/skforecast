@@ -143,7 +143,7 @@ def backtesting_sarimax(
          'in a future version of Skforecast. Instead, a forecaster based on ARIMA ' 
          'models, `ForecasterSarimax`, and the `model_selection_sarimax` module, ' 
          'for model evaluation and optimization, have been created.\n\n'
-         'Docs: https://joaquinamatrodrigo.github.io/skforecast/latest/user_guides/forecaster-sarimax-arima.html')
+         'Docs: https://joaquinamatrodrigo.github.io/skforecast/latest/user_guides/forecasting-sarimax-arima.html')
     )
 
     if isinstance(metric, str):
@@ -495,7 +495,7 @@ def cv_sarimax(
          'in a future version of Skforecast. Instead, a forecaster based on ARIMA ' 
          'models, `ForecasterSarimax`, and the `model_selection_sarimax` module, ' 
          'for model evaluation and optimization, have been created.\n\n'
-         'Docs: https://joaquinamatrodrigo.github.io/skforecast/latest/user_guides/forecaster-sarimax-arima.html')
+         'Docs: https://joaquinamatrodrigo.github.io/skforecast/latest/user_guides/forecasting-sarimax-arima.html')
     )
     
     if isinstance(metric, str):
@@ -637,7 +637,7 @@ def grid_search_sarimax(
          'in a future version of Skforecast. Instead, a forecaster based on ARIMA ' 
          'models, `ForecasterSarimax`, and the `model_selection_sarimax` module, ' 
          'for model evaluation and optimization, have been created.\n\n'
-         'Docs: https://joaquinamatrodrigo.github.io/skforecast/latest/user_guides/forecaster-sarimax-arima.html')
+         'Docs: https://joaquinamatrodrigo.github.io/skforecast/latest/user_guides/forecasting-sarimax-arima.html')
     )
 
     params_list = []

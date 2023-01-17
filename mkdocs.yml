@@ -27,6 +27,7 @@ nav:
       - Direct multi-step forecasting: user_guides/direct-multi-step-forecasting.ipynb
       - Multi-time series forecasting: user_guides/multi-time-series-forecasting.ipynb
       - Multivariate series forecasting: user_guides/multivariate-forecasting.ipynb
+      - Forecasting SARIMAX and ARIMA models: user_guides/forecasting-sarimax-arima.ipynb
       - Exogenous variables: user_guides/autoregresive-forecaster-exogenous.ipynb
       - Custom predictors: user_guides/custom-predictors.ipynb
       - Weighted time series forecasting: user_guides/weighted-time-series-forecasting.ipynb
