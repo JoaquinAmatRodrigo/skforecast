@@ -117,7 +117,7 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_steps_
                     columns = [f"pred_boot_{i}" for i in range(4)],
                     index   = pd.RangeIndex(start=50, stop=52)
                 )
-    results = forecaster.predict_bootstrapping(steps=2, n_boot=4, exog=exog_predict, in_sample_residuals=True)
+    results = forecaster.predict_bootstrapping(steps=2, n_boot=4, exog=exog_predict, in_sample_residuals=False)
 
     pd.testing.assert_frame_equal(expected, results)
 
@@ -167,7 +167,7 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_steps_
                                 [-0.06983175,  0.40010008,  0.06326565,  0.05134409]]
                         ),
                     columns = [f"pred_boot_{i}" for i in range(4)],
-                    index   = [50, 51]
+                    index   = pd.RangeIndex(start=50, stop=52)
                 )
     pd.testing.assert_frame_equal(expected, results)
         
