@@ -50,7 +50,7 @@ def test_backtesting_sarimax_ValueError_when_initial_train_size_more_than_or_equ
     """
     forecaster = ForecasterSarimax(regressor=ARIMA(order=(1,1,1)))
     
-    err_msg = re.escape('If used, `initial_train_size` must be smaller than length of `series`.')
+    err_msg = re.escape('If used, `initial_train_size` must be smaller than length of `y`.')
     with pytest.raises(ValueError, match = err_msg):
         backtesting_sarimax(
             forecaster         = forecaster,
