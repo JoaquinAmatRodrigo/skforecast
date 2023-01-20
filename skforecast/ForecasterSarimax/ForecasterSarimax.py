@@ -73,13 +73,21 @@ class ForecasterSarimax():
         preprocessing API. The transformation is applied to `exog` before training the
         forecaster. `inverse_transform` is not available when using ColumnTransformers.
    
-    window_size : int
-        Size of the window needed to create the predictors. It is equal to
-        max value of the parameters p,q,P,D of the ARIMA.
+    window_size : int, `1` 
+        Not used, present here for API consistency by convention.
 
     last_window : pandas Series
         Last window the forecaster has seen during trained. It stores the
         values needed to predict the next `step` right after the training data.
+
+    extended_index : pandas Index
+        When predicting using `last_window` and `last_window_exog`, the internal
+        statsmodels SARIMAX will be updated using its append method. To do this,
+        `last_window` data must start at the end of the index seen by the 
+        forecaster, this is stored in forecaster.extended_index.
+
+        Check https://www.statsmodels.org/dev/generated/statsmodels.tsa.arima.model.ARIMAResults.append.html
+        to know more about statsmodels append method.
         
     fitted : Bool
         Tag to identify if the regressor has been fitted (trained).
@@ -127,33 +135,28 @@ class ForecasterSarimax():
         self.regressor         = regressor
         self.transformer_y     = transformer_y
         self.transformer_exog  = transformer_exog
-        self.index_freq        = None
-        self.training_range    = None
+        self.window_size       = 1
         self.last_window       = None
         self.extended_index    = None
+        self.fitted            = False
+        self.index_type        = None
+        self.index_freq        = None
+        self.training_range    = None
         self.included_exog     = False
         self.exog_type         = None
         self.exog_col_names    = None
-        self.fitted            = False
         self.creation_date     = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
         self.fit_date          = None
         self.skforcast_version = skforecast.__version__
         self.python_version    = sys.version.split(" ")[0]
-        self.index_type        = None
         
         if not isinstance(self.regressor, pmdarima.arima.ARIMA):
-            raise ValueError(
+            raise TypeError(
                 (f"`regressor` must be an instance of type pmdarima.arima.ARIMA. "
                  f"Got {type(regressor)}.")
             )
 
         self.params = self.regressor.get_params(deep=True)
-        self.window_size = max([
-                            self.params['order'][0] + self.params['order'][1], 
-                            self.params['order'][2] + self.params['order'][1],
-                            self.params['seasonal_order'][0] + self.params['seasonal_order'][1], 
-                            self.params['seasonal_order'][2] + self.params['seasonal_order'][1]
-                           ])
 
 
     def __repr__(
@@ -180,7 +183,7 @@ class ForecasterSarimax():
             f"Training index frequency: {self.index_freq if self.fitted else None} \n"
             f"Creation date: {self.creation_date} \n"
             f"Last fit date: {self.fit_date} \n"
-            f"Last append date: {self.extended_index} \n"
+            f"Index seen by the forecaster: {self.extended_index} \n"
             f"Skforecast version: {self.skforcast_version} \n"
             f"Python version: {self.python_version} \n"
         )
@@ -287,6 +290,14 @@ class ForecasterSarimax():
         exogenous variables were used in the model fit, they will be expected 
         for the predict procedure and will fail otherwise.
         
+        When predicting using `last_window` and `last_window_exog`, the internal
+        statsmodels SARIMAX will be updated using its append method. To do this,
+        `last_window` data must start at the end of the index seen by the 
+        forecaster, this is stored in forecaster.extended_index.
+
+        Check https://www.statsmodels.org/dev/generated/statsmodels.tsa.arima.model.ARIMAResults.append.html
+        to know more about statsmodels append method.
+        
         Parameters
         ----------
         steps : int
@@ -355,17 +366,15 @@ class ForecasterSarimax():
         if last_window is not None:
             # If predictions do not follow directly from the end of the training 
             # data. The internal statsmodels SARIMAX model needs to be updated 
-            # using the append method. The data needs to start at the end of the 
+            # using its append method. The data needs to start at the end of the 
             # training series.
 
-            # check index fitted values 
-            # Even with append(refit=False) the values changes
-            # index_to_expand = self.regressor.arima_res_.fittedvalues.index
+            # check index append values
             expected_index = expand_index(index=self.extended_index, steps=1)[0]
             if expected_index != last_window.index[0]:
                 raise ValueError(
                     (f'To make predictions unrelated to the original data, `last_window` '
-                     f'has to start at the end of the training set.\n'
+                     f'has to start at the end of the index seen by the forecaster.\n'
                      f'    Series last index         : {self.extended_index[-1]}.\n'
                      f'    Expected index            : {expected_index}.\n'
                      f'    `last_window` index start : {last_window.index[0]}.')
@@ -390,7 +399,7 @@ class ForecasterSarimax():
                 if expected_index != last_window_exog.index[0]:
                     raise ValueError(
                         (f'To make predictions unrelated to the original data, `last_window_exog` '
-                         f'has to start at the end of the training set.\n'
+                         f'has to start at the end of the index seen by the forecaster.\n'
                          f'    Series last index              : {self.extended_index[-1]}.\n'
                          f'    Expected index                 : {expected_index}.\n'
                          f'    `last_window_exog` index start : {last_window_exog.index[0]}.')
@@ -462,6 +471,14 @@ class ForecasterSarimax():
         intervals. Note that if exogenous variables were used in the model fit, 
         they will be expected for the predict procedure and will fail otherwise.
         
+        When predicting using `last_window` and `last_window_exog`, the internal
+        statsmodels SARIMAX will be updated using its append method. To do this,
+        `last_window` data must start at the end of the index seen by the 
+        forecaster, this is stored in forecaster.extended_index.
+
+        Check https://www.statsmodels.org/dev/generated/statsmodels.tsa.arima.model.ARIMAResults.append.html
+        to know more about statsmodels append method.
+
         Parameters
         ---------- 
         steps : int
@@ -552,18 +569,16 @@ class ForecasterSarimax():
         if last_window is not None:
             # If predictions do not follow directly from the end of the training 
             # data. The internal statsmodels SARIMAX model needs to be updated 
-            # using the append method. The data needs to start at the end of the 
+            # using its append method. The data needs to start at the end of the 
             # training series.
 
-            # check index fitted values 
-            # Even with append(refit=False) the values changes
-            index_to_expand = self.regressor.arima_res_.fittedvalues.index
-            expected_index = expand_index(index_to_expand, 1)[0]
+            # check index append values
+            expected_index = expand_index(index=self.extended_index, steps=1)[0]
             if expected_index != last_window.index[0]:
                 raise ValueError(
                     (f'To make predictions unrelated to the original data, `last_window` '
-                     f'has to start at the end of the training set.\n'
-                     f'    Series last index         : {index_to_expand[-1]}.\n'
+                     f'has to start at the end of the index seen by the forecaster.\n'
+                     f'    Series last index         : {self.extended_index[-1]}.\n'
                      f'    Expected index            : {expected_index}.\n'
                      f'    `last_window` index start : {last_window.index[0]}.')
                 )
@@ -587,8 +602,8 @@ class ForecasterSarimax():
                 if expected_index != last_window_exog.index[0]:
                     raise ValueError(
                         (f'To make predictions unrelated to the original data, `last_window_exog` '
-                         f'has to start at the end of the training set.\n'
-                         f'    Series last index              : {index_to_expand[-1]}.\n'
+                         f'has to start at the end of the index seen by the forecaster.\n'
+                         f'    Series last index              : {self.extended_index[-1]}.\n'
                          f'    Expected index                 : {expected_index}.\n'
                          f'    `last_window_exog` index start : {last_window_exog.index[0]}.')
                     )
@@ -609,6 +624,7 @@ class ForecasterSarimax():
                                             exog  = last_window_exog,
                                             refit = False
                                         )
+            self.extended_index = self.regressor.arima_res_.fittedvalues.index
 
         # Exog
         if exog is not None:

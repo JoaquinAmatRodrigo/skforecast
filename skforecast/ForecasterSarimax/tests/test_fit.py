@@ -7,6 +7,10 @@ import pandas as pd
 from skforecast.ForecasterSarimax import ForecasterSarimax
 from pmdarima.arima import ARIMA
 
+# Fixtures
+from .fixtures_ForecasterSarimax import y
+from .fixtures_ForecasterSarimax import y_datetime
+
 
 def test_fit_exception_when_len_exog_is_not_the_same_as_len_y():
     """
@@ -62,3 +66,18 @@ def test_fit_last_window_stored():
     expected = pd.Series(np.arange(50))
 
     pd.testing.assert_series_equal(forecaster.last_window, expected)
+
+
+@pytest.mark.parametrize("y          , idx", 
+                         [(y         , pd.RangeIndex(start=0, stop=50)), 
+                          (y_datetime, pd.date_range(start='2000', periods=50, freq='A'))], 
+                         ids = lambda values : f'y, index: {values}')
+def test_fit_extended_index_stored(y, idx):
+    """
+    Test that values of self.regressor.arima_res_.fittedvalues.index are 
+    stored after fitting in forecaster.extended_index.
+    """
+    forecaster = ForecasterSarimax(regressor = ARIMA(order=(1,1,1)))
+    forecaster.fit(y=y)
+
+    pd.testing.assert_index_equal(forecaster.extended_index, idx)

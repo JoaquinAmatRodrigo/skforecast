@@ -207,9 +207,10 @@ def test_predict_interval_output_ForecasterSarimax_with_transform_y_and_transfor
     pd.testing.assert_frame_equal(predictions, expected)
 
 
-def test_exception_predict_interval_when_last_window_index_does_not_follow_training_set():
+def test_predict_interval_ValueError_when_last_window_index_does_not_follow_training_set():
     """
-    Raise exception if `last_window` index does not start at the end of the training set.
+    Raise ValueError if `last_window` index does not start at the end 
+    of the index seen by the forecaster.
     """
     y_test = pd.Series(data=y_datetime.values)
     y_test.index = pd.date_range(start='2022-01-01', periods=50, freq='D')
@@ -218,13 +219,12 @@ def test_exception_predict_interval_when_last_window_index_does_not_follow_train
 
     forecaster = ForecasterSarimax(regressor=ARIMA(order=(1,1,1)))
     forecaster.fit(y=y_test)
-    index_to_expand = forecaster.regressor.arima_res_.fittedvalues.index
-    expected_index = expand_index(index_to_expand, 1)[0]
+    expected_index = expand_index(forecaster.extended_index, 1)[0]
 
     err_msg = re.escape(
         (f'To make predictions unrelated to the original data, `last_window` '
-         f'has to start at the end of the training set.\n'
-         f'    Series last index         : {forecaster.last_window.index[-1]}.\n'
+         f'has to start at the end of the index seen by the forecaster.\n'
+         f'    Series last index         : {forecaster.extended_index[-1]}.\n'
          f'    Expected index            : {expected_index}.\n'
          f'    `last_window` index start : {lw_test.index[0]}.')
     )
@@ -236,9 +236,10 @@ def test_exception_predict_interval_when_last_window_index_does_not_follow_train
         )
 
 
-def test_exception_predict_interval_when_last_window_exog_index_does_not_follow_training_set():
+def test_predict_interval_ValueError_when_last_window_exog_index_does_not_follow_training_set():
     """
-    Raise exception if `last_window_exog` index does not start at the end of the training set.
+    Raise ValueError if `last_window_exog` index does not start at the end 
+    of the index seen by the forecaster.
     """
     y_test = pd.Series(data=y_datetime.values)
     y_test.index = pd.date_range(start='2022-01-01', periods=50, freq='D')
@@ -254,13 +255,12 @@ def test_exception_predict_interval_when_last_window_exog_index_does_not_follow_
 
     forecaster = ForecasterSarimax(regressor=ARIMA(order=(1,1,1)))
     forecaster.fit(y=y_test, exog=exog_test)
-    index_to_expand = forecaster.regressor.arima_res_.fittedvalues.index
-    expected_index = expand_index(index_to_expand, 1)[0]
+    expected_index = expand_index(forecaster.extended_index, 1)[0]
 
     err_msg = re.escape(
         (f'To make predictions unrelated to the original data, `last_window_exog` '
-         f'has to start at the end of the training set.\n'
-         f'    Series last index              : {forecaster.last_window.index[-1]}.\n'
+         f'has to start at the end of the index seen by the forecaster.\n'
+         f'    Series last index              : {forecaster.extended_index[-1]}.\n'
          f'    Expected index                 : {expected_index}.\n'
          f'    `last_window_exog` index start : {lw_exog_test.index[0]}.')
     )
@@ -377,3 +377,28 @@ def test_predict_interval_output_ForecasterSarimax_with_last_window_and_exog_amd
                )
     
     pd.testing.assert_frame_equal(predictions, expected)
+
+
+@pytest.mark.parametrize("y          , idx", 
+                         [(y         , pd.RangeIndex(start=0, stop=50)), 
+                          (y_datetime, pd.date_range(start='2000', periods=50, freq='A'))], 
+                         ids = lambda values : f'y, index: {values}')
+def test_predict_interval_ForecasterSarimax_updates_extended_index_twice(y, idx):
+    """
+    Test forecaster.extended_index is updated when using predict_interval twice.
+    """
+    y_fit = y.iloc[:30].copy()
+
+    forecaster = ForecasterSarimax(regressor=ARIMA(order=(1,1,1)))
+    forecaster.fit(y=y_fit)
+
+    lw_1 = y.iloc[30:40].copy()
+    forecaster.predict_interval(steps=5, alpha = 0.05, last_window=lw_1)
+    result_1 = forecaster.extended_index.copy()
+    expected_1 = idx[:40]
+
+    lw_2 = y.iloc[40:].copy()
+    forecaster.predict_interval(steps=5, alpha = 0.05, last_window=lw_2)
+
+    pd.testing.assert_index_equal(result_1, expected_1)
+    pd.testing.assert_index_equal(forecaster.extended_index, idx)

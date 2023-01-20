@@ -320,15 +320,11 @@ def _backtesting_sarimax_no_refit(
             last_window_y = None
             last_window_exog = None
         else: 
-            last_window_end   = initial_train_size + i * steps
-            last_window_start = initial_train_size + (i-1) * steps
-            last_window_y     = y.iloc[last_window_start:last_window_end]
+            last_window_start = initial_train_size + steps * (i-1)
+            last_window_end   = initial_train_size + steps * i
 
+            last_window_y     = y.iloc[last_window_start:last_window_end]
             last_window_exog  = exog.iloc[last_window_start:last_window_end, ] if exog is not None else None
-        
-        # print(last_window_y)
-        # print(forecaster.regressor.arima_res_.fittedvalues.tail())
-        # print(forecaster.regressor.arima_res_.fittedvalues.index)
         
         next_window_exog  = exog.iloc[last_window_end:last_window_end + steps, ] if exog is not None else None
     
@@ -352,7 +348,7 @@ def _backtesting_sarimax_no_refit(
                        last_window      = last_window_y,
                        last_window_exog = last_window_exog
                    )
-            
+        
         backtest_predictions.append(pred)
 
     backtest_predictions = pd.concat(backtest_predictions)

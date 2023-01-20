@@ -185,7 +185,8 @@ def test_predict_output_ForecasterSarimax_with_transform_y_and_transform_exog(kw
 
 def test_predict_ValueError_when_last_window_index_does_not_follow_training_set():
     """
-    Raise ValueError if `last_window` index does not start at the end of the training set.
+    Raise ValueError if `last_window` index does not start at the end 
+    of the index seen by the forecaster.
     """
     y_test = pd.Series(data=y_datetime.values)
     y_test.index = pd.date_range(start='2022-01-01', periods=50, freq='D')
@@ -197,7 +198,7 @@ def test_predict_ValueError_when_last_window_index_does_not_follow_training_set(
 
     err_msg = re.escape(
         (f'To make predictions unrelated to the original data, `last_window` '
-         f'has to start at the end of the training set.\n'
+         f'has to start at the end of the index seen by the forecaster.\n'
          f'    Series last index         : 2022-02-19 00:00:00.\n'
          f'    Expected index            : 2022-02-20 00:00:00.\n'
          f'    `last_window` index start : 2022-03-01 00:00:00.')
@@ -206,9 +207,10 @@ def test_predict_ValueError_when_last_window_index_does_not_follow_training_set(
         forecaster.predict(steps=5, last_window=lw_test)
 
 
-def test_exception_predict_when_last_window_exog_index_does_not_follow_training_set():
+def test_predict_ValueError_when_last_window_exog_index_does_not_follow_training_set():
     """
-    Raise exception if `last_window_exog` index does not start at the end of the training set.
+    Raise ValueError if `last_window_exog` index does not start at the end 
+    of the index seen by the forecaster.
     """
     y_test = pd.Series(data=y_datetime.values)
     y_test.index = pd.date_range(start='2022-01-01', periods=50, freq='D')
@@ -227,7 +229,7 @@ def test_exception_predict_when_last_window_exog_index_does_not_follow_training_
 
     err_msg = re.escape(
         (f'To make predictions unrelated to the original data, `last_window_exog` '
-         f'has to start at the end of the training set.\n'
+         f'has to start at the end of the index seen by the forecaster.\n'
          f'    Series last index              : 2022-02-19 00:00:00.\n'
          f'    Expected index                 : 2022-02-20 00:00:00.\n'
          f'    `last_window_exog` index start : 2022-03-01 00:00:00.')
@@ -335,3 +337,28 @@ def test_predict_output_ForecasterSarimax_with_last_window_and_exog_and_transfor
                )
     
     pd.testing.assert_series_equal(predictions, expected)
+
+
+@pytest.mark.parametrize("y          , idx", 
+                         [(y         , pd.RangeIndex(start=0, stop=50)), 
+                          (y_datetime, pd.date_range(start='2000', periods=50, freq='A'))], 
+                         ids = lambda values : f'y, index: {values}')
+def test_predict_ForecasterSarimax_updates_extended_index_twice(y, idx):
+    """
+    Test forecaster.extended_index is updated when using predict twice.
+    """
+    y_fit = y.iloc[:30].copy()
+
+    forecaster = ForecasterSarimax(regressor=ARIMA(order=(1,1,1)))
+    forecaster.fit(y=y_fit)
+
+    lw_1 = y.iloc[30:40].copy()
+    forecaster.predict(steps=5, last_window=lw_1)
+    result_1 = forecaster.extended_index.copy()
+    expected_1 = idx[:40]
+
+    lw_2 = y.iloc[40:].copy()
+    forecaster.predict(steps=5, last_window=lw_2)
+
+    pd.testing.assert_index_equal(result_1, expected_1)
+    pd.testing.assert_index_equal(forecaster.extended_index, idx)
