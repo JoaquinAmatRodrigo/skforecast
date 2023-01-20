@@ -117,4 +117,6 @@ def plot_multivariate_time_series_corr(
     )
 
     ax.set_xlabel('Time series')
-    fig.show()
+    
+    return ax
+    
