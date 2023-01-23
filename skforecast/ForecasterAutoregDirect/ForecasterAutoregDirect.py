@@ -16,6 +16,7 @@ import sklearn
 import sklearn.pipeline
 from sklearn.base import clone
 import inspect
+from copy import copy
 
 import skforecast
 from ..ForecasterBase import ForecasterBase
