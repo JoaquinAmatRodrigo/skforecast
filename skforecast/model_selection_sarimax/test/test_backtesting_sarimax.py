@@ -5,44 +5,42 @@ import pytest
 from pytest import approx
 import numpy as np
 import pandas as pd
-from sklearn.exceptions import NotFittedError
 from skforecast.ForecasterSarimax import ForecasterSarimax
-from skforecast.model_selection_statsmodels import backtesting_sarimax
+from skforecast.model_selection_sarimax import backtesting_sarimax
 from pmdarima.arima import ARIMA
 
-# Fixtures _backtesting_forecaster_refit Series (skforecast==0.4.2)
-# np.random.seed(123)
-# y = np.random.rand(50)
-# exog = np.random.rand(50)
+# Fixtures
+from ...ForecasterSarimax.tests.fixtures_ForecasterSarimax import y_datetime
+from ...ForecasterSarimax.tests.fixtures_ForecasterSarimax import exog_datetime
 
-y = pd.Series(
-    np.array([0.69646919, 0.28613933, 0.22685145, 0.55131477, 0.71946897,
-              0.42310646, 0.9807642 , 0.68482974, 0.4809319 , 0.39211752,
-              0.34317802, 0.72904971, 0.43857224, 0.0596779 , 0.39804426,
-              0.73799541, 0.18249173, 0.17545176, 0.53155137, 0.53182759,
-              0.63440096, 0.84943179, 0.72445532, 0.61102351, 0.72244338,
-              0.32295891, 0.36178866, 0.22826323, 0.29371405, 0.63097612,
-              0.09210494, 0.43370117, 0.43086276, 0.4936851 , 0.42583029,
-              0.31226122, 0.42635131, 0.89338916, 0.94416002, 0.50183668,
-              0.62395295, 0.1156184 , 0.31728548, 0.41482621, 0.86630916,
-              0.25045537, 0.48303426, 0.98555979, 0.51948512, 0.61289453]))
 
-exog = pd.Series(
-    np.array([0.12062867, 0.8263408 , 0.60306013, 0.54506801, 0.34276383,
-              0.30412079, 0.41702221, 0.68130077, 0.87545684, 0.51042234,
-              0.66931378, 0.58593655, 0.6249035 , 0.67468905, 0.84234244,
-              0.08319499, 0.76368284, 0.24366637, 0.19422296, 0.57245696,
-              0.09571252, 0.88532683, 0.62724897, 0.72341636, 0.01612921,
-              0.59443188, 0.55678519, 0.15895964, 0.15307052, 0.69552953,
-              0.31876643, 0.6919703 , 0.55438325, 0.38895057, 0.92513249,
-              0.84167   , 0.35739757, 0.04359146, 0.30476807, 0.39818568,
-              0.70495883, 0.99535848, 0.35591487, 0.76254781, 0.59317692,
-              0.6917018 , 0.15112745, 0.39887629, 0.2408559 , 0.34345601]), 
-    name='exog')
+def test_backtesting_sarimax_ValueError_when_initial_train_size_is_None():
+    """
+    Test ValueError is raised in backtesting_sarimax when initial_train_size is None.
+    """
+    forecaster = ForecasterSarimax(regressor=ARIMA(order=(1,1,1)))
+
+    initial_train_size = None
+    
+    err_msg = re.escape('`initial_train_size` must be an int smaller than the length of `y`.')
+    with pytest.raises(ValueError, match = err_msg):
+        backtesting_sarimax(
+            forecaster         = forecaster,
+            y                  = y_datetime,
+            steps              = 4,
+            metric             = 'mean_absolute_error',
+            initial_train_size = initial_train_size,
+            refit              = False,
+            fixed_train_size   = False,
+            exog               = None,
+            alpha              = None,
+            interval           = None,
+            verbose            = False
+        )
 
 
 @pytest.mark.parametrize("initial_train_size", 
-                         [(len(y)), (len(y) + 1)], 
+                         [(len(y_datetime)), (len(y_datetime) + 1)], 
                          ids = lambda value : f'len: {value}' )
 def test_backtesting_sarimax_ValueError_when_initial_train_size_more_than_or_equal_to_len_y(initial_train_size):
     """
@@ -50,11 +48,11 @@ def test_backtesting_sarimax_ValueError_when_initial_train_size_more_than_or_equ
     """
     forecaster = ForecasterSarimax(regressor=ARIMA(order=(1,1,1)))
     
-    err_msg = re.escape('If used, `initial_train_size` must be smaller than length of `y`.')
+    err_msg = re.escape('`initial_train_size` must be an int smaller than the length of `y`.')
     with pytest.raises(ValueError, match = err_msg):
         backtesting_sarimax(
             forecaster         = forecaster,
-            y                  = y,
+            y                  = y_datetime,
             steps              = 4,
             metric             = 'mean_absolute_error',
             initial_train_size = initial_train_size,
@@ -76,39 +74,13 @@ def test_backtesting_sarimax_ValueError_when_initial_train_size_less_than_foreca
     initial_train_size = forecaster.window_size - 1
     
     err_msg = re.escape(
-            f"`initial_train_size` must be greater than "
-            f"forecaster's window_size ({forecaster.window_size})."
+            (f"`initial_train_size` must be greater than "
+             f"forecaster's window_size ({forecaster.window_size}).")
         )
     with pytest.raises(ValueError, match = err_msg):
         backtesting_sarimax(
             forecaster         = forecaster,
-            y                  = y,
-            steps              = 4,
-            metric             = 'mean_absolute_error',
-            initial_train_size = initial_train_size,
-            refit              = False,
-            fixed_train_size   = False,
-            exog               = None,
-            alpha              = None,
-            interval           = None,
-            verbose            = False
-        )
-
-
-def test_backtesting_sarimax_NotFittedError_when_initial_train_size_None_and_forecaster_not_fitted():
-    """
-    Test NotFittedError is raised in backtesting_sarimax when initial_train_size is None and
-    forecaster is not fitted.
-    """
-    forecaster = ForecasterSarimax(regressor=ARIMA(order=(1,1,1)))
-
-    initial_train_size = None
-    
-    err_msg = re.escape('`forecaster` must be already trained if no `initial_train_size` is provided.')
-    with pytest.raises(NotFittedError, match = err_msg):
-        backtesting_sarimax(
-            forecaster         = forecaster,
-            y                  = y,
+            y                  = y_datetime,
             steps              = 4,
             metric             = 'mean_absolute_error',
             initial_train_size = initial_train_size,
@@ -133,7 +105,7 @@ def test_backtesting_sarimax_TypeError_when_refit_not_bool():
     with pytest.raises(TypeError, match = err_msg):
         backtesting_sarimax(
             forecaster         = forecaster,
-            y                  = y,
+            y                  = y_datetime,
             steps              = 4,
             metric             = 'mean_absolute_error',
             initial_train_size = 12,
@@ -146,49 +118,19 @@ def test_backtesting_sarimax_TypeError_when_refit_not_bool():
         )
 
 
-def test_backtesting_sarimax_ValueError_when_initial_train_size_None_and_refit_True():
-    """
-    Test ValueError is raised in backtesting_sarimax when initial_train_size is None
-    and refit is True.
-    """
-    forecaster = ForecasterSarimax(regressor=ARIMA(order=(1,1,1)))
-    forecaster.fitted = True
-
-    initial_train_size = None
-    refit = True
-    
-    err_msg = re.escape(f'`refit` is only allowed when `initial_train_size` is not `None`.')
-    with pytest.raises(ValueError, match = err_msg):
-        backtesting_sarimax(
-            forecaster         = forecaster,
-            y                  = y,
-            steps              = 4,
-            metric             = 'mean_absolute_error',
-            initial_train_size = initial_train_size,
-            refit              = refit,
-            fixed_train_size   = False,
-            exog               = None,
-            alpha              = None,
-            interval           = None,
-            verbose            = False
-        )
-
-
-def test_output_backtesting_sarimax_no_refit_no_exog_with_mocked():
+def test_output_backtesting_sarimax_no_refit_no_exog_no_remainder_with_mocked():
     """
     Test output of backtesting_sarimax with backtesting mocked, Series y is mocked, no exog, 
-    no refit, 12 observations to backtest, steps=4 (no remainder), metric='mean_squared_error'
+    no refit, 12 observations to backtest, steps=3 (no remainder), metric='mean_squared_error'
     """
     forecaster = ForecasterSarimax(regressor=ARIMA(order=(2,2,2)))
 
-    steps = 3
-
     metric, backtest_predictions = backtesting_sarimax(
                                         forecaster         = forecaster,
-                                        y                  = y,
-                                        steps              = steps,
+                                        y                  = y_datetime,
+                                        steps              = 3,
                                         metric             = 'mean_squared_error',
-                                        initial_train_size = len(y)-12,
+                                        initial_train_size = len(y_datetime)-12,
                                         fixed_train_size   = False,
                                         refit              = False,
                                         alpha              = None,
@@ -196,52 +138,227 @@ def test_output_backtesting_sarimax_no_refit_no_exog_with_mocked():
                                         verbose            = False
                                    )
     
-    expected_metric = 0.0822951336284151
-    expected_backtest_predictions = pd.DataFrame({
-    'predicted_mean':np.array([0.78762096, 0.69437463, 0.61216773, 0.55008326, 0.48495899, 0.42754477, 
-                               0.365715  , 0.32241806, 0.28424703, 0.42584791, 0.37543184, 0.33098452]),
-    'lower y':np.array([ 0.24826801, -0.02465313, -0.22013845,  0.01073031, -0.23406878, -0.40476141, 
-                        -0.17363794, -0.39660971, -0.54805914, -0.11350503, -0.34359592, -0.50132165]),
-    'upper y':np.array([1.3269739 , 1.4134024 , 1.44447391, 1.0894362 , 1.20398675, 1.25985094,
-                        0.90506794, 1.04144582, 1.11655321, 0.96520085, 1.09445961, 1.1632907 ])                                                                
-                                                                         }, index=np.arange(38, 50))
+    expected_metric = 0.10564120819988289
+    expected_values = np.array(
+                          [0.63793971, 0.55322609, 0.71445518, 0.81448569, 
+                           0.73818098, 0.71739124, 0.33699337, 0.34024219, 
+                           0.39178913, 0.66499417, 0.54139334, 0.53432513]
+                      )
+
+    expected_backtest_predictions = pd.DataFrame(
+                                        data    = expected_values,
+                                        columns = ['pred'],
+                                        index   = pd.date_range(start='2038', periods=12, freq='A')
+                                    )                                                     
 
     assert expected_metric == approx(metric)
     pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions)
 
 
-def test_output_backtesting_sarimax_yes_refit_no_exog_with_mocked():
+def test_output_backtesting_sarimax_no_refit_no_exog_remainder_with_mocked():
     """
     Test output of backtesting_sarimax with backtesting mocked, Series y is mocked, no exog, 
-    yes refit, 12 observations to backtest, steps=4 (no remainder), metric='mean_squared_error'
+    yes refit, 12 observations to backtest, steps=5 (remainder), metric='mean_squared_error'
     """
-    steps = 3
-    n_backtest = 12
-    y_train = y[:-n_backtest]
+    forecaster = ForecasterSarimax(regressor=ARIMA(order=(2,2,2)))
 
     metric, backtest_predictions = backtesting_sarimax(
-                                        y          = y,
-                                        steps      = steps,
-                                        metric     = 'mean_squared_error',
-                                        initial_train_size = len(y_train),
+                                        forecaster         = forecaster,
+                                        y                  = y_datetime,
+                                        steps              = 5,
+                                        metric             = 'mean_squared_error',
+                                        initial_train_size = len(y_datetime)-12,
                                         fixed_train_size   = False,
-                                        refit      = True,
-                                        order      = (1, 0, 0),
-                                        verbose    = False
+                                        refit              = False,
+                                        alpha              = None,
+                                        interval           = None,
+                                        verbose            = False
                                    )
     
-    expected_metric = 0.08690566590779003
-    expected_backtest_predictions = pd.DataFrame({
-    'predicted_mean':np.array([0.78762096, 0.69437463, 0.61216773, 0.54672076, 0.47904829, 0.41975224, 
-                               0.35752885, 0.30814562, 0.26558338, 0.41059292, 0.34901571, 0.29667332]),
-    'lower y':np.array([ 0.24826801, -0.02465313, -0.22013845,  0.01241147, -0.23135474, -0.40058642,
-                        -0.17946813, -0.40077799, -0.54786123, -0.1528057 , -0.39042186, -0.54741457]),
-    'upper y':np.array([1.3269739 , 1.4134024 , 1.44447391, 1.08103006, 1.18945132, 1.2400909 , 
-                        0.89452583, 1.01706922, 1.07902799, 0.97399153, 1.08845327, 1.14076121])                                                                
-                                                                         }, index=np.arange(38, 50))
+    expected_metric = 0.10061680900744897
+    expected_values = np.array(
+                          [0.63793971, 0.55322609, 0.71445518, 0.73039455, 0.69111006,
+                           0.49744496, 0.37841947, 0.3619615 , 0.43815806, 0.44457422,
+                           0.70144038, 0.61758017]
+                      )
+
+    expected_backtest_predictions = pd.DataFrame(
+                                        data    = expected_values,
+                                        columns = ['pred'],
+                                        index   = pd.date_range(start='2038', periods=12, freq='A')
+                                    )                                                     
 
     assert expected_metric == approx(metric)
     pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions)
+
+
+def test_output_backtesting_sarimax_yes_refit_no_exog_no_remainder_with_mocked():
+    """
+    Test output of backtesting_sarimax with backtesting mocked, Series y is mocked, no exog, 
+    yes refit, 12 observations to backtest, steps=3 (no remainder), metric='mean_squared_error'
+    """
+    forecaster = ForecasterSarimax(regressor=ARIMA(order=(2,2,2)))
+
+    metric, backtest_predictions = backtesting_sarimax(
+                                        forecaster         = forecaster,
+                                        y                  = y_datetime,
+                                        steps              = 3,
+                                        metric             = 'mean_squared_error',
+                                        initial_train_size = len(y_datetime)-12,
+                                        fixed_train_size   = False,
+                                        refit              = True,
+                                        alpha              = None,
+                                        interval           = None,
+                                        verbose            = False
+                                   )
+    
+    expected_metric = 0.1245724897025159
+    expected_values = np.array(
+                          [0.63793971, 0.55322609, 0.71445518, 0.82489505, 0.77191505,
+                           0.73750377, 0.30807646, 0.27854996, 0.28835934, 0.51981128,
+                           0.51690468, 0.51726221]
+                      )
+
+    expected_backtest_predictions = pd.DataFrame(
+                                        data    = expected_values,
+                                        columns = ['pred'],
+                                        index   = pd.date_range(start='2038', periods=12, freq='A')
+                                    )                                                     
+
+    assert expected_metric == approx(metric)
+    pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions)
+
+
+def test_output_backtesting_sarimax_yes_refit_no_exog_remainder_with_mocked():
+    """
+    Test output of backtesting_sarimax with backtesting mocked, Series y is mocked, no exog, 
+    yes refit, 12 observations to backtest, steps=5 (remainder), metric='mean_squared_error'
+    """
+    forecaster = ForecasterSarimax(regressor=ARIMA(order=(2,2,2)))
+
+    metric, backtest_predictions = backtesting_sarimax(
+                                        forecaster         = forecaster,
+                                        y                  = y_datetime,
+                                        steps              = 5,
+                                        metric             = 'mean_squared_error',
+                                        initial_train_size = len(y_datetime)-12,
+                                        fixed_train_size   = False,
+                                        refit              = True,
+                                        alpha              = None,
+                                        interval           = None,
+                                        verbose            = False
+                                   )
+    
+    expected_metric = 0.09556639597015694
+    expected_values = np.array(
+                          [0.63793971, 0.55322609, 0.71445518, 0.73039455, 0.69111006,
+                           0.4814143 , 0.5014026 , 0.48131545, 0.47225091, 0.4734432 ,
+                           0.78337242, 0.65285038]
+                      )
+
+    expected_backtest_predictions = pd.DataFrame(
+                                        data    = expected_values,
+                                        columns = ['pred'],
+                                        index   = pd.date_range(start='2038', periods=12, freq='A')
+                                    )                                                     
+
+    assert expected_metric == approx(metric)
+    pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions)
+
+
+def test_output_backtesting_sarimax_yes_refit_fixed_train_size_no_exog_no_remainder_with_mocked():
+    """
+    Test output of backtesting_sarimax with backtesting mocked, Series y is mocked, no exog, 
+    yes refit, fixed_train_size yes, 12 observations to backtest, steps=3 (no remainder), 
+    metric='mean_squared_error'
+    """
+    forecaster = ForecasterSarimax(regressor=ARIMA(order=(2,2,2)))
+
+    metric, backtest_predictions = backtesting_sarimax(
+                                        forecaster         = forecaster,
+                                        y                  = y_datetime,
+                                        steps              = 3,
+                                        metric             = 'mean_squared_error',
+                                        initial_train_size = len(y_datetime)-12,
+                                        fixed_train_size   = True,
+                                        refit              = True,
+                                        alpha              = None,
+                                        interval           = None,
+                                        verbose            = False
+                                   )
+    
+    expected_metric = 0.08703290568510223
+    expected_values = np.array(
+                          [0.63793971, 0.55322609, 0.71445518, 0.56816834, 0.60577745,
+                           0.61543978, 0.2837735 , 0.4109889 , 0.34055892, 0.54244717,
+                           0.35633378, 0.55692658]
+                      )
+
+    expected_backtest_predictions = pd.DataFrame(
+                                        data    = expected_values,
+                                        columns = ['pred'],
+                                        index   = pd.date_range(start='2038', periods=12, freq='A')
+                                    )                                                     
+
+    assert expected_metric == approx(metric)
+    pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions)
+
+
+def test_output_backtesting_sarimax_yes_refit_fixed_train_size_no_exog_remainder_with_mocked():
+    """
+    Test output of backtesting_sarimax with backtesting mocked, Series y is mocked, no exog, 
+    yes refit, fixed_train_size yes, 12 observations to backtest, steps=5 (remainder), 
+    metric='mean_squared_error'
+    """
+    forecaster = ForecasterSarimax(regressor=ARIMA(order=(2,2,2)))
+
+    metric, backtest_predictions = backtesting_sarimax(
+                                        forecaster         = forecaster,
+                                        y                  = y_datetime,
+                                        steps              = 5,
+                                        metric             = 'mean_squared_error',
+                                        initial_train_size = len(y_datetime)-12,
+                                        fixed_train_size   = True,
+                                        refit              = True,
+                                        alpha              = None,
+                                        interval           = None,
+                                        verbose            = False
+                                   )
+    
+    expected_metric = 0.14972067408401932
+    expected_values = np.array(
+                          [0.63793971, 0.55322609, 0.71445518, 0.73039455, 0.69111006,
+                           0.31724739, 0.1889182 , 0.29580158, 0.18153829, 0.2240739 ,
+                           0.69979474, 0.58754509]
+                      )
+
+    expected_backtest_predictions = pd.DataFrame(
+                                        data    = expected_values,
+                                        columns = ['pred'],
+                                        index   = pd.date_range(start='2038', periods=12, freq='A')
+                                    )                                                     
+
+    assert expected_metric == approx(metric)
+    pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions)
+
+
+
+
+
+
+
+# Hechos todos sin exog, no refit, refit y refit + fixed, con y sin remainder
+
+
+
+
+
+
+
+
+
+
+
 
 
 def test_output_backtesting_sarimax_no_refit_yes_exog_with_mocked():
@@ -316,17 +433,17 @@ def test_output_backtesting_sarimax_yes_refit_yes_exog_with_mocked():
 
 def my_metric(y_true, y_pred):
     """
-    Calleable metric
+    Callable metric
     """
     metric = ((y_true - y_pred)/len(y_true)).mean()
     
     return metric
 
 
-def test_output_backtesting_sarimax_no_refit_no_exog_calleable_metric_with_mocked():
+def test_output_backtesting_sarimax_no_refit_no_exog_callable_metric_with_mocked():
     """
     Test output of backtesting_sarimax with backtesting mocked, Series y is mocked, no exog, 
-    no refit, 12 observations to backtest, steps=4 (no remainder), calleable metric
+    no refit, 12 observations to backtest, steps=4 (no remainder), callable metric
     """
     steps = 3
     n_backtest = 12

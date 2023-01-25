@@ -177,17 +177,17 @@ def test_output_backtesting_sarimax_yes_refit_yes_exog_with_mocked():
 
 def my_metric(y_true, y_pred):
     """
-    Calleable metric
+    Callable metric
     """
     metric = ((y_true - y_pred)/len(y_true)).mean()
     
     return metric
 
 
-def test_output_backtesting_sarimax_no_refit_no_exog_calleable_metric_with_mocked():
+def test_output_backtesting_sarimax_no_refit_no_exog_callable_metric_with_mocked():
     """
     Test output of backtesting_sarimax with backtesting mocked, Series y is mocked, no exog, 
-    no refit, 12 observations to backtest, steps=4 (no remainder), calleable metric
+    no refit, 12 observations to backtest, steps=4 (no remainder), callable metric
     """
     steps = 3
     n_backtest = 12
