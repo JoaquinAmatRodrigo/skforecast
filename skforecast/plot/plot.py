@@ -6,7 +6,7 @@
 ################################################################################
 # coding=utf-8
  
-from typing import Union
+from typing import Union, Any
 import numpy as np
 import pandas as pd
 from ..utils import check_optional_dependency
@@ -118,5 +118,63 @@ def plot_multivariate_time_series_corr(
 
     ax.set_xlabel('Time series')
     
-    return ax
+    return fig
     
+
+def plot_prediction_distributions(
+    bootstrapping_predictions: pd.DataFrame,
+    bw_method: Any=None,
+    **fig_kw
+) -> matplotlib.figure.Figure:
+    """
+    Ridge plot of bootstrapping predictions. This plot is very useful to understand the
+    uncertainty of forecasting predictions.
+
+    Parameters
+    ----------
+    bootstrapping_predictions : pandas DataFrame
+        Bootstrapping predictions created with `Forecaster.predict_bootstrapping`.
+
+    bw_methodstr, scalar or callable, optional
+        The method used to calculate the estimator bandwidth. This can be 'scott’,
+         'silverman’, a scalar constant or a callable. If None (default), 'scott’ is used.
+         See scipy.stats.gaussian_kde for more information.
+
+    **fig_kw : any
+        All additional keyword arguments are passed to the `pyplot.figure` call.
+
+    Returns
+    ------
+    matplotlib.figure.Figure
+    """
+
+    index = bootstrapping_predictions.index.astype(str).to_list()[::-1]
+    palette = sns.cubehelix_palette(len(index), rot=-.25, light=.7, reverse=False)
+    fig, axs = plt.subplots(len(index), 1, sharex=True, **fig_kw)
+
+    for i, step in enumerate(index):
+        plot = (
+            bootstrapping_predictions.loc[step, :]
+            .plot.kde(ax=axs[i], bw_method=bw_method, color='w', lw=2)
+        )
+        #Fill density area
+        x = plot.get_children()[0]._x
+        y = plot.get_children()[0]._y
+        axs[i].fill_between(x, y, color=palette[i])
+        prediction_mean = bootstrapping_predictions.loc[step, :].mean()
+        
+        # Closest point on x to the prediction mean
+        idx = np.abs(x - prediction_mean).argmin()
+        axs[i].vlines(x[idx], ymin=0, ymax=y[idx], linestyle="dashed", color='w')
+
+        axs[i].spines['top'].set_visible(False)
+        axs[i].spines['right'].set_visible(False)
+        axs[i].spines['bottom'].set_visible(False)
+        axs[i].spines['left'].set_visible(False)
+        axs[i].set_yticklabels([])
+        axs[i].set_ylabel(step, rotation='horizontal', fontsize=8, va="bottom", ha='left')
+
+    fig.subplots_adjust(hspace=-0.3)
+    fig.suptitle('Forecasting distribution per step')
+
+    return axs
