@@ -308,17 +308,12 @@ def _backtesting_sarimax_no_refit(
         # Since the model is only fitted with the initial_train_size, last_window
         # and next_window_exog must be updated to include the data needed to make
         # predictions.
-        if i == 0 :
-            last_window_y = None
-            last_window_exog = None
-        else: 
-            last_window_start = initial_train_size + steps * (i-1)
-            last_window_end   = initial_train_size + steps * i
+        last_window_start = initial_train_size + steps * (i-1)
+        last_window_end   = initial_train_size + steps * i
 
-            last_window_y     = y.iloc[last_window_start:last_window_end]
-            last_window_exog  = exog.iloc[last_window_start:last_window_end, ] if exog is not None else None
-        
-        next_window_exog  = exog.iloc[last_window_end:last_window_end + steps, ] if exog is not None else None
+        last_window_y    = y.iloc[last_window_start:last_window_end] if i != 0 else None
+        last_window_exog = exog.iloc[last_window_start:last_window_end, ] if exog is not None and i != 0 else None 
+        next_window_exog = exog.iloc[last_window_end:last_window_end + steps, ] if exog is not None else None
     
         if i == folds - 1: # last fold
             # If remainder > 0, only the remaining steps need to be predicted
