@@ -760,7 +760,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                 )
 
         if last_window is None:
-            last_window = self.last_window.copy()
+            last_window = deepcopy(self.last_window)
         
         check_predict_input(
             forecaster_type  = type(self).__name__,

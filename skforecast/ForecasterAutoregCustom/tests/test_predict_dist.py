@@ -1,8 +1,8 @@
-# Unit test predict_dist ForecasterAutoregDirect
+# Unit test predict_dist ForecasterAutoreg
 # ==============================================================================
 import numpy as np
 import pandas as pd
-from skforecast.ForecasterAutoregDirect import ForecasterAutoregDirect
+from skforecast.ForecasterAutoregCustom import ForecasterAutoregCustom
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
 from scipy.stats import norm
@@ -30,11 +30,11 @@ def test_predict_dist_output_when_forecaster_is_LinearRegression_steps_is_2_in_s
     inputs are transformed.
     """
 
-    forecaster = ForecasterAutoregDirect(
-                    regressor        = LinearRegression(),
-                    steps            = 2,
-                    lags             = 3,
-                    transformer_y    = StandardScaler(),
+    forecaster = ForecasterAutoregCustom(
+                    regressor      = LinearRegression(),
+                    fun_predictors = create_predictors,
+                    window_size    = 3,
+                    transformer_y = StandardScaler(),
                     transformer_exog = StandardScaler(),
                  )
     forecaster.fit(y=y, exog=exog)
@@ -46,8 +46,8 @@ def test_predict_dist_output_when_forecaster_is_LinearRegression_steps_is_2_in_s
                 in_sample_residuals = True
             )
     expected = pd.DataFrame(
-                    data = np.array([[0.54274594, 0.20807726],
-                                     [0.32046382, 0.13511556]]),
+                    data = np.array([[0.52256427, 0.123189  ],
+                                     [0.11121952, 0.17472563]]),
                     columns = ['loc', 'scale'],
                     index   = pd.RangeIndex(start=50, stop=52)
                 )
@@ -61,11 +61,11 @@ def test_predict_dist_output_when_forecaster_is_LinearRegression_steps_is_2_in_s
     inputs are transformed.
     """
 
-    forecaster = ForecasterAutoregDirect(
-                    regressor        = LinearRegression(),
-                    steps            = 2,
-                    lags             = 3,
-                    transformer_y    = StandardScaler(),
+    forecaster = ForecasterAutoregCustom(
+                    regressor      = LinearRegression(),
+                    fun_predictors = create_predictors,
+                    window_size    = 3,
+                    transformer_y = StandardScaler(),
                     transformer_exog = StandardScaler(),
                  )
     forecaster.fit(y=y, exog=exog)
@@ -78,8 +78,8 @@ def test_predict_dist_output_when_forecaster_is_LinearRegression_steps_is_2_in_s
                 in_sample_residuals = False
             )
     expected = pd.DataFrame(
-                    data = np.array([[0.54274594, 0.20807726],
-                                     [0.32046382, 0.13511556]]),
+                    data = np.array([[0.52256427, 0.123189  ],
+                                     [0.11121952, 0.17472563]]),
                     columns = ['loc', 'scale'],
                     index   = pd.RangeIndex(start=50, stop=52)
                 )
