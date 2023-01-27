@@ -14,6 +14,8 @@ All notable changes to this project will be documented in this file.
 
 + Method `predict_bootstrapping()` to `ForecasterAutoreg`, `ForecasterAutoregDirect` and `ForecasterAutoregCustom`.
 
++ Function `plot_prediction_distribution` in module `plot`.
+
 **Changed**
 
 + `model_selection_statsmodels` is deprecated in favor of `ForecasterSarimax` and `model_selection_sarimax`.
