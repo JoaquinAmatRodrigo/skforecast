@@ -459,7 +459,7 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoregCustom_with_mock
 
 def test_evaluate_bayesian_search_optuna_when_return_best():
     """
-    Test forecaster is refited when return_best=True in _bayesian_search_optuna.
+    Test forecaster is refitted when return_best=True in _bayesian_search_optuna.
     """
     forecaster = ForecasterAutoreg(
                     regressor = Ridge(random_state=123),

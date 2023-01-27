@@ -274,6 +274,7 @@ class ForecasterSarimax():
 
         self.last_window = y.copy()
         self.extended_index = self.regressor.arima_res_.fittedvalues.index.copy()
+        self.params = self.regressor.get_params(deep=True)
 
 
     def predict(
@@ -685,6 +686,7 @@ class ForecasterSarimax():
 
         self.regressor = clone(self.regressor)
         self.regressor.set_params(**params)
+        self.params = self.regressor.get_params(deep=True)
         
     
     def get_feature_importance(

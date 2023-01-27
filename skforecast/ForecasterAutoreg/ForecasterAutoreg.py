@@ -217,7 +217,7 @@ class ForecasterAutoreg(ForecasterBase):
             params = {key : value for key, value in self.regressor.get_params().items() \
                       if key.startswith(name_pipe_steps)}
         else:
-            params = self.regressor.get_params()
+            params = self.regressor.get_params(deep=True)
 
         info = (
             f"{'=' * len(str(type(self)).split('.')[1])} \n"

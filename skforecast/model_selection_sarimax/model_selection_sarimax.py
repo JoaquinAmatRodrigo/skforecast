@@ -772,8 +772,8 @@ def _evaluate_grid_hyperparameters_sarimax(
 
     if return_best and exog is not None and (len(exog) != len(y)):
         raise ValueError(
-            f'`exog` must have same number of samples as `y`. '
-            f'length `exog`: ({len(exog)}), length `y`: ({len(y)})'
+            (f'`exog` must have same number of samples as `y`. '
+             f'length `exog`: ({len(exog)}), length `y`: ({len(y)})')
         )
 
     params_list = []
