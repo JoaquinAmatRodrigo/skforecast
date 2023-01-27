@@ -12,6 +12,8 @@ All notable changes to this project will be documented in this file.
 
 + Method `predict_interval()` to `ForecasterAutoregDirect`.
 
++ Method `predict_bootstrapping()` to `ForecasterAutoreg`, `ForecasterAutoregDirect` and `ForecasterAutoregCustom`.
+
 **Changed**
 
 + `model_selection_statsmodels` is deprecated in favor of `ForecasterSarimax` and `model_selection_sarimax`.
