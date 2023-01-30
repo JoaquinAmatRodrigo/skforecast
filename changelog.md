@@ -12,6 +12,8 @@ All notable changes to this project will be documented in this file.
 
 + Method `predict_interval()` to `ForecasterAutoregDirect`.
 
++ Method `predict_bootstrapping()` to `ForecasterAutoreg`, `ForecasterAutoregDirect` and `ForecasterAutoregCustom`.
+
 + Function `plot_prediction_distribution` in module `plot`.
 
 **Changed**

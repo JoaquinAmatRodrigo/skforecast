@@ -391,7 +391,7 @@ def test_results_output_bayesian_search_skopt_ForecasterAutoregCustom_with_mocke
 
 def test_evaluate_bayesian_search_skopt_when_return_best():
     """
-    Test forecaster is refited when return_best=True in _bayesian_search_skopt.
+    Test forecaster is refitted when return_best=True in _bayesian_search_skopt.
     """
     forecaster = ForecasterAutoreg(
                     regressor = Ridge(random_state=123),

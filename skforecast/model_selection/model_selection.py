@@ -575,7 +575,7 @@ def _backtesting_forecaster_no_refit(
         last_window_end   = initial_train_size + i * steps
         last_window_start = last_window_end - window_size 
         last_window_y     = y.iloc[last_window_start:last_window_end]
-
+        
         next_window_exog = exog.iloc[last_window_end:last_window_end + steps, ] if exog is not None else None
     
         if i == folds - 1: # last fold

@@ -200,7 +200,7 @@ def _backtesting_sarimax_no_refit(
     y: pd.Series,
     steps: int,
     metric: Union[str, callable, list],
-    initial_train_size: Optional[int]=None,
+    initial_train_size: int,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     alpha: Optional[float]=None,
     interval: Optional[list]=None,
@@ -240,11 +240,9 @@ def _backtesting_sarimax_no_refit(
         If list:
             List containing several strings and/or callable.
     
-    initial_train_size : int, default `None`
-        Number of samples in the initial train split. If `None` and `forecaster` is already
-        trained, no initial train is done and all data is used to evaluate the model. However, 
-        the first `len(forecaster.last_window)` observations are needed to create the 
-        initial predictors, so no predictions are calculated for them.
+    initial_train_size : int
+        Number of samples in the initial train split. The backtest forecaster is
+        trained using the first `initial_train_size` observations.
         
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
@@ -289,15 +287,9 @@ def _backtesting_sarimax_no_refit(
     
     backtest_predictions = []
 
-    if initial_train_size is not None:
-        exog_train_values = exog.iloc[:initial_train_size, ] if exog is not None else None
-        forecaster.fit(y=y.iloc[:initial_train_size], exog=exog_train_values)
-        window_size = forecaster.window_size
-    else:
-        # Although not used for training, first observations are needed to create
-        # the initial predictors
-        window_size = forecaster.window_size
-        initial_train_size = window_size
+    # initial_train_size cannot be None because of append method in Sarimax
+    exog_train_values = exog.iloc[:initial_train_size, ] if exog is not None else None
+    forecaster.fit(y=y.iloc[:initial_train_size], exog=exog_train_values)
     
     folds     = int(np.ceil((len(y) - initial_train_size) / steps))
     remainder = (len(y) - initial_train_size) % steps
@@ -316,12 +308,12 @@ def _backtesting_sarimax_no_refit(
         # Since the model is only fitted with the initial_train_size, last_window
         # and next_window_exog must be updated to include the data needed to make
         # predictions.
-        last_window_end   = initial_train_size + i * steps
-        last_window_start = last_window_end - window_size 
-        last_window_y     = y.iloc[last_window_start:last_window_end]
+        last_window_start = initial_train_size + steps * (i-1)
+        last_window_end   = initial_train_size + steps * i
 
-        last_window_exog  = exog.iloc[last_window_start:last_window_end, ] if exog is not None else None
-        next_window_exog  = exog.iloc[last_window_end:last_window_end + steps, ] if exog is not None else None
+        last_window_y    = y.iloc[last_window_start:last_window_end] if i != 0 else None
+        last_window_exog = exog.iloc[last_window_start:last_window_end, ] if exog is not None and i != 0 else None 
+        next_window_exog = exog.iloc[last_window_end:last_window_end + steps, ] if exog is not None else None
     
         if i == folds - 1: # last fold
             # If remainder > 0, only the remaining steps need to be predicted
@@ -343,7 +335,7 @@ def _backtesting_sarimax_no_refit(
                        last_window      = last_window_y,
                        last_window_exog = last_window_exog
                    )
-            
+        
         backtest_predictions.append(pred)
 
     backtest_predictions = pd.concat(backtest_predictions)
@@ -370,7 +362,7 @@ def backtesting_sarimax(
     y: pd.Series,
     steps: int,
     metric: Union[str, callable, list],
-    initial_train_size: Optional[int]=None,
+    initial_train_size: int,
     fixed_train_size: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     refit: bool=False,
@@ -410,13 +402,9 @@ def backtesting_sarimax(
         If list:
             List containing several strings and/or callable.
     
-    initial_train_size : int, default `None`
-        Number of samples in the initial train split. If `None` and `forecaster` is already 
-        trained, no initial train is done and all data is used to evaluate the model. However, 
-        the first `len(forecaster.last_window)` observations are needed to create the 
-        initial predictors, so no predictions are calculated for them.
-
-        `None` is only allowed when `refit` is `False`.
+    initial_train_size : int
+        Number of samples in the initial train split. The backtest forecaster is
+        trained using the first `initial_train_size` observations.
     
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
@@ -456,9 +444,14 @@ def backtesting_sarimax(
     
     """
 
+    if initial_train_size is None:
+        raise ValueError(
+            '`initial_train_size` must be an int smaller than the length of `y`.'
+        )
+
     if initial_train_size is not None and initial_train_size >= len(y):
         raise ValueError(
-            'If used, `initial_train_size` must be smaller than length of `y`.'
+            '`initial_train_size` must be an int smaller than the length of `y`.'
         )
         
     if initial_train_size is not None and initial_train_size < forecaster.window_size:
@@ -467,19 +460,9 @@ def backtesting_sarimax(
              f"forecaster's window_size ({forecaster.window_size}).")
         )
 
-    if initial_train_size is None and not forecaster.fitted:
-        raise NotFittedError(
-            '`forecaster` must be already trained if no `initial_train_size` is provided.'
-        )
-
     if not isinstance(refit, bool):
         raise TypeError(
             f'`refit` must be boolean: `True`, `False`.'
-        )
-
-    if initial_train_size is None and refit:
-        raise ValueError(
-            f'`refit` is only allowed when `initial_train_size` is not `None`.'
         )
     
     if refit:
@@ -557,7 +540,8 @@ def grid_search_sarimax(
             List containing several strings and/or callable.
 
     initial_train_size : int 
-        Number of samples in the initial train split.
+        Number of samples in the initial train split. The backtest forecaster is
+        trained using the first `initial_train_size` observations.
  
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
@@ -654,7 +638,8 @@ def random_search_sarimax(
             List containing several strings and/or callable.
 
     initial_train_size : int 
-        Number of samples in the initial train split.
+        Number of samples in the initial train split. The backtest forecaster is
+        trained using the first `initial_train_size` observations.
  
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
@@ -755,7 +740,8 @@ def _evaluate_grid_hyperparameters_sarimax(
             List containing several strings and/or callable.
 
     initial_train_size : int 
-        Number of samples in the initial train split.
+        Number of samples in the initial train split. The backtest forecaster is
+        trained using the first `initial_train_size` observations.
  
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
@@ -786,8 +772,8 @@ def _evaluate_grid_hyperparameters_sarimax(
 
     if return_best and exog is not None and (len(exog) != len(y)):
         raise ValueError(
-            f'`exog` must have same number of samples as `y`. '
-            f'length `exog`: ({len(exog)}), length `y`: ({len(y)})'
+            (f'`exog` must have same number of samples as `y`. '
+             f'length `exog`: ({len(exog)}), length `y`: ({len(y)})')
         )
 
     params_list = []

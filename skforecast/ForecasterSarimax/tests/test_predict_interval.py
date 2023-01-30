@@ -12,46 +12,19 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import OneHotEncoder
 
 # Fixtures
-# np.random.seed(123)
-# y = np.random.rand(50)
-# exog = np.random.rand(50)
-y = pd.Series(
-        data = np.array([0.69646919, 0.28613933, 0.22685145, 0.55131477, 0.71946897,
-                         0.42310646, 0.9807642 , 0.68482974, 0.4809319 , 0.39211752,
-                         0.34317802, 0.72904971, 0.43857224, 0.0596779 , 0.39804426,
-                         0.73799541, 0.18249173, 0.17545176, 0.53155137, 0.53182759,
-                         0.63440096, 0.84943179, 0.72445532, 0.61102351, 0.72244338,
-                         0.32295891, 0.36178866, 0.22826323, 0.29371405, 0.63097612,
-                         0.09210494, 0.43370117, 0.43086276, 0.4936851 , 0.42583029,
-                         0.31226122, 0.42635131, 0.89338916, 0.94416002, 0.50183668,
-                         0.62395295, 0.1156184 , 0.31728548, 0.41482621, 0.86630916,
-                         0.25045537, 0.48303426, 0.98555979, 0.51948512, 0.61289453]
-            ),
-        name = 'y'
-    )
-
-exog = pd.Series(
-           data = np.array([0.12062867, 0.8263408 , 0.60306013, 0.54506801, 0.34276383,
-                            0.30412079, 0.41702221, 0.68130077, 0.87545684, 0.51042234,
-                            0.66931378, 0.58593655, 0.6249035 , 0.67468905, 0.84234244,
-                            0.08319499, 0.76368284, 0.24366637, 0.19422296, 0.57245696,
-                            0.09571252, 0.88532683, 0.62724897, 0.72341636, 0.01612921,
-                            0.59443188, 0.55678519, 0.15895964, 0.15307052, 0.69552953,
-                            0.31876643, 0.6919703 , 0.55438325, 0.38895057, 0.92513249,
-                            0.84167   , 0.35739757, 0.04359146, 0.30476807, 0.39818568,
-                            0.70495883, 0.99535848, 0.35591487, 0.76254781, 0.59317692,
-                            0.6917018 , 0.15112745, 0.39887629, 0.2408559 , 0.34345601]
-               ),
-           name = 'exog'
-       )
-
-exog_predict = pd.Series(
-                  data = np.array([0.12062867, 0.8263408 , 0.60306013, 0.54506801, 0.34276383,
-                                   0.30412079, 0.41702221, 0.68130077, 0.87545684, 0.51042234]
-                      ),
-                  name = 'exog',
-                  index = pd.RangeIndex(start=50, stop=60)
-              )
+from .fixtures_ForecasterSarimax import y
+from .fixtures_ForecasterSarimax import exog
+from .fixtures_ForecasterSarimax import exog_predict
+from .fixtures_ForecasterSarimax import df_exog
+from .fixtures_ForecasterSarimax import df_exog_predict
+from .fixtures_ForecasterSarimax import y_datetime
+from .fixtures_ForecasterSarimax import lw_datetime
+from .fixtures_ForecasterSarimax import exog_datetime
+from .fixtures_ForecasterSarimax import lw_exog_datetime
+from .fixtures_ForecasterSarimax import exog_predict_datetime
+from .fixtures_ForecasterSarimax import df_exog_datetime
+from .fixtures_ForecasterSarimax import df_lw_exog_datetime
+from .fixtures_ForecasterSarimax import df_exog_predict_datetime
 
 
 def test_predict_interval_ValueError_when_ForecasterSarimax_last_window_exog_is_not_None_and_last_window_is_not_provided():
@@ -72,7 +45,8 @@ def test_predict_interval_ValueError_when_ForecasterSarimax_last_window_exog_is_
             alpha            = 0.05, 
             exog             = exog_predict, 
             last_window      = None, 
-            last_window_exog = exog)
+            last_window_exog = exog
+        )
 
 
 def test_predict_interval_ValueError_when_ForecasterSarimax_last_window_exog_is_None_and_included_exog_is_true():
@@ -83,7 +57,7 @@ def test_predict_interval_ValueError_when_ForecasterSarimax_last_window_exog_is_
     forecaster = ForecasterSarimax(regressor=ARIMA(order=(1,1,1)))
     forecaster.fit(y=y, exog=exog)
     lw = pd.Series(np.random.rand(10), index=pd.RangeIndex(start=50, stop=60))
-    exog_predict = pd.Series(np.random.rand(10), index=pd.RangeIndex(start=60, stop=70))
+    ex_pred = pd.Series(np.random.rand(10), index=pd.RangeIndex(start=60, stop=70))
     
     err_msg = re.escape(
                 ('Forecaster trained with exogenous variable/s. To make predictions '
@@ -94,14 +68,15 @@ def test_predict_interval_ValueError_when_ForecasterSarimax_last_window_exog_is_
         forecaster.predict_interval(
             steps            = 5, 
             alpha            = 0.05, 
-            exog             = exog_predict, 
+            exog             = ex_pred, 
             last_window      = lw, 
-            last_window_exog = None)
+            last_window_exog = None
+        )
 
 
-def test_exception_predict_interval_when_interval_is_not_symmetrical():
+def test_predict_interval_ValueError_when_interval_is_not_symmetrical():
     """
-    Raise exception if `interval` is not symmetrical.
+    Raise ValueError if `interval` is not symmetrical.
     """
     forecaster = ForecasterSarimax(regressor=ARIMA(order=(1,1,1)))
     forecaster.fit(y=y)
@@ -114,7 +89,11 @@ def test_exception_predict_interval_when_interval_is_not_symmetrical():
                  f'Got {interval_not_symmetrical}.')
             )
     with pytest.raises(ValueError, match = err_msg):
-        forecaster.predict_interval(steps=5, alpha=alpha, interval=interval_not_symmetrical)
+        forecaster.predict_interval(
+            steps    = 5, 
+            alpha    = alpha, 
+            interval = interval_not_symmetrical
+        )
 
 
 @pytest.mark.parametrize("alpha, interval", 
@@ -201,12 +180,6 @@ def test_predict_interval_output_ForecasterSarimax_with_transform_y_and_transfor
     Test predict_interval output of ForecasterSarimax, StandardScaler
     as transformer_y and transformer_exog as transformer_exog.
     """
-    df_exog = pd.DataFrame({
-                  'exog_1': exog,
-                  'exog_2': ['a']*25+['b']*25}
-              )
-    df_exog_predict = df_exog.copy()
-    df_exog_predict.index = pd.RangeIndex(start=50, stop=100)
     transformer_exog = ColumnTransformer(
                            [('scale', StandardScaler(), ['exog_1']),
                             ('onehot', OneHotEncoder(), ['exog_2'])],
@@ -234,68 +207,70 @@ def test_predict_interval_output_ForecasterSarimax_with_transform_y_and_transfor
     pd.testing.assert_frame_equal(predictions, expected)
 
 
-def test_exception_predict_interval_when_last_window_index_does_not_follow_training_set():
+def test_predict_interval_ValueError_when_last_window_index_does_not_follow_training_set():
     """
-    Raise exception if `last_window` index does not start at the end of the training set.
+    Raise ValueError if `last_window` index does not start at the end 
+    of the index seen by the forecaster.
     """
-    y_datetime = pd.Series(data=list(y))
-    y_datetime.index = pd.date_range(start='2022-01-01', periods=50)
-    lw_datetime = pd.Series(data=np.random.rand(50))
-    lw_datetime.index = pd.date_range(start='2022-03-01', periods=50)
+    y_test = pd.Series(data=y_datetime.values)
+    y_test.index = pd.date_range(start='2022-01-01', periods=50, freq='D')
+    lw_test = pd.Series(data=lw_datetime.values)
+    lw_test.index = pd.date_range(start='2022-03-01', periods=50, freq='D')
 
     forecaster = ForecasterSarimax(regressor=ARIMA(order=(1,1,1)))
-    forecaster.fit(y=y_datetime)
-    expected_index = expand_index(forecaster.last_window.index, 1)[0]
+    forecaster.fit(y=y_test)
+    expected_index = expand_index(forecaster.extended_index, 1)[0]
 
     err_msg = re.escape(
         (f'To make predictions unrelated to the original data, `last_window` '
-         f'has to start at the end of the training set.\n'
-         f'    Series last index         : {forecaster.last_window.index[-1]}.\n'
+         f'has to start at the end of the index seen by the forecaster.\n'
+         f'    Series last index         : {forecaster.extended_index[-1]}.\n'
          f'    Expected index            : {expected_index}.\n'
-         f'    `last_window` index start : {lw_datetime.index[0]}.')
+         f'    `last_window` index start : {lw_test.index[0]}.')
     )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.predict_interval(
             steps            = 5, 
             alpha            = 0.05,
-            last_window      = lw_datetime,
+            last_window      = lw_test,
         )
 
 
-def test_exception_predict_interval_when_last_window_exog_index_does_not_follow_training_set():
+def test_predict_interval_ValueError_when_last_window_exog_index_does_not_follow_training_set():
     """
-    Raise exception if `last_window_exog` index does not start at the end of the training set.
+    Raise ValueError if `last_window_exog` index does not start at the end 
+    of the index seen by the forecaster.
     """
-    y_datetime = pd.Series(data=list(y))
-    y_datetime.index = pd.date_range(start='2022-01-01', periods=50)
-    exog_datetime = pd.Series(data=list(exog))
-    exog_datetime.index = pd.date_range(start='2022-01-01', periods=50)
-    exog_pred_datetime = pd.Series(data=list(exog_predict))
-    exog_pred_datetime.index = pd.date_range(start='2022-04-11', periods=10)
+    y_test = pd.Series(data=y_datetime.values)
+    y_test.index = pd.date_range(start='2022-01-01', periods=50, freq='D')
+    lw_test = pd.Series(data=lw_datetime.values)
+    lw_test.index = pd.date_range(start='2022-02-20', periods=50, freq='D')
 
-    lw_datetime = pd.Series(data=np.random.rand(50))
-    lw_datetime.index = pd.date_range(start='2022-02-20', periods=50)
-    lw_exog_datetime = pd.Series(data=np.random.rand(50))
-    lw_exog_datetime.index = pd.date_range(start='2022-03-01', periods=50)
+    exog_test = pd.Series(data=exog_datetime.values)
+    exog_test.index = pd.date_range(start='2022-01-01', periods=50, freq='D')
+    exog_pred_test = pd.Series(data=exog_predict_datetime.values)
+    exog_pred_test.index = pd.date_range(start='2022-04-11', periods=10, freq='D')
+    lw_exog_test = pd.Series(data=lw_exog_datetime.values)
+    lw_exog_test.index = pd.date_range(start='2022-03-01', periods=50, freq='D')
 
     forecaster = ForecasterSarimax(regressor=ARIMA(order=(1,1,1)))
-    forecaster.fit(y=y_datetime, exog=exog_datetime)
-    expected_index = expand_index(forecaster.last_window.index, 1)[0]
+    forecaster.fit(y=y_test, exog=exog_test)
+    expected_index = expand_index(forecaster.extended_index, 1)[0]
 
     err_msg = re.escape(
         (f'To make predictions unrelated to the original data, `last_window_exog` '
-         f'has to start at the end of the training set.\n'
-         f'    Series last index              : {forecaster.last_window.index[-1]}.\n'
+         f'has to start at the end of the index seen by the forecaster.\n'
+         f'    Series last index              : {forecaster.extended_index[-1]}.\n'
          f'    Expected index                 : {expected_index}.\n'
-         f'    `last_window_exog` index start : {lw_exog_datetime.index[0]}.')
+         f'    `last_window_exog` index start : {lw_exog_test.index[0]}.')
     )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.predict_interval(
             steps            = 5, 
             alpha            = 0.05,
-            exog             = exog_pred_datetime, 
-            last_window      = lw_datetime, 
-            last_window_exog = lw_exog_datetime
+            exog             = exog_pred_test, 
+            last_window      = lw_test, 
+            last_window_exog = lw_exog_test
         )
 
 
@@ -307,11 +282,6 @@ def test_predict_interval_output_ForecasterSarimax_with_last_window(alpha, inter
     """
     Test predict_interval output of ForecasterSarimax with `last_window`.
     """
-    y_datetime = pd.Series(data=list(y))
-    y_datetime.index = pd.date_range(start='2000', periods=50, freq='A')
-    lw_datetime = pd.Series(data=list(exog))
-    lw_datetime.index = pd.date_range(start='2050', periods=50, freq='A')
-
     forecaster = ForecasterSarimax(regressor=ARIMA(order=(1,1,1)))
     forecaster.fit(y=y_datetime)
     predictions = forecaster.predict_interval(
@@ -322,11 +292,11 @@ def test_predict_interval_output_ForecasterSarimax_with_last_window(alpha, inter
                   )
     
     expected = pd.DataFrame(
-                   data    = np.array([[0.50413804, 0.04670129, 0.96157478],
-                                       [0.53115634, 0.06682964, 0.99548305],
-                                       [0.53616963, 0.07153717, 1.00080209],
-                                       [0.53756023, 0.07289965, 1.00222082],
-                                       [0.53835444, 0.07368981, 1.00301907]]),
+                   data    = np.array([[0.54929553, 0.09185879, 1.00673228],
+                                       [0.53939052, 0.07506382, 1.00371722],
+                                       [0.53832513, 0.07369267, 1.00295758],
+                                       [0.538715  , 0.07405442, 1.00337559],
+                                       [0.53934445, 0.07467982, 1.00400909]]),
                    columns = ['pred', 'lower_bound', 'upper_bound'],
                    index   = pd.date_range(start='2100', periods=5, freq='A')
                )
@@ -342,25 +312,13 @@ def test_predict_interval_output_ForecasterSarimax_with_last_window_and_exog(alp
     """
     Test predict_interval output of ForecasterSarimax with exogenous variables and `last_window`.
     """
-    y_datetime = pd.Series(data=list(y))
-    y_datetime.index = pd.date_range(start='2000', periods=50, freq='A')
-    lw_datetime = pd.Series(data=list(y))
-    lw_datetime.index = pd.date_range(start='2050', periods=50, freq='A')
-
-    exog_datetime = pd.Series(data=list(exog))
-    exog_datetime.index = pd.date_range(start='2000', periods=50, freq='A')
-    exog_pred_datetime = pd.Series(data=list(exog_predict))
-    exog_pred_datetime.index = pd.date_range(start='2100', periods=10, freq='A')
-    lw_exog_datetime = pd.Series(data=list(exog))
-    lw_exog_datetime.index = pd.date_range(start='2050', periods=50, freq='A')
-
     forecaster = ForecasterSarimax(regressor=ARIMA(order=(1,1,1)))
     forecaster.fit(y=y_datetime, exog=exog_datetime)
     predictions = forecaster.predict_interval(
                       steps            = 5, 
                       alpha            = alpha,
                       interval         = interval,
-                      exog             = exog_pred_datetime, 
+                      exog             = exog_predict_datetime, 
                       last_window      = lw_datetime, 
                       last_window_exog = lw_exog_datetime
                   )
@@ -378,7 +336,6 @@ def test_predict_interval_output_ForecasterSarimax_with_last_window_and_exog(alp
     pd.testing.assert_frame_equal(predictions, expected)
 
 
-'''
 @pytest.mark.parametrize("alpha, interval", 
                          [(0.05, [1, 99]), 
                           (None, [2.5, 97.5])], 
@@ -387,16 +344,6 @@ def test_predict_interval_output_ForecasterSarimax_with_last_window_and_exog_amd
     """
     Test predict_interval output of ForecasterSarimax with exogenous variables and `last_window`.
     """
-    y_datetime = pd.Series(data=list(y))
-    y_datetime.index = pd.date_range(start='2000', periods=50, freq='A')
-    lw_datetime = pd.Series(data=list(y))
-    lw_datetime.index = pd.date_range(start='2050', periods=50, freq='A')
-
-    df_exog = pd.DataFrame({'exog_1': exog, 'exog_2': ['a']*25+['b']*25})
-    df_exog.index = pd.date_range(start='2000', periods=50, freq='A')
-    df_lw_exog = pd.DataFrame({'exog_1': exog, 'exog_2': ['a']*25+['b']*25})
-    df_lw_exog.index = pd.date_range(start='2050', periods=50, freq='A')
-
     transformer_exog = ColumnTransformer(
                            [('scale', StandardScaler(), ['exog_1']),
                             ('onehot', OneHotEncoder(), ['exog_2'])],
@@ -409,25 +356,49 @@ def test_predict_interval_output_ForecasterSarimax_with_last_window_and_exog_amd
                      transformer_y    = StandardScaler(),
                      transformer_exog = transformer_exog
                  )
-    forecaster.fit(y=y_datetime, exog=df_exog)
+    forecaster.fit(y=y_datetime, exog=df_exog_datetime)
     predictions = forecaster.predict_interval(
                       steps            = 5, 
                       alpha            = alpha,
                       interval         = interval,
-                      exog             = df_exog, 
+                      exog             = df_exog_predict_datetime, 
                       last_window      = lw_datetime, 
-                      last_window_exog = df_lw_exog
+                      last_window_exog = df_lw_exog_datetime
                   )
 
     expected = pd.DataFrame(
-                   data    = np.array([[0.61391626, 0.17071366, 1.05711886],
-                                       [0.45503861, 0.00679555, 0.90328167],
-                                       [0.50278237, 0.05435185, 0.95121289],
-                                       [0.51561303, 0.06716642, 0.96405964],
-                                       [0.55975807, 0.11130937, 1.00820676]]),
+                   data    = np.array([[1.088376  , 0.65997541, 1.51677659],
+                                       [0.95966559, 0.52943384, 1.38989734],
+                                       [1.01645633, 0.58618273, 1.44672992],
+                                       [1.03681224, 0.60653591, 1.46708856],
+                                       [1.08793397, 0.65765741, 1.51821053]]),
                    columns = ['pred', 'lower_bound', 'upper_bound'],
                    index   = pd.date_range(start='2100', periods=5, freq='A')
                )
     
     pd.testing.assert_frame_equal(predictions, expected)
-'''
+
+
+@pytest.mark.parametrize("y          , idx", 
+                         [(y         , pd.RangeIndex(start=0, stop=50)), 
+                          (y_datetime, pd.date_range(start='2000', periods=50, freq='A'))], 
+                         ids = lambda values : f'y, index: {values}')
+def test_predict_interval_ForecasterSarimax_updates_extended_index_twice(y, idx):
+    """
+    Test forecaster.extended_index is updated when using predict_interval twice.
+    """
+    y_fit = y.iloc[:30].copy()
+
+    forecaster = ForecasterSarimax(regressor=ARIMA(order=(1,1,1)))
+    forecaster.fit(y=y_fit)
+
+    lw_1 = y.iloc[30:40].copy()
+    forecaster.predict_interval(steps=5, alpha = 0.05, last_window=lw_1)
+    result_1 = forecaster.extended_index.copy()
+    expected_1 = idx[:40]
+
+    lw_2 = y.iloc[40:].copy()
+    forecaster.predict_interval(steps=5, alpha = 0.05, last_window=lw_2)
+
+    pd.testing.assert_index_equal(result_1, expected_1)
+    pd.testing.assert_index_equal(forecaster.extended_index, idx)
