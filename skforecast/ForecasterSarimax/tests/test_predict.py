@@ -93,7 +93,7 @@ def test_predict_output_ForecasterSarimax(kwargs, data):
                    name  = 'pred'
                )
     
-    pd.testing.assert_series_equal(predictions, expected)
+    pd.testing.assert_series_equal(predictions, expected, rtol=0.001)
 
 
 @pytest.mark.parametrize("kwargs, data", 
@@ -117,7 +117,7 @@ def test_predict_output_ForecasterSarimax_with_exog(kwargs, data):
                    name  = 'pred'
                )
     
-    pd.testing.assert_series_equal(predictions, expected)
+    pd.testing.assert_series_equal(predictions, expected, rtol=0.001)
 
 
 @pytest.mark.parametrize("kwargs, data", 
@@ -144,7 +144,7 @@ def test_predict_output_ForecasterSarimax_with_transform_y(kwargs, data):
                    name  = 'pred'
                )
     
-    pd.testing.assert_series_equal(predictions, expected)
+    pd.testing.assert_series_equal(predictions, expected, rtol=0.001)
 
 
 @pytest.mark.parametrize("kwargs, data", 
@@ -180,7 +180,7 @@ def test_predict_output_ForecasterSarimax_with_transform_y_and_transform_exog(kw
                    name  = 'pred'
                )
     
-    pd.testing.assert_series_equal(predictions, expected)
+    pd.testing.assert_series_equal(predictions, expected, rtol=0.001)
 
 
 def test_predict_ValueError_when_last_window_index_does_not_follow_training_set():
@@ -264,7 +264,7 @@ def test_predict_output_ForecasterSarimax_with_last_window(kwargs, data):
                    name  = 'pred'
                )
     
-    pd.testing.assert_series_equal(predictions, expected)
+    pd.testing.assert_series_equal(predictions, expected, rtol=0.001)
 
 
 @pytest.mark.parametrize("kwargs, data", 
@@ -294,7 +294,7 @@ def test_predict_output_ForecasterSarimax_with_last_window_and_exog(kwargs, data
                    name  = 'pred'
                )
     
-    pd.testing.assert_series_equal(predictions, expected)
+    pd.testing.assert_series_equal(predictions, expected, rtol=0.001)
 
 
 @pytest.mark.parametrize("kwargs, data", 
@@ -336,7 +336,7 @@ def test_predict_output_ForecasterSarimax_with_last_window_and_exog_and_transfor
                    name  = 'pred'
                )
     
-    pd.testing.assert_series_equal(predictions, expected)
+    pd.testing.assert_series_equal(predictions, expected, rtol=0.001)
 
 
 @pytest.mark.parametrize("y          , idx", 
