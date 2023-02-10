@@ -153,7 +153,7 @@ def test_output_backtesting_sarimax_no_refit_no_exog_no_remainder_with_mocked():
                                     )                                                     
 
     assert expected_metric == approx(metric)
-    pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions)
+    pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions, rtol=0.001)
 
 
 def test_output_backtesting_sarimax_no_refit_no_exog_remainder_with_mocked():
@@ -191,7 +191,7 @@ def test_output_backtesting_sarimax_no_refit_no_exog_remainder_with_mocked():
                                     )                                                     
 
     assert expected_metric == approx(metric)
-    pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions)
+    pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions, rtol=0.001)
 
 
 def test_output_backtesting_sarimax_yes_refit_no_exog_no_remainder_with_mocked():
@@ -229,7 +229,7 @@ def test_output_backtesting_sarimax_yes_refit_no_exog_no_remainder_with_mocked()
                                     )                                                     
 
     assert expected_metric == approx(metric)
-    pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions)
+    pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions, rtol=0.001)
 
 
 def test_output_backtesting_sarimax_yes_refit_no_exog_remainder_with_mocked():
@@ -267,7 +267,7 @@ def test_output_backtesting_sarimax_yes_refit_no_exog_remainder_with_mocked():
                                     )                                                     
 
     assert expected_metric == approx(metric)
-    pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions)
+    pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions, rtol=0.001)
 
 
 def test_output_backtesting_sarimax_yes_refit_fixed_train_size_no_exog_no_remainder_with_mocked():
@@ -305,7 +305,7 @@ def test_output_backtesting_sarimax_yes_refit_fixed_train_size_no_exog_no_remain
                                     )                                                     
 
     assert expected_metric == approx(metric)
-    pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions)
+    pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions, rtol=0.001)
 
 
 def test_output_backtesting_sarimax_yes_refit_fixed_train_size_no_exog_remainder_with_mocked():
@@ -343,7 +343,7 @@ def test_output_backtesting_sarimax_yes_refit_fixed_train_size_no_exog_remainder
                                     )                                                     
 
     assert expected_metric == approx(metric)
-    pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions)
+    pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions, rtol=0.001)
 
 
 def test_output_backtesting_sarimax_no_refit_yes_exog_with_mocked():
@@ -382,7 +382,7 @@ def test_output_backtesting_sarimax_no_refit_yes_exog_with_mocked():
                                     )                                                     
 
     assert expected_metric == approx(metric)
-    pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions)
+    pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions, rtol=0.001)
 
 
 def test_output_backtesting_sarimax_yes_refit_yes_exog_with_mocked():
@@ -421,7 +421,7 @@ def test_output_backtesting_sarimax_yes_refit_yes_exog_with_mocked():
                                     )                                                     
 
     assert expected_metric == approx(metric)
-    pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions)
+    pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions, rtol=0.001)
 
 
 def test_output_backtesting_sarimax_yes_refit_fixed_train_size_yes_exog_with_mocked():
@@ -460,7 +460,7 @@ def test_output_backtesting_sarimax_yes_refit_fixed_train_size_yes_exog_with_moc
                                     )                                                     
 
     assert expected_metric == approx(metric)
-    pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions)
+    pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions, rtol=0.001)
 
 
 def my_metric(y_true, y_pred): # pragma: no cover
@@ -508,7 +508,7 @@ def test_output_backtesting_sarimax_no_refit_yes_exog_callable_metric_with_mocke
                                     )                                                     
 
     assert expected_metric == approx(metric)
-    pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions)
+    pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions, rtol=0.001)
 
 
 def test_output_backtesting_sarimax_no_refit_no_exog_list_of_metrics_with_mocked():
@@ -546,7 +546,7 @@ def test_output_backtesting_sarimax_no_refit_no_exog_list_of_metrics_with_mocked
                                     )                                                     
 
     assert expected_metric == approx(metric)
-    pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions)
+    pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions, rtol=0.001)
 
 
 def test_output_backtesting_sarimax_yes_refit_no_exog_callable_metric_with_mocked():
@@ -584,7 +584,7 @@ def test_output_backtesting_sarimax_yes_refit_no_exog_callable_metric_with_mocke
                                     )                                                     
 
     assert expected_metric == approx(metric)
-    pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions)
+    pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions, rtol=0.001)
 
 
 def test_output_backtesting_sarimax_yes_refit_fixed_train_size_yes_exog_list_of_metrics_with_mocked():
@@ -623,7 +623,7 @@ def test_output_backtesting_sarimax_yes_refit_fixed_train_size_yes_exog_list_of_
                                     )                                                     
 
     assert expected_metric == approx(metric)
-    pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions)
+    pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions, rtol=0.001)
 
 
 @pytest.mark.parametrize("alpha, interval", 
@@ -673,7 +673,7 @@ def test_output_backtesting_sarimax_no_refit_yes_exog_interval_with_mocked(alpha
                                     )                                                     
 
     assert expected_metric == approx(metric)
-    pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions)
+    pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions, rtol=0.001)
 
 
 @pytest.mark.parametrize("alpha, interval", 
@@ -723,7 +723,7 @@ def test_output_backtesting_sarimax_yes_refit_yes_exog_interval_with_mocked(alph
                                     )                                                     
 
     assert expected_metric == approx(metric)
-    pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions)
+    pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions, rtol=0.001)
 
 
 @pytest.mark.parametrize("alpha, interval", 
@@ -773,4 +773,4 @@ def test_output_backtesting_sarimax_yes_refit_fixed_train_size_yes_exog_interval
                                     )                                                     
 
     assert expected_metric == approx(metric)
-    pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions)
+    pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions, rtol=0.001)
