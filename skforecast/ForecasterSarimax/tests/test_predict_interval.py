@@ -117,7 +117,7 @@ def test_predict_interval_output_ForecasterSarimax(alpha, interval):
                    index   = pd.RangeIndex(start=50, stop=55, step=1)
                )
     
-    pd.testing.assert_frame_equal(predictions, expected, rtol=0.01)
+    pd.testing.assert_frame_equal(predictions, expected, atol=0.01)
 
 
 @pytest.mark.parametrize("alpha, interval", 
@@ -141,7 +141,7 @@ def test_predict_interval_output_ForecasterSarimax_with_exog(alpha, interval):
                    index   = pd.RangeIndex(start=50, stop=55, step=1)
                )
     
-    pd.testing.assert_frame_equal(predictions, expected, rtol=0.01)
+    pd.testing.assert_frame_equal(predictions, expected, atol=0.01)
 
 
 @pytest.mark.parametrize("alpha, interval", 
@@ -168,7 +168,7 @@ def test_predict_interval_output_ForecasterSarimax_with_transform_y(alpha, inter
                    index   = pd.RangeIndex(start=50, stop=55, step=1)
                )
     
-    pd.testing.assert_frame_equal(predictions, expected, rtol=0.01)
+    pd.testing.assert_frame_equal(predictions, expected, atol=0.01)
 
 
 @pytest.mark.parametrize("alpha, interval", 
@@ -204,7 +204,7 @@ def test_predict_interval_output_ForecasterSarimax_with_transform_y_and_transfor
                    index   = pd.RangeIndex(start=50, stop=55, step=1)
                )
     
-    pd.testing.assert_frame_equal(predictions, expected, rtol=0.01)
+    pd.testing.assert_frame_equal(predictions, expected, atol=0.01)
 
 
 def test_predict_interval_ValueError_when_last_window_index_does_not_follow_training_set():
@@ -301,7 +301,7 @@ def test_predict_interval_output_ForecasterSarimax_with_last_window(alpha, inter
                    index   = pd.date_range(start='2100', periods=5, freq='A')
                )
     
-    pd.testing.assert_frame_equal(predictions, expected, rtol=0.01)
+    pd.testing.assert_frame_equal(predictions, expected, atol=0.01)
 
 
 @pytest.mark.parametrize("alpha, interval", 
@@ -333,7 +333,7 @@ def test_predict_interval_output_ForecasterSarimax_with_last_window_and_exog(alp
                    index   = pd.date_range(start='2100', periods=5, freq='A')
                )
     
-    pd.testing.assert_frame_equal(predictions, expected, rtol=0.01)
+    pd.testing.assert_frame_equal(predictions, expected, atol=0.01)
 
 
 @pytest.mark.parametrize("alpha, interval", 
@@ -376,7 +376,7 @@ def test_predict_interval_output_ForecasterSarimax_with_last_window_and_exog_and
                    index   = pd.date_range(start='2100', periods=5, freq='A')
                )
     
-    pd.testing.assert_frame_equal(predictions, expected, rtol=0.01)
+    pd.testing.assert_frame_equal(predictions, expected, atol=0.01)
 
 
 @pytest.mark.parametrize("y          , idx", 
