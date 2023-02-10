@@ -21,7 +21,7 @@ def test_output_grid_search_sarimax_sarimax_with_mocked():
     Test output of grid_search_sarimax in ForecasterSarimax with mocked
     (mocked done in Skforecast v0.7.0).
     """
-    forecaster = ForecasterSarimax(regressor=ARIMA(order=(1,1,1)))
+    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, order=(1,1,1)))
 
     param_grid = [{'order' : [(1,1,1), (2,2,2)],
                    'method': ['powell', 'lbfgs']}]

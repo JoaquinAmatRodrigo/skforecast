@@ -23,7 +23,7 @@ def test_ValueError_evaluate_grid_hyperparameters_sarimax_when_return_best_and_l
     Test ValueError is raised in _evaluate_grid_hyperparameters_sarimax when return_best 
     and length of `y` and `exog` do not match.
     """
-    forecaster = ForecasterSarimax(regressor=ARIMA(order=(1,1,1)))
+    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, order=(1,1,1)))
 
     exog_test = exog_datetime[:30].copy()
 
@@ -52,7 +52,7 @@ def test_exception_evaluate_grid_hyperparameters_sarimax_metric_list_duplicate_n
     Test exception is raised in _evaluate_grid_hyperparameters_sarimax when a `list` of 
     metrics is used with duplicate names.
     """
-    forecaster = ForecasterSarimax(regressor=ARIMA(order=(1,1,1)))
+    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, order=(1,1,1)))
 
     err_msg = re.escape('When `metric` is a `list`, each metric name must be unique.')
     with pytest.raises(ValueError, match = err_msg):
@@ -76,7 +76,7 @@ def test_output_evaluate_grid_hyperparameters_sarimax_with_mocked():
     Test output of _evaluate_grid_hyperparameters_sarimax in ForecasterSarimax with mocked
     (mocked done in Skforecast v0.7.0).
     """
-    forecaster = ForecasterSarimax(regressor=ARIMA(order=(1,1,1)))
+    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, order=(1,1,1)))
 
     param_grid = [{'order': (1,1,1), 'seasonal_order': (0,0,0,0)}, 
                   {'order': (1,2,2), 'seasonal_order': (0,0,0,0)}, 
@@ -113,7 +113,7 @@ def test_output_evaluate_grid_hyperparameters_sarimax_exog_with_mocked():
     Test output of _evaluate_grid_hyperparameters_sarimax in ForecasterSarimax 
     with exog with mocked (mocked done in Skforecast v0.7.0).
     """
-    forecaster = ForecasterSarimax(regressor=ARIMA(order=(1,1,1)))
+    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, order=(1,1,1)))
 
     param_grid = [{'order': (1,1,1), 'with_intercept': False}, 
                   {'order': (1,1,1), 'with_intercept': True}, 
@@ -153,7 +153,7 @@ def test_output_evaluate_grid_hyperparameters_sarimax_metric_list_with_mocked():
     Test output of _evaluate_grid_hyperparameters_sarimax in ForecasterSarimax 
     with multiple metrics with mocked (mocked done in Skforecast v0.7.0).
     """
-    forecaster = ForecasterSarimax(regressor=ARIMA(order=(1,1,1)))
+    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, order=(1,1,1)))
 
     param_grid = [{'order': (1,1,1), 'method': 'lbfgs'}, 
                   {'order': (1,1,1), 'method': 'powell'}, 
@@ -193,7 +193,7 @@ def test_evaluate_grid_hyperparameters_sarimax_when_return_best():
     Test forecaster is refitted when return_best=True in 
     _evaluate_grid_hyperparameters_sarimax.
     """
-    forecaster = ForecasterSarimax(regressor=ARIMA(order=(3,3,3)))
+    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, order=(3,3,3)))
 
     param_grid = [{'order': (1,1,1), 'method': 'lbfgs'}, 
                   {'order': (1,1,1), 'method': 'powell'}, 
