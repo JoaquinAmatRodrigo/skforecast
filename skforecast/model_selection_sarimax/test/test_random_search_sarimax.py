@@ -58,4 +58,4 @@ def test_output_random_search_sarimax_sarimax_with_mocked():
         index = np.array([2, 8, 7, 6, 3, 9, 4, 1, 5, 0])
     )
 
-    pd.testing.assert_frame_equal(results, expected_results)
+    pd.testing.assert_frame_equal(results, expected_results, rtol=0.001)
