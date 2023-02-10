@@ -213,7 +213,7 @@ def test_evaluate_grid_hyperparameters_sarimax_when_return_best():
         verbose            = False
     )
     
-    expected_params = {'maxiter'           : 50,
+    expected_params = {'maxiter'           : 1000,
                        'method'            : 'powell',
                        'order'             : (1, 1, 1),
                        'out_of_sample_size': 0,
