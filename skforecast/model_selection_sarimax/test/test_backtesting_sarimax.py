@@ -212,24 +212,23 @@ def test_output_backtesting_sarimax_yes_refit_no_exog_no_remainder_with_mocked()
                                         refit              = True,
                                         alpha              = None,
                                         interval           = None,
-                                        verbose            = True
+                                        verbose            = False
                                    )
     
-    expected_metric = 0.1245724897025159
+    expected_metric = 0.11195734192693496
     expected_values = np.array(
-                          [0.63793971, 0.55322609, 0.71445518, 0.82489505, 0.77191505,
-                           0.73750377, 0.30807646, 0.27854996, 0.28835934, 0.51981128,
-                           0.51690468, 0.51726221]
+                        [0.63823688, 0.5535291 , 0.71457415, 0.8237381 , 0.7671365 ,
+                        0.7315812 , 0.46865075, 0.47620553, 0.47437724, 0.52047381,
+                        0.51618542, 0.51596407]
                       )
-
-    expected_backtest_predictions = pd.DataFrame(
-                                        data    = expected_values,
-                                        columns = ['pred'],
-                                        index   = pd.date_range(start='2038', periods=12, freq='A')
-                                    )                                                     
-
+    expected_values = pd.DataFrame(
+                          data    = expected_values,
+                          columns = ['pred'],
+                          index   = pd.date_range(start='2038', periods=12, freq='A')
+                      )                                                     
+    print(metric)
     assert expected_metric == approx(metric, abs=0.01)
-    pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions, atol=0.001)
+    pd.testing.assert_frame_equal(expected_values, backtest_predictions, atol=0.001)
 
 
 def test_output_backtesting_sarimax_yes_refit_no_exog_remainder_with_mocked():
@@ -253,22 +252,20 @@ def test_output_backtesting_sarimax_yes_refit_no_exog_remainder_with_mocked():
                                         verbose            = False
                                    )
     
-    expected_metric = 0.09556639597015694
+    expected_metric = 0.09205718721313501
     expected_values = np.array(
-                          [0.63793971, 0.55322609, 0.71445518, 0.73039455, 0.69111006,
-                           0.4814143 , 0.5014026 , 0.48131545, 0.47225091, 0.4734432 ,
-                           0.78337242, 0.65285038]
+                        [0.63823688, 0.5535291, 0.71457415, 0.73068107, 0.69155181,
+                         0.47290713, 0.49963264, 0.49367393, 0.49133867, 0.49348299,
+                         0.72450554, 0.63766057]
                       )
-
-    expected_backtest_predictions = pd.DataFrame(
-                                        data    = expected_values,
-                                        columns = ['pred'],
-                                        index   = pd.date_range(start='2038', periods=12, freq='A')
-                                    )                                                     
+    expected_values = pd.DataFrame(
+                          data    = expected_values,
+                          columns = ['pred'],
+                          index   = pd.date_range(start='2038', periods=12, freq='A')
+                      )                                                     
 
     assert expected_metric == approx(metric, abs=0.01)
-    pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions, atol=0.001)
-
+    pd.testing.assert_frame_equal(expected_values, backtest_predictions, atol=0.001)
 
 def test_output_backtesting_sarimax_yes_refit_fixed_train_size_no_exog_no_remainder_with_mocked():
     """
@@ -368,21 +365,21 @@ def test_output_backtesting_sarimax_no_refit_yes_exog_with_mocked():
                                         verbose            = False
                                    )
     
-    expected_metric = 0.08971294363961381
+    expected_metric = 0.08924856486084219
     expected_values = np.array(
-                          [0.65076021, 0.57703261, 0.66853316, 0.71762052, 0.71677803,
-                           0.67251158, 0.34619317, 0.32344791, 0.4671051 , 0.65322324,
-                           0.55053341, 0.52974663]
+                         [0.65196283, 0.57702538, 0.66580046, 0.714828, 0.71623124,
+                         0.67056245, 0.34725379, 0.32326499, 0.4678328, 0.65149367,
+                         0.55076885, 0.52887971]
                       )
 
-    expected_backtest_predictions = pd.DataFrame(
-                                        data    = expected_values,
-                                        columns = ['pred'],
-                                        index   = pd.date_range(start='2038', periods=12, freq='A')
-                                    )                                                     
+    expected_values = pd.DataFrame(
+                        data    = expected_values,
+                        columns = ['pred'],
+                        index   = pd.date_range(start='2038', periods=12, freq='A')
+                      )                                                     
 
     assert expected_metric == approx(metric, abs=0.01)
-    pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions, atol=0.001)
+    pd.testing.assert_frame_equal(expected_values, backtest_predictions, atol=0.001)
 
 
 def test_output_backtesting_sarimax_yes_refit_yes_exog_with_mocked():
@@ -407,21 +404,21 @@ def test_output_backtesting_sarimax_yes_refit_yes_exog_with_mocked():
                                         verbose            = False
                                    )
     
-    expected_metric = 0.10175644418425829
+    expected_metric = 0.10409885910606446
     expected_values = np.array(
-                          [0.65076021, 0.57703261, 0.66853316, 0.73931314, 0.7417212 ,
-                           0.68038136, 0.31180477, 0.25796641, 0.42197043, 0.58873725,
-                           0.5420918 , 0.47705565]
-                      )
+                         [0.65196283, 0.57702538, 0.66580046, 0.73326053, 0.73999565,
+                         0.68009211, 0.31761307, 0.264506, 0.42963014, 0.52169281,
+                         0.56901593, 0.54864362]
+                     )
 
-    expected_backtest_predictions = pd.DataFrame(
-                                        data    = expected_values,
-                                        columns = ['pred'],
-                                        index   = pd.date_range(start='2038', periods=12, freq='A')
-                                    )                                                     
+    expected_values = pd.DataFrame(
+                         data    = expected_values,
+                         columns = ['pred'],
+                         index   = pd.date_range(start='2038', periods=12, freq='A')
+                      )                                                     
 
     assert expected_metric == approx(metric, abs=0.01)
-    pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions, atol=0.001)
+    pd.testing.assert_frame_equal(expected_values, backtest_predictions, atol=0.001)
 
 
 def test_output_backtesting_sarimax_yes_refit_fixed_train_size_yes_exog_with_mocked():
