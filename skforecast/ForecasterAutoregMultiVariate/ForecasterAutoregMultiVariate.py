@@ -286,6 +286,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             f"Transformer for series: {self.transformer_series} \n"
             f"Transformer for exog: {self.transformer_exog} \n"
             f"Window size: {self.window_size} \n"
+            f"Target series, level: {self.level} \n"
             f"Multivariate series (names): {self.series_col_names} \n"
             f"Maximum steps predicted: {self.steps} \n"
             f"Weight function included: {True if self.weight_func is not None else False} \n"

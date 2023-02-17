@@ -10,18 +10,36 @@ from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
 
 
-def test_set_out_sample_residuals_exception_when_residuals_is_not_pd_Series():
+def test_set_out_sample_residuals_TypeError_when_residuals_is_not_pd_Series():
     """
-    Test exception is raised when residuals argument is not pd.Series.
+    Test TypeError is raised when residuals argument is not pd.Series.
     """
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
-    residuals=[1, 2, 3]
+    residuals = [1, 2, 3]
 
     err_msg = re.escape(
                 f"`residuals` argument must be `pd.Series`. Got {type(residuals)}."
             )
     with pytest.raises(TypeError, match = err_msg):
         forecaster.set_out_sample_residuals(residuals=residuals)
+
+
+def test_set_out_sample_residuals_warning_when_forecaster_has_transformer_and_transform_False():
+    """
+    Test Warning is raised when forcaster has a transformer_y and transform=False.
+    """
+    forecaster = ForecasterAutoreg(LinearRegression(), lags=3, transformer_y=StandardScaler())
+    residuals = pd.Series(np.arange(20))
+
+    err_msg = re.escape(
+                f'''
+                Argument `transform` is set to `False` but forecaster was trained
+                using a transformer {forecaster.transformer_y}. Ensure that the new residuals 
+                are already transformed or set `transform=True`.
+                '''
+            )
+    with pytest.warns(UserWarning, match = err_msg):
+        forecaster.set_out_sample_residuals(residuals=residuals, transform=False)
 
 
 def test_set_out_sample_residuals_when_residuals_length_is_greater_than_1000():
