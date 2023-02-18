@@ -19,7 +19,7 @@ import inspect
 from copy import deepcopy
 
 optional_dependencies = {
-    "statsmodels": ['statsmodels>=0.12, <0.14'],
+    "sarimax": ['statsmodels>=0.12, <0.14', 'pmdarima>=2.0, <2.1'],
     "plotting": ['matplotlib>=3.3, <3.7', 'seaborn==0.11', 'statsmodels>=0.12, <0.14']
 }
 
