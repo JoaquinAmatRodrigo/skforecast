@@ -12,7 +12,7 @@ def test_skforecast_utils_optional_dependencies_match_requirements_optional():
         requirements_optional = f.read()
 
     extras_require = {
-        "statsmodels": requirements_optional.split("\n\n")[0].splitlines(),
+        "sarimax": requirements_optional.split("\n\n")[0].splitlines(),
         "plotting": requirements_optional.split("\n\n")[1].splitlines()
     }
 
