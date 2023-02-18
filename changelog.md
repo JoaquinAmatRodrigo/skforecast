@@ -6,9 +6,9 @@ All notable changes to this project will be documented in this file.
 
 **Added**
 
-+ Class `ForecasterSarimax` and `model_selection_sarimax`.
++ Class `ForecasterSarimax` and `model_selection_sarimax` (wrapper of pmdarima).
 
-+ Method `predict_dist()` to `ForecasterAutoreg`, `ForecasterAutoregDirect` and `ForecasterAutoregCustom`.
++ Method `predict_dist()` to `ForecasterAutoreg`, `ForecasterAutoregDirect` and `ForecasterAutoregCustom`. 
 
 + Method `predict_interval()` to `ForecasterAutoregDirect`.
 
