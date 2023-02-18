@@ -670,12 +670,12 @@ class ForecasterAutoreg(ForecasterBase):
         n_boot: int=500,
         random_state: int=123,
         in_sample_residuals: bool=True
-    ) -> np.ndarray:
+    ) -> pd.DataFrame:
         """
         Generate multiple forecasting predictions using a bootstrapping process. 
         By sampling from a collection of past observed errors (the residuals),
         each iteration of bootstrapping generates a different set of predictions. 
-        See the Notes section for more information.        
+        See the Notes section for more information. 
         
         Parameters
         ----------   
@@ -925,12 +925,12 @@ class ForecasterAutoreg(ForecasterBase):
                       )
 
         boot_predictions = self.predict_bootstrapping(
-                                steps               = steps,
-                                last_window         = last_window,
-                                exog                = exog,
-                                n_boot              = n_boot,
-                                random_state        = random_state,
-                                in_sample_residuals = in_sample_residuals
+                               steps               = steps,
+                               last_window         = last_window,
+                               exog                = exog,
+                               n_boot              = n_boot,
+                               random_state        = random_state,
+                               in_sample_residuals = in_sample_residuals
                            )
 
         interval = np.array(interval)/100
