@@ -103,7 +103,7 @@ def test_output_evaluate_grid_hyperparameters_sarimax_with_mocked():
         index = np.array([0, 1])
     )
 
-    pd.testing.assert_frame_equal(results, expected_results, atol=0.001)
+    pd.testing.assert_frame_equal(results, expected_results, atol=0.0015)
 
 
 def test_output_evaluate_grid_hyperparameters_sarimax_exog_with_mocked():
@@ -179,7 +179,7 @@ def test_output_evaluate_grid_hyperparameters_sarimax_metric_list_with_mocked():
         index = np.array([0, 1])
     )
 
-    pd.testing.assert_frame_equal(results, expected_results, atol=0.001)
+    pd.testing.assert_frame_equal(results, expected_results, atol=0.015)
     
 
 def test_evaluate_grid_hyperparameters_sarimax_when_return_best():

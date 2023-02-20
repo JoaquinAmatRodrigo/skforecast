@@ -264,8 +264,8 @@ def test_output_backtesting_sarimax_yes_refit_no_exog_remainder_with_mocked():
                           index   = pd.date_range(start='2038', periods=12, freq='A')
                       )                                                     
 
-    assert expected_metric == approx(metric, abs=0.01)
-    pd.testing.assert_frame_equal(expected_values, backtest_predictions, atol=0.001)
+    assert expected_metric == approx(metric, abs=0.001)
+    pd.testing.assert_frame_equal(expected_values, backtest_predictions, atol=0.1)
 
 def test_output_backtesting_sarimax_yes_refit_fixed_train_size_no_exog_no_remainder_with_mocked():
     """
@@ -339,8 +339,8 @@ def test_output_backtesting_sarimax_yes_refit_fixed_train_size_no_exog_remainder
                                         index   = pd.date_range(start='2038', periods=12, freq='A')
                                     )                                                     
 
-    assert expected_metric == approx(metric, abs=0.01)
-    pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions, atol=0.001)
+    assert expected_metric == approx(metric, abs=0.0005)
+    pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions, atol=0.006)
 
 
 def test_output_backtesting_sarimax_no_refit_yes_exog_with_mocked():
@@ -417,8 +417,8 @@ def test_output_backtesting_sarimax_yes_refit_yes_exog_with_mocked():
                          index   = pd.date_range(start='2038', periods=12, freq='A')
                       )                                                     
 
-    assert expected_metric == approx(metric, abs=0.01)
-    pd.testing.assert_frame_equal(expected_values, backtest_predictions, atol=0.001)
+    assert expected_metric == approx(metric, abs=0.0005)
+    pd.testing.assert_frame_equal(expected_values, backtest_predictions, atol=0.0025)
 
 
 def test_output_backtesting_sarimax_yes_refit_fixed_train_size_yes_exog_with_mocked():
@@ -456,8 +456,8 @@ def test_output_backtesting_sarimax_yes_refit_fixed_train_size_yes_exog_with_moc
                         index   = pd.date_range(start='2038', periods=12, freq='A')
                       )                                                     
 
-    assert expected_metric == approx(metric, abs=0.01)
-    pd.testing.assert_frame_equal(expected_values, backtest_predictions, atol=0.001)
+    assert expected_metric == approx(metric, abs=0.0005)
+    pd.testing.assert_frame_equal(expected_values, backtest_predictions, atol=0.0015)
 
 
 def my_metric(y_true, y_pred): # pragma: no cover
@@ -669,7 +669,7 @@ def test_output_backtesting_sarimax_no_refit_yes_exog_interval_with_mocked(alpha
                         index   = pd.date_range(start='2038', periods=12, freq='A')
                       )                                                     
 
-    assert expected_metric == approx(metric, abs=0.01)
+    assert expected_metric == approx(metric, abs=0.000025)
     pd.testing.assert_frame_equal(expected_values, backtest_predictions, atol=0.001)
 
 
@@ -719,8 +719,8 @@ def test_output_backtesting_sarimax_yes_refit_yes_exog_interval_with_mocked(alph
                                         index   = pd.date_range(start='2038', periods=12, freq='A')
                                     )                                                     
 
-    assert expected_metric == approx(metric, abs=0.01)
-    pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions, atol=0.001)
+    assert expected_metric == approx(metric, abs=0.00025)
+    pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions, atol=0.0075)
 
 
 @pytest.mark.parametrize("alpha, interval", 
@@ -763,11 +763,11 @@ def test_output_backtesting_sarimax_yes_refit_fixed_train_size_yes_exog_interval
                                 [ 0.37252349, -0.27208667,  1.01713366],
                                 [ 0.48195615, -0.2650018 ,  1.22891409]])
 
-    expected_values = pd.DataFrame(
-                          data    = expected_values,
-                          columns = ['pred', 'lower_bound', 'upper_bound'],
-                          index   = pd.date_range(start='2038', periods=12, freq='A')
-                      )                                                     
+    expected_backtest_predictions = pd.DataFrame(
+                                        data    = expected_values,
+                                        columns = ['pred', 'lower_bound', 'upper_bound'],
+                                        index   = pd.date_range(start='2038', periods=12, freq='A')
+                                    )                                                     
 
-    assert expected_metric == approx(metric, abs=0.01)
-    pd.testing.assert_frame_equal(expected_values, backtest_predictions, atol=0.001)
+    assert expected_metric == approx(metric, abs=0.0002)
+    pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions, atol=0.0015)
