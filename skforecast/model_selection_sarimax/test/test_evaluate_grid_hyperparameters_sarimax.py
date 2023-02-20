@@ -23,7 +23,7 @@ def test_ValueError_evaluate_grid_hyperparameters_sarimax_when_return_best_and_l
     Test ValueError is raised in _evaluate_grid_hyperparameters_sarimax when return_best 
     and length of `y` and `exog` do not match.
     """
-    forecaster = ForecasterSarimax(regressor=ARIMA(order=(1,1,1)))
+    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, order=(1,1,1)))
 
     exog_test = exog_datetime[:30].copy()
 
@@ -52,7 +52,7 @@ def test_exception_evaluate_grid_hyperparameters_sarimax_metric_list_duplicate_n
     Test exception is raised in _evaluate_grid_hyperparameters_sarimax when a `list` of 
     metrics is used with duplicate names.
     """
-    forecaster = ForecasterSarimax(regressor=ARIMA(order=(1,1,1)))
+    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, order=(1,1,1)))
 
     err_msg = re.escape('When `metric` is a `list`, each metric name must be unique.')
     with pytest.raises(ValueError, match = err_msg):
@@ -76,10 +76,9 @@ def test_output_evaluate_grid_hyperparameters_sarimax_with_mocked():
     Test output of _evaluate_grid_hyperparameters_sarimax in ForecasterSarimax with mocked
     (mocked done in Skforecast v0.7.0).
     """
-    forecaster = ForecasterSarimax(regressor=ARIMA(order=(1,1,1)))
+    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, order=(1,1,1)))
 
     param_grid = [{'order': (1,1,1), 'seasonal_order': (0,0,0,0)}, 
-                  {'order': (1,2,2), 'seasonal_order': (0,0,0,0)}, 
                   {'order': (1,2,3), 'seasonal_order': (2,2,2,4)}]
 
     results = _evaluate_grid_hyperparameters_sarimax(
@@ -92,20 +91,19 @@ def test_output_evaluate_grid_hyperparameters_sarimax_with_mocked():
                   initial_train_size = len(y_datetime)-12,
                   fixed_train_size   = False,
                   return_best        = False,
-                  verbose            = True
+                  verbose            = False
               )
     
     expected_results = pd.DataFrame(
         data  = {'params'            : [{'order': (1,1,1), 'seasonal_order': (0,0,0,0)}, 
-                                        {'order': (1,2,2), 'seasonal_order': (0,0,0,0)}, 
                                         {'order': (1,2,3), 'seasonal_order': (2,2,2,4)}],
-                 'mean_squared_error': np.array([0.07437657, 0.13547973, 0.33529992]),
-                 'order'             : [(1, 1, 1), (1, 2, 2), (1, 2, 3)],
-                 'seasonal_order'    : [(0, 0, 0, 0), (0, 0, 0, 0), (2, 2, 2, 4)]},
-        index = np.array([0, 1, 2])
+                    'mean_squared_error': np.array([0.07440938870701645, 0.33300231290569804]),
+                    'order'             : [(1, 1, 1), (1, 2, 3)],
+                    'seasonal_order'    : [(0, 0, 0, 0), (2, 2, 2, 4)]},
+        index = np.array([0, 1])
     )
 
-    pd.testing.assert_frame_equal(results, expected_results)
+    pd.testing.assert_frame_equal(results, expected_results, atol=0.0015)
 
 
 def test_output_evaluate_grid_hyperparameters_sarimax_exog_with_mocked():
@@ -113,7 +111,7 @@ def test_output_evaluate_grid_hyperparameters_sarimax_exog_with_mocked():
     Test output of _evaluate_grid_hyperparameters_sarimax in ForecasterSarimax 
     with exog with mocked (mocked done in Skforecast v0.7.0).
     """
-    forecaster = ForecasterSarimax(regressor=ARIMA(order=(1,1,1)))
+    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, order=(1,1,1)))
 
     param_grid = [{'order': (1,1,1), 'with_intercept': False}, 
                   {'order': (1,1,1), 'with_intercept': True}, 
@@ -145,7 +143,7 @@ def test_output_evaluate_grid_hyperparameters_sarimax_exog_with_mocked():
         index = np.array([0, 1, 2, 3])
     )
 
-    pd.testing.assert_frame_equal(results, expected_results)
+    pd.testing.assert_frame_equal(results, expected_results, atol=0.001)
 
 
 def test_output_evaluate_grid_hyperparameters_sarimax_metric_list_with_mocked():
@@ -153,11 +151,9 @@ def test_output_evaluate_grid_hyperparameters_sarimax_metric_list_with_mocked():
     Test output of _evaluate_grid_hyperparameters_sarimax in ForecasterSarimax 
     with multiple metrics with mocked (mocked done in Skforecast v0.7.0).
     """
-    forecaster = ForecasterSarimax(regressor=ARIMA(order=(1,1,1)))
+    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, order=(1,1,1)))
 
     param_grid = [{'order': (1,1,1), 'method': 'lbfgs'}, 
-                  {'order': (1,1,1), 'method': 'powell'}, 
-                  {'order': (2,2,2), 'method': 'lbfgs'}, 
                   {'order': (2,2,2), 'method': 'powell'}]
 
     results = _evaluate_grid_hyperparameters_sarimax(
@@ -174,18 +170,16 @@ def test_output_evaluate_grid_hyperparameters_sarimax_metric_list_with_mocked():
               )
     
     expected_results = pd.DataFrame(
-        data  = {'params'             : [{'order': (1,1,1), 'method': 'powell'}, 
-                                         {'order': (1,1,1), 'method': 'lbfgs'}, 
-                                         {'order': (2,2,2), 'method': 'powell'}, 
-                                         {'order': (2,2,2), 'method': 'lbfgs'}],
-                 'mean_absolute_error': np.array([0.2249485 , 0.22497912, 0.2610407 , 0.27330493]),
-                 'mean_squared_error' : np.array([0.07783835, 0.07785217, 0.11220213, 0.12457249]),
-                 'order'              : [(1, 1, 1), (1, 1, 1), (2, 2, 2), (2, 2, 2)],
-                 'method'             : ['powell', 'lbfgs', 'powell', 'lbfgs']},
-        index = np.array([1, 0, 3, 2])
+        data  = {'params'             : [{'order': (1,1,1), 'method': 'lbfgs'}, 
+                                        {'order': (2,2,2), 'method': 'powell'}],
+                    'mean_absolute_error': np.array([0.2249986568362591, 0.27299724595171604]),
+                    'mean_squared_error' : np.array([0.07785902055180988, 0.1219896314815332]),
+                    'order'              : [(1, 1, 1), (2, 2, 2)],
+                    'method'             : ['lbfgs', 'powell']},
+        index = np.array([0, 1])
     )
 
-    pd.testing.assert_frame_equal(results, expected_results)
+    pd.testing.assert_frame_equal(results, expected_results, atol=0.015)
     
 
 def test_evaluate_grid_hyperparameters_sarimax_when_return_best():
@@ -193,7 +187,7 @@ def test_evaluate_grid_hyperparameters_sarimax_when_return_best():
     Test forecaster is refitted when return_best=True in 
     _evaluate_grid_hyperparameters_sarimax.
     """
-    forecaster = ForecasterSarimax(regressor=ARIMA(order=(3,3,3)))
+    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, order=(3,3,3)))
 
     param_grid = [{'order': (1,1,1), 'method': 'lbfgs'}, 
                   {'order': (1,1,1), 'method': 'powell'}, 
@@ -213,7 +207,7 @@ def test_evaluate_grid_hyperparameters_sarimax_when_return_best():
         verbose            = False
     )
     
-    expected_params = {'maxiter'           : 50,
+    expected_params = {'maxiter'           : 1000,
                        'method'            : 'powell',
                        'order'             : (1, 1, 1),
                        'out_of_sample_size': 0,

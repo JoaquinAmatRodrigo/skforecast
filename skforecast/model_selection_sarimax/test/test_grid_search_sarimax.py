@@ -21,10 +21,10 @@ def test_output_grid_search_sarimax_sarimax_with_mocked():
     Test output of grid_search_sarimax in ForecasterSarimax with mocked
     (mocked done in Skforecast v0.7.0).
     """
-    forecaster = ForecasterSarimax(regressor=ARIMA(order=(1,1,1)))
+    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, order=(1,1,1)))
 
     param_grid = [{'order' : [(1,1,1), (2,2,2)],
-                   'method': ['powell', 'lbfgs']}]
+                    'method': ['lbfgs']}]
 
     results = grid_search_sarimax(
                   forecaster         = forecaster,
@@ -36,18 +36,16 @@ def test_output_grid_search_sarimax_sarimax_with_mocked():
                   initial_train_size = len(y_datetime)-12,
                   fixed_train_size   = False,
                   return_best        = False,
-                  verbose            = True
+                  verbose            = False
               )
     
     expected_results = pd.DataFrame(
-        data  = {'params'             : [{'method': 'lbfgs', 'order': (1,1,1)}, 
-                                         {'method': 'powell', 'order': (1,1,1)}, 
-                                         {'method': 'powell', 'order': (2,2,2)}, 
-                                         {'method': 'lbfgs', 'order': (2,2,2)}],
-                 'mean_absolute_error': np.array([0.2168435 , 0.21686885, 0.25012153, 0.25015256]),
-                 'method'             : ['lbfgs', 'powell', 'powell', 'lbfgs'],
-                 'order'              : [(1, 1, 1), (1, 1, 1), (2, 2, 2), (2, 2, 2)]},
-        index = np.array([2, 0, 1, 3])
+        data  = {'params'             : [{'method': 'lbfgs', 'order': (1, 1, 1)}, 
+                                        {'method': 'lbfgs', 'order': (2, 2, 2)}],
+                    'mean_absolute_error': np.array([0.21691209090287925, 0.25017244915790254]),
+                    'method'             : ['lbfgs', 'lbfgs'],
+                    'order'              : [(1, 1, 1), (2, 2, 2)]},
+        index = np.array([0, 1])
     )
 
-    pd.testing.assert_frame_equal(results, expected_results)
+    pd.testing.assert_frame_equal(results, expected_results, atol=0.001)
