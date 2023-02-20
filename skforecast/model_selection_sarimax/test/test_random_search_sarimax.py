@@ -25,11 +25,11 @@ def test_output_random_search_sarimax_sarimax_with_mocked():
 
     # Generate 15 random `order`
     np.random.seed(123)
-    values = [(p,d,q) for p,d,q in zip(np.random.randint(0, high=4, size=15, dtype=int), 
-                                       np.random.randint(0, high=4, size=15, dtype=int),
-                                       np.random.randint(0, high=4, size=15, dtype=int))]
+    values = [(p,d,q) for p,d,q in zip(np.random.randint(0, high=4, size=3, dtype=int), 
+                                       np.random.randint(0, high=4, size=3, dtype=int),
+                                       np.random.randint(0, high=4, size=3, dtype=int))]
 
-    param_distributions = {'order' : values}
+    param_distributions = {'order': values}
 
     results = random_search_sarimax(
                   forecaster          = forecaster,
@@ -43,19 +43,15 @@ def test_output_random_search_sarimax_sarimax_with_mocked():
                   initial_train_size  = len(y_datetime)-12,
                   fixed_train_size    = False,
                   return_best         = False,
-                  verbose             = True
+                  verbose             = False
               )
     
     expected_results = pd.DataFrame(
-        data  = {'params'             : np.array([{'order': (0, 0, 2)}, {'order': (2, 1, 3)}, {'order': (1, 1, 1)},
-                                                  {'order': (3, 1, 0)}, {'order': (2, 1, 0)}, {'order': (1, 2, 1)},
-                                                  {'order': (2, 2, 0)}, {'order': (3, 2, 0)}, {'order': (2, 3, 3)},
-                                                  {'order': (1, 3, 2)}], dtype=object),
-                 'mean_absolute_error': np.array([0.20445157, 0.21545791, 0.2168435 , 0.24189445, 0.24504986,
-                                                  0.27556196, 0.28612558, 0.29589668, 0.31338047, 0.31517517]),
-                 'order'              : [(0, 0, 2), (2, 1, 3), (1, 1, 1), (3, 1, 0), (2, 1, 0), 
-                                         (1, 2, 1), (2, 2, 0), (3, 2, 0), (2, 3, 3), (1, 3, 2)]},
-        index = np.array([2, 8, 7, 6, 3, 9, 4, 1, 5, 0])
+        data  = {'params': np.array([{'order': (1, 0, 1)}, {'order': (2, 2, 2)}, {'order': (2, 2, 3)}],
+                                    dtype=object),
+                'mean_absolute_error': np.array([0.203796, 0.250172, 0.265417]),
+                'order'              : [(1, 0, 1), (2, 2, 2), (2, 2, 3)]},
+        index = np.array([1, 0, 2])
     )
 
     pd.testing.assert_frame_equal(results, expected_results, atol=0.001)

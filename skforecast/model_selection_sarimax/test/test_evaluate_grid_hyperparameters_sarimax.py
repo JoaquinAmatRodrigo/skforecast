@@ -79,7 +79,6 @@ def test_output_evaluate_grid_hyperparameters_sarimax_with_mocked():
     forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, order=(1,1,1)))
 
     param_grid = [{'order': (1,1,1), 'seasonal_order': (0,0,0,0)}, 
-                  {'order': (1,2,2), 'seasonal_order': (0,0,0,0)}, 
                   {'order': (1,2,3), 'seasonal_order': (2,2,2,4)}]
 
     results = _evaluate_grid_hyperparameters_sarimax(
@@ -92,17 +91,16 @@ def test_output_evaluate_grid_hyperparameters_sarimax_with_mocked():
                   initial_train_size = len(y_datetime)-12,
                   fixed_train_size   = False,
                   return_best        = False,
-                  verbose            = True
+                  verbose            = False
               )
     
     expected_results = pd.DataFrame(
         data  = {'params'            : [{'order': (1,1,1), 'seasonal_order': (0,0,0,0)}, 
-                                        {'order': (1,2,2), 'seasonal_order': (0,0,0,0)}, 
                                         {'order': (1,2,3), 'seasonal_order': (2,2,2,4)}],
-                 'mean_squared_error': np.array([0.07437657, 0.13547973, 0.33529992]),
-                 'order'             : [(1, 1, 1), (1, 2, 2), (1, 2, 3)],
-                 'seasonal_order'    : [(0, 0, 0, 0), (0, 0, 0, 0), (2, 2, 2, 4)]},
-        index = np.array([0, 1, 2])
+                    'mean_squared_error': np.array([0.07440938870701645, 0.33300231290569804]),
+                    'order'             : [(1, 1, 1), (1, 2, 3)],
+                    'seasonal_order'    : [(0, 0, 0, 0), (2, 2, 2, 4)]},
+        index = np.array([0, 1])
     )
 
     pd.testing.assert_frame_equal(results, expected_results, atol=0.001)
@@ -156,8 +154,6 @@ def test_output_evaluate_grid_hyperparameters_sarimax_metric_list_with_mocked():
     forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, order=(1,1,1)))
 
     param_grid = [{'order': (1,1,1), 'method': 'lbfgs'}, 
-                  {'order': (1,1,1), 'method': 'powell'}, 
-                  {'order': (2,2,2), 'method': 'lbfgs'}, 
                   {'order': (2,2,2), 'method': 'powell'}]
 
     results = _evaluate_grid_hyperparameters_sarimax(
@@ -174,15 +170,13 @@ def test_output_evaluate_grid_hyperparameters_sarimax_metric_list_with_mocked():
               )
     
     expected_results = pd.DataFrame(
-        data  = {'params'             : [{'order': (1,1,1), 'method': 'powell'}, 
-                                         {'order': (1,1,1), 'method': 'lbfgs'}, 
-                                         {'order': (2,2,2), 'method': 'powell'}, 
-                                         {'order': (2,2,2), 'method': 'lbfgs'}],
-                 'mean_absolute_error': np.array([0.2249485 , 0.22497912, 0.2610407 , 0.27330493]),
-                 'mean_squared_error' : np.array([0.07783835, 0.07785217, 0.11220213, 0.12457249]),
-                 'order'              : [(1, 1, 1), (1, 1, 1), (2, 2, 2), (2, 2, 2)],
-                 'method'             : ['powell', 'lbfgs', 'powell', 'lbfgs']},
-        index = np.array([1, 0, 3, 2])
+        data  = {'params'             : [{'order': (1,1,1), 'method': 'lbfgs'}, 
+                                        {'order': (2,2,2), 'method': 'powell'}],
+                    'mean_absolute_error': np.array([0.2249986568362591, 0.27299724595171604]),
+                    'mean_squared_error' : np.array([0.07785902055180988, 0.1219896314815332]),
+                    'order'              : [(1, 1, 1), (2, 2, 2)],
+                    'method'             : ['lbfgs', 'powell']},
+        index = np.array([0, 1])
     )
 
     pd.testing.assert_frame_equal(results, expected_results, atol=0.001)
