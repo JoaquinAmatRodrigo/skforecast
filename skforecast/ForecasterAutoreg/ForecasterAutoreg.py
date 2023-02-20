@@ -707,7 +707,6 @@ class ForecasterAutoreg(ForecasterBase):
             sample residuals are used. In the latter case, the user should have
             calculated and stored the residuals within the forecaster (see
             `set_out_sample_residuals()`).
-            
 
         Returns 
         -------
