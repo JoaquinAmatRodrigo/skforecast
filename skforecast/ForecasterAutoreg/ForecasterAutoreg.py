@@ -177,6 +177,7 @@ class ForecasterAutoreg(ForecasterBase):
         self.transformer_exog        = transformer_exog
         self.weight_func             = weight_func
         self.source_code_weight_func = None
+        self.index_type              = None
         self.index_freq              = None
         self.training_range          = None
         self.last_window             = None
@@ -191,7 +192,6 @@ class ForecasterAutoreg(ForecasterBase):
         self.fit_date                = None
         self.skforcast_version       = skforecast.__version__
         self.python_version          = sys.version.split(" ")[0]
-        self.index_type              = None
         
         self.lags = initialize_lags(type(self).__name__, lags)
         self.max_lag = max(self.lags)

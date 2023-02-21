@@ -9,9 +9,9 @@ from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
 
 # Fixtures
-from .fixtures import y
-from .fixtures import exog
-from .fixtures import exog_predict
+from .fixtures_ForecasterAutoregCustom import y
+from .fixtures_ForecasterAutoregCustom import exog
+from .fixtures_ForecasterAutoregCustom import exog_predict
         
 
 def create_predictors(y): # pragma: no cover

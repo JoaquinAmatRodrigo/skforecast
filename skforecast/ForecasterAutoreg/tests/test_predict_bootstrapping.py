@@ -9,9 +9,9 @@ from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
 
 # Fixtures
-from .fixtures import y
-from .fixtures import exog
-from .fixtures import exog_predict
+from .fixtures_ForecasterAutoreg import y
+from .fixtures_ForecasterAutoreg import exog
+from .fixtures_ForecasterAutoreg import exog_predict
 
 
 def test_predict_bootstrapping_ValueError_when_out_sample_residuals_is_None():

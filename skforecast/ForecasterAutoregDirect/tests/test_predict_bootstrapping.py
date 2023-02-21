@@ -6,26 +6,26 @@ from skforecast.ForecasterAutoregDirect import ForecasterAutoregDirect
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
 
-
 # Fixtures
-from .fixtures import y
-from .fixtures import exog
-from .fixtures import exog_predict
+from .fixtures_ForecasterAutoregDirect import y
+from .fixtures_ForecasterAutoregDirect import exog
+from .fixtures_ForecasterAutoregDirect import exog_predict
+
 
 def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_steps_is_2_in_sample_residuals_True_exog_and_transformer():
     """
-    Test output of predict_bootstrappingwhen regressor is LinearRegression,
+    Test output of predict_bootstrapping when regressor is LinearRegression,
     2 steps are predicted, using in-sample residuals, exog is included and both
     inputs are transformed.
     """
 
     forecaster = ForecasterAutoregDirect(
-                    LinearRegression(),
-                    steps = 2,
-                    lags = 3,
-                    transformer_y = StandardScaler(),
-                    transformer_exog = StandardScaler(),
-                )
+                     regressor        = LinearRegression(),
+                     steps            = 2,
+                     lags             = 3,
+                     transformer_y    = StandardScaler(),
+                     transformer_exog = StandardScaler(),
+                 )
     forecaster.fit(y=y, exog=exog)
     results = forecaster.predict_bootstrapping(steps=2, exog=exog_predict, n_boot=4, in_sample_residuals=True)
     expected = pd.DataFrame(
@@ -34,23 +34,24 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_steps_
                     columns = [f"pred_boot_{i}" for i in range(4)],
                     index   = pd.RangeIndex(start=50, stop=52)
                 )
+    
     pd.testing.assert_frame_equal(expected, results)
 
 
 def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_steps_is_2_in_sample_residuals_False_exog_and_transformer():
     """
-    Test output of predict_bootstrappingwhen regressor is LinearRegression,
+    Test output of predict_bootstrapping when regressor is LinearRegression,
     2 steps are predicted, using in-sample residuals, exog is included and both
     inputs are transformed.
     """
 
     forecaster = ForecasterAutoregDirect(
-                    LinearRegression(),
-                    steps = 2,
-                    lags = 3,
-                    transformer_y = StandardScaler(),
-                    transformer_exog = StandardScaler(),
-                )
+                     regressor        = LinearRegression(),
+                     steps            = 2,
+                     lags             = 3,
+                     transformer_y    = StandardScaler(),
+                     transformer_exog = StandardScaler(),
+                 )
     forecaster.fit(y=y, exog=exog)
     forecaster.out_sample_residuals = forecaster.in_sample_residuals
     results = forecaster.predict_bootstrapping(steps=2, exog=exog_predict, n_boot=4, in_sample_residuals=False)
@@ -60,20 +61,21 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_steps_
                     columns = [f"pred_boot_{i}" for i in range(4)],
                     index   = pd.RangeIndex(start=50, stop=52)
                 )
+    
     pd.testing.assert_frame_equal(expected, results)
 
 
 def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_steps_is_2_in_sample_residuals_fixed():
     """
-    Test output of predict_bootstrappingwhen regressor is LinearRegression,
+    Test output of predict_bootstrapping when regressor is LinearRegression,
     2 steps are predicted, using in-sample residuals that are fixed.
     """
 
     forecaster = ForecasterAutoregDirect(
-                    LinearRegression(),
-                    steps = 2,
-                    lags = 3
-                )
+                     regressor = LinearRegression(),
+                     steps     = 2,
+                     lags      = 3
+                 )
     forecaster.fit(y=y, exog=exog)
     forecaster.in_sample_residuals = {1: pd.Series([1, 1, 1, 1, 1, 1, 1]),
                                       2: pd.Series([5, 5, 5, 5, 5, 5, 5])}
@@ -84,5 +86,5 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_steps_
                     columns = [f"pred_boot_{i}" for i in range(4)],
                     index   = pd.RangeIndex(start=50, stop=52)
                 )
-    pd.testing.assert_frame_equal(expected, results)
-        
+    
+    pd.testing.assert_frame_equal(expected, results)        
