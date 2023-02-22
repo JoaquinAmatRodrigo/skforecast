@@ -8,6 +8,15 @@
 
 **Skforecast** is a python library that eases using scikit-learn regressors as multi-step forecasters. It also works with any regressor compatible with the scikit-learn API (pipelines, CatBoost, LightGBM, XGBoost, Ranger...).
 
+**Why use skforecast?**
+
+Skforecast is developed according to the following priorities:
+
++ Fast and robust prototyping.
++ Validation and backtesting methods to have a realistic assessment of model performance.
++ Models must be deployed in production.
++ Models must be interpretable.
+
 ## Installation
 
 The default installation of skforecast only installs hard dependencies.
@@ -67,6 +76,7 @@ pip install skforecast[plotting]
 + Create recursive autoregressive forecasters from any regressor that follows the scikit-learn API
 + Create direct autoregressive forecasters from any regressor that follows the scikit-learn API
 + Create multi-time series autoregressive forecasters from any regressor that follows the scikit-learn API
++ Create multivariate autoregressive forecasters from any regressor that follows the scikit-learn API
 + Include exogenous variables as predictors
 + Include custom predictors (rolling mean, rolling variance ...)
 + Multiple backtesting methods for model validation
@@ -93,9 +103,7 @@ pip install skforecast[plotting]
 
 <i class="fa-light fa-chart-line fa" style="font-size: 25px; color:#f26e1d;"></i>  [**Prediction intervals in forecasting models**](https://www.cienciadedatos.net/documentos/py42-forecasting-prediction-intervals-machine-learning.html)
 
-
 <i class="fa-duotone fa-water fa" style="font-size: 25px; color:teal;"></i> [**Multi-series forecasting**](https://www.cienciadedatos.net/documentos/py44-multi-series-forecasting-skforecast.html)
-
 
 <i class="fa-solid fa-virus-covid" style="font-size: 25px; color:red;"></i> [**Reducing the influence of Covid-19 on time series forecasting models**](https://www.cienciadedatos.net/documentos/py45-weighted-time-series-forecasting.html)
 

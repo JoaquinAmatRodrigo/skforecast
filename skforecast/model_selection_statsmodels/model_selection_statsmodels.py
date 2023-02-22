@@ -10,6 +10,7 @@ from typing import Union, Tuple, Optional
 import logging
 import numpy as np
 import pandas as pd
+import warnings
 from sklearn.model_selection import ParameterGrid
 from tqdm import tqdm
 from ..utils import check_optional_dependency
@@ -29,20 +30,20 @@ logging.basicConfig(
 
 
 def backtesting_sarimax(
-        y: pd.Series,
-        steps: int,
-        metric: Union[str, callable],
-        initial_train_size: int,
-        fixed_train_size: bool=False,
-        refit: bool=False,
-        order: tuple=(1, 0, 0), 
-        seasonal_order: tuple=(0, 0, 0, 0),
-        trend: str=None,
-        alpha: float= 0.05,
-        exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-        sarimax_kwargs: dict={},
-        fit_kwargs: dict={'disp':0},
-        verbose: bool=False
+    y: pd.Series,
+    steps: int,
+    metric: Union[str, callable],
+    initial_train_size: int,
+    fixed_train_size: bool=False,
+    refit: bool=False,
+    order: tuple=(1, 0, 0), 
+    seasonal_order: tuple=(0, 0, 0, 0),
+    trend: str=None,
+    alpha: float= 0.05,
+    exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+    sarimax_kwargs: dict={},
+    fit_kwargs: dict={'disp':0},
+    verbose: bool=False
 ) -> Tuple[float, pd.DataFrame]:
     """
     Backtesting (validation) of `SARIMAX` model from statsmodels >= 0.12. The model
@@ -136,6 +137,14 @@ def backtesting_sarimax(
                 column upper  = upper bound interval of the interval.
     
     """
+
+    warnings.warn(
+        ('The `model_selection_statsmodels` module is deprecated and will be removed '
+         'in a future version of Skforecast. Instead, a forecaster based on ARIMA ' 
+         'models, `ForecasterSarimax`, and the `model_selection_sarimax` module, ' 
+         'for model evaluation and optimization, have been created.\n\n'
+         'Docs: https://joaquinamatrodrigo.github.io/skforecast/latest/user_guides/forecasting-sarimax-arima.html')
+    )
 
     if isinstance(metric, str):
         metric = _get_metric(metric=metric)
@@ -480,6 +489,14 @@ def cv_sarimax(
                 column upper  = upper bound interval of the interval.
     
     """
+
+    warnings.warn(
+        ('The `model_selection_statsmodels` module is deprecated and will be removed '
+         'in a future version of Skforecast. Instead, a forecaster based on ARIMA ' 
+         'models, `ForecasterSarimax`, and the `model_selection_sarimax` module, ' 
+         'for model evaluation and optimization, have been created.\n\n'
+         'Docs: https://joaquinamatrodrigo.github.io/skforecast/latest/user_guides/forecasting-sarimax-arima.html')
+    )
     
     if isinstance(metric, str):
         metric = _get_metric(metric=metric)
@@ -614,6 +631,14 @@ def grid_search_sarimax(
             additional n columns with param = value.
 
     """
+
+    warnings.warn(
+        ('The `model_selection_statsmodels` module is deprecated and will be removed '
+         'in a future version of Skforecast. Instead, a forecaster based on ARIMA ' 
+         'models, `ForecasterSarimax`, and the `model_selection_sarimax` module, ' 
+         'for model evaluation and optimization, have been created.\n\n'
+         'Docs: https://joaquinamatrodrigo.github.io/skforecast/latest/user_guides/forecasting-sarimax-arima.html')
+    )
 
     params_list = []
     metric_list = []

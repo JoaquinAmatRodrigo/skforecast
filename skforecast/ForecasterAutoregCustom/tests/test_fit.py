@@ -23,9 +23,9 @@ def test_forecaster_DatetimeIndex_index_freq_stored():
     Test serie_with_DatetimeIndex.index.freqstr is stored in forecaster.index_freq.
     """
     serie_with_DatetimeIndex = pd.Series(
-                data  = np.arange(10),
-                index = pd.date_range(start='2022-01-01', periods=10)
-                )
+        data  = np.arange(10),
+        index = pd.date_range(start='2022-01-01', periods=10)
+    )
     forecaster = ForecasterAutoregCustom(
                      regressor      = LinearRegression(),
                      fun_predictors = create_predictors,
@@ -107,7 +107,7 @@ def test_fit_same_residuals_when_residuals_greater_than_1000():
     forecaster.fit(y=pd.Series(np.arange(1200)))
     results_2 = forecaster.in_sample_residuals
 
-    assert (results_1 == results_2).all()
+    pd.testing.assert_series_equal(results_1, results_2)
 
 
 def test_fit_last_window_stored():
@@ -121,5 +121,5 @@ def test_fit_last_window_stored():
                  )
     forecaster.fit(y=pd.Series(np.arange(50)))
     expected = pd.Series(np.array([45, 46, 47, 48, 49]), index=[45, 46, 47, 48, 49])
-    
-    assert (forecaster.last_window == expected).all()
+ 
+    pd.testing.assert_series_equal(forecaster.last_window, expected)

@@ -276,7 +276,7 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregCustom_with_mocke
 
 def test_evaluate_grid_hyperparameters_when_return_best():
     """
-    Test forecaster is refited when return_best=True in _evaluate_grid_hyperparameters.
+    Test forecaster is refitted when return_best=True in _evaluate_grid_hyperparameters.
     """
     forecaster = ForecasterAutoreg(
                     regressor = Ridge(random_state=123),

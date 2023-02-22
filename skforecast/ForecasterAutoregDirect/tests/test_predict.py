@@ -89,7 +89,8 @@ def test_predict_output_when_regressor_is_LinearRegression_using_exog():
     forecaster.fit(y    = pd.Series(np.arange(50)), 
                    exog = pd.Series(np.arange(start=100, stop=150, step=1)))
     results = forecaster.predict(steps = 5, 
-                                 exog  = pd.Series(np.arange(start=25, stop=50, step=0.5)))
+                                 exog  = pd.Series(np.arange(start=25, stop=50, step=0.5),
+                                                   index=pd.RangeIndex(start=50, stop=100)))
     expected = pd.Series(
                    data  = np.array([18.750, 19.625, 20.500, 21.375, 22.250]),
                    index = pd.RangeIndex(start=50, stop=55, step=1),
@@ -138,9 +139,11 @@ def test_predict_output_when_regressor_is_LinearRegression_with_transform_y_and_
         )
     exog = pd.DataFrame({
                 'col_1': [7.5, 24.4, 60.3, 57.3, 50.7, 41.4, 87.2, 47.4, 60.3, 87.2,
-                        7.5, 60.4, 50.3, 57.3, 24.7, 87.4, 87.2, 60.4, 50.7, 7.5],
+                          7.5, 60.4, 50.3, 57.3, 24.7, 87.4, 87.2, 60.4, 50.7, 7.5],
                 'col_2': ['a']*10 + ['b']*10}
            )
+    exog_predict = exog.copy()
+    exog_predict.index = pd.RangeIndex(start=20, stop=40)
 
     transformer_y = StandardScaler()
     transformer_exog = ColumnTransformer(
@@ -157,7 +160,7 @@ def test_predict_output_when_regressor_is_LinearRegression_with_transform_y_and_
                      transformer_exog = transformer_exog,
                  )
     forecaster.fit(y=y, exog=exog)
-    predictions = forecaster.predict(steps=[1, 2, 3, 4, 5], exog=exog)
+    predictions = forecaster.predict(steps=[1, 2, 3, 4, 5], exog=exog_predict)
     expected = pd.Series(
                    data  = np.array([1.10855119, -0.83442443, 0.9434436 , 0.6676508 , 0.58666266]),
                    index = pd.RangeIndex(start=20, stop=25, step=1),

@@ -145,7 +145,9 @@ def time_series_splitter(
         yield train_indices, test_indices
         
         
-def _get_metric(metric:str) -> callable:
+def _get_metric(
+    metric:str
+) -> callable:
     """
     Get the corresponding scikit-learn function to calculate the metric.
     
@@ -275,7 +277,7 @@ def _backtesting_forecaster_refit(
         - The training set increases with `steps` observations.
         - The model is re-fitted using the new training set.
 
-    In order to apply backtesting with re-fit, an initial training set must be
+    In order to apply backtesting with refit, an initial training set must be
     available, otherwise it would not be possible to increase the training set 
     after each iteration. `initial_train_size` must be provided.
     
@@ -573,7 +575,7 @@ def _backtesting_forecaster_no_refit(
         last_window_end   = initial_train_size + i * steps
         last_window_start = last_window_end - window_size 
         last_window_y     = y.iloc[last_window_start:last_window_end]
-
+        
         next_window_exog = exog.iloc[last_window_end:last_window_end + steps, ] if exog is not None else None
     
         if i == folds - 1: # last fold
@@ -623,7 +625,7 @@ def backtesting_forecaster(
     y: pd.Series,
     steps: int,
     metric: Union[str, callable, list],
-    initial_train_size: Optional[int],
+    initial_train_size: Optional[int]=None,
     fixed_train_size: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     refit: bool=False,
@@ -720,15 +722,22 @@ def backtesting_forecaster(
     
     """
 
+    if initial_train_size is not None and not isinstance(initial_train_size, (int, np.int64, np.int32)):
+        raise TypeError(
+            (f'If used, `initial_train_size` must be an integer greater than '
+             f'the window_size of the forecaster. Got {type(initial_train_size)}.')
+        )
+
     if initial_train_size is not None and initial_train_size >= len(y):
         raise ValueError(
-            'If used, `initial_train_size` must be smaller than length of `y`.'
+            (f'If used, `initial_train_size` must be an integer '
+             f'smaller than the length of `y` ({len(y)}).')
         )
         
     if initial_train_size is not None and initial_train_size < forecaster.window_size:
         raise ValueError(
-            f"`initial_train_size` must be greater than "
-            f"forecaster's window_size ({forecaster.window_size})."
+            (f'If used, `initial_train_size` must be an integer greater than '
+             f'the window_size of the forecaster ({forecaster.window_size}).')
         )
 
     if initial_train_size is None and not forecaster.fitted:

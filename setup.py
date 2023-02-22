@@ -34,6 +34,7 @@ extras_require["full"] = (
     + extras_require["test"]
 )
 
+extras_require["all"] = extras_require["full"]
 
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()

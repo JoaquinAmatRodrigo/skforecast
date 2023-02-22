@@ -15,6 +15,15 @@
 
 **Skforecast** is a python library that eases using scikit-learn regressors as multi-step forecasters. It also works with any regressor compatible with the scikit-learn API (pipelines, CatBoost, LightGBM, XGBoost, Ranger...).
 
+**Why use skforecast?**
+
+Skforecast is developed according to the following priorities:
+
++ Fast and robust prototyping.
++ Validation and backtesting methods to have a realistic assessment of model performance.
++ Models must be deployed in production.
++ Models must be interpretable.
+
 **Documentation: https://joaquinamatrodrigo.github.io/skforecast/**
 
 
@@ -86,16 +95,18 @@ pip install skforecast[plotting]
 + Get predictor importance
 + Forecaster in production
 
-## What is new in skforecast 0.6.0?
+## What is coming in the new release?
 
-- [x] Define individual time-based weights for the series, `ForecasterAutoreg`, `ForecasterAutoregCustom`, `ForecasterAutoregDirect`. 
-- [x] Define individual weights for the series, `ForecasterAutoregMultiSeries`. 
-- [x] Predict and backtest all series at the same time with `ForecasterAutoregMultiSeries`.
-- [x] Multiple metrics in `grid_search_forecaster_multiseries` and `random_search_forecaster_multiseries`, `ForecasterAutoregMultiSeries`.
-- [x] Modeling multivariate time series, `ForecasterAutoregMultivariate`.
-- [x] Bug fixes and performance improvements.
+- [ ] Predict and plot the distribution of each predicted step.
+- [x] A class of its own and faster implementation of ARIMA models with [pmdarima](https://github.com/alkaline-ml/pmdarima), `ForecasterSarimax`. 
+- [ ] Bug fixes and performance improvements.
 
-Visit the [changelog](https://github.com/JoaquinAmatRodrigo/skforecast/blob/0.6.x/changelog.md) to view all notable changes.
+Try it:
+```bash
+pip install git+https://github.com/JoaquinAmatRodrigo/skforecast@0.7.x
+```
+
+Visit the [changelog](https://github.com/JoaquinAmatRodrigo/skforecast/blob/0.7.x/changelog.md) to view all notable changes.
 
 
 # Documentation
@@ -109,6 +120,8 @@ Recent improvements are highlighted in the [release notes](https://joaquinamatro
 + [Recursive multi-step forecasting](https://joaquinamatrodrigo.github.io/skforecast/latest/user_guides/autoregresive-forecaster.html)
 
 + [Multi-time series forecasting](https://joaquinamatrodrigo.github.io/skforecast/latest/user_guides/multi-time-series-forecasting.html)
+
++ [Multivariate forecasting](https://joaquinamatrodrigo.github.io/skforecast/latest/user_guides/multivariate-forecasting.html)
 
 + [Backtesting (validation) of forecasting models](https://joaquinamatrodrigo.github.io/skforecast/latest/user_guides/backtesting.html)
 
@@ -155,7 +168,6 @@ Recent improvements are highlighted in the [release notes](https://joaquinamatro
 + [**Workshop predicción de series temporales con machine learning Universidad de Deusto / Deustuko Unibertsitatea**](https://youtu.be/MlktVhReO0E)
 
 + [**Intervalos de predicción en modelos de forecasting**](https://www.cienciadedatos.net/documentos/py42-intervalos-prediccion-modelos-forecasting-machine-learning.html)      [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JoaquinAmatRodrigo/skforecast/master?labpath=examples%2Fintervalos-prediccion-modelos-forecasting-machine-learning.ipynb)
-
 
 + [**Multi-series forecasting**](https://www.cienciadedatos.net/documentos/py44-multi-series-forecasting-skforecast-español.html)   [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JoaquinAmatRodrigo/skforecast/master?labpath=examples%2Fmulti-series-forecasting-español.ipynb)
 

@@ -11,23 +11,6 @@ from sklearn.preprocessing import OneHotEncoder
 from sklearn.linear_model import LinearRegression
 
 
-def test_predict_interval_exception_when_out_sample_residuals_is_None():
-    """
-    Test exception is raised when in_sample_residuals=False and
-    forecaster.out_sample_residuals is None.
-    """
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
-    forecaster.fit(y=pd.Series(np.arange(10)))
-
-    err_msg = re.escape(
-                ('`forecaster.out_sample_residuals` is `None`. Use '
-                 '`in_sample_residuals=True` or method `set_out_sample_residuals()` '
-                 'before `predict_interval()`.')
-              )
-    with pytest.raises(ValueError, match = err_msg):
-        forecaster.predict_interval(steps=1, in_sample_residuals=False)
-
-
 def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_1_in_sample_residuals_is_True():
     """
     Test output when regressor is LinearRegression and one step ahead is predicted
@@ -37,9 +20,9 @@ def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_1_
     forecaster.fit(y=pd.Series(np.arange(10)))
     forecaster.in_sample_residuals = np.full_like(forecaster.in_sample_residuals, fill_value=10)
     expected = pd.DataFrame(
-                   np.array([[10., 20., 20.]]),
+                   data    = np.array([[10., 20., 20.]]),
                    columns = ['pred', 'lower_bound', 'upper_bound'],
-                   index = pd.RangeIndex(start=10, stop=11, step=1)
+                   index   = pd.RangeIndex(start=10, stop=11, step=1)
                )
     results = forecaster.predict_interval(steps=1, in_sample_residuals=True)
 
@@ -53,12 +36,12 @@ def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_2_
     """
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
     forecaster.fit(y=pd.Series(np.arange(10)))
-    forecaster.in_sample_residuals = np.full_like(forecaster.in_sample_residuals, fill_value=10)
+    forecaster.in_sample_residuals = pd.Series(np.full_like(forecaster.in_sample_residuals, fill_value=10))
     expected = pd.DataFrame(
-                   np.array([[10. ,20., 20.],
-                             [11., 24.33333333, 24.33333333]]),
+                   data    = np.array([[10. ,20., 20.],
+                                       [11., 24.33333333, 24.33333333]]),
                    columns = ['pred', 'lower_bound', 'upper_bound'],
-                   index = pd.RangeIndex(start=10, stop=12, step=1)
+                   index   = pd.RangeIndex(start=10, stop=12, step=1)
                )
     results = forecaster.predict_interval(steps=2, in_sample_residuals=True)
 
@@ -74,9 +57,9 @@ def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_1_
     forecaster.fit(y=pd.Series(np.arange(10)))
     forecaster.out_sample_residuals = pd.Series(np.full_like(forecaster.in_sample_residuals, fill_value=10))
     expected = pd.DataFrame(
-                   np.array([[10., 20., 20.]]),
+                   data    = np.array([[10., 20., 20.]]),
                    columns = ['pred', 'lower_bound', 'upper_bound'],
-                   index = pd.RangeIndex(start=10, stop=11, step=1)
+                   index   = pd.RangeIndex(start=10, stop=11, step=1)
                )
     results = forecaster.predict_interval(steps=1, in_sample_residuals=False)
 
@@ -92,10 +75,10 @@ def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_2_
     forecaster.fit(y=pd.Series(np.arange(10)))
     forecaster.out_sample_residuals = pd.Series(np.full_like(forecaster.in_sample_residuals, fill_value=10))
     expected = pd.DataFrame(
-                   np.array([[10. ,20., 20.],
-                             [11., 24.33333333, 24.33333333]]),
+                   data    = np.array([[10. ,20., 20.],
+                                       [11., 24.33333333, 24.33333333]]),
                    columns = ['pred', 'lower_bound', 'upper_bound'],
-                   index = pd.RangeIndex(start=10, stop=12, step=1)
+                   index   = pd.RangeIndex(start=10, stop=12, step=1)
                )
     results = forecaster.predict_interval(steps=2, in_sample_residuals=False)
 
@@ -120,13 +103,13 @@ def test_predict_interval_output_when_regressor_is_LinearRegression_with_transfo
     forecaster.fit(y=y)
     predictions = forecaster.predict_interval(steps=5)
     expected = pd.DataFrame(
-                data = np.array([[-0.1578203 , -2.02104471,  1.55076389],
-                                 [-0.18459942, -1.85211385,  1.49693466],
-                                 [-0.13711051, -1.82918043,  1.37837389],
-                                 [-0.01966358, -1.7522189 ,  1.31940346],
-                                 [-0.03228613, -1.77074022,  1.56056698]]),
-                index = pd.RangeIndex(start=20, stop=25, step=1),
-                columns = ['pred', 'lower_bound', 'upper_bound']
+                   data = np.array([[-0.1578203 , -2.02104471,  1.55076389],
+                                    [-0.18459942, -1.85211385,  1.49693466],
+                                    [-0.13711051, -1.82918043,  1.37837389],
+                                    [-0.01966358, -1.7522189 ,  1.31940346],
+                                    [-0.03228613, -1.77074022,  1.56056698]]),
+                   index = pd.RangeIndex(start=20, stop=25, step=1),
+                   columns = ['pred', 'lower_bound', 'upper_bound']
                )
     
     pd.testing.assert_frame_equal(predictions, expected)
@@ -138,12 +121,14 @@ def test_predict_interval_output_when_regressor_is_LinearRegression_with_transfo
     as transformer_y and transformer_exog as transformer_exog.
     """
     y = pd.Series(
-            np.array([-0.59,  0.02, -0.9 , 1.09, -3.61, 0.72, -0.11, -0.4])
+            np.array([-0.59, 0.02, -0.9, 1.09, -3.61, 0.72, -0.11, -0.4])
         )
-    exog = pd.DataFrame({
-                'col_1': [7.5, 24.4, 60.3, 57.3, 50.7, 41.4, 87.2, 47.4],
-                'col_2': ['a', 'a', 'a', 'a', 'b', 'b', 'b', 'b']
-           })
+    exog = pd.DataFrame(
+               {'col_1': [7.5, 24.4, 60.3, 57.3, 50.7, 41.4, 87.2, 47.4],
+                'col_2': ['a', 'a', 'a', 'a', 'b', 'b', 'b', 'b']}
+           )
+    exog_predict = exog.copy()
+    exog_predict.index = pd.RangeIndex(start=8, stop=16)
 
     transformer_y = StandardScaler()
     transformer_exog = ColumnTransformer(
@@ -153,21 +138,21 @@ def test_predict_interval_output_when_regressor_is_LinearRegression_with_transfo
                             verbose_feature_names_out = False
                         )
     forecaster = ForecasterAutoreg(
-                    regressor = LinearRegression(),
-                    lags = 5,
-                    transformer_y = transformer_y,
-                    transformer_exog = transformer_exog,
-                )
+                     regressor        = LinearRegression(),
+                     lags             = 5,
+                     transformer_y    = transformer_y,
+                     transformer_exog = transformer_exog,
+                 )
     forecaster.fit(y=y, exog=exog)
-    predictions = forecaster.predict_interval(steps=5, exog=exog)
+    predictions = forecaster.predict_interval(steps=5, exog=exog_predict)
     expected = pd.DataFrame(
-                data = np.array([[ 0.50619336,  0.50619336,  0.50619336],
-                                 [-0.09630298, -0.09630298, -0.09630298],
-                                 [ 0.05254973,  0.05254973,  0.05254973],
-                                 [ 0.12281153,  0.12281153,  0.12281153],
-                                 [ 0.00221741,  0.00221741,  0.00221741]]),
-                index = pd.RangeIndex(start=8, stop=13, step=1),
-                columns = ['pred', 'lower_bound', 'upper_bound']
+                   data = np.array([[ 0.50619336,  0.50619336,  0.50619336],
+                                    [-0.09630298, -0.09630298, -0.09630298],
+                                    [ 0.05254973,  0.05254973,  0.05254973],
+                                    [ 0.12281153,  0.12281153,  0.12281153],
+                                    [ 0.00221741,  0.00221741,  0.00221741]]),
+                   index = pd.RangeIndex(start=8, stop=13, step=1),
+                   columns = ['pred', 'lower_bound', 'upper_bound']
                )
     
     pd.testing.assert_frame_equal(predictions, expected)

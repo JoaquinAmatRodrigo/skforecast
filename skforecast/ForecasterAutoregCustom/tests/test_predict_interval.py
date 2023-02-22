@@ -19,27 +19,6 @@ def create_predictors(y): # pragma: no cover
     lags = y[-1:-6:-1]
     
     return lags 
- 
-
-def test_predict_interval_exception_when_out_sample_residuals_is_None():
-    """
-    Test exception is raised when in_sample_residuals=False and
-    forecaster.out_sample_residuals is None.
-    """
-    forecaster = ForecasterAutoregCustom(
-                        regressor      = LinearRegression(),
-                        fun_predictors = create_predictors,
-                        window_size    = 5
-                 )
-    forecaster.fit(y=pd.Series(np.arange(10)))
-
-    err_msg = re.escape(
-                ('`forecaster.out_sample_residuals` is `None`. Use '
-                 '`in_sample_residuals=True` or method `set_out_sample_residuals()` '
-                 'before `predict_interval()`.')
-              )
-    with pytest.raises(ValueError, match = err_msg):
-        forecaster.predict_interval(steps=1, in_sample_residuals=False)
    
 
 def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_1_in_sample_residuals_is_True():
@@ -165,12 +144,14 @@ def test_predict_interval_output_when_regressor_is_LinearRegression_with_transfo
     as transformer_y and transformer_exog as transformer_exog.
     """
     y = pd.Series(
-            np.array([-0.59,  0.02, -0.9 , 1.09, -3.61, 0.72, -0.11, -0.4])
+            np.array([-0.59, 0.02, -0.9, 1.09, -3.61, 0.72, -0.11, -0.4])
         )
     exog = pd.DataFrame({
-                'col_1': [7.5, 24.4, 60.3, 57.3, 50.7, 41.4, 87.2, 47.4],
-                'col_2': ['a', 'a', 'a', 'a', 'b', 'b', 'b', 'b']
-           })
+               'col_1': [7.5, 24.4, 60.3, 57.3, 50.7, 41.4, 87.2, 47.4],
+               'col_2': ['a', 'a', 'a', 'a', 'b', 'b', 'b', 'b']}
+           )
+    exog_predict = exog.copy()
+    exog_predict.index = pd.RangeIndex(start=8, stop=16)
 
     transformer_y = StandardScaler()
     transformer_exog = ColumnTransformer(
@@ -187,7 +168,7 @@ def test_predict_interval_output_when_regressor_is_LinearRegression_with_transfo
                     transformer_exog = transformer_exog
                  )
     forecaster.fit(y=y, exog=exog)
-    predictions = forecaster.predict_interval(steps=5, exog=exog)
+    predictions = forecaster.predict_interval(steps=5, exog=exog_predict)
     expected = pd.DataFrame(
                 data = np.array([[ 0.50619336,  0.50619336,  0.50619336],
                                  [-0.09630298, -0.09630298, -0.09630298],
