@@ -994,7 +994,7 @@ class ForecasterAutoreg(ForecasterBase):
         predictions : pandas DataFrame
             Distribution parameters estimated for each step.
 
-        """               
+        """
 
         boot_samples = self.predict_bootstrapping(
                            steps               = steps,
