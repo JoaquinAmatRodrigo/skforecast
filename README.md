@@ -101,6 +101,7 @@ pip install skforecast[plotting]
 - [x] A class of its own and faster implementation of ARIMA models with [pmdarima](https://github.com/alkaline-ml/pmdarima), `ForecasterSarimax`. 
 - [x] Bug fixes and performance improvements.
 
+
 Try it:
 ```bash
 pip install git+https://github.com/JoaquinAmatRodrigo/skforecast@0.7.x
