@@ -97,9 +97,10 @@ pip install skforecast[plotting]
 
 ## What is coming in the new release?
 
-- [ ] Predict and plot the distribution of each predicted step.
+- [x] Predict and plot the distribution of each predicted step.
 - [x] A class of its own and faster implementation of ARIMA models with [pmdarima](https://github.com/alkaline-ml/pmdarima), `ForecasterSarimax`. 
-- [ ] Bug fixes and performance improvements.
+- [x] Bug fixes and performance improvements.
+
 
 Try it:
 ```bash
