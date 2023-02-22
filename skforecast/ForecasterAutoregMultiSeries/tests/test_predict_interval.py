@@ -103,7 +103,8 @@ def test_predict_interval_exception_when_out_sample_residuals_is_None():
     err_msg = re.escape(
                 ('`forecaster.out_sample_residuals` is `None`. Use '
                  '`in_sample_residuals=True` or method `set_out_sample_residuals()` '
-                 'before `predict_interval()`.')
+                 'before `predict_interval()`, `predict_bootstrapping()` or '
+                 '`predict_dist()`.')
               )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.predict_interval(steps=1, levels='1', in_sample_residuals=False)
