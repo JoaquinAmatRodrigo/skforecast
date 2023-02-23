@@ -168,3 +168,32 @@ def test_predict_output_when_regressor_is_LinearRegression_with_transform_y_and_
                )
     
     pd.testing.assert_series_equal(predictions, expected)
+
+
+def test_predict_output_when_regressor_is_LinearRegression_and_weight_func():
+    """
+    Test predict output when using LinearRegression as regressor and custom_weights.
+    """
+    def custom_weights(index):
+        """
+        Return 1 for all elements in index
+        """
+        weights = np.ones_like(index)
+
+        return weights
+    
+    forecaster = ForecasterAutoregDirect(
+                     regressor   = LinearRegression(), 
+                     lags        = 3, 
+                     steps       = 3, 
+                     weight_func = custom_weights
+                 )
+    forecaster.fit(y=pd.Series(np.arange(50)))
+    results = forecaster.predict(steps=3)
+    expected = pd.Series(
+                   data  = np.array([50., 51., 52.]),
+                   index = pd.RangeIndex(start=50, stop=53, step=1),
+                   name  = 'pred'
+               )
+    
+    pd.testing.assert_series_equal(results, expected)
