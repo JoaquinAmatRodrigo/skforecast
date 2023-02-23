@@ -32,7 +32,7 @@ def test_predict_ValueError_when_ForecasterSarimax_last_window_exog_is_not_None_
     Check ValueError is raised when last_window_exog is not None, but 
     last_window is not provided.
     """
-    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, order=(1,1,1)))
+    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, trend=None, method='nm', ftol=1e-19, order=(1,1,1)))
     forecaster.fit(y=y, exog=exog)
     
     err_msg = re.escape(
@@ -53,7 +53,7 @@ def test_predict_ValueError_when_ForecasterSarimax_last_window_exog_is_None_and_
     Check ValueError is raised when last_window_exog is None, but included_exog
     is True and last_window is provided.
     """
-    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, order=(1,1,1)))
+    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, trend=None, method='nm', ftol=1e-19, order=(1,1,1)))
     forecaster.fit(y=y, exog=exog)
     lw = pd.Series(np.random.rand(10), index=pd.RangeIndex(start=50, stop=60))
     ex_pred = pd.Series(np.random.rand(10), index=pd.RangeIndex(start=60, stop=70))
@@ -75,16 +75,16 @@ def test_predict_ValueError_when_ForecasterSarimax_last_window_exog_is_None_and_
 @pytest.mark.parametrize("kwargs, data", 
                          [({'order': (1,1,1), 
                             'seasonal_order': (0,0,0,0)}, 
-                            [0.5356622558529589, 0.5235127967378337, 0.5220779036724879, 0.5224069466873313, 0.5230263860169242]), 
+                            [0.5357917994, 0.5236704382, 0.5222455717, 0.5225814407, 0.523207142]), 
                           ({'order': (1,1,1), 
                             'seasonal_order': (1,1,1,2)}, 
-                            [0.6431759925083509, 0.6050596986486056, 0.6396899462894062, 0.6285046200049875, 0.6656014289542361])], 
+                            [0.64358976, 0.6057425641, 0.6404405344, 0.6293049695, 0.6664847988])], 
                          ids = lambda values : f'order, seasonal_order: {values}')
 def test_predict_output_ForecasterSarimax(kwargs, data):
     """
     Test predict output of ForecasterSarimax.
     """
-    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000,**kwargs))
+    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, trend=None, method='nm', ftol=1e-19, **kwargs))
     forecaster.fit(y=y)
     predictions = forecaster.predict(steps=5)
     expected = pd.Series(
@@ -93,22 +93,22 @@ def test_predict_output_ForecasterSarimax(kwargs, data):
                    name  = 'pred'
                )
     
-    pd.testing.assert_series_equal(predictions, expected, atol=0.001)
+    pd.testing.assert_series_equal(predictions, expected, atol=0.0001)
 
 
 @pytest.mark.parametrize("kwargs, data", 
                          [({'order': (1,1,1), 
                             'seasonal_order': (0,0,0,0)}, 
-                            [0.6051897923832147, 0.44485328798558965, 0.4924928857243766, 0.5053206219772969, 0.5495283846598701]), 
+                            [0.6051979717, 0.444932999, 0.4925494003, 0.5053724811, 0.5495608555]), 
                           ({'order': (1,1,1), 
                             'seasonal_order': (1,1,1,2)}, 
-                            [0.6909824504633173, 0.5360876052609425, 0.5960903549823267, 0.611936013104769, 0.6710989580405312])], 
+                            [0.6912741215, 0.5366948079, 0.5966985374, 0.612552592 , 0.6717425605])], 
                          ids = lambda values : f'order, seasonal_order: {values}')
 def test_predict_output_ForecasterSarimax_with_exog(kwargs, data):
     """
     Test predict output of ForecasterSarimax with exogenous variables.
     """
-    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000,**kwargs))
+    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, trend=None, method='nm', ftol=1e-19,**kwargs))
     forecaster.fit(y=y, exog=exog)
     predictions = forecaster.predict(steps=5, exog=exog_predict)
     expected = pd.Series(
@@ -117,23 +117,23 @@ def test_predict_output_ForecasterSarimax_with_exog(kwargs, data):
                    name  = 'pred'
                )
     
-    pd.testing.assert_series_equal(predictions, expected, atol=0.001)
+    pd.testing.assert_series_equal(predictions, expected, atol=0.0001)
 
 
 @pytest.mark.parametrize("kwargs, data", 
                          [({'order': (1,1,1), 
                             'seasonal_order': (0,0,0,0)}, 
-                            [0.5357834654099728, 0.5236345700464661, 0.5221995483814375, 0.5225315103469383, 0.523154891759637]), 
+                            [0.5357919716, 0.5236706695, 0.5222458244, 0.5225817054, 0.5232074166]), 
                           ({'order': (1,1,1), 
                             'seasonal_order': (1,1,1,2)}, 
-                            [0.6434931298499686, 0.6056518076986483, 0.6403508882756264, 0.6291997857629221, 0.6663689446926562])], 
+                            [0.6435918004, 0.6057455572, 0.6404437473, 0.6293084134, 0.6664885996])], 
                          ids = lambda values : f'order, seasonal_order: {values}')
 def test_predict_output_ForecasterSarimax_with_transform_y(kwargs, data):
     """
     Test predict output of ForecasterSarimax with a StandardScaler() as transformer_y.
     """
     forecaster = ForecasterSarimax(
-                     regressor     = ARIMA(maxiter=1000,**kwargs),
+                     regressor     = ARIMA(maxiter=1000, trend=None, method='nm', ftol=1e-19,**kwargs),
                      transformer_y = StandardScaler()
                  )
     forecaster.fit(y=y)
@@ -144,7 +144,7 @@ def test_predict_output_ForecasterSarimax_with_transform_y(kwargs, data):
                    name  = 'pred'
                )
     
-    pd.testing.assert_series_equal(predictions, expected, atol=0.001)
+    pd.testing.assert_series_equal(predictions, expected, atol=0.0001)
 
 
 @pytest.mark.parametrize("kwargs, data", 
@@ -168,7 +168,7 @@ def test_predict_output_ForecasterSarimax_with_transform_y_and_transform_exog(kw
                        )
 
     forecaster = ForecasterSarimax(
-                     regressor        = ARIMA(maxiter=1000,**kwargs),
+                     regressor        = ARIMA(maxiter=1000, trend=None, method='nm', ftol=1e-19,**kwargs),
                      transformer_y    = StandardScaler(),
                      transformer_exog = transformer_exog
                  )
@@ -180,7 +180,7 @@ def test_predict_output_ForecasterSarimax_with_transform_y_and_transform_exog(kw
                    name  = 'pred'
                )
     
-    pd.testing.assert_series_equal(predictions, expected, atol=0.001)
+    pd.testing.assert_series_equal(predictions, expected, atol=0.0001)
 
 
 def test_predict_ValueError_when_last_window_index_does_not_follow_training_set():
@@ -193,7 +193,7 @@ def test_predict_ValueError_when_last_window_index_does_not_follow_training_set(
     lw_test = pd.Series(data=lw_datetime.values)
     lw_test.index = pd.date_range(start='2022-03-01', periods=50, freq='D')
 
-    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000,order=(1,1,1)))
+    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, trend=None, method='nm', ftol=1e-19,order=(1,1,1)))
     forecaster.fit(y=y_test)
 
     err_msg = re.escape(
@@ -224,7 +224,7 @@ def test_predict_ValueError_when_last_window_exog_index_does_not_follow_training
     lw_exog_test = pd.Series(data=lw_exog_datetime.values)
     lw_exog_test.index = pd.date_range(start='2022-03-01', periods=50, freq='D')
 
-    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000,order=(1,1,1)))
+    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, trend=None, method='nm', ftol=1e-19,order=(1,1,1)))
     forecaster.fit(y=y_test, exog=exog_test)
 
     err_msg = re.escape(
@@ -255,7 +255,7 @@ def test_predict_output_ForecasterSarimax_with_last_window(kwargs, data):
     """
     Test predict output of ForecasterSarimax with `last_window`.
     """
-    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000,**kwargs))
+    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, trend=None, method='nm', ftol=1e-19,**kwargs))
     forecaster.fit(y=y_datetime)
     predictions = forecaster.predict(steps=5, last_window=lw_datetime)
     expected = pd.Series(
@@ -264,7 +264,7 @@ def test_predict_output_ForecasterSarimax_with_last_window(kwargs, data):
                    name  = 'pred'
                )
     
-    pd.testing.assert_series_equal(predictions, expected, atol=0.001)
+    pd.testing.assert_series_equal(predictions, expected, atol=0.0001)
 
 
 @pytest.mark.parametrize("kwargs, data", 
@@ -279,7 +279,7 @@ def test_predict_output_ForecasterSarimax_with_last_window_and_exog(kwargs, data
     """
     Test predict output of ForecasterSarimax with exogenous variables and `last_window`.
     """
-    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000,**kwargs))
+    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, trend=None, method='nm', ftol=1e-19,**kwargs))
     forecaster.fit(y=y_datetime, exog=exog_datetime)
     predictions = forecaster.predict(
                       steps            = 5, 
@@ -294,7 +294,7 @@ def test_predict_output_ForecasterSarimax_with_last_window_and_exog(kwargs, data
                    name  = 'pred'
                )
     
-    pd.testing.assert_series_equal(predictions, expected, atol=0.001)
+    pd.testing.assert_series_equal(predictions, expected, atol=0.0001)
 
 
 @pytest.mark.parametrize("kwargs, data", 
@@ -318,7 +318,7 @@ def test_predict_output_ForecasterSarimax_with_last_window_and_exog_and_transfor
                        )
 
     forecaster = ForecasterSarimax(
-                     regressor        = ARIMA(maxiter=1000,**kwargs), 
+                     regressor        = ARIMA(maxiter=1000, trend=None, method='nm', ftol=1e-19,**kwargs), 
                      transformer_y    = StandardScaler(),
                      transformer_exog = transformer_exog
                  )
@@ -336,7 +336,7 @@ def test_predict_output_ForecasterSarimax_with_last_window_and_exog_and_transfor
                    name  = 'pred'
                )
     
-    pd.testing.assert_series_equal(predictions, expected, atol=0.001)
+    pd.testing.assert_series_equal(predictions, expected, atol=0.0001)
 
 
 @pytest.mark.parametrize("y          , idx", 
@@ -349,7 +349,7 @@ def test_predict_ForecasterSarimax_updates_extended_index_twice(y, idx):
     """
     y_fit = y.iloc[:30].copy()
 
-    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000,order=(1,1,1)))
+    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, trend=None, method='nm', ftol=1e-19,order=(1,1,1)))
     forecaster.fit(y=y_fit)
 
     lw_1 = y.iloc[30:40].copy()
