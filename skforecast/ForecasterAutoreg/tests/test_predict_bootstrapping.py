@@ -30,7 +30,7 @@ def test_predict_bootstrapping_ValueError_when_out_sample_residuals_is_None():
               )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.predict_bootstrapping(steps=1, in_sample_residuals=False)
-        
+
 
 def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_exog_steps_is_1_in_sample_residuals_is_True():
     """

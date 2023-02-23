@@ -13,6 +13,10 @@ from sklearn.linear_model import LinearRegression
 from sklearn.neural_network import MLPRegressor
 from sklearn.ensemble import RandomForestRegressor
 
+# Fixtures
+series = pd.DataFrame({'1': pd.Series(np.arange(10)), 
+                       '2': pd.Series(np.arange(10))})
+                    
 
 def test_exception_is_raised_when_forecaster_is_not_fitted():
     """
@@ -21,7 +25,7 @@ def test_exception_is_raised_when_forecaster_is_not_fitted():
     """
     forecaster = ForecasterAutoregMultiSeries(
                     regressor = LinearRegression(),
-                    lags = 3,
+                    lags      = 3,
                  )
 
     err_msg = re.escape(
@@ -37,10 +41,6 @@ def test_output_get_feature_importance_when_regressor_is_RandomForest():
     Test output of get_feature_importance when regressor is RandomForestRegressor with lags=3
     and it is trained with series pandas DataFrame.
     """
-    series = pd.DataFrame({'1': pd.Series(np.arange(10)), 
-                           '2': pd.Series(np.arange(10))
-                          })
-
     forecaster = ForecasterAutoregMultiSeries(RandomForestRegressor(n_estimators=1, max_depth=2, random_state=123), lags=3)
     forecaster.fit(series=series)
     expected = pd.DataFrame({
@@ -58,10 +58,6 @@ def test_output_get_feature_importance_when_regressor_is_RandomForest_with_exog(
     and it is trained with series pandas DataFrame and a exogenous variable
     exog=pd.Series(np.arange(10, 20), name='exog').
     """
-    series = pd.DataFrame({'1': pd.Series(np.arange(10)), 
-                           '2': pd.Series(np.arange(10))
-                          })
-
     forecaster = ForecasterAutoregMultiSeries(RandomForestRegressor(n_estimators=1, max_depth=2, random_state=123), lags=3)
     forecaster.fit(series=series, exog=pd.Series(np.arange(10, 20), name='exog'))
     expected = pd.DataFrame({
@@ -78,10 +74,6 @@ def test_output_get_feature_importance_when_regressor_is_LinearRegression():
     Test output of get_feature_importance when regressor is LinearRegression with lags=3
     and it is trained with series pandas DataFrame.
     """
-    series = pd.DataFrame({'1': pd.Series(np.arange(10)), 
-                           '2': pd.Series(np.arange(10))
-                          })
-
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
     forecaster.fit(series=series)
     expected = pd.DataFrame({
@@ -140,10 +132,6 @@ def test_output_get_feature_importance_when_pipeline():
     (StandardScaler() + LinearRegression with lags=3),
     it is trained with series pandas DataFrame.
     """
-    series = pd.DataFrame({'1': pd.Series(np.arange(10)), 
-                           '2': pd.Series(np.arange(10))
-                          })
-
     forecaster = ForecasterAutoregMultiSeries(
                     regressor = make_pipeline(StandardScaler(), LinearRegression()),
                     lags      = 3

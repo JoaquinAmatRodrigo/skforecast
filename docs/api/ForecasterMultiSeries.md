@@ -4,8 +4,6 @@
 
 ::: skforecast.ForecasterAutoregMultiSeries.ForecasterAutoregMultiSeries.ForecasterAutoregMultiSeries._create_lags
 
-::: skforecast.ForecasterAutoregMultiSeries.ForecasterAutoregMultiSeries.ForecasterAutoregMultiSeries._estimate_boot_interval
-
 ::: skforecast.ForecasterAutoregMultiSeries.ForecasterAutoregMultiSeries.ForecasterAutoregMultiSeries._recursive_predict
 
 ::: skforecast.ForecasterAutoregMultiSeries.ForecasterAutoregMultiSeries.ForecasterAutoregMultiSeries.__repr__

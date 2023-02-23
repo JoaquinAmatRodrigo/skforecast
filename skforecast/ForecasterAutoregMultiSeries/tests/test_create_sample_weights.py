@@ -8,7 +8,7 @@ from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 from sklearn.linear_model import LinearRegression
 
 
-def custom_weights(index):
+def custom_weights(index): # pragma: no cover
     """
     Return 0 if index is between '2022-01-08' and '2022-01-10', 1 otherwise.
     """
@@ -21,7 +21,7 @@ def custom_weights(index):
     return weights
     
 
-def custom_weights_2(index):
+def custom_weights_2(index): # pragma: no cover
     """
     Return 2 if index is between '2022-01-11' and '2022-01-13', 3 otherwise.
     """
@@ -34,7 +34,7 @@ def custom_weights_2(index):
     return weights
 
 
-def custom_weights_nan(index):
+def custom_weights_nan(index): # pragma: no cover
     """
     Return np.nan if index is between '2022-01-08' and '2022-01-10', 1 otherwise.
     """
@@ -47,7 +47,7 @@ def custom_weights_nan(index):
     return weights
 
 
-def custom_weights_negative(index):
+def custom_weights_negative(index): # pragma: no cover
     """
     Return -1 if index is between '2022-01-08' and '2022-01-10', 1 otherwise.
     """
