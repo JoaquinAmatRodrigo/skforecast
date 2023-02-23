@@ -32,7 +32,7 @@ def test_predict_interval_ValueError_when_ForecasterSarimax_last_window_exog_is_
     Check ValueError is raised when last_window_exog is not None, but 
     last_window is not provided.
     """
-    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, order=(1,1,1)))
+    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, trend=None, method='nm', ftol=1e-19,  order=(1,1,1)))
     forecaster.fit(y=y, exog=exog)
     
     err_msg = re.escape(
@@ -54,7 +54,7 @@ def test_predict_interval_ValueError_when_ForecasterSarimax_last_window_exog_is_
     Check ValueError is raised when last_window_exog is None, but included_exog
     is True and last_window is provided.
     """
-    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, order=(1,1,1)))
+    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, trend=None, method='nm', ftol=1e-19,  order=(1,1,1)))
     forecaster.fit(y=y, exog=exog)
     lw = pd.Series(np.random.rand(10), index=pd.RangeIndex(start=50, stop=60))
     ex_pred = pd.Series(np.random.rand(10), index=pd.RangeIndex(start=60, stop=70))
@@ -78,7 +78,7 @@ def test_predict_interval_ValueError_when_interval_is_not_symmetrical():
     """
     Raise ValueError if `interval` is not symmetrical.
     """
-    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, order=(1,1,1)))
+    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, trend=None, method='nm', ftol=1e-19,  order=(1,1,1)))
     forecaster.fit(y=y)
     alpha = None
     interval_not_symmetrical = [5, 97.5] 
@@ -104,7 +104,7 @@ def test_predict_interval_output_ForecasterSarimax(alpha, interval):
     """
     Test predict_interval output of ForecasterSarimax.
     """
-    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, order=(1,1,1)))
+    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, trend=None, method='nm', ftol=1e-19,  order=(1,1,1)))
     forecaster.fit(y=y)
     predictions = forecaster.predict_interval(steps=5, alpha=alpha, interval=interval)
     expected = pd.DataFrame(
@@ -117,7 +117,7 @@ def test_predict_interval_output_ForecasterSarimax(alpha, interval):
                    index   = pd.RangeIndex(start=50, stop=55, step=1)
                )
     
-    pd.testing.assert_frame_equal(predictions, expected, atol=0.01)
+    pd.testing.assert_frame_equal(predictions, expected, atol=0.0001)
 
 
 @pytest.mark.parametrize("alpha, interval", 
@@ -128,7 +128,7 @@ def test_predict_interval_output_ForecasterSarimax_with_exog(alpha, interval):
     """
     Test predict_interval output of ForecasterSarimax with exogenous variables.
     """
-    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, order=(1,1,1)))
+    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, trend=None, method='nm', ftol=1e-19,  order=(1,1,1)))
     forecaster.fit(y=y, exog=exog)
     predictions = forecaster.predict_interval(steps=5, exog=exog_predict, alpha=alpha, interval=interval)
     expected = pd.DataFrame(
@@ -141,7 +141,7 @@ def test_predict_interval_output_ForecasterSarimax_with_exog(alpha, interval):
                    index   = pd.RangeIndex(start=50, stop=55, step=1)
                )
     
-    pd.testing.assert_frame_equal(predictions, expected, atol=0.01)
+    pd.testing.assert_frame_equal(predictions, expected, atol=0.0001)
 
 
 @pytest.mark.parametrize("alpha, interval", 
@@ -153,7 +153,7 @@ def test_predict_interval_output_ForecasterSarimax_with_transform_y(alpha, inter
     Test predict_interval output of ForecasterSarimax with a StandardScaler() as transformer_y.
     """
     forecaster = ForecasterSarimax(
-                     regressor     = ARIMA(maxiter=1000, order=(1,1,1)),
+                     regressor     = ARIMA(maxiter=1000, trend=None, method='nm', ftol=1e-19,  order=(1,1,1)),
                      transformer_y = StandardScaler()
                  )
     forecaster.fit(y=y)
@@ -168,7 +168,7 @@ def test_predict_interval_output_ForecasterSarimax_with_transform_y(alpha, inter
                    index   = pd.RangeIndex(start=50, stop=55, step=1)
                )
     
-    pd.testing.assert_frame_equal(predictions, expected, atol=0.01)
+    pd.testing.assert_frame_equal(predictions, expected, atol=0.0001)
 
 
 @pytest.mark.parametrize("alpha, interval", 
@@ -188,7 +188,7 @@ def test_predict_interval_output_ForecasterSarimax_with_transform_y_and_transfor
                        )
 
     forecaster = ForecasterSarimax(
-                     regressor        = ARIMA(maxiter=1000, order=(1,1,1)),
+                     regressor        = ARIMA(maxiter=1000, trend=None, method='nm', ftol=1e-19,  order=(1,1,1)),
                      transformer_y    = StandardScaler(),
                      transformer_exog = transformer_exog
                  )
@@ -204,7 +204,7 @@ def test_predict_interval_output_ForecasterSarimax_with_transform_y_and_transfor
                    index   = pd.RangeIndex(start=50, stop=55, step=1)
                )
     
-    pd.testing.assert_frame_equal(predictions, expected, atol=0.01)
+    pd.testing.assert_frame_equal(predictions, expected, atol=0.0001)
 
 
 def test_predict_interval_ValueError_when_last_window_index_does_not_follow_training_set():
@@ -217,7 +217,7 @@ def test_predict_interval_ValueError_when_last_window_index_does_not_follow_trai
     lw_test = pd.Series(data=lw_datetime.values)
     lw_test.index = pd.date_range(start='2022-03-01', periods=50, freq='D')
 
-    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, order=(1,1,1)))
+    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, trend=None, method='nm', ftol=1e-19,  order=(1,1,1)))
     forecaster.fit(y=y_test)
     expected_index = expand_index(forecaster.extended_index, 1)[0]
 
@@ -253,7 +253,7 @@ def test_predict_interval_ValueError_when_last_window_exog_index_does_not_follow
     lw_exog_test = pd.Series(data=lw_exog_datetime.values)
     lw_exog_test.index = pd.date_range(start='2022-03-01', periods=50, freq='D')
 
-    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, order=(1,1,1)))
+    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, trend=None, method='nm', ftol=1e-19,  order=(1,1,1)))
     forecaster.fit(y=y_test, exog=exog_test)
     expected_index = expand_index(forecaster.extended_index, 1)[0]
 
@@ -282,7 +282,7 @@ def test_predict_interval_output_ForecasterSarimax_with_last_window(alpha, inter
     """
     Test predict_interval output of ForecasterSarimax with `last_window`.
     """
-    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, order=(1,1,1)))
+    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, trend=None, method='nm', ftol=1e-19,  order=(1,1,1)))
     forecaster.fit(y=y_datetime)
     predictions = forecaster.predict_interval(
                       steps            = 5, 
@@ -301,7 +301,7 @@ def test_predict_interval_output_ForecasterSarimax_with_last_window(alpha, inter
                    index   = pd.date_range(start='2100', periods=5, freq='A')
                )
     
-    pd.testing.assert_frame_equal(predictions, expected, atol=0.01)
+    pd.testing.assert_frame_equal(predictions, expected, atol=0.0001)
 
 
 @pytest.mark.parametrize("alpha, interval", 
@@ -312,7 +312,7 @@ def test_predict_interval_output_ForecasterSarimax_with_last_window_and_exog(alp
     """
     Test predict_interval output of ForecasterSarimax with exogenous variables and `last_window`.
     """
-    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, order=(1,1,1)))
+    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, trend=None, method='nm', ftol=1e-19,  order=(1,1,1)))
     forecaster.fit(y=y_datetime, exog=exog_datetime)
     predictions = forecaster.predict_interval(
                       steps            = 5, 
@@ -333,7 +333,7 @@ def test_predict_interval_output_ForecasterSarimax_with_last_window_and_exog(alp
                    index   = pd.date_range(start='2100', periods=5, freq='A')
                )
     
-    pd.testing.assert_frame_equal(predictions, expected, atol=0.01)
+    pd.testing.assert_frame_equal(predictions, expected, atol=0.0001)
 
 
 @pytest.mark.parametrize("alpha, interval", 
@@ -352,7 +352,7 @@ def test_predict_interval_output_ForecasterSarimax_with_last_window_and_exog_and
                        )
 
     forecaster = ForecasterSarimax(
-                     regressor        = ARIMA(maxiter=1000, order=(1,1,1)), 
+                     regressor        = ARIMA(maxiter=1000, trend=None, method='nm', ftol=1e-19,  order=(1,1,1)), 
                      transformer_y    = StandardScaler(),
                      transformer_exog = transformer_exog
                  )
@@ -376,7 +376,7 @@ def test_predict_interval_output_ForecasterSarimax_with_last_window_and_exog_and
                    index   = pd.date_range(start='2100', periods=5, freq='A')
                )
     
-    pd.testing.assert_frame_equal(predictions, expected, atol=0.01)
+    pd.testing.assert_frame_equal(predictions, expected, atol=0.0001)
 
 
 @pytest.mark.parametrize("y          , idx", 
@@ -389,7 +389,7 @@ def test_predict_interval_ForecasterSarimax_updates_extended_index_twice(y, idx)
     """
     y_fit = y.iloc[:30].copy()
 
-    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, order=(1,1,1)))
+    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, trend=None, method='nm', ftol=1e-19,  order=(1,1,1)))
     forecaster.fit(y=y_fit)
 
     lw_1 = y.iloc[30:40].copy()
