@@ -8,13 +8,13 @@ def test_skforecast_utils_optional_dependencies_match_requirements_optional():
     requirements_optional.txt
     """
 
-    with open('requirements_optional.txt') as f:
+    with open('../requirements_optional.txt') as f:
         requirements_optional = f.read()
 
-    extras_require = {
+    requirements_optional = {
         "sarimax": requirements_optional.split("\n\n")[0].splitlines(),
         "plotting": requirements_optional.split("\n\n")[1].splitlines()
     }
 
-    extras_require = {k: v[1:] for k, v in extras_require.items()}
-    assert extras_require == optional_dependencies
+    requirements_optional = {k: v[1:] for k, v in requirements_optional.items()}
+    assert requirements_optional == optional_dependencies
