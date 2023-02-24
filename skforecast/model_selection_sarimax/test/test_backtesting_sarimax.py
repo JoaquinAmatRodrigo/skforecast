@@ -18,7 +18,7 @@ def test_backtesting_sarimax_ValueError_when_initial_train_size_is_None():
     """
     Test ValueError is raised in backtesting_sarimax when initial_train_size is None.
     """
-    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, trend=None, method='nm', ftol=1e-19,  order=(1,1,1)))
+    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=10000, trend=None, method='nm', ftol=1e-19,  order=(1,1,1)))
 
     initial_train_size = None
     
@@ -46,7 +46,7 @@ def test_backtesting_sarimax_ValueError_when_initial_train_size_more_than_or_equ
     """
     Test ValueError is raised in backtesting_sarimax when initial_train_size >= len(y).
     """
-    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, trend=None, method='nm', ftol=1e-19,  order=(1,1,1)))
+    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=10000, trend=None, method='nm', ftol=1e-19,  order=(1,1,1)))
     
     err_msg = re.escape('`initial_train_size` must be an int smaller than the length of `y`.')
     with pytest.raises(ValueError, match = err_msg):
@@ -69,7 +69,7 @@ def test_backtesting_sarimax_ValueError_when_initial_train_size_less_than_foreca
     """
     Test ValueError is raised in backtesting_sarimax when initial_train_size < forecaster.window_size.
     """
-    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, trend=None, method='nm', ftol=1e-19,  order=(1,1,1)))
+    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=10000, trend=None, method='nm', ftol=1e-19,  order=(1,1,1)))
 
     initial_train_size = forecaster.window_size - 1
     
@@ -97,7 +97,7 @@ def test_backtesting_sarimax_TypeError_when_refit_not_bool():
     """
     Test TypeError is raised in backtesting_sarimax when refit is not bool.
     """
-    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, trend=None, method='nm', ftol=1e-19,  order=(1,1,1)))
+    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=10000, trend=None, method='nm', ftol=1e-19,  order=(1,1,1)))
 
     refit = 'not_bool'
     
@@ -124,7 +124,7 @@ def test_output_backtesting_sarimax_no_refit_no_exog_no_remainder_with_mocked():
     no refit, 12 observations to backtest, steps=3 (no remainder), metric='mean_squared_error'. 
     Mocked done with skforecast 0.7.0.
     """
-    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, trend=None, method='nm', ftol=1e-19,  order=(2,2,2)))
+    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=10000, trend=None, method='nm', ftol=1e-19,  order=(2,2,2)))
 
     metric, backtest_predictions = backtesting_sarimax(
                                         forecaster         = forecaster,
@@ -160,7 +160,7 @@ def test_output_backtesting_sarimax_no_refit_no_exog_remainder_with_mocked():
     yes refit, 12 observations to backtest, steps=5 (remainder), metric='mean_squared_error'. 
     Mocked done with skforecast 0.7.0.
     """
-    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, trend=None, method='nm', ftol=1e-19,  order=(2,2,2)))
+    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=10000, trend=None, method='nm', ftol=1e-19,  order=(2,2,2)))
 
     metric, backtest_predictions = backtesting_sarimax(
                                         forecaster         = forecaster,
@@ -338,7 +338,7 @@ def test_output_backtesting_sarimax_no_refit_yes_exog_with_mocked():
     no refit, 12 observations to backtest, steps=3 (no remainder), metric='mean_squared_error'. 
     Mocked done with skforecast 0.7.0.
     """
-    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, trend=None, method='nm', ftol=1e-19,  order=(2,2,2)))
+    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=10000, trend=None, method='nm', ftol=1e-19,  order=(2,2,2)))
 
     metric, backtest_predictions = backtesting_sarimax(
                                         forecaster         = forecaster,
@@ -457,7 +457,7 @@ def test_output_backtesting_sarimax_no_refit_yes_exog_callable_metric_with_mocke
     no refit, 12 observations to backtest, steps=3 (no remainder), callable metric. 
     Mocked done with skforecast 0.7.0.
     """
-    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, trend=None, method='nm', ftol=1e-19,  order=(2,2,2)))
+    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=10000, trend=None, method='nm', ftol=1e-19,  order=(2,2,2)))
 
     metric, backtest_predictions = backtesting_sarimax(
                                         forecaster         = forecaster,
@@ -493,7 +493,7 @@ def test_output_backtesting_sarimax_no_refit_no_exog_list_of_metrics_with_mocked
     no refit, 12 observations to backtest, steps=3 (no remainder), list of metrics. 
     Mocked done with skforecast 0.7.0.
     """
-    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, trend=None, method='nm', ftol=1e-19,  order=(2,2,2)))
+    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=10000, trend=None, method='nm', ftol=1e-19,  order=(2,2,2)))
 
     metric, backtest_predictions = backtesting_sarimax(
                                         forecaster         = forecaster,
@@ -605,7 +605,7 @@ def test_output_backtesting_sarimax_no_refit_yes_exog_interval_with_mocked(alpha
     no refit, 12 observations to backtest, steps=3 (no remainder), metric='mean_absolute_error',
     interval. Mocked done with skforecast 0.7.0.
     """
-    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, trend=None, method='nm', ftol=1e-19,  order=(2,2,2)))
+    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=10000, trend=None, method='nm', ftol=1e-19,  order=(2,2,2)))
 
     metric, backtest_predictions = backtesting_sarimax(
                                         forecaster         = forecaster,
