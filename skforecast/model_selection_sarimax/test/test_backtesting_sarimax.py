@@ -375,7 +375,7 @@ def test_output_backtesting_sarimax_yes_refit_yes_exog_with_mocked():
     yes refit, 12 observations to backtest, steps=3 (no remainder), metric='mean_squared_error'. 
     Mocked done with skforecast 0.7.0.
     """
-    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=10000, trend=None, method='nm', ftol=1e-19,  order=(2,2,2)))
+    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=10000, trend=None, method='nm', ftol=1e-19,  order=(1,0,0)))
 
     metric, backtest_predictions = backtesting_sarimax(
                                         forecaster         = forecaster,
@@ -391,10 +391,10 @@ def test_output_backtesting_sarimax_yes_refit_yes_exog_with_mocked():
                                         verbose            = False
                                    )
     
-    expected_metric = 0.1040532152699317
-    expected_values = np.array([0.6519047238, 0.5772943726, 0.6657697849, 0.7337365893,
-                                0.7402027263, 0.6800253246, 0.3175607719, 0.2646546682,
-                                0.4297918732, 0.522778418, 0.5725599904, 0.5547692757])
+    expected_metric = 0.06443497388158415
+    expected_values = np.array([0.5808796661, 0.5170345946, 0.4546504329, 0.4518464581,
+                                0.5349945619, 0.4592103268, 0.4659649981, 0.448978798 ,
+                                0.5612031446, 0.500060416 , 0.5448058138, 0.5246443326])
 
     expected_values = pd.DataFrame(
                          data    = expected_values,
