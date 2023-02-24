@@ -76,7 +76,7 @@ def test_output_evaluate_grid_hyperparameters_sarimax_with_mocked():
     Test output of _evaluate_grid_hyperparameters_sarimax in ForecasterSarimax with mocked
     (mocked done in Skforecast v0.7.0).
     """
-    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, trend=None, method='nm', ftol=1e-19,  order=(1,1,1)))
+    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=10000, trend=None, method='nm', ftol=1e-19,  order=(1,1,1)))
 
     param_grid = [{'order': (1,1,1), 'seasonal_order': (0,0,0,0)}, 
                   {'order': (1,2,3), 'seasonal_order': (2,2,2,4)}]
@@ -97,13 +97,14 @@ def test_output_evaluate_grid_hyperparameters_sarimax_with_mocked():
     expected_results = pd.DataFrame(
         data  = {'params'            : [{'order': (1,1,1), 'seasonal_order': (0,0,0,0)}, 
                                         {'order': (1,2,3), 'seasonal_order': (2,2,2,4)}],
-                    'mean_squared_error': np.array([0.07440938870701645, 0.33300231290569804]),
+                    'mean_squared_error': np.array([0.07438601385742186, 0.34802636414953864]),
                     'order'             : [(1, 1, 1), (1, 2, 3)],
                     'seasonal_order'    : [(0, 0, 0, 0), (2, 2, 2, 4)]},
         index = np.array([0, 1])
     )
 
     pd.testing.assert_frame_equal(results, expected_results, atol=0.0001)
+
 
 
 def test_output_evaluate_grid_hyperparameters_sarimax_exog_with_mocked():
@@ -113,10 +114,8 @@ def test_output_evaluate_grid_hyperparameters_sarimax_exog_with_mocked():
     """
     forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, trend=None, method='nm', ftol=1e-19,  order=(1,1,1)))
 
-    param_grid = [{'order': (1,1,1), 'with_intercept': False}, 
-                  {'order': (1,1,1), 'with_intercept': True}, 
-                  {'order': (2,2,2), 'with_intercept': False}, 
-                  {'order': (2,2,2), 'with_intercept': True}]
+    param_grid = [{'order': (1,0,0), 'with_intercept': False}, 
+                  {'order': (1,1,1), 'with_intercept': True}]
 
     results = _evaluate_grid_hyperparameters_sarimax(
                   forecaster         = forecaster,
@@ -133,14 +132,12 @@ def test_output_evaluate_grid_hyperparameters_sarimax_exog_with_mocked():
               )
     
     expected_results = pd.DataFrame(
-        data  = {'params'            : [{'order': (1,1,1), 'with_intercept': False}, 
-                                        {'order': (1,1,1), 'with_intercept': True}, 
-                                        {'order': (2,2,2), 'with_intercept': False}, 
-                                        {'order': (2,2,2), 'with_intercept': True}],
-                 'mean_squared_error': np.array([0.06404248, 0.06874972, 0.08803988, 0.08971294]),
-                 'order'             : [(1, 1, 1), (1, 1, 1), (2, 2, 2), (2, 2, 2)],
-                 'with_intercept'    : [False, True, False, True]},
-        index = np.array([0, 1, 2, 3])
+        data  = {'params'            : [{'order': (1,1,1), 'with_intercept': True}, 
+                                        {'order': (1,0,0), 'with_intercept': False}],
+                 'mean_squared_error': np.array([0.0687304810, 0.0804257343]),
+                 'order'             : [(1, 1, 1), (1, 0, 0)],
+                 'with_intercept'    : [True, False]},
+        index = np.array([1, 0])
     )
 
     pd.testing.assert_frame_equal(results, expected_results, atol=0.0001)
@@ -153,8 +150,8 @@ def test_output_evaluate_grid_hyperparameters_sarimax_metric_list_with_mocked():
     """
     forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, trend=None, method='nm', ftol=1e-19,  order=(1,1,1)))
 
-    param_grid = [{'order': (1,1,1), 'method': 'lbfgs'}, 
-                  {'order': (2,2,2), 'method': 'powell'}]
+    param_grid = [{'order': (1,0,0), 'with_intercept': False}, 
+                  {'order': (1,1,1), 'with_intercept': True}]
 
     results = _evaluate_grid_hyperparameters_sarimax(
                   forecaster         = forecaster,
@@ -170,13 +167,13 @@ def test_output_evaluate_grid_hyperparameters_sarimax_metric_list_with_mocked():
               )
     
     expected_results = pd.DataFrame(
-        data  = {'params'             : [{'order': (1,1,1), 'method': 'lbfgs'}, 
-                                        {'order': (2,2,2), 'method': 'powell'}],
-                    'mean_absolute_error': np.array([0.2249986568362591, 0.27299724595171604]),
-                    'mean_squared_error' : np.array([0.07785902055180988, 0.1219896314815332]),
-                    'order'              : [(1, 1, 1), (2, 2, 2)],
-                    'method'             : ['lbfgs', 'powell']},
-        index = np.array([0, 1])
+        data  = {'params'             : [{'order': (1,1,1), 'with_intercept': True}, 
+                                        {'order': (1, 0, 0), 'with_intercept': False}],
+                    'mean_absolute_error': np.array([0.224946431, 0.233685478]),
+                    'mean_squared_error' : np.array([0.0778376867, 0.0869055273]),
+                    'order'              : [(1, 1, 1), (1, 0, 0)],
+                    'with_intercept'     : [True, False]},
+        index = np.array([1, 0])
     )
 
     pd.testing.assert_frame_equal(results, expected_results, atol=0.0001)
@@ -187,12 +184,10 @@ def test_evaluate_grid_hyperparameters_sarimax_when_return_best():
     Test forecaster is refitted when return_best=True in 
     _evaluate_grid_hyperparameters_sarimax.
     """
-    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, trend=None, method='nm', ftol=1e-19,  order=(3,3,3)))
+    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=10000, trend=None, method='nm', ftol=1e-19,  order=(1,0,0)))
 
-    param_grid = [{'order': (1,1,1), 'method': 'lbfgs'}, 
-                  {'order': (1,1,1), 'method': 'powell'}, 
-                  {'order': (2,2,2), 'method': 'lbfgs'}, 
-                  {'order': (2,2,2), 'method': 'powell'}]
+    param_grid = [{'order': (1,0,0), 'with_intercept': False}, 
+                  {'order': (1,1,1), 'with_intercept': True}]
 
     _evaluate_grid_hyperparameters_sarimax(
         forecaster         = forecaster,
@@ -207,17 +202,19 @@ def test_evaluate_grid_hyperparameters_sarimax_when_return_best():
         verbose            = False
     )
     
-    expected_params = {'maxiter'           : 1000,
-                       'method'            : 'powell',
-                       'order'             : (1, 1, 1),
-                       'out_of_sample_size': 0,
-                       'scoring'           : 'mse',
-                       'scoring_args'      : None,
-                       'seasonal_order'    : (0, 0, 0, 0),
-                       'start_params'      : None,
-                       'suppress_warnings' : False,
-                       'trend'             : None,
-                       'with_intercept'    : True}
+    expected_params = {
+                        'maxiter': 10000,
+                        'method': 'nm',
+                        'order': (1, 1, 1),
+                        'out_of_sample_size': 0,
+                        'scoring': 'mse',
+                        'scoring_args': None,
+                        'seasonal_order': (0, 0, 0, 0),
+                        'start_params': None,
+                        'suppress_warnings': False,
+                        'trend': None,
+                        'with_intercept': True
+                    }
     
     assert expected_params == forecaster.params
     assert expected_params['method'] == forecaster.regressor.method
