@@ -705,7 +705,7 @@ def test_output_backtesting_sarimax_yes_refit_fixed_train_size_yes_exog_interval
     yes refit, fixed_train_size, 12 observations to backtest, steps=3 (no remainder), 
     metric='mean_absolute_error', interval. Mocked done with skforecast 0.7.0.
     """
-    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=10000, trend=None, method='nm', ftol=1e-19,  order=(2,2,2)))
+    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=10000, trend=None, method='nm', ftol=1e-19,  order=(1,0,0)))
 
     metric, backtest_predictions = backtesting_sarimax(
                                         forecaster         = forecaster,
@@ -721,19 +721,19 @@ def test_output_backtesting_sarimax_yes_refit_fixed_train_size_yes_exog_interval
                                         verbose            = False
                                    )
     
-    expected_metric = [0.25796710568368647]
-    expected_values = np.array([[ 0.6519047238,  0.1867398521,  1.1170695955],
-                                [ 0.5772943726,  0.0550837622,  1.099504983 ],
-                                [ 0.6657697849,  0.121451421 ,  1.2100881488],
-                                [ 0.7620030163,  0.3034036355,  1.2206023971],
-                                [ 0.7858998429,  0.2794773829,  1.292322303 ],
-                                [ 0.7475340329,  0.22787058  ,  1.2671974858],
-                                [ 0.3289957937, -0.1473156992,  0.8053072867],
-                                [ 0.3357500345, -0.2326164776,  0.9041165466],
-                                [ 0.4982306108, -0.120464111 ,  1.1169253327],
-                                [ 0.4963807234,  0.0420330534,  0.9507283935],
-                                [ 0.5321684767,  0.05767149  ,  1.0066654633],
-                                [ 0.5141926925,  0.0380659504,  0.9903194346]])
+    expected_metric = [0.20744848519166362]
+    expected_values = np.array([[0.5808796661, 0.164441322 , 0.9973180102],
+                                [0.5170345946, 0.0940599402, 0.9400092491],
+                                [0.4546504329, 0.0314706312, 0.8778302345],
+                                [0.4818642089, 0.0605997277, 0.9031286902],
+                                [0.5347689152, 0.1022767621, 0.9672610683],
+                                [0.4795745631, 0.0464842333, 0.9126648928],
+                                [0.4687425354, 0.0429977408, 0.89448733  ],
+                                [0.4599063136, 0.0169252478, 0.9028873794],
+                                [0.5514034666, 0.1070284241, 0.995778509 ],
+                                [0.4824086925, 0.0556563027, 0.9091610824],
+                                [0.5174687336, 0.0852978136, 0.9496396537],
+                                [0.5003253491, 0.0680168459, 0.9326338523]])
 
     expected_backtest_predictions = pd.DataFrame(
                                         data    = expected_values,
