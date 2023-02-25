@@ -18,6 +18,10 @@ All notable changes to this project will be documented in this file.
 
 **Changed**
 
++ Deprecated python 3.7 compatibility
+
++ Added python 3.11 compatibility
+
 + `model_selection_statsmodels` is deprecated in favor of `ForecasterSarimax` and `model_selection_sarimax`.
 
 + Remove `levels_weights` argument in `grid_search_forecaster_multiseries` and `random_search_forecaster_multiseries`, deprecated since version 0.6.0. Use `series_weights` and `weights_func` when creating the forecaster instead.
