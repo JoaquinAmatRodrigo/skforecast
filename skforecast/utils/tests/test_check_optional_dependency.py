@@ -8,7 +8,7 @@ def test_skforecast_utils_optional_dependencies_match_requirements_optional():
     requirements_optional.txt
     """
 
-    with open('../requirements_optional.txt') as f:
+    with open('requirements_optional.txt') as f:
         requirements_optional = f.read()
 
     requirements_optional = {
