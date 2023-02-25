@@ -20,7 +20,7 @@ from copy import deepcopy
 
 optional_dependencies = {
     "sarimax": ['statsmodels>=0.12, <0.14', 'pmdarima>=2.0, <2.1'],
-    "plotting": ['matplotlib>=3.3, <3.7', 'seaborn==0.11', 'statsmodels>=0.12, <0.14']
+    "plotting": ['matplotlib>=3.3, <3.8', 'seaborn>=0.11, <0.13', 'statsmodels>=0.12, <0.14']
 }
 
 

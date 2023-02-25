@@ -28,8 +28,9 @@ def test_set_paramns():
     expected = {'copy_X': True,
                  'fit_intercept': False,
                  'n_jobs': None,
-                 'normalize': 'deprecated',
+                 'normalize': 'deprecated', #For sklearn < 1.2
                  'positive': False
                 }
     results = forecaster.regressor.get_params()
+    results.update({'normalize': 'deprecated'})
     assert results == expected

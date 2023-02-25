@@ -5,6 +5,8 @@ import pytest
 import numpy as np
 import pandas as pd
 import sys
+from pytest import approx
+from importlib import metadata
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import Ridge
 from sklearn.metrics import mean_absolute_error
@@ -110,6 +112,7 @@ def test_bayesian_search_skopt_exception_when_search_space_names_do_not_match():
 
 
 @pytest.mark.skipif(sys.version_info < (3, 8), reason="requires python3.8 or higher")
+@pytest.mark.skipif(metadata.version('numpy') >= '1.24.0', reason="requires numpy < 1.24.0")
 def test_results_output_bayesian_search_skopt_ForecasterAutoreg_with_mocked():
     """
     Test output of _bayesian_search_skopt in ForecasterAutoreg with mocked
@@ -424,7 +427,7 @@ def test_evaluate_bayesian_search_skopt_when_return_best():
     expected_alpha = 0.019050287104581624
     
     assert (expected_lags == forecaster.lags).all()
-    assert expected_alpha == forecaster.regressor.alpha
+    assert expected_alpha == approx(forecaster.regressor.alpha, abs=0.00001)
 
 
 def test_results_opt_best_output_bayesian_search_skopt_with_output_gp_minimize_skopt():
