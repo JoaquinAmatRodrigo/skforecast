@@ -39,10 +39,10 @@ extras_require["all"] = extras_require["full"]
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
-if sys.version_info[:2] < (3, 7):
-    raise RuntimeError("Python version >= 3.7 required.")
+if sys.version_info[:2] < (3, 8):
+    raise RuntimeError("Python version >= 3.8 required.")
 
-if sys.version_info[:2] > (3, 10):
+if sys.version_info[:2] > (3, 11):
     fmt = "Skforecast {} may not yet support Python {}.{}."
     warnings.warn(
         fmt.format(VERSION, *sys.version_info[:2]),
@@ -62,10 +62,10 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
         "License :: OSI Approved :: MIT License"
     ],
     install_requires=requirements_base,

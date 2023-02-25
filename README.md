@@ -1,4 +1,4 @@
-![Python](https://img.shields.io/badge/python-3.7%20%7C%203.8%20%7C%203.9%20%7C%203.10-blue)
+![Python](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-blue)
 ![PyPI](https://img.shields.io/pypi/v/skforecast)
 [![codecov](https://codecov.io/gh/JoaquinAmatRodrigo/skforecast/branch/master/graph/badge.svg)](https://codecov.io/gh/JoaquinAmatRodrigo/skforecast)
 [![Build status](https://github.com/JoaquinAmatRodrigo/skforecast/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/JoaquinAmatRodrigo/skforecast/actions/workflows/unit-tests.yml/badge.svg)
@@ -65,21 +65,24 @@ pip install skforecast[plotting]
 
 # Dependencies
 
++ Python >= 3.8
+
 ## Hard dependencies
 
-+ numpy>=1.20, <1.24
++ numpy>=1.20, <1.25
 + pandas>=1.2, <1.6
 + tqdm>=4.57.0, <4.65
-+ scikit-learn>=1.0, <1.2
-+ optuna>=2.10.0, <3.1
++ scikit-learn>=1.0, <1.3
++ optuna>=2.10.0, <3.2
 + scikit-optimize==0.9.0
 + joblib>=1.1.0, <1.3.0
 
 ## Optional dependencies
 
-+ matplotlib>=3.3, <3.7
-+ seaborn==0.11
++ matplotlib>=3.3, <3.8
++ seaborn>=0.11, <0.13
 + statsmodels>=0.12, <0.14
++ pmdarima>=2.0, <2.1
 
 # Features
 

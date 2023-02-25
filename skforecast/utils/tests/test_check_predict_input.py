@@ -992,3 +992,39 @@ def test_check_predict_input_TypeError_when_ForecasterSarimax_last_window_exog_i
             levels           = None,
             series_col_names = None
         )
+
+
+def test_check_predict_input_ValueError_when_last_window_exog_is_dataframe_without_columns_in_exog_col_names():
+    """
+    Raise ValueError when there are missing columns in `last_window_exog`, ForecasterSarimax.
+    """
+    exog = pd.DataFrame(np.arange(10).reshape(5, 2), columns=['col1', 'col3'])
+    exog.index=pd.date_range(start='6/1/2018', periods=5, freq='M')
+    last_window_exog = pd.DataFrame(np.arange(10).reshape(5, 2), columns=['col1', 'col2'])
+    last_window_exog.index=pd.date_range(start='1/1/2018', periods=5, freq='M')
+    exog_col_names = ['col1', 'col3']
+
+    err_msg = re.escape(
+                (f'Missing columns in `exog`. Expected {exog_col_names}. '
+                 f'Got {last_window_exog.columns.to_list()}.') 
+              )
+    with pytest.raises(ValueError, match = err_msg):
+        check_predict_input(
+            forecaster_type  = 'ForecasterSarimax',
+            steps            = 2,
+            fitted           = True,
+            included_exog    = True,
+            index_type       = pd.DatetimeIndex,
+            index_freq       = 'M',
+            window_size      = 5,
+            last_window      = pd.Series(np.arange(5), index=pd.date_range(start='1/1/2018', periods=5, freq='M')),
+            last_window_exog = last_window_exog,
+            exog             = exog,
+            exog_type        = pd.DataFrame,
+            exog_col_names   = exog_col_names,
+            interval         = None,
+            alpha            = None,
+            max_steps        = None,
+            levels           = None,
+            series_col_names = None
+        )

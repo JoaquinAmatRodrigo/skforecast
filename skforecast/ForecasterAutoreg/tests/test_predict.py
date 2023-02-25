@@ -30,7 +30,7 @@ def test_predict_output_when_regressor_is_LinearRegression_with_exog():
     Test predict output when using LinearRegression as regressor.
     """
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
-    forecaster.fit(y=pd.Series(np.arange(50)), exog=pd.Series(np.arange(50, 150, 2)))
+    forecaster.fit(y=pd.Series(np.arange(50), name='y'), exog=pd.Series(np.arange(50, 150, 2), name='exog'))
     exog_pred = pd.Series(np.arange(100, 105), index=pd.RangeIndex(start=50, stop=55))
     predictions = forecaster.predict(steps=5, exog=exog_pred)
     expected = pd.Series(
@@ -110,9 +110,8 @@ def test_predict_output_when_regressor_is_LinearRegression_with_transform_y_and_
 
 def test_predict_output_when_regressor_is_LinearRegression_and_weight_func():
     """
-    Test predict output when using LinearRegression as regressor.
+    Test predict output when using LinearRegression as regressor and custom_weights.
     """
-
     def custom_weights(index):
         """
         Return 1 for all elements in index

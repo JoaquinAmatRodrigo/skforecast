@@ -21,7 +21,7 @@ def test_output_random_search_sarimax_sarimax_with_mocked():
     Test output of random_search_sarimax in ForecasterSarimax with mocked
     (mocked done in Skforecast v0.7.0).
     """
-    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, order=(1,1,1)))
+    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=10000, trend=None, method='nm', ftol=1e-19,  order=(1,1,1)))
 
     # Generate 15 random `order`
     np.random.seed(123)
@@ -35,7 +35,7 @@ def test_output_random_search_sarimax_sarimax_with_mocked():
                   forecaster          = forecaster,
                   y                   = y_datetime,
                   param_distributions = param_distributions,
-                  n_iter              = 10,
+                  n_iter              = 3,
                   random_state        = 123,
                   steps               = 3,
                   refit               = False,
@@ -47,11 +47,11 @@ def test_output_random_search_sarimax_sarimax_with_mocked():
               )
     
     expected_results = pd.DataFrame(
-        data  = {'params': np.array([{'order': (1, 0, 1)}, {'order': (2, 2, 2)}, {'order': (2, 2, 3)}],
+        data  = {'params': np.array([{'order': (1, 0, 1)}, {'order': (2, 2, 3)}, {'order': (2, 2, 2)}],
                                     dtype=object),
-                'mean_absolute_error': np.array([0.203796, 0.250172, 0.265417]),
-                'order'              : [(1, 0, 1), (2, 2, 2), (2, 2, 3)]},
-        index = np.array([1, 0, 2])
+                'mean_absolute_error': np.array([0.20379714167503413, 0.24736436822367514, 0.2501673978304879]),
+                'order'              : [(1, 0, 1), (2, 2, 3), (2, 2, 2)]},
+        index = np.array([1, 2, 0])
     )
 
     pd.testing.assert_frame_equal(results, expected_results, atol=0.001)

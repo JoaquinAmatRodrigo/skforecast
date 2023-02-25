@@ -228,7 +228,7 @@ class ForecasterAutoregDirect(ForecasterBase):
             )
         
         self.in_sample_residuals = {step: None for step in range(1, steps + 1)}
-        self.out_sample_residuals = {step: None for step in range(1, steps + 1)}
+        self.out_sample_residuals = None
         self.regressors_ = {step: clone(self.regressor) for step in range(1, steps + 1)}
         self.lags = initialize_lags(type(self).__name__, lags)
         self.max_lag = max(self.lags)
@@ -1156,6 +1156,9 @@ class ForecasterAutoregDirect(ForecasterBase):
 
         """
 
+        if self.out_sample_residuals is None:
+            self.out_sample_residuals = {step: None for step in range(1, self.steps + 1)}
+
         if not isinstance(residuals, dict) or not all(isinstance(x, pd.Series) for x in residuals.values()):
             raise TypeError(
                 f"`residuals` argument must be a dict of `pd.Series`. Got {type(residuals)}."
@@ -1163,40 +1166,40 @@ class ForecasterAutoregDirect(ForecasterBase):
 
         if not set(self.out_sample_residuals.keys()).issubset(set(residuals.keys())):
             warnings.warn(
-                f'''
+                f"""
                 Only residuals of models 
                 {set(self.out_sample_residuals.keys()).intersection(set(residuals.keys()))} 
                 are updated.
-                '''
+                """
             )
 
         residuals = {key: value for key, value in residuals.items() if key in self.out_sample_residuals.keys()}
 
         if not transform and self.transformer_y is not None:
             warnings.warn(
-                f'''
+                f"""
                 Argument `transform` is set to `False` but forecaster was trained
                 using a transformer {self.transformer_y}. Ensure that the new residuals 
                 are already transformed or set `transform=True`.
-                '''
+                """
             )
 
         if transform and self.transformer_y is not None:
             warnings.warn(
-                f'''
+                f"""
                 Residuals will be transformed using the same transformer used 
                 when training the forecaster ({self.transformer_y}). Ensure that the
                 new residuals are on the same scale as the original time series.
-                '''
+                """
             )
 
             for key, value in residuals.items():
                 residuals[key] = transform_series(
-                                    series            = value,
-                                    transformer       = self.transformer_y,
-                                    fit               = False,
-                                    inverse_transform = False
-                                )
+                                     series            = value,
+                                     transformer       = self.transformer_y,
+                                     fit               = False,
+                                     inverse_transform = False
+                                 )
            
         for key, value in residuals.items():
             if len(value) > 1000:
