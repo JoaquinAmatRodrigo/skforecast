@@ -10,17 +10,19 @@ from importlib import metadata
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import Ridge
 from sklearn.metrics import mean_absolute_error
-from skopt.space import Categorical, Real, Integer
-from skopt.utils import use_named_args
-from skopt import gp_minimize
+# from skopt.space import Categorical, Real, Integer
+# from skopt.utils import use_named_args
+# from skopt import gp_minimize
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
 from skforecast.ForecasterAutoregCustom import ForecasterAutoregCustom
 from skforecast.model_selection import backtesting_forecaster
-from skforecast.model_selection.model_selection import _bayesian_search_skopt
+# from skforecast.model_selection.model_selection import _bayesian_search_skopt
 
 from tqdm import tqdm
 from functools import partialmethod
 tqdm.__init__ = partialmethod(tqdm.__init__, disable=True) # hide progress bar
+
+pytestmark = pytest.mark.skip(reason="`_bayesian_search_skopt` is deprecated since skforecast 0.7.0")
 
 # Fixtures _backtesting_forecaster_refit Series (skforecast==0.4.2)
 # np.random.seed(123)
