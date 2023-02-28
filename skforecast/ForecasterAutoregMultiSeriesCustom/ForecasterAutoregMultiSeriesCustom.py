@@ -49,9 +49,10 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
     regressor : regressor or pipeline compatible with the scikit-learn API
         An instance of a regressor or pipeline compatible with the scikit-learn API.
         
-    fun_predictors : Callable
+    fun_predictors : callable, dict
         Function that takes a numpy ndarray as a window of values as input and  
         returns a numpy ndarray with the predictors associated with that window.
+        A dict can be used to apply a different function o each series.
         
     window_size : int
         Size of the window needed by `fun_predictors` to create the predictors.
@@ -77,7 +78,6 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         in `weight_func`. Ignored if `regressor` does not have the argument 
         `sample_weight` in its `fit` method. See Notes section for more details 
         on the use of the weights.
-        **New in version 0.6.0**
 
     series_weights : dict, default `None`
         Weights associated with each series {'series_column_name' : float}. It is only
@@ -85,7 +85,6 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         If `series_weights` is provided, a weight of 1 is given to all series not present
         in `series_weights`. If `None`, all levels have the same weight. See Notes section
         for more details on the use of the weights.
-        **New in version 0.6.0**
     
     Attributes
     ----------
@@ -95,6 +94,10 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
     create_predictors : Callable
         Function that takes a numpy ndarray as a window of values as input and  
         returns a numpy ndarray with the predictors associated with that window.
+
+    create_predictors_: dict
+        Dictionary with the `create_predictors` for each series. It is created cloning the
+        function in `create_predictors` and is used internally to avoid overwriting.
 
     source_code_create_predictors : str
         Source code of the custom function used to create the predictors.
@@ -127,16 +130,13 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         in `weight_func`. Ignored if `regressor` does not have the argument 
         `sample_weight` in its `fit` method. See Notes section for more details 
         on the use of the weights.
-        **New in version 0.6.0**
 
     weight_func_ : dict
-        Dictionary with the `weight_func` for each series. It is created cloning the objects
+        Dictionary with the `weight_func` for each series. It is created cloning the fucntion
         in `weight_func` and is used internally to avoid overwriting.
-        **New in version 0.6.0**
 
     source_code_weight_func : str, dict
         Source code of the custom function(s) used to create weights.
-        **New in version 0.6.0**
 
     series_weights : dict, default `None`
         Weights associated with each series {'series_column_name': float}. It is only
@@ -144,12 +144,10 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         If `series_weights` is provided, a weight of 1 is given to all series not present
         in `series_weights`. If `None`, all levels have the same weight. See Notes section
         for more details on the use of the weights.
-        **New in version 0.6.0**
 
     series_weights_ : dict
         Weights associated with each series.It is created as a clone of `series_weights`
         and is used internally to avoid overwriting.
-        **New in version 0.6.0**
         
     window_size : int
         Size of the window needed by `fun_predictors` to create the predictors.
@@ -389,6 +387,9 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
                         f"{series_not_in_transformer_series} not present in `transformer_series`."
                         f" No transformation is applied to these series."
                     )
+
+        if not isinstance(self.create_predictors, dict):
+            self.create_predictors = {serie: self.create_predictors for serie in series_col_names}
         
         X_levels = []
         for i, serie in enumerate(series.columns):
@@ -403,8 +404,6 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
                 )
 
             y_values, y_index = preprocess_y(y=y)
-
-            #------
             temp_X_train  = []
             temp_y_train  = []
 
@@ -413,14 +412,11 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
                 train_index = np.arange(j, self.window_size + j)
                 test_index  = self.window_size + j
 
-                temp_X_train.append(self.create_predictors(y=y_values[train_index]))
+                temp_X_train.append(self.create_predictors_[serie](y=y_values[train_index]))
                 temp_y_train.append(y_values[test_index])
 
             X_train_values = np.vstack(temp_X_train)
             y_train_values = np.array(temp_y_train)
-            #X_train_col_names = [f"custom_predictor_{i}" for i in range(temp_X_train.shape[1])]
-
-            #----
 
             if i == 0:
                 X_train = X_train_values
