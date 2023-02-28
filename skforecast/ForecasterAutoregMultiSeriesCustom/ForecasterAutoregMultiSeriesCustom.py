@@ -1,5 +1,5 @@
 ################################################################################
-#                        ForecasterAutoregMultiSeries                          #
+#                   ForecasterAutoregMultiSeriesCustom                         #
 #                                                                              #
 # This work by Joaquin Amat Rodrigo and Javier Escobar Ortiz is licensed       #
 # under a Creative Commons Attribution 4.0 International License.              #
@@ -38,10 +38,10 @@ logging.basicConfig(
     level  = logging.INFO,
 )
 
-class ForecasterAutoregMultiSeries(ForecasterBase):
+class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
     """
     This class turns any regressor compatible with the scikit-learn API into a
-    recursive autoregressive (multi-step) forecaster for multiple serie with a custom
+    recursive autoregressive (multi-step) forecaster for multiple series with a custom
     function to create predictors.
     
     Parameters
@@ -391,8 +391,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                     )
         
         X_levels = []
-        X_train_col_names = [f"lag_{lag}" for lag in self.lags]
-
         for i, serie in enumerate(series.columns):
 
             y = series[serie]
@@ -405,7 +403,24 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 )
 
             y_values, y_index = preprocess_y(y=y)
-            X_train_values, y_train_values = self._create_lags(y=y_values)
+
+            #------
+            temp_X_train  = []
+            temp_y_train  = []
+
+            for j in range(len(y) - self.window_size):
+
+                train_index = np.arange(j, self.window_size + j)
+                test_index  = self.window_size + j
+
+                temp_X_train.append(self.create_predictors(y=y_values[train_index]))
+                temp_y_train.append(y_values[test_index])
+
+            X_train_values = np.vstack(temp_X_train)
+            y_train_values = np.array(temp_y_train)
+            #X_train_col_names = [f"custom_predictor_{i}" for i in range(temp_X_train.shape[1])]
+
+            #----
 
             if i == 0:
                 X_train = X_train_values
@@ -416,6 +431,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
             X_level = [serie]*len(X_train_values)
             X_levels.extend(X_level)
+        X_train_col_names = [f"custom_predictor_{i}" for i in range(X_train.shape[1])]
 
         if exog is not None:
             if len(exog) != len(series):
@@ -447,19 +463,19 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             col_names_exog = exog.columns if isinstance(exog, pd.DataFrame) else [exog.name]
             X_train_col_names.extend(col_names_exog)
 
-            # The first `self.max_lag` positions have to be removed from exog
+            # The first `self.window_size` positions have to be removed from exog
             # since they are not in X_train. Then exog is cloned as many times
             # as series.
             if exog_values.ndim == 1:
                 X_train = np.column_stack((
                               X_train,
-                              np.tile(exog_values[self.max_lag:, ], series.shape[1])
+                              np.tile(exog_values[self.window_size:, ], series.shape[1])
                           )) 
 
             else:
                 X_train = np.column_stack((
                               X_train,
-                              np.tile(exog_values[self.max_lag:, ], [series.shape[1], 1])
+                              np.tile(exog_values[self.window_size:, ], [series.shape[1], 1])
                           ))
 
         X_levels = pd.Series(X_levels)
@@ -479,7 +495,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         y_train_index = pd.Index(
                             np.tile(
-                                y_index[self.max_lag: ].values,
+                                y_index[self.window_size: ].values,
                                 reps = len(series_col_names)
                             )
                         )
@@ -684,9 +700,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         self.in_sample_residuals = in_sample_residuals
 
-        # The last time window of training data is stored so that lags needed as
-        # predictors in the first iteration of `predict()` can be calculated.
-        self.last_window = series.iloc[-self.max_lag:, ].copy()
+        # The last time window of training data is stored so that predictors in
+        # the first iteration of `predict()` can be calculated.
+        self.last_window = series.iloc[-self.window_size:].copy()
 
 
     def _recursive_predict(

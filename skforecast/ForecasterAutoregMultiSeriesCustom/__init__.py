@@ -1,1 +1,1 @@
-from .ForecasterAutoregMultiSeriesCustom import ForecasterAutoregMultiSeries
+from .ForecasterAutoregMultiSeriesCustom import ForecasterAutoregMultiSeriesCustom
