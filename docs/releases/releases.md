@@ -29,6 +29,8 @@ All notable changes to this project will be documented in this file.
 
 + Remove engine `'skopt'` in `bayesian_search_forecaster` in favor of engine `'optuna'`. To continue using it, use skforecast 0.6.0.
 
++ Remove the `scikit-optimize` dependency.
+
 **Fixed**
 
 + Remove operator `**` in `set_params()` method for all forecasters.
