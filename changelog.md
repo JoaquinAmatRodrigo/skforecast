@@ -26,6 +26,8 @@ All notable changes to this project will be documented in this file.
 
 + Remove `levels_weights` argument in `grid_search_forecaster_multiseries` and `random_search_forecaster_multiseries`, deprecated since version 0.6.0. Use `series_weights` and `weights_func` when creating the forecaster instead.
 
++ `in_sample_residuals` and `out_sample_residuals` are stored as numpy arrays instead of pandas series.
+
 **Fixed**
 
 
