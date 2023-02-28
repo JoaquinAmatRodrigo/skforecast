@@ -19,19 +19,19 @@ def create_predictors(y): # pragma: no cover
     return lags  
 
 
-def test_set_out_sample_residuals_exception_when_residuals_is_not_pd_Series():
+def test_set_out_sample_residuals_exception_when_residuals_is_not_numpy_ndarray():
     """
-    Test exception is raised when residuals argument is not pd.Series.
+    Test exception is raised when residuals argument is not numpy ndarray.
     """
     forecaster = ForecasterAutoregCustom(
                     regressor      = LinearRegression(),
                     fun_predictors = create_predictors,
                     window_size    = 5
                 )
-    residuals=[1, 2, 3]
+    residuals=pd.Series([1, 2, 3])
 
     err_msg = re.escape(
-                f"`residuals` argument must be `pd.Series`. Got {type(residuals)}."
+                f"`residuals` argument must be `numpy ndarray`. Got {type(residuals)}."
             )
     with pytest.raises(TypeError, match = err_msg):
         forecaster.set_out_sample_residuals(residuals=residuals)
@@ -46,7 +46,7 @@ def test_set_out_sample_residuals_when_residuals_length_is_greater_than_1000():
                     fun_predictors = create_predictors,
                     window_size    = 5
                 )
-    forecaster.set_out_sample_residuals(residuals=pd.Series(np.arange(2000)))
+    forecaster.set_out_sample_residuals(residuals=np.arange(2000))
 
     assert len(forecaster.out_sample_residuals) == 1000
 
@@ -61,14 +61,14 @@ def test_same_out_sample_residuals_stored_when_residuals_length_is_greater_than_
                     fun_predictors = create_predictors,
                     window_size    = 5
                 )
-    forecaster.set_out_sample_residuals(residuals=pd.Series(np.arange(2000)))
+    forecaster.set_out_sample_residuals(residuals=np.arange(2000))
     out_sample_residuals_1 = forecaster.out_sample_residuals
     forecaster = ForecasterAutoregCustom(
                     regressor      = LinearRegression(),
                     fun_predictors = create_predictors,
                     window_size    = 5
                 )
-    forecaster.set_out_sample_residuals(residuals=pd.Series(np.arange(2000)))
+    forecaster.set_out_sample_residuals(residuals=np.arange(2000))
     out_sample_residuals_2 = forecaster.out_sample_residuals
 
     assert (out_sample_residuals_1 == out_sample_residuals_2).all()
@@ -83,9 +83,9 @@ def test_set_out_sample_residuals_when_residuals_length_is_less_than_1000_and_no
                     fun_predictors = create_predictors,
                     window_size    = 5
                 )
-    forecaster.set_out_sample_residuals(residuals=pd.Series(np.arange(20)))
-    forecaster.set_out_sample_residuals(residuals=pd.Series(np.arange(10)), append=False)
-    expected = pd.Series(np.arange(10))
+    forecaster.set_out_sample_residuals(residuals=np.arange(20))
+    forecaster.set_out_sample_residuals(residuals=np.arange(10), append=False)
+    expected = np.arange(10)
     results = forecaster.out_sample_residuals
 
     assert (results == expected).all()
@@ -100,9 +100,9 @@ def test_set_out_sample_residuals_when_residuals_length_is_less_than_1000_and_ap
                     fun_predictors = create_predictors,
                     window_size    = 5
                 )
-    forecaster.set_out_sample_residuals(residuals=pd.Series(np.arange(10)))
-    forecaster.set_out_sample_residuals(residuals=pd.Series(np.arange(10)), append=True)
-    expected = pd.Series(np.hstack([np.arange(10), np.arange(10)]))
+    forecaster.set_out_sample_residuals(residuals=np.arange(10))
+    forecaster.set_out_sample_residuals(residuals=np.arange(10), append=True)
+    expected = np.hstack([np.arange(10), np.arange(10)])
     results = forecaster.out_sample_residuals
 
     assert (results == expected).all()
@@ -117,9 +117,9 @@ def test_set_out_sample_residuals_when_residuals_length_is_more_than_1000_and_ap
                     fun_predictors = create_predictors,
                     window_size    = 5
                 )
-    forecaster.set_out_sample_residuals(residuals=pd.Series(np.arange(10)))
-    forecaster.set_out_sample_residuals(residuals=pd.Series(np.arange(1000)), append=True)
-    expected = pd.Series(np.hstack([np.arange(10), np.arange(1200)])[:1000])
+    forecaster.set_out_sample_residuals(residuals=np.arange(10))
+    forecaster.set_out_sample_residuals(residuals=np.arange(1000), append=True)
+    expected = np.hstack([np.arange(10), np.arange(1200)])[:1000]
     results = forecaster.out_sample_residuals
 
     assert (results == expected).all()
@@ -143,9 +143,9 @@ def test_set_out_sample_residuals_when_transform_is_True():
                 11.5, 11.4, 11.3, 10.5,  9.6, 10.4, 11.7,  8.7, 10.6])
         )
     forecaster.fit(y=y)
-    new_residuals = pd.Series(np.random.normal(size=100), name='residuals')
-    new_residuals_transformed = forecaster.transformer_y.transform(new_residuals.to_frame())
-    new_residuals_transformed = pd.Series(new_residuals_transformed.flatten(), name='residuals')
+    new_residuals = np.random.normal(size=100)
+    new_residuals_transformed = forecaster.transformer_y.transform(new_residuals.reshape(-1, 1))
+    new_residuals_transformed = new_residuals_transformed.flatten()
     forecaster.set_out_sample_residuals(residuals=new_residuals, transform=True)
 
-    pd.testing.assert_series_equal(new_residuals_transformed, forecaster.out_sample_residuals)
+    np.testing.assert_array_equal(new_residuals_transformed, forecaster.out_sample_residuals)
