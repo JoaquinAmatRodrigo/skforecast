@@ -1331,7 +1331,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
     
     def set_params(
         self, 
-        **params: dict
+        params: dict
     ) -> None:
         """
         Set new values to the parameters of the scikit learn model stored in the

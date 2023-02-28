@@ -1009,7 +1009,7 @@ def _evaluate_grid_hyperparameters_multiseries(
         
         for params in tqdm(param_grid, desc='loop param_grid', position=1, leave=False, ncols=90):
 
-            forecaster.set_params(**params)
+            forecaster.set_params(params)
             metrics_levels = backtesting_forecaster_multiseries(
                                  forecaster         = forecaster,
                                  series             = series,
@@ -1047,7 +1047,7 @@ def _evaluate_grid_hyperparameters_multiseries(
         best_metric = results[list(metric_dict.keys())[0]].iloc[0]
         
         forecaster.set_lags(best_lags)
-        forecaster.set_params(**best_params)
+        forecaster.set_params(best_params)
         forecaster.fit(series=series, exog=exog, store_in_sample_residuals=True)
         
         print(

@@ -790,7 +790,7 @@ def _evaluate_grid_hyperparameters_sarimax(
   
     for params in tqdm(param_grid, desc='loop param_grid', position=0, ncols=90):
 
-        forecaster.set_params(**params)
+        forecaster.set_params(params)
         metrics_values = backtesting_sarimax(
                                 forecaster         = forecaster,
                                 y                  = y,
@@ -823,7 +823,7 @@ def _evaluate_grid_hyperparameters_sarimax(
         best_params = results['params'].iloc[0]
         best_metric = results[list(metric_dict.keys())[0]].iloc[0]
         
-        forecaster.set_params(**best_params)
+        forecaster.set_params(best_params)
         forecaster.fit(y=y, exog=exog)
         
         print(

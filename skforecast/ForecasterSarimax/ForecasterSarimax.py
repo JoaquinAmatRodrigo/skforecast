@@ -668,7 +668,7 @@ class ForecasterSarimax():
     
     def set_params(
         self, 
-        **params: dict
+        params: dict
     ) -> None:
         """
         Set new values to the parameters of the model stored in the forecaster.
