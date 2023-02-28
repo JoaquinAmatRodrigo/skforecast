@@ -19,7 +19,7 @@ def test_initialize_lags_input_lags_parameter(lags, expected):
     Test creation of attribute lags with different arguments.
     """
     lags = initialize_lags(
-               forecaster_type = 'ForecasterAutoreg',
+               forecaster_name = 'ForecasterAutoreg',
                lags            = lags
            )
 
@@ -33,7 +33,7 @@ def test_initialize_lags_exception_when_lags_is_int_lower_than_1():
     err_msg = re.escape('Minimum value of lags allowed is 1.')
     with pytest.raises(ValueError, match = err_msg):
         initialize_lags(
-            forecaster_type = 'ForecasterAutoreg',
+            forecaster_name = 'ForecasterAutoreg',
             lags            = -10
         )
 
@@ -49,7 +49,7 @@ def test_initialize_lags_exception_when_lags_list_or_numpy_array_with_values_not
     for lags in [lags_list, lags_np_array]:
         with pytest.raises(TypeError, match = err_msg):
             initialize_lags(
-                forecaster_type = 'ForecasterAutoreg',
+                forecaster_name = 'ForecasterAutoreg',
                 lags            = lags
             )
 
@@ -62,7 +62,7 @@ def test_initialize_lags_exception_when_lags_has_values_lower_than_1():
     for lags in [[0, 1], range(0, 2), np.arange(0, 2)]:
         with pytest.raises(ValueError, match = err_msg):
             initialize_lags(
-                forecaster_type = 'ForecasterAutoreg',
+                forecaster_name = 'ForecasterAutoreg',
                 lags            = lags
             )
 
@@ -78,7 +78,7 @@ def test_initialize_lags_exception_when_lags_is_not_valid_type():
             )
     with pytest.raises(TypeError, match = err_msg):
         initialize_lags(
-            forecaster_type = 'ForecasterAutoreg',
+            forecaster_name = 'ForecasterAutoreg',
             lags            = lags
         )
 
@@ -94,6 +94,6 @@ def test_initialize_lags_exception_when_lags_is_not_valid_type_ForecasterAutoreg
             )
     with pytest.raises(TypeError, match = err_msg):
         initialize_lags(
-            forecaster_type = 'ForecasterAutoregMultiVariate',
+            forecaster_name = 'ForecasterAutoregMultiVariate',
             lags            = lags
         )

@@ -167,9 +167,9 @@ class ForecasterSarimax():
         """
 
         info = (
-            f"{'=' * len(str(type(self)).split('.')[1])} \n"
-            f"{str(type(self)).split('.')[1]} \n"
-            f"{'=' * len(str(type(self)).split('.')[1])} \n"
+            f"{'=' * len(type(self).__name__)} \n"
+            f"{type(self).__name__} \n"
+            f"{'=' * len(type(self).__name__)} \n"
             f"Regressor: {self.regressor} \n"
             f"Regressor parameters: {self.params} \n"
             f"Window size: {self.window_size} \n"
@@ -330,7 +330,7 @@ class ForecasterSarimax():
         last_window_check = last_window.copy() if last_window is not None else self.last_window.copy()
 
         check_predict_input(
-            forecaster_type  = type(self).__name__,
+            forecaster_name  = type(self).__name__,
             steps            = steps,
             fitted           = self.fitted,
             included_exog    = self.included_exog,
@@ -523,7 +523,7 @@ class ForecasterSarimax():
         last_window_check = last_window.copy() if last_window is not None else self.last_window.copy()
 
         check_predict_input(
-            forecaster_type  = type(self).__name__,
+            forecaster_name  = type(self).__name__,
             steps            = steps,
             fitted           = self.fitted,
             included_exog    = self.included_exog,
