@@ -103,9 +103,6 @@ class ForecasterAutoregCustom(ForecasterBase):
         Last window the forecaster has seen during trained. It stores the
         values needed to predict the next `step` right after the training data.
         
-    window_size : int
-        Size of the window needed by `fun_predictors` to create the predictors.
-        
     fitted : Bool
         Tag to identify if the regressor has been fitted (trained).
         
