@@ -64,7 +64,6 @@ pip install skforecast[plotting]
 + tqdm>=4.57.0, <4.65
 + scikit-learn>=1.0, <1.3
 + optuna>=2.10.0, <3.2
-+ scikit-optimize==0.9.0
 + joblib>=1.1.0, <1.3.0
 
 ### Optional dependencies
