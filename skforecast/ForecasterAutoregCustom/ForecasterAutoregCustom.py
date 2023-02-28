@@ -142,12 +142,12 @@ class ForecasterAutoregCustom(ForecasterBase):
     X_train_col_names : list
         Names of columns of the matrix created internally for training.
         
-    in_sample_residuals : pandas Series
+    in_sample_residuals : numpy ndarray
         Residuals of the model when predicting training data. Only stored up to
         1000 values. If `transformer_y` is not `None`, residuals are stored in the
         transformed scale.
         
-    out_sample_residuals : pandas Series
+    out_sample_residuals : numpy ndarray
         Residuals of the model when predicting non training data. Only stored
         up to 1000 values. If `transformer_y` is not `None`, residuals
         are assumed to be in the transformed scale. Use `set_out_sample_residuals` to
@@ -480,15 +480,11 @@ class ForecasterAutoregCustom(ForecasterBase):
             self.index_freq = X_train.index.step
 
         residuals = y_train - self.regressor.predict(X_train)
-        residuals = pd.Series(
-                        data  = residuals,
-                        index = y_train.index,
-                        name  = 'in_sample_residuals'
-                    )
 
         if len(residuals) > 1000:
             # Only up to 1000 residuals are stored
-            residuals = residuals.sample(n=1000, random_state=123, replace=False)
+            rng = np.random.default_rng(seed=123)
+            residuals = rng.choice(a=residuals, size=1000, replace=False)
                                                   
         self.in_sample_residuals = residuals
         
@@ -1043,7 +1039,7 @@ class ForecasterAutoregCustom(ForecasterBase):
     
     def set_out_sample_residuals(
         self, 
-        residuals: pd.Series, 
+        residuals: np.ndarray, 
         append: bool=True,
         transform: bool=True,
         random_state: int=123
@@ -1055,7 +1051,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         
         Parameters
         ----------
-        residuals : pd.Series
+        residuals : numpy ndarray
             Values of residuals. If len(residuals) > 1000, only a random sample
             of 1000 values are stored.
             
@@ -1077,9 +1073,9 @@ class ForecasterAutoregCustom(ForecasterBase):
 
         """
 
-        if not isinstance(residuals, pd.Series):
+        if not isinstance(residuals, np.ndarray):
             raise TypeError(
-                f"`residuals` argument must be `pd.Series`. Got {type(residuals)}."
+                f"`residuals` argument must be `numpy ndarray`. Got {type(residuals)}."
             )
 
         if not transform and self.transformer_y is not None:
@@ -1101,16 +1097,15 @@ class ForecasterAutoregCustom(ForecasterBase):
             )
 
             residuals = transform_series(
-                            series            = residuals,
+                            series            = pd.Series(residuals, name='residuals'),
                             transformer       = self.transformer_y,
                             fit               = False,
                             inverse_transform = False
-                        )
+                        ).to_numpy()
             
         if len(residuals) > 1000:
             rng = np.random.default_rng(seed=random_state)
             residuals = rng.choice(a=residuals, size=1000, replace=False)
-            residuals = pd.Series(residuals)   
     
         if append and self.out_sample_residuals is not None:
             free_space = max(0, 1000 - len(self.out_sample_residuals))
@@ -1125,7 +1120,7 @@ class ForecasterAutoregCustom(ForecasterBase):
                                 residuals[:free_space]
                             ))
 
-        self.out_sample_residuals = pd.Series(residuals)
+        self.out_sample_residuals = residuals
 
     
     def get_feature_importance(

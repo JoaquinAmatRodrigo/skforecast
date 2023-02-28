@@ -594,15 +594,11 @@ class ForecasterAutoregDirect(ForecasterBase):
                 self.regressors_[step].fit(X=X_train_step, y=y_train_step)
                 
             residuals = y_train_step - self.regressors_[step].predict(X_train_step)
-            residuals = pd.Series(
-                            data  = residuals,
-                            index = y_train.index,
-                            name  = 'in_sample_residuals'
-                        )
 
             if len(residuals) > 1000:
                 # Only up to 1000 residuals are stored
-                residuals = residuals.sample(n=1000, random_state=123, replace=False)
+                rng = np.random.default_rng(seed=123)
+                residuals = rng.choice(a=residuals, size=1000, replace=False)
 
             self.in_sample_residuals[step] = residuals
 
@@ -1135,7 +1131,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         Parameters
         ----------
         residuals : dict
-            Dictionary of panda.Series with the residuals of each model (step).
+            Dictionary of numpy ndarray with the residuals of each model (step).
             If len(residuals) > 1000, only a random sample of 1000 values are stored.
             
         append : bool, default `True`
@@ -1159,9 +1155,9 @@ class ForecasterAutoregDirect(ForecasterBase):
         if self.out_sample_residuals is None:
             self.out_sample_residuals = {step: None for step in range(1, self.steps + 1)}
 
-        if not isinstance(residuals, dict) or not all(isinstance(x, pd.Series) for x in residuals.values()):
+        if not isinstance(residuals, dict) or not all(isinstance(x, np.ndarray) for x in residuals.values()):
             raise TypeError(
-                f"`residuals` argument must be a dict of `pd.Series`. Got {type(residuals)}."
+                f"`residuals` argument must be a dict of `numpy ndarray`. Got {type(residuals)}."
             )
 
         if not set(self.out_sample_residuals.keys()).issubset(set(residuals.keys())):
@@ -1195,11 +1191,11 @@ class ForecasterAutoregDirect(ForecasterBase):
 
             for key, value in residuals.items():
                 residuals[key] = transform_series(
-                                     series            = value,
+                                     series            = pd.Series(value, name='residuals'),
                                      transformer       = self.transformer_y,
                                      fit               = False,
                                      inverse_transform = False
-                                 )
+                                 ).to_numpy()
            
         for key, value in residuals.items():
             if len(value) > 1000:
@@ -1219,7 +1215,7 @@ class ForecasterAutoregDirect(ForecasterBase):
                                 value[:free_space]
                             ))
             
-            self.out_sample_residuals[key] = pd.Series(value)
+            self.out_sample_residuals[key] = value
 
  
     def get_feature_importance(
