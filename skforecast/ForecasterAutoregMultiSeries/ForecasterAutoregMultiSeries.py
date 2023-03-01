@@ -183,14 +183,16 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         
     in_sample_residuals : dict
         Residuals of the model when predicting training data. Only stored up to
-        1000 values in the form `{level: residuals}`.
+        1000 values in the form `{level: residuals}`. If `transformer_series` 
+        is not `None`, residuals are stored in the transformed scale.
         
     out_sample_residuals : dict
-        Residuals of the model when predicting non-training data. Only stored
-        up to 1000 values in the form `{level: residuals}`. Use 
-        `set_out_sample_residuals` to set values.
+        Residuals of the models when predicting non training data. Only stored
+        up to 1000 values in the form `{level: residuals}`. If `transformer_series` 
+        is not `None`, residuals are assumed to be in the transformed scale. Use 
+        `set_out_sample_residuals()` method to set values.
         
-    fitted : Bool
+    fitted : bool
         Tag to identify if the regressor has been fitted (trained).
 
     creation_date : str
@@ -267,7 +269,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.window_size = self.max_lag
 
         self.weight_func, self.source_code_weight_func, self.series_weights = initialize_weights(
-            forecaster_type = type(self).__name__, 
+            forecaster_name = type(self).__name__, 
             regressor       = regressor, 
             weight_func     = weight_func, 
             series_weights  = series_weights
@@ -412,10 +414,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             )
             series_not_in_transformer_series = set(series.columns) - set(self.transformer_series.keys())
             if series_not_in_transformer_series:
-                    warnings.warn(
-                        f"{series_not_in_transformer_series} not present in `transformer_series`."
-                        f" No transformation is applied to these series."
-                    )
+                warnings.warn(
+                    f"{series_not_in_transformer_series} not present in `transformer_series`."
+                    f" No transformation is applied to these series."
+                )
         
         X_levels = []
         X_train_col_names = [f"lag_{lag}" for lag in self.lags]
@@ -696,7 +698,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             residuals = y_train - self.regressor.predict(X_train)
 
             for serie in series.columns:
-                in_sample_residuals[serie] = residuals.values[X_train[serie] == 1.]
+                in_sample_residuals[serie] = residuals.loc[X_train[serie] == 1.].values
                 if len(in_sample_residuals[serie]) > 1000:
                     # Only up to 1000 residuals are stored
                     rng = np.random.default_rng(seed=123)
@@ -707,7 +709,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                                                  )
         else:
             for serie in series.columns:
-                in_sample_residuals[serie] = np.array([None])
+                in_sample_residuals[serie] = None
 
         self.in_sample_residuals = in_sample_residuals
 
@@ -822,7 +824,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             last_window = deepcopy(self.last_window)
         
         check_predict_input(
-            forecaster_type  = type(self).__name__,
+            forecaster_name  = type(self).__name__,
             steps            = steps,
             fitted           = self.fitted,
             included_exog    = self.included_exog,
@@ -974,35 +976,46 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         elif isinstance(levels, str):
             levels = [levels]
 
-        for level in levels:
-            if in_sample_residuals and (self.in_sample_residuals[level] == None).any():
+        if in_sample_residuals:
+            if not set(levels).issubset(set(self.in_sample_residuals.keys())):
                 raise ValueError(
-                    (f"`forecaster.in_sample_residuals['{level}']` contains `None` values. "
-                      "Try using `fit` method with `in_sample_residuals=True` or set in "
-                      "`predict_interval()`, `predict_bootstrapping()` or "
-                      "`predict_dist()` method `in_sample_residuals=False` and use "
-                      "`out_sample_residuals` (see `set_out_sample_residuals()`).")
+                    (f"Not `forecaster.in_sample_residuals` for levels: "
+                     f"{set(levels) - set(self.in_sample_residuals.keys())}.")
                 )
-
-        if not in_sample_residuals and self.out_sample_residuals is None:
-            raise ValueError(
-                ('`forecaster.out_sample_residuals` is `None`. Use '
-                 '`in_sample_residuals=True` or method `set_out_sample_residuals()` '
-                 'before `predict_interval()`, `predict_bootstrapping()` or '
-                 '`predict_dist()`.')
-            )
-
-        if not in_sample_residuals and len(set(levels) - set(self.out_sample_residuals.keys())) != 0:
-            raise ValueError(
-                (f'Not `forecaster.out_sample_residuals` for levels: {set(levels) - set(self.out_sample_residuals.keys())}. '
-                 f'Use method `set_out_sample_residuals()`.')
-            )
+            residuals_levels = self.in_sample_residuals
+        else:
+            if self.out_sample_residuals is None:
+                raise ValueError(
+                    ("`forecaster.out_sample_residuals` is `None`. Use "
+                     "`in_sample_residuals=True` or method `set_out_sample_residuals()` "
+                     "before `predict_interval()`, `predict_bootstrapping()` or "
+                     "`predict_dist()`.")
+                )
+            else:
+                if not set(levels).issubset(set(self.out_sample_residuals.keys())):
+                    raise ValueError(
+                        (f"Not `forecaster.out_sample_residuals` for levels: "
+                         f"{set(levels) - set(self.out_sample_residuals.keys())}. "
+                         f"Use method `set_out_sample_residuals()`.")
+                    )
+            residuals_levels = self.out_sample_residuals
+                
+        check_residuals = 'forecaster.in_sample_residuals' if in_sample_residuals else 'forecaster.out_sample_residuals'
+        for level in levels:
+            if residuals_levels[level] is None:
+                raise ValueError(
+                    (f"forecaster residuals for level '{level}' are `None`. Check `{check_residuals}`.")
+                )
+            elif (residuals_levels[level] == None).any():
+                raise ValueError(
+                    (f"forecaster residuals for level '{level}' contains `None` values. Check `{check_residuals}`.")
+                )
 
         if last_window is None:
             last_window = deepcopy(self.last_window)
 
         check_predict_input(
-            forecaster_type  = type(self).__name__,
+            forecaster_name  = type(self).__name__,
             steps            = steps,
             fitted           = self.fitted,
             included_exog    = self.included_exog,
@@ -1065,10 +1078,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             rng = np.random.default_rng(seed=random_state)
             seeds = rng.integers(low=0, high=10000, size=n_boot)
 
-            if in_sample_residuals:
-                residuals = self.in_sample_residuals[level]
-            else:
-                residuals = self.out_sample_residuals[level]
+            residuals = residuals_levels[level]
 
             for i in range(n_boot):
                 # In each bootstraping iteration the initial last_window and exog 
@@ -1380,7 +1390,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         
     def set_out_sample_residuals(
         self, 
-        residuals: pd.DataFrame,
+        residuals: dict,
         append: bool=True,
         transform: bool=True,
         random_state: int=123
@@ -1392,9 +1402,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         
         Parameters
         ----------
-        residuals : pandas DataFrame
-            Values of residuals. If len(residuals) > 1000, only a random sample
-            of 1000 values are stored. Columns must be the same as `levels`.
+        residuals : dict
+            Dictionary of numpy ndarrays with the residuals of each level in the
+            form {level: residuals}. If len(residuals) > 1000, only a random 
+            sample of 1000 values are stored. Keys must be the same as `levels`.
             
         append : bool, default `True`
             If `True`, new residuals are added to the once already stored in the
@@ -1414,9 +1425,11 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         """
 
-        if not isinstance(residuals, pd.DataFrame):
+        if not isinstance(residuals, dict) or not all(isinstance(x, np.ndarray) for x in residuals.values()):
             raise TypeError(
-                f"`residuals` argument must be a pandas DataFrame. Got {type(residuals)}."
+                f"`residuals` argument must be a dict of numpy ndarrays in the form "
+                "`{level: residuals}`. " 
+                f"Got {type(residuals)}."
             )
 
         if not self.fitted:
@@ -1425,64 +1438,64 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                  "arguments before using `set_out_sample_residuals()`.")
             )
         
-        out_sample_residuals = {}
+        if self.out_sample_residuals is None:
+            self.out_sample_residuals = {level: None for level in self.series_col_names}
 
-        for level in residuals.columns:
+        if not set(self.out_sample_residuals.keys()).issubset(set(residuals.keys())):
+            warnings.warn(
+                f"""
+                Only residuals of levels 
+                {set(self.out_sample_residuals.keys()).intersection(set(residuals.keys()))} 
+                are updated.
+                """
+            )
 
-            if not level in self.series_col_names:
-                continue
-            else:      
+        residuals = {key: value for key, value in residuals.items() if key in self.out_sample_residuals.keys()}
 
-                residuals_level = residuals[level]
+        for level, value in residuals.items():
 
-                if not transform and self.transformer_series_[level] is not None:
-                    warnings.warn(
-                        ('Argument `transform` is set to `False` but forecaster was trained '
-                         f'using a transformer {self.transformer_series_[level]} for level {level}. '
-                         'Ensure that the new residuals are already transformed or set `transform=True`.')
-                    )
+            residuals_level = value
 
-                if transform and self.transformer_series_ and self.transformer_series_[level]:
-                    warnings.warn(
-                        ('Residuals will be transformed using the same transformer used '
-                         f'when training the forecaster for level {level} : ({self.transformer_series_[level]}). '
-                         'Ensure that the new residuals are on the same scale as the '
-                         'original time series. ')
-                    )
+            if not transform and self.transformer_series_[level] is not None:
+                warnings.warn(
+                    ("Argument `transform` is set to `False` but forecaster was "
+                    f"trained using a transformer {self.transformer_series_[level]} "
+                    f"for level {level}. Ensure that the new residuals are "
+                     "already transformed or set `transform=True`.")
+                )
 
-                    residuals_level = transform_series(
-                                          series            = residuals_level,
-                                          transformer       = self.transformer_series_[level],
-                                          fit               = False,
-                                          inverse_transform = False
-                                      )
+            if transform and self.transformer_series_ and self.transformer_series_[level]:
+                warnings.warn(
+                    ("Residuals will be transformed using the same transformer used "
+                    f"when training the forecaster for level {level} : "
+                    f"({self.transformer_series_[level]}). Ensure that the new "
+                     "residuals are on the same scale as the original time series.")
+                )
+                residuals_level = transform_series(
+                                      series            = pd.Series(residuals_level, name='residuals'),
+                                      transformer       = self.transformer_series_[level],
+                                      fit               = False,
+                                      inverse_transform = False
+                                  ).to_numpy()
 
-                if len(residuals_level) > 1000:
-                    rng = np.random.default_rng(seed=random_state)
-                    residuals_level = rng.choice(a=residuals_level, size=1000, replace=False)
-        
-                if append and self.out_sample_residuals is not None:
+            if len(residuals_level) > 1000:
+                rng = np.random.default_rng(seed=random_state)
+                residuals_level = rng.choice(a=residuals_level, size=1000, replace=False)
+    
+            if append and self.out_sample_residuals[level] is not None:
+                free_space = max(0, 1000 - len(self.out_sample_residuals[level]))
+                if len(residuals_level) < free_space:
+                    residuals_level = np.hstack((
+                                            self.out_sample_residuals[level],
+                                            residuals_level
+                                        ))
+                else:
+                    residuals_level = np.hstack((
+                                            self.out_sample_residuals[level],
+                                            residuals_level[:free_space]
+                                        ))
 
-                    if not level in self.out_sample_residuals.keys():
-                        raise ValueError(
-                            f'{level} does not exists in `forecaster.out_sample_residuals` keys: {list(self.out_sample_residuals.keys())}'
-                        )
-
-                    free_space = max(0, 1000 - len(self.out_sample_residuals[level]))
-                    if len(residuals_level) < free_space:
-                        residuals_level = np.hstack((
-                                              self.out_sample_residuals[level],
-                                              residuals_level
-                                          ))
-                    else:
-                        residuals_level = np.hstack((
-                                              self.out_sample_residuals[level],
-                                              residuals_level[:free_space]
-                                          ))
-
-                out_sample_residuals[level] = np.array(residuals_level)
-
-        self.out_sample_residuals = out_sample_residuals
+            self.out_sample_residuals[level] = residuals_level
 
     
     def get_feature_importance(
