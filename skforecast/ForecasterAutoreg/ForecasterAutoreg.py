@@ -835,13 +835,14 @@ class ForecasterAutoreg(ForecasterBase):
                                columns = [f"pred_boot_{i}" for i in range(n_boot)]
                            )
 
-        for col in boot_predictions.columns:
-            boot_predictions[col] = transform_series(
-                                        series            = boot_predictions[col],
-                                        transformer       = self.transformer_y,
-                                        fit               = False,
-                                        inverse_transform = True
-                                    )
+        if self.transformer_y:
+            for col in boot_predictions.columns:
+                boot_predictions[col] = transform_series(
+                                            series            = boot_predictions[col],
+                                            transformer       = self.transformer_y,
+                                            fit               = False,
+                                            inverse_transform = True
+                                        )
                                     
         return boot_predictions
 
