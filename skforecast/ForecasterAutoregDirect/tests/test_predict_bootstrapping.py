@@ -14,6 +14,23 @@ from .fixtures_ForecasterAutoregDirect import exog
 from .fixtures_ForecasterAutoregDirect import exog_predict
 
 
+def test_predict_bootstrapping_ValueError_when_not_in_sample_residuals_for_any_step():
+    """
+    Test ValueError is raised when in_sample_residuals=True but there is no
+    residuals for any step.
+    """
+    forecaster = ForecasterAutoregDirect(LinearRegression(), lags=3, steps=2)
+    forecaster.fit(y=pd.Series(np.arange(10)))
+    forecaster.in_sample_residuals = {2: np.array([1, 2, 3])}
+
+    err_msg = re.escape(
+                (f'Not `forecaster.in_sample_residuals` for steps: '
+                 f'{set([1, 2]) - set(forecaster.in_sample_residuals.keys())}.')
+                )
+    with pytest.raises(ValueError, match = err_msg):
+        forecaster.predict_bootstrapping(steps=None, in_sample_residuals=True)
+
+
 def test_predict_bootstrapping_ValueError_when_out_sample_residuals_is_None():
     """
     Test ValueError is raised when in_sample_residuals=False and
@@ -30,6 +47,63 @@ def test_predict_bootstrapping_ValueError_when_out_sample_residuals_is_None():
               )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.predict_bootstrapping(steps=1, in_sample_residuals=False)
+
+
+def test_predict_bootstrapping_ValueError_when_not_out_sample_residuals_for_all_steps_predicted():
+    """
+    Test ValueError is raised when in_sample_residuals=False and
+    forecaster.out_sample_residuals is not available for all steps predicted.
+    """
+    forecaster = ForecasterAutoregDirect(LinearRegression(), lags=3, steps=3)
+    forecaster.fit(y=pd.Series(np.arange(15)))
+    residuals = {2: np.array([1, 2, 3, 4, 5]), 
+                 3: np.array([1, 2, 3, 4, 5])}
+    forecaster.out_sample_residuals = residuals
+
+    err_msg = re.escape(
+                    (f'Not `forecaster.out_sample_residuals` for steps: '
+                     f'{set([1, 2]) - set(forecaster.out_sample_residuals.keys())}. '
+                     f'Use method `set_out_sample_residuals()`.')
+                )
+    with pytest.raises(ValueError, match = err_msg):
+        forecaster.predict_bootstrapping(steps=[1, 2], in_sample_residuals=False)
+
+
+def test_predict_bootstrapping_ValueError_when_step_out_sample_residuals_value_is_None():
+    """
+    Test ValueError is raised when in_sample_residuals=False and
+    forecaster.out_sample_residuals has a step with a None.
+    """
+    forecaster = ForecasterAutoregDirect(LinearRegression(), lags=3, steps=3)
+    forecaster.fit(y=pd.Series(np.arange(15)))
+    residuals = {1: np.array([1, 2, 3, 4, 5]),
+                 2: np.array([1, 2, 3, 4, 5])}
+    forecaster.set_out_sample_residuals(residuals = residuals)
+
+    err_msg = re.escape(
+                    (f"forecaster residuals for step 3 are `None`. Check forecaster.out_sample_residuals.")
+                )
+    with pytest.raises(ValueError, match = err_msg):
+        forecaster.predict_bootstrapping(steps=3, in_sample_residuals=False)
+
+
+def test_predict_bootstrapping_ValueError_when_step_out_sample_residuals_value_contains_None():
+    """
+    Test ValueError is raised when in_sample_residuals=False and
+    forecaster.out_sample_residuals has a step with a None value.
+    """
+    forecaster = ForecasterAutoregDirect(LinearRegression(), lags=3, steps=3)
+    forecaster.fit(y=pd.Series(np.arange(15)))
+    residuals = {1: np.array([1, 2, 3, 4, 5]),
+                 2: np.array([1, 2, 3, 4, 5]), 
+                 3: np.array([1, 2, 3, 4, None])}
+    forecaster.set_out_sample_residuals(residuals = residuals)
+
+    err_msg = re.escape(
+                    (f"forecaster residuals for step 3 contains `None` values. Check forecaster.out_sample_residuals.")
+                )
+    with pytest.raises(ValueError, match = err_msg):
+        forecaster.predict_bootstrapping(steps=3, in_sample_residuals=False)
 
 
 @pytest.mark.parametrize("steps", [2, [1, 2], None], 
