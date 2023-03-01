@@ -172,8 +172,19 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
 
     X_train_col_names : list
         Names of columns of the matrix created internally for training.
+
+    in_sample_residuals : dict
+        Residuals of the models when predicting training data. Only stored up to
+        1000 values per model in the form `{step: residuals}`. If `transformer_series` 
+        is not `None`, residuals are stored in the transformed scale.
         
-    fitted : Bool
+    out_sample_residuals : dict
+        Residuals of the models when predicting non training data. Only stored
+        up to 1000 values per model in the form `{step: residuals}`. If `transformer_series` 
+        is not `None`, residuals are assumed to be in the transformed scale. Use 
+        `set_out_sample_residuals()` method to set values.
+        
+    fitted : bool
         Tag to identify if the regressor has been fitted (trained).
 
     creation_date : str
@@ -187,6 +198,11 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
 
     python_version : str
         Version of python used to create the forecaster.
+        
+    Notes
+    -----
+    A separate model is created for each forecasting time step. It is important to
+    note that all models share the same parameter and hyperparameter configuration.
     
     """
     
@@ -247,20 +263,29 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         if isinstance(lags, dict):
             self.lags = {}
             for key in lags:
-                self.lags[key] = initialize_lags(forecaster_type=type(self), lags=lags[key])
+                self.lags[key] = initialize_lags(
+                                     forecaster_name = type(self).__name__,
+                                     lags            = lags[key]
+                                 )
         else:
-            self.lags = initialize_lags(forecaster_type=type(self), lags=lags)
+            self.lags = initialize_lags(
+                            forecaster_name = type(self).__name__, 
+                            lags            = lags
+                        )
 
         self.lags_ = self.lags
         self.max_lag = max(list(chain(*self.lags.values()))) if isinstance(self.lags, dict) else max(self.lags)
         self.window_size = self.max_lag
             
         self.weight_func, self.source_code_weight_func, _ = initialize_weights(
-            forecaster_type = type(self).__name__, 
+            forecaster_name = type(self).__name__, 
             regressor       = regressor, 
             weight_func     = weight_func, 
             series_weights  = None
         )
+
+        self.in_sample_residuals = {step: np.array([None]) for step in range(1, steps + 1)}
+        self.out_sample_residuals = None
     
 
     def __repr__(
@@ -278,18 +303,18 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             params = self.regressor.get_params()
 
         info = (
-            f"{'=' * len(str(type(self)).split('.')[1])} \n"
-            f"{str(type(self)).split('.')[1]} \n"
-            f"{'=' * len(str(type(self)).split('.')[1])} \n"
+            f"{'=' * len(type(self).__name__)} \n"
+            f"{type(self).__name__} \n"
+            f"{'=' * len(type(self).__name__)} \n"
             f"Regressor: {self.regressor} \n"
             f"Lags: {self.lags} \n"
             f"Transformer for series: {self.transformer_series} \n"
             f"Transformer for exog: {self.transformer_exog} \n"
+            f"Weight function included: {True if self.weight_func is not None else False} \n"
             f"Window size: {self.window_size} \n"
             f"Target series, level: {self.level} \n"
             f"Multivariate series (names): {self.series_col_names} \n"
             f"Maximum steps predicted: {self.steps} \n"
-            f"Weight function included: {True if self.weight_func is not None else False} \n"
             f"Exogenous included: {self.included_exog} \n"
             f"Type of exogenous variable: {self.exog_type} \n"
             f"Exogenous variables names: {self.exog_col_names} \n"
@@ -615,7 +640,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         self,
         series: pd.DataFrame,
         exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-        store_in_sample_residuals: Any=None
+        store_in_sample_residuals: bool=True
     ) -> None:
         """
         Training Forecaster.
@@ -630,8 +655,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             number of observations as `series` and their indexes must be aligned so
             that series[i] is regressed on exog[i].
 
-        store_in_sample_residuals : Ignored
-            Not used, present here for API consistency by convention.
+        store_in_sample_residuals : bool, default `True`
+            if True, in_sample_residuals are stored.
 
         Returns 
         -------
@@ -640,16 +665,17 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         """
         
         # Reset values in case the forecaster has already been fitted.
-        self.index_type        = None
-        self.index_freq        = None
-        self.last_window       = None
-        self.included_exog     = False
-        self.exog_type         = None
-        self.exog_col_names    = None
-        self.series_col_names  = None
-        self.X_train_col_names = None
-        self.fitted            = False
-        self.training_range    = None
+        self.index_type          = None
+        self.index_freq          = None
+        self.last_window         = None
+        self.included_exog       = False
+        self.exog_type           = None
+        self.exog_col_names      = None
+        self.series_col_names    = None
+        self.X_train_col_names   = None
+        self.in_sample_residuals = {step: np.array([None]) for step in range(1, self.steps + 1)}
+        self.fitted              = False
+        self.training_range      = None
         
         self.series_col_names = list(series.columns)
 
@@ -661,8 +687,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
 
             if len(set(self.exog_col_names) - set(self.series_col_names)) != len(self.exog_col_names):
                 raise ValueError(
-                    (f'`exog` cannot contain a column named the same as one of the series'
-                     f' (column names of series).\n'
+                    (f'`exog` cannot contain a column named the same as one of the series '
+                     f'(column names of series).\n'
                      f'    `series` columns : {self.series_col_names}.\n'
                      f'    `exog`   columns : {self.exog_col_names}.')
                 )
@@ -687,6 +713,22 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                 )
             else:
                 self.regressors_[step].fit(X=X_train_step, y=y_train_step)
+
+            # This is done to save time during fit in functions such as backtesting()
+            if store_in_sample_residuals:
+            
+                residuals = y_train_step - self.regressors_[step].predict(X_train_step)
+
+                if len(residuals) > 1000:
+                    # Only up to 1000 residuals are stored
+                    rng = np.random.default_rng(seed=123)
+                    residuals = rng.choice(
+                                    a       = residuals, 
+                                    size    = 1000, 
+                                    replace = False
+                                )
+
+                self.in_sample_residuals[step] = residuals
         
         self.fitted = True
         self.fit_date = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
@@ -764,7 +806,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             last_window = deepcopy(self.last_window)
         
         check_predict_input(
-            forecaster_type  = type(self).__name__,
+            forecaster_name  = type(self).__name__,
             steps            = steps,
             fitted           = self.fitted,
             included_exog    = self.included_exog,
@@ -854,6 +896,147 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                       )
 
         return predictions
+
+
+    def predict_bootstrapping(
+        self,
+        steps: Optional[Union[int, list]]=None,
+        last_window: Optional[pd.DataFrame]=None,
+        exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+        n_boot: int=500,
+        random_state: int=123,
+        in_sample_residuals: bool=True
+    ) -> pd.DataFrame:
+        """
+        Generate multiple forecasting predictions using a bootstrapping process. 
+        By sampling from a collection of past observed errors (the residuals),
+        each iteration of bootstrapping generates a different set of predictions. 
+        See the Notes section for more information. 
+        
+        Parameters
+        ----------   
+        steps : int, list, None, default `None`
+            Predict n steps. The value of `steps` must be less than or equal to the 
+            value of steps defined when initializing the forecaster. Starts at 1.
+        
+            If int:
+                Only steps within the range of 1 to int are predicted.
+        
+            If list:
+                List of ints. Only the steps contained in the list are predicted.
+
+            If `None`:
+                As many steps are predicted as were defined at initialization.
+
+        last_window : pandas DataFrame, default `None`
+            Values of the series used to create the predictors (lags) need in the 
+            first iteration of prediction (t + 1).
+    
+            If `last_window = None`, the values stored in` self.last_window` are
+            used to calculate the initial predictors, and the predictions start
+            right after training data.
+            
+        exog : pandas Series, pandas DataFrame, default `None`
+            Exogenous variable/s included as predictor/s.
+            
+        n_boot : int, default `500`
+            Number of bootstrapping iterations used to estimate prediction
+            intervals.
+
+        random_state : int, default `123`
+            Sets a seed to the random generator, so that boot intervals are always 
+            deterministic.
+                        
+        in_sample_residuals : bool, default `True`
+            If `True`, residuals from the training data are used as proxy of
+            prediction error to create prediction intervals. If `False`, out of
+            sample residuals are used. In the latter case, the user should have
+            calculated and stored the residuals within the forecaster (see
+            `set_out_sample_residuals()`).
+
+        Returns 
+        -------
+        boot_predictions : pandas DataFrame, shape (steps, n_boot)
+            Predictions generated by bootstrapping.
+
+        Notes
+        -----
+        More information about prediction intervals in forecasting:
+        https://otexts.com/fpp3/prediction-intervals.html#prediction-intervals-from-bootstrapped-residuals
+        Forecasting: Principles and Practice (3nd ed) Rob J Hyndman and George Athanasopoulos.
+
+        """
+
+        if isinstance(steps, int):
+            steps = list(np.arange(steps) + 1)
+        elif steps is None:
+            steps = list(np.arange(self.steps) + 1)
+        elif isinstance(steps, list):
+            steps = list(np.array(steps))
+
+        for step in steps:
+            if in_sample_residuals and (self.in_sample_residuals[step] == None).any():
+                raise ValueError(
+                    (f"`forecaster.in_sample_residuals['{step}']` contains `None` values. "
+                      "Try using `fit` method with `in_sample_residuals=True` or set in "
+                      "`predict_interval()`, `predict_bootstrapping()` or "
+                      "`predict_dist()` method `in_sample_residuals=False` and use "
+                      "`out_sample_residuals` (see `set_out_sample_residuals()`).")
+                )
+
+        if not in_sample_residuals and self.out_sample_residuals is None:
+            raise ValueError(
+                ('`forecaster.out_sample_residuals` is `None`. Use '
+                 '`in_sample_residuals=True` or method `set_out_sample_residuals()` '
+                 'before `predict_interval()`, `predict_bootstrapping()` or '
+                 '`predict_dist()`.')
+            )
+
+        if not in_sample_residuals and len(set(steps) - set(self.out_sample_residuals.keys())) != 0:
+            raise ValueError(
+                (f'Not `forecaster.out_sample_residuals` for steps: {set(steps) - set(self.out_sample_residuals.keys())}. '
+                 f'Use method `set_out_sample_residuals()`.')
+            )
+        
+        if in_sample_residuals:
+            residuals = self.in_sample_residuals
+        else:
+            residuals = self.out_sample_residuals
+
+        predictions = self.predict(
+                          steps       = steps,
+                          last_window = last_window,
+                          exog        = exog 
+                      )
+
+        # Predictions must be in the transformed scale before adding residuals
+        predictions = transform_series(
+                          series            = predictions,
+                          transformer       = self.transformer_y,
+                          fit               = False,
+                          inverse_transform = False
+                      )
+        boot_predictions = pd.concat([predictions] * n_boot, axis=1)
+        boot_predictions.columns= [f"pred_boot_{i}" for i in range(n_boot)]
+
+        rng = np.random.default_rng(seed=random_state)
+        for i, step in enumerate(steps):
+            sample_residuals = rng.choice(
+                                   a       = residuals[step],
+                                   size    = n_boot,
+                                   replace = True
+                               )
+            boot_predictions.iloc[i, :] = boot_predictions.iloc[i, :] + sample_residuals
+
+        for col in boot_predictions.columns:
+            boot_predictions[col] = transform_series(
+                                        series            = boot_predictions[col],
+                                        transformer       = self.transformer_y,
+                                        fit               = False,
+                                        inverse_transform = True
+                                    )
+        
+        return boot_predictions
     
 
     def set_params(
@@ -904,13 +1087,19 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         None
         
         """
-        
+
         if isinstance(lags, dict):
             self.lags = {}
             for key in lags:
-                self.lags[key] = initialize_lags(forecaster_type=type(self), lags=lags[key])
+                self.lags[key] = initialize_lags(
+                                     forecaster_name = type(self).__name__,
+                                     lags            = lags[key]
+                                 )
         else:
-            self.lags = initialize_lags(forecaster_type=type(self), lags=lags)
+            self.lags = initialize_lags(
+                            forecaster_name = type(self).__name__, 
+                            lags            = lags
+                        )
         
         self.lags_ = self.lags
         self.max_lag = max(list(chain(*self.lags.values()))) if isinstance(self.lags, dict) else max(self.lags)
