@@ -725,8 +725,8 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
             Time series to be predicted.
         
         last_window : numpy ndarray
-            Values of the series used to create the predictors (lags) need in the 
-            first iteration of prediction (t + 1).
+            Values of the series used to create the predictors  need in the first iteration
+            of prediction (t + 1).
             
         exog : numpy ndarray, default `None`
             Exogenous variable/s included as predictor/s.
@@ -741,7 +741,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         predictions = np.full(shape=steps, fill_value=np.nan)
 
         for i in range(steps):
-            X = last_window[-self.lags].reshape(1, -1)
+            X = self.fun_predictors(y=last_window).reshape(1, -1)
             if exog is not None:
                 X = np.column_stack((X, exog[i, ].reshape(1, -1)))
             
@@ -785,8 +785,8 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
             
 
         last_window : pandas DataFrame, default `None`
-            Values of the series used to create the predictors (lags) need in the
-            first iteration of prediction (t + 1).
+            Values of the series used to create the predictors need in the first
+            iteration of prediction (t + 1).
 
             If `last_window = None`, the values stored in `self.last_window` are
             used to calculate the initial predictors, and the predictions start
@@ -919,8 +919,8 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
             Time series to be predicted. If `None` all levels will be predicted.
             
         last_window : pandas DataFrame, default `None`
-            Values of the series used to create the predictors (lags) need in the 
-            first iteration of prediction (t + 1).
+            Values of the series used to create the predictors need in the first iteration
+            of prediction (t + 1).
     
             If `last_window = None`, the values stored in `self.last_window` are
             used to calculate the initial predictors, and the predictions start
@@ -1137,8 +1137,8 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
               
             
         last_window : pandas DataFrame, default `None`
-            Values of the series used to create the predictors (lags) needed in the 
-            first iteration of prediction (t + 1).
+            Values of the series used to create the predictors need in the first iteration
+            of prediction (t + 1).
     
             If `last_window = None`, the values stored in` self.last_window` are
             used to calculate the initial predictors, and the predictions start
@@ -1251,8 +1251,8 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
               
             
         last_window : pandas DataFrame, default `None`
-            Values of the series used to create the predictors (lags) needed in the 
-            first iteration of prediction (t + 1).
+            Values of the series used to create the predictors need in the first iteration
+            of prediction (t + 1).
     
             If `last_window = None`, the values stored in` self.last_window` are
             used to calculate the initial predictors, and the predictions start
@@ -1339,32 +1339,6 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
 
         self.regressor = clone(self.regressor)
         self.regressor.set_params(**params)
-        
-        
-    def set_lags(
-        self, 
-        lags: Union[int, list, np.ndarray, range]
-    ) -> None:
-        """      
-        Set new value to the attribute `lags`.
-        Attributes `max_lag` and `window_size` are also updated.
-        
-        Parameters
-        ----------
-        lags : int, list, 1D np.array, range
-            Lags used as predictors. Index starts at 1, so lag 1 is equal to t-1.
-                `int`: include lags from 1 to `lags`.
-                `list` or `np.array`: include only lags present in `lags`.
-
-        Returns 
-        -------
-        None
-        
-        """
-        
-        self.lags = initialize_lags(type(self).__name__, lags)            
-        self.max_lag  = max(self.lags)
-        self.window_size = max(self.lags)
         
         
     def set_out_sample_residuals(

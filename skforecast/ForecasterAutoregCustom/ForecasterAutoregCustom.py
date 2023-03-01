@@ -211,7 +211,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         self.source_code_create_predictors = inspect.getsource(fun_predictors)
 
         self.weight_func, self.source_code_weight_func, _ = initialize_weights(
-            forecaster_type = type(self).__name__, 
+            forecaster_name = type(self).__name__, 
             regressor       = regressor, 
             weight_func     = weight_func, 
             series_weights  = None
@@ -510,8 +510,8 @@ class ForecasterAutoregCustom(ForecasterBase):
             Number of future steps predicted.
             
         last_window : numpy ndarray
-            Values of the series used to create the predictors (lags) need in the 
-            first iteration of prediction (t + 1).
+            Values of the series used to create the predictors need in the first iteration
+            of prediction (t + 1).
             
         exog : numpy ndarray, default `None`
             Exogenous variable/s included as predictor/s.
@@ -564,8 +564,8 @@ class ForecasterAutoregCustom(ForecasterBase):
             Number of future steps predicted.
             
         last_window : pandas Series, default `None`
-            Values of the series used to create the predictors (lags) need in the 
-            first iteration of prediction (t + 1).
+            Values of the series used to create the predictors need in the first iteration
+            of prediction (t + 1).
     
             If `last_window = None`, the values stored in `self.last_window` are
             used to calculate the initial predictors, and the predictions start
@@ -584,8 +584,10 @@ class ForecasterAutoregCustom(ForecasterBase):
         if last_window is None:
             last_window = copy(self.last_window)
 
+        last_window = last_window.iloc[-self.window_size:]
+
         check_predict_input(
-            forecaster_type  = type(self).__name__,
+            forecaster_name  = type(self).__name__,
             steps            = steps,
             fitted           = self.fitted,
             included_exog    = self.included_exog,
@@ -682,8 +684,8 @@ class ForecasterAutoregCustom(ForecasterBase):
             Number of future steps predicted.
             
         last_window : pandas Series, default `None`
-            Values of the series used to create the predictors (lags) need in the 
-            first iteration of prediction (t + 1).
+            Values of the series used to create the predictors need in the first iteration
+            of prediction (t + 1).
     
             If `last_window = None`, the values stored in `self.last_window` are
             used to calculate the initial predictors, and the predictions start
@@ -732,7 +734,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             last_window = copy(self.last_window)
 
         check_predict_input(
-            forecaster_type  = type(self).__name__,
+            forecaster_name  = type(self).__name__,
             steps            = steps,
             fitted           = self.fitted,
             included_exog    = self.included_exog,
@@ -866,8 +868,8 @@ class ForecasterAutoregCustom(ForecasterBase):
             Number of future steps predicted.
             
         last_window : pandas Series, default `None`
-            Values of the series used to create the predictors (lags) needed in the 
-            first iteration of prediction (t + 1).
+            Values of the series used to create the predictors need in the first iteration
+            of prediction (t + 1).
     
             If `last_window = None`, the values stored in` self.last_window` are
             used to calculate the initial predictors, and the predictions start
@@ -963,8 +965,8 @@ class ForecasterAutoregCustom(ForecasterBase):
             A distribution object from scipy.stats.
             
         last_window : pandas Series, default `None`
-            Values of the series used to create the predictors (lags) needed in the 
-            first iteration of prediction (t + 1).
+            Values of the series used to create the predictors need in the first iteration
+            of prediction (t + 1).
     
             If `last_window = None`, the values stored in` self.last_window` are
             used to calculate the initial predictors, and the predictions start
