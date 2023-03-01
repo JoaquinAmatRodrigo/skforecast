@@ -25,7 +25,7 @@ optional_dependencies = {
 
 
 def initialize_lags(
-    forecaster_type: str,
+    forecaster_name: str,
     lags: Any
 ) -> np.ndarray:
     """
@@ -33,7 +33,7 @@ def initialize_lags(
     
     Parameters
     ----------
-    forecaster_type : str
+    forecaster_name : str
         Forcaster type. ForecasterAutoreg, ForecasterAutoregCustom, 
         ForecasterAutoregDirect, ForecasterAutoregMultiSeries, 
         ForecasterAutoregMultiVariate.
@@ -66,7 +66,7 @@ def initialize_lags(
     elif isinstance(lags, np.ndarray):
         lags = lags
     else:
-        if not forecaster_type == 'ForecasterAutoregMultiVariate':
+        if not forecaster_name == 'ForecasterAutoregMultiVariate':
             raise TypeError(
                 '`lags` argument must be an int, 1d numpy ndarray, range or list. '
                 f"Got {type(lags)}."
@@ -81,7 +81,7 @@ def initialize_lags(
 
 
 def initialize_weights(
-    forecaster_type: str,
+    forecaster_name: str,
     regressor: object,
     weight_func: Union[callable, dict],
     series_weights: dict
@@ -93,7 +93,7 @@ def initialize_weights(
     
     Parameters
     ----------
-    forecaster_type : str
+    forecaster_name : str
         Forcaster type: ForecasterAutoreg, ForecasterAutoregCustom, 
         ForecasterAutoregDirect, ForecasterAutoregMultiSeries, 
         ForecasterAutoregMultiVariate, ForecasterAutoregMultiSeriesCustom.
@@ -124,12 +124,14 @@ def initialize_weights(
     source_code_weight_func = None
 
     if weight_func is not None:
-        if not isinstance(weight_func, Callable) and \
-        not forecaster_type in ['ForecasterAutoregMultiSeries', 'ForecasterAutoregMultiSeriesCustom']:
-            raise TypeError(
-                f"Argument `weight_func` must be a callable. Got {type(weight_func)}."
-            )
-        elif not isinstance(weight_func, (Callable, dict)) and forecaster_type == 'ForecasterAutoregMultiSeries':
+
+        if forecaster_name in ['ForecasterAutoregMultiSeries', 'ForecasterAutoregMultiSeriesCustom']:
+            if not isinstance(weight_func, (Callable, dict)):
+                raise TypeError(
+                    f"Argument `weight_func` must be a callable or a dict of "
+                    f"callables. Got {type(weight_func)}."
+                )
+        elif not isinstance(weight_func, Callable):
             raise TypeError(
                 f"Argument `weight_func` must be a callable or a dict of "
                 f"callables. Got {type(weight_func)}."
@@ -284,7 +286,7 @@ def check_interval(
 
 
 def check_predict_input(
-    forecaster_type: str,
+    forecaster_name: str,
     steps: int,
     fitted: bool,
     included_exog: bool,
@@ -309,7 +311,7 @@ def check_predict_input(
 
     Parameters
     ----------
-    forecaster_type : str
+    forecaster_name : str
         Forcaster type: ForecasterAutoreg, ForecasterAutoregCustom, 
         ForecasterAutoregDirect, ForecasterAutoregMultiSeries, 
         ForecasterAutoregMultiVariate, ForecasterAutoregMultiSeriesCustom.
@@ -401,7 +403,7 @@ def check_predict_input(
     if interval is not None or alpha is not None:
         check_interval(interval=interval, alpha=alpha)
     
-    if forecaster_type in ['ForecasterAutoregMultiSeries', 'ForecasterAutoregMultiSeriesCustom']:
+    if forecaster_name in ['ForecasterAutoregMultiSeries', 'ForecasterAutoregMultiSeriesCustom']:
         if levels is not None and not isinstance(levels, (str, list)):
             raise TypeError(
                 f'`levels` must be a `list` of column names, a `str` of a column name or `None`.'
@@ -425,14 +427,14 @@ def check_predict_input(
         
     # Checks last_window
     # Check last_window type (pd.Series or pd.DataFrame according to forecaster)
-    if forecaster_type in ['ForecasterAutoregMultiSeries', 'ForecasterAutoregMultiVariate',
+    if forecaster_name in ['ForecasterAutoregMultiSeries', 'ForecasterAutoregMultiVariate',
                            'ForecasterAutoregMultiSeriesCustom']:
         if not isinstance(last_window, pd.DataFrame):
             raise TypeError(
                 f'`last_window` must be a pandas DataFrame. Got {type(last_window)}.'
             )
         
-        if forecaster_type in ['ForecasterAutoregMultiSeries', 'ForecasterAutoregMultiSeriesCustom'] and \
+        if forecaster_name in ['ForecasterAutoregMultiSeries', 'ForecasterAutoregMultiSeriesCustom'] and \
             len(set(levels) - set(last_window.columns)) != 0:
             raise ValueError(
                 (f'`last_window` must contain a column(s) named as the level(s) to be predicted.\n'
@@ -440,7 +442,7 @@ def check_predict_input(
                  f'    `last_window` columns : {list(last_window.columns)}.')
             )
         
-        if forecaster_type == 'ForecasterAutoregMultiVariate' and \
+        if forecaster_name == 'ForecasterAutoregMultiVariate' and \
             (series_col_names != list(last_window.columns)):
             raise ValueError(
                 (f'`last_window` columns must be the same as `series` column names.\n'
@@ -531,7 +533,7 @@ def check_predict_input(
             )
 
     # Checks ForecasterSarimax
-    if forecaster_type == 'ForecasterSarimax':
+    if forecaster_name == 'ForecasterSarimax':
         # Check last_window_exog type, len, nulls and index (type and freq)
         if last_window_exog is not None:
             if not included_exog:

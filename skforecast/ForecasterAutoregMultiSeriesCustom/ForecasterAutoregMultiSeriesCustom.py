@@ -279,7 +279,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         self.source_code_create_predictors = inspect.getsource(fun_predictors)
 
         self.weight_func, self.source_code_weight_func, self.series_weights = initialize_weights(
-            forecaster_type = type(self).__name__, 
+            forecaster_name = type(self).__name__, 
             regressor       = regressor, 
             weight_func     = weight_func, 
             series_weights  = series_weights
@@ -802,7 +802,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
             last_window = deepcopy(self.last_window)
         
         check_predict_input(
-            forecaster_type  = type(self).__name__,
+            forecaster_name  = type(self).__name__,
             steps            = steps,
             fitted           = self.fitted,
             included_exog    = self.included_exog,
@@ -982,7 +982,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
             last_window = deepcopy(self.last_window)
 
         check_predict_input(
-            forecaster_type  = type(self).__name__,
+            forecaster_name  = type(self).__name__,
             steps            = steps,
             fitted           = self.fitted,
             included_exog    = self.included_exog,
