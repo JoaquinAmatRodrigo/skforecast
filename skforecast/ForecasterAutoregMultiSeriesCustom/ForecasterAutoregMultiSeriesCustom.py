@@ -50,12 +50,16 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         An instance of a regressor or pipeline compatible with the scikit-learn API.
         
     fun_predictors : Callable
-        Function that takes a numpy ndarray as a window of values as input and returns
-        a numpy ndarray with the predictors associated with that window. The same
+        Function that receive as a window of values as input (numpy ndarray) and returns
+        another numpy ndarray with the predictors associated with that window. The same
         function is applied to all series.
         
     window_size : int
         Size of the window needed by `fun_predictors` to create the predictors.
+
+    name_predictors : list, default `None`
+        Name of the predictors returned by `fun_predictors`. If `None`, predictors are
+        named using the prefix 'custom_predictor_'.
 
     transformer_series : transformer (preprocessor) or dict of transformers, default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
@@ -91,16 +95,20 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
     regressor : regressor or pipeline compatible with the scikit-learn API
         An instance of a regressor or pipeline compatible with the scikit-learn API.
         
-    create_predictors : Callable
-        Function that takes a numpy ndarray as a window of values as input and returns
-        a numpy ndarray with the predictors associated with that window. The same
+    fun_predictors : Callable
+        Function that receive as a window of values as input (numpy ndarray) and returns
+        another numpy ndarray with the predictors associated with that window. The same
         function is applied to all series.
 
-    source_code_create_predictors : str
+    source_code_fun_predictors : str
         Source code of the custom function used to create the predictors.
         
     window_size : int
         Size of the window needed by `fun_predictors` to create the predictors.
+
+    name_predictors : list, default `None`
+        Name of the predictors returned by `fun_predictors`. If `None`, predictors are
+        named using the prefix 'custom_predictor_'.
 
     transformer_series : transformer (preprocessor) or dict of transformers, default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
@@ -230,6 +238,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         regressor: object,
         fun_predictors: Callable, 
         window_size: int,
+        name_predictors: Optional[list]=None,
         transformer_series: Optional[Union[object, dict]]=None,
         transformer_exog: Optional[object]=None,
         weight_func: Optional[Union[Callable, dict]]=None,
@@ -237,8 +246,8 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
     ) -> None:
         
         self.regressor                     = regressor
-        self.create_predictors             = fun_predictors
-        self.source_code_create_predictors = None
+        self.fun_predictors                = fun_predictors
+        self.source_code_fun_predictors    = None
         self.window_size                   = window_size
         self.transformer_series            = transformer_series
         self.transformer_series_           = None
@@ -276,7 +285,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
                 f'Argument `fun_predictors` must be a Callable. Got {type(fun_predictors)}.'
             )
     
-        self.source_code_create_predictors = inspect.getsource(fun_predictors)
+        self.source_code_fun_predictors = inspect.getsource(fun_predictors)
 
         self.weight_func, self.source_code_weight_func, self.series_weights = initialize_weights(
             forecaster_name = type(self).__name__, 
@@ -305,7 +314,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
             f"{type(self).__name__} \n"
             f"{'=' * len(type(self).__name__)} \n"
             f"Regressor: {self.regressor} \n"
-            f"Predictors created with function: {self.create_predictors.__name__} \n"
+            f"Predictors created with function: {self.fun_predictors.__name__} \n"
             f"Transformer for series: {self.transformer_series} \n"
             f"Transformer for exog: {self.transformer_exog} \n"
             f"Window size: {self.window_size} \n"
@@ -407,7 +416,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
                 train_index = np.arange(j, self.window_size + j)
                 test_index  = self.window_size + j
 
-                temp_X_train.append(self.create_predictors(y=y_values[train_index]))
+                temp_X_train.append(self.fun_predictors(y=y_values[train_index]))
                 temp_y_train.append(y_values[test_index])
 
             X_train_values = np.vstack(temp_X_train)
