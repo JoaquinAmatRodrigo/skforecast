@@ -28,6 +28,10 @@ All notable changes to this project will be documented in this file.
 
 + Remove engine `'skopt'` in `bayesian_search_forecaster` in favor of engine `'optuna'`. To continue using it, use skforecast 0.6.0.
 
++ `in_sample_residuals` and `out_sample_residuals` are stored as numpy ndarrays instead of pandas series.
+
++ In `ForecasterAutoregMultiSeries`, `set_out_sample_residuals()` is now expecting a `dict` for the `residuals` argument instead of a pandas DataFrame.
+
 + Remove the `scikit-optimize` dependency.
 
 **Fixed**
