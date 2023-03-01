@@ -50,8 +50,9 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         An instance of a regressor or pipeline compatible with the scikit-learn API.
         
     fun_predictors : Callable
-        Function that takes a numpy ndarray as a window of values as input and  
-        returns a numpy ndarray with the predictors associated with that window.
+        Function that takes a numpy ndarray as a window of values as input and returns
+        a numpy ndarray with the predictors associated with that window. The same
+        function is applied to all series.
         
     window_size : int
         Size of the window needed by `fun_predictors` to create the predictors.
@@ -69,15 +70,14 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         preprocessing API. The transformation is applied to `exog` before training the
         forecaster. `inverse_transform` is not available when using ColumnTransformers.
 
-    weight_func : callable, dict, default `None`
+    weight_func : Callable, dict, default `None`
         Function that defines the individual weights for each sample based on the
         index. For example, a function that assigns a lower weight to certain dates.
-        If dict {'series_column_name' : callable} a different function can be
+        If dict {'series_column_name' : Callable} a different function can be
         used for each series, a weight of 1 is given to all series not present
         in `weight_func`. Ignored if `regressor` does not have the argument 
         `sample_weight` in its `fit` method. See Notes section for more details 
-        on the use of the weights.
-        **New in version 0.6.0**
+        on the use of the weights. 
 
     series_weights : dict, default `None`
         Weights associated with each series {'series_column_name' : float}. It is only
@@ -85,7 +85,6 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         If `series_weights` is provided, a weight of 1 is given to all series not present
         in `series_weights`. If `None`, all levels have the same weight. See Notes section
         for more details on the use of the weights.
-        **New in version 0.6.0**
     
     Attributes
     ----------
@@ -93,8 +92,9 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         An instance of a regressor or pipeline compatible with the scikit-learn API.
         
     create_predictors : Callable
-        Function that takes a numpy ndarray as a window of values as input and  
-        returns a numpy ndarray with the predictors associated with that window.
+        Function that takes a numpy ndarray as a window of values as input and returns
+        a numpy ndarray with the predictors associated with that window. The same
+        function is applied to all series.
 
     source_code_create_predictors : str
         Source code of the custom function used to create the predictors.
@@ -119,24 +119,21 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         preprocessing API. The transformation is applied to `exog` before training the
         forecaster. `inverse_transform` is not available when using ColumnTransformers.
 
-    weight_func : callable, dict, default `None`
+    weight_func : Callable, dict, default `None`
         Function that defines the individual weights of each sample based on the
         index. For example, a function that assigns a lower weight to certain dates.
-        If dict {'series_column_name': callable} a different function can be
+        If dict {'series_column_name': Callable} a different function can be
         used for each series, a weight of 1 is given to all series not present
         in `weight_func`. Ignored if `regressor` does not have the argument 
         `sample_weight` in its `fit` method. See Notes section for more details 
         on the use of the weights.
-        **New in version 0.6.0**
 
     weight_func_ : dict
         Dictionary with the `weight_func` for each series. It is created cloning the objects
         in `weight_func` and is used internally to avoid overwriting.
-        **New in version 0.6.0**
 
     source_code_weight_func : str, dict
         Source code of the custom function(s) used to create weights.
-        **New in version 0.6.0**
 
     series_weights : dict, default `None`
         Weights associated with each series {'series_column_name': float}. It is only
@@ -144,12 +141,10 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         If `series_weights` is provided, a weight of 1 is given to all series not present
         in `series_weights`. If `None`, all levels have the same weight. See Notes section
         for more details on the use of the weights.
-        **New in version 0.6.0**
 
     series_weights_ : dict
         Weights associated with each series.It is created as a clone of `series_weights`
         and is used internally to avoid overwriting.
-        **New in version 0.6.0**
         
     window_size : int
         Size of the window needed by `fun_predictors` to create the predictors.
@@ -233,11 +228,11 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
     def __init__(
         self,
         regressor: object,
-        fun_predictors: callable, 
+        fun_predictors: Callable, 
         window_size: int,
         transformer_series: Optional[Union[object, dict]]=None,
         transformer_exog: Optional[object]=None,
-        weight_func: Optional[Union[callable, dict]]=None,
+        weight_func: Optional[Union[Callable, dict]]=None,
         series_weights: Optional[dict]=None
     ) -> None:
         
@@ -278,7 +273,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
 
         if not callable(fun_predictors):
             raise TypeError(
-                f'Argument `fun_predictors` must be a callable. Got {type(fun_predictors)}.'
+                f'Argument `fun_predictors` must be a Callable. Got {type(fun_predictors)}.'
             )
     
         self.source_code_create_predictors = inspect.getsource(fun_predictors)
@@ -404,7 +399,6 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
 
             y_values, y_index = preprocess_y(y=y)
 
-            #------
             temp_X_train  = []
             temp_y_train  = []
 
@@ -418,9 +412,6 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
 
             X_train_values = np.vstack(temp_X_train)
             y_train_values = np.array(temp_y_train)
-            #X_train_col_names = [f"custom_predictor_{i}" for i in range(temp_X_train.shape[1])]
-
-            #----
 
             if i == 0:
                 X_train = X_train_values
@@ -782,7 +773,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
 
         levels : str, list, default `None`
             Time series to be predicted. If `None` all levels will be predicted.
-            **New in version 0.6.0**
+            
 
         last_window : pandas DataFrame, default `None`
             Values of the series used to create the predictors (lags) need in the
@@ -1134,7 +1125,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
 
         levels : str, list, default `None`
             Time series to be predicted. If `None` all levels will be predicted.  
-            **New in version 0.6.0**  
+              
             
         last_window : pandas DataFrame, default `None`
             Values of the series used to create the predictors (lags) needed in the 
@@ -1248,7 +1239,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
 
         levels : str, list, default `None`
             Time series to be predicted. If `None` all levels will be predicted.  
-            **New in version 0.6.0**  
+              
             
         last_window : pandas DataFrame, default `None`
             Values of the series used to create the predictors (lags) needed in the 
