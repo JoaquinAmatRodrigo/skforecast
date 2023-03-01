@@ -885,8 +885,8 @@ def transform_series(
     if fit and hasattr(transformer, 'fit'):
         transformer.fit(data)
 
-    # If argument feature_names_in_ is overwritten to allow using the transformer on
-    # other series than those that were passed during fit.
+    # If argument feature_names_in_ exits, is overwritten to allow using the 
+    # transformer on other series than those that were passed during fit.
     if hasattr(transformer, 'feature_names_in_') and transformer.feature_names_in_[0] != data.columns[0]:
         transformer = deepcopy(transformer)
         transformer.feature_names_in_ = np.array([data.columns[0]], dtype=object)
@@ -902,18 +902,18 @@ def transform_series(
     
     if isinstance(values_transformed, np.ndarray) and values_transformed.shape[1] == 1:
         data_transformed = pd.Series(
-                                 data  = values_transformed.flatten(),
-                                 index = data.index,
-                                 name  = data.columns[0]
-                             )
+                               data  = values_transformed.flatten(),
+                               index = data.index,
+                               name  = data.columns[0]
+                           )
     elif isinstance(values_transformed, pd.DataFrame) and values_transformed.shape[1] == 1:
         data_transformed = values_transformed.squeeze()
     else:
         data_transformed = pd.DataFrame(
-                                 data    = values_transformed,
-                                 index   = data.index,
-                                 columns = transformer.get_feature_names_out()
-                             )
+                               data    = values_transformed,
+                               index   = data.index,
+                               columns = transformer.get_feature_names_out()
+                           )
 
     return data_transformed
 

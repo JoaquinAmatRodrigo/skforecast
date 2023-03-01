@@ -22,9 +22,10 @@ from tqdm import tqdm
 from functools import partialmethod
 tqdm.__init__ = partialmethod(tqdm.__init__, disable=True) # hide progress bar
 
+# This line skips all the tests in the file
 pytestmark = pytest.mark.skip(reason="`_bayesian_search_skopt` is deprecated since skforecast 0.7.0")
 
-# Fixtures _backtesting_forecaster_refit Series (skforecast==0.4.2)
+# Fixtures
 # np.random.seed(123)
 # y = np.random.rand(50)
 
