@@ -526,9 +526,8 @@ def check_predict_input(
         expected_index = expand_index(last_window.index, 1)[0]
         if expected_index != exog.index[0]:
             raise ValueError(
-                (f'To make predictions `exog` must start one step ahead of `last_window` end.\n'
+                (f'`exog` must start one step ahead of `last_window` end.\n'
                  f'    `last_window` ends at : {last_window.index[-1]}.\n'
-                 f'    Expected index        : {expected_index}.\n'
                  f'    `exog` starts at      : {exog.index[0]}.')
             )
 
