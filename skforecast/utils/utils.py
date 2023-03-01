@@ -94,9 +94,9 @@ def initialize_weights(
     Parameters
     ----------
     forecaster_type : str
-        Forcaster type. ForecasterAutoreg, ForecasterAutoregCustom, 
+        Forcaster type: ForecasterAutoreg, ForecasterAutoregCustom, 
         ForecasterAutoregDirect, ForecasterAutoregMultiSeries, 
-        ForecasterAutoregMultiVariate.
+        ForecasterAutoregMultiVariate, ForecasterAutoregMultiSeriesCustom.
 
     regressor : regressor or pipeline compatible with the scikit-learn API
         Regressor of the forecaster.
@@ -124,7 +124,8 @@ def initialize_weights(
     source_code_weight_func = None
 
     if weight_func is not None:
-        if not isinstance(weight_func, Callable) and not forecaster_type == 'ForecasterAutoregMultiSeries':
+        if not isinstance(weight_func, Callable) and \
+        not forecaster_type in ['ForecasterAutoregMultiSeries', 'ForecasterAutoregMultiSeriesCustom']:
             raise TypeError(
                 f"Argument `weight_func` must be a callable. Got {type(weight_func)}."
             )
@@ -309,9 +310,9 @@ def check_predict_input(
     Parameters
     ----------
     forecaster_type : str
-        Forcaster type. ForecasterAutoreg, ForecasterAutoregCustom, 
+        Forcaster type: ForecasterAutoreg, ForecasterAutoregCustom, 
         ForecasterAutoregDirect, ForecasterAutoregMultiSeries, 
-        ForecasterAutoregMultiVariate.
+        ForecasterAutoregMultiVariate, ForecasterAutoregMultiSeriesCustom.
 
     steps : int
         Number of future steps predicted.
@@ -363,11 +364,12 @@ def check_predict_input(
         `ForecasterAutoregMultiVariate`).
             
     levels : str, list, default `None`
-        Time series to be predicted (`ForecasterAutoregMultiSeries`).
+        Time series to be predicted (`ForecasterAutoregMultiSeries` and
+        `ForecasterAutoregMultiSeriesCustom`).
 
     series_col_names : list, default `None`
-        Names of the columns used during fit (`ForecasterAutoregMultiSeries` and 
-        `ForecasterAutoregMultiVariate`).
+        Names of the columns used during fit (`ForecasterAutoregMultiSeries`, 
+        `ForecasterAutoregMultiVariate` and `ForecasterAutoregMultiSeriesCustom`).
     
     """
 
@@ -399,7 +401,7 @@ def check_predict_input(
     if interval is not None or alpha is not None:
         check_interval(interval=interval, alpha=alpha)
     
-    if forecaster_type == 'ForecasterAutoregMultiSeries':
+    if forecaster_type in ['ForecasterAutoregMultiSeries', 'ForecasterAutoregMultiSeriesCustom']:
         if levels is not None and not isinstance(levels, (str, list)):
             raise TypeError(
                 f'`levels` must be a `list` of column names, a `str` of a column name or `None`.'
@@ -423,13 +425,14 @@ def check_predict_input(
         
     # Checks last_window
     # Check last_window type (pd.Series or pd.DataFrame according to forecaster)
-    if forecaster_type in ['ForecasterAutoregMultiSeries', 'ForecasterAutoregMultiVariate']:
+    if forecaster_type in ['ForecasterAutoregMultiSeries', 'ForecasterAutoregMultiVariate',
+                           'ForecasterAutoregMultiSeriesCustom']:
         if not isinstance(last_window, pd.DataFrame):
             raise TypeError(
                 f'`last_window` must be a pandas DataFrame. Got {type(last_window)}.'
             )
         
-        if forecaster_type == 'ForecasterAutoregMultiSeries' and \
+        if forecaster_type in ['ForecasterAutoregMultiSeries', 'ForecasterAutoregMultiSeriesCustom'] and \
             len(set(levels) - set(last_window.columns)) != 0:
             raise ValueError(
                 (f'`last_window` must contain a column(s) named as the level(s) to be predicted.\n'
