@@ -141,7 +141,7 @@ def initialize_weights(
         else:
             source_code_weight_func = inspect.getsource(weight_func)
 
-        if 'sample_weight' not in inspect.getfullargspec(regressor.fit)[0]:
+        if 'sample_weight' not in inspect.signature(regressor.fit).parameters:
             warnings.warn(
                 (f'Argument `weight_func` is ignored since regressor {regressor} '
                  f'does not accept `sample_weight` in its `fit` method.')
