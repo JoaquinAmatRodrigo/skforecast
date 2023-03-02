@@ -20,7 +20,6 @@ import inspect
 
 import skforecast
 from ..ForecasterBase import ForecasterBase
-from ..utils import initialize_lags
 from ..utils import initialize_weights
 from ..utils import check_y
 from ..utils import check_exog
@@ -709,7 +708,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
             residuals = y_train - self.regressor.predict(X_train)
 
             for serie in series.columns:
-                in_sample_residuals[serie] = residuals.values[X_train[serie] == 1.]
+                in_sample_residuals[serie] = residuals.loc[X_train[serie] == 1.].to_numpy()
                 if len(in_sample_residuals[serie]) > 1000:
                     # Only up to 1000 residuals are stored
                     rng = np.random.default_rng(seed=123)
@@ -806,10 +805,9 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
 
         levels : str, list, default `None`
             Time series to be predicted. If `None` all levels will be predicted.
-            
 
         last_window : pandas DataFrame, default `None`
-            Values of the series used to create the predictors need in the first
+            Values of the series used to create the predictors needed in the first
             iteration of prediction (t + 1).
 
             If `last_window = None`, the values stored in `self.last_window` are
@@ -945,8 +943,8 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
             Time series to be predicted. If `None` all levels will be predicted.
             
         last_window : pandas DataFrame, default `None`
-            Values of the series used to create the predictors need in the first iteration
-            of prediction (t + 1).
+            Values of the series used to create the predictors needed in the first
+            iteration of prediction (t + 1).
     
             If `last_window = None`, the values stored in `self.last_window` are
             used to calculate the initial predictors, and the predictions start
@@ -989,32 +987,45 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         elif isinstance(levels, str):
             levels = [levels]
 
-        for level in levels:
-            if in_sample_residuals and (self.in_sample_residuals[level] == None).any():
+        if in_sample_residuals:
+            if not set(levels).issubset(set(self.in_sample_residuals.keys())):
                 raise ValueError(
-                    (f"`forecaster.in_sample_residuals['{level}']` contains `None` values. "
-                      "Try using `fit` method with `in_sample_residuals=True` or set in "
-                      "`predict_interval()`, `predict_bootstrapping()` or "
-                      "`predict_dist()` method `in_sample_residuals=False` and use "
-                      "`out_sample_residuals` (see `set_out_sample_residuals()`).")
+                    (f"Not `forecaster.in_sample_residuals` for levels: "
+                     f"{set(levels) - set(self.in_sample_residuals.keys())}.")
                 )
-
-        if not in_sample_residuals and self.out_sample_residuals is None:
-            raise ValueError(
-                ('`forecaster.out_sample_residuals` is `None`. Use '
-                 '`in_sample_residuals=True` or method `set_out_sample_residuals()` '
-                 'before `predict_interval()`, `predict_bootstrapping()` or '
-                 '`predict_dist()`.')
-            )
-
-        if not in_sample_residuals and len(set(levels) - set(self.out_sample_residuals.keys())) != 0:
-            raise ValueError(
-                (f'Not `forecaster.out_sample_residuals` for levels: {set(levels) - set(self.out_sample_residuals.keys())}. '
-                 f'Use method `set_out_sample_residuals()`.')
-            )
+            residuals_levels = self.in_sample_residuals
+        else:
+            if self.out_sample_residuals is None:
+                raise ValueError(
+                    ("`forecaster.out_sample_residuals` is `None`. Use "
+                     "`in_sample_residuals=True` or method `set_out_sample_residuals()` "
+                     "before `predict_interval()`, `predict_bootstrapping()` or "
+                     "`predict_dist()`.")
+                )
+            else:
+                if not set(levels).issubset(set(self.out_sample_residuals.keys())):
+                    raise ValueError(
+                        (f"Not `forecaster.out_sample_residuals` for levels: "
+                         f"{set(levels) - set(self.out_sample_residuals.keys())}. "
+                         f"Use method `set_out_sample_residuals()`.")
+                    )
+            residuals_levels = self.out_sample_residuals
+                
+        check_residuals = 'forecaster.in_sample_residuals' if in_sample_residuals else 'forecaster.out_sample_residuals'
+        for level in levels:
+            if residuals_levels[level] is None:
+                raise ValueError(
+                    (f"forecaster residuals for level '{level}' are `None`. Check `{check_residuals}`.")
+                )
+            elif (residuals_levels[level] == None).any():
+                raise ValueError(
+                    (f"forecaster residuals for level '{level}' contains `None` values. Check `{check_residuals}`.")
+                )
 
         if last_window is None:
             last_window = deepcopy(self.last_window)
+
+        last_window = last_window.iloc[-self.window_size:, ]
 
         check_predict_input(
             forecaster_name  = type(self).__name__,
@@ -1080,10 +1091,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
             rng = np.random.default_rng(seed=random_state)
             seeds = rng.integers(low=0, high=10000, size=n_boot)
 
-            if in_sample_residuals:
-                residuals = self.in_sample_residuals[level]
-            else:
-                residuals = self.out_sample_residuals[level]
+            residuals = residuals_levels[level]
 
             for i in range(n_boot):
                 # In each bootstraping iteration the initial last_window and exog 
@@ -1160,11 +1168,10 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
 
         levels : str, list, default `None`
             Time series to be predicted. If `None` all levels will be predicted.  
-              
             
         last_window : pandas DataFrame, default `None`
-            Values of the series used to create the predictors need in the first iteration
-            of prediction (t + 1).
+            Values of the series used to create the predictors needed in the first
+            iteration of prediction (t + 1).
     
             If `last_window = None`, the values stored in` self.last_window` are
             used to calculate the initial predictors, and the predictions start
@@ -1274,11 +1281,10 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
 
         levels : str, list, default `None`
             Time series to be predicted. If `None` all levels will be predicted.  
-              
             
         last_window : pandas DataFrame, default `None`
-            Values of the series used to create the predictors need in the first iteration
-            of prediction (t + 1).
+            Values of the series used to create the predictors needed in the first
+            re of prediction (t + 1).
     
             If `last_window = None`, the values stored in` self.last_window` are
             used to calculate the initial predictors, and the predictions start
@@ -1346,7 +1352,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
     
     def set_params(
         self, 
-        **params: dict
+        params: dict
     ) -> None:
         """
         Set new values to the parameters of the scikit learn model stored in the
@@ -1369,7 +1375,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         
     def set_out_sample_residuals(
         self, 
-        residuals: pd.DataFrame,
+        residuals: dict,
         append: bool=True,
         transform: bool=True,
         random_state: int=123
@@ -1381,9 +1387,10 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         
         Parameters
         ----------
-        residuals : pandas DataFrame
-            Values of residuals. If len(residuals) > 1000, only a random sample
-            of 1000 values are stored. Columns must be the same as `levels`.
+        residuals : dict
+            Dictionary of numpy ndarrays with the residuals of each level in the
+            form {level: residuals}. If len(residuals) > 1000, only a random 
+            sample of 1000 values are stored. Keys must be the same as `levels`.
             
         append : bool, default `True`
             If `True`, new residuals are added to the once already stored in the
@@ -1403,9 +1410,11 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
 
         """
 
-        if not isinstance(residuals, pd.DataFrame):
+        if not isinstance(residuals, dict) or not all(isinstance(x, np.ndarray) for x in residuals.values()):
             raise TypeError(
-                f"`residuals` argument must be a pandas DataFrame. Got {type(residuals)}."
+                f"`residuals` argument must be a dict of numpy ndarrays in the form "
+                "`{level: residuals}`. " 
+                f"Got {type(residuals)}."
             )
 
         if not self.fitted:
@@ -1414,64 +1423,64 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
                  "arguments before using `set_out_sample_residuals()`.")
             )
         
-        out_sample_residuals = {}
+        if self.out_sample_residuals is None:
+            self.out_sample_residuals = {level: None for level in self.series_col_names}
 
-        for level in residuals.columns:
+        if not set(self.out_sample_residuals.keys()).issubset(set(residuals.keys())):
+            warnings.warn(
+                f"""
+                Only residuals of levels 
+                {set(self.out_sample_residuals.keys()).intersection(set(residuals.keys()))} 
+                are updated.
+                """
+            )
 
-            if not level in self.series_col_names:
-                continue
-            else:      
+        residuals = {key: value for key, value in residuals.items() if key in self.out_sample_residuals.keys()}
 
-                residuals_level = residuals[level]
+        for level, value in residuals.items():
 
-                if not transform and self.transformer_series_[level] is not None:
-                    warnings.warn(
-                        ('Argument `transform` is set to `False` but forecaster was trained '
-                         f'using a transformer {self.transformer_series_[level]} for level {level}. '
-                         'Ensure that the new residuals are already transformed or set `transform=True`.')
-                    )
+            residuals_level = value
 
-                if transform and self.transformer_series_ and self.transformer_series_[level]:
-                    warnings.warn(
-                        ('Residuals will be transformed using the same transformer used '
-                         f'when training the forecaster for level {level} : ({self.transformer_series_[level]}). '
-                         'Ensure that the new residuals are on the same scale as the '
-                         'original time series. ')
-                    )
+            if not transform and self.transformer_series_[level] is not None:
+                warnings.warn(
+                    ("Argument `transform` is set to `False` but forecaster was "
+                    f"trained using a transformer {self.transformer_series_[level]} "
+                    f"for level {level}. Ensure that the new residuals are "
+                     "already transformed or set `transform=True`.")
+                )
 
-                    residuals_level = transform_series(
-                                          series            = residuals_level,
-                                          transformer       = self.transformer_series_[level],
-                                          fit               = False,
-                                          inverse_transform = False
-                                      )
+            if transform and self.transformer_series_ and self.transformer_series_[level]:
+                warnings.warn(
+                    ("Residuals will be transformed using the same transformer used "
+                    f"when training the forecaster for level {level} : "
+                    f"({self.transformer_series_[level]}). Ensure that the new "
+                     "residuals are on the same scale as the original time series.")
+                )
+                residuals_level = transform_series(
+                                      series            = pd.Series(residuals_level, name='residuals'),
+                                      transformer       = self.transformer_series_[level],
+                                      fit               = False,
+                                      inverse_transform = False
+                                  ).to_numpy()
 
-                if len(residuals_level) > 1000:
-                    rng = np.random.default_rng(seed=random_state)
-                    residuals_level = rng.choice(a=residuals_level, size=1000, replace=False)
-        
-                if append and self.out_sample_residuals is not None:
+            if len(residuals_level) > 1000:
+                rng = np.random.default_rng(seed=random_state)
+                residuals_level = rng.choice(a=residuals_level, size=1000, replace=False)
+    
+            if append and self.out_sample_residuals[level] is not None:
+                free_space = max(0, 1000 - len(self.out_sample_residuals[level]))
+                if len(residuals_level) < free_space:
+                    residuals_level = np.hstack((
+                                            self.out_sample_residuals[level],
+                                            residuals_level
+                                        ))
+                else:
+                    residuals_level = np.hstack((
+                                            self.out_sample_residuals[level],
+                                            residuals_level[:free_space]
+                                        ))
 
-                    if not level in self.out_sample_residuals.keys():
-                        raise ValueError(
-                            f'{level} does not exists in `forecaster.out_sample_residuals` keys: {list(self.out_sample_residuals.keys())}'
-                        )
-
-                    free_space = max(0, 1000 - len(self.out_sample_residuals[level]))
-                    if len(residuals_level) < free_space:
-                        residuals_level = np.hstack((
-                                              self.out_sample_residuals[level],
-                                              residuals_level
-                                          ))
-                    else:
-                        residuals_level = np.hstack((
-                                              self.out_sample_residuals[level],
-                                              residuals_level[:free_space]
-                                          ))
-
-                out_sample_residuals[level] = np.array(residuals_level)
-
-        self.out_sample_residuals = out_sample_residuals
+            self.out_sample_residuals[level] = residuals_level
 
     
     def get_feature_importance(
