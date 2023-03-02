@@ -26,7 +26,7 @@ All notable changes to this project will be documented in this file.
 
 + Remove `levels_weights` argument in `grid_search_forecaster_multiseries` and `random_search_forecaster_multiseries`, deprecated since version 0.6.0. Use `series_weights` and `weights_func` when creating the forecaster instead.
 
-+  Attributes `create_predictors` and `source_code_create_predictors` renamed to `fun_predictors` and `source_code_fun_predictors` in `ForecasterAutoregCustom`.
++  Attributes `create_predictors` and `source_code_create_predictors` renamed to `fun_predictors` and `source_code_fun_predictors` in `ForecasterAutoregCustom`. Old names will be removed in version 0.8.0. 
 
 **Fixed**
 
