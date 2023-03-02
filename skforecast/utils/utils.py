@@ -880,6 +880,9 @@ def transform_series(
     if transformer is None:
         return series
 
+    if series.name is None:
+        series.name = 'no_name'
+        
     data = series.to_frame()
 
     if fit and hasattr(transformer, 'fit'):
