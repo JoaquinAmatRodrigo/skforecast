@@ -6,7 +6,11 @@ import numpy as np
 import pandas as pd
 from skforecast.ForecasterAutoregDirect import ForecasterAutoregDirect
 from sklearn.linear_model import LinearRegression
+from sklearn.exceptions import NotFittedError
 from sklearn.preprocessing import StandardScaler
+
+# Fixtures
+y = pd.Series(np.arange(15))
 
 
 @pytest.mark.parametrize("residuals", [[1, 2, 3], {1: [1,2,3,4]}], 
@@ -25,16 +29,33 @@ def test_set_out_sample_residuals_TypeError_when_residuals_is_not_a_dict_of_nump
         forecaster.set_out_sample_residuals(residuals=residuals)
 
 
+def test_set_out_sample_residuals_NotFittedError_when_forecaster_not_fitted():
+    """
+    Test NotFittedError is raised when forecaster is not fitted.
+    """
+    forecaster = ForecasterAutoregDirect(LinearRegression(fit_intercept=True), lags=3, steps=2)
+    residuals = {1: np.array([1, 2, 3, 4, 5]), 
+                 2: np.array([1, 2, 3, 4, 5])}
+
+    err_msg = re.escape(
+                ("This forecaster is not fitted yet. Call `fit` with appropriate "
+                 "arguments before using `set_out_sample_residuals()`.")
+            )
+    with pytest.raises(NotFittedError, match = err_msg):
+        forecaster.set_out_sample_residuals(residuals=residuals)
+
+
 def test_set_out_sample_residuals_warning_when_residuals_not_for_all_steps():
     """
     Test Warning is raised when residuals does not contain a residue for all steps.
     """
     forecaster = ForecasterAutoregDirect(LinearRegression(fit_intercept=True), lags=3, steps=2)
+    forecaster.fit(y=y)
     residuals = {1: np.array([1, 2, 3])}
 
     err_msg = re.escape(
                 f"""
-                Only residuals of models 
+                Only residuals of models (steps) 
                 {set({1: None, 2: None}.keys()).intersection(set(residuals.keys()))} 
                 are updated.
                 """
@@ -48,6 +69,7 @@ def test_set_out_sample_residuals_warning_when_forecaster_has_transformer_and_tr
     Test Warning is raised when forcaster has a transformer_y and transform=False.
     """
     forecaster = ForecasterAutoregDirect(LinearRegression(), lags=3, steps=2, transformer_y=StandardScaler())
+    forecaster.fit(y=y)
     residuals = {1: np.array([1, 2, 3]), 2: np.array([1, 2, 3])}
 
     err_msg = re.escape(
@@ -66,7 +88,7 @@ def test_set_out_sample_residuals_warning_when_forecaster_has_transformer_and_tr
     Test Warning is raised when forcaster has a transformer_y and transform=True.
     """
     forecaster = ForecasterAutoregDirect(LinearRegression(), lags=3, steps=2, transformer_y=StandardScaler())
-    forecaster.fit(y=pd.Series(np.arange(10)))
+    forecaster.fit(y=y)
     residuals = {1: np.array([1, 2, 3]), 2: np.array([1, 2, 3])}
 
     err_msg = re.escape(
@@ -85,6 +107,7 @@ def test_set_out_sample_residuals_when_residuals_length_is_less_than_1000_and_no
     Test residuals stored when new residuals length is less than 1000 and append is False.
     """
     forecaster = ForecasterAutoregDirect(LinearRegression(fit_intercept=True), lags=3, steps=2)
+    forecaster.fit(y=y)
     residuals = {1: np.arange(10), 2: np.arange(10)}
     new_residuals = {1: np.arange(20), 2: np.arange(20)}
 
@@ -102,6 +125,7 @@ def test_set_out_sample_residuals_when_residuals_length_is_less_than_1000_and_ap
     Test residuals stored when new residuals length is less than 1000 and append is True.
     """
     forecaster = ForecasterAutoregDirect(LinearRegression(fit_intercept=True), lags=3, steps=2)
+    forecaster.fit(y=y)
     residuals = {1: np.arange(10), 2: np.arange(10)}
 
     forecaster.set_out_sample_residuals(residuals=residuals)
@@ -119,6 +143,7 @@ def test_set_out_sample_residuals_when_residuals_length_is_greater_than_1000():
     Test len residuals stored when its length is greater than 1000.
     """
     forecaster = ForecasterAutoregDirect(LinearRegression(fit_intercept=True), lags=3, steps=2)
+    forecaster.fit(y=y)
     residuals = {1: np.arange(2000), 2: np.arange(2000)}
 
     forecaster.set_out_sample_residuals(residuals=residuals)
@@ -133,6 +158,7 @@ def test_set_out_sample_residuals_when_residuals_length_is_more_than_1000_and_ap
     Test residuals stored when new residuals length is more than 1000 and append is True.
     """
     forecaster = ForecasterAutoregDirect(LinearRegression(fit_intercept=True), lags=3, steps=2)
+    forecaster.fit(y=y)
     residuals = {1: np.arange(10), 2: np.arange(10)}
     residuals_2 = {1: np.arange(1200), 2: np.arange(1200)}
 
@@ -158,6 +184,7 @@ def test_set_out_sample_residuals_when_residuals_keys_do_not_match():
     Test residuals are not stored when keys does not match.
     """
     forecaster = ForecasterAutoregDirect(LinearRegression(fit_intercept=True), lags=3, steps=2)
+    forecaster.fit(y=y)
     residuals = {3: np.arange(10), 4: np.arange(10)}
 
     forecaster.set_out_sample_residuals(residuals=residuals)
@@ -171,6 +198,7 @@ def test_set_out_sample_residuals_when_residuals_keys_partially_match():
     Test residuals are stored only for matching keys.
     """
     forecaster = ForecasterAutoregDirect(LinearRegression(fit_intercept=True), lags=3, steps=2)
+    forecaster.fit(y=y)
     residuals = {1: np.arange(10), 4: np.arange(10)}
 
     forecaster.set_out_sample_residuals(residuals=residuals)

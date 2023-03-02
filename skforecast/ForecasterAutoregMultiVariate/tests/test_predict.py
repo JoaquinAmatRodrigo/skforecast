@@ -17,6 +17,13 @@ from skforecast.ForecasterAutoregMultiVariate.tests.fixtures_ForecasterAutoregMu
 from skforecast.ForecasterAutoregMultiVariate.tests.fixtures_ForecasterAutoregMultiVariate import exog
 from skforecast.ForecasterAutoregMultiVariate.tests.fixtures_ForecasterAutoregMultiVariate import exog_predict
 
+transformer_exog = ColumnTransformer(
+                       [('scale', StandardScaler(), ['exog_1']),
+                        ('onehot', OneHotEncoder(), ['exog_2'])],
+                       remainder = 'passthrough',
+                       verbose_feature_names_out = False
+                   )
+
 
 @pytest.mark.parametrize("steps", [[1, 2.0, 3], [1, 4.]], 
                          ids=lambda steps: f'steps: {steps}')
@@ -182,12 +189,6 @@ def test_predict_output_when_regressor_is_LinearRegression_with_transform_series
     Test predict output when using LinearRegression as regressor, StandardScaler
     as transformer_series and transformer_exog as transformer_exog.
     """
-    transformer_exog = ColumnTransformer(
-                            [('scale', StandardScaler(), ['exog_1']),
-                             ('onehot', OneHotEncoder(), ['exog_2'])],
-                            remainder = 'passthrough',
-                            verbose_feature_names_out = False
-                       )
     forecaster = ForecasterAutoregMultiVariate(
                      regressor          = LinearRegression(),
                      level              = 'l1',

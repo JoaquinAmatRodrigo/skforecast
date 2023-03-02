@@ -494,7 +494,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         X_levels = pd.Series(X_levels)
         X_levels = pd.get_dummies(X_levels, dtype=float)
         X_train_col_names.extend(X_levels.columns)
-        X_train = np.column_stack((X_train, X_levels.values))
+        X_train = np.column_stack((X_train, X_levels.to_numpy()))
 
         X_train = pd.DataFrame(
                       data    = X_train,
@@ -508,7 +508,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         y_train_index = pd.Index(
                             np.tile(
-                                y_index[self.max_lag: ].values,
+                                y_index[self.max_lag: ].to_numpy(),
                                 reps = len(series_col_names)
                             )
                         )
@@ -698,7 +698,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             residuals = y_train - self.regressor.predict(X_train)
 
             for serie in series.columns:
-                in_sample_residuals[serie] = residuals.loc[X_train[serie] == 1.].values
+                in_sample_residuals[serie] = residuals.loc[X_train[serie] == 1.].to_numpy()
                 if len(in_sample_residuals[serie]) > 1000:
                     # Only up to 1000 residuals are stored
                     rng = np.random.default_rng(seed=123)
