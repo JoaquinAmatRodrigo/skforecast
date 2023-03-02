@@ -59,7 +59,8 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
 
     name_predictors : list, default `None`
         Name of the predictors returned by `fun_predictors`. If `None`, predictors are
-        named using the prefix 'custom_predictor_'.
+        named using the prefix 'custom_predictor_<i>' where `i` is the index of the position
+        the predictor has in the returned array of `fun_predictors`.
 
     transformer_series : transformer (preprocessor) or dict of transformers, default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
@@ -108,7 +109,8 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
 
     name_predictors : list, default `None`
         Name of the predictors returned by `fun_predictors`. If `None`, predictors are
-        named using the prefix 'custom_predictor_'.
+        named using the prefix 'custom_predictor_<i>' where `i` is the index of the position
+        the predictor has in the returned array of `fun_predictors`.
 
     transformer_series : transformer (preprocessor) or dict of transformers, default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
@@ -249,6 +251,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         self.fun_predictors                = fun_predictors
         self.source_code_fun_predictors    = None
         self.window_size                   = window_size
+        self.name_predictors               = name_predictors
         self.transformer_series            = transformer_series
         self.transformer_series_           = None
         self.transformer_exog              = transformer_exog
@@ -431,7 +434,16 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
 
             X_level = [serie]*len(X_train_values)
             X_levels.extend(X_level)
-        X_train_col_names = [f"custom_predictor_{i}" for i in range(X_train.shape[1])]
+
+        if self.name_predictors is None:
+            X_train_col_names = [f"custom_predictor_{i}" for i in range(X_train.shape[1])]
+        else:
+            if len(self.name_predictors) != X_train.shape[1]:
+                raise ValueError(
+                    f"The length of provided predictors names (`name_predictors`) do not "
+                    f"match the length output of `fun_predictors`." 
+                )
+            X_train_col_names = self.name_predictors
 
         if exog is not None:
             if len(exog) != len(series):

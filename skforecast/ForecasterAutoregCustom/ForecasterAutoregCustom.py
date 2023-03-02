@@ -55,6 +55,11 @@ class ForecasterAutoregCustom(ForecasterBase):
     window_size : int
         Size of the window needed by `fun_predictors` to create the predictors.
 
+    name_predictors : list, default `None`
+        Name of the predictors returned by `fun_predictors`. If `None`, predictors are
+        named using the prefix 'custom_predictor_<i>' where `i` is the index of the position
+        the predictor has in the returned array of `fun_predictors`.
+
     transformer_y : object transformer (preprocessor), default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API with methods: fit, transform, fit_transform and inverse_transform.
@@ -87,6 +92,11 @@ class ForecasterAutoregCustom(ForecasterBase):
         
     window_size : int
         Size of the window needed by `fun_predictors` to create the predictors.
+
+    name_predictors : list, default `None`
+        Name of the predictors returned by `fun_predictors`. If `None`, predictors are
+        named using the prefix 'custom_predictor_<i>' where `i` is the index of the position
+        the predictor has in the returned array of `fun_predictors`.
 
     transformer_y : object transformer (preprocessor), default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
@@ -169,6 +179,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         regressor: object, 
         fun_predictors: callable, 
         window_size: int,
+        name_predictors: Optional[list]=None,
         transformer_y: Optional[object]=None,
         transformer_exog: Optional[object]=None,
         weight_func: Optional[callable]=None
@@ -178,6 +189,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         self.create_predictors             = fun_predictors
         self.source_code_create_predictors = None
         self.window_size                   = window_size
+        self.name_predictors               = name_predictors
         self.transformer_y                 = transformer_y
         self.transformer_exog              = transformer_exog
         self.weight_func                   = weight_func
@@ -345,7 +357,16 @@ class ForecasterAutoregCustom(ForecasterBase):
         
         X_train = np.vstack(X_train)
         y_train = np.array(y_train)
-        X_train_col_names = [f"custom_predictor_{i}" for i in range(X_train.shape[1])]
+
+        if self.name_predictors is None:
+            X_train_col_names = [f"custom_predictor_{i}" for i in range(X_train.shape[1])]
+        else:
+            if len(self.name_predictors) != X_train.shape[1]:
+                raise ValueError(
+                    f"The length of provided predictors names (`name_predictors`) do not "
+                    f"match the length output of `fun_predictors`." 
+                )
+            X_train_col_names = self.name_predictors
 
         if np.isnan(X_train).any():
             raise Exception(
