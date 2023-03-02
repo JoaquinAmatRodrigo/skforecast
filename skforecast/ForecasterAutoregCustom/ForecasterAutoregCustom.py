@@ -382,7 +382,7 @@ class ForecasterAutoregCustom(ForecasterBase):
                     f"The length of provided predictors names (`name_predictors`) do not "
                     f"match the length output of `fun_predictors`." 
                 )
-            X_train_col_names = self.name_predictors
+            X_train_col_names = self.name_predictors.copy()
 
         if np.isnan(X_train).any():
             raise Exception(
