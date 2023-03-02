@@ -586,14 +586,14 @@ class ForecasterAutoregDirect(ForecasterBase):
             sample_weight = self.create_sample_weights(X_train=X_train_step)
             if sample_weight is not None:
                 self.regressors_[step].fit(
-                    X = X_train_step,
-                    y = y_train_step,
+                    X             = X_train_step,
+                    y             = y_train_step,
                     sample_weight = sample_weight
                 )
             else:
                 self.regressors_[step].fit(X=X_train_step, y=y_train_step)
                 
-            residuals = y_train_step - self.regressors_[step].predict(X_train_step)
+            residuals = (y_train_step - self.regressors_[step].predict(X_train_step)).to_numpy()
 
             if len(residuals) > 1000:
                 # Only up to 1000 residuals are stored
@@ -1196,6 +1196,12 @@ class ForecasterAutoregDirect(ForecasterBase):
                 "`{step: residuals}`. " 
                 f"Got {type(residuals)}."
             )
+
+        if not self.fitted:
+            raise sklearn.exceptions.NotFittedError(
+                ("This forecaster is not fitted yet. Call `fit` with appropriate "
+                 "arguments before using `set_out_sample_residuals()`.")
+            )
         
         if self.out_sample_residuals is None:
             self.out_sample_residuals = {step: None for step in range(1, self.steps + 1)}
@@ -1203,7 +1209,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         if not set(self.out_sample_residuals.keys()).issubset(set(residuals.keys())):
             warnings.warn(
                 f"""
-                Only residuals of models 
+                Only residuals of models (steps) 
                 {set(self.out_sample_residuals.keys()).intersection(set(residuals.keys()))} 
                 are updated.
                 """
