@@ -7,27 +7,37 @@ All notable changes to this project will be documented in this file.
 
 **Added**
 
-+ Class `ForecasterSarimax` and `model_selection_sarimax`.
++ Class `ForecasterSarimax` and `model_selection_sarimax` (wrapper of [pmdarima](http://alkaline-ml.com/pmdarima/modules/generated/pmdarima.arima.ARIMA.html#pmdarima.arima.ARIMA)).
+  
++ Method `predict_interval()` to `ForecasterAutoregDirect` and `ForecasterAutoregMultiVariate`.
 
-+ Method `predict_dist()` to `ForecasterAutoreg`, `ForecasterAutoregDirect` and `ForecasterAutoregCustom`.
++ Method `predict_bootstrapping()` to all forecasters, generate multiple forecasting predictions using a bootstrapping process.
 
-+ Method `predict_interval()` to `ForecasterAutoregDirect`.
++ Method `predict_dist()` to all forecasters, fit a given probability distribution for each step.
 
 + Function `plot_prediction_distribution` in module `plot`.
 
 **Changed**
 
-+ Deprecated python 3.7 compatibility
++ Deprecated `python 3.7` compatibility.
 
-+ Added python 3.11 compatibility
++ Added `python 3.11` compatibility.
 
-+ `model_selection_statsmodels` is deprecated in favor of `ForecasterSarimax` and `model_selection_sarimax`.
++ `model_selection_statsmodels` is deprecated in favor of `ForecasterSarimax` and `model_selection_sarimax`. It will be removed in version 0.8.0.
 
 + Remove `levels_weights` argument in `grid_search_forecaster_multiseries` and `random_search_forecaster_multiseries`, deprecated since version 0.6.0. Use `series_weights` and `weights_func` when creating the forecaster instead.
 
-+ `in_sample_residuals` and `out_sample_residuals` are stored as numpy arrays instead of pandas series.
++ Remove engine `'skopt'` in `bayesian_search_forecaster` in favor of engine `'optuna'`. To continue using it, use skforecast 0.6.0.
+
++ `in_sample_residuals` and `out_sample_residuals` are stored as numpy ndarrays instead of pandas series.
+
++ In `ForecasterAutoregMultiSeries`, `set_out_sample_residuals()` is now expecting a `dict` for the `residuals` argument instead of a pandas DataFrame.
+
++ Remove the `scikit-optimize` dependency.
 
 **Fixed**
+
++ Remove operator `**` in `set_params()` method for all forecasters.
 
 
 ## [0.6.0] - [2022-11-30]

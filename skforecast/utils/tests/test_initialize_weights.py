@@ -12,11 +12,11 @@ from sklearn.neighbors import KNeighborsRegressor
 
 
 
-@pytest.mark.parametrize("forecaster_type", 
+@pytest.mark.parametrize("forecaster_name", 
                          ['ForecasterAutoreg', 'ForecasterAutoregCustom',
                           'ForecasterAutoregDirect', 'ForecasterAutoregMultiVariate'], 
-                         ids=lambda ft: f'forecaster_type: {ft}')
-def test_exception_initialize_weights_when_weight_func_is_not_a_callable(forecaster_type):
+                         ids=lambda ft: f'forecaster_name: {ft}')
+def test_exception_initialize_weights_when_weight_func_is_not_a_callable(forecaster_name):
     """
     Test exception is raised when weight_func is not a callable.
     """
@@ -24,7 +24,7 @@ def test_exception_initialize_weights_when_weight_func_is_not_a_callable(forecas
     err_msg = re.escape(f"Argument `weight_func` must be a callable. Got {type(weight_func)}.")
     with pytest.raises(TypeError, match = err_msg):
         initialize_weights(
-            forecaster_type = forecaster_type, 
+            forecaster_name = forecaster_name, 
             regressor       = LinearRegression(), 
             weight_func     = weight_func, 
             series_weights  = None
@@ -39,7 +39,7 @@ def test_exception_initialize_weights_when_weight_func_is_not_a_callable_or_dict
     err_msg = re.escape(f"Argument `weight_func` must be a callable or a dict of callables. Got {type(weight_func)}.")
     with pytest.raises(TypeError, match = err_msg):
         initialize_weights(
-            forecaster_type = 'ForecasterAutoregMultiSeries', 
+            forecaster_name = 'ForecasterAutoregMultiSeries', 
             regressor       = LinearRegression(), 
             weight_func     = weight_func, 
             series_weights  = None
@@ -57,7 +57,7 @@ def test_exception_initialize_weights_when_series_weights_is_not_a_dict():
     )
     with pytest.raises(TypeError, match = err_msg):
         initialize_weights(
-            forecaster_type = 'ForecasterAutoregMultiSeries', 
+            forecaster_name = 'ForecasterAutoregMultiSeries', 
             regressor       = LinearRegression(), 
             weight_func     = None, 
             series_weights  = series_weights
@@ -79,7 +79,7 @@ def test_exception_initialize_weights_when_weight_func_is_provided_and_regressor
             )
     with pytest.warns(UserWarning, match = warn_msg):
         weight_func, source_code_weight_func, _ = initialize_weights(
-            forecaster_type = 'ForecasterAutoreg', 
+            forecaster_name = 'ForecasterAutoreg', 
             regressor       = KNeighborsRegressor(), 
             weight_func     = weight_func, 
             series_weights  = None
@@ -102,7 +102,7 @@ def test_exception_initialize_weights_when_series_weights_is_provided_and_regres
             )
     with pytest.warns(UserWarning, match = warn_msg):
         weight_func, source_code_weight_func, series_weights = initialize_weights(
-            forecaster_type = 'ForecasterAutoregMultiSeries', 
+            forecaster_name = 'ForecasterAutoregMultiSeries', 
             regressor       = KNeighborsRegressor(), 
             weight_func     = None, 
             series_weights  = series_weights
@@ -123,7 +123,7 @@ def test_output_initialize_weights_source_code_weight_func_when_weight_func_not_
         pass
 
     weight_func, source_code_weight_func, series_weights = initialize_weights(
-        forecaster_type = 'ForecasterAutoregMultiSeries', 
+        forecaster_name = 'ForecasterAutoregMultiSeries', 
         regressor       = LinearRegression(), 
         weight_func     = test_weight_func, 
         series_weights  = None
@@ -152,7 +152,7 @@ def test_output_initialize_weights_source_code_weight_func_when_weight_func_dict
     weight_func = {'series_1': test_weight_func, 'series_2': test_weight_func_2}    
 
     weight_func, source_code_weight_func, series_weights = initialize_weights(
-        forecaster_type = 'ForecasterAutoregMultiSeries', 
+        forecaster_name = 'ForecasterAutoregMultiSeries', 
         regressor       = LinearRegression(), 
         weight_func     = weight_func, 
         series_weights  = None

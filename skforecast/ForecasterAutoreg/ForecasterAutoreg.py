@@ -198,7 +198,7 @@ class ForecasterAutoreg(ForecasterBase):
         self.window_size = self.max_lag
             
         self.weight_func, self.source_code_weight_func, _ = initialize_weights(
-            forecaster_type = type(self).__name__, 
+            forecaster_name = type(self).__name__, 
             regressor       = regressor, 
             weight_func     = weight_func, 
             series_weights  = None
@@ -220,9 +220,9 @@ class ForecasterAutoreg(ForecasterBase):
             params = self.regressor.get_params(deep=True)
 
         info = (
-            f"{'=' * len(str(type(self)).split('.')[1])} \n"
-            f"{str(type(self)).split('.')[1]} \n"
-            f"{'=' * len(str(type(self)).split('.')[1])} \n"
+            f"{'=' * len(type(self).__name__)} \n"
+            f"{type(self).__name__} \n"
+            f"{'=' * len(type(self).__name__)} \n"
             f"Regressor: {self.regressor} \n"
             f"Lags: {self.lags} \n"
             f"Transformer for y: {self.transformer_y} \n"
@@ -582,7 +582,7 @@ class ForecasterAutoreg(ForecasterBase):
             last_window = copy(self.last_window)
 
         check_predict_input(
-            forecaster_type  = type(self).__name__,
+            forecaster_name  = type(self).__name__,
             steps            = steps,
             fitted           = self.fitted,
             included_exog    = self.included_exog,
@@ -729,7 +729,7 @@ class ForecasterAutoreg(ForecasterBase):
             last_window = copy(self.last_window)
 
         check_predict_input(
-            forecaster_type  = type(self).__name__,
+            forecaster_name  = type(self).__name__,
             steps            = steps,
             fitted           = self.fitted,
             included_exog    = self.included_exog,
@@ -831,13 +831,14 @@ class ForecasterAutoreg(ForecasterBase):
                                columns = [f"pred_boot_{i}" for i in range(n_boot)]
                            )
 
-        for col in boot_predictions.columns:
-            boot_predictions[col] = transform_series(
-                                        series            = boot_predictions[col],
-                                        transformer       = self.transformer_y,
-                                        fit               = False,
-                                        inverse_transform = True
-                                    )
+        if self.transformer_y:
+            for col in boot_predictions.columns:
+                boot_predictions[col] = transform_series(
+                                            series            = boot_predictions[col],
+                                            transformer       = self.transformer_y,
+                                            fit               = False,
+                                            inverse_transform = True
+                                        )
                                     
         return boot_predictions
 
@@ -1014,7 +1015,7 @@ class ForecasterAutoreg(ForecasterBase):
     
     def set_params(
         self, 
-        **params: dict
+        params: dict
     ) -> None:
         """
         Set new values to the parameters of the scikit learn model stored in the

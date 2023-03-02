@@ -26,7 +26,7 @@ def test_set_out_sample_residuals_TypeError_when_residuals_is_not_numpy_array():
 
 def test_set_out_sample_residuals_warning_when_forecaster_has_transformer_and_transform_False():
     """
-    Test Warning is raised when forcaster has a transformer_y and transform=False.
+    Test Warning is raised when forecaster has a transformer_y and transform=False.
     """
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3, transformer_y=StandardScaler())
     residuals = np.arange(20)

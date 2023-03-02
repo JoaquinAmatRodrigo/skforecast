@@ -21,7 +21,7 @@ def test_check_predict_input_NotFittedError_when_fitted_is_False():
               )
     with pytest.raises(NotFittedError, match = err_msg):
         check_predict_input(
-            forecaster_type  = 'ForecasterAutoreg',
+            forecaster_name  = 'ForecasterAutoreg',
             steps            = 5,
             fitted           = False,
             included_exog    = False,
@@ -50,7 +50,7 @@ def test_check_predict_input_ValueError_when_steps_int_lower_than_1():
     err_msg = re.escape(f'`steps` must be an integer greater than or equal to 1. Got {steps}.')
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
-            forecaster_type  = 'ForecasterAutoreg',
+            forecaster_name  = 'ForecasterAutoreg',
             steps            = steps,
             fitted           = True,
             included_exog    = False,
@@ -83,7 +83,7 @@ def test_check_predict_input_ValueError_when_steps_list_lower_than_1():
               )
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
-            forecaster_type  = 'ForecasterAutoregDirect',
+            forecaster_name  = 'ForecasterAutoregDirect',
             steps            = steps,
             fitted           = True,
             included_exog    = False,
@@ -118,7 +118,7 @@ def test_check_predict_input_ValueError_when_last_step_greater_than_max_steps():
               )
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
-            forecaster_type  = 'ForecasterAutoregMultiVariate',
+            forecaster_name  = 'ForecasterAutoregMultiVariate',
             steps            = steps,
             fitted           = True,
             included_exog    = False,
@@ -147,7 +147,7 @@ def test_check_predict_input_TypeError_when_ForecasterAutoregMultiSeries_and_lev
     err_msg = re.escape(f'`levels` must be a `list` of column names, a `str` of a column name or `None`.')   
     with pytest.raises(TypeError, match = err_msg):
         check_predict_input(
-            forecaster_type  = 'ForecasterAutoregMultiSeries',
+            forecaster_name  = 'ForecasterAutoregMultiSeries',
             steps            = 5,
             fitted           = True,
             included_exog    = False,
@@ -179,7 +179,7 @@ def test_check_predict_input_ValueError_when_ForecasterAutoregMultiSeries_and_le
     err_msg = re.escape(f'`levels` must be in `series_col_names` : {series_col_names}.')
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
-            forecaster_type  = 'ForecasterAutoregMultiSeries',
+            forecaster_name  = 'ForecasterAutoregMultiSeries',
             steps            = 5,
             fitted           = True,
             included_exog    = False,
@@ -208,7 +208,7 @@ def test_check_predict_input_ValueError_when_exog_is_none_and_included_exog_is_t
               )   
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
-            forecaster_type  = 'ForecasterAutoreg',
+            forecaster_name  = 'ForecasterAutoreg',
             steps            = 5,
             fitted           = True,
             included_exog    = True,
@@ -237,7 +237,7 @@ def test_check_predict_input_ValueError_when_exog_is_not_none_and_included_exog_
               )   
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
-            forecaster_type  = 'ForecasterAutoreg',
+            forecaster_name  = 'ForecasterAutoreg',
             steps            = 5,
             fitted           = True,
             included_exog    = False,
@@ -257,11 +257,11 @@ def test_check_predict_input_ValueError_when_exog_is_not_none_and_included_exog_
         )
 
 
-@pytest.mark.parametrize("forecaster_type", 
+@pytest.mark.parametrize("forecaster_name", 
                          ['ForecasterAutoregMultiSeries',
                           'ForecasterAutoregMultiVariate'], 
-                         ids=lambda ft: f'forecaster_type: {ft}')
-def test_check_predict_input_TypeError_when_last_window_is_not_pandas_DataFrame(forecaster_type):
+                         ids=lambda ft: f'forecaster_name: {ft}')
+def test_check_predict_input_TypeError_when_last_window_is_not_pandas_DataFrame(forecaster_name):
     """
     `ForecasterAutoregMultiSeries` and `ForecasterAutoregMultiVariate`.
     """
@@ -269,7 +269,7 @@ def test_check_predict_input_TypeError_when_last_window_is_not_pandas_DataFrame(
     err_msg = re.escape(f'`last_window` must be a pandas DataFrame. Got {type(last_window)}.')
     with pytest.raises(TypeError, match = err_msg):
         check_predict_input(
-            forecaster_type  = forecaster_type,
+            forecaster_name  = forecaster_name,
             steps            = 10,
             fitted           = True,
             included_exog    = True,
@@ -306,7 +306,7 @@ def test_check_predict_input_ValueError_when_levels_not_in_last_window_Forecaste
                 )
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
-            forecaster_type  = 'ForecasterAutoregMultiSeries',
+            forecaster_name  = 'ForecasterAutoregMultiSeries',
             steps            = 10,
             fitted           = True,
             included_exog    = True,
@@ -340,7 +340,7 @@ def test_check_predict_input_ValueError_when_series_col_names_not_last_window_Fo
                 )
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
-            forecaster_type  = 'ForecasterAutoregMultiVariate',
+            forecaster_name  = 'ForecasterAutoregMultiVariate',
             steps            = 10,
             fitted           = True,
             included_exog    = True,
@@ -367,7 +367,7 @@ def test_check_predict_input_TypeError_when_last_window_is_not_pandas_series():
     err_msg = re.escape(f'`last_window` must be a pandas Series. Got {type(last_window)}.')
     with pytest.raises(TypeError, match = err_msg):
         check_predict_input(
-            forecaster_type  = 'ForecasterAutoreg',
+            forecaster_name  = 'ForecasterAutoreg',
             steps            = 10,
             fitted           = True,
             included_exog    = True,
@@ -398,7 +398,7 @@ def test_check_predict_input_ValueError_when_length_last_window_is_lower_than_wi
               )
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
-            forecaster_type  = 'ForecasterAutoreg',
+            forecaster_name  = 'ForecasterAutoreg',
             steps            = 10,
             fitted           = True,
             included_exog    = True,
@@ -424,7 +424,7 @@ def test_check_predict_input_ValueError_when_last_window_has_missing_values():
     err_msg = re.escape('`last_window` has missing values.')
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
-            forecaster_type  = 'ForecasterAutoreg',
+            forecaster_name  = 'ForecasterAutoreg',
             steps            = 10,
             fitted           = True,
             included_exog    = True,
@@ -459,7 +459,7 @@ def test_check_predict_input_TypeError_when_last_window_index_is_not_of_index_ty
               )
     with pytest.raises(TypeError, match = err_msg):
         check_predict_input(
-            forecaster_type  = 'ForecasterAutoreg',
+            forecaster_name  = 'ForecasterAutoreg',
             steps            = 10,
             fitted           = True,
             included_exog    = False,
@@ -494,7 +494,7 @@ def test_check_predict_input_TypeError_when_last_window_index_frequency_is_not_i
               )
     with pytest.raises(TypeError, match = err_msg):
         check_predict_input(
-            forecaster_type  = 'ForecasterAutoreg',
+            forecaster_name  = 'ForecasterAutoreg',
             steps            = 10,
             fitted           = True,
             included_exog    = False,
@@ -526,7 +526,7 @@ def test_check_predict_input_ValueError_when_len_exog_is_less_than_steps(steps):
             )
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
-            forecaster_type  = 'ForecasterAutoreg',
+            forecaster_name  = 'ForecasterAutoreg',
             steps            = steps,
             fitted           = True,
             included_exog    = True,
@@ -552,7 +552,7 @@ def test_check_predict_input_TypeError_when_exog_is_not_pandas_series_or_datafra
     err_msg = re.escape('`exog` must be a pandas Series or DataFrame.')
     with pytest.raises(TypeError, match = err_msg):
         check_predict_input(
-            forecaster_type  = 'ForecasterAutoreg',
+            forecaster_name  = 'ForecasterAutoreg',
             steps            = 10,
             fitted           = True,
             included_exog    = True,
@@ -578,7 +578,7 @@ def test_check_predict_input_ValueError_when_exog_has_missing_values():
     err_msg = re.escape('`exog` has missing values.')
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
-            forecaster_type  = 'ForecasterAutoreg',
+            forecaster_name  = 'ForecasterAutoreg',
             steps            = 3,
             fitted           = True,
             included_exog    = True,
@@ -607,7 +607,7 @@ def test_check_predict_input_TypeError_when_exog_is_not_of_exog_type():
     err_msg = re.escape(f'Expected type for `exog`: {exog_type}. Got {type(exog)}.')
     with pytest.raises(TypeError, match = err_msg):
         check_predict_input(
-            forecaster_type  = 'ForecasterAutoreg',
+            forecaster_name  = 'ForecasterAutoreg',
             steps            = 5,
             fitted           = True,
             included_exog    = True,
@@ -640,7 +640,7 @@ def test_check_predict_input_ValueError_when_exog_is_dataframe_without_columns_i
               )
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
-            forecaster_type  = 'ForecasterAutoreg',
+            forecaster_name  = 'ForecasterAutoreg',
             steps            = 2,
             fitted           = True,
             included_exog    = True,
@@ -674,7 +674,7 @@ def test_check_predict_input_TypeError_when_exog_index_is_not_of_index_type():
               )
     with pytest.raises(TypeError, match = err_msg):
         check_predict_input(
-            forecaster_type  = 'ForecasterAutoreg',
+            forecaster_name  = 'ForecasterAutoreg',
             steps            = 10,
             fitted           = True,
             included_exog    = True,
@@ -708,7 +708,7 @@ def test_check_predict_input_TypeError_when_exog_index_frequency_is_not_index_fr
               )
     with pytest.raises(TypeError, match = err_msg):
         check_predict_input(
-            forecaster_type  = 'ForecasterAutoreg',
+            forecaster_name  = 'ForecasterAutoreg',
             steps            = 10,
             fitted           = True,
             included_exog    = True,
@@ -747,7 +747,7 @@ def test_check_predict_input_ValueError_when_exog_index_does_not_follow_last_win
         )
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
-            forecaster_type  = 'ForecasterAutoreg',
+            forecaster_name  = 'ForecasterAutoreg',
             steps            = 10,
             fitted           = True,
             included_exog    = True,
@@ -786,7 +786,7 @@ def test_check_predict_input_ValueError_when_exog_index_does_not_follow_last_win
         )
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
-            forecaster_type  = 'ForecasterAutoreg',
+            forecaster_name  = 'ForecasterAutoreg',
             steps            = 10,
             fitted           = True,
             included_exog    = True,
@@ -817,7 +817,7 @@ def test_check_predict_input_ValueError_when_ForecasterSarimax_last_window_exog_
               )   
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
-            forecaster_type  = 'ForecasterSarimax',
+            forecaster_name  = 'ForecasterSarimax',
             steps            = 3,
             fitted           = True,
             included_exog    = False,
@@ -847,7 +847,7 @@ def test_check_predict_input_TypeError_when_ForecasterSarimax_last_window_exog_i
             )
     with pytest.raises(TypeError, match = err_msg):
         check_predict_input(
-            forecaster_type  = 'ForecasterSarimax',
+            forecaster_name  = 'ForecasterSarimax',
             steps            = 10,
             fitted           = True,
             included_exog    = True,
@@ -878,7 +878,7 @@ def test_check_predict_input_ValueError_when_ForecasterSarimax_length_last_windo
               )
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
-            forecaster_type  = 'ForecasterSarimax',
+            forecaster_name  = 'ForecasterSarimax',
             steps            = 10,
             fitted           = True,
             included_exog    = True,
@@ -904,7 +904,7 @@ def test_check_predict_input_ValueError_when_ForecasterSarimax_last_window_exog_
     err_msg = re.escape('`last_window_exog` has missing values.')
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
-            forecaster_type  = 'ForecasterSarimax',
+            forecaster_name  = 'ForecasterSarimax',
             steps            = 10,
             fitted           = True,
             included_exog    = True,
@@ -939,7 +939,7 @@ def test_check_predict_input_TypeError_when_ForecasterSarimax_last_window_exog_i
               )
     with pytest.raises(TypeError, match = err_msg):
         check_predict_input(
-            forecaster_type  = 'ForecasterSarimax',
+            forecaster_name  = 'ForecasterSarimax',
             steps            = 10,
             fitted           = True,
             included_exog    = True,
@@ -974,7 +974,7 @@ def test_check_predict_input_TypeError_when_ForecasterSarimax_last_window_exog_i
               )
     with pytest.raises(TypeError, match = err_msg):
         check_predict_input(
-            forecaster_type  = 'ForecasterSarimax',
+            forecaster_name  = 'ForecasterSarimax',
             steps            = 10,
             fitted           = True,
             included_exog    = True,
@@ -1010,7 +1010,7 @@ def test_check_predict_input_ValueError_when_last_window_exog_is_dataframe_witho
               )
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
-            forecaster_type  = 'ForecasterSarimax',
+            forecaster_name  = 'ForecasterSarimax',
             steps            = 2,
             fitted           = True,
             included_exog    = True,

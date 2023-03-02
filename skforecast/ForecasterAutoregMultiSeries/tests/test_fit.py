@@ -18,8 +18,7 @@ def test_fit_exception_when_exog_columns_same_as_series_col_names(exog):
     the series levels.
     """
     series = pd.DataFrame({'l1': pd.Series(np.arange(10)), 
-                           'l2': pd.Series(np.arange(10))
-                          })
+                           'l2': pd.Series(np.arange(10))})
 
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
     series_col_names = ['l1', 'l2']
@@ -105,8 +104,7 @@ def test_forecaster_DatetimeIndex_index_freq_stored():
     Test serie_with_DatetimeIndex.index.freqstr is stored in forecaster.index_freq.
     """
     series = pd.DataFrame({'1': pd.Series(np.arange(5)), 
-                           '2': pd.Series(np.arange(5))
-                          })
+                           '2': pd.Series(np.arange(5))})
 
     series.index = pd.date_range(start='2022-01-01', periods=5, freq='1D')
 
@@ -123,8 +121,8 @@ def test_forecaster_index_step_stored():
     Test serie without DatetimeIndex, step is stored in forecaster.index_freq.
     """
     series = pd.DataFrame({'1': pd.Series(np.arange(5)), 
-                           '2': pd.Series(np.arange(5))
-                          })
+                           '2': pd.Series(np.arange(5))})
+    
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
     forecaster.fit(series=series)
     expected = series.index.step
@@ -139,19 +137,18 @@ def test_fit_in_sample_residuals_stored():
     when `store_in_sample_residuals=True`.
     """
     series = pd.DataFrame({'1': pd.Series(np.arange(5)), 
-                           '2': pd.Series(np.arange(5))
-                           })
+                           '2': pd.Series(np.arange(5))})
 
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
     forecaster.fit(series=series, store_in_sample_residuals=True)
-    expected = {'1': np.array([0, 0]),
-                '2': np.array([0, 0]),
-               }
+    expected = {'1': np.array([-4.4408921e-16, 0.0000000e+00]),
+                '2': np.array([0., 0.])}
     results = forecaster.in_sample_residuals
 
+    assert isinstance(results, dict)
+    assert all(isinstance(x, np.ndarray) for x in results.values())
     assert results.keys() == expected.keys()
-    assert list(results.values())[0] == approx(list(expected.values())[0])
-    assert list(results.values())[1] == approx(list(expected.values())[1])
+    assert all(all(np.isclose(results[k], expected[k])) for k in expected.keys())
 
 
 def test_fit_in_sample_residuals_stored_XGBRegressor():
@@ -159,19 +156,18 @@ def test_fit_in_sample_residuals_stored_XGBRegressor():
     Test that values of in_sample_residuals are stored after fitting with XGBRegressor.
     """
     series = pd.DataFrame({'1': pd.Series(np.arange(5)), 
-                           '2': pd.Series(np.arange(5))
-                           })
+                           '2': pd.Series(np.arange(5))})
 
     forecaster = ForecasterAutoregMultiSeries(XGBRegressor(random_state=123), lags=3)
     forecaster.fit(series=series, store_in_sample_residuals=True)
     expected = {'1': np.array([-0.00049472,  0.00049543]),
-                '2': np.array([-0.00049472,  0.00049543]),
-               }
+                '2': np.array([-0.00049472,  0.00049543])}
     results = forecaster.in_sample_residuals
 
+    assert isinstance(results, dict)
+    assert all(isinstance(x, np.ndarray) for x in results.values())
     assert results.keys() == expected.keys()
-    assert np.isclose(list(results.values())[0], list(expected.values())[0]).all()
-    assert np.isclose(list(results.values())[1], list(expected.values())[1]).all()
+    assert all(all(np.isclose(results[k], expected[k])) for k in expected.keys())
 
 
 def test_fit_same_residuals_when_residuals_greater_than_1000():
@@ -181,8 +177,7 @@ def test_fit_same_residuals_when_residuals_greater_than_1000():
     1000 values.
     """
     series = pd.DataFrame({'1': pd.Series(np.arange(1010)), 
-                           '2': pd.Series(np.arange(1010))
-                           })
+                           '2': pd.Series(np.arange(1010))})
 
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
     forecaster.fit(series=series, store_in_sample_residuals=True)
@@ -191,11 +186,14 @@ def test_fit_same_residuals_when_residuals_greater_than_1000():
     forecaster.fit(series=series, store_in_sample_residuals=True)
     results_2 = forecaster.in_sample_residuals
 
-    assert len(results_1['1']) == 1000
-    assert len(results_2['2']) == 1000
+    assert isinstance(results_1, dict)
+    assert all(isinstance(x, np.ndarray) for x in results_1.values())
+    assert isinstance(results_2, dict)
+    assert all(isinstance(x, np.ndarray) for x in results_2.values())
     assert results_1.keys() == results_2.keys()
-    assert list(results_1.values())[0] == approx(list(results_2.values())[0])
-    assert list(results_1.values())[1] == approx(list(results_2.values())[1])
+    assert all(len(results_1[k] == 1000) for k in results_1.keys())
+    assert all(len(results_2[k] == 1000) for k in results_2.keys())
+    assert all(all(results_1[k] == results_2[k]) for k in results_2.keys())
 
 
 def test_fit_in_sample_residuals_not_stored():
@@ -204,19 +202,16 @@ def test_fit_in_sample_residuals_not_stored():
     when `store_in_sample_residuals=False`.
     """
     series = pd.DataFrame({'1': pd.Series(np.arange(5)), 
-                           '2': pd.Series(np.arange(5))
-                           })
+                           '2': pd.Series(np.arange(5))})
 
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
     forecaster.fit(series=series, store_in_sample_residuals=False)
-    expected = {'1': np.array([None]),
-                '2': np.array([None])
-               }
+    expected = {'1': None, '2': None}
     results = forecaster.in_sample_residuals
 
+    assert isinstance(results, dict)
     assert results.keys() == expected.keys()
-    assert list(results.values())[0] == list(expected.values())[0]
-    assert list(results.values())[1] == list(expected.values())[1]
+    assert all(results[k] == expected[k] for k in expected.keys())
 
 
 def test_fit_last_window_stored():

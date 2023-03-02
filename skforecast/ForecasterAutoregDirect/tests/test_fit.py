@@ -1,5 +1,6 @@
 # Unit test fit ForecasterAutoregDirect
 # ==============================================================================
+from pytest import approx
 import numpy as np
 import pandas as pd
 from skforecast.ForecasterAutoregDirect import ForecasterAutoregDirect
@@ -34,6 +35,60 @@ def test_forecaster_index_step_stored():
     results = forecaster.index_freq
 
     assert results == expected
+    
+    
+def test_fit_in_sample_residuals_stored():
+    """
+    Test that values of in_sample_residuals are stored after fitting.
+    """
+    forecaster = ForecasterAutoregDirect(LinearRegression(), lags=3, steps=2)
+    forecaster.fit(y=pd.Series(np.arange(5)))
+    expected = {1: np.array([0.]),
+                2: np.array([0.])}
+    results = forecaster.in_sample_residuals
+
+    assert isinstance(results, dict)
+    assert all(isinstance(x, np.ndarray) for x in results.values())
+    assert results.keys() == expected.keys()
+    assert all(all(np.isclose(results[k], expected[k])) for k in expected.keys())
+
+
+def test_fit_in_sample_residuals_stored_XGBRegressor():
+    """
+    Test that values of in_sample_residuals are stored after fitting with XGBRegressor.
+    """
+    forecaster = ForecasterAutoregDirect(XGBRegressor(random_state=123), lags=3, steps=2)
+    forecaster.fit(y=pd.Series(np.arange(5)))
+    expected = {1: np.array([7.15255737e-07]),
+                2: np.array([7.15255737e-07])}
+    results = forecaster.in_sample_residuals
+
+    assert isinstance(results, dict)
+    assert all(isinstance(x, np.ndarray) for x in results.values())
+    assert results.keys() == expected.keys()
+    assert all(all(np.isclose(results[k], expected[k])) for k in expected.keys())
+
+
+def test_fit_same_residuals_when_residuals_greater_than_1000():
+    """
+    Test fit return same residuals when residuals len is greater than 1000.
+    Testing with two different forecaster.
+    """
+    forecaster = ForecasterAutoregDirect(LinearRegression(), lags=3, steps=2)
+    forecaster.fit(y=pd.Series(np.arange(1200)))
+    results_1 = forecaster.in_sample_residuals
+    forecaster = ForecasterAutoregDirect(LinearRegression(), lags=3, steps=2)
+    forecaster.fit(y=pd.Series(np.arange(1200)))
+    results_2 = forecaster.in_sample_residuals
+
+    assert isinstance(results_1, dict)
+    assert all(isinstance(x, np.ndarray) for x in results_1.values())
+    assert isinstance(results_2, dict)
+    assert all(isinstance(x, np.ndarray) for x in results_2.values())
+    assert results_1.keys() == results_2.keys()
+    assert all(len(results_1[k] == 1000) for k in results_1.keys())
+    assert all(len(results_2[k] == 1000) for k in results_2.keys())
+    assert all(all(results_1[k] == results_2[k]) for k in results_2.keys())
 
 
 def test_fit_last_window_stored():
