@@ -121,7 +121,7 @@ class ForecasterBase(ABC):
         
 
     @abstractmethod
-    def set_params(self, **params: dict) -> None:
+    def set_params(self, params: dict) -> None:
         """
         Set new values to the parameters of the scikit learn model stored in the
         ForecasterAutoreg.

@@ -23,8 +23,6 @@ from sklearn.exceptions import NotFittedError
 import optuna
 from optuna.samplers import TPESampler, RandomSampler
 optuna.logging.set_verbosity(optuna.logging.WARNING) # disable optuna logs
-from skopt.utils import use_named_args
-from skopt import gp_minimize
 
 logging.basicConfig(
     format = '%(name)-10s %(levelname)-5s %(message)s', 
@@ -1129,7 +1127,7 @@ def _evaluate_grid_hyperparameters(
         
         for params in tqdm(param_grid, desc='loop param_grid', position=1, leave=False, ncols=90):
 
-            forecaster.set_params(**params)
+            forecaster.set_params(params)
             metrics_values = backtesting_forecaster(
                                  forecaster         = forecaster,
                                  y                  = y,
@@ -1166,7 +1164,7 @@ def _evaluate_grid_hyperparameters(
         
         if type(forecaster).__name__ in ['ForecasterAutoreg', 'ForecasterAutoregDirect']:
             forecaster.set_lags(best_lags)
-        forecaster.set_params(**best_params)
+        forecaster.set_params(best_params)
         forecaster.fit(y=y, exog=exog)
         
         print(
@@ -1194,14 +1192,14 @@ def bayesian_search_forecaster(
     random_state: int=123,
     return_best: bool=True,
     verbose: bool=True,
-    engine: str='skopt',
+    engine: str='optuna',
     kwargs_create_study: dict={},
     kwargs_study_optimize: dict={},
-    kwargs_gp_minimize: dict={},
+    kwargs_gp_minimize: Any='deprecated'
 ) -> Tuple[pd.DataFrame, object]:
     """
     Bayesian optimization for a Forecaster object using time series backtesting and 
-    optuna or skopt library.
+    optuna library.
     
     Parameters
     ----------
@@ -1220,6 +1218,7 @@ def bayesian_search_forecaster(
         If skopt engine: dict
             Dictionary with parameters names (`str`) as keys and Space object from skopt 
             (Real, Integer, Categorical) as values.
+            **Deprecated in version 0.7.0**
 
     steps : int
         Number of steps to predict.
@@ -1236,7 +1235,6 @@ def bayesian_search_forecaster(
 
         If list:
             List containing several strings and/or callable.
-
 
     initial_train_size : int 
         Number of samples in the initial train split.
@@ -1269,12 +1267,13 @@ def bayesian_search_forecaster(
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
 
-    engine : str, default `'skopt'`
+    engine : str, default `'optuna'`
         If 'optuna':
-            Bayesian optimization runs through the optuna library 
+            Bayesian optimization runs through the optuna library.
 
         If 'skopt':
-            Bayesian optimization runs through the skopt library
+            Bayesian optimization runs through the skopt library.
+            **Deprecated in version 0.7.0**
 
     kwargs_create_study : dict, default `{'direction':'minimize', 'sampler':TPESampler(seed=123)}`
         Only applies to engine='optuna'.
@@ -1287,6 +1286,7 @@ def bayesian_search_forecaster(
     kwargs_gp_minimize : dict, default `{}`
         Only applies to engine='skopt'.
             Other keyword arguments (key, value mappings) to pass to skopt.gp_minimize().
+            **Deprecated in version 0.7.0**
 
     Returns 
     -------
@@ -1303,6 +1303,7 @@ def bayesian_search_forecaster(
 
         If skopt engine:
             The best optimization result returned as a OptimizeResult object.
+            **Deprecated in version 0.7.0**
     
     """
 
@@ -1311,49 +1312,38 @@ def bayesian_search_forecaster(
             f'`exog` must have same number of samples as `y`. '
             f'length `exog`: ({len(exog)}), length `y`: ({len(y)})'
         )
+    
+    if engine == 'skopt':
+        warnings.warn(
+            ("The engine 'skopt' for `bayesian_search_forecaster` is deprecated "
+             "in favor of 'optuna' engine. To continue using it, use skforecast "
+             "0.6.0. The optimization will be performed using the 'optuna' engine.")
+        )
+        engine = 'optuna'
 
-    if engine not in ['optuna', 'skopt']:
+    if engine not in ['optuna']:
         raise ValueError(
-                f"""`engine` only allows 'optuna' or 'skopt', got {engine}."""
-              )
+            f"""`engine` only allows 'optuna', got {engine}."""
+        )
 
-    if engine == 'optuna':
-        results, results_opt_best = _bayesian_search_optuna(
-                                        forecaster            = forecaster,
-                                        y                     = y,
-                                        exog                  = exog,
-                                        lags_grid             = lags_grid,
-                                        search_space          = search_space,
-                                        steps                 = steps,
-                                        metric                = metric,
-                                        refit                 = refit,
-                                        initial_train_size    = initial_train_size,
-                                        fixed_train_size      = fixed_train_size,
-                                        n_trials              = n_trials,
-                                        random_state          = random_state,
-                                        return_best           = return_best,
-                                        verbose               = verbose,
-                                        kwargs_create_study   = kwargs_create_study,
-                                        kwargs_study_optimize = kwargs_study_optimize
-                                    )
-    else:
-        results, results_opt_best = _bayesian_search_skopt(
-                                        forecaster         = forecaster,
-                                        y                  = y,
-                                        exog               = exog,
-                                        lags_grid          = lags_grid,
-                                        search_space       = search_space,
-                                        steps              = steps,
-                                        metric             = metric,
-                                        refit              = refit,
-                                        initial_train_size = initial_train_size,
-                                        fixed_train_size   = fixed_train_size,
-                                        n_trials           = n_trials,
-                                        random_state       = random_state,
-                                        return_best        = return_best,
-                                        verbose            = verbose,
-                                        kwargs_gp_minimize = kwargs_gp_minimize
-                                    )
+    results, results_opt_best = _bayesian_search_optuna(
+                                    forecaster            = forecaster,
+                                    y                     = y,
+                                    exog                  = exog,
+                                    lags_grid             = lags_grid,
+                                    search_space          = search_space,
+                                    steps                 = steps,
+                                    metric                = metric,
+                                    refit                 = refit,
+                                    initial_train_size    = initial_train_size,
+                                    fixed_train_size      = fixed_train_size,
+                                    n_trials              = n_trials,
+                                    random_state          = random_state,
+                                    return_best           = return_best,
+                                    verbose               = verbose,
+                                    kwargs_create_study   = kwargs_create_study,
+                                    kwargs_study_optimize = kwargs_study_optimize
+                                )
 
     return results, results_opt_best
 
@@ -1496,7 +1486,7 @@ def _bayesian_search_optuna(
         search_space       = search_space,
     ) -> float:
         
-        forecaster.set_params(**search_space(trial))
+        forecaster.set_params(search_space(trial))
         
         metrics, _ = backtesting_forecaster(
                          forecaster         = forecaster,
@@ -1580,7 +1570,7 @@ def _bayesian_search_optuna(
         
         if type(forecaster).__name__ in ['ForecasterAutoreg', 'ForecasterAutoregDirect']:
             forecaster.set_lags(best_lags)
-        forecaster.set_params(**best_params)
+        forecaster.set_params(best_params)
         forecaster.fit(y=y, exog=exog)
         
         print(
@@ -1590,234 +1580,4 @@ def _bayesian_search_optuna(
             f"  Backtesting metric: {best_metric}\n"
         )
             
-    return results, results_opt_best
-
-
-def _bayesian_search_skopt(
-    forecaster,
-    y: pd.Series,
-    search_space: dict,
-    steps: int,
-    metric: Union[str, callable, list],
-    initial_train_size: int,
-    fixed_train_size: bool=True,
-    exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-    lags_grid: Optional[list]=None,
-    refit: bool=False,
-    n_trials: int=10,
-    random_state: int=123,
-    return_best: bool=True,
-    verbose: bool=True,
-    kwargs_gp_minimize: dict={}
-) -> Tuple[pd.DataFrame, object]:
-    """
-    Bayesian optimization for a Forecaster object using time series backtesting and skopt library.
-    
-    Parameters
-    ----------
-    forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect
-        Forcaster model.
-        
-    y : pandas Series
-        Training time series. 
-        
-    search_space : dict
-        Dictionary with parameters names (`str`) as keys and Space object from skopt 
-        (Real, Integer, Categorical) as values.
-
-    steps : int
-        Number of steps to predict.
-        
-    metric : str, callable, list
-        Metric used to quantify the goodness of fit of the model.
-        
-        If string:
-            {'mean_squared_error', 'mean_absolute_error',
-             'mean_absolute_percentage_error', 'mean_squared_log_error'}
-    
-        If callable:
-            Function with arguments y_true, y_pred that returns a float.
-
-        If list:
-            List containing several strings and/or callable.
-
-    initial_train_size : int 
-        Number of samples in the initial train split.
- 
-    fixed_train_size : bool, default `True`
-        If True, train size doesn't increase but moves by `steps` in each iteration.
-
-    exog : pandas Series, pandas DataFrame, default `None`
-        Exogenous variable/s included as predictor/s. Must have the same
-        number of observations as `y` and should be aligned so that y[i] is
-        regressed on exog[i].
-           
-    lags_grid : list of int, lists, np.narray or range, default `None`
-        Lists of `lags` to try. Only used if forecaster is an instance of 
-        `ForecasterAutoreg` or `ForecasterAutoregDirect`.
-        
-    refit : bool, default `False`
-        Whether to re-fit the forecaster in each iteration of backtesting.
-        
-    n_trials : int, default `10`
-        Number of parameter settings that are sampled in each lag configuration.
-        When using engine "skopt", the minimum value is 10.
-
-    random_state : int, default `123`
-        Sets a seed to the sampling for reproducible output.
-
-    return_best : bool, default `True`
-        Refit the `forecaster` using the best found parameters on the whole data.
-        
-    verbose : bool, default `True`
-        Print number of folds used for cv or backtesting.
-
-    kwargs_gp_minimize : dict, default `{}`
-        Other keyword arguments (key, value mappings) to pass to skopt.gp_minimize().
-
-    Returns 
-    -------
-    results : pandas DataFrame
-        Results for each combination of parameters.
-            column lags = predictions.
-            column params = lower bound of the interval.
-            column metric = metric value estimated for the combination of parameters.
-            additional n columns with param = value.
-
-    results_opt_best : scipy object
-        The best optimization result returned as a OptimizeResult object.
-    
-    """
-
-    if type(forecaster).__name__ == 'ForecasterAutoregCustom':
-        if lags_grid is not None:
-            warnings.warn(
-                '`lags_grid` ignored if forecaster is an instance of `ForecasterAutoregCustom`.'
-            )
-        lags_grid = ['custom predictors']
-        
-    elif lags_grid is None:
-        lags_grid = [forecaster.lags]
-   
-    lags_list = []
-    params_list = []
-    results_opt_best = None
-    if not isinstance(metric, list):
-        metric = [metric] 
-    metric_dict = {(m if isinstance(m, str) else m.__name__): [] for m in metric}
-    
-    if len(metric_dict) != len(metric):
-        raise ValueError(
-            'When `metric` is a `list`, each metric name must be unique.'
-        )
-
-    for key in search_space.keys():
-        if key != search_space[key].name:
-            raise ValueError(
-                f"""Some of the key values do not match the Space object name from skopt.
-                    {key} != {search_space[key].name}"""
-            )
-
-    search_space = list(search_space.values())
-
-    # Objective function using backtesting_forecaster
-    @use_named_args(search_space)
-    def _objective(
-        forecaster         = forecaster,
-        y                  = y,
-        exog               = exog,
-        initial_train_size = initial_train_size,
-        fixed_train_size   = fixed_train_size,
-        steps              = steps,
-        metric             = metric,
-        refit              = refit,
-        verbose            = verbose,
-        **params
-    ) -> float:
-        
-        forecaster.set_params(**params)
-        
-        metrics, _ = backtesting_forecaster(
-                         forecaster         = forecaster,
-                         y                  = y,
-                         exog               = exog,
-                         steps              = steps,
-                         metric             = metric,
-                         initial_train_size = initial_train_size,
-                         fixed_train_size   = fixed_train_size,
-                         refit              = refit,
-                         verbose            = verbose
-                     )
-        # Store metrics in the variable metric_values defined outside _objective.
-        nonlocal metric_values
-        metric_values.append(metrics)
-
-        return abs(metrics[0])
-
-    print(
-        f"""Number of models compared: {n_trials*len(lags_grid)},
-         {n_trials} bayesian search in each lag configuration."""
-    )
-
-    for lags in tqdm(lags_grid, desc='loop lags_grid', position=0, ncols=90):
-
-        metric_values = [] # This variable will be modified inside _objective function. 
-        # It is a trick to extract multiple values from _objective function since
-        # only the optimized value can be returned.
-        
-        if type(forecaster).__name__ in ['ForecasterAutoreg', 'ForecasterAutoregDirect']:
-            forecaster.set_lags(lags)
-            lags = forecaster.lags.copy()
-        
-        results_opt = gp_minimize(
-                        func         = _objective,
-                        dimensions   = search_space,
-                        n_calls      = n_trials,
-                        random_state = random_state,
-                        **kwargs_gp_minimize
-                      )
-
-        for i in range(len(results_opt.x_iters)):
-            params = {param.name: results_opt.x_iters[i][j] 
-                      for j, param in enumerate(search_space)}
- 
-            params_list.append(params)
-            lags_list.append(lags)
-
-            for m, m_values in zip(metric, metric_values[i]):
-                m_name = m if isinstance(m, str) else m.__name__
-                metric_dict[m_name].append(m_values)
-
-        if results_opt_best is None:
-            results_opt_best = results_opt
-        else:
-            if results_opt.fun < results_opt_best.fun:
-                results_opt_best = results_opt
-        
-    results = pd.DataFrame({
-                  'lags'  : lags_list,
-                  'params': params_list,
-                  **metric_dict})
-
-    results = results.sort_values(by=list(metric_dict.keys())[0], ascending=True)
-    results = pd.concat([results, results['params'].apply(pd.Series)], axis=1)
-    
-    if return_best:
-        
-        best_lags = results['lags'].iloc[0]
-        best_params = results['params'].iloc[0]
-        best_metric = results[list(metric_dict.keys())[0]].iloc[0]
-        
-        if type(forecaster).__name__ in ['ForecasterAutoreg', 'ForecasterAutoregDirect']:
-            forecaster.set_lags(best_lags)
-        forecaster.set_params(**best_params)
-        forecaster.fit(y=y, exog=exog)
-        
-        print(
-            f"`Forecaster` refitted using the best-found lags and parameters, and the whole data set: \n"
-            f"  Lags: {best_lags} \n"
-            f"  Parameters: {best_params}\n"
-            f"  Backtesting metric: {best_metric}\n"
-        )
-
     return results, results_opt_best

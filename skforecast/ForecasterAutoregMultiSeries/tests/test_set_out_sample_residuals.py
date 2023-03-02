@@ -2,35 +2,42 @@
 # ==============================================================================
 import re
 import pytest
-from pytest import approx
 import numpy as np
 import pandas as pd
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 from sklearn.linear_model import LinearRegression
 from sklearn.exceptions import NotFittedError
+from sklearn.preprocessing import StandardScaler
+
+# Fixtures
+series = pd.DataFrame({'l1': pd.Series(np.arange(10)), 
+                       'l2': pd.Series(np.arange(10))
+                       })
 
 
-def test_set_out_sample_residuals_exception_when_residuals_is_not_pd_DataFrame():
+@pytest.mark.parametrize("residuals", [[1, 2, 3], {'1': [1,2,3,4]}], 
+                         ids=lambda residuals: f'residuals: {residuals}')
+def test_set_out_sample_residuals_TypeError_when_residuals_is_not_a_dict_of_numpy_ndarray(residuals):
     """
-    Test exception is raised when residuals argument is not pandas DataFrame.
+    Test TypeError is raised when residuals is not a dict of numpy ndarrays.
     """
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
-    residuals = [1, 2, 3]
-
     err_msg = re.escape(
-                f"`residuals` argument must be a pandas DataFrame. Got {type(residuals)}."
+                f"`residuals` argument must be a dict of numpy ndarrays in the form "
+                "`{level: residuals}`. " 
+                f"Got {type(residuals)}."
             )
     with pytest.raises(TypeError, match = err_msg):
         forecaster.set_out_sample_residuals(residuals=residuals)
 
 
-def test_set_out_sample_residuals_exception_when_forecaster_not_fitted():
+def test_set_out_sample_residuals_NotFittedError_when_forecaster_not_fitted():
     """
-    Test exception is raised when forecaster is not fitted.
+    Test NotFittedError is raised when forecaster is not fitted.
     """
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
-    residuals = pd.DataFrame({'1': [1, 2, 3, 4, 5], 
-                              '2': [1, 2, 3, 4, 5]})
+    residuals = {'l1': np.array([1, 2, 3, 4, 5]), 
+                 'l2': np.array([1, 2, 3, 4, 5])}
 
     err_msg = re.escape(
                 ("This forecaster is not fitted yet. Call `fit` with appropriate "
@@ -40,22 +47,99 @@ def test_set_out_sample_residuals_exception_when_forecaster_not_fitted():
         forecaster.set_out_sample_residuals(residuals=residuals)
 
 
-def test_set_out_sample_residuals_exception_when_append_and_column_not_in_keys():
+def test_set_out_sample_residuals_warning_when_residuals_not_for_all_levels():
     """
-    Test exception is raised when `append = True` but a column from residuals is in
-    self.series_col_names but not in out_sample_residuals keys.
+    Test Warning is raised when residuals does not contain a residue for all levels.
+    """
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(fit_intercept=True), lags=3)
+    forecaster.fit(series=series)
+    residuals = {'l1': np.array([1, 2, 3])}
+
+    err_msg = re.escape(
+                f"""
+                Only residuals of levels 
+                {set(forecaster.series_col_names).intersection(set(residuals.keys()))} 
+                are updated.
+                """
+            )
+    with pytest.warns(UserWarning, match = err_msg):
+        forecaster.set_out_sample_residuals(residuals=residuals)
+
+
+def test_set_out_sample_residuals_warning_when_forecaster_has_transformer_and_transform_False():
+    """
+    Test Warning is raised when forcaster has a transformer_series and transform=False.
+    """
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3,
+                                              transformer_series=StandardScaler())
+    forecaster.fit(series=series)
+    residuals = {'l1': np.array([1, 2, 3]), 'l2': np.array([1, 2, 3])}
+    level = 'l1'
+
+    err_msg = re.escape(
+                    ("Argument `transform` is set to `False` but forecaster was "
+                    f"trained using a transformer {forecaster.transformer_series_[level]} "
+                    f"for level {level}. Ensure that the new residuals are "
+                     "already transformed or set `transform=True`.")
+                )
+    with pytest.warns(UserWarning, match = err_msg):
+        forecaster.set_out_sample_residuals(residuals=residuals, transform=False)
+
+
+def test_set_out_sample_residuals_warning_when_forecaster_has_transformer_and_transform_True():
+    """
+    Test Warning is raised when forcaster has a transformer_y and transform=True.
+    """
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3,
+                                              transformer_series=StandardScaler())
+    forecaster.fit(series=series)
+    residuals = {'l1': np.array([1, 2, 3]), 'l2': np.array([1, 2, 3])}
+    level = 'l1'
+
+    err_msg = re.escape(
+                ("Residuals will be transformed using the same transformer used "
+                f"when training the forecaster for level {level} : "
+                f"({forecaster.transformer_series_[level]}). Ensure that the new "
+                 "residuals are on the same scale as the original time series.")
+            )
+    with pytest.warns(UserWarning, match = err_msg):
+        forecaster.set_out_sample_residuals(residuals=residuals, transform=True)
+
+
+def test_set_out_sample_residuals_when_residuals_length_is_less_than_1000_and_no_append():
+    """
+    Test residuals stored when new residuals length is less than 1000 and append is False.
     """
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
-    level = '1'
-    forecaster.series_col_names = ['1']
-    forecaster.out_sample_residuals = {'2': np.arange(5)}
-    forecaster.fitted = True
-    residuals = pd.DataFrame({'1': [1, 2, 3, 4, 5], 
-                              '2': [1, 2, 3, 4, 5]})
+    forecaster.fit(series=series)
+    residuals = {'l1': np.arange(10), 'l2': np.arange(10)}
+    new_residuals = {'l1': np.arange(20), 'l2': np.arange(20)}
 
-    err_msg = re.escape(f'{level} does not exists in `forecaster.out_sample_residuals` keys: {list(forecaster.out_sample_residuals.keys())}')
-    with pytest.raises(ValueError, match = err_msg):
-        forecaster.set_out_sample_residuals(residuals=residuals)
+    forecaster.set_out_sample_residuals(residuals=residuals)
+    forecaster.set_out_sample_residuals(residuals=new_residuals, append=False)
+    expected = {'l1': np.arange(20), 'l2': np.arange(20)}
+    results = forecaster.out_sample_residuals
+
+    assert expected.keys() == results.keys()
+    assert all(all(expected[k] == results[k]) for k in expected.keys())
+
+
+def test_set_out_sample_residuals_when_residuals_length_is_less_than_1000_and_append():
+    """
+    Test residuals stored when new residuals length is less than 1000 and append is True.
+    """
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
+    forecaster.fit(series=series)
+    residuals = {'l1': np.arange(10), 'l2': np.arange(10)}
+    
+    forecaster.set_out_sample_residuals(residuals=residuals)
+    forecaster.set_out_sample_residuals(residuals=residuals, append=True)
+    expected = {'l1': np.append(np.arange(10), np.arange(10)),
+                'l2': np.append(np.arange(10), np.arange(10))}
+    results = forecaster.out_sample_residuals
+
+    assert expected.keys() == results.keys()
+    assert all(all(expected[k] == results[k]) for k in expected.keys())
 
 
 def test_set_out_sample_residuals_when_residuals_length_is_greater_than_1000():
@@ -63,93 +147,37 @@ def test_set_out_sample_residuals_when_residuals_length_is_greater_than_1000():
     Test len residuals stored when its length is greater than 1000.
     """
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
-    forecaster.series_col_names = ['1']
-    forecaster.fitted = True
-    forecaster.set_out_sample_residuals(residuals = pd.DataFrame({'1': np.arange(2000), 
-                                                                  '2': np.arange(2000)}))
+    forecaster.fit(series=series)
 
-    assert len(forecaster.out_sample_residuals['1']) == 1000
+    residuals = {'l1': np.arange(2000), 'l2': np.arange(2000)}
+    forecaster.set_out_sample_residuals(residuals=residuals)
+    results = forecaster.out_sample_residuals
 
-
-def test_same_out_sample_residuals_stored_when_residuals_length_is_greater_than_1000():
-    """
-    Test same `out_sample_residuals` are stored when its length is greater than 1000
-    executing function two times.
-    """
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
-    forecaster.series_col_names = ['1']
-    forecaster.fitted = True
-    forecaster.set_out_sample_residuals(residuals = pd.DataFrame({'1': np.arange(2000), 
-                                                                  '2': np.arange(2000)}))
-    out_sample_residuals_1 = forecaster.out_sample_residuals['1']
-
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
-    forecaster.series_col_names = ['1']
-    forecaster.fitted = True
-    forecaster.set_out_sample_residuals(residuals = pd.DataFrame({'1': np.arange(2000)}))
-    out_sample_residuals_2 = forecaster.out_sample_residuals['1']
-
-    assert (out_sample_residuals_1 == out_sample_residuals_2).all()
+    assert list(results.keys()) == ['l1', 'l2']
+    assert all(len(value)==1000 for value in results.values())
 
 
-@pytest.mark.parametrize("level, expected", 
-                         [('1' , np.arange(10)),
-                          ('2' , np.arange(10))])
-def test_set_out_sample_residuals_when_residuals_length_is_less_than_1000_and_no_append(level, expected):
-    """
-    Test residuals stored when new residuals length is less than 1000 and append is False.
-    """
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
-    forecaster.series_col_names = ['1', '2']
-    forecaster.fitted = True
-    residuals = pd.DataFrame({'1': np.arange(10), 
-                              '2': np.arange(10)})
-
-    forecaster.set_out_sample_residuals(residuals = pd.DataFrame({'1': np.arange(20), 
-                                                                  '2': np.arange(20)}))
-    forecaster.set_out_sample_residuals(residuals = residuals,
-                                        append    = False)
-
-    assert (forecaster.out_sample_residuals[level] == expected).all()
-
-
-@pytest.mark.parametrize("level, expected", 
-                         [('1' , np.hstack([np.arange(10), np.arange(10)])),
-                          ('2' , np.hstack([np.arange(10), np.arange(10)]))])
-def test_set_out_sample_residuals_when_residuals_length_is_less_than_1000_and_append(level, expected):
-    """
-    Test residuals stored when new residuals length is less than 1000 and append is True.
-    """
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
-    forecaster.series_col_names = ['1', '2']
-    forecaster.fitted = True
-    residuals = pd.DataFrame({'1': np.arange(10), 
-                              '2': np.arange(10)})
-
-    forecaster.set_out_sample_residuals(residuals = residuals)
-    forecaster.set_out_sample_residuals(residuals = residuals,
-                                        append    = True)
-
-    assert (forecaster.out_sample_residuals[level] == expected).all()
-
-
-@pytest.mark.parametrize("level, expected", 
-                         [('1' , np.hstack([np.arange(10), np.arange(1200)])[:1000]),
-                          ('2' , np.hstack([np.arange(10), np.arange(1200)])[:1000])])
-def test_set_out_sample_residuals_when_residuals_length_is_more_than_1000_and_append(level, expected):
+def test_set_out_sample_residuals_when_residuals_length_is_more_than_1000_and_append():
     """
     Test residuals stored when new residuals length is more than 1000 and append is True.
     """
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
-    forecaster.series_col_names = ['1', '2']
-    forecaster.fitted = True
-    residuals = pd.DataFrame({'1': np.arange(10), 
-                              '2': np.arange(10)})
-    residuals_2 = pd.DataFrame({'1': np.arange(1000), 
-                                '2': np.arange(1000)})
+    forecaster.fit(series=series)
+    residuals = {'l1': np.arange(10), 'l2': np.arange(10)}
+    residuals_2 = {'l1': np.arange(1200), 'l2': np.arange(1200)}
 
     forecaster.set_out_sample_residuals(residuals = residuals)
     forecaster.set_out_sample_residuals(residuals = residuals_2,
                                         append    = True)
 
-    assert (forecaster.out_sample_residuals[level] == expected).all()
+    expected = {}
+    for key, value in residuals_2.items():
+        rng = np.random.default_rng(seed=123)
+        expected_2 = rng.choice(a=value, size=1000, replace=False)
+        expected[key] = np.hstack([np.arange(10), expected_2])[:1000]
+
+    results = forecaster.out_sample_residuals
+
+    assert expected.keys() == results.keys()
+    assert all(all(expected[k] == results[k]) for k in expected.keys())
+    assert all(len(value)==1000 for value in results.values())

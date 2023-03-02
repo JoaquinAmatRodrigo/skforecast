@@ -10,7 +10,7 @@ def test_ForecasterSarimax_set_params():
     """
     forecaster = ForecasterSarimax(regressor=ARIMA(order=(1,1,1)))
     new_params = {'order': (2,2,2), 'seasonal_order': (1,1,1,2)}
-    forecaster.set_params(**new_params)
+    forecaster.set_params(new_params)
     expected = {'maxiter'           : 50,
                 'method'            : 'lbfgs',
                 'order'             : (2, 2, 2),

@@ -1,5 +1,5 @@
 ################################################################################
-#                                 utils                                        #
+#                             skforecast.utils                                 #
 #                                                                              #
 # This work by Joaquin Amat Rodrigo and Javier Escobar Ortiz is licensed       #
 # under a Creative Commons Attribution 4.0 International License.              #
@@ -34,7 +34,7 @@ def initialize_lags(
     Parameters
     ----------
     forecaster_name : str
-        Forcaster type. ForecasterAutoreg, ForecasterAutoregCustom, 
+        Forecaster name. ForecasterAutoreg, ForecasterAutoregCustom, 
         ForecasterAutoregDirect, ForecasterAutoregMultiSeries, 
         ForecasterAutoregMultiVariate.
 
@@ -68,12 +68,12 @@ def initialize_lags(
     else:
         if not forecaster_name == 'ForecasterAutoregMultiVariate':
             raise TypeError(
-                '`lags` argument must be an int, 1d numpy ndarray, range or list. '
+                "`lags` argument must be an int, 1d numpy ndarray, range or list. "
                 f"Got {type(lags)}."
             )
         else:
             raise TypeError(
-                '`lags` argument must be a dict, int, 1d numpy ndarray, range or list. '
+                "`lags` argument must be a dict, int, 1d numpy ndarray, range or list. "
                 f"Got {type(lags)}."
             )
 
@@ -94,7 +94,7 @@ def initialize_weights(
     Parameters
     ----------
     forecaster_name : str
-        Forcaster type: ForecasterAutoreg, ForecasterAutoregCustom, 
+        Forecaster name. ForecasterAutoreg, ForecasterAutoregCustom, 
         ForecasterAutoregDirect, ForecasterAutoregMultiSeries, 
         ForecasterAutoregMultiVariate, ForecasterAutoregMultiSeriesCustom.
 
@@ -312,7 +312,7 @@ def check_predict_input(
     Parameters
     ----------
     forecaster_name : str
-        Forcaster type: ForecasterAutoreg, ForecasterAutoregCustom, 
+        Forecaster name. ForecasterAutoreg, ForecasterAutoregCustom, 
         ForecasterAutoregDirect, ForecasterAutoregMultiSeries, 
         ForecasterAutoregMultiVariate, ForecasterAutoregMultiSeriesCustom.
 
@@ -884,13 +884,16 @@ def transform_series(
     if transformer is None:
         return series
 
+    if series.name is None:
+        series.name = 'no_name'
+        
     data = series.to_frame()
 
     if fit and hasattr(transformer, 'fit'):
         transformer.fit(data)
 
-    # If argument feature_names_in_ is overwritten to allow using the transformer on
-    # other series than those that were passed during fit.
+    # If argument feature_names_in_ exits, is overwritten to allow using the 
+    # transformer on other series than those that were passed during fit.
     if hasattr(transformer, 'feature_names_in_') and transformer.feature_names_in_[0] != data.columns[0]:
         transformer = deepcopy(transformer)
         transformer.feature_names_in_ = np.array([data.columns[0]], dtype=object)
@@ -906,18 +909,18 @@ def transform_series(
     
     if isinstance(values_transformed, np.ndarray) and values_transformed.shape[1] == 1:
         data_transformed = pd.Series(
-                                 data  = values_transformed.flatten(),
-                                 index = data.index,
-                                 name  = data.columns[0]
-                             )
+                               data  = values_transformed.flatten(),
+                               index = data.index,
+                               name  = data.columns[0]
+                           )
     elif isinstance(values_transformed, pd.DataFrame) and values_transformed.shape[1] == 1:
         data_transformed = values_transformed.squeeze()
     else:
         data_transformed = pd.DataFrame(
-                                 data    = values_transformed,
-                                 index   = data.index,
-                                 columns = transformer.get_feature_names_out()
-                             )
+                               data    = values_transformed,
+                               index   = data.index,
+                               columns = transformer.get_feature_names_out()
+                           )
 
     return data_transformed
 

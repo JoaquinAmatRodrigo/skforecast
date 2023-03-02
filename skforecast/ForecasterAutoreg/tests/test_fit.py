@@ -73,7 +73,7 @@ def test_fit_same_residuals_when_residuals_greater_than_1000():
     forecaster.fit(y=pd.Series(np.arange(1200)))
     results_2 = forecaster.in_sample_residuals
 
-    pd.testing.assert_series_equal(results_1, results_2)
+    np.testing.assert_array_equal(results_1, results_2)
 
 
 def test_fit_last_window_stored():
