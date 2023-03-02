@@ -377,6 +377,13 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         if not isinstance(series, pd.DataFrame):
             raise TypeError(f'`series` must be a pandas DataFrame. Got {type(series)}.')
 
+        if len(series) < self.window_size + 1:
+            raise ValueError(
+                (f'`series` must have as many values as the windows_size needed by '
+                 f'{self.fun_predictors.__name__}. For this Forecaster the '
+                 f'minimum length is {self.window_size + 1}')
+            )
+
         series_col_names = list(series.columns)
 
         if self.transformer_series is None:
@@ -424,6 +431,11 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
 
             X_train_values = np.vstack(temp_X_train)
             y_train_values = np.array(temp_y_train)
+
+            if np.isnan(X_train_values).any():
+                raise Exception(
+                    f"`fun_predictors()` is returning `NaN` values for series {serie}."
+                )
 
             if i == 0:
                 X_train = X_train_values
