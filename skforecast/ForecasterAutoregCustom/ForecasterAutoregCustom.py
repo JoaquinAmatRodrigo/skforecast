@@ -49,8 +49,8 @@ class ForecasterAutoregCustom(ForecasterBase):
         An instance of a regressor or pipeline compatible with the scikit-learn API.
         
     fun_predictors : Callable
-        Function that takes a numpy ndarray as a window of values as input and  
-        returns a numpy ndarray with the predictors associated with that window.
+        Function that receive as a window of values as input (numpy ndarray) and returns
+        another numpy ndarray with the predictors associated with that window.
         
     window_size : int
         Size of the window needed by `fun_predictors` to create the predictors.
@@ -82,13 +82,26 @@ class ForecasterAutoregCustom(ForecasterBase):
     ----------
     regressor : regressor compatible with the scikit-learn API
         An instance of a regressor compatible with the scikit-learn API.
+
+    fun_predictors : Callable
+        Function that receive as a window of values as input (numpy ndarray) and returns
+        another numpy ndarray with the predictors associated with that window.
+        **New in version 0.7.0**
         
     create_predictors : Callable
         Function that takes a numpy ndarray as a window of values as input and  
         returns a numpy ndarray with the predictors associated with that window.
+        **Deprecated in version 0.7.0 in favor of `fun_predictors`, it will be
+        removed in version 0.8.0**
 
     source_code_create_predictors : str
         Source code of the custom function used to create the predictors.
+        **Deprecated in version 0.7.0 in favor of `fun_predictors`, it will be
+        removed in version 0.8.0**
+
+    source_code_fun_predictors : str
+        Source code of the custom function used to create the predictors.
+        **New in version 0.7.0**
         
     window_size : int
         Size of the window needed by `fun_predictors` to create the predictors.
@@ -186,8 +199,10 @@ class ForecasterAutoregCustom(ForecasterBase):
     ) -> None:
         
         self.regressor                     = regressor
-        self.create_predictors             = fun_predictors
-        self.source_code_create_predictors = None
+        self.create_predictors             = fun_predictors # Deprecated
+        self.source_code_create_predictors = None # Deprecated
+        self.fun_predictors                = fun_predictors
+        self.source_code_fun_predictors    = None
         self.window_size                   = window_size
         self.name_predictors               = name_predictors
         self.transformer_y                 = transformer_y
@@ -221,6 +236,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             )
     
         self.source_code_create_predictors = inspect.getsource(fun_predictors)
+        self.source_code_fun_predictors = inspect.getsource(fun_predictors)
 
         self.weight_func, self.source_code_weight_func, _ = initialize_weights(
             forecaster_name = type(self).__name__, 
@@ -249,7 +265,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             f"{str(type(self)).split('.')[1]} \n"
             f"{'=' * len(str(type(self)).split('.')[1])} \n"
             f"Regressor: {self.regressor} \n"
-            f"Predictors created with function: {self.create_predictors.__name__} \n"
+            f"Predictors created with function: {self.fun_predictors.__name__} \n"
             f"Transformer for y: {self.transformer_y} \n"
             f"Transformer for exog: {self.transformer_exog} \n"
             f"Window size: {self.window_size} \n"
@@ -302,7 +318,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         if len(y) < self.window_size + 1:
             raise ValueError(
                 (f'`y` must have as many values as the windows_size needed by '
-                 f'{self.create_predictors.__name__}. For this Forecaster the '
+                 f'{self.fun_predictors.__name__}. For this Forecaster the '
                  f'minimum length is {self.window_size + 1}')
             )
 
@@ -352,7 +368,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             train_index = np.arange(i, self.window_size + i)
             test_index  = self.window_size + i
 
-            X_train.append(self.create_predictors(y=y_values[train_index]))
+            X_train.append(self.fun_predictors(y=y_values[train_index]))
             y_train.append(y_values[test_index])
         
         X_train = np.vstack(X_train)
@@ -370,7 +386,7 @@ class ForecasterAutoregCustom(ForecasterBase):
 
         if np.isnan(X_train).any():
             raise Exception(
-                f"`create_predictors()` is returning `NaN` values."
+                f"`fun_predictors()` is returning `NaN` values."
             )
         
         if exog is not None:
@@ -547,10 +563,10 @@ class ForecasterAutoregCustom(ForecasterBase):
         predictions = np.full(shape=steps, fill_value=np.nan)
 
         for i in range(steps):
-            X = self.create_predictors(y=last_window).reshape(1, -1)
+            X = self.fun_predictors(y=last_window).reshape(1, -1)
             if np.isnan(X).any():
                 raise Exception(
-                    f"`create_predictors()` is returning `NaN` values."
+                    f"`fun_predictors()` is returning `NaN` values."
                 )
             if exog is not None:
                 X = np.column_stack((X, exog[i, ].reshape(1, -1)))
