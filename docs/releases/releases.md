@@ -19,6 +19,12 @@ All notable changes to this project will be documented in this file.
 
 + Function `plot_prediction_distribution` in module `plot`.
 
++ Alias `backtesting_forecaster_multivariate` for `backtesting_forecaster_multiseries` in `model_selection_multiseries` module.
+
++ Alias `grid_search_forecaster_multivariate` for `grid_search_forecaster_multiseries` in `model_selection_multiseries` module.
+
++ Alias `random_search_forecaster_multivariate` for `random_search_forecaster_multiseries` in `model_selection_multiseries` module.
+
 **Changed**
 
 + Deprecated `python 3.7` compatibility.
