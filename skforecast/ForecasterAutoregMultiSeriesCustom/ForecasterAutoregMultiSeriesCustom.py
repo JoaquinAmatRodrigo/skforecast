@@ -42,6 +42,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
     This class turns any regressor compatible with the scikit-learn API into a
     recursive autoregressive (multi-step) forecaster for multiple series with a custom
     function to create predictors.
+    **New in version 0.7.0**
     
     Parameters
     ----------
@@ -89,6 +90,10 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         If `series_weights` is provided, a weight of 1 is given to all series not present
         in `series_weights`. If `None`, all levels have the same weight. See Notes section
         for more details on the use of the weights.
+
+    forecaster_id : str, default `None`
+        Name used as an identifier of the forecaster. It may be used, for example to identify
+        the time series being modeled.
     
     Attributes
     ----------
@@ -214,6 +219,10 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
     python_version : str
         Version of python used to create the forecaster.
 
+    forecaster_id : str, default `None`
+        Name used as an identifier of the forecaster. It may be used, for example to identify
+        the time series being modeled.
+
 
     Notes
     -----
@@ -243,7 +252,8 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         transformer_series: Optional[Union[object, dict]]=None,
         transformer_exog: Optional[object]=None,
         weight_func: Optional[Union[Callable, dict]]=None,
-        series_weights: Optional[dict]=None
+        series_weights: Optional[dict]=None,
+        forecaster_id: Optional[Union[str, int]]=None
     ) -> None:
         
         self.regressor                     = regressor
@@ -276,6 +286,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         self.fit_date                      = None
         self.skforcast_version             = skforecast.__version__
         self.python_version                = sys.version.split(" ")[0]
+        self.forecaster_id                 = forecaster_id
 
         if not isinstance(window_size, int):
             raise TypeError(
@@ -334,6 +345,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
             f"Last fit date: {self.fit_date} \n"
             f"Skforecast version: {self.skforcast_version} \n"
             f"Python version: {self.python_version} \n"
+            f"Forecaster id: {self.forecaster_id} \n"
         )
 
         return info
@@ -1277,7 +1289,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
             Number of future steps predicted.
 
         distribution : Object
-            A distribution object from scipy.stats.
+            A distribution object from scipy.stats. For example scipy.stats.norm.
 
         levels : str, list, default `None`
             Time series to be predicted. If `None` all levels will be predicted.  
