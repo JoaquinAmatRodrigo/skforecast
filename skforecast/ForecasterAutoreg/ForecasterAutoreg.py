@@ -90,20 +90,6 @@ class ForecasterAutoreg(ForecasterBase):
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API. The transformation is applied to `exog` before training the
         forecaster. `inverse_transform` is not available when using ColumnTransformers.
-        
-    max_lag : int
-        Maximum value of lag included in `lags`.
-   
-    window_size : int
-        Size of the window needed to create the predictors. It is equal to
-        `max_lag`.
-
-    last_window : pandas Series
-        Last window the forecaster has seen during trained. It stores the
-        values needed to predict the next `step` right after the training data.
-        
-    fitted : Bool
-        Tag to identify if the regressor has been fitted (trained).
 
     weight_func : callable
         Function that defines the individual weights for each sample based on the
@@ -115,6 +101,17 @@ class ForecasterAutoreg(ForecasterBase):
     source_code_weight_func : str
         Source code of the custom function used to create weights.
         **New in version 0.6.0**
+        
+    max_lag : int
+        Maximum value of lag included in `lags`.
+   
+    window_size : int
+        Size of the window needed to create the predictors. It is equal to
+        `max_lag`.
+
+    last_window : pandas Series
+        Last window the forecaster has seen during trained. It stores the
+        values needed to predict the next `step` right after the training data.
         
     index_type : type
         Type of index of the input used in training.
@@ -148,6 +145,9 @@ class ForecasterAutoreg(ForecasterBase):
         up to 1000 values. If `transformer_y` is not `None`, residuals
         are assumed to be in the transformed scale. Use `set_out_sample_residuals` to
         set values.
+        
+    fitted : bool
+        Tag to identify if the regressor has been fitted (trained).
 
     creation_date : str
         Date of creation.
@@ -177,10 +177,10 @@ class ForecasterAutoreg(ForecasterBase):
         self.transformer_exog        = transformer_exog
         self.weight_func             = weight_func
         self.source_code_weight_func = None
+        self.last_window             = None
         self.index_type              = None
         self.index_freq              = None
         self.training_range          = None
-        self.last_window             = None
         self.included_exog           = False
         self.exog_type               = None
         self.exog_col_names          = None
@@ -481,12 +481,16 @@ class ForecasterAutoreg(ForecasterBase):
         else: 
             self.index_freq = X_train.index.step
 
-        residuals = y_train - self.regressor.predict(X_train)
+        residuals = (y_train - self.regressor.predict(X_train)).to_numpy()
 
         if len(residuals) > 1000:
             # Only up to 1000 residuals are stored
             rng = np.random.default_rng(seed=123)
-            residuals = rng.choice(a=residuals, size=1000, replace=False)
+            residuals = rng.choice(
+                            a       = residuals, 
+                            size    = 1000, 
+                            replace = False
+                        )
                                                   
         self.in_sample_residuals = residuals
         
