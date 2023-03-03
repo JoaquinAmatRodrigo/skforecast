@@ -581,31 +581,33 @@ def backtesting_forecaster_multiseries(
             f'`refit` is only allowed when `initial_train_size` is not `None`.'
         )
 
-    if interval is not None and type(forecaster).__name__ == 'ForecasterAutoregMultiVariate':
+    if type(forecaster).__name__ not in ['ForecasterAutoregMultiSeries', 
+                                         'ForecasterAutoregMultiSeriesCustom', 
+                                         'ForecasterAutoregMultiVariate']:
         raise TypeError(
-            ('Interval prediction is only available when forecaster is of type '
-             'ForecasterAutoregMultiSeries.')
+            ("`forecaster` must be of type `ForecasterAutoregMultiSeries`, "
+             "`ForecasterAutoregMultiSeriesCustom` or `ForecasterAutoregMultiVariate`, "
+             "for all other types of forecasters use the functions available in "
+             f"the `model_selection` module. Got {type(forecaster).__name__}")
         )
 
-    if type(forecaster).__name__ not in ['ForecasterAutoregMultiSeries', 'ForecasterAutoregMultiVariate']:
+    if type(forecaster).__name__ in ['ForecasterAutoregMultiSeries', 
+                                     'ForecasterAutoregMultiSeriesCustom'] \
+        and levels is not None and not isinstance(levels, (str, list)):
         raise TypeError(
-            ('`forecaster` must be of type `ForecasterAutoregMultiSeries` or '
-             '`ForecasterAutoregMultiVariate`, for all other types of '
-             'forecasters use the functions available in the `model_selection` module.')
+            (f"`levels` must be a `list` of column names, a `str` of a column name "
+             f"or `None` when using a `ForecasterAutoregMultiSeries` or "
+             f"`ForecasterAutoregMultiSeriesCustom`. If the forecaster is of type "
+             f"`ForecasterAutoregMultiVariate`, this argument is ignored.")
         )
 
-    if type(forecaster).__name__ == 'ForecasterAutoregMultiSeries' and levels is not None and not isinstance(levels, (str, list)):
-        raise TypeError(
-            (f'`levels` must be a `list` of column names, a `str` of a column name or `None` '
-             f'when using a ForecasterAutoregMultiSeries. If the forecaster is of type '
-             f'ForecasterAutoregMultiVariate, this argument is ignored.')
-        )
-
-    if type(forecaster).__name__ == 'ForecasterAutoregMultiVariate' and levels and levels != forecaster.level and levels != [forecaster.level]:
+    if type(forecaster).__name__ == 'ForecasterAutoregMultiVariate' \
+        and levels and levels != forecaster.level and levels != [forecaster.level]:
         warnings.warn(
-            (f"`levels` argument have no use when the forecaster is of type ForecasterAutoregMultiVariate. "
-             f"The level of this forecaster is {forecaster.level}, to predict another level, change the `level` "
-             f"argument when initializing the forecaster. \n")
+            (f"`levels` argument have no use when the forecaster is of type "
+             f"`ForecasterAutoregMultiVariate`. The level of this forecaster is "
+             f"{forecaster.level}, to predict another level, change the `level` "
+             f"argument when initializing the forecaster.")
         )
     
     if refit:

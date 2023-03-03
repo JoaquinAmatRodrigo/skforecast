@@ -28,15 +28,15 @@ def test_predict_dist_output_when_forecaster_is_LinearRegression_steps_is_2_in_s
     2 steps are predicted, using in-sample residuals, exog is included and both
     inputs are transformed.
     """
-
-    forecaster = ForecasterAutoregDirect(
-                     regressor        = LinearRegression(),
-                     steps            = 2,
-                     lags             = 3,
-                     transformer_y    = StandardScaler(),
-                     transformer_exog = StandardScaler(),
+    forecaster = ForecasterAutoregMultiVariate(
+                     regressor          = LinearRegression(),
+                     steps              = 2,
+                     level              = 'l1',
+                     lags               = 3,
+                     transformer_series = StandardScaler(),
+                     transformer_exog   = transformer_exog
                  )
-    forecaster.fit(y=y, exog=exog)
+    forecaster.fit(series=series, exog=exog)
     results = forecaster.predict_dist(
                   steps               = 2,
                   exog                = exog_predict,
@@ -45,8 +45,8 @@ def test_predict_dist_output_when_forecaster_is_LinearRegression_steps_is_2_in_s
                   in_sample_residuals = True
               )
     expected = pd.DataFrame(
-                   data    = np.array([[0.54274594, 0.20807726],
-                                       [0.32046382, 0.13511556]]),
+                   data    = np.array([[0.53808076, 0.11721631],
+                                       [0.32552242, 0.1713172 ]]),
                    columns = ['loc', 'scale'],
                    index   = pd.RangeIndex(start=50, stop=52)
                )
@@ -60,15 +60,15 @@ def test_predict_dist_output_when_forecaster_is_LinearRegression_steps_is_2_in_s
     2 steps are predicted, using out-sample residuals, exog is included and both
     inputs are transformed.
     """
-
-    forecaster = ForecasterAutoregDirect(
-                     regressor        = LinearRegression(),
-                     steps            = 2,
-                     lags             = 3,
-                     transformer_y    = StandardScaler(),
-                     transformer_exog = StandardScaler(),
+    forecaster = ForecasterAutoregMultiVariate(
+                     regressor          = LinearRegression(),
+                     steps              = 2,
+                     level              = 'l1',
+                     lags               = 3,
+                     transformer_series = StandardScaler(),
+                     transformer_exog   = transformer_exog
                  )
-    forecaster.fit(y=y, exog=exog)
+    forecaster.fit(series=series, exog=exog)
     forecaster.out_sample_residuals = forecaster.in_sample_residuals
     results = forecaster.predict_dist(
                   steps               = 2,
@@ -78,8 +78,8 @@ def test_predict_dist_output_when_forecaster_is_LinearRegression_steps_is_2_in_s
                   in_sample_residuals = False
               )
     expected = pd.DataFrame(
-                   data    = np.array([[0.54274594, 0.20807726],
-                                       [0.32046382, 0.13511556]]),
+                   data    = np.array([[0.53808076, 0.11721631],
+                                       [0.32552242, 0.1713172 ]]),
                    columns = ['loc', 'scale'],
                    index   = pd.RangeIndex(start=50, stop=52)
                )
