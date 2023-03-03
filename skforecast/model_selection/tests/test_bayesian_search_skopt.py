@@ -10,19 +10,22 @@ from importlib import metadata
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import Ridge
 from sklearn.metrics import mean_absolute_error
-from skopt.space import Categorical, Real, Integer
-from skopt.utils import use_named_args
-from skopt import gp_minimize
+# from skopt.space import Categorical, Real, Integer
+# from skopt.utils import use_named_args
+# from skopt import gp_minimize
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
 from skforecast.ForecasterAutoregCustom import ForecasterAutoregCustom
 from skforecast.model_selection import backtesting_forecaster
-from skforecast.model_selection.model_selection import _bayesian_search_skopt
+# from skforecast.model_selection.model_selection import _bayesian_search_skopt
 
 from tqdm import tqdm
 from functools import partialmethod
 tqdm.__init__ = partialmethod(tqdm.__init__, disable=True) # hide progress bar
 
-# Fixtures _backtesting_forecaster_refit Series (skforecast==0.4.2)
+# This line skips all the tests in the file
+pytestmark = pytest.mark.skip(reason="`_bayesian_search_skopt` is deprecated since skforecast 0.7.0")
+
+# Fixtures
 # np.random.seed(123)
 # y = np.random.rand(50)
 
@@ -39,7 +42,7 @@ y = pd.Series(
               0.25045537, 0.48303426, 0.98555979, 0.51948512, 0.61289453]))
 
 
-def test_exception_bayesian_search_skopt_metric_list_duplicate_names():
+def test_exception_bayesian_search_skopt_metric_list_duplicate_names(): # pragma: no cover
     """
     Test exception is raised in _bayesian_search_optuna when a `list` of 
     metrics is used with duplicate names.
@@ -74,7 +77,7 @@ def test_exception_bayesian_search_skopt_metric_list_duplicate_names():
         )
 
 
-def test_bayesian_search_skopt_exception_when_search_space_names_do_not_match():
+def test_bayesian_search_skopt_exception_when_search_space_names_do_not_match(): # pragma: no cover
     """
     Test Exception is raised when search_space key name do not match the Space 
     object name from skopt.
@@ -113,7 +116,7 @@ def test_bayesian_search_skopt_exception_when_search_space_names_do_not_match():
 
 @pytest.mark.skipif(sys.version_info < (3, 8), reason="requires python3.8 or higher")
 @pytest.mark.skipif(metadata.version('numpy') >= '1.24.0', reason="requires numpy < 1.24.0")
-def test_results_output_bayesian_search_skopt_ForecasterAutoreg_with_mocked():
+def test_results_output_bayesian_search_skopt_ForecasterAutoreg_with_mocked(): # pragma: no cover
     """
     Test output of _bayesian_search_skopt in ForecasterAutoreg with mocked
     (mocked done in Skforecast v0.4.3).
@@ -199,7 +202,7 @@ def test_results_output_bayesian_search_skopt_ForecasterAutoreg_with_mocked():
     pd.testing.assert_frame_equal(results, expected_results, check_dtype=False)
     
 
-def test_results_output_bayesian_search_skopt_ForecasterAutoreg_with_mocked_when_kwargs_gp_minimize():
+def test_results_output_bayesian_search_skopt_ForecasterAutoreg_with_mocked_when_kwargs_gp_minimize(): # pragma: no cover
     """
     Test output of _bayesian_search_skopt in ForecasterAutoreg when kwargs_gp_minimize with mocked
     (mocked done in Skforecast v0.4.3).
@@ -272,7 +275,7 @@ def test_results_output_bayesian_search_skopt_ForecasterAutoreg_with_mocked_when
     pd.testing.assert_frame_equal(results, expected_results)
 
 
-def test_results_output_bayesian_search_skopt_ForecasterAutoreg_with_mocked_when_lags_grid_is_None():
+def test_results_output_bayesian_search_skopt_ForecasterAutoreg_with_mocked_when_lags_grid_is_None(): # pragma: no cover
     """
     Test output of _bayesian_search_skopt in ForecasterAutoreg when lags_grid is None with mocked
     (mocked done in Skforecast v0.4.3), should use forecaster.lags as lags_grid.
@@ -327,7 +330,7 @@ def test_results_output_bayesian_search_skopt_ForecasterAutoreg_with_mocked_when
     pd.testing.assert_frame_equal(results, expected_results)
 
 
-def test_results_output_bayesian_search_skopt_ForecasterAutoregCustom_with_mocked():
+def test_results_output_bayesian_search_skopt_ForecasterAutoregCustom_with_mocked(): # pragma: no cover
     """
     Test output of _bayesian_search_skopt in ForecasterAutoregCustom with mocked
     (mocked done in Skforecast v0.4.3).
@@ -392,7 +395,7 @@ def test_results_output_bayesian_search_skopt_ForecasterAutoregCustom_with_mocke
     pd.testing.assert_frame_equal(results, expected_results)
     
 
-def test_evaluate_bayesian_search_skopt_when_return_best():
+def test_evaluate_bayesian_search_skopt_when_return_best(): # pragma: no cover
     """
     Test forecaster is refitted when return_best=True in _bayesian_search_skopt.
     """
@@ -430,7 +433,7 @@ def test_evaluate_bayesian_search_skopt_when_return_best():
     assert expected_alpha == approx(forecaster.regressor.alpha, abs=0.00001)
 
 
-def test_results_opt_best_output_bayesian_search_skopt_with_output_gp_minimize_skopt():
+def test_results_opt_best_output_bayesian_search_skopt_with_output_gp_minimize_skopt(): # pragma: no cover
     """
     Test results_opt_best output of _bayesian_search_skopt with output gp_minimize() skopt.
     """

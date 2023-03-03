@@ -24,23 +24,21 @@ transformer_exog = ColumnTransformer(
                    )
 
 
-def test_predict_bootstrapping_ValueError_when_forecaster_in_sample_residuals_contains_None_values():
+def test_predict_bootstrapping_ValueError_when_not_in_sample_residuals_for_any_level():
     """
-    Test ValueError is raised when forecaster.in_sample_residuals are not stored 
-    during fit method.
+    Test ValueError is raised when in_sample_residuals=True but there is no
+    residuals for any level.
     """
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
-    forecaster.fit(series=series, store_in_sample_residuals=False)
+    forecaster.fit(series=series)
+    forecaster.in_sample_residuals = {2: np.array([1, 2, 3])}
 
     err_msg = re.escape(
-                (f"`forecaster.in_sample_residuals['1']` contains `None` values. "
-                  "Try using `fit` method with `in_sample_residuals=True` or set in "
-                  "`predict_interval()`, `predict_bootstrapping()` or "
-                  "`predict_dist()` method `in_sample_residuals=False` and use "
-                  "`out_sample_residuals` (see `set_out_sample_residuals()`).")
-              )
+                (f"Not `forecaster.in_sample_residuals` for levels: "
+                 f"{set(['1', '2']) - set(forecaster.in_sample_residuals.keys())}.")
+                )
     with pytest.raises(ValueError, match = err_msg):
-        forecaster.predict_bootstrapping(steps=1, levels='1', in_sample_residuals=True)
+        forecaster.predict_bootstrapping(steps=1, levels=None, in_sample_residuals=True)
 
 
 def test_predict_bootstrapping_ValueError_when_out_sample_residuals_is_None():
@@ -49,7 +47,7 @@ def test_predict_bootstrapping_ValueError_when_out_sample_residuals_is_None():
     forecaster.out_sample_residuals is None.
     """
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
-    forecaster.fit(series=series, store_in_sample_residuals=False)
+    forecaster.fit(series=series)
 
     err_msg = re.escape(
                 ('`forecaster.out_sample_residuals` is `None`. Use '
@@ -68,17 +66,53 @@ def test_predict_bootstrapping_ValueError_when_not_out_sample_residuals_for_all_
     """
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
     forecaster.fit(series=series)
-    residuals = pd.DataFrame({'2': [1, 2, 3, 4, 5], 
-                              '3': [1, 2, 3, 4, 5]})
-    forecaster.set_out_sample_residuals(residuals = residuals)
+    residuals = {'2': np.array([1, 2, 3, 4, 5]), 
+                 '3': np.array([1, 2, 3, 4, 5])}
+    forecaster.out_sample_residuals = residuals
     levels = ['1']
 
     err_msg = re.escape(
-                (f'Not `forecaster.out_sample_residuals` for levels: {set(levels) - set(forecaster.out_sample_residuals.keys())}. '
-                 f'Use method `set_out_sample_residuals()`.')
+                (f"Not `forecaster.out_sample_residuals` for levels: "
+                 f"{set(levels) - set(forecaster.out_sample_residuals.keys())}. "
+                 f"Use method `set_out_sample_residuals()`.")
             )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.predict_bootstrapping(steps=1, levels=levels, in_sample_residuals=False)
+
+
+def test_predict_bootstrapping_ValueError_when_level_out_sample_residuals_value_is_None():
+    """
+    Test ValueError is raised when in_sample_residuals=False and
+    forecaster.out_sample_residuals has a level with a None.
+    """
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
+    forecaster.fit(series=series)
+    residuals = {'1': np.array([1, 2, 3, 4, 5])}
+    forecaster.set_out_sample_residuals(residuals = residuals)
+
+    err_msg = re.escape(
+                    (f"forecaster residuals for level '2' are `None`. Check `forecaster.out_sample_residuals`.")
+                )
+    with pytest.raises(ValueError, match = err_msg):
+        forecaster.predict_bootstrapping(steps=3, in_sample_residuals=False)
+
+
+def test_predict_bootstrapping_ValueError_when_step_out_sample_residuals_value_contains_None():
+    """
+    Test ValueError is raised when in_sample_residuals=False and
+    forecaster.out_sample_residuals has a step with a None value.
+    """
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
+    forecaster.fit(series=series)
+    residuals = {'1': np.array([1, 2, 3, 4, 5]),
+                 '2': np.array([1, 2, 3, 4, None])}
+    forecaster.set_out_sample_residuals(residuals = residuals)
+
+    err_msg = re.escape(
+                    (f"forecaster residuals for level '2' contains `None` values. Check `forecaster.out_sample_residuals`.")
+                )
+    with pytest.raises(ValueError, match = err_msg):
+        forecaster.predict_bootstrapping(steps=3, in_sample_residuals=False)
 
 
 def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_exog_steps_is_1_in_sample_residuals_is_True():

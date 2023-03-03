@@ -5,8 +5,7 @@ import pytest
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import Ridge
-from sklearn.metrics import mean_squared_error 
-from skopt.space import Real
+# from skopt.space import Real
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
 from skforecast.ForecasterAutoregCustom import ForecasterAutoregCustom
 from skforecast.model_selection import bayesian_search_forecaster
@@ -30,7 +29,7 @@ y = pd.Series(
 
 def test_exception_bayesian_search_forecaster_when_return_best_and_len_y_exog_different():
     """
-    Test exception is raised in _evaluate_grid_hyperparameters when return_best 
+    Test exception is raised in bayesian_search_forecaster when return_best 
     and length of `y` and `exog` do not match.
     """
     forecaster = ForecasterAutoreg(
@@ -38,6 +37,11 @@ def test_exception_bayesian_search_forecaster_when_return_best_and_len_y_exog_di
                     lags      = 2
                  )
     exog = y[:30]
+
+    def search_space(trial): # pragma: no cover
+        search_space  = {'alpha' : trial.suggest_loguniform('alpha', 1e-2, 1.0)
+                        }
+        return search_space
 
     err_msg = re.escape(
             f'`exog` must have same number of samples as `y`. '
@@ -49,7 +53,7 @@ def test_exception_bayesian_search_forecaster_when_return_best_and_len_y_exog_di
             y                  = y,
             exog               = exog,
             lags_grid          = [2, 4],
-            search_space       = {'alpha': Real(0.01, 1.0, "log-uniform", name='alpha')},
+            search_space       = search_space,
             steps              = 3,
             metric             = 'mean_absolute_error',
             refit              = True,
@@ -59,29 +63,33 @@ def test_exception_bayesian_search_forecaster_when_return_best_and_len_y_exog_di
             random_state       = 123,
             return_best        = True,
             verbose            = False,
-            engine             = 'skopt'
+            engine             = 'optuna'
         )
 
 
-def test_bayesian_search_forecaster_exception_when_engine_not_optuna_or_skopt():
+def test_bayesian_search_forecaster_ValueError_when_engine_not_optuna():
     """
-    Test Exception in bayesian_search_forecaster is raised when engine is not 'optuna' 
-    or 'skopt'.
+    Test ValueError in bayesian_search_forecaster is raised when engine is not 'optuna'.
     """
     forecaster = ForecasterAutoreg(
                     regressor = Ridge(random_state=123),
                     lags      = 2
                  )
 
-    engine = 'not_optuna_or_skopt'
+    def search_space(trial): # pragma: no cover
+        search_space  = {'alpha' : trial.suggest_loguniform('alpha', 1e-2, 1.0)
+                        }
+        return search_space
+
+    engine = 'not_optuna'
     
-    err_msg = re.escape(f"""`engine` only allows 'optuna' or 'skopt', got {engine}.""")
+    err_msg = re.escape(f"""`engine` only allows 'optuna', got {engine}.""")
     with pytest.raises(ValueError, match = err_msg):
         bayesian_search_forecaster(
             forecaster         = forecaster,
             y                  = y,
             lags_grid          = [2, 4],
-            search_space       = {'alpha': Real(0.01, 1.0, "log-uniform", name='alpha')},
+            search_space       = search_space,
             steps              = 3,
             metric             = 'mean_absolute_error',
             refit              = True,
@@ -115,12 +123,10 @@ def test_results_output_bayesian_search_forecaster_optuna_engine_ForecasterAutor
                         window_size    = 4
                  )
 
-    def search_space(trial):
+    def search_space(trial): # pragma: no cover
         search_space  = {'alpha' : trial.suggest_loguniform('alpha', 1e-2, 1.0)
                         }
         return search_space
-
-    engine = 'optuna'
 
     results = bayesian_search_forecaster(
                     forecaster         = forecaster,
@@ -135,7 +141,7 @@ def test_results_output_bayesian_search_forecaster_optuna_engine_ForecasterAutor
                     random_state       = 123,
                     return_best        = False,
                     verbose            = False,
-                    engine             = engine
+                    engine             = 'optuna'
               )[0]
     
     expected_results = pd.DataFrame({
@@ -163,12 +169,13 @@ def test_results_output_bayesian_search_forecaster_optuna_engine_ForecasterAutor
     pd.testing.assert_frame_equal(results, expected_results)
 
 
-def test_results_output_bayesian_search_forecaster_skopt_engine_ForecasterAutoregCustom_with_mocked():
+@pytest.mark.skip(reason="`_bayesian_search_skopt` is deprecated since skforecast 0.7.0")
+def test_results_output_bayesian_search_forecaster_skopt_engine_ForecasterAutoregCustom_with_mocked(): # pragma: no cover
     """
     Test output of bayesian_search_forecaster in ForecasterAutoregCustom with mocked
     using skopt engine (mocked done in Skforecast v0.4.3).
     """
-    def create_predictors(y):
+    def create_predictors(y): # pragma: no cover
         """
         Create first 4 lags of a time series, used in ForecasterAutoregCustom.
         """

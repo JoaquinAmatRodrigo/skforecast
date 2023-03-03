@@ -127,7 +127,6 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_mocked():
     Test output of _bayesian_search_optuna in ForecasterAutoreg with mocked
     (mocked done in Skforecast v0.4.3).
     """
-
     forecaster = ForecasterAutoreg(
                     regressor = RandomForestRegressor(random_state=123),
                     lags      = 2 # Placeholder, the value will be overwritten

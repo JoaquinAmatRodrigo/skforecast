@@ -1,5 +1,5 @@
 ################################################################################
-#                                 utils                                        #
+#                             skforecast.utils                                 #
 #                                                                              #
 # This work by Joaquin Amat Rodrigo and Javier Escobar Ortiz is licensed       #
 # under a Creative Commons Attribution 4.0 International License.              #
@@ -25,7 +25,7 @@ optional_dependencies = {
 
 
 def initialize_lags(
-    forecaster_type: str,
+    forecaster_name: str,
     lags: Any
 ) -> np.ndarray:
     """
@@ -33,8 +33,8 @@ def initialize_lags(
     
     Parameters
     ----------
-    forecaster_type : str
-        Forcaster type. ForecasterAutoreg, ForecasterAutoregCustom, 
+    forecaster_name : str
+        Forecaster name. ForecasterAutoreg, ForecasterAutoregCustom, 
         ForecasterAutoregDirect, ForecasterAutoregMultiSeries, 
         ForecasterAutoregMultiVariate.
 
@@ -66,14 +66,14 @@ def initialize_lags(
     elif isinstance(lags, np.ndarray):
         lags = lags
     else:
-        if not forecaster_type == 'ForecasterAutoregMultiVariate':
+        if not forecaster_name == 'ForecasterAutoregMultiVariate':
             raise TypeError(
-                '`lags` argument must be an int, 1d numpy ndarray, range or list. '
+                "`lags` argument must be an int, 1d numpy ndarray, range or list. "
                 f"Got {type(lags)}."
             )
         else:
             raise TypeError(
-                '`lags` argument must be a dict, int, 1d numpy ndarray, range or list. '
+                "`lags` argument must be a dict, int, 1d numpy ndarray, range or list. "
                 f"Got {type(lags)}."
             )
 
@@ -81,7 +81,7 @@ def initialize_lags(
 
 
 def initialize_weights(
-    forecaster_type: str,
+    forecaster_name: str,
     regressor: object,
     weight_func: Union[callable, dict],
     series_weights: dict
@@ -93,10 +93,10 @@ def initialize_weights(
     
     Parameters
     ----------
-    forecaster_type : str
-        Forcaster type. ForecasterAutoreg, ForecasterAutoregCustom, 
+    forecaster_name : str
+        Forecaster name. ForecasterAutoreg, ForecasterAutoregCustom, 
         ForecasterAutoregDirect, ForecasterAutoregMultiSeries, 
-        ForecasterAutoregMultiVariate.
+        ForecasterAutoregMultiVariate, ForecasterAutoregMultiSeriesCustom.
 
     regressor : regressor or pipeline compatible with the scikit-learn API
         Regressor of the forecaster.
@@ -124,14 +124,16 @@ def initialize_weights(
     source_code_weight_func = None
 
     if weight_func is not None:
-        if not isinstance(weight_func, Callable) and not forecaster_type == 'ForecasterAutoregMultiSeries':
+
+        if forecaster_name in ['ForecasterAutoregMultiSeries', 'ForecasterAutoregMultiSeriesCustom']:
+            if not isinstance(weight_func, (Callable, dict)):
+                raise TypeError(
+                    f"Argument `weight_func` must be a callable or a dict of "
+                    f"callables. Got {type(weight_func)}."
+                )
+        elif not isinstance(weight_func, Callable):
             raise TypeError(
                 f"Argument `weight_func` must be a callable. Got {type(weight_func)}."
-            )
-        elif not isinstance(weight_func, (Callable, dict)) and forecaster_type == 'ForecasterAutoregMultiSeries':
-            raise TypeError(
-                f"Argument `weight_func` must be a callable or a dict of "
-                f"callables. Got {type(weight_func)}."
             )
         
         if isinstance(weight_func, dict):
@@ -283,7 +285,7 @@ def check_interval(
 
 
 def check_predict_input(
-    forecaster_type: str,
+    forecaster_name: str,
     steps: int,
     fitted: bool,
     included_exog: bool,
@@ -308,10 +310,10 @@ def check_predict_input(
 
     Parameters
     ----------
-    forecaster_type : str
-        Forcaster type. ForecasterAutoreg, ForecasterAutoregCustom, 
+    forecaster_name : str
+        Forecaster name. ForecasterAutoreg, ForecasterAutoregCustom, 
         ForecasterAutoregDirect, ForecasterAutoregMultiSeries, 
-        ForecasterAutoregMultiVariate.
+        ForecasterAutoregMultiVariate, ForecasterAutoregMultiSeriesCustom.
 
     steps : int
         Number of future steps predicted.
@@ -363,11 +365,12 @@ def check_predict_input(
         `ForecasterAutoregMultiVariate`).
             
     levels : str, list, default `None`
-        Time series to be predicted (`ForecasterAutoregMultiSeries`).
+        Time series to be predicted (`ForecasterAutoregMultiSeries` and
+        `ForecasterAutoregMultiSeriesCustom`).
 
     series_col_names : list, default `None`
-        Names of the columns used during fit (`ForecasterAutoregMultiSeries` and 
-        `ForecasterAutoregMultiVariate`).
+        Names of the columns used during fit (`ForecasterAutoregMultiSeries`, 
+        `ForecasterAutoregMultiVariate` and `ForecasterAutoregMultiSeriesCustom`).
     
     """
 
@@ -399,7 +402,7 @@ def check_predict_input(
     if interval is not None or alpha is not None:
         check_interval(interval=interval, alpha=alpha)
     
-    if forecaster_type == 'ForecasterAutoregMultiSeries':
+    if forecaster_name in ['ForecasterAutoregMultiSeries', 'ForecasterAutoregMultiSeriesCustom']:
         if levels is not None and not isinstance(levels, (str, list)):
             raise TypeError(
                 f'`levels` must be a `list` of column names, a `str` of a column name or `None`.'
@@ -423,13 +426,14 @@ def check_predict_input(
         
     # Checks last_window
     # Check last_window type (pd.Series or pd.DataFrame according to forecaster)
-    if forecaster_type in ['ForecasterAutoregMultiSeries', 'ForecasterAutoregMultiVariate']:
+    if forecaster_name in ['ForecasterAutoregMultiSeries', 'ForecasterAutoregMultiVariate',
+                           'ForecasterAutoregMultiSeriesCustom']:
         if not isinstance(last_window, pd.DataFrame):
             raise TypeError(
                 f'`last_window` must be a pandas DataFrame. Got {type(last_window)}.'
             )
         
-        if forecaster_type == 'ForecasterAutoregMultiSeries' and \
+        if forecaster_name in ['ForecasterAutoregMultiSeries', 'ForecasterAutoregMultiSeriesCustom'] and \
             len(set(levels) - set(last_window.columns)) != 0:
             raise ValueError(
                 (f'`last_window` must contain a column(s) named as the level(s) to be predicted.\n'
@@ -437,7 +441,7 @@ def check_predict_input(
                  f'    `last_window` columns : {list(last_window.columns)}.')
             )
         
-        if forecaster_type == 'ForecasterAutoregMultiVariate' and \
+        if forecaster_name == 'ForecasterAutoregMultiVariate' and \
             (series_col_names != list(last_window.columns)):
             raise ValueError(
                 (f'`last_window` columns must be the same as `series` column names.\n'
@@ -528,7 +532,7 @@ def check_predict_input(
             )
 
     # Checks ForecasterSarimax
-    if forecaster_type == 'ForecasterSarimax':
+    if forecaster_name == 'ForecasterSarimax':
         # Check last_window_exog type, len, nulls and index (type and freq)
         if last_window_exog is not None:
             if not included_exog:
@@ -880,13 +884,16 @@ def transform_series(
     if transformer is None:
         return series
 
+    if series.name is None:
+        series.name = 'no_name'
+        
     data = series.to_frame()
 
     if fit and hasattr(transformer, 'fit'):
         transformer.fit(data)
 
-    # If argument feature_names_in_ is overwritten to allow using the transformer on
-    # other series than those that were passed during fit.
+    # If argument feature_names_in_ exits, is overwritten to allow using the 
+    # transformer on other series than those that were passed during fit.
     if hasattr(transformer, 'feature_names_in_') and transformer.feature_names_in_[0] != data.columns[0]:
         transformer = deepcopy(transformer)
         transformer.feature_names_in_ = np.array([data.columns[0]], dtype=object)
@@ -902,18 +909,18 @@ def transform_series(
     
     if isinstance(values_transformed, np.ndarray) and values_transformed.shape[1] == 1:
         data_transformed = pd.Series(
-                                 data  = values_transformed.flatten(),
-                                 index = data.index,
-                                 name  = data.columns[0]
-                             )
+                               data  = values_transformed.flatten(),
+                               index = data.index,
+                               name  = data.columns[0]
+                           )
     elif isinstance(values_transformed, pd.DataFrame) and values_transformed.shape[1] == 1:
         data_transformed = values_transformed.squeeze()
     else:
         data_transformed = pd.DataFrame(
-                                 data    = values_transformed,
-                                 index   = data.index,
-                                 columns = transformer.get_feature_names_out()
-                             )
+                               data    = values_transformed,
+                               index   = data.index,
+                               columns = transformer.get_feature_names_out()
+                           )
 
     return data_transformed
 
