@@ -2,7 +2,6 @@
 # ==============================================================================
 import re
 import pytest
-from pytest import approx
 import numpy as np
 import pandas as pd
 import inspect
@@ -11,14 +10,13 @@ from sklearn.linear_model import LinearRegression
 from sklearn.neighbors import KNeighborsRegressor
 
 
-
 @pytest.mark.parametrize("forecaster_name", 
                          ['ForecasterAutoreg', 'ForecasterAutoregCustom',
                           'ForecasterAutoregDirect', 'ForecasterAutoregMultiVariate'], 
-                         ids=lambda ft: f'forecaster_name: {ft}')
-def test_exception_initialize_weights_when_weight_func_is_not_a_callable(forecaster_name):
+                         ids=lambda fn: f'forecaster_name: {fn}')
+def test_TypeError_initialize_weights_when_weight_func_is_not_a_callable(forecaster_name):
     """
-    Test exception is raised when weight_func is not a callable.
+    Test TypeError is raised when weight_func is not a callable.
     """
     weight_func = 'not_callable'
     err_msg = re.escape(f"Argument `weight_func` must be a callable. Got {type(weight_func)}.")
@@ -31,24 +29,30 @@ def test_exception_initialize_weights_when_weight_func_is_not_a_callable(forecas
         )
 
 
-def test_exception_initialize_weights_when_weight_func_is_not_a_callable_or_dict():
+@pytest.mark.parametrize("forecaster_name", 
+                         ['ForecasterAutoregMultiSeries', 'ForecasterAutoregMultiSeriesCustom'], 
+                         ids=lambda fn: f'forecaster_name: {fn}')
+def test_TypeError_initialize_weights_when_weight_func_is_not_a_callable_or_dict(forecaster_name):
     """
-    Test exception is raised when weight_func is not a callable or a dict.
+    Test TypeError is raised when weight_func is not a callable or a dict.
     """
     weight_func = 'not_callable_or_dict'
     err_msg = re.escape(f"Argument `weight_func` must be a callable or a dict of callables. Got {type(weight_func)}.")
     with pytest.raises(TypeError, match = err_msg):
         initialize_weights(
-            forecaster_name = 'ForecasterAutoregMultiSeries', 
+            forecaster_name = forecaster_name, 
             regressor       = LinearRegression(), 
             weight_func     = weight_func, 
             series_weights  = None
         )
 
 
-def test_exception_initialize_weights_when_series_weights_is_not_a_dict():
+@pytest.mark.parametrize("forecaster_name", 
+                         ['ForecasterAutoregMultiSeries', 'ForecasterAutoregMultiSeriesCustom'], 
+                         ids=lambda fn: f'forecaster_name: {fn}')
+def test_TypeError_initialize_weights_when_series_weights_is_not_a_dict(forecaster_name):
     """
-    Test exception is raised when series_weights is not a dict.
+    Test TypeError is raised when series_weights is not a dict.
     """
     series_weights = 'not_callable_or_dict'
     err_msg = re.escape(
@@ -57,19 +61,18 @@ def test_exception_initialize_weights_when_series_weights_is_not_a_dict():
     )
     with pytest.raises(TypeError, match = err_msg):
         initialize_weights(
-            forecaster_name = 'ForecasterAutoregMultiSeries', 
+            forecaster_name = forecaster_name, 
             regressor       = LinearRegression(), 
             weight_func     = None, 
             series_weights  = series_weights
         )
 
 
-def test_exception_initialize_weights_when_weight_func_is_provided_and_regressor_has_not_sample_weights():
+def test_UserWarning_initialize_weights_when_weight_func_is_provided_and_regressor_has_not_sample_weights():
     """
-    Test warning is created when weight_func is provided but the regressor has no argument
+    Test UserWarning is created when weight_func is provided but the regressor has no argument
     sample_weights in his fit method.
     """
-
     def weight_func(): # pragma: no cover
         pass
 
@@ -89,9 +92,9 @@ def test_exception_initialize_weights_when_weight_func_is_provided_and_regressor
     assert source_code_weight_func is None
 
 
-def test_exception_initialize_weights_when_series_weights_is_provided_and_regressor_has_not_sample_weights():
+def test_UserWarning_initialize_weights_when_series_weights_is_provided_and_regressor_has_not_sample_weights():
     """
-    Test warning is created when series_weights is provided but the regressor has no argument
+    Test UserWarning is created when series_weights is provided but the regressor has no argument
     sample_weights in his fit method.
     """
     series_weights = {'series_1': 1., 'series_2': 2.}
@@ -152,7 +155,7 @@ def test_output_initialize_weights_source_code_weight_func_when_weight_func_dict
     weight_func = {'series_1': test_weight_func, 'series_2': test_weight_func_2}    
 
     weight_func, source_code_weight_func, series_weights = initialize_weights(
-        forecaster_name = 'ForecasterAutoregMultiSeries', 
+        forecaster_name = 'ForecasterAutoregMultiSeriesCustom', 
         regressor       = LinearRegression(), 
         weight_func     = weight_func, 
         series_weights  = None

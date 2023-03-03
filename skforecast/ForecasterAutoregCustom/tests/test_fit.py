@@ -2,7 +2,6 @@
 # ==============================================================================
 import numpy as np
 import pandas as pd
-from pytest import approx
 from skforecast.ForecasterAutoregCustom import ForecasterAutoregCustom
 from sklearn.linear_model import LinearRegression
 from xgboost import XGBRegressor
@@ -65,10 +64,11 @@ def test_fit_in_sample_residuals_stored():
                      window_size    = 5
                  )
     forecaster.fit(y=pd.Series(np.arange(7)))
-    expected = np.array([0, 0])
     results = forecaster.in_sample_residuals
+    expected = np.array([0., 0.])
 
-    assert results.values == approx(expected)
+    assert isinstance(results, np.ndarray)
+    np.testing.assert_array_equal(results, expected)
 
 
 def test_fit_in_sample_residuals_stored_XGBRegressor():
@@ -81,10 +81,11 @@ def test_fit_in_sample_residuals_stored_XGBRegressor():
                      window_size    = 5
                  )
     forecaster.fit(y=pd.Series(np.arange(7)))
+    results = forecaster.in_sample_residuals
     expected = np.array([-0.0008831, 0.00088501])
-    results = forecaster.in_sample_residuals.to_numpy()
 
-    assert np.isclose(expected, results).all()
+    assert isinstance(results, np.ndarray)
+    assert all(np.isclose(results, expected))
 
 
 def test_fit_same_residuals_when_residuals_greater_than_1000():
@@ -107,6 +108,8 @@ def test_fit_same_residuals_when_residuals_greater_than_1000():
     forecaster.fit(y=pd.Series(np.arange(1200)))
     results_2 = forecaster.in_sample_residuals
 
+    assert isinstance(results_1, np.ndarray)
+    assert isinstance(results_2, np.ndarray)
     np.testing.assert_array_equal(results_1, results_2)
 
 

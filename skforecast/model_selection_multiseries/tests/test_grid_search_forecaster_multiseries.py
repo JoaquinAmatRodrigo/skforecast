@@ -7,6 +7,7 @@ from sklearn.linear_model import Ridge
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 from skforecast.ForecasterAutoregMultiVariate import ForecasterAutoregMultiVariate
 from skforecast.model_selection_multiseries import grid_search_forecaster_multiseries
+from skforecast.model_selection_multiseries import grid_search_forecaster_multivariate
 
 from tqdm import tqdm
 from functools import partialmethod
@@ -78,7 +79,7 @@ def test_output_grid_search_forecaster_multiseries_ForecasterAutoregMultiVariate
     lags_grid = [2, 4]
     param_grid = {'alpha': [0.01, 0.1, 1]}
 
-    results = grid_search_forecaster_multiseries(
+    results = grid_search_forecaster_multivariate(
                     forecaster          = forecaster,
                     series              = series,
                     param_grid          = param_grid,

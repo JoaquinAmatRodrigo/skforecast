@@ -239,15 +239,15 @@ def test_create_train_X_y_exception_when_y_and_exog_have_different_length():
         forecaster.fit(y=y, exog=exog)
 
 
-def test_create_train_X_y_exception_fun_predictors_return_nan_values():
+def test_create_train_X_y_ValueError_fun_predictors_return_nan_values():
     """
-    Test exception is raised when length of y and length of exog are different.
+    Test ValueError is raised when fun_predictors returns `NaN`values.
     """
     forecaster = ForecasterAutoregCustom(
                     regressor      = LinearRegression(),
                     fun_predictors = lambda y: np.array([np.nan, np.nan]),
                     window_size    = 5
                 )
-    err_msg = re.escape("`create_predictors()` is returning `NaN` values.")
-    with pytest.raises(Exception, match = err_msg):
+    err_msg = re.escape("`fun_predictors()` is returning `NaN` values.")
+    with pytest.raises(ValueError, match = err_msg):
         forecaster.fit(y=pd.Series(np.arange(50)))

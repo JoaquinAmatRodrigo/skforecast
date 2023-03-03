@@ -769,7 +769,7 @@ def test_check_predict_input_ValueError_when_exog_index_does_not_follow_last_win
 
 def test_check_predict_input_ValueError_when_exog_index_does_not_follow_last_window_index_RangeIndex():
     """
-    Raise exception if `exog` index does not start at the end of `last_window` index when RangeIndex.
+    Raise ValueError if `exog` index does not start at the end of `last_window` index when RangeIndex.
     """
     exog_datetime = pd.Series(data=np.random.rand(10))
     exog_datetime.index = pd.RangeIndex(start=11, stop=21)

@@ -6,6 +6,8 @@ All notable changes to this project will be documented in this file.
 
 **Added**
 
++ Class `ForecasterAutoregMultiSeriesCustom`.
+
 + Class `ForecasterSarimax` and `model_selection_sarimax` (wrapper of [pmdarima](http://alkaline-ml.com/pmdarima/modules/generated/pmdarima.arima.ARIMA.html#pmdarima.arima.ARIMA)).
   
 + Method `predict_interval()` to `ForecasterAutoregDirect` and `ForecasterAutoregMultiVariate`.
@@ -15,6 +17,12 @@ All notable changes to this project will be documented in this file.
 + Method `predict_dist()` to all forecasters, fit a given probability distribution for each step.
 
 + Function `plot_prediction_distribution` in module `plot`.
+
++ Alias `backtesting_forecaster_multivariate` for `backtesting_forecaster_multiseries` in `model_selection_multiseries` module.
+
++ Alias `grid_search_forecaster_multivariate` for `grid_search_forecaster_multiseries` in `model_selection_multiseries` module.
+
++ Alias `random_search_forecaster_multivariate` for `random_search_forecaster_multiseries` in `model_selection_multiseries` module.
 
 **Changed**
 
@@ -32,7 +40,7 @@ All notable changes to this project will be documented in this file.
 
 + `in_sample_residuals` and `out_sample_residuals` are stored as numpy ndarrays instead of pandas series.
 
-+ In `ForecasterAutoregMultiSeries`, `set_out_sample_residuals()` is now expecting a `dict` for the `residuals` argument instead of a pandas DataFrame.
++ In `ForecasterAutoregMultiSeries`, `set_out_sample_residuals()` is now expecting a `dict` for the `residuals` argument instead of a `pandas DataFrame`.
 
 + Remove the `scikit-optimize` dependency.
 

@@ -121,13 +121,6 @@ class ForecasterAutoregCustom(ForecasterBase):
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API. The transformation is applied to `exog` before training the
         forecaster. `inverse_transform` is not available when using ColumnTransformers.
-
-    last_window : pandas Series
-        Last window the forecaster has seen during trained. It stores the
-        values needed to predict the next `step` right after the training data.
-        
-    fitted : Bool
-        Tag to identify if the regressor has been fitted (trained).
         
     weight_func : callable
         Function that defines the individual weights for each sample based on the
@@ -139,6 +132,10 @@ class ForecasterAutoregCustom(ForecasterBase):
     source_code_weight_func : str
         Source code of the custom function used to create weights.
         **New in version 0.6.0**
+
+    last_window : pandas Series
+        Last window the forecaster has seen during trained. It stores the
+        values needed to predict the next `step` right after the training data.
         
     index_type : type
         Type of index of the input used in training.
@@ -172,6 +169,9 @@ class ForecasterAutoregCustom(ForecasterBase):
         up to 1000 values. If `transformer_y` is not `None`, residuals
         are assumed to be in the transformed scale. Use `set_out_sample_residuals` to
         set values.
+        
+    fitted : bool
+        Tag to identify if the regressor has been fitted (trained).
 
     creation_date : str
         Date of creation.
@@ -209,10 +209,10 @@ class ForecasterAutoregCustom(ForecasterBase):
         self.transformer_exog              = transformer_exog
         self.weight_func                   = weight_func
         self.source_code_weight_func       = None
+        self.last_window                   = None
         self.index_type                    = None
         self.index_freq                    = None
         self.training_range                = None
-        self.last_window                   = None
         self.included_exog                 = False
         self.exog_type                     = None
         self.exog_col_names                = None
@@ -385,7 +385,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             X_train_col_names = self.name_predictors.copy()
 
         if np.isnan(X_train).any():
-            raise Exception(
+            raise ValueError(
                 f"`fun_predictors()` is returning `NaN` values."
             )
         
@@ -397,16 +397,16 @@ class ForecasterAutoregCustom(ForecasterBase):
             X_train = np.column_stack((X_train, exog_values[self.window_size:, ]))
 
         X_train = pd.DataFrame(
-                    data    = X_train,
-                    columns = X_train_col_names,
-                    index   = y_index[self.window_size: ]
+                      data    = X_train,
+                      columns = X_train_col_names,
+                      index   = y_index[self.window_size: ]
                   )
         self.X_train_col_names = X_train_col_names
         y_train = pd.Series(
-                    data  = y_train,
-                    index = y_index[self.window_size: ],
-                    name  = 'y'
-                 )
+                      data  = y_train,
+                      index = y_index[self.window_size: ],
+                      name  = 'y'
+                  )
                         
         return X_train, y_train
 
@@ -513,12 +513,16 @@ class ForecasterAutoregCustom(ForecasterBase):
         else: 
             self.index_freq = X_train.index.step
 
-        residuals = y_train - self.regressor.predict(X_train)
+        residuals = (y_train - self.regressor.predict(X_train)).to_numpy()
 
         if len(residuals) > 1000:
             # Only up to 1000 residuals are stored
             rng = np.random.default_rng(seed=123)
-            residuals = rng.choice(a=residuals, size=1000, replace=False)
+            residuals = rng.choice(
+                            a       = residuals, 
+                            size    = 1000, 
+                            replace = False
+                        )                            
                                                   
         self.in_sample_residuals = residuals
         
