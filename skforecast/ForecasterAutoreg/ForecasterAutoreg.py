@@ -71,6 +71,11 @@ class ForecasterAutoreg(ForecasterBase):
         index. For example, a function that assigns a lower weight to certain dates.
         Ignored if `regressor` does not have the argument `sample_weight` in its `fit`
         method. The resulting `sample_weight` cannot have negative values.
+
+    forecaster_id : str, int default `None`
+        Name used as an identifier of the forecaster. It may be used, for example to identify
+        the time series being modeled.
+        **New in version 0.7.0**
     
     Attributes
     ----------
@@ -160,6 +165,11 @@ class ForecasterAutoreg(ForecasterBase):
 
     python_version : str
         Version of python used to create the forecaster.
+
+    forecaster_id : str, int default `None`
+        Name used as an identifier of the forecaster. It may be used, for example to identify
+        the time series being modeled.
+        **New in version 0.7.0**
      
     """
     
@@ -169,7 +179,8 @@ class ForecasterAutoreg(ForecasterBase):
         lags: Union[int, np.ndarray, list],
         transformer_y: Optional[object]=None,
         transformer_exog: Optional[object]=None,
-        weight_func: Optional[callable]=None
+        weight_func: Optional[callable]=None,
+        forecaster_id: Optional[Union[str, int]]=None
     ) -> None:
         
         self.regressor               = regressor
@@ -192,6 +203,7 @@ class ForecasterAutoreg(ForecasterBase):
         self.fit_date                = None
         self.skforcast_version       = skforecast.__version__
         self.python_version          = sys.version.split(" ")[0]
+        self.forecaster_id           = forecaster_id
         
         self.lags = initialize_lags(type(self).__name__, lags)
         self.max_lag = max(self.lags)
@@ -240,6 +252,7 @@ class ForecasterAutoreg(ForecasterBase):
             f"Last fit date: {self.fit_date} \n"
             f"Skforecast version: {self.skforcast_version} \n"
             f"Python version: {self.python_version} \n"
+            f"Forecaster id: {self.forecaster_id} \n"
         )
 
         return info
