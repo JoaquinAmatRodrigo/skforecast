@@ -38,7 +38,7 @@ def test_exception_bayesian_search_forecaster_when_return_best_and_len_y_exog_di
                  )
     exog = y[:30]
 
-    def search_space(trial):
+    def search_space(trial): # pragma: no cover
         search_space  = {'alpha' : trial.suggest_loguniform('alpha', 1e-2, 1.0)
                         }
         return search_space
@@ -76,7 +76,7 @@ def test_bayesian_search_forecaster_ValueError_when_engine_not_optuna():
                     lags      = 2
                  )
 
-    def search_space(trial):
+    def search_space(trial): # pragma: no cover
         search_space  = {'alpha' : trial.suggest_loguniform('alpha', 1e-2, 1.0)
                         }
         return search_space
@@ -123,7 +123,7 @@ def test_results_output_bayesian_search_forecaster_optuna_engine_ForecasterAutor
                         window_size    = 4
                  )
 
-    def search_space(trial):
+    def search_space(trial): # pragma: no cover
         search_space  = {'alpha' : trial.suggest_loguniform('alpha', 1e-2, 1.0)
                         }
         return search_space
@@ -170,12 +170,12 @@ def test_results_output_bayesian_search_forecaster_optuna_engine_ForecasterAutor
 
 
 @pytest.mark.skip(reason="`_bayesian_search_skopt` is deprecated since skforecast 0.7.0")
-def test_results_output_bayesian_search_forecaster_skopt_engine_ForecasterAutoregCustom_with_mocked():
+def test_results_output_bayesian_search_forecaster_skopt_engine_ForecasterAutoregCustom_with_mocked(): # pragma: no cover
     """
     Test output of bayesian_search_forecaster in ForecasterAutoregCustom with mocked
     using skopt engine (mocked done in Skforecast v0.4.3).
     """
-    def create_predictors(y):
+    def create_predictors(y): # pragma: no cover
         """
         Create first 4 lags of a time series, used in ForecasterAutoregCustom.
         """
