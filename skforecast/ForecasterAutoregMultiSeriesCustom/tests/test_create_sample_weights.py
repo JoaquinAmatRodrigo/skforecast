@@ -113,7 +113,7 @@ def create_predictors(y): # pragma: no cover
     """
     Create first 3 lags of a time series.
     """
-    lags = y[-1:-3:-1]
+    lags = y[-1:-4:-1]
 
     return lags
 

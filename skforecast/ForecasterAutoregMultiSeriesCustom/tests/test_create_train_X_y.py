@@ -12,7 +12,7 @@ def create_predictors(y): # pragma: no cover
     """
     Create first 3 lags of a time series.
     """
-    lags = y[-1:-3:-1]
+    lags = y[-1:-4:-1]
 
     return lags
 
@@ -135,7 +135,7 @@ def test_create_train_X_y_output_when_series_and_exog_is_None():
                                      [4.0, 3.0, 2.0, 0., 1.],
                                      [5.0, 4.0, 3.0, 0., 1.]]),
                     index   = np.array([0, 1, 2, 3, 4, 5, 6, 7]),
-                    columns = ['lag_1', 'lag_2', 'lag_3', '1', '2']
+                    columns = ['custom_predictor_0', 'custom_predictor_1', 'custom_predictor_2', '1', '2']
                 ),
                 pd.Series(
                     data  = np.array([3., 4., 5., 6., 3., 4., 5., 6.]),
@@ -186,7 +186,7 @@ def test_create_train_X_y_output_when_series_and_exog_is_pandas_series():
                                      [4.0, 3.0, 2.0, 105., 0., 1.],
                                      [5.0, 4.0, 3.0, 106., 0., 1.]]),
                     index   = np.array([0, 1, 2, 3, 4, 5, 6, 7]),
-                    columns = ['lag_1', 'lag_2', 'lag_3', 'exog', '1', '2']
+                    columns = ['custom_predictor_0', 'custom_predictor_1', 'custom_predictor_2', 'exog', '1', '2']
                 ),
                 pd.Series(
                     data  = np.array([3., 4., 5., 6., 3., 4., 5., 6.]),
@@ -239,7 +239,7 @@ def test_create_train_X_y_output_when_series_and_exog_is_dataframe():
                                      [4.0, 3.0, 2.0, 105., 1005., 0., 1.],
                                      [5.0, 4.0, 3.0, 106., 1006., 0., 1.]]),
                     index   = np.array([0, 1, 2, 3, 4, 5, 6, 7]),
-                    columns = ['lag_1', 'lag_2', 'lag_3', 'exog_1', 'exog_2', '1', '2']
+                    columns = ['custom_predictor_0', 'custom_predictor_1', 'custom_predictor_2', 'exog_1', 'exog_2', '1', '2']
                 ),
                 pd.Series(
                     data  = np.array([3., 4., 5., 6., 3., 4., 5., 6.]),
@@ -294,7 +294,7 @@ def test_create_train_X_y_output_when_series_and_exog_is_dataframe_datetime_inde
                                      [4.0, 3.0, 2.0, 105., 1005., 0., 1.],
                                      [5.0, 4.0, 3.0, 106., 1006., 0., 1.]]),
                     index   = np.array([0, 1, 2, 3, 4, 5, 6, 7]),
-                    columns = ['lag_1', 'lag_2', 'lag_3', 'exog_1', 'exog_2', '1', '2']
+                    columns = ['custom_predictor_0', 'custom_predictor_1', 'custom_predictor_2', 'exog_1', 'exog_2', '1', '2']
                 ),
                 pd.Series(
                     data  = np.array([3., 4., 5., 6., 3., 4., 5., 6.]),

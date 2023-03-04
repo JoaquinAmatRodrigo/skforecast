@@ -23,13 +23,26 @@ transformer_exog = ColumnTransformer(
                        verbose_feature_names_out = False
                    )
 
+def create_predictors(y): # pragma: no cover
+    """
+    Create first 3 lags of a time series.
+    """
+    lags = y[-1:-4:-1]
+
+    return lags
+
 
 def test_predict_bootstrapping_ValueError_when_not_in_sample_residuals_for_any_level():
     """
     Test ValueError is raised when in_sample_residuals=True but there is no
     residuals for any level.
     """
-    forecaster = ForecasterAutoregMultiSeriesCustom(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                     regressor       = LinearRegression(),
+                     fun_predictors  = create_predictors,
+                     window_size     = 3
+                 )
+    
     forecaster.fit(series=series)
     forecaster.in_sample_residuals = {2: np.array([1, 2, 3])}
 
@@ -46,7 +59,11 @@ def test_predict_bootstrapping_ValueError_when_out_sample_residuals_is_None():
     Test ValueError is raised when in_sample_residuals=False and
     forecaster.out_sample_residuals is None.
     """
-    forecaster = ForecasterAutoregMultiSeriesCustom(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                     regressor       = LinearRegression(),
+                     fun_predictors  = create_predictors,
+                     window_size     = 3
+                 )
     forecaster.fit(series=series)
 
     err_msg = re.escape(
@@ -64,7 +81,11 @@ def test_predict_bootstrapping_ValueError_when_not_out_sample_residuals_for_all_
     Test ValueError is raised when in_sample_residuals=False and
     forecaster.out_sample_residuals is not available for all levels.
     """
-    forecaster = ForecasterAutoregMultiSeriesCustom(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                     regressor       = LinearRegression(),
+                     fun_predictors  = create_predictors,
+                     window_size     = 3
+                 )
     forecaster.fit(series=series)
     residuals = {'2': np.array([1, 2, 3, 4, 5]), 
                  '3': np.array([1, 2, 3, 4, 5])}
@@ -85,7 +106,11 @@ def test_predict_bootstrapping_ValueError_when_level_out_sample_residuals_value_
     Test ValueError is raised when in_sample_residuals=False and
     forecaster.out_sample_residuals has a level with a None.
     """
-    forecaster = ForecasterAutoregMultiSeriesCustom(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                     regressor       = LinearRegression(),
+                     fun_predictors  = create_predictors,
+                     window_size     = 3
+                 )
     forecaster.fit(series=series)
     residuals = {'1': np.array([1, 2, 3, 4, 5])}
     forecaster.set_out_sample_residuals(residuals = residuals)
@@ -102,7 +127,11 @@ def test_predict_bootstrapping_ValueError_when_step_out_sample_residuals_value_c
     Test ValueError is raised when in_sample_residuals=False and
     forecaster.out_sample_residuals has a step with a None value.
     """
-    forecaster = ForecasterAutoregMultiSeriesCustom(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                     regressor       = LinearRegression(),
+                     fun_predictors  = create_predictors,
+                     window_size     = 3
+                 )
     forecaster.fit(series=series)
     residuals = {'1': np.array([1, 2, 3, 4, 5]),
                  '2': np.array([1, 2, 3, 4, None])}
@@ -120,7 +149,11 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_exog_s
     Test output of predict_bootstrapping when regressor is LinearRegression and
     1 step ahead is predicted with exog using in-sample residuals.
     """
-    forecaster = ForecasterAutoregMultiSeriesCustom(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                     regressor       = LinearRegression(),
+                     fun_predictors  = create_predictors,
+                     window_size     = 3
+                 )
     forecaster.fit(series=series, exog=exog['col_1'])
     results = forecaster.predict_bootstrapping(steps=1, n_boot=4, exog=exog_predict['col_1'], in_sample_residuals=True)
 
@@ -146,7 +179,11 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_exog_s
     Test output of predict_bootstrapping when regressor is LinearRegression and
     2 steps ahead are predicted with exog using in-sample residuals.
     """
-    forecaster = ForecasterAutoregMultiSeriesCustom(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                     regressor       = LinearRegression(),
+                     fun_predictors  = create_predictors,
+                     window_size     = 3
+                 )
     forecaster.fit(series=series, exog=exog['col_1'])
     results = forecaster.predict_bootstrapping(steps=2, n_boot=4, exog=exog_predict['col_1'], in_sample_residuals=True)
 
@@ -174,7 +211,11 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_exog_s
     Test output of predict_bootstrapping when regressor is LinearRegression and
     1 step ahead is predicted with exog using out-sample residuals.
     """
-    forecaster = ForecasterAutoregMultiSeriesCustom(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                     regressor       = LinearRegression(),
+                     fun_predictors  = create_predictors,
+                     window_size     = 3
+                 )
     forecaster.fit(series=series, exog=exog['col_1'])
     forecaster.out_sample_residuals = forecaster.in_sample_residuals
     results = forecaster.predict_bootstrapping(steps=1, n_boot=4, exog=exog_predict['col_1'], in_sample_residuals=False)
@@ -201,7 +242,11 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_exog_s
     Test output of predict_bootstrapping when regressor is LinearRegression and
     2 steps ahead are predicted with exog using out-sample residuals.
     """
-    forecaster = ForecasterAutoregMultiSeriesCustom(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                     regressor       = LinearRegression(),
+                     fun_predictors  = create_predictors,
+                     window_size     = 3
+                 )
     forecaster.fit(series=series, exog=exog['col_1'])
     forecaster.out_sample_residuals = forecaster.in_sample_residuals
     results = forecaster.predict_bootstrapping(steps=2, n_boot=4, exog=exog_predict['col_1'], in_sample_residuals=False)
@@ -233,7 +278,8 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_steps_
     """    
     forecaster = ForecasterAutoregMultiSeriesCustom(
                      regressor          = LinearRegression(),
-                     lags               = 3,
+                     fun_predictors     = create_predictors,
+                     window_size        = 3,
                      transformer_series = StandardScaler(),
                      transformer_exog   = transformer_exog,
                  )
@@ -269,7 +315,8 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_steps_
     """
     forecaster = ForecasterAutoregMultiSeriesCustom(
                      regressor          = LinearRegression(),
-                     lags               = 3,
+                     fun_predictors     = create_predictors,
+                     window_size        = 3,
                      transformer_series = StandardScaler(),
                      transformer_exog   = transformer_exog,
                  )

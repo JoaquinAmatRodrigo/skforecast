@@ -11,6 +11,15 @@ from sklearn.preprocessing import StandardScaler
 from xgboost import XGBRegressor
 
 
+def create_predictors(y): # pragma: no cover
+    """
+    Create first 3 lags of a time series.
+    """
+    lags = y[-1:-4:-1]
+
+    return lags
+
+
 @pytest.mark.parametrize('exog', ['l1', ['l1'], ['l1', 'l2']])
 def test_fit_exception_when_exog_columns_same_as_series_col_names(exog):
     """
@@ -20,7 +29,11 @@ def test_fit_exception_when_exog_columns_same_as_series_col_names(exog):
     series = pd.DataFrame({'l1': pd.Series(np.arange(10)), 
                            'l2': pd.Series(np.arange(10))})
 
-    forecaster = ForecasterAutoregMultiSeriesCustom(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                     regressor       = LinearRegression(),
+                     fun_predictors  = create_predictors,
+                     window_size     = 3
+                 )
     series_col_names = ['l1', 'l2']
     exog_col_names = exog if isinstance(exog, list) else [exog]
 
@@ -67,8 +80,9 @@ def test_fit_correct_dict_create_series_weights_weight_func_transformer_series()
     series_weights = {'l1': 3., 'l3': 0.5, 'l4': 2.}
 
     forecaster = ForecasterAutoregMultiSeriesCustom(
-                     regressor          = LinearRegression(), 
-                     lags               = 3,
+                     regressor          = LinearRegression(),
+                     fun_predictors     = create_predictors,
+                     window_size        = 3,
                      transformer_series = transformer_series,
                      weight_func        = weight_func,
                      series_weights     = series_weights
@@ -108,7 +122,11 @@ def test_forecaster_DatetimeIndex_index_freq_stored():
 
     series.index = pd.date_range(start='2022-01-01', periods=5, freq='1D')
 
-    forecaster = ForecasterAutoregMultiSeriesCustom(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                     regressor       = LinearRegression(),
+                     fun_predictors  = create_predictors,
+                     window_size     = 3
+                 )
     forecaster.fit(series=series)
     expected = series.index.freqstr
     results = forecaster.index_freq
@@ -123,7 +141,11 @@ def test_forecaster_index_step_stored():
     series = pd.DataFrame({'1': pd.Series(np.arange(5)), 
                            '2': pd.Series(np.arange(5))})
     
-    forecaster = ForecasterAutoregMultiSeriesCustom(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                     regressor       = LinearRegression(),
+                     fun_predictors  = create_predictors,
+                     window_size     = 3
+                 )
     forecaster.fit(series=series)
     expected = series.index.step
     results = forecaster.index_freq
@@ -139,7 +161,11 @@ def test_fit_in_sample_residuals_stored():
     series = pd.DataFrame({'1': pd.Series(np.arange(5)), 
                            '2': pd.Series(np.arange(5))})
 
-    forecaster = ForecasterAutoregMultiSeriesCustom(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                     regressor       = LinearRegression(),
+                     fun_predictors  = create_predictors,
+                     window_size     = 3
+                 )
     forecaster.fit(series=series, store_in_sample_residuals=True)
     expected = {'1': np.array([-4.4408921e-16, 0.0000000e+00]),
                 '2': np.array([0., 0.])}
@@ -158,7 +184,12 @@ def test_fit_in_sample_residuals_stored_XGBRegressor():
     series = pd.DataFrame({'1': pd.Series(np.arange(5)), 
                            '2': pd.Series(np.arange(5))})
 
-    forecaster = ForecasterAutoregMultiSeriesCustom(XGBRegressor(random_state=123), lags=3)
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                     regressor       = XGBRegressor(random_state=123),
+                     fun_predictors  = create_predictors,
+                     window_size     = 3
+                 )
+    
     forecaster.fit(series=series, store_in_sample_residuals=True)
     expected = {'1': np.array([-0.00049472,  0.00049543]),
                 '2': np.array([-0.00049472,  0.00049543])}
@@ -179,10 +210,18 @@ def test_fit_same_residuals_when_residuals_greater_than_1000():
     series = pd.DataFrame({'1': pd.Series(np.arange(1010)), 
                            '2': pd.Series(np.arange(1010))})
 
-    forecaster = ForecasterAutoregMultiSeriesCustom(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                     regressor       = LinearRegression(),
+                     fun_predictors  = create_predictors,
+                     window_size     = 3
+                 )
     forecaster.fit(series=series, store_in_sample_residuals=True)
     results_1 = forecaster.in_sample_residuals
-    forecaster = ForecasterAutoregMultiSeriesCustom(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                     regressor       = LinearRegression(),
+                     fun_predictors  = create_predictors,
+                     window_size     = 3
+                 )
     forecaster.fit(series=series, store_in_sample_residuals=True)
     results_2 = forecaster.in_sample_residuals
 
@@ -204,7 +243,11 @@ def test_fit_in_sample_residuals_not_stored():
     series = pd.DataFrame({'1': pd.Series(np.arange(5)), 
                            '2': pd.Series(np.arange(5))})
 
-    forecaster = ForecasterAutoregMultiSeriesCustom(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                     regressor       = LinearRegression(),
+                     fun_predictors  = create_predictors,
+                     window_size     = 3
+                 )
     forecaster.fit(series=series, store_in_sample_residuals=False)
     expected = {'1': None, '2': None}
     results = forecaster.in_sample_residuals
@@ -222,7 +265,11 @@ def test_fit_last_window_stored():
                            '2': pd.Series(np.arange(5))
                           })
 
-    forecaster = ForecasterAutoregMultiSeriesCustom(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                     regressor       = LinearRegression(),
+                     fun_predictors  = create_predictors,
+                     window_size     = 3
+                 )
     forecaster.fit(series=series)
     expected = pd.DataFrame({'1': pd.Series(np.array([2, 3, 4])), 
                              '2': pd.Series(np.array([2, 3, 4]))
