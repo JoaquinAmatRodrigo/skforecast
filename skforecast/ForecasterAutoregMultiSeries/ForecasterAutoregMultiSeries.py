@@ -84,6 +84,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         in `series_weights`. If `None`, all levels have the same weight. See Notes section
         for more details on the use of the weights.
         **New in version 0.6.0**
+
+    forecaster_id : str, int default `None`
+        Name used as an identifier of the forecaster.
+
     
     Attributes
     ----------
@@ -207,6 +211,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
     python_version : str
         Version of python used to create the forecaster.
 
+    forecaster_id : str, int default `None`
+        Name used as an identifier of the forecaster.
+
 
     Notes
     -----
@@ -234,7 +241,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         transformer_series: Optional[Union[object, dict]]=None,
         transformer_exog: Optional[object]=None,
         weight_func: Optional[Union[callable, dict]]=None,
-        series_weights: Optional[dict]=None
+        series_weights: Optional[dict]=None,
+        forecaster_id: Optional[Union[str, int]]=None
     ) -> None:
         
         self.regressor               = regressor
@@ -263,6 +271,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.fit_date                = None
         self.skforcast_version       = skforecast.__version__
         self.python_version          = sys.version.split(" ")[0]
+        self.forecaster_id           = forecaster_id
         
         self.lags = initialize_lags(type(self).__name__, lags)
         self.max_lag = max(self.lags)
@@ -313,6 +322,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             f"Last fit date: {self.fit_date} \n"
             f"Skforecast version: {self.skforcast_version} \n"
             f"Python version: {self.python_version} \n"
+            f"Forecaster id: {self.forecaster_id} \n"
         )
 
         return info

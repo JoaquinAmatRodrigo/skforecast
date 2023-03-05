@@ -24,6 +24,8 @@ All notable changes to this project will be documented in this file.
 
 + Alias `random_search_forecaster_multivariate` for `random_search_forecaster_multiseries` in `model_selection_multiseries` module.
 
++ Attribute `forecaster_id` to all Forecasters.
+
 **Changed**
 
 + Deprecated `python 3.7` compatibility.

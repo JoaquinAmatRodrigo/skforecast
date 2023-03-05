@@ -77,6 +77,9 @@ class ForecasterAutoregCustom(ForecasterBase):
         Ignored if `regressor` does not have the argument `sample_weight` in its `fit`
         method. The resulting `sample_weight` cannot have negative values.
         **New in version 0.6.0**
+
+    forecaster_id : str, int default `None`
+        Name used as an identifier of the forecaster.
     
     Attributes
     ----------
@@ -184,6 +187,9 @@ class ForecasterAutoregCustom(ForecasterBase):
 
     python_version : str
         Version of python used to create the forecaster.
+
+    forecaster_id : str, int default `None`
+        Name used as an identifier of the forecaster.
     
     """
     
@@ -195,7 +201,8 @@ class ForecasterAutoregCustom(ForecasterBase):
         name_predictors: Optional[list]=None,
         transformer_y: Optional[object]=None,
         transformer_exog: Optional[object]=None,
-        weight_func: Optional[callable]=None
+        weight_func: Optional[callable]=None,
+        forecaster_id: Optional[Union[str, int]]=None
     ) -> None:
         
         self.regressor                     = regressor
@@ -224,6 +231,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         self.fit_date                      = None
         self.skforcast_version             = skforecast.__version__
         self.python_version                = sys.version.split(" ")[0]
+        self.forecaster_id                 = forecaster_id
         
         if not isinstance(window_size, int):
             raise TypeError(
@@ -281,6 +289,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             f"Last fit date: {self.fit_date} \n"
             f"Skforecast version: {self.skforcast_version} \n"
             f"Python version: {self.python_version} \n"
+            f"Forecaster id: {self.forecaster_id} \n"
         )
 
         return info
