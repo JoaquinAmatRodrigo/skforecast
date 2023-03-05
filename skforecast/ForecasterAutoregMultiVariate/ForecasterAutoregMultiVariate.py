@@ -87,9 +87,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         `fit` method. The resulting `sample_weight` cannot have negative values.
 
     forecaster_id : str, int default `None`
-        Name used as an identifier of the forecaster. It may be used, for example to identify
-        the time series being modeled.
-        **New in version 0.7.0**
+        Name used as an identifier of the forecaster.
         
 
     Attributes
@@ -208,9 +206,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         Version of python used to create the forecaster.
 
     forecaster_id : str, int default `None`
-        Name used as an identifier of the forecaster. It may be used, for example to identify
-        the time series being modeled.
-        **New in version 0.7.0**
+        Name used as an identifier of the forecaster.
         
     Notes
     -----

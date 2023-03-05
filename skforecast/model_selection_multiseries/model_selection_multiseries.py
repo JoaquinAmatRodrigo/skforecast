@@ -709,7 +709,7 @@ def grid_search_forecaster_multiseries(
         regressed on exog[i].
            
     lags_grid : list of int, lists, np.narray or range, default `None`
-        Lists of `lags` to try.Only used if forecaster is an instance of 
+        Lists of `lags` to try. Only used if forecaster is an instance of 
         `ForecasterAutoregMultiSeries` or `ForecasterAutoregMultiVariate`.
         
     refit : bool, default `False`
@@ -821,7 +821,7 @@ def random_search_forecaster_multiseries(
         regressed on exog[i].
            
     lags_grid : list of int, lists, np.narray or range, default `None`
-        Lists of `lags` to try.Only used if forecaster is an instance of 
+        Lists of `lags` to try. Only used if forecaster is an instance of 
         `ForecasterAutoregMultiSeries` or `ForecasterAutoregMultiVariate`.
         
     refit : bool, default `False`
@@ -937,7 +937,7 @@ def _evaluate_grid_hyperparameters_multiseries(
         regressed on exog[i].
            
     lags_grid : list of int, lists, np.narray or range, default `None`
-        Lists of `lags` to try.Only used if forecaster is an instance of 
+        Lists of `lags` to try. Only used if forecaster is an instance of 
         `ForecasterAutoregMultiSeries` or `ForecasterAutoregMultiVariate`.
         
     refit : bool, default `False`
@@ -1269,7 +1269,7 @@ def grid_search_forecaster_multivariate(
         regressed on exog[i].
            
     lags_grid : list of int, lists, np.narray or range, default `None`
-        Lists of `lags` to try.Only used if forecaster is an instance of 
+        Lists of `lags` to try. Only used if forecaster is an instance of 
         `ForecasterAutoregMultiSeries` or `ForecasterAutoregMultiVariate`.
         
     refit : bool, default `False`
@@ -1379,7 +1379,7 @@ def random_search_forecaster_multivariate(
         regressed on exog[i].
            
     lags_grid : list of int, lists, np.narray or range, default `None`
-        Lists of `lags` to try.Only used if forecaster is an instance of 
+        Lists of `lags` to try. Only used if forecaster is an instance of 
         `ForecasterAutoregMultiSeries` or `ForecasterAutoregMultiVariate`.
         
     refit : bool, default `False`
