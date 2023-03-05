@@ -709,7 +709,8 @@ def grid_search_forecaster_multiseries(
         regressed on exog[i].
            
     lags_grid : list of int, lists, np.narray or range, default `None`
-        Lists of `lags` to try.
+        Lists of `lags` to try. Only used if forecaster is an instance of 
+        `ForecasterAutoregMultiSeries` or `ForecasterAutoregMultiVariate`.
         
     refit : bool, default `False`
         Whether to re-fit the forecaster in each iteration of backtesting.
@@ -820,7 +821,8 @@ def random_search_forecaster_multiseries(
         regressed on exog[i].
            
     lags_grid : list of int, lists, np.narray or range, default `None`
-        Lists of `lags` to try.
+        Lists of `lags` to try. Only used if forecaster is an instance of 
+        `ForecasterAutoregMultiSeries` or `ForecasterAutoregMultiVariate`.
         
     refit : bool, default `False`
         Whether to re-fit the forecaster in each iteration of backtesting.
@@ -935,7 +937,8 @@ def _evaluate_grid_hyperparameters_multiseries(
         regressed on exog[i].
            
     lags_grid : list of int, lists, np.narray or range, default `None`
-        Lists of `lags` to try.
+        Lists of `lags` to try. Only used if forecaster is an instance of 
+        `ForecasterAutoregMultiSeries` or `ForecasterAutoregMultiVariate`.
         
     refit : bool, default `False`
         Whether to re-fit the forecaster in each iteration of backtesting.
@@ -953,8 +956,8 @@ def _evaluate_grid_hyperparameters_multiseries(
             column levels = levels.
             column lags = predictions.
             column params = lower bound of the interval.
-            column metric = metric(s) value(s) estimated for each combination of parameters. The resulting metric will be
-                            the average of the optimization of all levels.
+            column metric = metric(s) value(s) estimated for each combination of parameters.
+            The resulting metric will be the average of the optimization of all levels.
             additional n columns with param = value.
     
     """
@@ -965,7 +968,8 @@ def _evaluate_grid_hyperparameters_multiseries(
             f'length `exog`: ({len(exog)}), length `series`: ({len(series)})'
         )
 
-    if type(forecaster).__name__ == 'ForecasterAutoregMultiSeries' and levels is not None and not isinstance(levels, (str, list)):
+    if type(forecaster).__name__ in ['ForecasterAutoregMultiSeries', 'ForecasterAutoregMultiSeriesCustom']  \
+        and levels is not None and not isinstance(levels, (str, list)):
         raise TypeError(
             f'`levels` must be a `list` of column names, a `str` of a column name or `None`.'
         )
@@ -973,9 +977,10 @@ def _evaluate_grid_hyperparameters_multiseries(
     if type(forecaster).__name__ == 'ForecasterAutoregMultiVariate':
         if levels and levels != forecaster.level and levels != [forecaster.level]:
             warnings.warn(
-                (f"`levels` argument have no use when the forecaster is of type ForecasterAutoregMultiVariate. "
-                 f"The level of this forecaster is {forecaster.level}, to predict another level, change the `level` "
-                 f"argument when initializing the forecaster. \n")
+                (f"`levels` argument have no use when the forecaster is of type "
+                 f"ForecasterAutoregMultiVariate. "
+                 f"The level of this forecaster is {forecaster.level}, to predict another "
+                 f"level, change the `level` argument when initializing the forecaster. \n")
             )
         levels = [forecaster.level]
     else:
@@ -985,7 +990,13 @@ def _evaluate_grid_hyperparameters_multiseries(
         elif isinstance(levels, str):
             levels = [levels]
 
-    if lags_grid is None:
+    if type(forecaster).__name__ == 'ForecasterAutoregMultiSeriesCustom':
+        if lags_grid is not None:
+            warnings.warn(
+                '`lags_grid` ignored if forecaster is an instance of `ForecasterAutoregMultiSeriesCustom`.'
+            )
+        lags_grid = ['custom predictors']
+    elif lags_grid is None:
         lags_grid = [forecaster.lags]
    
     lags_list = []
@@ -1005,9 +1016,10 @@ def _evaluate_grid_hyperparameters_multiseries(
     )
 
     for lags in tqdm(lags_grid, desc='loop lags_grid', position=0, ncols=90):
-        
-        forecaster.set_lags(lags)
-        lags = forecaster.lags.copy()
+
+        if type(forecaster).__name__ in ['ForecasterAutoregMultiSeries', 'ForecasterAutoregMultiVariate']:
+            forecaster.set_lags(lags)
+            lags = forecaster.lags.copy()
         
         for params in tqdm(param_grid, desc='loop param_grid', position=1, leave=False, ncols=90):
 
@@ -1048,7 +1060,8 @@ def _evaluate_grid_hyperparameters_multiseries(
         best_params = results['params'].iloc[0]
         best_metric = results[list(metric_dict.keys())[0]].iloc[0]
         
-        forecaster.set_lags(best_lags)
+        if type(forecaster).__name__ != 'ForecasterAutoregMultiSeriesCustom':
+            forecaster.set_lags(best_lags)
         forecaster.set_params(best_params)
         forecaster.fit(series=series, exog=exog, store_in_sample_residuals=True)
         
@@ -1256,7 +1269,8 @@ def grid_search_forecaster_multivariate(
         regressed on exog[i].
            
     lags_grid : list of int, lists, np.narray or range, default `None`
-        Lists of `lags` to try.
+        Lists of `lags` to try. Only used if forecaster is an instance of 
+        `ForecasterAutoregMultiSeries` or `ForecasterAutoregMultiVariate`.
         
     refit : bool, default `False`
         Whether to re-fit the forecaster in each iteration of backtesting.
@@ -1365,7 +1379,8 @@ def random_search_forecaster_multivariate(
         regressed on exog[i].
            
     lags_grid : list of int, lists, np.narray or range, default `None`
-        Lists of `lags` to try.
+        Lists of `lags` to try. Only used if forecaster is an instance of 
+        `ForecasterAutoregMultiSeries` or `ForecasterAutoregMultiVariate`.
         
     refit : bool, default `False`
         Whether to re-fit the forecaster in each iteration of backtesting.

@@ -35,6 +35,7 @@ class ForecasterSarimax():
     """
     This class turns ARIMA model from pmdarima library into a Forecaster compatible with 
     the skforecast API.
+    **New in version 0.7.0**
     
     Parameters
     ----------
@@ -52,6 +53,9 @@ class ForecasterSarimax():
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API. The transformation is applied to `exog` before training the
         forecaster. `inverse_transform` is not available when using ColumnTransformers.
+
+    forecaster_id : str, int default `None`
+        Name used as an identifier of the forecaster.
     
     Attributes
     ----------
@@ -122,6 +126,9 @@ class ForecasterSarimax():
 
     python_version : str
         Version of python used to create the forecaster.
+
+    forecaster_id : str, int default `None`
+        Name used as an identifier of the forecaster.
      
     """
     
@@ -130,6 +137,7 @@ class ForecasterSarimax():
         regressor: ARIMA,
         transformer_y: Optional[object]=None,
         transformer_exog: Optional[object]=None,
+        forecaster_id: Optional[Union[str, int]]=None
     ) -> None:
         
         self.regressor         = regressor
@@ -149,6 +157,7 @@ class ForecasterSarimax():
         self.fit_date          = None
         self.skforcast_version = skforecast.__version__
         self.python_version    = sys.version.split(" ")[0]
+        self.forecaster_id     = forecaster_id
         
         if not isinstance(self.regressor, pmdarima.arima.ARIMA):
             raise TypeError(
@@ -186,6 +195,7 @@ class ForecasterSarimax():
             f"Index seen by the forecaster: {self.extended_index} \n"
             f"Skforecast version: {self.skforcast_version} \n"
             f"Python version: {self.python_version} \n"
+            f"Forecaster id: {self.forecaster_id} \n"
         )
 
         return info
