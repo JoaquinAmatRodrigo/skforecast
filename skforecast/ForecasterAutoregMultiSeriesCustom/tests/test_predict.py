@@ -20,6 +20,15 @@ series_2 = pd.DataFrame({'1': pd.Series(np.arange(start=0, stop=50)),
                          '2': pd.Series(np.arange(start=50, stop=100))})
 
 
+def create_predictors(y): # pragma: no cover
+    """
+    Create first 5 lags of a time series.
+    """
+    lags = y[-1:-6:-1]
+
+    return lags
+
+
 @pytest.fixture(params=[('1'  , [50., 51., 52., 53., 54.]), 
                         (['2'], [100., 101., 102., 103., 104.]),
                         (['1', '2'], [[50., 100.],
@@ -56,7 +65,11 @@ def test_predict_output_when_regressor_is_LinearRegression_with_fixture(expected
     Test predict output when using LinearRegression as regressor with pytest fixture.
     This test is equivalent to the next one.
     """
-    forecaster = ForecasterAutoregMultiSeriesCustom(LinearRegression(), lags=5)
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                    regressor      = LinearRegression(),
+                    fun_predictors = create_predictors,
+                    window_size    = 5
+                )
     forecaster.fit(series=series_2)
     predictions = forecaster.predict(steps=5, levels=expected_pandas_dataframe[0])
     expected = expected_pandas_dataframe[1]
@@ -68,7 +81,11 @@ def test_predict_output_when_regressor_is_LinearRegression():
     """
     Test predict output when using LinearRegression as regressor.
     """
-    forecaster = ForecasterAutoregMultiSeriesCustom(LinearRegression(), lags=5)
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                    regressor      = LinearRegression(),
+                    fun_predictors = create_predictors,
+                    window_size    = 5,
+                )
     forecaster.fit(series=series_2)
     predictions_1 = forecaster.predict(steps=5, levels='1')
     expected_1 = pd.DataFrame(
@@ -111,7 +128,11 @@ def test_predict_output_when_regressor_is_LinearRegression_with_last_window():
                       index = pd.RangeIndex(start=45, stop=50, step=1)
                   )
 
-    forecaster = ForecasterAutoregMultiSeriesCustom(LinearRegression(), lags=5)
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                    regressor      = LinearRegression(),
+                    fun_predictors = create_predictors,
+                    window_size    = 5
+                )
     forecaster.fit(series=series_2)
     predictions_1 = forecaster.predict(steps=5, levels='1', last_window=last_window)
     expected_1 = pd.DataFrame(
@@ -148,8 +169,9 @@ def test_predict_output_when_regressor_is_LinearRegression_with_transform_series
     Test predict output when using LinearRegression as regressor and StandardScaler.
     """
     forecaster = ForecasterAutoregMultiSeriesCustom(
-                     regressor          = LinearRegression(),
-                     lags               = 5,
+                     regressor      = LinearRegression(),
+                     fun_predictors = create_predictors,
+                     window_size    = 5,
                      transformer_series = StandardScaler()
                  )
     forecaster.fit(series=series)
@@ -169,8 +191,9 @@ def test_predict_output_when_regressor_is_LinearRegression_with_transform_series
     is a dict with 2 different transformers.
     """
     forecaster = ForecasterAutoregMultiSeriesCustom(
-                     regressor          = LinearRegression(),
-                     lags               = 5,
+                     regressor      = LinearRegression(),
+                     fun_predictors = create_predictors,
+                     window_size    = 5,
                      transformer_series = {'1': StandardScaler(), '2': MinMaxScaler()}
                  )
     forecaster.fit(series=series)
@@ -197,7 +220,8 @@ def test_predict_output_when_regressor_is_LinearRegression_with_transform_series
                        )
     forecaster = ForecasterAutoregMultiSeriesCustom(
                      regressor          = LinearRegression(),
-                     lags               = 5,
+                     fun_predictors     = create_predictors,
+                     window_size        = 5,
                      transformer_series = StandardScaler(),
                      transformer_exog   = transformer_exog,
                  )

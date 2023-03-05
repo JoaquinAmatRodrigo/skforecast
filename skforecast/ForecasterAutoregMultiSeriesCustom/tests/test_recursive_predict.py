@@ -6,6 +6,14 @@ import pandas as pd
 from skforecast.ForecasterAutoregMultiSeriesCustom import ForecasterAutoregMultiSeriesCustom
 from sklearn.linear_model import LinearRegression
 
+def create_predictors(y): # pragma: no cover
+    """
+    Create first 5 lags of a time series.
+    """
+    lags = y[-1:-6:-1]
+
+    return lags
+
 
 def test_recursive_predict_output_when_regressor_is_LinearRegression():
     """
@@ -15,7 +23,11 @@ def test_recursive_predict_output_when_regressor_is_LinearRegression():
                            '2': pd.Series(np.arange(start=50, stop=100))
                           })
 
-    forecaster = ForecasterAutoregMultiSeriesCustom(LinearRegression(), lags=5)
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                     regressor          = LinearRegression(),
+                     fun_predictors     = create_predictors,
+                     window_size        = 5
+                 )
     forecaster.fit(series=series)
     level = '1'
     predictions_1 = forecaster._recursive_predict(

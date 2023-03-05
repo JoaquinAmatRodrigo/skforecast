@@ -3,11 +3,23 @@
 from skforecast.ForecasterAutoregMultiSeriesCustom import ForecasterAutoregMultiSeriesCustom
 from sklearn.linear_model import LinearRegression
 
+def create_predictors(y): # pragma: no cover
+    """
+    Create first 3 lags of a time series.
+    """
+    lags = y[-1:-4:-1]
+
+    return lags
+
 
 def test_set_params():
     """
     """
-    forecaster = ForecasterAutoregMultiSeriesCustom(LinearRegression(fit_intercept=True), lags=3)
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                    regressor          = LinearRegression(fit_intercept=True),
+                    fun_predictors     = create_predictors,
+                    window_size        = 3
+                 )
     new_params = {'fit_intercept': False}
     forecaster.set_params(new_params)
     expected = {'copy_X': True,

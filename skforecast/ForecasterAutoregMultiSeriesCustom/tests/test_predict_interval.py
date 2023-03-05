@@ -19,6 +19,14 @@ from .fixtures_ForecasterAutoregMultiSeriesCustom import exog_predict
 series_2 = pd.DataFrame({'1': pd.Series(np.arange(10)), 
                          '2': pd.Series(np.arange(10))})
 
+def create_predictors(y): # pragma: no cover
+    """
+    Create first 3 lags of a time series.
+    """
+    lags = y[-1:-4:-1]
+
+    return lags
+
 
 @pytest.fixture(params=[('1'  , np.array([[10., 20., 20.]])), 
                         (['2'], np.array([[10., 30., 30.]])),
@@ -57,7 +65,11 @@ def test_predict_output_when_regressor_is_LinearRegression_steps_is_1_in_sample_
     Test output when regressor is LinearRegression and one step ahead is predicted
     using in sample residuals. This test is equivalent to the next one.
     """
-    forecaster = ForecasterAutoregMultiSeriesCustom(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                    regressor       = LinearRegression(),
+                     fun_predictors = create_predictors,
+                     window_size    = 3,
+                )
     forecaster.fit(series=series_2, store_in_sample_residuals=True)
     forecaster.in_sample_residuals['1'] = np.full_like(forecaster.in_sample_residuals['1'], fill_value=10)
     forecaster.in_sample_residuals['2'] = np.full_like(forecaster.in_sample_residuals['2'], fill_value=20)
@@ -73,7 +85,11 @@ def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_1_
     Test output when regressor is LinearRegression and one step ahead is predicted
     using in sample residuals.
     """
-    forecaster = ForecasterAutoregMultiSeriesCustom(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                    regressor       = LinearRegression(),
+                     fun_predictors = create_predictors,
+                     window_size    = 3,
+                )
     forecaster.fit(series=series_2, store_in_sample_residuals=True)
 
     forecaster.in_sample_residuals['1'] = np.full_like(forecaster.in_sample_residuals['1'], fill_value=10)
@@ -144,7 +160,11 @@ def test_predict_output_when_regressor_is_LinearRegression_steps_is_2_in_sample_
     Test output when regressor is LinearRegression and one step ahead is predicted
     using in sample residuals. This test is equivalent to the next one.
     """
-    forecaster = ForecasterAutoregMultiSeriesCustom(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                    regressor      = LinearRegression(),
+                    fun_predictors = create_predictors,
+                    window_size    = 3,
+                )
     forecaster.fit(series=series_2, store_in_sample_residuals=True)
     forecaster.in_sample_residuals['1'] = np.full_like(forecaster.in_sample_residuals['1'], fill_value=10)
     forecaster.in_sample_residuals['2'] = np.full_like(forecaster.in_sample_residuals['2'], fill_value=20)
@@ -160,7 +180,11 @@ def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_2_
     Test output when regressor is LinearRegression and two step ahead is predicted
     using in sample residuals.
     """
-    forecaster = ForecasterAutoregMultiSeriesCustom(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                    regressor      = LinearRegression(),
+                    fun_predictors = create_predictors,
+                    window_size    = 3,
+                )
     forecaster.fit(series=series_2, store_in_sample_residuals=True)
 
     forecaster.in_sample_residuals['1'] = np.full_like(forecaster.in_sample_residuals['1'], fill_value=10)
@@ -201,7 +225,11 @@ def test_predict_output_when_regressor_is_LinearRegression_steps_is_1_in_sample_
     Test output when regressor is LinearRegression and one step ahead is predicted
     using out sample residuals.
     """
-    forecaster = ForecasterAutoregMultiSeriesCustom(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                    regressor      = LinearRegression(),
+                    fun_predictors = create_predictors,
+                    window_size    = 3,
+                )
     forecaster.fit(series=series_2, store_in_sample_residuals=True)
 
     residuals = {'1': np.full_like(forecaster.in_sample_residuals['1'], fill_value=10), 
@@ -219,7 +247,11 @@ def test_predict_output_when_regressor_is_LinearRegression_steps_is_2_in_sample_
     Test output when regressor is LinearRegression and one step ahead is predicted
     using in sample residuals. This test is equivalent to the next one.
     """
-    forecaster = ForecasterAutoregMultiSeriesCustom(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                    regressor      = LinearRegression(),
+                    fun_predictors = create_predictors,
+                    window_size    = 3,
+                )
     forecaster.fit(series=series_2, store_in_sample_residuals=True)
 
     residuals = {'1': np.full_like(forecaster.in_sample_residuals['1'], fill_value=10), 
@@ -238,17 +270,18 @@ def test_predict_interval_output_when_regressor_is_LinearRegression_with_transfo
     """
     forecaster = ForecasterAutoregMultiSeriesCustom(
                      regressor          = LinearRegression(),
-                     lags               = 5,
+                     fun_predictors     = create_predictors,
+                     window_size        = 3,
                      transformer_series = StandardScaler()
                  )
     forecaster.fit(series=series)
     predictions = forecaster.predict_interval(steps=5, levels='1')
     expected = pd.DataFrame(
-                   data = np.array([[0.52791431, 0.18396317, 0.95754082],
-                                    [0.44509712, 0.0128976 , 0.84417134],
-                                    [0.42176045, 0.05538845, 0.82860157],
-                                    [0.48087237, 0.13819232, 0.89557796],
-                                    [0.48268008, 0.1309113 , 0.90553765]]),
+                   data = np.array([[0.49300446, 0.1127329 , 0.8957496 ],
+                                    [0.50358145, 0.06968912, 0.90112753],
+                                    [0.50306954, 0.06633492, 0.88968806],
+                                    [0.50796191, 0.13082997, 0.90510251],
+                                    [0.50781568, 0.11536063, 0.93464907]]),
                    index = pd.RangeIndex(start=50, stop=55, step=1),
                    columns = ['1', '1_lower_bound', '1_upper_bound']
                )
@@ -263,17 +296,18 @@ def test_predict_interval_output_when_regressor_is_LinearRegression_with_transfo
     """
     forecaster = ForecasterAutoregMultiSeriesCustom(
                      regressor          = LinearRegression(),
-                     lags               = 5,
+                     fun_predictors     = create_predictors,
+                     window_size        = 3,
                      transformer_series = {'1': StandardScaler(), '2': MinMaxScaler()}
                  )
     forecaster.fit(series=series)
     predictions = forecaster.predict_interval(steps=5, levels=['1'])
     expected = pd.DataFrame(
-                   data = np.array([[0.59619193, 0.18343628, 1.00239295],
-                                    [0.46282914, 0.05746129, 0.85226151],
-                                    [0.41738496, 0.01752287, 0.8300486 ],
-                                    [0.48522676, 0.11948742, 0.90879137],
-                                    [0.47525733, 0.117253  , 0.88886001]]),
+                   data = np.array([[0.5567357 , 0.15168829, 0.93889146],
+                                    [0.50694567, 0.08199289, 0.90753719],
+                                    [0.51127353, 0.08587232, 0.90581568],
+                                    [0.51327383, 0.14090782, 0.91811281],
+                                    [0.50978027, 0.10608631, 0.93405271]]),
                    index = pd.RangeIndex(start=50, stop=55, step=1),
                    columns = ['1', '1_lower_bound', '1_upper_bound']
                )
@@ -294,18 +328,19 @@ def test_predict_interval_output_when_regressor_is_LinearRegression_with_transfo
                        )
     forecaster = ForecasterAutoregMultiSeriesCustom(
                      regressor          = LinearRegression(),
-                     lags               = 5,
+                     fun_predictors     = create_predictors,
+                     window_size        = 3,
                      transformer_series = StandardScaler(),
                      transformer_exog   = transformer_exog,
-                 )
+                )
     forecaster.fit(series=series, exog=exog)
     predictions = forecaster.predict_interval(steps=5, levels=['1', '2'], exog=exog_predict)
     expected = pd.DataFrame(
-                   data = np.array([[0.53267333, 0.17691231, 0.9399491 , 0.55496412, 0.14714165, 0.9246417],
-                                    [0.44478046, 0.04641456, 0.83203647, 0.57787982, 0.14450512, 0.93373637],
-                                    [0.52579563, 0.13671047, 0.92765308, 0.66389117, 0.23054494, 1.02657915],
-                                    [0.57391142, 0.21373477, 0.97709097, 0.65789846, 0.23499484, 1.02002429],
-                                    [0.54633594, 0.1725495 , 0.94995973, 0.5841187 , 0.18811899, 0.9513278 ]]),
+                   data = np.array([[0.50201669, 0.10891904, 0.90089875, 0.52531076, 0.10696675, 0.9156779 ],
+                                    [0.49804821, 0.09776535, 0.88356798, 0.51683613, 0.08385857, 0.92154261],
+                                    [0.59201747, 0.1880649 , 0.96148336, 0.61509778, 0.18270673, 1.02114822],
+                                    [0.60179565, 0.216096  , 0.9880778 , 0.60446614, 0.18396533, 0.98997181],
+                                    [0.56736867, 0.17944505, 0.97036278, 0.56524059, 0.13232921, 0.97872883]]),
                    index = pd.RangeIndex(start=50, stop=55, step=1),
                    columns = ['1', '1_lower_bound', '1_upper_bound', '2', '2_lower_bound', '2_upper_bound']
                )

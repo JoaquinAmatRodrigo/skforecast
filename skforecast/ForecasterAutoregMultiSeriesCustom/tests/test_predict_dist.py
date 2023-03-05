@@ -22,6 +22,13 @@ transformer_exog = ColumnTransformer(
                        verbose_feature_names_out = False
                    )
 
+def create_predictors(y): # pragma: no cover
+    """
+    Create first 3 lags of a time series.
+    """
+    lags = y[-1:-4:-1]
+
+    return lags
 
 @pytest.mark.parametrize("level", 
                          ['1', ['1']], 
@@ -34,7 +41,8 @@ def test_predict_dist_output_when_forecaster_is_LinearRegression_steps_is_2_in_s
     """
     forecaster = ForecasterAutoregMultiSeriesCustom(
                      regressor          = LinearRegression(),
-                     lags               = 3,
+                     fun_predictors     = create_predictors,
+                     window_size        = 3,
                      transformer_series = StandardScaler(),
                      transformer_exog   = transformer_exog,
                  )
@@ -69,7 +77,8 @@ def test_predict_dist_output_when_forecaster_is_LinearRegression_steps_is_2_in_s
     """
     forecaster = ForecasterAutoregMultiSeriesCustom(
                      regressor          = LinearRegression(),
-                     lags               = 3,
+                     fun_predictors     = create_predictors,
+                     window_size        = 3,
                      transformer_series = StandardScaler(),
                      transformer_exog   = transformer_exog,
                  )
