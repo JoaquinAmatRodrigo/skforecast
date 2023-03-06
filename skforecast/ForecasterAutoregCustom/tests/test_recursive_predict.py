@@ -1,6 +1,8 @@
 # Unit test _recursive_predict ForecasterAutoregCustom
 # ==============================================================================
 from pytest import approx
+import pytest
+import re
 import numpy as np
 import pandas as pd
 from skforecast.ForecasterAutoregCustom import ForecasterAutoregCustom
@@ -34,3 +36,23 @@ def test_recursive_predict_output_when_regressor_is_LinearRegression():
                   )
     expected = np.array([50., 51., 52., 53., 54.])
     assert (predictions == approx(expected))
+
+
+def test_recursive_predict_exception_when_fun_predictors_return_nan():
+    """
+    Test exception is raised when y and exog have different index.
+    """
+    forecaster = ForecasterAutoregCustom(
+                    regressor       = LinearRegression(),
+                    fun_predictors  = create_predictors,
+                    window_size     = 5
+                 )
+
+    forecaster.fit(
+        y = pd.Series(np.arange(10), index=pd.date_range(start='2022-01-01', periods=10, freq='1D'))
+    )
+
+    err_msg = re.escape("`fun_predictors()` is returning `NaN` values.")
+    
+    with pytest.raises(Exception, match = err_msg):
+        forecaster._recursive_predict(last_window=np.array([np.nan]), steps=3) 
