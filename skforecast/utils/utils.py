@@ -157,7 +157,7 @@ def initialize_weights(
                 f"Argument `series_weights` must be a dict of floats or ints."
                 f"Got {type(series_weights)}."
             )
-        if 'sample_weight' not in inspect.getfullargspec(regressor.fit)[0]:
+        if 'sample_weight' not in inspect.signature(regressor.fit).parameters:
             warnings.warn(
                 (f'Argument `series_weights` is ignored since regressor {regressor} '
                  f'does not accept `sample_weight` in its `fit` method.')
