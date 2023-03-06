@@ -8,6 +8,7 @@ from sklearn.linear_model import Ridge
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import mean_squared_error
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
+from skforecast.ForecasterAutoregMultiSeriesCustom import ForecasterAutoregMultiSeriesCustom
 from skforecast.ForecasterAutoregMultiVariate import ForecasterAutoregMultiVariate
 from skforecast.model_selection_multiseries.model_selection_multiseries import _evaluate_grid_hyperparameters_multiseries
 
@@ -18,10 +19,18 @@ tqdm.__init__ = partialmethod(tqdm.__init__, disable=True) # hide progress bar
 # Fixtures
 from .fixtures_model_selection_multiseries import series
 
-
-def test_exception_evaluate_grid_hyperparameters_multiseries_when_return_best_and_len_series_exog_different():
+def create_predictors(y): # pragma: no cover
     """
-    Test exception is raised in _evaluate_grid_hyperparameters_multiseries when 
+    Create first 4 lags of a time series.
+    """
+    lags = y[-1:-5:-1]
+
+    return lags
+
+
+def test_ValueError_evaluate_grid_hyperparameters_multiseries_when_return_best_and_len_series_exog_different():
+    """
+    Test ValueError is raised in _evaluate_grid_hyperparameters_multiseries when 
     `return_best = True` and length of `series` and `exog` do not match.
     """
     forecaster = ForecasterAutoregMultiSeries(
@@ -52,9 +61,9 @@ def test_exception_evaluate_grid_hyperparameters_multiseries_when_return_best_an
         )
 
 
-def test_evaluate_grid_hyperparameters_multiseries_exception_when_levels_not_list_str_None():
+def test_TypeError_grid_hyperparameters_multiseries_exception_when_levels_not_list_str_None():
     """
-    Test Exception is raised in _evaluate_grid_hyperparameters_multiseries when 
+    Test TypeError is raised in _evaluate_grid_hyperparameters_multiseries when 
     `levels` is not a `list`, `str` or `None`.
     """
     forecaster = ForecasterAutoregMultiSeries(
@@ -86,9 +95,9 @@ def test_evaluate_grid_hyperparameters_multiseries_exception_when_levels_not_lis
         )
 
 
-def test_evaluate_grid_hyperparameters_multiseries_multivariate_warning_when_levels():
+def test_UserWarning_evaluate_grid_hyperparameters_multiseries_multivariate_warning_when_levels():
     """
-    Test Warning is raised when levels is not forecaster.level or None.
+    Test UserWarning is raised when levels is not forecaster.level or None.
     """
     forecaster = ForecasterAutoregMultiVariate(
                      regressor = Ridge(random_state=123),
@@ -371,6 +380,219 @@ def test_evaluate_grid_hyperparameters_multiseries_when_return_best_ForecasterAu
     expected_series_col_names = ['l1', 'l2']
     
     assert (expected_lags == forecaster.lags).all()
+    assert expected_alpha == forecaster.regressor.alpha
+    assert expected_series_col_names ==  forecaster.series_col_names
+
+
+# ForecasterAutoregMultiSeriesCustom
+# ======================================================================================================================
+def test_UserWarning_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMultiSeriesCustom_lags_grid():
+    """
+    Test UserWarning _evaluate_grid_hyperparameters_multiseries in ForecasterAutoregMultiSeriesCustom 
+    when `lags_grid` is not `None`.
+    """
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                     regressor      = Ridge(random_state=123),
+                     fun_predictors = create_predictors,
+                     window_size    = 4 
+                 )
+
+    lags_grid = [2 , 4]
+    steps = 3
+    n_validation = 12
+    param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
+
+    warn_msg = re.escape(
+                '`lags_grid` ignored if forecaster is an instance of `ForecasterAutoregMultiSeriesCustom`.'
+            )
+    with pytest.warns(UserWarning, match = warn_msg):
+        _evaluate_grid_hyperparameters_multiseries(
+            forecaster          = forecaster,
+            series              = series,
+            param_grid          = param_grid,
+            steps               = steps,
+            metric              = 'mean_absolute_error',
+            initial_train_size  = len(series) - n_validation,
+            fixed_train_size    = False,
+            levels              = None,
+            exog                = None,
+            lags_grid           = lags_grid,
+            refit               = False,
+            return_best         = False,
+            verbose             = False
+        )
+
+
+def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMultiSeriesCustom_with_mocked():
+    """
+    Test output of _evaluate_grid_hyperparameters_multiseries in ForecasterAutoregMultiSeriesCustom 
+    with mocked (mocked done in Skforecast v0.5.0).
+    """
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                     regressor      = Ridge(random_state=123),
+                     fun_predictors = create_predictors,
+                     window_size    = 4 
+                 )
+
+    steps = 3
+    n_validation = 12
+    param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
+
+    results = _evaluate_grid_hyperparameters_multiseries(
+                  forecaster          = forecaster,
+                  series              = series,
+                  param_grid          = param_grid,
+                  steps               = steps,
+                  metric              = 'mean_absolute_error',
+                  initial_train_size  = len(series) - n_validation,
+                  fixed_train_size    = False,
+                  levels              = None,
+                  exog                = None,
+                  lags_grid           = None,
+                  refit               = False,
+                  return_best         = False,
+                  verbose             = False
+              )
+    
+    expected_results = pd.DataFrame({
+            'levels':[['l1', 'l2'], ['l1', 'l2'], ['l1', 'l2']],
+            'lags'  :['custom predictors', 'custom predictors', 'custom predictors'],
+            'params':[{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}],
+            'mean_absolute_error':np.array([0.20968100463227382, 0.20969259779858337, 0.20977945312386406]),                                                               
+            'alpha' :np.array([0.01, 0.1, 1.])
+                                     },
+            index=[0, 1, 2]
+                                   )
+
+    pd.testing.assert_frame_equal(results, expected_results)
+
+
+@pytest.mark.parametrize("levels", 
+                         ['l1', ['l1']], 
+                         ids = lambda value : f'levels: {value}' )
+def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMultiSeriesCustom_levels_str_list_with_mocked(levels):
+    """
+    Test output of _evaluate_grid_hyperparameters_multiseries in ForecasterAutoregMultiSeriesCustom 
+    with mocked when `levels` is a `str` or a `list` (mocked done in Skforecast v0.5.0).
+    """
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                     regressor      = Ridge(random_state=123),
+                     fun_predictors = create_predictors,
+                     window_size    = 4 
+                 )
+
+    steps = 3
+    n_validation = 12
+    param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
+
+    results = _evaluate_grid_hyperparameters_multiseries(
+                  forecaster          = forecaster,
+                  series              = series,
+                  param_grid          = param_grid,
+                  steps               = steps,
+                  metric              = 'mean_absolute_error',
+                  initial_train_size  = len(series) - n_validation,
+                  fixed_train_size    = False,
+                  levels              = levels,
+                  exog                = None,
+                  lags_grid           = None,
+                  refit               = False,
+                  return_best         = False,
+                  verbose             = False
+              )
+    
+    expected_results = pd.DataFrame({
+            'levels':[['l1'], ['l1'], ['l1']],
+            'lags'  :['custom predictors', 'custom predictors', 'custom predictors'],
+            'params':[{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}],
+            'mean_absolute_error':np.array([0.20669393332187616, 0.20671040715338015, 0.20684013292264494]),                                                               
+            'alpha' :np.array([0.01, 0.1, 1.])
+                                     },
+            index=[0, 1, 2]
+                                   )
+
+    pd.testing.assert_frame_equal(results, expected_results)
+
+
+def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMultiSeriesCustom_multiple_metrics_with_mocked():
+    """
+    Test output of _evaluate_grid_hyperparameters_multiseries in ForecasterAutoregMultiSeriesCustom 
+    with mocked when multiple metrics (mocked done in Skforecast v0.6.0).
+    """
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                     regressor      = Ridge(random_state=123),
+                     fun_predictors = create_predictors,
+                     window_size    = 4 
+                 )
+
+    steps = 3
+    n_validation = 12
+    param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
+
+    results = _evaluate_grid_hyperparameters_multiseries(
+                  forecaster          = forecaster,
+                  series              = series,
+                  param_grid          = param_grid,
+                  steps               = steps,
+                  metric              = [mean_squared_error, 'mean_absolute_error'],
+                  initial_train_size  = len(series) - n_validation,
+                  fixed_train_size    = False,
+                  levels              = None,
+                  exog                = None,
+                  lags_grid           = None,
+                  refit               = False,
+                  return_best         = False,
+                  verbose             = False
+              )
+    
+    expected_results = pd.DataFrame({
+            'levels':[['l1', 'l2'], ['l1', 'l2'], ['l1', 'l2']],
+            'lags'  :['custom predictors', 'custom predictors', 'custom predictors'],
+            'params':[{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}],
+            'mean_squared_error':np.array([0.06365397633008085, 0.06367614582294409, 0.06385378127252679]),
+            'mean_absolute_error':np.array([0.20968100463227382, 0.20969259779858337, 0.20977945312386406]),
+            'alpha' :np.array([0.01, 0.1, 1.])
+                                     },
+            index=[0, 1, 2]
+                                   )
+
+    pd.testing.assert_frame_equal(results, expected_results)
+
+
+def test_evaluate_grid_hyperparameters_multiseries_when_return_best_ForecasterAutoregMultiSeriesCustom():
+    """
+    Test forecaster is refitted when `return_best = True` in 
+    _evaluate_grid_hyperparameters_multiseries.
+    """
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                     regressor      = Ridge(random_state=123),
+                     fun_predictors = create_predictors,
+                     window_size    = 4 
+                 )
+
+    steps = 3
+    n_validation = 12
+    param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
+
+    _evaluate_grid_hyperparameters_multiseries(
+        forecaster          = forecaster,
+        series              = series,
+        param_grid          = param_grid,
+        steps               = steps,
+        metric              = 'mean_absolute_error',
+        initial_train_size  = len(series) - n_validation,
+        fixed_train_size    = False,
+        levels              = None,
+        exog                = None,
+        lags_grid           = None,
+        refit               = False,
+        return_best         = True,
+        verbose             = False
+    )
+
+    expected_alpha = 0.01
+    expected_series_col_names = ['l1', 'l2']
+    
     assert expected_alpha == forecaster.regressor.alpha
     assert expected_series_col_names ==  forecaster.series_col_names
 
