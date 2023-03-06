@@ -79,7 +79,8 @@ def test_create_train_X_y_exception_when_y_and_exog_have_different_index():
 
 def test_create_train_X_y_exception_when_len_name_predictors_not_match_X_train_columns():
     """
-    Test exception is raised when y and exog have different index.
+    Test exception is raised when argument `name_predictors` has less values than the number of
+    columns of X_train.
     """
     forecaster = ForecasterAutoregCustom(
                     regressor       = LinearRegression(),
@@ -100,7 +101,7 @@ def test_create_train_X_y_exception_when_len_name_predictors_not_match_X_train_c
 
 def test_create_train_X_y_column_names_match_name_predictors():
     """
-    Test exception is raised when y and exog have different index.
+    Check column names in X_train match the ones in argument `name_predictors`.
     """
     forecaster = ForecasterAutoregCustom(
                     regressor       = LinearRegression(),
