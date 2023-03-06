@@ -77,6 +77,43 @@ def test_create_train_X_y_exception_when_y_and_exog_have_different_index():
             exog=pd.Series(np.arange(10), index=pd.RangeIndex(start=0, stop=10, step=1))
         ) 
 
+def test_create_train_X_y_exception_when_len_name_predictors_not_match_X_train_columns():
+    """
+    Test exception is raised when y and exog have different index.
+    """
+    forecaster = ForecasterAutoregCustom(
+                    regressor       = LinearRegression(),
+                    fun_predictors  = create_predictors,
+                    name_predictors = ['lag_1', 'lag_2'],
+                    window_size     = 5
+                 )
+
+    err_msg = re.escape(
+                ("The length of provided predictors names (`name_predictors`) do not "
+                 "match the length output of `fun_predictors`.")      
+              )
+    with pytest.raises(ValueError, match = err_msg):
+        forecaster.fit(
+            y = pd.Series(np.arange(10), index=pd.date_range(start='2022-01-01', periods=10, freq='1D'))
+        )
+
+
+def test_create_train_X_y_column_names_match_name_predictors():
+    """
+    Test exception is raised when y and exog have different index.
+    """
+    forecaster = ForecasterAutoregCustom(
+                    regressor       = LinearRegression(),
+                    fun_predictors  = create_predictors,
+                    name_predictors = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5'],
+                    window_size     = 5
+                 )
+
+    train_X = forecaster.create_train_X_y(
+                y = pd.Series(np.arange(10), index=pd.date_range(start='2022-01-01', periods=10, freq='1D'))
+            )[0]
+    assert train_X.columns.to_list() == ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5']
+    
 
 def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_None():
     """
