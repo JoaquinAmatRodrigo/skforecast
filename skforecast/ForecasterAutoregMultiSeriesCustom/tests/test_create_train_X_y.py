@@ -16,6 +16,13 @@ def create_predictors(y): # pragma: no cover
 
     return lags
 
+def create_predictors_nan(y): # pragma: no cover
+    """
+    Create first 3 lags of a time series.
+    """
+    lags = np.array([1, 2, np.nan], dtype=float)
+    return lags
+
 
 def test_create_train_X_y_exception_when_series_not_dataframe():
     """
@@ -314,3 +321,93 @@ def test_create_train_X_y_output_when_series_and_exog_is_dataframe_datetime_inde
             pd.testing.assert_series_equal(results[i], expected[i])
         else:
             assert (results[i] == expected[i]).all()
+
+
+def test_create_train_X_y_exception_when_len_name_predictors_not_match_X_train_columns():
+    """
+    Test exception is raised when argument `name_predictors` has less values than the number of
+    columns of X_train.
+    """
+    series = pd.DataFrame({'1': pd.Series(np.arange(5)),  
+                           '2': pd.Series(np.arange(5))
+                           })
+
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                    regressor       = LinearRegression(),
+                    fun_predictors  = create_predictors,
+                    name_predictors = ['lag_1', 'lag_2'],
+                    window_size     = 3
+                 )
+
+    err_msg = re.escape(
+                ("The length of provided predictors names (`name_predictors`) do not "
+                 "match the length output of `fun_predictors`.")      
+              )
+    with pytest.raises(ValueError, match = err_msg):
+        forecaster.fit(series = series)
+
+
+def test_create_train_X_y_column_names_match_name_predictors():
+    """
+    Check column names in X_train match the ones in argument `name_predictors`.
+    """
+    series = pd.DataFrame({'1': pd.Series(np.arange(5)),  
+                           '2': pd.Series(np.arange(5))
+                           })
+
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                    regressor       = LinearRegression(),
+                    fun_predictors  = create_predictors,
+                    name_predictors = ['lag_1', 'lag_2', 'lag_3'],
+                    window_size     = 3
+                 )
+
+    train_X = forecaster.create_train_X_y(series = series)[0]
+    assert train_X.columns.to_list() == ['lag_1', 'lag_2', 'lag_3', '1', '2']
+
+
+def test_create_train_X_y_exception_when_fun_predictors_return_nan():
+    """
+    Test exception is raised when `fun_predictors()` return NaN values.
+    """
+    
+    series = pd.DataFrame({'1': pd.Series(np.arange(5)),  
+                           '2': pd.Series(np.arange(5))
+                           })
+
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                    regressor       = LinearRegression(),
+                    fun_predictors  = create_predictors_nan,
+                    name_predictors = ['lag_1', 'lag_2', 'lag_3'],
+                    window_size     = 3
+                 )
+
+    err_msg = re.escape(
+                ("`fun_predictors()` is returning `NaN` values for series 1.")      
+              )
+    with pytest.raises(Exception, match = err_msg):
+        forecaster.create_train_X_y(series = series)
+
+
+def test_create_train_X_y_exception_when_series_length_is_lower_than_windows_size():
+    """
+    """
+    
+    series = pd.DataFrame({'1': pd.Series(np.arange(2)),  
+                           '2': pd.Series(np.arange(2))
+                           })
+
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                    regressor       = LinearRegression(),
+                    fun_predictors  = create_predictors_nan,
+                    name_predictors = ['lag_1', 'lag_2', 'lag_3'],
+                    window_size     = 3
+                 )
+
+    err_msg = re.escape(
+                (f'`series` must have as many values as the windows_size needed by '
+                 f'{forecaster.fun_predictors.__name__}. For this Forecaster the '
+                 f'minimum length is {forecaster.window_size + 1}')      
+              )
+    with pytest.raises(Exception, match = err_msg):
+        forecaster.create_train_X_y(series = series)

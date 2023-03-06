@@ -14,7 +14,7 @@ All notable changes to this project will be documented in this file.
 
 + Method `predict_bootstrapping()` to all forecasters, generate multiple forecasting predictions using a bootstrapping process.
 
-+ Method `predict_dist()` to all forecasters, fit a given probability distribution for each step.
++ Method `predict_dist()` to all forecasters, fit a given probability distribution for each step using a bootstrapping process.
 
 + Function `plot_prediction_distribution` in module `plot`.
 
@@ -49,6 +49,8 @@ All notable changes to this project will be documented in this file.
 **Fixed**
 
 + Remove operator `**` in `set_params()` method for all forecasters.
+
++ Replace  `getfullargspec` in favor of `inspect.signature` (contribution by @jordisilv).
 
 
 ## [0.6.0] - [2022-11-30]

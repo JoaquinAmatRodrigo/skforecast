@@ -7,7 +7,9 @@ import pandas as pd
 import inspect
 from skforecast.utils.utils import initialize_weights
 from sklearn.linear_model import LinearRegression
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.neighbors import KNeighborsRegressor
+from xgboost import XGBRegressor
 
 
 @pytest.mark.parametrize("forecaster_name", 
@@ -70,8 +72,8 @@ def test_TypeError_initialize_weights_when_series_weights_is_not_a_dict(forecast
 
 def test_UserWarning_initialize_weights_when_weight_func_is_provided_and_regressor_has_not_sample_weights():
     """
-    Test UserWarning is created when weight_func is provided but the regressor has no argument
-    sample_weights in his fit method.
+    Test UserWarning is created when weight_func is provided but the regressor 
+    has no argument sample_weights in his fit method.
     """
     def weight_func(): # pragma: no cover
         pass
@@ -94,8 +96,8 @@ def test_UserWarning_initialize_weights_when_weight_func_is_provided_and_regress
 
 def test_UserWarning_initialize_weights_when_series_weights_is_provided_and_regressor_has_not_sample_weights():
     """
-    Test UserWarning is created when series_weights is provided but the regressor has no argument
-    sample_weights in his fit method.
+    Test UserWarning is created when series_weights is provided but the regressor 
+    has no argument sample_weights in his fit method.
     """
     series_weights = {'series_1': 1., 'series_2': 2.}
 
@@ -112,6 +114,49 @@ def test_UserWarning_initialize_weights_when_series_weights_is_provided_and_regr
         )
     
     assert series_weights is None
+
+
+@pytest.mark.parametrize("regressor", 
+                         [LinearRegression(), RandomForestRegressor(), XGBRegressor()], 
+                         ids=lambda regressor: f'regressor: {type(regressor).__name__}')
+def test_initialize_weights_finds_sample_weight_in_different_regressors_when_weight_func(recwarn, regressor):
+    """
+    Test initialize weights finds `sample_weight` attribute in different
+    regressors when `weight_func`.
+    """
+    def weight_func(): # pragma: no cover
+        pass
+
+    weight_func, source_code_weight_func, _ = initialize_weights(
+        forecaster_name = 'ForecasterAutoreg', 
+        regressor       = regressor, 
+        weight_func     = weight_func, 
+        series_weights  = None
+    )
+    
+    # Count the number of warnings, it should be 0
+    assert len(recwarn) == 0
+
+
+@pytest.mark.parametrize("regressor", 
+                         [LinearRegression(), RandomForestRegressor(), XGBRegressor()], 
+                         ids=lambda regressor: f'regressor: {type(regressor).__name__}')
+def test_initialize_weights_finds_sample_weight_in_different_regressors_when_series_weights(recwarn, regressor):
+    """
+    Test initialize weights finds `sample_weight` attribute in different
+    regressors when `series_weights`.
+    """
+    series_weights = {'series_1': 1., 'series_2': 2.}
+
+    weight_func, source_code_weight_func, series_weights = initialize_weights(
+        forecaster_name = 'ForecasterAutoregMultiSeries', 
+        regressor       = regressor, 
+        weight_func     = None, 
+        series_weights  = series_weights
+    )
+    
+    # Count the number of warnings, it should be 0
+    assert len(recwarn) == 0
 
 
 def test_output_initialize_weights_source_code_weight_func_when_weight_func_not_dict():

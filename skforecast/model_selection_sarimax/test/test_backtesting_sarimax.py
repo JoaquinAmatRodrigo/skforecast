@@ -136,7 +136,7 @@ def test_output_backtesting_sarimax_no_refit_no_exog_no_remainder_with_mocked():
                                         refit              = False,
                                         alpha              = None,
                                         interval           = None,
-                                        verbose            = False
+                                        verbose            = True
                                    )
     
     expected_metric = 0.10564449116792594
