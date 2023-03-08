@@ -38,7 +38,7 @@ pip install skforecast
 Specific version:
 
 ```bash
-pip install skforecast==0.6.0
+pip install skforecast==0.7.0
 ```
 
 Latest (unstable):
@@ -97,19 +97,16 @@ pip install skforecast[plotting]
 + Get predictor importance
 + Forecaster in production
 
-## What is coming in the new release?
+## What is new in skforecast 0.7.0?
 
-- [x] Predict and plot the distribution of each predicted step.
-- [x] A class of its own and faster implementation of ARIMA models with [pmdarima](https://github.com/alkaline-ml/pmdarima), `ForecasterSarimax`. 
+- [x] Predict and plot the distribution of each predicted step, `predict_dist` and `plot_prediction_distribution` (Ridgeline plot).
+- [x] A class of its own and faster implementation of ARIMA models with [pmdarima](https://github.com/alkaline-ml/pmdarima), `ForecasterSarimax`, `model_selection_sarimax`.
+- [x] Modeling multiple time series simultaneously with a custom function to create predictors, `ForecasterAutoregMultiSeriesCustom`.
+- [x] `python 3.11` compatibility.
 - [x] Bug fixes and performance improvements.
 
 
-Try it:
-```bash
-pip install git+https://github.com/JoaquinAmatRodrigo/skforecast@0.7.x
-```
-
-Visit the [changelog](https://github.com/JoaquinAmatRodrigo/skforecast/blob/0.7.x/changelog.md) to view all notable changes.
+Visit the [changelog](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/changelog.md) to view all notable changes.
 
 
 # Documentation
@@ -190,7 +187,7 @@ If you use this software, please cite it using the following metadata.
 
 **APA**:
 ```
-Amat Rodrigo, J., & Escobar Ortiz, J. skforecast (Version 0.6.0) [Computer software]
+Amat Rodrigo, J., & Escobar Ortiz, J. skforecast (Version 0.7.0) [Computer software]
 ```
 
 **BibTeX**:
@@ -198,10 +195,10 @@ Amat Rodrigo, J., & Escobar Ortiz, J. skforecast (Version 0.6.0) [Computer softw
 @software{skforecast,
 author = {Amat Rodrigo, Joaquin and Escobar Ortiz, Javier},
 license = {MIT},
-month = {11},
+month = {3},
 title = {{skforecast}},
-version = {0.6.0},
-year = {2022}
+version = {0.7.0},
+year = {2023}
 }
 ```
 
