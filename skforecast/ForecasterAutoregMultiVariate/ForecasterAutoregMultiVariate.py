@@ -1392,20 +1392,16 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
 
         if not transform and self.transformer_series_[self.level] is not None:
             warnings.warn(
-                f"""
-                Argument `transform` is set to `False` but forecaster was trained
-                using a transformer {self.transformer_series_[self.level]}. Ensure 
-                that the new residuals are already transformed or set `transform=True`.
-                """
+                (f"Argument `transform` is set to `False` but forecaster was trained "
+                 f"using a transformer {self.transformer_series_[self.level]}. Ensure "
+                 f"that the new residuals are already transformed or set `transform=True`.")
             )
 
         if transform and self.transformer_series_[self.level] is not None:
             warnings.warn(
-                f"""
-                Residuals will be transformed using the same transformer used when 
-                training the forecaster ({self.transformer_series_[self.level]}). Ensure 
-                the new residuals are on the same scale as the original time series.
-                """
+                (f"Residuals will be transformed using the same transformer used when "
+                 f"training the forecaster ({self.transformer_series_[self.level]}). Ensure "
+                 f"the new residuals are on the same scale as the original time series.")
             )
             for key, value in residuals.items():
                 residuals[key] = transform_series(

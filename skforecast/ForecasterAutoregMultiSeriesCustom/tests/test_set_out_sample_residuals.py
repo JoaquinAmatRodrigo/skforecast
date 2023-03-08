@@ -11,8 +11,7 @@ from sklearn.preprocessing import StandardScaler
 
 # Fixtures
 series = pd.DataFrame({'l1': pd.Series(np.arange(10)), 
-                       'l2': pd.Series(np.arange(10))
-                       })
+                       'l2': pd.Series(np.arange(10))})
 
 def create_predictors(y): # pragma: no cover
     """
@@ -21,7 +20,6 @@ def create_predictors(y): # pragma: no cover
     lags = y[-1:-6:-1]
 
     return lags
-
 
 
 @pytest.mark.parametrize("residuals", [[1, 2, 3], {'1': [1,2,3,4]}], 
@@ -33,7 +31,7 @@ def test_set_out_sample_residuals_TypeError_when_residuals_is_not_a_dict_of_nump
     forecaster = ForecasterAutoregMultiSeriesCustom(
                     regressor      = LinearRegression(),
                     fun_predictors = create_predictors,
-                    window_size    = 3,
+                    window_size    = 5,
                 )
     err_msg = re.escape(
                 f"`residuals` argument must be a dict of numpy ndarrays in the form "
@@ -51,7 +49,7 @@ def test_set_out_sample_residuals_NotFittedError_when_forecaster_not_fitted():
     forecaster = ForecasterAutoregMultiSeriesCustom(
                     regressor      = LinearRegression(),
                     fun_predictors = create_predictors,
-                    window_size    = 3,
+                    window_size    = 5,
                 )
     residuals = {'l1': np.array([1, 2, 3, 4, 5]), 
                  'l2': np.array([1, 2, 3, 4, 5])}
@@ -71,7 +69,7 @@ def test_set_out_sample_residuals_warning_when_residuals_not_for_all_levels():
     forecaster = ForecasterAutoregMultiSeriesCustom(
                     regressor      = LinearRegression(fit_intercept=True),
                     fun_predictors = create_predictors,
-                    window_size    = 3
+                    window_size    = 5
                  )
                 
     forecaster.fit(series=series)
@@ -95,7 +93,7 @@ def test_set_out_sample_residuals_warning_when_forecaster_has_transformer_and_tr
     forecaster = ForecasterAutoregMultiSeriesCustom(
                     regressor          = LinearRegression(),
                     fun_predictors     = create_predictors,
-                    window_size        = 3,
+                    window_size        = 5,
                     transformer_series = StandardScaler()
                  )
     forecaster.fit(series=series)
@@ -119,7 +117,7 @@ def test_set_out_sample_residuals_warning_when_forecaster_has_transformer_and_tr
     forecaster = ForecasterAutoregMultiSeriesCustom(
                     regressor          = LinearRegression(),
                     fun_predictors     = create_predictors,
-                    window_size        = 3,
+                    window_size        = 5,
                     transformer_series = StandardScaler()
                  )
     forecaster.fit(series=series)
@@ -143,7 +141,7 @@ def test_set_out_sample_residuals_when_residuals_length_is_less_than_1000_and_no
     forecaster = ForecasterAutoregMultiSeriesCustom(
                     regressor         = LinearRegression(),
                     fun_predictors    = create_predictors,
-                    window_size       = 3,
+                    window_size       = 5,
                 )
     forecaster.fit(series=series)
     residuals = {'l1': np.arange(10), 'l2': np.arange(10)}
@@ -165,7 +163,7 @@ def test_set_out_sample_residuals_when_residuals_length_is_less_than_1000_and_ap
     forecaster = ForecasterAutoregMultiSeriesCustom(
                     regressor      = LinearRegression(),
                     fun_predictors = create_predictors,
-                    window_size    = 3,
+                    window_size    = 5,
                 )
     forecaster.fit(series=series)
     residuals = {'l1': np.arange(10), 'l2': np.arange(10)}
@@ -187,7 +185,7 @@ def test_set_out_sample_residuals_when_residuals_length_is_greater_than_1000():
     forecaster = ForecasterAutoregMultiSeriesCustom(
                     regressor      = LinearRegression(),
                     fun_predictors = create_predictors,
-                    window_size    = 3,
+                    window_size    = 5,
                 )
     forecaster.fit(series=series)
 
@@ -206,7 +204,7 @@ def test_set_out_sample_residuals_when_residuals_length_is_more_than_1000_and_ap
     forecaster = ForecasterAutoregMultiSeriesCustom(
                     regressor      = LinearRegression(),
                     fun_predictors = create_predictors,
-                    window_size    = 3,
+                    window_size    = 5,
                 )
     forecaster.fit(series=series)
     residuals = {'l1': np.arange(10), 'l2': np.arange(10)}
