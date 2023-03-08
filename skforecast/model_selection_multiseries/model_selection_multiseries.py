@@ -773,8 +773,8 @@ def random_search_forecaster_multiseries(
     verbose: bool=True
 ) -> pd.DataFrame:
     """
-    Random search over specified parameter values or distributions for a Forecaster object.
-    Validation is done using multi-series backtesting.
+    Random search over specified parameter values or distributions for a Forecaster 
+    object. Validation is done using multi-series backtesting.
     
     Parameters
     ----------
@@ -1095,6 +1095,8 @@ def backtesting_forecaster_multivariate(
     verbose: bool=False
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
+    This function is an alias of backtesting_forecaster_multiseries.
+
     Backtesting for multi-series and multivariate forecasters.
 
     If `refit` is False, the model is trained only once using the `initial_train_size`
@@ -1221,6 +1223,8 @@ def grid_search_forecaster_multivariate(
     verbose: bool=True
 ) -> pd.DataFrame:
     """
+    This function is an alias of grid_search_forecaster_multiseries.
+
     Exhaustive search over specified parameter values for a Forecaster object.
     Validation is done using multi-series backtesting.
     
@@ -1331,8 +1335,10 @@ def random_search_forecaster_multivariate(
     verbose: bool=True
 ) -> pd.DataFrame:
     """
-    Random search over specified parameter values or distributions for a Forecaster object.
-    Validation is done using multi-series backtesting.
+    This function is an alias of random_search_forecaster_multiseries.
+
+    Random search over specified parameter values or distributions for a Forecaster 
+    object. Validation is done using multi-series backtesting.
     
     Parameters
     ----------
