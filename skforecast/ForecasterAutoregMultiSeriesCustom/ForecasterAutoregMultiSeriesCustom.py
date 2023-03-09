@@ -416,6 +416,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
                     )
         
         X_levels = []
+        expected = []
         for i, serie in enumerate(series.columns):
 
             y = series[serie]
@@ -444,7 +445,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
             y_train_values = np.array(temp_y_train)
 
             if np.isnan(X_train_values).any():
-                raise Exception(
+                raise ValueError(
                     f"`fun_predictors()` is returning `NaN` values for series {serie}."
                 )
 
@@ -463,10 +464,22 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         else:
             if len(self.name_predictors) != X_train.shape[1]:
                 raise ValueError(
-                    f"The length of provided predictors names (`name_predictors`) do not "
-                    f"match the length output of `fun_predictors`." 
+                    (f"The length of provided predictors names (`name_predictors`) do not "
+                     f"match the number of columns created by `fun_predictors()`.")
                 )
             X_train_col_names = self.name_predictors.copy()
+
+        # y_values correspond only to the last series of `series`. Since the columns
+        # of X_train are the same for all series, the check is the same.
+        expected = self.fun_predictors(y_values[:-1])
+        observed = X_train[-1, :]
+
+        if expected.shape != observed.shape or not (expected == observed).all():
+            raise ValueError(
+                (f"The `window_size` argument ({self.window_size}), declared when "
+                 f"initializing the forecaster, does not correspond to the window "
+                 f"used by `fun_predictors()`.")
+            )
 
         if exog is not None:
             if len(exog) != len(series):

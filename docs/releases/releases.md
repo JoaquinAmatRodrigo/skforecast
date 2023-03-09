@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.7.0] - [dev]
+## [0.7.0] - [2023-03-10]
 
 **Added**
 
@@ -50,7 +50,7 @@ All notable changes to this project will be documented in this file.
 
 + Remove operator `**` in `set_params()` method for all forecasters.
 
-+ Replace  `getfullargspec` in favor of `inspect.signature` (contribution by @jordisilv).
++ Replace `getfullargspec` in favor of `inspect.signature` (contribution by @jordisilv).
 
 
 ## [0.6.0] - [2022-11-30]
