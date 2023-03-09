@@ -16,9 +16,9 @@ def create_predictors(y): # pragma: no cover
     return lags
 
 
-def test_create_train_X_y_exception_when_len_y_is_less_than_window_size():
+def test_create_train_X_y_ValueError_when_len_y_is_less_than_window_size():
     """
-    Test exception is raised when length of y is less than self.window_size +1.
+    Test ValueError is raised when length of y is less than self.window_size + 1.
     """
     forecaster = ForecasterAutoregCustom(
                      regressor      = LinearRegression(),
@@ -39,9 +39,9 @@ def test_create_train_X_y_exception_when_len_y_is_less_than_window_size():
                          [(pd.Series(np.arange(50)), pd.Series(np.arange(10))), 
                           (pd.Series(np.arange(10)), pd.Series(np.arange(50))), 
                           (pd.Series(np.arange(10)), pd.DataFrame(np.arange(50).reshape(25,2)))])
-def test_create_train_X_y_exception_when_len_y_is_different_from_len_exog(y, exog):
+def test_create_train_X_y_ValueError_when_len_y_is_different_from_len_exog(y, exog):
     """
-    Test exception is raised when length of y is not equal to length exog.
+    Test ValueError is raised when length of y is not equal to length exog.
     """
     forecaster = ForecasterAutoregCustom(
                      regressor      = LinearRegression(),
@@ -57,9 +57,9 @@ def test_create_train_X_y_exception_when_len_y_is_different_from_len_exog(y, exo
         forecaster.create_train_X_y(y=y, exog=exog)
 
 
-def test_create_train_X_y_exception_when_y_and_exog_have_different_index():
+def test_create_train_X_y_ValueError_when_y_and_exog_have_different_index():
     """
-    Test exception is raised when y and exog have different index.
+    Test ValueError is raised when y and exog have different index.
     """
     forecaster = ForecasterAutoregCustom(
                     regressor      = LinearRegression(),
@@ -75,11 +75,11 @@ def test_create_train_X_y_exception_when_y_and_exog_have_different_index():
         forecaster.fit(
             y=pd.Series(np.arange(10), index=pd.date_range(start='2022-01-01', periods=10, freq='1D')),
             exog=pd.Series(np.arange(10), index=pd.RangeIndex(start=0, stop=10, step=1))
-        ) 
+        )
 
-def test_create_train_X_y_exception_when_len_name_predictors_not_match_X_train_columns():
+def test_create_train_X_y_ValueError_when_len_name_predictors_not_match_X_train_columns():
     """
-    Test exception is raised when argument `name_predictors` has less values than the number of
+    Test ValueError is raised when argument `name_predictors` has less values than the number of
     columns of X_train.
     """
     forecaster = ForecasterAutoregCustom(
@@ -90,9 +90,31 @@ def test_create_train_X_y_exception_when_len_name_predictors_not_match_X_train_c
                  )
 
     err_msg = re.escape(
-                ("The length of provided predictors names (`name_predictors`) do not "
-                 "match the length output of `fun_predictors`.")      
-              )
+                    (f"The length of provided predictors names (`name_predictors`) do not "
+                     f"match the number of columns created by `fun_predictors()`.")
+                )
+    with pytest.raises(ValueError, match = err_msg):
+        forecaster.fit(
+            y = pd.Series(np.arange(10), index=pd.date_range(start='2022-01-01', periods=10, freq='1D'))
+        )
+
+
+def test_create_train_X_y_ValueError_when_forecaster_window_size_does_not_match_with_fun_predictors():
+    """
+    Test ValueError is raised when the window needed by `fun_predictors()` does 
+    not correspond with the forecaster.window_size.
+    """
+    forecaster = ForecasterAutoregCustom(
+                    regressor       = LinearRegression(),
+                    fun_predictors  = create_predictors,
+                    window_size     = 4
+                 )
+
+    err_msg = re.escape(
+                (f"The `window_size` argument ({forecaster.window_size}), declared when "
+                 f"initializing the forecaster, does not correspond to the window "
+                 f"used by `fun_predictors()`.")
+            )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.fit(
             y = pd.Series(np.arange(10), index=pd.date_range(start='2022-01-01', periods=10, freq='1D'))

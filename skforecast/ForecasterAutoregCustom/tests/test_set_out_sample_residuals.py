@@ -19,15 +19,15 @@ def create_predictors(y): # pragma: no cover
     return lags  
 
 
-def test_set_out_sample_residuals_exception_when_residuals_is_not_numpy_ndarray():
+def test_set_out_sample_residuals_TypeError_when_residuals_is_not_numpy_ndarray():
     """
-    Test exception is raised when residuals argument is not numpy ndarray.
+    Test TypeError is raised when residuals argument is not numpy ndarray.
     """
     forecaster = ForecasterAutoregCustom(
-                    regressor      = LinearRegression(),
-                    fun_predictors = create_predictors,
-                    window_size    = 5
-                )
+                     regressor      = LinearRegression(),
+                     fun_predictors = create_predictors,
+                     window_size    = 5
+                 )
     residuals=pd.Series([1, 2, 3])
 
     err_msg = re.escape(
@@ -35,6 +35,49 @@ def test_set_out_sample_residuals_exception_when_residuals_is_not_numpy_ndarray(
             )
     with pytest.raises(TypeError, match = err_msg):
         forecaster.set_out_sample_residuals(residuals=residuals)
+
+
+def test_set_out_sample_residuals_warning_when_forecaster_has_transformer_and_transform_False():
+    """
+    Test Warning is raised when forecaster has a transformer_y and transform=False.
+    """
+    forecaster = ForecasterAutoregCustom(
+                     regressor      = LinearRegression(),
+                     fun_predictors = create_predictors,
+                     window_size    = 5,
+                     transformer_y  = StandardScaler()
+                 )
+    residuals = np.arange(10)
+
+    err_msg = re.escape(
+                (f"Argument `transform` is set to `False` but forecaster was trained "
+                 f"using a transformer {forecaster.transformer_y}. Ensure that the new residuals "
+                 f"are already transformed or set `transform=True`.")
+            )
+    with pytest.warns(UserWarning, match = err_msg):
+        forecaster.set_out_sample_residuals(residuals=residuals, transform=False)
+
+
+def test_set_out_sample_residuals_warning_when_forecaster_has_transformer_and_transform_True():
+    """
+    Test Warning is raised when forecaster has a transformer_y and transform=True.
+    """
+    forecaster = ForecasterAutoregCustom(
+                     regressor      = LinearRegression(),
+                     fun_predictors = create_predictors,
+                     window_size    = 5,
+                     transformer_y  = StandardScaler()
+                 )
+    forecaster.fit(y=pd.Series(np.arange(10)))
+    residuals = np.arange(10)
+
+    err_msg = re.escape(
+                (f"Residuals will be transformed using the same transformer used "
+                 f"when training the forecaster ({forecaster.transformer_y}). Ensure that the "
+                 f"new residuals are on the same scale as the original time series.")
+            )
+    with pytest.warns(UserWarning, match = err_msg):
+        forecaster.set_out_sample_residuals(residuals=residuals, transform=True)
 
 
 def test_set_out_sample_residuals_when_residuals_length_is_greater_than_1000():

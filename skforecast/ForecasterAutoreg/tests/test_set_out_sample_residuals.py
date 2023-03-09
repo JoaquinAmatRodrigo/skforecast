@@ -2,7 +2,6 @@
 # ==============================================================================
 import re
 import pytest
-from pytest import approx
 import numpy as np
 import pandas as pd
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
@@ -29,17 +28,32 @@ def test_set_out_sample_residuals_warning_when_forecaster_has_transformer_and_tr
     Test Warning is raised when forecaster has a transformer_y and transform=False.
     """
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3, transformer_y=StandardScaler())
-    residuals = np.arange(20)
+    residuals = np.arange(10)
 
     err_msg = re.escape(
-                f'''
-                Argument `transform` is set to `False` but forecaster was trained
-                using a transformer {forecaster.transformer_y}. Ensure that the new residuals 
-                are already transformed or set `transform=True`.
-                '''
+                (f"Argument `transform` is set to `False` but forecaster was trained "
+                 f"using a transformer {forecaster.transformer_y}. Ensure that the new residuals "
+                 f"are already transformed or set `transform=True`.")
             )
     with pytest.warns(UserWarning, match = err_msg):
         forecaster.set_out_sample_residuals(residuals=residuals, transform=False)
+
+
+def test_set_out_sample_residuals_warning_when_forecaster_has_transformer_and_transform_True():
+    """
+    Test Warning is raised when forecaster has a transformer_y and transform=True.
+    """
+    forecaster = ForecasterAutoreg(LinearRegression(), lags=3, transformer_y=StandardScaler())
+    forecaster.fit(y=pd.Series(np.arange(10)))
+    residuals = np.arange(10)
+
+    err_msg = re.escape(
+                (f"Residuals will be transformed using the same transformer used "
+                 f"when training the forecaster ({forecaster.transformer_y}). Ensure that the "
+                 f"new residuals are on the same scale as the original time series.")
+            )
+    with pytest.warns(UserWarning, match = err_msg):
+        forecaster.set_out_sample_residuals(residuals=residuals, transform=True)
 
 
 def test_set_out_sample_residuals_when_residuals_length_is_greater_than_1000():

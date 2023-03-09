@@ -388,14 +388,24 @@ class ForecasterAutoregCustom(ForecasterBase):
         else:
             if len(self.name_predictors) != X_train.shape[1]:
                 raise ValueError(
-                    f"The length of provided predictors names (`name_predictors`) do not "
-                    f"match the length output of `fun_predictors`." 
+                    (f"The length of provided predictors names (`name_predictors`) do not "
+                     f"match the number of columns created by `fun_predictors()`.")
                 )
             X_train_col_names = self.name_predictors.copy()
 
         if np.isnan(X_train).any():
             raise ValueError(
                 f"`fun_predictors()` is returning `NaN` values."
+            )
+
+        expected = self.fun_predictors(y_values[:-1])
+        observed = X_train[-1, :]
+
+        if expected.shape != observed.shape or not (expected == observed).all():
+            raise ValueError(
+                (f"The `window_size` argument ({self.window_size}), declared when "
+                 f"initializing the forecaster, does not correspond to the window "
+                 f"used by `fun_predictors()`.")
             )
         
         if exog is not None:
@@ -1130,20 +1140,16 @@ class ForecasterAutoregCustom(ForecasterBase):
 
         if not transform and self.transformer_y is not None:
             warnings.warn(
-                f'''
-                Argument `transform` is set to `False` but forecaster was trained
-                using a transformer {self.transformer_y}. Ensure that the new residuals 
-                are already transformed or set `transform=True`.
-                '''
+                (f"Argument `transform` is set to `False` but forecaster was trained "
+                 f"using a transformer {self.transformer_y}. Ensure that the new residuals "
+                 f"are already transformed or set `transform=True`.")
             )
 
         if transform and self.transformer_y is not None:
             warnings.warn(
-                f'''
-                Residuals will be transformed using the same transformer used 
-                when training the forecaster ({self.transformer_y}). Ensure that the
-                new residuals are on the same scale as the original time series.
-                '''
+                (f"Residuals will be transformed using the same transformer used "
+                 f"when training the forecaster ({self.transformer_y}). Ensure that the "
+                 f"new residuals are on the same scale as the original time series.")
             )
 
             residuals = transform_series(
