@@ -25,16 +25,16 @@ def test_predict_output_when_regressor_is_LinearRegression():
     Test predict output when using LinearRegression as regressor.
     """
     forecaster = ForecasterAutoregCustom(
-                        regressor      = LinearRegression(),
-                        fun_predictors = create_predictors,
-                        window_size    = 5
-                    )
+                     regressor      = LinearRegression(),
+                     fun_predictors = create_predictors,
+                     window_size    = 5
+                 )
     forecaster.fit(y=pd.Series(np.arange(50)))
     results = forecaster.predict(steps=5)
     expected = pd.Series(
-                data = np.array([50., 51., 52., 53., 54.]),
-                index = pd.RangeIndex(start=50, stop=55, step=1),
-                name = 'pred'
+                   data = np.array([50., 51., 52., 53., 54.]),
+                   index = pd.RangeIndex(start=50, stop=55, step=1),
+                   name = 'pred'
                )
     pd.testing.assert_series_equal(results, expected)
 
@@ -50,23 +50,51 @@ def test_predict_output_when_regressor_is_LinearRegression_with_transform_y():
         )
     transformer_y = StandardScaler()
     forecaster = ForecasterAutoregCustom(
-                    regressor = LinearRegression(),
-                    fun_predictors = create_predictors,
-                    window_size    = 5,
-                    transformer_y = transformer_y
+                     regressor = LinearRegression(),
+                     fun_predictors = create_predictors,
+                     window_size    = 5,
+                     transformer_y = transformer_y
                  )
     forecaster.fit(y=y)
     predictions = forecaster.predict(steps=5)
     expected = pd.Series(
-                data = np.array([-0.1578203 , -0.18459942, -0.13711051, -0.01966358, -0.03228613]),
-                index = pd.RangeIndex(start=20, stop=25, step=1),
-                name = 'pred'
+                   data = np.array([-0.1578203 , -0.18459942, -0.13711051, -0.01966358, -0.03228613]),
+                   index = pd.RangeIndex(start=20, stop=25, step=1),
+                   name = 'pred'
                )
     
     pd.testing.assert_series_equal(predictions, expected)
 
 
-def test_predict_output_when_regressor_is_LinearRegression_with_transform_y_and_transform_exog():
+def test_predict_output_when_regressor_is_LinearRegression_with_transform_y_and_transform_exog_series():
+    """
+    Test predict output when using LinearRegression as regressor, StandardScaler
+    as transformer_y and StandardScaler as transformer_exog.
+    """
+    y = pd.Series( np.array([-0.59,  0.02, -0.9 ,  1.09, -3.61,  0.72, -0.11, -0.4]))
+    exog = pd.Series(np.array([7.5, 24.4, 60.3, 57.3, 50.7, 41.4, 87.2, 47.4]))
+    exog_predict = exog.copy()
+    exog_predict.index = pd.RangeIndex(start=8, stop=16)
+
+    forecaster = ForecasterAutoregCustom(
+                     regressor        = LinearRegression(),
+                     fun_predictors   = create_predictors,
+                     window_size      = 5,
+                     transformer_y    = StandardScaler(),
+                     transformer_exog = StandardScaler()
+                 )
+    forecaster.fit(y=y, exog=exog)
+    predictions = forecaster.predict(steps=5, exog=exog_predict)
+    expected = pd.Series(
+                   data = np.array([0.5061933607954291, -0.09630297564967266, 0.05254973278138386, 0.1228115308156914, 0.002217414222449643]),
+                   index = pd.RangeIndex(start=8, stop=13, step=1),
+                   name = 'pred'
+               )
+    
+    pd.testing.assert_series_equal(predictions, expected)
+
+
+def test_predict_output_when_regressor_is_LinearRegression_with_transform_y_and_transform_exog_df():
     """
     Test predict output when using LinearRegression as regressor, StandardScaler
     as transformer_y and transformer_exog as transformer_exog.

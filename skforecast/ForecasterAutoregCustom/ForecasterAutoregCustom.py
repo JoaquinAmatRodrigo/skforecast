@@ -49,8 +49,8 @@ class ForecasterAutoregCustom(ForecasterBase):
         An instance of a regressor or pipeline compatible with the scikit-learn API.
         
     fun_predictors : Callable
-        Function that receive as a window of values as input (numpy ndarray) and returns
-        another numpy ndarray with the predictors associated with that window.
+        Function that receives a time series as input (numpy ndarray) and returns
+        another numpy ndarray with the predictors.
         
     window_size : int
         Size of the window needed by `fun_predictors` to create the predictors.
@@ -87,13 +87,13 @@ class ForecasterAutoregCustom(ForecasterBase):
         An instance of a regressor compatible with the scikit-learn API.
 
     fun_predictors : Callable
-        Function that receive as a window of values as input (numpy ndarray) and returns
-        another numpy ndarray with the predictors associated with that window.
+        Function that receives a time series as input (numpy ndarray) and returns
+        another numpy ndarray with the predictors.
         **New in version 0.7.0**
         
     create_predictors : Callable
-        Function that takes a numpy ndarray as a window of values as input and  
-        returns a numpy ndarray with the predictors associated with that window.
+        Function that receives a time series as input (numpy ndarray) and returns
+        another numpy ndarray with the predictors.
         **Deprecated in version 0.7.0 in favor of `fun_predictors`, it will be
         removed in version 0.8.0**
 
