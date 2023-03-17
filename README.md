@@ -56,7 +56,7 @@ pip install skforecast[full]
 Install optional dependencies:
 
 ```bash
-pip install skforecast[statsmodels]
+pip install skforecast[sarimax]
 ```
 
 ```bash
@@ -100,7 +100,7 @@ pip install skforecast[plotting]
 ## What is new in skforecast 0.7.0?
 
 - [x] Predict and plot the distribution of each predicted step, `predict_dist` and `plot_prediction_distribution` (Ridgeline plot).
-- [x] A class of its own and faster implementation of ARIMA models with [pmdarima](https://github.com/alkaline-ml/pmdarima), `ForecasterSarimax`, `model_selection_sarimax`.
+- [x] A class for ARIMA models with [pmdarima](https://github.com/alkaline-ml/pmdarima), `ForecasterSarimax`, `model_selection_sarimax`.
 - [x] Modeling multiple time series simultaneously with a custom function to create predictors, `ForecasterAutoregMultiSeriesCustom`.
 - [x] `python 3.11` compatibility.
 - [x] Bug fixes and performance improvements.
