@@ -6,7 +6,7 @@
 ################################################################################
 # coding=utf-8
  
-from typing import Union, Any
+from typing import Union, Any, Optional
 import numpy as np
 import pandas as pd
 from ..utils import check_optional_dependency
@@ -31,21 +31,21 @@ def plot_residuals(
     """
     Parameters
     ----------
-    residuals: pandas Series, numpy ndarray, default `None`.
+    residuals : pandas Series, numpy ndarray, default `None`.
         Values of residuals. If `None`, residuals are calculated internally using
         `y_true` and `y_true`.
 
-    y_true: pandas Series, numpy ndarray, default `None`.
+    y_true : pandas Series, numpy ndarray, default `None`.
         Ground truth (correct) values. Ignored if residuals is not `None`.
 
-    y_pred: pandas Series, numpy ndarray, default `None`. 
+    y_pred : pandas Series, numpy ndarray, default `None`. 
         Values of predictions. Ignored if residuals is not `None`.
         
-    fig: matplotlib.figure.Figure, default `None`. 
+    fig : matplotlib.figure.Figure, default `None`. 
         Pre-existing fig for the plot. Otherwise, call matplotlib.pyplot.figure()
         internally.
         
-    kwargs
+    fig_kw : dict
         Other keyword arguments are passed to matplotlib.pyplot.figure()
         
     Returns
@@ -125,7 +125,7 @@ def plot_multivariate_time_series_corr(
 
 def plot_prediction_distribution(
     bootstrapping_predictions: pd.DataFrame,
-    bw_method: Any=None,
+    bw_method: Optional[Any]=None,
     **fig_kw
 ) -> matplotlib.figure.Figure:
     """
@@ -137,12 +137,12 @@ def plot_prediction_distribution(
     bootstrapping_predictions : pandas DataFrame
         Bootstrapping predictions created with `Forecaster.predict_bootstrapping`.
 
-    bw_methodstr, scalar or callable, optional
+    bw_method : str, scalar, Callable, default `None`
         The method used to calculate the estimator bandwidth. This can be 'scott',
-        'silverman', a scalar constant or a callable. If None (default), 'scott' is used.
+        'silverman', a scalar constant or a Callable. If None (default), 'scott' is used.
         See scipy.stats.gaussian_kde for more information.
 
-    **fig_kw : any
+    fig_kw : dict
         All additional keyword arguments are passed to the `pyplot.figure` call.
 
     Returns

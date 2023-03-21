@@ -7,7 +7,7 @@
 # coding=utf-8
 
 
-from typing import Union, Tuple, Optional, Any
+from typing import Union, Tuple, Optional, Any, Callable
 import numpy as np
 import pandas as pd
 import warnings
@@ -31,7 +31,7 @@ def _backtesting_sarimax_refit(
     forecaster,
     y: pd.Series,
     steps: int,
-    metric: Union[str, callable, list],
+    metric: Union[str, Callable, list],
     initial_train_size: int,
     fixed_train_size: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
@@ -64,18 +64,18 @@ def _backtesting_sarimax_refit(
     steps : int
         Number of steps to predict.
         
-    metric : str, callable, list
+    metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
         If string:
             {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
     
-        If callable:
+        If Callable:
             Function with arguments y_true, y_pred that returns a float.
 
         If list:
-            List containing several strings and/or callable.
+            List containing several strings and/or Callable.
     
     initial_train_size : int
         Number of samples in the initial train split. The backtest forecaster is
@@ -199,7 +199,7 @@ def _backtesting_sarimax_no_refit(
     forecaster,
     y: pd.Series,
     steps: int,
-    metric: Union[str, callable, list],
+    metric: Union[str, Callable, list],
     initial_train_size: int,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     alpha: Optional[float]=None,
@@ -227,18 +227,18 @@ def _backtesting_sarimax_no_refit(
     steps : int
         Number of steps to predict.
         
-    metric : str, callable, list
+    metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
         If string:
             {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
     
-        If callable:
+        If Callable:
             Function with arguments y_true, y_pred that returns a float.
 
         If list:
-            List containing several strings and/or callable.
+            List containing several strings and/or Callable.
     
     initial_train_size : int
         Number of samples in the initial train split. The backtest forecaster is
@@ -361,7 +361,7 @@ def backtesting_sarimax(
     forecaster,
     y: pd.Series,
     steps: int,
-    metric: Union[str, callable, list],
+    metric: Union[str, Callable, list],
     initial_train_size: int,
     fixed_train_size: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
@@ -389,18 +389,18 @@ def backtesting_sarimax(
     steps : int
         Number of steps to predict.
         
-    metric : str, callable, list
+    metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
         If string:
             {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
     
-        If callable:
+        If Callable:
             Function with arguments y_true, y_pred that returns a float.
 
         If list:
-            List containing several strings and/or callable.
+            List containing several strings and/or Callable.
     
     initial_train_size : int
         Number of samples in the initial train split. The backtest forecaster is
@@ -499,7 +499,7 @@ def grid_search_sarimax(
     y: pd.Series,
     param_grid: dict,
     steps: int,
-    metric: Union[str, callable, list],
+    metric: Union[str, Callable, list],
     initial_train_size: int,
     fixed_train_size: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
@@ -526,18 +526,18 @@ def grid_search_sarimax(
     steps : int
         Number of steps to predict.
         
-    metric : str, callable, list
+    metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
         If string:
             {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
     
-        If callable:
+        If Callable:
             Function with arguments y_true, y_pred that returns a float.
 
         If list:
-            List containing several strings and/or callable.
+            List containing several strings and/or Callable.
 
     initial_train_size : int 
         Number of samples in the initial train split. The backtest forecaster is
@@ -595,7 +595,7 @@ def random_search_sarimax(
     y: pd.Series,
     param_distributions: dict,
     steps: int,
-    metric: Union[str, callable, list],
+    metric: Union[str, Callable, list],
     initial_train_size: int,
     fixed_train_size: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
@@ -624,18 +624,18 @@ def random_search_sarimax(
     steps : int
         Number of steps to predict.
         
-    metric : str, callable, list
+    metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
         If string:
             {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
     
-        If callable:
+        If Callable:
             Function with arguments y_true, y_pred that returns a float.
 
         If list:
-            List containing several strings and/or callable.
+            List containing several strings and/or Callable.
 
     initial_train_size : int 
         Number of samples in the initial train split. The backtest forecaster is
@@ -700,7 +700,7 @@ def _evaluate_grid_hyperparameters_sarimax(
     y: pd.Series,
     param_grid: dict,
     steps: int,
-    metric: Union[str, callable, list],
+    metric: Union[str, Callable, list],
     initial_train_size: int,
     fixed_train_size: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
@@ -726,18 +726,18 @@ def _evaluate_grid_hyperparameters_sarimax(
     steps : int
         Number of steps to predict.
         
-    metric : str, callable, list
+    metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
         If string:
             {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
     
-        If callable:
+        If Callable:
             Function with arguments y_true, y_pred that returns a float.
 
         If list:
-            List containing several strings and/or callable.
+            List containing several strings and/or Callable.
 
     initial_train_size : int 
         Number of samples in the initial train split. The backtest forecaster is

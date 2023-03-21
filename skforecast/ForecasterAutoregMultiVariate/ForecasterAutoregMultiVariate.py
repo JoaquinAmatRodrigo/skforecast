@@ -6,7 +6,7 @@
 ################################################################################
 # coding=utf-8
 
-from typing import Union, Dict, List, Tuple, Any, Optional
+from typing import Union, Dict, List, Tuple, Any, Optional, Callable
 import warnings
 import logging
 import sys
@@ -62,10 +62,15 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         
     lags : int, list, numpy ndarray, range, dict
         Lags used as predictors. Index starts at 1, so lag 1 is equal to t-1.
-            `int`: include lags from 1 to `lags` (included).
-            `list`, `numpy ndarray` or `range`: include only lags present in `lags`,
-                all elements must be int.
-            `dict`: create different lags for each series. {'series_column_name': lags}.
+
+        If `int`: 
+            include lags from 1 to `lags` (included).
+            
+        If `list`, `numpy ndarray` or `range`: 
+            include only lags present in `lags`, all elements must be int.
+
+        If `dict`: 
+            create different lags for each series. {'series_column_name': lags}.
 
     transformer_series : transformer or dict of transformers, default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
@@ -80,13 +85,13 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         preprocessing API. The transformation is applied to `exog` before training the
         forecaster. `inverse_transform` is not available when using ColumnTransformers.
 
-    weight_func : callable, default `None`
+    weight_func : Callable, default `None`
         Function that defines the individual weights for each sample based on the
         index. For example, a function that assigns a lower weight to certain dates.
         Ignored if `regressor` does not have the argument `sample_weight` in its
         `fit` method. The resulting `sample_weight` cannot have negative values.
 
-    forecaster_id : str, int default `None`
+    forecaster_id : str, int, default `None`
         Name used as an identifier of the forecaster.
         
 
@@ -108,11 +113,16 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         
     lags : int, list, numpy ndarray, range, dict
         Lags used as predictors. Index starts at 1, so lag 1 is equal to t-1.
-            `int`: include lags from 1 to `lags` (included).
-            `list`, `numpy ndarray` or `range`: include only lags present in `lags`,
-                all elements must be int.
-            `dict`: create different lags for each series. {'series_column_name': lags}.
+
+        If `int`: 
+            include lags from 1 to `lags` (included).
         
+        If `list`, `numpy ndarray` or `range`: 
+            include only lags present in `lags`, all elements must be int.
+
+        If `dict`: 
+            create different lags for each series. {'series_column_name': lags}.
+
     lags_ : dict
         Dictionary with the of the lags for each series. Created from `lags` and used
         internally.
@@ -134,7 +144,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         preprocessing API. The transformation is applied to `exog` before training the
         forecaster. `inverse_transform` is not available when using ColumnTransformers.
 
-    weight_func : callable, default `None`
+    weight_func : Callable, default `None`
         Function that defines the individual weights for each sample based on the
         index. For example, a function that assigns a lower weight to certain dates.
         Ignored if `regressor` does not have the argument `sample_weight` in its
@@ -223,7 +233,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         lags: Union[int, np.ndarray, list, dict],
         transformer_series: Optional[Union[object, dict]]=None,
         transformer_exog: Optional[object]=None,
-        weight_func: Optional[callable]=None,
+        weight_func: Optional[Callable]=None,
         forecaster_id: Optional[Union[str, int]]=None
     ) -> None:
         
@@ -770,10 +780,10 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             Predict n steps. The value of `steps` must be less than or equal to the 
             value of steps defined when initializing the forecaster. Starts at 1.
         
-            If int:
+            If `int`:
                 Only steps within the range of 1 to int are predicted.
         
-            If list:
+            If `list`:
                 List of ints. Only the steps contained in the list are predicted.
 
             If `None`:
@@ -932,10 +942,10 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             Predict n steps. The value of `steps` must be less than or equal to the 
             value of steps defined when initializing the forecaster. Starts at 1.
         
-            If int:
+            If `int`:
                 Only steps within the range of 1 to int are predicted.
         
-            If list:
+            If `list`:
                 List of ints. Only the steps contained in the list are predicted.
 
             If `None`:
@@ -1083,10 +1093,10 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             Predict n steps. The value of `steps` must be less than or equal to the 
             value of steps defined when initializing the forecaster. Starts at 1.
         
-            If int:
+            If `int`:
                 Only steps within the range of 1 to int are predicted.
         
-            If list:
+            If `list`:
                 List of ints. Only the steps contained in the list are predicted.
 
             If `None`:
@@ -1194,10 +1204,10 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             Predict n steps. The value of `steps` must be less than or equal to the 
             value of steps defined when initializing the forecaster. Starts at 1.
         
-            If int:
+            If `int`:
                 Only steps within the range of 1 to int are predicted.
         
-            If list:
+            If `list`:
                 List of ints. Only the steps contained in the list are predicted.
 
             If `None`:
@@ -1295,12 +1305,16 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         Parameters
         ----------
         lags : int, list, 1d numpy ndarray, range, dict
-        Lags used as predictors. Index starts at 1, so lag 1 is equal to t-1.
-            `int`: include lags from 1 to `lags` (included).
-            `list`, `numpy ndarray` or `range`: include only lags present in `lags`,
-                all elements must be int.
-            `dict`: generate different lags for each series used to fit the 
-                regressors. {'series_column_name': lags}.
+            Lags used as predictors. Index starts at 1, so lag 1 is equal to t-1.
+
+            If `int`: 
+                include lags from 1 to `lags` (included).
+            
+            If `list`, `numpy ndarray` or `range`: 
+                include only lags present in `lags`, all elements must be int.
+
+            If `dict`: 
+                create different lags for each series. {'series_column_name': lags}.
 
         Returns 
         -------

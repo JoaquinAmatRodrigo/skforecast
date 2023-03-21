@@ -6,7 +6,7 @@
 ################################################################################
 # coding=utf-8
 
-from typing import Union, Dict, List, Tuple, Any, Optional
+from typing import Union, Dict, List, Tuple, Any, Optional, Callable
 import warnings
 import logging
 import sys
@@ -71,14 +71,14 @@ class ForecasterAutoregCustom(ForecasterBase):
         preprocessing API. The transformation is applied to `exog` before training the
         forecaster. `inverse_transform` is not available when using ColumnTransformers.
     
-    weight_func : callable, default `None`
+    weight_func : Callable, default `None`
         Function that defines the individual weights for each sample based on the
         index. For example, a function that assigns a lower weight to certain dates.
         Ignored if `regressor` does not have the argument `sample_weight` in its `fit`
         method. The resulting `sample_weight` cannot have negative values.
         **New in version 0.6.0**
 
-    forecaster_id : str, int default `None`
+    forecaster_id : str, int, default `None`
         Name used as an identifier of the forecaster.
     
     Attributes
@@ -125,7 +125,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         preprocessing API. The transformation is applied to `exog` before training the
         forecaster. `inverse_transform` is not available when using ColumnTransformers.
         
-    weight_func : callable
+    weight_func : Callable
         Function that defines the individual weights for each sample based on the
         index. For example, a function that assigns a lower weight to certain dates.
         Ignored if `regressor` does not have the argument `sample_weight` in its `fit`
@@ -196,12 +196,12 @@ class ForecasterAutoregCustom(ForecasterBase):
     def __init__(
         self, 
         regressor: object, 
-        fun_predictors: callable, 
+        fun_predictors: Callable, 
         window_size: int,
         name_predictors: Optional[list]=None,
         transformer_y: Optional[object]=None,
         transformer_exog: Optional[object]=None,
-        weight_func: Optional[callable]=None,
+        weight_func: Optional[Callable]=None,
         forecaster_id: Optional[Union[str, int]]=None
     ) -> None:
         
@@ -235,12 +235,12 @@ class ForecasterAutoregCustom(ForecasterBase):
         
         if not isinstance(window_size, int):
             raise TypeError(
-                f'Argument `window_size` must be an int. Got {type(window_size)}.'
+                f"Argument `window_size` must be an int. Got {type(window_size)}."
             )
 
-        if not callable(fun_predictors):
+        if not isinstance(fun_predictors, Callable):
             raise TypeError(
-                f'Argument `fun_predictors` must be a callable. Got {type(fun_predictors)}.'
+                f"Argument `fun_predictors` must be a Callable. Got {type(fun_predictors)}."
             )
     
         self.source_code_create_predictors = inspect.getsource(fun_predictors)

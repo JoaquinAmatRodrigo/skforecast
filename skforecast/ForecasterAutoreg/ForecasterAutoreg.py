@@ -6,7 +6,7 @@
 ################################################################################
 # coding=utf-8
 
-from typing import Union, Dict, List, Tuple, Any, Optional
+from typing import Union, Dict, List, Tuple, Any, Optional, Callable
 import warnings
 import logging
 import sys
@@ -66,13 +66,13 @@ class ForecasterAutoreg(ForecasterBase):
         preprocessing API. The transformation is applied to `exog` before training the
         forecaster. `inverse_transform` is not available when using ColumnTransformers.
 
-    weight_func : callable, default `None`
+    weight_func : Callable, default `None`
         Function that defines the individual weights for each sample based on the
         index. For example, a function that assigns a lower weight to certain dates.
         Ignored if `regressor` does not have the argument `sample_weight` in its `fit`
         method. The resulting `sample_weight` cannot have negative values.
 
-    forecaster_id : str, int default `None`
+    forecaster_id : str, int, default `None`
         Name used as an identifier of the forecaster.
     
     Attributes
@@ -94,7 +94,7 @@ class ForecasterAutoreg(ForecasterBase):
         preprocessing API. The transformation is applied to `exog` before training the
         forecaster. `inverse_transform` is not available when using ColumnTransformers.
 
-    weight_func : callable
+    weight_func : Callable
         Function that defines the individual weights for each sample based on the
         index. For example, a function that assigns a lower weight to certain dates.
         Ignored if `regressor` does not have the argument `sample_weight` in its `fit`
@@ -175,7 +175,7 @@ class ForecasterAutoreg(ForecasterBase):
         lags: Union[int, np.ndarray, list],
         transformer_y: Optional[object]=None,
         transformer_exog: Optional[object]=None,
-        weight_func: Optional[callable]=None,
+        weight_func: Optional[Callable]=None,
         forecaster_id: Optional[Union[str, int]]=None
     ) -> None:
         

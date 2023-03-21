@@ -67,10 +67,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         preprocessing API. The transformation is applied to `exog` before training the
         forecaster. `inverse_transform` is not available when using ColumnTransformers.
 
-    weight_func : callable, dict, default `None`
+    weight_func : Callable, dict, default `None`
         Function that defines the individual weights for each sample based on the
         index. For example, a function that assigns a lower weight to certain dates.
-        If dict {'series_column_name' : callable} a different function can be
+        If dict {'series_column_name' : Callable} a different function can be
         used for each series, a weight of 1 is given to all series not present
         in `weight_func`. Ignored if `regressor` does not have the argument 
         `sample_weight` in its `fit` method. See Notes section for more details 
@@ -85,7 +85,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         for more details on the use of the weights.
         **New in version 0.6.0**
 
-    forecaster_id : str, int default `None`
+    forecaster_id : str, int, default `None`
         Name used as an identifier of the forecaster.
 
     
@@ -114,10 +114,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         preprocessing API. The transformation is applied to `exog` before training the
         forecaster. `inverse_transform` is not available when using ColumnTransformers.
 
-    weight_func : callable, dict, default `None`
+    weight_func : Callable, dict, default `None`
         Function that defines the individual weights of each sample based on the
         index. For example, a function that assigns a lower weight to certain dates.
-        If dict {'series_column_name': callable} a different function can be
+        If dict {'series_column_name': Callable} a different function can be
         used for each series, a weight of 1 is given to all series not present
         in `weight_func`. Ignored if `regressor` does not have the argument 
         `sample_weight` in its `fit` method. See Notes section for more details 
@@ -240,7 +240,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         lags: Union[int, np.ndarray, list],
         transformer_series: Optional[Union[object, dict]]=None,
         transformer_exog: Optional[object]=None,
-        weight_func: Optional[Union[callable, dict]]=None,
+        weight_func: Optional[Union[Callable, dict]]=None,
         series_weights: Optional[dict]=None,
         forecaster_id: Optional[Union[str, int]]=None
     ) -> None:
