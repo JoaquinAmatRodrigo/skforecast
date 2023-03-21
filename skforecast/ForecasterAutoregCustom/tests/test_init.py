@@ -25,7 +25,7 @@ def test_init_TypeError_when_window_size_argument_is_string():
     """
     window_size = '5'
     err_msg = re.escape(
-                 f'Argument `window_size` must be an int. Got {type(window_size)}.'
+                 f"Argument `window_size` must be an int. Got {type(window_size)}."
              )
     with pytest.raises(TypeError, match = err_msg):
          ForecasterAutoregCustom(
@@ -34,13 +34,13 @@ def test_init_TypeError_when_window_size_argument_is_string():
              window_size    = window_size
          )
 
-def test_init_TypeError_when_fun_predictors_argument_is_not_callable():
+def test_init_TypeError_when_fun_predictors_argument_is_not_Callable():
     """
-    Test TypeError is raised when fun_predictors is not a callable.
+    Test TypeError is raised when fun_predictors is not a Callable.
     """
     fun_predictors = 'create_predictors'
     err_msg = re.escape(
-                 f'Argument `fun_predictors` must be a callable. Got {type(fun_predictors)}.'
+                 f"Argument `fun_predictors` must be a Callable. Got {type(fun_predictors)}."
              )
     with pytest.raises(TypeError, match = err_msg):
          ForecasterAutoregCustom(
@@ -49,13 +49,13 @@ def test_init_TypeError_when_fun_predictors_argument_is_not_callable():
              window_size    = 5
          )
 
-def test_init_TypeError_when_weight_func_argument_is_not_callable():
+def test_init_TypeError_when_weight_func_argument_is_not_Callable():
     """
     Test TypeError is raised when weight_func is not a callable.
     """
     weight_func = '---'
     err_msg = re.escape(
-                 f"Argument `weight_func` must be a callable. Got {type(weight_func)}."
+                 f"Argument `weight_func` must be a Callable. Got {type(weight_func)}."
              )
     with pytest.raises(TypeError, match = err_msg):
          ForecasterAutoregCustom(

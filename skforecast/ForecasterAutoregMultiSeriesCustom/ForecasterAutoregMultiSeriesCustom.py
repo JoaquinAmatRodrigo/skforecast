@@ -91,7 +91,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         in `series_weights`. If `None`, all levels have the same weight. See Notes section
         for more details on the use of the weights.
 
-    forecaster_id : str, default `None`
+    forecaster_id : str, int, default `None`
         Name used as an identifier of the forecaster. It may be used, for example to identify
         the time series being modeled.
     
@@ -290,12 +290,12 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
 
         if not isinstance(window_size, int):
             raise TypeError(
-                f'Argument `window_size` must be an int. Got {type(window_size)}.'
+                f"Argument `window_size` must be an int. Got {type(window_size)}."
             )
 
-        if not callable(fun_predictors):
+        if not isinstance(fun_predictors, Callable):
             raise TypeError(
-                f'Argument `fun_predictors` must be a Callable. Got {type(fun_predictors)}.'
+                f"Argument `fun_predictors` must be a Callable. Got {type(fun_predictors)}."
             )
     
         self.source_code_fun_predictors = inspect.getsource(fun_predictors)

@@ -83,9 +83,9 @@ def initialize_lags(
 def initialize_weights(
     forecaster_name: str,
     regressor: object,
-    weight_func: Union[callable, dict],
+    weight_func: Union[Callable, dict],
     series_weights: dict
-) -> Tuple[Union[callable, dict], Union[callable, dict], dict]:
+) -> Tuple[Union[Callable, dict], Union[Callable, dict], dict]:
     """
     Check weights arguments, `weight_func` and `series_weights` for the different 
     forecasters. Create `source_code_weight_func`, source code of the custom 
@@ -101,7 +101,7 @@ def initialize_weights(
     regressor : regressor or pipeline compatible with the scikit-learn API
         Regressor of the forecaster.
 
-    weight_func : callable, dict
+    weight_func : Callable, dict
         Argument `weight_func` of the forecaster.
 
     series_weights : dict
@@ -110,7 +110,7 @@ def initialize_weights(
         
     Returns
     ----------
-    weight_func : callable, dict
+    weight_func : Callable, dict
         Argument `weight_func` of the forecaster.
 
     source_code_weight_func : str, dict
@@ -128,12 +128,12 @@ def initialize_weights(
         if forecaster_name in ['ForecasterAutoregMultiSeries', 'ForecasterAutoregMultiSeriesCustom']:
             if not isinstance(weight_func, (Callable, dict)):
                 raise TypeError(
-                    f"Argument `weight_func` must be a callable or a dict of "
-                    f"callables. Got {type(weight_func)}."
+                    (f"Argument `weight_func` must be a Callable or a dict of "
+                     f"Callables. Got {type(weight_func)}.")
                 )
         elif not isinstance(weight_func, Callable):
             raise TypeError(
-                f"Argument `weight_func` must be a callable. Got {type(weight_func)}."
+                f"Argument `weight_func` must be a Callable. Got {type(weight_func)}."
             )
         
         if isinstance(weight_func, dict):
@@ -145,8 +145,8 @@ def initialize_weights(
 
         if 'sample_weight' not in inspect.signature(regressor.fit).parameters:
             warnings.warn(
-                (f'Argument `weight_func` is ignored since regressor {regressor} '
-                 f'does not accept `sample_weight` in its `fit` method.')
+                (f"Argument `weight_func` is ignored since regressor {regressor} "
+                 f"does not accept `sample_weight` in its `fit` method.")
             )
             weight_func = None
             source_code_weight_func = None
@@ -154,13 +154,13 @@ def initialize_weights(
     if series_weights is not None:
         if not isinstance(series_weights, dict):
             raise TypeError(
-                f"Argument `series_weights` must be a dict of floats or ints."
-                f"Got {type(series_weights)}."
+                (f"Argument `series_weights` must be a dict of floats or ints."
+                 f"Got {type(series_weights)}.")
             )
         if 'sample_weight' not in inspect.signature(regressor.fit).parameters:
             warnings.warn(
-                (f'Argument `series_weights` is ignored since regressor {regressor} '
-                 f'does not accept `sample_weight` in its `fit` method.')
+                (f"Argument `series_weights` is ignored since regressor {regressor} "
+                 f"does not accept `sample_weight` in its `fit` method.")
             )
             series_weights = None
 
@@ -614,8 +614,8 @@ def preprocess_y(
         y_index = y.index
     elif isinstance(y.index, pd.DatetimeIndex) and y.index.freq is None:
         warnings.warn(
-            '`y` has DatetimeIndex index but no frequency. '
-            'Index is overwritten with a RangeIndex of step 1.'
+            ('`y` has DatetimeIndex index but no frequency. '
+             'Index is overwritten with a RangeIndex of step 1.')
         )
         y_index = pd.RangeIndex(
                       start = 0,
@@ -624,7 +624,8 @@ def preprocess_y(
                   )
     else:
         warnings.warn(
-            '`y` has no DatetimeIndex nor RangeIndex index. Index is overwritten with a RangeIndex.'
+            ('`y` has no DatetimeIndex nor RangeIndex index. '
+             'Index is overwritten with a RangeIndex.')
         )
         y_index = pd.RangeIndex(
                       start = 0,
@@ -671,23 +672,24 @@ def preprocess_last_window(
         last_window_index = last_window.index
     elif isinstance(last_window.index, pd.DatetimeIndex) and last_window.index.freq is None:
         warnings.warn(
-            '`last_window` has DatetimeIndex index but no frequency. '
-            'Index is overwritten with a RangeIndex of step 1.'
+            ('`last_window` has DatetimeIndex index but no frequency. '
+             'Index is overwritten with a RangeIndex of step 1.')
         )
         last_window_index = pd.RangeIndex(
                                 start = 0,
                                 stop  = len(last_window),
                                 step  = 1
-                                )
+                            )
     else:
         warnings.warn(
-            '`last_window` has no DatetimeIndex nor RangeIndex index. Index is overwritten with a RangeIndex.'
+            ('`last_window` has no DatetimeIndex nor RangeIndex index. '
+             'Index is overwritten with a RangeIndex.')
         )
         last_window_index = pd.RangeIndex(
                                 start = 0,
                                 stop  = len(last_window),
                                 step  = 1
-                                )
+                            )
 
     last_window_values = last_window.to_numpy()
 
@@ -728,24 +730,25 @@ def preprocess_exog(
         exog_index = exog.index
     elif isinstance(exog.index, pd.DatetimeIndex) and exog.index.freq is None:
         warnings.warn(
-            '`exog` has DatetimeIndex index but no frequency. '
-            'Index is overwritten with a RangeIndex of step 1.'
+            ('`exog` has DatetimeIndex index but no frequency. '
+             'Index is overwritten with a RangeIndex of step 1.')
         )
         exog_index = pd.RangeIndex(
-                        start = 0,
-                        stop  = len(exog),
-                        step  = 1
-                        )
+                         start = 0,
+                         stop  = len(exog),
+                         step  = 1
+                     )
 
     else:
         warnings.warn(
-            '`exog` has no DatetimeIndex nor RangeIndex index. Index is overwritten with a RangeIndex.'
+            ('`exog` has no DatetimeIndex nor RangeIndex index. '
+             'Index is overwritten with a RangeIndex.')
         )
         exog_index = pd.RangeIndex(
-                        start = 0,
-                        stop  = len(exog),
-                        step  = 1
-                        )
+                         start = 0,
+                         stop  = len(exog),
+                         step  = 1
+                     )
 
     exog_values = exog.to_numpy()
 
@@ -771,6 +774,7 @@ def exog_to_direct(
     Returns 
     -------
     exog_transformed : numpy ndarray
+        Exog transformed.
 
     """
 
@@ -810,12 +814,14 @@ def expand_index(
     ----------        
     index : pd.Index, None
         Index of last window.
+    
     steps : int
         Number of steps to expand.
 
     Returns 
     -------
     new_index : pd.Index
+        New index.
 
     """
     
@@ -856,6 +862,7 @@ def transform_series(
     Parameters
     ----------
     series : pandas Series
+        Series to be transformed.
 
     transformer : scikit-learn alike transformer (preprocessor).
         scikit-learn alike transformer (preprocessor) with methods: fit, transform,
@@ -908,21 +915,21 @@ def transform_series(
         values_transformed = values_transformed.toarray()
     
     if isinstance(values_transformed, np.ndarray) and values_transformed.shape[1] == 1:
-        data_transformed = pd.Series(
-                               data  = values_transformed.flatten(),
-                               index = data.index,
-                               name  = data.columns[0]
-                           )
+        series_transformed = pd.Series(
+                                 data  = values_transformed.flatten(),
+                                 index = data.index,
+                                 name  = data.columns[0]
+                             )
     elif isinstance(values_transformed, pd.DataFrame) and values_transformed.shape[1] == 1:
-        data_transformed = values_transformed.squeeze()
+        series_transformed = values_transformed.squeeze()
     else:
-        data_transformed = pd.DataFrame(
-                               data    = values_transformed,
-                               index   = data.index,
-                               columns = transformer.get_feature_names_out()
-                           )
+        series_transformed = pd.DataFrame(
+                                 data    = values_transformed,
+                                 index   = data.index,
+                                 columns = transformer.get_feature_names_out()
+                             )
 
-    return data_transformed
+    return series_transformed
 
 
 def transform_dataframe(
@@ -938,7 +945,8 @@ def transform_dataframe(
 
     Parameters
     ----------
-    series : pandas DataFrame
+    df : pandas DataFrame
+        Pandas DataFrame to be transformed.
 
     transformer : scikit-learn alike transformer, preprocessor or ColumnTransformer.
         scikit-learn alike transformer, preprocessor or ColumnTransformer.
@@ -952,7 +960,7 @@ def transform_dataframe(
 
     Returns
     -------
-    series_transformed : pandas DataFrame
+    df_transformed : pandas DataFrame
         Transformed DataFrame.
     
     """
@@ -1009,13 +1017,13 @@ def save_forecaster(
     Parameters
     ----------
     forecaster: forecaster object from skforecast library.
-        Model created with skforecast library.
+        Forecaster created with skforecast library.
 
     file_name: str
         File name given to the object.
         
     verbose: bool, default `True`
-        Print info about the forecaster saved
+        Print summary about the forecaster saved.
 
     Returns 
     -------
@@ -1034,15 +1042,12 @@ def load_forecaster(
     verbose: bool=True
 ) -> object:
     """
-    Load forecaster model from disc using joblib.
+    Load forecaster model using joblib.
 
     Parameters
     ----------
-    forecaster: forecaster object from skforecast library.
-        Forecaster created with skforecast library.
-
     file_name: str
-        File name given to the object.
+        Object file name.
 
     verbose: bool, default `True`
         Print summary about the forecaster loaded.

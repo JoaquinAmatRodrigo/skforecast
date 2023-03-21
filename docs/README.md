@@ -46,7 +46,7 @@ pip install skforecast[full]
 Install optional dependencies:
 
 ```bash
-pip install skforecast[statsmodels]
+pip install skforecast[sarimax]
 ```
 
 ```bash
