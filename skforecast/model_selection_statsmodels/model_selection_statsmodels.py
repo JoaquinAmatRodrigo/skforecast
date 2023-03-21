@@ -6,7 +6,7 @@
 ################################################################################
 # coding=utf-8
 
-from typing import Union, Tuple, Optional
+from typing import Union, Tuple, Optional, Callable
 import logging
 import numpy as np
 import pandas as pd
@@ -32,7 +32,7 @@ logging.basicConfig(
 def backtesting_sarimax(
     y: pd.Series,
     steps: int,
-    metric: Union[str, callable],
+    metric: Union[str, Callable],
     initial_train_size: int,
     fixed_train_size: bool=False,
     refit: bool=False,
@@ -61,13 +61,13 @@ def backtesting_sarimax(
     steps : int
         Number of steps to predict.
 
-    metric : str, callable
+    metric : str, Callable
         Metric used to quantify the goodness of fit of the model.
         
         If string:
             {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
 
-        If callable:
+        If Callable:
             Function with arguments y_true, y_pred that returns a float.
 
     initial_train_size: int 
@@ -396,7 +396,7 @@ def cv_sarimax(
         y: pd.Series,
         initial_train_size: int,
         steps: int,
-        metric: Union[str, callable],
+        metric: Union[str, Callable],
         order: tuple=(1, 0, 0), 
         seasonal_order: tuple=(0, 0, 0, 0),
         trend: str=None,
@@ -452,13 +452,13 @@ def cv_sarimax(
     steps : int
         Number of steps to predict.
         
-    metric : str, callable
+    metric : str, Callable
         Metric used to quantify the goodness of fit of the model.
         
         If string:
             {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
 
-        If callable:
+        If Callable:
             Function with arguments y_true, y_pred that returns a float.
         
     exog : pandas Series, pandas DataFrame, default `None`
@@ -561,7 +561,7 @@ def grid_search_sarimax(
         y: pd.Series,
         param_grid: dict,
         steps: int,
-        metric: Union[str, callable],
+        metric: Union[str, Callable],
         initial_train_size: int,
         fixed_train_size: bool=False,
         exog: Union[pd.Series, pd.DataFrame]=None,
@@ -588,13 +588,13 @@ def grid_search_sarimax(
     steps : int
         Number of steps to predict.
         
-    metric : str, callable
+    metric : str, Callable
         Metric used to quantify the goodness of fit of the model.
         
         If string:
             {'mean_squared_error', 'mean_absolute_error', 'mean_absolute_percentage_error'}
 
-        If callable:
+        If Callable:
             Function with arguments y_true, y_pred that returns a float.
 
     initial_train_size: int 

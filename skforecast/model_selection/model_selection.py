@@ -6,7 +6,7 @@
 ################################################################################
 # coding=utf-8
 
-from typing import Union, Tuple, Optional, Any
+from typing import Union, Tuple, Optional, Any, Callable
 import numpy as np
 import pandas as pd
 import warnings
@@ -144,20 +144,21 @@ def time_series_splitter(
         
         
 def _get_metric(
-    metric:str
-) -> callable:
+    metric: str
+) -> Callable:
     """
     Get the corresponding scikit-learn function to calculate the metric.
     
     Parameters
     ----------
-    metric : {'mean_squared_error', 'mean_absolute_error', 
-              'mean_absolute_percentage_error', 'mean_squared_log_error'}
-        Metric used to quantify the goodness of fit of the model.
+    metric : str
+        Metric used to quantify the goodness of fit of the model. Available metrics: 
+        {'mean_squared_error', 'mean_absolute_error', 
+         'mean_absolute_percentage_error', 'mean_squared_log_error'}
     
     Returns 
     -------
-    metric : callable
+    metric : Callable
         scikit-learn function to calculate the desired metric.
     
     """
@@ -165,8 +166,8 @@ def _get_metric(
     if metric not in ['mean_squared_error', 'mean_absolute_error',
                       'mean_absolute_percentage_error', 'mean_squared_log_error']:
         raise ValueError(
-            f"Allowed metrics are: 'mean_squared_error', 'mean_absolute_error', "
-            f"'mean_absolute_percentage_error' and 'mean_squared_log_error'. Got {metric}."
+            (f"Allowed metrics are: 'mean_squared_error', 'mean_absolute_error', "
+             f"'mean_absolute_percentage_error' and 'mean_squared_log_error'. Got {metric}.")
         )
     
     metrics = {
@@ -255,7 +256,7 @@ def _backtesting_forecaster_refit(
     forecaster,
     y: pd.Series,
     steps: int,
-    metric: Union[str, callable, list],
+    metric: Union[str, Callable, list],
     initial_train_size: int,
     fixed_train_size: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
@@ -290,18 +291,18 @@ def _backtesting_forecaster_refit(
     steps : int
         Number of steps to predict.
         
-    metric : str, callable, list
+    metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
         If string:
             {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
     
-        If callable:
+        If Callable:
             Function with arguments y_true, y_pred that returns a float.
 
         If list:
-            List containing several strings and/or callable.
+            List containing several strings and/or Callable.
     
     initial_train_size : int
         Number of samples in the initial train split. The backtest forecaster is
@@ -442,7 +443,7 @@ def _backtesting_forecaster_no_refit(
     forecaster,
     y: pd.Series,
     steps: int,
-    metric: Union[str, callable, list],
+    metric: Union[str, Callable, list],
     initial_train_size: Optional[int]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     interval: Optional[list]=None,
@@ -472,18 +473,18 @@ def _backtesting_forecaster_no_refit(
     steps : int
         Number of steps to predict.
         
-    metric : str, callable, list
+    metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
         If string:
             {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
     
-        If callable:
+        If Callable:
             Function with arguments y_true, y_pred that returns a float.
 
         If list:
-            List containing several strings and/or callable.
+            List containing several strings and/or Callable.
     
     initial_train_size : int, default `None`
         Number of samples in the initial train split. If `None` and `forecaster` is already
@@ -622,7 +623,7 @@ def backtesting_forecaster(
     forecaster,
     y: pd.Series,
     steps: int,
-    metric: Union[str, callable, list],
+    metric: Union[str, Callable, list],
     initial_train_size: Optional[int]=None,
     fixed_train_size: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
@@ -652,18 +653,18 @@ def backtesting_forecaster(
     steps : int
         Number of steps to predict.
         
-    metric : str, callable, list
+    metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
         If string:
             {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
     
-        If callable:
+        If Callable:
             Function with arguments y_true, y_pred that returns a float.
 
         If list:
-            List containing several strings and/or callable.
+            List containing several strings and/or Callable.
     
     initial_train_size : int, default `None`
         Number of samples in the initial train split. If `None` and `forecaster` is already 
@@ -804,7 +805,7 @@ def grid_search_forecaster(
     y: pd.Series,
     param_grid: dict,
     steps: int,
-    metric: Union[str, callable, list],
+    metric: Union[str, Callable, list],
     initial_train_size: int,
     fixed_train_size: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
@@ -832,18 +833,18 @@ def grid_search_forecaster(
     steps : int
         Number of steps to predict.
         
-    metric : str, callable, list
+    metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
         If string:
             {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
     
-        If callable:
+        If Callable:
             Function with arguments y_true, y_pred that returns a float.
 
         If list:
-            List containing several strings and/or callable.
+            List containing several strings and/or Callable.
 
     initial_train_size : int 
         Number of samples in the initial train split.
@@ -905,7 +906,7 @@ def random_search_forecaster(
     y: pd.Series,
     param_distributions: dict,
     steps: int,
-    metric: Union[str, callable, list],
+    metric: Union[str, Callable, list],
     initial_train_size: int,
     fixed_train_size: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
@@ -935,18 +936,18 @@ def random_search_forecaster(
     steps : int
         Number of steps to predict.
         
-    metric : str, callable, list
+    metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
         If string:
             {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
     
-        If callable:
+        If Callable:
             Function with arguments y_true, y_pred that returns a float.
 
         If list:
-            List containing several strings and/or callable.
+            List containing several strings and/or Callable.
 
     initial_train_size : int 
         Number of samples in the initial train split.
@@ -1015,7 +1016,7 @@ def _evaluate_grid_hyperparameters(
     y: pd.Series,
     param_grid: dict,
     steps: int,
-    metric: Union[str, callable, list],
+    metric: Union[str, Callable, list],
     initial_train_size: int,
     fixed_train_size: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
@@ -1042,18 +1043,18 @@ def _evaluate_grid_hyperparameters(
     steps : int
         Number of steps to predict.
         
-    metric : str, callable, list
+    metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
         If string:
             {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
     
-        If callable:
+        If Callable:
             Function with arguments y_true, y_pred that returns a float.
 
         If list:
-            List containing several strings and/or callable.
+            List containing several strings and/or Callable.
 
     initial_train_size : int 
         Number of samples in the initial train split.
@@ -1180,9 +1181,9 @@ def _evaluate_grid_hyperparameters(
 def bayesian_search_forecaster(
     forecaster,
     y: pd.Series,
-    search_space: Union[callable, dict],
+    search_space: Union[Callable, dict],
     steps: int,
-    metric: Union[str, callable, list],
+    metric: Union[str, Callable, list],
     initial_train_size: int,
     fixed_train_size: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
@@ -1209,8 +1210,8 @@ def bayesian_search_forecaster(
     y : pandas Series
         Training time series. 
         
-    search_space : callable (optuna), dict (skopt)
-        If optuna engine: callable
+    search_space : Callable (optuna), dict (skopt)
+        If optuna engine: Callable
             Function with argument `trial` which returns a dictionary with parameters names 
             (`str`) as keys and Trial object from optuna (trial.suggest_float, 
             trial.suggest_int, trial.suggest_categorical) as values.
@@ -1223,18 +1224,18 @@ def bayesian_search_forecaster(
     steps : int
         Number of steps to predict.
         
-    metric : str, callable, list
+    metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
         If string:
             {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
     
-        If callable:
+        If Callable:
             Function with arguments y_true, y_pred that returns a float.
 
         If list:
-            List containing several strings and/or callable.
+            List containing several strings and/or Callable.
 
     initial_train_size : int 
         Number of samples in the initial train split.
@@ -1351,9 +1352,9 @@ def bayesian_search_forecaster(
 def _bayesian_search_optuna(
     forecaster,
     y: pd.Series,
-    search_space: callable,
+    search_space: Callable,
     steps: int,
-    metric: Union[str, callable, list],
+    metric: Union[str, Callable, list],
     initial_train_size: int,
     fixed_train_size: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
@@ -1378,7 +1379,7 @@ def _bayesian_search_optuna(
     y : pandas Series
         Training time series. 
         
-    search_space : callable
+    search_space : Callable
         Function with argument `trial` which returns a dictionary with parameters names 
         (`str`) as keys and Trial object from optuna (trial.suggest_float, 
         trial.suggest_int, trial.suggest_categorical) as values.
@@ -1386,18 +1387,18 @@ def _bayesian_search_optuna(
     steps : int
         Number of steps to predict.
         
-    metric : str, callable, list
+    metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
         If string:
             {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
     
-        If callable:
+        If Callable:
             Function with arguments y_true, y_pred that returns a float.
 
         If list:
-            List containing several strings and/or callable.
+            List containing several strings and/or Callable.
 
     initial_train_size : int 
         Number of samples in the initial train split.

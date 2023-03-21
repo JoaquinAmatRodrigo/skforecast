@@ -6,7 +6,7 @@
 ################################################################################
 # coding=utf-8
 
-from typing import Union, Dict, List, Tuple, Any, Optional
+from typing import Union, Dict, List, Tuple, Any, Optional, Callable
 import warnings
 import logging
 import sys
@@ -72,14 +72,14 @@ class ForecasterAutoregDirect(ForecasterBase):
         preprocessing API. The transformation is applied to `exog` before training the
         forecaster. `inverse_transform` is not available when using ColumnTransformers.
 
-    weight_func : callable, default `None`
+    weight_func : Callable, default `None`
         Function that defines the individual weights for each sample based on the
         index. For example, a function that assigns a lower weight to certain dates.
         Ignored if `regressor` does not have the argument `sample_weight` in its `fit`
         method. The resulting `sample_weight` cannot have negative values.
         **New in version 0.6.0**
 
-    forecaster_id : str, int default `None`
+    forecaster_id : str, int, default `None`
         Name used as an identifier of the forecaster.
     
     Attributes
@@ -112,7 +112,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         preprocessing API. The transformation is applied to `exog` before training the
         forecaster. `inverse_transform` is not available when using ColumnTransformers.
         
-    weight_func : callable
+    weight_func : Callable
         Function that defines the individual weights for each sample based on the
         index. For example, a function that assigns a lower weight to certain dates.
         Ignored if `regressor` does not have the argument `sample_weight` in its `fit`
@@ -199,7 +199,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         lags: Union[int, np.ndarray, list],
         transformer_y: Optional[object]=None,
         transformer_exog: Optional[object]=None,
-        weight_func: Optional[callable]=None,
+        weight_func: Optional[Callable]=None,
         forecaster_id: Optional[Union[str, int]]=None
     ) -> None:
         
@@ -642,10 +642,10 @@ class ForecasterAutoregDirect(ForecasterBase):
             Predict n steps. The value of `steps` must be less than or equal to the 
             value of steps defined when initializing the forecaster. Starts at 1.
         
-            If int:
+            If `int`:
                 Only steps within the range of 1 to int are predicted.
         
-            If list:
+            If `list`:
                 List of ints. Only the steps contained in the list are predicted.
 
             If `None`:
@@ -795,10 +795,10 @@ class ForecasterAutoregDirect(ForecasterBase):
             Predict n steps. The value of `steps` must be less than or equal to the 
             value of steps defined when initializing the forecaster. Starts at 1.
         
-            If int:
+            If `int`:
                 Only steps within the range of 1 to int are predicted.
         
-            If list:
+            If `list`:
                 List of ints. Only the steps contained in the list are predicted.
 
             If `None`:
@@ -942,10 +942,10 @@ class ForecasterAutoregDirect(ForecasterBase):
             Predict n steps. The value of `steps` must be less than or equal to the 
             value of steps defined when initializing the forecaster. Starts at 1.
         
-            If int:
+            If `int`:
                 Only steps within the range of 1 to int are predicted.
         
-            If list:
+            If `list`:
                 List of ints. Only the steps contained in the list are predicted.
 
             If `None`:
@@ -1049,10 +1049,10 @@ class ForecasterAutoregDirect(ForecasterBase):
             Predict n steps. The value of `steps` must be less than or equal to the 
             value of steps defined when initializing the forecaster. Starts at 1.
         
-            If int:
+            If `int`:
                 Only steps within the range of 1 to int are predicted.
         
-            If list:
+            If `list`:
                 List of ints. Only the steps contained in the list are predicted.
 
             If `None`:

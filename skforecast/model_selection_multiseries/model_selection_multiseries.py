@@ -6,7 +6,7 @@
 ################################################################################
 # coding=utf-8
 
-from typing import Union, Tuple, Optional, Any
+from typing import Union, Tuple, Optional, Any, Callable
 import numpy as np
 import pandas as pd
 import warnings
@@ -30,7 +30,7 @@ def _backtesting_forecaster_multiseries_refit(
     forecaster,
     series: pd.DataFrame,
     steps: int,
-    metric: Union[str, callable, list],
+    metric: Union[str, Callable, list],
     initial_train_size: int,
     fixed_train_size: bool=True,
     levels: Optional[Union[str, list]]=None,
@@ -57,7 +57,7 @@ def _backtesting_forecaster_multiseries_refit(
     
     Parameters
     ----------
-    forecaster : ForecasterAutoregMultiSeries
+    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate
         Forecaster model.
         
     series : pandas DataFrame
@@ -66,18 +66,18 @@ def _backtesting_forecaster_multiseries_refit(
     steps : int
         Number of steps to predict.
         
-    metric : str, callable, list
+    metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
         If string:
             {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
     
-        If callable:
+        If Callable:
             Function with arguments y_true, y_pred that returns a float.
 
         If list:
-            List containing several strings and/or callable.
+            List containing several strings and/or Callable.
     
     initial_train_size : int
         Number of samples in the initial train split. The backtest forecaster is
@@ -243,7 +243,7 @@ def _backtesting_forecaster_multiseries_no_refit(
     forecaster,
     series: pd.DataFrame,
     steps: int,
-    metric: Union[str, callable, list],
+    metric: Union[str, Callable, list],
     initial_train_size: Optional[int]=None,
     levels: Optional[Union[str, list]]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
@@ -265,7 +265,7 @@ def _backtesting_forecaster_multiseries_no_refit(
     
     Parameters
     ----------
-    forecaster : ForecasterAutoregMultiSeries
+    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate
         Forecaster model.
         
     series : pandas DataFrame
@@ -274,18 +274,18 @@ def _backtesting_forecaster_multiseries_no_refit(
     steps : int
         Number of steps to predict.
         
-    metric : str, callable, list
+    metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
         If string:
             {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
     
-        If callable:
+        If Callable:
             Function with arguments y_true, y_pred that returns a float.
 
         If list:
-            List containing several strings and/or callable.
+            List containing several strings and/or Callable.
     
     initial_train_size : int, default `None`
         Number of samples in the initial train split. If `None` and `forecaster` is already
@@ -445,7 +445,7 @@ def backtesting_forecaster_multiseries(
     forecaster,
     series: pd.DataFrame,
     steps: int,
-    metric: Union[str, callable, list],
+    metric: Union[str, Callable, list],
     initial_train_size: Optional[int],
     fixed_train_size: bool=True,
     levels: Optional[Union[str, list]]=None,
@@ -467,7 +467,7 @@ def backtesting_forecaster_multiseries(
 
     Parameters
     ----------
-    forecaster : ForecasterAutoregMultiSeries
+    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate
         Forecaster model.
 
     series : pandas DataFrame
@@ -476,18 +476,18 @@ def backtesting_forecaster_multiseries(
     steps : int
         Number of steps to predict.
         
-    metric : str, callable, list
+    metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
         If string:
             {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
     
-        If callable:
+        If Callable:
             Function with arguments y_true, y_pred that returns a float.
 
         If list:
-            List containing several strings and/or callable.
+            List containing several strings and/or Callable.
     
     initial_train_size : int, default `None`
         Number of samples in the initial train split. If `None` and `forecaster` is already 
@@ -650,7 +650,7 @@ def grid_search_forecaster_multiseries(
     series: pd.DataFrame,
     param_grid: dict,
     steps: int,
-    metric: Union[str, callable, list],
+    metric: Union[str, Callable, list],
     initial_train_size: int,
     fixed_train_size: bool=True,
     levels: Optional[Union[str, list]]=None,
@@ -666,7 +666,7 @@ def grid_search_forecaster_multiseries(
     
     Parameters
     ----------
-    forecaster : ForecasterAutoregMultiSeries
+    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate
         Forcaster model.
         
     series : pandas DataFrame
@@ -679,18 +679,18 @@ def grid_search_forecaster_multiseries(
     steps : int
         Number of steps to predict.
         
-    metric : str, callable, list
+    metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
         If string:
             {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
     
-        If callable:
+        If Callable:
             Function with arguments y_true, y_pred that returns a float.
 
         If list:
-            List containing several strings and/or callable.
+            List containing several strings and/or Callable.
 
     initial_train_size : int 
         Number of samples in the initial train split.
@@ -760,7 +760,7 @@ def random_search_forecaster_multiseries(
     series: pd.DataFrame,
     param_distributions: dict,
     steps: int,
-    metric: Union[str, callable, list],
+    metric: Union[str, Callable, list],
     initial_train_size: int,
     fixed_train_size: bool=True,
     levels: Optional[Union[str, list]]=None,
@@ -778,7 +778,7 @@ def random_search_forecaster_multiseries(
     
     Parameters
     ----------
-    forecaster : ForecasterAutoregMultiSeries
+    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate
         Forcaster model.
         
     series : pandas DataFrame
@@ -791,18 +791,18 @@ def random_search_forecaster_multiseries(
     steps : int
         Number of steps to predict.
         
-    metric : str, callable, list
+    metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
         If string:
             {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
     
-        If callable:
+        If Callable:
             Function with arguments y_true, y_pred that returns a float.
 
         If list:
-            List containing several strings and/or callable.
+            List containing several strings and/or Callable.
 
     initial_train_size : int 
         Number of samples in the initial train split.
@@ -879,7 +879,7 @@ def _evaluate_grid_hyperparameters_multiseries(
     series: pd.DataFrame,
     param_grid: dict,
     steps: int,
-    metric: Union[str, callable, list],
+    metric: Union[str, Callable, list],
     initial_train_size: int,
     fixed_train_size: bool=True,
     levels: Optional[Union[str, list]]=None,
@@ -894,7 +894,7 @@ def _evaluate_grid_hyperparameters_multiseries(
     
     Parameters
     ----------
-    forecaster : ForecasterAutoregMultiSeries
+    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate
         Forcaster model.
 
     series : pandas DataFrame
@@ -907,18 +907,18 @@ def _evaluate_grid_hyperparameters_multiseries(
     steps : int
         Number of steps to predict.
         
-    metric : str, callable, list
+    metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
         If string:
             {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
     
-        If callable:
+        If Callable:
             Function with arguments y_true, y_pred that returns a float.
 
         If list:
-            List containing several strings and/or callable.
+            List containing several strings and/or Callable.
 
     initial_train_size : int 
         Number of samples in the initial train split.
@@ -1082,7 +1082,7 @@ def backtesting_forecaster_multivariate(
     forecaster,
     series: pd.DataFrame,
     steps: int,
-    metric: Union[str, callable, list],
+    metric: Union[str, Callable, list],
     initial_train_size: Optional[int],
     fixed_train_size: bool=True,
     levels: Optional[Union[str, list]]=None,
@@ -1106,7 +1106,7 @@ def backtesting_forecaster_multivariate(
 
     Parameters
     ----------
-    forecaster : ForecasterAutoregMultiSeries
+    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate
         Forecaster model.
 
     series : pandas DataFrame
@@ -1115,18 +1115,18 @@ def backtesting_forecaster_multivariate(
     steps : int
         Number of steps to predict.
         
-    metric : str, callable, list
+    metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
         If string:
             {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
     
-        If callable:
+        If Callable:
             Function with arguments y_true, y_pred that returns a float.
 
         If list:
-            List containing several strings and/or callable.
+            List containing several strings and/or Callable.
     
     initial_train_size : int, default `None`
         Number of samples in the initial train split. If `None` and `forecaster` is already 
@@ -1212,7 +1212,7 @@ def grid_search_forecaster_multivariate(
     series: pd.DataFrame,
     param_grid: dict,
     steps: int,
-    metric: Union[str, callable, list],
+    metric: Union[str, Callable, list],
     initial_train_size: int,
     fixed_train_size: bool=True,
     levels: Optional[Union[str, list]]=None,
@@ -1230,7 +1230,7 @@ def grid_search_forecaster_multivariate(
     
     Parameters
     ----------
-    forecaster : ForecasterAutoregMultiSeries
+    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate
         Forcaster model.
         
     series : pandas DataFrame
@@ -1243,18 +1243,18 @@ def grid_search_forecaster_multivariate(
     steps : int
         Number of steps to predict.
         
-    metric : str, callable, list
+    metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
         If string:
             {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
     
-        If callable:
+        If Callable:
             Function with arguments y_true, y_pred that returns a float.
 
         If list:
-            List containing several strings and/or callable.
+            List containing several strings and/or Callable.
 
     initial_train_size : int 
         Number of samples in the initial train split.
@@ -1322,7 +1322,7 @@ def random_search_forecaster_multivariate(
     series: pd.DataFrame,
     param_distributions: dict,
     steps: int,
-    metric: Union[str, callable, list],
+    metric: Union[str, Callable, list],
     initial_train_size: int,
     fixed_train_size: bool=True,
     levels: Optional[Union[str, list]]=None,
@@ -1342,7 +1342,7 @@ def random_search_forecaster_multivariate(
     
     Parameters
     ----------
-    forecaster : ForecasterAutoregMultiSeries
+    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate
         Forcaster model.
         
     series : pandas DataFrame
@@ -1355,18 +1355,18 @@ def random_search_forecaster_multivariate(
     steps : int
         Number of steps to predict.
         
-    metric : str, callable, list
+    metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
         If string:
             {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
     
-        If callable:
+        If Callable:
             Function with arguments y_true, y_pred that returns a float.
 
         If list:
-            List containing several strings and/or callable.
+            List containing several strings and/or Callable.
 
     initial_train_size : int 
         Number of samples in the initial train split.
