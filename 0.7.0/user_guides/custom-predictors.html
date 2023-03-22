@@ -4289,13 +4289,13 @@ Forecaster id: None </pre>
             <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Predict</span>
 <span class="c1"># ==============================================================================</span>
 <span class="n">steps</span> <span class="o">=</span> <span class="mi">36</span>
-<span class="n">predictions</span> <span class="o">=</span> <span class="n">forecaster</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">steps</span><span class="o">=</span><span class="n">steps</span><span class="p">)</span>
+<span class="n">predictions</span> <span class="o">=</span> <span class="n">forecaster</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">steps</span><span class="o">=</span><span class="n">steps</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 <span class="n">predictions</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
 </pre></div>
 <div id="cell-19" class="clipboard-copy-txt"># Predict
 # ==============================================================================
 steps = 36
-predictions = forecaster.predict(steps=steps)
+predictions = forecaster.predict(steps=steps, levels=None)
 predictions.head(3)</div>
     
         </div>
