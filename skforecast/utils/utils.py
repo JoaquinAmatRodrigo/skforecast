@@ -214,8 +214,24 @@ def check_exog(
     if not isinstance(exog, (pd.Series, pd.DataFrame)):
         raise TypeError('`exog` must be `pd.Series` or `pd.DataFrame`.')
 
+    if isinstance(exog, pd.DataFrame):
+        if not all([dtype in ['float', 'int', 'category'] for dtype in exog.dtypes]):
+            raise TypeError(
+                "Exog must contain only int, float or category types"
+            )
+    else:
+        if not exog.dtypes in ['float', 'int', 'category']:
+            raise TypeError(
+                "Exog must contain only int, float or category types"
+            )
+
     if exog.isnull().any().any():
-        raise ValueError('`exog` has missing values.')
+        warnings.warn(
+            ('`exog` has missing values. Most of machine learning models do not allow '
+            'missing values.')
+    )
+
+    check that categories only contain integers
                 
     return
 
@@ -700,8 +716,8 @@ def preprocess_exog(
     exog: Union[pd.Series, pd.DataFrame]
 ) -> Tuple[np.ndarray, pd.Index]:
     """
-    Returns values ​​and index of series separately. Index is overwritten 
-    according to the next rules:
+    Returns values, index and dtypes of series or data frame separately. Index is
+    overwritten  according to the next rules:
         If index is of type DatetimeIndex and has frequency, nothing is 
         changed.
         If index is of type RangeIndex, nothing is changed.
@@ -750,9 +766,45 @@ def preprocess_exog(
                          step  = 1
                      )
 
+    if isinstance(exog, pd.Series):
+        exog_dtypes = {exog.name: exog.dtypes}
+    else:
+        exog_dtypes = exog.dtypes.to_dict()
+
     exog_values = exog.to_numpy()
 
-    return exog_values, exog_index
+    return exog_values, exog_index, exog_dtypes
+
+
+def fix_exog_dtypes(
+    exog: Union[pd.Series, pd.DataFrame],
+    exog_dtypes: dict,
+) -> Union[pd.Series, pd.DataFrame]:
+    """
+    Cast `exog` to a specified types.
+    If `exog` is a pandas Series, `exog_dtypes` must be a dict with a single value.
+
+    Parameters
+    ----------        
+    exog : pandas Series, pandas DataFrame
+        Exogenous variables.
+    exog_dtypes: dict
+        Dictionary with name and type of the series or data frame columns.
+
+    Returns 
+    -------
+    exog
+
+    """
+    
+    if isinstance(exog, pd.Series) and exog.dtypes != list(exog_dtypes.values())[0]:
+            exog = exog.astype(list(exog_dtypes.values())[0])
+    elif isinstance(exog, pd.DataFrame):
+        for col, dtype in exog_dtypes.items():
+            if exog[col].dtypes != dtype:
+                exog[col] = exog[col].astype(dtype)
+
+    return exog
 
 
 def exog_to_direct(

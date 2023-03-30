@@ -28,6 +28,7 @@ from ..utils import check_interval
 from ..utils import preprocess_y
 from ..utils import preprocess_last_window
 from ..utils import preprocess_exog
+from ..utils import fix_exog_dtypes
 from ..utils import expand_index
 from ..utils import check_predict_input
 from ..utils import transform_series
@@ -356,7 +357,7 @@ class ForecasterAutoreg(ForecasterBase):
                             fit               = True,
                             inverse_transform = False
                        )
-            exog_values, exog_index = preprocess_exog(exog=exog)
+            exog_values, exog_index, exog_dtypes = preprocess_exog(exog=exog)
             
             if not (exog_index[:len(y_index)] == y_index).all():
                 raise ValueError(
@@ -366,19 +367,24 @@ class ForecasterAutoreg(ForecasterBase):
         
         X_train, y_train = self._create_lags(y=y_values)
         X_train_col_names = [f"lag_{i}" for i in self.lags]
-        if exog is not None:
-            col_names_exog = exog.columns if isinstance(exog, pd.DataFrame) else [exog.name]
-            X_train_col_names.extend(col_names_exog)
-            # The first `self.max_lag` positions have to be removed from exog
-            # since they are not in X_train.
-            X_train = np.column_stack((X_train, exog_values[self.max_lag:, ]))
-
         X_train = pd.DataFrame(
                     data    = X_train,
                     columns = X_train_col_names,
                     index   = y_index[self.max_lag: ]
                   )
-        self.X_train_col_names = X_train_col_names
+        if exog is not None:
+            col_names_exog = exog.columns if isinstance(exog, pd.DataFrame) else [exog.name]
+            # The first `self.max_lag` positions have to be removed from exog
+            # since they are not in X_train.
+            exog_to_train = pd.DataFrame(
+                                data    = exog_values[self.max_lag:, ],
+                                columns = col_names_exog,
+                                index   = y_index[self.max_lag: ]
+                            )
+            exog_to_train = fix_exog_dtypes(exog=exog_to_train, exog_dtypes=exog_dtypes)
+            X_train = pd.concat((X_train, exog_to_train), axis=1)
+
+        self.X_train_col_names = X_train.columns.to_list()
         y_train = pd.Series(
                     data  = y_train,
                     index = y_index[self.max_lag: ],
