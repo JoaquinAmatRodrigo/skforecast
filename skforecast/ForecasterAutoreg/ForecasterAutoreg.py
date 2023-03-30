@@ -636,9 +636,9 @@ class ForecasterAutoreg(ForecasterBase):
                            inverse_transform = False
                        )
             
-            exog_values, _ = preprocess_exog(
-                                 exog = exog.iloc[:steps, ]
-                             )
+            exog_values, _, _ = preprocess_exog(
+                                    exog = exog.iloc[:steps, ]
+                                )
         else:
             exog_values = None
         
@@ -783,9 +783,9 @@ class ForecasterAutoreg(ForecasterBase):
                            inverse_transform = False
                        )
             
-            exog_values, _ = preprocess_exog(
-                                 exog = exog.iloc[:steps, ]
-                             )
+            exog_values, _, _ = preprocess_exog(
+                                    exog = exog.iloc[:steps, ]
+                                )
         else:
             exog_values = None
         

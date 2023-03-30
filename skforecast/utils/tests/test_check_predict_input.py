@@ -666,7 +666,7 @@ def test_check_predict_input_TypeError_when_exog_index_is_not_of_index_type():
     exog = pd.Series(np.arange(10))
     index_type = pd.DatetimeIndex
     check_exog(exog = exog)
-    _, exog_index = preprocess_exog(exog=exog.iloc[:0, ])
+    _, exog_index, _ = preprocess_exog(exog=exog.iloc[:0, ])
 
     err_msg = re.escape(
                 (f'Expected index of type {index_type} for `exog`. '
@@ -700,7 +700,7 @@ def test_check_predict_input_TypeError_when_exog_index_frequency_is_not_index_fr
     exog = pd.Series(np.arange(10), index=pd.date_range(start='1/1/2018', periods=10))
     index_freq = 'M'
     check_exog(exog = exog)
-    _, exog_index = preprocess_exog(exog=exog.iloc[:0, ])
+    _, exog_index, _ = preprocess_exog(exog=exog.iloc[:0, ])
 
     err_msg = re.escape(
                 (f'Expected frequency of type {index_freq} for `exog`. '

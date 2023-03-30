@@ -219,19 +219,32 @@ def check_exog(
             raise TypeError(
                 "Exog must contain only int, float or category types"
             )
+        for col in exog.select_dtypes(include='category'):
+            if exog[col].cat.categories.dtype != int:
+                raise TypeError(
+                    ("Categorical columns in exog must contain only integer values. "
+                    "See skforecast docs for more info about how to include categorical "
+                    "features.")
+                )
     else:
         if not exog.dtypes in ['float', 'int', 'category']:
             raise TypeError(
-                "Exog must contain only int, float or category types"
+                "Exog must contain only int, float or category dtypes."
+            )
+        if exog.dtypes == 'category' and exog.cat.categories.dtype != int:
+            raise TypeError(
+                ("If exog is of type category, it must contain only integer values. "
+                 "See skforecast docs for more info about how to include categorical "
+                 "features.")
             )
 
     if exog.isnull().any().any():
         warnings.warn(
             ('`exog` has missing values. Most of machine learning models do not allow '
-            'missing values.')
+            'missing values. Fitting the forecaster may fail.')
     )
 
-    check that categories only contain integers
+    
                 
     return
 
@@ -507,7 +520,10 @@ def check_predict_input(
         if not isinstance(exog, (pd.Series, pd.DataFrame)):
             raise TypeError('`exog` must be a pandas Series or DataFrame.')
         if exog.isnull().values.any():
-            raise ValueError('`exog` has missing values.')
+            warnings.warn(
+                ('`exog` has missing values. Most of machine learning models do not allow '
+                 'missing values. `predict` method may fail.')
+            )
         if not isinstance(exog, exog_type):
             raise TypeError(
                 f'Expected type for `exog`: {exog_type}. Got {type(exog)}.'     
@@ -522,9 +538,9 @@ def check_predict_input(
                      f'Got {exog.columns.to_list()}.') 
                 )
 
-        # Check nulls and index type and freq
+        # Check nulls, dtypes, index type and freq
         check_exog(exog = exog)
-        _, exog_index = preprocess_exog(exog=exog.iloc[:0, ])
+        _, exog_index, _ = preprocess_exog(exog=exog.iloc[:0, ])
         if not isinstance(exog_index, index_type):
             raise TypeError(
                 (f'Expected index of type {index_type} for `exog`. '
@@ -541,10 +557,10 @@ def check_predict_input(
         expected_index = expand_index(last_window.index, 1)[0]
         if expected_index != exog.index[0]:
             raise ValueError(
-                (f'To make predictions `exog` must start one step ahead of `last_window` end.\n'
+                (f'To make predictions `exog` must start one step ahead of `last_window`.\n'
                  f'    `last_window` ends at : {last_window.index[-1]}.\n'
-                 f'    Expected index        : {expected_index}.\n'
-                 f'    `exog` starts at      : {exog.index[0]}.')
+                 f'    `exog` starts at      : {exog.index[0]}.\n'
+                 f'     Expected index       : {expected_index}.')
             )
 
     # Checks ForecasterSarimax
@@ -783,6 +799,11 @@ def fix_exog_dtypes(
     """
     Cast `exog` to a specified types.
     If `exog` is a pandas Series, `exog_dtypes` must be a dict with a single value.
+    If `exog_dtypes` is `category` but the current type of `exog` is `float`, then
+    the type is cast to `int` and then to `category`. This is done because, for
+    a predictor to accept a categorical exog, it must contain only integer values.
+    Due to the internal modifications of numpy, the values may be casted to `float`,
+    so they have to be re-converted to `int`.
 
     Parameters
     ----------        
@@ -800,13 +821,13 @@ def fix_exog_dtypes(
     if isinstance(exog, pd.Series) and exog.dtypes != list(exog_dtypes.values())[0]:
             exog = exog.astype(list(exog_dtypes.values())[0])
     elif isinstance(exog, pd.DataFrame):
-        for col, dtype in exog_dtypes.items():
-            if exog[col].dtypes != dtype:
-                if dtype == "category" and exog[col].dtypes==int:
+        for col, initial_dtype in exog_dtypes.items():
+            if exog[col].dtypes != initial_dtype:
+                if initial_dtype == "category" and exog[col].dtypes==float:
                     exog[col] = exog[col].astype(int).astype("category")
                 else:
-                    exog[col] = exog[col].astype(dtype)
-        !!!Test el paso de categoria a int a categoria
+                    exog[col] = exog[col].astype(initial_dtype)
+
     return exog
 
 
