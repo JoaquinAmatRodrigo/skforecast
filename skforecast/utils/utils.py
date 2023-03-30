@@ -802,8 +802,11 @@ def fix_exog_dtypes(
     elif isinstance(exog, pd.DataFrame):
         for col, dtype in exog_dtypes.items():
             if exog[col].dtypes != dtype:
-                exog[col] = exog[col].astype(dtype)
-
+                if dtype == "category" and exog[col].dtypes==int:
+                    exog[col] = exog[col].astype(int).astype("category")
+                else:
+                    exog[col] = exog[col].astype(dtype)
+        !!!Test el paso de categoria a int a categoria
     return exog
 
 
