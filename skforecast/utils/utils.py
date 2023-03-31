@@ -17,6 +17,7 @@ from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import FunctionTransformer
 import inspect
 from copy import deepcopy
+from ..exceptions import MissingValuesExogWarning
 
 optional_dependencies = {
     "sarimax": ['statsmodels>=0.12, <0.14', 'pmdarima>=2.0, <2.1'],
@@ -197,7 +198,7 @@ def check_exog(
     exog: Any
 ) -> None:
     """
-    Raise Exception if `exog` is not pandas Series or pandas DataFrame, or
+    Raise Exception if `exog` is not pandas Series or pandas DataFrame. Rise a Warning
     if it has missing values.
     
     Parameters
@@ -241,11 +242,9 @@ def check_exog(
     if exog.isnull().any().any():
         warnings.warn(
             ('`exog` has missing values. Most of machine learning models do not allow '
-            'missing values. Fitting the forecaster may fail.')
+            'missing values. Fitting the forecaster may fail.'), MissingValuesExogWarning
     )
-
-    
-                
+         
     return
 
 
@@ -522,7 +521,7 @@ def check_predict_input(
         if exog.isnull().values.any():
             warnings.warn(
                 ('`exog` has missing values. Most of machine learning models do not allow '
-                 'missing values. `predict` method may fail.')
+                 'missing values. `predict` method may fail.'), MissingValuesExogWarning
             )
         if not isinstance(exog, exog_type):
             raise TypeError(
@@ -584,7 +583,11 @@ def check_predict_input(
                      f'generate the predictors. For this forecaster it is {window_size}.')
                 )
             if last_window_exog.isnull().any().all():
-                raise ValueError('`last_window_exog` has missing values.')
+                warnings.warn(
+                ('`last_window_exog` has missing values. Most of machine learning models '
+                 'do not allow missing values. `predict` method may fail.'),
+                MissingValuesExogWarning
+            )
             _, last_window_exog_index = preprocess_last_window(
                                         last_window = last_window_exog.iloc[:0]
                                     ) 
@@ -819,7 +822,7 @@ def fix_exog_dtypes(
     """
     
     if isinstance(exog, pd.Series) and exog.dtypes != list(exog_dtypes.values())[0]:
-            exog = exog.astype(list(exog_dtypes.values())[0])
+        exog = exog.astype(list(exog_dtypes.values())[0])
     elif isinstance(exog, pd.DataFrame):
         for col, initial_dtype in exog_dtypes.items():
             if exog[col].dtypes != initial_dtype:
