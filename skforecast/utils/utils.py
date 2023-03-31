@@ -216,27 +216,27 @@ def check_exog(
         raise TypeError('`exog` must be `pd.Series` or `pd.DataFrame`.')
 
     if isinstance(exog, pd.DataFrame):
-        if not all([dtype in ['float', 'int', 'category'] for dtype in exog.dtypes]):
+        if not all([dtype in ['float', 'int', 'category', 'bool'] for dtype in exog.dtypes]): # TODO: change to custom warning
             raise TypeError(
-                "Exog must contain only int, float or category types"
+                "Exog must contain only int, float, bool or category types"
             )
         for col in exog.select_dtypes(include='category'):
             if exog[col].cat.categories.dtype != int:
                 raise TypeError(
                     ("Categorical columns in exog must contain only integer values. "
-                    "See skforecast docs for more info about how to include categorical "
-                    "features.")
+                     "See skforecast docs for more info about how to include categorical "
+                     "features.") #TODO: add link to docs
                 )
     else:
-        if not exog.dtypes in ['float', 'int', 'category']:
-            raise TypeError(
-                "Exog must contain only int, float or category dtypes."
+        if not exog.dtypes in ['float', 'int', 'category', 'bool']:
+            raise TypeError(   # TODO: change to custom warning
+                "Exog must contain only int, float, bool or category dtypes."
             )
         if exog.dtypes == 'category' and exog.cat.categories.dtype != int:
             raise TypeError(
                 ("If exog is of type category, it must contain only integer values. "
                  "See skforecast docs for more info about how to include categorical "
-                 "features.")
+                 "features.") #TODO: add link to docs
             )
 
     if exog.isnull().any().any():
@@ -733,7 +733,7 @@ def preprocess_last_window(
 
 def preprocess_exog(
     exog: Union[pd.Series, pd.DataFrame]
-) -> Tuple[np.ndarray, pd.Index]:
+) -> Tuple[np.ndarray, pd.Index, dict]:
     """
     Returns values, index and dtypes of series or data frame separately. Index is
     overwritten  according to the next rules:
@@ -756,6 +756,9 @@ def preprocess_exog(
 
     exog_index : pandas Index
         Index of `exog` modified according to the rules.
+
+    exog_dtypes : dict
+        Dictionary with the dtypes of `exog`.
 
     """
     
@@ -795,7 +798,7 @@ def preprocess_exog(
     return exog_values, exog_index, exog_dtypes
 
 
-def fix_exog_dtypes(
+def cast_exog_dtypes(
     exog: Union[pd.Series, pd.DataFrame],
     exog_dtypes: dict,
 ) -> Union[pd.Series, pd.DataFrame]:
@@ -804,7 +807,7 @@ def fix_exog_dtypes(
     If `exog` is a pandas Series, `exog_dtypes` must be a dict with a single value.
     If `exog_dtypes` is `category` but the current type of `exog` is `float`, then
     the type is cast to `int` and then to `category`. This is done because, for
-    a predictor to accept a categorical exog, it must contain only integer values.
+    a forecaster to accept a categorical exog, it must contain only integer values.
     Due to the internal modifications of numpy, the values may be casted to `float`,
     so they have to be re-converted to `int`.
 
@@ -820,6 +823,7 @@ def fix_exog_dtypes(
     exog
 
     """
+    #TODO remove keys from exog_dtypes not in exog.columns
     
     if isinstance(exog, pd.Series) and exog.dtypes != list(exog_dtypes.values())[0]:
         exog = exog.astype(list(exog_dtypes.values())[0])

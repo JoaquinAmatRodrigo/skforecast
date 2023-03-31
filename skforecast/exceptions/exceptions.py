@@ -23,7 +23,7 @@ class MissingValuesExogWarning(UserWarning):
 
     def __str__(self):
         extra_message = (
-            "\n You can suppress this warning using "
+            "\n You can suppress this warning using: "
             "warnings.simplefilter('ignore', category=MissingValuesExogWarning)"
         )
         return self.message + " " + extra_message
