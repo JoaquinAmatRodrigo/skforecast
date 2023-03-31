@@ -69,25 +69,25 @@ Some machine learning models, such as long short-term memory (LSTM) neural netwo
 
 ## Multi-time series forecasting
 
-In univariate time series forecasting, a single time series is modeled as a linear or nonlinear combination of its lags. That is, the past values of the series are used to forecast its future. In multi-time series forecasting, two or more time series are modeled together using a single model. Two strategies can be distinguished:
+In univariate time series forecasting, a single time series is modeled as a linear or nonlinear combination of its lags, where past values of the series are used to forecast its future. In multi-series forecasting, two or more time series are modeled together using a single model. There are two distinct strategies for multi-series forecasting.
 
-### No multivariate time series
+### Independent Multi-Series Forecasting
 
-A single model is trained for all time series, but each time series remains independent of the others. In other words, the past values of one series are not used as predictors of other series. Why is it useful then to model everything together? Although the series do not depend on each other, they may follow the same intrinsic pattern regarding their past and future values. For example, in the same store, the sales of products A and B may not be related, but they follow the same dynamics, that of the store.
+A single model is trained for all time series, but each time series remains independent of the others, meaning that past values of one series are not used as predictors of other series. However, modeling them together is useful because the series may follow the same intrinsic pattern regarding their past and future values. For instance, the sales of products A and B in the same store may not be related, but they follow the same dynamics, that of the store.
 
 <p align="center"><img src="../img/forecaster_multi_series_train_matrix_diagram.png" style="width: 800px"></p>
 
 <center><font size="2.5"> <i>Transformation of two time series and an exogenous variable into the matrices needed to train a machine learning model in a multi-series context.</i></font></center>
 
-In order to predict the next *n* steps, the [recursive multi-step forecasting](https://joaquinamatrodrigo.github.io/skforecast/latest/quick-start/introduction-forecasting.html#multi-step-forecasting) is applied as in univariate forecasting. The only difference is that, the series name for which to estimate the predictions, needs to be indicated.
+To predict the next *n* steps, the strategy of [recursive multi-step forecasting](https://joaquinamatrodrigo.github.io/skforecast/latest/quick-start/introduction-forecasting.html#multi-step-forecasting) is applied
 
 <p align="center"><img src="../img/forecaster_multi_series_prediction_diagram.png" style="width: 800px"></p>
 
-<center><font size="2.5"> <i>Process of recursive forecasting with multiple series.</i></font></center>
+<center><font size="2.5"> <i>Diagram of recursive forecasting with multiple independent time series.</i></font></center>
 
-### Multivariate time series
+### Dependent Multi-Series Forecasting (multivariate time series)
 
-All series are modeled in a single model considering that each time series depends not only on its past values but also on the past values of the other series. The forecaster is expected not only to learn the information of each series separately but also to relate them. For example, the measurements made by all the sensors (flow, temperature, pressure...) installed on an industrial machine such as a compressor.
+All series are modeled together in a single model, considering that each time series depends not only on its past values but also on the past values of the other series. The forecaster is expected not only to learn the information of each series separately but also to relate them. An example is the measurements made by all the sensors (flow, temperature, pressure...) installed on an industrial machine such as a compressor.
 
 <p align="center"><img src="../img/forecaster_multivariate_train_matrix_diagram.png" style="width: 800px"></p>
 
