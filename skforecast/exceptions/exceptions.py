@@ -27,3 +27,20 @@ class MissingValuesExogWarning(UserWarning):
             "warnings.simplefilter('ignore', category=MissingValuesExogWarning)"
         )
         return self.message + " " + extra_message
+    
+
+class ValueTypeExogWarning(UserWarning):
+    """
+    Warning used to notify there are values in the exogenous data that are not
+    'int', 'float', 'bool' or 'category'. Most machine learning models do not
+    accept other data types, therefore the forecaster `fit` and `predict` may fail.
+    """
+    def __init__(self, message):
+        self.message = message
+
+    def __str__(self):
+        extra_message = (
+            "\n You can suppress this warning using: "
+            "warnings.simplefilter('ignore', category=ValueTypesExogWarning)"
+        )
+        return self.message + " " + extra_message
