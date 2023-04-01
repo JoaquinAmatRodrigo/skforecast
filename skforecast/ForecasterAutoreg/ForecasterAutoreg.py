@@ -29,6 +29,7 @@ from ..utils import preprocess_y
 from ..utils import preprocess_last_window
 from ..utils import preprocess_exog
 from ..utils import cast_exog_dtypes
+from ..utils import check_dtypes_exog
 from ..utils import expand_index
 from ..utils import check_predict_input
 from ..utils import transform_series
@@ -381,6 +382,7 @@ class ForecasterAutoreg(ForecasterBase):
                                 columns = col_names_exog,
                                 index   = y_index[self.max_lag: ]
                             )
+            check_dtypes_exog(exog_to_train)
             exog_to_train = cast_exog_dtypes(exog=exog_to_train, exog_dtypes=exog_dtypes)
             X_train = pd.concat((X_train, exog_to_train), axis=1)
 
