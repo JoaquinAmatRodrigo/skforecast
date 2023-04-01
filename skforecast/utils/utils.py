@@ -18,6 +18,7 @@ from sklearn.preprocessing import FunctionTransformer
 import inspect
 from copy import deepcopy
 from ..exceptions import MissingValuesExogWarning
+from ..exceptions import ValueTypeExogWarning
 
 optional_dependencies = {
     "sarimax": ['statsmodels>=0.12, <0.14', 'pmdarima>=2.0, <2.1'],
@@ -215,10 +216,44 @@ def check_exog(
     if not isinstance(exog, (pd.Series, pd.DataFrame)):
         raise TypeError('`exog` must be `pd.Series` or `pd.DataFrame`.')
 
+    if exog.isnull().any().any():
+        warnings.warn(
+            ('`exog` has missing values. Most of machine learning models do not allow '
+            'missing values. Fitting the forecaster may fail.'), MissingValuesExogWarning
+    )
+         
+    return
+
+
+def check_dtypes_exog(
+    exog: Union[pd.DataFrame, pd.Series]
+) -> None:
+    """
+    Raise Exception if `exog` has categorical columns with non integer values.
+    This is needed when using machine learning regressors that allow categorical
+    features.
+    Rise a Warning if values are not `init`, `float`, `bool` or `category`.
+    
+    Parameters
+    ----------        
+    exog :  pandas DataFrame, pandas Series
+        Exogenous variable/s included as predictor/s.
+
+    Returns
+    ----------
+    None
+
+    """
+        
+    if not isinstance(exog, (pd.Series, pd.DataFrame)):
+        raise TypeError('`exog` must be `pd.Series` or `pd.DataFrame`.')
+
     if isinstance(exog, pd.DataFrame):
-        if not all([dtype in ['float', 'int', 'category', 'bool'] for dtype in exog.dtypes]): # TODO: change to custom warning
-            raise TypeError(
-                "Exog must contain only int, float, bool or category types"
+        if not all([dtype in ['float', 'int', 'category', 'bool'] for dtype in exog.dtypes]):
+            warnings.warn(
+                ('`exog` must contain only int, float, bool or category dtypes. Most '
+                'machine learning models do not allow other types of values values . '
+                'Fitting the forecaster may fail.'), ValueTypeExogWarning
             )
         for col in exog.select_dtypes(include='category'):
             if exog[col].cat.categories.dtype != int:
@@ -229,8 +264,10 @@ def check_exog(
                 )
     else:
         if not exog.dtypes in ['float', 'int', 'category', 'bool']:
-            raise TypeError(   # TODO: change to custom warning
-                "Exog must contain only int, float, bool or category dtypes."
+            warnings.warn(
+                ('`exog` must contain only int, float, bool or category dtypes. Most '
+                'machine learning models do not allow other types of values values . '
+                'Fitting the forecaster may fail.'), ValueTypeExogWarning
             )
         if exog.dtypes == 'category' and exog.cat.categories.dtype != int:
             raise TypeError(
@@ -238,12 +275,6 @@ def check_exog(
                  "See skforecast docs for more info about how to include categorical "
                  "features.") #TODO: add link to docs
             )
-
-    if exog.isnull().any().any():
-        warnings.warn(
-            ('`exog` has missing values. Most of machine learning models do not allow '
-            'missing values. Fitting the forecaster may fail.'), MissingValuesExogWarning
-    )
          
     return
 
@@ -823,7 +854,9 @@ def cast_exog_dtypes(
     exog
 
     """
-    #TODO remove keys from exog_dtypes not in exog.columns
+
+    # Remove keys from exog_dtypes not in exog.columns
+    exog_dtypes = {k:v for k, v in exog_dtypes.items() if k in exog.columns}
     
     if isinstance(exog, pd.Series) and exog.dtypes != list(exog_dtypes.values())[0]:
         exog = exog.astype(list(exog_dtypes.values())[0])
