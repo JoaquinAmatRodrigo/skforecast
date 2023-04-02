@@ -29,7 +29,7 @@ class MissingValuesExogWarning(UserWarning):
         return self.message + " " + extra_message
     
 
-class ValueTypeExogWarning(UserWarning):
+class ValueTypeWarning(UserWarning):
     """
     Warning used to notify there are values in the exogenous data that are not
     'int', 'float', 'bool' or 'category'. Most machine learning models do not
