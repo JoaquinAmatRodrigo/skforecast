@@ -18,7 +18,7 @@ from sklearn.preprocessing import FunctionTransformer
 import inspect
 from copy import deepcopy
 from ..exceptions import MissingValuesExogWarning
-from ..exceptions import ValueTypeExogWarning
+from ..exceptions import ValueTypeWarning
 
 optional_dependencies = {
     "sarimax": ['statsmodels>=0.12, <0.14', 'pmdarima>=2.0, <2.1'],
@@ -220,7 +220,7 @@ def check_exog(
         warnings.warn(
             ('`exog` has missing values. Most of machine learning models do not allow '
             'missing values. Fitting the forecaster may fail.'), MissingValuesExogWarning
-    )
+    ) # TODO: esto deberia estar despues del exog transfor por si se hace una imputación de missings
          
     return
 
@@ -253,7 +253,7 @@ def check_dtypes_exog(
             warnings.warn(
                 ('`exog` must contain only int, float, bool or category dtypes. Most '
                 'machine learning models do not allow other types of values values . '
-                'Fitting the forecaster may fail.'), ValueTypeExogWarning
+                'Fitting the forecaster may fail.'), ValueTypeWarning
             )
         for col in exog.select_dtypes(include='category'):
             if exog[col].cat.categories.dtype != int:
@@ -267,7 +267,7 @@ def check_dtypes_exog(
             warnings.warn(
                 ('`exog` must contain only int, float, bool or category dtypes. Most '
                 'machine learning models do not allow other types of values values . '
-                'Fitting the forecaster may fail.'), ValueTypeExogWarning
+                'Fitting the forecaster may fail.'), ValueTypeWarning
             )
         if exog.dtypes == 'category' and exog.cat.categories.dtype != int:
             raise TypeError(
@@ -570,7 +570,7 @@ def check_predict_input(
 
         # Check nulls, dtypes, index type and freq
         check_exog(exog = exog)
-        _, exog_index, _ = preprocess_exog(exog=exog.iloc[:0, ])
+        _, exog_index = preprocess_exog(exog=exog.iloc[:0, ])
         if not isinstance(exog_index, index_type):
             raise TypeError(
                 (f'Expected index of type {index_type} for `exog`. '
@@ -764,9 +764,9 @@ def preprocess_last_window(
 
 def preprocess_exog(
     exog: Union[pd.Series, pd.DataFrame]
-) -> Tuple[np.ndarray, pd.Index, dict]:
+) -> Tuple[np.ndarray, pd.Index]:
     """
-    Returns values, index and dtypes of series or data frame separately. Index is
+    Returns values and index of series or data frame separately. Index is
     overwritten  according to the next rules:
         If index is of type DatetimeIndex and has frequency, nothing is 
         changed.
@@ -787,10 +787,6 @@ def preprocess_exog(
 
     exog_index : pandas Index
         Index of `exog` modified according to the rules.
-
-    exog_dtypes : dict
-        Dictionary with the dtypes of `exog`.
-
     """
     
     if isinstance(exog.index, pd.DatetimeIndex) and exog.index.freq is not None:
@@ -819,14 +815,9 @@ def preprocess_exog(
                          step  = 1
                      )
 
-    if isinstance(exog, pd.Series):
-        exog_dtypes = {exog.name: exog.dtypes}
-    else:
-        exog_dtypes = exog.dtypes.to_dict()
-
     exog_values = exog.to_numpy()
 
-    return exog_values, exog_index, exog_dtypes
+    return exog_values, exog_index
 
 
 def cast_exog_dtypes(
