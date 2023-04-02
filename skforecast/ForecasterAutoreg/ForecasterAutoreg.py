@@ -28,7 +28,6 @@ from ..utils import check_interval
 from ..utils import preprocess_y
 from ..utils import preprocess_last_window
 from ..utils import preprocess_exog
-from ..utils import cast_exog_dtypes
 from ..utils import check_dtypes_exog
 from ..utils import expand_index
 from ..utils import check_predict_input
@@ -358,7 +357,7 @@ class ForecasterAutoreg(ForecasterBase):
                             fit               = True,
                             inverse_transform = False
                        )
-            exog_values, exog_index, exog_dtypes = preprocess_exog(exog=exog)
+            _, exog_index = preprocess_exog(exog=exog)
             
             if not (exog_index[:len(y_index)] == y_index).all():
                 raise ValueError(
@@ -374,16 +373,10 @@ class ForecasterAutoreg(ForecasterBase):
                     index   = y_index[self.max_lag: ]
                   )
         if exog is not None:
-            col_names_exog = exog.columns if isinstance(exog, pd.DataFrame) else [exog.name]
             # The first `self.max_lag` positions have to be removed from exog
             # since they are not in X_train.
-            exog_to_train = pd.DataFrame(
-                                data    = exog_values[self.max_lag:, ],
-                                columns = col_names_exog,
-                                index   = y_index[self.max_lag: ]
-                            )
+            exog_to_train = exog.iloc[self.max_lag:, ]
             check_dtypes_exog(exog_to_train)
-            exog_to_train = cast_exog_dtypes(exog=exog_to_train, exog_dtypes=exog_dtypes)
             X_train = pd.concat((X_train, exog_to_train), axis=1)
 
         self.X_train_col_names = X_train.columns.to_list()
@@ -555,6 +548,9 @@ class ForecasterAutoreg(ForecasterBase):
             with warnings.catch_warnings():
                 # Suppress scikit-learn warning: "X does not have valid feature names,
                 # but NoOpTransformer was fitted with feature names".
+
+                # TODO: if self.exog_has_category then X to pandas and cast types.
+
                 warnings.simplefilter("ignore")
                 prediction = self.regressor.predict(X)
                 predictions[i] = prediction.ravel()[0]
@@ -638,9 +634,8 @@ class ForecasterAutoreg(ForecasterBase):
                            inverse_transform = False
                        )
             
-            exog_values, _, _ = preprocess_exog(
-                                    exog = exog.iloc[:steps, ]
-                                )
+            exog_values = exog.iloc[:steps, ].to_numpy() # TODO: expandir esto a el resto de forecasters
+
         else:
             exog_values = None
         
@@ -785,9 +780,8 @@ class ForecasterAutoreg(ForecasterBase):
                            inverse_transform = False
                        )
             
-            exog_values, _, _ = preprocess_exog(
-                                    exog = exog.iloc[:steps, ]
-                                )
+            exog_values = exog.iloc[:steps, ].to_numpy()
+
         else:
             exog_values = None
         
