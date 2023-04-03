@@ -224,6 +224,29 @@ def check_exog(
          
     return
 
+def get_exog_dtypes(
+    exog: Union[pd.DataFrame, pd.Series]
+) -> dict:
+    """_summary_
+
+    Parameters
+    ----------
+    exog :  pandas DataFrame, pandas Series
+        Exogenous variable/s included as predictor/s.
+
+    Returns
+    -------
+    exog_dtypes : dict
+        Dictionary with the dtypes in `exog`.
+    """
+
+    if isinstance(exog, pd.Series):
+        exog_dtypes = {exog.name: exog.dtypes}
+    else:
+        exog_dtypes = exog.dtypes.to_dict()
+    
+    return exog_dtypes
+
 
 def check_dtypes_exog(
     exog: Union[pd.DataFrame, pd.Series]
