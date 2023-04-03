@@ -670,8 +670,9 @@ def check_predict_input(
 
 
 def preprocess_y(
-    y: pd.Series
-) -> Tuple[np.ndarray, pd.Index]:
+    y: pd.Series,
+    return_values : bool=True
+) -> Tuple[Union[None, np.ndarray], pd.Index]:
     """
     Returns values and index of series separately. Index is overwritten 
     according to the next rules:
@@ -687,9 +688,13 @@ def preprocess_y(
     y : pandas Series
         Time series.
 
+    return_values : bool, default=True
+        If `True` return the values of `y` as numpy ndarray. This option is intended
+        to be able to avoid copying data when it is not necessary.
+
     Returns 
     -------
-    y_values : numpy ndarray
+    y_values : None, numpy ndarray
         Numpy array with values of `y`.
 
     y_index : pandas Index
@@ -722,7 +727,10 @@ def preprocess_y(
                       step  = 1
                   )
 
-    y_values = y.to_numpy()
+    if return_values:
+        y_values = y.to_numpy()
+    else:
+        y_values = None
 
     return y_values, y_index
 
@@ -786,8 +794,9 @@ def preprocess_last_window(
 
 
 def preprocess_exog(
-    exog: Union[pd.Series, pd.DataFrame]
-) -> Tuple[np.ndarray, pd.Index]:
+    exog: Union[pd.Series, pd.DataFrame],
+    return_values : bool=True
+) -> Tuple[Union[None, np.ndarray], pd.Index]:
     """
     Returns values and index of series or data frame separately. Index is
     overwritten  according to the next rules:
@@ -803,9 +812,13 @@ def preprocess_exog(
     exog : pandas Series, pandas DataFrame
         Exogenous variables.
 
+    return_values : bool, default=True
+        If `True` return the values of `exog` as numpy ndarray. This option is intended
+        to be able to avoid copying data when it is not necessary.
+
     Returns 
     -------
-    exog_values : numpy ndarray
+    exog_values : None, numpy ndarray
         Numpy array with values of `exog`.
 
     exog_index : pandas Index
@@ -838,7 +851,10 @@ def preprocess_exog(
                          step  = 1
                      )
 
-    exog_values = exog.to_numpy()
+    if return_values:
+        exog_values = exog.to_numpy()
+    else:
+        exog_values = None
 
     return exog_values, exog_index
 
