@@ -29,6 +29,8 @@ from ..utils import preprocess_y
 from ..utils import preprocess_last_window
 from ..utils import preprocess_exog
 from ..utils import check_dtypes_exog
+from ..utils import get_dtypes_exog
+from ..utils import cast_exog_dtypes
 from ..utils import expand_index
 from ..utils import check_predict_input
 from ..utils import transform_series
@@ -130,7 +132,11 @@ class ForecasterAutoreg(ForecasterBase):
         If the forecaster has been trained using exogenous variable/s.
         
     exog_type : type
-        Type of exogenous variable/s used in training.
+        Type of exogenous data (pandas Series or DataFrame) used in training.
+
+    exog_dtypes : type
+        Type of each exogenous variable/s used in training. If `transformer_exog` is used,
+        the dtypes are calculated after the transformation.
         
     exog_col_names : list
         Names of columns of `exog` if `exog` used in training was a pandas
@@ -191,6 +197,7 @@ class ForecasterAutoreg(ForecasterBase):
         self.training_range          = None
         self.included_exog           = False
         self.exog_type               = None
+        self.exog_dtypes             = None
         self.exog_col_names          = None
         self.X_train_col_names       = None
         self.in_sample_residuals     = None
@@ -357,13 +364,14 @@ class ForecasterAutoreg(ForecasterBase):
                             fit               = True,
                             inverse_transform = False
                        )
-            _, exog_index = preprocess_exog(exog=exog)
+            _, exog_index = preprocess_exog(exog=exog, return_values=False)
             
             if not (exog_index[:len(y_index)] == y_index).all():
                 raise ValueError(
                     ('Different index for `y` and `exog`. They must be equal '
                      'to ensure the correct alignment of values.')      
                 )
+            self.exog_dtypes = get_dtypes_exog(exog=exog)
         
         X_train, y_train = self._create_lags(y=y_values)
         X_train_col_names = [f"lag_{i}" for i in self.lags]
@@ -462,6 +470,7 @@ class ForecasterAutoreg(ForecasterBase):
         self.last_window          = None
         self.included_exog        = False
         self.exog_type            = None
+        self.exog_dtypes          = None
         self.exog_col_names       = None
         self.X_train_col_names    = None
         self.in_sample_residuals  = None
@@ -539,11 +548,20 @@ class ForecasterAutoreg(ForecasterBase):
         """
 
         predictions = np.full(shape=steps, fill_value=np.nan)
+        exog_has_category = True if 'category' in self.exog_dtypes.values() else False
 
         for i in range(steps):
             X = last_window[-self.lags].reshape(1, -1)
             if exog is not None:
                 X = np.column_stack((X, exog[i, ].reshape(1, -1)))
+                # When concatenating exog values to lag values, numpy will cast all them
+                # to float. Some models may rise error because types are different than when
+                # the model were trained. To avoid this, a pandas DataFrame is created and
+                # the dtypes matched. Unfortunately this implies an extra computation.
+                if exog_has_category:
+
+                    !!! al venir de un numpy, los nombres de las columnas no sirven para el mapeo, tiene que ser por posición!!
+                    X = cast_exog_dtypes(pd.DataFrame(data=X), exog_dtypes=self.exog_dtypes)
 
             with warnings.catch_warnings():
                 # Suppress scikit-learn warning: "X does not have valid feature names,
