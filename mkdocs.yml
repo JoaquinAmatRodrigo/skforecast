@@ -28,6 +28,7 @@ nav:
       - Independent multi-time series forecasting: user_guides/independent-multi-time-series-forecasting.ipynb
       - Dependent multivariate series forecasting: user_guides/dependent-multi-series-multivariate-forecasting.ipynb
       - Exogenous variables: user_guides/exogenous-variables.ipynb
+      - Categorical variables: user_guides/categorical-variables.ipynb
       - Custom predictors: user_guides/custom-predictors.ipynb
       - Weighted time series forecasting: user_guides/weighted-time-series-forecasting.ipynb
       - Backtesting forecaster: user_guides/backtesting.ipynb
