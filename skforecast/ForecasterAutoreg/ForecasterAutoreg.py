@@ -29,7 +29,7 @@ from ..utils import preprocess_y
 from ..utils import preprocess_last_window
 from ..utils import preprocess_exog
 from ..utils import check_dtypes_exog
-from ..utils import get_dtypes_exog
+from ..utils import get_exog_dtypes
 from ..utils import cast_exog_dtypes
 from ..utils import expand_index
 from ..utils import check_predict_input
@@ -371,7 +371,7 @@ class ForecasterAutoreg(ForecasterBase):
                     ('Different index for `y` and `exog`. They must be equal '
                      'to ensure the correct alignment of values.')      
                 )
-            self.exog_dtypes = get_dtypes_exog(exog=exog)
+            self.exog_dtypes = get_exog_dtypes(exog=exog)
         
         X_train, y_train = self._create_lags(y=y_values)
         X_train_col_names = [f"lag_{i}" for i in self.lags]
@@ -558,10 +558,10 @@ class ForecasterAutoreg(ForecasterBase):
                 # to float. Some models may rise error because types are different than when
                 # the model were trained. To avoid this, a pandas DataFrame is created and
                 # the dtypes matched. Unfortunately this implies an extra computation.
-                if exog_has_category:
+                # if exog_has_category:
 
-                    !!! al venir de un numpy, los nombres de las columnas no sirven para el mapeo, tiene que ser por posición!!
-                    X = cast_exog_dtypes(pd.DataFrame(data=X), exog_dtypes=self.exog_dtypes)
+                #     !!! al venir de un numpy, los nombres de las columnas no sirven para el mapeo, tiene que ser por posición!!
+                #     X = cast_exog_dtypes(pd.DataFrame(data=X), exog_dtypes=self.exog_dtypes)
 
             with warnings.catch_warnings():
                 # Suppress scikit-learn warning: "X does not have valid feature names,
