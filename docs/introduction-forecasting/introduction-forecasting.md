@@ -107,11 +107,13 @@ Overall, backtesting is an essential step in the development of a time series fo
 
 In this approach, the model is trained before making predictions each time, and all available data up to that point is used in the training process. This differs from standard cross-validation, where the data is randomly distributed between training and validation sets.
 
-Instead of randomizing the data, backtesting with refit and increasing training size sequentially increases the size of the training set while maintaining the temporal order of the data. By doing this, the model can be tested on progressively larger amounts of historical data, providing a more accurate assessment of its predictive capabilities.
+Instead of randomizing the data, this backtesting sequentially increases the size of the training set while maintaining the temporal order of the data. By doing this, the model can be tested on progressively larger amounts of historical data, providing a more accurate assessment of its predictive capabilities.
 
 <p align="center"><img src="../img/diagram-backtesting-refit.png" style="width: 500px;"></p>
 
 <p align="center"><img src="../img/backtesting_refit.gif" style="width: 600px;"></p>
+
+<center><font size="2.5"> <i>Backtesting with refit and increasing training size (fixed origin).</i></font></center>
 
 
 ### Backtesting with refit and fixed training size (rolling origin)
@@ -122,6 +124,8 @@ In this approach, the model is trained using a fixed window of past observations
 
 <p align="center"><img src="../img/backtesting_refit_fixed_train_size.gif" style="width: 600px;"></p>
 
+<center><font size="2.5"> <i>Backtesting with refit and fixed training size (rolling origin).</i></font></center>
+
 
 ### Backtesting without refit
 
@@ -130,3 +134,5 @@ Backtesting without refit is a strategy where the model is trained only once and
 <p align="center"><img src="../img/diagram-backtesting-no-refit.png" style="width: 500px;"></p>
 
 <p align="center"><img src="../img/backtesting_no_refit.gif" style="width: 600px;"></p>
+
+<center><font size="2.5"> <i>Backtesting without refit.</i></font></center>
