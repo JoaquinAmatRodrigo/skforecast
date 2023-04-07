@@ -44,3 +44,19 @@ class ValueTypeWarning(UserWarning):
             "warnings.simplefilter('ignore', category=ValueTypesExogWarning)"
         )
         return self.message + " " + extra_message
+    
+
+class LongTrainingWarning(UserWarning):
+    """
+    Warning used to notify that a large number of models will be trained and the
+    the process may take a while to run.
+    """
+    def __init__(self, message):
+        self.message = message
+
+    def __str__(self):
+        extra_message = (
+            "\n You can suppress this warning using: "
+            "warnings.simplefilter('ignore', category=LongTrainingWarning)"
+        )
+        return self.message + " " + extra_message
