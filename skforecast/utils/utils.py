@@ -196,16 +196,19 @@ def check_y(
     
     
 def check_exog(
-    exog: Any
+    exog: Any,
+    allow_nan: bool = True
 ) -> None:
     """
-    Raise Exception if `exog` is not pandas Series or pandas DataFrame. Rise a Warning
-    if it has missing values.
+    Raise Exception if `exog` is not pandas Series or pandas DataFrame.
+    If `allow_nan = True`, rise a Warning if it has missing values.
     
     Parameters
     ----------        
     exog :  Any
         Exogenous variable/s included as predictor/s.
+    allow_nan: bool, default True
+        Rise a Warning if it has missing values.
 
     Returns
     ----------
@@ -216,13 +219,15 @@ def check_exog(
     if not isinstance(exog, (pd.Series, pd.DataFrame)):
         raise TypeError('`exog` must be `pd.Series` or `pd.DataFrame`.')
 
-    if exog.isnull().any().any():
-        warnings.warn(
-            ('`exog` has missing values. Most of machine learning models do not allow '
-            'missing values. Fitting the forecaster may fail.'), MissingValuesExogWarning
-    ) # TODO: esto deberia estar despues del exog transfor por si se hace una imputación de missings
+    if not allow_nan:
+        if exog.isnull().any().any():
+            warnings.warn(
+                ('`exog` has missing values. Most of machine learning models do not allow '
+                'missing values. Fitting the forecaster may fail.'), MissingValuesExogWarning
+        )
          
     return
+
 
 def get_exog_dtypes(
     exog: Union[pd.DataFrame, pd.Series]
@@ -325,7 +330,8 @@ def check_dtypes_exog(
                 raise TypeError(
                     ("Categorical columns in exog must contain only integer values. "
                      "See skforecast docs for more info about how to include categorical "
-                     "features.") #TODO: add link to docs
+                     "features https://joaquinamatrodrigo.github.io/skforecast/"
+                     "latest/user_guides/categorical-features.html")
                 )
     else:
         if not exog.dtypes in ['float', 'int', 'category', 'bool']:
@@ -338,7 +344,8 @@ def check_dtypes_exog(
             raise TypeError(
                 ("If exog is of type category, it must contain only integer values. "
                  "See skforecast docs for more info about how to include categorical "
-                 "features.") #TODO: add link to docs
+                 "features https://joaquinamatrodrigo.github.io/skforecast/"
+                 "latest/user_guides/categorical-features.html")
             )
          
     return
