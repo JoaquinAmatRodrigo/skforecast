@@ -88,7 +88,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#use-forecaster-in-production" class="md-skip">
+        <a href="#using-forecaster-models-in-production" class="md-skip">
           Skip to content
         </a>
       
@@ -331,7 +331,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../faq/profiling-skforecast.html" class="md-tabs__link">
+      <a href="../faq/faq.html" class="md-tabs__link">
         FAQ and Tips
       </a>
     </li>
@@ -517,7 +517,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../faq/profiling-skforecast.html" class="md-nav__link">
+      <a href="../faq/faq.html" class="md-nav__link">
         FAQ and Tips
       </a>
     </li>
@@ -653,8 +653,8 @@
   
   
     <li class="md-nav__item">
-      <a href="multi-time-series-forecasting.html" class="md-nav__link">
-        Multi-time series forecasting
+      <a href="independent-multi-time-series-forecasting.html" class="md-nav__link">
+        Independent multi-time series forecasting
       </a>
     </li>
   
@@ -667,8 +667,8 @@
   
   
     <li class="md-nav__item">
-      <a href="multivariate-forecasting.html" class="md-nav__link">
-        Multivariate series forecasting
+      <a href="dependent-multi-series-multivariate-forecasting.html" class="md-nav__link">
+        Dependent multivariate series forecasting
       </a>
     </li>
   
@@ -681,7 +681,7 @@
   
   
     <li class="md-nav__item">
-      <a href="autoregresive-forecaster-exogenous.html" class="md-nav__link">
+      <a href="exogenous-variables.html" class="md-nav__link">
         Exogenous variables
       </a>
     </li>
@@ -793,7 +793,21 @@
   
   
     <li class="md-nav__item">
-      <a href="forecasting-xgboost.html" class="md-nav__link">
+      <a href="categorical-features.html" class="md-nav__link">
+        Categorical features
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="forecasting-xgboost-lightgbm.html" class="md-nav__link">
         Forecasting with XGBoost and LightGBM
       </a>
     </li>
@@ -1206,6 +1220,20 @@
           FAQ and Tips
         </label>
         <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../faq/faq.html" class="md-nav__link">
+        Table of contents
+      </a>
+    </li>
+  
+
+            
           
             
               
@@ -2345,17 +2373,8 @@ Licensed under the Apache License, Version 2.0.
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h1 id="use-forecaster-in-production">Use forecaster in production<a class="anchor-link" href="#use-forecaster-in-production">&#182;</a></h1><p>A trained model may be deployed in production to generate predictions regularly. Suppose predictions have to be generated on a weekly basis, for example, every Monday. By default, when using the <code>predict</code> method on a trained forecaster object, predictions start right after the last training observation. Therefore, the model could be retrained weekly, just before the first prediction is needed, and call its predict method. This strategy, although simple, may not be possible to use for several reasons:</p>
-<ul>
-<li><p>Model training is very expensive and cannot be run as often.</p>
-</li>
-<li><p>The history with which the model was trained is no longer available.</p>
-</li>
-<li><p>The prediction frequency is so high that there is no time to train the model between predictions.</p>
-</li>
-</ul>
-<p>In these scenarios, the model must be able to predict at any time, even if it has not been recently trained.</p>
-<p>Every model generated using skforecast has the <code>last_window</code> argument in its <code>predict</code> method. Using this argument, it is possible to provide only the past values needs to create the autoregressive predictors (lags) and thus, generate the predictions without the need to retrain the model.</p>
+<h1 id="using-forecaster-models-in-production">Using forecaster models in production<a class="anchor-link" href="#using-forecaster-models-in-production">&#182;</a></h1><p>When using a trained model in production, regular predictions need to be generated, for example, on a weekly basis every Monday. By default, the <code>predict</code> method on a trained forecaster object generates predictions starting right after the last training observation. Therefore, the model could be retrained weekly, just before the first prediction is needed, and its predict method called. However, this approach may not be practical due to reasons such as: expensive model training, unavailability of the training data history, or high prediction frequency.</p>
+<p>In such scenarios, the model must be able to predict at any time, even if it has not been recently trained. Fortunately, every model generated using skforecast has the <code>last_window</code> argument in its <code>predict</code> method. This argument allows providing only the past values needed to create the autoregressive predictors (lags or custom predictors), enabling prediction without the need to retrain the model. This feature is particularly useful when there are limitations in retraining the model regularly or when dealing with high-frequency predictions.</p>
 
 </div>
 </div>
@@ -2648,7 +2667,7 @@ Freq: MS, Name: pred, dtype: float64</pre>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <p>As expected, predictions follow directly from the end of training data.</p>
-<p>When <code>last window</code> is provided, the forecaster uses this data to generate the lags needed as predictors and starts the prediction afterward.</p>
+<p>When the <code>last_window</code> argument is provided, the forecaster uses this data to generate the necessary lags as predictors and starts the prediction thereafter.</p>
 
 </div>
 </div>
@@ -2659,7 +2678,7 @@ Freq: MS, Name: pred, dtype: float64</pre>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[5]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[6]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
         
         
         <div class="CodeMirror cm-s-jupyter">
@@ -2676,11 +2695,13 @@ Freq: MS, Name: pred, dtype: float64</pre>
         </div>
             <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Predict</span>
 <span class="c1"># ==============================================================================</span>
-<span class="n">forecaster</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">steps</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">last_window</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">tail</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
+<span class="n">last_window</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">tail</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">forecaster</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">steps</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">last_window</span><span class="o">=</span><span class="n">last_window</span><span class="p">)</span>
 </pre></div>
 <div id="cell-5" class="clipboard-copy-txt"># Predict
 # ==============================================================================
-forecaster.predict(steps=3, last_window=data['y'].tail(5))</div>
+last_window = data['y'].tail(5)
+forecaster.predict(steps=3, last_window=last_window)</div>
     
         </div>
     </div>
@@ -2698,7 +2719,7 @@ forecaster.predict(steps=3, last_window=data['y'].tail(5))</div>
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[5]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[6]:</div>
 
 
 
@@ -2745,19 +2766,10 @@ Freq: MS, Name: pred, dtype: float64</pre>
 
 It is important to note that `last_window`'s length must be enough to include the maximum lag used by the forecaster. For example, if the forecaster uses lags 1, 24 and 48, `last_window` must include the last 48 values of the series.
 
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>A <code>forecaster_id</code> has been included when initializing the forecaster, this may help to identify the target of the forecaster.</p>
 
+When using the `last_window` argument, it is crucial to ensure that the length of `last_window` is sufficient to include the maximum lag (or custom predictor) used by the forecaster. For instance, if the forecaster employs lags 1, 24, and 48, `last_window` must include the most recent 48 values of the series. Failing to include the required number of past observations may result in an error or incorrect predictions.
+
+</div>
 </div>
 </div>
 </div>
@@ -2767,7 +2779,7 @@ It is important to note that `last_window`'s length must be enough to include th
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[6]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[7]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
         
         
         <div class="CodeMirror cm-s-jupyter">
@@ -2782,73 +2794,12 @@ It is important to note that `last_window`'s length must be enough to include th
                 </div>
             </clipboard-copy>
         </div>
-            <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Forecaster identifier</span>
-<span class="c1"># ==============================================================================</span>
-<span class="n">forecaster</span><span class="o">.</span><span class="n">forecaster_id</span>
-</pre></div>
-<div id="cell-6" class="clipboard-copy-txt"># Forecaster identifier
-# ==============================================================================
-forecaster.forecaster_id</div>
-    
-        </div>
-    </div>
-
-</div>
-</div>
-
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-
-
-<div class="jp-OutputArea jp-Cell-outputArea">
-
-<div class="jp-OutputArea-child">
-
-    
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[6]:</div>
-
-
-
-
-<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain">
-<pre>&#39;forecasting_series_y&#39;</pre>
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
-<div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[7]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-        
-        
-        <div class="CodeMirror cm-s-jupyter">
-        <div class="zeroclipboard-container">
-            <clipboard-copy for="cell-7">
-            <div>
-                <span class="notice" hidden>Copied!</span>
-                <svg aria-hidden="true" width="20" height="20" viewBox="0 0 16 16" version="1.1"  data-view-component="true" class="clipboard-copy-icon">
-                    <path fill="currentColor" fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path>
-                    <path fill="currentColor" fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path>
-                </svg>
-                </div>
-            </clipboard-copy>
-        </div>
             <div class="highlight-ipynb hl-python"><pre><span></span><span class="o">%%</span><span class="n">html</span>
 <span class="o">&lt;</span><span class="n">style</span><span class="o">&gt;</span>
 <span class="o">.</span><span class="n">jupyter</span><span class="o">-</span><span class="n">wrapper</span> <span class="o">.</span><span class="n">jp</span><span class="o">-</span><span class="n">CodeCell</span> <span class="o">.</span><span class="n">jp</span><span class="o">-</span><span class="n">Cell</span><span class="o">-</span><span class="n">inputWrapper</span> <span class="o">.</span><span class="n">jp</span><span class="o">-</span><span class="n">InputPrompt</span> <span class="p">{</span><span class="n">display</span><span class="p">:</span> <span class="n">none</span><span class="p">;}</span>
 <span class="o">&lt;/</span><span class="n">style</span><span class="o">&gt;</span>
 </pre></div>
-<div id="cell-7" class="clipboard-copy-txt">%%html
+<div id="cell-6" class="clipboard-copy-txt">%%html
 <style>
 .jupyter-wrapper .jp-CodeCell .jp-Cell-inputWrapper .jp-InputPrompt {display: none;}
 </style></div>

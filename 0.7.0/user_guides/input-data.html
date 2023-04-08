@@ -331,7 +331,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../faq/profiling-skforecast.html" class="md-tabs__link">
+      <a href="../faq/faq.html" class="md-tabs__link">
         FAQ and Tips
       </a>
     </li>
@@ -517,7 +517,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../faq/profiling-skforecast.html" class="md-nav__link">
+      <a href="../faq/faq.html" class="md-nav__link">
         FAQ and Tips
       </a>
     </li>
@@ -715,8 +715,8 @@
   
   
     <li class="md-nav__item">
-      <a href="multi-time-series-forecasting.html" class="md-nav__link">
-        Multi-time series forecasting
+      <a href="independent-multi-time-series-forecasting.html" class="md-nav__link">
+        Independent multi-time series forecasting
       </a>
     </li>
   
@@ -729,8 +729,8 @@
   
   
     <li class="md-nav__item">
-      <a href="multivariate-forecasting.html" class="md-nav__link">
-        Multivariate series forecasting
+      <a href="dependent-multi-series-multivariate-forecasting.html" class="md-nav__link">
+        Dependent multivariate series forecasting
       </a>
     </li>
   
@@ -743,7 +743,7 @@
   
   
     <li class="md-nav__item">
-      <a href="autoregresive-forecaster-exogenous.html" class="md-nav__link">
+      <a href="exogenous-variables.html" class="md-nav__link">
         Exogenous variables
       </a>
     </li>
@@ -855,7 +855,21 @@
   
   
     <li class="md-nav__item">
-      <a href="forecasting-xgboost.html" class="md-nav__link">
+      <a href="categorical-features.html" class="md-nav__link">
+        Categorical features
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="forecasting-xgboost-lightgbm.html" class="md-nav__link">
         Forecasting with XGBoost and LightGBM
       </a>
     </li>
@@ -1258,6 +1272,20 @@
           FAQ and Tips
         </label>
         <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../faq/faq.html" class="md-nav__link">
+        Table of contents
+      </a>
+    </li>
+  
+
+            
           
             
               
@@ -2444,13 +2472,13 @@ Licensed under the Apache License, Version 2.0.
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>Since <strong>Version 0.4.0</strong> only pandas series and dataframes are allowed (although internally numpy arrays are used for performance). Based on the type of pandas index, the following rules are applied:</p>
+<p>Skforecast only allows pandas series and dataframes as input (although numpy arrays are used internally for better performance). The type of pandas index is used to determine how the data is processed:</p>
 <ul>
 <li><p>If the index is not of type DatetimeIndex, a RangeIndex is created.</p>
 </li>
-<li><p>If the index is of type DatetimeIndex and but has no frequency, a RangeIndex is created.</p>
+<li><p>If the index is of type DatetimeIndex but has no frequency, a RangeIndex is created.</p>
 </li>
-<li><p>If the index is of type DatetimeIndex and has a frequency, nothing is changed.</p>
+<li><p>If the index is of type DatetimeIndex and has a frequency, it remains unchanged.</p>
 </li>
 </ul>
 
@@ -2471,7 +2499,7 @@ Licensed under the Apache License, Version 2.0.
     <b> &nbsp Note</b>
 </p>
 
-There is nothing wrong with using data that does not have an associated date/time index. However, if a pandas series with an associated frequency is used, results will have a more useful index.
+Although it is possible to use data without an associated date/time index, when using a pandas series with an associated frequency prediction results will have a more useful index.
 
 </div>
 </div>
@@ -2812,10 +2840,10 @@ Freq: MS, Name: pred, dtype: float64</pre>
             </clipboard-copy>
         </div>
             <div class="highlight-ipynb hl-python"><pre><span></span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span class="n">data</span>
 </pre></div>
 <div id="cell-4" class="clipboard-copy-txt">data = data.reset_index(drop=True)
-data.head()</div>
+data</div>
     
         </div>
     </div>
@@ -2880,8 +2908,33 @@ data.head()</div>
       <th>4</th>
       <td>0.502369</td>
     </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>199</th>
+      <td>0.761822</td>
+    </tr>
+    <tr>
+      <th>200</th>
+      <td>0.649435</td>
+    </tr>
+    <tr>
+      <th>201</th>
+      <td>0.827887</td>
+    </tr>
+    <tr>
+      <th>202</th>
+      <td>0.816255</td>
+    </tr>
+    <tr>
+      <th>203</th>
+      <td>0.762137</td>
+    </tr>
   </tbody>
 </table>
+<p>204 rows × 1 columns</p>
 </div>
 </div>
 

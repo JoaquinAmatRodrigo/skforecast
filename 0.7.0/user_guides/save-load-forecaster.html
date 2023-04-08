@@ -88,7 +88,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#save-and-load-forecaster" class="md-skip">
+        <a href="#save-and-load-forecasters" class="md-skip">
           Skip to content
         </a>
       
@@ -331,7 +331,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../faq/profiling-skforecast.html" class="md-tabs__link">
+      <a href="../faq/faq.html" class="md-tabs__link">
         FAQ and Tips
       </a>
     </li>
@@ -517,7 +517,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../faq/profiling-skforecast.html" class="md-nav__link">
+      <a href="../faq/faq.html" class="md-nav__link">
         FAQ and Tips
       </a>
     </li>
@@ -653,8 +653,8 @@
   
   
     <li class="md-nav__item">
-      <a href="multi-time-series-forecasting.html" class="md-nav__link">
-        Multi-time series forecasting
+      <a href="independent-multi-time-series-forecasting.html" class="md-nav__link">
+        Independent multi-time series forecasting
       </a>
     </li>
   
@@ -667,8 +667,8 @@
   
   
     <li class="md-nav__item">
-      <a href="multivariate-forecasting.html" class="md-nav__link">
-        Multivariate series forecasting
+      <a href="dependent-multi-series-multivariate-forecasting.html" class="md-nav__link">
+        Dependent multivariate series forecasting
       </a>
     </li>
   
@@ -681,7 +681,7 @@
   
   
     <li class="md-nav__item">
-      <a href="autoregresive-forecaster-exogenous.html" class="md-nav__link">
+      <a href="exogenous-variables.html" class="md-nav__link">
         Exogenous variables
       </a>
     </li>
@@ -793,7 +793,21 @@
   
   
     <li class="md-nav__item">
-      <a href="forecasting-xgboost.html" class="md-nav__link">
+      <a href="categorical-features.html" class="md-nav__link">
+        Categorical features
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="forecasting-xgboost-lightgbm.html" class="md-nav__link">
         Forecasting with XGBoost and LightGBM
       </a>
     </li>
@@ -869,8 +883,8 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#save-and-load-model" class="md-nav__link">
-    Save and load model
+  <a href="#save-and-load-forecaster-model" class="md-nav__link">
+    Save and load forecaster model
   </a>
   
 </li>
@@ -1258,6 +1272,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../faq/faq.html" class="md-nav__link">
+        Table of contents
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../faq/profiling-skforecast.html" class="md-nav__link">
         Profiling skforecast
       </a>
@@ -1356,8 +1384,8 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#save-and-load-model" class="md-nav__link">
-    Save and load model
+  <a href="#save-and-load-forecaster-model" class="md-nav__link">
+    Save and load forecaster model
   </a>
   
 </li>
@@ -2419,9 +2447,29 @@ Licensed under the Apache License, Version 2.0.
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h1 id="save-and-load-forecaster">Save and load forecaster<a class="anchor-link" href="#save-and-load-forecaster">&#182;</a></h1><p>Skforecast models can be stored and loaded from disk using pickle or joblib library. To simplify the process, two functions are available: <code>save_forecaster</code> and <code>load_forecaster</code>, a simple example is shown below.</p>
+<h1 id="save-and-load-forecasters">Save and load forecasters<a class="anchor-link" href="#save-and-load-forecasters">&#182;</a></h1><p>Skforecast models can be easily saved and loaded from disk using the pickle or joblib library. To streamline this process, two convenient functions, <code>save_forecaster</code> and <code>load_forecaster</code>, are available. See below for a simple example.</p>
 <p>A <code>forecaster_id</code> has been included when initializing the forecaster, this may help to identify the target of the forecaster.</p>
 
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<script src="https://kit.fontawesome.com/d20edc211b.js" crossorigin="anonymous"></script><div class="admonition note" name="html-admonition" style="background: rgba(0,184,212,.1); padding-top: 0px; padding-bottom: 6px; border-radius: 8px; border-left: 8px solid #00b8d4;">
+
+<p class="title">
+    <i class="fa-circle-exclamation fa" style="font-size: 18px; color:#00b8d4;"></i>
+    <b> &nbsp Note</b>
+</p>
+
+Since version 0.7.0, when initializing the forecaster, a `forecaster_id` can be included to help identify the target of the forecaster.
+
+</div>
 </div>
 </div>
 </div>
@@ -2544,7 +2592,7 @@ data = data.asfreq('MS')</div>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h2 id="save-and-load-model">Save and load model<a class="anchor-link" href="#save-and-load-model">&#182;</a></h2>
+<h2 id="save-and-load-forecaster-model">Save and load forecaster model<a class="anchor-link" href="#save-and-load-forecaster-model">&#182;</a></h2>
 </div>
 </div>
 </div>
@@ -2646,10 +2694,10 @@ Freq: MS, Name: pred, dtype: float64</pre>
             </clipboard-copy>
         </div>
             <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Save model</span>
-<span class="n">save_forecaster</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">file_name</span><span class="o">=</span><span class="s1">&#39;forecaster.py&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">save_forecaster</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">file_name</span><span class="o">=</span><span class="s1">&#39;forecaster_001.py&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
 <div id="cell-4" class="clipboard-copy-txt"># Save model
-save_forecaster(forecaster, file_name='forecaster.py', verbose=False)</div>
+save_forecaster(forecaster, file_name='forecaster_001.py', verbose=False)</div>
     
         </div>
     </div>
@@ -2680,10 +2728,10 @@ save_forecaster(forecaster, file_name='forecaster.py', verbose=False)</div>
             </clipboard-copy>
         </div>
             <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Load model</span>
-<span class="n">forecaster_loaded</span> <span class="o">=</span> <span class="n">load_forecaster</span><span class="p">(</span><span class="s1">&#39;forecaster.py&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">forecaster_loaded</span> <span class="o">=</span> <span class="n">load_forecaster</span><span class="p">(</span><span class="s1">&#39;forecaster_001.py&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 <div id="cell-5" class="clipboard-copy-txt"># Load model
-forecaster_loaded = load_forecaster('forecaster.py', verbose=True)</div>
+forecaster_loaded = load_forecaster('forecaster_001.py', verbose=True)</div>
     
         </div>
     </div>
@@ -2721,10 +2769,10 @@ Training range: [Timestamp(&#39;1991-07-01 00:00:00&#39;), Timestamp(&#39;2008-0
 Training index type: DatetimeIndex 
 Training index frequency: MS 
 Regressor parameters: {&#39;bootstrap&#39;: True, &#39;ccp_alpha&#39;: 0.0, &#39;criterion&#39;: &#39;squared_error&#39;, &#39;max_depth&#39;: None, &#39;max_features&#39;: 1.0, &#39;max_leaf_nodes&#39;: None, &#39;max_samples&#39;: None, &#39;min_impurity_decrease&#39;: 0.0, &#39;min_samples_leaf&#39;: 1, &#39;min_samples_split&#39;: 2, &#39;min_weight_fraction_leaf&#39;: 0.0, &#39;n_estimators&#39;: 100, &#39;n_jobs&#39;: None, &#39;oob_score&#39;: False, &#39;random_state&#39;: 123, &#39;verbose&#39;: 0, &#39;warm_start&#39;: False} 
-Creation date: 2023-03-14 08:11:07 
-Last fit date: 2023-03-14 08:11:07 
+Creation date: 2023-04-08 21:10:13 
+Last fit date: 2023-04-08 21:10:13 
 Skforecast version: 0.7.0 
-Python version: 3.9.13 
+Python version: 3.10.0 
 Forecaster id: forecaster_001 
 
 </pre>

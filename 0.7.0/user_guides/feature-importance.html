@@ -331,7 +331,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../faq/profiling-skforecast.html" class="md-tabs__link">
+      <a href="../faq/faq.html" class="md-tabs__link">
         FAQ and Tips
       </a>
     </li>
@@ -517,7 +517,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../faq/profiling-skforecast.html" class="md-nav__link">
+      <a href="../faq/faq.html" class="md-nav__link">
         FAQ and Tips
       </a>
     </li>
@@ -653,8 +653,8 @@
   
   
     <li class="md-nav__item">
-      <a href="multi-time-series-forecasting.html" class="md-nav__link">
-        Multi-time series forecasting
+      <a href="independent-multi-time-series-forecasting.html" class="md-nav__link">
+        Independent multi-time series forecasting
       </a>
     </li>
   
@@ -667,8 +667,8 @@
   
   
     <li class="md-nav__item">
-      <a href="multivariate-forecasting.html" class="md-nav__link">
-        Multivariate series forecasting
+      <a href="dependent-multi-series-multivariate-forecasting.html" class="md-nav__link">
+        Dependent multivariate series forecasting
       </a>
     </li>
   
@@ -681,7 +681,7 @@
   
   
     <li class="md-nav__item">
-      <a href="autoregresive-forecaster-exogenous.html" class="md-nav__link">
+      <a href="exogenous-variables.html" class="md-nav__link">
         Exogenous variables
       </a>
     </li>
@@ -848,7 +848,21 @@
   
   
     <li class="md-nav__item">
-      <a href="forecasting-xgboost.html" class="md-nav__link">
+      <a href="categorical-features.html" class="md-nav__link">
+        Categorical features
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="forecasting-xgboost-lightgbm.html" class="md-nav__link">
         Forecasting with XGBoost and LightGBM
       </a>
     </li>
@@ -1251,6 +1265,20 @@
           FAQ and Tips
         </label>
         <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../faq/faq.html" class="md-nav__link">
+        Table of contents
+      </a>
+    </li>
+  
+
+            
           
             
               
@@ -2419,7 +2447,11 @@ Licensed under the Apache License, Version 2.0.
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h1 id="feature-importance">Feature importance<a class="anchor-link" href="#feature-importance">&#182;</a></h1><p>The importance of the predictors included in a forecaster can be obtained using the method <code>get_feature_importance</code>. This method accesses the <code>coef_</code> and <code>feature_importances_</code> attributes of the internal regressor.</p>
+<h1 id="feature-importance">Feature importance<a class="anchor-link" href="#feature-importance">&#182;</a></h1><p>Feature importance is a technique used in machine learning to determine the relevance or importance of each feature (or variable) in a model's prediction. In other words, it measures how much each feature contributes to the model's output.</p>
+<p>Feature importance can be used for several purposes, such as identifying the most relevant features for a specific prediction, understanding the behavior of a model, and selecting the best set of features for a given task. It can also help to identify potential biases or errors in the data used to train the model. It is important to note that feature importance is not a definitive measure of causality. Just because a feature is identified as important does not necessarily mean that it is causing the outcome. Other factors, such as confounding variables, may also be at play.</p>
+<p>The method used to calculate feature importance can vary depending on the type of machine learning model being used. Different machine learning models may have different assumptions and characteristics that affect the calculation of feature importance. For example, decision tree-based models like random forest and gradient boosting typically use mean decrease impurity or permutation feature importance methods to calculate feature importance.</p>
+<p>Linear regression models typically use coefficients or standardized coefficients to determine feature importance. The magnitude of the coefficient reflects the strength and direction of the relationship between the feature and the target variable.</p>
+<p>The importance of the predictors included in a forecaster can be obtained using the method <code>get_feature_importance</code>. This method accesses the <code>coef_</code> and <code>feature_importances_</code> attributes of the internal regressor.</p>
 
 </div>
 </div>
@@ -2438,7 +2470,27 @@ Licensed under the Apache License, Version 2.0.
     <b> &nbsp Warning</b>
 </p>
 
-This method only returns values if the regressor used inside the forecaster has the attribute `coef_` or `feature_importances_`.
+The `get_feature_importance` method will only provide values if the forecaster's regressor has either the `coef_` or `feature_importances_` attribute, which are standard in scikit-learn. If your regressor does not follow this naming convention, please consider opening an [issue on GitHub](https://github.com/JoaquinAmatRodrigo/skforecast/issues) and we will strive to include it in future updates.
+
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<script src="https://kit.fontawesome.com/d20edc211b.js" crossorigin="anonymous"></script><div class="admonition note" name="html-admonition" style="background: rgba(0,184,212,.1); padding-top: 0px; padding-bottom: 6px; border-radius: 8px; border-left: 8px solid #00b8d4;">
+
+<p class="title">
+    <i class="fa-solid fa-circle-info" style="font-size: 18px; color:#00b8d4;"></i>
+    <b> &nbsp See also</b>
+</p>
+
+<a href="https://joaquinamatrodrigo.github.io/skforecast/latest/user_guides/shap-values-skforecast.html">SHAP values in skforecast models</a>
 
 </div>
 </div>
@@ -2461,7 +2513,7 @@ This method only returns values if the regressor used inside the forecaster has 
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[1]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[7]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
         
         
         <div class="CodeMirror cm-s-jupyter">
@@ -2518,7 +2570,7 @@ from skforecast.ForecasterAutoregDirect import ForecasterAutoregDirect</div>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[2]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[8]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
         
         
         <div class="CodeMirror cm-s-jupyter">
@@ -2579,7 +2631,7 @@ data = data.asfreq('MS')</div>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[3]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[9]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
         
         
         <div class="CodeMirror cm-s-jupyter">
@@ -2594,7 +2646,7 @@ data = data.asfreq('MS')</div>
                 </div>
             </clipboard-copy>
         </div>
-            <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Create and fit forecaster</span>
+            <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Create and fit forecaster using a RandomForest regressor</span>
 <span class="c1"># ==============================================================================</span>
 <span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
                  <span class="n">regressor</span> <span class="o">=</span> <span class="n">RandomForestRegressor</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">),</span>
@@ -2607,7 +2659,7 @@ data = data.asfreq('MS')</div>
 <span class="c1"># ==============================================================================</span>
 <span class="n">forecaster</span><span class="o">.</span><span class="n">get_feature_importance</span><span class="p">()</span>
 </pre></div>
-<div id="cell-3" class="clipboard-copy-txt"># Create and fit forecaster
+<div id="cell-3" class="clipboard-copy-txt"># Create and fit forecaster using a RandomForest regressor
 # ==============================================================================
 forecaster = ForecasterAutoreg(
                  regressor = RandomForestRegressor(random_state=123),
@@ -2636,7 +2688,7 @@ forecaster.get_feature_importance()</div>
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[3]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[9]:</div>
 
 
 
@@ -2717,7 +2769,7 @@ forecaster.get_feature_importance()</div>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[4]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[10]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
         
         
         <div class="CodeMirror cm-s-jupyter">
@@ -2732,7 +2784,7 @@ forecaster.get_feature_importance()</div>
                 </div>
             </clipboard-copy>
         </div>
-            <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Create and fit forecaster</span>
+            <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Create and fit forecaster using a linear regressor</span>
 <span class="c1"># ==============================================================================</span>
 <span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
                  <span class="n">regressor</span> <span class="o">=</span> <span class="n">Ridge</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">),</span>
@@ -2743,7 +2795,7 @@ forecaster.get_feature_importance()</div>
 
 <span class="n">forecaster</span><span class="o">.</span><span class="n">get_feature_importance</span><span class="p">()</span>
 </pre></div>
-<div id="cell-4" class="clipboard-copy-txt"># Create and fit forecaster
+<div id="cell-4" class="clipboard-copy-txt"># Create and fit forecaster using a linear regressor
 # ==============================================================================
 forecaster = ForecasterAutoreg(
                  regressor = Ridge(random_state=123),
@@ -2770,7 +2822,7 @@ forecaster.get_feature_importance()</div>
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[4]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[10]:</div>
 
 
 
@@ -2852,7 +2904,7 @@ forecaster.get_feature_importance()</div>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>Since <code>ForecasterAutoregDirect</code> fits one model per step, it is necessary to specify from which model retrieves its feature importance.</p>
+<p>To properly retrieve feature importance in the <code>ForecasterAutoregDirect</code> model, it is essential to specify the specific model from which to extract the feature importance. This is because <code>ForecasterAutoregDirect</code> fits one model per step, and each model may have different important features. Therefore, the user needs to explicitly indicate which model's feature importance they want to extract to ensure that the correct features are used.</p>
 
 </div>
 </div>
@@ -2863,7 +2915,7 @@ forecaster.get_feature_importance()</div>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[5]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[11]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
         
         
         <div class="CodeMirror cm-s-jupyter">
@@ -2881,28 +2933,28 @@ forecaster.get_feature_importance()</div>
             <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Create and fit forecaster</span>
 <span class="c1"># ==============================================================================</span>
 <span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoregDirect</span><span class="p">(</span>
-                 <span class="n">regressor</span> <span class="o">=</span> <span class="n">RandomForestRegressor</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">),</span>
+                 <span class="n">regressor</span> <span class="o">=</span> <span class="n">Ridge</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">),</span>
                  <span class="n">steps</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
                  <span class="n">lags</span> <span class="o">=</span> <span class="mi">5</span>
              <span class="p">)</span>
 
 <span class="n">forecaster</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">],</span> <span class="n">exog</span><span class="o">=</span><span class="n">data</span><span class="p">[[</span><span class="s1">&#39;exog_1&#39;</span><span class="p">,</span> <span class="s1">&#39;exog_2&#39;</span><span class="p">]])</span>
 
-<span class="c1"># Predictors importance</span>
+<span class="c1"># Predictors importance of model for step 1</span>
 <span class="c1"># ==============================================================================</span>
 <span class="n">forecaster</span><span class="o">.</span><span class="n">get_feature_importance</span><span class="p">(</span><span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>
 <div id="cell-5" class="clipboard-copy-txt"># Create and fit forecaster
 # ==============================================================================
 forecaster = ForecasterAutoregDirect(
-                 regressor = RandomForestRegressor(random_state=123),
+                 regressor = Ridge(random_state=123),
                  steps = 10,
                  lags = 5
              )
 
 forecaster.fit(y=data['y'], exog=data[['exog_1', 'exog_2']])
 
-# Predictors importance
+# Predictors importance of model for step 1
 # ==============================================================================
 forecaster.get_feature_importance(step=1)</div>
     
@@ -2922,7 +2974,7 @@ forecaster.get_feature_importance(step=1)</div>
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[5]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[11]:</div>
 
 
 
@@ -2953,37 +3005,37 @@ forecaster.get_feature_importance(step=1)</div>
     <tr>
       <th>0</th>
       <td>lag_1</td>
-      <td>0.530194</td>
+      <td>0.326827</td>
     </tr>
     <tr>
       <th>1</th>
       <td>lag_2</td>
-      <td>0.100517</td>
+      <td>-0.055386</td>
     </tr>
     <tr>
       <th>2</th>
       <td>lag_3</td>
-      <td>0.026218</td>
+      <td>-0.155098</td>
     </tr>
     <tr>
       <th>3</th>
       <td>lag_4</td>
-      <td>0.077921</td>
+      <td>-0.220415</td>
     </tr>
     <tr>
       <th>4</th>
       <td>lag_5</td>
-      <td>0.050994</td>
+      <td>-0.138252</td>
     </tr>
     <tr>
       <th>5</th>
       <td>exog_1</td>
-      <td>0.056439</td>
+      <td>0.386103</td>
     </tr>
     <tr>
       <th>6</th>
       <td>exog_2</td>
-      <td>0.157717</td>
+      <td>0.635972</td>
     </tr>
   </tbody>
 </table>
@@ -3003,7 +3055,7 @@ forecaster.get_feature_importance(step=1)</div>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[6]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[12]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
         
         
         <div class="CodeMirror cm-s-jupyter">
@@ -3109,13 +3161,13 @@ forecaster.get_feature_importance(step=1)</div>
       
       
         
-        <a href="forecasting-xgboost.html" class="md-footer__link md-footer__link--next" aria-label="Next: Forecasting with XGBoost and LightGBM" rel="next">
+        <a href="categorical-features.html" class="md-footer__link md-footer__link--next" aria-label="Next: Categorical features" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Forecasting with XGBoost and LightGBM
+              Categorical features
             </div>
           </div>
           <div class="md-footer__button md-icon">
