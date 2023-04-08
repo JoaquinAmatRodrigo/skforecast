@@ -14,7 +14,7 @@ nav:
     - User Guides: user_guides/input-data.ipynb
     - Examples and tutorials: examples/examples.md
     - API Reference: api/ForecasterAutoreg.md
-    - FAQ and Tips: faq/profiling-skforecast.ipynb
+    - FAQ and Tips: faq/faq.md
     - Releases: releases/releases.md
 
   - Introduction to forecasting: introduction-forecasting/introduction-forecasting.md
@@ -65,6 +65,7 @@ nav:
       - utils: api/utils.md
 
   - FAQ and Tips:
+      - Table of contents: faq/faq.md
       - Profiling skforecast: faq/profiling-skforecast.ipynb
       - Avoid negative predictions when forecasting: faq/non-negative-predictions.ipynb
       - Forecasting time series with missing values: faq/forecasting-time-series-with-missing-values.ipynb
