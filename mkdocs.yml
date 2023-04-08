@@ -14,7 +14,7 @@ nav:
     - User Guides: user_guides/input-data.ipynb
     - Examples and tutorials: examples/examples.md
     - API Reference: api/ForecasterAutoreg.md
-    - FAQ and Tips: faq/profiling-skforecast.ipynb
+    - FAQ and Tips: faq/faq.md
     - Releases: releases/releases.md
 
   - Introduction to forecasting: introduction-forecasting/introduction-forecasting.md
@@ -35,7 +35,8 @@ nav:
       - Scikit-learn Transformers and Pipelines: user_guides/sklearn-transformers-and-pipeline.ipynb
       - Probabilistic forecasting: user_guides/probabilistic-forecasting.ipynb
       - Feature importance: user_guides/feature-importance.ipynb
-      - Forecasting with XGBoost and LightGBM: user_guides/forecasting-xgboost.ipynb
+      - Categorical features: user_guides/categorical-features.ipynb
+      - Forecasting with XGBoost and LightGBM: user_guides/forecasting-xgboost-lightgbm.ipynb
       - Forecasting SARIMAX and ARIMA models: user_guides/forecasting-sarimax-arima.ipynb
       - Save and load forecaster: user_guides/save-load-forecaster.ipynb
       - Forecaster in production: user_guides/forecaster-in-production.ipynb
@@ -64,6 +65,7 @@ nav:
       - utils: api/utils.md
 
   - FAQ and Tips:
+      - Table of contents: faq/faq.md
       - Profiling skforecast: faq/profiling-skforecast.ipynb
       - Avoid negative predictions when forecasting: faq/non-negative-predictions.ipynb
       - Forecasting time series with missing values: faq/forecasting-time-series-with-missing-values.ipynb
