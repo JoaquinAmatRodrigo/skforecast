@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.7.1] - [2023-04-xx]
+
+**Added**
+
++ Added exceptions module with custom warnings.
+
+**Changed**
+
+
+**Fixed**
+
+
 ## [0.7.0] - [2023-03-21]
 
 **Added**
