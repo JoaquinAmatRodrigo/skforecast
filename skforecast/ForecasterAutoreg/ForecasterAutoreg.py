@@ -364,6 +364,8 @@ class ForecasterAutoreg(ForecasterBase):
                             fit               = True,
                             inverse_transform = False
                        )
+                
+            check_exog(exog=exog, allow_nan=False)
             _, exog_index = preprocess_exog(exog=exog, return_values=False)
             
             if not (exog_index[:len(y_index)] == y_index).all():
@@ -548,27 +550,14 @@ class ForecasterAutoreg(ForecasterBase):
         """
 
         predictions = np.full(shape=steps, fill_value=np.nan)
-        exog_has_category = True if 'category' in self.exog_dtypes.values() else False
 
         for i in range(steps):
             X = last_window[-self.lags].reshape(1, -1)
             if exog is not None:
                 X = np.column_stack((X, exog[i, ].reshape(1, -1)))
-                # When concatenating exog values to lag values, numpy will cast all them
-                # to float. Some models may rise error because types are different than when
-                # the model were trained. To avoid this, a pandas DataFrame is created and
-                # the dtypes matched. Unfortunately this implies an extra computation.
-                # if exog_has_category:
-
-                #     !!! al venir de un numpy, los nombres de las columnas no sirven para el mapeo, tiene que ser por posición!!
-                #     X = cast_exog_dtypes(pd.DataFrame(data=X), exog_dtypes=self.exog_dtypes)
-
             with warnings.catch_warnings():
                 # Suppress scikit-learn warning: "X does not have valid feature names,
                 # but NoOpTransformer was fitted with feature names".
-
-                # TODO: if self.exog_has_category then X to pandas and cast types.
-
                 warnings.simplefilter("ignore")
                 prediction = self.regressor.predict(X)
                 predictions[i] = prediction.ravel()[0]
@@ -652,7 +641,7 @@ class ForecasterAutoreg(ForecasterBase):
                            inverse_transform = False
                        )
             
-            exog_values = exog.iloc[:steps, ].to_numpy() # TODO: expandir esto a el resto de forecasters
+            exog_values = exog.iloc[:steps, ].to_numpy()
 
         else:
             exog_values = None
