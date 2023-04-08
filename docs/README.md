@@ -139,6 +139,35 @@ If you found skforecast useful, you can support us with a donation. Your contrib
 [![paypal](https://www.paypalobjects.com/en_US/ES/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate/?hosted_button_id=D2JZSWRLTZDL6)
 
 
+# How to Contribute to Skforecast
+
+For more information on how to contribute to skforecast, see our [Contribution Guide](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/CONTRIBUTING.md).
+
+
+# Citation
+
+If you use this software, please cite it using the following metadata.
+
+**APA**:
+```
+Amat Rodrigo, J., & Escobar Ortiz, J. skforecast (Version 0.7.0) [Computer software]
+```
+
+**BibTeX**:
+```
+@software{skforecast,
+author = {Amat Rodrigo, Joaquin and Escobar Ortiz, Javier},
+license = {MIT},
+month = {3},
+title = {{skforecast}},
+version = {0.7.0},
+year = {2023}
+}
+```
+
+View the [citation file](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/CITATION.cff).
+
+
 ## License
 
 **joaquinAmatRodrigo/skforecast** is licensed under the **MIT License**, a short and simple permissive license with conditions only requiring the preservation of copyright and license notices. Licensed works, modifications and larger works may be distributed under different terms and without source code.
