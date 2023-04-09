@@ -201,14 +201,15 @@ def check_exog(
 ) -> None:
     """
     Raise Exception if `exog` is not pandas Series or pandas DataFrame.
-    If `allow_nan = True`, rise a Warning if it has missing values.
+    If `allow_nan = True`, issue a warning if `exog` contains NaN values.
     
     Parameters
     ----------        
     exog :  Any
         Exogenous variable/s included as predictor/s.
     allow_nan: bool, default True
-        Rise a Warning if it has missing values.
+        If True, allows the presence of NaN values in `exog`. If False (default),
+        issue a warning if `exog` contains NaN values.
 
     Returns
     ----------
@@ -302,7 +303,7 @@ def check_dtypes_exog(
     Raise Exception if `exog` has categorical columns with non integer values.
     This is needed when using machine learning regressors that allow categorical
     features.
-    Rise a Warning if values are not `init`, `float`, `bool` or `category`.
+    Rise a Warning if values are not `init`, `float`, or `category`.
     
     Parameters
     ----------        
@@ -319,9 +320,9 @@ def check_dtypes_exog(
         raise TypeError('`exog` must be `pd.Series` or `pd.DataFrame`.')
 
     if isinstance(exog, pd.DataFrame):
-        if not all([dtype in ['float', 'int', 'category', 'bool'] for dtype in exog.dtypes]):
+        if not all([dtype in ['float', 'int', 'category'] for dtype in exog.dtypes]):
             warnings.warn(
-                ('`exog` must contain only int, float, bool or category dtypes. Most '
+                ('`exog` must contain only int, float or category dtypes. Most '
                 'machine learning models do not allow other types of values values . '
                 'Fitting the forecaster may fail.'), ValueTypeWarning
             )
@@ -334,9 +335,9 @@ def check_dtypes_exog(
                      "latest/user_guides/categorical-features.html")
                 )
     else:
-        if not exog.dtypes in ['float', 'int', 'category', 'bool']:
+        if not exog.dtypes in ['float', 'int', 'category']:
             warnings.warn(
-                ('`exog` must contain only int, float, bool or category dtypes. Most '
+                ('`exog` must contain only int, float or category dtypes. Most '
                 'machine learning models do not allow other types of values values . '
                 'Fitting the forecaster may fail.'), ValueTypeWarning
             )
@@ -739,7 +740,7 @@ def preprocess_y(
 
     return_values : bool, default=True
         If `True` return the values of `y` as numpy ndarray. This option is intended
-        to be able to avoid copying data when it is not necessary.
+        to avoid copying data when it is not necessary.
 
     Returns 
     -------
@@ -863,7 +864,7 @@ def preprocess_exog(
 
     return_values : bool, default=True
         If `True` return the values of `exog` as numpy ndarray. This option is intended
-        to be able to avoid copying data when it is not necessary.
+        to avoid copying data when it is not necessary.
 
     Returns 
     -------
