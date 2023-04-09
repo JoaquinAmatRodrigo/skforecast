@@ -5,6 +5,7 @@ import pytest
 import numpy as np
 import pandas as pd
 from skforecast.utils import check_exog
+from skforecast.exceptions import MissingValuesExogWarning
 
 
 @pytest.mark.parametrize("exog", 
@@ -26,10 +27,13 @@ def test_check_exog_exception_when_exog_not_series_or_dataframe(exog):
                           pd.DataFrame([[1,2], [3, None], [5, 6]])], 
                          ids = lambda exog : f'exog: {exog}'
                         )
-def test_check_exog_exception_when_exog_has_missing_values(exog):
+def test_check_exog_warning_when_exog_has_missing_values_and_allow_nan_False(exog):
     """
-    Check exception is raised when y has missing values
+    Check warning is issued when y has missing values
     """
-    err_msg = re.escape('`exog` has missing values.')
-    with pytest.raises(ValueError, match = err_msg):
-        check_exog(exog)
+    warn_msg = re.escape(
+                ("`exog` has missing values. Most of machine learning models do "
+                "not allow missing values. Fitting the forecaster may fail.")
+               )
+    with pytest.warns(MissingValuesExogWarning, match = warn_msg):
+        check_exog(exog, allow_nan=False)

@@ -51,7 +51,7 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_series():
     forecaster = ForecasterAutoreg(LinearRegression(), lags=5)
     results = forecaster.create_train_X_y(
                 y = pd.Series(np.arange(10)),
-                exog =  pd.Series(np.arange(100, 110), name='exog')
+                exog =  pd.Series(np.arange(100, 110), name='exog', dtype=float)
               )
     expected = (pd.DataFrame(
                     data = np.array([[4., 3., 2., 1., 0., 105.],
@@ -87,8 +87,8 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_dataframe():
     results = forecaster.create_train_X_y(
                 y = pd.Series(np.arange(10)),
                 exog = pd.DataFrame({
-                            'exog_1' : np.arange(100, 110),
-                            'exog_2' : np.arange(1000, 1010)
+                            'exog_1' : np.arange(100, 110, dtype=float),
+                            'exog_2' : np.arange(1000, 1010, dtype=float)
                         })
               )
         

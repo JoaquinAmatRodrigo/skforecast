@@ -30,12 +30,12 @@ def test_set_out_sample_residuals_warning_when_forecaster_has_transformer_and_tr
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3, transformer_y=StandardScaler())
     residuals = np.arange(10)
 
-    err_msg = re.escape(
+    warn_msg = re.escape(
                 (f"Argument `transform` is set to `False` but forecaster was trained "
                  f"using a transformer {forecaster.transformer_y}. Ensure that the new residuals "
                  f"are already transformed or set `transform=True`.")
             )
-    with pytest.warns(UserWarning, match = err_msg):
+    with pytest.warns(UserWarning, match = warn_msg):
         forecaster.set_out_sample_residuals(residuals=residuals, transform=False)
 
 
@@ -47,12 +47,12 @@ def test_set_out_sample_residuals_warning_when_forecaster_has_transformer_and_tr
     forecaster.fit(y=pd.Series(np.arange(10)))
     residuals = np.arange(10)
 
-    err_msg = re.escape(
+    warn_msg = re.escape(
                 (f"Residuals will be transformed using the same transformer used "
                  f"when training the forecaster ({forecaster.transformer_y}). Ensure that the "
                  f"new residuals are on the same scale as the original time series.")
             )
-    with pytest.warns(UserWarning, match = err_msg):
+    with pytest.warns(UserWarning, match = warn_msg):
         forecaster.set_out_sample_residuals(residuals=residuals, transform=True)
 
 

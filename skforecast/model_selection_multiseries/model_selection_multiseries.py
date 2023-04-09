@@ -16,6 +16,7 @@ from tqdm import tqdm
 from sklearn.model_selection import ParameterGrid
 from sklearn.model_selection import ParameterSampler
 from sklearn.exceptions import NotFittedError
+from ..exceptions import LongTrainingWarning
 
 from ..model_selection.model_selection import _get_metric
 from ..model_selection.model_selection import _backtesting_forecaster_verbose
@@ -157,13 +158,13 @@ def _backtesting_forecaster_multiseries_refit(
         warnings.warn(
             (f"The forecaster will be fit {folds} times. This can take substantial amounts of time. "
              f"If not feasible, try with `refit = False`. \n"),
-            RuntimeWarning
+            LongTrainingWarning
         )
     elif type(forecaster).__name__ == 'ForecasterAutoregMultiVariate' and folds*forecaster.steps > 50:
         warnings.warn(
             (f"The forecaster will be fit {folds*forecaster.steps} times ({folds} folds * {forecaster.steps} regressors). "
              f"This can take substantial amounts of time. If not feasible, try with `refit = False`. \n"),
-             RuntimeWarning
+             LongTrainingWarning
         )
     
     if verbose:
