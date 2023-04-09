@@ -9,6 +9,7 @@ from skforecast.utils import check_predict_input
 from skforecast.utils import check_exog
 from skforecast.utils import preprocess_exog
 from skforecast.utils import preprocess_last_window
+from skforecast.exceptions import MissingValuesExogWarning
 
 
 def test_check_predict_input_NotFittedError_when_fitted_is_False():
@@ -572,11 +573,14 @@ def test_check_predict_input_TypeError_when_exog_is_not_pandas_series_or_datafra
         )
 
 
-def test_check_predict_input_ValueError_when_exog_has_missing_values():
+def test_check_predict_input_warning_when_exog_has_missing_values():
     """
     """
-    err_msg = re.escape('`exog` has missing values.')
-    with pytest.raises(ValueError, match = err_msg):
+    warn_msg = re.escape(
+                ("`exog` has missing values. Most of machine learning models do "
+                 "not allow missing values. `predict` method may fail.")
+               )
+    with pytest.warns(MissingValuesExogWarning, match = warn_msg):
         check_predict_input(
             forecaster_name  = 'ForecasterAutoreg',
             steps            = 3,
@@ -587,7 +591,7 @@ def test_check_predict_input_ValueError_when_exog_has_missing_values():
             window_size      = 2,
             last_window      = pd.Series(np.arange(10), index=pd.date_range(start='1/1/2018', periods=10, freq='M')),
             last_window_exog = None,
-            exog             = pd.Series([1, 2, 3, np.nan]),
+            exog             = pd.Series([1, 2, 3, np.nan], index=pd.date_range(start='11/1/2018', periods=4, freq='M')),
             exog_type        = None,
             exog_col_names   = None,
             interval         = None,
@@ -666,7 +670,7 @@ def test_check_predict_input_TypeError_when_exog_index_is_not_of_index_type():
     exog = pd.Series(np.arange(10))
     index_type = pd.DatetimeIndex
     check_exog(exog = exog)
-    _, exog_index, _ = preprocess_exog(exog=exog.iloc[:0, ])
+    _, exog_index = preprocess_exog(exog=exog.iloc[:0, ])
 
     err_msg = re.escape(
                 (f'Expected index of type {index_type} for `exog`. '
@@ -700,7 +704,7 @@ def test_check_predict_input_TypeError_when_exog_index_frequency_is_not_index_fr
     exog = pd.Series(np.arange(10), index=pd.date_range(start='1/1/2018', periods=10))
     index_freq = 'M'
     check_exog(exog = exog)
-    _, exog_index, _ = preprocess_exog(exog=exog.iloc[:0, ])
+    _, exog_index = preprocess_exog(exog=exog.iloc[:0, ])
 
     err_msg = re.escape(
                 (f'Expected frequency of type {index_freq} for `exog`. '
@@ -740,10 +744,10 @@ def test_check_predict_input_ValueError_when_exog_index_does_not_follow_last_win
     expected_index = '2022-11-30 00:00:00'
 
     err_msg = re.escape(
-            (f'To make predictions `exog` must start one step ahead of `last_window` end.\n'
-             f'    `last_window` ends at : {lw_datetime.index[-1]}.\n'
-             f'    Expected index        : {expected_index}.\n'
-             f'    `exog` starts at      : {exog_datetime.index[0]}.')
+                (f'To make predictions `exog` must start one step ahead of `last_window`.\n'
+                 f'    `last_window` ends at : {lw_datetime.index[-1]}.\n'
+                 f'    `exog` starts at      : {exog_datetime.index[0]}.\n'
+                 f'     Expected index       : {expected_index}.')
         )
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
@@ -779,11 +783,11 @@ def test_check_predict_input_ValueError_when_exog_index_does_not_follow_last_win
     expected_index = 10
 
     err_msg = re.escape(
-            (f'To make predictions `exog` must start one step ahead of `last_window` end.\n'
-             f'    `last_window` ends at : {lw_datetime.index[-1]}.\n'
-             f'    Expected index        : {expected_index}.\n'
-             f'    `exog` starts at      : {exog_datetime.index[0]}.')
-        )
+                (f'To make predictions `exog` must start one step ahead of `last_window`.\n'
+                 f'    `last_window` ends at : {lw_datetime.index[-1]}.\n'
+                 f'    `exog` starts at      : {exog_datetime.index[0]}.\n'
+                 f'     Expected index       : {expected_index}.')
+              )
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
             forecaster_name  = 'ForecasterAutoreg',
@@ -901,8 +905,11 @@ def test_check_predict_input_ValueError_when_ForecasterSarimax_length_last_windo
 def test_check_predict_input_ValueError_when_ForecasterSarimax_last_window_exog_has_missing_values():
     """
     """
-    err_msg = re.escape('`last_window_exog` has missing values.')
-    with pytest.raises(ValueError, match = err_msg):
+    warn_msg = re.escape(
+                ("`last_window_exog` has missing values. Most of machine learning models "
+                 "do not allow missing values. `predict` method may fail.")
+            )
+    with pytest.warns(MissingValuesExogWarning, match = warn_msg):
         check_predict_input(
             forecaster_name  = 'ForecasterSarimax',
             steps            = 10,
