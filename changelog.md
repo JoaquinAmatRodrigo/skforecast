@@ -8,8 +8,24 @@ All notable changes to this project will be documented in this file.
 
 + Added exceptions module with custom warnings.
 
++ Added function `utils.get_exog_dtypes` to issue a warning if exogenous variables are one of type `init`, `float`, or `category`. Raise Exception if `exog` has categorical columns with non integer values.
+
++ Added function `utils.get_exog_dtypes` to get the data types of the exogenous variables included during the training of the forecaster model. 
+
++ Added function `utils.cast_exog_dtypes` to cast data types of the exogenous variables using a dictionary as a mapping.
+
 **Changed**
 
++ The `utils.check_exog` function now includes a new optional parameter, `allow_nan`,
+that controls whether a warning should be issued if the input `exog` contains NaN values. 
+
++ `check_exog` is applied before and after `exog` transformations.
+
++ The `utils.preprocess_y` function now includes a new optional parameter, `return_values`,
+that controls whether to return a numpy ndarray with the values of y or not. This new option is intended to avoid copying data when it is not necessary.
+
++ The `utils.preprocess_exog` function now includes a new optional parameter, `return_values`,
+that controls whether to return a numpy ndarray with the values of y or not. This new option is intended to avoid copying data when it is not necessary.
 
 **Fixed**
 
