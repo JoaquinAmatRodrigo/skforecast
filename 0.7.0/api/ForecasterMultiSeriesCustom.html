@@ -1877,7 +1877,7 @@ the time series being modeled.</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/ForecasterAutoregMultiSeriesCustom/ForecasterAutoregMultiSeriesCustom.py</code></summary>
+          <summary>Source code in <code>skforecast\forecasterautoregmultiseriescustom\forecasterautoregmultiseriescustom.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">ForecasterAutoregMultiSeriesCustom</span><span class="p">(</span><span class="n">ForecasterBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This class turns any regressor compatible with the scikit-learn API into a</span>
@@ -3479,7 +3479,7 @@ types of weights.</p>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/ForecasterAutoregMultiSeriesCustom/ForecasterAutoregMultiSeriesCustom.py</code></summary>
+          <summary>Source code in <code>skforecast\forecasterautoregmultiseriescustom\forecasterautoregmultiseriescustom.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">create_sample_weights</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">series</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
@@ -3635,7 +3635,7 @@ number of observations as <code>series</code> and their indexes must be aligned.
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/ForecasterAutoregMultiSeriesCustom/ForecasterAutoregMultiSeriesCustom.py</code></summary>
+          <summary>Source code in <code>skforecast\forecasterautoregmultiseriescustom\forecasterautoregmultiseriescustom.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">create_train_X_y</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">series</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
@@ -3892,7 +3892,7 @@ that series[i] is regressed on exog[i].</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/ForecasterAutoregMultiSeriesCustom/ForecasterAutoregMultiSeriesCustom.py</code></summary>
+          <summary>Source code in <code>skforecast\forecasterautoregmultiseriescustom\forecasterautoregmultiseriescustom.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">fit</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">series</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
@@ -4058,7 +4058,7 @@ importance in the attribute <code>feature_importances_</code> or <code>coef_</co
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/ForecasterAutoregMultiSeriesCustom/ForecasterAutoregMultiSeriesCustom.py</code></summary>
+          <summary>Source code in <code>skforecast\forecasterautoregmultiseriescustom\forecasterautoregmultiseriescustom.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">get_feature_importance</span><span class="p">(</span>
     <span class="bp">self</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
@@ -4191,7 +4191,7 @@ right after training data.</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/ForecasterAutoregMultiSeriesCustom/ForecasterAutoregMultiSeriesCustom.py</code></summary>
+          <summary>Source code in <code>skforecast\forecasterautoregmultiseriescustom\forecasterautoregmultiseriescustom.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">predict</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
@@ -4428,7 +4428,7 @@ calculated and stored the residuals within the forecaster (see
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/ForecasterAutoregMultiSeriesCustom/ForecasterAutoregMultiSeriesCustom.py</code></summary>
+          <summary>Source code in <code>skforecast\forecasterautoregmultiseriescustom\forecasterautoregmultiseriescustom.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">predict_bootstrapping</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
@@ -4765,7 +4765,7 @@ calculated and stored the residuals within the forecaster (see
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/ForecasterAutoregMultiSeriesCustom/ForecasterAutoregMultiSeriesCustom.py</code></summary>
+          <summary>Source code in <code>skforecast\forecasterautoregmultiseriescustom\forecasterautoregmultiseriescustom.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">predict_dist</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
@@ -4975,7 +4975,7 @@ calculated and stored the residuals within the forecaster (see
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/ForecasterAutoregMultiSeriesCustom/ForecasterAutoregMultiSeriesCustom.py</code></summary>
+          <summary>Source code in <code>skforecast\forecasterautoregmultiseriescustom\forecasterautoregmultiseriescustom.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">predict_interval</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
@@ -5151,7 +5151,7 @@ is overwritten with the new residuals.</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/ForecasterAutoregMultiSeriesCustom/ForecasterAutoregMultiSeriesCustom.py</code></summary>
+          <summary>Source code in <code>skforecast\forecasterautoregmultiseriescustom\forecasterautoregmultiseriescustom.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">set_out_sample_residuals</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> 
     <span class="n">residuals</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
@@ -5303,7 +5303,7 @@ is overwritten with the new residuals.</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/ForecasterAutoregMultiSeriesCustom/ForecasterAutoregMultiSeriesCustom.py</code></summary>
+          <summary>Source code in <code>skforecast\forecasterautoregmultiseriescustom\forecasterautoregmultiseriescustom.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">set_params</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> 
     <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span>
@@ -5415,7 +5415,7 @@ of prediction (t + 1).</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/ForecasterAutoregMultiSeriesCustom/ForecasterAutoregMultiSeriesCustom.py</code></summary>
+          <summary>Source code in <code>skforecast\forecasterautoregmultiseriescustom\forecasterautoregmultiseriescustom.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">_recursive_predict</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
@@ -5499,7 +5499,7 @@ of prediction (t + 1).</p></td>
       <p>Information displayed when a ForecasterAutoregMultiSeriesCustom object is printed.</p>
 
         <details class="quote">
-          <summary>Source code in <code>skforecast/ForecasterAutoregMultiSeriesCustom/ForecasterAutoregMultiSeriesCustom.py</code></summary>
+          <summary>Source code in <code>skforecast\forecasterautoregmultiseriescustom\forecasterautoregmultiseriescustom.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span>
     <span class="bp">self</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>

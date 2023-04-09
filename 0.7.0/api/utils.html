@@ -1655,7 +1655,7 @@
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+          <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">save_forecaster</span><span class="p">(</span>
     <span class="n">forecaster</span><span class="p">,</span> 
     <span class="n">file_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> 
@@ -1748,7 +1748,7 @@
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+          <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">load_forecaster</span><span class="p">(</span>
     <span class="n">file_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span>
@@ -1845,7 +1845,7 @@ ForecasterAutoregMultiVariate.</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+          <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">initialize_lags</span><span class="p">(</span>
     <span class="n">forecaster_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">lags</span><span class="p">:</span> <span class="n">Any</span>
@@ -1994,7 +1994,7 @@ ForecasterAutoregMultiVariate, ForecasterAutoregMultiSeriesCustom.</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+          <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">initialize_weights</span><span class="p">(</span>
     <span class="n">forecaster_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">regressor</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span>
@@ -2140,7 +2140,7 @@ ForecasterAutoregMultiVariate, ForecasterAutoregMultiSeriesCustom.</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+          <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">check_y</span><span class="p">(</span>
     <span class="n">y</span><span class="p">:</span> <span class="n">Any</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -2226,7 +2226,7 @@ ForecasterAutoregMultiVariate, ForecasterAutoregMultiSeriesCustom.</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+          <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">check_exog</span><span class="p">(</span>
     <span class="n">exog</span><span class="p">:</span> <span class="n">Any</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -2302,7 +2302,7 @@ interval of 95% should be as <code>interval = [2.5, 97.5]</code>.</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+          <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">check_interval</span><span class="p">(</span>
     <span class="n">interval</span><span class="p">:</span> <span class="nb">list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span><span class="o">=</span><span class="kc">None</span>
@@ -2516,7 +2516,7 @@ interval of 95% should be as <code>interval = [2.5, 97.5]</code>.</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+          <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">check_predict_input</span><span class="p">(</span>
     <span class="n">forecaster_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
@@ -2875,7 +2875,7 @@ interval of 95% should be as <code>interval = [2.5, 97.5]</code>.</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+          <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">preprocess_y</span><span class="p">(</span>
     <span class="n">y</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">]:</span>
@@ -2996,7 +2996,7 @@ interval of 95% should be as <code>interval = [2.5, 97.5]</code>.</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+          <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">preprocess_last_window</span><span class="p">(</span>
     <span class="n">last_window</span><span class="p">:</span><span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]</span>
  <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">]:</span>
@@ -3117,7 +3117,7 @@ interval of 95% should be as <code>interval = [2.5, 97.5]</code>.</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+          <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">preprocess_exog</span><span class="p">(</span>
     <span class="n">exog</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">]:</span>
@@ -3239,7 +3239,7 @@ interval of 95% should be as <code>interval = [2.5, 97.5]</code>.</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+          <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">exog_to_direct</span><span class="p">(</span>
     <span class="n">exog</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">steps</span><span class="p">:</span> <span class="nb">int</span>
@@ -3349,7 +3349,7 @@ interval of 95% should be as <code>interval = [2.5, 97.5]</code>.</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+          <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">expand_index</span><span class="p">(</span>
     <span class="n">index</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span> 
     <span class="n">steps</span><span class="p">:</span> <span class="nb">int</span>
@@ -3473,7 +3473,7 @@ or a DataFrame.</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+          <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">transform_series</span><span class="p">(</span>
     <span class="n">series</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
     <span class="n">transformer</span><span class="p">,</span>
@@ -3635,7 +3635,7 @@ when using transformers of class scikit-learn ColumnTransformers.</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+          <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">transform_dataframe</span><span class="p">(</span>
     <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
     <span class="n">transformer</span><span class="p">,</span>
@@ -3751,7 +3751,7 @@ when using transformers of class scikit-learn ColumnTransformers.</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+          <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">check_optional_dependency</span><span class="p">(</span>
     <span class="n">package_name</span><span class="p">:</span> <span class="nb">str</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -3858,7 +3858,7 @@ when using transformers of class scikit-learn ColumnTransformers.</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+          <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">multivariate_time_series_corr</span><span class="p">(</span>
     <span class="n">time_series</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
     <span class="n">other</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>

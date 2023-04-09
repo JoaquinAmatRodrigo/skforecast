@@ -1649,7 +1649,7 @@ DataFrame.</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/ForecasterSarimax/ForecasterSarimax.py</code></summary>
+          <summary>Source code in <code>skforecast\forecastersarimax\forecastersarimax.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">ForecasterSarimax</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This class turns ARIMA model from pmdarima library into a Forecaster compatible with </span>
@@ -2403,7 +2403,7 @@ that y[i] is regressed on exog[i].</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/ForecasterSarimax/ForecasterSarimax.py</code></summary>
+          <summary>Source code in <code>skforecast\forecastersarimax\forecastersarimax.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">fit</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">y</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
@@ -2546,7 +2546,7 @@ that y[i] is regressed on exog[i].</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/ForecasterSarimax/ForecasterSarimax.py</code></summary>
+          <summary>Source code in <code>skforecast\forecastersarimax\forecastersarimax.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">get_feature_importance</span><span class="p">(</span>
     <span class="bp">self</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
@@ -2665,7 +2665,7 @@ of the training data.</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/ForecasterSarimax/ForecasterSarimax.py</code></summary>
+          <summary>Source code in <code>skforecast\forecastersarimax\forecastersarimax.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">predict</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
@@ -2952,7 +2952,7 @@ provided, <code>alpha</code> will be used.</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/ForecasterSarimax/ForecasterSarimax.py</code></summary>
+          <summary>Source code in <code>skforecast\forecastersarimax\forecastersarimax.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">predict_interval</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
@@ -3203,7 +3203,7 @@ provided, <code>alpha</code> will be used.</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/ForecasterSarimax/ForecasterSarimax.py</code></summary>
+          <summary>Source code in <code>skforecast\forecastersarimax\forecastersarimax.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">set_params</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> 
     <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span>

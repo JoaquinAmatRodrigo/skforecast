@@ -1846,7 +1846,7 @@ is not <code>None</code>, residuals are assumed to be in the transformed scale. 
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/ForecasterAutoregDirect/ForecasterAutoregDirect.py</code></summary>
+          <summary>Source code in <code>skforecast\forecasterautoregdirect\forecasterautoregdirect.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">ForecasterAutoregDirect</span><span class="p">(</span><span class="n">ForecasterBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This class turns any regressor compatible with the scikit-learn API into a</span>
@@ -3216,7 +3216,7 @@ is not <code>None</code>, residuals are assumed to be in the transformed scale. 
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/ForecasterAutoregDirect/ForecasterAutoregDirect.py</code></summary>
+          <summary>Source code in <code>skforecast\forecasterautoregdirect\forecasterautoregdirect.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">create_sample_weights</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">X_train</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
@@ -3325,7 +3325,7 @@ number of observations as <code>y</code> and their indexes must be aligned.</p><
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/ForecasterAutoregDirect/ForecasterAutoregDirect.py</code></summary>
+          <summary>Source code in <code>skforecast\forecasterautoregdirect\forecasterautoregdirect.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">create_train_X_y</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">y</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
@@ -3499,7 +3499,7 @@ number of observations as <code>y</code> and their indexes must be aligned.</p><
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/ForecasterAutoregDirect/ForecasterAutoregDirect.py</code></summary>
+          <summary>Source code in <code>skforecast\forecasterautoregdirect\forecasterautoregdirect.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">filter_train_X_y_for_step</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">step</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
@@ -3600,7 +3600,7 @@ that y[i] is regressed on exog[i].</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/ForecasterAutoregDirect/ForecasterAutoregDirect.py</code></summary>
+          <summary>Source code in <code>skforecast\forecasterautoregdirect\forecasterautoregdirect.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">fit</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">y</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
@@ -3749,7 +3749,7 @@ for each forecast time step). First step is 1.</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/ForecasterAutoregDirect/ForecasterAutoregDirect.py</code></summary>
+          <summary>Source code in <code>skforecast\forecasterautoregdirect\forecasterautoregdirect.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">get_feature_importance</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> 
     <span class="n">step</span><span class="p">:</span> <span class="nb">int</span>
@@ -3905,7 +3905,7 @@ right after training data.</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/ForecasterAutoregDirect/ForecasterAutoregDirect.py</code></summary>
+          <summary>Source code in <code>skforecast\forecasterautoregdirect\forecasterautoregdirect.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">predict</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">steps</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">list</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -4158,7 +4158,7 @@ calculated and stored the residuals within the forecaster (see
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/ForecasterAutoregDirect/ForecasterAutoregDirect.py</code></summary>
+          <summary>Source code in <code>skforecast\forecasterautoregdirect\forecasterautoregdirect.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">predict_bootstrapping</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">steps</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">list</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -4417,7 +4417,7 @@ calculated and stored the residuals within the forecaster (see
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/ForecasterAutoregDirect/ForecasterAutoregDirect.py</code></summary>
+          <summary>Source code in <code>skforecast\forecasterautoregdirect\forecasterautoregdirect.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">predict_dist</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">distribution</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span>
@@ -4620,7 +4620,7 @@ calculated and stored the residuals within the forecaster (see
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/ForecasterAutoregDirect/ForecasterAutoregDirect.py</code></summary>
+          <summary>Source code in <code>skforecast\forecasterautoregdirect\forecasterautoregdirect.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">predict_interval</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">steps</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">list</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -4767,7 +4767,7 @@ calculated and stored the residuals within the forecaster (see
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/ForecasterAutoregDirect/ForecasterAutoregDirect.py</code></summary>
+          <summary>Source code in <code>skforecast\forecasterautoregdirect\forecasterautoregdirect.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">set_lags</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> 
     <span class="n">lags</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">range</span><span class="p">]</span>
@@ -4859,7 +4859,7 @@ is overwritten with the new residuals.</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/ForecasterAutoregDirect/ForecasterAutoregDirect.py</code></summary>
+          <summary>Source code in <code>skforecast\forecasterautoregdirect\forecasterautoregdirect.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">set_out_sample_residuals</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> 
     <span class="n">residuals</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> 
@@ -5008,7 +5008,7 @@ configuration of parameters and hyperparameters.</p>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/ForecasterAutoregDirect/ForecasterAutoregDirect.py</code></summary>
+          <summary>Source code in <code>skforecast\forecasterautoregdirect\forecasterautoregdirect.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">set_params</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> 
     <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span>
@@ -5106,7 +5106,7 @@ column, the lag 2 in the second column and so on.</p>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/ForecasterAutoreg/ForecasterAutoreg.py</code></summary>
+          <summary>Source code in <code>skforecast\forecasterautoreg\forecasterautoreg.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">_create_lags</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> 
     <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
@@ -5175,7 +5175,7 @@ column, the lag 2 in the second column and so on.</p>
       <p>Information displayed when a ForecasterAutoreg object is printed.</p>
 
         <details class="quote">
-          <summary>Source code in <code>skforecast/ForecasterAutoreg/ForecasterAutoreg.py</code></summary>
+          <summary>Source code in <code>skforecast\forecasterautoreg\forecasterautoreg.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span>
     <span class="bp">self</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
