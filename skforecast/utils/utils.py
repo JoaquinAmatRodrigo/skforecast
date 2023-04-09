@@ -627,7 +627,7 @@ def check_predict_input(
                 ('`exog` has missing values. Most of machine learning models do not allow '
                  'missing values. `predict` method may fail.'), MissingValuesExogWarning
             )
-        if not isinstance(exog, exog_type):
+        if exog_type and not isinstance(exog, exog_type):
             raise TypeError(
                 f'Expected type for `exog`: {exog_type}. Got {type(exog)}.'     
             )
