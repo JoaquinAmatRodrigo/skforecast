@@ -30,7 +30,6 @@ from ..utils import preprocess_last_window
 from ..utils import preprocess_exog
 from ..utils import check_dtypes_exog
 from ..utils import get_exog_dtypes
-from ..utils import cast_exog_dtypes
 from ..utils import expand_index
 from ..utils import check_predict_input
 from ..utils import transform_series
@@ -495,7 +494,7 @@ class ForecasterAutoreg(ForecasterBase):
 
         self.fitted = True
         self.fit_date = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
-        self.training_range = preprocess_y(y=y)[1][[0, -1]]
+        self.training_range = preprocess_y(y=y, return_values=False)[1][[0, -1]]
         self.index_type = type(X_train.index)
         if isinstance(X_train.index, pd.DatetimeIndex):
             self.index_freq = X_train.index.freqstr
