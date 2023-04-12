@@ -28,6 +28,8 @@ from ..utils import check_interval
 from ..utils import preprocess_y
 from ..utils import preprocess_last_window
 from ..utils import preprocess_exog
+from ..utils import check_dtypes_exog
+from ..utils import get_exog_dtypes
 from ..utils import expand_index
 from ..utils import check_predict_input
 from ..utils import transform_series
@@ -129,7 +131,11 @@ class ForecasterAutoreg(ForecasterBase):
         If the forecaster has been trained using exogenous variable/s.
         
     exog_type : type
-        Type of exogenous variable/s used in training.
+        Type of exogenous data (pandas Series or DataFrame) used in training.
+
+    exog_dtypes : type
+        Type of each exogenous variable/s used in training. If `transformer_exog` is used,
+        the dtypes are calculated after the transformation.
         
     exog_col_names : list
         Names of columns of `exog` if `exog` used in training was a pandas
@@ -190,6 +196,7 @@ class ForecasterAutoreg(ForecasterBase):
         self.training_range          = None
         self.included_exog           = False
         self.exog_type               = None
+        self.exog_dtypes             = None
         self.exog_col_names          = None
         self.X_train_col_names       = None
         self.in_sample_residuals     = None
@@ -356,29 +363,32 @@ class ForecasterAutoreg(ForecasterBase):
                             fit               = True,
                             inverse_transform = False
                        )
-            exog_values, exog_index = preprocess_exog(exog=exog)
+                
+            check_exog(exog=exog, allow_nan=False)
+            _, exog_index = preprocess_exog(exog=exog, return_values=False)
             
             if not (exog_index[:len(y_index)] == y_index).all():
                 raise ValueError(
                     ('Different index for `y` and `exog`. They must be equal '
                      'to ensure the correct alignment of values.')      
                 )
+            self.exog_dtypes = get_exog_dtypes(exog=exog)
         
         X_train, y_train = self._create_lags(y=y_values)
         X_train_col_names = [f"lag_{i}" for i in self.lags]
-        if exog is not None:
-            col_names_exog = exog.columns if isinstance(exog, pd.DataFrame) else [exog.name]
-            X_train_col_names.extend(col_names_exog)
-            # The first `self.max_lag` positions have to be removed from exog
-            # since they are not in X_train.
-            X_train = np.column_stack((X_train, exog_values[self.max_lag:, ]))
-
         X_train = pd.DataFrame(
                     data    = X_train,
                     columns = X_train_col_names,
                     index   = y_index[self.max_lag: ]
                   )
-        self.X_train_col_names = X_train_col_names
+        if exog is not None:
+            # The first `self.max_lag` positions have to be removed from exog
+            # since they are not in X_train.
+            exog_to_train = exog.iloc[self.max_lag:, ]
+            check_dtypes_exog(exog_to_train)
+            X_train = pd.concat((X_train, exog_to_train), axis=1)
+
+        self.X_train_col_names = X_train.columns.to_list()
         y_train = pd.Series(
                     data  = y_train,
                     index = y_index[self.max_lag: ],
@@ -461,6 +471,7 @@ class ForecasterAutoreg(ForecasterBase):
         self.last_window          = None
         self.included_exog        = False
         self.exog_type            = None
+        self.exog_dtypes          = None
         self.exog_col_names       = None
         self.X_train_col_names    = None
         self.in_sample_residuals  = None
@@ -483,7 +494,7 @@ class ForecasterAutoreg(ForecasterBase):
 
         self.fitted = True
         self.fit_date = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
-        self.training_range = preprocess_y(y=y)[1][[0, -1]]
+        self.training_range = preprocess_y(y=y, return_values=False)[1][[0, -1]]
         self.index_type = type(X_train.index)
         if isinstance(X_train.index, pd.DatetimeIndex):
             self.index_freq = X_train.index.freqstr
@@ -543,7 +554,6 @@ class ForecasterAutoreg(ForecasterBase):
             X = last_window[-self.lags].reshape(1, -1)
             if exog is not None:
                 X = np.column_stack((X, exog[i, ].reshape(1, -1)))
-
             with warnings.catch_warnings():
                 # Suppress scikit-learn warning: "X does not have valid feature names,
                 # but NoOpTransformer was fitted with feature names".
@@ -630,9 +640,8 @@ class ForecasterAutoreg(ForecasterBase):
                            inverse_transform = False
                        )
             
-            exog_values, _ = preprocess_exog(
-                                 exog = exog.iloc[:steps, ]
-                             )
+            exog_values = exog.iloc[:steps, ].to_numpy()
+
         else:
             exog_values = None
         
@@ -777,9 +786,8 @@ class ForecasterAutoreg(ForecasterBase):
                            inverse_transform = False
                        )
             
-            exog_values, _ = preprocess_exog(
-                                 exog = exog.iloc[:steps, ]
-                             )
+            exog_values = exog.iloc[:steps, ].to_numpy()
+
         else:
             exog_values = None
         

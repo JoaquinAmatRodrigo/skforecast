@@ -63,6 +63,7 @@ nav:
       - model_selection_statsmodels: api/model_selection_statsmodels.md # deprecated
       - plot: api/plot.md
       - utils: api/utils.md
+      - exceptions: api/exceptions.md
 
   - FAQ and Tips:
       - Table of contents: faq/faq.md

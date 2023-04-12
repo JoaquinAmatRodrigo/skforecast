@@ -17,6 +17,8 @@ from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import FunctionTransformer
 import inspect
 from copy import deepcopy
+from ..exceptions import MissingValuesExogWarning
+from ..exceptions import ValueTypeWarning
 
 optional_dependencies = {
     "sarimax": ['statsmodels>=0.12, <0.14', 'pmdarima>=2.0, <2.1'],
@@ -194,15 +196,76 @@ def check_y(
     
     
 def check_exog(
-    exog: Any
+    exog: Any,
+    allow_nan: bool = True
 ) -> None:
     """
-    Raise Exception if `exog` is not pandas Series or pandas DataFrame, or
-    if it has missing values.
+    Raise Exception if `exog` is not pandas Series or pandas DataFrame.
+    If `allow_nan = True`, issue a warning if `exog` contains NaN values.
     
     Parameters
     ----------        
     exog :  Any
+        Exogenous variable/s included as predictor/s.
+    allow_nan: bool, default True
+        If True, allows the presence of NaN values in `exog`. If False (default),
+        issue a warning if `exog` contains NaN values.
+
+    Returns
+    ----------
+    None
+
+    """
+        
+    if not isinstance(exog, (pd.Series, pd.DataFrame)):
+        raise TypeError('`exog` must be `pd.Series` or `pd.DataFrame`.')
+
+    if not allow_nan:
+        if exog.isnull().any().any():
+            warnings.warn(
+                ('`exog` has missing values. Most of machine learning models do not allow '
+                'missing values. Fitting the forecaster may fail.'), MissingValuesExogWarning
+        )
+         
+    return
+
+
+def get_exog_dtypes(
+    exog: Union[pd.DataFrame, pd.Series]
+) -> dict:
+    """_summary_
+
+    Parameters
+    ----------
+    exog :  pandas DataFrame, pandas Series
+        Exogenous variable/s included as predictor/s.
+
+    Returns
+    -------
+    exog_dtypes : dict
+        Dictionary with the dtypes in `exog`.
+    """
+
+    if isinstance(exog, pd.Series):
+        exog_dtypes = {exog.name: exog.dtypes}
+    else:
+        exog_dtypes = exog.dtypes.to_dict()
+    
+    return exog_dtypes
+
+
+def check_dtypes_exog(
+    exog: Union[pd.DataFrame, pd.Series]
+) -> None:
+    """
+    Raise Exception if `exog` has categorical columns with non integer values.
+    This is needed when using machine learning regressors that allow categorical
+    features.
+    Rise a Warning if values are not `init`, `float`, or `category`.
+    
+    Parameters
+    ----------        
+    exog :  pandas DataFrame, pandas Series
         Exogenous variable/s included as predictor/s.
 
     Returns
@@ -214,9 +277,36 @@ def check_exog(
     if not isinstance(exog, (pd.Series, pd.DataFrame)):
         raise TypeError('`exog` must be `pd.Series` or `pd.DataFrame`.')
 
-    if exog.isnull().any().any():
-        raise ValueError('`exog` has missing values.')
-                
+    if isinstance(exog, pd.DataFrame):
+        if not all([dtype in ['float', 'int', 'category'] for dtype in exog.dtypes]):
+            warnings.warn(
+                ('`exog` must contain only int, float or category dtypes. Most '
+                'machine learning models do not allow other types of values values . '
+                'Fitting the forecaster may fail.'), ValueTypeWarning
+            )
+        for col in exog.select_dtypes(include='category'):
+            if exog[col].cat.categories.dtype not in [int, np.int64, np.int32]:
+                raise TypeError(
+                    ("Categorical columns in exog must contain only integer values. "
+                     "See skforecast docs for more info about how to include categorical "
+                     "features https://joaquinamatrodrigo.github.io/skforecast/"
+                     "latest/user_guides/categorical-features.html")
+                )
+    else:
+        if not exog.dtypes in ['float', 'int', 'category']:
+            warnings.warn(
+                ('`exog` must contain only int, float or category dtypes. Most '
+                'machine learning models do not allow other types of values values . '
+                'Fitting the forecaster may fail.'), ValueTypeWarning
+            )
+        if exog.dtypes == 'category' and exog.cat.categories.dtype not in [int, np.int64, np.int32]:
+            raise TypeError(
+                ("If exog is of type category, it must contain only integer values. "
+                 "See skforecast docs for more info about how to include categorical "
+                 "features https://joaquinamatrodrigo.github.io/skforecast/"
+                 "latest/user_guides/categorical-features.html")
+            )
+         
     return
 
 
@@ -491,8 +581,11 @@ def check_predict_input(
         if not isinstance(exog, (pd.Series, pd.DataFrame)):
             raise TypeError('`exog` must be a pandas Series or DataFrame.')
         if exog.isnull().values.any():
-            raise ValueError('`exog` has missing values.')
-        if not isinstance(exog, exog_type):
+            warnings.warn(
+                ('`exog` has missing values. Most of machine learning models do not allow '
+                 'missing values. `predict` method may fail.'), MissingValuesExogWarning
+            )
+        if exog_type and not isinstance(exog, exog_type):
             raise TypeError(
                 f'Expected type for `exog`: {exog_type}. Got {type(exog)}.'     
             )
@@ -506,7 +599,7 @@ def check_predict_input(
                      f'Got {exog.columns.to_list()}.') 
                 )
 
-        # Check nulls and index type and freq
+        # Check nulls, dtypes, index type and freq
         check_exog(exog = exog)
         _, exog_index = preprocess_exog(exog=exog.iloc[:0, ])
         if not isinstance(exog_index, index_type):
@@ -525,10 +618,10 @@ def check_predict_input(
         expected_index = expand_index(last_window.index, 1)[0]
         if expected_index != exog.index[0]:
             raise ValueError(
-                (f'To make predictions `exog` must start one step ahead of `last_window` end.\n'
+                (f'To make predictions `exog` must start one step ahead of `last_window`.\n'
                  f'    `last_window` ends at : {last_window.index[-1]}.\n'
-                 f'    Expected index        : {expected_index}.\n'
-                 f'    `exog` starts at      : {exog.index[0]}.')
+                 f'    `exog` starts at      : {exog.index[0]}.\n'
+                 f'     Expected index       : {expected_index}.')
             )
 
     # Checks ForecasterSarimax
@@ -552,7 +645,11 @@ def check_predict_input(
                      f'generate the predictors. For this forecaster it is {window_size}.')
                 )
             if last_window_exog.isnull().any().all():
-                raise ValueError('`last_window_exog` has missing values.')
+                warnings.warn(
+                ('`last_window_exog` has missing values. Most of machine learning models '
+                 'do not allow missing values. `predict` method may fail.'),
+                MissingValuesExogWarning
+            )
             _, last_window_exog_index = preprocess_last_window(
                                         last_window = last_window_exog.iloc[:0]
                                     ) 
@@ -581,8 +678,9 @@ def check_predict_input(
 
 
 def preprocess_y(
-    y: pd.Series
-) -> Tuple[np.ndarray, pd.Index]:
+    y: pd.Series,
+    return_values : bool=True
+) -> Tuple[Union[None, np.ndarray], pd.Index]:
     """
     Returns values and index of series separately. Index is overwritten 
     according to the next rules:
@@ -598,9 +696,13 @@ def preprocess_y(
     y : pandas Series
         Time series.
 
+    return_values : bool, default=True
+        If `True` return the values of `y` as numpy ndarray. This option is intended
+        to avoid copying data when it is not necessary.
+
     Returns 
     -------
-    y_values : numpy ndarray
+    y_values : None, numpy ndarray
         Numpy array with values of `y`.
 
     y_index : pandas Index
@@ -633,7 +735,10 @@ def preprocess_y(
                       step  = 1
                   )
 
-    y_values = y.to_numpy()
+    if return_values:
+        y_values = y.to_numpy()
+    else:
+        y_values = None
 
     return y_values, y_index
 
@@ -697,11 +802,12 @@ def preprocess_last_window(
 
 
 def preprocess_exog(
-    exog: Union[pd.Series, pd.DataFrame]
-) -> Tuple[np.ndarray, pd.Index]:
+    exog: Union[pd.Series, pd.DataFrame],
+    return_values : bool=True
+) -> Tuple[Union[None, np.ndarray], pd.Index]:
     """
-    Returns values ​​and index of series separately. Index is overwritten 
-    according to the next rules:
+    Returns values and index of series or data frame separately. Index is
+    overwritten  according to the next rules:
         If index is of type DatetimeIndex and has frequency, nothing is 
         changed.
         If index is of type RangeIndex, nothing is changed.
@@ -714,14 +820,17 @@ def preprocess_exog(
     exog : pandas Series, pandas DataFrame
         Exogenous variables.
 
+    return_values : bool, default=True
+        If `True` return the values of `exog` as numpy ndarray. This option is intended
+        to avoid copying data when it is not necessary.
+
     Returns 
     -------
-    exog_values : numpy ndarray
+    exog_values : None, numpy ndarray
         Numpy array with values of `exog`.
 
     exog_index : pandas Index
         Index of `exog` modified according to the rules.
-
     """
     
     if isinstance(exog.index, pd.DatetimeIndex) and exog.index.freq is not None:
@@ -750,9 +859,54 @@ def preprocess_exog(
                          step  = 1
                      )
 
-    exog_values = exog.to_numpy()
+    if return_values:
+        exog_values = exog.to_numpy()
+    else:
+        exog_values = None
 
     return exog_values, exog_index
+    
+
+def cast_exog_dtypes(
+    exog: Union[pd.Series, pd.DataFrame],
+    exog_dtypes: dict,
+) -> Union[pd.Series, pd.DataFrame]: # pragma: no cover
+    """
+    Cast `exog` to a specified types.
+    If `exog` is a pandas Series, `exog_dtypes` must be a dict with a single value.
+    If `exog_dtypes` is `category` but the current type of `exog` is `float`, then
+    the type is cast to `int` and then to `category`. This is done because, for
+    a forecaster to accept a categorical exog, it must contain only integer values.
+    Due to the internal modifications of numpy, the values may be casted to `float`,
+    so they have to be re-converted to `int`.
+
+    Parameters
+    ----------        
+    exog : pandas Series, pandas DataFrame
+        Exogenous variables.
+    exog_dtypes: dict
+        Dictionary with name and type of the series or data frame columns.
+
+    Returns 
+    -------
+    exog
+
+    """
+
+    # Remove keys from exog_dtypes not in exog.columns
+    exog_dtypes = {k:v for k, v in exog_dtypes.items() if k in exog.columns}
+    
+    if isinstance(exog, pd.Series) and exog.dtypes != list(exog_dtypes.values())[0]:
+        exog = exog.astype(list(exog_dtypes.values())[0])
+    elif isinstance(exog, pd.DataFrame):
+        for col, initial_dtype in exog_dtypes.items():
+            if exog[col].dtypes != initial_dtype:
+                if initial_dtype == "category" and exog[col].dtypes==float:
+                    exog[col] = exog[col].astype(int).astype("category")
+                else:
+                    exog[col] = exog[col].astype(initial_dtype)
+
+    return exog
 
 
 def exog_to_direct(

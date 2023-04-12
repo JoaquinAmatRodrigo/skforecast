@@ -20,6 +20,7 @@ from sklearn.metrics import mean_squared_log_error
 from sklearn.model_selection import ParameterGrid
 from sklearn.model_selection import ParameterSampler
 from sklearn.exceptions import NotFittedError
+from ..exceptions import LongTrainingWarning
 import optuna
 from optuna.samplers import TPESampler, RandomSampler
 optuna.logging.set_verbosity(optuna.logging.WARNING) # disable optuna logs
@@ -370,13 +371,13 @@ def _backtesting_forecaster_refit(
         warnings.warn(
             (f"The forecaster will be fit {folds} times. This can take substantial amounts of time. "
              f"If not feasible, try with `refit = False`. \n"),
-            RuntimeWarning
+            LongTrainingWarning
         )
     elif type(forecaster).__name__ == 'ForecasterAutoregDirect' and folds*forecaster.steps > 50:
         warnings.warn(
             (f"The forecaster will be fit {folds*forecaster.steps} times ({folds} folds * {forecaster.steps} regressors). "
              f"This can take substantial amounts of time. If not feasible, try with `refit = False`. \n"),
-             RuntimeWarning
+             LongTrainingWarning
         )
     
     if verbose:
