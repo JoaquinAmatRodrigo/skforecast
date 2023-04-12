@@ -296,7 +296,7 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_series_of_categ
     exog is a pandas series of category.
     """
     y = pd.Series(np.arange(10))
-    exog = pd.Series(range(10), name='exog', dtype='category')
+    exog = pd.Series(pd.Categorical(range(10), categories=range(10)), name='exog')
     forecaster = ForecasterAutoreg(LinearRegression(), lags=5)
     results = forecaster.create_train_X_y(y=y, exog=exog)
     expected = (
@@ -308,7 +308,7 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_series_of_categ
                             [8., 7., 6., 5., 4.]]),
             index   = np.array([5, 6, 7, 8, 9]),
             columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5']
-        ).assign(exog=pd.Categorical( range(5, 10), categories=range(10))),
+        ).assign(exog=pd.Categorical(range(5, 10), categories=range(10))),
         pd.Series(
             np.array([5, 6, 7, 8, 9]),
             index = np.array([5, 6, 7, 8, 9]),
