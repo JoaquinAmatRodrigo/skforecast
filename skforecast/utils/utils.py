@@ -327,7 +327,7 @@ def check_dtypes_exog(
                 'Fitting the forecaster may fail.'), ValueTypeWarning
             )
         for col in exog.select_dtypes(include='category'):
-            if exog[col].cat.categories.dtype != int:
+            if exog[col].cat.categories.dtype not in [int, np.int64, np.int32]:
                 raise TypeError(
                     ("Categorical columns in exog must contain only integer values. "
                      "See skforecast docs for more info about how to include categorical "
@@ -341,7 +341,7 @@ def check_dtypes_exog(
                 'machine learning models do not allow other types of values values . '
                 'Fitting the forecaster may fail.'), ValueTypeWarning
             )
-        if exog.dtypes == 'category' and exog.cat.categories.dtype != int:
+        if exog.dtypes == 'category' and exog.cat.categories.dtype not in [int, np.int64, np.int32]:
             raise TypeError(
                 ("If exog is of type category, it must contain only integer values. "
                  "See skforecast docs for more info about how to include categorical "
