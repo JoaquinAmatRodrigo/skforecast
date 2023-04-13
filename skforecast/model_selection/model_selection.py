@@ -12,7 +12,7 @@ import pandas as pd
 import warnings
 import logging
 from copy import deepcopy
-from tqdm import tqdm
+from tqdm.autonotebook import tqdm
 from sklearn.metrics import mean_squared_error 
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import mean_absolute_percentage_error
@@ -265,7 +265,8 @@ def _backtesting_forecaster_refit(
     n_boot: int=500,
     random_state: int=123,
     in_sample_residuals: bool=True,
-    verbose: bool=False
+    verbose: bool=False,
+    show_progress: bool=True
 ) -> Tuple[Union[float, list], pd.DataFrame]:
     """
     Backtesting of forecaster model with a re-fitting strategy. A copy of the  
@@ -340,6 +341,9 @@ def _backtesting_forecaster_refit(
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used for backtesting.
 
+    show_progress: bool, default `True`
+        Whether to show a progress bar. Defaults to True.
+
     Returns 
     -------
     metrics_value : float, list
@@ -391,7 +395,7 @@ def _backtesting_forecaster_refit(
             fixed_train_size   = fixed_train_size
         )
     
-    for i in range(folds):
+    for i in tqdm(range(folds)) if show_progress else range(folds):
         # In each iteration the model is fitted before making predictions.
         # if fixed_train_size the train size doesn't increase but moves by `steps` in each iteration.
         # if false the train size increases by `steps` in each iteration.
@@ -451,7 +455,8 @@ def _backtesting_forecaster_no_refit(
     n_boot: int=500,
     random_state: int=123,
     in_sample_residuals: bool=True,
-    verbose: bool=False
+    verbose: bool=False,
+    show_progress: bool=True
 ) -> Tuple[Union[float, list], pd.DataFrame]:
     """
     Backtesting of forecaster without iterative re-fitting. In each iteration,
@@ -521,6 +526,9 @@ def _backtesting_forecaster_no_refit(
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used for backtesting.
 
+    show_progress: bool, default `True`
+        Whether to show a progress bar. Defaults to True.
+
     Returns 
     -------
     metrics_value : float, list
@@ -568,7 +576,7 @@ def _backtesting_forecaster_no_refit(
             refit              = False
         )
 
-    for i in range(folds):
+    for i in tqdm(range(folds)) if show_progress else range(folds):
         # Since the model is only fitted with the initial_train_size, last_window
         # and next_window_exog must be updated to include the data needed to make
         # predictions.
@@ -633,7 +641,8 @@ def backtesting_forecaster(
     n_boot: int=500,
     random_state: int=123,
     in_sample_residuals: bool=True,
-    verbose: bool=False
+    verbose: bool=False,
+    show_progress: bool=True
 ) -> Tuple[Union[float, list], pd.DataFrame]:
     """
     Backtesting of forecaster model.
@@ -709,6 +718,9 @@ def backtesting_forecaster(
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used for backtesting.
 
+    show_progress: bool, default `True`
+        Whether to show a progress bar. Defaults to True.
+
     Returns 
     -------
     metrics_value : float, list
@@ -781,7 +793,8 @@ def backtesting_forecaster(
             n_boot              = n_boot,
             random_state        = random_state,
             in_sample_residuals = in_sample_residuals,
-            verbose             = verbose
+            verbose             = verbose,
+            show_progress       = show_progress
         )
     else:
         metrics_values, backtest_predictions = _backtesting_forecaster_no_refit(
@@ -795,7 +808,8 @@ def backtesting_forecaster(
             n_boot              = n_boot,
             random_state        = random_state,
             in_sample_residuals = in_sample_residuals,
-            verbose             = verbose
+            verbose             = verbose,
+            show_progress       = show_progress
         )
 
     return metrics_values, backtest_predictions
@@ -1140,7 +1154,8 @@ def _evaluate_grid_hyperparameters(
                                  exog               = exog,
                                  refit              = refit,
                                  interval           = None,
-                                 verbose            = verbose
+                                 verbose            = verbose,
+                                 show_progress      = False
                              )[0]
             warnings.filterwarnings('ignore', category=RuntimeWarning, message= "The forecaster will be fit.*")
             lags_list.append(lags)
@@ -1499,7 +1514,8 @@ def _bayesian_search_optuna(
                          initial_train_size = initial_train_size,
                          fixed_train_size   = fixed_train_size,
                          refit              = refit,
-                         verbose            = verbose
+                         verbose            = verbose,
+                         show_progress      = False
                      )
         # Store metrics in the variable metric_values defined outside _objective.
         nonlocal metric_values

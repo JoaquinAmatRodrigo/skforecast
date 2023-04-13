@@ -14,6 +14,8 @@ All notable changes to this project will be documented in this file.
 
 + Added function `utils.cast_exog_dtypes` to cast data types of the exogenous variables using a dictionary as a mapping.
 
++ Added argument `show_progress` to functions `model_selection.backtesting_forecaster`, `model_selection_multiseries.backtesting_forecaster_multiseries` and `model_selection_sarimax.backtesting_forecaster_sarimax` to indicate weather to show a progress bar.
+
 **Changed**
 
 + The `utils.check_exog` function now includes a new optional parameter, `allow_nan`,
@@ -26,6 +28,8 @@ that controls whether to return a numpy ndarray with the values of y or not. Thi
 
 + The `utils.preprocess_exog` function now includes a new optional parameter, `return_values`,
 that controls whether to return a numpy ndarray with the values of y or not. This new option is intended to avoid copying data when it is not necessary.
+
++ Replaced `tqdm.tqdm` by `tqdm.autonotebook.tqdm`.
 
 **Fixed**
 
