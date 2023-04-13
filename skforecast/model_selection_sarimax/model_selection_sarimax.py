@@ -13,7 +13,7 @@ import pandas as pd
 import warnings
 import logging
 from copy import deepcopy
-from tqdm import tqdm
+from tqdm.autonotebook import tqdm
 from sklearn.model_selection import ParameterGrid
 from sklearn.model_selection import ParameterSampler
 from sklearn.exceptions import NotFittedError
@@ -37,7 +37,8 @@ def _backtesting_sarimax_refit(
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     alpha: Optional[float]=None,
     interval: Optional[list]=None,
-    verbose: bool=False
+    verbose: bool=False,
+    show_progress: bool=True
 ) -> Tuple[Union[float, list], pd.DataFrame]:
     """
     Backtesting of ForecasterSarimax model with a re-fitting strategy. A copy of the  
@@ -103,6 +104,9 @@ def _backtesting_sarimax_refit(
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used for backtesting.
 
+    show_progress: bool, default `True`
+        Whether to show a progress bar. Defaults to True.
+
     Returns 
     -------
     metrics_value : float, list
@@ -148,7 +152,7 @@ def _backtesting_sarimax_refit(
             fixed_train_size   = fixed_train_size
         )
     
-    for i in range(folds):
+    for i in tqdm(range(folds)) if show_progress else range(folds):
         # In each iteration the model is fitted before making predictions.
         # if fixed_train_size the train size doesn't increase but moves by `steps` in each iteration.
         # if false the train size increases by `steps` in each iteration.
@@ -204,7 +208,8 @@ def _backtesting_sarimax_no_refit(
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     alpha: Optional[float]=None,
     interval: Optional[list]=None,
-    verbose: bool=False
+    verbose: bool=False,
+    show_progress: bool=True
 ) -> Tuple[Union[float, list], pd.DataFrame]:
     """
     Backtesting of ForecasterSarimax without iterative re-fitting. In each iteration,
@@ -263,6 +268,9 @@ def _backtesting_sarimax_no_refit(
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used for backtesting.
 
+    show_progress: bool, default `True`
+        Whether to show a progress bar. Defaults to True.
+
     Returns 
     -------
     metrics_value : float, list
@@ -304,7 +312,7 @@ def _backtesting_sarimax_no_refit(
             refit              = False
         )
 
-    for i in range(folds):
+    for i in tqdm(range(folds)) if show_progress else range(folds):
         # Since the model is only fitted with the initial_train_size, last_window
         # and next_window_exog must be updated to include the data needed to make
         # predictions.
@@ -368,7 +376,8 @@ def backtesting_sarimax(
     refit: bool=False,
     alpha: Optional[float]=None,
     interval: Optional[list]=None,
-    verbose: bool=False
+    verbose: bool=False,
+    show_progress: bool=True
 ) -> Tuple[Union[float, list], pd.DataFrame]:
     """
     Backtesting of ForecasterSarimax.
@@ -431,6 +440,9 @@ def backtesting_sarimax(
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used for backtesting.
 
+    show_progress: bool, default `True`
+        Whether to show a progress bar. Defaults to True.
+
     Returns 
     -------
     metrics_value : float, list
@@ -476,7 +488,8 @@ def backtesting_sarimax(
             exog                = exog,
             alpha               = alpha,
             interval            = interval,
-            verbose             = verbose
+            verbose             = verbose,
+            show_progress       = show_progress
         )
     else:
         metrics_values, backtest_predictions = _backtesting_sarimax_no_refit(
@@ -488,7 +501,8 @@ def backtesting_sarimax(
             exog                = exog,
             alpha               = alpha,
             interval            = interval,
-            verbose             = verbose
+            verbose             = verbose,
+            show_progress       = show_progress
         )
 
     return metrics_values, backtest_predictions
@@ -792,18 +806,19 @@ def _evaluate_grid_hyperparameters_sarimax(
 
         forecaster.set_params(params)
         metrics_values = backtesting_sarimax(
-                                forecaster         = forecaster,
-                                y                  = y,
-                                steps              = steps,
-                                metric             = metric,
-                                initial_train_size = initial_train_size,
-                                fixed_train_size   = fixed_train_size,
-                                exog               = exog,
-                                refit              = refit,
-                                alpha              = None,
-                                interval           = None,
-                                verbose            = verbose
-                            )[0]
+                            forecaster         = forecaster,
+                            y                  = y,
+                            steps              = steps,
+                            metric             = metric,
+                            initial_train_size = initial_train_size,
+                            fixed_train_size   = fixed_train_size,
+                            exog               = exog,
+                            refit              = refit,
+                            alpha              = None,
+                            interval           = None,
+                            verbose            = verbose,
+                            show_progress      = False
+                         )[0]
         warnings.filterwarnings('ignore', category=RuntimeWarning, message= "The forecaster will be fit.*")   
         params_list.append(params)
         for m, m_value in zip(metric, metrics_values):

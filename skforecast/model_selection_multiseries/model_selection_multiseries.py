@@ -12,7 +12,7 @@ import pandas as pd
 import warnings
 import logging
 from copy import deepcopy
-from tqdm import tqdm
+from tqdm.autonotebook import tqdm
 from sklearn.model_selection import ParameterGrid
 from sklearn.model_selection import ParameterSampler
 from sklearn.exceptions import NotFittedError
@@ -40,7 +40,8 @@ def _backtesting_forecaster_multiseries_refit(
     n_boot: int=500,
     random_state: int=123,
     in_sample_residuals: bool=True,
-    verbose: bool=False
+    verbose: bool=False,
+    show_progress: bool=True
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
     Backtesting of forecaster model with a re-fitting strategy. A copy of the  
@@ -117,6 +118,9 @@ def _backtesting_forecaster_multiseries_refit(
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used for backtesting.
 
+    show_progress: bool, default `True`
+        Whether to show a progress bar. Defaults to True.
+
     Returns 
     -------
     metrics_levels : pandas DataFrame
@@ -180,7 +184,7 @@ def _backtesting_forecaster_multiseries_refit(
 
     store_in_sample_residuals = False if interval is None else True
 
-    for i in range(folds):
+    for i in tqdm(range(folds)) if show_progress else range(folds):
         # In each iteration the model is fitted before making predictions.
         # if fixed_train_size the train size doesn't increase but moves by `steps` in each iteration.
         # if false the train size increases by `steps` in each iteration.
@@ -252,7 +256,8 @@ def _backtesting_forecaster_multiseries_no_refit(
     n_boot: int=500,
     random_state: int=123,
     in_sample_residuals: bool=True,
-    verbose: bool=False
+    verbose: bool=False,
+    show_progress: bool=True
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
     Backtesting of forecaster without iterative re-fitting. In each iteration,
@@ -324,6 +329,9 @@ def _backtesting_forecaster_multiseries_no_refit(
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used for backtesting.
 
+    show_progress: bool, default `True`
+        Whether to show a progress bar. Defaults to True.
+
     Returns 
     -------
     metrics_levels : pandas DataFrame
@@ -386,7 +394,7 @@ def _backtesting_forecaster_multiseries_no_refit(
             refit              = False
         )
 
-    for i in range(folds):
+    for i in tqdm(range(folds)) if show_progress else range(folds):
         # Since the model is only fitted with the initial_train_size, last_window
         # and next_window_exog must be updated to include the data needed to make
         # predictions.
@@ -456,7 +464,8 @@ def backtesting_forecaster_multiseries(
     n_boot: int=500,
     random_state: int=123,
     in_sample_residuals: bool=True,
-    verbose: bool=False
+    verbose: bool=False,
+    show_progress: bool=True
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
     Backtesting for multi-series and multivariate forecasters.
@@ -534,6 +543,9 @@ def backtesting_forecaster_multiseries(
                   
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used for backtesting.
+
+    show_progress: bool, default `True`
+        Whether to show a progress bar. Defaults to True.
 
     Returns 
     -------
@@ -625,7 +637,8 @@ def backtesting_forecaster_multiseries(
             n_boot              = n_boot,
             random_state        = random_state,
             in_sample_residuals = in_sample_residuals,
-            verbose             = verbose
+            verbose             = verbose,
+            show_progress       = show_progress
         )
     else:
         metrics_levels, backtest_predictions = _backtesting_forecaster_multiseries_no_refit(
@@ -640,7 +653,8 @@ def backtesting_forecaster_multiseries(
             n_boot              = n_boot,
             random_state        = random_state,
             in_sample_residuals = in_sample_residuals,
-            verbose             = verbose
+            verbose             = verbose,
+            show_progress       = show_progress
         )
 
     return metrics_levels, backtest_predictions
@@ -1036,7 +1050,8 @@ def _evaluate_grid_hyperparameters_multiseries(
                                  exog               = exog,
                                  refit              = refit,
                                  interval           = None,
-                                 verbose            = verbose
+                                 verbose            = verbose,
+                                 show_progress      = False
                              )[0]
             warnings.filterwarnings('ignore', category=RuntimeWarning, message= "The forecaster will be fit.*")
             lags_list.append(lags)
@@ -1093,7 +1108,8 @@ def backtesting_forecaster_multivariate(
     n_boot: int=500,
     random_state: int=123,
     in_sample_residuals: bool=True,
-    verbose: bool=False
+    verbose: bool=False,
+    show_progress: bool=True
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
     This function is an alias of backtesting_forecaster_multiseries.
@@ -1174,6 +1190,9 @@ def backtesting_forecaster_multivariate(
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used for backtesting.
 
+    show_progress: bool, default `True`
+        Whether to show a progress bar. Defaults to True.
+
     Returns 
     -------
     metrics_levels : pandas DataFrame
@@ -1202,7 +1221,9 @@ def backtesting_forecaster_multivariate(
         n_boot              = n_boot,
         random_state        = random_state,
         in_sample_residuals = in_sample_residuals,
-        verbose             = verbose
+        verbose             = verbose,
+        show_progress       = show_progress
+        
     )
 
     return metrics_levels, backtest_predictions
