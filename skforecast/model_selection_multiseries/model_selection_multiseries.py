@@ -12,7 +12,7 @@ import pandas as pd
 import warnings
 import logging
 from copy import deepcopy
-from tqdm.autonotebook import tqdm
+from tqdm.auto import tqdm
 from sklearn.model_selection import ParameterGrid
 from sklearn.model_selection import ParameterSampler
 from sklearn.exceptions import NotFittedError
