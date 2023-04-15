@@ -667,7 +667,7 @@ def grid_search_sarimax(
         f"Number of models compared: {len(param_grid)}"
     )
         
-    for params in tqdm(param_grid, ncols=90):
+    for params in tqdm(param_grid):
 
         metric_value = backtesting_sarimax(
                             y              = y,

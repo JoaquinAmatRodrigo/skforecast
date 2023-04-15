@@ -12,7 +12,7 @@ import pandas as pd
 import warnings
 import logging
 from copy import deepcopy
-from tqdm.autonotebook import tqdm
+from tqdm.auto import tqdm
 from sklearn.metrics import mean_squared_error 
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import mean_absolute_percentage_error
@@ -1135,13 +1135,13 @@ def _evaluate_grid_hyperparameters(
 
     print(f"Number of models compared: {len(param_grid)*len(lags_grid)}.")
 
-    for lags in tqdm(lags_grid, desc='loop lags_grid', position=0, ncols=90):
+    for lags in tqdm(lags_grid, desc='lags grid', position=0): #ncols=90
         
         if type(forecaster).__name__ in ['ForecasterAutoreg', 'ForecasterAutoregDirect']:
             forecaster.set_lags(lags)
             lags = forecaster.lags.copy()
         
-        for params in tqdm(param_grid, desc='loop param_grid', position=1, leave=False, ncols=90):
+        for params in tqdm(param_grid, desc='params grid', position=1, leave=False): #ncols=90
 
             forecaster.set_params(params)
             metrics_values = backtesting_forecaster(
@@ -1528,7 +1528,7 @@ def _bayesian_search_optuna(
          {n_trials} bayesian search in each lag configuration."""
     )
 
-    for lags in tqdm(lags_grid, desc='loop lags_grid', position=0, ncols=90):
+    for lags in tqdm(lags_grid, desc='lags grid', position=0): #ncols=90
                 
         metric_values = [] # This variable will be modified inside _objective function. 
         # It is a trick to extract multiple values from _objective function since

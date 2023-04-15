@@ -802,7 +802,7 @@ def _evaluate_grid_hyperparameters_sarimax(
 
     print(f"Number of models compared: {len(param_grid)}.")
   
-    for params in tqdm(param_grid, desc='loop param_grid', position=0, ncols=90):
+    for params in tqdm(param_grid, desc='params grid', position=0):
 
         forecaster.set_params(params)
         metrics_values = backtesting_sarimax(

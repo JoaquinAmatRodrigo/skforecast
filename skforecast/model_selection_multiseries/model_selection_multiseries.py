@@ -1030,13 +1030,13 @@ def _evaluate_grid_hyperparameters_multiseries(
         f'Number of iterations: {len(param_grid)*len(lags_grid)}.'
     )
 
-    for lags in tqdm(lags_grid, desc='loop lags_grid', position=0, ncols=90):
+    for lags in tqdm(lags_grid, desc='lags grid', position=0):
 
         if type(forecaster).__name__ in ['ForecasterAutoregMultiSeries', 'ForecasterAutoregMultiVariate']:
             forecaster.set_lags(lags)
             lags = forecaster.lags.copy()
         
-        for params in tqdm(param_grid, desc='loop param_grid', position=1, leave=False, ncols=90):
+        for params in tqdm(param_grid, desc='params grid', position=1, leave=False):
 
             forecaster.set_params(params)
             metrics_levels = backtesting_forecaster_multiseries(
