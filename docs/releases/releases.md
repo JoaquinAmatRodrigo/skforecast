@@ -29,7 +29,7 @@ that controls whether to return a numpy ndarray with the values of y or not. Thi
 + The `utils.preprocess_exog` function now includes a new optional parameter, `return_values`,
 that controls whether to return a numpy ndarray with the values of y or not. This new option is intended to avoid copying data when it is not necessary.
 
-+ Replaced `tqdm.tqdm` by `tqdm.autonotebook.tqdm`.
++ Replaced `tqdm.tqdm` by `tqdm.auto.tqdm`.
 
 **Fixed**
 
