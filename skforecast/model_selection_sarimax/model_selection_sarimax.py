@@ -16,8 +16,8 @@ from copy import deepcopy
 from tqdm.auto import tqdm
 from sklearn.model_selection import ParameterGrid
 from sklearn.model_selection import ParameterSampler
-from sklearn.exceptions import NotFittedError
 
+from ..exceptions import LongTrainingWarning
 from ..model_selection.model_selection import _get_metric
 from ..model_selection.model_selection import _backtesting_forecaster_verbose
 
@@ -138,7 +138,7 @@ def _backtesting_sarimax_refit(
         warnings.warn(
             (f"The forecaster will be fit {folds} times. This can take substantial amounts of time. "
              f"If not feasible, try with `refit = False`. \n"),
-            RuntimeWarning
+            LongTrainingWarning
         )
     
     if verbose:
