@@ -368,9 +368,12 @@ class ForecasterAutoregCustom(ForecasterBase):
                             fit               = True,
                             inverse_transform = False
                        )
-            check_exog(exog=exog, allow_nan=False)
-            _, exog_index = preprocess_exog(exog=exog, return_values=False)
             
+            check_exog(exog=exog, allow_nan=False)
+            check_exog_dtypes(exog)
+            self.exog_dtypes = get_exog_dtypes(exog=exog)
+
+            _, exog_index = preprocess_exog(exog=exog, return_values=False)
             if not (exog_index[:len(y_index)] == y_index).all():
                 raise ValueError(
                     ("Different index for `y` and `exog`. They must be equal "

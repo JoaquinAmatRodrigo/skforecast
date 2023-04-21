@@ -103,7 +103,8 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_None():
         pd.Series(
             data  = np.array([5, 6, 7, 8, 9]),
             index = np.array([5, 6, 7, 8, 9]),
-            name  = 'y'
+            name  = 'y',
+            dtype = float
         )
     )
 
@@ -113,8 +114,7 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_None():
 
 @pytest.mark.parametrize("dtype", 
                          [float, int], 
-                         ids = lambda dt : f'dtype: {dt}'
-                        )
+                         ids = lambda dt : f'dtype: {dt}')
 def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_series_of_float_int(dtype):
     """
     Test the output of create_train_X_y when y=pd.Series(np.arange(10)) and 
@@ -148,8 +148,7 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_series_of_float
 
 @pytest.mark.parametrize("dtype", 
                          [float, int], 
-                         ids = lambda dt : f'dtype: {dt}'
-                        )
+                         ids = lambda dt : f'dtype: {dt}')
 def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_dataframe_of_float_int(dtype):
     """
     Test the output of create_train_X_y when y=pd.Series(np.arange(10)) and 
@@ -184,78 +183,17 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_dataframe_of_fl
     pd.testing.assert_series_equal(results[1], expected[1])
 
 
-def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_series_of_bool():
+@pytest.mark.parametrize("exog_values, dtype", 
+                         [([True]    , bool), 
+                          (['string'], str)], 
+                         ids = lambda dt : f'values, dtype: {dt}')
+def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_series_of_bool_str(exog_values, dtype):
     """
     Test the output of create_train_X_y when y=pd.Series(np.arange(10)) and 
-    exog is a pandas series of bool.
+    exog is a pandas series of bool or str.
     """
     y = pd.Series(np.arange(10), dtype=float)
-    exog = pd.Series([True]*10, name='exog', dtype=bool)
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=5)
-    results = forecaster.create_train_X_y(y=y, exog=exog)
-    expected = (
-        pd.DataFrame(
-            data = np.array([[4., 3., 2., 1., 0., 1],
-                             [5., 4., 3., 2., 1., 1],
-                             [6., 5., 4., 3., 2., 1],
-                             [7., 6., 5., 4., 3., 1],
-                             [8., 7., 6., 5., 4., 1]]),
-            index   = np.array([5, 6, 7, 8, 9]),
-            columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 'exog']
-        ).astype({'exog': bool}),
-        pd.Series(
-            data  = np.array([5, 6, 7, 8, 9]),
-            index = np.array([5, 6, 7, 8, 9]),
-            name  = 'y',
-            dtype = float
-        )
-    )
-
-    pd.testing.assert_frame_equal(results[0], expected[0])
-    pd.testing.assert_series_equal(results[1], expected[1])
-
-
-def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_dataframe_of_bool():
-    """
-    Test the output of create_train_X_y when y=pd.Series(np.arange(10)) and 
-    exog is a pandas dataframe with two columns of bool.
-    """
-    y = pd.Series(np.arange(10), dtype=float)
-    exog = pd.DataFrame({
-               'exog_1': [True]*10,
-               'exog_2': [False]*10,
-           })
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=5)
-    results = forecaster.create_train_X_y(y=y, exog=exog)
-    expected = (
-        pd.DataFrame(
-            data = np.array([[4., 3., 2., 1., 0., 1, 0],
-                             [5., 4., 3., 2., 1., 1, 0],
-                             [6., 5., 4., 3., 2., 1, 0],
-                             [7., 6., 5., 4., 3., 1, 0],
-                             [8., 7., 6., 5., 4., 1, 0]]),
-            index   = np.array([5, 6, 7, 8, 9]),
-            columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 'exog_1', 'exog_2']
-        ).astype({'exog_1': bool, 'exog_2': bool}),
-        pd.Series(
-            data  = np.array([5, 6, 7, 8, 9]),
-            index = np.array([5, 6, 7, 8, 9]),
-            name  = 'y',
-            dtype = float
-        )
-    )
-
-    pd.testing.assert_frame_equal(results[0], expected[0])
-    pd.testing.assert_series_equal(results[1], expected[1])
-
-
-def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_series_of_str():
-    """
-    Test the output of create_train_X_y when y=pd.Series(np.arange(10)) and 
-    exog is a pandas series of str.
-    """
-    y = pd.Series(np.arange(10), dtype=float)
-    exog = pd.Series(['string']*10, name='exog', dtype=str)
+    exog = pd.Series(exog_values*10, name='exog', dtype=dtype)
     forecaster = ForecasterAutoreg(LinearRegression(), lags=5)
     results = forecaster.create_train_X_y(y=y, exog=exog)
     expected = (
@@ -267,7 +205,7 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_series_of_str()
                              [8., 7., 6., 5., 4.]]),
             index   = np.array([5, 6, 7, 8, 9]),
             columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5']
-        ).assign(exog=['string']*5),
+        ).assign(exog=exog_values*5).astype({'exog': dtype}),
         pd.Series(
             data  = np.array([5, 6, 7, 8, 9]),
             index = np.array([5, 6, 7, 8, 9]),
@@ -280,15 +218,19 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_series_of_str()
     pd.testing.assert_series_equal(results[1], expected[1])
 
 
-def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_dataframe_of_str():
+@pytest.mark.parametrize("v_exog_1   , v_exog_2  , dtype", 
+                         [([True]    , [False]   , bool), 
+                          (['string'], ['string'], str)], 
+                         ids = lambda dt : f'values, dtype: {dt}')
+def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_dataframe_of_bool_str(v_exog_1, v_exog_2, dtype):
     """
     Test the output of create_train_X_y when y=pd.Series(np.arange(10)) and 
-    exog is a pandas dataframe with two columns of str.
+    exog is a pandas dataframe with two columns of bool or str.
     """
     y = pd.Series(np.arange(10), dtype=float)
     exog = pd.DataFrame({
-               'exog_1': ['string']*10,
-               'exog_2': ['string']*10,
+               'exog_1': v_exog_1*10,
+               'exog_2': v_exog_2*10,
            })
     forecaster = ForecasterAutoreg(LinearRegression(), lags=5)
     results = forecaster.create_train_X_y(y=y, exog=exog)
@@ -301,7 +243,7 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_dataframe_of_st
                              [8., 7., 6., 5., 4.]]),
             index   = np.array([5, 6, 7, 8, 9]),
             columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5']
-        ).assign(exog_1=['string']*5, exog_2=['string']*5),
+        ).assign(exog_1=v_exog_1*5, exog_2=v_exog_2*5).astype({'exog_1': dtype, 'exog_2': dtype}),
         pd.Series(
             data  = np.array([5, 6, 7, 8, 9]),
             index = np.array([5, 6, 7, 8, 9]),
@@ -384,8 +326,8 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_dataframe_of_ca
 
 def test_create_train_X_y_output_when_y_is_series_10_and_transformer_y_is_StandardScaler():
     """
-    Test the output of create_train_X_y when exog is None and transformer_exog
-    is not None.
+    Test the output of create_train_X_y when exog is None and transformer_y
+    is StandardScaler.
     """
     forecaster = ForecasterAutoreg(
                     regressor = LinearRegression(),
@@ -421,10 +363,10 @@ def test_create_train_X_y_output_when_exog_is_None_and_transformer_exog_is_not_N
     is not None.
     """
     forecaster = ForecasterAutoreg(
-        regressor        = LinearRegression(),
-        lags             = 5,
-        transformer_exog = StandardScaler()
-    )
+                     regressor        = LinearRegression(),
+                     lags             = 5,
+                     transformer_exog = StandardScaler()
+                 )
     results = forecaster.create_train_X_y(y=pd.Series(np.arange(10), dtype=float))
     expected = (
         pd.DataFrame(
@@ -467,10 +409,10 @@ def test_create_train_X_y_output_when_transformer_y_and_transformer_exog():
                         )
 
     forecaster = ForecasterAutoreg(
-                    regressor = LinearRegression(),
-                    lags = 5,
-                    transformer_y = transformer_y,
-                    transformer_exog= transformer_exog
+                    regressor        = LinearRegression(),
+                    lags             = 5,
+                    transformer_y    = transformer_y,
+                    transformer_exog = transformer_exog
                 )
 
     expected = (

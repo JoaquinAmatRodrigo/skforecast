@@ -363,15 +363,17 @@ class ForecasterAutoreg(ForecasterBase):
                            fit               = True,
                            inverse_transform = False
                        )
-            check_exog(exog=exog, allow_nan=False)
-            _, exog_index = preprocess_exog(exog=exog, return_values=False)
             
+            check_exog(exog=exog, allow_nan=False)
+            check_exog_dtypes(exog)
+            self.exog_dtypes = get_exog_dtypes(exog=exog)
+
+            _, exog_index = preprocess_exog(exog=exog, return_values=False)
             if not (exog_index[:len(y_index)] == y_index).all():
                 raise ValueError(
                     ("Different index for `y` and `exog`. They must be equal "
                      "to ensure the correct alignment of values.")
                 )
-            self.exog_dtypes = get_exog_dtypes(exog=exog)
         
         X_train, y_train = self._create_lags(y=y_values)
         X_train_col_names = [f"lag_{i}" for i in self.lags]
@@ -380,11 +382,11 @@ class ForecasterAutoreg(ForecasterBase):
                       columns = X_train_col_names,
                       index   = y_index[self.max_lag: ]
                   )
+        
         if exog is not None:
             # The first `self.max_lag` positions have to be removed from exog
             # since they are not in X_train.
             exog_to_train = exog.iloc[self.max_lag:, ]
-            check_exog_dtypes(exog_to_train)
             X_train = pd.concat((X_train, exog_to_train), axis=1)
 
         self.X_train_col_names = X_train.columns.to_list()
