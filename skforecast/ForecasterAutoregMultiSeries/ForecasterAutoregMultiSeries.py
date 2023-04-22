@@ -27,11 +27,11 @@ from ..utils import check_exog
 from ..utils import get_exog_dtypes
 from ..utils import check_exog_dtypes
 from ..utils import check_interval
+from ..utils import check_predict_input
 from ..utils import preprocess_y
 from ..utils import preprocess_last_window
 from ..utils import preprocess_exog
 from ..utils import expand_index
-from ..utils import check_predict_input
 from ..utils import transform_series
 from ..utils import transform_dataframe
 
@@ -676,10 +676,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
             if len(set(self.exog_col_names) - set(self.series_col_names)) != len(self.exog_col_names):
                 raise ValueError(
-                    (f'`exog` cannot contain a column named the same as one of the series'
-                     f' (column names of series).\n'
-                     f'    `series` columns : {self.series_col_names}.\n'
-                     f'    `exog`   columns : {self.exog_col_names}.')
+                    (f"`exog` cannot contain a column named the same as one of the series"
+                     f" (column names of series).\n"
+                     f"    `series` columns : {self.series_col_names}.\n"
+                     f"    `exog`   columns : {self.exog_col_names}.")
                 )
 
         X_train, y_train, y_index, y_train_index = self.create_train_X_y(series=series, exog=exog)

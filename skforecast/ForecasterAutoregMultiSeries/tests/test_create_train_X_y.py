@@ -112,16 +112,15 @@ def test_create_train_X_y_ValueError_when_series_and_exog_have_different_index()
                            '2': pd.Series(np.arange(7))})
     series.index = pd.date_range(start='2022-01-01', periods=7, freq='1D')
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5)
+    
+    exog = pd.Series(np.arange(7), index=pd.RangeIndex(start=0, stop=7, step=1))
 
     err_msg = re.escape(
                 ("Different index for `series` and `exog`. They must be equal "
                  "to ensure the correct alignment of values.")
               )
     with pytest.raises(ValueError, match = err_msg):
-        forecaster.fit(
-            series = series,
-            exog   = pd.Series(np.arange(7), index=pd.RangeIndex(start=0, stop=7, step=1))
-        )
+        forecaster.fit(series=series, exog=exog)
 
 
 def test_create_train_X_y_output_when_series_and_exog_is_None():
@@ -129,9 +128,9 @@ def test_create_train_X_y_output_when_series_and_exog_is_None():
     Test the output of create_train_X_y when series has 2 columns and 
     exog is None.
     """
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
     series = pd.DataFrame({'1': pd.Series(np.arange(7, dtype=float)), 
                            '2': pd.Series(np.arange(7, dtype=float))})
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
 
     results = forecaster.create_train_X_y(series=series)
     expected = (
@@ -226,10 +225,8 @@ def test_create_train_X_y_output_when_series_10_and_exog_is_dataframe_of_float_i
     """
     series = pd.DataFrame({'1': pd.Series(np.arange(10, dtype=float)), 
                            '2': pd.Series(np.arange(10, dtype=float))})
-    exog = pd.DataFrame({
-               'exog_1': np.arange(100, 110, dtype=dtype),
-               'exog_2': np.arange(1000, 1010, dtype=dtype)
-           })
+    exog = pd.DataFrame({'exog_1': np.arange(100, 110, dtype=dtype),
+                         'exog_2': np.arange(1000, 1010, dtype=dtype)})
 
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5)
     results = forecaster.create_train_X_y(series=series, exog=exog)    
@@ -479,10 +476,10 @@ def test_create_train_X_y_output_when_series_and_exog_is_dataframe_datetime_inde
     Test the output of create_train_X_y when series has 2 columns and 
     exog is a pandas dataframe with two columns and datetime index.
     """
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
     series = pd.DataFrame({'1': np.arange(7, dtype=float), 
                            '2': np.arange(7, dtype=float)},
                            index = pd.date_range("1990-01-01", periods=7, freq='D'))
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
 
     results = forecaster.create_train_X_y(
                   series = series,
@@ -580,13 +577,13 @@ def test_create_train_X_y_output_when_exog_is_None_and_transformer_exog_is_not_N
     Test the output of create_train_X_y when exog is None and transformer_exog
     is not None.
     """
+    series = pd.DataFrame({'1': pd.Series(np.arange(7, dtype=float)), 
+                           '2': pd.Series(np.arange(7, dtype=float))})
     forecaster = ForecasterAutoregMultiSeries(
                      regressor        = LinearRegression(),
                      lags             = 3,
                      transformer_exog = StandardScaler()
                  )
-    series = pd.DataFrame({'1': pd.Series(np.arange(7, dtype=float)), 
-                           '2': pd.Series(np.arange(7, dtype=float))})
 
     results = forecaster.create_train_X_y(series=series)
     expected = (

@@ -86,7 +86,7 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_None():
     Test the output of create_train_X_y when y=pd.Series(np.arange(10)) and 
     exog is None.
     """
-    y = pd.Series(np.arange(10))
+    y = pd.Series(np.arange(10), dtype=float)
     exog = None
     forecaster = ForecasterAutoreg(LinearRegression(), lags=5)
     results = forecaster.create_train_X_y(y=y, exog=exog)
