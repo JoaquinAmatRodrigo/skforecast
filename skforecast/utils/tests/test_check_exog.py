@@ -12,28 +12,28 @@ from skforecast.exceptions import MissingValuesExogWarning
                          [10, [1, 2, 3], np.arange(10).reshape(-1, 1)], 
                          ids = lambda exog : f'exog: {exog}'
                         )
-def test_check_exog_exception_when_exog_not_series_or_dataframe(exog):
+def test_check_exog_TypeError_when_exog_not_series_or_dataframe(exog):
     """
-    Check exception is raised when exog is not a pandas Series or a
+    Check TypeError is raised when exog is not a pandas Series or a
     pandas DataFrame
     """
-    err_msg = re.escape('`exog` must be `pd.Series` or `pd.DataFrame`.')
+    err_msg = re.escape("`exog` must be a pandas Series or DataFrame.")
     with pytest.raises(TypeError, match = err_msg):
         check_exog(exog=exog)
 
 
 @pytest.mark.parametrize("exog", 
                          [pd.Series([0, 1, None]),
-                          pd.DataFrame([[1,2], [3, None], [5, 6]])], 
-                         ids = lambda exog : f'exog: {exog}'
+                          pd.DataFrame([[1, 2], [3, None], [5, 6]])], 
+                         ids = lambda exog : f'exog type: {type(exog)}'
                         )
-def test_check_exog_warning_when_exog_has_missing_values_and_allow_nan_False(exog):
+def test_check_exog_MissingValuesExogWarning_when_exog_has_missing_values_and_allow_nan_False(exog):
     """
-    Check warning is issued when y has missing values
+    Check MissingValuesExogWarning is issued when y has missing values
     """
     warn_msg = re.escape(
-                ("`exog` has missing values. Most of machine learning models do "
-                "not allow missing values. Fitting the forecaster may fail.")
+                ("`exog` has missing values. Most machine learning models do "
+                 "not allow missing values. Fitting the forecaster may fail.")
                )
     with pytest.warns(MissingValuesExogWarning, match = warn_msg):
         check_exog(exog, allow_nan=False)

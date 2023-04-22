@@ -24,12 +24,12 @@ from ..utils import initialize_lags
 from ..utils import initialize_weights
 from ..utils import check_y
 from ..utils import check_exog
+from ..utils import get_exog_dtypes
+from ..utils import check_exog_dtypes
 from ..utils import check_interval
 from ..utils import preprocess_y
 from ..utils import preprocess_last_window
 from ..utils import preprocess_exog
-from ..utils import check_dtypes_exog
-from ..utils import get_exog_dtypes
 from ..utils import expand_index
 from ..utils import check_predict_input
 from ..utils import transform_series
@@ -133,9 +133,9 @@ class ForecasterAutoreg(ForecasterBase):
     exog_type : type
         Type of exogenous data (pandas Series or DataFrame) used in training.
 
-    exog_dtypes : type
-        Type of each exogenous variable/s used in training. If `transformer_exog` is used,
-        the dtypes are calculated after the transformation.
+    exog_dtypes : dict
+        Type of each exogenous variable/s used in training. If `transformer_exog` 
+        is used, the dtypes are calculated after the transformation.
         
     exog_col_names : list
         Names of columns of `exog` if `exog` used in training was a pandas
@@ -152,8 +152,8 @@ class ForecasterAutoreg(ForecasterBase):
     out_sample_residuals : numpy ndarray
         Residuals of the model when predicting non training data. Only stored
         up to 1000 values. If `transformer_y` is not `None`, residuals
-        are assumed to be in the transformed scale. Use `set_out_sample_residuals` to
-        set values.
+        are assumed to be in the transformed scale. Use `set_out_sample_residuals` 
+        method to set values.
         
     fitted : bool
         Tag to identify if the regressor has been fitted (trained).
@@ -291,8 +291,8 @@ class ForecasterAutoreg(ForecasterBase):
         n_splits = len(y) - self.max_lag
         if n_splits <= 0:
             raise ValueError(
-                f'The maximum lag ({self.max_lag}) must be less than the length '
-                f'of the series ({len(y)}).'
+                f"The maximum lag ({self.max_lag}) must be less than the length "
+                f"of the series ({len(y)})."
             )
         
         X_data = np.full(shape=(n_splits, len(self.lags)), fill_value=np.nan, dtype=float)
@@ -348,52 +348,53 @@ class ForecasterAutoreg(ForecasterBase):
                     f'`exog` must have same number of samples as `y`. '
                     f'length `exog`: ({len(exog)}), length `y`: ({len(y)})'
                 )
-            check_exog(exog=exog)
+            check_exog(exog=exog, allow_nan=True)
             if isinstance(exog, pd.Series):
                 exog = transform_series(
-                            series            = exog,
-                            transformer       = self.transformer_exog,
-                            fit               = True,
-                            inverse_transform = False
+                           series            = exog,
+                           transformer       = self.transformer_exog,
+                           fit               = True,
+                           inverse_transform = False
                        )
             else:
                 exog = transform_dataframe(
-                            df                = exog,
-                            transformer       = self.transformer_exog,
-                            fit               = True,
-                            inverse_transform = False
+                           df                = exog,
+                           transformer       = self.transformer_exog,
+                           fit               = True,
+                           inverse_transform = False
                        )
-                
-            check_exog(exog=exog, allow_nan=False)
-            _, exog_index = preprocess_exog(exog=exog, return_values=False)
             
+            check_exog(exog=exog, allow_nan=False)
+            check_exog_dtypes(exog)
+            self.exog_dtypes = get_exog_dtypes(exog=exog)
+
+            _, exog_index = preprocess_exog(exog=exog, return_values=False)
             if not (exog_index[:len(y_index)] == y_index).all():
                 raise ValueError(
-                    ('Different index for `y` and `exog`. They must be equal '
-                     'to ensure the correct alignment of values.')      
+                    ("Different index for `y` and `exog`. They must be equal "
+                     "to ensure the correct alignment of values.")
                 )
-            self.exog_dtypes = get_exog_dtypes(exog=exog)
         
         X_train, y_train = self._create_lags(y=y_values)
         X_train_col_names = [f"lag_{i}" for i in self.lags]
         X_train = pd.DataFrame(
-                    data    = X_train,
-                    columns = X_train_col_names,
-                    index   = y_index[self.max_lag: ]
+                      data    = X_train,
+                      columns = X_train_col_names,
+                      index   = y_index[self.max_lag: ]
                   )
+        
         if exog is not None:
             # The first `self.max_lag` positions have to be removed from exog
             # since they are not in X_train.
             exog_to_train = exog.iloc[self.max_lag:, ]
-            check_dtypes_exog(exog_to_train)
             X_train = pd.concat((X_train, exog_to_train), axis=1)
 
         self.X_train_col_names = X_train.columns.to_list()
         y_train = pd.Series(
-                    data  = y_train,
-                    index = y_index[self.max_lag: ],
-                    name  = 'y'
-                 )
+                      data  = y_train,
+                      index = y_index[self.max_lag: ],
+                      name  = 'y'
+                  )
                         
         return X_train, y_train
 
@@ -466,17 +467,17 @@ class ForecasterAutoreg(ForecasterBase):
         """
         
         # Reset values in case the forecaster has already been fitted.
-        self.index_type           = None
-        self.index_freq           = None
-        self.last_window          = None
-        self.included_exog        = False
-        self.exog_type            = None
-        self.exog_dtypes          = None
-        self.exog_col_names       = None
-        self.X_train_col_names    = None
-        self.in_sample_residuals  = None
-        self.fitted               = False
-        self.training_range       = None
+        self.index_type          = None
+        self.index_freq          = None
+        self.last_window         = None
+        self.included_exog       = False
+        self.exog_type           = None
+        self.exog_dtypes         = None
+        self.exog_col_names      = None
+        self.X_train_col_names   = None
+        self.in_sample_residuals = None
+        self.fitted              = False
+        self.training_range      = None
         
         if exog is not None:
             self.included_exog = True
@@ -639,9 +640,7 @@ class ForecasterAutoreg(ForecasterBase):
                            fit               = False,
                            inverse_transform = False
                        )
-            
             exog_values = exog.iloc[:steps, ].to_numpy()
-
         else:
             exog_values = None
         
@@ -785,9 +784,7 @@ class ForecasterAutoreg(ForecasterBase):
                            fit               = False,
                            inverse_transform = False
                        )
-            
             exog_values = exog.iloc[:steps, ].to_numpy()
-
         else:
             exog_values = None
         
