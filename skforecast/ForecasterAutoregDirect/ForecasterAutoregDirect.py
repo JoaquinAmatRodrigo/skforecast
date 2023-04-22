@@ -24,13 +24,15 @@ from ..utils import initialize_lags
 from ..utils import initialize_weights
 from ..utils import check_y
 from ..utils import check_exog
+from ..utils import get_exog_dtypes
+from ..utils import check_exog_dtypes
+from ..utils import check_predict_input
+from ..utils import check_interval
 from ..utils import preprocess_y
 from ..utils import preprocess_last_window
 from ..utils import preprocess_exog
 from ..utils import exog_to_direct
 from ..utils import expand_index
-from ..utils import check_predict_input
-from ..utils import check_interval
 from ..utils import transform_series
 from ..utils import transform_dataframe
 
@@ -148,6 +150,10 @@ class ForecasterAutoregDirect(ForecasterBase):
         
     exog_type : type
         Type of exogenous variable/s used in training.
+
+    exog_dtypes : dict
+        Type of each exogenous variable/s used in training. If `transformer_exog` 
+        is used, the dtypes are calculated after the transformation.
         
     exog_col_names : list
         Names of columns of `exog` if `exog` used in training was a pandas
@@ -215,6 +221,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         self.training_range          = None
         self.included_exog           = False
         self.exog_type               = None
+        self.exog_dtypes             = None
         self.exog_col_names          = None
         self.X_train_col_names       = None
         self.fitted                  = False
@@ -226,8 +233,8 @@ class ForecasterAutoregDirect(ForecasterBase):
 
         if not isinstance(steps, int):
             raise TypeError(
-                f"`steps` argument must be an int greater than or equal to 1. "
-                f"Got {type(steps)}."
+                (f"`steps` argument must be an int greater than or equal to 1. "
+                 f"Got {type(steps)}.")
             )
 
         if steps < 1:
@@ -323,8 +330,8 @@ class ForecasterAutoregDirect(ForecasterBase):
         n_splits = len(y) - self.max_lag - (self.steps - 1) # rows of y_data
         if n_splits <= 0:
             raise ValueError(
-                f'The maximum lag ({self.max_lag}) must be less than the length '
-                f'of the series minus the number of steps ({len(y)-(self.steps-1)}).'
+                (f"The maximum lag ({self.max_lag}) must be less than the length "
+                 f"of the series minus the number of steps ({len(y)-(self.steps-1)}).")
             )
         
         X_data = np.full(shape=(n_splits, len(self.lags)), fill_value=np.nan, dtype=float)
@@ -370,8 +377,8 @@ class ForecasterAutoregDirect(ForecasterBase):
 
         if len(y) < self.max_lag + self.steps:
             raise ValueError(
-                f'Minimum length of `y` for training this forecaster is '
-                f'{self.max_lag + self.steps}. Got {len(y)}.'
+                (f"Minimum length of `y` for training this forecaster is "
+                 f"{self.max_lag + self.steps}. Got {len(y)}.")
             )
 
         check_y(y=y)
@@ -390,8 +397,8 @@ class ForecasterAutoregDirect(ForecasterBase):
         if exog is not None:
             if len(exog) != len(y):
                 raise ValueError(
-                    (f'`exog` must have same number of samples as `y`. '
-                     f'length `exog`: ({len(exog)}), length `y`: ({len(y)})')
+                    (f"`exog` must have same number of samples as `y`. "
+                     f"length `exog`: ({len(exog)}), length `y`: ({len(y)})")
                 )
             check_exog(exog=exog)
             # Need here for filter_train_X_y_for_step to work without fitting
@@ -413,8 +420,8 @@ class ForecasterAutoregDirect(ForecasterBase):
             exog_values, exog_index = preprocess_exog(exog=exog)
             if not (exog_index[:len(y_index)] == y_index).all():
                 raise ValueError(
-                    ('Different index for `y` and `exog`. They must be equal '
-                     'to ensure the correct alignment of values.')      
+                    ("Different index for `y` and `exog`. They must be equal "
+                     "to ensure the correct alignment of values.")      
                 )
             col_names_exog = exog.columns if isinstance(exog, pd.DataFrame) else [exog.name]
 
@@ -569,6 +576,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         self.last_window         = None
         self.included_exog       = False
         self.exog_type           = None
+        self.exog_dtypes         = None
         self.exog_col_names      = None
         self.X_train_col_names   = None
         self.in_sample_residuals = {step: None for step in range(1, self.steps + 1)}
