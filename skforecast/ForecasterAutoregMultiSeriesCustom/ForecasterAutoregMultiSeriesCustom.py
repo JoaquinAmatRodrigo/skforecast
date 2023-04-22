@@ -23,6 +23,8 @@ from ..ForecasterBase import ForecasterBase
 from ..utils import initialize_weights
 from ..utils import check_y
 from ..utils import check_exog
+from ..utils import get_exog_dtypes
+from ..utils import check_exog_dtypes
 from ..utils import check_interval
 from ..utils import preprocess_y
 from ..utils import preprocess_last_window
@@ -184,6 +186,10 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         
     exog_type : type
         Type of exogenous variable/s used in training.
+
+    exog_dtypes : dict
+        Type of each exogenous variable/s used in training. If `transformer_exog` 
+        is used, the dtypes are calculated after the transformation.
         
     exog_col_names : list
         Names of columns of `exog` if `exog` used in training was a pandas
@@ -256,37 +262,38 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         forecaster_id: Optional[Union[str, int]]=None
     ) -> None:
         
-        self.regressor                     = regressor
-        self.fun_predictors                = fun_predictors
-        self.source_code_fun_predictors    = None
-        self.window_size                   = window_size
-        self.name_predictors               = name_predictors
-        self.transformer_series            = transformer_series
-        self.transformer_series_           = None
-        self.transformer_exog              = transformer_exog
-        self.weight_func                   = weight_func
-        self.weight_func_                  = None
-        self.source_code_weight_func       = None
-        self.series_weights                = series_weights
-        self.series_weights_               = None
-        self.index_type                    = None
-        self.index_freq                    = None
-        self.index_values                  = None
-        self.training_range                = None
-        self.last_window                   = None
-        self.included_exog                 = False
-        self.exog_type                     = None
-        self.exog_col_names                = None
-        self.series_col_names              = None
-        self.X_train_col_names             = None
-        self.in_sample_residuals           = None
-        self.out_sample_residuals          = None
-        self.fitted                        = False
-        self.creation_date                 = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
-        self.fit_date                      = None
-        self.skforcast_version             = skforecast.__version__
-        self.python_version                = sys.version.split(" ")[0]
-        self.forecaster_id                 = forecaster_id
+        self.regressor                  = regressor
+        self.fun_predictors             = fun_predictors
+        self.source_code_fun_predictors = None
+        self.window_size                = window_size
+        self.name_predictors            = name_predictors
+        self.transformer_series         = transformer_series
+        self.transformer_series_        = None
+        self.transformer_exog           = transformer_exog
+        self.weight_func                = weight_func
+        self.weight_func_               = None
+        self.source_code_weight_func    = None
+        self.series_weights             = series_weights
+        self.series_weights_            = None
+        self.index_type                 = None
+        self.index_freq                 = None
+        self.index_values               = None
+        self.training_range             = None
+        self.last_window                = None
+        self.included_exog              = False
+        self.exog_type                  = None
+        self.exog_dtypes                = None
+        self.exog_col_names             = None
+        self.series_col_names           = None
+        self.X_train_col_names          = None
+        self.in_sample_residuals        = None
+        self.out_sample_residuals       = None
+        self.fitted                     = False
+        self.creation_date              = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
+        self.fit_date                   = None
+        self.skforcast_version          = skforecast.__version__
+        self.python_version             = sys.version.split(" ")[0]
+        self.forecaster_id              = forecaster_id
 
         if not isinstance(window_size, int):
             raise TypeError(
@@ -386,13 +393,13 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         """
 
         if not isinstance(series, pd.DataFrame):
-            raise TypeError(f'`series` must be a pandas DataFrame. Got {type(series)}.')
+            raise TypeError(f"`series` must be a pandas DataFrame. Got {type(series)}.")
 
         if len(series) < self.window_size + 1:
             raise ValueError(
-                (f'`series` must have as many values as the windows_size needed by '
-                 f'{self.fun_predictors.__name__}. For this Forecaster the '
-                 f'minimum length is {self.window_size + 1}')
+                (f"`series` must have as many values as the windows_size needed by "
+                 f"{self.fun_predictors.__name__}. For this Forecaster the "
+                 f"minimum length is {self.window_size + 1}")
             )
 
         series_col_names = list(series.columns)
@@ -411,12 +418,45 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
             series_not_in_transformer_series = set(series.columns) - set(self.transformer_series.keys())
             if series_not_in_transformer_series:
                     warnings.warn(
-                        f"{series_not_in_transformer_series} not present in `transformer_series`."
-                        f" No transformation is applied to these series."
+                        (f"{series_not_in_transformer_series} not present in `transformer_series`."
+                         f" No transformation is applied to these series.")
                     )
         
+        if exog is not None:
+            if len(exog) != len(series):
+                raise ValueError(
+                    (f"`exog` must have same number of samples as `series`. "
+                     f"length `exog`: ({len(exog)}), length `series`: ({len(series)})")
+                )
+            check_exog(exog=exog, allow_nan=True)
+            if isinstance(exog, pd.Series):
+                exog = transform_series(
+                           series            = exog,
+                           transformer       = self.transformer_exog,
+                           fit               = True,
+                           inverse_transform = False
+                       )
+            else:
+                exog = transform_dataframe(
+                           df                = exog,
+                           transformer       = self.transformer_exog,
+                           fit               = True,
+                           inverse_transform = False
+                       )
+            
+            check_exog(exog=exog, allow_nan=False)
+            check_exog_dtypes(exog)
+            self.exog_dtypes = get_exog_dtypes(exog=exog)
+
+            _, exog_index = preprocess_exog(exog=exog, return_values=False)
+            if not (exog_index[:len(series.index)] == series.index).all():
+                raise ValueError(
+                    ("Different index for `series` and `exog`. They must be equal "
+                     "to ensure the correct alignment of values.")
+                )
+
         X_levels = []
-        expected = []
+        
         for i, serie in enumerate(series.columns):
 
             y = series[serie]
@@ -480,61 +520,26 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
                  f"initializing the forecaster, does not correspond to the window "
                  f"used by `fun_predictors()`.")
             )
-
-        if exog is not None:
-            if len(exog) != len(series):
-                raise ValueError(
-                    f'`exog` must have same number of samples as `series`. '
-                    f'length `exog`: ({len(exog)}), length `series`: ({len(series)})'
-                )
-            check_exog(exog=exog)
-            if isinstance(exog, pd.Series):
-                exog = transform_series(
-                            series            = exog,
-                            transformer       = self.transformer_exog,
-                            fit               = True,
-                            inverse_transform = False
-                       )
-            else:
-                exog = transform_dataframe(
-                            df                = exog,
-                            transformer       = self.transformer_exog,
-                            fit               = True,
-                            inverse_transform = False
-                       )
-            exog_values, exog_index = preprocess_exog(exog=exog)
-            if not (exog_index[:len(y_index)] == y_index).all():
-                raise ValueError(
-                    ('Different index for `series` and `exog`. They must be equal '
-                     'to ensure the correct alignment of values.')      
-                )
-            col_names_exog = exog.columns if isinstance(exog, pd.DataFrame) else [exog.name]
-            X_train_col_names.extend(col_names_exog)
-
-            # The first `self.window_size` positions have to be removed from exog
-            # since they are not in X_train. Then exog is cloned as many times
-            # as series.
-            if exog_values.ndim == 1:
-                X_train = np.column_stack((
-                              X_train,
-                              np.tile(exog_values[self.window_size:, ], series.shape[1])
-                          )) 
-
-            else:
-                X_train = np.column_stack((
-                              X_train,
-                              np.tile(exog_values[self.window_size:, ], [series.shape[1], 1])
-                          ))
-
+        
         X_levels = pd.Series(X_levels)
         X_levels = pd.get_dummies(X_levels, dtype=float)
-        X_train_col_names.extend(X_levels.columns)
-        X_train = np.column_stack((X_train, X_levels.values))
 
         X_train = pd.DataFrame(
                       data    = X_train,
                       columns = X_train_col_names
                   )
+
+        if exog is not None:
+            # The first `self.window_size` positions have to be removed from exog
+            # since they are not in X_train. Then exog is cloned as many times
+            # as series.
+            exog_to_train = exog.iloc[self.window_size:, ]
+            exog_to_train = pd.concat([exog_to_train]*len(series_col_names)).reset_index(drop=True)
+        else:
+            exog_to_train = None
+
+        X_train = pd.concat([X_train, exog_to_train, X_levels], axis=1)
+        self.X_train_col_names = X_train.columns.to_list()
 
         y_train = pd.Series(
                       data = y_train,
@@ -547,8 +552,6 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
                                 reps = len(series_col_names)
                             )
                         )
-        
-        self.X_train_col_names = X_train_col_names
 
         return X_train, y_train, y_index, y_train_index
 
@@ -680,6 +683,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         self.last_window         = None
         self.included_exog       = False
         self.exog_type           = None
+        self.exog_dtypes         = None
         self.exog_col_names      = None
         self.series_col_names    = None
         self.X_train_col_names   = None
@@ -697,10 +701,10 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
 
             if len(set(self.exog_col_names) - set(self.series_col_names)) != len(self.exog_col_names):
                 raise ValueError(
-                    (f'`exog` cannot contain a column named the same as one of the series'
-                     f' (column names of series).\n'
-                     f'    `series` columns : {self.series_col_names}.\n'
-                     f'    `exog`   columns : {self.exog_col_names}.')
+                    (f"`exog` cannot contain a column named the same as one of the series"
+                     f" (column names of series).\n"
+                     f"    `series` columns : {self.series_col_names}.\n"
+                     f"    `exog`   columns : {self.exog_col_names}.")
                 )
 
         X_train, y_train, y_index, y_train_index = self.create_train_X_y(series=series, exog=exog)
@@ -893,9 +897,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
                            inverse_transform = False
                        )
             
-            exog_values, _ = preprocess_exog(
-                                 exog = exog.iloc[:steps, ]
-                             )
+            exog_values = exog.iloc[:steps, ].to_numpy()
         else:
             exog_values = None
 
@@ -1088,9 +1090,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
                            inverse_transform = False
                        )
             
-            exog_values, _ = preprocess_exog(
-                                 exog = exog.iloc[:steps, ]
-                             )
+            exog_values = exog.iloc[:steps, ].to_numpy()
         else:
             exog_values = None
         
@@ -1540,21 +1540,21 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
 
         try:
             feature_importance = pd.DataFrame({
-                                    'feature': self.X_train_col_names,
-                                    'importance' : estimator.feature_importances_
-                                })
+                                     'feature': self.X_train_col_names,
+                                     'importance': estimator.feature_importances_
+                                 })
         except:   
             try:
                 feature_importance = pd.DataFrame({
-                                        'feature': self.X_train_col_names,
-                                        'importance' : estimator.coef_
-                                    })
+                                         'feature': self.X_train_col_names,
+                                         'importance': estimator.coef_
+                                     })
             except:
                 warnings.warn(
-                    f"Impossible to access feature importance for regressor of type {type(estimator)}. "
-                    f"This method is only valid when the regressor stores internally "
-                    f"the feature importance in the attribute `feature_importances_` "
-                    f"or `coef_`."
+                    (f"Impossible to access feature importance for regressor of type {type(estimator)}. "
+                     f"This method is only valid when the regressor stores internally "
+                     f"the feature importance in the attribute `feature_importances_` "
+                     f"or `coef_`.")
                 )
 
                 feature_importance = None

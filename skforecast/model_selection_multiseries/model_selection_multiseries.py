@@ -16,8 +16,8 @@ from tqdm.auto import tqdm
 from sklearn.model_selection import ParameterGrid
 from sklearn.model_selection import ParameterSampler
 from sklearn.exceptions import NotFittedError
-from ..exceptions import LongTrainingWarning
 
+from ..exceptions import LongTrainingWarning
 from ..model_selection.model_selection import _get_metric
 from ..model_selection.model_selection import _backtesting_forecaster_verbose
 

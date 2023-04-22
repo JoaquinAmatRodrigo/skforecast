@@ -515,38 +515,6 @@ def test_check_predict_input_TypeError_when_last_window_index_frequency_is_not_i
         )
 
 
-@pytest.mark.parametrize("steps", [10, [1, 2, 3, 4, 5, 6], [2, 6]], 
-                         ids=lambda steps: f'steps: {steps}')
-def test_check_predict_input_ValueError_when_len_exog_is_less_than_steps(steps):
-    """
-    """
-    last_step = max(steps) if isinstance(steps, list) else steps
-    err_msg = re.escape(
-                f'`exog` must have at least as many values as the distance to '
-                f'the maximum step predicted, {last_step}.'
-            )
-    with pytest.raises(ValueError, match = err_msg):
-        check_predict_input(
-            forecaster_name  = 'ForecasterAutoreg',
-            steps            = steps,
-            fitted           = True,
-            included_exog    = True,
-            index_type       = pd.DatetimeIndex,
-            index_freq       = 'M',
-            window_size      = 5,
-            last_window      = pd.Series(np.arange(10), index=pd.date_range(start='1/1/2018', periods=10, freq='M')),
-            last_window_exog = None,
-            exog             = pd.Series(np.arange(5)),
-            exog_type        = None,
-            exog_col_names   = None,
-            interval         = None,
-            alpha            = None,
-            max_steps        = None,
-            levels           = None,
-            series_col_names = None
-        )
-
-
 def test_check_predict_input_TypeError_when_exog_is_not_pandas_series_or_dataframe():
     """
     """
@@ -573,7 +541,7 @@ def test_check_predict_input_TypeError_when_exog_is_not_pandas_series_or_datafra
         )
 
 
-def test_check_predict_input_warning_when_exog_has_missing_values():
+def test_check_predict_input_MissingValuesExogWarning_when_exog_has_missing_values():
     """
     """
     warn_msg = re.escape(
@@ -592,7 +560,7 @@ def test_check_predict_input_warning_when_exog_has_missing_values():
             last_window      = pd.Series(np.arange(10), index=pd.date_range(start='1/1/2018', periods=10, freq='M')),
             last_window_exog = None,
             exog             = pd.Series([1, 2, 3, np.nan], index=pd.date_range(start='11/1/2018', periods=4, freq='M')),
-            exog_type        = None,
+            exog_type        = pd.Series,
             exog_col_names   = None,
             interval         = None,
             alpha            = None,
@@ -608,7 +576,7 @@ def test_check_predict_input_TypeError_when_exog_is_not_of_exog_type():
     exog = pd.Series(np.arange(10))
     exog_type = pd.DataFrame
 
-    err_msg = re.escape(f'Expected type for `exog`: {exog_type}. Got {type(exog)}.')
+    err_msg = re.escape(f"Expected type for `exog`: {exog_type}. Got {type(exog)}.")
     with pytest.raises(TypeError, match = err_msg):
         check_predict_input(
             forecaster_name  = 'ForecasterAutoreg',
@@ -622,6 +590,38 @@ def test_check_predict_input_TypeError_when_exog_is_not_of_exog_type():
             last_window_exog = None,
             exog             = exog,
             exog_type        = exog_type,
+            exog_col_names   = None,
+            interval         = None,
+            alpha            = None,
+            max_steps        = None,
+            levels           = None,
+            series_col_names = None
+        )
+
+
+@pytest.mark.parametrize("steps", [10, [1, 2, 3, 4, 5, 6], [2, 6]], 
+                         ids=lambda steps: f'steps: {steps}')
+def test_check_predict_input_ValueError_when_len_exog_is_less_than_steps(steps):
+    """
+    """
+    last_step = max(steps) if isinstance(steps, list) else steps
+    err_msg = re.escape(
+                f'`exog` must have at least as many values as the distance to '
+                f'the maximum step predicted, {last_step}.'
+            )
+    with pytest.raises(ValueError, match = err_msg):
+        check_predict_input(
+            forecaster_name  = 'ForecasterAutoreg',
+            steps            = steps,
+            fitted           = True,
+            included_exog    = True,
+            index_type       = pd.DatetimeIndex,
+            index_freq       = 'M',
+            window_size      = 5,
+            last_window      = pd.Series(np.arange(10), index=pd.date_range(start='1/1/2018', periods=10, freq='M')),
+            last_window_exog = None,
+            exog             = pd.Series(np.arange(5)),
+            exog_type        = pd.Series,
             exog_col_names   = None,
             interval         = None,
             alpha            = None,

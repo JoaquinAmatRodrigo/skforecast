@@ -20,10 +20,11 @@ from sklearn.metrics import mean_squared_log_error
 from sklearn.model_selection import ParameterGrid
 from sklearn.model_selection import ParameterSampler
 from sklearn.exceptions import NotFittedError
-from ..exceptions import LongTrainingWarning
 import optuna
 from optuna.samplers import TPESampler, RandomSampler
 optuna.logging.set_verbosity(optuna.logging.WARNING) # disable optuna logs
+
+from ..exceptions import LongTrainingWarning
 
 logging.basicConfig(
     format = '%(name)-10s %(levelname)-5s %(message)s', 

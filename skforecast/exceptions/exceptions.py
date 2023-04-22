@@ -6,10 +6,10 @@
 ################################################################################
 # coding=utf-8
 
-'''
-The skforecast.exceptions module includes all custom warnings and error classes used
-across skforecast.
-'''
+"""
+The skforecast.exceptions module contains all the custom warnings and error 
+classes used across skforecast.
+"""
 
 class MissingValuesExogWarning(UserWarning):
     """
@@ -29,9 +29,9 @@ class MissingValuesExogWarning(UserWarning):
         return self.message + " " + extra_message
     
 
-class ValueTypeWarning(UserWarning):
+class DataTypeWarning(UserWarning):
     """
-    Warning used to notify there are values in the exogenous data that are not
+    Warning used to notify there are dtypes in the exogenous data that are not
     'int', 'float', 'bool' or 'category'. Most machine learning models do not
     accept other data types, therefore the forecaster `fit` and `predict` may fail.
     """
