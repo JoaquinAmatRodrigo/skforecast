@@ -152,13 +152,12 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_series_of_float
 def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_dataframe_of_float_int(dtype):
     """
     Test the output of create_train_X_y when y=pd.Series(np.arange(10)) and 
-    exog is a pandas dataframe with two columns of floats or ints.
+    exog is a pandas dataframe with 2 columns of floats or ints.
     """
     y = pd.Series(np.arange(10), dtype=float)
-    exog = pd.DataFrame({
-               'exog_1': np.arange(100, 110, dtype=dtype),
-               'exog_2': np.arange(1000, 1010, dtype=dtype)
-           })
+    exog = pd.DataFrame({'exog_1': np.arange(100, 110, dtype=dtype),
+                         'exog_2': np.arange(1000, 1010, dtype=dtype)})
+    
     forecaster = ForecasterAutoreg(LinearRegression(), lags=5)
     results = forecaster.create_train_X_y(y=y, exog=exog)        
     expected = (
