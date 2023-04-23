@@ -950,7 +950,10 @@ def exog_to_direct(
     exog_transformed = []
     for column in exog.columns:
 
-        exog_column_transformed = [(exog[column].iloc[i : len_columns-(steps-1-i)]).reset_index(drop=True) for i in range(steps)]
+        exog_column_transformed = [
+            (exog[column].iloc[i : len_columns - (steps - 1 - i)]).reset_index(drop=True)
+            for i in range(steps)
+        ]
         exog_column_transformed = pd.concat(exog_column_transformed, axis=1)
         exog_column_transformed.columns = [f"{column}_step_{i+1}" for i in range(steps)]
 
