@@ -293,10 +293,9 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_dataframe_of_ca
     exog is a pandas dataframe with two columns of category.
     """
     y = pd.Series(np.arange(10), dtype=float)
-    exog = pd.DataFrame({
-               'exog_1': pd.Categorical(range(10)),
-               'exog_2': pd.Categorical(range(100, 110)),
-           })
+    exog = pd.DataFrame({'exog_1': pd.Categorical(range(10)),
+                         'exog_2': pd.Categorical(range(100, 110))})
+    
     forecaster = ForecasterAutoreg(LinearRegression(), lags=5)
     results = forecaster.create_train_X_y(y=y, exog=exog)        
     expected = (
