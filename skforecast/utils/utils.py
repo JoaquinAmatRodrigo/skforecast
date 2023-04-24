@@ -889,9 +889,10 @@ def cast_exog_dtypes(
     so they have to be re-converted to `int`.
 
     Parameters
-    ----------        
+    ----------
     exog : pandas Series, pandas DataFrame
         Exogenous variables.
+    
     exog_dtypes: dict
         Dictionary with name and type of the series or data frame columns.
 
@@ -918,6 +919,59 @@ def cast_exog_dtypes(
 
 
 def exog_to_direct(
+    exog: Union[pd.Series, pd.DataFrame],
+    steps: int
+)-> pd.DataFrame:
+    """
+    Transforms `exog` to a pandas DataFrame with the shape needed for Direct
+    forecasting.
+    
+    Parameters
+    ----------
+    exog : pandas Series, pandas DataFrame
+        Exogenous variables.
+
+    steps : int.
+        Number of steps that will be predicted using exog.
+
+    Returns 
+    -------
+    exog_transformed : pandas DataFrame
+        Exogenous variables transformed.
+    
+    """
+
+    if not isinstance(exog, (pd.Series, pd.DataFrame)):
+        raise TypeError(f"`exog` must be a pandas Series or DataFrame. Got {type(exog)}.")
+
+    if isinstance(exog, pd.Series):
+        exog = exog.to_frame()
+
+    len_columns = len(exog)
+    exog_idx = exog.index
+    exog_transformed = []
+    for column in exog.columns:
+
+        exog_column_transformed = [
+            (exog[column].iloc[i : len_columns - (steps - 1 - i)]).reset_index(drop=True)
+            for i in range(steps)
+        ]
+        exog_column_transformed = pd.concat(exog_column_transformed, axis=1)
+        exog_column_transformed.columns = [f"{column}_step_{i+1}" for i in range(steps)]
+
+        exog_transformed.append(exog_column_transformed)
+
+    if len(exog_transformed) > 1:
+        exog_transformed = pd.concat(exog_transformed, axis=1)
+    else:
+        exog_transformed = exog_column_transformed
+
+    exog_transformed.index = exog_idx[-len(exog_transformed):]
+
+    return exog_transformed
+
+
+def exog_to_direct_numpy(
     exog: np.ndarray,
     steps: int
 )-> np.ndarray:
@@ -928,37 +982,33 @@ def exog_to_direct(
     Parameters
     ----------        
     exog : numpy ndarray, shape(samples,)
-        Time series values.
+        Exogenous variables.
 
     steps : int.
-        Number of steps that will be predicted using this exog.
+        Number of steps that will be predicted using exog.
 
     Returns 
     -------
     exog_transformed : numpy ndarray
-        Exog transformed.
+        Exogenous variables transformed.
 
     """
 
     exog_transformed = []
+    
+    if exog.ndim == 1:
+        exog = np.expand_dims(exog, axis=1)
 
-    if exog.ndim < 2:
-        exog = exog.reshape(-1, 1)
-
-    for column in range(exog.shape[1]):
-
-        exog_column_transformed = []
-
-        for i in range(exog.shape[0] - (steps -1)):
-            exog_column_transformed.append(exog[i:i + steps, column])
-
-        if len(exog_column_transformed) > 1:
-            exog_column_transformed = np.vstack(exog_column_transformed)
-
+    for i in range(exog.shape[1]):
+        exog_column = exog[:, i]
+        exog_column_transformed = np.vstack(
+            [np.roll(exog_column, j) for j in range(steps)]
+        ).T[steps - 1:]
+        exog_column_transformed = exog_column_transformed[:, ::-1]
         exog_transformed.append(exog_column_transformed)
 
     if len(exog_transformed) > 1:
-        exog_transformed = np.hstack(exog_transformed)
+        exog_transformed = np.concatenate(exog_transformed, axis=1)
     else:
         exog_transformed = exog_column_transformed
 

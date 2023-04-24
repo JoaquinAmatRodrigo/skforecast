@@ -471,6 +471,59 @@ def test_create_train_X_y_output_when_series_10_and_exog_is_dataframe_of_categor
             np.testing.assert_array_equal(results[i], expected[i])
 
 
+def test_create_train_X_y_output_when_series_10_and_exog_is_dataframe_of_float_int_category():
+    """
+    Test the output of create_train_X_y when series has 2 columns and 
+    exog is a pandas dataframe with two columns of float, int, category.
+    """
+    series = pd.DataFrame({'l1': pd.Series(np.arange(10, dtype=float)), 
+                           'l2': pd.Series(np.arange(10, dtype=float))})
+    exog = pd.DataFrame({'exog_1': pd.Series(np.arange(100, 110), dtype=float),
+                         'exog_2': pd.Series(np.arange(1000, 1010), dtype=int),
+                         'exog_3': pd.Categorical(range(100, 110))})
+
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5)
+    results = forecaster.create_train_X_y(series=series, exog=exog)   
+
+    expected = (
+        pd.DataFrame(
+            data = np.array([[4., 3., 2., 1., 0., 105., 1005.],
+                             [5., 4., 3., 2., 1., 106., 1006.],
+                             [6., 5., 4., 3., 2., 107., 1007.],
+                             [7., 6., 5., 4., 3., 108., 1008.],
+                             [8., 7., 6., 5., 4., 109., 1009.],
+                             [4., 3., 2., 1., 0., 105., 1005.],
+                             [5., 4., 3., 2., 1., 106., 1006.],
+                             [6., 5., 4., 3., 2., 107., 1007.],
+                             [7., 6., 5., 4., 3., 108., 1008.],
+                             [8., 7., 6., 5., 4., 109., 1009.]],
+                             dtype=float),
+            index   = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]),
+            columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 
+                       'exog_1', 'exog_2']
+        ).assign(exog_3 = pd.Categorical([105, 106, 107, 108, 109]*2, categories=range(100, 110)), 
+                 l1     = [1.]*5 + [0.]*5, 
+                 l2     = [0.]*5 + [1.]*5).astype({'exog_1': float, 
+                                                   'exog_2': int}),
+        pd.Series(
+            data  = np.array([5, 6, 7, 8, 9, 5, 6, 7, 8, 9]),
+            index = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]),
+            name  = 'y',
+            dtype = float
+        ),
+        pd.RangeIndex(start=0, stop=len(series), step=1),
+        pd.Index(np.array([5, 6, 7, 8, 9, 5, 6, 7, 8, 9]))
+    )
+
+    for i in range(len(expected)):
+        if isinstance(expected[i], pd.DataFrame):
+            pd.testing.assert_frame_equal(results[i], expected[i])
+        elif isinstance(expected[i], pd.Series):
+            pd.testing.assert_series_equal(results[i], expected[i])
+        else:
+            np.testing.assert_array_equal(results[i], expected[i])
+
+
 def test_create_train_X_y_output_when_series_and_exog_is_dataframe_datetime_index():
     """
     Test the output of create_train_X_y when series has 2 columns and 
@@ -479,16 +532,12 @@ def test_create_train_X_y_output_when_series_and_exog_is_dataframe_datetime_inde
     series = pd.DataFrame({'1': np.arange(7, dtype=float), 
                            '2': np.arange(7, dtype=float)},
                            index = pd.date_range("1990-01-01", periods=7, freq='D'))
+    exog = pd.DataFrame({'exog_1' : np.arange(100, 107, dtype=float),
+                         'exog_2' : np.arange(1000, 1007, dtype=float)},
+                        index = pd.date_range("1990-01-01", periods=7, freq='D'))
+                         
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
-
-    results = forecaster.create_train_X_y(
-                  series = series,
-                  exog = pd.DataFrame(
-                             {'exog_1' : np.arange(100, 107, dtype=float),
-                              'exog_2' : np.arange(1000, 1007, dtype=float)},
-                              index = pd.date_range("1990-01-01", periods=7, freq='D')
-                         )           
-              )
+    results = forecaster.create_train_X_y(series=series, exog=exog)
 
     expected = (
         pd.DataFrame(
