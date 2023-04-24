@@ -220,14 +220,14 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_None():
                              [6., 5., 4., 3., 2.],
                              [7., 6., 5., 4., 3.],
                              [8., 7., 6., 5., 4.]]),
-            index   = np.array([5, 6, 7, 8, 9]),
+            index   = pd.RangeIndex(start=5, stop=10, step=1),
             columns = ['custom_predictor_0', 'custom_predictor_1',
                        'custom_predictor_2', 'custom_predictor_3',
                        'custom_predictor_4']
         ),
         pd.Series(
             data  = np.array([5., 6., 7., 8., 9.]),
-            index = np.array([5, 6, 7, 8, 9]),
+            index = pd.RangeIndex(start=5, stop=10, step=1),
             name  = 'y',
             dtype = float
         )
@@ -260,14 +260,14 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_series_of_float
                              [6., 5., 4., 3., 2., 107.],
                              [7., 6., 5., 4., 3., 108.],
                              [8., 7., 6., 5., 4., 109.]]),
-            index   = np.array([5, 6, 7, 8, 9]),
+            index   = pd.RangeIndex(start=5, stop=10, step=1),
             columns = ['custom_predictor_0', 'custom_predictor_1',
                        'custom_predictor_2', 'custom_predictor_3',
                        'custom_predictor_4', 'exog']
         ).astype({'exog': dtype}),
         pd.Series(
             data  = np.array([5., 6., 7., 8., 9.]),
-            index = np.array([5, 6, 7, 8, 9]),
+            index = pd.RangeIndex(start=5, stop=10, step=1),
             name  = 'y',
             dtype = float
         )
@@ -303,14 +303,14 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_dataframe_of_fl
                              [6., 5., 4., 3., 2., 107., 1007.],
                              [7., 6., 5., 4., 3., 108., 1008.],
                              [8., 7., 6., 5., 4., 109., 1009.]]),
-            index   = np.array([5, 6, 7, 8, 9]),
+            index   = pd.RangeIndex(start=5, stop=10, step=1),
             columns = ['custom_predictor_0', 'custom_predictor_1',
                        'custom_predictor_2', 'custom_predictor_3',
                        'custom_predictor_4', 'exog_1', 'exog_2']
         ).astype({'exog_1': dtype, 'exog_2': dtype}),
         pd.Series(
             data  = np.array([5., 6., 7., 8., 9.]),
-            index = np.array([5, 6, 7, 8, 9]),
+            index = pd.RangeIndex(start=5, stop=10, step=1),
             name  = 'y',
             dtype = float
         )
@@ -344,14 +344,14 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_series_of_bool_
                              [6., 5., 4., 3., 2.],
                              [7., 6., 5., 4., 3.],
                              [8., 7., 6., 5., 4.]]),
-            index   = np.array([5, 6, 7, 8, 9]),
+            index   = pd.RangeIndex(start=5, stop=10, step=1),
             columns = ['custom_predictor_0', 'custom_predictor_1',
                        'custom_predictor_2', 'custom_predictor_3',
                        'custom_predictor_4']
         ).assign(exog=exog_values*5).astype({'exog': dtype}),
         pd.Series(
             data  = np.array([5, 6, 7, 8, 9]),
-            index = np.array([5, 6, 7, 8, 9]),
+            index = pd.RangeIndex(start=5, stop=10, step=1),
             name  = 'y',
             dtype = float
         )
@@ -388,14 +388,14 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_dataframe_of_bo
                              [6., 5., 4., 3., 2.],
                              [7., 6., 5., 4., 3.],
                              [8., 7., 6., 5., 4.]]),
-            index   = np.array([5, 6, 7, 8, 9]),
+            index   = pd.RangeIndex(start=5, stop=10, step=1),
             columns = ['custom_predictor_0', 'custom_predictor_1',
                        'custom_predictor_2', 'custom_predictor_3',
                        'custom_predictor_4']
         ).assign(exog_1=v_exog_1*5, exog_2=v_exog_2*5).astype({'exog_1': dtype, 'exog_2': dtype}),
         pd.Series(
             data  = np.array([5, 6, 7, 8, 9]),
-            index = np.array([5, 6, 7, 8, 9]),
+            index = pd.RangeIndex(start=5, stop=10, step=1),
             name  = 'y',
             dtype = float
         )
@@ -425,14 +425,14 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_series_of_categ
                              [6., 5., 4., 3., 2.],
                              [7., 6., 5., 4., 3.],
                              [8., 7., 6., 5., 4.]]),
-            index   = np.array([5, 6, 7, 8, 9]),
+            index   = pd.RangeIndex(start=5, stop=10, step=1),
             columns = ['custom_predictor_0', 'custom_predictor_1',
                        'custom_predictor_2', 'custom_predictor_3',
                        'custom_predictor_4']
         ).assign(exog=pd.Categorical(range(5, 10), categories=range(10))),
         pd.Series(
             data  = np.array([5, 6, 7, 8, 9]),
-            index = np.array([5, 6, 7, 8, 9]),
+            index = pd.RangeIndex(start=5, stop=10, step=1),
             name  = 'y',
             dtype = float
         )
@@ -465,7 +465,7 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_dataframe_of_ca
                              [6., 5., 4., 3., 2.],
                              [7., 6., 5., 4., 3.],
                              [8., 7., 6., 5., 4.]]),
-            index   = np.array([5, 6, 7, 8, 9]),
+            index   = pd.RangeIndex(start=5, stop=10, step=1),
             columns = ['custom_predictor_0', 'custom_predictor_1',
                        'custom_predictor_2', 'custom_predictor_3',
                        'custom_predictor_4']
@@ -475,7 +475,7 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_dataframe_of_ca
         ),
         pd.Series(
             data  = np.array([5, 6, 7, 8, 9]),
-            index = np.array([5, 6, 7, 8, 9]),
+            index = pd.RangeIndex(start=5, stop=10, step=1),
             name  = 'y',
             dtype = float
         )
@@ -509,7 +509,7 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_dataframe_of_fl
                              [6., 5., 4., 3., 2., 107., 1007.],
                              [7., 6., 5., 4., 3., 108., 1008.],
                              [8., 7., 6., 5., 4., 109., 1009.]]),
-            index   = np.array([5, 6, 7, 8, 9]),
+            index   = pd.RangeIndex(start=5, stop=10, step=1),
             columns = ['custom_predictor_0', 'custom_predictor_1',
                        'custom_predictor_2', 'custom_predictor_3',
                        'custom_predictor_4', 'exog_1', 'exog_2']
@@ -517,7 +517,7 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_dataframe_of_fl
                   'exog_2': int}).assign(exog_3=pd.Categorical(range(105, 110), categories=range(100, 110))),
         pd.Series(
             data  = np.array([5, 6, 7, 8, 9]),
-            index = np.array([5, 6, 7, 8, 9]),
+            index = pd.RangeIndex(start=5, stop=10, step=1),
             name  = 'y',
             dtype = float
         )

@@ -212,13 +212,13 @@ def test_create_train_X_y_output_when_lags_3_steps_1_and_exog_is_None(level, exp
                              [6., 5., 4., 106., 105., 104.],
                              [7., 6., 5., 107., 106., 105.],
                              [8., 7., 6., 108., 107., 106.]], dtype=float),
-            index   = np.array([3, 4, 5, 6, 7, 8, 9]),
+            index   = pd.RangeIndex(start=3, stop=10, step=1),
             columns = ['l1_lag_1', 'l1_lag_2', 'l1_lag_3',
                        'l2_lag_1', 'l2_lag_2', 'l2_lag_3']
         ),
         pd.DataFrame(
             data    = np.array(expected_y_values, dtype=float),
-            index   = np.array([3, 4, 5, 6, 7, 8, 9]),
+            index   = pd.RangeIndex(start=3, stop=10, step=1),
             columns = [f'{level}_step_1'])
     )
 
@@ -251,13 +251,13 @@ def test_create_train_X_y_output_when_interspersed_lags_steps_2_and_exog_is_None
                              [5., 3., 105., 103.],
                              [6., 4., 106., 104.],
                              [7., 5., 107., 105.]], dtype=float),
-            index   = np.array([4, 5, 6, 7, 8, 9]),
+            index   = pd.RangeIndex(start=4, stop=10, step=1),
             columns = ['l1_lag_1', 'l1_lag_3',
                        'l2_lag_1', 'l2_lag_3']
         ),
         pd.DataFrame(
             data    = np.array(expected_y_values, dtype=float),
-            index   = np.array([4, 5, 6, 7, 8, 9]),
+            index   = pd.RangeIndex(start=4, stop=10, step=1),
             columns = [f'{level}_step_1', f'{level}_step_2']
         )
     )
@@ -289,13 +289,13 @@ def test_create_train_X_y_output_when_different_lags_steps_2_and_exog_is_None(le
                              [5., 4., 3., 105., 101.],
                              [6., 5., 4., 106., 102.],
                              [7., 6., 5., 107., 103.]], dtype=float),
-            index   = np.array([6, 7, 8, 9]),
+            index   = pd.RangeIndex(start=6, stop=10, step=1),
             columns = ['l1_lag_1', 'l1_lag_2', 'l1_lag_3',
                        'l2_lag_1', 'l2_lag_5']
         ),
         pd.DataFrame(
             data    = np.array(expected_y_values, dtype=float),
-            index   = np.array([6, 7, 8, 9]),
+            index   = pd.RangeIndex(start=6, stop=10, step=1),
             columns = [f'{level}_step_1', f'{level}_step_2']
         )
     )
@@ -328,7 +328,7 @@ def test_create_train_X_y_output_when_lags_5_steps_1_and_exog_is_series_of_float
                              [7., 6., 5., 4., 3., 57., 56., 55., 54., 53., 108.],
                              [8., 7., 6., 5., 4., 58., 57., 56., 55., 54., 109.]], 
                              dtype=float),
-            index = np.array([5, 6, 7, 8, 9]),
+            index = pd.RangeIndex(start=5, stop=10, step=1),
             columns = ['l1_lag_1', 'l1_lag_2', 'l1_lag_3', 'l1_lag_4', 'l1_lag_5', 
                        'l2_lag_1', 'l2_lag_2', 'l2_lag_3', 'l2_lag_4', 'l2_lag_5',
                        'exog_step_1']
@@ -339,7 +339,7 @@ def test_create_train_X_y_output_when_lags_5_steps_1_and_exog_is_series_of_float
                              [7.],
                              [8.],
                              [9.]], dtype=float),
-            index = np.array([5, 6, 7, 8, 9]),
+            index = pd.RangeIndex(start=5, stop=10, step=1),
             columns = ['l1_step_1']
         )
     )
@@ -371,7 +371,7 @@ def test_create_train_X_y_output_when_lags_5_steps_2_and_exog_is_series_of_float
                              [6., 5., 4., 3., 2., 56., 55., 54., 53., 52., 107., 108.],
                              [7., 6., 5., 4., 3., 57., 56., 55., 54., 53., 108., 109.]], 
                              dtype=float),
-            index = np.array([6, 7, 8, 9]),
+            index = pd.RangeIndex(start=6, stop=10, step=1),
             columns = ['l1_lag_1', 'l1_lag_2', 'l1_lag_3', 'l1_lag_4', 'l1_lag_5', 
                        'l2_lag_1', 'l2_lag_2', 'l2_lag_3', 'l2_lag_4', 'l2_lag_5',
                        'exog_step_1', 'exog_step_2']
@@ -381,7 +381,7 @@ def test_create_train_X_y_output_when_lags_5_steps_2_and_exog_is_series_of_float
                              [6., 7.],
                              [7., 8.],
                              [8., 9.]], dtype=float),
-            index = np.array([6, 7, 8, 9]),
+            index = pd.RangeIndex(start=6, stop=10, step=1),
             columns = ['l1_step_1', 'l1_step_2']
         )
     )
@@ -415,7 +415,7 @@ def test_create_train_X_y_output_when_lags_5_steps_1_and_exog_is_dataframe_of_fl
                              [7., 6., 5., 4., 3., 57., 56., 55., 54., 53., 108., 1008.],
                              [8., 7., 6., 5., 4., 58., 57., 56., 55., 54., 109., 1009.]], 
                              dtype=float),
-            index = np.array([5, 6, 7, 8, 9]),
+            index = pd.RangeIndex(start=5, stop=10, step=1),
             columns = ['l1_lag_1', 'l1_lag_2', 'l1_lag_3', 'l1_lag_4', 'l1_lag_5', 
                        'l2_lag_1', 'l2_lag_2', 'l2_lag_3', 'l2_lag_4', 'l2_lag_5',
                        'exog_1_step_1', 'exog_2_step_1']
@@ -426,7 +426,7 @@ def test_create_train_X_y_output_when_lags_5_steps_1_and_exog_is_dataframe_of_fl
                              [57.],
                              [58.],
                              [59.]], dtype=float),
-            index = np.array([5, 6, 7, 8, 9]),
+            index = pd.RangeIndex(start=5, stop=10, step=1),
             columns = ['l2_step_1']
         )      
     )
@@ -458,7 +458,7 @@ def test_create_train_X_y_output_when_lags_5_steps_3_and_exog_is_dataframe_of_fl
                              [5., 4., 3., 2., 1., 55., 54., 53., 52., 51., 106., 107., 108., 1006., 1007., 1008.],
                              [6., 5., 4., 3., 2., 56., 55., 54., 53., 52., 107., 108., 109., 1007., 1008., 1009.]],
                             dtype=float),
-            index = np.array([7, 8, 9]),
+            index = pd.RangeIndex(start=7, stop=10, step=1),
             columns = ['l1_lag_1', 'l1_lag_2', 'l1_lag_3', 'l1_lag_4', 'l1_lag_5', 
                        'l2_lag_1', 'l2_lag_2', 'l2_lag_3', 'l2_lag_4', 'l2_lag_5',
                        'exog_1_step_1', 'exog_1_step_2', 'exog_1_step_3',
@@ -469,7 +469,7 @@ def test_create_train_X_y_output_when_lags_5_steps_3_and_exog_is_dataframe_of_fl
             data = np.array([[55., 56., 57.],
                              [56., 57., 58.],
                              [57., 58., 59.]], dtype=float),
-            index = np.array([7, 8, 9]),
+            index = pd.RangeIndex(start=7, stop=10, step=1),
             columns = ['l2_step_1', 'l2_step_2', 'l2_step_3']
         )
     )
@@ -503,7 +503,7 @@ def test_create_train_X_y_output_when_lags_5_steps_1_and_exog_is_series_of_bool_
                              [7., 6., 5., 4., 3., 57., 56., 55., 54., 53.],
                              [8., 7., 6., 5., 4., 58., 57., 56., 55., 54.]], 
                              dtype=float),
-            index = np.array([5, 6, 7, 8, 9]),
+            index = pd.RangeIndex(start=5, stop=10, step=1),
             columns = ['l1_lag_1', 'l1_lag_2', 'l1_lag_3', 'l1_lag_4', 'l1_lag_5', 
                        'l2_lag_1', 'l2_lag_2', 'l2_lag_3', 'l2_lag_4', 'l2_lag_5']
         ).assign(exog_step_1=exog_values*5).astype({'exog_step_1': dtype}),
@@ -513,7 +513,7 @@ def test_create_train_X_y_output_when_lags_5_steps_1_and_exog_is_series_of_bool_
                              [7.],
                              [8.],
                              [9.]], dtype=float),
-            index = np.array([5, 6, 7, 8, 9]),
+            index = pd.RangeIndex(start=5, stop=10, step=1),
             columns = ['l1_step_1']
         )
     )
@@ -546,7 +546,7 @@ def test_create_train_X_y_output_when_lags_5_steps_2_and_exog_is_series_of_bool_
                              [6., 5., 4., 3., 2., 56., 55., 54., 53., 52.],
                              [7., 6., 5., 4., 3., 57., 56., 55., 54., 53.]], 
                              dtype=float),
-            index = np.array([6, 7, 8, 9]),
+            index = pd.RangeIndex(start=6, stop=10, step=1),
             columns = ['l1_lag_1', 'l1_lag_2', 'l1_lag_3', 'l1_lag_4', 'l1_lag_5', 
                        'l2_lag_1', 'l2_lag_2', 'l2_lag_3', 'l2_lag_4', 'l2_lag_5']
         ).assign(exog_step_1=exog_values*4,
@@ -557,7 +557,7 @@ def test_create_train_X_y_output_when_lags_5_steps_2_and_exog_is_series_of_bool_
                              [6., 7.],
                              [7., 8.],
                              [8., 9.]], dtype=float),
-            index = np.array([6, 7, 8, 9]),
+            index = pd.RangeIndex(start=6, stop=10, step=1),
             columns = ['l1_step_1', 'l1_step_2']
         )
     )
@@ -592,7 +592,7 @@ def test_create_train_X_y_output_when_lags_5_steps_1_and_exog_is_dataframe_of_bo
                              [7., 6., 5., 4., 3., 57., 56., 55., 54., 53.],
                              [8., 7., 6., 5., 4., 58., 57., 56., 55., 54.]], 
                              dtype=float),
-            index = np.array([5, 6, 7, 8, 9]),
+            index = pd.RangeIndex(start=5, stop=10, step=1),
             columns = ['l1_lag_1', 'l1_lag_2', 'l1_lag_3', 'l1_lag_4', 'l1_lag_5', 
                        'l2_lag_1', 'l2_lag_2', 'l2_lag_3', 'l2_lag_4', 'l2_lag_5']
         ).assign(exog_1_step_1=v_exog_1*5,
@@ -604,7 +604,7 @@ def test_create_train_X_y_output_when_lags_5_steps_1_and_exog_is_dataframe_of_bo
                              [57.],
                              [58.],
                              [59.]], dtype=float),
-            index = np.array([5, 6, 7, 8, 9]),
+            index = pd.RangeIndex(start=5, stop=10, step=1),
             columns = ['l2_step_1']
         )      
     )
@@ -637,7 +637,7 @@ def test_create_train_X_y_output_when_lags_5_steps_3_and_exog_is_dataframe_of_bo
                              [5., 4., 3., 2., 1., 55., 54., 53., 52., 51.],
                              [6., 5., 4., 3., 2., 56., 55., 54., 53., 52.]],
                             dtype=float),
-            index = np.array([7, 8, 9]),
+            index = pd.RangeIndex(start=7, stop=10, step=1),
             columns = ['l1_lag_1', 'l1_lag_2', 'l1_lag_3', 'l1_lag_4', 'l1_lag_5', 
                        'l2_lag_1', 'l2_lag_2', 'l2_lag_3', 'l2_lag_4', 'l2_lag_5']
         ).assign(exog_1_step_1=v_exog_1*3,
@@ -651,7 +651,7 @@ def test_create_train_X_y_output_when_lags_5_steps_3_and_exog_is_dataframe_of_bo
             data = np.array([[55., 56., 57.],
                              [56., 57., 58.],
                              [57., 58., 59.]], dtype=float),
-            index = np.array([7, 8, 9]),
+            index = pd.RangeIndex(start=7, stop=10, step=1),
             columns = ['l2_step_1', 'l2_step_2', 'l2_step_3']
         )
     )
@@ -681,7 +681,7 @@ def test_create_train_X_y_output_when_lags_5_steps_1_and_exog_is_series_of_categ
                              [7., 6., 5., 4., 3., 57., 56., 55., 54., 53.],
                              [8., 7., 6., 5., 4., 58., 57., 56., 55., 54.]], 
                              dtype=float),
-            index = np.array([5, 6, 7, 8, 9]),
+            index = pd.RangeIndex(start=5, stop=10, step=1),
             columns = ['l1_lag_1', 'l1_lag_2', 'l1_lag_3', 'l1_lag_4', 'l1_lag_5', 
                        'l2_lag_1', 'l2_lag_2', 'l2_lag_3', 'l2_lag_4', 'l2_lag_5']
         ).assign(exog_step_1=pd.Categorical(range(5, 10), categories=range(10))),
@@ -691,7 +691,7 @@ def test_create_train_X_y_output_when_lags_5_steps_1_and_exog_is_series_of_categ
                              [7.],
                              [8.],
                              [9.]], dtype=float),
-            index = np.array([5, 6, 7, 8, 9]),
+            index = pd.RangeIndex(start=5, stop=10, step=1),
             columns = ['l1_step_1']
         )
     )
@@ -720,7 +720,7 @@ def test_create_train_X_y_output_when_lags_5_steps_2_and_exog_is_series_of_categ
                              [6., 5., 4., 3., 2., 56., 55., 54., 53., 52.],
                              [7., 6., 5., 4., 3., 57., 56., 55., 54., 53.]], 
                              dtype=float),
-            index = np.array([6, 7, 8, 9]),
+            index = pd.RangeIndex(start=6, stop=10, step=1),
             columns = ['l1_lag_1', 'l1_lag_2', 'l1_lag_3', 'l1_lag_4', 'l1_lag_5', 
                        'l2_lag_1', 'l2_lag_2', 'l2_lag_3', 'l2_lag_4', 'l2_lag_5']
         ).assign(exog_step_1=pd.Categorical(range(5, 9), categories=range(10)),
@@ -730,7 +730,7 @@ def test_create_train_X_y_output_when_lags_5_steps_2_and_exog_is_series_of_categ
                              [6., 7.],
                              [7., 8.],
                              [8., 9.]], dtype=float),
-            index = np.array([6, 7, 8, 9]),
+            index = pd.RangeIndex(start=6, stop=10, step=1),
             columns = ['l1_step_1', 'l1_step_2']
         )
     )
@@ -761,7 +761,7 @@ def test_create_train_X_y_output_when_lags_5_steps_1_and_exog_is_dataframe_of_ca
                              [7., 6., 5., 4., 3., 57., 56., 55., 54., 53.],
                              [8., 7., 6., 5., 4., 58., 57., 56., 55., 54.]], 
                              dtype=float),
-            index = np.array([5, 6, 7, 8, 9]),
+            index = pd.RangeIndex(start=5, stop=10, step=1),
             columns = ['l1_lag_1', 'l1_lag_2', 'l1_lag_3', 'l1_lag_4', 'l1_lag_5', 
                        'l2_lag_1', 'l2_lag_2', 'l2_lag_3', 'l2_lag_4', 'l2_lag_5']
         ).assign(
@@ -774,7 +774,7 @@ def test_create_train_X_y_output_when_lags_5_steps_1_and_exog_is_dataframe_of_ca
                              [57.],
                              [58.],
                              [59.]], dtype=float),
-            index = np.array([5, 6, 7, 8, 9]),
+            index = pd.RangeIndex(start=5, stop=10, step=1),
             columns = ['l2_step_1']
         )      
     )
@@ -803,7 +803,7 @@ def test_create_train_X_y_output_when_lags_5_steps_3_and_exog_is_dataframe_of_ca
                              [5., 4., 3., 2., 1., 55., 54., 53., 52., 51.],
                              [6., 5., 4., 3., 2., 56., 55., 54., 53., 52.]],
                             dtype=float),
-            index = np.array([7, 8, 9]),
+            index = pd.RangeIndex(start=7, stop=10, step=1),
             columns = ['l1_lag_1', 'l1_lag_2', 'l1_lag_3', 'l1_lag_4', 'l1_lag_5', 
                        'l2_lag_1', 'l2_lag_2', 'l2_lag_3', 'l2_lag_4', 'l2_lag_5']
         ).assign(
@@ -818,7 +818,7 @@ def test_create_train_X_y_output_when_lags_5_steps_3_and_exog_is_dataframe_of_ca
             data = np.array([[55., 56., 57.],
                              [56., 57., 58.],
                              [57., 58., 59.]], dtype=float),
-            index = np.array([7, 8, 9]),
+            index = pd.RangeIndex(start=7, stop=10, step=1),
             columns = ['l2_step_1', 'l2_step_2', 'l2_step_3']
         )
     )
@@ -849,7 +849,7 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_dataframe_of_fl
                              [7., 6., 5., 4., 3., 57., 56., 55., 54., 53., 108., 1008.],
                              [8., 7., 6., 5., 4., 58., 57., 56., 55., 54., 109., 1009.]], 
                              dtype=float),
-            index   = np.array([5, 6, 7, 8, 9]),
+            index   = pd.RangeIndex(start=5, stop=10, step=1),
             columns = ['l1_lag_1', 'l1_lag_2', 'l1_lag_3', 'l1_lag_4', 'l1_lag_5', 
                        'l2_lag_1', 'l2_lag_2', 'l2_lag_3', 'l2_lag_4', 'l2_lag_5',
                        'exog_1_step_1', 'exog_2_step_1']
@@ -857,7 +857,7 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_dataframe_of_fl
                   'exog_2_step_1': int}).assign(exog_3_step_1=pd.Categorical(range(105, 110), categories=range(100, 110))),
         pd.DataFrame(
             data    = np.array([5, 6, 7, 8, 9], dtype=float),
-            index   = np.array([5, 6, 7, 8, 9]),
+            index   = pd.RangeIndex(start=5, stop=10, step=1),
             columns = ['l1_step_1']
         )
     )
@@ -886,7 +886,7 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_dataframe_of_fl
                              [5., 4., 3., 2., 1., 55., 54., 53., 52., 51., 106., 107., 108., 1006., 1007., 1008.],
                              [6., 5., 4., 3., 2., 56., 55., 54., 53., 52., 107., 108., 109., 1007., 1008., 1009.]],
                             dtype=float),
-            index = np.array([7, 8, 9]),
+            index = pd.RangeIndex(start=7, stop=10, step=1),
             columns = ['l1_lag_1', 'l1_lag_2', 'l1_lag_3', 'l1_lag_4', 'l1_lag_5', 
                        'l2_lag_1', 'l2_lag_2', 'l2_lag_3', 'l2_lag_4', 'l2_lag_5',
                        'exog_1_step_1', 'exog_1_step_2', 'exog_1_step_3',
@@ -903,7 +903,7 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_dataframe_of_fl
             data = np.array([[5., 6., 7.],
                              [6., 7., 8.],
                              [7., 8., 9.]], dtype=float),
-            index = np.array([7, 8, 9]),
+            index = pd.RangeIndex(start=7, stop=10, step=1),
             columns = ['l1_step_1', 'l1_step_2', 'l1_step_3']
         )
     )
@@ -989,13 +989,13 @@ def test_create_train_X_y_output_when_lags_3_steps_1_and_exog_is_None_and_transf
                              [6., 5., 4., 106., 105., 104.],
                              [7., 6., 5., 107., 106., 105.],
                              [8., 7., 6., 108., 107., 106.]], dtype=float),
-            index   = np.array([3, 4, 5, 6, 7, 8, 9]),
+            index   = pd.RangeIndex(start=3, stop=10, step=1),
             columns = ['l1_lag_1', 'l1_lag_2', 'l1_lag_3',
                        'l2_lag_1', 'l2_lag_2', 'l2_lag_3']
         ),
         pd.DataFrame(
             data    = np.array(expected_y_values, dtype=float),
-            index   = np.array([3, 4, 5, 6, 7, 8, 9]),
+            index   = pd.RangeIndex(start=3, stop=10, step=1),
             columns = [f'{level}_step_1'])
     )
 

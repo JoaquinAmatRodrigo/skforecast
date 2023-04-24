@@ -400,7 +400,7 @@ class ForecasterAutoregDirect(ForecasterBase):
                 )
             check_exog(exog=exog, allow_nan=True)
             # Need here for filter_train_X_y_for_step to work without fitting
-            self.included_exog = True 
+            self.included_exog = True
             if isinstance(exog, pd.Series):
                 exog = transform_series(
                            series            = exog,
