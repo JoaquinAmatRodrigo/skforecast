@@ -100,7 +100,7 @@ def test_exog_to_direct_when_steps_2_exog_DataFrame_2d_category():
 def test_exog_to_direct_when_steps_2_exog_DataFrame_3d_float_int_category():
     """
     Test exog_to_direct results when using steps 2 and exog is a  
-    pandas DataFrame with 2 columns of float, int, category.
+    pandas DataFrame with 3 columns of float, int, category.
     """
     exog = pd.DataFrame({'exog_1': pd.Series(np.arange(100, 110), dtype=float),
                          'exog_2': pd.Series(np.arange(1000, 1010), dtype=int),
