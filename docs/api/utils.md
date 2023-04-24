@@ -6,12 +6,16 @@
 ::: skforecast.utils.utils.initialize_weights
 ::: skforecast.utils.utils.check_y
 ::: skforecast.utils.utils.check_exog
+::: skforecast.utils.utils.get_exog_dtypes
+::: skforecast.utils.utils.check_exog_dtypes
 ::: skforecast.utils.utils.check_interval
 ::: skforecast.utils.utils.check_predict_input
 ::: skforecast.utils.utils.preprocess_y
 ::: skforecast.utils.utils.preprocess_last_window
 ::: skforecast.utils.utils.preprocess_exog
+::: skforecast.utils.utils.cast_exog_dtypes
 ::: skforecast.utils.utils.exog_to_direct
+::: skforecast.utils.utils.exog_to_direct_numpy
 ::: skforecast.utils.utils.expand_index
 ::: skforecast.utils.utils.transform_series
 ::: skforecast.utils.utils.transform_dataframe

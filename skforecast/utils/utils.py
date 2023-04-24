@@ -932,12 +932,13 @@ def exog_to_direct(
         Exogenous variables.
 
     steps : int.
-        Number of steps that will be predicted using this exog.
+        Number of steps that will be predicted using exog.
 
     Returns 
     -------
-    exog_transformed : numpy ndarray
-        Exog transformed.
+    exog_transformed : pandas DataFrame
+        Exogenous variables transformed.
+    
     """
 
     if not isinstance(exog, (pd.Series, pd.DataFrame)):
@@ -947,6 +948,7 @@ def exog_to_direct(
         exog = exog.to_frame()
 
     len_columns = len(exog)
+    exog_idx = exog.index
     exog_transformed = []
     for column in exog.columns:
 
@@ -964,6 +966,8 @@ def exog_to_direct(
     else:
         exog_transformed = exog_column_transformed
 
+    exog_transformed.index = exog_idx[-len(exog_transformed):]
+
     return exog_transformed
 
 
@@ -978,15 +982,15 @@ def exog_to_direct_numpy(
     Parameters
     ----------        
     exog : numpy ndarray, shape(samples,)
-        Time series values.
+        Exogenous variables.
 
     steps : int.
-        Number of steps that will be predicted using this exog.
+        Number of steps that will be predicted using exog.
 
     Returns 
     -------
     exog_transformed : numpy ndarray
-        Exog transformed.
+        Exogenous variables transformed.
 
     """
 
