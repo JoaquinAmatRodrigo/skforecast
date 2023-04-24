@@ -15,18 +15,18 @@
 
 **Time series forecasting with scikit-learn regressors.**
 
-**Skforecast** is a python library that eases using scikit-learn regressors as multi-step forecasters. It also works with any regressor compatible with the scikit-learn API (pipelines, CatBoost, LightGBM, XGBoost, Ranger...).
+**Skforecast** is a Python library that eases using scikit-learn regressors as multi-step forecasters. It also works with any regressor compatible with the scikit-learn API (pipelines, CatBoost, LightGBM, XGBoost, Ranger...).
 
 **Why use skforecast?**
 
 Skforecast is developed according to the following priorities:
 
-+ Fast and robust prototyping.
-+ Validation and backtesting methods to have a realistic assessment of model performance.
-+ Models must be deployed in production.
-+ Models must be interpretable.
++ Fast and robust prototyping. ⚡
++ Validation and backtesting methods to have a realistic assessment of model performance. 🔍
++ Models must be deployed in production. 📦
++ Models must be interpretable. 🔮
 
-**Documentation: https://joaquinamatrodrigo.github.io/skforecast/**
+**Documentation: https://skforecast.org**
 
 
 # Installation
@@ -40,7 +40,7 @@ pip install skforecast
 Specific version:
 
 ```bash
-pip install skforecast==0.7.0
+pip install skforecast==0.7.1
 ```
 
 Latest (unstable):
@@ -72,7 +72,7 @@ pip install skforecast[plotting]
 ## Hard dependencies
 
 + numpy>=1.20, <1.25
-+ pandas>=1.2, <1.6
++ pandas>=1.2, <2.1
 + tqdm>=4.57.0, <4.65
 + scikit-learn>=1.0, <1.3
 + optuna>=2.10.0, <3.2
@@ -93,45 +93,44 @@ pip install skforecast[plotting]
 + Include exogenous variables as predictors
 + Include custom predictors (rolling mean, rolling variance ...)
 + Multiple backtesting methods for model validation
-+ Grid search, random search and bayesian search to find optimal lags (predictors) and best hyperparameters
++ Grid search, random search and Bayesian search to find optimal lags (predictors) and best hyperparameters
 + Include custom metrics for model validation and grid search
 + Prediction interval estimated by bootstrapping and quantile regression
 + Get predictor importance
 + Forecaster in production
 
-## What is new in skforecast 0.7.0?
+## What is new in skforecast 0.7.1?
 
-- [x] Predict and plot the distribution of each predicted step, `predict_dist` and `plot_prediction_distribution` (Ridgeline plot).
-- [x] A class for ARIMA models with [pmdarima](https://github.com/alkaline-ml/pmdarima), `ForecasterSarimax`, `model_selection_sarimax`.
-- [x] Modeling multiple time series simultaneously with a custom function to create predictors, `ForecasterAutoregMultiSeriesCustom`.
-- [x] `python 3.11` compatibility.
+- [x] Support for `pandas 2.0.x`.
+- [x] New user guide on how to include **categorical variables** in the Forecasters.
+- [x] New user guide on how to use **GPU in Google Colab** with XGBoost and LightGBM regressors.
+- [x] The dtypes of exogenous variables are maintained when generating the training matrices with the `create_train_X_y` method in all the Forecasters.
 - [x] Bug fixes and performance improvements.
 
-
-Visit the [changelog](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/changelog.md) to view all notable changes.
+Visit the [release notes](https://skforecast.org/latest/releases/releases.html) to view all notable changes.
 
 
 # Documentation
 
-The documentation for the latest release is at [skforecast docs](https://joaquinamatrodrigo.github.io/skforecast/).
+The documentation for the latest release is at [skforecast docs](https://skforecast.org).
 
-Recent improvements are highlighted in the [release notes](https://joaquinamatrodrigo.github.io/skforecast/latest/releases/releases.html).
+Recent improvements are highlighted in the [release notes](https://skforecast.org/latest/releases/releases.html).
 
-+ [Introduction to time series and forecasting](https://joaquinamatrodrigo.github.io/skforecast/latest/quick-start/introduction-forecasting.html)
++ [Introduction to time series and forecasting](https://skforecast.org/latest/user_guides/quick-start-skforecast.html)
 
-+ [Recursive multi-step forecasting](https://joaquinamatrodrigo.github.io/skforecast/latest/user_guides/autoregresive-forecaster.html)
++ [Recursive multi-step forecasting](https://skforecast.org/latest/user_guides/autoregresive-forecaster.html)
 
-+ [Multi-time series forecasting](https://joaquinamatrodrigo.github.io/skforecast/latest/user_guides/multi-time-series-forecasting.html)
++ [Independent multi-series forecasting](https://skforecast.org/latest/user_guides/independent-multi-time-series-forecasting.html)
 
-+ [Multivariate forecasting](https://joaquinamatrodrigo.github.io/skforecast/latest/user_guides/multivariate-forecasting.html)
++ [Dependent multi-series forecasting (Multivariate forecasting)](https://skforecast.org/latest/user_guides/dependent-multi-series-multivariate-forecasting.html)
 
-+ [Backtesting (validation) of forecasting models](https://joaquinamatrodrigo.github.io/skforecast/latest/user_guides/backtesting.html)
++ [Backtesting (validation) of forecasting models](https://skforecast.org/latest/user_guides/backtesting.html)
 
-+ [Hyperparameter tuning and lags selection of forecasting models](https://joaquinamatrodrigo.github.io/skforecast/latest/user_guides/hyperparameter-tuning-and-lags-selection.html)
++ [Hyperparameter tuning and lags selection of forecasting models](https://skforecast.org/latest/user_guides/hyperparameter-tuning-and-lags-selection.html)
 
-+ [Prediction intervals](https://joaquinamatrodrigo.github.io/skforecast/latest/user_guides/prediction-intervals.html)
++ [Probabilistic forecasting](https://skforecast.org/latest/user_guides/probabilistic-forecasting.html)
 
-+ [Using forecasters in production](https://joaquinamatrodrigo.github.io/skforecast/latest/user_guides/forecaster-in-production.html)
++ [Using forecasters in production](https://skforecast.org/latest/user_guides/forecaster-in-production.html)
 
 
 # Examples and tutorials 
@@ -194,7 +193,7 @@ If you use this software, please cite it using the following metadata.
 
 **APA**:
 ```
-Amat Rodrigo, J., & Escobar Ortiz, J. skforecast (Version 0.7.0) [Computer software]
+Amat Rodrigo, J., & Escobar Ortiz, J. skforecast (Version 0.7.1) [Computer software]
 ```
 
 **BibTeX**:
@@ -202,9 +201,9 @@ Amat Rodrigo, J., & Escobar Ortiz, J. skforecast (Version 0.7.0) [Computer softw
 @software{skforecast,
 author = {Amat Rodrigo, Joaquin and Escobar Ortiz, Javier},
 license = {MIT},
-month = {3},
+month = {4},
 title = {{skforecast}},
-version = {0.7.0},
+version = {0.7.1},
 year = {2023}
 }
 ```

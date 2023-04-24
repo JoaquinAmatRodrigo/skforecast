@@ -6,7 +6,7 @@
 
 **Time series forecasting with scikit-learn regressors.**
 
-**Skforecast** is a python library that eases using scikit-learn regressors as multi-step forecasters. It also works with any regressor compatible with the scikit-learn API (pipelines, CatBoost, LightGBM, XGBoost, Ranger...).
+**Skforecast** is a Python library that eases using scikit-learn regressors as multi-step forecasters. It also works with any regressor compatible with the scikit-learn API (pipelines, CatBoost, LightGBM, XGBoost, Ranger...).
 
 **Why use skforecast?**
 
@@ -28,7 +28,7 @@ pip install skforecast
 Specific version:
 
 ```bash
-pip install skforecast==0.7.0
+pip install skforecast==0.7.1
 ```
 
 Latest (unstable):
@@ -60,7 +60,7 @@ pip install skforecast[plotting]
 ### Hard dependencies
 
 + numpy>=1.20, <1.25
-+ pandas>=1.2, <1.6
++ pandas>=1.2, <2.1
 + tqdm>=4.57.0, <4.65
 + scikit-learn>=1.0, <1.3
 + optuna>=2.10.0, <3.2
@@ -82,7 +82,7 @@ pip install skforecast[plotting]
 + Include exogenous variables as predictors
 + Include custom predictors (rolling mean, rolling variance ...)
 + Multiple backtesting methods for model validation
-+ Grid search, random search and bayesian search to find optimal lags (predictors) and best hyperparameters
++ Grid search, random search and Bayesian search to find optimal lags (predictors) and best hyperparameters
 + Include custom metrics for model validation and grid search
 + Prediction interval estimated by bootstrapping and quantile regression
 + Get predictor importance
@@ -150,7 +150,7 @@ If you use this software, please cite it using the following metadata.
 
 **APA**:
 ```
-Amat Rodrigo, J., & Escobar Ortiz, J. skforecast (Version 0.7.0) [Computer software]
+Amat Rodrigo, J., & Escobar Ortiz, J. skforecast (Version 0.7.1) [Computer software]
 ```
 
 **BibTeX**:
@@ -158,9 +158,9 @@ Amat Rodrigo, J., & Escobar Ortiz, J. skforecast (Version 0.7.0) [Computer softw
 @software{skforecast,
 author = {Amat Rodrigo, Joaquin and Escobar Ortiz, Javier},
 license = {MIT},
-month = {3},
+month = {4},
 title = {{skforecast}},
-version = {0.7.0},
+version = {0.7.1},
 year = {2023}
 }
 ```

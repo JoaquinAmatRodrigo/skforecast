@@ -2,11 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.7.1] - [2023-04-xx]
+## [0.7.1] - [2023-04-25]
 
 **Added**
 
-+ Added exceptions module with custom warnings.
++ Added `exceptions` module with custom warnings.
 
 + Added function `utils.get_exog_dtypes` to issue a warning if exogenous variables are one of type `init`, `float`, or `category`. Raise Exception if `exog` has categorical columns with non integer values.
 
@@ -15,23 +15,24 @@ All notable changes to this project will be documented in this file.
 + Added function `utils.cast_exog_dtypes` to cast data types of the exogenous variables using a dictionary as a mapping.
 
 + Added argument `show_progress` to functions `model_selection.backtesting_forecaster`, `model_selection_multiseries.backtesting_forecaster_multiseries` and `model_selection_sarimax.backtesting_forecaster_sarimax` to indicate weather to show a progress bar.
+  
++ Support for `pandas 2.0.x`.
 
 **Changed**
 
-+ The `utils.check_exog` function now includes a new optional parameter, `allow_nan`,
-that controls whether a warning should be issued if the input `exog` contains NaN values. 
++ The `utils.check_exog` function now includes a new optional parameter, `allow_nan`, that controls whether a warning should be issued if the input `exog` contains NaN values. 
 
 + `check_exog` is applied before and after `exog` transformations.
 
-+ The `utils.preprocess_y` function now includes a new optional parameter, `return_values`,
-that controls whether to return a numpy ndarray with the values of y or not. This new option is intended to avoid copying data when it is not necessary.
++ The `utils.preprocess_y` function now includes a new optional parameter, `return_values`, that controls whether to return a numpy ndarray with the values of y or not. This new option is intended to avoid copying data when it is not necessary.
 
-+ The `utils.preprocess_exog` function now includes a new optional parameter, `return_values`,
-that controls whether to return a numpy ndarray with the values of y or not. This new option is intended to avoid copying data when it is not necessary.
++ The `utils.preprocess_exog` function now includes a new optional parameter, `return_values`, that controls whether to return a numpy ndarray with the values of y or not. This new option is intended to avoid copying data when it is not necessary.
 
 + Replaced `tqdm.tqdm` by `tqdm.auto.tqdm`.
 
 **Fixed**
+
++ The dtypes of exogenous variables are maintained when generating the training matrices with the `create_train_X_y` method in all the Forecasters.
 
 
 ## [0.7.0] - [2023-03-21]

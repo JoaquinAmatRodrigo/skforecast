@@ -378,7 +378,9 @@ class ForecasterAutoregDirect(ForecasterBase):
         if len(y) < self.max_lag + self.steps:
             raise ValueError(
                 (f"Minimum length of `y` for training this forecaster is "
-                 f"{self.max_lag + self.steps}. Got {len(y)}.")
+                 f"{self.max_lag + self.steps}. Got {len(y)}. Reduce the "
+                 f"number of predicted steps, {self.steps}, or the maximum "
+                 f"lag, {self.max_lag}, if no more data is available.")
             )
 
         check_y(y=y)
@@ -390,19 +392,15 @@ class ForecasterAutoregDirect(ForecasterBase):
             )
         y_values, y_index = preprocess_y(y=y)
 
-        X_train, y_train = self._create_lags(y=y_values)
-        y_train_col_names = [f"y_step_{i+1}" for i in range(self.steps)]
-        X_train_col_names = [f"lag_{i}" for i in self.lags]
-
         if exog is not None:
             if len(exog) != len(y):
                 raise ValueError(
                     (f"`exog` must have same number of samples as `y`. "
                      f"length `exog`: ({len(exog)}), length `y`: ({len(y)})")
                 )
-            check_exog(exog=exog)
+            check_exog(exog=exog, allow_nan=True)
             # Need here for filter_train_X_y_for_step to work without fitting
-            self.included_exog = True 
+            self.included_exog = True
             if isinstance(exog, pd.Series):
                 exog = transform_series(
                            series            = exog,
@@ -417,30 +415,36 @@ class ForecasterAutoregDirect(ForecasterBase):
                            fit               = True,
                            inverse_transform = False
                        )
-            exog_values, exog_index = preprocess_exog(exog=exog)
+                
+            check_exog(exog=exog, allow_nan=False)
+            check_exog_dtypes(exog)
+            self.exog_dtypes = get_exog_dtypes(exog=exog)
+
+            _, exog_index = preprocess_exog(exog=exog, return_values=False)
             if not (exog_index[:len(y_index)] == y_index).all():
                 raise ValueError(
                     ("Different index for `y` and `exog`. They must be equal "
                      "to ensure the correct alignment of values.")      
                 )
-            col_names_exog = exog.columns if isinstance(exog, pd.DataFrame) else [exog.name]
 
-            # Transform exog to match direct format
-            X_exog = exog_to_direct(exog=exog_values, steps=self.steps)
-            col_names_exog = [f"{col_name}_step_{i+1}" for col_name in col_names_exog for i in range(self.steps)]
-            X_train_col_names.extend(col_names_exog)
-
-            # The first `self.max_lag` positions have to be removed from X_exog
-            # since they are not in X_lags.
-            X_exog = X_exog[-X_train.shape[0]:, ]
-            X_train = np.column_stack((X_train, X_exog))
-
+        X_train, y_train = self._create_lags(y=y_values)
+        X_train_col_names = [f"lag_{i}" for i in self.lags]
         X_train = pd.DataFrame(
                       data    = X_train,
                       columns = X_train_col_names,
                       index   = y_index[self.max_lag + (self.steps -1): ]
                   )
-        self.X_train_col_names = X_train_col_names
+
+        if exog is not None:
+            # Transform exog to match direct format
+            # The first `self.max_lag` positions have to be removed from X_exog
+            # since they are not in X_lags.
+            exog_to_train = exog_to_direct(exog=exog, steps=self.steps).iloc[-X_train.shape[0]:, :]
+            X_train = pd.concat((X_train, exog_to_train), axis=1)
+
+        self.X_train_col_names = X_train.columns.to_list()
+
+        y_train_col_names = [f"y_step_{i+1}" for i in range(self.steps)]
         y_train = pd.DataFrame(
                       data    = y_train,
                       index   = y_index[self.max_lag + (self.steps -1): ],
@@ -484,8 +488,8 @@ class ForecasterAutoregDirect(ForecasterBase):
 
         if (step < 1) or (step > self.steps):
             raise ValueError(
-                f"Invalid value `step`. For this forecaster, minimum value is 1 "
-                f"and the maximum step is {self.steps}."
+                (f"Invalid value `step`. For this forecaster, minimum value is 1 "
+                 f"and the maximum step is {self.steps}.")
             )
 
         step = step - 1 # Matrices X_train and y_train start at index 0.
@@ -625,7 +629,7 @@ class ForecasterAutoregDirect(ForecasterBase):
 
         self.fitted = True
         self.fit_date = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
-        self.training_range = preprocess_y(y=y)[1][[0, -1]]
+        self.training_range = preprocess_y(y=y, return_values=False)[1][[0, -1]]
         self.index_type = type(X_train.index)
         if isinstance(X_train.index, pd.DatetimeIndex):
             self.index_freq = X_train.index.freqstr
@@ -687,8 +691,8 @@ class ForecasterAutoregDirect(ForecasterBase):
         for step in steps:
             if not isinstance(step, (int, np.int64, np.int32)):
                 raise TypeError(
-                    f"`steps` argument must be an int, a list of ints or `None`. "
-                    f"Got {type(steps)}."
+                    (f"`steps` argument must be an int, a list of ints or `None`. "
+                     f"Got {type(steps)}.")
                 )
 
         if last_window is None:
@@ -729,11 +733,7 @@ class ForecasterAutoregDirect(ForecasterBase):
                            fit               = False,
                            inverse_transform = False
                        )
-            
-            exog_values, _ = preprocess_exog(
-                                 exog = exog.iloc[:max(steps), ]
-                             )
-            exog_values = exog_to_direct(exog=exog_values, steps=max(steps))
+            exog_values = exog_to_direct(exog=exog.iloc[:max(steps), ], steps=max(steps)).to_numpy()
         else:
             exog_values = None
 
@@ -861,28 +861,28 @@ class ForecasterAutoregDirect(ForecasterBase):
         if in_sample_residuals:
             if not set(steps).issubset(set(self.in_sample_residuals.keys())):
                 raise ValueError(
-                    (f'Not `forecaster.in_sample_residuals` for steps: '
-                     f'{set(steps) - set(self.in_sample_residuals.keys())}.')
+                    (f"Not `forecaster.in_sample_residuals` for steps: "
+                     f"{set(steps) - set(self.in_sample_residuals.keys())}.")
                 )
             residuals = self.in_sample_residuals
         else:
             if self.out_sample_residuals is None:
                 raise ValueError(
-                    ('`forecaster.out_sample_residuals` is `None`. Use '
-                     '`in_sample_residuals=True` or method `set_out_sample_residuals()` '
-                     'before `predict_interval()`, `predict_bootstrapping()` or '
-                     '`predict_dist()`.')
+                    ("`forecaster.out_sample_residuals` is `None`. Use "
+                     "`in_sample_residuals=True` or method `set_out_sample_residuals()` "
+                     "before `predict_interval()`, `predict_bootstrapping()` or "
+                     "`predict_dist()`.")
                 )
             else:
                 if not set(steps).issubset(set(self.out_sample_residuals.keys())):
                     raise ValueError(
-                        (f'Not `forecaster.out_sample_residuals` for steps: '
-                         f'{set(steps) - set(self.out_sample_residuals.keys())}. '
-                         f'Use method `set_out_sample_residuals()`.')
+                        (f"Not `forecaster.out_sample_residuals` for steps: "
+                         f"{set(steps) - set(self.out_sample_residuals.keys())}. "
+                         f"Use method `set_out_sample_residuals()`.")
                     )
             residuals = self.out_sample_residuals
         
-        check_residuals = 'forecaster.in_sample_residuals' if in_sample_residuals else 'forecaster.out_sample_residuals'
+        check_residuals = "forecaster.in_sample_residuals" if in_sample_residuals else "forecaster.out_sample_residuals"
         for step in steps:
             if residuals[step] is None:
                 raise ValueError(

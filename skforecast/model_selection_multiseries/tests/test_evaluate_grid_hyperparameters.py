@@ -198,7 +198,7 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
                                             0.21077344827205086, 0.21078653113227208, 0.21078779824759553]),                                                               
             'alpha' :np.array([0.01, 0.1, 1., 1., 0.1, 0.01])
                                      },
-            index=[3, 4, 5, 2, 1, 0]
+            index=pd.Index([3, 4, 5, 2, 1, 0], dtype='int64')
                                    )
 
     pd.testing.assert_frame_equal(results, expected_results)
@@ -243,7 +243,7 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregMultiSeries_lags_
             'mean_absolute_error':np.array([0.21077344827205086, 0.21078653113227208, 0.21078779824759553]),                                                               
             'alpha' :np.array([1., 0.1 , 0.01])
                                      },
-            index=[2, 1, 0]
+            index=pd.Index([2, 1, 0], dtype='int64')
                                    )
 
     pd.testing.assert_frame_equal(results, expected_results)
@@ -291,7 +291,7 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
                                             0.2073988652614679, 0.20741562577568792, 0.2075484707375347]),                                                               
             'alpha' :np.array([0.01, 0.1, 1., 0.01, 0.1, 1.])
                                      },
-            index=[3, 4, 5, 0, 1, 2]
+            index=pd.Index([3, 4, 5, 0, 1, 2], dtype='int64')
                                    )
 
     pd.testing.assert_frame_equal(results, expected_results)
@@ -338,7 +338,7 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
                                             0.21078779824759553, 0.21078653113227208, 0.21077344827205086]),
             'alpha' :np.array([0.01, 0.1, 1., 0.01, 0.1, 1.])
                                      },
-            index=[3, 4, 5, 0, 1, 2]
+            index=pd.Index([3, 4, 5, 0, 1, 2], dtype='int64')
                                    )
 
     pd.testing.assert_frame_equal(results, expected_results)
@@ -461,7 +461,7 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
             'mean_absolute_error':np.array([0.20968100463227382, 0.20969259779858337, 0.20977945312386406]),                                                               
             'alpha' :np.array([0.01, 0.1, 1.])
                                      },
-            index=[0, 1, 2]
+            index=pd.Index([0, 1, 2], dtype='int64')
                                    )
 
     pd.testing.assert_frame_equal(results, expected_results)
@@ -508,7 +508,7 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
             'mean_absolute_error':np.array([0.20669393332187616, 0.20671040715338015, 0.20684013292264494]),                                                               
             'alpha' :np.array([0.01, 0.1, 1.])
                                      },
-            index=[0, 1, 2]
+            index=pd.Index([0, 1, 2], dtype='int64')
                                    )
 
     pd.testing.assert_frame_equal(results, expected_results)
@@ -553,7 +553,7 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
             'mean_absolute_error':np.array([0.20968100463227382, 0.20969259779858337, 0.20977945312386406]),
             'alpha' :np.array([0.01, 0.1, 1.])
                                      },
-            index=[0, 1, 2]
+            index=pd.Index([0, 1, 2], dtype='int64')
                                    )
 
     pd.testing.assert_frame_equal(results, expected_results)
@@ -639,7 +639,7 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
             'mean_absolute_error': np.array([0.20115194, 0.20183032, 0.20566862, 0.22224269, 0.22625017, 0.22644284]),                                                               
             'alpha' : np.array([0.01, 0.1, 1., 1., 0.1, 0.01])
                                      },
-            index=[0, 1, 2, 5, 4, 3]
+            index=pd.Index([0, 1, 2, 5, 4, 3], dtype='int64')
                                    )
 
     pd.testing.assert_frame_equal(results, expected_results)
@@ -686,7 +686,7 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregMultiVariate_lags
             'mean_absolute_error': np.array([0.20115194, 0.20183032, 0.20566862]),                                                               
             'alpha' : np.array([0.01, 0.1 , 1.])
                                      },
-            index=[0, 1, 2]
+            index=pd.Index([0, 1, 2], dtype='int64')
                                    )
 
     pd.testing.assert_frame_equal(results, expected_results)
@@ -743,7 +743,7 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregMultiVariate_lags
                                              0.21863968, 0.22401526, 0.22830217, 0.22878132]),                                                               
             'alpha' : np.array([0.01, 0.1 , 1.  , 1.  , 0.1 , 0.01, 1.  , 0.1 , 0.01])
                                      },
-            index=[0, 1, 2, 5, 4, 3, 8, 7, 6]
+            index=pd.Index([0, 1, 2, 5, 4, 3, 8, 7, 6], dtype='int64')
                                    )
 
     # Skip `lags` column because is not easy to compare, but checked when realizing the test
@@ -791,7 +791,7 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
             'mean_absolute_error': np.array([0.20115194, 0.20183032, 0.20566862, 0.22224269, 0.22625017, 0.22644284]),
             'alpha' : np.array([0.01, 0.1, 1., 1., 0.1, 0.01])
                                      },
-            index=[0, 1, 2, 5, 4, 3]
+            index=pd.Index([0, 1, 2, 5, 4, 3], dtype='int64')
                                    )
 
     pd.testing.assert_frame_equal(results, expected_results)

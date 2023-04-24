@@ -65,7 +65,7 @@ def test_output_grid_search_forecaster_ForecasterAutoreg_with_mocked():
             'mean_squared_error':np.array([0.06464646, 0.06502362, 0.06745534, 0.06779272, 0.06802481, 0.06948609]),                                                               
             'alpha' :np.array([0.01, 0.1 , 1.  , 0.01, 0.1 , 1.  ])
                                      },
-            index=np.arange(idx)
+            index=pd.RangeIndex(start=0, stop=idx, step=1)
                                    )
 
     pd.testing.assert_frame_equal(results, expected_results)

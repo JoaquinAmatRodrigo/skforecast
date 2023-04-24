@@ -97,12 +97,12 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_None():
                              [6., 5., 4., 3., 2.],
                              [7., 6., 5., 4., 3.],
                              [8., 7., 6., 5., 4.]]),
-            index   = np.array([5, 6, 7, 8, 9]),
+            index   = pd.RangeIndex(start=5, stop=10, step=1),
             columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5']
         ),
         pd.Series(
             data  = np.array([5, 6, 7, 8, 9]),
-            index = np.array([5, 6, 7, 8, 9]),
+            index = pd.RangeIndex(start=5, stop=10, step=1),
             name  = 'y',
             dtype = float
         )
@@ -131,12 +131,12 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_series_of_float
                              [6., 5., 4., 3., 2., 107.],
                              [7., 6., 5., 4., 3., 108.],
                              [8., 7., 6., 5., 4., 109.]]),
-            index   = np.array([5, 6, 7, 8, 9]),
+            index   = pd.RangeIndex(start=5, stop=10, step=1),
             columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 'exog']
         ).astype({'exog': dtype}),
         pd.Series(
             data  = np.array([5, 6, 7, 8, 9]),
-            index = np.array([5, 6, 7, 8, 9]),
+            index = pd.RangeIndex(start=5, stop=10, step=1),
             name  = 'y',
             dtype = float
         )
@@ -152,13 +152,12 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_series_of_float
 def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_dataframe_of_float_int(dtype):
     """
     Test the output of create_train_X_y when y=pd.Series(np.arange(10)) and 
-    exog is a pandas dataframe with two columns of floats or ints.
+    exog is a pandas dataframe with 2 columns of floats or ints.
     """
     y = pd.Series(np.arange(10), dtype=float)
-    exog = pd.DataFrame({
-               'exog_1': np.arange(100, 110, dtype=dtype),
-               'exog_2': np.arange(1000, 1010, dtype=dtype)
-           })
+    exog = pd.DataFrame({'exog_1': np.arange(100, 110, dtype=dtype),
+                         'exog_2': np.arange(1000, 1010, dtype=dtype)})
+    
     forecaster = ForecasterAutoreg(LinearRegression(), lags=5)
     results = forecaster.create_train_X_y(y=y, exog=exog)        
     expected = (
@@ -168,12 +167,12 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_dataframe_of_fl
                              [6., 5., 4., 3., 2., 107., 1007.],
                              [7., 6., 5., 4., 3., 108., 1008.],
                              [8., 7., 6., 5., 4., 109., 1009.]]),
-            index   = np.array([5, 6, 7, 8, 9]),
+            index   = pd.RangeIndex(start=5, stop=10, step=1),
             columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 'exog_1', 'exog_2']
         ).astype({'exog_1': dtype, 'exog_2': dtype}),
         pd.Series(
             data  = np.array([5, 6, 7, 8, 9]),
-            index = np.array([5, 6, 7, 8, 9]),
+            index = pd.RangeIndex(start=5, stop=10, step=1),
             name  = 'y',
             dtype = float
         )
@@ -203,12 +202,12 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_series_of_bool_
                              [6., 5., 4., 3., 2.],
                              [7., 6., 5., 4., 3.],
                              [8., 7., 6., 5., 4.]]),
-            index   = np.array([5, 6, 7, 8, 9]),
+            index   = pd.RangeIndex(start=5, stop=10, step=1),
             columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5']
         ).assign(exog=exog_values*5).astype({'exog': dtype}),
         pd.Series(
             data  = np.array([5, 6, 7, 8, 9]),
-            index = np.array([5, 6, 7, 8, 9]),
+            index = pd.RangeIndex(start=5, stop=10, step=1),
             name  = 'y',
             dtype = float
         )
@@ -241,12 +240,12 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_dataframe_of_bo
                              [6., 5., 4., 3., 2.],
                              [7., 6., 5., 4., 3.],
                              [8., 7., 6., 5., 4.]]),
-            index   = np.array([5, 6, 7, 8, 9]),
+            index   = pd.RangeIndex(start=5, stop=10, step=1),
             columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5']
         ).assign(exog_1=v_exog_1*5, exog_2=v_exog_2*5).astype({'exog_1': dtype, 'exog_2': dtype}),
         pd.Series(
             data  = np.array([5, 6, 7, 8, 9]),
-            index = np.array([5, 6, 7, 8, 9]),
+            index = pd.RangeIndex(start=5, stop=10, step=1),
             name  = 'y',
             dtype = float
         )
@@ -272,12 +271,12 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_series_of_categ
                              [6., 5., 4., 3., 2.],
                              [7., 6., 5., 4., 3.],
                              [8., 7., 6., 5., 4.]]),
-            index   = np.array([5, 6, 7, 8, 9]),
+            index   = pd.RangeIndex(start=5, stop=10, step=1),
             columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5']
         ).assign(exog=pd.Categorical(range(5, 10), categories=range(10))),
         pd.Series(
             data  = np.array([5, 6, 7, 8, 9]),
-            index = np.array([5, 6, 7, 8, 9]),
+            index = pd.RangeIndex(start=5, stop=10, step=1),
             name  = 'y',
             dtype = float
         )
@@ -293,10 +292,9 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_dataframe_of_ca
     exog is a pandas dataframe with two columns of category.
     """
     y = pd.Series(np.arange(10), dtype=float)
-    exog = pd.DataFrame({
-               'exog_1': pd.Categorical(range(10)),
-               'exog_2': pd.Categorical(range(100, 110)),
-           })
+    exog = pd.DataFrame({'exog_1': pd.Categorical(range(10)),
+                         'exog_2': pd.Categorical(range(100, 110))})
+    
     forecaster = ForecasterAutoreg(LinearRegression(), lags=5)
     results = forecaster.create_train_X_y(y=y, exog=exog)        
     expected = (
@@ -306,7 +304,7 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_dataframe_of_ca
                              [6., 5., 4., 3., 2.],
                              [7., 6., 5., 4., 3.],
                              [8., 7., 6., 5., 4.]]),
-            index   = np.array([5, 6, 7, 8, 9]),
+            index   = pd.RangeIndex(start=5, stop=10, step=1),
             columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5']
         ).assign(
             exog_1=pd.Categorical(range(5, 10), categories=range(10)),
@@ -314,7 +312,43 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_dataframe_of_ca
         ),
         pd.Series(
             data  = np.array([5, 6, 7, 8, 9]),
-            index = np.array([5, 6, 7, 8, 9]),
+            index = pd.RangeIndex(start=5, stop=10, step=1),
+            name  = 'y',
+            dtype = float
+        )
+    )
+
+    pd.testing.assert_frame_equal(results[0], expected[0])
+    pd.testing.assert_series_equal(results[1], expected[1])
+
+
+def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_dataframe_of_float_int_category():
+    """
+    Test the output of create_train_X_y when y=pd.Series(np.arange(10)) and 
+    exog is a pandas dataframe with 3 columns of float, int, category.
+    """
+    y = pd.Series(np.arange(10), dtype=float)
+    exog = pd.DataFrame({'exog_1': pd.Series(np.arange(100, 110), dtype=float),
+                         'exog_2': pd.Series(np.arange(1000, 1010), dtype=int),
+                         'exog_3': pd.Categorical(range(100, 110))})
+    
+    forecaster = ForecasterAutoreg(LinearRegression(), lags=5)
+    results = forecaster.create_train_X_y(y=y, exog=exog)        
+    expected = (
+        pd.DataFrame(
+            data = np.array([[4., 3., 2., 1., 0., 105., 1005.],
+                             [5., 4., 3., 2., 1., 106., 1006.],
+                             [6., 5., 4., 3., 2., 107., 1007.],
+                             [7., 6., 5., 4., 3., 108., 1008.],
+                             [8., 7., 6., 5., 4., 109., 1009.]]),
+            index   = pd.RangeIndex(start=5, stop=10, step=1),
+            columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 
+                       'exog_1', 'exog_2']
+        ).astype({'exog_1': float, 
+                  'exog_2': int}).assign(exog_3=pd.Categorical(range(105, 110), categories=range(100, 110))),
+        pd.Series(
+            data  = np.array([5, 6, 7, 8, 9]),
+            index = pd.RangeIndex(start=5, stop=10, step=1),
             name  = 'y',
             dtype = float
         )
@@ -395,10 +429,12 @@ def test_create_train_X_y_output_when_transformer_y_and_transformer_exog():
     Test the output of create_train_X_y when using transformer_y and transformer_exog.
     """
     y = pd.Series(np.arange(8), dtype = float)
+    y.index = pd.date_range("1990-01-01", periods=8, freq='D')
     exog = pd.DataFrame({
                'col_1': [7.5, 24.4, 60.3, 57.3, 50.7, 41.4, 87.2, 47.4],
-               'col_2': ['a', 'a', 'a', 'a', 'b', 'b', 'b', 'b']
-           })
+               'col_2': ['a', 'a', 'a', 'a', 'b', 'b', 'b', 'b']},
+               index = pd.date_range("1990-01-01", periods=8, freq='D')
+           )
 
     transformer_y = StandardScaler()
     transformer_exog = ColumnTransformer(
@@ -414,6 +450,7 @@ def test_create_train_X_y_output_when_transformer_y_and_transformer_exog():
                     transformer_y    = transformer_y,
                     transformer_exog = transformer_exog
                 )
+    results = forecaster.create_train_X_y(y=y, exog=exog)
 
     expected = (
         pd.DataFrame(
@@ -423,19 +460,17 @@ def test_create_train_X_y_output_when_transformer_y_and_transformer_exog():
                               -1.09108945, 1.79326881,  0.        ,  1.        ],
                              [1.09108945,  0.65465367,  0.21821789, -0.21821789,
                               -0.65465367, 0.01673866,  0.        ,  1.        ]]),
-            index   = pd.RangeIndex(start=5, stop=8, step=1),
+            index   = pd.date_range("1990-01-06", periods=3, freq='D'),
             columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 'col_1',
                        'col_2_a', 'col_2_b']
         ),
         pd.Series(
             data  = np.array([0.65465367, 1.09108945, 1.52752523]),
-            index = pd.RangeIndex(start=5, stop=8, step=1),
+            index = pd.date_range("1990-01-06", periods=3, freq='D'),
             name  = 'y',
             dtype = float
         )
     )
-
-    results = forecaster.create_train_X_y(y=y, exog=exog)
 
     pd.testing.assert_frame_equal(results[0], expected[0])
     pd.testing.assert_series_equal(results[1], expected[1])
