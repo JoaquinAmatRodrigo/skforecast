@@ -562,10 +562,12 @@ def test_create_train_X_y_output_when_transformer_y_and_transformer_exog():
     Test the output of create_train_X_y when using transformer_y and transformer_exog.
     """
     y = pd.Series(np.arange(8), dtype=float)
+    y.index = pd.date_range("1990-01-01", periods=8, freq='D')
     exog = pd.DataFrame({
                'col_1': [7.5, 24.4, 60.3, 57.3, 50.7, 41.4, 87.2, 47.4],
-               'col_2': ['a', 'a', 'a', 'a', 'b', 'b', 'b', 'b']
-           })
+               'col_2': ['a', 'a', 'a', 'a', 'b', 'b', 'b', 'b']},
+               index = pd.date_range("1990-01-01", periods=8, freq='D')
+           )
 
     transformer_y = StandardScaler()
     transformer_exog = ColumnTransformer(
@@ -582,6 +584,7 @@ def test_create_train_X_y_output_when_transformer_y_and_transformer_exog():
                      transformer_y    = transformer_y,
                      transformer_exog = transformer_exog
                  )
+    results = forecaster.create_train_X_y(y=y, exog=exog)
 
     expected = (
         pd.DataFrame(
@@ -591,20 +594,18 @@ def test_create_train_X_y_output_when_transformer_y_and_transformer_exog():
                               -1.09108945, 1.79326881,  0.        ,  1.        ],
                              [1.09108945,  0.65465367,  0.21821789, -0.21821789,
                               -0.65465367, 0.01673866,  0.        ,  1.        ]]),
-            index   = pd.RangeIndex(start=5, stop=8, step=1),
+            index   = pd.date_range("1990-01-06", periods=3, freq='D'),
             columns = ['custom_predictor_0', 'custom_predictor_1',
                        'custom_predictor_2', 'custom_predictor_3',
                        'custom_predictor_4', 'col_1', 'col_2_a', 'col_2_b']
         ),
         pd.Series(
             data  = np.array([0.65465367, 1.09108945, 1.52752523]),
-            index = pd.RangeIndex(start=5, stop=8, step=1),
+            index = pd.date_range("1990-01-06", periods=3, freq='D'),
             name  = 'y',
             dtype = float
         )
     )
-
-    results = forecaster.create_train_X_y(y=y, exog=exog)
 
     pd.testing.assert_frame_equal(results[0], expected[0])
     pd.testing.assert_series_equal(results[1], expected[1])
