@@ -196,7 +196,7 @@ def test_results_output_bayesian_search_skopt_ForecasterAutoreg_with_mocked(): #
                              'sqrt', 'sqrt', 'sqrt', 'log2', 'log2', 'sqrt', 'log2', 'log2', 'log2', 
                              'log2', 'sqrt']
                                      },
-            index=list(range(20))
+            index=pd.RangeIndex(start=0, stop=20, step=1)
                                    ).sort_values(by='mean_absolute_error', ascending=True)
 
     pd.testing.assert_frame_equal(results, expected_results, check_dtype=False)
@@ -269,7 +269,7 @@ def test_results_output_bayesian_search_skopt_ForecasterAutoreg_with_mocked_when
                                0.04428828255962529, 0.7862467218336935, 0.21382904045131165,
                                0.4646709105348175, 0.01124059864722814])
                                      },
-            index=list(range(20))
+            index=pd.RangeIndex(start=0, stop=20, step=1)
                                    ).sort_values(by='mean_absolute_error', ascending=True)
 
     pd.testing.assert_frame_equal(results, expected_results)
@@ -324,7 +324,7 @@ def test_results_output_bayesian_search_skopt_ForecasterAutoreg_with_mocked_when
                                0.06635119445083354, 0.14434062917737708, 0.019050287104581624, 
                                0.0633920962590419])
                                      },
-            index=list(range(10))
+            index=pd.RangeIndex(start=0, stop=10, step=1)
                                    ).sort_values(by='mean_absolute_error', ascending=True)
 
     pd.testing.assert_frame_equal(results, expected_results)
@@ -389,7 +389,7 @@ def test_results_output_bayesian_search_skopt_ForecasterAutoregCustom_with_mocke
                                0.06635119445083354, 0.14434062917737708, 0.019050287104581624, 
                                0.0633920962590419])
                                      },
-            index=list(range(10))
+            index=pd.RangeIndex(start=0, stop=10, step=1)
                                    ).sort_values(by='mean_absolute_error', ascending=True)
 
     pd.testing.assert_frame_equal(results, expected_results)

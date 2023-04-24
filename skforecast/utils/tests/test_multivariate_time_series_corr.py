@@ -1,9 +1,10 @@
 # Unit test multivariate_time_series_corr
 # ==============================================================================
-import pandas as pd
-import pytest
 import re
+import pytest
+import pandas as pd
 from skforecast.utils.utils import multivariate_time_series_corr
+
 
 def test_output_multivariate_time_series_corr():
     """
@@ -21,7 +22,7 @@ def test_output_multivariate_time_series_corr():
                     'series_2': [1., 1., 1., 1., 1.],
                     'series_3': [-0.21854656, -0.02836, -0.11964501, -0.45360921, -0.17251639],
                 },
-                index = range(5)
+                index = pd.RangeIndex(start=0, stop=5, step=1)
             )
     expected.index.name = 'lag'
 
@@ -43,7 +44,7 @@ def test_exception_multivariate_when_inputs_have_different_index():
     other = pd.DataFrame(
                 {'series_2': range(5),
                 'series_3': [9, 2, 3, 8, 2]},
-                index = [10, 11, 12, 13, 14]
+                index = pd.RangeIndex(start=10, stop=15, step=1)
             )
 
     err_msg = re.escape("`time_series` and `other` must have the same index.")

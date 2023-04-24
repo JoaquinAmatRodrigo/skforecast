@@ -385,7 +385,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                               0.48767779, 0.477799  , 0.48523814, 
                                               0.49341916, 0.48967772, 0.48517846, 
                                               0.49868447, 0.4859614 , 0.48480032])},
-                               index=np.arange(38, 50)
+                               index=pd.RangeIndex(start=38, stop=50, step=1)
                            )
                                    
     pd.testing.assert_frame_equal(expected_metric, metrics_levels)
@@ -496,7 +496,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                               0.50853803, 0.50006415, 0.50105623,
                                               0.46764379, 0.46845675, 0.46768947, 
                                               0.48298309, 0.47778385, 0.47776533])},
-                               index=np.arange(38, 50)
+                               index=pd.RangeIndex(start=38, stop=50, step=1)
                            )
                                    
     pd.testing.assert_frame_equal(expected_metric, metrics_levels)
@@ -544,7 +544,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                0.510664891759972, 0.49734477162307983, 0.5009680695304023,
                                                0.48647770856843825, 0.4884651517014008, 0.48643766346259326, 
                                                0.4973047492523979, 0.4899104838474172, 0.4891085370228432])},
-                               index=np.arange(38, 50)
+                               index=pd.RangeIndex(start=38, stop=50, step=1)
                            )
                                    
     pd.testing.assert_frame_equal(expected_metric, metrics_levels)
@@ -592,7 +592,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                0.510664891759972, 0.49734477162307983, 0.5009680695304023,
                                                0.48647770856843825, 0.4884651517014008, 0.48643766346259326, 
                                                0.4973047492523979, 0.4899104838474172, 0.4891085370228432])},
-                               index=np.arange(38, 50)
+                               index=pd.RangeIndex(start=38, stop=50, step=1)
                            )
                                    
     pd.testing.assert_frame_equal(expected_metric, metrics_levels)
@@ -643,7 +643,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                'l2':np.array([0.50266337, 0.53045945, 0.50527774, 0.50315834, 0.50452649,
                                               0.47372756, 0.51226827, 0.50650107, 0.50420766, 0.50448097,
                                               0.52211914, 0.51092531])},
-                               index=np.arange(38, 50)
+                               index=pd.RangeIndex(start=38, stop=50, step=1)
                            )
                                    
     pd.testing.assert_frame_equal(expected_metric, metrics_levels)
@@ -694,7 +694,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                'l2':np.array([0.50266337, 0.53045945, 0.50527774, 0.50315834, 0.50452649,
                                               0.46847508, 0.5144631 , 0.51135241, 0.50842259, 0.50838289,
                                               0.52555989, 0.51801796])},
-                               index=np.arange(38, 50)
+                               index=pd.RangeIndex(start=38, stop=50, step=1)
                            )
                                    
     pd.testing.assert_frame_equal(expected_metric, metrics_levels)
@@ -751,7 +751,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                 [0.49986428, 0.22649307, 0.7678067 ],
                                                 [0.51750994, 0.24211075, 0.78058954]]),
                                columns = ['l1', 'l1_lower_bound', 'l1_upper_bound'],
-                               index = np.arange(38, 50)
+                               index = pd.RangeIndex(start=38, stop=50, step=1)
                            )
                                    
     pd.testing.assert_frame_equal(expected_metric, metrics_levels)
@@ -808,7 +808,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                 [0.49132695, 0.21857874, 0.78112082],
                                                 [0.51665452, 0.26139311, 0.80879351]]),
                                columns = ['l1', 'l1_lower_bound', 'l1_upper_bound'],
-                               index = np.arange(38, 50)
+                               index = pd.RangeIndex(start=38, stop=50, step=1)
                            )
                                    
     pd.testing.assert_frame_equal(expected_metric, metrics_levels)
@@ -857,7 +857,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
                                               0.48490132, 0.46928502, 0.52511441, 
                                               0.46529858, 0.45430583, 0.51706306, 
                                               0.50561424, 0.47109786, 0.45568319])},
-                               index=np.arange(38, 50)
+                               index=pd.RangeIndex(start=38, stop=50, step=1)
                            )
                                    
     pd.testing.assert_frame_equal(expected_metric, metrics_levels)
@@ -966,7 +966,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
                                               0.50326485, 0.53339207, 0.50892268, 
                                               0.46841857, 0.48498214, 0.52778775,
                                               0.51476103, 0.48480385, 0.53470992])},
-                               index=np.arange(38, 50)
+                               index=pd.RangeIndex(start=38, stop=50, step=1)
                            )
                                    
     pd.testing.assert_frame_equal(expected_metric, metrics_levels)
@@ -1013,7 +1013,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
                                               0.49816586, 0.48470807, 0.54162611,
                                               0.45270749, 0.47194035, 0.53386908,
                                               0.55296942, 0.53498642, 0.44772825])},
-                               index=np.arange(38, 50)
+                               index=pd.RangeIndex(start=38, stop=50, step=1)
                            )
                                    
     pd.testing.assert_frame_equal(expected_metric, metrics_levels)
@@ -1061,7 +1061,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
                                               0.49816586, 0.48470807, 0.54162611, 
                                               0.45270749, 0.47194035, 0.53386908, 
                                               0.55296942, 0.53498642, 0.44772825])},
-                               index=np.arange(38, 50)
+                               index=pd.RangeIndex(start=38, stop=50, step=1)
                            )
                                    
     pd.testing.assert_frame_equal(expected_metric, metrics_levels)
@@ -1118,7 +1118,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
                                                 [0.50007531, 0.37775181, 0.64721816],
                                                 [0.55280975, 0.43277803, 0.69595266]]),
                                columns = ['l1', 'lower_bound', 'upper_bound'],
-                               index = np.arange(38, 50)
+                               index = pd.RangeIndex(start=38, stop=50, step=1)
                            )
                                    
     pd.testing.assert_frame_equal(expected_metric, metrics_levels)
@@ -1175,7 +1175,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
                                                 [0.51109877, 0.39178411, 0.66186064],
                                                 [0.54738032, 0.42195622, 0.69395717]]),
                                columns = ['l1', 'lower_bound', 'upper_bound'],
-                               index = np.arange(38, 50)
+                               index = pd.RangeIndex(start=38, stop=50, step=1)
                            )
                                    
     pd.testing.assert_frame_equal(expected_metric, metrics_levels)

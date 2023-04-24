@@ -69,7 +69,7 @@ def test_output_backtesting_forecaster_refit_no_exog_no_remainder_ForecasterAuto
     expected_predictions = pd.DataFrame({
     'pred':np.array([0.55717779, 0.43355138, 0.54969767, 0.52945466, 0.38969292, 0.52778339,
                      0.49152015, 0.4841678 , 0.4076433 , 0.50904672, 0.50249462, 0.49232817])
-                                                                }, index=np.arange(38, 50))
+                                                                }, index=pd.RangeIndex(start=38, stop=50, step=1))
 
     forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3)
 
@@ -116,7 +116,7 @@ def test_output_backtesting_forecaster_refit_no_exog_no_remainder_ForecasterAuto
     expected_predictions = pd.DataFrame({
     'pred':np.array([0.55717779, 0.43355138, 0.54969767, 0.52945466, 0.38969292, 0.52778339,
                      0.49152015, 0.4841678 , 0.4076433 , 0.50904672, 0.50249462, 0.49232817])
-                                                                }, index=np.arange(38, 50))
+                                                                }, index=pd.RangeIndex(start=38, stop=50, step=1))
 
     forecaster = ForecasterAutoregCustom(
                      regressor      = LinearRegression(), 
@@ -157,7 +157,7 @@ def test_output_backtesting_forecaster_refit_no_exog_no_remainder_ForecasterAuto
     expected_predictions = pd.DataFrame({
     'pred':np.array([0.5468482 , 0.44670961, 0.57651222, 0.52511275, 0.3686309 , 0.56234835, 
                      0.44276032, 0.52260065, 0.37665741, 0.5382938 , 0.48755548, 0.44534071])
-                                                                }, index=np.arange(38, 50))
+                                                                }, index=pd.RangeIndex(start=38, stop=50, step=1))
 
     forecaster = ForecasterAutoregDirect(
                      regressor = LinearRegression(), 
@@ -197,7 +197,7 @@ def test_output_backtesting_forecaster_refit_no_exog_yes_remainder_with_mocked()
     expected_predictions = pd.DataFrame({
     'pred':np.array([0.55717779, 0.43355138, 0.54969767, 0.52945466, 0.48308861, 0.5096801 ,
                      0.49519677, 0.47997916, 0.49177914, 0.495797  , 0.57738724, 0.44370472])
-                                                                 }, index=np.arange(38, 50))
+                                                                 }, index=pd.RangeIndex(start=38, stop=50, step=1))
     forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3)
 
     n_backtest = 12
@@ -232,7 +232,7 @@ def test_output_backtesting_forecaster_refit_yes_exog_no_remainder_with_mocked()
     expected_predictions = pd.DataFrame({
     'pred':np.array([0.59059622, 0.47257504, 0.53024098, 0.46163343, 0.42295275, 0.46286083,
                      0.43618422, 0.43552906, 0.48687517, 0.55455072, 0.55577332, 0.53943402])
-                                                                 }, index=np.arange(38, 50))
+                                                                 }, index=pd.RangeIndex(start=38, stop=50, step=1))
     forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3)
 
     n_backtest = 12
@@ -267,7 +267,7 @@ def test_output_backtesting_forecaster_refit_yes_exog_yes_remainder_with_mocked(
     expected_predictions = pd.DataFrame({
     'pred':np.array([0.59059622, 0.47257504, 0.53024098, 0.46163343, 0.50035119, 0.43595809,
                      0.4349167 , 0.42381237, 0.55165332, 0.53442833, 0.65361802, 0.51297419])
-                                                                 }, index=np.arange(38, 50))
+                                                                 }, index=pd.RangeIndex(start=38, stop=50, step=1))
     forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3)
 
     n_backtest = 12
@@ -311,7 +311,7 @@ def test_output_backtesting_forecaster_refit_interval_no_exog_no_remainder_with_
                             0.0495347 , 0.04527341, 0.0113795 , 0.13676538, 0.12478441, 0.06814153]),
     'upper_bound':np.array([0.95368172, 0.81704742, 0.93685716, 0.9407976 , 0.78486946, 0.93084605,
                             0.84533191, 0.90255909, 0.80099612, 0.88747244, 0.88292664, 0.88718366])                                                                 
-                                                                         }, index=np.arange(38, 50))
+                                                                         }, index=pd.RangeIndex(start=38, stop=50, step=1))
 
     forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3)
 
@@ -352,7 +352,7 @@ def test_output_backtesting_forecaster_refit_interval_no_exog_yes_remainder_with
                             0.09795868, 0.08383945, 0.10160946, 0.08917676, 0.23321023, 0.08685352]),
     'upper_bound':np.array([0.95368172, 0.81704742, 0.93685716, 0.9407976 , 0.85396419, 0.86172991,
                             0.88313129, 0.82354636, 0.93875053, 0.86176335, 0.96037185, 0.84205069])                                                                 
-                                                                }, index=np.arange(38, 50))
+                                                                }, index=pd.RangeIndex(start=38, stop=50, step=1))
     
     forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3)
 
@@ -393,7 +393,7 @@ def test_output_backtesting_forecaster_refit_interval_yes_exog_no_remainder_with
                             0.01436362, 0.02747413, 0.14867238, 0.19834047, 0.19884259, 0.16964474]),
     'upper_bound':np.array([0.95777604, 0.88685543, 0.90755063, 0.87811336, 0.8225198 , 0.81894689,
                             0.81179723, 0.84420112, 0.89407425, 0.93903702, 0.91748574, 0.93705358])                                                                 
-                                                                         }, index=np.arange(38, 50))
+                                                                         }, index=pd.RangeIndex(start=38, stop=50, step=1))
     
     forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3)
 
@@ -434,7 +434,7 @@ def test_output_backtesting_forecaster_refit_interval_yes_exog_yes_remainder_wit
                             0.05015513, 0.07677812, 0.17434611, 0.16051962, 0.29167326, 0.15775686]),
     'upper_bound':np.array([0.95777604, 0.88685543, 0.90755063, 0.87811336, 0.86891022, 0.74808834,
                             0.80296989, 0.77919033, 0.97680126, 0.8877086 , 1.07608747, 0.90555785])                                                                 
-                                                                         }, index=np.arange(38, 50))
+                                                                         }, index=pd.RangeIndex(start=38, stop=50, step=1))
 
     forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3)
 
@@ -479,7 +479,7 @@ def test_output_backtesting_forecaster_refit_interval_out_sample_residuals_no_ex
                                 0.64554988, 0.64183541, 0.48700909, 0.68845988, 0.63865297, 0.60684242]),
         'upper_bound':np.array([1.54070487, 1.5131313 , 1.56749058, 1.62564968, 1.37322   , 1.61930035, 
                                 1.54870568, 1.55335041, 1.39117037, 1.56935123, 1.51973211, 1.50300901])                                                                
-                                                                            }, index=np.arange(38, 50))
+                                                                            }, index=pd.RangeIndex(start=38, stop=50, step=1))
 
     forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3)
     forecaster.set_out_sample_residuals(residuals=out_sample_residuals, append=False)
@@ -528,7 +528,7 @@ def test_callable_metric_backtesting_forecaster_refit_no_exog_no_remainder_with_
     expected_predictions = pd.DataFrame({
     'pred':np.array([0.55717779, 0.43355138, 0.54969767, 0.52945466, 0.38969292, 0.52778339,
                      0.49152015, 0.4841678 , 0.4076433 , 0.50904672, 0.50249462, 0.49232817])
-                                                                }, index=np.arange(38, 50))
+                                                                }, index=pd.RangeIndex(start=38, stop=50, step=1))
     forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3)
 
     n_backtest = 12
@@ -563,7 +563,7 @@ def test_list_metrics_backtesting_forecaster_refit_no_exog_no_remainder_with_moc
     expected_predictions = pd.DataFrame({
     'pred':np.array([0.55717779, 0.43355138, 0.54969767, 0.52945466, 0.38969292, 0.52778339,
                      0.49152015, 0.4841678 , 0.4076433 , 0.50904672, 0.50249462, 0.49232817])
-                                                                }, index=np.arange(38, 50))
+                                                                }, index=pd.RangeIndex(start=38, stop=50, step=1))
 
     forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3)
 
@@ -604,7 +604,7 @@ def test_output_backtesting_forecaster_refit_fixed_train_size_no_exog_no_remaind
     expected_predictions = pd.DataFrame({
     'pred':np.array([0.55717779, 0.43355138, 0.54969767, 0.52945466, 0.34597367, 0.50223873,
                      0.47833829, 0.46082257, 0.37810191, 0.49508366, 0.48808014, 0.47323313])
-                                                                }, index=np.arange(38, 50))
+                                                                }, index=pd.RangeIndex(start=38, stop=50, step=1))
 
     forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3)
 
@@ -641,7 +641,7 @@ def test_output_backtesting_forecaster_refit_fixed_train_size_no_exog_yes_remain
     expected_predictions = pd.DataFrame({
     'pred':np.array([0.55717779, 0.43355138, 0.54969767, 0.52945466, 0.48308861, 0.4909399 , 
                      0.47942107, 0.46025344, 0.46649132, 0.47061725, 0.57603136, 0.41480551])
-                                                                }, index=np.arange(38, 50))
+                                                                }, index=pd.RangeIndex(start=38, stop=50, step=1))
     forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3)
 
     n_backtest = 12
@@ -677,7 +677,7 @@ def test_output_backtesting_forecaster_refit_fixed_train_size_yes_exog_no_remain
     expected_predictions = pd.DataFrame({
     'pred':np.array([0.59059622, 0.47257504, 0.53024098, 0.46163343, 0.37689967, 0.44267729, 
                      0.42642836, 0.41604275, 0.45047245, 0.53784704, 0.53726274, 0.51516772])
-                                                                }, index=np.arange(38, 50))
+                                                                }, index=pd.RangeIndex(start=38, stop=50, step=1))
     forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3)
 
     n_backtest = 12
@@ -713,7 +713,7 @@ def test_output_backtesting_forecaster_refit_fixed_train_size_yes_exog_yes_remai
     expected_predictions = pd.DataFrame({
     'pred':np.array([0.59059622, 0.47257504, 0.53024098, 0.46163343, 0.50035119, 0.41975558, 
                      0.4256614 , 0.41176005, 0.52357817, 0.509974  , 0.65354628, 0.48210726])
-                                                                }, index=np.arange(38, 50))
+                                                                }, index=pd.RangeIndex(start=38, stop=50, step=1))
     forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3)
 
     n_backtest = 12
