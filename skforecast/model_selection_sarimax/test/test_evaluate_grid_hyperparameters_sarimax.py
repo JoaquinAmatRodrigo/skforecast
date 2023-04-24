@@ -100,7 +100,7 @@ def test_output_evaluate_grid_hyperparameters_sarimax_with_mocked():
                     'mean_squared_error': np.array([0.07438601385742186, 0.34802636414953864]),
                     'order'             : [(1, 1, 1), (1, 2, 3)],
                     'seasonal_order'    : [(0, 0, 0, 0), (2, 2, 2, 4)]},
-        index = np.array([0, 1])
+        index = pd.Index(np.array([0, 1]), dtype='int64')
     )
 
     pd.testing.assert_frame_equal(results, expected_results, atol=0.0001)
@@ -137,7 +137,7 @@ def test_output_evaluate_grid_hyperparameters_sarimax_exog_with_mocked():
                  'mean_squared_error': np.array([0.0687304810, 0.0804257343]),
                  'order'             : [(1, 1, 1), (1, 0, 0)],
                  'with_intercept'    : [True, False]},
-        index = np.array([1, 0])
+        index = pd.Index(np.array([1, 0]), dtype='int64')
     )
 
     pd.testing.assert_frame_equal(results, expected_results, atol=0.0001)
@@ -173,7 +173,7 @@ def test_output_evaluate_grid_hyperparameters_sarimax_metric_list_with_mocked():
                     'mean_squared_error' : np.array([0.0778376867, 0.0869055273]),
                     'order'              : [(1, 1, 1), (1, 0, 0)],
                     'with_intercept'     : [True, False]},
-        index = np.array([1, 0])
+        index = pd.Index(np.array([1, 0]), dtype='int64')
     )
 
     pd.testing.assert_frame_equal(results, expected_results, atol=0.0001)

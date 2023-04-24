@@ -45,7 +45,7 @@ def test_output_grid_search_sarimax_sarimax_with_mocked():
                     'mean_absolute_error': np.array([0.21691209090287925, 0.25017244915790254]),
                     'method'             : ['lbfgs', 'lbfgs'],
                     'order'              : [(1, 1, 1), (2, 2, 2)]},
-        index = np.array([0, 1])
+        index = pd.Index(np.array([0, 1]), dtype='int64')
     )
 
     pd.testing.assert_frame_equal(results, expected_results, atol=0.0001)

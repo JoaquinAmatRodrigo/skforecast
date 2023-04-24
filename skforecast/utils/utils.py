@@ -1392,7 +1392,7 @@ def multivariate_time_series_corr(
         corr[col] = lag_values.corr(method=method).iloc[1:, 0]
 
     corr = pd.DataFrame(corr)
-    corr.index = corr.index.astype(int)
-    corr.index.name="lag"
+    corr.index = corr.index.astype('int64')
+    corr.index.name = "lag"
     
     return corr

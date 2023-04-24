@@ -65,7 +65,7 @@ def test_output_backtesting_sarimax_no_refit_no_exog_with_mocked():
                         -0.17363794, -0.39660971, -0.54805914, -0.11350503, -0.34359592, -0.50132165]),
     'upper y':np.array([1.3269739 , 1.4134024 , 1.44447391, 1.0894362 , 1.20398675, 1.25985094,
                         0.90506794, 1.04144582, 1.11655321, 0.96520085, 1.09445961, 1.1632907 ])                                                                
-                                                                         }, index=np.arange(38, 50))
+                                                                         }, index=pd.RangeIndex(start=38, stop=50, step=1))
 
     assert expected_metric == approx(metric)
     pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions)
@@ -99,7 +99,7 @@ def test_output_backtesting_sarimax_yes_refit_no_exog_with_mocked():
                         -0.17946813, -0.40077799, -0.54786123, -0.1528057 , -0.39042186, -0.54741457]),
     'upper y':np.array([1.3269739 , 1.4134024 , 1.44447391, 1.08103006, 1.18945132, 1.2400909 , 
                         0.89452583, 1.01706922, 1.07902799, 0.97399153, 1.08845327, 1.14076121])                                                                
-                                                                         }, index=np.arange(38, 50))
+                                                                         }, index=pd.RangeIndex(start=38, stop=50, step=1))
 
     assert expected_metric == approx(metric)
     pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions)
@@ -134,7 +134,7 @@ def test_output_backtesting_sarimax_no_refit_yes_exog_with_mocked():
                         -0.14075634, -0.38285107, -0.47306387, -0.12661325, -0.3336438 , -0.50807831]),
     'upper y':np.array([1.30504807, 1.4022235 , 1.41504195, 1.04867188, 1.2582836 , 1.27179848, 
                         0.91921374, 1.04808309, 1.20250537, 0.93335683, 1.09729036, 1.16749093])                                                                
-                                                                         }, index=np.arange(38, 50))
+                                                                         }, index=pd.RangeIndex(start=38, stop=50, step=1))
 
     assert expected_metric == approx(metric)
     pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions)
@@ -169,7 +169,7 @@ def test_output_backtesting_sarimax_yes_refit_yes_exog_with_mocked():
                         -0.14460782, -0.38731126, -0.47372304, -0.16511761, -0.37462024, -0.55570653]),
     'upper y':np.array([1.30504807, 1.4022235 , 1.41504195, 1.0482601 , 1.24116743, 1.25685401,
                         0.91075403, 1.02850588, 1.174583  , 0.93593015, 1.09968035, 1.15769851])                                                                
-                                                                         }, index=np.arange(38, 50))
+                                                                         }, index=pd.RangeIndex(start=38, stop=50, step=1))
 
     assert expected_metric == approx(metric)
     pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions, rtol=1e-4)
@@ -212,7 +212,7 @@ def test_output_backtesting_sarimax_no_refit_no_exog_callable_metric_with_mocked
                         -0.17363794, -0.39660971, -0.54805914, -0.11350503, -0.34359592, -0.50132165]),
     'upper y':np.array([1.3269739 , 1.4134024 , 1.44447391, 1.0894362 , 1.20398675, 1.25985094, 
                         0.90506794, 1.04144582, 1.11655321, 0.96520085, 1.09445961, 1.1632907 ])                                                                
-                                                                         }, index=np.arange(38, 50))
+                                                                         }, index=pd.RangeIndex(start=38, stop=50, step=1))
 
     assert expected_metric == approx(metric)
     pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions)
@@ -247,7 +247,7 @@ def test_output_backtesting_sarimax_yes_refit_no_exog_fixed_train_size_with_mock
                         -0.15419253, -0.37169314, -0.52068564, -0.15280075, -0.38764766, -0.54031653]),
     'upper y':np.array([1.3269739 , 1.4134024 , 1.44447391, 1.07631765, 1.18312815, 1.23273858,
                         0.89067769, 1.02547342, 1.10104854, 0.95899756, 1.06042944, 1.10176172])                                                                
-                                                                         }, index=np.arange(38, 50))
+                                                                         }, index=pd.RangeIndex(start=38, stop=50, step=1))
 
     assert expected_metric == approx(metric)
     pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions)
@@ -283,7 +283,7 @@ def test_output_backtesting_sarimax_yes_refit_yes_exog_fixed_train_size_with_moc
                         -0.12436057, -0.35775318, -0.45385542, -0.16140765, -0.37591687, -0.5487951 ]),
     'upper y':np.array([1.30504807, 1.4022235 , 1.41504195, 1.06016252, 1.21310503, 1.24440491,
                         0.90503984, 1.03592617, 1.18247947, 0.93341534, 1.07589771, 1.12372107])                                                                
-                                                                         }, index=np.arange(38, 50))
+                                                                         }, index=pd.RangeIndex(start=38, stop=50, step=1))
 
     assert expected_metric == approx(metric)
     pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions)

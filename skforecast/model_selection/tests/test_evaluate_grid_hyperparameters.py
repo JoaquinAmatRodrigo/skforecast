@@ -128,7 +128,7 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoreg_with_mocked():
             'mean_squared_error':np.array([0.06464646, 0.06502362, 0.06745534, 0.06779272, 0.06802481, 0.06948609]),                                                               
             'alpha' :np.array([0.01, 0.1 , 1.  , 0.01, 0.1 , 1.  ])
                                      },
-            index=np.arange(idx)
+            index=pd.RangeIndex(start=0, stop=idx, step=1)
                                    )
 
     pd.testing.assert_frame_equal(results, expected_results)
@@ -170,7 +170,7 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoreg_lags_grid_is_Non
             'mean_squared_error':np.array([0.06464646, 0.06502362, 0.06745534]),                                                               
             'alpha' :np.array([0.01, 0.1 , 1.])
                                      },
-            index=[0, 1, 2]
+            index=pd.RangeIndex(start=0, stop=3, step=1)
                                    )
 
     pd.testing.assert_frame_equal(results, expected_results)
@@ -217,7 +217,7 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoreg_metric_list_with
                             'mean_absolute_error': np.array([0.20278812, 0.20314819, 0.20519952, 
                                                              0.20601567, 0.206323, 0.20747017]),                                                          
                             'alpha': np.array([0.01, 0.1 , 1.  , 0.01, 0.1 , 1.  ])},
-                            index = np.arange(idx)
+                            index = pd.RangeIndex(start=0, stop=idx, step=1)
                        )
 
     pd.testing.assert_frame_equal(results, expected_results)
@@ -268,7 +268,7 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregCustom_with_mocke
             'mean_squared_error':np.array([0.06779272, 0.06802481, 0.06948609]),                                                               
             'alpha' :np.array([0.01, 0.1 , 1.])
                                      },
-            index=np.arange(idx)
+            index=pd.RangeIndex(start=0, stop=idx, step=1)
                                    )
     
     pd.testing.assert_frame_equal(results, expected_results)

@@ -166,25 +166,25 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_mocked():
                       [1, 2], [1, 2, 3, 4], [1, 2], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4],
                       [1, 2, 3, 4]],
             'params':[{'n_estimators': 13, 'min_samples_leaf': 0.42753938073418213, 'max_features': 'sqrt'},
-                        {'n_estimators': 14, 'min_samples_leaf': 0.782328520465639, 'max_features': 'log2'},
-                        {'n_estimators': 16, 'min_samples_leaf': 0.707020154488976, 'max_features': 'log2'},
-                        {'n_estimators': 16, 'min_samples_leaf': 0.707020154488976, 'max_features': 'log2'},
-                        {'n_estimators': 14, 'min_samples_leaf': 0.782328520465639, 'max_features': 'log2'},
-                        {'n_estimators': 12, 'min_samples_leaf': 0.14977928606210794, 'max_features': 'sqrt'},
-                        {'n_estimators': 13, 'min_samples_leaf': 0.42753938073418213, 'max_features': 'sqrt'},
-                        {'n_estimators': 14, 'min_samples_leaf': 0.3116628929828935, 'max_features': 'log2'},
-                        {'n_estimators': 14, 'min_samples_leaf': 0.3116628929828935, 'max_features': 'log2'},
-                        {'n_estimators': 17, 'min_samples_leaf': 0.21035794225904136, 'max_features': 'log2'},
-                        {'n_estimators': 17, 'min_samples_leaf': 0.21035794225904136, 'max_features': 'log2'},
-                        {'n_estimators': 17, 'min_samples_leaf': 0.19325882509735576, 'max_features': 'sqrt'},
-                        {'n_estimators': 15, 'min_samples_leaf': 0.2466706727024324, 'max_features': 'sqrt'},
-                        {'n_estimators': 17, 'min_samples_leaf': 0.2649149454284987, 'max_features': 'log2'},
-                        {'n_estimators': 15, 'min_samples_leaf': 0.2466706727024324, 'max_features': 'sqrt'},
-                        {'n_estimators': 14, 'min_samples_leaf': 0.1147302385573586, 'max_features': 'sqrt'},
-                        {'n_estimators': 17, 'min_samples_leaf': 0.2649149454284987, 'max_features': 'log2'},
-                        {'n_estimators': 17, 'min_samples_leaf': 0.19325882509735576, 'max_features': 'sqrt'},
-                        {'n_estimators': 14, 'min_samples_leaf': 0.1147302385573586, 'max_features': 'sqrt'},
-                        {'n_estimators': 12, 'min_samples_leaf': 0.14977928606210794, 'max_features': 'sqrt'}],
+                      {'n_estimators': 14, 'min_samples_leaf': 0.782328520465639, 'max_features': 'log2'},
+                      {'n_estimators': 16, 'min_samples_leaf': 0.707020154488976, 'max_features': 'log2'},
+                      {'n_estimators': 16, 'min_samples_leaf': 0.707020154488976, 'max_features': 'log2'},
+                      {'n_estimators': 14, 'min_samples_leaf': 0.782328520465639, 'max_features': 'log2'},
+                      {'n_estimators': 12, 'min_samples_leaf': 0.14977928606210794, 'max_features': 'sqrt'},
+                      {'n_estimators': 13, 'min_samples_leaf': 0.42753938073418213, 'max_features': 'sqrt'},
+                      {'n_estimators': 14, 'min_samples_leaf': 0.3116628929828935, 'max_features': 'log2'},
+                      {'n_estimators': 14, 'min_samples_leaf': 0.3116628929828935, 'max_features': 'log2'},
+                      {'n_estimators': 17, 'min_samples_leaf': 0.21035794225904136, 'max_features': 'log2'},
+                      {'n_estimators': 17, 'min_samples_leaf': 0.21035794225904136, 'max_features': 'log2'},
+                      {'n_estimators': 17, 'min_samples_leaf': 0.19325882509735576, 'max_features': 'sqrt'},
+                      {'n_estimators': 15, 'min_samples_leaf': 0.2466706727024324, 'max_features': 'sqrt'},
+                      {'n_estimators': 17, 'min_samples_leaf': 0.2649149454284987, 'max_features': 'log2'},
+                      {'n_estimators': 15, 'min_samples_leaf': 0.2466706727024324, 'max_features': 'sqrt'},
+                      {'n_estimators': 14, 'min_samples_leaf': 0.1147302385573586, 'max_features': 'sqrt'},
+                      {'n_estimators': 17, 'min_samples_leaf': 0.2649149454284987, 'max_features': 'log2'},
+                      {'n_estimators': 17, 'min_samples_leaf': 0.19325882509735576, 'max_features': 'sqrt'},
+                      {'n_estimators': 14, 'min_samples_leaf': 0.1147302385573586, 'max_features': 'sqrt'},
+                      {'n_estimators': 12, 'min_samples_leaf': 0.14977928606210794, 'max_features': 'sqrt'}],
             'mean_absolute_error':np.array([0.2077587228, 0.2095295831, 0.2104587292, 0.2152253922,
                                             0.2166138881, 0.2173338079, 0.2173997593, 0.2212038456,
                                             0.2213244194, 0.2228916722, 0.2229839748, 0.2235827592,
@@ -201,7 +201,7 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_mocked():
                              'log2', 'log2', 'log2', 'sqrt', 'sqrt', 'log2', 'sqrt', 'sqrt',
                              'log2', 'sqrt', 'sqrt', 'sqrt']
                                      },
-            index=[17, 19, 15, 5, 9, 4, 7, 8, 18, 6, 16, 0, 2, 1, 12, 3, 11, 10, 13, 14]
+            index=pd.Index([17, 19, 15, 5, 9, 4, 7, 8, 18, 6, 16, 0, 2, 1, 12, 3, 11, 10, 13, 14], dtype="int64")
                                    ).sort_values(by='mean_absolute_error', ascending=True)
 
     pd.testing.assert_frame_equal(results, expected_results, check_dtype=False)
@@ -257,7 +257,7 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_mocked_whe
             'alpha' :np.array([0.24713734184878824, 0.03734897347801035, 0.028425159292991616, 0.12665709946616685, 0.274750150868112, 0.07017992831138445, 0.9152261002780916, 0.23423914662544418, 0.09159332036121723, 0.06084642077147053, 0.24713734184878824, 0.03734897347801035, 0.028425159292991616, 0.12665709946616685, 0.274750150868112, 0.07017992831138445, 0.9152261002780916, 0.23423914662544418, 0.09159332036121723, 0.06084642077147053]
 )
                                      },
-            index=list(range(20))
+            index=pd.RangeIndex(start=0, stop=20, step=1)
                                    ).sort_values(by='mean_absolute_error', ascending=True)
 
     pd.testing.assert_frame_equal(results, expected_results)
@@ -319,7 +319,7 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_mocked_whe
             'max_depth' :np.array([23, 25, 25, 23, 25, 25]),
             'max_features' :['sqrt', 'log2', 'sqrt', 'sqrt', 'log2', 'sqrt']
                                      },
-            index=list(range(6))
+            index=pd.RangeIndex(start=0, stop=6, step=1)
                                    ).sort_values(by='mean_absolute_error', ascending=True).reset_index(drop=True)
 
     pd.testing.assert_frame_equal(results.head(2), expected_results.head(2), check_dtype=False)
@@ -378,7 +378,7 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_mocked_whe
                                0.9152261002780916, 0.23423914662544418, 0.09159332036121723,
                                0.06084642077147053])
                                      },
-            index=list(range(10))
+            index=pd.RangeIndex(start=0, stop=10, step=1)
                                    ).sort_values(by='mean_absolute_error', ascending=True)
 
     pd.testing.assert_frame_equal(results, expected_results)
@@ -447,7 +447,7 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoregCustom_with_mock
                                0.9152261002780916, 0.23423914662544418, 0.09159332036121723,
                                0.06084642077147053])
                                      },
-            index=list(range(10))
+            index=pd.RangeIndex(start=0, stop=10, step=1)
                                    ).sort_values(by='mean_absolute_error', ascending=True)
 
     pd.testing.assert_frame_equal(results, expected_results)

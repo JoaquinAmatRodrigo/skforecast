@@ -65,7 +65,7 @@ def test_output_grid_search_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                             0.21077344827205086, 0.21078653113227208, 0.21078779824759553]),                                                               
             'alpha' :np.array([0.01, 0.1, 1., 1., 0.1, 0.01])
                                      },
-            index=[3, 4, 5, 2, 1, 0]
+            index=pd.Index([3, 4, 5, 2, 1, 0], dtype='int64')
                                    )
 
     pd.testing.assert_frame_equal(results, expected_results)
@@ -109,7 +109,7 @@ def test_output_grid_search_forecaster_multiseries_ForecasterAutoregMultiSeriesC
             'mean_absolute_error':np.array([0.21077344827205086, 0.21078653113227208, 0.21078779824759553]),                                                               
             'alpha' :np.array([1., 0.1, 0.01])
                                      },
-            index=[2, 1, 0]
+            index=pd.Index([2, 1, 0], dtype='int64')
                                    )
 
     pd.testing.assert_frame_equal(results, expected_results)
@@ -155,7 +155,7 @@ def test_output_grid_search_forecaster_multiseries_ForecasterAutoregMultiVariate
             'mean_absolute_error': np.array([0.20115194, 0.20183032, 0.20566862, 0.22224269, 0.22625017, 0.22644284]),                                                               
             'alpha' : np.array([0.01, 0.1, 1., 1., 0.1, 0.01])
                                      },
-            index=[0, 1, 2, 5, 4, 3]
+            index=pd.Index([0, 1, 2, 5, 4, 3], dtype='int64')
                                    )
 
     pd.testing.assert_frame_equal(results, expected_results)
