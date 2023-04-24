@@ -60,7 +60,7 @@ pip install skforecast[plotting]
 ### Hard dependencies
 
 + numpy>=1.20, <1.25
-+ pandas>=1.2, <1.6
++ pandas>=1.2, <2.1
 + tqdm>=4.57.0, <4.65
 + scikit-learn>=1.0, <1.3
 + optuna>=2.10.0, <3.2
