@@ -322,6 +322,42 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_dataframe_of_ca
     pd.testing.assert_series_equal(results[1], expected[1])
 
 
+def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_dataframe_of_float_int_category():
+    """
+    Test the output of create_train_X_y when y=pd.Series(np.arange(10)) and 
+    exog is a pandas dataframe with 3 columns of float, int, category.
+    """
+    y = pd.Series(np.arange(10), dtype=float)
+    exog = pd.DataFrame({'exog_1': pd.Series(np.arange(100, 110), dtype=float),
+                         'exog_2': pd.Series(np.arange(1000, 1010), dtype=int),
+                         'exog_3': pd.Categorical(range(100, 110))})
+    
+    forecaster = ForecasterAutoreg(LinearRegression(), lags=5)
+    results = forecaster.create_train_X_y(y=y, exog=exog)        
+    expected = (
+        pd.DataFrame(
+            data = np.array([[4., 3., 2., 1., 0., 105., 1005.],
+                             [5., 4., 3., 2., 1., 106., 1006.],
+                             [6., 5., 4., 3., 2., 107., 1007.],
+                             [7., 6., 5., 4., 3., 108., 1008.],
+                             [8., 7., 6., 5., 4., 109., 1009.]]),
+            index   = np.array([5, 6, 7, 8, 9]),
+            columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 
+                       'exog_1', 'exog_2']
+        ).astype({'exog_1': float, 
+                  'exog_2': int}).assign(exog_3=pd.Categorical(range(105, 110), categories=range(100, 110))),
+        pd.Series(
+            data  = np.array([5, 6, 7, 8, 9]),
+            index = np.array([5, 6, 7, 8, 9]),
+            name  = 'y',
+            dtype = float
+        )
+    )
+
+    pd.testing.assert_frame_equal(results[0], expected[0])
+    pd.testing.assert_series_equal(results[1], expected[1])
+
+
 def test_create_train_X_y_output_when_y_is_series_10_and_transformer_y_is_StandardScaler():
     """
     Test the output of create_train_X_y when exog is None and transformer_y

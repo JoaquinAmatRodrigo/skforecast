@@ -942,7 +942,7 @@ def exog_to_direct(
     """
 
     if not isinstance(exog, (pd.Series, pd.DataFrame)):
-        raise TypeError("`exog` must be a pandas Series or DataFrame.")
+        raise TypeError(f"`exog` must be a pandas Series or DataFrame. Got {type(exog)}.")
 
     if isinstance(exog, pd.Series):
         exog = exog.to_frame()
