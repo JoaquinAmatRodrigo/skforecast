@@ -30,6 +30,10 @@ All notable changes to this project will be documented in this file.
 
 + Replaced `tqdm.tqdm` by `tqdm.auto.tqdm`.
 
++ Refactor `utils.exog_to_direct`.
+
++ Refactor `get_feature_importance` in all Forecasters.
+
 **Fixed**
 
 + The dtypes of exogenous variables are maintained when generating the training matrices with the `create_train_X_y` method in all the Forecasters.
