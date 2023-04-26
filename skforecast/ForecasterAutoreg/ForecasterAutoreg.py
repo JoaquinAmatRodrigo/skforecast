@@ -1192,25 +1192,23 @@ class ForecasterAutoreg(ForecasterBase):
         else:
             estimator = self.regressor
 
-        try:
+        if hasattr(estimator, 'feature_importances_'):
+            feature_importance = estimator.feature_importances_
+        elif hasattr(estimator, 'coef_'):
+            feature_importance = estimator.coef_
+        else:
+            warnings.warn(
+                (f"Impossible to access feature importance for regressor of type "
+                 f"{type(estimator)}. This method is only valid when the "
+                 f"regressor stores internally the feature importance in the "
+                 f"attribute `feature_importances_` or `coef_`.")
+            )
+            feature_importance = None
+
+        if feature_importance is not None:
             feature_importance = pd.DataFrame({
                                      'feature': self.X_train_col_names,
-                                     'importance' : estimator.feature_importances_
+                                     'importance': feature_importance
                                  })
-        except:   
-            try:
-                feature_importance = pd.DataFrame({
-                                         'feature': self.X_train_col_names,
-                                         'importance' : estimator.coef_
-                                     })
-            except:
-                warnings.warn(
-                    f"Impossible to access feature importance for regressor of type {type(estimator)}. "
-                    f"This method is only valid when the regressor stores internally "
-                    f"the feature importance in the attribute `feature_importances_` "
-                    f"or `coef_`."
-                )
-
-                feature_importance = None
 
         return feature_importance

@@ -1491,8 +1491,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
 
         if (step < 1) or (step > self.steps):
             raise ValueError(
-                f"The step must have a value from 1 to the maximum number of steps "
-                f"({self.steps}). Got {step}."
+                (f"The step must have a value from 1 to the maximum number of steps "
+                 f"({self.steps}). Got {step}.")
             )
 
         if isinstance(self.regressor, sklearn.pipeline.Pipeline):
@@ -1502,32 +1502,32 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         
         len_columns_lags = len(list(chain(*self.lags_.values())))
         idx_columns_lags = np.arange(len_columns_lags)
-        idx_columns_exog = np.array([], dtype=int)
         if self.included_exog:
             idx_columns_exog = np.arange(len(self.X_train_col_names))[len_columns_lags + step-1::self.steps]
+        else:
+            idx_columns_exog = np.array([], dtype=int)
+        
         idx_columns = np.hstack((idx_columns_lags, idx_columns_exog))
-        feature_names = [self.X_train_col_names[i] for i in idx_columns]
-        feature_names = [name.replace(f"_step_{step}", "") for name in feature_names]
+        feature_names = [self.X_train_col_names[i].replace(f"_step_{step}", "") 
+                         for i in idx_columns]
 
-        try:
+        if hasattr(estimator, 'feature_importances_'):
+            feature_importance = estimator.feature_importances_
+        elif hasattr(estimator, 'coef_'):
+            feature_importance = estimator.coef_
+        else:
+            warnings.warn(
+                (f"Impossible to access feature importance for regressor of type "
+                 f"{type(estimator)}. This method is only valid when the "
+                 f"regressor stores internally the feature importance in the "
+                 f"attribute `feature_importances_` or `coef_`.")
+            )
+            feature_importance = None
+
+        if feature_importance is not None:
             feature_importance = pd.DataFrame({
-                                    'feature': feature_names,
-                                    'importance': estimator.feature_importances_
+                                     'feature': feature_names,
+                                     'importance': feature_importance
                                  })
-        except:   
-            try:
-                feature_importance = pd.DataFrame({
-                                        'feature': feature_names,
-                                        'importance': estimator.coef_
-                                     })
-            except:
-                warnings.warn(
-                    f"Impossible to access feature importance for regressor of type "
-                    f"{type(estimator)}. This method is only valid when the "
-                    f"regressor stores internally the feature importance in the "
-                    f"attribute `feature_importances_` or `coef_`."
-                )
-
-                feature_importance = None
 
         return feature_importance
