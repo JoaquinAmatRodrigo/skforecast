@@ -697,12 +697,44 @@ class ForecasterSarimax():
         self.regressor = clone(self.regressor)
         self.regressor.set_params(**params)
         self.params = self.regressor.get_params(deep=True)
-        
-    
+
+
+    def get_feature_importances(
+        self
+    ) -> pd.DataFrame:
+        """
+        Return feature importances of the regressor stored in the
+        forecaster.
+
+        Parameters
+        ----------
+        self
+
+        Returns
+        -------
+        feature_importances : pandas DataFrame
+            Feature importances associated with each predictor.
+
+        """
+
+        if self.fitted == False:
+            raise NotFittedError(
+                ("This forecaster is not fitted yet. Call `fit` with appropriate "
+                 "arguments before using `get_feature_importances()`.")
+            )
+
+        feature_importances = self.regressor.params().to_frame().reset_index()
+        feature_importances.columns = ['feature', 'importance']
+
+        return feature_importances
+
+
     def get_feature_importance(
         self
     ) -> pd.DataFrame:
-        """      
+        """
+        This method has been replaced by `get_feature_importances()`.
+
         Return feature importance of the regressor stored in the
         forecaster.
 
@@ -712,18 +744,14 @@ class ForecasterSarimax():
 
         Returns
         -------
-        feature_importance : pandas DataFrame
-            Feature importance associated with each predictor.
+        feature_importances : pandas DataFrame
+            Feature importances associated with each predictor.
 
         """
 
-        if self.fitted == False:
-            raise NotFittedError(
-                ("This forecaster is not fitted yet. Call `fit` with appropriate "
-                 "arguments before using `get_feature_importance()`.")
-            )
+        warnings.warn(
+            (f"get_feature_importance() method has been renamed to get_feature_importances()."
+             f"This method will be removed in skforecast 0.9.0.")
+        )
 
-        feature_importance = self.regressor.params().to_frame().reset_index()
-        feature_importance.columns = ['feature', 'importance']
-
-        return feature_importance
+        return self.get_feature_importances()

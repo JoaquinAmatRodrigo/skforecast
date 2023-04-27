@@ -40,7 +40,7 @@ pip install skforecast
 Specific version:
 
 ```bash
-pip install skforecast==0.7.1
+pip install skforecast==0.7.0
 ```
 
 Latest (unstable):
@@ -99,12 +99,13 @@ pip install skforecast[plotting]
 + Get predictor importance
 + Forecaster in production
 
-## What is new in skforecast 0.7.1?
+## What is new in skforecast 0.8.0?
 
 - [x] Support for `pandas 2.0.x`.
 - [x] New user guide on how to include **categorical variables** in the Forecasters.
 - [x] New user guide on how to use **GPU in Google Colab** with XGBoost and LightGBM regressors.
-- [x] The dtypes of exogenous variables are maintained when generating the training matrices with the `create_train_X_y` method in all the Forecasters.
+- [] The dtypes of exogenous variables are maintained when generating the training matrices with the `create_train_X_y` method in all the Forecasters.
+- [] kwargs for fit method.
 - [x] Bug fixes and performance improvements.
 
 Visit the [release notes](https://skforecast.org/latest/releases/releases.html) to view all notable changes.
@@ -193,7 +194,7 @@ If you use this software, please cite it using the following metadata.
 
 **APA**:
 ```
-Amat Rodrigo, J., & Escobar Ortiz, J. skforecast (Version 0.7.1) [Computer software]
+Amat Rodrigo, J., & Escobar Ortiz, J. skforecast (Version 0.7.0) [Computer software]
 ```
 
 **BibTeX**:
@@ -201,9 +202,9 @@ Amat Rodrigo, J., & Escobar Ortiz, J. skforecast (Version 0.7.1) [Computer softw
 @software{skforecast,
 author = {Amat Rodrigo, Joaquin and Escobar Ortiz, Javier},
 license = {MIT},
-month = {4},
+month = {3},
 title = {{skforecast}},
-version = {0.7.1},
+version = {0.7.0},
 year = {2023}
 }
 ```
