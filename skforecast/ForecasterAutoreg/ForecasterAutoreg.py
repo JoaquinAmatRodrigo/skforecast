@@ -76,6 +76,9 @@ class ForecasterAutoreg(ForecasterBase):
 
     forecaster_id : str, int, default `None`
         Name used as an identifier of the forecaster.
+
+    fit_kwargs : dict, default `None`
+        Additional parameters passed to the `fit` method of the regressor.
     
     Attributes
     ----------
@@ -172,6 +175,9 @@ class ForecasterAutoreg(ForecasterBase):
 
     forecaster_id : str, int default `None`
         Name used as an identifier of the forecaster.
+
+    fit_kwargs : dict, default `None`
+        Additional keyword arguments passed to the `fit` method of the regressor.
      
     """
     
@@ -182,7 +188,8 @@ class ForecasterAutoreg(ForecasterBase):
         transformer_y: Optional[object]=None,
         transformer_exog: Optional[object]=None,
         weight_func: Optional[Callable]=None,
-        forecaster_id: Optional[Union[str, int]]=None
+        forecaster_id: Optional[Union[str, int]]=None,
+        fit_kwargs: Optional[dict]=None
     ) -> None:
         
         self.regressor               = regressor
@@ -207,6 +214,12 @@ class ForecasterAutoreg(ForecasterBase):
         self.skforcast_version       = skforecast.__version__
         self.python_version          = sys.version.split(" ")[0]
         self.forecaster_id           = forecaster_id
+        self.fit_kwargs              = fit_kwargs if fit_kwargs is not None else {}
+
+        if not isinstance(self.fit_kwargs, dict):
+            raise TypeError(
+                f"Argument `fit_kwargs` must be a dict. Got {type(fit_kwargs)}."
+            )
         
         self.lags = initialize_lags(type(self).__name__, lags)
         self.max_lag = max(self.lags)
@@ -251,6 +264,7 @@ class ForecasterAutoreg(ForecasterBase):
             f"Training index type: {str(self.index_type).split('.')[-1][:-2] if self.fitted else None} \n"
             f"Training index frequency: {self.index_freq if self.fitted else None} \n"
             f"Regressor parameters: {params} \n"
+            f"fit_kwargs: {self.fit_kwargs} \n"
             f"Creation date: {self.creation_date} \n"
             f"Last fit date: {self.fit_date} \n"
             f"Skforecast version: {self.skforcast_version} \n"
@@ -445,7 +459,8 @@ class ForecasterAutoreg(ForecasterBase):
     def fit(
         self,
         y: pd.Series,
-        exog: Optional[Union[pd.Series, pd.DataFrame]]=None
+        exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+        fit_kwargs: Optional[dict]=None
     ) -> None:
         """
         Training Forecaster.
@@ -459,6 +474,11 @@ class ForecasterAutoreg(ForecasterBase):
             Exogenous variable/s included as predictor/s. Must have the same
             number of observations as `y` and their indexes must be aligned so
             that y[i] is regressed on exog[i].
+
+        fit_kwargs : dict, default `None`
+            Additional keyword arguments passed to the `fit` method of the regressor.
+            If also passed during the instantiation of the forecaster, the values
+            specified here will take precedence.
 
         Returns 
         -------
@@ -478,6 +498,20 @@ class ForecasterAutoreg(ForecasterBase):
         self.in_sample_residuals = None
         self.fitted              = False
         self.training_range      = None
+
+        if fit_kwargs is not None:
+            if not isinstance(fit_kwargs, dict):
+                raise TypeError(
+                    f"Argument `fit_kwargs` must be a dict. Got {type(fit_kwargs)}."
+                )
+            else:
+                # Update the values of `fit_kwargs` created in `__init__` with the
+                # values passed to `fit`.
+                self.fit_kwargs.update(fit_kwargs)
+
+        # Select only the keyword arguments allowed by the regressor's `fit` method.
+        self.fit_kwargs = {k:v for k, v in self.fit_kwargs.items()
+                           if k in inspect.signature(self.regressor.fit).parameters}
         
         if exog is not None:
             self.included_exog = True
@@ -489,9 +523,10 @@ class ForecasterAutoreg(ForecasterBase):
         sample_weight = self.create_sample_weights(X_train=X_train)
 
         if sample_weight is not None:
-            self.regressor.fit(X=X_train, y=y_train, sample_weight=sample_weight)
+            self.regressor.fit(X=X_train, y=y_train, sample_weight=sample_weight,
+                               **self.fit_kwargs)
         else:
-            self.regressor.fit(X=X_train, y=y_train)
+            self.regressor.fit(X=X_train, y=y_train, **self.fit_kwargs)
 
         self.fitted = True
         self.fit_date = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
@@ -640,6 +675,7 @@ class ForecasterAutoreg(ForecasterBase):
                            fit               = False,
                            inverse_transform = False
                        )
+            check_exog_dtypes(exog=exog)
             exog_values = exog.iloc[:steps, ].to_numpy()
         else:
             exog_values = None
