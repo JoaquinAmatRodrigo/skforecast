@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.7.1] - [2023-04-25]
+## [0.8.0] - [2023-XX-XX]
 
 **Added**
 
@@ -29,6 +29,12 @@ All notable changes to this project will be documented in this file.
 + The `utils.preprocess_exog` function now includes a new optional parameter, `return_values`, that controls whether to return a numpy ndarray with the values of y or not. This new option is intended to avoid copying data when it is not necessary.
 
 + Replaced `tqdm.tqdm` by `tqdm.auto.tqdm`.
+
++ Refactor `utils.exog_to_direct`.
+
++ Rename `get_feature_importance()` to `get_feature_importances()` in all Forecasters. `get_feature_importance()` method will me removed in skforecast 0.8.0.
+
++ Refactor `get_feature_importances()` in all Forecasters.
 
 **Fixed**
 
