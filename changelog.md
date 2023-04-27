@@ -32,7 +32,9 @@ All notable changes to this project will be documented in this file.
 
 + Refactor `utils.exog_to_direct`.
 
-+ Refactor `get_feature_importance` in all Forecasters.
++ Rename `get_feature_importance()` to `get_feature_importances()` in all Forecasters. `get_feature_importance()` method will me removed in skforecast 0.8.0.
+
++ Refactor `get_feature_importances()` in all Forecasters.
 
 **Fixed**
 
