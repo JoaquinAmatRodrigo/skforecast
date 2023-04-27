@@ -287,6 +287,11 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.python_version          = sys.version.split(" ")[0]
         self.forecaster_id           = forecaster_id
         self.fit_kwargs              = fit_kwargs if fit_kwargs is not None else {}
+
+        if not isinstance(fit_kwargs, dict):
+            raise TypeError(
+                f"Argument `fit_kwargs` must be a dict. Got {type(fit_kwargs)}."
+            )
         
         self.lags = initialize_lags(type(self).__name__, lags)
         self.max_lag = max(self.lags)
@@ -684,10 +689,15 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.series_col_names = list(series.columns)
         
         if fit_kwargs is not None:
-            # Update the values of `fit_kwargs` created in `__init__` with the
-            # values passed to `fit`.
-            self.fit_kwargs.update(fit_kwargs)
-
+            if not isinstance(fit_kwargs, dict):
+                raise TypeError(
+                    f"Argument `fit_kwargs` must be a dict. Got {type(fit_kwargs)}."
+                )
+            else:
+                # Update the values of `fit_kwargs` created in `__init__` with the
+                # values passed to `fit`.
+                self.fit_kwargs.update(fit_kwargs)
+                
         # Select only the keyword arguments allowed by the regressor's `fit` method.
         self.fit_kwargs = {k:v for k, v in self.fit_kwargs.items()
                            if k in inspect.signature(self.regressor.fit).parameters}

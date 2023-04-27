@@ -257,6 +257,11 @@ class ForecasterAutoregCustom(ForecasterBase):
             raise TypeError(
                 f"Argument `fun_predictors` must be a Callable. Got {type(fun_predictors)}."
             )
+        
+        if not isinstance(fit_kwargs, dict):
+            raise TypeError(
+                f"Argument `fit_kwargs` must be a dict. Got {type(fit_kwargs)}."
+            )
     
         self.source_code_create_predictors = inspect.getsource(fun_predictors)
         self.source_code_fun_predictors = inspect.getsource(fun_predictors)
@@ -538,9 +543,14 @@ class ForecasterAutoregCustom(ForecasterBase):
         self.training_range      = None
 
         if fit_kwargs is not None:
-            # Update the values of `fit_kwargs` created in `__init__` with the
-            # values passed to `fit`.
-            self.fit_kwargs.update(fit_kwargs)
+            if not isinstance(fit_kwargs, dict):
+                raise TypeError(
+                    f"Argument `fit_kwargs` must be a dict. Got {type(fit_kwargs)}."
+                )
+            else:
+                # Update the values of `fit_kwargs` created in `__init__` with the
+                # values passed to `fit`.
+                self.fit_kwargs.update(fit_kwargs)
 
         # Select only the keyword arguments allowed by the regressor's `fit` method.
         self.fit_kwargs = {k:v for k, v in self.fit_kwargs.items()
