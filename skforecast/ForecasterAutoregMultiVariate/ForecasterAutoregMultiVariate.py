@@ -294,6 +294,11 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                 f"`steps` argument must be greater than or equal to 1. Got {steps}."
             )
         
+        if not isinstance(fit_kwargs, dict):
+            raise TypeError(
+                f"Argument `fit_kwargs` must be a dict. Got {type(fit_kwargs)}."
+            )
+        
         self.regressors_ = {step: clone(self.regressor) for step in range(1, steps + 1)}
 
         if isinstance(lags, dict):
@@ -729,9 +734,14 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         self.series_col_names = list(series.columns)
 
         if fit_kwargs is not None:
-            # Update the values of `fit_kwargs` created in `__init__` with the
-            # values passed to `fit`.
-            self.fit_kwargs.update(fit_kwargs)
+            if not isinstance(fit_kwargs, dict):
+                raise TypeError(
+                    f"Argument `fit_kwargs` must be a dict. Got {type(fit_kwargs)}."
+                )
+            else:
+                # Update the values of `fit_kwargs` created in `__init__` with the
+                # values passed to `fit`.
+                self.fit_kwargs.update(fit_kwargs)
 
         # Select only the keyword arguments allowed by the regressor's `fit` method.
         self.fit_kwargs = {k:v for k, v in self.fit_kwargs.items()
