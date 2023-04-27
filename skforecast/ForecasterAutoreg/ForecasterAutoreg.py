@@ -216,7 +216,7 @@ class ForecasterAutoreg(ForecasterBase):
         self.forecaster_id           = forecaster_id
         self.fit_kwargs              = fit_kwargs if fit_kwargs is not None else {}
 
-        if not isinstance(fit_kwargs, dict):
+        if not isinstance(self.fit_kwargs, dict):
             raise TypeError(
                 f"Argument `fit_kwargs` must be a dict. Got {type(fit_kwargs)}."
             )

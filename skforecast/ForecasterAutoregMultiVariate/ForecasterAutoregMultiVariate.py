@@ -294,7 +294,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                 f"`steps` argument must be greater than or equal to 1. Got {steps}."
             )
         
-        if not isinstance(fit_kwargs, dict):
+        if not isinstance(self.fit_kwargs, dict):
             raise TypeError(
                 f"Argument `fit_kwargs` must be a dict. Got {type(fit_kwargs)}."
             )

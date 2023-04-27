@@ -258,7 +258,7 @@ class ForecasterAutoregCustom(ForecasterBase):
                 f"Argument `fun_predictors` must be a Callable. Got {type(fun_predictors)}."
             )
         
-        if not isinstance(fit_kwargs, dict):
+        if not isinstance(self.fit_kwargs, dict):
             raise TypeError(
                 f"Argument `fit_kwargs` must be a dict. Got {type(fit_kwargs)}."
             )
