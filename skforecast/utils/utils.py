@@ -603,8 +603,7 @@ def check_predict_input(
                      f"Got {exog.columns.to_list()}.") 
                 )
 
-        # Check dtypes, index type and freq
-        check_exog_dtypes(exog=exog)
+        # Check index dtype and freq
         _, exog_index = preprocess_exog(
                             exog          = exog.iloc[:0, ],
                             return_values = False
