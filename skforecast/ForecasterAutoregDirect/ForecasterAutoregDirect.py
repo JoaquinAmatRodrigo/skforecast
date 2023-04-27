@@ -1276,16 +1276,16 @@ class ForecasterAutoregDirect(ForecasterBase):
             self.out_sample_residuals[key] = value
 
  
-    def get_feature_importance(
+    def get_feature_importances(
         self, 
         step: int
     ) -> pd.DataFrame:
-        """      
+        """
         Return impurity-based feature importance of the model stored in
         the forecaster for a specific step. Since a separate model is created for
         each forecast time step, it is necessary to select the model from which
         retrieve information. Only valid when regressor stores internally the 
-        feature importance in the attribute `feature_importances_` or `coef_`.
+        feature importances in the attribute `feature_importances_` or `coef_`.
 
         Parameters
         ----------
@@ -1295,8 +1295,8 @@ class ForecasterAutoregDirect(ForecasterBase):
 
         Returns 
         -------
-        feature_importance : pandas DataFrame
-            Feature importance associated with each predictor.
+        feature_importances : pandas DataFrame
+            Feature importances associated with each predictor.
         
         """
 
@@ -1308,7 +1308,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         if self.fitted == False:
             raise sklearn.exceptions.NotFittedError(
                 ("This forecaster is not fitted yet. Call `fit` with appropriate "
-                 "arguments before using `get_feature_importance()`.")
+                 "arguments before using `get_feature_importances()`.")
             )
 
         if (step < 1) or (step > self.steps):
@@ -1333,22 +1333,56 @@ class ForecasterAutoregDirect(ForecasterBase):
                          for i in idx_columns]
 
         if hasattr(estimator, 'feature_importances_'):
-            feature_importance = estimator.feature_importances_
+            feature_importances = estimator.feature_importances_
         elif hasattr(estimator, 'coef_'):
-            feature_importance = estimator.coef_
+            feature_importances = estimator.coef_
         else:
             warnings.warn(
-                (f"Impossible to access feature importance for regressor of type "
+                (f"Impossible to access feature importances for regressor of type "
                  f"{type(estimator)}. This method is only valid when the "
-                 f"regressor stores internally the feature importance in the "
+                 f"regressor stores internally the feature importances in the "
                  f"attribute `feature_importances_` or `coef_`.")
             )
-            feature_importance = None
+            feature_importances = None
 
-        if feature_importance is not None:
-            feature_importance = pd.DataFrame({
-                                     'feature': feature_names,
-                                     'importance': feature_importance
-                                 })
+        if feature_importances is not None:
+            feature_importances = pd.DataFrame({
+                                      'feature': feature_names,
+                                      'importance': feature_importances
+                                  })
 
-        return feature_importance
+        return feature_importances
+    
+
+    def get_feature_importance(
+        self, 
+        step: int
+    ) -> pd.DataFrame:
+        """
+        This method has been replaced by `get_feature_importances()`.
+
+        Return impurity-based feature importance of the model stored in
+        the forecaster for a specific step. Since a separate model is created for
+        each forecast time step, it is necessary to select the model from which
+        retrieve information. Only valid when regressor stores internally the 
+        feature importances in the attribute `feature_importances_` or `coef_`.
+
+        Parameters
+        ----------
+        step : int
+            Model from which retrieve information (a separate model is created 
+            for each forecast time step). First step is 1.
+
+        Returns 
+        -------
+        feature_importances : pandas DataFrame
+            Feature importances associated with each predictor.
+        
+        """
+
+        warnings.warn(
+            (f"get_feature_importance() method has been renamed to get_feature_importances()."
+             f"This method will be removed in skforecast 0.8.0.")
+        )
+
+        return self.get_feature_importances(step=step)

@@ -160,10 +160,10 @@ class ForecasterBase(ABC):
         
         pass
 
+
     def summary(self) -> None:
         """      
         Show forecaster information.
         """
         
         print(self)
-        

@@ -1,4 +1,4 @@
-# Unit test get_feature_importance ForecasterAutoregCustom
+# Unit test get_feature_importances ForecasterAutoregCustom
 # ==============================================================================
 import re
 import pytest
@@ -25,7 +25,7 @@ def create_predictors(y): # pragma: no cover
 
 def test_NotFittedError_is_raised_when_forecaster_is_not_fitted():
     """
-    Test NotFittedError is raised when calling get_feature_importance() and 
+    Test NotFittedError is raised when calling get_feature_importances() and 
     forecaster is not fitted.
     """
     forecaster = ForecasterAutoregCustom(
@@ -36,15 +36,15 @@ def test_NotFittedError_is_raised_when_forecaster_is_not_fitted():
 
     err_msg = re.escape(
                 ("This forecaster is not fitted yet. Call `fit` with appropriate "
-                 "arguments before using `get_feature_importance()`.")
+                 "arguments before using `get_feature_importances()`.")
               )
     with pytest.raises(NotFittedError, match = err_msg):         
-        forecaster.get_feature_importance()
+        forecaster.get_feature_importances()
 
 
-def test_output_get_feature_importance_when_regressor_is_RandomForest():
+def test_output_get_feature_importances_when_regressor_is_RandomForest():
     """
-    Test output of get_feature_importance when regressor is RandomForestRegressor 
+    Test output of get_feature_importances when regressor is RandomForestRegressor 
     with create_predictors and it is trained with y=pd.Series(np.arange(10)).
     """
     forecaster = ForecasterAutoregCustom(
@@ -54,7 +54,7 @@ def test_output_get_feature_importance_when_regressor_is_RandomForest():
                  )
     forecaster.fit(y=pd.Series(np.arange(10)))
 
-    results = forecaster.get_feature_importance()
+    results = forecaster.get_feature_importances()
     expected = pd.DataFrame({
                    'feature': ['custom_predictor_0', 'custom_predictor_1',
                                'custom_predictor_2', 'custom_predictor_3',
@@ -65,9 +65,9 @@ def test_output_get_feature_importance_when_regressor_is_RandomForest():
     pd.testing.assert_frame_equal(results, expected)
     
     
-def test_output_get_feature_importance_when_regressor_is_RandomForest_with_exog():
+def test_output_get_feature_importances_when_regressor_is_RandomForest_with_exog():
     """
-    Test output of get_feature_importance when regressor is RandomForestRegressor 
+    Test output of get_feature_importances when regressor is RandomForestRegressor 
     with create_predictors and it is trained with y=pd.Series(np.arange(10)) and 
     a exogenous variable exog=pd.Series(np.arange(10, 20), name='exog').
     """
@@ -78,7 +78,7 @@ def test_output_get_feature_importance_when_regressor_is_RandomForest_with_exog(
                  )
     forecaster.fit(y=pd.Series(np.arange(10)), exog=pd.Series(np.arange(10, 20), name='exog'))
     
-    results = forecaster.get_feature_importance()
+    results = forecaster.get_feature_importances()
     expected = pd.DataFrame({
                    'feature': ['custom_predictor_0', 'custom_predictor_1',
                                'custom_predictor_2', 'custom_predictor_3',
@@ -89,9 +89,9 @@ def test_output_get_feature_importance_when_regressor_is_RandomForest_with_exog(
     pd.testing.assert_frame_equal(results, expected)
 
 
-def test_output_get_feature_importance_when_regressor_is_LinearRegression():
+def test_output_get_feature_importances_when_regressor_is_LinearRegression():
     """
-    Test output of get_feature_importance when regressor is LinearRegression with
+    Test output of get_feature_importances when regressor is LinearRegression with
     create_predictors and it is trained with y=pd.Series(np.arange(7)).
     """
     forecaster = ForecasterAutoregCustom(
@@ -101,7 +101,7 @@ def test_output_get_feature_importance_when_regressor_is_LinearRegression():
                  )
     forecaster.fit(y=pd.Series(np.arange(7)))
 
-    results = forecaster.get_feature_importance()
+    results = forecaster.get_feature_importances()
     expected = pd.DataFrame({
                    'feature': ['custom_predictor_0', 'custom_predictor_1',
                                'custom_predictor_2', 'custom_predictor_3',
@@ -112,9 +112,9 @@ def test_output_get_feature_importance_when_regressor_is_LinearRegression():
     pd.testing.assert_frame_equal(results, expected)
 
 
-def test_output_get_feature_importance_when_regressor_is_LinearRegression_with_exog():
+def test_output_get_feature_importances_when_regressor_is_LinearRegression_with_exog():
     """
-    Test output of get_feature_importance when regressor is LinearRegression with
+    Test output of get_feature_importances when regressor is LinearRegression with
     create_predictors and it is trained with y=pd.Series(np.arange(7)) and 
     a exogenous variable exog=pd.Series(np.arange(10, 17), name='exog').
     """
@@ -125,7 +125,7 @@ def test_output_get_feature_importance_when_regressor_is_LinearRegression_with_e
                  )
     forecaster.fit(y=pd.Series(np.arange(7)), exog=pd.Series(np.arange(10, 17), name='exog'))
     
-    results = forecaster.get_feature_importance()
+    results = forecaster.get_feature_importances()
     expected = pd.DataFrame({
                    'feature': ['custom_predictor_0', 'custom_predictor_1',
                                'custom_predictor_2', 'custom_predictor_3',
@@ -136,9 +136,9 @@ def test_output_get_feature_importance_when_regressor_is_LinearRegression_with_e
     pd.testing.assert_frame_equal(results, expected)
     
     
-def test_output_and_UserWarning_get_feature_importance_when_regressor_no_attributes():
+def test_output_and_UserWarning_get_feature_importances_when_regressor_no_attributes():
     """
-    Test output of get_feature_importance when regressor is MLPRegressor with create_predictors
+    Test output of get_feature_importances when regressor is MLPRegressor with create_predictors
     and it is trained with y=pd.Series(np.arange(10)). Since MLPRegressor hasn't attributes
     `feature_importances_` or `coef_, results = None and a UserWarning is issues.
     """
@@ -153,19 +153,19 @@ def test_output_and_UserWarning_get_feature_importance_when_regressor_no_attribu
     expected = None
 
     warn_msg = re.escape(
-                (f"Impossible to access feature importance for regressor of type "
+                (f"Impossible to access feature importances for regressor of type "
                  f"{type(estimator)}. This method is only valid when the "
-                 f"regressor stores internally the feature importance in the "
+                 f"regressor stores internally the feature importances in the "
                  f"attribute `feature_importances_` or `coef_`.")
             )
     with pytest.warns(UserWarning, match = warn_msg):
-        results = forecaster.get_feature_importance()
+        results = forecaster.get_feature_importances()
         assert results is expected
 
 
-def test_output_get_feature_importance_when_pipeline_LinearRegression():
+def test_output_get_feature_importances_when_pipeline_LinearRegression():
     """
-    Test output of get_feature_importance when regressor is pipeline,
+    Test output of get_feature_importances when regressor is pipeline,
     (StandardScaler() + LinearRegression with create_predictors),
     it is trained with y=pd.Series(np.arange(7)).
     """
@@ -176,7 +176,7 @@ def test_output_get_feature_importance_when_pipeline_LinearRegression():
                  )
     forecaster.fit(y=pd.Series(np.arange(7)))
 
-    results = forecaster.get_feature_importance()
+    results = forecaster.get_feature_importances()
     expected = pd.DataFrame({
                    'feature': ['custom_predictor_0', 'custom_predictor_1',
                                'custom_predictor_2', 'custom_predictor_3',
@@ -187,9 +187,9 @@ def test_output_get_feature_importance_when_pipeline_LinearRegression():
     pd.testing.assert_frame_equal(results, expected)
 
 
-def test_output_get_feature_importance_when_pipeline_RandomForestRegressor():
+def test_output_get_feature_importances_when_pipeline_RandomForestRegressor():
     """
-    Test output of get_feature_importance when regressor is pipeline,
+    Test output of get_feature_importances when regressor is pipeline,
     (StandardScaler() + RandomForestRegressor with create_predictors),
     it is trained with y=pd.Series(np.arange(7)).
     """
@@ -201,7 +201,7 @@ def test_output_get_feature_importance_when_pipeline_RandomForestRegressor():
                  )
     forecaster.fit(y=pd.Series(np.arange(10)))
     
-    results = forecaster.get_feature_importance()
+    results = forecaster.get_feature_importances()
     expected = pd.DataFrame({
                    'feature': ['custom_predictor_0', 'custom_predictor_1',
                                'custom_predictor_2', 'custom_predictor_3',

@@ -1,4 +1,4 @@
-# Unit test get_feature_importance ForecasterAutoregMultiVariate
+# Unit test get_feature_importances ForecasterAutoregMultiVariate
 # ==============================================================================
 import re
 import pytest
@@ -22,7 +22,7 @@ exog = pd.DataFrame({'exog_1': np.arange(10, dtype=float),
 
 def test_TypeError_is_raised_when_step_is_not_int():
     """
-    Test TypeError is raised when calling get_feature_importance() and step is 
+    Test TypeError is raised when calling get_feature_importances() and step is 
     not an int.
     """
     forecaster = ForecasterAutoregMultiVariate(
@@ -37,12 +37,12 @@ def test_TypeError_is_raised_when_step_is_not_int():
 
     err_msg = re.escape(f'`step` must be an integer. Got {type(step)}.')
     with pytest.raises(TypeError, match = err_msg):         
-        forecaster.get_feature_importance(step=step)
+        forecaster.get_feature_importances(step=step)
 
 
 def test_NotFittedError_is_raised_when_forecaster_is_not_fitted():
     """
-    Test NotFittedError is raised when calling get_feature_importance() and 
+    Test NotFittedError is raised when calling get_feature_importances() and 
     forecaster is not fitted.
     """
     forecaster = ForecasterAutoregMultiVariate(
@@ -54,16 +54,16 @@ def test_NotFittedError_is_raised_when_forecaster_is_not_fitted():
 
     err_msg = re.escape(
                 ("This forecaster is not fitted yet. Call `fit` with appropriate "
-                 "arguments before using `get_feature_importance()`.")
+                 "arguments before using `get_feature_importances()`.")
               )
     with pytest.raises(NotFittedError, match = err_msg):         
-        forecaster.get_feature_importance(step=1)
+        forecaster.get_feature_importances(step=1)
 
 
 @pytest.mark.parametrize("step", [0, 2], ids=lambda step: f'step: {step}')
 def test_ValueError_is_raised_when_step_is_greater_than_forecaster_steps(step):
     """
-    Test ValueError is raised when calling get_feature_importance() and step is 
+    Test ValueError is raised when calling get_feature_importances() and step is 
     less than 1 or greater than the forecaster.steps.
     """
     forecaster = ForecasterAutoregMultiVariate(
@@ -79,12 +79,12 @@ def test_ValueError_is_raised_when_step_is_greater_than_forecaster_steps(step):
                  f"({forecaster.steps}). Got {step}.")
             )
     with pytest.raises(ValueError, match = err_msg):         
-        forecaster.get_feature_importance(step=step)
+        forecaster.get_feature_importances(step=step)
 
 
-def test_output_get_feature_importance_when_regressor_is_RandomForestRegressor_lags_3_step_1():
+def test_output_get_feature_importances_when_regressor_is_RandomForestRegressor_lags_3_step_1():
     """
-    Test output of get_feature_importance for step 1, when regressor is 
+    Test output of get_feature_importances for step 1, when regressor is 
     RandomForestRegressor with lags=3.
     """
     forecaster = ForecasterAutoregMultiVariate(
@@ -95,7 +95,7 @@ def test_output_get_feature_importance_when_regressor_is_RandomForestRegressor_l
                  )
     forecaster.fit(series=series)
 
-    results = forecaster.get_feature_importance(step=1)
+    results = forecaster.get_feature_importances(step=1)
     expected = pd.DataFrame({
                    'feature': ['l1_lag_1', 'l1_lag_2', 'l1_lag_3', 
                                'l2_lag_1', 'l2_lag_2', 'l2_lag_3'],
@@ -106,9 +106,9 @@ def test_output_get_feature_importance_when_regressor_is_RandomForestRegressor_l
     pd.testing.assert_frame_equal(results, expected)
   
     
-def test_output_get_feature_importance_when_regressor_is_RandomForestRegressor_lags_3_step_2_exog_included():
+def test_output_get_feature_importances_when_regressor_is_RandomForestRegressor_lags_3_step_2_exog_included():
     """
-    Test output of get_feature_importance for step 2, when regressor is 
+    Test output of get_feature_importances for step 2, when regressor is 
     RandomForestRegressor with lags=3 and exog.
     """
     forecaster = ForecasterAutoregMultiVariate(
@@ -119,7 +119,7 @@ def test_output_get_feature_importance_when_regressor_is_RandomForestRegressor_l
                  )
     forecaster.fit(series=series, exog=exog)
 
-    results = forecaster.get_feature_importance(step=2)
+    results = forecaster.get_feature_importances(step=2)
     expected = pd.DataFrame({
                    'feature': ['l1_lag_1', 'l1_lag_2', 'l1_lag_3', 
                                'l2_lag_1', 'l2_lag_2', 'l2_lag_3', 
@@ -132,9 +132,9 @@ def test_output_get_feature_importance_when_regressor_is_RandomForestRegressor_l
     pd.testing.assert_frame_equal(results, expected)
     
     
-def test_output_get_feature_importance_when_regressor_is_LinearRegression_lags_3_step_1():
+def test_output_get_feature_importances_when_regressor_is_LinearRegression_lags_3_step_1():
     """
-    Test output of get_feature_importance for step 1, when regressor is 
+    Test output of get_feature_importances for step 1, when regressor is 
     LinearRegression with lags=3.
     """
     forecaster = ForecasterAutoregMultiVariate(
@@ -145,7 +145,7 @@ def test_output_get_feature_importance_when_regressor_is_LinearRegression_lags_3
                  )
     forecaster.fit(series=series)
 
-    results = forecaster.get_feature_importance(step=1)
+    results = forecaster.get_feature_importances(step=1)
     expected = pd.DataFrame({
                    'feature': ['l1_lag_1', 'l1_lag_2', 'l1_lag_3', 
                                'l2_lag_1', 'l2_lag_2', 'l2_lag_3'],
@@ -156,9 +156,9 @@ def test_output_get_feature_importance_when_regressor_is_LinearRegression_lags_3
     pd.testing.assert_frame_equal(results, expected)
 
 
-def test_output_get_feature_importance_when_regressor_is_LinearRegression_lags_3_step_2_exog_included():
+def test_output_get_feature_importances_when_regressor_is_LinearRegression_lags_3_step_2_exog_included():
     """
-    Test output of get_feature_importance for step 1, when regressor is 
+    Test output of get_feature_importances for step 1, when regressor is 
     LinearRegression with lags=3 and exog.
     """
     forecaster = ForecasterAutoregMultiVariate(
@@ -169,7 +169,7 @@ def test_output_get_feature_importance_when_regressor_is_LinearRegression_lags_3
                  )
     forecaster.fit(series=series, exog=exog)
 
-    results = forecaster.get_feature_importance(step=2)
+    results = forecaster.get_feature_importances(step=2)
     expected = pd.DataFrame({
                    'feature': ['l1_lag_1', 'l1_lag_2', 'l1_lag_3', 
                                'l2_lag_1', 'l2_lag_2', 'l2_lag_3', 
@@ -182,9 +182,9 @@ def test_output_get_feature_importance_when_regressor_is_LinearRegression_lags_3
     pd.testing.assert_frame_equal(results, expected)
     
 
-def test_output_get_feature_importance_when_regressor_no_attributes():
+def test_output_get_feature_importances_when_regressor_no_attributes():
     """
-    Test output of get_feature_importance when regressor is MLPRegressor with lags=5
+    Test output of get_feature_importances when regressor is MLPRegressor with lags=5
     and it is trained with y=pd.Series(np.arange(10)). Since MLPRegressor hasn't attributes
     `feature_importances_` or `coef_, results = None and a warning is raised`
     """
@@ -200,19 +200,19 @@ def test_output_get_feature_importance_when_regressor_no_attributes():
     expected = None
 
     warn_msg = re.escape(
-            (f"Impossible to access feature importance for regressor of type "
+            (f"Impossible to access feature importances for regressor of type "
              f"{type(estimator)}. This method is only valid when the "
-             f"regressor stores internally the feature importance in the "
+             f"regressor stores internally the feature importances in the "
              f"attribute `feature_importances_` or `coef_`.")
         )
     with pytest.warns(UserWarning, match = warn_msg):
-        results = forecaster.get_feature_importance(step=1)
+        results = forecaster.get_feature_importances(step=1)
         assert results is expected
 
 
-def test_output_get_feature_importance_when_pipeline_LinearRegression():
+def test_output_get_feature_importances_when_pipeline_LinearRegression():
     """
-    Test output of get_feature_importance when regressor is pipeline,
+    Test output of get_feature_importances when regressor is pipeline,
     (StandardScaler() + LinearRegression with lags=3).
     """
     forecaster = ForecasterAutoregMultiVariate(
@@ -223,7 +223,7 @@ def test_output_get_feature_importance_when_pipeline_LinearRegression():
                      steps     = 1
                  )
     forecaster.fit(series=series)
-    results = forecaster.get_feature_importance(step=1)
+    results = forecaster.get_feature_importances(step=1)
     expected = pd.DataFrame({
                    'feature': ['l1_lag_1', 'l1_lag_2', 'l1_lag_3', 
                                'l2_lag_1', 'l2_lag_2', 'l2_lag_3'],
@@ -234,9 +234,9 @@ def test_output_get_feature_importance_when_pipeline_LinearRegression():
     pd.testing.assert_frame_equal(results, expected)
 
 
-def test_output_get_feature_importance_when_pipeline_RandomForestRegressor():
+def test_output_get_feature_importances_when_pipeline_RandomForestRegressor():
     """
-    Test output of get_feature_importance when regressor is pipeline,
+    Test output of get_feature_importances when regressor is pipeline,
     (StandardScaler() + RandomForestRegressor with lags=3).
     """
     forecaster = ForecasterAutoregMultiVariate(
@@ -247,7 +247,7 @@ def test_output_get_feature_importance_when_pipeline_RandomForestRegressor():
                      steps     = 1
                  )
     forecaster.fit(series=series)
-    results = forecaster.get_feature_importance(step=1)
+    results = forecaster.get_feature_importances(step=1)
     expected = pd.DataFrame({
                    'feature': ['l1_lag_1', 'l1_lag_2', 'l1_lag_3', 
                                'l2_lag_1', 'l2_lag_2', 'l2_lag_3'],
