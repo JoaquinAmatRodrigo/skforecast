@@ -83,6 +83,9 @@ class ForecasterAutoregDirect(ForecasterBase):
 
     forecaster_id : str, int, default `None`
         Name used as an identifier of the forecaster.
+
+    fit_kwargs : dict, default `None`
+        Additional parameters passed to the `fit` method of the regressor.
     
     Attributes
     ----------
@@ -190,6 +193,9 @@ class ForecasterAutoregDirect(ForecasterBase):
 
     forecaster_id : str, int default `None`
         Name used as an identifier of the forecaster.
+
+    fit_kwargs : dict, default `None`
+        Additional parameters passed to the `fit` method of the regressor.
         
     Notes
     -----
@@ -206,7 +212,8 @@ class ForecasterAutoregDirect(ForecasterBase):
         transformer_y: Optional[object]=None,
         transformer_exog: Optional[object]=None,
         weight_func: Optional[Callable]=None,
-        forecaster_id: Optional[Union[str, int]]=None
+        forecaster_id: Optional[Union[str, int]]=None,
+        fit_kwargs: Optional[dict]=None,
     ) -> None:
         
         self.regressor               = regressor
@@ -230,6 +237,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         self.skforcast_version       = skforecast.__version__
         self.python_version          = sys.version.split(" ")[0]
         self.forecaster_id           = forecaster_id
+        self.fit_kwargs              = fit_kwargs if fit_kwargs is not None else {}
 
         if not isinstance(steps, int):
             raise TypeError(
@@ -290,6 +298,7 @@ class ForecasterAutoregDirect(ForecasterBase):
             f"Training index type: {str(self.index_type).split('.')[-1][:-2] if self.fitted else None} \n"
             f"Training index frequency: {self.index_freq if self.fitted else None} \n"
             f"Regressor parameters: {params} \n"
+            f"fit_kwargs: {self.fit_kwargs} \n"
             f"Creation date: {self.creation_date} \n"
             f"Last fit date: {self.fit_date} \n"
             f"Skforecast version: {self.skforcast_version} \n"
@@ -553,7 +562,8 @@ class ForecasterAutoregDirect(ForecasterBase):
     def fit(
         self,
         y: pd.Series,
-        exog: Optional[Union[pd.Series, pd.DataFrame]]=None
+        exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+        fit_kwargs: Optional[dict]=None
     ) -> None:
         """
         Training Forecaster.
@@ -567,6 +577,11 @@ class ForecasterAutoregDirect(ForecasterBase):
             Exogenous variable/s included as predictor/s. Must have the same
             number of observations as `y` and their indexes must be aligned so
             that y[i] is regressed on exog[i].
+
+        fit_kwargs : dict, default `None`
+            Additional keyword arguments passed to the `fit` method of the regressor.
+            If also passed during the instantiation of the forecaster, the values
+            specified here will take precedence.
 
         Returns 
         -------
@@ -586,6 +601,15 @@ class ForecasterAutoregDirect(ForecasterBase):
         self.in_sample_residuals = {step: None for step in range(1, self.steps + 1)}
         self.fitted              = False
         self.training_range      = None
+
+        if fit_kwargs is not None:
+            # Update the values of `fit_kwargs` created in `__init__` with the
+            # values passed to `fit`.
+            self.fit_kwargs.update(fit_kwargs)
+
+        # Select only the keyword arguments allowed by the regressor's `fit` method.
+        self.fit_kwargs = {k:v for k, v in self.fit_kwargs.items()
+                           if k in inspect.signature(self.regressor.fit).parameters}
 
         if exog is not None:
             self.included_exog = True
@@ -609,10 +633,15 @@ class ForecasterAutoregDirect(ForecasterBase):
                 self.regressors_[step].fit(
                     X             = X_train_step,
                     y             = y_train_step,
-                    sample_weight = sample_weight
+                    sample_weight = sample_weight,
+                    **self.fit_kwargs
                 )
             else:
-                self.regressors_[step].fit(X=X_train_step, y=y_train_step)
+                self.regressors_[step].fit(
+                    X = X_train_step,
+                    y = y_train_step,
+                    **self.fit_kwargs
+                )
                 
             residuals = (y_train_step - self.regressors_[step].predict(X_train_step)).to_numpy()
 
@@ -733,6 +762,7 @@ class ForecasterAutoregDirect(ForecasterBase):
                            fit               = False,
                            inverse_transform = False
                        )
+            check_exog_dtypes(exog=exog)
             exog_values = exog_to_direct(exog=exog.iloc[:max(steps), ], steps=max(steps)).to_numpy()
         else:
             exog_values = None
