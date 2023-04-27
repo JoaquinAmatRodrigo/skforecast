@@ -1583,7 +1583,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
 
         warnings.warn(
             (f"get_feature_importance() method has been renamed to get_feature_importances()."
-             f"This method will be removed in skforecast 0.8.0.")
+             f"This method will be removed in skforecast 0.9.0.")
         )
 
         return self.get_feature_importances()
