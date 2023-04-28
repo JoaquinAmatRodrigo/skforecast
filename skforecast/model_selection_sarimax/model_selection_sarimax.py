@@ -6,7 +6,6 @@
 ################################################################################
 # coding=utf-8
 
-
 from typing import Union, Tuple, Optional, Any, Callable
 import numpy as np
 import pandas as pd
