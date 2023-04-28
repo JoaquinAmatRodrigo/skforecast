@@ -21,7 +21,7 @@ from ..exceptions import MissingValuesExogWarning
 from ..exceptions import DataTypeWarning
 
 optional_dependencies = {
-    "sarimax": ['statsmodels>=0.12, <0.14', 'pmdarima>=2.0, <2.1'],
+    "sarimax": ['pmdarima>=2.0, <2.1'],
     "plotting": ['matplotlib>=3.3, <3.8', 'seaborn>=0.11, <0.13', 'statsmodels>=0.12, <0.14']
 }
 
@@ -70,13 +70,13 @@ def initialize_lags(
     else:
         if not forecaster_name == 'ForecasterAutoregMultiVariate':
             raise TypeError(
-                "`lags` argument must be an int, 1d numpy ndarray, range or list. "
-                f"Got {type(lags)}."
+                ("`lags` argument must be an int, 1d numpy ndarray, range or list. "
+                 f"Got {type(lags)}.")
             )
         else:
             raise TypeError(
-                "`lags` argument must be a dict, int, 1d numpy ndarray, range or list. "
-                f"Got {type(lags)}."
+                ("`lags` argument must be a dict, int, 1d numpy ndarray, range or list. "
+                 f"Got {type(lags)}.")
             )
 
     return lags
@@ -167,6 +167,63 @@ def initialize_weights(
             series_weights = None
 
     return weight_func, source_code_weight_func, series_weights
+
+
+def check_select_fit_kwargs(
+    regressor: object,
+    fit_kwargs: Optional[dict]=None
+) -> dict:
+    """
+    Check if `fit_kwargs` is a dict and select only the keys that are used by
+    the `fit` method of the regressor.
+
+    Parameters
+    ----------
+    regressor : object
+        Regressor object.
+
+    fit_kwargs : dict, default `None`
+        Dictionary with the arguments to pass to the `fit' method of the 
+        forecaster.
+
+    Returns
+    -------
+    fit_kwargs : dict
+        Dictionary with the arguments to be passed to the `fit` method of the 
+        regressor after removing the unused keys.
+    
+    """
+
+    if fit_kwargs is None:
+        fit_kwargs = {}
+    else:
+        if not isinstance(fit_kwargs, dict):
+            raise TypeError(
+                f"Argument `fit_kwargs` must be a dict. Got {type(fit_kwargs)}."
+            )
+
+        # Non used keys
+        non_used_keys = [k for k in fit_kwargs.keys()
+                        if k not in inspect.signature(regressor.fit).parameters]
+        if non_used_keys:
+            warnings.warn(
+                (f"Argument/s {non_used_keys} ignored since they are not used by the "
+                 f"regressor's `fit` method.")
+            )
+
+        if 'sample_weight' in fit_kwargs.keys():
+            warnings.warn(
+                ("The `sample_weight` argument is ignored. Use `weight_func` to pass "
+                 "a function that defines the individual weights for each sample "
+                 "based on its index.")
+            )
+            del fit_kwargs['sample_weight']
+
+        # Select only the keyword arguments allowed by the regressor's `fit` method.
+        fit_kwargs = {k:v for k, v in fit_kwargs.items()
+                      if k in inspect.signature(regressor.fit).parameters}
+
+    return fit_kwargs
 
 
 def check_y(
@@ -382,16 +439,16 @@ def check_predict_input(
     index_type: type,
     index_freq: str,
     window_size: int,
-    last_window: Union[pd.Series, pd.DataFrame]=None,
-    last_window_exog: Union[pd.Series, pd.DataFrame]=None,
-    exog: Union[pd.Series, pd.DataFrame]=None,
-    exog_type: Union[type, None]=None,
-    exog_col_names: Union[list, None]=None,
-    interval: list=None,
-    alpha: float=None,
-    max_steps: int=None,
+    last_window: Optional[Union[pd.Series, pd.DataFrame]]=None,
+    last_window_exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+    exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+    exog_type: Optional[Union[type, None]]=None,
+    exog_col_names: Optional[Union[list, None]]=None,
+    interval: Optional[list]=None,
+    alpha: Optional[float]=None,
+    max_steps: Optional[int]=None,
     levels: Optional[Union[str, list]]=None,
-    series_col_names: list=None
+    series_col_names: Optional[list]=None
 ) -> None:
     """
     Check all inputs of predict method. This is a helper function to validate
@@ -1394,59 +1451,3 @@ def multivariate_time_series_corr(
     corr.index.name = "lag"
     
     return corr
-
-
-def check_select_fit_kwargs(
-    regressor: object,
-    fit_kwargs: Union[dict, None]
-    ) -> None:
-    """
-    Check if `fit_kwargs` is a dict and select only the keys that are used by
-    the `fit` method of the regressor.
-
-    Parameters
-    ----------
-    regressor : object, None
-        Regressor object.
-
-    fit_kwargs : dict
-        Dictionary with the arguments to be passed to the `fit` method of the 
-        forecaster.
-
-    Returns
-    -------
-    fit_kwargs : dict
-        Dictionary with the arguments to be passed to the `fit` method of the
-        regressor after removing the non used keys.
-    """
-
-    if fit_kwargs is None:
-        fit_kwargs = {}
-    
-    if not isinstance(fit_kwargs, dict):
-        raise TypeError(
-            f"Argument `fit_kwargs` must be a dict. Got {type(fit_kwargs)}."
-        )
-
-    # Non used keys
-    non_used_keys = [k for k in fit_kwargs.keys()
-                    if k not in inspect.signature(regressor.fit).parameters]
-    if non_used_keys:
-        warnings.warn(
-            f"Argument/s {non_used_keys} ignored since they are not used by the "
-            f"regressor's `fit` method."
-        )
-
-    if 'sample_weight' in fit_kwargs.keys():
-        warnings.warn(
-            "Argument `sample_weight` ignored. Use `weight_func` to pass a "
-            "function that defines the individual weights for each sample based "
-            "on their index."
-        )
-        del fit_kwargs['sample_weight']
-
-    # Select only the keyword arguments allowed by the regressor's `fit` method.
-    fit_kwargs = {k:v for k, v in fit_kwargs.items()
-                    if k in inspect.signature(regressor.fit).parameters}
-
-    return fit_kwargs
