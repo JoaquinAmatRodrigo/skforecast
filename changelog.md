@@ -14,9 +14,15 @@ All notable changes to this project will be documented in this file.
 
 + Added function `utils.cast_exog_dtypes` to cast data types of the exogenous variables using a dictionary as a mapping.
 
++ Added function  `check_select_fit_kwargs` to if argument `fit_kwargs` is a dictionary and select only the keys that are used by the `fit` method of the regressor.
+
 + Added argument `show_progress` to functions `model_selection.backtesting_forecaster`, `model_selection_multiseries.backtesting_forecaster_multiseries` and `model_selection_sarimax.backtesting_forecaster_sarimax` to indicate weather to show a progress bar.
   
 + Support for `pandas 2.0.x`.
+
++ Added argument `fit_kwargs` to all Forecaster to allow including additional keyword arguments passed to the `fit` method of the regressor.
+
++ Added method `set_fit_kwargs` to update the `fit_kwargs` attribute.
 
 **Changed**
 

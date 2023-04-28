@@ -14,7 +14,6 @@ import numpy as np
 import pandas as pd
 import sklearn
 from sklearn.compose import ColumnTransformer
-from sklearn.preprocessing import FunctionTransformer
 import inspect
 from copy import deepcopy
 
@@ -294,7 +293,7 @@ def check_exog_dtypes(
                      "latest/user_guides/categorical-features.html")
                 )
     else:
-        if not exog.dtypes in ['float', 'int', 'category']:
+        if exog.dtypes not in ['float', 'int', 'category']:
             warnings.warn(
                 ("`exog` may contain only `int`, `float` or `category` dtypes. Most "
                  "machine learning models do not allow other types of values. "
@@ -496,7 +495,7 @@ def check_predict_input(
     if forecaster_name in ['ForecasterAutoregMultiSeries', 'ForecasterAutoregMultiSeriesCustom']:
         if levels is not None and not isinstance(levels, (str, list)):
             raise TypeError(
-                f'`levels` must be a `list` of column names, a `str` of a column name or `None`.'
+                '`levels` must be a `list` of column names, a `str` of a column name or `None`.'
             )
         if len(set(levels) - set(series_col_names)) != 0:
             raise ValueError(
@@ -1395,3 +1394,59 @@ def multivariate_time_series_corr(
     corr.index.name = "lag"
     
     return corr
+
+
+def check_select_fit_kwargs(
+    regressor: object,
+    fit_kwargs: Union[dict, None]
+    ) -> None:
+    """
+    Check if `fit_kwargs` is a dict and select only the keys that are used by
+    the `fit` method of the regressor.
+
+    Parameters
+    ----------
+    regressor : object, None
+        Regressor object.
+
+    fit_kwargs : dict
+        Dictionary with the arguments to be passed to the `fit` method of the 
+        forecaster.
+
+    Returns
+    -------
+    fit_kwargs : dict
+        Dictionary with the arguments to be passed to the `fit` method of the
+        regressor after removing the non used keys.
+    """
+
+    if fit_kwargs is None:
+        fit_kwargs = {}
+    
+    if not isinstance(fit_kwargs, dict):
+        raise TypeError(
+            f"Argument `fit_kwargs` must be a dict. Got {type(fit_kwargs)}."
+        )
+
+    # Non used keys
+    non_used_keys = [k for k in fit_kwargs.keys()
+                    if k not in inspect.signature(regressor.fit).parameters]
+    if non_used_keys:
+        warnings.warn(
+            f"Argument/s {non_used_keys} ignored since they are not used by the "
+            f"regressor's `fit` method."
+        )
+
+    if 'sample_weight' in fit_kwargs.keys():
+        warnings.warn(
+            "Argument `sample_weight` ignored. Use `weight_func` to pass a "
+            "function that defines the individual weights for each sample based "
+            "on their index."
+        )
+        del fit_kwargs['sample_weight']
+
+    # Select only the keyword arguments allowed by the regressor's `fit` method.
+    fit_kwargs = {k:v for k, v in fit_kwargs.items()
+                    if k in inspect.signature(regressor.fit).parameters}
+
+    return fit_kwargs
