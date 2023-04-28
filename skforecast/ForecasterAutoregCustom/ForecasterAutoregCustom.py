@@ -6,7 +6,7 @@
 ################################################################################
 # coding=utf-8
 
-from typing import Union, Dict, List, Tuple, Any, Optional, Callable
+from typing import Union, Tuple, Optional, Callable
 import warnings
 import logging
 import sys
@@ -26,6 +26,7 @@ from ..utils import check_exog
 from ..utils import get_exog_dtypes
 from ..utils import check_exog_dtypes
 from ..utils import check_interval
+from ..utils import check_select_fit_kwargs
 from ..utils import preprocess_y
 from ..utils import preprocess_last_window
 from ..utils import preprocess_exog
@@ -82,9 +83,11 @@ class ForecasterAutoregCustom(ForecasterBase):
 
     forecaster_id : str, int, default `None`
         Name used as an identifier of the forecaster.
+        **New in version 0.7.0**
 
     fit_kwargs : dict, default `None`
         Additional parameters passed to the `fit` method of the regressor.
+        **New in version 0.8.0**
     
     Attributes
     ----------
@@ -197,12 +200,14 @@ class ForecasterAutoregCustom(ForecasterBase):
     python_version : str
         Version of python used to create the forecaster.
 
-    forecaster_id : str, int default `None`
+    forecaster_id : str, int, default `None`
         Name used as an identifier of the forecaster.
+        **New in version 0.7.0**
 
     fit_kwargs : dict, default `None`
-        Additional keyword arguments passed to the `fit` method of the regressor.
-    
+        Additional parameters passed to the `fit` method of the regressor.
+        **New in version 0.8.0**
+
     """
     
     def __init__(
@@ -246,7 +251,6 @@ class ForecasterAutoregCustom(ForecasterBase):
         self.skforcast_version             = skforecast.__version__
         self.python_version                = sys.version.split(" ")[0]
         self.forecaster_id                 = forecaster_id
-        self.fit_kwargs                    = fit_kwargs if fit_kwargs is not None else {}
         
         if not isinstance(window_size, int):
             raise TypeError(
@@ -257,12 +261,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             raise TypeError(
                 f"Argument `fun_predictors` must be a Callable. Got {type(fun_predictors)}."
             )
-        
-        if not isinstance(self.fit_kwargs, dict):
-            raise TypeError(
-                f"Argument `fit_kwargs` must be a dict. Got {type(fit_kwargs)}."
-            )
-    
+            
         self.source_code_create_predictors = inspect.getsource(fun_predictors)
         self.source_code_fun_predictors = inspect.getsource(fun_predictors)
 
@@ -271,6 +270,11 @@ class ForecasterAutoregCustom(ForecasterBase):
             regressor       = regressor, 
             weight_func     = weight_func, 
             series_weights  = None
+        )
+
+        self.fit_kwargs = check_select_fit_kwargs(
+            regressor = self.regressor,
+            fit_kwargs = fit_kwargs
         )
                 
         
@@ -502,8 +506,7 @@ class ForecasterAutoregCustom(ForecasterBase):
     def fit(
         self,
         y: pd.Series,
-        exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-        fit_kwargs: Optional[dict]=None
+        exog: Optional[Union[pd.Series, pd.DataFrame]]=None
     ) -> None:
         """
         Training Forecaster.
@@ -517,11 +520,6 @@ class ForecasterAutoregCustom(ForecasterBase):
             Exogenous variable/s included as predictor/s. Must have the same
             number of observations as `y` and their indexes must be aligned so
             that y[i] is regressed on exog[i].
-
-        fit_kwargs : dict, default `None`
-            Additional keyword arguments passed to the `fit` method of the regressor.
-            If also passed during the instantiation of the forecaster, the values
-            specified here will take precedence.
 
         Returns 
         -------
@@ -541,20 +539,6 @@ class ForecasterAutoregCustom(ForecasterBase):
         self.in_sample_residuals = None
         self.fitted              = False
         self.training_range      = None
-
-        if fit_kwargs is not None:
-            if not isinstance(fit_kwargs, dict):
-                raise TypeError(
-                    f"Argument `fit_kwargs` must be a dict. Got {type(fit_kwargs)}."
-                )
-            else:
-                # Update the values of `fit_kwargs` created in `__init__` with the
-                # values passed to `fit`.
-                self.fit_kwargs.update(fit_kwargs)
-
-        # Select only the keyword arguments allowed by the regressor's `fit` method.
-        self.fit_kwargs = {k:v for k, v in self.fit_kwargs.items()
-                           if k in inspect.signature(self.regressor.fit).parameters}
         
         if exog is not None:
             self.included_exog = True
@@ -633,7 +617,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             X = self.fun_predictors(y=last_window).reshape(1, -1)
             if np.isnan(X).any():
                 raise ValueError(
-                    f"`fun_predictors()` is returning `NaN` values."
+                    "`fun_predictors()` is returning `NaN` values."
                 )
             if exog is not None:
                 X = np.column_stack((X, exog[i, ].reshape(1, -1)))
@@ -1138,6 +1122,28 @@ class ForecasterAutoregCustom(ForecasterBase):
         
         self.regressor = clone(self.regressor)
         self.regressor.set_params(**params)
+
+
+    def set_fit_kwargs(
+        self, 
+        fit_kwargs: dict
+    ) -> None:
+        """
+        Set new values to the additional keyword arguments passed to the `fit`
+        method of the regressor.
+        
+        Parameters
+        ----------
+        fit_kwargs : dict
+            Parameters values.
+
+        Returns 
+        -------
+        None
+        
+        """
+
+        self.fit_kwargs.update(fit_kwargs)
         
     
     def set_out_sample_residuals(
@@ -1241,7 +1247,7 @@ class ForecasterAutoregCustom(ForecasterBase):
 
         """
 
-        if self.fitted == False:
+        if self.fitted is False:
             raise sklearn.exceptions.NotFittedError(
                 ("This forecaster is not fitted yet. Call `fit` with appropriate "
                  "arguments before using `get_feature_importances()`.")
@@ -1296,8 +1302,8 @@ class ForecasterAutoregCustom(ForecasterBase):
         """
 
         warnings.warn(
-            (f"get_feature_importance() method has been renamed to get_feature_importances()."
-             f"This method will be removed in skforecast 0.9.0.")
+            ("get_feature_importance() method has been renamed to get_feature_importances(). "
+             "This method will be removed in skforecast 0.9.0.")
         )
 
         return self.get_feature_importances()
