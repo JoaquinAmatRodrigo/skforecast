@@ -4,6 +4,7 @@
 ::: skforecast.utils.utils.load_forecaster
 ::: skforecast.utils.utils.initialize_lags
 ::: skforecast.utils.utils.initialize_weights
+::: skforecast.utils.utils.check_select_fit_kwargs
 ::: skforecast.utils.utils.check_y
 ::: skforecast.utils.utils.check_exog
 ::: skforecast.utils.utils.get_exog_dtypes
