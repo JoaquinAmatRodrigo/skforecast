@@ -315,7 +315,7 @@ class ForecasterSarimax():
             Number of future steps predicted.
             
         last_window : pandas Series, default `None`
-            Values of the series used to create the predictors needed in the 
+            Series values used to create the predictors needed in the 
             predictions. Used to make predictions unrelated to the original data. 
             Values have to start at the end of the training data.
 
@@ -496,8 +496,9 @@ class ForecasterSarimax():
             Number of future steps predicted.
             
         last_window : pandas Series, default `None`
-            Values of the series used to create the predictors needed in the 
-            first iteration of prediction (t + 1).
+            Series values used to create the predictors needed in the 
+            predictions. Used to make predictions unrelated to the original data. 
+            Values have to start at the end of the training data.
 
         last_window_exog : pandas Series, pandas DataFrame, default `None`
             Values of the exogenous variables aligned with `last_window`. Only
@@ -555,25 +556,25 @@ class ForecasterSarimax():
         # If last_window_exog is provided but no last_window
         if last_window is None and last_window_exog is not None:
             raise ValueError(
-                ('To make predictions unrelated to the original data, both '
-                 '`last_window` and `last_window_exog` must be provided.')
+                ("To make predictions unrelated to the original data, both "
+                 "`last_window` and `last_window_exog` must be provided.")
             )
 
         # Check if forecaster needs exog
         if last_window is not None and last_window_exog is None and self.included_exog:
             raise ValueError(
-                ('Forecaster trained with exogenous variable/s. To make predictions '
-                 'unrelated to the original data, same variable/s must be provided '
-                 'using `last_window_exog`.')
+                ("Forecaster trained with exogenous variable/s. To make predictions "
+                 "unrelated to the original data, same variable/s must be provided "
+                 "using `last_window_exog`.")
             )  
 
         # If interval and alpha take alpha, if interval transform to alpha
         if alpha is None:
             if 100 - interval[1] != interval[0]:
                 raise ValueError(
-                    (f'When using `interval` in ForecasterSarimax, it must be symmetrical. '
-                     f'For example, interval of 95% should be as `interval = [2.5, 97.5]`. '
-                     f'Got {interval}.')
+                    (f"When using `interval` in ForecasterSarimax, it must be symmetrical. "
+                     f"For example, interval of 95% should be as `interval = [2.5, 97.5]`. "
+                     f"Got {interval}.")
                 )
             alpha = 2*(100 - interval[1])/100
 
@@ -587,11 +588,11 @@ class ForecasterSarimax():
             expected_index = expand_index(index=self.extended_index, steps=1)[0]
             if expected_index != last_window.index[0]:
                 raise ValueError(
-                    (f'To make predictions unrelated to the original data, `last_window` '
-                     f'has to start at the end of the index seen by the forecaster.\n'
-                     f'    Series last index         : {self.extended_index[-1]}.\n'
-                     f'    Expected index            : {expected_index}.\n'
-                     f'    `last_window` index start : {last_window.index[0]}.')
+                    (f"To make predictions unrelated to the original data, `last_window` "
+                     f"has to start at the end of the index seen by the forecaster.\n"
+                     f"    Series last index         : {self.extended_index[-1]}.\n"
+                     f"    Expected index            : {expected_index}.\n"
+                     f"    `last_window` index start : {last_window.index[0]}.")
                 )
 
             last_window = transform_series(
@@ -612,11 +613,11 @@ class ForecasterSarimax():
                 # check index last_window_exog
                 if expected_index != last_window_exog.index[0]:
                     raise ValueError(
-                        (f'To make predictions unrelated to the original data, `last_window_exog` '
-                         f'has to start at the end of the index seen by the forecaster.\n'
-                         f'    Series last index              : {self.extended_index[-1]}.\n'
-                         f'    Expected index                 : {expected_index}.\n'
-                         f'    `last_window_exog` index start : {last_window_exog.index[0]}.')
+                        (f"To make predictions unrelated to the original data, `last_window_exog` "
+                         f"has to start at the end of the index seen by the forecaster.\n"
+                         f"    Series last index              : {self.extended_index[-1]}.\n"
+                         f"    Expected index                 : {expected_index}.\n"
+                         f"    `last_window_exog` index start : {last_window_exog.index[0]}.")
                     )
 
                 if isinstance(last_window_exog, pd.Series):
@@ -717,7 +718,7 @@ class ForecasterSarimax():
 
         """
 
-        if self.fitted == False:
+        if not self.fitted:
             raise NotFittedError(
                 ("This forecaster is not fitted yet. Call `fit` with appropriate "
                  "arguments before using `get_feature_importances()`.")
@@ -750,8 +751,8 @@ class ForecasterSarimax():
         """
 
         warnings.warn(
-            (f"get_feature_importance() method has been renamed to get_feature_importances()."
-             f"This method will be removed in skforecast 0.9.0.")
+            ("get_feature_importance() method has been renamed to get_feature_importances()."
+             "This method will be removed in skforecast 0.9.0.")
         )
 
         return self.get_feature_importances()
