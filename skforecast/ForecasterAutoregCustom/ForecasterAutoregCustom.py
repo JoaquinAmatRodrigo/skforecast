@@ -273,7 +273,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         )
 
         self.fit_kwargs = check_select_fit_kwargs(
-            regressor = self.regressor,
+            regressor  = regressor,
             fit_kwargs = fit_kwargs
         )
                 
@@ -1143,7 +1143,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         
         """
 
-        self.fit_kwargs.update(fit_kwargs)
+        self.fit_kwargs = check_select_fit_kwargs(self.regressor, fit_kwargs=fit_kwargs)
         
     
     def set_out_sample_residuals(
