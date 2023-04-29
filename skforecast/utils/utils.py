@@ -51,15 +51,15 @@ def initialize_lags(
     """
 
     if isinstance(lags, int) and lags < 1:
-        raise ValueError('Minimum value of lags allowed is 1.')
+        raise ValueError("Minimum value of lags allowed is 1.")
 
     if isinstance(lags, (list, np.ndarray)):
         for lag in lags:
             if not isinstance(lag, (int, np.int64, np.int32)):
-                raise TypeError('All values in `lags` must be int.')
+                raise TypeError("All values in `lags` must be int.")
         
     if isinstance(lags, (list, range, np.ndarray)) and min(lags) < 1:
-        raise ValueError('Minimum value of lags allowed is 1.')
+        raise ValueError("Minimum value of lags allowed is 1.")
 
     if isinstance(lags, int):
         lags = np.arange(lags) + 1
@@ -204,7 +204,7 @@ def check_select_fit_kwargs(
 
         # Non used keys
         non_used_keys = [k for k in fit_kwargs.keys()
-                        if k not in inspect.signature(regressor.fit).parameters]
+                         if k not in inspect.signature(regressor.fit).parameters]
         if non_used_keys:
             warnings.warn(
                 (f"Argument/s {non_used_keys} ignored since they are not used by the "
@@ -244,10 +244,10 @@ def check_y(
     """
     
     if not isinstance(y, pd.Series):
-        raise TypeError('`y` must be a pandas Series.')
+        raise TypeError("`y` must be a pandas Series.")
         
     if y.isnull().any():
-        raise ValueError('`y` has missing values.')
+        raise ValueError("`y` has missing values.")
     
     return
     
@@ -402,30 +402,30 @@ def check_interval(
 
         if (interval[0] < 0.) or (interval[0] >= 100.):
             raise ValueError(
-                f'Lower interval bound ({interval[0]}) must be >= 0 and < 100.'
+                f"Lower interval bound ({interval[0]}) must be >= 0 and < 100."
             )
 
         if (interval[1] <= 0.) or (interval[1] > 100.):
             raise ValueError(
-                f'Upper interval bound ({interval[1]}) must be > 0 and <= 100.'
+                f"Upper interval bound ({interval[1]}) must be > 0 and <= 100."
             )
 
         if interval[0] >= interval[1]:
             raise ValueError(
-                f'Lower interval bound ({interval[0]}) must be less than the '
-                f'upper interval bound ({interval[1]}).'
+                f"Lower interval bound ({interval[0]}) must be less than the "
+                f"upper interval bound ({interval[1]})."
             )
     
     if alpha is not None:
         if not isinstance(alpha, float):
             raise TypeError(
-                ('`alpha` must be a `float`. For example, interval of 95% '
-                 'should be as `alpha = 0.05`.')
+                ("`alpha` must be a `float`. For example, interval of 95% "
+                 "should be as `alpha = 0.05`.")
             )
 
         if (alpha <= 0.) or (alpha >= 1):
             raise ValueError(
-                f'`alpha` must have a value between 0 and 1. Got {alpha}.'
+                f"`alpha` must have a value between 0 and 1. Got {alpha}."
             )
 
     return
@@ -523,13 +523,13 @@ def check_predict_input(
 
     if not fitted:
         raise sklearn.exceptions.NotFittedError(
-            ('This Forecaster instance is not fitted yet. Call `fit` with '
-             'appropriate arguments before using predict.')
+            ("This Forecaster instance is not fitted yet. Call `fit` with "
+             "appropriate arguments before using predict.")
         )
     
     if isinstance(steps, int) and steps < 1:
         raise ValueError(
-            f'`steps` must be an integer greater than or equal to 1. Got {steps}.'
+            f"`steps` must be an integer greater than or equal to 1. Got {steps}."
         )
 
     if isinstance(steps, list) and min(steps) < 1:
@@ -552,23 +552,23 @@ def check_predict_input(
     if forecaster_name in ['ForecasterAutoregMultiSeries', 'ForecasterAutoregMultiSeriesCustom']:
         if levels is not None and not isinstance(levels, (str, list)):
             raise TypeError(
-                '`levels` must be a `list` of column names, a `str` of a column name or `None`.'
+                "`levels` must be a `list` of column names, a `str` of a column name or `None`."
             )
         if len(set(levels) - set(series_col_names)) != 0:
             raise ValueError(
-                f'`levels` must be in `series_col_names` : {series_col_names}.'
+                f"`levels` must be in `series_col_names` : {series_col_names}."
             )
 
     if exog is None and included_exog:
         raise ValueError(
-            ('Forecaster trained with exogenous variable/s. '
-             'Same variable/s must be provided when predicting.')
+            ("Forecaster trained with exogenous variable/s. "
+             "Same variable/s must be provided when predicting.")
         )
         
     if exog is not None and not included_exog:
         raise ValueError(
-            ('Forecaster trained without exogenous variable/s. '
-             '`exog` must be `None` when predicting.')
+            ("Forecaster trained without exogenous variable/s. "
+             "`exog` must be `None` when predicting.")
         )
         
     # Checks last_window
@@ -577,35 +577,35 @@ def check_predict_input(
                            'ForecasterAutoregMultiSeriesCustom']:
         if not isinstance(last_window, pd.DataFrame):
             raise TypeError(
-                f'`last_window` must be a pandas DataFrame. Got {type(last_window)}.'
+                f"`last_window` must be a pandas DataFrame. Got {type(last_window)}."
             )
         
         if forecaster_name in ['ForecasterAutoregMultiSeries', 'ForecasterAutoregMultiSeriesCustom'] and \
             len(set(levels) - set(last_window.columns)) != 0:
             raise ValueError(
-                (f'`last_window` must contain a column(s) named as the level(s) to be predicted.\n'
-                 f'    `levels` : {levels}.\n'
-                 f'    `last_window` columns : {list(last_window.columns)}.')
+                (f"`last_window` must contain a column(s) named as the level(s) to be predicted.\n"
+                 f"    `levels` : {levels}.\n"
+                 f"    `last_window` columns : {list(last_window.columns)}.")
             )
         
         if forecaster_name == 'ForecasterAutoregMultiVariate' and \
             (series_col_names != list(last_window.columns)):
             raise ValueError(
-                (f'`last_window` columns must be the same as `series` column names.\n'
-                 f'    `last_window` columns : {list(last_window.columns)}.\n'
-                 f'    `series` columns      : {series_col_names}.')
+                (f"`last_window` columns must be the same as `series` column names.\n"
+                 f"    `last_window` columns : {list(last_window.columns)}.\n"
+                 f"    `series` columns      : {series_col_names}.")
             )    
     else:    
         if not isinstance(last_window, pd.Series):
             raise TypeError(
-                f'`last_window` must be a pandas Series. Got {type(last_window)}.'
+                f"`last_window` must be a pandas Series. Got {type(last_window)}."
             )
     
     # Check last_window len, nulls and index (type and freq)
     if len(last_window) < window_size:
         raise ValueError(
-            (f'`last_window` must have as many values as needed to '
-             f'generate the predictors. For this forecaster it is {window_size}.')
+            (f"`last_window` must have as many values as needed to "
+             f"generate the predictors. For this forecaster it is {window_size}.")
         )
     if last_window.isnull().any().all():
         raise ValueError(
@@ -617,25 +617,25 @@ def check_predict_input(
                            ) 
     if not isinstance(last_window_index, index_type):
         raise TypeError(
-            (f'Expected index of type {index_type} for `last_window`. '
-             f'Got {type(last_window_index)}.')
+            (f"Expected index of type {index_type} for `last_window`. "
+             f"Got {type(last_window_index)}.")
         )
     if isinstance(last_window_index, pd.DatetimeIndex):
         if not last_window_index.freqstr == index_freq:
             raise TypeError(
-                (f'Expected frequency of type {index_freq} for `last_window`. '
-                 f'Got {last_window_index.freqstr}.')
+                (f"Expected frequency of type {index_freq} for `last_window`. "
+                 f"Got {last_window_index.freqstr}.")
             )
 
     # Checks exog
     if exog is not None:
         # Check type, nulls and expected type
         if not isinstance(exog, (pd.Series, pd.DataFrame)):
-            raise TypeError('`exog` must be a pandas Series or DataFrame.')
+            raise TypeError("`exog` must be a pandas Series or DataFrame.")
         if exog.isnull().any().any():
             warnings.warn(
-                ('`exog` has missing values. Most of machine learning models do not allow '
-                 'missing values. `predict` method may fail.'), MissingValuesExogWarning
+                ("`exog` has missing values. Most of machine learning models do not allow "
+                 "missing values. `predict` method may fail."), MissingValuesExogWarning
             )
         if not isinstance(exog, exog_type):
             raise TypeError(
@@ -646,8 +646,8 @@ def check_predict_input(
         last_step = max(steps) if isinstance(steps, list) else steps
         if len(exog) < last_step:
             raise ValueError(
-                (f'`exog` must have at least as many values as the distance to '
-                 f'the maximum step predicted, {last_step}.')
+                (f"`exog` must have at least as many values as the distance to "
+                 f"the maximum step predicted, {last_step}.")
             )
 
         # Check all columns are in the pandas DataFrame
@@ -666,24 +666,24 @@ def check_predict_input(
                         )
         if not isinstance(exog_index, index_type):
             raise TypeError(
-                (f'Expected index of type {index_type} for `exog`. '
-                 f'Got {type(exog_index)}.')
+                (f"Expected index of type {index_type} for `exog`. "
+                 f"Got {type(exog_index)}.")
             )   
         if isinstance(exog_index, pd.DatetimeIndex):
             if not exog_index.freqstr == index_freq:
                 raise TypeError(
-                    (f'Expected frequency of type {index_freq} for `exog`. '
-                     f'Got {exog_index.freqstr}.')
+                    (f"Expected frequency of type {index_freq} for `exog`. "
+                     f"Got {exog_index.freqstr}.")
                 )
 
         # Check exog starts one step ahead of last_window end.
         expected_index = expand_index(last_window.index, 1)[0]
         if expected_index != exog.index[0]:
             raise ValueError(
-                (f'To make predictions `exog` must start one step ahead of `last_window`.\n'
-                 f'    `last_window` ends at : {last_window.index[-1]}.\n'
-                 f'    `exog` starts at      : {exog.index[0]}.\n'
-                 f'     Expected index       : {expected_index}.')
+                (f"To make predictions `exog` must start one step ahead of `last_window`.\n"
+                 f"    `last_window` ends at : {last_window.index[-1]}.\n"
+                 f"    `exog` starts at      : {exog.index[0]}.\n"
+                 f"     Expected index       : {expected_index}.")
             )
 
     # Checks ForecasterSarimax
@@ -692,24 +692,24 @@ def check_predict_input(
         if last_window_exog is not None:
             if not included_exog:
                 raise ValueError(
-                    ('Forecaster trained without exogenous variable/s. '
-                     '`last_window_exog` must be `None` when predicting.')
+                    ("Forecaster trained without exogenous variable/s. "
+                     "`last_window_exog` must be `None` when predicting.")
                 )
 
             if not isinstance(last_window_exog, (pd.Series, pd.DataFrame)):
                 raise TypeError(
-                    (f'`last_window_exog` must be a pandas Series or a '
-                     f'pandas DataFrame. Got {type(last_window_exog)}.')
+                    (f"`last_window_exog` must be a pandas Series or a "
+                     f"pandas DataFrame. Got {type(last_window_exog)}.")
                 )
             if len(last_window_exog) < window_size:
                 raise ValueError(
-                    (f'`last_window_exog` must have as many values as needed to '
-                     f'generate the predictors. For this forecaster it is {window_size}.')
+                    (f"`last_window_exog` must have as many values as needed to "
+                     f"generate the predictors. For this forecaster it is {window_size}.")
                 )
             if last_window_exog.isnull().any().all():
                 warnings.warn(
-                ('`last_window_exog` has missing values. Most of machine learning models '
-                 'do not allow missing values. `predict` method may fail.'),
+                ("`last_window_exog` has missing values. Most of machine learning models "
+                 "do not allow missing values. `predict` method may fail."),
                 MissingValuesExogWarning
             )
             _, last_window_exog_index = preprocess_last_window(
@@ -718,14 +718,14 @@ def check_predict_input(
                                         ) 
             if not isinstance(last_window_exog_index, index_type):
                 raise TypeError(
-                    (f'Expected index of type {index_type} for `last_window_exog`. '
-                     f'Got {type(last_window_exog_index)}.')
+                    (f"Expected index of type {index_type} for `last_window_exog`. "
+                     f"Got {type(last_window_exog_index)}.")
                 )
             if isinstance(last_window_exog_index, pd.DatetimeIndex):
                 if not last_window_exog_index.freqstr == index_freq:
                     raise TypeError(
-                        (f'Expected frequency of type {index_freq} for `last_window_exog`. '
-                         f'Got {last_window_exog_index.freqstr}.')
+                        (f"Expected frequency of type {index_freq} for `last_window_exog`. "
+                         f"Got {last_window_exog_index.freqstr}.")
                     )
 
             # Check all columns are in the pd.DataFrame, last_window_exog
@@ -733,8 +733,8 @@ def check_predict_input(
                 col_missing = set(exog_col_names).difference(set(last_window_exog.columns))
                 if col_missing:
                     raise ValueError(
-                        (f'Missing columns in `exog`. Expected {exog_col_names}. '
-                         f'Got {last_window_exog.columns.to_list()}.') 
+                        (f"Missing columns in `exog`. Expected {exog_col_names}. "
+                         f"Got {last_window_exog.columns.to_list()}.") 
                     )
 
     return
@@ -905,8 +905,8 @@ def preprocess_exog(
         exog_index = exog.index
     elif isinstance(exog.index, pd.DatetimeIndex) and exog.index.freq is None:
         warnings.warn(
-            ('`exog` has DatetimeIndex index but no frequency. '
-             'Index is overwritten with a RangeIndex of step 1.')
+            ("`exog` has DatetimeIndex index but no frequency. "
+             "Index is overwritten with a RangeIndex of step 1.")
         )
         exog_index = pd.RangeIndex(
                          start = 0,
@@ -916,8 +916,8 @@ def preprocess_exog(
 
     else:
         warnings.warn(
-            ('`exog` has no DatetimeIndex nor RangeIndex index. '
-             'Index is overwritten with a RangeIndex.')
+            ("`exog` has no DatetimeIndex nor RangeIndex index. "
+             "Index is overwritten with a RangeIndex.")
         )
         exog_index = pd.RangeIndex(
                          start = 0,
@@ -1133,8 +1133,8 @@ def transform_series(
 
     transformer : scikit-learn alike transformer (preprocessor).
         scikit-learn alike transformer (preprocessor) with methods: fit, transform,
-        fit_transform and inverse_transform. ColumnTransformers are not allowed since they
-        do not have inverse_transform method.
+        fit_transform and inverse_transform. ColumnTransformers are not allowed 
+        since they do not have inverse_transform method.
 
     fit : bool, default `False`
         Train the transformer before applying it.
@@ -1145,14 +1145,14 @@ def transform_series(
     Returns
     -------
     series_transformed : pandas Series, pandas DataFrame
-        Transformed Series. Depending on the transformer used, the output may be a Series
-        or a DataFrame.
+        Transformed Series. Depending on the transformer used, the output may 
+        be a Series or a DataFrame.
 
     """
     
     if not isinstance(series, pd.Series):
         raise TypeError(
-            "`series` argument must be a pandas Series."
+            (f"`series` argument must be a pandas Series. Got {type(series)}.")
         )
         
     if transformer is None:
@@ -1207,8 +1207,8 @@ def transform_dataframe(
 ) -> pd.DataFrame:
     """      
     Transform raw values of pandas DataFrame with a scikit-learn alike
-    transformer, preprocessor or ColumnTransformer. `inverse_transform` is not available
-    when using ColumnTransformers.
+    transformer, preprocessor or ColumnTransformer. `inverse_transform` is not 
+    available when using ColumnTransformers.
 
     Parameters
     ----------
@@ -1234,7 +1234,7 @@ def transform_dataframe(
     
     if not isinstance(df, pd.DataFrame):
         raise TypeError(
-            "`df` argument must be a pandas DataFrame."
+            f"`df` argument must be a pandas DataFrame. Got {type(df)}"
         )
 
     if transformer is None:
@@ -1242,7 +1242,7 @@ def transform_dataframe(
 
     if inverse_transform and isinstance(transformer, ColumnTransformer):
         raise Exception(
-            '`inverse_transform` is not available when using ColumnTransformers.'
+            "`inverse_transform` is not available when using ColumnTransformers."
         )
  
     if not inverse_transform:

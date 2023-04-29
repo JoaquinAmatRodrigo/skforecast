@@ -9,14 +9,16 @@ from sklearn.preprocessing import OneHotEncoder
 from skforecast.utils import transform_series
 
 
-def test_transform_series_exception_when_series_is_not_pandas_series():
+def test_transform_series_TypeError_when_series_is_not_pandas_series():
     """
-    Test exception is raised when series is not a pandas series.
+    Test TypeError is raised when series is not a pandas series.
     """
-    err_msg = re.escape("`series` argument must be a pandas Series.")
+    series = np.arange(10)
+
+    err_msg = re.escape(f"`series` argument must be a pandas Series. Got {type(series)}")
     with pytest.raises(TypeError, match = err_msg):
         transform_series(
-            series            = np.arange(10),
+            series            = series,
             transformer       = None,
             fit               = True,
             inverse_transform = False
