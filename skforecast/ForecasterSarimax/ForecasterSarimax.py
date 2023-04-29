@@ -18,6 +18,7 @@ from sklearn.base import clone
 from sklearn.exceptions import NotFittedError
 
 import skforecast
+from ..utils import check_select_fit_kwargs
 from ..utils import check_y
 from ..utils import check_exog
 from ..utils import check_predict_input
@@ -33,8 +34,8 @@ logging.basicConfig(
 
 class ForecasterSarimax():
     """
-    This class turns ARIMA model from pmdarima library into a Forecaster compatible with 
-    the skforecast API.
+    This class turns ARIMA model from pmdarima library into a Forecaster 
+    compatible with the skforecast API.
     **New in version 0.7.0**
     
     Parameters
@@ -53,6 +54,10 @@ class ForecasterSarimax():
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API. The transformation is applied to `exog` before training the
         forecaster. `inverse_transform` is not available when using ColumnTransformers.
+
+    fit_kwargs : dict, default `None`
+        Additional arguments to be passed to the `fit` method of the regressor.
+        **New in version 0.8.0**
 
     forecaster_id : str, int default `None`
         Name used as an identifier of the forecaster.
@@ -115,6 +120,10 @@ class ForecasterSarimax():
         Names of columns of `exog` if `exog` used in training was a pandas
         DataFrame.
 
+    fit_kwargs : dict
+        Additional arguments to be passed to the `fit` method of the regressor.
+        **New in version 0.8.0**
+
     creation_date : str
         Date of creation.
 
@@ -137,6 +146,7 @@ class ForecasterSarimax():
         regressor: ARIMA,
         transformer_y: Optional[object]=None,
         transformer_exog: Optional[object]=None,
+        fit_kwargs: Optional[dict]=None,
         forecaster_id: Optional[Union[str, int]]=None
     ) -> None:
         
@@ -167,6 +177,11 @@ class ForecasterSarimax():
 
         self.params = self.regressor.get_params(deep=True)
 
+        self.fit_kwargs = check_select_fit_kwargs(
+                              regressor  = regressor,
+                              fit_kwargs = fit_kwargs
+                          )
+
 
     def __repr__(
         self
@@ -181,6 +196,7 @@ class ForecasterSarimax():
             f"{'=' * len(type(self).__name__)} \n"
             f"Regressor: {self.regressor} \n"
             f"Regressor parameters: {self.params} \n"
+            f"fit_kwargs: {self.fit_kwargs} \n"
             f"Window size: {self.window_size} \n"
             f"Transformer for y: {self.transformer_y} \n"
             f"Transformer for exog: {self.transformer_exog} \n"
@@ -229,8 +245,8 @@ class ForecasterSarimax():
         if exog is not None:
             if len(exog) != len(y):
                 raise ValueError(
-                    (f'`exog` must have same number of samples as `y`. '
-                     f'length `exog`: ({len(exog)}), length `y`: ({len(y)})')
+                    (f"`exog` must have same number of samples as `y`. "
+                     f"length `exog`: ({len(exog)}), length `y`: ({len(y)})")
                 )
             check_exog(exog=exog)
 
@@ -272,7 +288,7 @@ class ForecasterSarimax():
                        inverse_transform = False
                    )
         
-        self.regressor.fit(y=y, X=exog)
+        self.regressor.fit(y=y, X=exog, **self.fit_kwargs)
         self.fitted = True
         self.fit_date = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
         self.training_range = y.index[[0, -1]]
@@ -362,16 +378,16 @@ class ForecasterSarimax():
         # If last_window_exog is provided but no last_window
         if last_window is None and last_window_exog is not None:
             raise ValueError(
-                ('To make predictions unrelated to the original data, both '
-                 '`last_window` and `last_window_exog` must be provided.')
+                ("To make predictions unrelated to the original data, both "
+                 "`last_window` and `last_window_exog` must be provided.")
             )
 
         # Check if forecaster needs exog
         if last_window is not None and last_window_exog is None and self.included_exog:
             raise ValueError(
-                ('Forecaster trained with exogenous variable/s. To make predictions '
-                 'unrelated to the original data, same variable/s must be provided '
-                 'using `last_window_exog`.')
+                ("Forecaster trained with exogenous variable/s. To make predictions "
+                 "unrelated to the original data, same variable/s must be provided "
+                 "using `last_window_exog`.")
             )
 
         if last_window is not None:
@@ -384,11 +400,11 @@ class ForecasterSarimax():
             expected_index = expand_index(index=self.extended_index, steps=1)[0]
             if expected_index != last_window.index[0]:
                 raise ValueError(
-                    (f'To make predictions unrelated to the original data, `last_window` '
-                     f'has to start at the end of the index seen by the forecaster.\n'
-                     f'    Series last index         : {self.extended_index[-1]}.\n'
-                     f'    Expected index            : {expected_index}.\n'
-                     f'    `last_window` index start : {last_window.index[0]}.')
+                    (f"To make predictions unrelated to the original data, `last_window` "
+                     f"has to start at the end of the index seen by the forecaster.\n"
+                     f"    Series last index         : {self.extended_index[-1]}.\n"
+                     f"    Expected index            : {expected_index}.\n"
+                     f"    `last_window` index start : {last_window.index[0]}.")
                 )
             
             last_window = transform_series(
@@ -409,11 +425,11 @@ class ForecasterSarimax():
                 # check index last_window_exog
                 if expected_index != last_window_exog.index[0]:
                     raise ValueError(
-                        (f'To make predictions unrelated to the original data, `last_window_exog` '
-                         f'has to start at the end of the index seen by the forecaster.\n'
-                         f'    Series last index              : {self.extended_index[-1]}.\n'
-                         f'    Expected index                 : {expected_index}.\n'
-                         f'    `last_window_exog` index start : {last_window_exog.index[0]}.')
+                        (f"To make predictions unrelated to the original data, `last_window_exog` "
+                         f"has to start at the end of the index seen by the forecaster.\n"
+                         f"    Series last index              : {self.extended_index[-1]}.\n"
+                         f"    Expected index                 : {expected_index}.\n"
+                         f"    `last_window_exog` index start : {last_window_exog.index[0]}.")
                     )
 
                 if isinstance(last_window_exog, pd.Series):
@@ -698,6 +714,28 @@ class ForecasterSarimax():
         self.regressor = clone(self.regressor)
         self.regressor.set_params(**params)
         self.params = self.regressor.get_params(deep=True)
+
+
+    def set_fit_kwargs(
+        self, 
+        fit_kwargs: dict
+    ) -> None:
+        """
+        Set new values for the additional keyword arguments passed to the `fit` 
+        method of the regressor.
+        
+        Parameters
+        ----------
+        fit_kwargs : dict
+            Dict of the form {"argument": new_value}.
+
+        Returns 
+        -------
+        None
+        
+        """
+
+        self.fit_kwargs = check_select_fit_kwargs(self.regressor, fit_kwargs=fit_kwargs)
 
 
     def get_feature_importances(
