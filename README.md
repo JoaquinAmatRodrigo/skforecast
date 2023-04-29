@@ -156,6 +156,8 @@ Recent improvements are highlighted in the [release notes](https://skforecast.or
 
 + [**Forecasting time series with missing values**](https://www.cienciadedatos.net/documentos/py46-forecasting-time-series-missing-values.html)
 
++ [**Intermittent demand forecasting**](https://www.cienciadedatos.net/documentos/py48-intermittent-demand-forecasting.html)
+
 
 **Español**
 
