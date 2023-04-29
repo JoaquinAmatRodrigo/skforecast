@@ -100,8 +100,8 @@ class ForecasterBase(ABC):
             Number of future steps predicted.
             
         last_window : pandas Series, default `None`
-            Values of the series used to create the predictors (lags) need in the 
-            first iteration of prediction (t + 1).
+            Series values used to create the predictors (lags) needed in the 
+            first iteration of the prediction (t + 1).
     
             If `last_window = None`, the values stored in` self.last_window` are
             used to calculate the initial predictors, and the predictions start

@@ -22,6 +22,7 @@ import skforecast
 from ..ForecasterBase import ForecasterBase
 from ..utils import initialize_lags
 from ..utils import initialize_weights
+from ..utils import check_select_fit_kwargs
 from ..utils import check_y
 from ..utils import check_exog
 from ..utils import get_exog_dtypes
@@ -87,11 +88,13 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         for more details on the use of the weights.
         **New in version 0.6.0**
 
+    fit_kwargs : dict, default `None`
+        Additional arguments to be passed to the `fit` method of the regressor.
+        **New in version 0.8.0**
+
     forecaster_id : str, int, default `None`
         Name used as an identifier of the forecaster.
-
-    fit_kwargs : dict, default `None`
-        Additional parameters passed to the `fit` method of the regressor.
+        **New in version 0.7.0**
 
     
     Attributes
@@ -193,6 +196,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
     X_train_col_names : list
         Names of columns of the matrix created internally for training.
+
+    fit_kwargs : dict
+        Additional arguments to be passed to the `fit` method of the regressor.
+        **New in version 0.8.0**
         
     in_sample_residuals : dict
         Residuals of the model when predicting training data. Only stored up to
@@ -222,9 +229,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
     forecaster_id : str, int default `None`
         Name used as an identifier of the forecaster.
-
-    fit_kwargs : dict, default `None`
-        Additional parameters passed to the `fit` method of the regressor.
+        **New in version 0.7.0**
 
 
     Notes
@@ -254,8 +259,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         transformer_exog: Optional[object]=None,
         weight_func: Optional[Union[Callable, dict]]=None,
         series_weights: Optional[dict]=None,
-        forecaster_id: Optional[Union[str, int]]=None,
-        fit_kwargs: Optional[dict]=None
+        fit_kwargs: Optional[dict]=None,
+        forecaster_id: Optional[Union[str, int]]=None
     ) -> None:
         
         self.regressor               = regressor
@@ -286,12 +291,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.skforcast_version       = skforecast.__version__
         self.python_version          = sys.version.split(" ")[0]
         self.forecaster_id           = forecaster_id
-        self.fit_kwargs              = fit_kwargs if fit_kwargs is not None else {}
-
-        if not isinstance(self.fit_kwargs, dict):
-            raise TypeError(
-                f"Argument `fit_kwargs` must be a dict. Got {type(fit_kwargs)}."
-            )
         
         self.lags = initialize_lags(type(self).__name__, lags)
         self.max_lag = max(self.lags)
@@ -303,6 +302,11 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             weight_func     = weight_func, 
             series_weights  = series_weights
         )
+
+        self.fit_kwargs = check_select_fit_kwargs(
+                              regressor  = regressor,
+                              fit_kwargs = fit_kwargs
+                          )
 
 
     def __repr__(
@@ -686,22 +690,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.fitted              = False
         self.training_range      = None
         
-        self.series_col_names = list(series.columns)
-        
-        if fit_kwargs is not None:
-            if not isinstance(fit_kwargs, dict):
-                raise TypeError(
-                    f"Argument `fit_kwargs` must be a dict. Got {type(fit_kwargs)}."
-                )
-            else:
-                # Update the values of `fit_kwargs` created in `__init__` with the
-                # values passed to `fit`.
-                self.fit_kwargs.update(fit_kwargs)
-                
-        # Select only the keyword arguments allowed by the regressor's `fit` method.
-        self.fit_kwargs = {k:v for k, v in self.fit_kwargs.items()
-                           if k in inspect.signature(self.regressor.fit).parameters}
-        
+        self.series_col_names = list(series.columns)        
 
         if exog is not None:
             self.included_exog = True
@@ -726,8 +715,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         if sample_weight is not None:
             self.regressor.fit(
-                X = X_train,
-                y = y_train,
+                X             = X_train,
+                y             = y_train,
                 sample_weight = sample_weight,
                 **self.fit_kwargs
             )
@@ -792,8 +781,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             Time series to be predicted.
         
         last_window : numpy ndarray
-            Values of the series used to create the predictors (lags) need in the 
-            first iteration of prediction (t + 1).
+            Series values used to create the predictors (lags) needed in the 
+            first iteration of the prediction (t + 1).
             
         exog : numpy ndarray, default `None`
             Exogenous variable/s included as predictor/s.
@@ -852,8 +841,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             **New in version 0.6.0**
 
         last_window : pandas DataFrame, default `None`
-            Values of the series used to create the predictors (lags) need in the
-            first iteration of prediction (t + 1).
+            Series values used to create the predictors (lags) needed in the 
+            first iteration of the prediction (t + 1).
 
             If `last_window = None`, the values stored in `self.last_window` are
             used to calculate the initial predictors, and the predictions start
@@ -986,8 +975,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             Time series to be predicted. If `None` all levels will be predicted.
             
         last_window : pandas DataFrame, default `None`
-            Values of the series used to create the predictors (lags) need in the 
-            first iteration of prediction (t + 1).
+            Series values used to create the predictors (lags) needed in the 
+            first iteration of the prediction (t + 1).
     
             If `last_window = None`, the values stored in `self.last_window` are
             used to calculate the initial predictors, and the predictions start
@@ -1209,8 +1198,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             **New in version 0.6.0**  
             
         last_window : pandas DataFrame, default `None`
-            Values of the series used to create the predictors (lags) needed in the 
-            first iteration of prediction (t + 1).
+            Series values used to create the predictors (lags) needed in the 
+            first iteration of the prediction (t + 1).
     
             If `last_window = None`, the values stored in` self.last_window` are
             used to calculate the initial predictors, and the predictions start
@@ -1323,8 +1312,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             **New in version 0.6.0**  
             
         last_window : pandas DataFrame, default `None`
-            Values of the series used to create the predictors (lags) needed in the 
-            first iteration of prediction (t + 1).
+            Series values used to create the predictors (lags) needed in the 
+            first iteration of the prediction (t + 1).
     
             If `last_window = None`, the values stored in` self.last_window` are
             used to calculate the initial predictors, and the predictions start
@@ -1411,6 +1400,28 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         self.regressor = clone(self.regressor)
         self.regressor.set_params(**params)
+
+
+    def set_fit_kwargs(
+        self, 
+        fit_kwargs: dict
+    ) -> None:
+        """
+        Set new values for the additional keyword arguments passed to the `fit` 
+        method of the regressor.
+        
+        Parameters
+        ----------
+        fit_kwargs : dict
+            Dict of the form {"argument": new_value}.
+
+        Returns 
+        -------
+        None
+        
+        """
+
+        self.fit_kwargs = check_select_fit_kwargs(self.regressor, fit_kwargs=fit_kwargs)
         
         
     def set_lags(
@@ -1568,7 +1579,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         
         """
 
-        if self.fitted == False:
+        if not self.fitted:
             raise sklearn.exceptions.NotFittedError(
                 ("This forecaster is not fitted yet. Call `fit` with appropriate "
                  "arguments before using `get_feature_importances()`.")
@@ -1623,8 +1634,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         """
 
         warnings.warn(
-            (f"get_feature_importance() method has been renamed to get_feature_importances()."
-             f"This method will be removed in skforecast 0.9.0.")
+            ("get_feature_importance() method has been renamed to get_feature_importances()."
+             "This method will be removed in skforecast 0.9.0.")
         )
 
         return self.get_feature_importances()

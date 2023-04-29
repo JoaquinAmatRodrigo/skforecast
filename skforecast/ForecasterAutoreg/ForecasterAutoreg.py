@@ -22,13 +22,13 @@ import skforecast
 from ..ForecasterBase import ForecasterBase
 from ..utils import initialize_lags
 from ..utils import initialize_weights
+from ..utils import check_select_fit_kwargs
 from ..utils import check_y
 from ..utils import check_exog
 from ..utils import get_exog_dtypes
 from ..utils import check_exog_dtypes
 from ..utils import check_predict_input
 from ..utils import check_interval
-from ..utils import check_select_fit_kwargs
 from ..utils import preprocess_y
 from ..utils import preprocess_last_window
 from ..utils import preprocess_exog
@@ -75,13 +75,13 @@ class ForecasterAutoreg(ForecasterBase):
         Ignored if `regressor` does not have the argument `sample_weight` in its `fit`
         method. The resulting `sample_weight` cannot have negative values.
 
+    fit_kwargs : dict, default `None`
+        Additional arguments to be passed to the `fit` method of the regressor.
+        **New in version 0.8.0**
+
     forecaster_id : str, int, default `None`
         Name used as an identifier of the forecaster.
         **New in version 0.7.0**
-
-    fit_kwargs : dict, default `None`
-        Additional parameters passed to the `fit` method of the regressor.
-        **New in version 0.8.0**
     
     Attributes
     ----------
@@ -149,6 +149,10 @@ class ForecasterAutoreg(ForecasterBase):
 
     X_train_col_names : list
         Names of columns of the matrix created internally for training.
+
+    fit_kwargs : dict
+        Additional arguments to be passed to the `fit` method of the regressor.
+        **New in version 0.8.0**
         
     in_sample_residuals : numpy ndarray
         Residuals of the model when predicting training data. Only stored up to
@@ -176,13 +180,9 @@ class ForecasterAutoreg(ForecasterBase):
     python_version : str
         Version of python used to create the forecaster.
 
-    forecaster_id : str
+    forecaster_id : str, int default `None`
         Name used as an identifier of the forecaster.
         **New in version 0.7.0**
-
-    fit_kwargs : dict
-        Additional keyword arguments passed to the `fit` method of the regressor.
-        **New in version 0.8.0**
      
     """
     
@@ -193,8 +193,8 @@ class ForecasterAutoreg(ForecasterBase):
         transformer_y: Optional[object]=None,
         transformer_exog: Optional[object]=None,
         weight_func: Optional[Callable]=None,
-        forecaster_id: Optional[Union[str, int]]=None,
-        fit_kwargs: Optional[dict]=None
+        fit_kwargs: Optional[dict]=None,
+        forecaster_id: Optional[Union[str, int]]=None
     ) -> None:
         
         self.regressor               = regressor
@@ -232,9 +232,9 @@ class ForecasterAutoreg(ForecasterBase):
         )
 
         self.fit_kwargs = check_select_fit_kwargs(
-            regressor = regressor,
-            fit_kwargs = fit_kwargs
-        )
+                              regressor  = regressor,
+                              fit_kwargs = fit_kwargs
+                          )
 
 
     def __repr__(
@@ -467,6 +467,9 @@ class ForecasterAutoreg(ForecasterBase):
     ) -> None:
         """
         Training Forecaster.
+
+        Additional arguments to be passed to the `fit` method of the regressor 
+        can be added with the `fit_kwargs` argument when initializing the forecaster.
         
         Parameters
         ----------        
@@ -555,8 +558,8 @@ class ForecasterAutoreg(ForecasterBase):
             Number of future steps predicted.
             
         last_window : numpy ndarray
-            Values of the series used to create the predictors (lags) need in the 
-            first iteration of prediction (t + 1).
+            Series values used to create the predictors (lags) needed in the 
+            first iteration of the prediction (t + 1).
             
         exog : numpy ndarray, default `None`
             Exogenous variable/s included as predictor/s.
@@ -604,8 +607,8 @@ class ForecasterAutoreg(ForecasterBase):
             Number of future steps predicted.
             
         last_window : pandas Series, default `None`
-            Values of the series used to create the predictors (lags) need in the 
-            first iteration of prediction (t + 1).
+            Series values used to create the predictors (lags) needed in the 
+            first iteration of the prediction (t + 1).
     
             If `last_window = None`, the values stored in `self.last_window` are
             used to calculate the initial predictors, and the predictions start
@@ -720,8 +723,8 @@ class ForecasterAutoreg(ForecasterBase):
             Number of future steps predicted.
             
         last_window : pandas Series, default `None`
-            Values of the series used to create the predictors (lags) need in the 
-            first iteration of prediction (t + 1).
+            Series values used to create the predictors (lags) needed in the 
+            first iteration of the prediction (t + 1).
     
             If `last_window = None`, the values stored in `self.last_window` are
             used to calculate the initial predictors, and the predictions start
@@ -902,8 +905,8 @@ class ForecasterAutoreg(ForecasterBase):
             Number of future steps predicted.
             
         last_window : pandas Series, default `None`
-            Values of the series used to create the predictors (lags) needed in the 
-            first iteration of prediction (t + 1).
+            Series values used to create the predictors (lags) needed in the 
+            first iteration of the prediction (t + 1).
     
             If `last_window = None`, the values stored in` self.last_window` are
             used to calculate the initial predictors, and the predictions start
@@ -999,8 +1002,8 @@ class ForecasterAutoreg(ForecasterBase):
             A distribution object from scipy.stats.
             
         last_window : pandas Series, default `None`
-            Values of the series used to create the predictors (lags) needed in the 
-            first iteration of prediction (t + 1).
+            Series values used to create the predictors (lags) needed in the 
+            first iteration of the prediction (t + 1).
     
             If `last_window = None`, the values stored in` self.last_window` are
             used to calculate the initial predictors, and the predictions start
@@ -1079,13 +1082,13 @@ class ForecasterAutoreg(ForecasterBase):
         fit_kwargs: dict
     ) -> None:
         """
-        Set new values to the additional keyword arguments passed to the `fit`
+        Set new values for the additional keyword arguments passed to the `fit` 
         method of the regressor.
         
         Parameters
         ----------
         fit_kwargs : dict
-            Parameters values.
+            Dict of the form {"argument": new_value}.
 
         Returns 
         -------
@@ -1094,13 +1097,13 @@ class ForecasterAutoreg(ForecasterBase):
         """
 
         self.fit_kwargs = check_select_fit_kwargs(self.regressor, fit_kwargs=fit_kwargs)
-        
+
         
     def set_lags(
         self, 
         lags: Union[int, list, np.ndarray, range]
     ) -> None:
-        """      
+        """
         Set new value to the attribute `lags`.
         Attributes `max_lag` and `window_size` are also updated.
         
@@ -1223,7 +1226,7 @@ class ForecasterAutoreg(ForecasterBase):
 
         """
 
-        if self.fitted is False:
+        if not self.fitted:
             raise sklearn.exceptions.NotFittedError(
                 ("This forecaster is not fitted yet. Call `fit` with appropriate "
                  "arguments before using `get_feature_importances()`.")

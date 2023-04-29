@@ -6,29 +6,39 @@ All notable changes to this project will be documented in this file.
 
 **Added**
 
++ Added the `fit_kwargs` argument to all forecasters to allow the inclusion of additional keyword arguments passed to the regressor's `fit` method.
+
++ Added the `set_fit_kwargs` method to set the `fit_kwargs` attribute.
+  
++ Support for `pandas 2.0.x`.
+
 + Added `exceptions` module with custom warnings.
 
-+ Added function `utils.get_exog_dtypes` to issue a warning if exogenous variables are one of type `init`, `float`, or `category`. Raise Exception if `exog` has categorical columns with non integer values.
++ Added function `utils.check_exog_dtypes` to issue a warning if exogenous variables are one of type `init`, `float`, or `category`. Raise Exception if `exog` has categorical columns with non integer values.
 
 + Added function `utils.get_exog_dtypes` to get the data types of the exogenous variables included during the training of the forecaster model. 
 
 + Added function `utils.cast_exog_dtypes` to cast data types of the exogenous variables using a dictionary as a mapping.
 
-+ Added function  `check_select_fit_kwargs` to if argument `fit_kwargs` is a dictionary and select only the keys that are used by the `fit` method of the regressor.
++ Added function `utils.check_select_fit_kwargs` to check if the argument `fit_kwargs` is a dictionary and select only the keys used by the `fit` method of the regressor.
 
 + Added argument `show_progress` to functions `model_selection.backtesting_forecaster`, `model_selection_multiseries.backtesting_forecaster_multiseries` and `model_selection_sarimax.backtesting_forecaster_sarimax` to indicate weather to show a progress bar.
-  
-+ Support for `pandas 2.0.x`.
-
-+ Added argument `fit_kwargs` to all Forecaster to allow including additional keyword arguments passed to the `fit` method of the regressor.
-
-+ Added method `set_fit_kwargs` to update the `fit_kwargs` attribute.
 
 **Changed**
 
++ Rename optional dependency package `statsmodels` to `sarimax`. Now only `pmdarima` will be installed, `statsmodels` is no longer needed.
+
++ Rename `get_feature_importance()` to `get_feature_importances()` in all Forecasters. `get_feature_importance()` method will me removed in skforecast 0.8.0.
+
++ Refactor `get_feature_importances()` in all Forecasters.
+
++ Remove `model_selection_statsmodels` in favor of `ForecasterSarimax` and `model_selection_sarimax`, (deprecated since 0.7.0).
+
++ Remove attributes `create_predictors` and `source_code_create_predictors` in favor of `fun_predictors` and `source_code_fun_predictors` in `ForecasterAutoregCustom`, (deprecated since 0.7.0).
+
 + The `utils.check_exog` function now includes a new optional parameter, `allow_nan`, that controls whether a warning should be issued if the input `exog` contains NaN values. 
 
-+ `check_exog` is applied before and after `exog` transformations.
++ `utils.check_exog` is applied before and after `exog` transformations.
 
 + The `utils.preprocess_y` function now includes a new optional parameter, `return_values`, that controls whether to return a numpy ndarray with the values of y or not. This new option is intended to avoid copying data when it is not necessary.
 
@@ -37,10 +47,6 @@ All notable changes to this project will be documented in this file.
 + Replaced `tqdm.tqdm` by `tqdm.auto.tqdm`.
 
 + Refactor `utils.exog_to_direct`.
-
-+ Rename `get_feature_importance()` to `get_feature_importances()` in all Forecasters. `get_feature_importance()` method will me removed in skforecast 0.8.0.
-
-+ Refactor `get_feature_importances()` in all Forecasters.
 
 **Fixed**
 

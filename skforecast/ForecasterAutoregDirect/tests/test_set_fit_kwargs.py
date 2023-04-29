@@ -1,6 +1,6 @@
-# Unit test set_fit_kwargs ForecasterAutoreg
+# Unit test set_fit_kwargs ForecasterAutoregDirect
 # ==============================================================================
-from skforecast.ForecasterAutoreg import ForecasterAutoreg
+from skforecast.ForecasterAutoregDirect import ForecasterAutoregDirect
 from lightgbm import LGBMRegressor
 
 
@@ -8,8 +8,9 @@ def test_set_fit_kwargs():
     """
     Test set_fit_kwargs method.
     """
-    forecaster = ForecasterAutoreg(
+    forecaster = ForecasterAutoregDirect(
                      regressor  = LGBMRegressor(),
+                     steps      = 3,
                      lags       = 3,
                      fit_kwargs = {'categorical_feature': 'auto'}
                  )
