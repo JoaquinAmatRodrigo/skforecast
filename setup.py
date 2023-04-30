@@ -23,13 +23,13 @@ with open("requirements_test.txt") as f:
     requirements_test = f.read().splitlines()
 
 extras_require = {
-    "statsmodels": requirements_optional.split("\n\n")[0].splitlines(),
+    "sarimax": requirements_optional.split("\n\n")[0].splitlines(),
     "plotting": requirements_optional.split("\n\n")[1].splitlines(),
     "test": requirements_test
 }
 
 extras_require["full"] = (
-    extras_require["statsmodels"]
+    extras_require["sarimax"]
     + extras_require["plotting"]
     + extras_require["test"]
 )

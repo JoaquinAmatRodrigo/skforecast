@@ -26,7 +26,7 @@ Skforecast is developed according to the following priorities:
 + Models must be deployed in production. 📦
 + Models must be interpretable. 🔮
 
-**Documentation: https://skforecast.org**
+**Documentation: https://skforecast.org** 📚
 
 
 # Installation
@@ -104,8 +104,8 @@ pip install skforecast[plotting]
 - [x] Support for `pandas 2.0.x`.
 - [x] New user guide on how to include **categorical variables** in the Forecasters.
 - [x] New user guide on how to use **GPU in Google Colab** with XGBoost and LightGBM regressors.
-- [] The dtypes of exogenous variables are maintained when generating the training matrices with the `create_train_X_y` method in all the Forecasters.
-- [] kwargs for fit method.
+- [x] The dtypes of exogenous variables are maintained when generating the training matrices with the `create_train_X_y` method in all the Forecasters.
+- [ ] Include custom kwargs during fit.
 - [x] Bug fixes and performance improvements.
 
 Visit the [release notes](https://skforecast.org/latest/releases/releases.html) to view all notable changes.
@@ -156,6 +156,8 @@ Recent improvements are highlighted in the [release notes](https://skforecast.or
 
 + [**Forecasting time series with missing values**](https://www.cienciadedatos.net/documentos/py46-forecasting-time-series-missing-values.html)
 
++ [**Intermittent demand forecasting**](https://www.cienciadedatos.net/documentos/py48-intermittent-demand-forecasting.html)
+
 
 **Español**
 
@@ -174,6 +176,8 @@ Recent improvements are highlighted in the [release notes](https://skforecast.or
 + [**Intervalos de predicción en modelos de forecasting**](https://www.cienciadedatos.net/documentos/py42-intervalos-prediccion-modelos-forecasting-machine-learning.html)      [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JoaquinAmatRodrigo/skforecast/master?labpath=examples%2Fintervalos-prediccion-modelos-forecasting-machine-learning.ipynb)
 
 + [**Multi-series forecasting**](https://www.cienciadedatos.net/documentos/py44-multi-series-forecasting-skforecast-español.html)   [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JoaquinAmatRodrigo/skforecast/master?labpath=examples%2Fmulti-series-forecasting-español.ipynb)
+
++ [**Predicción de demanda intermitente**](https://www.cienciadedatos.net/documentos/py48-forecasting-demanda-intermitente.html)
 
 
 # Donating

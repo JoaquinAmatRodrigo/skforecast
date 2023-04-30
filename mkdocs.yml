@@ -43,9 +43,6 @@ nav:
       - Shap-values: user_guides/shap-values-skforecast.ipynb
       - Skforecast in GPU: user_guides/skforecast-in-GPU.ipynb
       - Plot forecaster residuals: user_guides/plot-forecaster-residuals.ipynb
-      - Backtesting SARIMAX and ARIMA models: user_guides/backtesting-sarimax-arima.ipynb # deprecated
-      - Grid search SARIMAX and ARIMA models: user_guides/grid-search-sarimax-arima.ipynb # deprecated
-      
 
   - Examples and tutorials:
       - Examples and tutorials: examples/examples.md
@@ -61,7 +58,6 @@ nav:
       - model_selection: api/model_selection.md
       - model_selection_multiseries: api/model_selection_multiseries.md
       - model_selection_sarimax: api/model_selection_sarimax.md
-      - model_selection_statsmodels: api/model_selection_statsmodels.md # deprecated
       - plot: api/plot.md
       - utils: api/utils.md
       - exceptions: api/exceptions.md

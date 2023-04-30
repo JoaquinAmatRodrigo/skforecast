@@ -11,17 +11,45 @@ from sklearn.preprocessing import OneHotEncoder
 from skforecast.utils import transform_dataframe
 
 
-def test_transform_dataframe_exception_when_df_is_not_pandas_DataFrame():
+def test_transform_dataframe_TypeError_when_df_is_not_pandas_DataFrame():
     """
-    Test exception is raised when df is not a pandas DataFrame.
+    Test TypeError is raised when df is not a pandas DataFrame.
     """
-    err_msg = re.escape("`df` argument must be a pandas DataFrame.")
+    df = pd.Series(np.arange(10), name='y')
+
+    err_msg = re.escape(f"`df` argument must be a pandas DataFrame. Got {type(df)}")
     with pytest.raises(TypeError, match = err_msg):
         transform_dataframe(
-            df                = pd.Series(np.arange(10), name='y'),
+            df                = df,
             transformer       = None,
             fit               = True,
             inverse_transform = False
+        )
+
+
+def test_transform_dataframe_exception_when_transformer_is_ColumnTransformer_and_inverse_transform_is_true():
+    """
+    Test that transform_dataframe raise exception when transformer is ColumnTransformer
+    and argument inverse_transform is True.
+    """
+    df_input = pd.DataFrame({
+                'col_1': [7.5, 24.4, 60.3, 57.3, 50.7, 41.4, 87.2, 47.4],
+                'col_2': ['a', 'a', 'a', 'a', 'b', 'b', 'b', 'b']
+               })
+    transformer = ColumnTransformer(
+                    [('scale', StandardScaler(), ['col_1']),
+                    ('onehot', OneHotEncoder(), ['col_2'])],
+                    remainder = 'passthrough',
+                    verbose_feature_names_out = False
+                  )
+
+    err_msg = re.escape("`inverse_transform` is not available when using ColumnTransformers.")
+    with pytest.raises(Exception, match = err_msg):
+        transform_dataframe(
+            df = df_input,
+            transformer = transformer,
+            fit = True,
+            inverse_transform = True
         )
 
 
@@ -123,29 +151,3 @@ def test_transform_dataframe_when_transformer_is_ColumnTransformer():
                )
     
     pd.testing.assert_frame_equal(results, expected)
-
-
-def test_transform_dataframe_exception_when_transformer_is_ColumnTransformer_and_inverse_transform_is_true():
-    """
-    Test that transform_dataframe raise exception when transformer is ColumnTransformer
-    and argument inverse_transform is True.
-    """
-    df_input = pd.DataFrame({
-                'col_1': [7.5, 24.4, 60.3, 57.3, 50.7, 41.4, 87.2, 47.4],
-                'col_2': ['a', 'a', 'a', 'a', 'b', 'b', 'b', 'b']
-               })
-    transformer = ColumnTransformer(
-                    [('scale', StandardScaler(), ['col_1']),
-                    ('onehot', OneHotEncoder(), ['col_2'])],
-                    remainder = 'passthrough',
-                    verbose_feature_names_out = False
-                  )
-
-    err_msg = re.escape('`inverse_transform` is not available when using ColumnTransformers.')
-    with pytest.raises(Exception, match = err_msg):
-        transform_dataframe(
-            df = df_input,
-            transformer = transformer,
-            fit = True,
-            inverse_transform = True
-        )
