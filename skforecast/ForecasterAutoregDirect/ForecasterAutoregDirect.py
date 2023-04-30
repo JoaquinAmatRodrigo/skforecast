@@ -477,11 +477,13 @@ class ForecasterAutoregDirect(ForecasterBase):
         self,
         step: int,
         X_train: pd.DataFrame,
-        y_train: pd.Series
+        y_train: pd.Series,
+        remove_suffix: bool=False
     ) -> Tuple[pd.DataFrame, pd.Series]:
         """
         Select columns needed to train a forecaster for a specific step. The input
-        matrices should be created with created with `create_train_X_y()`.         
+        matrices should be created with created with `create_train_X_y()`. If
+        `remove_suffix=True` sufix "_step_i" is removed from the column names. 
 
         Parameters
         ----------
@@ -494,6 +496,9 @@ class ForecasterAutoregDirect(ForecasterBase):
         y_train : pandas Series
             Values (target) of the time series related to each row of `X_train`.
 
+        remove_suffix : bool, default False
+            If True, suffix "_step_i" is removed from the column names.
+
 
         Returns 
         -------
@@ -504,7 +509,7 @@ class ForecasterAutoregDirect(ForecasterBase):
             Values (target) of the time series related to each row of `X_train`.
 
         """
-
+    
         if (step < 1) or (step > self.steps):
             raise ValueError(
                 (f"Invalid value `step`. For this forecaster, minimum value is 1 "
@@ -521,6 +526,12 @@ class ForecasterAutoregDirect(ForecasterBase):
             idx_columns_exog = np.arange(X_train.shape[1])[len(self.lags) + step::self.steps]
             idx_columns = np.hstack((idx_columns_lags, idx_columns_exog))
             X_train_step = X_train.iloc[:, idx_columns]
+
+        if remove_suffix:
+            step = step + 1
+            X_train_step.columns = [col_name.replace(f"_step_{step}", "")
+                                    for col_name in X_train_step.columns]
+            y_train_step.name = y_train_step.name.replace(f"_step_{step}", "")
 
         return  X_train_step, y_train_step
 
@@ -623,9 +634,10 @@ class ForecasterAutoregDirect(ForecasterBase):
             # self.regressors_ and self.filter_train_X_y_for_step expect
             # first step to start at value 1
             X_train_step, y_train_step = self.filter_train_X_y_for_step(
-                                             step    = step,
-                                             X_train = X_train,
-                                             y_train = y_train
+                                             step          = step,
+                                             X_train       = X_train,
+                                             y_train       = y_train,
+                                             remove_suffix = True
                                          )
             sample_weight = self.create_sample_weights(X_train=X_train_step)
             if sample_weight is not None:
