@@ -93,12 +93,12 @@ class ForecasterAutoregDirect(ForecasterBase):
     ----------
     regressor : regressor or pipeline compatible with the scikit-learn API
         An instance of a regressor or pipeline compatible with the scikit-learn API.
-        One instance of this regressor is trained for each step. All
-        them are stored in `self.regressors_`.
-        
+        An instance of this regressor is trained for each step. All of them 
+        are stored in `self.regressors_`.
+
     regressors_ : dict
-        Dictionary with regressors trained for each step. They are initialized as a copy
-        of `regressor`.
+        Dictionary with regressors trained for each step. They are initialized 
+        as a copy of `regressor`.
         
     steps : int
         Number of future steps the forecaster will predict when using method
@@ -138,8 +138,8 @@ class ForecasterAutoregDirect(ForecasterBase):
         `max_lag`.
 
     last_window : pandas Series
-        Last window the forecaster has seen during trained. It stores the
-        values needed to predict the next `step` right after the training data.
+        Last window the forecaster has seen during training. It stores the
+        values needed to predict the next `step` immediately after the training data.
         
     index_type : type
         Type of index of the input used in training.
@@ -481,9 +481,10 @@ class ForecasterAutoregDirect(ForecasterBase):
         remove_suffix: bool=False
     ) -> Tuple[pd.DataFrame, pd.Series]:
         """
-        Select columns needed to train a forecaster for a specific step. The input
-        matrices should be created with created with `create_train_X_y()`. If
-        `remove_suffix=True` sufix "_step_i" is removed from the column names. 
+        Select the columns needed to train a forecaster for a specific step.  
+        The input matrices should be created using `create_train_X_y()`. If 
+        `remove_suffix=True` the suffix "_step_i" will be removed from the 
+        column names. 
 
         Parameters
         ----------
@@ -496,9 +497,8 @@ class ForecasterAutoregDirect(ForecasterBase):
         y_train : pandas Series
             Values (target) of the time series related to each row of `X_train`.
 
-        remove_suffix : bool, default False
+        remove_suffix : bool, default `False`
             If True, suffix "_step_i" is removed from the column names.
-
 
         Returns 
         -------
@@ -528,10 +528,9 @@ class ForecasterAutoregDirect(ForecasterBase):
             X_train_step = X_train.iloc[:, idx_columns]
 
         if remove_suffix:
-            step = step + 1
-            X_train_step.columns = [col_name.replace(f"_step_{step}", "")
+            X_train_step.columns = [col_name.replace(f"_step_{step + 1}", "")
                                     for col_name in X_train_step.columns]
-            y_train_step.name = y_train_step.name.replace(f"_step_{step}", "")
+            y_train_step.name = y_train_step.name.replace(f"_step_{step + 1}", "")
 
         return  X_train_step, y_train_step
 
@@ -583,8 +582,7 @@ class ForecasterAutoregDirect(ForecasterBase):
     def fit(
         self,
         y: pd.Series,
-        exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-        fit_kwargs: Optional[dict]=None
+        exog: Optional[Union[pd.Series, pd.DataFrame]]=None
     ) -> None:
         """
         Training Forecaster.
@@ -761,29 +759,29 @@ class ForecasterAutoregDirect(ForecasterBase):
         if exog is not None:
             if isinstance(exog, pd.DataFrame):
                 exog = transform_dataframe(
-                            df                = exog,
-                            transformer       = self.transformer_exog,
-                            fit               = False,
-                            inverse_transform = False
-                        )
+                           df                = exog,
+                           transformer       = self.transformer_exog,
+                           fit               = False,
+                           inverse_transform = False
+                       )
             else:
                 exog = transform_series(
-                            series            = exog,
-                            transformer       = self.transformer_exog,
-                            fit               = False,
-                            inverse_transform = False
-                        )
+                           series            = exog,
+                           transformer       = self.transformer_exog,
+                           fit               = False,
+                           inverse_transform = False
+                       )
             check_exog_dtypes(exog=exog)
             exog_values = exog_to_direct(exog=exog.iloc[:max(steps), ], steps=max(steps)).to_numpy()
         else:
             exog_values = None
 
         last_window = transform_series(
-                            series            = last_window,
-                            transformer       = self.transformer_y,
-                            fit               = False,
-                            inverse_transform = False
-                       )
+                          series            = last_window,
+                          transformer       = self.transformer_y,
+                          fit               = False,
+                          inverse_transform = False
+                      )
         last_window_values, last_window_index = preprocess_last_window(
                                                     last_window = last_window
                                                 )
@@ -800,26 +798,26 @@ class ForecasterAutoregDirect(ForecasterBase):
 
         regressors = [self.regressors_[step] for step in steps]
         with warnings.catch_warnings():
-                # Suppress scikit-learn warning: "X does not have valid feature names,
-                # but NoOpTransformer was fitted with feature names".
-                warnings.simplefilter("ignore")
-                predictions = [
-                    regressor.predict(X)[0] for regressor, X in zip(regressors, Xs)
-                ]
+            # Suppress scikit-learn warning: "X does not have valid feature names,
+            # but NoOpTransformer was fitted with feature names".
+            warnings.simplefilter("ignore")
+            predictions = [
+                regressor.predict(X)[0] for regressor, X in zip(regressors, Xs)
+            ]
 
         idx = expand_index(index=last_window_index, steps=max(steps))
         predictions = pd.Series(
-                            data  = predictions,
-                            index = idx[np.array(steps)-1],
-                            name  = 'pred'
-                        )
+                          data  = predictions,
+                          index = idx[np.array(steps)-1],
+                          name  = 'pred'
+                      )
 
         predictions = transform_series(
-                            series            = predictions,
-                            transformer       = self.transformer_y,
-                            fit               = False,
-                            inverse_transform = True
-                        )
+                          series            = predictions,
+                          transformer       = self.transformer_y,
+                          fit               = False,
+                          inverse_transform = True
+                      )
 
         return predictions
     
@@ -831,7 +829,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         exog: Optional[Union[pd.Series, pd.DataFrame]]=None
     ) -> pd.Series:                                          # pragma: no cover
         """
-        Equivalent to predict but using pandas instead of numpy.
+        Equivalent to predict() but using pandas instead of numpy.
         """
 
         if isinstance(steps, int):
@@ -871,10 +869,10 @@ class ForecasterAutoregDirect(ForecasterBase):
         regressors = [self.regressors_[step] for step in steps]
         predictions = [regressor.predict(X)[0] for regressor, X in zip(regressors, Xs)]
         predictions = pd.Series(
-                        data  = predictions,
-                        index = idx[np.array(steps)-1],
-                        name  = 'pred',
-                    )
+                          data  = predictions,
+                          index = idx[np.array(steps)-1],
+                          name  = 'pred',
+                      )
 
         return predictions
 
