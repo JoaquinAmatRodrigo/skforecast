@@ -798,17 +798,18 @@ class ForecasterAutoregDirect(ForecasterBase):
                 for step in steps
             ]
 
+        regressors = [self.regressors_[step] for step in steps]
         with warnings.catch_warnings():
                 # Suppress scikit-learn warning: "X does not have valid feature names,
                 # but NoOpTransformer was fitted with feature names".
                 warnings.simplefilter("ignore")
                 predictions = [
-                    regressor.predict(X)[0] for regressor, X in zip(self.regressors_.values(), Xs)
+                    regressor.predict(X)[0] for regressor, X in zip(regressors, Xs)
                 ]
 
         idx = expand_index(index=last_window_index, steps=max(steps))
         predictions = pd.Series(
-                            data  = predictions.reshape(-1),
+                            data  = predictions,
                             index = idx[np.array(steps)-1],
                             name  = 'pred'
                         )
@@ -867,7 +868,8 @@ class ForecasterAutoregDirect(ForecasterBase):
                 for step in steps
             ]
 
-        predictions = [regressor.predict(X)[0] for regressor, X in zip(self.regressors_.values(), Xs)]
+        regressors = [self.regressors_[step] for step in steps]
+        predictions = [regressor.predict(X)[0] for regressor, X in zip(regressors, Xs)]
         predictions = pd.Series(
                         data  = predictions,
                         index = idx[np.array(steps)-1],
