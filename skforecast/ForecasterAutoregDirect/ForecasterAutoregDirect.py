@@ -790,8 +790,6 @@ class ForecasterAutoregDirect(ForecasterBase):
 
         X_lags = last_window_values[-self.lags].reshape(1, -1)
         
-        predictions = np.full(shape=len(steps), fill_value=np.nan)
-
         if exog is None:
             Xs = [X_lags] * len(steps)
         else:
@@ -805,12 +803,12 @@ class ForecasterAutoregDirect(ForecasterBase):
                 # but NoOpTransformer was fitted with feature names".
                 warnings.simplefilter("ignore")
                 predictions = [
-                    regressor.predict(X) for regressor, X in zip(self.regressors_.values(), Xs)
+                    regressor.predict(X)[0] for regressor, X in zip(self.regressors_.values(), Xs)
                 ]
 
         idx = expand_index(index=last_window_index, steps=max(steps))
         predictions = pd.Series(
-                            data  = predictions,
+                            data  = predictions.reshape(-1),
                             index = idx[np.array(steps)-1],
                             name  = 'pred'
                         )
@@ -857,11 +855,6 @@ class ForecasterAutoregDirect(ForecasterBase):
                                     return_values = False
                             )
         idx = expand_index(index=last_window_index, steps=max(steps))
-        predictions = pd.Series(
-                            data  = np.nan,
-                            index = idx[np.array(steps)-1],
-                            name  = 'pred'
-                        )
         X_lags = last_window.iloc[-self.lags]
         X_lags.index = [f"lag_{lag}" for lag in self.lags]
         X_lags = X_lags.to_frame().T
@@ -874,7 +867,7 @@ class ForecasterAutoregDirect(ForecasterBase):
                 for step in steps
             ]
 
-        predictions = [regressor.predict(X) for regressor, X in zip(self.regressors_.values(), Xs)]
+        predictions = [regressor.predict(X)[0] for regressor, X in zip(self.regressors_.values(), Xs)]
         predictions = pd.Series(
                         data  = predictions,
                         index = idx[np.array(steps)-1],
