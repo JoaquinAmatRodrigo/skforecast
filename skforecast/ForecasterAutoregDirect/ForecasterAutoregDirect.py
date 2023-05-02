@@ -706,7 +706,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         last_window : pandas Series, default `None`
             Series values used to create the predictors (lags) needed in the 
             first iteration of the prediction (t + 1).
-    
+
             If `last_window = None`, the values stored in` self.last_window` are
             used to calculate the initial predictors, and the predictions start
             right after training data.
@@ -761,29 +761,29 @@ class ForecasterAutoregDirect(ForecasterBase):
         if exog is not None:
             if isinstance(exog, pd.DataFrame):
                 exog = transform_dataframe(
-                           df                = exog,
-                           transformer       = self.transformer_exog,
-                           fit               = False,
-                           inverse_transform = False
-                       )
+                            df                = exog,
+                            transformer       = self.transformer_exog,
+                            fit               = False,
+                            inverse_transform = False
+                        )
             else:
                 exog = transform_series(
-                           series            = exog,
-                           transformer       = self.transformer_exog,
-                           fit               = False,
-                           inverse_transform = False
-                       )
+                            series            = exog,
+                            transformer       = self.transformer_exog,
+                            fit               = False,
+                            inverse_transform = False
+                        )
             check_exog_dtypes(exog=exog)
             exog_values = exog_to_direct(exog=exog.iloc[:max(steps), ], steps=max(steps)).to_numpy()
         else:
             exog_values = None
 
         last_window = transform_series(
-                          series            = last_window,
-                          transformer       = self.transformer_y,
-                          fit               = False,
-                          inverse_transform = False
-                      )
+                            series            = last_window,
+                            transformer       = self.transformer_y,
+                            fit               = False,
+                            inverse_transform = False
+                       )
         last_window_values, last_window_index = preprocess_last_window(
                                                     last_window = last_window
                                                 )
@@ -792,33 +792,94 @@ class ForecasterAutoregDirect(ForecasterBase):
         
         predictions = np.full(shape=len(steps), fill_value=np.nan)
 
-        for i, step in enumerate(steps):
-            regressor = self.regressors_[step]
-            if exog is None:
-                X = X_lags
-            else:
-                # Only columns from exog related with the current step are selected.
-                X = np.hstack([X_lags, exog_values[0][step-1::max(steps)].reshape(1, -1)])
-            with warnings.catch_warnings():
+        if exog is None:
+            Xs = [X_lags] * len(steps)
+        else:
+            Xs = [
+                np.hstack([X_lags, exog_values[0][step-1::max(steps)].reshape(1, -1)])
+                for step in steps
+            ]
+
+        with warnings.catch_warnings():
                 # Suppress scikit-learn warning: "X does not have valid feature names,
                 # but NoOpTransformer was fitted with feature names".
                 warnings.simplefilter("ignore")
-                predictions[i] = regressor.predict(X)
+                predictions = [
+                    regressor.predict(X) for regressor, X in zip(self.regressors_.values(), Xs)
+                ]
 
         idx = expand_index(index=last_window_index, steps=max(steps))
-
         predictions = pd.Series(
-                          data  = predictions.reshape(-1),
-                          index = idx[np.array(steps)-1],
-                          name  = 'pred'
-                      )
+                            data  = predictions,
+                            index = idx[np.array(steps)-1],
+                            name  = 'pred'
+                        )
 
         predictions = transform_series(
-                          series            = predictions,
-                          transformer       = self.transformer_y,
-                          fit               = False,
-                          inverse_transform = True
-                      )
+                            series            = predictions,
+                            transformer       = self.transformer_y,
+                            fit               = False,
+                            inverse_transform = True
+                        )
+
+        return predictions
+    
+
+    def predict_pandas( 
+        self,
+        steps: Optional[Union[int, list]]=None,
+        last_window: Optional[pd.Series]=None,
+        exog: Optional[Union[pd.Series, pd.DataFrame]]=None
+    ) -> pd.Series:                                          # pragma: no cover
+        """
+        Equivalent to predict but using pandas instead of numpy.
+        """
+
+        if isinstance(steps, int):
+            steps = list(np.arange(steps) + 1)
+        elif steps is None:
+            steps = list(np.arange(self.steps) + 1)
+        elif isinstance(steps, list):
+            steps = list(np.array(steps))
+
+        for step in steps:
+            if not isinstance(step, (int, np.int64, np.int32)):
+                raise TypeError(
+                    (f"`steps` argument must be an int, a list of ints or `None`. "
+                        f"Got {type(steps)}.")
+                )
+
+        if last_window is None:
+            last_window = copy(self.last_window)
+
+        _, last_window_index = preprocess_last_window(
+                                    last_window   = last_window,
+                                    return_values = False
+                            )
+        idx = expand_index(index=last_window_index, steps=max(steps))
+        predictions = pd.Series(
+                            data  = np.nan,
+                            index = idx[np.array(steps)-1],
+                            name  = 'pred'
+                        )
+        X_lags = last_window.iloc[-self.lags]
+        X_lags.index = [f"lag_{lag}" for lag in self.lags]
+        X_lags = X_lags.to_frame().T
+
+        if exog is None:
+            Xs = [X_lags] * len(steps)
+        else:
+            Xs = [
+                pd.concat([X_lags, exog.iloc[step-1::max(steps)]], axis=1)
+                for step in steps
+            ]
+
+        predictions = [regressor.predict(X) for regressor, X in zip(self.regressors_.values(), Xs)]
+        predictions = pd.Series(
+                        data  = predictions,
+                        index = idx[np.array(steps)-1],
+                        name  = 'pred',
+                    )
 
         return predictions
 
