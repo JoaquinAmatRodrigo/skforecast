@@ -135,8 +135,8 @@ class ForecasterAutoregCustom(ForecasterBase):
         **New in version 0.6.0**
 
     last_window : pandas Series
-        Last window the forecaster has seen during trained. It stores the
-        values needed to predict the next `step` right after the training data.
+        Last window the forecaster has seen during training. It stores the
+        values needed to predict the next `step` immediately after the training data.
         
     index_type : type
         Type of index of the input used in training.
