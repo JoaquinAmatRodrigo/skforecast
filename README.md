@@ -23,7 +23,7 @@ Skforecast is developed according to the following priorities:
 
 + Fast and robust prototyping. :zap:
 + Validation and backtesting methods to have a realistic assessment of model performance. :mag:
-+ Models must be deployed in production. :box:
++ Models must be deployed in production. :hammer:
 + Models must be interpretable. :crystal_ball:
 
 **Documentation: https://skforecast.org** :books:
@@ -104,11 +104,11 @@ pip install skforecast[plotting]
 - [x] Support for `pandas 2.0.x`.
 - [x] New user guide on how to include **categorical variables** in the Forecasters.
 - [x] New user guide on how to use **GPU in Google Colab** with XGBoost and LightGBM regressors.
+- [x] Include custom kwargs during fit.
 - [x] The dtypes of exogenous variables are maintained when generating the training matrices with the `create_train_X_y` method in all the Forecasters.
-- [ ] Include custom kwargs during fit.
 - [x] Bug fixes and performance improvements.
 
-Visit the [release notes](https://skforecast.org/latest/releases/releases.html) to view all notable changes.
+Visit the [release notes](https://github.com/JoaquinAmatRodrigo/skforecast/blob/feature_update_category_docs/changelog.md) to view all notable changes.
 
 
 # Documentation
