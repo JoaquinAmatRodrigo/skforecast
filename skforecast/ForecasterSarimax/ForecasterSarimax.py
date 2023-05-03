@@ -86,8 +86,8 @@ class ForecasterSarimax():
         Not used, present here for API consistency by convention.
 
     last_window : pandas Series
-        Last window the forecaster has seen during trained. It stores the
-        values needed to predict the next `step` right after the training data.
+        Last window the forecaster has seen during training. It stores the
+        values needed to predict the next `step` immediately after the training data.
 
     extended_index : pandas Index
         When predicting using `last_window` and `last_window_exog`, the internal

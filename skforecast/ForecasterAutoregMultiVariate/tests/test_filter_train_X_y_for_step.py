@@ -101,3 +101,47 @@ def test_filter_train_X_y_for_step_output_when_lags_3_steps_2_and_exog_for_step_
  
     pd.testing.assert_frame_equal(results[0], expected[0])
     pd.testing.assert_series_equal(results[1], expected[1])
+
+
+def test_filter_train_X_y_for_step_output_when_lags_3_steps_2_and_exog_for_step_2_remove_suffix():
+    """
+    Test output of filter_train_X_y_for_step when regressor is LinearRegression, 
+    lags is 3 and steps is 2 with exog for step 2 with remove_suffix=True.
+    """
+    series = pd.DataFrame({'l1': pd.Series(np.arange(10), dtype=float), 
+                           'l2': pd.Series(np.arange(50, 60), dtype=float)})
+    exog = pd.Series(np.arange(100, 110), name='exog', dtype=int)
+
+    forecaster = ForecasterAutoregMultiVariate(LinearRegression(), level='l2',
+                                               lags=[1, 2, 3], steps=2)
+    X_train, y_train = forecaster.create_train_X_y(series=series, exog=exog)
+    results = forecaster.filter_train_X_y_for_step(
+                  step          = 2, 
+                  X_train       = X_train, 
+                  y_train       = y_train,
+                  remove_suffix = True
+              )
+
+    expected = (
+        pd.DataFrame(
+            data = np.array([[2., 1., 0., 52., 51., 50., 104.],
+                             [3., 2., 1., 53., 52., 51., 105.],
+                             [4., 3., 2., 54., 53., 52., 106.],
+                             [5., 4., 3., 55., 54., 53., 107.],
+                             [6., 5., 4., 56., 55., 54., 108.],
+                             [7., 6., 5., 57., 56., 55., 109.]], dtype=float),
+            index   = pd.RangeIndex(start=4, stop=10, step=1),
+            columns = ['l1_lag_1', 'l1_lag_2', 'l1_lag_3',
+                       'l2_lag_1', 'l2_lag_2', 'l2_lag_3',
+                       'exog']
+        ).astype({'exog': int}),
+        pd.Series(
+            data  = np.array([54., 55., 56., 57., 58., 59.]),
+            index = pd.RangeIndex(start=4, stop=10, step=1),
+            name  = 'l2', 
+            dtype = float
+        )
+    )  
+ 
+    pd.testing.assert_frame_equal(results[0], expected[0])
+    pd.testing.assert_series_equal(results[1], expected[1])

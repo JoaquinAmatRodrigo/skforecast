@@ -10,12 +10,19 @@ from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import OrdinalEncoder
+from sklearn.preprocessing import FunctionTransformer
+from sklearn.compose import make_column_transformer
+from sklearn.compose import make_column_selector
+from sklearn.pipeline import make_pipeline
 from sklearn.linear_model import LinearRegression
+from sklearn.ensemble import HistGradientBoostingRegressor
+from lightgbm import LGBMRegressor
 
 # Fixtures
-from skforecast.ForecasterAutoregMultiVariate.tests.fixtures_ForecasterAutoregMultiVariate import series
-from skforecast.ForecasterAutoregMultiVariate.tests.fixtures_ForecasterAutoregMultiVariate import exog
-from skforecast.ForecasterAutoregMultiVariate.tests.fixtures_ForecasterAutoregMultiVariate import exog_predict
+from .fixtures_ForecasterAutoregMultiVariate import series
+from .fixtures_ForecasterAutoregMultiVariate import exog
+from .fixtures_ForecasterAutoregMultiVariate import exog_predict
 
 transformer_exog = ColumnTransformer(
                        [('scale', StandardScaler(), ['exog_1']),
@@ -231,3 +238,159 @@ def test_predict_output_when_regressor_is_LinearRegression_and_weight_func():
                )
     
     pd.testing.assert_frame_equal(results, expected)
+
+
+def test_predict_output_when_categorical_features_native_implementation_HistGradientBoostingRegressor():
+    """
+    Test predict output when using HistGradientBoostingRegressor and categorical variables.
+    """
+    df_exog = pd.DataFrame({'exog_1': exog['exog_1'],
+                            'exog_2': ['a', 'b', 'c', 'd', 'e']*10,
+                            'exog_3': pd.Categorical(['F', 'G', 'H', 'I', 'J']*10)})
+    
+    exog_predict = df_exog.copy()
+    exog_predict.index = pd.RangeIndex(start=50, stop=100)
+
+    categorical_features = df_exog.select_dtypes(exclude=[np.number]).columns.tolist()
+    transformer_exog = make_column_transformer(
+                           (
+                               OrdinalEncoder(
+                                   dtype=int,
+                                   handle_unknown="use_encoded_value",
+                                   unknown_value=-1,
+                                   encoded_missing_value=-1
+                               ),
+                               categorical_features
+                           ),
+                           remainder="passthrough",
+                           verbose_feature_names_out=False,
+                       ).set_output(transform="pandas")
+    
+    forecaster = ForecasterAutoregMultiVariate(
+                     regressor          = HistGradientBoostingRegressor(
+                                              categorical_features = categorical_features,
+                                              random_state         = 123
+                                          ),
+                     level              = 'l1',
+                     lags               = 5,
+                     steps              = 10,
+                     transformer_series = None,
+                     transformer_exog   = transformer_exog
+                 )
+    forecaster.fit(series=series, exog=df_exog)
+    predictions = forecaster.predict(steps=10, exog=exog_predict)
+
+    expected = pd.DataFrame(
+                   data = np.array([0.50131059, 0.49276926, 0.47433929, 0.4668392 , 
+                                    0.47754412, 0.47360906, 0.47749396, 0.48461923, 
+                                    0.48686681, 0.50223394]),
+                   index   = pd.RangeIndex(start=50, stop=60, step=1),
+                   columns = ['l1']
+               )
+    
+    pd.testing.assert_frame_equal(predictions, expected)
+
+
+def test_predict_output_when_categorical_features_native_implementation_LGBMRegressor():
+    """
+    Test predict output when using LGBMRegressor and categorical variables.
+    """
+    df_exog = pd.DataFrame({'exog_1': exog['exog_1'],
+                            'exog_2': ['a', 'b', 'c', 'd', 'e']*10,
+                            'exog_3': pd.Categorical(['F', 'G', 'H', 'I', 'J']*10)})
+    
+    exog_predict = df_exog.copy()
+    exog_predict.index = pd.RangeIndex(start=50, stop=100)
+
+    categorical_features = df_exog.select_dtypes(exclude=[np.number]).columns.tolist()
+    transformer_exog = make_column_transformer(
+                           (
+                               OrdinalEncoder(
+                                   dtype=int,
+                                   handle_unknown="use_encoded_value",
+                                   unknown_value=-1,
+                                   encoded_missing_value=-1
+                               ),
+                               categorical_features
+                           ),
+                           remainder="passthrough",
+                           verbose_feature_names_out=False,
+                       ).set_output(transform="pandas")
+    
+    forecaster = ForecasterAutoregMultiVariate(
+                     regressor          = LGBMRegressor(random_state=123),
+                     level              = 'l1',
+                     lags               = 5,
+                     steps              = 10,
+                     transformer_series = None,
+                     transformer_exog   = transformer_exog,
+                     fit_kwargs         = {'categorical_feature': categorical_features}
+                 )
+    forecaster.fit(series=series, exog=df_exog)
+    predictions = forecaster.predict(steps=10, exog=exog_predict)
+
+    expected = pd.DataFrame(
+                   data = np.array([0.50131059, 0.49276926, 0.47433929, 0.46683919,
+                                    0.47754412, 0.47360906, 0.47749395, 0.48461923, 
+                                    0.48686681, 0.50223394]),
+                   index   = pd.RangeIndex(start=50, stop=60, step=1),
+                   columns = ['l1']
+               )
+    
+    pd.testing.assert_frame_equal(predictions, expected)
+
+
+def test_predict_output_when_categorical_features_native_implementation_LGBMRegressor_auto():
+    """
+    Test predict output when using LGBMRegressor and categorical variables with 
+    categorical_features='auto'.
+    """
+    df_exog = pd.DataFrame({'exog_1': exog['exog_1'],
+                            'exog_2': ['a', 'b', 'c', 'd', 'e']*10,
+                            'exog_3': pd.Categorical(['F', 'G', 'H', 'I', 'J']*10)})
+    
+    exog_predict = df_exog.copy()
+    exog_predict.index = pd.RangeIndex(start=50, stop=100)
+
+    pipeline_categorical = make_pipeline(
+                               OrdinalEncoder(
+                                   dtype=int,
+                                   handle_unknown="use_encoded_value",
+                                   unknown_value=-1,
+                                   encoded_missing_value=-1
+                               ),
+                               FunctionTransformer(
+                                   func=lambda x: x.astype('category'),
+                                   feature_names_out= 'one-to-one'
+                               )
+                           )
+    transformer_exog = make_column_transformer(
+                            (
+                                pipeline_categorical,
+                                make_column_selector(dtype_exclude=np.number)
+                            ),
+                            remainder="passthrough",
+                            verbose_feature_names_out=False,
+                       ).set_output(transform="pandas")
+    
+    forecaster = ForecasterAutoregMultiVariate(
+                     regressor          = LGBMRegressor(random_state=123),
+                     level              = 'l1',
+                     lags               = 5,
+                     steps              = 10,
+                     transformer_series = None,
+                     transformer_exog   = transformer_exog,
+                     fit_kwargs         = {'categorical_feature': 'auto'}
+                 )
+    forecaster.fit(series=series, exog=df_exog)
+    predictions = forecaster.predict(steps=10, exog=exog_predict)
+
+    expected = pd.DataFrame(
+                   data = np.array([0.50131059, 0.49276926, 0.47433929, 0.46683919,
+                                    0.47754412, 0.47360906, 0.47749395, 0.48461923, 
+                                    0.48686681, 0.50223394]),
+                   index   = pd.RangeIndex(start=50, stop=60, step=1),
+                   columns = ['l1']
+               )
+    
+    pd.testing.assert_frame_equal(predictions, expected)

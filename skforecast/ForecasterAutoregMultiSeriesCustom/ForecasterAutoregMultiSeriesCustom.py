@@ -171,8 +171,8 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         Size of the window needed by `fun_predictors` to create the predictors.
 
     last_window : pandas Series
-        Last window the forecaster has seen during training. It stores the
-        values needed to predict the next `step` right after the training data.
+        Last window seen by the forecaster during training. It stores the values 
+        needed to predict the next `step` immediately after the training data.
         
     index_type : type
         Type of index of the input used in training.
@@ -668,8 +668,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         self,
         series: pd.DataFrame,
         exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-        store_in_sample_residuals: bool=True,
-        fit_kwargs: Optional[dict]=None
+        store_in_sample_residuals: bool=True
     ) -> None:
         """
         Training Forecaster.
@@ -686,11 +685,6 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
 
         store_in_sample_residuals : bool, default `True`
             if True, in_sample_residuals are stored.
-
-        fit_kwargs : dict, default `None`
-            Additional keyword arguments passed to the `fit` method of the regressor.
-            If also passed during the instantiation of the forecaster, the values
-            specified here will take precedence.
 
         Returns 
         -------
