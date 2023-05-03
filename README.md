@@ -21,7 +21,7 @@
 
 Skforecast is developed according to the following priorities:
 
-+ Fast and robust prototyping. ⚡
++ Fast and robust prototyping. :zap:
 + Validation and backtesting methods to have a realistic assessment of model performance. 🔍
 + Models must be deployed in production. 📦
 + Models must be interpretable. 🔮
