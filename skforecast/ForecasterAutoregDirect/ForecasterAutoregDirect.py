@@ -761,29 +761,29 @@ class ForecasterAutoregDirect(ForecasterBase):
         if exog is not None:
             if isinstance(exog, pd.DataFrame):
                 exog = transform_dataframe(
-                            df                = exog,
-                            transformer       = self.transformer_exog,
-                            fit               = False,
-                            inverse_transform = False
-                        )
+                           df                = exog,
+                           transformer       = self.transformer_exog,
+                           fit               = False,
+                           inverse_transform = False
+                       )
             else:
                 exog = transform_series(
-                            series            = exog,
-                            transformer       = self.transformer_exog,
-                            fit               = False,
-                            inverse_transform = False
-                        )
+                           series            = exog,
+                           transformer       = self.transformer_exog,
+                           fit               = False,
+                           inverse_transform = False
+                       )
             check_exog_dtypes(exog=exog)
             exog_values = exog_to_direct(exog=exog.iloc[:max(steps), ], steps=max(steps)).to_numpy()
         else:
             exog_values = None
 
         last_window = transform_series(
-                            series            = last_window,
-                            transformer       = self.transformer_y,
-                            fit               = False,
-                            inverse_transform = False
-                       )
+                          series            = last_window,
+                          transformer       = self.transformer_y,
+                          fit               = False,
+                          inverse_transform = False
+                      )
         last_window_values, last_window_index = preprocess_last_window(
                                                     last_window = last_window
                                                 )
@@ -800,26 +800,26 @@ class ForecasterAutoregDirect(ForecasterBase):
 
         regressors = [self.regressors_[step] for step in steps]
         with warnings.catch_warnings():
-                # Suppress scikit-learn warning: "X does not have valid feature names,
-                # but NoOpTransformer was fitted with feature names".
-                warnings.simplefilter("ignore")
-                predictions = [
-                    regressor.predict(X)[0] for regressor, X in zip(regressors, Xs)
-                ]
+            # Suppress scikit-learn warning: "X does not have valid feature names,
+            # but NoOpTransformer was fitted with feature names".
+            warnings.simplefilter("ignore")
+            predictions = [
+                regressor.predict(X)[0] for regressor, X in zip(regressors, Xs)
+            ]
 
         idx = expand_index(index=last_window_index, steps=max(steps))
         predictions = pd.Series(
-                            data  = predictions,
-                            index = idx[np.array(steps)-1],
-                            name  = 'pred'
-                        )
+                          data  = predictions,
+                          index = idx[np.array(steps)-1],
+                          name  = 'pred'
+                      )
 
         predictions = transform_series(
-                            series            = predictions,
-                            transformer       = self.transformer_y,
-                            fit               = False,
-                            inverse_transform = True
-                        )
+                          series            = predictions,
+                          transformer       = self.transformer_y,
+                          fit               = False,
+                          inverse_transform = True
+                      )
 
         return predictions
     
@@ -831,7 +831,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         exog: Optional[Union[pd.Series, pd.DataFrame]]=None
     ) -> pd.Series:                                          # pragma: no cover
         """
-        Equivalent to predict but using pandas instead of numpy.
+        Equivalent to predict() but using pandas instead of numpy.
         """
 
         if isinstance(steps, int):
@@ -845,16 +845,16 @@ class ForecasterAutoregDirect(ForecasterBase):
             if not isinstance(step, (int, np.int64, np.int32)):
                 raise TypeError(
                     (f"`steps` argument must be an int, a list of ints or `None`. "
-                        f"Got {type(steps)}.")
+                     f"Got {type(steps)}.")
                 )
 
         if last_window is None:
             last_window = copy(self.last_window)
 
         _, last_window_index = preprocess_last_window(
-                                    last_window   = last_window,
-                                    return_values = False
-                            )
+                                   last_window   = last_window,
+                                   return_values = False
+                               )
         idx = expand_index(index=last_window_index, steps=max(steps))
         X_lags = last_window.iloc[-self.lags]
         X_lags.index = [f"lag_{lag}" for lag in self.lags]
@@ -871,10 +871,10 @@ class ForecasterAutoregDirect(ForecasterBase):
         regressors = [self.regressors_[step] for step in steps]
         predictions = [regressor.predict(X)[0] for regressor, X in zip(regressors, Xs)]
         predictions = pd.Series(
-                        data  = predictions,
-                        index = idx[np.array(steps)-1],
-                        name  = 'pred',
-                    )
+                          data  = predictions,
+                          index = idx[np.array(steps)-1],
+                          name  = 'pred',
+                      )
 
         return predictions
 
