@@ -145,7 +145,7 @@ def time_series_splitter(
         yield train_indices, test_indices
 
 
-def create_backtesting_folds(
+def _create_backtesting_folds(
     y: pd.Series,
     test_size: int,
     initial_train_size: int,
@@ -161,16 +161,22 @@ def create_backtesting_folds(
     are observed at fixed time intervals, in train/test sets. In each split, test
     indices must be higher than before.
 
+    Three arrays are returned for each fold with the position of train, test
+    including the gap, and test excluding the gap. The gap is the number of
+    samples to exclude from the end of each train set before the test set. The
+    test excluding the gap is the one that must be used to make evaluate the
+    model. The test including the gap is provided for convenience.
+
     Returned indexes are not the indexes of the original time series, but the
     positional indexes of the samples in the time series. For example, if the   
     original time series is `y = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19]`, the
-    returned indexes for the first fold if  `test_size = 4` and 
-    `initial_train_size = 2` are: `[[0, 1], [2, 3, 4, 5]]`. This means that the
-    first fold is using the samples with positional indexes 0 and 1 in the time
-    series as training set, and the samples with positional indexes 2, 3, 4 and
-    5 as test set. The second fold would be `[[0, 1, 2, 3], [4, 5, 6, 7]]`, and 
-    so on.
-
+    returned indexes for the first fold if  `test_size = 4`, `gap = 1` and 
+    `initial_train_size = 2` are: `[[0, 1], [2, 3, 4, 5], [3, 4, 5]]]`. This means
+    that the first fold is using the samples with positional indexes 0 and 1 in
+    the time series as training set, and the samples with positional indexes 2,
+    3, 4 and 5 as test set, but only the samples with positional indexes 3, 4 and
+    5 should be used to evaluate the model since `gap = 1`. The second fold would
+    be `[[0, 1, 2, 3], [4, 5, 6, 7], [5, 6, 7]]`, and so on.
     
     Parameters
     ----------        
@@ -201,7 +207,8 @@ def create_backtesting_folds(
     Returns
     ------
     folds : list
-        List containing the train-test indices (position) of `y` for each fold.
+        List containing the indices (position) of `y` for training, test including
+        the gap, and test excluding the gap for each fold.
     
     """
 
@@ -228,7 +235,7 @@ def create_backtesting_folds(
         )
 
     
-    idx = np.arange(len(y))
+    idx = range(len(y))
     folds = []
     i = 0
     last_fold_excluded = False
@@ -241,21 +248,22 @@ def create_backtesting_folds(
             # increases by `test_size` in each iteration.
             train_idx_start = i * (test_size) if fixed_train_size else 0
             train_idx_end = initial_train_size + i * (test_size)
-            test_idx_start = train_idx_end + gap
+            test_idx_start = train_idx_end
         else:
             # The train size doesn't increase and doesn't move.
             train_idx_start = 0
             train_idx_end = initial_train_size
-            test_idx_start = initial_train_size + i * (test_size) + gap
+            test_idx_start = initial_train_size + i * (test_size)
 
         try:
-            test_idx_end = test_idx_start + test_size
+            test_idx_end = test_idx_start + gap + test_size
         except:
-            validation_end = len(y)
+            test_idx_end = len(y)
 
         folds.append([
-            idx[train_idx_start:train_idx_end],
-            idx[test_idx_start:test_idx_end]
+            idx[train_idx_start : train_idx_end],
+            idx[test_idx_start : test_idx_end],
+            idx[test_idx_start + gap : test_idx_end]
         ])
 
         i += 1
@@ -282,13 +290,14 @@ def create_backtesting_folds(
             print(f"    Last fold only includes {remainder} observations.")
         print("")
 
-        for fold in folds:
+        for i, fold in enumerate(folds):
             training_start = y.index[fold[0][0]]
             training_end = y.index[fold[0][-1]]
             training_length = len(fold[0])
-            validation_start = y.index[fold[1][0]]
-            validation_end = y.index[fold[1][-1]]
-            validation_length = len(fold[1])
+            validation_start = y.index[fold[2][0]]
+            validation_end = y.index[fold[2][-1]]
+            validation_length = len(fold[2])
+            print(f"Fold: {i}")
             print(
                 f"    Training:   {training_start} -- {training_end} (n={training_length})"
             )
@@ -297,7 +306,10 @@ def create_backtesting_folds(
             )
 
     if not return_all_indexes:
-        folds = [[[fold[0][0], fold[0][-1]], [fold[1][0], fold[1][-1]]] for fold in folds]
+        folds = [
+            [[fold[0][0], fold[0][-1]], [fold[1][0], fold[1][-1]], [fold[2][0], fold[2][-1]]] 
+            for fold in folds
+        ]
 
     return folds
         
