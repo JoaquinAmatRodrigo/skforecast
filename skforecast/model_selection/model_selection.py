@@ -143,6 +143,163 @@ def time_series_splitter(
                 break
         
         yield train_indices, test_indices
+
+
+def create_backtesting_folds(
+    y: pd.Series,
+    test_size: int,
+    initial_train_size: int,
+    gap: int,
+    refit: bool=False,
+    fixed_train_size: bool=True,
+    allow_incomplete_fold: bool=True,
+    return_all_indexes: bool=False,
+    verbose: bool=True
+) -> list:
+    """
+    Provides train/test indices (position) to split time series data samples that
+    are observed at fixed time intervals, in train/test sets. In each split, test
+    indices must be higher than before.
+
+    Returned indexes are not the indexes of the original time series, but the
+    positional indexes of the samples in the time series. For example, if the   
+    original time series is `y = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19]`, the
+    returned indexes for the first fold if  `test_size = 4` and 
+    `initial_train_size = 2` are: `[[0, 1], [2, 3, 4, 5]]`. This means that the
+    first fold is using the samples with positional indexes 0 and 1 in the time
+    series as training set, and the samples with positional indexes 2, 3, 4 and
+    5 as test set. The second fold would be `[[0, 1, 2, 3], [4, 5, 6, 7]]`, and 
+    so on.
+
+    
+    Parameters
+    ----------        
+    y : pandas Series
+        Time series values. 
+    
+    initial_train_size : int 
+        Size of the training set in the first fold.
+        
+    test_size : int
+        Size of the test set in each fold.
+
+    gap : int, default 0
+        Number of samples to exclude from the end of each train set before the
+        test set.
+        
+    allow_incomplete_fold : bool, default `True`
+        Last fold is allowed to be incomplete if it does not reach `test_size`
+        samples in the test set. Otherwise, the last fold is excluded.
+
+    return_all_indexes : bool, default `False`
+        If `True`, return all the indexes included in each fold. If `False`, return
+        only the first and last index of each partition in each fold.
+        
+    verbose : bool, default `True`
+        Print information if the folds created.
+
+    Returns
+    ------
+    folds : list
+        List containing the train-test indices (position) of `y` for each fold.
+    
+    """
+
+    if not isinstance(y, pd.Series):
+        raise ValueError("`y` must be a pandas Series.")
+    
+    if not isinstance(test_size, int):
+        raise ValueError("`test_size` must be an integer.")
+    if test_size < 1:
+        raise ValueError("`test_size` must be greater than 0.")
+    if not isinstance(gap, int):
+        raise ValueError("`gap` must be an integer.")
+    if gap < 1:
+        raise ValueError("`gap` must be greater than 0.")
+    if not isinstance(initial_train_size, int):
+        raise ValueError("`initial_train_size` must be an integer.")
+    if initial_train_size < 1:
+        raise ValueError("`initial_train_size` must be greater than 0.")
+
+    if initial_train_size + gap > len(y):
+        raise ValueError(
+            "The combination of initial_train_size and gap can not be larger"
+            "than the length of y."
+        )
+
+    
+    idx = np.arange(len(y))
+    folds = []
+    i = 0
+    last_fold_excluded = False
+
+    while initial_train_size + (i * test_size) + gap <= len(y):
+
+        if refit:
+            # If fixed_train_size the train size doesn't increase but moves by 
+            # `test_size` positions in each iteration. If False, the train size
+            # increases by `test_size` in each iteration.
+            train_idx_start = i * (test_size) if fixed_train_size else 0
+            train_idx_end = initial_train_size + i * (test_size)
+            test_idx_start = train_idx_end + gap
+        else:
+            # The train size doesn't increase and doesn't move.
+            train_idx_start = 0
+            train_idx_end = initial_train_size
+            test_idx_start = initial_train_size + i * (test_size) + gap
+
+        try:
+            test_idx_end = test_idx_start + test_size
+        except:
+            validation_end = len(y)
+
+        folds.append([
+            idx[train_idx_start:train_idx_end],
+            idx[test_idx_start:test_idx_end]
+        ])
+
+        i += 1
+
+    remainder = test_size - (test_size - len(folds[-1][1]))
+
+    if not allow_incomplete_fold:
+        if remainder != 0:
+            folds = folds[:-1]
+            last_fold_excluded = True
+            remainder = 0
+
+    if verbose:
+        print(f"Information of backtesting process")
+        print(f"----------------------------------")
+        print(f"Number of observations used for initial training: {initial_train_size}")
+        print(f"Number of observations used for backtesting: {len(y) - initial_train_size}")
+        print(f"    Number of folds: {len(folds)}")
+        print(f"    Number of steps per fold: {test_size}")
+        print(f"    Number of steps to exclude from the end of each train set before test (gap): {gap}")
+        if last_fold_excluded:
+            print(f"    Last fold has been excluded because it was incomplete.")
+        if remainder !=0:
+            print(f"    Last fold only includes {remainder} observations.")
+        print("")
+
+        for fold in folds:
+            training_start = y.index[fold[0][0]]
+            training_end = y.index[fold[0][-1]]
+            training_length = len(fold[0])
+            validation_start = y.index[fold[1][0]]
+            validation_end = y.index[fold[1][-1]]
+            validation_length = len(fold[1])
+            print(
+                f"    Training:   {training_start} -- {training_end} (n={training_length})"
+            )
+            print(
+                f"    Validation: {validation_start} -- {validation_end} (n={validation_length})"
+            )
+
+    if not return_all_indexes:
+        folds = [[[fold[0][0], fold[0][-1]], [fold[1][0], fold[1][-1]]] for fold in folds]
+
+    return folds
         
         
 def _get_metric(
