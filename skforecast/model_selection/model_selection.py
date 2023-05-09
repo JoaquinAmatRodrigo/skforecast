@@ -148,7 +148,7 @@ def time_series_splitter(
 def _create_backtesting_folds(
     y: pd.Series,
     test_size: int,
-    initial_train_size: int,
+    initial_train_size: Union[int, None],
     gap: int,
     refit: bool=False,
     fixed_train_size: bool=True,
@@ -183,8 +183,9 @@ def _create_backtesting_folds(
     y : pandas Series
         Time series values. 
     
-    initial_train_size : int 
-        Size of the training set in the first fold.
+    initial_train_size : int, None
+        Size of the training set in the first fold. If `None` or 0, the initial
+        fold does not include a training set.
         
     test_size : int
         Size of the test set in each fold.
@@ -223,17 +224,19 @@ def _create_backtesting_folds(
         raise ValueError("`gap` must be an integer.")
     if gap < 1:
         raise ValueError("`gap` must be greater than 0.")
-    if not isinstance(initial_train_size, int):
-        raise ValueError("`initial_train_size` must be an integer.")
-    if initial_train_size < 1:
-        raise ValueError("`initial_train_size` must be greater than 0.")
+    if initial_train_size is not None and not isinstance(initial_train_size, int):
+        raise ValueError("`initial_train_size` must be an integer or None.")
+    if initial_train_size is not None and initial_train_size < 1:
+        raise ValueError("`initial_train_size` must be greater than 0 or None.")
+
+    if initial_train_size is None:
+        initial_train_size = 0
 
     if initial_train_size + gap > len(y):
         raise ValueError(
             "The combination of initial_train_size and gap can not be larger"
             "than the length of y."
         )
-
     
     idx = range(len(y))
     folds = []
@@ -260,11 +263,13 @@ def _create_backtesting_folds(
         except:
             test_idx_end = len(y)
 
-        folds.append([
+        sets = [
             idx[train_idx_start : train_idx_end],
             idx[test_idx_start : test_idx_end],
             idx[test_idx_start + gap : test_idx_end]
-        ])
+        ]
+        sets =[set if len(set) > 0 else None for set in sets]
+        folds.append(sets)
 
         i += 1
 
@@ -291,9 +296,9 @@ def _create_backtesting_folds(
         print("")
 
         for i, fold in enumerate(folds):
-            training_start = y.index[fold[0][0]]
-            training_end = y.index[fold[0][-1]]
-            training_length = len(fold[0])
+            training_start = y.index[fold[0][0]] if fold[0] is not None else None
+            training_end = y.index[fold[0][-1]] if fold[0] is not None else None
+            training_length = len(fold[0]) if fold[0] is not None else 0
             validation_start = y.index[fold[2][0]]
             validation_end = y.index[fold[2][-1]]
             validation_length = len(fold[2])
@@ -353,104 +358,15 @@ def _get_metric(
     return metric
 
 
-def _backtesting_forecaster_verbose(
-    index_values: pd.Index,
-    steps: int,
-    initial_train_size: int,
-    folds: int,
-    remainder: int,
-    gap: int,
-    refit: bool=False,
-    fixed_train_size: bool=True
-) -> None:
-    """
-    Verbose for backtesting_forecaster functions.
-    
-    Parameters
-    ----------        
-    index_values : pandas Index
-        Values of the index of the series.
-    
-    steps : int
-        Number of steps to predict.
-
-    initial_train_size : int
-        Number of samples in the initial train split. The backtest forecaster is
-        trained using the first `initial_train_size` observations.
-        
-    folds : int
-        Number of backtesting stages.
-
-    remainder : int
-        Number of observations in the last backtesting stage. 
-
-    gap : int
-        Number of observations to exclude from the end of each train set before test.
-
-    refit : bool, default `False`
-        Whether to re-fit the forecaster in each iteration.
-
-    fixed_train_size : bool, default `True`
-        If True, train size doesn't increase but moves by `steps` in each iteration.
-    
-    """
-
-    print(f"Information of backtesting process")
-    print(f"----------------------------------")
-    print(f"Number of observations used for initial training: {initial_train_size}")
-    print(f"Number of observations used for backtesting: {len(index_values) - initial_train_size}")
-    print(f"    Number of folds: {folds}")
-    print(f"    Number of steps per fold: {steps}")
-    print(f"    Number of steps to exclude from the end of each train set before test (gap): {gap}")
-    if remainder != 0:
-        print(f"    Last fold only includes {remainder} observations.")
-    print("")
-    for i in range(folds):
-        if refit:
-            # if fixed_train_size the train size doesn't increase but moves by `steps` in each iteration.
-            # if false the train size increases by `steps` in each iteration.
-            train_idx_start = i * (steps-gap) if fixed_train_size else 0
-            train_idx_end = initial_train_size + i * (steps-gap)
-        else:
-            # The train size doesn't increase and doesn't move
-            train_idx_start = 0
-            train_idx_end = initial_train_size
-        last_window_end = initial_train_size + i * (steps-gap)
-        print(f"Data partition in fold: {i}")
-
-        if i < folds - 1:
-            print(
-                f"    Training:   {index_values[train_idx_start]} -- "
-                f"{index_values[train_idx_end - 1]}  "
-                f"(n={len(index_values[train_idx_start:train_idx_end])})"
-            )
-            print(
-                f"    Validation: {index_values[last_window_end + gap]} -- "
-                f"{index_values[last_window_end + steps - 1]}  "
-                f"(n={len(index_values[last_window_end:last_window_end + steps]) - gap})"
-            )
-        else:
-            print(
-                f"    Training:   {index_values[train_idx_start]} -- "
-                f"{index_values[train_idx_end - 1]}  "
-                f"(n={len(index_values[train_idx_start:train_idx_end])})"
-            )
-            print(
-                f"    Validation: {index_values[last_window_end + gap]} -- "
-                f"{index_values[-1]}  (n={len(index_values[last_window_end:]) - gap})"
-            )
-    print("")
-
-    return
-
-
 def _backtesting_forecaster_refit(
     forecaster,
     y: pd.Series,
     steps: int,
     metric: Union[str, Callable, list],
     initial_train_size: int,
+    gap: int = 0,
     fixed_train_size: bool=True,
+    allow_incomplete_fold: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     interval: Optional[list]=None,
     n_boot: int=500,
@@ -503,6 +419,14 @@ def _backtesting_forecaster_refit(
         
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
+
+    gap : int, default 0
+        Number of samples to exclude from the end of each train set before the
+        test set.
+        
+    allow_incomplete_fold : bool, default `True`
+        Last fold is allowed to be incomplete if it does not reach `steps`
+        samples in the test set. Otherwise, the last fold is excluded.
         
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
@@ -557,50 +481,53 @@ def _backtesting_forecaster_refit(
     else:
         metrics = metric
 
-    backtest_predictions = []
-    
-    folds = int(np.ceil((len(y) - initial_train_size) / steps))
-    remainder = (len(y) - initial_train_size) % steps
-    
-    if type(forecaster).__name__ != 'ForecasterAutoregDirect' and folds > 50:
+    folds = _create_backtesting_folds(
+                y                     = y,
+                test_size             = steps,
+                initial_train_size    = initial_train_size,
+                gap                   = gap,
+                refit                 = True,
+                fixed_train_size      = fixed_train_size,
+                allow_incomplete_fold = allow_incomplete_fold,
+                return_all_indexes    = False,
+                verbose               = verbose  
+            )
+        
+    if type(forecaster).__name__ != 'ForecasterAutoregDirect' and len(folds) > 50:
         warnings.warn(
-            (f"The forecaster will be fit {folds} times. This can take substantial amounts of time. "
-             f"If not feasible, try with `refit = False`. \n"),
+            (f"The forecaster will be fit {folds} times. This can take substantial "
+             f"amounts of time. If not feasible, try with `refit = False`.\n"),
             LongTrainingWarning
         )
-    elif type(forecaster).__name__ == 'ForecasterAutoregDirect' and folds*forecaster.steps > 50:
+    elif type(forecaster).__name__ == 'ForecasterAutoregDirect' and len(folds)*forecaster.steps > 50:
         warnings.warn(
-            (f"The forecaster will be fit {folds*forecaster.steps} times ({folds} folds * {forecaster.steps} regressors). "
-             f"This can take substantial amounts of time. If not feasible, try with `refit = False`. \n"),
+            (f"The forecaster will be fit {len(folds)*forecaster.steps} times "
+             f"({len(folds)} folds * {forecaster.steps} regressors). This can take "
+             f"substantial amounts of time. If not feasible, try with `refit = False`.\n"),
              LongTrainingWarning
         )
+
+    backtest_predictions = []
     
-    if verbose:
-        _backtesting_forecaster_verbose(
-            index_values       = y.index,
-            steps              = steps,
-            initial_train_size = initial_train_size,
-            folds              = folds,
-            remainder          = remainder,
-            refit              = True,
-            fixed_train_size   = fixed_train_size
-        )
-    
-    for i in tqdm(range(folds)) if show_progress else range(folds):
+    for fold in tqdm(folds) if show_progress else folds:
         # In each iteration the model is fitted before making predictions.
-        # if fixed_train_size the train size doesn't increase but moves by `steps` in each iteration.
-        # if false the train size increases by `steps` in each iteration.
-        train_idx_start = i * steps if fixed_train_size else 0
-        train_idx_end = initial_train_size + i * steps
+        # if fixed_train_size the train size doesn't increase but moves by `steps`
+        # in each iteration. if false the train size increases by `steps` in each
+        # iteration.
+        train_idx_start = fold[0][0] if fixed_train_size else 0
+        train_idx_end   = fold[0][1]
+        test_idx_start  = fold[1][0]
+        test_idx_end    = fold[1][1]
+        pred_idx_start  = fold[2][0]
+        pred_idx_end    = fold[2][1]
 
-        exog_train_values = exog.iloc[train_idx_start:train_idx_end, ] if exog is not None else None
-        next_window_exog = exog.iloc[train_idx_end:train_idx_end + steps, ] if exog is not None else None
+        y_train = y.iloc[train_idx_start:train_idx_end, ]
+        exog_train = exog.iloc[train_idx_start:train_idx_end, ] if exog is not None else None
+        next_window_exog = exog.iloc[test_idx_start:test_idx_end, ] if exog is not None else None
 
-        forecaster.fit(y=y.iloc[train_idx_start:train_idx_end, ], exog=exog_train_values)
+        forecaster.fit(y=y_train, exog=exog_train)
 
-        if i == folds - 1: # last fold
-            # If remainder > 0, only the remaining steps need to be predicted
-            steps = steps if remainder == 0 else remainder
+        steps = len(fold[1])
 
         if interval is None:
             pred = forecaster.predict(steps=steps, exog=next_window_exog)
@@ -613,7 +540,8 @@ def _backtesting_forecaster_refit(
                        random_state        = random_state,
                        in_sample_residuals = in_sample_residuals
                    )
-            
+
+        pred = pred.iloc[pred_idx_start:pred_idx_end, ]
         backtest_predictions.append(pred)
     
     backtest_predictions = pd.concat(backtest_predictions)
@@ -621,16 +549,17 @@ def _backtesting_forecaster_refit(
         backtest_predictions = pd.DataFrame(backtest_predictions)
 
     if isinstance(metric, list):
-        metrics_values = [m(
-                            y_true = y.iloc[initial_train_size: initial_train_size + len(backtest_predictions)],
-                            y_pred = backtest_predictions['pred']
-                          ) for m in metrics
-                         ]
+        metrics_values = [
+            m(
+                y_true = y.iloc[initial_train_size: initial_train_size + len(backtest_predictions)],
+                y_pred = backtest_predictions['pred']
+            ) for m in metrics
+        ]
     else:
         metrics_values = metrics(
-                            y_true = y.iloc[initial_train_size: initial_train_size + len(backtest_predictions)],
-                            y_pred = backtest_predictions['pred']
-                         )
+            y_true = y.iloc[initial_train_size: initial_train_size + len(backtest_predictions)],
+            y_pred = backtest_predictions['pred']
+        )
 
     return metrics_values, backtest_predictions
 
@@ -640,7 +569,9 @@ def _backtesting_forecaster_no_refit(
     y: pd.Series,
     steps: int,
     metric: Union[str, Callable, list],
+    gap: int = 0,
     initial_train_size: Optional[int]=None,
+    allow_incomplete_fold: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     interval: Optional[list]=None,
     n_boot: int=500,
@@ -688,6 +619,14 @@ def _backtesting_forecaster_no_refit(
         trained, no initial train is done and all data is used to evaluate the model. However, 
         the first `len(forecaster.last_window)` observations are needed to create the 
         initial predictors, so no predictions are calculated for them.
+
+    gap : int, default 0
+        Number of samples to exclude from the end of each train set before the
+        test set.
+        
+    allow_incomplete_fold : bool, default `True`
+        Last fold is allowed to be incomplete if it does not reach `steps`
+        samples in the test set. Otherwise, the last fold is excluded.
         
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
