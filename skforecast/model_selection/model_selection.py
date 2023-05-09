@@ -263,13 +263,13 @@ def _create_backtesting_folds(
         except:
             test_idx_end = len(y)
 
-        sets = [
+        partitions = [
             idx[train_idx_start : train_idx_end],
             idx[test_idx_start : test_idx_end],
             idx[test_idx_start + gap : test_idx_end]
         ]
-        sets =[set if len(set) > 0 else None for set in sets]
-        folds.append(sets)
+        partitions =[partition if len(partition) > 0 else None for partition in partitions]
+        folds.append(partitions)
 
         i += 1
 
