@@ -231,7 +231,7 @@ def _create_backtesting_folds(
             test_idx_start = initial_train_size + i * (test_size)
 
         test_idx_end = test_idx_start + gap + test_size
-
+    
         partitions = [
             idx[train_idx_start : train_idx_end],
             idx[test_idx_start : test_idx_end],
@@ -489,7 +489,7 @@ def _backtesting_forecaster_refit(
         train_idx_end   = fold[0][1] + 1
         test_idx_start  = fold[1][0]
         test_idx_end    = fold[1][1] + 1
-
+        
         y_train = y.iloc[train_idx_start:train_idx_end, ]
         exog_train = exog.iloc[train_idx_start:train_idx_end, ] if exog is not None else None
         next_window_exog = exog.iloc[test_idx_start:test_idx_end, ] if exog is not None else None

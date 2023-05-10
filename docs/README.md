@@ -1,8 +1,17 @@
 <script src="https://kit.fontawesome.com/d20edc211b.js" crossorigin="anonymous"></script>
 
-<img src="img/logo_skforecast_no_background.png" width=185 height=185 align="right">
+<h1 style="font-size:10vw">skforecast</h1>
 
-# skforecast
+![Python](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-blue)
+[![PyPI](https://img.shields.io/pypi/v/skforecast)](https://pypi.org/project/skforecast/)
+[![codecov](https://codecov.io/gh/JoaquinAmatRodrigo/skforecast/branch/master/graph/badge.svg)](https://codecov.io/gh/JoaquinAmatRodrigo/skforecast)
+[![Build status](https://github.com/JoaquinAmatRodrigo/skforecast/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/JoaquinAmatRodrigo/skforecast/actions/workflows/unit-tests.yml/badge.svg)
+[![Project Status: Active](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
+[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/JoaquinAmatRodrigo/skforecast/graphs/commit-activity)
+[![License](https://img.shields.io/github/license/JoaquinAmatRodrigo/skforecast)](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/LICENSE)
+[![Downloads](https://static.pepy.tech/personalized-badge/skforecast?period=total&units=international_system&left_color=grey&right_color=blue&left_text=Downloads)](https://pepy.tech/project/skforecast)
+
+<img src="img/logo_skforecast_no_background.png" width=185 height=185 align="right">
 
 **Time series forecasting with scikit-learn regressors.**
 
@@ -12,10 +21,10 @@
 
 Skforecast is developed according to the following priorities:
 
-+ Fast and robust prototyping.
-+ Validation and backtesting methods to have a realistic assessment of model performance.
-+ Models must be deployed in production.
-+ Models must be interpretable.
++ Fast and robust prototyping. :zap:
++ Validation and backtesting methods to have a realistic assessment of model performance. :mag:
++ Models must be deployed in production. :hammer:
++ Models must be interpretable. :crystal_ball:
 
 ## Installation
 

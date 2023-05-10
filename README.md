@@ -4,13 +4,15 @@
 [![PyPI](https://img.shields.io/pypi/v/skforecast)](https://pypi.org/project/skforecast/)
 [![codecov](https://codecov.io/gh/JoaquinAmatRodrigo/skforecast/branch/master/graph/badge.svg)](https://codecov.io/gh/JoaquinAmatRodrigo/skforecast)
 [![Build status](https://github.com/JoaquinAmatRodrigo/skforecast/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/JoaquinAmatRodrigo/skforecast/actions/workflows/unit-tests.yml/badge.svg)
+[![Project Status: Active](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/JoaquinAmatRodrigo/skforecast/graphs/commit-activity)
 [![License](https://img.shields.io/github/license/JoaquinAmatRodrigo/skforecast)](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/LICENSE)
 [![Downloads](https://static.pepy.tech/personalized-badge/skforecast?period=total&units=international_system&left_color=grey&right_color=blue&left_text=Downloads)](https://pepy.tech/project/skforecast)
 
+
 <p><img src="./images/logo_skforecast_no_background.png" alt="logo-skforecast" title="logo-skforecast" width="200" align="right"></p>
 
-**Time series forecasting with scikit-learn regressors**
+**Time series forecasting with scikit-learn regressors.**
 
 **Skforecast** is a Python library that eases using scikit-learn regressors as multi-step forecasters. It also works with any regressor compatible with the scikit-learn API (pipelines, CatBoost, LightGBM, XGBoost, Ranger...).
 
@@ -18,12 +20,12 @@
 
 Skforecast is developed according to the following priorities:
 
-+ Fast and robust prototyping. ⚡
-+ Validation and backtesting methods to have a realistic assessment of model performance. 🔍
-+ Models must be deployed in production. 📦
-+ Models must be interpretable. 🔮
++ Fast and robust prototyping. :zap:
++ Validation and backtesting methods to have a realistic assessment of model performance. :mag:
++ Models must be deployed in production. :hammer:
++ Models must be interpretable. :crystal_ball:
 
-**Documentation: https://skforecast.org** 📚
+**Documentation: https://skforecast.org** :books:
 
 
 # Installation
@@ -101,11 +103,11 @@ pip install skforecast[plotting]
 - [x] Support for `pandas 2.0.x`.
 - [x] New user guide on how to include **categorical variables** in the Forecasters.
 - [x] New user guide on how to use **GPU in Google Colab** with XGBoost and LightGBM regressors.
+- [x] Include custom kwargs during fit.
 - [x] The dtypes of exogenous variables are maintained when generating the training matrices with the `create_train_X_y` method in all the Forecasters.
-- [ ] Include custom kwargs during fit.
 - [x] Bug fixes and performance improvements.
 
-Visit the [release notes](https://skforecast.org/latest/releases/releases.html) to view all notable changes.
+Visit the [release notes](https://github.com/JoaquinAmatRodrigo/skforecast/blob/feature_update_category_docs/changelog.md) to view all notable changes.
 
 
 # Documentation
@@ -173,6 +175,8 @@ Recent improvements are highlighted in the [release notes](https://skforecast.or
 + [**Intervalos de predicción en modelos de forecasting**](https://www.cienciadedatos.net/documentos/py42-intervalos-prediccion-modelos-forecasting-machine-learning.html)      [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JoaquinAmatRodrigo/skforecast/master?labpath=examples%2Fintervalos-prediccion-modelos-forecasting-machine-learning.ipynb)
 
 + [**Multi-series forecasting**](https://www.cienciadedatos.net/documentos/py44-multi-series-forecasting-skforecast-español.html)   [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JoaquinAmatRodrigo/skforecast/master?labpath=examples%2Fmulti-series-forecasting-español.ipynb)
+
++ [**Predicción de demanda intermitente**](https://www.cienciadedatos.net/documentos/py48-forecasting-demanda-intermitente.html)
 
 
 # Donating
