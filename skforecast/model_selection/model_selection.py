@@ -197,10 +197,17 @@ def _create_backtesting_folds(
     if initial_train_size is None:
         initial_train_size = 0
 
-    if initial_train_size + gap > len(y):
+    if initial_train_size + gap >= len(y):
         raise ValueError(
-            ("The combination of initial_train_size and gap can not be larger "
+            ("The combination of initial_train_size and gap cannot be greater "
              "than the length of y.")
+        )
+    if not allow_incomplete_fold and len(y) - (initial_train_size + gap) < test_size:
+        raise ValueError(
+            (f"There is not enough data to evaluate all the steps as "
+             f"`allow_incomplete_fold` is `True`.\n"
+             f"    Data available for test : {len(y) - (initial_train_size + gap)} \n"
+             f"    Steps                   : {test_size}\n")
         )
     
     idx = range(len(y))
@@ -223,10 +230,7 @@ def _create_backtesting_folds(
             train_idx_end = initial_train_size
             test_idx_start = initial_train_size + i * (test_size)
 
-        try:
-            test_idx_end = test_idx_start + gap + test_size
-        except:
-            test_idx_end = len(y)
+        test_idx_end = test_idx_start + gap + test_size
 
         partitions = [
             idx[train_idx_start : train_idx_end],
@@ -242,19 +246,20 @@ def _create_backtesting_folds(
             last_fold_excluded = True
 
     # Replace partitions inside folds with length 0 with None
-    folds = [[partition if len(partition) > 0 else None for partition in fold] 
+    folds = [[partition if len(partition) > 0 else None 
+              for partition in fold] 
              for fold in folds]
     
     if verbose:
-        print(f"Information of backtesting process")
-        print(f"----------------------------------")
+        print("Information of backtesting process")
+        print("----------------------------------")
         print(f"Number of observations used for initial training: {initial_train_size}")
         print(f"Number of observations used for backtesting: {len(y) - initial_train_size}")
         print(f"    Number of folds: {len(folds)}")
         print(f"    Number of steps per fold: {test_size}")
         print(f"    Number of steps to exclude from the end of each train set before test (gap): {gap}")
         if last_fold_excluded:
-            print(f"    Last fold has been excluded because it was incomplete.")
+            print("    Last fold has been excluded because it was incomplete.")
         if len(folds[-1][2]) < test_size:
             print(f"    Last fold only includes {len(folds[-1][2])} observations.")
         print("")
