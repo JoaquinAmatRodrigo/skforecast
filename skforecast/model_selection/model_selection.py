@@ -104,11 +104,11 @@ def _backtesting_forecaster_verbose(
 
 def _create_backtesting_folds(
     y: pd.Series,
-    test_size: int,
     initial_train_size: Union[int, None],
-    gap: int = 0,
+    test_size: int,
     refit: bool=False,
     fixed_train_size: bool=True,
+    gap: int=0,
     allow_incomplete_fold: bool=True,
     return_all_indexes: bool=False,
     verbose: bool=True
@@ -147,13 +147,19 @@ def _create_backtesting_folds(
     test_size : int
         Size of the test set in each fold.
 
-    gap : int, default 0
-        Number of samples to exclude from the end of each train set before the
-        test set.
+    refit : bool, default `False`
+        Whether to re-fit the forecaster in each iteration.
+
+    fixed_train_size : bool, default `True`
+        If True, train size doesn't increase but moves by `steps` in each iteration.
+
+    gap : int, default `0`
+        Number of samples to be excluded after the end of each training set and 
+        before the test set.
         
     allow_incomplete_fold : bool, default `True`
-        Last fold is allowed to be incomplete if it does not reach `test_size`
-        samples in the test set. Otherwise, the last fold is excluded.
+        Last fold is allowed to have a smaller number of samples than the 
+        `test_size`. If `False`, the last fold is excluded.
 
     return_all_indexes : bool, default `False`
         If `True`, return all the indexes included in each fold. If `False`, return
@@ -193,8 +199,8 @@ def _create_backtesting_folds(
 
     if initial_train_size + gap > len(y):
         raise ValueError(
-            "The combination of initial_train_size and gap can not be larger"
-            "than the length of y."
+            ("The combination of initial_train_size and gap can not be larger "
+             "than the length of y.")
         )
     
     idx = range(len(y))
@@ -236,7 +242,8 @@ def _create_backtesting_folds(
             last_fold_excluded = True
 
     # Replace partitions inside folds with length 0 with None
-    folds = [[partition if len(partition) > 0 else None for partition in fold] for fold in folds]
+    folds = [[partition if len(partition) > 0 else None for partition in fold] 
+             for fold in folds]
     
     if verbose:
         print(f"Information of backtesting process")
@@ -253,11 +260,11 @@ def _create_backtesting_folds(
         print("")
 
         for i, fold in enumerate(folds):
-            training_start = y.index[fold[0][0]] if fold[0] is not None else None
-            training_end = y.index[fold[0][-1]] if fold[0] is not None else None
-            training_length = len(fold[0]) if fold[0] is not None else 0
-            validation_start = y.index[fold[2][0]]
-            validation_end = y.index[fold[2][-1]]
+            training_start    = y.index[fold[0][0]] if fold[0] is not None else None
+            training_end      = y.index[fold[0][-1]] if fold[0] is not None else None
+            training_length   = len(fold[0]) if fold[0] is not None else 0
+            validation_start  = y.index[fold[2][0]]
+            validation_end    = y.index[fold[2][-1]]
             validation_length = len(fold[2])
             print(f"Fold: {i}")
             print(
@@ -269,7 +276,9 @@ def _create_backtesting_folds(
 
     if not return_all_indexes:
         folds = [
-            [[fold[0][0], fold[0][-1]], [fold[1][0], fold[1][-1]], [fold[2][0], fold[2][-1]]] 
+            [[fold[0][0], fold[0][-1]], 
+             [fold[1][0], fold[1][-1]], 
+             [fold[2][0], fold[2][-1]]] 
             for fold in folds
         ]
 
@@ -321,8 +330,8 @@ def _backtesting_forecaster_refit(
     steps: int,
     metric: Union[str, Callable, list],
     initial_train_size: int,
-    gap: int = 0,
     fixed_train_size: bool=True,
+    gap: int=0,
     allow_incomplete_fold: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     interval: Optional[list]=None,
@@ -377,13 +386,13 @@ def _backtesting_forecaster_refit(
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
 
-    gap : int, default 0
-        Number of samples to exclude from the end of each train set before the
-        test set.
+    gap : int, default `0`
+        Number of samples to be excluded after the end of each training set and 
+        before the test set.
         
     allow_incomplete_fold : bool, default `True`
-        Last fold is allowed to be incomplete if it does not reach `steps`
-        samples in the test set. Otherwise, the last fold is excluded.
+        Last fold is allowed to have a smaller number of samples than the 
+        `test_size`. If `False`, the last fold is excluded.
         
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
@@ -522,8 +531,8 @@ def _backtesting_forecaster_no_refit(
     y: pd.Series,
     steps: int,
     metric: Union[str, Callable, list],
-    gap: int = 0,
     initial_train_size: Optional[int]=None,
+    gap: int=0,
     allow_incomplete_fold: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     interval: Optional[list]=None,
@@ -577,13 +586,13 @@ def _backtesting_forecaster_no_refit(
         `None` is only allowed when `refit` is `False` and `forecaster` is already
         trained.
 
-    gap : int, default 0
-        Number of samples to exclude from the end of each train set before the
-        test set.
+    gap : int, default `0`
+        Number of samples to be excluded after the end of each training set and 
+        before the test set.
         
     allow_incomplete_fold : bool, default `True`
-        Last fold is allowed to be incomplete if it does not reach `steps`
-        samples in the test set. Otherwise, the last fold is excluded.
+        Last fold is allowed to have a smaller number of samples than the 
+        `test_size`. If `False`, the last fold is excluded.
         
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
@@ -666,8 +675,8 @@ def _backtesting_forecaster_no_refit(
         # Since the model is only fitted with the initial_train_size, last_window
         # and next_window_exog must be updated to include the data needed to make
         # predictions.
-        test_idx_start  = fold[1][0]
-        test_idx_end    = fold[1][1] + 1
+        test_idx_start = fold[1][0]
+        test_idx_end   = fold[1][1] + 1
 
         last_window_end   = test_idx_start
         last_window_start = last_window_end - window_size 
@@ -719,10 +728,10 @@ def backtesting_forecaster(
     y: pd.Series,
     steps: int,
     metric: Union[str, Callable, list],
-    gap: int = 0,
     initial_train_size: Optional[int]=None,
-    allow_incomplete_fold: bool=True,
     fixed_train_size: bool=True,
+    gap: int=0,
+    allow_incomplete_fold: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     refit: bool=False,
     interval: Optional[list]=None,
@@ -772,25 +781,25 @@ def backtesting_forecaster(
         to backtest the model on the same data used to train it.
 
         `None` is only allowed when `refit` is `False` and `forecaster` is already trained.
-
-    gap : int, default 0
-        Number of samples to exclude from the end of each train set before the
-        test set.
-        
-    allow_incomplete_fold : bool, default `True`
-        Last fold is allowed to be incomplete if it does not reach `steps`
-        samples in the test set. Otherwise, the last fold is excluded.
     
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
 
-    gap : int, default 0
-        Number of samples to exclude from the end of each train set before the
-        test set.
+    gap : int, default `0`
+        Number of samples to be excluded after the end of each training set and 
+        before the test set.
         
     allow_incomplete_fold : bool, default `True`
-        Last fold is allowed to be incomplete if it does not reach `steps`
-        samples in the test set. Otherwise, the last fold is excluded.
+        Last fold is allowed to have a smaller number of samples than the 
+        `test_size`. If `False`, the last fold is excluded.
+
+    gap : int, default `0`
+        Number of samples to be excluded after the end of each training set and 
+        before the test set.
+        
+    allow_incomplete_fold : bool, default `True`
+        Last fold is allowed to have a smaller number of samples than the 
+        `test_size`. If `False`, the last fold is excluded.
         
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
@@ -841,48 +850,50 @@ def backtesting_forecaster(
 
     if initial_train_size is not None and not isinstance(initial_train_size, (int, np.int64, np.int32)):
         raise TypeError(
-            (f'If used, `initial_train_size` must be an integer greater than '
-             f'the window_size of the forecaster. Got {type(initial_train_size)}.')
+            (f"If used, `initial_train_size` must be an integer greater than "
+             f"the window_size of the forecaster. Got {type(initial_train_size)}.")
         )
 
     if initial_train_size is not None and initial_train_size >= len(y):
         raise ValueError(
-            (f'If used, `initial_train_size` must be an integer '
-             f'smaller than the length of `y` ({len(y)}).')
+            (f"If used, `initial_train_size` must be an integer "
+             f"smaller than the length of `y` ({len(y)}).")
         )
         
     if initial_train_size is not None and initial_train_size < forecaster.window_size:
         raise ValueError(
-            (f'If used, `initial_train_size` must be an integer greater than '
-             f'the window_size of the forecaster ({forecaster.window_size}).')
+            (f"If used, `initial_train_size` must be an integer greater than "
+             f"the window_size of the forecaster ({forecaster.window_size}).")
         )
 
     if initial_train_size is None and not forecaster.fitted:
         raise NotFittedError(
-            '`forecaster` must be already trained if no `initial_train_size` is provided.'
+            "`forecaster` must be already trained if no `initial_train_size` is provided."
         )
 
     if not isinstance(refit, bool):
         raise TypeError(
-            f'`refit` must be boolean: `True`, `False`.'
+            "`refit` must be boolean: `True`, `False`."
         )
 
     if initial_train_size is None and refit:
         raise ValueError(
-            f'`refit` is only allowed when `initial_train_size` is not `None`.'
+            "`refit` is only allowed when `initial_train_size` is not `None`."
         )
 
     if interval is not None and type(forecaster).__name__ == 'ForecasterAutoregDirect':
         raise TypeError(
-            ('Interval prediction is only available when forecaster is of type '
-             'ForecasterAutoreg or ForecasterAutoregCustom.')
+            ("Interval prediction is only available when forecaster is of type "
+             "ForecasterAutoreg or ForecasterAutoregCustom.")
         )
     
-    if type(forecaster).__name__ not in ['ForecasterAutoreg', 'ForecasterAutoregCustom', 'ForecasterAutoregDirect']:
+    if type(forecaster).__name__ not in ['ForecasterAutoreg', 
+                                         'ForecasterAutoregCustom', 
+                                         'ForecasterAutoregDirect']:
         raise TypeError(
-            ('`forecaster` must be of type `ForecasterAutoreg`, `ForecasterAutoregCustom` '
-             'or `ForecasterAutoregDirect`, for all other types of forecasters '
-             'use the functions available in the `model_selection` module.')
+            ("`forecaster` must be of type `ForecasterAutoreg`, `ForecasterAutoregCustom` "
+             "or `ForecasterAutoregDirect`, for all other types of forecasters "
+             "use the functions available in the `model_selection` module.")
         )
     
     if refit:
@@ -910,8 +921,8 @@ def backtesting_forecaster(
             steps                 = steps,
             metric                = metric,
             initial_train_size    = initial_train_size,
-            allow_incomplete_fold = allow_incomplete_fold,
             gap                   = gap,
+            allow_incomplete_fold = allow_incomplete_fold,
             exog                  = exog,
             interval              = interval,
             n_boot                = n_boot,
@@ -931,8 +942,8 @@ def grid_search_forecaster(
     steps: int,
     metric: Union[str, Callable, list],
     initial_train_size: int,
-    gap: int = 0,
     fixed_train_size: bool=True,
+    gap: int=0,
     allow_incomplete_fold: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Optional[list]=None,
@@ -978,13 +989,13 @@ def grid_search_forecaster(
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
 
-    gap : int, default 0
-        Number of samples to exclude from the end of each train set before the
-        test set.
+    gap : int, default `0`
+        Number of samples to be excluded after the end of each training set and 
+        before the test set.
         
     allow_incomplete_fold : bool, default `True`
-        Last fold is allowed to be incomplete if it does not reach `steps`
-        samples in the test set. Otherwise, the last fold is excluded.
+        Last fold is allowed to have a smaller number of samples than the 
+        `test_size`. If `False`, the last fold is excluded.
 
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
@@ -1018,18 +1029,20 @@ def grid_search_forecaster(
     param_grid = list(ParameterGrid(param_grid))
 
     results = _evaluate_grid_hyperparameters(
-        forecaster          = forecaster,
-        y                   = y,
-        param_grid          = param_grid,
-        steps               = steps,
-        metric              = metric,
-        initial_train_size  = initial_train_size,
-        fixed_train_size    = fixed_train_size,
-        exog                = exog,
-        lags_grid           = lags_grid,
-        refit               = refit,
-        return_best         = return_best,
-        verbose             = verbose
+        forecaster            = forecaster,
+        y                     = y,
+        param_grid            = param_grid,
+        steps                 = steps,
+        metric                = metric,
+        initial_train_size    = initial_train_size,
+        fixed_train_size      = fixed_train_size,
+        gap                   = gap,
+        allow_incomplete_fold = allow_incomplete_fold,
+        exog                  = exog,
+        lags_grid             = lags_grid,
+        refit                 = refit,
+        return_best           = return_best,
+        verbose               = verbose
     )
 
     return results
@@ -1042,8 +1055,8 @@ def random_search_forecaster(
     steps: int,
     metric: Union[str, Callable, list],
     initial_train_size: int,
-    gap: int = 0,
     fixed_train_size: bool=True,
+    gap: int=0,
     allow_incomplete_fold: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Optional[list]=None,
@@ -1091,13 +1104,13 @@ def random_search_forecaster(
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
 
-    gap : int, default 0
-        Number of samples to exclude from the end of each train set before the
-        test set.
+    gap : int, default `0`
+        Number of samples to be excluded after the end of each training set and 
+        before the test set.
         
     allow_incomplete_fold : bool, default `True`
-        Last fold is allowed to be incomplete if it does not reach `steps`
-        samples in the test set. Otherwise, the last fold is excluded.
+        Last fold is allowed to have a smaller number of samples than the 
+        `test_size`. If `False`, the last fold is excluded.
 
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
@@ -1138,18 +1151,20 @@ def random_search_forecaster(
     param_grid = list(ParameterSampler(param_distributions, n_iter=n_iter, random_state=random_state))
 
     results = _evaluate_grid_hyperparameters(
-        forecaster          = forecaster,
-        y                   = y,
-        param_grid          = param_grid,
-        steps               = steps,
-        metric              = metric,
-        initial_train_size  = initial_train_size,
-        fixed_train_size    = fixed_train_size,
-        exog                = exog,
-        lags_grid           = lags_grid,
-        refit               = refit,
-        return_best         = return_best,
-        verbose             = verbose
+        forecaster            = forecaster,
+        y                     = y,
+        param_grid            = param_grid,
+        steps                 = steps,
+        metric                = metric,
+        initial_train_size    = initial_train_size,
+        fixed_train_size      = fixed_train_size,
+        gap                   = gap,
+        allow_incomplete_fold = allow_incomplete_fold,
+        exog                  = exog,
+        lags_grid             = lags_grid,
+        refit                 = refit,
+        return_best           = return_best,
+        verbose               = verbose
     )
 
     return results
@@ -1162,8 +1177,8 @@ def _evaluate_grid_hyperparameters(
     steps: int,
     metric: Union[str, Callable, list],
     initial_train_size: int,
-    gap: int = 0,
     fixed_train_size: bool=True,
+    gap: int=0,
     allow_incomplete_fold: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Optional[list]=None,
@@ -1208,13 +1223,13 @@ def _evaluate_grid_hyperparameters(
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
 
-    gap : int, default 0
-        Number of samples to exclude from the end of each train set before the
-        test set.
+    gap : int, default `0`
+        Number of samples to be excluded after the end of each training set and 
+        before the test set.
         
     allow_incomplete_fold : bool, default `True`
-        Last fold is allowed to be incomplete if it does not reach `steps`
-        samples in the test set. Otherwise, the last fold is excluded.
+        Last fold is allowed to have a smaller number of samples than the 
+        `test_size`. If `False`, the last fold is excluded.
 
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
@@ -1247,14 +1262,14 @@ def _evaluate_grid_hyperparameters(
 
     if return_best and exog is not None and (len(exog) != len(y)):
         raise ValueError(
-            f'`exog` must have same number of samples as `y`. '
-            f'length `exog`: ({len(exog)}), length `y`: ({len(y)})'
+            (f"`exog` must have same number of samples as `y`. "
+             f"length `exog`: ({len(exog)}), length `y`: ({len(y)})")
         )
 
     if type(forecaster).__name__ == 'ForecasterAutoregCustom':
         if lags_grid is not None:
             warnings.warn(
-                '`lags_grid` ignored if forecaster is an instance of `ForecasterAutoregCustom`.'
+                "`lags_grid` ignored if forecaster is an instance of `ForecasterAutoregCustom`."
             )
         lags_grid = ['custom predictors']
         
@@ -1269,7 +1284,7 @@ def _evaluate_grid_hyperparameters(
     
     if len(metric_dict) != len(metric):
         raise ValueError(
-            'When `metric` is a `list`, each metric name must be unique.'
+            "When `metric` is a `list`, each metric name must be unique."
         )
 
     print(f"Number of models compared: {len(param_grid)*len(lags_grid)}.")
@@ -1284,17 +1299,19 @@ def _evaluate_grid_hyperparameters(
 
             forecaster.set_params(params)
             metrics_values = backtesting_forecaster(
-                                 forecaster         = forecaster,
-                                 y                  = y,
-                                 steps              = steps,
-                                 metric             = metric,
-                                 initial_train_size = initial_train_size,
-                                 fixed_train_size   = fixed_train_size,
-                                 exog               = exog,
-                                 refit              = refit,
-                                 interval           = None,
-                                 verbose            = verbose,
-                                 show_progress      = False
+                                 forecaster            = forecaster,
+                                 y                     = y,
+                                 steps                 = steps,
+                                 metric                = metric,
+                                 initial_train_size    = initial_train_size,
+                                 fixed_train_size      = fixed_train_size,
+                                 gap                   = gap,
+                                 allow_incomplete_fold = allow_incomplete_fold,
+                                 exog                  = exog,
+                                 refit                 = refit,
+                                 interval              = None,
+                                 verbose               = verbose,
+                                 show_progress         = False
                              )[0]
             warnings.filterwarnings('ignore', category=RuntimeWarning, message= "The forecaster will be fit.*")
             lags_list.append(lags)
@@ -1340,8 +1357,8 @@ def bayesian_search_forecaster(
     steps: int,
     metric: Union[str, Callable, list],
     initial_train_size: int,
-    gap: int = 0,
     fixed_train_size: bool=True,
+    gap: int=0,
     allow_incomplete_fold: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Optional[list]=None,
@@ -1400,13 +1417,13 @@ def bayesian_search_forecaster(
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
 
-    gap : int, default 0
-        Number of samples to exclude from the end of each train set before the
-        test set.
+    gap : int, default `0`
+        Number of samples to be excluded after the end of each training set and 
+        before the test set.
         
     allow_incomplete_fold : bool, default `True`
-        Last fold is allowed to be incomplete if it does not reach `steps`
-        samples in the test set. Otherwise, the last fold is excluded.
+        Last fold is allowed to have a smaller number of samples than the 
+        `test_size`. If `False`, the last fold is excluded.
 
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
@@ -1503,6 +1520,8 @@ def bayesian_search_forecaster(
                                     refit                 = refit,
                                     initial_train_size    = initial_train_size,
                                     fixed_train_size      = fixed_train_size,
+                                    gap                   = gap,
+                                    allow_incomplete_fold = allow_incomplete_fold,
                                     n_trials              = n_trials,
                                     random_state          = random_state,
                                     return_best           = return_best,
@@ -1521,8 +1540,8 @@ def _bayesian_search_optuna(
     steps: int,
     metric: Union[str, Callable, list],
     initial_train_size: int,
-    gap: int = 0,
     fixed_train_size: bool=True,
+    gap: int=0,
     allow_incomplete_fold: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Optional[list]=None,
@@ -1573,13 +1592,13 @@ def _bayesian_search_optuna(
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
 
-    gap : int, default 0
-        Number of samples to exclude from the end of each train set before the
-        test set.
+    gap : int, default `0`
+        Number of samples to be excluded after the end of each training set and 
+        before the test set.
         
     allow_incomplete_fold : bool, default `True`
-        Last fold is allowed to be incomplete if it does not reach `steps`
-        samples in the test set. Otherwise, the last fold is excluded.
+        Last fold is allowed to have a smaller number of samples than the 
+        `test_size`. If `False`, the last fold is excluded.
 
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
@@ -1628,7 +1647,7 @@ def _bayesian_search_optuna(
     if type(forecaster).__name__ == 'ForecasterAutoregCustom':
         if lags_grid is not None:
             warnings.warn(
-                '`lags_grid` ignored if forecaster is an instance of `ForecasterAutoregCustom`.'
+                "`lags_grid` ignored if forecaster is an instance of `ForecasterAutoregCustom`."
             )
         lags_grid = ['custom predictors']
         
@@ -1644,37 +1663,41 @@ def _bayesian_search_optuna(
     
     if len(metric_dict) != len(metric):
         raise ValueError(
-            'When `metric` is a `list`, each metric name must be unique.'
+            "When `metric` is a `list`, each metric name must be unique."
         )
 
     # Objective function using backtesting_forecaster
     def _objective(
         trial,
-        forecaster         = forecaster,
-        y                  = y,
-        exog               = exog,
-        initial_train_size = initial_train_size,
-        fixed_train_size   = fixed_train_size,
-        steps              = steps,
-        metric             = metric,
-        refit              = refit,
-        verbose            = verbose,
-        search_space       = search_space,
+        forecaster            = forecaster,
+        y                     = y,
+        exog                  = exog,
+        initial_train_size    = initial_train_size,
+        fixed_train_size      = fixed_train_size,
+        gap                   = gap,
+        allow_incomplete_fold = allow_incomplete_fold,
+        steps                 = steps,
+        metric                = metric,
+        refit                 = refit,
+        verbose               = verbose,
+        search_space          = search_space,
     ) -> float:
         
         forecaster.set_params(search_space(trial))
         
         metrics, _ = backtesting_forecaster(
-                         forecaster         = forecaster,
-                         y                  = y,
-                         exog               = exog,
-                         steps              = steps,
-                         metric             = metric,
-                         initial_train_size = initial_train_size,
-                         fixed_train_size   = fixed_train_size,
-                         refit              = refit,
-                         verbose            = verbose,
-                         show_progress      = False
+                         forecaster            = forecaster,
+                         y                     = y,
+                         exog                  = exog,
+                         steps                 = steps,
+                         metric                = metric,
+                         initial_train_size    = initial_train_size,
+                         fixed_train_size      = fixed_train_size,
+                         gap                   = gap,
+                         allow_incomplete_fold = allow_incomplete_fold,
+                         refit                 = refit,
+                         verbose               = verbose,
+                         show_progress         = False
                      )
         # Store metrics in the variable metric_values defined outside _objective.
         nonlocal metric_values
@@ -1699,7 +1722,7 @@ def _bayesian_search_optuna(
         
         if 'sampler' in kwargs_create_study.keys():
             kwargs_create_study['sampler']._rng = np.random.RandomState(random_state)
-            kwargs_create_study['sampler']._random_sampler = RandomSampler(seed=random_state)    
+            kwargs_create_study['sampler']._random_sampler = RandomSampler(seed=random_state)
 
         study = optuna.create_study(**kwargs_create_study)
 
@@ -1731,10 +1754,11 @@ def _bayesian_search_optuna(
             if best_trial.value < results_opt_best.value:
                 results_opt_best = best_trial
         
-    results = pd.DataFrame({
-                'lags'  : lags_list,
-                'params': params_list,
-                **metric_dict})
+    results = pd.DataFrame(
+                  {'lags'  : lags_list,
+                   'params': params_list,
+                   **metric_dict}
+              )
 
     results = results.sort_values(by=list(metric_dict.keys())[0], ascending=True)
     results = pd.concat([results, results['params'].apply(pd.Series)], axis=1)
