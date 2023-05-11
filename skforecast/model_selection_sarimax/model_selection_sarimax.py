@@ -75,7 +75,7 @@ def _backtesting_sarimax_refit(
             Function with arguments y_true, y_pred that returns a float.
 
         If list:
-            List containing several strings and/or Callable.
+            List containing multiple strings and/or Callables.
     
     initial_train_size : int
         Number of samples in the initial train split. The backtest forecaster is
@@ -242,7 +242,7 @@ def _backtesting_sarimax_no_refit(
             Function with arguments y_true, y_pred that returns a float.
 
         If list:
-            List containing several strings and/or Callable.
+            List containing multiple strings and/or Callables.
     
     initial_train_size : int
         Number of samples in the initial train split. The backtest forecaster is
@@ -408,7 +408,7 @@ def backtesting_sarimax(
             Function with arguments y_true, y_pred that returns a float.
 
         If list:
-            List containing several strings and/or Callable.
+            List containing multiple strings and/or Callables.
     
     initial_train_size : int
         Number of samples in the initial train split. The backtest forecaster is
@@ -550,7 +550,7 @@ def grid_search_sarimax(
             Function with arguments y_true, y_pred that returns a float.
 
         If list:
-            List containing several strings and/or Callable.
+            List containing multiple strings and/or Callables.
 
     initial_train_size : int 
         Number of samples in the initial train split. The backtest forecaster is
@@ -648,7 +648,7 @@ def random_search_sarimax(
             Function with arguments y_true, y_pred that returns a float.
 
         If list:
-            List containing several strings and/or Callable.
+            List containing multiple strings and/or Callables.
 
     initial_train_size : int 
         Number of samples in the initial train split. The backtest forecaster is
@@ -750,7 +750,7 @@ def _evaluate_grid_hyperparameters_sarimax(
             Function with arguments y_true, y_pred that returns a float.
 
         If list:
-            List containing several strings and/or Callable.
+            List containing multiple strings and/or Callables.
 
     initial_train_size : int 
         Number of samples in the initial train split. The backtest forecaster is

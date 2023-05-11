@@ -114,6 +114,9 @@ def _create_backtesting_folds(
     verbose: bool=True
 ) -> list:
     """
+    This function is designed to work after passing the available checks in the 
+    `backtesting_forecaster()` function.
+
     Provides train/test indices (position) to split time series data samples that
     are observed at fixed time intervals, in train/test sets. In each split, test
     indices must be higher than before.
@@ -176,39 +179,8 @@ def _create_backtesting_folds(
     
     """
 
-    if not isinstance(y, pd.Series):
-        raise ValueError("`y` must be a pandas Series.")
-    
-    if not isinstance(test_size, (int, np.integer)):
-        raise ValueError("`test_size` must be an integer.")
-    if test_size < 1:
-        raise ValueError("`test_size` must be greater than 0.")
-    if not isinstance(gap, (int, np.integer)):
-        raise ValueError("`gap` must be an integer.")
-    if gap < 0:
-        raise ValueError("`gap` must be equal or greater than 0.")
-    if initial_train_size is not None and not isinstance(initial_train_size, (int, np.integer)):
-        raise ValueError("`initial_train_size` must be an integer or None.")
-    if initial_train_size is not None and initial_train_size < 0:
-        raise ValueError(
-            "`initial_train_size` must be None or a integer equal or greater than 0."
-        )
-
     if initial_train_size is None:
         initial_train_size = 0
-
-    if initial_train_size + gap >= len(y):
-        raise ValueError(
-            ("The combination of initial_train_size and gap cannot be greater "
-             "than the length of y.")
-        )
-    if not allow_incomplete_fold and len(y) - (initial_train_size + gap) < test_size:
-        raise ValueError(
-            (f"There is not enough data to evaluate {test_size} steps in a single "
-             f"fold. Set `allow_incomplete_fold` to `True` to allow incomplete folds.\n"
-             f"    Data available for test : {len(y) - (initial_train_size + gap)} \n"
-             f"    Steps                   : {test_size}\n")
-        )
     
     idx = range(len(y))
     folds = []
@@ -273,11 +245,12 @@ def _create_backtesting_folds(
             validation_length = len(fold[2])
             print(f"Fold: {i}")
             print(
-                f"    Training:   {training_start} -- {training_end} (n={training_length})"
+                f"    Training:   {training_start} -- {training_end}  (n={training_length})"
             )
             print(
-                f"    Validation: {validation_start} -- {validation_end} (n={validation_length})"
+                f"    Validation: {validation_start} -- {validation_end}  (n={validation_length})"
             )
+        print("")
 
     if not return_all_indexes:
         folds = [
@@ -382,7 +355,7 @@ def _backtesting_forecaster_refit(
             Function with arguments y_true, y_pred that returns a float.
 
         If list:
-            List containing several strings and/or Callable.
+            List containing multiple strings and/or Callables.
     
     initial_train_size : int
         Number of samples in the initial train split. The backtest forecaster is
@@ -579,7 +552,7 @@ def _backtesting_forecaster_no_refit(
             Function with arguments y_true, y_pred that returns a float.
 
         If list:
-            List containing several strings and/or Callable.
+            List containing multiple strings and/or Callables.
     
     initial_train_size : int, default `None`
         Number of samples in the initial train split. If `None` and `forecaster` is already
@@ -776,7 +749,7 @@ def backtesting_forecaster(
             Function with arguments y_true, y_pred that returns a float.
 
         If list:
-            List containing several strings and/or Callable.
+            List containing multiple strings and/or Callables.
     
     initial_train_size : int, default `None`
         Number of samples in the initial train split. If `None` and `forecaster` is already 
@@ -789,14 +762,6 @@ def backtesting_forecaster(
     
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
-
-    gap : int, default `0`
-        Number of samples to be excluded after the end of each training set and 
-        before the test set.
-        
-    allow_incomplete_fold : bool, default `True`
-        Last fold is allowed to have a smaller number of samples than the 
-        `test_size`. If `False`, the last fold is excluded.
 
     gap : int, default `0`
         Number of samples to be excluded after the end of each training set and 
@@ -852,45 +817,6 @@ def backtesting_forecaster(
             column upper_bound = upper bound interval of the interval.
     
     """
-
-    if initial_train_size is not None and not isinstance(initial_train_size, (int, np.int64, np.int32)):
-        raise TypeError(
-            (f"If used, `initial_train_size` must be an integer greater than "
-             f"the window_size of the forecaster. Got {type(initial_train_size)}.")
-        )
-
-    if initial_train_size is not None and initial_train_size >= len(y):
-        raise ValueError(
-            (f"If used, `initial_train_size` must be an integer "
-             f"smaller than the length of `y` ({len(y)}).")
-        )
-        
-    if initial_train_size is not None and initial_train_size < forecaster.window_size:
-        raise ValueError(
-            (f"If used, `initial_train_size` must be an integer greater than "
-             f"the window_size of the forecaster ({forecaster.window_size}).")
-        )
-
-    if initial_train_size is None and not forecaster.fitted:
-        raise NotFittedError(
-            "`forecaster` must be already trained if no `initial_train_size` is provided."
-        )
-
-    if not isinstance(refit, bool):
-        raise TypeError(
-            "`refit` must be boolean: `True`, `False`."
-        )
-
-    if initial_train_size is None and refit:
-        raise ValueError(
-            "`refit` is only allowed when `initial_train_size` is not `None`."
-        )
-
-    if interval is not None and type(forecaster).__name__ == 'ForecasterAutoregDirect':
-        raise TypeError(
-            ("Interval prediction is only available when forecaster is of type "
-             "ForecasterAutoreg or ForecasterAutoregCustom.")
-        )
     
     if type(forecaster).__name__ not in ['ForecasterAutoreg', 
                                          'ForecasterAutoregCustom', 
@@ -898,7 +824,80 @@ def backtesting_forecaster(
         raise TypeError(
             ("`forecaster` must be of type `ForecasterAutoreg`, `ForecasterAutoregCustom` "
              "or `ForecasterAutoregDirect`, for all other types of forecasters "
-             "use the functions available in the `model_selection` module.")
+             "use the functions available in the other `model_selection` modules.")
+        )
+    
+    if not isinstance(y, pd.Series):
+        raise TypeError("`y` must be a pandas Series.")
+    if not isinstance(steps, (int, np.integer)) or steps < 1:
+        raise TypeError(
+            f"`steps` must be an integer greater than or equal to 1. Got {steps}."
+        )
+    if not isinstance(gap, (int, np.integer)) or gap < 0:
+        raise TypeError(
+            f"`gap` must be an integer greater than 0. Got {gap}."
+        )
+    if not isinstance(metric, (str, Callable, list)):
+        raise TypeError(
+            (f"`metric` must be a string, a callable function, or a list containing "
+             f"multiple strings and/or callables. Got {type(metric)}.")
+        )
+
+    if initial_train_size is not None:
+        if not isinstance(initial_train_size, (int, np.integer)):
+            raise TypeError(
+                (f"If used, `initial_train_size` must be an integer greater than "
+                 f"the window_size of the forecaster. Got {type(initial_train_size)}.")
+            )
+        if initial_train_size >= len(y):
+            raise ValueError(
+                (f"If used, `initial_train_size` must be an integer "
+                 f"smaller than the length of `y` ({len(y)}).")
+            )    
+        if initial_train_size < forecaster.window_size:
+            raise ValueError(
+                (f"If used, `initial_train_size` must be an integer greater than "
+                 f"the window_size of the forecaster ({forecaster.window_size}).")
+            )
+        if initial_train_size + gap >= len(y):
+            raise ValueError(
+                (f"The combination of initial_train_size {initial_train_size} and gap "
+                 f"{gap} cannot be greater than the length of y ({len(y)}).")
+            )
+    else:
+        if not forecaster.fitted:
+            raise NotFittedError(
+                ("`forecaster` must be already trained if no `initial_train_size` "
+                 "is provided.")
+            )
+        if refit:
+            raise ValueError(
+                "`refit` is only allowed when `initial_train_size` is not `None`."
+            )
+    
+    if not isinstance(fixed_train_size, bool):
+        raise TypeError("`fixed_train_size` must be a boolean: `True`, `False`.")
+    if not isinstance(allow_incomplete_fold, bool):
+        raise TypeError("`allow_incomplete_fold` must be a boolean: `True`, `False`.")
+    if not isinstance(refit, bool):
+        raise TypeError("`refit` must be a boolean: `True`, `False`.")
+    if not isinstance(n_boot, (int, np.integer)) or n_boot < 0:
+        raise TypeError(f"`n_boot` must be an integer greater than 0. Got {n_boot}.")
+    if not isinstance(random_state, (int, np.integer)) or random_state < 0:
+        raise TypeError(f"`random_state` must be an integer greater than 0. Got {random_state}.")
+    if not isinstance(in_sample_residuals, bool):
+        raise TypeError("`in_sample_residuals` must be a boolean: `True`, `False`.")
+    if not isinstance(verbose, bool):
+        raise TypeError("`verbose` must be a boolean: `True`, `False`.")
+    if not isinstance(show_progress, bool):
+        raise TypeError("`show_progress` must be a boolean: `True`, `False`.")
+
+    if not allow_incomplete_fold and len(y) - (initial_train_size + gap) < steps:
+        raise ValueError(
+            (f"There is not enough data to evaluate {steps} steps in a single "
+             f"fold. Set `allow_incomplete_fold` to `True` to allow incomplete folds.\n"
+             f"    Data available for test : {len(y) - (initial_train_size + gap)} \n"
+             f"    Steps                   : {steps}\n")
         )
     
     if refit:
@@ -986,7 +985,7 @@ def grid_search_forecaster(
             Function with arguments y_true, y_pred that returns a float.
 
         If list:
-            List containing several strings and/or Callable.
+            List containing multiple strings and/or Callables.
 
     initial_train_size : int 
         Number of samples in the initial train split.
@@ -1101,7 +1100,7 @@ def random_search_forecaster(
             Function with arguments y_true, y_pred that returns a float.
 
         If list:
-            List containing several strings and/or Callable.
+            List containing multiple strings and/or Callables.
 
     initial_train_size : int 
         Number of samples in the initial train split.
@@ -1220,7 +1219,7 @@ def _evaluate_grid_hyperparameters(
             Function with arguments y_true, y_pred that returns a float.
 
         If list:
-            List containing several strings and/or Callable.
+            List containing multiple strings and/or Callables.
 
     initial_train_size : int 
         Number of samples in the initial train split.
@@ -1414,7 +1413,7 @@ def bayesian_search_forecaster(
             Function with arguments y_true, y_pred that returns a float.
 
         If list:
-            List containing several strings and/or Callable.
+            List containing multiple strings and/or Callables.
 
     initial_train_size : int 
         Number of samples in the initial train split.
@@ -1589,7 +1588,7 @@ def _bayesian_search_optuna(
             Function with arguments y_true, y_pred that returns a float.
 
         If list:
-            List containing several strings and/or Callable.
+            List containing multiple strings and/or Callables.
 
     initial_train_size : int 
         Number of samples in the initial train split.
