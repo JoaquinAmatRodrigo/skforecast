@@ -1,4 +1,5 @@
-<h1 style="font-size:10vw">skforecast</h1>
+
+<h1 style="font-size:5em" ><img align="middle" src="./images/logo_skforecast_no_background.png" alt="" width="100">skforecast</h1>
 
 ![Python](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-blue)
 [![PyPI](https://img.shields.io/pypi/v/skforecast)](https://pypi.org/project/skforecast/)
@@ -9,8 +10,6 @@
 [![License](https://img.shields.io/github/license/JoaquinAmatRodrigo/skforecast)](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/LICENSE)
 [![Downloads](https://static.pepy.tech/personalized-badge/skforecast?period=total&units=international_system&left_color=grey&right_color=blue&left_text=Downloads)](https://pepy.tech/project/skforecast)
 
-
-<p><img src="./images/logo_skforecast_no_background.png" alt="logo-skforecast" title="logo-skforecast" width="200" align="right"></p>
 
 **Time series forecasting with scikit-learn regressors.**
 
