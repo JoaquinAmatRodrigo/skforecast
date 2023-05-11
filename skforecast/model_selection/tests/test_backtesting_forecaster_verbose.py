@@ -168,15 +168,33 @@ def test_create_backtesting_folds_no_refit_no_gap_no_remainder(capfd):
                 [range(0, 70), range(90, 100), range(90, 100)]]
     
     out, _ = capfd.readouterr()
+    expected_out = (
+        "Information of backtesting process\n"
+        "----------------------------------\n"
+        "Number of observations used for initial training: 70\n"
+        "Number of observations used for backtesting: 30\n"
+        "    Number of folds: 3\n"
+        "    Number of steps per fold: 10\n"
+        "    Number of steps to exclude from the end of each train set before test (gap): 0\n\n"
+        "Fold: 0\n"
+        "    Training:   2022-01-01 00:00:00 -- 2022-03-11 00:00:00  (n=70)\n"
+        "    Validation: 2022-03-12 00:00:00 -- 2022-03-21 00:00:00  (n=10)\n"
+        "Fold: 1\n"
+        "    Training:   2022-01-01 00:00:00 -- 2022-03-11 00:00:00  (n=70)\n"
+        "    Validation: 2022-03-22 00:00:00 -- 2022-03-31 00:00:00  (n=10)\n"
+        "Fold: 2\n"
+        "    Training:   2022-01-01 00:00:00 -- 2022-03-11 00:00:00  (n=70)\n"
+        "    Validation: 2022-04-01 00:00:00 -- 2022-04-10 00:00:00  (n=10)\n\n"
+    )
 
-    assert out == 'Information of backtesting process\n----------------------------------\nNumber of observations used for initial training: 70\nNumber of observations used for backtesting: 30\n    Number of folds: 3\n    Number of steps per fold: 10\n    Number of steps to exclude from the end of each train set before test (gap): 0\n\nFold: 0\n    Training:   2022-01-01 00:00:00 -- 2022-03-11 00:00:00  (n=70)\n    Validation: 2022-03-12 00:00:00 -- 2022-03-21 00:00:00  (n=10)\nFold: 1\n    Training:   2022-01-01 00:00:00 -- 2022-03-11 00:00:00  (n=70)\n    Validation: 2022-03-22 00:00:00 -- 2022-03-31 00:00:00  (n=10)\nFold: 2\n    Training:   2022-01-01 00:00:00 -- 2022-03-11 00:00:00  (n=70)\n    Validation: 2022-04-01 00:00:00 -- 2022-04-10 00:00:00  (n=10)\n\n'
+    assert out == expected_out
     assert folds == expected
     
     
-def test_create_backtesting_folds_no_refit_no_gap_no_incomplete_fold(capfd):
+def test_create_backtesting_folds_no_refit_no_gap_allow_incomplete_fold_False(capfd):
     """
     Test _create_backtesting_folds output when refit is False, gap=0, 
-    remainder and not allow incomplete folds.
+    remainder and allow_incomplete_fold=False.
     """
     y = pd.Series(np.arange(100))
     y.index = pd.date_range(start='2022-01-01', periods=100, freq='D')
@@ -202,6 +220,84 @@ def test_create_backtesting_folds_no_refit_no_gap_no_incomplete_fold(capfd):
                 [range(0, 65), range(85, 95), range(85, 95)]]
     
     out, _ = capfd.readouterr()
+    expected_out = (
+        "Information of backtesting process\n"
+        "----------------------------------\n"
+        "Number of observations used for initial training: 65\n"
+        "Number of observations used for backtesting: 35\n"
+        "    Number of folds: 3\n"
+        "    Number of steps per fold: 10\n"
+        "    Number of steps to exclude from the end of each train set before test (gap): 0\n"
+        "    Last fold has been excluded because it was incomplete.\n\n"
+        "Fold: 0\n"
+        "    Training:   2022-01-01 00:00:00 -- 2022-03-06 00:00:00  (n=65)\n"
+        "    Validation: 2022-03-07 00:00:00 -- 2022-03-16 00:00:00  (n=10)\n"
+        "Fold: 1\n"
+        "    Training:   2022-01-01 00:00:00 -- 2022-03-06 00:00:00  (n=65)\n"
+        "    Validation: 2022-03-17 00:00:00 -- 2022-03-26 00:00:00  (n=10)\n"
+        "Fold: 2\n"
+        "    Training:   2022-01-01 00:00:00 -- 2022-03-06 00:00:00  (n=65)\n"
+        "    Validation: 2022-03-27 00:00:00 -- 2022-04-05 00:00:00  (n=10)\n\n"
+    )
 
-    assert out == 'Information of backtesting process\n----------------------------------\nNumber of observations used for initial training: 65\nNumber of observations used for backtesting: 35\n    Number of folds: 3\n    Number of steps per fold: 10\n    Number of steps to exclude from the end of each train set before test (gap): 0\n    Last fold has been excluded because it was incomplete.\n\nFold: 0\n    Training:   2022-01-01 00:00:00 -- 2022-03-06 00:00:00  (n=65)\n    Validation: 2022-03-07 00:00:00 -- 2022-03-16 00:00:00  (n=10)\nFold: 1\n    Training:   2022-01-01 00:00:00 -- 2022-03-06 00:00:00  (n=65)\n    Validation: 2022-03-17 00:00:00 -- 2022-03-26 00:00:00  (n=10)\nFold: 2\n    Training:   2022-01-01 00:00:00 -- 2022-03-06 00:00:00  (n=65)\n    Validation: 2022-03-27 00:00:00 -- 2022-04-05 00:00:00  (n=10)\n\n'
+    assert out == expected_out
+    assert folds == expected
+    
+    
+def test_create_backtesting_folds_no_refit_gap_allow_incomplete_fold_True_return_all_indexes_False(capfd):
+    """
+    Test _create_backtesting_folds output when refit is False, gap=5, 
+    remainder, allow_incomplete_fold=True and return_all_indexes=False.
+    """
+    y = pd.Series(np.arange(100))
+    y.index = pd.date_range(start='2022-01-01', periods=100, freq='D')
+    initial_train_size = 70
+    gap = 5
+    test_size = 7
+    refit = False
+    allow_incomplete_fold = True
+    return_all_indexes = False
+
+    folds = _create_backtesting_folds(
+                y                     = y,
+                initial_train_size    = initial_train_size,
+                test_size             = test_size,
+                gap                   = gap,
+                refit                 = refit,
+                fixed_train_size      = False,
+                allow_incomplete_fold = allow_incomplete_fold,
+                return_all_indexes    = return_all_indexes,
+                verbose               = True
+            )
+    
+    expected = [[[0, 69], [70, 81], [75, 81]],
+                [[0, 69], [77, 88], [82, 88]],
+                [[0, 69], [84, 95], [89, 95]],
+                [[0, 69], [91, 99], [96, 99]]]
+                    
+    out, _ = capfd.readouterr()
+    expected_out = (
+        "Information of backtesting process\n"
+        "----------------------------------\n"
+        "Number of observations used for initial training: 70\n"
+        "Number of observations used for backtesting: 30\n"
+        "    Number of folds: 4\n"
+        "    Number of steps per fold: 7\n"
+        "    Number of steps to exclude from the end of each train set before test (gap): 5\n"
+        "    Last fold only includes 4 observations.\n\n"
+        "Fold: 0\n"
+        "    Training:   2022-01-01 00:00:00 -- 2022-03-11 00:00:00  (n=70)\n"
+        "    Validation: 2022-03-17 00:00:00 -- 2022-03-23 00:00:00  (n=7)\n"
+        "Fold: 1\n"
+        "    Training:   2022-01-01 00:00:00 -- 2022-03-11 00:00:00  (n=70)\n"
+        "    Validation: 2022-03-24 00:00:00 -- 2022-03-30 00:00:00  (n=7)\n"
+        "Fold: 2\n"
+        "    Training:   2022-01-01 00:00:00 -- 2022-03-11 00:00:00  (n=70)\n"
+        "    Validation: 2022-03-31 00:00:00 -- 2022-04-06 00:00:00  (n=7)\n"
+        "Fold: 3\n"
+        "    Training:   2022-01-01 00:00:00 -- 2022-03-11 00:00:00  (n=70)\n"
+        "    Validation: 2022-04-07 00:00:00 -- 2022-04-10 00:00:00  (n=4)\n\n"
+    )
+
+    assert out == expected_out
     assert folds == expected
