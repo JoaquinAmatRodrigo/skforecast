@@ -204,8 +204,8 @@ def _create_backtesting_folds(
         )
     if not allow_incomplete_fold and len(y) - (initial_train_size + gap) < test_size:
         raise ValueError(
-            (f"There is not enough data to evaluate all the steps as "
-             f"`allow_incomplete_fold` is `True`.\n"
+            (f"There is not enough data to evaluate {test_size} steps in a single "
+             f"fold. Set `allow_incomplete_fold` to `True` to allow incomplete folds.\n"
              f"    Data available for test : {len(y) - (initial_train_size + gap)} \n"
              f"    Steps                   : {test_size}\n")
         )
