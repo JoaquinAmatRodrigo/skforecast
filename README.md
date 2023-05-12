@@ -38,7 +38,7 @@ pip install skforecast
 Specific version:
 
 ```bash
-pip install skforecast==0.7.0
+pip install skforecast==0.8.0
 ```
 
 Latest (unstable):
@@ -104,6 +104,7 @@ pip install skforecast[plotting]
 - [x] New user guide on how to use **GPU in Google Colab** with XGBoost and LightGBM regressors.
 - [x] Include custom kwargs during fit.
 - [x] The dtypes of exogenous variables are maintained when generating the training matrices with the `create_train_X_y` method in all the Forecasters.
+- [x] Include `gap` argument in backtesting functions to omit observations between training and prediction.
 - [x] Bug fixes and performance improvements.
 
 Visit the [release notes](https://github.com/JoaquinAmatRodrigo/skforecast/blob/feature_update_category_docs/changelog.md) to view all notable changes.
@@ -196,7 +197,7 @@ If you use this software, please cite it using the following metadata.
 
 **APA**:
 ```
-Amat Rodrigo, J., & Escobar Ortiz, J. skforecast (Version 0.7.0) [Computer software]
+Amat Rodrigo, J., & Escobar Ortiz, J. skforecast (Version 0.8.0) [Computer software]
 ```
 
 **BibTeX**:
@@ -204,9 +205,9 @@ Amat Rodrigo, J., & Escobar Ortiz, J. skforecast (Version 0.7.0) [Computer softw
 @software{skforecast,
 author = {Amat Rodrigo, Joaquin and Escobar Ortiz, Javier},
 license = {MIT},
-month = {3},
+month = {5},
 title = {{skforecast}},
-version = {0.7.0},
+version = {0.8.0},
 year = {2023}
 }
 ```
