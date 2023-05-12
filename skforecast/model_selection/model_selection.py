@@ -444,7 +444,7 @@ def _backtesting_forecaster_refit(
         
     if type(forecaster).__name__ != 'ForecasterAutoregDirect' and len(folds) > 50:
         warnings.warn(
-            (f"The forecaster will be fit {folds} times. This can take substantial "
+            (f"The forecaster will be fit {len(folds)} times. This can take substantial "
              f"amounts of time. If not feasible, try with `refit = False`.\n"),
             LongTrainingWarning
         )
@@ -459,9 +459,9 @@ def _backtesting_forecaster_refit(
     backtest_predictions = []
     
     for fold in tqdm(folds) if show_progress else folds:
-        # In each iteration the model is fitted before making predictions.
-        # if fixed_train_size the train size doesn't increase but moves by `steps`
-        # in each iteration. if false the train size increases by `steps` in each
+        # In each iteration the model is fitted before making predictions. 
+        # if fixed_train_size the train size doesn't increase but moves by `steps` 
+        # in each iteration. if False the train size increases by `steps` in each 
         # iteration.
         train_idx_start = fold[0][0]
         train_idx_end   = fold[0][1]
@@ -626,8 +626,8 @@ def _backtesting_forecaster_no_refit(
 
     # Initial model training
     if initial_train_size is not None:
-        exog_train_values = exog.iloc[:initial_train_size, ] if exog is not None else None
-        forecaster.fit(y=y.iloc[:initial_train_size], exog=exog_train_values)
+        exog_train = exog.iloc[:initial_train_size, ] if exog is not None else None
+        forecaster.fit(y=y.iloc[:initial_train_size], exog=exog_train)
         window_size = forecaster.window_size
         externally_fitted = False
     else:
@@ -680,6 +680,7 @@ def _backtesting_forecaster_no_refit(
                        random_state        = random_state,
                        in_sample_residuals = in_sample_residuals
                    )
+        
         pred = pred.iloc[gap:, ]
         backtest_predictions.append(pred)
 

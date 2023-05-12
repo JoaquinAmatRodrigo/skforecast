@@ -19,6 +19,8 @@ from sklearn.model_selection import ParameterSampler
 from ..exceptions import LongTrainingWarning
 from ..model_selection.model_selection import _get_metric
 from ..model_selection.model_selection import _backtesting_forecaster_verbose
+from ..model_selection.model_selection import _create_backtesting_folds
+from ..utils import check_backtesting_input
 
 logging.basicConfig(
     format = '%(name)-10s %(levelname)-5s %(message)s', 
@@ -33,6 +35,8 @@ def _backtesting_sarimax_refit(
     metric: Union[str, Callable, list],
     initial_train_size: int,
     fixed_train_size: bool=True,
+    gap: int=0,
+    allow_incomplete_fold: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     alpha: Optional[float]=None,
     interval: Optional[list]=None,
@@ -83,6 +87,14 @@ def _backtesting_sarimax_refit(
         
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
+
+    gap : int, default `0`
+        Number of samples to be excluded after the end of each training set and 
+        before the test set.
+        
+    allow_incomplete_fold : bool, default `True`
+        Last fold is allowed to have a smaller number of samples than the 
+        `test_size`. If `False`, the last fold is excluded.
         
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
@@ -121,52 +133,48 @@ def _backtesting_sarimax_refit(
 
     forecaster = deepcopy(forecaster)
 
-    if isinstance(metric, str):
-        metrics = _get_metric(metric=metric)
-    elif isinstance(metric, list):
-        metrics = [_get_metric(metric=m) if isinstance(m, str) else m for m in metric]
+    if not isinstance(metric, list):
+        metrics = [_get_metric(metric=metric) if isinstance(metric, str) else metric]
     else:
-        metrics = metric
+        metrics = [_get_metric(metric=m) if isinstance(m, str) else m for m in metric]
+    
+    folds = _create_backtesting_folds(
+                data                  = y,
+                test_size             = steps,
+                initial_train_size    = initial_train_size,
+                gap                   = gap,
+                refit                 = True,
+                fixed_train_size      = fixed_train_size,
+                allow_incomplete_fold = allow_incomplete_fold,
+                return_all_indexes    = False,
+                verbose               = verbose  
+            )
+    
+    if len(folds) > 50:
+        warnings.warn(
+            (f"The forecaster will be fit {len(folds)} times. This can take substantial "
+             f"amounts of time. If not feasible, try with `refit = False`.\n"),
+            LongTrainingWarning
+        )
 
     backtest_predictions = []
     
-    folds = int(np.ceil((len(y) - initial_train_size) / steps))
-    remainder = (len(y) - initial_train_size) % steps
-    
-    if folds > 50:
-        warnings.warn(
-            (f"The forecaster will be fit {folds} times. This can take substantial amounts of time. "
-             f"If not feasible, try with `refit = False`. \n"),
-            LongTrainingWarning
-        )
-    
-    if verbose:
-        _backtesting_forecaster_verbose(
-            index_values       = y.index,
-            steps              = steps,
-            initial_train_size = initial_train_size,
-            folds              = folds,
-            remainder          = remainder,
-            refit              = True,
-            fixed_train_size   = fixed_train_size
-        )
-    
-    for i in tqdm(range(folds)) if show_progress else range(folds):
-        # In each iteration the model is fitted before making predictions.
-        # if fixed_train_size the train size doesn't increase but moves by `steps` in each iteration.
-        # if false the train size increases by `steps` in each iteration.
-        train_idx_start = i * steps if fixed_train_size else 0
-        train_idx_end = initial_train_size + i * steps
+    for fold in tqdm(folds) if show_progress else folds:
+        # In each iteration the model is fitted before making predictions. 
+        # if fixed_train_size the train size doesn't increase but moves by `steps` 
+        # in each iteration. if False the train size increases by `steps` in each 
+        # iteration.
+        train_idx_start = fold[0][0]
+        train_idx_end   = fold[0][1]
+        test_idx_start  = fold[1][0]
+        test_idx_end    = fold[1][1]
+        
+        y_train = y.iloc[train_idx_start:train_idx_end, ]
+        exog_train = exog.iloc[train_idx_start:train_idx_end, ] if exog is not None else None
+        next_window_exog = exog.iloc[test_idx_start:test_idx_end, ] if exog is not None else None
 
-        exog_train_values = exog.iloc[train_idx_start:train_idx_end, ] if exog is not None else None
-        next_window_exog = exog.iloc[train_idx_end:train_idx_end + steps, ] if exog is not None else None
-
-        forecaster.fit(y=y.iloc[train_idx_start:train_idx_end, ], exog=exog_train_values)
-
-        if i == folds - 1: # last fold
-            # If remainder > 0, only the remaining steps need to be predicted
-            steps = steps if remainder == 0 else remainder
-
+        forecaster.fit(y=y_train, exog=exog_train)
+        steps = len(range(test_idx_start, test_idx_end))
         if alpha is None and interval is None:
             pred = forecaster.predict(steps=steps, exog=next_window_exog)
         else:
@@ -176,24 +184,22 @@ def _backtesting_sarimax_refit(
                        interval = interval,
                        exog     = next_window_exog,
                    )
-            
+
+        pred = pred.iloc[gap:, ]            
         backtest_predictions.append(pred)
     
     backtest_predictions = pd.concat(backtest_predictions)
     if isinstance(backtest_predictions, pd.Series):
         backtest_predictions = pd.DataFrame(backtest_predictions)
 
-    if isinstance(metric, list):
-        metrics_values = [m(
-                            y_true = y.iloc[initial_train_size: initial_train_size + len(backtest_predictions)],
-                            y_pred = backtest_predictions['pred']
-                          ) for m in metrics
-                         ]
-    else:
-        metrics_values = metrics(
-                            y_true = y.iloc[initial_train_size: initial_train_size + len(backtest_predictions)],
-                            y_pred = backtest_predictions['pred']
-                         )
+    metrics_values = [m(
+                        y_true = y.loc[backtest_predictions.index],
+                        y_pred = backtest_predictions['pred']
+                      ) for m in metrics
+                     ]
+    
+    if not isinstance(metric, list):
+        metrics_values = metrics_values[0]
 
     return metrics_values, backtest_predictions
 
@@ -204,6 +210,8 @@ def _backtesting_sarimax_no_refit(
     steps: int,
     metric: Union[str, Callable, list],
     initial_train_size: int,
+    gap: int=0,
+    allow_incomplete_fold: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     alpha: Optional[float]=None,
     interval: Optional[list]=None,
@@ -247,6 +255,14 @@ def _backtesting_sarimax_no_refit(
     initial_train_size : int
         Number of samples in the initial train split. The backtest forecaster is
         trained using the first `initial_train_size` observations.
+
+    gap : int, default `0`
+        Number of samples to be excluded after the end of each training set and 
+        before the test set.
+        
+    allow_incomplete_fold : bool, default `True`
+        Last fold is allowed to have a smaller number of samples than the 
+        `test_size`. If `False`, the last fold is excluded.
         
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
@@ -285,47 +301,46 @@ def _backtesting_sarimax_no_refit(
 
     forecaster = deepcopy(forecaster)
 
-    if isinstance(metric, str):
-        metrics = _get_metric(metric=metric)
-    elif isinstance(metric, list):
-        metrics = [_get_metric(metric=m) if isinstance(m, str) else m for m in metric]
+    if not isinstance(metric, list):
+        metrics = [_get_metric(metric=metric) if isinstance(metric, str) else metric]
     else:
-        metrics = metric
+        metrics = [_get_metric(metric=m) if isinstance(m, str) else m for m in metric]
+
+    # initial_train_size cannot be None because of append method in Sarimax
+    exog_train = exog.iloc[:initial_train_size, ] if exog is not None else None
+    forecaster.fit(y=y.iloc[:initial_train_size], exog=exog_train)
+    
+    folds = _create_backtesting_folds(
+                data                  = y,
+                initial_train_size    = initial_train_size,
+                test_size             = steps,
+                refit                 = False,
+                gap                   = gap,
+                allow_incomplete_fold = allow_incomplete_fold,
+                return_all_indexes    = False,
+                verbose               = verbose  
+            )
     
     backtest_predictions = []
 
-    # initial_train_size cannot be None because of append method in Sarimax
-    exog_train_values = exog.iloc[:initial_train_size, ] if exog is not None else None
-    forecaster.fit(y=y.iloc[:initial_train_size], exog=exog_train_values)
-    
-    folds     = int(np.ceil((len(y) - initial_train_size) / steps))
-    remainder = (len(y) - initial_train_size) % steps
-    
-    if verbose:
-        _backtesting_forecaster_verbose(
-            index_values       = y.index,
-            steps              = steps,
-            initial_train_size = initial_train_size,
-            folds              = folds,
-            remainder          = remainder,
-            refit              = False
-        )
-
-    for i in tqdm(range(folds)) if show_progress else range(folds):
+    for fold in tqdm(folds) if show_progress else folds:
         # Since the model is only fitted with the initial_train_size, last_window
         # and next_window_exog must be updated to include the data needed to make
         # predictions.
+        last_window_start = fold[0][1]
+        last_window_end   = fold[1][0]
+        test_idx_start = fold[1][0]
+        test_idx_end   = fold[1][1]
+
         last_window_start = initial_train_size + steps * (i-1)
         last_window_end   = initial_train_size + steps * i
-
         last_window_y    = y.iloc[last_window_start:last_window_end] if i != 0 else None
         last_window_exog = exog.iloc[last_window_start:last_window_end, ] if exog is not None and i != 0 else None 
+
         next_window_exog = exog.iloc[last_window_end:last_window_end + steps, ] if exog is not None else None
-    
-        if i == folds - 1: # last fold
-            # If remainder > 0, only the remaining steps need to be predicted
-            steps = steps if remainder == 0 else remainder
-        
+        next_window_exog = exog.iloc[test_idx_start:test_idx_end, ] if exog is not None else None
+
+        steps = len(range(test_idx_start, test_idx_end))
         if alpha is None and interval is None:
             pred = forecaster.predict(
                        steps            = steps,
@@ -349,17 +364,14 @@ def _backtesting_sarimax_no_refit(
     if isinstance(backtest_predictions, pd.Series):
         backtest_predictions = pd.DataFrame(backtest_predictions)
 
-    if isinstance(metric, list):
-        metrics_values = [m(
-                            y_true = y.iloc[initial_train_size: initial_train_size + len(backtest_predictions)],
-                            y_pred = backtest_predictions['pred']
-                          ) for m in metrics
-                         ]
-    else:
-        metrics_values = metrics(
-                             y_true = y.iloc[initial_train_size: initial_train_size + len(backtest_predictions)],
-                             y_pred = backtest_predictions['pred']
-                         )
+    metrics_values = [m(
+                        y_true = y.loc[backtest_predictions.index],
+                        y_pred = backtest_predictions['pred']
+                      ) for m in metrics
+                     ]
+    
+    if not isinstance(metric, list):
+        metrics_values = metrics_values[0]
 
     return metrics_values, backtest_predictions
 
@@ -371,6 +383,8 @@ def backtesting_sarimax(
     metric: Union[str, Callable, list],
     initial_train_size: int,
     fixed_train_size: bool=True,
+    gap: int=0,
+    allow_incomplete_fold: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     refit: bool=False,
     alpha: Optional[float]=None,
@@ -416,7 +430,15 @@ def backtesting_sarimax(
     
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
+
+    gap : int, default `0`
+        Number of samples to be excluded after the end of each training set and 
+        before the test set.
         
+    allow_incomplete_fold : bool, default `True`
+        Last fold is allowed to have a smaller number of samples than the 
+        `test_size`. If `False`, the last fold is excluded.
+
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
@@ -437,7 +459,8 @@ def backtesting_sarimax(
         provided, `alpha` will be used.
                   
     verbose : bool, default `False`
-        Print number of folds and index of training and validation sets used for backtesting.
+        Print number of folds and index of training and validation sets used 
+        for backtesting.
 
     show_progress: bool, default `True`
         Whether to show a progress bar. Defaults to True.
@@ -454,54 +477,60 @@ def backtesting_sarimax(
             column upper_bound = upper bound interval of the interval.
     
     """
-
-    if initial_train_size is None:
-        raise ValueError(
-            '`initial_train_size` must be an int smaller than the length of `y`.'
-        )
-
-    if initial_train_size is not None and initial_train_size >= len(y):
-        raise ValueError(
-            '`initial_train_size` must be an int smaller than the length of `y`.'
-        )
-        
-    if initial_train_size is not None and initial_train_size < forecaster.window_size:
-        raise ValueError(
-            (f"`initial_train_size` must be greater than "
-             f"forecaster's window_size ({forecaster.window_size}).")
-        )
-
-    if not isinstance(refit, bool):
+    
+    if type(forecaster).__name__ not in ['ForecasterSarimax']:
         raise TypeError(
-            f'`refit` must be boolean: `True`, `False`.'
+            ("`forecaster` must be of type `ForecasterSarimax`, for all other "
+             "types of forecasters use the functions available in the other "
+             "`model_selection` modules.")
         )
+    
+    check_backtesting_input(
+        forecaster            = forecaster,
+        steps                 = steps,
+        metric                = metric,
+        y                     = y,
+        initial_train_size    = initial_train_size,
+        fixed_train_size      = fixed_train_size,
+        gap                   = gap,
+        allow_incomplete_fold = allow_incomplete_fold,
+        refit                 = refit,
+        interval              = interval,
+        alpha                 = alpha,
+        verbose               = verbose,
+        show_progress         = show_progress
+    )
     
     if refit:
         metrics_values, backtest_predictions = _backtesting_sarimax_refit(
-            forecaster          = forecaster,
-            y                   = y,
-            steps               = steps,
-            metric              = metric,
-            initial_train_size  = initial_train_size,
-            fixed_train_size    = fixed_train_size,
-            exog                = exog,
-            alpha               = alpha,
-            interval            = interval,
-            verbose             = verbose,
-            show_progress       = show_progress
+            forecaster            = forecaster,
+            y                     = y,
+            steps                 = steps,
+            metric                = metric,
+            initial_train_size    = initial_train_size,
+            fixed_train_size      = fixed_train_size,
+            gap                   = gap,
+            allow_incomplete_fold = allow_incomplete_fold,
+            exog                  = exog,
+            alpha                 = alpha,
+            interval              = interval,
+            verbose               = verbose,
+            show_progress         = show_progress
         )
     else:
         metrics_values, backtest_predictions = _backtesting_sarimax_no_refit(
-            forecaster          = forecaster,
-            y                   = y,
-            steps               = steps,
-            metric              = metric,
-            initial_train_size  = initial_train_size,
-            exog                = exog,
-            alpha               = alpha,
-            interval            = interval,
-            verbose             = verbose,
-            show_progress       = show_progress
+            forecaster            = forecaster,
+            y                     = y,
+            steps                 = steps,
+            metric                = metric,
+            initial_train_size    = initial_train_size,
+            gap                   = gap,
+            allow_incomplete_fold = allow_incomplete_fold,
+            exog                  = exog,
+            alpha                 = alpha,
+            interval              = interval,
+            verbose               = verbose,
+            show_progress         = show_progress
         )
 
     return metrics_values, backtest_predictions
@@ -515,6 +544,8 @@ def grid_search_sarimax(
     metric: Union[str, Callable, list],
     initial_train_size: int,
     fixed_train_size: bool=True,
+    gap: int=0,
+    allow_incomplete_fold: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     refit: bool=False,
     return_best: bool=True,
@@ -559,6 +590,14 @@ def grid_search_sarimax(
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
 
+    gap : int, default `0`
+        Number of samples to be excluded after the end of each training set and 
+        before the test set.
+        
+    allow_incomplete_fold : bool, default `True`
+        Last fold is allowed to have a smaller number of samples than the 
+        `test_size`. If `False`, the last fold is excluded.
+
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
@@ -587,17 +626,19 @@ def grid_search_sarimax(
     param_grid = list(ParameterGrid(param_grid))
 
     results = _evaluate_grid_hyperparameters_sarimax(
-        forecaster          = forecaster,
-        y                   = y,
-        param_grid          = param_grid,
-        steps               = steps,
-        metric              = metric,
-        initial_train_size  = initial_train_size,
-        fixed_train_size    = fixed_train_size,
-        exog                = exog,
-        refit               = refit,
-        return_best         = return_best,
-        verbose             = verbose
+        forecaster            = forecaster,
+        y                     = y,
+        param_grid            = param_grid,
+        steps                 = steps,
+        metric                = metric,
+        initial_train_size    = initial_train_size,
+        fixed_train_size      = fixed_train_size,
+        gap                   = gap,
+        allow_incomplete_fold = allow_incomplete_fold,
+        exog                  = exog,
+        refit                 = refit,
+        return_best           = return_best,
+        verbose               = verbose
     )
 
     return results
@@ -611,6 +652,8 @@ def random_search_sarimax(
     metric: Union[str, Callable, list],
     initial_train_size: int,
     fixed_train_size: bool=True,
+    gap: int=0,
+    allow_incomplete_fold: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     refit: bool=False,
     n_iter: int=10,
@@ -657,6 +700,14 @@ def random_search_sarimax(
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
 
+    gap : int, default `0`
+        Number of samples to be excluded after the end of each training set and 
+        before the test set.
+        
+    allow_incomplete_fold : bool, default `True`
+        Last fold is allowed to have a smaller number of samples than the 
+        `test_size`. If `False`, the last fold is excluded.
+
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
@@ -692,17 +743,19 @@ def random_search_sarimax(
     param_grid = list(ParameterSampler(param_distributions, n_iter=n_iter, random_state=random_state))
 
     results = _evaluate_grid_hyperparameters_sarimax(
-        forecaster          = forecaster,
-        y                   = y,
-        param_grid          = param_grid,
-        steps               = steps,
-        metric              = metric,
-        initial_train_size  = initial_train_size,
-        fixed_train_size    = fixed_train_size,
-        exog                = exog,
-        refit               = refit,
-        return_best         = return_best,
-        verbose             = verbose
+        forecaster            = forecaster,
+        y                     = y,
+        param_grid            = param_grid,
+        steps                 = steps,
+        metric                = metric,
+        initial_train_size    = initial_train_size,
+        fixed_train_size      = fixed_train_size,
+        gap                   = gap,
+        allow_incomplete_fold = allow_incomplete_fold,
+        exog                  = exog,
+        refit                 = refit,
+        return_best           = return_best,
+        verbose               = verbose
     )
 
     return results
@@ -716,6 +769,8 @@ def _evaluate_grid_hyperparameters_sarimax(
     metric: Union[str, Callable, list],
     initial_train_size: int,
     fixed_train_size: bool=True,
+    gap: int=0,
+    allow_incomplete_fold: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     refit: bool=False,
     return_best: bool=True,
@@ -758,6 +813,14 @@ def _evaluate_grid_hyperparameters_sarimax(
  
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
+
+    gap : int, default `0`
+        Number of samples to be excluded after the end of each training set and 
+        before the test set.
+        
+    allow_incomplete_fold : bool, default `True`
+        Last fold is allowed to have a smaller number of samples than the 
+        `test_size`. If `False`, the last fold is excluded.
 
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
@@ -805,18 +868,20 @@ def _evaluate_grid_hyperparameters_sarimax(
 
         forecaster.set_params(params)
         metrics_values = backtesting_sarimax(
-                            forecaster         = forecaster,
-                            y                  = y,
-                            steps              = steps,
-                            metric             = metric,
-                            initial_train_size = initial_train_size,
-                            fixed_train_size   = fixed_train_size,
-                            exog               = exog,
-                            refit              = refit,
-                            alpha              = None,
-                            interval           = None,
-                            verbose            = verbose,
-                            show_progress      = False
+                            forecaster            = forecaster,
+                            y                     = y,
+                            steps                 = steps,
+                            metric                = metric,
+                            initial_train_size    = initial_train_size,
+                            fixed_train_size      = fixed_train_size,
+                            gap                   = gap,
+                            allow_incomplete_fold = allow_incomplete_fold,
+                            exog                  = exog,
+                            refit                 = refit,
+                            alpha                 = None,
+                            interval              = None,
+                            verbose               = verbose,
+                            show_progress         = False
                          )[0]
         warnings.filterwarnings('ignore', category=RuntimeWarning, message= "The forecaster will be fit.*")   
         params_list.append(params)
