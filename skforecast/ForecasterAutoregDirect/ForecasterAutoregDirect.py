@@ -843,16 +843,16 @@ class ForecasterAutoregDirect(ForecasterBase):
             if not isinstance(step, (int, np.int64, np.int32)):
                 raise TypeError(
                     (f"`steps` argument must be an int, a list of ints or `None`. "
-                        f"Got {type(steps)}.")
+                     f"Got {type(steps)}.")
                 )
 
         if last_window is None:
             last_window = copy(self.last_window)
 
         _, last_window_index = preprocess_last_window(
-                                    last_window   = last_window,
-                                    return_values = False
-                            )
+                                   last_window   = last_window,
+                                   return_values = False
+                               )
         idx = expand_index(index=last_window_index, steps=max(steps))
         X_lags = last_window.iloc[-self.lags]
         X_lags.index = [f"lag_{lag}" for lag in self.lags]

@@ -1,3 +1,6 @@
+
+<img src="images/banner-landing-page-skforecast.png#only-light" align="left"  style="margin-bottom: 30px; margin-top: 0px;">
+
 ![Python](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-blue)
 [![PyPI](https://img.shields.io/pypi/v/skforecast)](https://pypi.org/project/skforecast/)
 [![codecov](https://codecov.io/gh/JoaquinAmatRodrigo/skforecast/branch/master/graph/badge.svg)](https://codecov.io/gh/JoaquinAmatRodrigo/skforecast)
@@ -8,18 +11,11 @@
 [![Downloads](https://static.pepy.tech/personalized-badge/skforecast?period=total&units=international_system&left_color=grey&right_color=blue&left_text=Downloads)](https://pepy.tech/project/skforecast)
 
 
-
-# skforecast
-
-<p><img src="./images/logo_skforecast_no_background.png" alt="logo-skforecast" title="logo-skforecast" width="200" align="right"></p>
-
-**Time series forecasting with scikit-learn regressors.**
-
-**Skforecast** is a Python library that eases using scikit-learn regressors as multi-step forecasters. It also works with any regressor compatible with the scikit-learn API (pipelines, CatBoost, LightGBM, XGBoost, Ranger...).
+**Skforecast** is a Python library that eases using scikit-learn regressors as single and multi-step forecasters. It also works with any regressor compatible with the scikit-learn API (LightGBM, XGBoost, CatBoost, ...).
 
 **Why use skforecast?**
 
-Skforecast is developed according to the following priorities:
+The fields of statistics and machine learning have developed many excellent algorithms for regression that can be useful for forecasting, but applying them effectively to time series analysis can still be a challenge. To address this issue, the skforecast library provides a comprehensive set of tools for training, validation and prediction in a variety of scenarios commonly encountered when working with time series. The library is built using the widely used Scikit-learn API, making it easy to integrate into existing workflows. With Skforecast, users have access to a wide range of functionalities such as feature engineering, model selection, hyperparameter tuning and many others. This allows users to focus on the essential aspects of their projects and leave the intricacies of time series analysis to Skforecast. In addition, skforecast is developed according to the following priorities:
 
 + Fast and robust prototyping. :zap:
 + Validation and backtesting methods to have a realistic assessment of model performance. :mag:

@@ -79,7 +79,7 @@ def _backtesting_forecaster_multiseries_refit(
             Function with arguments y_true, y_pred that returns a float.
 
         If list:
-            List containing several strings and/or Callable.
+            List containing multiple strings and/or Callables.
     
     initial_train_size : int
         Number of samples in the initial train split. The backtest forecaster is
@@ -291,7 +291,7 @@ def _backtesting_forecaster_multiseries_no_refit(
             Function with arguments y_true, y_pred that returns a float.
 
         If list:
-            List containing several strings and/or Callable.
+            List containing multiple strings and/or Callables.
     
     initial_train_size : int, default `None`
         Number of samples in the initial train split. If `None` and `forecaster` is already
@@ -497,7 +497,7 @@ def backtesting_forecaster_multiseries(
             Function with arguments y_true, y_pred that returns a float.
 
         If list:
-            List containing several strings and/or Callable.
+            List containing multiple strings and/or Callables.
     
     initial_train_size : int, default `None`
         Number of samples in the initial train split. If `None` and `forecaster` is already 
@@ -705,7 +705,7 @@ def grid_search_forecaster_multiseries(
             Function with arguments y_true, y_pred that returns a float.
 
         If list:
-            List containing several strings and/or Callable.
+            List containing multiple strings and/or Callables.
 
     initial_train_size : int 
         Number of samples in the initial train split.
@@ -817,7 +817,7 @@ def random_search_forecaster_multiseries(
             Function with arguments y_true, y_pred that returns a float.
 
         If list:
-            List containing several strings and/or Callable.
+            List containing multiple strings and/or Callables.
 
     initial_train_size : int 
         Number of samples in the initial train split.
@@ -933,7 +933,7 @@ def _evaluate_grid_hyperparameters_multiseries(
             Function with arguments y_true, y_pred that returns a float.
 
         If list:
-            List containing several strings and/or Callable.
+            List containing multiple strings and/or Callables.
 
     initial_train_size : int 
         Number of samples in the initial train split.
@@ -1143,7 +1143,7 @@ def backtesting_forecaster_multivariate(
             Function with arguments y_true, y_pred that returns a float.
 
         If list:
-            List containing several strings and/or Callable.
+            List containing multiple strings and/or Callables.
     
     initial_train_size : int, default `None`
         Number of samples in the initial train split. If `None` and `forecaster` is already 
@@ -1276,7 +1276,7 @@ def grid_search_forecaster_multivariate(
             Function with arguments y_true, y_pred that returns a float.
 
         If list:
-            List containing several strings and/or Callable.
+            List containing multiple strings and/or Callables.
 
     initial_train_size : int 
         Number of samples in the initial train split.
@@ -1388,7 +1388,7 @@ def random_search_forecaster_multivariate(
             Function with arguments y_true, y_pred that returns a float.
 
         If list:
-            List containing several strings and/or Callable.
+            List containing multiple strings and/or Callables.
 
     initial_train_size : int 
         Number of samples in the initial train split.

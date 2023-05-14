@@ -433,7 +433,7 @@ def check_interval(
 
 def check_predict_input(
     forecaster_name: str,
-    steps: int,
+    steps: Union[int, list],
     fitted: bool,
     included_exog: bool,
     index_type: type,
@@ -462,7 +462,7 @@ def check_predict_input(
         ForecasterAutoregDirect, ForecasterAutoregMultiSeries, 
         ForecasterAutoregMultiVariate, ForecasterAutoregMultiSeriesCustom.
 
-    steps : int
+    steps : int, list
         Number of future steps predicted.
 
     fitted: Bool
@@ -527,7 +527,7 @@ def check_predict_input(
              "appropriate arguments before using predict.")
         )
     
-    if isinstance(steps, int) and steps < 1:
+    if isinstance(steps, (int, np.integer)) and steps < 1:
         raise ValueError(
             f"`steps` must be an integer greater than or equal to 1. Got {steps}."
         )
