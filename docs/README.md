@@ -1,10 +1,10 @@
 <script src="https://kit.fontawesome.com/d20edc211b.js" crossorigin="anonymous"></script>
 
-<img src="img/Banner-landing-page-SKForecast.png#only-light" align="left"  style="
+<img src="img/banner-landing-page-skforecast.png#only-light" align="left"  style="
     margin-bottom: 30px;
     margin-top: 0px;">
 
-<img src="img/Banner-landing-page-dark-mode-SKForecast.png#only-dark" align="left" style="
+<img src="img/banner-landing-page-dark-mode-skforecast.png#only-dark" align="left" style="
     margin-bottom: 30px;
     margin-top: 0px;">
 
@@ -18,11 +18,11 @@
 [![Downloads](https://static.pepy.tech/personalized-badge/skforecast?period=total&units=international_system&left_color=grey&right_color=blue&left_text=Downloads)](https://pepy.tech/project/skforecast)
 
 
-**Skforecast** is a Python library that eases using scikit-learn regressors as multi-step forecasters. It also works with any regressor compatible with the scikit-learn API (pipelines, CatBoost, LightGBM, XGBoost, Ranger...).
+**Skforecast** is a Python library that eases using scikit-learn regressors as single and multi-step forecasters. It also works with any regressor compatible with the scikit-learn API (pipelines, CatBoost, LightGBM, XGBoost, Ranger...).
 
 **Why use skforecast?**
 
-Skforecast is developed according to the following priorities:
+The fields of statistics and machine learning have developed many excellent algorithms for regression that can be useful for forecasting, but applying them effectively to time series analysis can still be a challenge. To address this issue, the skforecast library provides a comprehensive set of tools for training, validation and prediction in a variety of scenarios commonly encountered when working with time series. The library is built using the widely used Scikit-learn API, making it easy to integrate into existing workflows. With Skforecast, users have access to a wide range of functionalities such as feature engineering, model selection, hyperparameter tuning and many others. This allows users to focus on the essential aspects of their projects and leave the intricacies of time series analysis to Skforecast. In addition, skforecast is developed according to the following priorities:
 
 + Fast and robust prototyping. :zap:
 + Validation and backtesting methods to have a realistic assessment of model performance. :mag:
@@ -146,7 +146,7 @@ Universidad de Deusto / Deustuko Unibertsitatea**](https://youtu.be/MlktVhReO0E)
 <i class="fa-duotone fa-water fa" style="font-size: 25px; color:teal;"></i> [**Multi-series forecasting**](https://www.cienciadedatos.net/documentos/py44-multi-series-forecasting-skforecast-español.html)
 
 
-# How to Contribute to Skforecast
+## How to Contribute to Skforecast
 
 For more information on how to contribute to skforecast, see our [Contribution Guide](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/CONTRIBUTING.md).
 
@@ -156,7 +156,7 @@ If you found skforecast useful, you can support us with a donation. Your contrib
 
 [![paypal](https://www.paypalobjects.com/en_US/ES/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate/?hosted_button_id=D2JZSWRLTZDL6)
 
-# Citation
+## Citation
 
 If you use this software, please cite it using the following metadata.
 
@@ -180,6 +180,6 @@ year = {2023}
 View the [citation file](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/CITATION.cff).
 
 
-# License
+## License
 
 **joaquinAmatRodrigo/skforecast** is licensed under the **MIT License**, a short and simple permissive license with conditions only requiring the preservation of copyright and license notices. Licensed works, modifications and larger works may be distributed under different terms and without source code.

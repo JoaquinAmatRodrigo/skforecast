@@ -95,7 +95,7 @@ theme:
   font:
     text: Open Sans
     code: Ubuntu Mono
-  logo: img/logo-skforecast-white-no-backgound.png
+  logo: img/logo-skforecast-orange-no-backgound.png
   highlightjs: true
   features:
     - navigation.tabs
