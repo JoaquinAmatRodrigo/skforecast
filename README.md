@@ -1,5 +1,5 @@
 
-<h1 style="font-size:5em" ><img align="middle" src="./images/logo_skforecast_no_background.png" alt="" width="100">skforecast</h1>
+<h1 style="font-size:5em" ><img align="middle" src="./images/logo-skforecast-nobackground.png" alt="" width="100">skforecast</h1>
 
 ![Python](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-blue)
 [![PyPI](https://img.shields.io/pypi/v/skforecast)](https://pypi.org/project/skforecast/)

@@ -93,9 +93,9 @@ theme:
   name: material
   custom_dir: docs/overrides
   font:
-    text: Ubuntu
+    text: Open Sans
     code: Ubuntu Mono
-  logo: img/logo_skforecast_white_no_background.png
+  logo: img/logo-skforecast-white-no-backgound.png
   highlightjs: true
   features:
     - navigation.tabs
@@ -104,31 +104,27 @@ theme:
     - navigation.expand
     - navigation.top
   palette:    
-    # Palette toggle for automatic mode
-    - media: "(prefers-color-scheme)"
-      primary: custom
-      accent: custom
+    # # Palette toggle for automatic mode
+    # - media: "(prefers-color-scheme)"
+    #   primary: custom
+    #   accent: custom
     #   toggle:
     #     icon: material/brightness-auto
     #     name: Switch to light mode
 
-    # # Palette toggle for light mode
-    # - media: "(prefers-color-scheme: light)"
-    #   primary: custom
-    #   accent: custom
-    #   scheme: default 
-    #   toggle:
-    #     icon: material/brightness-7
-    #     name: Switch to dark mode
+    # Palette toggle for light mode
+    - media: "(prefers-color-scheme)"
+      scheme: light
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
 
-    # # Palette toggle for dark mode
-    # - media: "(prefers-color-scheme: dark)"
-    #   primary: custom
-    #   accent: custom
-    #   scheme: slate
-    #   toggle:
-    #     icon: material/brightness-4
-    #     name: Switch to system preference
+    # Palette toggle for dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
 
 markdown_extensions:
   - admonition

@@ -1,6 +1,12 @@
 <script src="https://kit.fontawesome.com/d20edc211b.js" crossorigin="anonymous"></script>
 
-<h1 style="font-size:10vw">skforecast</h1>
+<img src="img/Banner-landing-page-SKForecast.png#only-light" align="left"  style="
+    margin-bottom: 30px;
+    margin-top: 0px;">
+
+<img src="img/Banner-landing-page-dark-mode-SKForecast.png#only-dark" align="left" style="
+    margin-bottom: 30px;
+    margin-top: 0px;">
 
 ![Python](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-blue)
 [![PyPI](https://img.shields.io/pypi/v/skforecast)](https://pypi.org/project/skforecast/)
@@ -11,9 +17,6 @@
 [![License](https://img.shields.io/github/license/JoaquinAmatRodrigo/skforecast)](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/LICENSE)
 [![Downloads](https://static.pepy.tech/personalized-badge/skforecast?period=total&units=international_system&left_color=grey&right_color=blue&left_text=Downloads)](https://pepy.tech/project/skforecast)
 
-<img src="img/logo_skforecast_no_background.png" width=185 height=185 align="right">
-
-**Time series forecasting with scikit-learn regressors.**
 
 **Skforecast** is a Python library that eases using scikit-learn regressors as multi-step forecasters. It also works with any regressor compatible with the scikit-learn API (pipelines, CatBoost, LightGBM, XGBoost, Ranger...).
 
@@ -143,17 +146,15 @@ Universidad de Deusto / Deustuko Unibertsitatea**](https://youtu.be/MlktVhReO0E)
 <i class="fa-duotone fa-water fa" style="font-size: 25px; color:teal;"></i> [**Multi-series forecasting**](https://www.cienciadedatos.net/documentos/py44-multi-series-forecasting-skforecast-español.html)
 
 
+# How to Contribute to Skforecast
+
+For more information on how to contribute to skforecast, see our [Contribution Guide](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/CONTRIBUTING.md).
+
 ## Donating
 
 If you found skforecast useful, you can support us with a donation. Your contribution will help to continue developing and improving this project. Many thanks! :hugging_face: :heart_eyes:
 
 [![paypal](https://www.paypalobjects.com/en_US/ES/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate/?hosted_button_id=D2JZSWRLTZDL6)
-
-
-# How to Contribute to Skforecast
-
-For more information on how to contribute to skforecast, see our [Contribution Guide](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/CONTRIBUTING.md).
-
 
 # Citation
 
@@ -179,6 +180,6 @@ year = {2023}
 View the [citation file](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/CITATION.cff).
 
 
-## License
+# License
 
 **joaquinAmatRodrigo/skforecast** is licensed under the **MIT License**, a short and simple permissive license with conditions only requiring the preservation of copyright and license notices. Licensed works, modifications and larger works may be distributed under different terms and without source code.
