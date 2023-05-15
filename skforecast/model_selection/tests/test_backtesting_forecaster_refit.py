@@ -10,48 +10,10 @@ from skforecast.ForecasterAutoregCustom import ForecasterAutoregCustom
 from skforecast.ForecasterAutoregDirect import ForecasterAutoregDirect
 from skforecast.model_selection.model_selection import _backtesting_forecaster_refit
 
-# Fixtures _backtesting_forecaster_refit Series (skforecast==0.4.2)
-# np.random.seed(123)
-# y = np.random.rand(50)
-# exog = np.random.rand(50)
-# out_sample_residuals = np.random.rand(50)
-
-y = pd.Series(
-    np.array([0.69646919, 0.28613933, 0.22685145, 0.55131477, 0.71946897,
-              0.42310646, 0.9807642 , 0.68482974, 0.4809319 , 0.39211752,
-              0.34317802, 0.72904971, 0.43857224, 0.0596779 , 0.39804426,
-              0.73799541, 0.18249173, 0.17545176, 0.53155137, 0.53182759,
-              0.63440096, 0.84943179, 0.72445532, 0.61102351, 0.72244338,
-              0.32295891, 0.36178866, 0.22826323, 0.29371405, 0.63097612,
-              0.09210494, 0.43370117, 0.43086276, 0.4936851 , 0.42583029,
-              0.31226122, 0.42635131, 0.89338916, 0.94416002, 0.50183668,
-              0.62395295, 0.1156184 , 0.31728548, 0.41482621, 0.86630916,
-              0.25045537, 0.48303426, 0.98555979, 0.51948512, 0.61289453]))
-
-exog = pd.Series(
-    np.array([0.12062867, 0.8263408 , 0.60306013, 0.54506801, 0.34276383,
-              0.30412079, 0.41702221, 0.68130077, 0.87545684, 0.51042234,
-              0.66931378, 0.58593655, 0.6249035 , 0.67468905, 0.84234244,
-              0.08319499, 0.76368284, 0.24366637, 0.19422296, 0.57245696,
-              0.09571252, 0.88532683, 0.62724897, 0.72341636, 0.01612921,
-              0.59443188, 0.55678519, 0.15895964, 0.15307052, 0.69552953,
-              0.31876643, 0.6919703 , 0.55438325, 0.38895057, 0.92513249,
-              0.84167   , 0.35739757, 0.04359146, 0.30476807, 0.39818568,
-              0.70495883, 0.99535848, 0.35591487, 0.76254781, 0.59317692,
-              0.6917018 , 0.15112745, 0.39887629, 0.2408559 , 0.34345601]), 
-    name='exog')
-
-out_sample_residuals = np.array(
-             [0.51312815, 0.66662455, 0.10590849, 0.13089495, 0.32198061,
-              0.66156434, 0.84650623, 0.55325734, 0.85445249, 0.38483781,
-              0.3167879 , 0.35426468, 0.17108183, 0.82911263, 0.33867085,
-              0.55237008, 0.57855147, 0.52153306, 0.00268806, 0.98834542,
-              0.90534158, 0.20763586, 0.29248941, 0.52001015, 0.90191137,
-              0.98363088, 0.25754206, 0.56435904, 0.80696868, 0.39437005,
-              0.73107304, 0.16106901, 0.60069857, 0.86586446, 0.98352161,
-              0.07936579, 0.42834727, 0.20454286, 0.45063649, 0.54776357,
-              0.09332671, 0.29686078, 0.92758424, 0.56900373, 0.457412  ,
-              0.75352599, 0.74186215, 0.04857903, 0.7086974 , 0.83924335])
+# Fixtures
+from .fixtures_model_selection import y
+from .fixtures_model_selection import exog
+from .fixtures_model_selection import out_sample_residuals
 
 
 # ******************************************************************************
@@ -88,7 +50,7 @@ def test_output_backtesting_forecaster_refit_no_exog_no_remainder_ForecasterAuto
                                         n_boot              = 500,
                                         random_state        = 123,
                                         in_sample_residuals = True,
-                                        verbose             = True
+                                        verbose             = False
                                    )
                                    
     assert expected_metric == approx(metric)
@@ -139,7 +101,7 @@ def test_output_backtesting_forecaster_refit_no_exog_no_remainder_ForecasterAuto
                                         n_boot              = 500,
                                         random_state        = 123,
                                         in_sample_residuals = True,
-                                        verbose             = True
+                                        verbose             = False
                                    )
                                    
     assert expected_metric == approx(metric)
@@ -180,7 +142,7 @@ def test_output_backtesting_forecaster_refit_no_exog_no_remainder_ForecasterAuto
                                         n_boot              = 500,
                                         random_state        = 123,
                                         in_sample_residuals = True,
-                                        verbose             = True
+                                        verbose             = False
                                    )
                                    
     assert expected_metric == approx(metric)
@@ -734,5 +696,131 @@ def test_output_backtesting_forecaster_refit_fixed_train_size_yes_exog_yes_remai
                                         verbose             = False
                                    )
                                    
+    assert expected_metric == approx(metric)
+    pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
+
+
+# ******************************************************************************
+# * Gap                                                                        *
+# ******************************************************************************
+
+
+def test_output_backtesting_forecaster_refit_interval_yes_exog_yes_remainder_gap_with_mocked():
+    """
+    Test output of _backtesting_forecaster_refit with backtesting mocked, interval yes. 
+    Regressor is LinearRegression with lags=3, Series y is mocked, exog is mocked, 
+    20 observations to backtest, steps=5 and gap=3, metric='mean_squared_error',
+    'in_sample_residuals = True'
+    """
+    expected_metric = 0.0839045861490063
+    expected_predictions = pd.DataFrame(
+        data = np.array([[ 0.65022999,  0.24880098,  1.06503914],
+                         [ 0.52364637,  0.19453326,  0.923044  ],
+                         [ 0.46809256,  0.12440678,  0.8859392 ],
+                         [ 0.48759732,  0.24079549,  0.86300276],
+                         [ 0.47172445,  0.13894447,  0.74697552],
+                         [ 0.54075007,  0.15420011,  0.89637884],
+                         [ 0.50283999,  0.19115121,  0.85076388],
+                         [ 0.49737535,  0.22956778,  0.7939908 ],
+                         [ 0.49185456,  0.22055651,  0.84145859],
+                         [ 0.48906044,  0.17652033,  0.80063491],
+                         [ 0.27751064, -0.07159784,  0.70858646],
+                         [ 0.25859617, -0.03545793,  0.57770947],
+                         [ 0.32853669,  0.03467979,  0.64259882],
+                         [ 0.43751884,  0.13949436,  0.82693778],
+                         [ 0.33016371, -0.04785842,  0.64473596],
+                         [ 0.58126262,  0.24794122,  0.97074189],
+                         [ 0.52955296,  0.19886586,  0.86943174]]),
+        columns = ['pred', 'lower_bound', 'upper_bound'],
+        index = pd.RangeIndex(start=33, stop=50, step=1)
+    )
+
+    forecaster = ForecasterAutoregDirect(
+                     regressor = LinearRegression(), 
+                     lags      = 3,
+                     steps     = 8
+                 )
+
+    n_backtest = 20
+    y_train = y[:-n_backtest]
+
+    metric, backtest_predictions = _backtesting_forecaster_refit(
+                                        forecaster            = forecaster,
+                                        y                     = y,
+                                        exog                  = exog,
+                                        initial_train_size    = len(y_train),
+                                        fixed_train_size      = False,
+                                        gap                   = 3,
+                                        allow_incomplete_fold = True,
+                                        steps                 = 5,
+                                        metric                = 'mean_squared_error',
+                                        interval              = [5, 95],
+                                        n_boot                = 500,
+                                        random_state          = 123,
+                                        in_sample_residuals   = True,
+                                        verbose               = False
+                                   )
+
+    assert expected_metric == approx(metric)
+    pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
+
+
+def test_output_backtesting_forecaster_refit_interval_yes_exog_not_allow_remainder_gap_with_mocked():
+    """
+    Test output of _backtesting_forecaster_no_refit with backtesting mocked, interval yes. 
+    Regressor is LinearRegression with lags=3, Series y is mocked, exog is mocked, 
+    20 observations to backtest, steps=5 and gap=3, metric='mean_squared_error',
+    'in_sample_residuals = True', allow_incomplete_fold = False
+    """
+    y_with_index = y.copy()
+    y_with_index.index = pd.date_range(start='2022-01-01', periods=50, freq='D')
+    exog_with_index = exog.copy()
+    exog_with_index.index = pd.date_range(start='2022-01-01', periods=50, freq='D')
+
+    expected_metric = 0.09133694038363274
+    expected_predictions = pd.DataFrame(
+        data = np.array([[ 0.65022999,  0.24880098,  1.06503914],
+                         [ 0.52364637,  0.19453326,  0.923044  ],
+                         [ 0.46809256,  0.12440678,  0.8859392 ],
+                         [ 0.48759732,  0.24079549,  0.86300276],
+                         [ 0.47172445,  0.13894447,  0.74697552],
+                         [ 0.50952084,  0.17343609,  0.96199755],
+                         [ 0.52131987,  0.17725791,  0.88095373],
+                         [ 0.50289964,  0.13703358,  0.89080844],
+                         [ 0.54941988,  0.19541499,  0.81990615],
+                         [ 0.51121195,  0.23007235,  0.7944829 ],
+                         [ 0.25123452, -0.05173225,  0.55943282],
+                         [ 0.2791409 ,  0.05693818,  0.67369153],
+                         [ 0.28390161,  0.00743721,  0.64748321],
+                         [ 0.38317935,  0.0929118 ,  0.70099806],
+                         [ 0.42183128,  0.08731419,  0.80993652]]),
+        columns = ['pred', 'lower_bound', 'upper_bound'],
+        index = pd.date_range(start='2022-02-03', periods=15, freq='D')
+    )
+
+    forecaster = ForecasterAutoregDirect(
+                     regressor = LinearRegression(), 
+                     lags      = 3,
+                     steps     = 8
+                 )
+
+    metric, backtest_predictions = _backtesting_forecaster_refit(
+                                        forecaster            = forecaster,
+                                        y                     = y_with_index,
+                                        exog                  = exog_with_index,
+                                        initial_train_size    = len(y_with_index) - 20,
+                                        fixed_train_size      = True,
+                                        gap                   = 3,
+                                        allow_incomplete_fold = False,
+                                        steps                 = 5,
+                                        metric                = 'mean_squared_error',
+                                        interval              = [5, 95],
+                                        n_boot                = 500,
+                                        random_state          = 123,
+                                        in_sample_residuals   = True,
+                                        verbose               = False
+                                   )
+    backtest_predictions = backtest_predictions.asfreq('D')
+
     assert expected_metric == approx(metric)
     pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)

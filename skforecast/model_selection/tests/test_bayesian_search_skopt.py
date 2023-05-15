@@ -18,28 +18,15 @@ from skforecast.ForecasterAutoregCustom import ForecasterAutoregCustom
 from skforecast.model_selection import backtesting_forecaster
 # from skforecast.model_selection.model_selection import _bayesian_search_skopt
 
+# Fixtures
+from .fixtures_model_selection import y
+
 from tqdm import tqdm
 from functools import partialmethod
 tqdm.__init__ = partialmethod(tqdm.__init__, disable=True) # hide progress bar
 
 # This line skips all the tests in the file
 pytestmark = pytest.mark.skip(reason="`_bayesian_search_skopt` is deprecated since skforecast 0.7.0")
-
-# Fixtures
-# np.random.seed(123)
-# y = np.random.rand(50)
-
-y = pd.Series(
-    np.array([0.69646919, 0.28613933, 0.22685145, 0.55131477, 0.71946897,
-              0.42310646, 0.9807642 , 0.68482974, 0.4809319 , 0.39211752,
-              0.34317802, 0.72904971, 0.43857224, 0.0596779 , 0.39804426,
-              0.73799541, 0.18249173, 0.17545176, 0.53155137, 0.53182759,
-              0.63440096, 0.84943179, 0.72445532, 0.61102351, 0.72244338,
-              0.32295891, 0.36178866, 0.22826323, 0.29371405, 0.63097612,
-              0.09210494, 0.43370117, 0.43086276, 0.4936851 , 0.42583029,
-              0.31226122, 0.42635131, 0.89338916, 0.94416002, 0.50183668,
-              0.62395295, 0.1156184 , 0.31728548, 0.41482621, 0.86630916,
-              0.25045537, 0.48303426, 0.98555979, 0.51948512, 0.61289453]))
 
 
 def test_exception_bayesian_search_skopt_metric_list_duplicate_names(): # pragma: no cover

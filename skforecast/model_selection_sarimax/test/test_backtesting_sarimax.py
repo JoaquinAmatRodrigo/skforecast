@@ -5,6 +5,8 @@ import pytest
 from pytest import approx
 import numpy as np
 import pandas as pd
+from sklearn.linear_model import Ridge
+from skforecast.ForecasterAutoreg import ForecasterAutoreg
 from skforecast.ForecasterSarimax import ForecasterSarimax
 from skforecast.model_selection_sarimax import backtesting_sarimax
 from pmdarima.arima import ARIMA
@@ -14,107 +16,37 @@ from ...ForecasterSarimax.tests.fixtures_ForecasterSarimax import y_datetime
 from ...ForecasterSarimax.tests.fixtures_ForecasterSarimax import exog_datetime
 
 
-def test_backtesting_sarimax_ValueError_when_initial_train_size_is_None():
+def test_backtesting_forecaster_TypeError_when_forecaster_not_supported_types():
     """
-    Test ValueError is raised in backtesting_sarimax when initial_train_size is None.
+    Test TypeError is raised in backtesting_forecaster if Forecaster is not one 
+    of the types supported by the function.
     """
-    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=10000, trend=None, method='nm', ftol=1e-19,  order=(1,1,1)))
+    forecaster = ForecasterAutoreg(
+                    regressor = Ridge(random_state=123),
+                    lags      = 2
+                 )
 
-    initial_train_size = None
-    
-    err_msg = re.escape('`initial_train_size` must be an int smaller than the length of `y`.')
-    with pytest.raises(ValueError, match = err_msg):
-        backtesting_sarimax(
-            forecaster         = forecaster,
-            y                  = y_datetime,
-            steps              = 4,
-            metric             = 'mean_absolute_error',
-            initial_train_size = initial_train_size,
-            refit              = False,
-            fixed_train_size   = False,
-            exog               = None,
-            alpha              = None,
-            interval           = None,
-            verbose            = False
-        )
-
-
-@pytest.mark.parametrize("initial_train_size", 
-                         [(len(y_datetime)), (len(y_datetime) + 1)], 
-                         ids = lambda value : f'len: {value}' )
-def test_backtesting_sarimax_ValueError_when_initial_train_size_more_than_or_equal_to_len_y(initial_train_size):
-    """
-    Test ValueError is raised in backtesting_sarimax when initial_train_size >= len(y).
-    """
-    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=10000, trend=None, method='nm', ftol=1e-19,  order=(1,1,1)))
-    
-    err_msg = re.escape('`initial_train_size` must be an int smaller than the length of `y`.')
-    with pytest.raises(ValueError, match = err_msg):
-        backtesting_sarimax(
-            forecaster         = forecaster,
-            y                  = y_datetime,
-            steps              = 4,
-            metric             = 'mean_absolute_error',
-            initial_train_size = initial_train_size,
-            refit              = False,
-            fixed_train_size   = False,
-            exog               = None,
-            alpha              = None,
-            interval           = None,
-            verbose            = False
-        )
-
-
-def test_backtesting_sarimax_ValueError_when_initial_train_size_less_than_forecaster_window_size():
-    """
-    Test ValueError is raised in backtesting_sarimax when initial_train_size < forecaster.window_size.
-    """
-    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=10000, trend=None, method='nm', ftol=1e-19,  order=(1,1,1)))
-
-    initial_train_size = forecaster.window_size - 1
-    
     err_msg = re.escape(
-            (f"`initial_train_size` must be greater than "
-             f"forecaster's window_size ({forecaster.window_size}).")
+            ("`forecaster` must be of type `ForecasterSarimax`, for all other "
+             "types of forecasters use the functions available in the other "
+             "`model_selection` modules.")
         )
-    with pytest.raises(ValueError, match = err_msg):
-        backtesting_sarimax(
-            forecaster         = forecaster,
-            y                  = y_datetime,
-            steps              = 4,
-            metric             = 'mean_absolute_error',
-            initial_train_size = initial_train_size,
-            refit              = False,
-            fixed_train_size   = False,
-            exog               = None,
-            alpha              = None,
-            interval           = None,
-            verbose            = False
-        )
-
-
-def test_backtesting_sarimax_TypeError_when_refit_not_bool():
-    """
-    Test TypeError is raised in backtesting_sarimax when refit is not bool.
-    """
-    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=10000, trend=None, method='nm', ftol=1e-19,  order=(1,1,1)))
-
-    refit = 'not_bool'
-    
-    err_msg = re.escape( f'`refit` must be boolean: `True`, `False`.')
     with pytest.raises(TypeError, match = err_msg):
         backtesting_sarimax(
-            forecaster         = forecaster,
-            y                  = y_datetime,
-            steps              = 4,
-            metric             = 'mean_absolute_error',
-            initial_train_size = 12,
-            refit              = refit,
-            fixed_train_size   = False,
-            exog               = None,
-            alpha              = None,
-            interval           = None,
-            verbose            = False
+            forecaster            = forecaster,
+            y                     = y_datetime,
+            steps                 = 3,
+            metric                = 'mean_absolute_error',
+            initial_train_size    = len(y_datetime[:-12]),
+            fixed_train_size      = False,
+            gap                   = 0,
+            allow_incomplete_fold = False,
+            exog                  = None,
+            refit                 = False,
+            alpha                 = None,
+            interval              = None,
+            verbose               = False,
+            show_progress         = False
         )
 
 

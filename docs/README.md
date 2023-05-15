@@ -1,21 +1,33 @@
 <script src="https://kit.fontawesome.com/d20edc211b.js" crossorigin="anonymous"></script>
 
-<img src="img/logo_skforecast_no_background.png" width=185 height=185 align="right">
+<img src="img/banner-landing-page-skforecast.png#only-light" align="left"  style="
+    margin-bottom: 30px;
+    margin-top: 0px;">
 
-# skforecast
+<img src="img/banner-landing-page-dark-mode-skforecast.png#only-dark" align="left" style="
+    margin-bottom: 30px;
+    margin-top: 0px;">
 
-**Time series forecasting with scikit-learn regressors.**
+![Python](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-blue)
+[![PyPI](https://img.shields.io/pypi/v/skforecast)](https://pypi.org/project/skforecast/)
+[![codecov](https://codecov.io/gh/JoaquinAmatRodrigo/skforecast/branch/master/graph/badge.svg)](https://codecov.io/gh/JoaquinAmatRodrigo/skforecast)
+[![Build status](https://github.com/JoaquinAmatRodrigo/skforecast/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/JoaquinAmatRodrigo/skforecast/actions/workflows/unit-tests.yml/badge.svg)
+[![Project Status: Active](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
+[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/JoaquinAmatRodrigo/skforecast/graphs/commit-activity)
+[![License](https://img.shields.io/github/license/JoaquinAmatRodrigo/skforecast)](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/LICENSE)
+[![Downloads](https://static.pepy.tech/personalized-badge/skforecast?period=total&units=international_system&left_color=grey&right_color=blue&left_text=Downloads)](https://pepy.tech/project/skforecast)
 
-**Skforecast** is a Python library that eases using scikit-learn regressors as multi-step forecasters. It also works with any regressor compatible with the scikit-learn API (pipelines, CatBoost, LightGBM, XGBoost, Ranger...).
+
+**Skforecast** is a Python library that eases using scikit-learn regressors as single and multi-step forecasters. It also works with any regressor compatible with the scikit-learn API (pipelines, CatBoost, LightGBM, XGBoost, Ranger...).
 
 **Why use skforecast?**
 
-Skforecast is developed according to the following priorities:
+The fields of statistics and machine learning have developed many excellent regression algorithms that can be useful for forecasting, but applying them effectively to time series analysis can still be a challenge. To address this issue, the skforecast library provides a comprehensive set of tools for training, validation and prediction in a variety of scenarios commonly encountered when working with time series. The library is built using the widely used scikit-learn API, making it easy to integrate into existing workflows. With skforecast, users have access to a wide range of functionalities such as feature engineering, model selection, hyperparameter tuning and many others. This allows users to focus on the essential aspects of their projects and leave the intricacies of time series analysis to skforecast. In addition, skforecast is developed according to the following priorities:
 
-+ Fast and robust prototyping.
-+ Validation and backtesting methods to have a realistic assessment of model performance.
-+ Models must be deployed in production.
-+ Models must be interpretable.
++ Fast and robust prototyping. :zap:
++ Validation and backtesting methods to have a realistic assessment of model performance. :mag:
++ Models must be deployed in production. :hammer:
++ Models must be interpretable. :crystal_ball:
 
 ## Installation
 
@@ -28,7 +40,7 @@ pip install skforecast
 Specific version:
 
 ```bash
-pip install skforecast==0.7.0
+pip install skforecast==0.8.0
 ```
 
 Latest (unstable):
@@ -136,25 +148,23 @@ Universidad de Deusto / Deustuko Unibertsitatea**](https://youtu.be/MlktVhReO0E)
 <i class="fa-solid fa-wave-square" style="color: #fbbb09;"></i> [**Predicción demanda intermitente**](https://www.cienciadedatos.net/documentos/py48-forecasting-demanda-intermitente.html)
 
 
+## How to contribute
+
+For more information on how to contribute to skforecast, see our [Contribution Guide](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/CONTRIBUTING.md).
+
 ## Donating
 
 If you found skforecast useful, you can support us with a donation. Your contribution will help to continue developing and improving this project. Many thanks! :hugging_face: :heart_eyes:
 
 [![paypal](https://www.paypalobjects.com/en_US/ES/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate/?hosted_button_id=D2JZSWRLTZDL6)
 
-
-# How to Contribute to Skforecast
-
-For more information on how to contribute to skforecast, see our [Contribution Guide](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/CONTRIBUTING.md).
-
-
-# Citation
+## Citation
 
 If you use this software, please cite it using the following metadata.
 
 **APA**:
 ```
-Amat Rodrigo, J., & Escobar Ortiz, J. skforecast (Version 0.7.0) [Computer software]
+Amat Rodrigo, J., & Escobar Ortiz, J. skforecast (Version 0.8.0) [Computer software]
 ```
 
 **BibTeX**:
@@ -162,9 +172,9 @@ Amat Rodrigo, J., & Escobar Ortiz, J. skforecast (Version 0.7.0) [Computer softw
 @software{skforecast,
 author = {Amat Rodrigo, Joaquin and Escobar Ortiz, Javier},
 license = {MIT},
-month = {3},
+month = {5},
 title = {{skforecast}},
-version = {0.7.0},
+version = {0.8.0},
 year = {2023}
 }
 ```

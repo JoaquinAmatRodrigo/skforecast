@@ -5,6 +5,7 @@ import pytest
 import numpy as np
 import pandas as pd
 import inspect
+from skforecast.exceptions import IgnoredArgumentWarning
 from skforecast.utils.utils import initialize_weights
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
@@ -70,9 +71,9 @@ def test_TypeError_initialize_weights_when_series_weights_is_not_a_dict(forecast
         )
 
 
-def test_UserWarning_initialize_weights_when_weight_func_is_provided_and_regressor_has_not_sample_weights():
+def test_IgnoredArgumentWarning_initialize_weights_when_weight_func_is_provided_and_regressor_has_not_sample_weights():
     """
-    Test UserWarning is created when weight_func is provided but the regressor 
+    Test IgnoredArgumentWarning is created when weight_func is provided but the regressor 
     has no argument sample_weights in his fit method.
     """
     def weight_func(): # pragma: no cover
@@ -82,7 +83,7 @@ def test_UserWarning_initialize_weights_when_weight_func_is_provided_and_regress
                 (f"Argument `weight_func` is ignored since regressor KNeighborsRegressor() "
                  f"does not accept `sample_weight` in its `fit` method.")
             )
-    with pytest.warns(UserWarning, match = warn_msg):
+    with pytest.warns(IgnoredArgumentWarning, match = warn_msg):
         weight_func, source_code_weight_func, _ = initialize_weights(
             forecaster_name = 'ForecasterAutoreg', 
             regressor       = KNeighborsRegressor(), 
@@ -94,18 +95,18 @@ def test_UserWarning_initialize_weights_when_weight_func_is_provided_and_regress
     assert source_code_weight_func is None
 
 
-def test_UserWarning_initialize_weights_when_series_weights_is_provided_and_regressor_has_not_sample_weights():
+def test_IgnoredArgumentWarning_initialize_weights_when_series_weights_is_provided_and_regressor_has_not_sample_weights():
     """
-    Test UserWarning is created when series_weights is provided but the regressor 
+    Test IgnoredArgumentWarning is created when series_weights is provided but the regressor 
     has no argument sample_weights in his fit method.
     """
     series_weights = {'series_1': 1., 'series_2': 2.}
 
     warn_msg = re.escape(
-                (f"Argument `series_weights` is ignored since regressor KNeighborsRegressor() "
-                 f"does not accept `sample_weight` in its `fit` method.")
+                ("Argument `series_weights` is ignored since regressor KNeighborsRegressor() "
+                 "does not accept `sample_weight` in its `fit` method.")
             )
-    with pytest.warns(UserWarning, match = warn_msg):
+    with pytest.warns(IgnoredArgumentWarning, match = warn_msg):
         weight_func, source_code_weight_func, series_weights = initialize_weights(
             forecaster_name = 'ForecasterAutoregMultiSeries', 
             regressor       = KNeighborsRegressor(), 

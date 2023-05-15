@@ -47,7 +47,7 @@ When working with time series, it is seldom needed to predict only the next elem
 
 ### Recursive multi-step forecasting
 
-Since the value *t(n-1)* is required to predict *t(n)*, and *t(n-1)* is unknown, a recursive process is applied in which, each new prediction, is based on the previous one. This process is known as recursive forecasting or recursive multi-step forecasting and can be easily generated with the `ForecasterAutoreg` and `ForecasterAutoregCustom` classes.
+Since the value *t(n-1)* is required to predict *t(n)*, and *t(n-1)* is unknown, a recursive process is applied in which, each new prediction, is based on the previous one. This process is known as recursive forecasting or recursive multi-step forecasting and can be easily generated with the [`ForecasterAutoreg`](https://skforecast.org/latest/user_guides/autoregresive-forecaster.html) and [`ForecasterAutoregCustom`](https://skforecast.org/latest/user_guides/custom-predictors.html) classes.
 
 <p align="center"><img src="../img/diagram-recursive-mutistep-forecasting.png" style="width: 650px"></p>
 
@@ -56,7 +56,7 @@ Since the value *t(n-1)* is required to predict *t(n)*, and *t(n-1)* is unknown,
 
 ### Direct multi-step forecasting
 
-Direct multi-step forecasting consists of training a different model for each step of the forecast horizon. For example, to predict the next 5 values of a time series, 5 different models are trained, one for each step. As a result, the predictions are independent of each other. This entire process is automated in the `ForecasterAutoregDirect` class. 
+Direct multi-step forecasting consists of training a different model for each step of the forecast horizon. For example, to predict the next 5 values of a time series, 5 different models are trained, one for each step. As a result, the predictions are independent of each other. This entire process is automated in the [`ForecasterAutoregDirect`](https://skforecast.org/latest/user_guides/direct-multi-step-forecasting.html) class. 
 
 <p align="center"><img src="../img/diagram-direct-multi-step-forecasting.png" style="width: 700px"></p>
 
@@ -85,6 +85,8 @@ To predict the next *n* steps, the strategy of [recursive multi-step forecasting
 
 <center><font size="2.5"> <i>Diagram of recursive forecasting with multiple independent time series.</i></font></center>
 
+The [`ForecasterAutoregMultiSeries`](https://skforecast.org/latest/user_guides/independent-multi-time-series-forecasting.html) and [`ForecasterAutoregMultiSeriesCustom`](https://skforecast.org/latest/user_guides/custom-predictors.html#forecasterautoregmultiseriescustom) classes cover this process. 
+
 ### Dependent Multi-Series Forecasting (multivariate time series)
 
 All series are modeled together in a single model, considering that each time series depends not only on its past values but also on the past values of the other series. The forecaster is expected not only to learn the information of each series separately but also to relate them. An example is the measurements made by all the sensors (flow, temperature, pressure...) installed on an industrial machine such as a compressor.
@@ -92,6 +94,8 @@ All series are modeled together in a single model, considering that each time se
 <p align="center"><img src="../img/forecaster_multivariate_train_matrix_diagram.png" style="width: 800px"></p>
 
 <center><font size="2.5"> <i>Transformation of two time series and an exogenous variable into the matrices needed to train a machine learning model in a multi-variate-series context.</i></font></center>
+
+The [`ForecasterAutoregMultiVariate`](https://skforecast.org/latest/user_guides/dependent-multi-series-multivariate-forecasting.html) class covers this process. 
 
 ## Backtesting forecasting models
 
@@ -136,3 +140,5 @@ Backtesting without refit is a strategy where the model is trained only once and
 <p align="center"><img src="../img/backtesting_no_refit.gif" style="width: 600px;"></p>
 
 <center><font size="2.5"> <i>Backtesting without refit.</i></font></center>
+
+Check the [Backtesting user guide](https://skforecast.org/latest/user_guides/backtesting.html) for a code example.

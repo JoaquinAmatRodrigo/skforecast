@@ -7,6 +7,7 @@ import pandas as pd
 from sklearn.linear_model import Ridge
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import mean_squared_error
+from skforecast.exceptions import IgnoredArgumentWarning
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 from skforecast.ForecasterAutoregMultiSeriesCustom import ForecasterAutoregMultiSeriesCustom
 from skforecast.ForecasterAutoregMultiVariate import ForecasterAutoregMultiVariate
@@ -386,9 +387,9 @@ def test_evaluate_grid_hyperparameters_multiseries_when_return_best_ForecasterAu
 
 # ForecasterAutoregMultiSeriesCustom
 # ======================================================================================================================
-def test_UserWarning_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMultiSeriesCustom_lags_grid():
+def test_IgnoredArgumentWarning_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMultiSeriesCustom_lags_grid():
     """
-    Test UserWarning _evaluate_grid_hyperparameters_multiseries in ForecasterAutoregMultiSeriesCustom 
+    Test IgnoredArgumentWarning _evaluate_grid_hyperparameters_multiseries in ForecasterAutoregMultiSeriesCustom 
     when `lags_grid` is not `None`.
     """
     forecaster = ForecasterAutoregMultiSeriesCustom(
@@ -405,7 +406,7 @@ def test_UserWarning_evaluate_grid_hyperparameters_multiseries_ForecasterAutoreg
     warn_msg = re.escape(
                 '`lags_grid` ignored if forecaster is an instance of `ForecasterAutoregMultiSeriesCustom`.'
             )
-    with pytest.warns(UserWarning, match = warn_msg):
+    with pytest.warns(IgnoredArgumentWarning, match = warn_msg):
         _evaluate_grid_hyperparameters_multiseries(
             forecaster          = forecaster,
             series              = series,

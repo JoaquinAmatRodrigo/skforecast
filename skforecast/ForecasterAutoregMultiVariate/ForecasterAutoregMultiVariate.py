@@ -21,6 +21,7 @@ from itertools import chain
 
 import skforecast
 from ..ForecasterBase import ForecasterBase
+from ..exceptions import IgnoredArgumentWarning
 from ..utils import initialize_lags
 from ..utils import initialize_weights
 from ..utils import check_select_fit_kwargs
@@ -107,12 +108,12 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
     ----------
     regressor : regressor or pipeline compatible with the scikit-learn API
         An instance of a regressor or pipeline compatible with the scikit-learn API.
-        One instance of this regressor is trained for each step. All
-        them are stored in `self.regressors_`.
+        An instance of this regressor is trained for each step. All of them 
+        are stored in `self.regressors_`.
 
     regressors_ : dict
-        Dictionary with regressors trained for each step. They are initialized as a copy
-        of `regressor`.
+        Dictionary with regressors trained for each step. They are initialized 
+        as a copy of `regressor`.
         
     steps : int
         Number of future steps the forecaster will predict when using method
@@ -132,8 +133,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             create different lags for each series. {'series_column_name': lags}.
 
     lags_ : dict
-        Dictionary with the of the lags for each series. Created from `lags` and used
-        internally.
+        Dictionary containing the lags of each series. Created from `lags` and 
+        used internally.
 
     transformer_series : transformer (preprocessor) or dict of transformers, default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
@@ -169,8 +170,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         `max_lag`.
 
     last_window : pandas Series
-        Last window the forecaster has seen during training. It stores the
-        values needed to predict the next `step` right after the training data.
+        Last window seen by the forecaster during training. It stores the values 
+        needed to predict the next `step` immediately after the training data.
         
     index_type : type
         Type of index of the input used in training.
@@ -504,7 +505,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             if series_not_in_transformer_series:
                 warnings.warn(
                     (f"{series_not_in_transformer_series} not present in `transformer_series`."
-                     f" No transformation is applied to these series.")
+                     f" No transformation is applied to these series."),
+                     IgnoredArgumentWarning
                 )
 
         if exog is not None:
@@ -594,11 +596,14 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         self,
         step: int,
         X_train: pd.DataFrame,
-        y_train: pd.Series
+        y_train: pd.Series,
+        remove_suffix: bool=False
     ) -> Tuple[pd.DataFrame, pd.Series]:
         """
-        Select columns needed to train a forecaster for a specific step. The input
-        matrices should be created with created with `create_train_X_y()`.         
+        Select the columns needed to train a forecaster for a specific step.  
+        The input matrices should be created using `create_train_X_y()`. If 
+        `remove_suffix=True` the suffix "_step_i" will be removed from the 
+        column names.      
 
         Parameters
         ----------
@@ -611,6 +616,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         y_train : pandas Series
             Values (target) of the time series related to each row of `X_train`.
 
+        remove_suffix : bool, default `False`
+            If True, suffix "_step_i" is removed from the column names.
 
         Returns 
         -------
@@ -639,6 +646,11 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             idx_columns_exog = np.arange(X_train.shape[1])[len_columns_lags + step::self.steps]
             idx_columns = np.hstack((idx_columns_lags, idx_columns_exog))
             X_train_step = X_train.iloc[:, idx_columns]
+
+        if remove_suffix:
+            X_train_step.columns = [col_name.replace(f"_step_{step + 1}", "")
+                                    for col_name in X_train_step.columns]
+            y_train_step.name = y_train_step.name.replace(f"_step_{step + 1}", "")
 
         return  X_train_step, y_train_step
 
@@ -691,8 +703,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         self,
         series: pd.DataFrame,
         exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-        store_in_sample_residuals: bool=True,
-        fit_kwargs: Optional[dict]=None
+        store_in_sample_residuals: bool=True
     ) -> None:
         """
         Training Forecaster.
@@ -709,11 +720,6 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
 
         store_in_sample_residuals : bool, default `True`
             if True, in_sample_residuals are stored.
-
-        fit_kwargs : dict, default `None`
-            Additional keyword arguments passed to the `fit` method of the regressor.
-            If also passed during the instantiation of the forecaster, the values
-            specified here will take precedence.
 
         Returns 
         -------
@@ -758,9 +764,10 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             # self.regressors_ and self.filter_train_X_y_for_step expect
             # first step to start at value 1
             X_train_step, y_train_step = self.filter_train_X_y_for_step(
-                                             step    = step,
-                                             X_train = X_train,
-                                             y_train = y_train
+                                             step          = step,
+                                             X_train       = X_train,
+                                             y_train       = y_train,
+                                             remove_suffix = True
                                          )
             sample_weight = self.create_sample_weights(X_train=X_train_step)
             if sample_weight is not None:
@@ -771,7 +778,11 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                     **self.fit_kwargs
                 )
             else:
-                self.regressors_[step].fit(X=X_train_step, y=y_train_step, **self.fit_kwargs)
+                self.regressors_[step].fit(
+                    X = X_train_step, 
+                    y = y_train_step, 
+                    **self.fit_kwargs
+                )
 
             # This is done to save time during fit in functions such as backtesting()
             if store_in_sample_residuals:
@@ -923,21 +934,24 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
 
         predictions = np.full(shape=len(steps), fill_value=np.nan)
 
-        for i, step in enumerate(steps):
-            regressor = self.regressors_[step]
-            if exog is None:
-                X = X_lags
-            else:
-                # Only columns from exog related with the current step are selected.
-                X = np.hstack([X_lags, exog_values[0][step-1::max(steps)].reshape(1, -1)])
-            with warnings.catch_warnings():
-                # Suppress scikit-learn warning: "X does not have valid feature names,
-                # but NoOpTransformer was fitted with feature names".
-                warnings.simplefilter("ignore")
-                predictions[i] = regressor.predict(X)
+        if exog is None:
+            Xs = [X_lags] * len(steps)
+        else:
+            Xs = [
+                np.hstack([X_lags, exog_values[0][step-1::max(steps)].reshape(1, -1)])
+                for step in steps
+            ]
+
+        regressors = [self.regressors_[step] for step in steps]
+        with warnings.catch_warnings():
+            # Suppress scikit-learn warning: "X does not have valid feature names,
+            # but NoOpTransformer was fitted with feature names".
+            warnings.simplefilter("ignore")
+            predictions = [
+                regressor.predict(X)[0] for regressor, X in zip(regressors, Xs)
+            ]
 
         idx = expand_index(index=last_window_index, steps=max(steps))
-
         predictions = pd.DataFrame(
                           data    = predictions,
                           columns = [self.level],
@@ -1037,24 +1051,24 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         if in_sample_residuals:
             if not set(steps).issubset(set(self.in_sample_residuals.keys())):
                 raise ValueError(
-                    (f'Not `forecaster.in_sample_residuals` for steps: '
-                     f'{set(steps) - set(self.in_sample_residuals.keys())}.')
+                    (f"Not `forecaster.in_sample_residuals` for steps: "
+                     f"{set(steps) - set(self.in_sample_residuals.keys())}.")
                 )
             residuals = self.in_sample_residuals
         else:
             if self.out_sample_residuals is None:
                 raise ValueError(
-                    ('`forecaster.out_sample_residuals` is `None`. Use '
-                     '`in_sample_residuals=True` or method `set_out_sample_residuals()` '
-                     'before `predict_interval()`, `predict_bootstrapping()` or '
-                     '`predict_dist()`.')
+                    ("`forecaster.out_sample_residuals` is `None`. Use "
+                     "`in_sample_residuals=True` or method `set_out_sample_residuals()` "
+                     "before `predict_interval()`, `predict_bootstrapping()` or "
+                     "`predict_dist()`.")
                 )
             else:
                 if not set(steps).issubset(set(self.out_sample_residuals.keys())):
                     raise ValueError(
-                        (f'Not `forecaster.out_sample_residuals` for steps: '
-                         f'{set(steps) - set(self.out_sample_residuals.keys())}. '
-                         f'Use method `set_out_sample_residuals()`.')
+                        (f"Not `forecaster.out_sample_residuals` for steps: "
+                         f"{set(steps) - set(self.out_sample_residuals.keys())}. "
+                         f"Use method `set_out_sample_residuals()`.")
                     )
             residuals = self.out_sample_residuals
         
@@ -1451,11 +1465,11 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         
         if not set(self.out_sample_residuals.keys()).issubset(set(residuals.keys())):
             warnings.warn(
-                f"""
+                (f"""
                 Only residuals of models (steps) 
                 {set(self.out_sample_residuals.keys()).intersection(set(residuals.keys()))} 
                 are updated.
-                """
+                """), IgnoredArgumentWarning
             )
 
         residuals = {key: value for key, value in residuals.items() if key in self.out_sample_residuals.keys()}

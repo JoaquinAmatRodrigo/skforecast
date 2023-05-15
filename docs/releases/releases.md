@@ -1,8 +1,8 @@
 # Change Log
 
-All notable changes to this project will be documented in this file.
+All significant changes to this project are documented in this release file.
 
-## [0.8.0] - [2023-XX-XX]
+## [0.8.0] - [2023-05-16]
 
 **Added**
 
@@ -22,7 +22,11 @@ All notable changes to this project will be documented in this file.
 
 + Added function `utils.check_select_fit_kwargs` to check if the argument `fit_kwargs` is a dictionary and select only the keys used by the `fit` method of the regressor.
 
++ Added argument `gap` to functions in `model_selection`, `model_selection_multiseries` and `model_selection_sarimax` to omit observations between training and prediction.
+
 + Added argument `show_progress` to functions `model_selection.backtesting_forecaster`, `model_selection_multiseries.backtesting_forecaster_multiseries` and `model_selection_sarimax.backtesting_forecaster_sarimax` to indicate weather to show a progress bar.
+
++ Added argument `remove_suffix`, default `False`, to the method `filter_train_X_y_for_step()` in `ForecasterAutoregDirect` and `ForecasterAutoregMultiVariate`. If `remove_suffix=True` the suffix "_step_i" will be removed from the column names of the training matrices.
 
 **Changed**
 
