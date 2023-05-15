@@ -14,11 +14,13 @@ import numpy as np
 import pandas as pd
 import sklearn
 from sklearn.compose import ColumnTransformer
+from sklearn.exceptions import NotFittedError
 import inspect
 from copy import deepcopy
 
 from ..exceptions import MissingValuesExogWarning
 from ..exceptions import DataTypeWarning
+from ..exceptions import IgnoredArgumentWarning
 
 optional_dependencies = {
     "sarimax": ['pmdarima>=2.0, <2.1'],
@@ -148,7 +150,8 @@ def initialize_weights(
         if 'sample_weight' not in inspect.signature(regressor.fit).parameters:
             warnings.warn(
                 (f"Argument `weight_func` is ignored since regressor {regressor} "
-                 f"does not accept `sample_weight` in its `fit` method.")
+                 f"does not accept `sample_weight` in its `fit` method."),
+                 IgnoredArgumentWarning
             )
             weight_func = None
             source_code_weight_func = None
@@ -162,7 +165,8 @@ def initialize_weights(
         if 'sample_weight' not in inspect.signature(regressor.fit).parameters:
             warnings.warn(
                 (f"Argument `series_weights` is ignored since regressor {regressor} "
-                 f"does not accept `sample_weight` in its `fit` method.")
+                 f"does not accept `sample_weight` in its `fit` method."),
+                 IgnoredArgumentWarning
             )
             series_weights = None
 
@@ -208,14 +212,16 @@ def check_select_fit_kwargs(
         if non_used_keys:
             warnings.warn(
                 (f"Argument/s {non_used_keys} ignored since they are not used by the "
-                 f"regressor's `fit` method.")
+                 f"regressor's `fit` method."),
+                 IgnoredArgumentWarning
             )
 
         if 'sample_weight' in fit_kwargs.keys():
             warnings.warn(
                 ("The `sample_weight` argument is ignored. Use `weight_func` to pass "
                  "a function that defines the individual weights for each sample "
-                 "based on its index.")
+                 "based on its index."),
+                 IgnoredArgumentWarning
             )
             del fit_kwargs['sample_weight']
 
@@ -281,8 +287,9 @@ def check_exog(
         if exog.isnull().any().any():
             warnings.warn(
                 ("`exog` has missing values. Most machine learning models do not allow "
-                 "missing values. Fitting the forecaster may fail."), MissingValuesExogWarning
-        )
+                 "missing values. Fitting the forecaster may fail."), 
+                 MissingValuesExogWarning
+            )
          
     return
 
@@ -345,8 +352,8 @@ def check_exog_dtypes(
             if exog[col].cat.categories.dtype not in [int, np.int32, np.int64]:
                 raise TypeError(
                     ("Categorical columns in exog must contain only integer values. "
-                     "See skforecast docs for more info about how to include categorical "
-                     "features https://skforecast.org/"
+                     "See skforecast docs for more info about how to include "
+                     "categorical features https://skforecast.org/"
                      "latest/user_guides/categorical-features.html")
                 )
     else:
@@ -359,8 +366,8 @@ def check_exog_dtypes(
         if exog.dtypes == 'category' and exog.cat.categories.dtype not in [int, np.int32, np.int64]:
             raise TypeError(
                 ("If exog is of type category, it must contain only integer values. "
-                 "See skforecast docs for more info about how to include categorical "
-                 "features https://skforecast.org/"
+                 "See skforecast docs for more info about how to include "
+                 "categorical features https://skforecast.org/"
                  "latest/user_guides/categorical-features.html")
             )
          
@@ -634,8 +641,9 @@ def check_predict_input(
             raise TypeError("`exog` must be a pandas Series or DataFrame.")
         if exog.isnull().any().any():
             warnings.warn(
-                ("`exog` has missing values. Most of machine learning models do not allow "
-                 "missing values. `predict` method may fail."), MissingValuesExogWarning
+                ("`exog` has missing values. Most of machine learning models do "
+                 "not allow missing values. `predict` method may fail."), 
+                 MissingValuesExogWarning
             )
         if not isinstance(exog, exog_type):
             raise TypeError(
@@ -708,8 +716,8 @@ def check_predict_input(
                 )
             if last_window_exog.isnull().any().all():
                 warnings.warn(
-                ("`last_window_exog` has missing values. Most of machine learning models "
-                 "do not allow missing values. `predict` method may fail."),
+                ("`last_window_exog` has missing values. Most of machine learning "
+                 "models do not allow missing values. `predict` method may fail."),
                 MissingValuesExogWarning
             )
             _, last_window_exog_index = preprocess_last_window(
@@ -724,8 +732,8 @@ def check_predict_input(
             if isinstance(last_window_exog_index, pd.DatetimeIndex):
                 if not last_window_exog_index.freqstr == index_freq:
                     raise TypeError(
-                        (f"Expected frequency of type {index_freq} for `last_window_exog`. "
-                         f"Got {last_window_exog_index.freqstr}.")
+                        (f"Expected frequency of type {index_freq} for "
+                         f"`last_window_exog`. Got {last_window_exog_index.freqstr}.")
                     )
 
             # Check all columns are in the pd.DataFrame, last_window_exog
@@ -1451,3 +1459,197 @@ def multivariate_time_series_corr(
     corr.index.name = "lag"
     
     return corr
+
+
+def check_backtesting_input(
+    forecaster: object,
+    steps: int,
+    metric: Union[str, Callable, list],
+    y: Optional[pd.Series]=None,
+    series: Optional[pd.DataFrame]=None,
+    initial_train_size: Optional[int]=None,
+    fixed_train_size: bool=True,
+    gap: int=0,
+    allow_incomplete_fold: bool=True,
+    refit: bool=False,
+    interval: Optional[list]=None,
+    alpha: Optional[float]=None,
+    n_boot: int=500,
+    random_state: int=123,
+    in_sample_residuals: bool=True,
+    verbose: bool=False,
+    show_progress: bool=True
+) -> None:
+    """
+    This is a helper function to check most inputs of backtesting functions in 
+    modules `model_selection`, `model_selection_multiseries` and 
+    `model_selection_sarimax`.
+
+    Parameters
+    ----------
+    forecaster : object
+        Forecaster model.
+
+    steps : int, list
+        Number of future steps predicted.
+        
+    metric : str, Callable, list
+        Metric used to quantify the goodness of fit of the model.
+        
+    y : pandas Series
+        Training time series for uni-series forecasters.
+
+    series : pandas DataFrame
+        Training time series for multi-series forecasters.
+    
+    initial_train_size : int, default `None`
+        Number of samples in the initial train split. If `None` and `forecaster` 
+        is already trained, no initial train is done and all data is used to 
+        evaluate the model.
+    
+    fixed_train_size : bool, default `True`
+        If True, train size doesn't increase but moves by `steps` in each iteration.
+
+    gap : int, default `0`
+        Number of samples to be excluded after the end of each training set and 
+        before the test set.
+        
+    allow_incomplete_fold : bool, default `True`
+        Last fold is allowed to have a smaller number of samples than the 
+        `test_size`. If `False`, the last fold is excluded.
+
+    refit : bool, default `False`
+        Whether to re-fit the forecaster in each iteration.
+
+    interval : list, default `None`
+        Confidence of the prediction interval estimated. Sequence of percentiles
+        to compute, which must be between 0 and 100 inclusive.
+
+    alpha : float, default `None`
+        The confidence intervals used in ForecasterSarimax are (1 - alpha) %.
+            
+    n_boot : int, default `500`
+        Number of bootstrapping iterations used to estimate prediction
+        intervals.
+
+    random_state : int, default `123`
+        Sets a seed to the random generator, so that boot intervals are always 
+        deterministic.
+
+    in_sample_residuals : bool, default `True`
+        If `True`, residuals from the training data are used as proxy of prediction 
+        error to create prediction intervals.  If `False`, out_sample_residuals 
+        are used if they are already stored inside the forecaster.
+                  
+    verbose : bool, default `False`
+        Print number of folds and index of training and validation sets used 
+        for backtesting.
+
+    show_progress: bool, default `True`
+        Whether to show a progress bar. Defaults to True.
+
+    Returns 
+    -------
+        
+    """
+
+    forecasters_uni = ['ForecasterAutoreg', 'ForecasterAutoregCustom', 
+                       'ForecasterAutoregDirect', 'ForecasterSarimax']
+    forecasters_multi = ['ForecasterAutoregMultiSeries', 
+                         'ForecasterAutoregMultiSeriesCustom', 
+                         'ForecasterAutoregMultiVariate']
+
+    if type(forecaster).__name__ in forecasters_uni:
+        if not isinstance(y, pd.Series):
+            raise TypeError("`y` must be a pandas Series.")
+        data_name = 'y'
+        data_length = len(y)
+        
+    if type(forecaster).__name__ in forecasters_multi:
+        if not isinstance(series, pd.DataFrame):
+            raise TypeError("`series` must be a pandas DataFrame.")
+        data_name = 'series'
+        data_length = len(series)
+        
+    if not isinstance(steps, (int, np.integer)) or steps < 1:
+        raise TypeError(
+            f"`steps` must be an integer greater than or equal to 1. Got {steps}."
+        )
+    if not isinstance(gap, (int, np.integer)) or gap < 0:
+        raise TypeError(
+            f"`gap` must be an integer greater than or equal to 0. Got {gap}."
+        )
+    if not isinstance(metric, (str, Callable, list)):
+        raise TypeError(
+            (f"`metric` must be a string, a callable function, or a list containing "
+             f"multiple strings and/or callables. Got {type(metric)}.")
+        )
+
+    if initial_train_size is not None:
+        if not isinstance(initial_train_size, (int, np.integer)):
+            raise TypeError(
+                (f"If used, `initial_train_size` must be an integer greater than the "
+                 f"window_size of the forecaster. Got type {type(initial_train_size)}.")
+            )
+        if initial_train_size >= data_length:
+            raise ValueError(
+                (f"If used, `initial_train_size` must be an integer smaller "
+                 f"than the length of `{data_name}` ({data_length}).")
+            )    
+        if initial_train_size < forecaster.window_size:
+            raise ValueError(
+                (f"If used, `initial_train_size` must be an integer greater than "
+                 f"the window_size of the forecaster ({forecaster.window_size}).")
+            )
+        if initial_train_size + gap >= data_length:
+            raise ValueError(
+                (f"The combination of initial_train_size {initial_train_size} and "
+                 f"gap {gap} cannot be greater than the length of `{data_name}` "
+                 f"({data_length}).")
+            )
+    else:
+        if type(forecaster).__name__ == 'ForecasterSarimax':
+            raise ValueError(
+                (f"`initial_train_size` must be an integer smaller than the "
+                 f"length of `{data_name}` ({data_length}).")
+            )    
+        else:
+            if not forecaster.fitted:
+                raise NotFittedError(
+                    ("`forecaster` must be already trained if no `initial_train_size` "
+                     "is provided.")
+                )
+            if refit:
+                raise ValueError(
+                    "`refit` is only allowed when `initial_train_size` is not `None`."
+                )
+    
+    if not isinstance(fixed_train_size, bool):
+        raise TypeError("`fixed_train_size` must be a boolean: `True`, `False`.")
+    if not isinstance(allow_incomplete_fold, bool):
+        raise TypeError("`allow_incomplete_fold` must be a boolean: `True`, `False`.")
+    if not isinstance(refit, bool):
+        raise TypeError("`refit` must be a boolean: `True`, `False`.")
+    if not isinstance(n_boot, (int, np.integer)) or n_boot < 0:
+        raise TypeError(f"`n_boot` must be an integer greater than 0. Got {n_boot}.")
+    if not isinstance(random_state, (int, np.integer)) or random_state < 0:
+        raise TypeError(f"`random_state` must be an integer greater than 0. Got {random_state}.")
+    if not isinstance(in_sample_residuals, bool):
+        raise TypeError("`in_sample_residuals` must be a boolean: `True`, `False`.")
+    if not isinstance(verbose, bool):
+        raise TypeError("`verbose` must be a boolean: `True`, `False`.")
+    if not isinstance(show_progress, bool):
+        raise TypeError("`show_progress` must be a boolean: `True`, `False`.")
+
+    if interval is not None or alpha is not None:
+        check_interval(interval=interval, alpha=alpha)
+
+    if not allow_incomplete_fold and data_length - (initial_train_size + gap) < steps:
+        raise ValueError(
+            (f"There is not enough data to evaluate {steps} steps in a single "
+             f"fold. Set `allow_incomplete_fold` to `True` to allow incomplete folds.\n"
+             f"    Data available for test : {data_length - (initial_train_size + gap)}\n"
+             f"    Steps                   : {steps}")
+        )
+    
+    return

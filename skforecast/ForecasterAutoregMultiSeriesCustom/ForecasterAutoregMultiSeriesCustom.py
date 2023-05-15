@@ -20,6 +20,7 @@ import inspect
 
 import skforecast
 from ..ForecasterBase import ForecasterBase
+from ..exceptions import IgnoredArgumentWarning
 from ..utils import initialize_weights
 from ..utils import check_select_fit_kwargs
 from ..utils import check_y
@@ -435,7 +436,8 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
             if series_not_in_transformer_series:
                     warnings.warn(
                         (f"{series_not_in_transformer_series} not present in `transformer_series`."
-                         f" No transformation is applied to these series.")
+                         f" No transformation is applied to these series."),
+                         IgnoredArgumentWarning
                     )
         
         if exog is not None:
@@ -609,8 +611,9 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
             series_not_in_series_weights = set(series.columns) - set(self.series_weights.keys())
             if series_not_in_series_weights:
                 warnings.warn(
-                    f"{series_not_in_series_weights} not present in `series_weights`."
-                    f" A weight of 1 is given to all their samples."
+                    (f"{series_not_in_series_weights} not present in `series_weights`."
+                     f" A weight of 1 is given to all their samples."),
+                    IgnoredArgumentWarning
                 )
             self.series_weights_ = dict.fromkeys(series.columns, 1.)
             self.series_weights_.update((k, v) for k, v in self.series_weights.items() if k in self.series_weights_)
@@ -626,8 +629,9 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
                 series_not_in_weight_func = set(series.columns) - set(self.weight_func.keys())
                 if series_not_in_weight_func:
                     warnings.warn(
-                        f"{series_not_in_weight_func} not present in `weight_func`."
-                        f" A weight of 1 is given to all their samples."
+                        (f"{series_not_in_weight_func} not present in `weight_func`."
+                         f" A weight of 1 is given to all their samples."),
+                        IgnoredArgumentWarning
                     )
                 self.weight_func_ = dict.fromkeys(series.columns, lambda index: np.ones_like(index, dtype=float))
                 self.weight_func_.update((k, v) for k, v in self.weight_func.items() if k in self.weight_func_)
@@ -1496,11 +1500,11 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
 
         if not set(self.out_sample_residuals.keys()).issubset(set(residuals.keys())):
             warnings.warn(
-                f"""
+                (f"""
                 Only residuals of levels 
                 {set(self.out_sample_residuals.keys()).intersection(set(residuals.keys()))} 
                 are updated.
-                """
+                """), IgnoredArgumentWarning
             )
 
         residuals = {key: value for key, value in residuals.items() if key in self.out_sample_residuals.keys()}

@@ -19,12 +19,14 @@ from sklearn.metrics import mean_absolute_percentage_error
 from sklearn.metrics import mean_squared_log_error
 from sklearn.model_selection import ParameterGrid
 from sklearn.model_selection import ParameterSampler
-from sklearn.exceptions import NotFittedError
 import optuna
 from optuna.samplers import TPESampler, RandomSampler
-optuna.logging.set_verbosity(optuna.logging.WARNING) # disable optuna logs
 
 from ..exceptions import LongTrainingWarning
+from ..exceptions import IgnoredArgumentWarning
+from ..utils import check_backtesting_input
+
+optuna.logging.set_verbosity(optuna.logging.WARNING) # disable optuna logs
 
 logging.basicConfig(
     format = '%(name)-10s %(levelname)-5s %(message)s', 
@@ -103,9 +105,10 @@ def _backtesting_forecaster_verbose(
 
 
 def _create_backtesting_folds(
-    y: pd.Series,
+    data: Union[pd.Series, pd.DataFrame],
     initial_train_size: Union[int, None],
     test_size: int,
+    externally_fitted: bool=False,
     refit: bool=False,
     fixed_train_size: bool=True,
     gap: int=0,
@@ -140,8 +143,8 @@ def _create_backtesting_folds(
     
     Parameters
     ----------        
-    y : pandas Series
-        Time series values. 
+    data : pandas Series, pandas DataFrame
+        Time series values.
     
     initial_train_size : int, None
         Size of the training set in the first fold. If `None` or 0, the initial
@@ -149,6 +152,10 @@ def _create_backtesting_folds(
         
     test_size : int
         Size of the test set in each fold.
+
+    externally_fitted : bool, default `False`
+        Flag indicating whether the forecaster is already trained. Only used when 
+        `initial_train_size` is None and `refit` is False.
 
     refit : bool, default `False`
         Whether to re-fit the forecaster in each iteration.
@@ -178,16 +185,13 @@ def _create_backtesting_folds(
         the gap, and test excluding the gap for each fold.
     
     """
-
-    if initial_train_size is None:
-        initial_train_size = 0
     
-    idx = range(len(y))
+    idx = range(len(data))
     folds = []
     i = 0
     last_fold_excluded = False
 
-    while initial_train_size + (i * test_size) + gap < len(y):
+    while initial_train_size + (i * test_size) + gap < len(data):
 
         if refit:
             # If fixed_train_size the train size doesn't increase but moves by 
@@ -225,8 +229,11 @@ def _create_backtesting_folds(
     if verbose:
         print("Information of backtesting process")
         print("----------------------------------")
-        print(f"Number of observations used for initial training: {initial_train_size}")
-        print(f"Number of observations used for backtesting: {len(y) - initial_train_size}")
+        if externally_fitted:
+            print(f"An already trained forecaster is to be used. Window size: {initial_train_size}")
+        else:
+            print(f"Number of observations used for initial training: {initial_train_size}")
+        print(f"Number of observations used for backtesting: {len(data) - initial_train_size}")
         print(f"    Number of folds: {len(folds)}")
         print(f"    Number of steps per fold: {test_size}")
         print(f"    Number of steps to exclude from the end of each train set before test (gap): {gap}")
@@ -237,26 +244,28 @@ def _create_backtesting_folds(
         print("")
 
         for i, fold in enumerate(folds):
-            training_start    = y.index[fold[0][0]] if fold[0] is not None else None
-            training_end      = y.index[fold[0][-1]] if fold[0] is not None else None
+            training_start    = data.index[fold[0][0]] if fold[0] is not None else None
+            training_end      = data.index[fold[0][-1]] if fold[0] is not None else None
             training_length   = len(fold[0]) if fold[0] is not None else 0
-            validation_start  = y.index[fold[2][0]]
-            validation_end    = y.index[fold[2][-1]]
+            validation_start  = data.index[fold[2][0]]
+            validation_end    = data.index[fold[2][-1]]
             validation_length = len(fold[2])
             print(f"Fold: {i}")
-            print(
-                f"    Training:   {training_start} -- {training_end}  (n={training_length})"
-            )
+            if not externally_fitted:
+                print(
+                    f"    Training:   {training_start} -- {training_end}  (n={training_length})"
+                )
             print(
                 f"    Validation: {validation_start} -- {validation_end}  (n={validation_length})"
             )
         print("")
 
     if not return_all_indexes:
+        # +1 to prevent iloc pandas from deleting the last observation
         folds = [
-            [[fold[0][0], fold[0][-1]], 
-             [fold[1][0], fold[1][-1]], 
-             [fold[2][0], fold[2][-1]]] 
+            [[fold[0][0], fold[0][-1]+1], 
+             [fold[1][0], fold[1][-1]+1], 
+             [fold[2][0], fold[2][-1]+1]] 
             for fold in folds
         ]
 
@@ -418,15 +427,13 @@ def _backtesting_forecaster_refit(
 
     forecaster = deepcopy(forecaster)
 
-    if isinstance(metric, str):
-        metrics = _get_metric(metric=metric)
-    elif isinstance(metric, list):
-        metrics = [_get_metric(metric=m) if isinstance(m, str) else m for m in metric]
+    if not isinstance(metric, list):
+        metrics = [_get_metric(metric=metric) if isinstance(metric, str) else metric]
     else:
-        metrics = metric
+        metrics = [_get_metric(metric=m) if isinstance(m, str) else m for m in metric]
 
     folds = _create_backtesting_folds(
-                y                     = y,
+                data                  = y,
                 test_size             = steps,
                 initial_train_size    = initial_train_size,
                 gap                   = gap,
@@ -439,7 +446,7 @@ def _backtesting_forecaster_refit(
         
     if type(forecaster).__name__ != 'ForecasterAutoregDirect' and len(folds) > 50:
         warnings.warn(
-            (f"The forecaster will be fit {folds} times. This can take substantial "
+            (f"The forecaster will be fit {len(folds)} times. This can take substantial "
              f"amounts of time. If not feasible, try with `refit = False`.\n"),
             LongTrainingWarning
         )
@@ -454,14 +461,14 @@ def _backtesting_forecaster_refit(
     backtest_predictions = []
     
     for fold in tqdm(folds) if show_progress else folds:
-        # In each iteration the model is fitted before making predictions.
-        # if fixed_train_size the train size doesn't increase but moves by `steps`
-        # in each iteration. if false the train size increases by `steps` in each
+        # In each iteration the model is fitted before making predictions. 
+        # if fixed_train_size the train size doesn't increase but moves by `steps` 
+        # in each iteration. if False the train size increases by `steps` in each 
         # iteration.
         train_idx_start = fold[0][0]
-        train_idx_end   = fold[0][1] + 1
+        train_idx_end   = fold[0][1]
         test_idx_start  = fold[1][0]
-        test_idx_end    = fold[1][1] + 1
+        test_idx_end    = fold[1][1]
         
         y_train = y.iloc[train_idx_start:train_idx_end, ]
         exog_train = exog.iloc[train_idx_start:train_idx_end, ] if exog is not None else None
@@ -488,18 +495,14 @@ def _backtesting_forecaster_refit(
     if isinstance(backtest_predictions, pd.Series):
         backtest_predictions = pd.DataFrame(backtest_predictions)
 
-    if isinstance(metric, list):
-        metrics_values = [
-            m(
-                y_true = y.iloc[initial_train_size: initial_train_size + len(backtest_predictions)],
-                y_pred = backtest_predictions['pred']
-            ) for m in metrics
-        ]
-    else:
-        metrics_values = metrics(
-            y_true = y.iloc[initial_train_size: initial_train_size + len(backtest_predictions)],
-            y_pred = backtest_predictions['pred']
-        )
+    metrics_values = [m(
+                        y_true = y.loc[backtest_predictions.index],
+                        y_pred = backtest_predictions['pred']
+                      ) for m in metrics
+                     ]
+    
+    if not isinstance(metric, list):
+        metrics_values = metrics_values[0]
 
     return metrics_values, backtest_predictions
 
@@ -618,30 +621,31 @@ def _backtesting_forecaster_no_refit(
 
     forecaster = deepcopy(forecaster)
 
-    if isinstance(metric, str):
-        metrics = _get_metric(metric=metric)
-    elif isinstance(metric, list):
-        metrics = [_get_metric(metric=m) if isinstance(m, str) else m for m in metric]
+    if not isinstance(metric, list):
+        metrics = [_get_metric(metric=metric) if isinstance(metric, str) else metric]
     else:
-        metrics = metric
+        metrics = [_get_metric(metric=m) if isinstance(m, str) else m for m in metric]
 
     # Initial model training
     if initial_train_size is not None:
-        exog_train_values = exog.iloc[:initial_train_size, ] if exog is not None else None
-        forecaster.fit(y=y.iloc[:initial_train_size], exog=exog_train_values)
+        exog_train = exog.iloc[:initial_train_size, ] if exog is not None else None
+        forecaster.fit(y=y.iloc[:initial_train_size], exog=exog_train)
         window_size = forecaster.window_size
+        externally_fitted = False
     else:
         # Although not used for training, first observations are needed to create
         # the initial predictors
         window_size = forecaster.window_size
         initial_train_size = window_size
+        externally_fitted = True
     
     folds = _create_backtesting_folds(
-                y                     = y,
-                test_size             = steps,
+                data                  = y,
                 initial_train_size    = initial_train_size,
-                gap                   = gap,
+                test_size             = steps,
+                externally_fitted     = externally_fitted,
                 refit                 = False,
+                gap                   = gap,
                 allow_incomplete_fold = allow_incomplete_fold,
                 return_all_indexes    = False,
                 verbose               = verbose  
@@ -654,7 +658,7 @@ def _backtesting_forecaster_no_refit(
         # and next_window_exog must be updated to include the data needed to make
         # predictions.
         test_idx_start = fold[1][0]
-        test_idx_end   = fold[1][1] + 1
+        test_idx_end   = fold[1][1]
 
         last_window_end   = test_idx_start
         last_window_start = last_window_end - window_size 
@@ -686,17 +690,14 @@ def _backtesting_forecaster_no_refit(
     if isinstance(backtest_predictions, pd.Series):
         backtest_predictions = pd.DataFrame(backtest_predictions)
 
-    if isinstance(metric, list):
-        metrics_values = [m(
-                            y_true = y.iloc[initial_train_size: initial_train_size + len(backtest_predictions)],
-                            y_pred = backtest_predictions['pred']
-                          ) for m in metrics
-                         ]
-    else:
-        metrics_values = metrics(
-                             y_true = y.iloc[initial_train_size: initial_train_size + len(backtest_predictions)],
-                             y_pred = backtest_predictions['pred']
-                         )
+    metrics_values = [m(
+                        y_true = y.loc[backtest_predictions.index],
+                        y_pred = backtest_predictions['pred']
+                      ) for m in metrics
+                     ]
+    
+    if not isinstance(metric, list):
+        metrics_values = metrics_values[0]
 
     return metrics_values, backtest_predictions
 
@@ -800,7 +801,8 @@ def backtesting_forecaster(
         are used if they are already stored inside the forecaster.
                   
     verbose : bool, default `False`
-        Print number of folds and index of training and validation sets used for backtesting.
+        Print number of folds and index of training and validation sets used 
+        for backtesting.
 
     show_progress: bool, default `True`
         Whether to show a progress bar. Defaults to True.
@@ -827,77 +829,30 @@ def backtesting_forecaster(
              "use the functions available in the other `model_selection` modules.")
         )
     
-    if not isinstance(y, pd.Series):
-        raise TypeError("`y` must be a pandas Series.")
-    if not isinstance(steps, (int, np.integer)) or steps < 1:
-        raise TypeError(
-            f"`steps` must be an integer greater than or equal to 1. Got {steps}."
-        )
-    if not isinstance(gap, (int, np.integer)) or gap < 0:
-        raise TypeError(
-            f"`gap` must be an integer greater than 0. Got {gap}."
-        )
-    if not isinstance(metric, (str, Callable, list)):
-        raise TypeError(
-            (f"`metric` must be a string, a callable function, or a list containing "
-             f"multiple strings and/or callables. Got {type(metric)}.")
-        )
-
-    if initial_train_size is not None:
-        if not isinstance(initial_train_size, (int, np.integer)):
-            raise TypeError(
-                (f"If used, `initial_train_size` must be an integer greater than "
-                 f"the window_size of the forecaster. Got {type(initial_train_size)}.")
-            )
-        if initial_train_size >= len(y):
-            raise ValueError(
-                (f"If used, `initial_train_size` must be an integer "
-                 f"smaller than the length of `y` ({len(y)}).")
-            )    
-        if initial_train_size < forecaster.window_size:
-            raise ValueError(
-                (f"If used, `initial_train_size` must be an integer greater than "
-                 f"the window_size of the forecaster ({forecaster.window_size}).")
-            )
-        if initial_train_size + gap >= len(y):
-            raise ValueError(
-                (f"The combination of initial_train_size {initial_train_size} and gap "
-                 f"{gap} cannot be greater than the length of y ({len(y)}).")
-            )
-    else:
-        if not forecaster.fitted:
-            raise NotFittedError(
-                ("`forecaster` must be already trained if no `initial_train_size` "
-                 "is provided.")
-            )
-        if refit:
-            raise ValueError(
-                "`refit` is only allowed when `initial_train_size` is not `None`."
-            )
+    check_backtesting_input(
+        forecaster            = forecaster,
+        steps                 = steps,
+        metric                = metric,
+        y                     = y,
+        initial_train_size    = initial_train_size,
+        fixed_train_size      = fixed_train_size,
+        gap                   = gap,
+        allow_incomplete_fold = allow_incomplete_fold,
+        refit                 = refit,
+        interval              = interval,
+        n_boot                = n_boot,
+        random_state          = random_state,
+        in_sample_residuals   = in_sample_residuals,
+        verbose               = verbose,
+        show_progress         = show_progress
+    )
     
-    if not isinstance(fixed_train_size, bool):
-        raise TypeError("`fixed_train_size` must be a boolean: `True`, `False`.")
-    if not isinstance(allow_incomplete_fold, bool):
-        raise TypeError("`allow_incomplete_fold` must be a boolean: `True`, `False`.")
-    if not isinstance(refit, bool):
-        raise TypeError("`refit` must be a boolean: `True`, `False`.")
-    if not isinstance(n_boot, (int, np.integer)) or n_boot < 0:
-        raise TypeError(f"`n_boot` must be an integer greater than 0. Got {n_boot}.")
-    if not isinstance(random_state, (int, np.integer)) or random_state < 0:
-        raise TypeError(f"`random_state` must be an integer greater than 0. Got {random_state}.")
-    if not isinstance(in_sample_residuals, bool):
-        raise TypeError("`in_sample_residuals` must be a boolean: `True`, `False`.")
-    if not isinstance(verbose, bool):
-        raise TypeError("`verbose` must be a boolean: `True`, `False`.")
-    if not isinstance(show_progress, bool):
-        raise TypeError("`show_progress` must be a boolean: `True`, `False`.")
-
-    if not allow_incomplete_fold and len(y) - (initial_train_size + gap) < steps:
+    if type(forecaster).__name__ == 'ForecasterAutoregDirect' and \
+       forecaster.steps < steps + gap:
         raise ValueError(
-            (f"There is not enough data to evaluate {steps} steps in a single "
-             f"fold. Set `allow_incomplete_fold` to `True` to allow incomplete folds.\n"
-             f"    Data available for test : {len(y) - (initial_train_size + gap)} \n"
-             f"    Steps                   : {steps}\n")
+            ("When using a ForecasterAutoregDirect, the combination of steps "
+             f"+ gap ({steps+gap}) cannot be greater than the `steps` parameter "
+             f"declared when the forecaster is initialized ({forecaster.steps}).")
         )
     
     if refit:
@@ -1273,7 +1228,8 @@ def _evaluate_grid_hyperparameters(
     if type(forecaster).__name__ == 'ForecasterAutoregCustom':
         if lags_grid is not None:
             warnings.warn(
-                "`lags_grid` ignored if forecaster is an instance of `ForecasterAutoregCustom`."
+                "`lags_grid` ignored if forecaster is an instance of `ForecasterAutoregCustom`.",
+                IgnoredArgumentWarning
             )
         lags_grid = ['custom predictors']
         
@@ -1651,7 +1607,8 @@ def _bayesian_search_optuna(
     if type(forecaster).__name__ == 'ForecasterAutoregCustom':
         if lags_grid is not None:
             warnings.warn(
-                "`lags_grid` ignored if forecaster is an instance of `ForecasterAutoregCustom`."
+                "`lags_grid` ignored if forecaster is an instance of `ForecasterAutoregCustom`.",
+                IgnoredArgumentWarning
             )
         lags_grid = ['custom predictors']
         

@@ -8,33 +8,29 @@ import sys
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import Ridge
 from sklearn.metrics import mean_absolute_error
-import optuna
-from optuna.samplers import TPESampler
-optuna.logging.set_verbosity(optuna.logging.WARNING)
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
 from skforecast.ForecasterAutoregCustom import ForecasterAutoregCustom
 from skforecast.model_selection import backtesting_forecaster
 from skforecast.model_selection.model_selection import _bayesian_search_optuna
-
+import optuna
+from optuna.samplers import TPESampler
 from tqdm import tqdm
 from functools import partialmethod
+
+# Fixtures
+from .fixtures_model_selection import y
+
+def create_predictors(y): # pragma: no cover
+    """
+    Create first 4 lags of a time series, used in ForecasterAutoregCustom.
+    """
+
+    lags = y[-1:-5:-1]
+
+    return lags
+
+optuna.logging.set_verbosity(optuna.logging.WARNING)
 tqdm.__init__ = partialmethod(tqdm.__init__, disable=True) # hide progress bar
-
-# Fixtures _backtesting_forecaster_refit Series (skforecast==0.4.2)
-# np.random.seed(123)
-# y = np.random.rand(50)
-
-y = pd.Series(
-    np.array([0.69646919, 0.28613933, 0.22685145, 0.55131477, 0.71946897,
-              0.42310646, 0.9807642 , 0.68482974, 0.4809319 , 0.39211752,
-              0.34317802, 0.72904971, 0.43857224, 0.0596779 , 0.39804426,
-              0.73799541, 0.18249173, 0.17545176, 0.53155137, 0.53182759,
-              0.63440096, 0.84943179, 0.72445532, 0.61102351, 0.72244338,
-              0.32295891, 0.36178866, 0.22826323, 0.29371405, 0.63097612,
-              0.09210494, 0.43370117, 0.43086276, 0.4936851 , 0.42583029,
-              0.31226122, 0.42635131, 0.89338916, 0.94416002, 0.50183668,
-              0.62395295, 0.1156184 , 0.31728548, 0.41482621, 0.86630916,
-              0.25045537, 0.48303426, 0.98555979, 0.51948512, 0.61289453]))
 
 
 def test_exception_bayesian_search_optuna_metric_list_duplicate_names():
@@ -52,11 +48,11 @@ def test_exception_bayesian_search_optuna_metric_list_duplicate_names():
     y_train = y[:-n_validation]
     lags_grid = [2, 4]
     def search_space(trial): # pragma: no cover
-        search_space  = {'alpha' : trial.suggest_loguniform('not_alpha', 1e-2, 1.0)
+        search_space  = {'alpha' : trial.suggest_float('not_alpha', 1e-2, 1.0)
                         }
         return search_space
 
-    err_msg = re.escape('When `metric` is a `list`, each metric name must be unique.')
+    err_msg = re.escape("When `metric` is a `list`, each metric name must be unique.")
     with pytest.raises(ValueError, match = err_msg):
         _bayesian_search_optuna(
             forecaster         = forecaster,
@@ -90,12 +86,12 @@ def test_bayesian_search_optuna_exception_when_search_space_names_do_not_match()
     y_train = y[:-n_validation]
     lags_grid = [2, 4]
     def search_space(trial):
-        search_space  = {'alpha' : trial.suggest_loguniform('not_alpha', 1e-2, 1.0)
+        search_space  = {'alpha' : trial.suggest_float('not_alpha', 1e-2, 1.0)
                         }
         return search_space
     
     err_msg = re.escape(
-                f"""Some of the key values do not match the search_space key names.
+                """Some of the key values do not match the search_space key names.
                 Dict keys     : ['alpha']
                 Trial objects : ['not_alpha'].""")
     with pytest.raises(ValueError, match = err_msg):
@@ -209,8 +205,8 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_mocked():
 
 def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_mocked_when_kwargs_create_study():
     """
-    Test output of _bayesian_search_optuna in ForecasterAutoreg when kwargs_create_study with mocked
-    (mocked done in Skforecast v0.4.3).
+    Test output of _bayesian_search_optuna in ForecasterAutoreg when 
+    kwargs_create_study with mocked (mocked done in Skforecast v0.4.3).
     """
     forecaster = ForecasterAutoreg(
                     regressor = Ridge(random_state=123),
@@ -223,7 +219,7 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_mocked_whe
     lags_grid = [4, 2]
 
     def search_space(trial):
-        search_space  = {'alpha' : trial.suggest_loguniform('alpha', 1e-2, 1.0)
+        search_space  = {'alpha' : trial.suggest_float('alpha', 1e-2, 1.0)
                         }
         return search_space
 
@@ -248,25 +244,38 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_mocked_whe
               )[0]
     
     expected_results = pd.DataFrame({
-            'lags'  :[[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4],
-                      [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4],
-                      [1, 2], [1, 2], [1, 2], [1, 2], [1, 2], [1, 2], [1, 2], [1, 2], [1, 2], [1, 2]],
-            'params':[{'alpha': 0.24713734184878824}, {'alpha': 0.03734897347801035}, {'alpha': 0.028425159292991616}, {'alpha': 0.12665709946616685}, {'alpha': 0.274750150868112}, {'alpha': 0.07017992831138445}, {'alpha': 0.9152261002780916}, {'alpha': 0.23423914662544418}, {'alpha': 0.09159332036121723}, {'alpha': 0.06084642077147053}, {'alpha': 0.24713734184878824}, {'alpha': 0.03734897347801035}, {'alpha': 0.028425159292991616}, {'alpha': 0.12665709946616685}, {'alpha': 0.274750150868112}, {'alpha': 0.07017992831138445}, {'alpha': 0.9152261002780916}, {'alpha': 0.23423914662544418}, {'alpha': 0.09159332036121723}, {'alpha': 0.06084642077147053}],
-            'mean_absolute_error':np.array([0.216456292811124, 0.21668294660495988, 0.2166890437876308, 0.21660255096339978, 0.2164189788190982, 0.2166571743908303, 0.21548741275543748, 0.2164733416179101, 0.2166378443581651, 0.21666500432810773, 0.2124154959419979, 0.21189487956437836, 0.21186904800174858, 0.21213539597840395, 0.21247361506525617, 0.2119869822558119, 0.21341333210491734, 0.21238762670131375, 0.21204468608736057, 0.21196125599125668]
-),                                                               
-            'alpha' :np.array([0.24713734184878824, 0.03734897347801035, 0.028425159292991616, 0.12665709946616685, 0.274750150868112, 0.07017992831138445, 0.9152261002780916, 0.23423914662544418, 0.09159332036121723, 0.06084642077147053, 0.24713734184878824, 0.03734897347801035, 0.028425159292991616, 0.12665709946616685, 0.274750150868112, 0.07017992831138445, 0.9152261002780916, 0.23423914662544418, 0.09159332036121723, 0.06084642077147053]
-)
-                                     },
-            index=pd.RangeIndex(start=0, stop=20, step=1)
-                                   ).sort_values(by='mean_absolute_error', ascending=True)
+        'lags'  :[[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4],
+                  [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4],
+                  [1, 2], [1, 2], [1, 2], [1, 2], [1, 2], [1, 2], [1, 2], [1, 2], [1, 2], [1, 2]],
+        'params':[{'alpha': 0.6995044937418831}, {'alpha': 0.29327794160087567},
+                  {'alpha': 0.2345829390285611}, {'alpha': 0.5558016213920624},
+                  {'alpha': 0.7222742800877074}, {'alpha': 0.42887539552321635},
+                  {'alpha': 0.9809565564007693}, {'alpha': 0.6879814411990146},
+                  {'alpha': 0.48612258246951734}, {'alpha': 0.398196343012209},
+                  {'alpha': 0.6995044937418831}, {'alpha': 0.29327794160087567},
+                  {'alpha': 0.2345829390285611}, {'alpha': 0.5558016213920624},
+                  {'alpha': 0.7222742800877074}, {'alpha': 0.42887539552321635},
+                  {'alpha': 0.9809565564007693}, {'alpha': 0.6879814411990146},
+                  {'alpha': 0.48612258246951734}, {'alpha': 0.398196343012209}],
+        'mean_absolute_error':np.array([0.2157946 , 0.21639339, 0.21647289, 0.21600778, 0.21576132,
+                                        0.21619734, 0.21539791, 0.21581151, 0.21611205, 0.21624265,
+                                        0.21316446, 0.21251148, 0.21238838, 0.21296631, 0.21319325,
+                                        0.21276374, 0.21347973, 0.21314963, 0.21285869, 0.21271021]),
+        'alpha' :np.array([0.69950449, 0.29327794, 0.23458294, 0.55580162, 0.72227428,
+                           0.4288754 , 0.98095656, 0.68798144, 0.48612258, 0.39819634,
+                           0.69950449, 0.29327794, 0.23458294, 0.55580162, 0.72227428,
+                           0.4288754 , 0.98095656, 0.68798144, 0.48612258, 0.39819634])
+        },
+        index=pd.RangeIndex(start=0, stop=20, step=1)
+    ).sort_values(by='mean_absolute_error', ascending=True)
 
     pd.testing.assert_frame_equal(results, expected_results)
 
 
 def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_mocked_when_kwargs_study_optimize():
     """
-    Test output of _bayesian_search_optuna in ForecasterAutoreg when kwargs_study_optimize with mocked
-    (mocked done in Skforecast v0.4.3).
+    Test output of _bayesian_search_optuna in ForecasterAutoreg when 
+    kwargs_study_optimize with mocked (mocked done in Skforecast v0.4.3).
     """
     forecaster = ForecasterAutoreg(
                     regressor = RandomForestRegressor(random_state=123),
@@ -327,8 +336,9 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_mocked_whe
 
 def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_mocked_when_lags_grid_is_None():
     """
-    Test output of _bayesian_search_optuna in ForecasterAutoreg when lags_grid is None with mocked
-    (mocked done in Skforecast v0.4.3), should use forecaster.lags as lags_grid.
+    Test output of _bayesian_search_optuna in ForecasterAutoreg when lags_grid 
+    is None with mocked (mocked done in Skforecast v0.4.3), should use 
+    forecaster.lags as lags_grid.
     """
     forecaster = ForecasterAutoreg(
                     regressor = Ridge(random_state=123),
@@ -341,7 +351,7 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_mocked_whe
     lags_grid = None
     
     def search_space(trial):
-        search_space  = {'alpha' : trial.suggest_loguniform('alpha', 1e-2, 1.0)
+        search_space  = {'alpha' : trial.suggest_float('alpha', 1e-2, 1.0)
                         }
         return search_space
 
@@ -362,24 +372,20 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_mocked_whe
               )[0]
     
     expected_results = pd.DataFrame({
-            'lags'  :[[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4],
-                      [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]],
-            'params':[{'alpha': 0.24713734184878824}, {'alpha': 0.03734897347801035}, 
-                      {'alpha': 0.028425159292991616}, {'alpha': 0.12665709946616685}, 
-                      {'alpha': 0.274750150868112}, {'alpha': 0.07017992831138445},
-                      {'alpha': 0.9152261002780916}, {'alpha': 0.23423914662544418}, 
-                      {'alpha': 0.09159332036121723}, {'alpha': 0.06084642077147053}],
-            'mean_absolute_error':np.array([0.216456292811124, 0.21668294660495988, 0.2166890437876308,
-                               0.21660255096339978, 0.2164189788190982, 0.2166571743908303,
-                               0.21548741275543748, 0.2164733416179101, 0.2166378443581651,
-                               0.21666500432810773]),                                                               
-            'alpha' :np.array([0.24713734184878824, 0.03734897347801035, 0.028425159292991616, 
-                               0.12665709946616685, 0.274750150868112, 0.07017992831138445, 
-                               0.9152261002780916, 0.23423914662544418, 0.09159332036121723,
-                               0.06084642077147053])
-                                     },
-            index=pd.RangeIndex(start=0, stop=10, step=1)
-                                   ).sort_values(by='mean_absolute_error', ascending=True)
+        'lags'  :[[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4],
+                  [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]],
+        'params':[{'alpha': 0.6995044937418831}, {'alpha': 0.29327794160087567},
+                  {'alpha': 0.2345829390285611}, {'alpha': 0.5558016213920624},
+                  {'alpha': 0.7222742800877074}, {'alpha': 0.42887539552321635},
+                  {'alpha': 0.9809565564007693}, {'alpha': 0.6879814411990146},
+                  {'alpha': 0.48612258246951734}, {'alpha': 0.398196343012209}],
+        'mean_absolute_error':np.array([0.2157946 , 0.21639339, 0.21647289, 0.21600778, 0.21576132,
+                                        0.21619734, 0.21539791, 0.21581151, 0.21611205, 0.216242651]),
+        'alpha' :np.array([0.69950449, 0.29327794, 0.23458294, 0.55580162, 0.72227428,
+                           0.4288754 , 0.98095656, 0.68798144, 0.48612258, 0.39819634])
+        },
+        index=pd.RangeIndex(start=0, stop=10, step=1)
+    ).sort_values(by='mean_absolute_error', ascending=True)
 
     pd.testing.assert_frame_equal(results, expected_results)
 
@@ -388,20 +394,11 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoregCustom_with_mock
     """
     Test output of _bayesian_search_optuna in ForecasterAutoregCustom with mocked
     (mocked done in Skforecast v0.4.3).
-    """
-    def create_predictors(y):
-        """
-        Create first 4 lags of a time series, used in ForecasterAutoregCustom.
-        """
-
-        lags = y[-1:-5:-1]
-
-        return lags
-    
+    """    
     forecaster = ForecasterAutoregCustom(
-                        regressor      = Ridge(random_state=123),
-                        fun_predictors = create_predictors,
-                        window_size    = 4
+                     regressor      = Ridge(random_state=123),
+                     fun_predictors = create_predictors,
+                     window_size    = 4
                  )
 
     steps = 3
@@ -409,7 +406,7 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoregCustom_with_mock
     y_train = y[:-n_validation]
     
     def search_space(trial):
-        search_space  = {'alpha' : trial.suggest_loguniform('alpha', 1e-2, 1.0)
+        search_space  = {'alpha' : trial.suggest_float('alpha', 1e-2, 1.0)
                         }
         return search_space
 
@@ -429,26 +426,22 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoregCustom_with_mock
               )[0]
     
     expected_results = pd.DataFrame({
-            'lags'  :['custom predictors', 'custom predictors', 'custom predictors',
-                      'custom predictors', 'custom predictors', 'custom predictors',
-                      'custom predictors', 'custom predictors', 'custom predictors',
-                      'custom predictors'],
-            'params':[{'alpha': 0.24713734184878824}, {'alpha': 0.03734897347801035},
-                      {'alpha': 0.028425159292991616}, {'alpha': 0.12665709946616685}, 
-                      {'alpha': 0.274750150868112}, {'alpha': 0.07017992831138445}, 
-                      {'alpha': 0.9152261002780916}, {'alpha': 0.23423914662544418},
-                      {'alpha': 0.09159332036121723}, {'alpha': 0.06084642077147053}],
-            'mean_absolute_error':np.array([0.216456292811124, 0.21668294660495988, 0.2166890437876308, 
-                               0.21660255096339978, 0.21641897881909822, 0.2166571743908303, 
-                               0.21548741275543748, 0.21647334161791013, 0.2166378443581651,
-                               0.21666500432810773]),                                                               
-            'alpha' :np.array([0.24713734184878824, 0.03734897347801035, 0.028425159292991616,
-                               0.12665709946616685, 0.274750150868112, 0.07017992831138445, 
-                               0.9152261002780916, 0.23423914662544418, 0.09159332036121723,
-                               0.06084642077147053])
-                                     },
-            index=pd.RangeIndex(start=0, stop=10, step=1)
-                                   ).sort_values(by='mean_absolute_error', ascending=True)
+        'lags'  :['custom predictors', 'custom predictors', 'custom predictors',
+                  'custom predictors', 'custom predictors', 'custom predictors',
+                  'custom predictors', 'custom predictors', 'custom predictors',
+                  'custom predictors'],
+        'params':[{'alpha': 0.6995044937418831}, {'alpha': 0.29327794160087567},
+                  {'alpha': 0.2345829390285611}, {'alpha': 0.5558016213920624},
+                  {'alpha': 0.7222742800877074}, {'alpha': 0.42887539552321635},
+                  {'alpha': 0.9809565564007693}, {'alpha': 0.6879814411990146},
+                  {'alpha': 0.48612258246951734}, {'alpha': 0.398196343012209}],
+        'mean_absolute_error':np.array([0.2157946 , 0.21639339, 0.21647289, 0.21600778, 0.21576132,
+                                        0.21619734, 0.21539791, 0.21581151, 0.21611205, 0.216242651]),
+        'alpha' :np.array([0.69950449, 0.29327794, 0.23458294, 0.55580162, 0.72227428,
+                           0.4288754 , 0.98095656, 0.68798144, 0.48612258, 0.39819634])
+        },
+        index=pd.RangeIndex(start=0, stop=10, step=1)
+    ).sort_values(by='mean_absolute_error', ascending=True)
 
     pd.testing.assert_frame_equal(results, expected_results)
     
@@ -468,7 +461,7 @@ def test_evaluate_bayesian_search_optuna_when_return_best():
     lags_grid = [2, 4]
     
     def search_space(trial):
-        search_space  = {'alpha' : trial.suggest_loguniform('alpha', 1e-2, 1.0)
+        search_space  = {'alpha' : trial.suggest_float('alpha', 1e-2, 1.0)
                         }
         return search_space
 
@@ -488,15 +481,16 @@ def test_evaluate_bayesian_search_optuna_when_return_best():
     )
     
     expected_lags = np.array([1, 2])
-    expected_alpha = 0.028425159292991616
+    expected_alpha = 0.2345829390285611
     
-    assert (expected_lags == forecaster.lags).all()
+    np.testing.assert_array_equal(forecaster.lags, expected_lags)
     assert expected_alpha == forecaster.regressor.alpha
 
 
 def test_results_opt_best_output_bayesian_search_optuna_with_output_study_best_trial_optuna():
     """
-    Test results_opt_best output of _bayesian_search_optuna with output study.best_trial optuna.
+    Test results_opt_best output of _bayesian_search_optuna with output 
+    study.best_trial optuna.
     """
     forecaster = ForecasterAutoreg(
                     regressor = Ridge(random_state=123),
@@ -527,7 +521,7 @@ def test_results_opt_best_output_bayesian_search_optuna_with_output_study_best_t
             verbose    = verbose,
         ) -> float:
         
-        alpha = trial.suggest_loguniform('alpha', 1e-2, 1.0)
+        alpha = trial.suggest_float('alpha', 1e-2, 1.0)
         
         forecaster = ForecasterAutoreg(
                         regressor = Ridge(random_state=random_state, 
@@ -556,7 +550,7 @@ def test_results_opt_best_output_bayesian_search_optuna_with_output_study_best_t
 
     lags_grid = [4, 2]
     def search_space(trial):
-        search_space  = {'alpha' : trial.suggest_loguniform('alpha', 1e-2, 1.0)
+        search_space  = {'alpha' : trial.suggest_float('alpha', 1e-2, 1.0)
                         }
         return search_space
     return_best  = False

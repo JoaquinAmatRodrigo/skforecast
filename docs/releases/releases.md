@@ -2,7 +2,7 @@
 
 All significant changes to this project are documented in this release file.
 
-## [0.8.0] - [2023-XX-XX]
+## [0.8.0] - [2023-05-XX]
 
 **Added**
 
@@ -21,6 +21,8 @@ All significant changes to this project are documented in this release file.
 + Added function `utils.cast_exog_dtypes` to cast data types of the exogenous variables using a dictionary as a mapping.
 
 + Added function `utils.check_select_fit_kwargs` to check if the argument `fit_kwargs` is a dictionary and select only the keys used by the `fit` method of the regressor.
+
++ Added argument `gap` to functions in `model_selection`, `model_selection_multiseries` and `model_selection_sarimax` to omit observations between training and prediction.
 
 + Added argument `show_progress` to functions `model_selection.backtesting_forecaster`, `model_selection_multiseries.backtesting_forecaster_multiseries` and `model_selection_sarimax.backtesting_forecaster_sarimax` to indicate weather to show a progress bar.
 

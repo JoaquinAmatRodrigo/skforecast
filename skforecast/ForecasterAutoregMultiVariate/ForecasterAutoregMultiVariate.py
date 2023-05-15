@@ -21,6 +21,7 @@ from itertools import chain
 
 import skforecast
 from ..ForecasterBase import ForecasterBase
+from ..exceptions import IgnoredArgumentWarning
 from ..utils import initialize_lags
 from ..utils import initialize_weights
 from ..utils import check_select_fit_kwargs
@@ -504,7 +505,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             if series_not_in_transformer_series:
                 warnings.warn(
                     (f"{series_not_in_transformer_series} not present in `transformer_series`."
-                     f" No transformation is applied to these series.")
+                     f" No transformation is applied to these series."),
+                     IgnoredArgumentWarning
                 )
 
         if exog is not None:
@@ -1463,11 +1465,11 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         
         if not set(self.out_sample_residuals.keys()).issubset(set(residuals.keys())):
             warnings.warn(
-                f"""
+                (f"""
                 Only residuals of models (steps) 
                 {set(self.out_sample_residuals.keys()).intersection(set(residuals.keys()))} 
                 are updated.
-                """
+                """), IgnoredArgumentWarning
             )
 
         residuals = {key: value for key, value in residuals.items() if key in self.out_sample_residuals.keys()}
