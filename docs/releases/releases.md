@@ -2,7 +2,7 @@
 
 All significant changes to this project are documented in this release file.
 
-## [0.8.0] - [2023-05-XX]
+## [0.8.0] - [2023-05-16]
 
 **Added**
 

@@ -117,8 +117,8 @@ def _create_backtesting_folds(
     verbose: bool=True
 ) -> list:
     """
-    This function is designed to work after passing the available checks in the 
-    `backtesting_forecaster()` function.
+    This function is designed to work after passing the `check_backtesting_input` 
+    function from `skforecast.utils`.
 
     Provides train/test indices (position) to split time series data samples that
     are observed at fixed time intervals, in train/test sets. In each split, test
