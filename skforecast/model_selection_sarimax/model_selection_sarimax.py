@@ -1,5 +1,5 @@
 ################################################################################
-#                        skforecast.model_selection_sarimax                            #
+#                      skforecast.model_selection_sarimax                      #
 #                                                                              #
 # This work by Joaquin Amat Rodrigo and Javier Escobar Ortiz is licensed       #
 # under a Creative Commons Attribution 4.0 International License.              #
@@ -17,6 +17,7 @@ from sklearn.model_selection import ParameterGrid
 from sklearn.model_selection import ParameterSampler
 
 from ..exceptions import LongTrainingWarning
+from ..exceptions import IgnoredArgumentWarning
 from ..model_selection.model_selection import _get_metric
 from ..model_selection.model_selection import _backtesting_forecaster_verbose
 from ..model_selection.model_selection import _create_backtesting_folds
@@ -210,8 +211,6 @@ def _backtesting_sarimax_no_refit(
     steps: int,
     metric: Union[str, Callable, list],
     initial_train_size: int,
-    gap: int=0,
-    allow_incomplete_fold: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     alpha: Optional[float]=None,
     interval: Optional[list]=None,
@@ -255,14 +254,6 @@ def _backtesting_sarimax_no_refit(
     initial_train_size : int
         Number of samples in the initial train split. The backtest forecaster is
         trained using the first `initial_train_size` observations.
-
-    gap : int, default `0`
-        Number of samples to be excluded after the end of each training set and 
-        before the test set.
-        
-    allow_incomplete_fold : bool, default `True`
-        Last fold is allowed to have a smaller number of samples than the 
-        `test_size`. If `False`, the last fold is excluded.
         
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
@@ -281,7 +272,8 @@ def _backtesting_sarimax_no_refit(
         provided, `alpha` will be used.
             
     verbose : bool, default `False`
-        Print number of folds and index of training and validation sets used for backtesting.
+        Print number of folds and index of training and validation sets used 
+        for backtesting.
 
     show_progress: bool, default `True`
         Whether to show a progress bar. Defaults to True.
@@ -310,37 +302,36 @@ def _backtesting_sarimax_no_refit(
     exog_train = exog.iloc[:initial_train_size, ] if exog is not None else None
     forecaster.fit(y=y.iloc[:initial_train_size], exog=exog_train)
     
-    folds = _create_backtesting_folds(
-                data                  = y,
-                initial_train_size    = initial_train_size,
-                test_size             = steps,
-                refit                 = False,
-                gap                   = gap,
-                allow_incomplete_fold = allow_incomplete_fold,
-                return_all_indexes    = False,
-                verbose               = verbose  
-            )
+    folds     = int(np.ceil((len(y) - initial_train_size) / steps))
+    remainder = (len(y) - initial_train_size) % steps
     
+    if verbose:
+        _backtesting_forecaster_verbose(
+            index_values       = y.index,
+            steps              = steps,
+            initial_train_size = initial_train_size,
+            folds              = folds,
+            remainder          = remainder,
+            refit              = False
+        )
+
     backtest_predictions = []
 
-    for fold in tqdm(folds) if show_progress else folds:
+    for i in tqdm(range(folds)) if show_progress else range(folds):
         # Since the model is only fitted with the initial_train_size, last_window
         # and next_window_exog must be updated to include the data needed to make
         # predictions.
-        last_window_start = fold[0][1]
-        last_window_end   = fold[1][0]
-        test_idx_start = fold[1][0]
-        test_idx_end   = fold[1][1]
-
         last_window_start = initial_train_size + steps * (i-1)
         last_window_end   = initial_train_size + steps * i
+
         last_window_y    = y.iloc[last_window_start:last_window_end] if i != 0 else None
         last_window_exog = exog.iloc[last_window_start:last_window_end, ] if exog is not None and i != 0 else None 
-
         next_window_exog = exog.iloc[last_window_end:last_window_end + steps, ] if exog is not None else None
-        next_window_exog = exog.iloc[test_idx_start:test_idx_end, ] if exog is not None else None
 
-        steps = len(range(test_idx_start, test_idx_end))
+        if i == folds - 1: # last fold
+            # If remainder > 0, only the remaining steps need to be predicted
+            steps = steps if remainder == 0 else remainder
+
         if alpha is None and interval is None:
             pred = forecaster.predict(
                        steps            = steps,
@@ -518,14 +509,19 @@ def backtesting_sarimax(
             show_progress         = show_progress
         )
     else:
+        if gap != 0 or allow_incomplete_fold is not True:
+            warnings.warn(
+                ("When using `refit=False`, the `gap` and `allow_incomplete_fold`"
+                 "arguments are ignored. Set `refit=True` to used them."), 
+                 IgnoredArgumentWarning
+            )
+
         metrics_values, backtest_predictions = _backtesting_sarimax_no_refit(
             forecaster            = forecaster,
             y                     = y,
             steps                 = steps,
             metric                = metric,
             initial_train_size    = initial_train_size,
-            gap                   = gap,
-            allow_incomplete_fold = allow_incomplete_fold,
             exog                  = exog,
             alpha                 = alpha,
             interval              = interval,
