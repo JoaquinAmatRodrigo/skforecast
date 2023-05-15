@@ -17,6 +17,7 @@ from sklearn.model_selection import ParameterGrid
 from sklearn.model_selection import ParameterSampler
 
 from ..exceptions import LongTrainingWarning
+from ..exceptions import IgnoredArgumentWarning
 from ..model_selection.model_selection import _get_metric
 from ..model_selection.model_selection import _create_backtesting_folds
 from ..utils import check_backtesting_input
@@ -633,7 +634,8 @@ def backtesting_forecaster_multiseries(
             (f"`levels` argument have no use when the forecaster is of type "
              f"`ForecasterAutoregMultiVariate`. The level of this forecaster is "
              f"{forecaster.level}, to predict another level, change the `level` "
-             f"argument when initializing the forecaster.")
+             f"argument when initializing the forecaster."),
+             IgnoredArgumentWarning
         )
     
     if refit:
@@ -1052,7 +1054,8 @@ def _evaluate_grid_hyperparameters_multiseries(
                 (f"`levels` argument have no use when the forecaster is of type "
                  f"ForecasterAutoregMultiVariate. The level of this forecaster "
                  f"is {forecaster.level}, to predict another level, change "
-                 f"the `level` argument when initializing the forecaster. \n")
+                 f"the `level` argument when initializing the forecaster. \n"),
+                 IgnoredArgumentWarning
             )
         levels = [forecaster.level]
     else:
@@ -1066,7 +1069,8 @@ def _evaluate_grid_hyperparameters_multiseries(
         if lags_grid is not None:
             warnings.warn(
                 ("`lags_grid` ignored if forecaster is an instance of "
-                 "`ForecasterAutoregMultiSeriesCustom`.")
+                 "`ForecasterAutoregMultiSeriesCustom`."),
+                 IgnoredArgumentWarning
             )
         lags_grid = ['custom predictors']
     elif lags_grid is None:

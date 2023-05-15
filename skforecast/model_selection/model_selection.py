@@ -21,10 +21,12 @@ from sklearn.model_selection import ParameterGrid
 from sklearn.model_selection import ParameterSampler
 import optuna
 from optuna.samplers import TPESampler, RandomSampler
-optuna.logging.set_verbosity(optuna.logging.WARNING) # disable optuna logs
 
 from ..exceptions import LongTrainingWarning
+from ..exceptions import IgnoredArgumentWarning
 from ..utils import check_backtesting_input
+
+optuna.logging.set_verbosity(optuna.logging.WARNING) # disable optuna logs
 
 logging.basicConfig(
     format = '%(name)-10s %(levelname)-5s %(message)s', 
@@ -1226,7 +1228,8 @@ def _evaluate_grid_hyperparameters(
     if type(forecaster).__name__ == 'ForecasterAutoregCustom':
         if lags_grid is not None:
             warnings.warn(
-                "`lags_grid` ignored if forecaster is an instance of `ForecasterAutoregCustom`."
+                "`lags_grid` ignored if forecaster is an instance of `ForecasterAutoregCustom`.",
+                IgnoredArgumentWarning
             )
         lags_grid = ['custom predictors']
         
@@ -1604,7 +1607,8 @@ def _bayesian_search_optuna(
     if type(forecaster).__name__ == 'ForecasterAutoregCustom':
         if lags_grid is not None:
             warnings.warn(
-                "`lags_grid` ignored if forecaster is an instance of `ForecasterAutoregCustom`."
+                "`lags_grid` ignored if forecaster is an instance of `ForecasterAutoregCustom`.",
+                IgnoredArgumentWarning
             )
         lags_grid = ['custom predictors']
         

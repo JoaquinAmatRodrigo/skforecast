@@ -20,6 +20,7 @@ from copy import deepcopy
 
 from ..exceptions import MissingValuesExogWarning
 from ..exceptions import DataTypeWarning
+from ..exceptions import IgnoredArgumentWarning
 
 optional_dependencies = {
     "sarimax": ['pmdarima>=2.0, <2.1'],
@@ -149,7 +150,8 @@ def initialize_weights(
         if 'sample_weight' not in inspect.signature(regressor.fit).parameters:
             warnings.warn(
                 (f"Argument `weight_func` is ignored since regressor {regressor} "
-                 f"does not accept `sample_weight` in its `fit` method.")
+                 f"does not accept `sample_weight` in its `fit` method."),
+                 IgnoredArgumentWarning
             )
             weight_func = None
             source_code_weight_func = None
@@ -163,7 +165,8 @@ def initialize_weights(
         if 'sample_weight' not in inspect.signature(regressor.fit).parameters:
             warnings.warn(
                 (f"Argument `series_weights` is ignored since regressor {regressor} "
-                 f"does not accept `sample_weight` in its `fit` method.")
+                 f"does not accept `sample_weight` in its `fit` method."),
+                 IgnoredArgumentWarning
             )
             series_weights = None
 
@@ -209,14 +212,16 @@ def check_select_fit_kwargs(
         if non_used_keys:
             warnings.warn(
                 (f"Argument/s {non_used_keys} ignored since they are not used by the "
-                 f"regressor's `fit` method.")
+                 f"regressor's `fit` method."),
+                 IgnoredArgumentWarning
             )
 
         if 'sample_weight' in fit_kwargs.keys():
             warnings.warn(
                 ("The `sample_weight` argument is ignored. Use `weight_func` to pass "
                  "a function that defines the individual weights for each sample "
-                 "based on its index.")
+                 "based on its index."),
+                 IgnoredArgumentWarning
             )
             del fit_kwargs['sample_weight']
 
@@ -282,8 +287,9 @@ def check_exog(
         if exog.isnull().any().any():
             warnings.warn(
                 ("`exog` has missing values. Most machine learning models do not allow "
-                 "missing values. Fitting the forecaster may fail."), MissingValuesExogWarning
-        )
+                 "missing values. Fitting the forecaster may fail."), 
+                 MissingValuesExogWarning
+            )
          
     return
 
@@ -346,8 +352,8 @@ def check_exog_dtypes(
             if exog[col].cat.categories.dtype not in [int, np.int32, np.int64]:
                 raise TypeError(
                     ("Categorical columns in exog must contain only integer values. "
-                     "See skforecast docs for more info about how to include categorical "
-                     "features https://skforecast.org/"
+                     "See skforecast docs for more info about how to include "
+                     "categorical features https://skforecast.org/"
                      "latest/user_guides/categorical-features.html")
                 )
     else:
@@ -360,8 +366,8 @@ def check_exog_dtypes(
         if exog.dtypes == 'category' and exog.cat.categories.dtype not in [int, np.int32, np.int64]:
             raise TypeError(
                 ("If exog is of type category, it must contain only integer values. "
-                 "See skforecast docs for more info about how to include categorical "
-                 "features https://skforecast.org/"
+                 "See skforecast docs for more info about how to include "
+                 "categorical features https://skforecast.org/"
                  "latest/user_guides/categorical-features.html")
             )
          
@@ -635,8 +641,9 @@ def check_predict_input(
             raise TypeError("`exog` must be a pandas Series or DataFrame.")
         if exog.isnull().any().any():
             warnings.warn(
-                ("`exog` has missing values. Most of machine learning models do not allow "
-                 "missing values. `predict` method may fail."), MissingValuesExogWarning
+                ("`exog` has missing values. Most of machine learning models do "
+                 "not allow missing values. `predict` method may fail."), 
+                 MissingValuesExogWarning
             )
         if not isinstance(exog, exog_type):
             raise TypeError(
@@ -709,8 +716,8 @@ def check_predict_input(
                 )
             if last_window_exog.isnull().any().all():
                 warnings.warn(
-                ("`last_window_exog` has missing values. Most of machine learning models "
-                 "do not allow missing values. `predict` method may fail."),
+                ("`last_window_exog` has missing values. Most of machine learning "
+                 "models do not allow missing values. `predict` method may fail."),
                 MissingValuesExogWarning
             )
             _, last_window_exog_index = preprocess_last_window(
@@ -725,8 +732,8 @@ def check_predict_input(
             if isinstance(last_window_exog_index, pd.DatetimeIndex):
                 if not last_window_exog_index.freqstr == index_freq:
                     raise TypeError(
-                        (f"Expected frequency of type {index_freq} for `last_window_exog`. "
-                         f"Got {last_window_exog_index.freqstr}.")
+                        (f"Expected frequency of type {index_freq} for "
+                         f"`last_window_exog`. Got {last_window_exog_index.freqstr}.")
                     )
 
             # Check all columns are in the pd.DataFrame, last_window_exog

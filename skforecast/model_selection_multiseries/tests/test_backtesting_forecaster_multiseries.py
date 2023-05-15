@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 from sklearn.linear_model import Ridge
 from sklearn.metrics import mean_absolute_error
+from skforecast.exceptions import IgnoredArgumentWarning
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 from skforecast.ForecasterAutoregMultiSeriesCustom import ForecasterAutoregMultiSeriesCustom
@@ -100,9 +101,9 @@ def test_backtesting_forecaster_multiseries_TypeError_when_levels_not_list_str_N
         )
 
 
-def test_backtesting_forecaster_multiseries_UserWarning_forecaster_multivariate_and_levels():
+def test_backtesting_forecaster_multiseries_IgnoredArgumentWarning_forecaster_multivariate_and_levels():
     """
-    Test UserWarning is raised when levels is not forecaster.level or None in
+    Test IgnoredArgumentWarning is raised when levels is not forecaster.level or None in
     ForecasterAutoregMultiVariate.
     """
     forecaster = ForecasterAutoregMultiVariate(
@@ -118,7 +119,7 @@ def test_backtesting_forecaster_multiseries_UserWarning_forecaster_multivariate_
                  f"{forecaster.level}, to predict another level, change the `level` "
                  f"argument when initializing the forecaster.")
             )
-    with pytest.warns(UserWarning, match = warn_msg):
+    with pytest.warns(IgnoredArgumentWarning, match = warn_msg):
         backtesting_forecaster_multiseries(
             forecaster          = forecaster,
             series              = series,

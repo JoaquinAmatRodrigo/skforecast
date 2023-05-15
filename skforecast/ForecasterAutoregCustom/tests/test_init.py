@@ -5,6 +5,7 @@ import pytest
 import pandas as pd
 import numpy as np
 from skforecast.ForecasterAutoregCustom import ForecasterAutoregCustom
+from skforecast.exceptions import IgnoredArgumentWarning
 from sklearn.linear_model import LinearRegression
 from sklearn.neighbors import KNeighborsRegressor
 
@@ -66,19 +67,19 @@ def test_init_TypeError_when_weight_func_argument_is_not_Callable():
          )
 
 
-def test_init_UserWarning_when_series_weights_is_provided_and_regressor_has_not_sample_weights():
+def test_init_IgnoredArgumentWarning_when_series_weights_is_provided_and_regressor_has_not_sample_weights():
     """
-    Test warning is created when weight_func is provided but the regressor has no argument
-    sample_weights in his fit method.
+    Test IgnoredArgumentWarning is created when weight_func is provided but the 
+    regressor has no argument sample_weights in his fit method.
     """
     def weight_func(index): # pragma: no cover
          return np.ones_like(index)
  
     warn_msg = re.escape(
-                 (f"Argument `weight_func` is ignored since regressor KNeighborsRegressor() "
-                  f"does not accept `sample_weight` in its `fit` method.")
+                 ("Argument `weight_func` is ignored since regressor KNeighborsRegressor() "
+                  "does not accept `sample_weight` in its `fit` method.")
              )
-    with pytest.warns(UserWarning, match = warn_msg):
+    with pytest.warns(IgnoredArgumentWarning, match = warn_msg):
          ForecasterAutoregCustom(
              regressor      = KNeighborsRegressor(),
              fun_predictors = create_predictors,
