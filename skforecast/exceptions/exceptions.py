@@ -73,6 +73,6 @@ class IgnoredArgumentWarning(UserWarning):
     def __str__(self):
         extra_message = (
             "\n You can suppress this warning using: "
-            "warnings.simplefilter('ignore', category=LongTrainingWarning)"
+            "warnings.simplefilter('ignore', category=IgnoredArgumentWarning)"
         )
         return self.message + " " + extra_message
