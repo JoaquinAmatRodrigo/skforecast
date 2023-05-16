@@ -1,6 +1,6 @@
-
-<img src="images/banner-landing-page-skforecast.png#only-light" align="left"  style="margin-bottom: 30px; margin-top: 0px;">
-<br>
+<h1 align="left">
+<img src="images/banner-landing-page-skforecast.png#only-light" style= margin-top: 0px;">
+</h1><br>
 
 ![Python](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-blue)
 [![PyPI](https://img.shields.io/pypi/v/skforecast)](https://pypi.org/project/skforecast/)
