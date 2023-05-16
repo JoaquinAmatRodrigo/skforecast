@@ -615,7 +615,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
                      f" A weight of 1 is given to all their samples."),
                     IgnoredArgumentWarning
                 )
-            self.series_weights_ = dict.fromkeys(series.columns, 1.)
+            self.series_weights_ = {col: 1. for col in series.columns}
             self.series_weights_.update((k, v) for k, v in self.series_weights.items() if k in self.series_weights_)
             weights_series = [np.repeat(self.series_weights_[serie], sum(X_train[serie])) 
                               for serie in series.columns]
@@ -623,7 +623,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
 
         if self.weight_func is not None:
             if isinstance(self.weight_func, Callable):
-                self.weight_func_ = dict.fromkeys(series.columns, self.weight_func)
+                self.weight_func_ = {col: copy(self.weight_func) for col in series.columns}
             else:
                 # Series not present in weight_func have a weight of 1 in all their samples
                 series_not_in_weight_func = set(series.columns) - set(self.weight_func.keys())
@@ -633,13 +633,13 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
                          f" A weight of 1 is given to all their samples."),
                         IgnoredArgumentWarning
                     )
-                self.weight_func_ = dict.fromkeys(series.columns, lambda index: np.ones_like(index, dtype=float))
+                self.weight_func_ = {col: lambda x: np.ones_like(x, dtype=float) for col in series.columns}
                 self.weight_func_.update((k, v) for k, v in self.weight_func.items() if k in self.weight_func_)
                 
             weights_samples = []
             for key in self.weight_func_.keys():
-                index = y_train_index[X_train[X_train[key] == 1.0].index]
-                weights_samples.append(self.weight_func_[key](index))
+                idx = y_train_index[X_train[X_train[key] == 1.0].index]
+                weights_samples.append(self.weight_func_[key](idx))
             weights_samples = np.concatenate(weights_samples)
 
         if weights_series is not None:
