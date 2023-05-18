@@ -1670,7 +1670,7 @@ for backtesting.</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast\model_selection_multiseries\model_selection_multiseries.py</code></summary>
+          <summary>Source code in <code>skforecast/model_selection_multiseries/model_selection_multiseries.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">backtesting_forecaster_multiseries</span><span class="p">(</span>
     <span class="n">forecaster</span><span class="p">,</span>
     <span class="n">series</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
@@ -1690,7 +1690,7 @@ for backtesting.</p></td>
     <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">show_progress</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Backtesting for multi-series and multivariate forecasters.</span>
 
 <span class="sd">    If `refit` is False, the model is trained only once using the `initial_train_size`</span>
@@ -2044,7 +2044,7 @@ regressed on exog[i].</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast\model_selection_multiseries\model_selection_multiseries.py</code></summary>
+          <summary>Source code in <code>skforecast/model_selection_multiseries/model_selection_multiseries.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">grid_search_forecaster_multiseries</span><span class="p">(</span>
     <span class="n">forecaster</span><span class="p">,</span>
     <span class="n">series</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
@@ -2062,7 +2062,7 @@ regressed on exog[i].</p></td>
     <span class="n">return_best</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Exhaustive search over specified parameter values for a Forecaster object.</span>
 <span class="sd">    Validation is done using multi-series backtesting.</span>
 
@@ -2343,7 +2343,7 @@ n_iter trades off runtime vs quality of the solution.</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast\model_selection_multiseries\model_selection_multiseries.py</code></summary>
+          <summary>Source code in <code>skforecast/model_selection_multiseries/model_selection_multiseries.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">random_search_forecaster_multiseries</span><span class="p">(</span>
     <span class="n">forecaster</span><span class="p">,</span>
     <span class="n">series</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
@@ -2363,7 +2363,7 @@ n_iter trades off runtime vs quality of the solution.</p></td>
     <span class="n">return_best</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Random search over specified parameter values or distributions for a Forecaster </span>
 <span class="sd">    object. Validation is done using multi-series backtesting.</span>
 
@@ -2656,7 +2656,7 @@ are used if they are already stored inside the forecaster.</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast\model_selection_multiseries\model_selection_multiseries.py</code></summary>
+          <summary>Source code in <code>skforecast/model_selection_multiseries/model_selection_multiseries.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">backtesting_forecaster_multivariate</span><span class="p">(</span>
     <span class="n">forecaster</span><span class="p">,</span>
     <span class="n">series</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
@@ -2676,7 +2676,7 @@ are used if they are already stored inside the forecaster.</p></td>
     <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">show_progress</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This function is an alias of backtesting_forecaster_multiseries.</span>
 
 <span class="sd">    Backtesting for multi-series and multivariate forecasters.</span>
@@ -2967,7 +2967,7 @@ regressed on exog[i].</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast\model_selection_multiseries\model_selection_multiseries.py</code></summary>
+          <summary>Source code in <code>skforecast/model_selection_multiseries/model_selection_multiseries.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">grid_search_forecaster_multivariate</span><span class="p">(</span>
     <span class="n">forecaster</span><span class="p">,</span>
     <span class="n">series</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
@@ -2985,7 +2985,7 @@ regressed on exog[i].</p></td>
     <span class="n">return_best</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This function is an alias of grid_search_forecaster_multiseries.</span>
 
 <span class="sd">    Exhaustive search over specified parameter values for a Forecaster object.</span>
@@ -3267,7 +3267,7 @@ n_iter trades off runtime vs quality of the solution.</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast\model_selection_multiseries\model_selection_multiseries.py</code></summary>
+          <summary>Source code in <code>skforecast/model_selection_multiseries/model_selection_multiseries.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">random_search_forecaster_multivariate</span><span class="p">(</span>
     <span class="n">forecaster</span><span class="p">,</span>
     <span class="n">series</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
@@ -3287,7 +3287,7 @@ n_iter trades off runtime vs quality of the solution.</p></td>
     <span class="n">return_best</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This function is an alias of random_search_forecaster_multiseries.</span>
 
 <span class="sd">    Random search over specified parameter values or distributions for a Forecaster </span>
