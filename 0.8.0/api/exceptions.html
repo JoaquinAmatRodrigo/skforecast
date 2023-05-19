@@ -1476,9 +1476,9 @@ missing values. Most machine learning models do not accept missing values, there
 the forecaster <code>fit</code> and <code>predict</code> may fail.</p>
 
         <details class="quote">
-          <summary>Source code in <code>skforecast/exceptions/exceptions.py</code></summary>
+          <summary>Source code in <code>skforecast\exceptions\exceptions.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">MissingValuesExogWarning</span><span class="p">(</span><span class="ne">UserWarning</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Warning used to notify there are missing values in the exogenous data.</span>
 <span class="sd">    This warning occurs when the input data passed to the `exog` arguments contains</span>
 <span class="sd">    missing values. Most machine learning models do not accept missing values, therefore</span>
@@ -1523,9 +1523,9 @@ DataTypeWarning            (<span title="UserWarning">UserWarning</span>)
 accept other data types, therefore the forecaster <code>fit</code> and <code>predict</code> may fail.</p>
 
         <details class="quote">
-          <summary>Source code in <code>skforecast/exceptions/exceptions.py</code></summary>
+          <summary>Source code in <code>skforecast\exceptions\exceptions.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">DataTypeWarning</span><span class="p">(</span><span class="ne">UserWarning</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Warning used to notify there are dtypes in the exogenous data that are not</span>
 <span class="sd">    &#39;int&#39;, &#39;float&#39;, &#39;bool&#39; or &#39;category&#39;. Most machine learning models do not</span>
 <span class="sd">    accept other data types, therefore the forecaster `fit` and `predict` may fail.</span>
@@ -1568,9 +1568,9 @@ LongTrainingWarning            (<span title="UserWarning">UserWarning</span>)
 <p>the process may take a while to run.</p>
 
         <details class="quote">
-          <summary>Source code in <code>skforecast/exceptions/exceptions.py</code></summary>
+          <summary>Source code in <code>skforecast\exceptions\exceptions.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">LongTrainingWarning</span><span class="p">(</span><span class="ne">UserWarning</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Warning used to notify that a large number of models will be trained and the</span>
 <span class="sd">    the process may take a while to run.</span>
 <span class="sd">    &quot;&quot;&quot;</span>

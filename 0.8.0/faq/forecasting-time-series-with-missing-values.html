@@ -2635,12 +2635,13 @@ from skforecast.model_selection import backtesting_forecaster</div>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<script src="https://kit.fontawesome.com/d20edc211b.js" crossorigin="anonymous"></script><div class="admonition note" name="html-admonition" style="background: rgba(0,184,212,.1); padding-top: 0px; padding-bottom: 6px; border-radius: 8px; border-left: 8px solid #00b8d4;">
+<div class="admonition note" name="html-admonition" style="background: rgba(0,184,212,.1); padding-top: 0px; padding-bottom: 6px; border-radius: 8px; border-left: 8px solid #00b8d4; padding-left: 10px;">
 
 <p class="title">
-    <i class="fa-circle-exclamation fa" style="font-size: 18px; color:#00b8d4;"></i>
-    <b> &nbsp Note</b>
+    <i style="font-size: 18px; color:#00b8d4;"></i>
+    <b style="color: #00b8d4;">🖉 Note</b>
 </p>
+
 In this document, a forecaster of type <code>ForecasterAutoreg</code> is used. The same strategy can be applied with any forecaster from skforecast.
 
 </div>
@@ -3092,12 +3093,13 @@ data_test  = data.loc[end_train:, :]</div>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<script src="https://kit.fontawesome.com/d20edc211b.js" crossorigin="anonymous"></script><div class="admonition note" name="html-admonition" style="background: rgba(0,184,212,.1); padding-top: 0px; padding-bottom: 6px; border-radius: 8px; border-left: 8px solid #00b8d4;">
+<div class="admonition note" name="html-admonition" style="background: rgba(0,184,212,.1); padding-top: 0px; padding-bottom: 6px; border-radius: 8px; border-left: 8px solid #00b8d4; padding-left: 10px;">
 
 <p class="title">
-    <i class="fa-circle-exclamation fa" style="font-size: 18px; color:#00b8d4;"></i>
-    <b> &nbsp Note</b>
+    <i style="font-size: 18px; color:#00b8d4;"></i>
+    <b style="color: #00b8d4;">🖉 Note</b>
 </p>
+
 Imputed values should neither participate in the training process as a target nor as a predictor (lag). Therefore, values within a window size as large as the lags used should also be excluded.
 
 </div>
@@ -3128,7 +3130,7 @@ Imputed values should neither participate in the training process as a target no
             <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Custom function to create weights</span>
 <span class="c1"># ==============================================================================</span>
 <span class="k">def</span> <span class="nf">custom_weights</span><span class="p">(</span><span class="n">index</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return 0 if index is in any gap.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">gaps</span> <span class="o">=</span> <span class="p">[</span>
@@ -3273,7 +3275,7 @@ predictions.head(4)</div>
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
-<pre>100%|██████████| 14/14 [00:00&lt;00:00, 21.66it/s]</pre>
+<pre>100%|██████████| 14/14 [00:00&lt;00:00, 26.19it/s]</pre>
 </div>
 </div>
 
@@ -3365,7 +3367,7 @@ predictions.head(4)</div>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[10]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[9]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
         
         
         <div class="CodeMirror cm-s-jupyter">

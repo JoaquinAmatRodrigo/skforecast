@@ -1637,7 +1637,7 @@ for backtesting.</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/model_selection/model_selection.py</code></summary>
+          <summary>Source code in <code>skforecast\model_selection\model_selection.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">backtesting_forecaster</span><span class="p">(</span>
     <span class="n">forecaster</span><span class="p">,</span>
     <span class="n">y</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
@@ -1656,7 +1656,7 @@ for backtesting.</p></td>
     <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">show_progress</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">list</span><span class="p">],</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Backtesting of forecaster model.</span>
 
 <span class="sd">    If `refit` is False, the model is trained only once using the `initial_train_size`</span>
@@ -1981,7 +1981,7 @@ regressed on exog[i].</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/model_selection/model_selection.py</code></summary>
+          <summary>Source code in <code>skforecast\model_selection\model_selection.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">grid_search_forecaster</span><span class="p">(</span>
     <span class="n">forecaster</span><span class="p">,</span>
     <span class="n">y</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
@@ -1998,7 +1998,7 @@ regressed on exog[i].</p></td>
     <span class="n">return_best</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Exhaustive search over specified parameter values for a Forecaster object.</span>
 <span class="sd">    Validation is done using time series backtesting.</span>
 
@@ -2259,7 +2259,7 @@ n_iter trades off runtime vs quality of the solution.</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/model_selection/model_selection.py</code></summary>
+          <summary>Source code in <code>skforecast\model_selection\model_selection.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">random_search_forecaster</span><span class="p">(</span>
     <span class="n">forecaster</span><span class="p">,</span>
     <span class="n">y</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
@@ -2278,7 +2278,7 @@ n_iter trades off runtime vs quality of the solution.</p></td>
     <span class="n">return_best</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Random search over specified parameter values or distributions for a Forecaster object.</span>
 <span class="sd">    Validation is done using time series backtesting.</span>
 
@@ -2584,7 +2584,7 @@ When using engine "skopt", the minimum value is 10.</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/model_selection/model_selection.py</code></summary>
+          <summary>Source code in <code>skforecast\model_selection\model_selection.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">bayesian_search_forecaster</span><span class="p">(</span>
     <span class="n">forecaster</span><span class="p">,</span>
     <span class="n">y</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
@@ -2607,7 +2607,7 @@ When using engine "skopt", the minimum value is 10.</p></td>
     <span class="n">kwargs_study_optimize</span><span class="p">:</span> <span class="nb">dict</span><span class="o">=</span><span class="p">{},</span>
     <span class="n">kwargs_gp_minimize</span><span class="p">:</span> <span class="n">Any</span><span class="o">=</span><span class="s1">&#39;deprecated&#39;</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="nb">object</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Bayesian optimization for a Forecaster object using time series backtesting and </span>
 <span class="sd">    optuna library.</span>
 

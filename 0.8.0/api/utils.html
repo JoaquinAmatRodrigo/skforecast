@@ -1767,13 +1767,13 @@
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+          <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">save_forecaster</span><span class="p">(</span>
     <span class="n">forecaster</span><span class="p">,</span> 
     <span class="n">file_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> 
     <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Save forecaster model using joblib.</span>
 
 <span class="sd">    Parameters</span>
@@ -1860,12 +1860,12 @@
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+          <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">load_forecaster</span><span class="p">(</span>
     <span class="n">file_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">object</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Load forecaster model using joblib.</span>
 
 <span class="sd">    Parameters</span>
@@ -1957,12 +1957,12 @@ ForecasterAutoregMultiVariate.</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+          <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">initialize_lags</span><span class="p">(</span>
     <span class="n">forecaster_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">lags</span><span class="p">:</span> <span class="n">Any</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Check lags argument input and generate the corresponding numpy ndarray.</span>
 
 <span class="sd">    Parameters</span>
@@ -2106,14 +2106,14 @@ ForecasterAutoregMultiVariate, ForecasterAutoregMultiSeriesCustom.</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+          <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">initialize_weights</span><span class="p">(</span>
     <span class="n">forecaster_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">regressor</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span>
     <span class="n">weight_func</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Callable</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span>
     <span class="n">series_weights</span><span class="p">:</span> <span class="nb">dict</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Callable</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span> <span class="n">Union</span><span class="p">[</span><span class="n">Callable</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span> <span class="nb">dict</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Check weights arguments, `weight_func` and `series_weights` for the different </span>
 <span class="sd">    forecasters. Create `source_code_weight_func`, source code of the custom </span>
 <span class="sd">    function(s) used to create weights.</span>
@@ -2260,12 +2260,12 @@ regressor after removing the unused keys.</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+          <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">check_select_fit_kwargs</span><span class="p">(</span>
     <span class="n">regressor</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span>
     <span class="n">fit_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Check if `fit_kwargs` is a dict and select only the keys that are used by</span>
 <span class="sd">    the `fit` method of the regressor.</span>
 
@@ -2378,11 +2378,11 @@ regressor after removing the unused keys.</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+          <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">check_y</span><span class="p">(</span>
     <span class="n">y</span><span class="p">:</span> <span class="n">Any</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Raise Exception if `y` is not pandas Series or if it has missing values.</span>
 
 <span class="sd">    Parameters</span>
@@ -2471,12 +2471,12 @@ issue a warning if <code>exog</code> contains NaN values.</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+          <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">check_exog</span><span class="p">(</span>
     <span class="n">exog</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
     <span class="n">allow_nan</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Raise Exception if `exog` is not pandas Series or pandas DataFrame.</span>
 <span class="sd">    If `allow_nan = True`, issue a warning if `exog` contains NaN values.</span>
 
@@ -2563,11 +2563,11 @@ issue a warning if <code>exog</code> contains NaN values.</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+          <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">get_exog_dtypes</span><span class="p">(</span>
     <span class="n">exog</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Store dtypes of `exog`.</span>
 
 <span class="sd">    Parameters</span>
@@ -2651,11 +2651,11 @@ Rise a Warning if values are not <code>init</code>, <code>float</code>, or <code
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+          <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">check_exog_dtypes</span><span class="p">(</span>
     <span class="n">exog</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Raise Exception if `exog` has categorical columns with non integer values.</span>
 <span class="sd">    This is needed when using machine learning regressors that allow categorical</span>
 <span class="sd">    features.</span>
@@ -2754,12 +2754,12 @@ interval of 95% should be as <code>interval = [2.5, 97.5]</code>.</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+          <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">check_interval</span><span class="p">(</span>
     <span class="n">interval</span><span class="p">:</span> <span class="nb">list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span><span class="o">=</span><span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Check provided confidence interval sequence is valid.</span>
 
 <span class="sd">    Parameters</span>
@@ -2968,7 +2968,7 @@ interval of 95% should be as <code>interval = [2.5, 97.5]</code>.</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+          <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">check_predict_input</span><span class="p">(</span>
     <span class="n">forecaster_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">steps</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">list</span><span class="p">],</span>
@@ -2988,7 +2988,7 @@ interval of 95% should be as <code>interval = [2.5, 97.5]</code>.</p></td>
     <span class="n">levels</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">series_col_names</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Check all inputs of predict method. This is a helper function to validate</span>
 <span class="sd">    that inputs used in predict method match attributes of a forecaster already</span>
 <span class="sd">    trained.</span>
@@ -3348,12 +3348,12 @@ intended to avoid copying data when it is not necessary.</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+          <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">preprocess_y</span><span class="p">(</span>
     <span class="n">y</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
     <span class="n">return_values</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns values and index of series separately. Index is overwritten </span>
 <span class="sd">    according to the next rules:</span>
 <span class="sd">        If index is of type DatetimeIndex and has frequency, nothing is </span>
@@ -3481,12 +3481,12 @@ is intended to avoid copying data when it is not necessary.</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+          <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">preprocess_last_window</span><span class="p">(</span>
     <span class="n">last_window</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">],</span>
     <span class="n">return_values</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span>
  <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns values and index of series separately. Index is overwritten </span>
 <span class="sd">    according to the next rules:</span>
 <span class="sd">        If index is of type DatetimeIndex and has frequency, nothing is </span>
@@ -3614,12 +3614,12 @@ intended to avoid copying data when it is not necessary.</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+          <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">preprocess_exog</span><span class="p">(</span>
     <span class="n">exog</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">],</span>
     <span class="n">return_values</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns values and index of series or data frame separately. Index is</span>
 <span class="sd">    overwritten  according to the next rules:</span>
 <span class="sd">        If index is of type DatetimeIndex and has frequency, nothing is </span>
@@ -3746,12 +3746,12 @@ so they have to be re-converted to <code>int</code>.</p>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+          <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">cast_exog_dtypes</span><span class="p">(</span>
     <span class="n">exog</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">],</span>
     <span class="n">exog_dtypes</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]:</span> <span class="c1"># pragma: no cover</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Cast `exog` to a specified types.</span>
 <span class="sd">    If `exog` is a pandas Series, `exog_dtypes` must be a dict with a single value.</span>
 <span class="sd">    If `exog_dtypes` is `category` but the current type of `exog` is `float`, then</span>
@@ -3852,12 +3852,12 @@ so they have to be re-converted to <code>int</code>.</p>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+          <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">exog_to_direct</span><span class="p">(</span>
     <span class="n">exog</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">],</span>
     <span class="n">steps</span><span class="p">:</span> <span class="nb">int</span>
 <span class="p">)</span><span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Transforms `exog` to a pandas DataFrame with the shape needed for Direct</span>
 <span class="sd">    forecasting.</span>
 
@@ -3968,12 +3968,12 @@ so they have to be re-converted to <code>int</code>.</p>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+          <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">exog_to_direct_numpy</span><span class="p">(</span>
     <span class="n">exog</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">steps</span><span class="p">:</span> <span class="nb">int</span>
 <span class="p">)</span><span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Transforms `exog` to `np.ndarray` with the shape needed for direct</span>
 <span class="sd">    forecasting.</span>
 
@@ -4074,12 +4074,12 @@ so they have to be re-converted to <code>int</code>.</p>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+          <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">expand_index</span><span class="p">(</span>
     <span class="n">index</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span> 
     <span class="n">steps</span><span class="p">:</span> <span class="nb">int</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create a new index of length `steps` starting at the end of the index.</span>
 
 <span class="sd">    Parameters</span>
@@ -4198,14 +4198,14 @@ be a Series or a DataFrame.</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+          <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">transform_series</span><span class="p">(</span>
     <span class="n">series</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
     <span class="n">transformer</span><span class="p">,</span>
     <span class="n">fit</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">inverse_transform</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;      </span>
+    <span class="sd">&quot;&quot;&quot;      </span>
 <span class="sd">    Transform raw values of pandas Series with a scikit-learn alike transformer</span>
 <span class="sd">    (preprocessor). The transformer used must have the following methods: fit, transform,</span>
 <span class="sd">    fit_transform and inverse_transform. ColumnTransformers are not allowed since they</span>
@@ -4360,14 +4360,14 @@ when using transformers of class scikit-learn ColumnTransformers.</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+          <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">transform_dataframe</span><span class="p">(</span>
     <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
     <span class="n">transformer</span><span class="p">,</span>
     <span class="n">fit</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">inverse_transform</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;      </span>
+    <span class="sd">&quot;&quot;&quot;      </span>
 <span class="sd">    Transform raw values of pandas DataFrame with a scikit-learn alike</span>
 <span class="sd">    transformer, preprocessor or ColumnTransformer. `inverse_transform` is not </span>
 <span class="sd">    available when using ColumnTransformers.</span>
@@ -4476,11 +4476,11 @@ when using transformers of class scikit-learn ColumnTransformers.</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+          <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">check_optional_dependency</span><span class="p">(</span>
     <span class="n">package_name</span><span class="p">:</span> <span class="nb">str</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Check if an optional dependency is installed, if not raise an ImportError  </span>
 <span class="sd">    with installation instructions.</span>
 
@@ -4583,14 +4583,14 @@ when using transformers of class scikit-learn ColumnTransformers.</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+          <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">multivariate_time_series_corr</span><span class="p">(</span>
     <span class="n">time_series</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
     <span class="n">other</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
     <span class="n">lags</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">],</span>
     <span class="n">method</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;pearson&#39;</span>
 <span class="p">)</span><span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute correlation between a time_series and the lagged values of other </span>
 <span class="sd">    time series. </span>
 

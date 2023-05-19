@@ -2841,8 +2841,8 @@ forecaster = ForecasterAutoreg(
 </div>
 
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2865,33 +2865,62 @@ forecaster = ForecasterAutoreg(
             <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Backtesting predictions on test data</span>
 <span class="c1"># ==============================================================================</span>
 <span class="n">metric</span><span class="p">,</span> <span class="n">predictions</span> <span class="o">=</span> <span class="n">backtesting_forecaster</span><span class="p">(</span>
-                          <span class="n">forecaster</span>         <span class="o">=</span> <span class="n">forecaster</span><span class="p">,</span>
-                          <span class="n">y</span>                  <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;users&#39;</span><span class="p">],</span>
-                          <span class="n">initial_train_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:</span><span class="n">end_train</span><span class="p">]),</span>
-                          <span class="n">fixed_train_size</span>   <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                          <span class="n">steps</span>              <span class="o">=</span> <span class="mi">24</span><span class="p">,</span>
-                          <span class="n">refit</span>              <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                          <span class="n">metric</span>             <span class="o">=</span> <span class="s1">&#39;mean_squared_error&#39;</span><span class="p">,</span>
-                          <span class="n">verbose</span>            <span class="o">=</span> <span class="kc">False</span>
+                          <span class="n">forecaster</span>            <span class="o">=</span> <span class="n">forecaster</span><span class="p">,</span>
+                          <span class="n">y</span>                     <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;users&#39;</span><span class="p">],</span>
+                          <span class="n">steps</span>                 <span class="o">=</span> <span class="mi">24</span><span class="p">,</span>
+                          <span class="n">metric</span>                <span class="o">=</span> <span class="s1">&#39;mean_squared_error&#39;</span><span class="p">,</span>
+                          <span class="n">initial_train_size</span>    <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:</span><span class="n">end_train</span><span class="p">]),</span>
+                          <span class="n">fixed_train_size</span>      <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                          <span class="n">gap</span>                   <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                          <span class="n">allow_incomplete_fold</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                          <span class="n">refit</span>                 <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                          <span class="n">verbose</span>               <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                          <span class="n">show_progress</span>         <span class="o">=</span> <span class="kc">True</span>  
                       <span class="p">)</span>
 </pre></div>
 <div id="cell-6" class="clipboard-copy-txt"># Backtesting predictions on test data
 # ==============================================================================
 metric, predictions = backtesting_forecaster(
-                          forecaster         = forecaster,
-                          y                  = data['users'],
-                          initial_train_size = len(data.loc[:end_train]),
-                          fixed_train_size   = False,
-                          steps              = 24,
-                          refit              = False,
-                          metric             = 'mean_squared_error',
-                          verbose            = False
+                          forecaster            = forecaster,
+                          y                     = data['users'],
+                          steps                 = 24,
+                          metric                = 'mean_squared_error',
+                          initial_train_size    = len(data.loc[:end_train]),
+                          fixed_train_size      = False,
+                          gap                   = 0,
+                          allow_incomplete_fold = True,
+                          refit                 = False,
+                          verbose               = False,
+                          show_progress         = True  
                       )</div>
     
         </div>
     </div>
 
 </div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
+<pre>100%|██████████| 11/11 [00:00&lt;00:00, 478.22it/s]
+</pre>
+</div>
+</div>
+
+</div>
+
 </div>
 
 </div>
@@ -3174,8 +3203,8 @@ data_test_log  = np.log1p(data_test)</div>
 </div>
 
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -3205,14 +3234,17 @@ data_test_log  = np.log1p(data_test)</div>
 <span class="c1"># Backtesting predictions on test data</span>
 <span class="c1"># ==============================================================================</span>
 <span class="n">metric</span><span class="p">,</span> <span class="n">predictions</span> <span class="o">=</span> <span class="n">backtesting_forecaster</span><span class="p">(</span>
-                          <span class="n">forecaster</span>         <span class="o">=</span> <span class="n">forecaster</span><span class="p">,</span>
-                          <span class="n">y</span>                  <span class="o">=</span> <span class="n">data_log</span><span class="p">[</span><span class="s1">&#39;users&#39;</span><span class="p">],</span>
-                          <span class="n">initial_train_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:</span><span class="n">end_train</span><span class="p">]),</span>
-                          <span class="n">fixed_train_size</span>   <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                          <span class="n">steps</span>              <span class="o">=</span> <span class="mi">24</span><span class="p">,</span>
-                          <span class="n">refit</span>              <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                          <span class="n">metric</span>             <span class="o">=</span> <span class="s1">&#39;mean_squared_error&#39;</span><span class="p">,</span>
-                          <span class="n">verbose</span>            <span class="o">=</span> <span class="kc">False</span>
+                          <span class="n">forecaster</span>            <span class="o">=</span> <span class="n">forecaster</span><span class="p">,</span>
+                          <span class="n">y</span>                     <span class="o">=</span> <span class="n">data_log</span><span class="p">[</span><span class="s1">&#39;users&#39;</span><span class="p">],</span>
+                          <span class="n">steps</span>                 <span class="o">=</span> <span class="mi">24</span><span class="p">,</span>
+                          <span class="n">metric</span>                <span class="o">=</span> <span class="s1">&#39;mean_squared_error&#39;</span><span class="p">,</span>
+                          <span class="n">initial_train_size</span>    <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_log</span><span class="o">.</span><span class="n">loc</span><span class="p">[:</span><span class="n">end_train</span><span class="p">]),</span>
+                          <span class="n">fixed_train_size</span>      <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                          <span class="n">gap</span>                   <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                          <span class="n">allow_incomplete_fold</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                          <span class="n">refit</span>                 <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                          <span class="n">verbose</span>               <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                          <span class="n">show_progress</span>         <span class="o">=</span> <span class="kc">True</span>  
                       <span class="p">)</span>
 </pre></div>
 <div id="cell-10" class="clipboard-copy-txt"># Create forecaster and train
@@ -3225,20 +3257,46 @@ forecaster = ForecasterAutoreg(
 # Backtesting predictions on test data
 # ==============================================================================
 metric, predictions = backtesting_forecaster(
-                          forecaster         = forecaster,
-                          y                  = data_log['users'],
-                          initial_train_size = len(data.loc[:end_train]),
-                          fixed_train_size   = False,
-                          steps              = 24,
-                          refit              = False,
-                          metric             = 'mean_squared_error',
-                          verbose            = False
+                          forecaster            = forecaster,
+                          y                     = data_log['users'],
+                          steps                 = 24,
+                          metric                = 'mean_squared_error',
+                          initial_train_size    = len(data_log.loc[:end_train]),
+                          fixed_train_size      = False,
+                          gap                   = 0,
+                          allow_incomplete_fold = True,
+                          refit                 = False,
+                          verbose               = False,
+                          show_progress         = True  
                       )</div>
     
         </div>
     </div>
 
 </div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
+<pre>100%|██████████| 11/11 [00:00&lt;00:00, 549.92it/s]
+</pre>
+</div>
+</div>
+
+</div>
+
 </div>
 
 </div>
@@ -3532,14 +3590,17 @@ class="
 <span class="c1"># Backtesting predictions on test data</span>
 <span class="c1"># ==============================================================================</span>
 <span class="n">metric</span><span class="p">,</span> <span class="n">predictions</span> <span class="o">=</span> <span class="n">backtesting_forecaster</span><span class="p">(</span>
-                          <span class="n">forecaster</span>         <span class="o">=</span> <span class="n">forecaster</span><span class="p">,</span>
-                          <span class="n">y</span>                  <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;users&#39;</span><span class="p">],</span>
-                          <span class="n">initial_train_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:</span><span class="n">end_train</span><span class="p">]),</span>
-                          <span class="n">fixed_train_size</span>   <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                          <span class="n">steps</span>              <span class="o">=</span> <span class="mi">24</span><span class="p">,</span>
-                          <span class="n">refit</span>              <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                          <span class="n">metric</span>             <span class="o">=</span> <span class="s1">&#39;mean_squared_error&#39;</span><span class="p">,</span>
-                          <span class="n">verbose</span>            <span class="o">=</span> <span class="kc">False</span>
+                          <span class="n">forecaster</span>            <span class="o">=</span> <span class="n">forecaster</span><span class="p">,</span>
+                          <span class="n">y</span>                     <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;users&#39;</span><span class="p">],</span>
+                          <span class="n">steps</span>                 <span class="o">=</span> <span class="mi">24</span><span class="p">,</span>
+                          <span class="n">metric</span>                <span class="o">=</span> <span class="s1">&#39;mean_squared_error&#39;</span><span class="p">,</span>
+                          <span class="n">initial_train_size</span>    <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:</span><span class="n">end_train</span><span class="p">]),</span>
+                          <span class="n">fixed_train_size</span>      <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                          <span class="n">gap</span>                   <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                          <span class="n">allow_incomplete_fold</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                          <span class="n">refit</span>                 <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                          <span class="n">verbose</span>               <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                          <span class="n">show_progress</span>         <span class="o">=</span> <span class="kc">True</span>  
                       <span class="p">)</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Backtesting metric: </span><span class="si">{</span><span class="n">metric</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -3562,14 +3623,17 @@ forecaster.fit(data['users'])
 # Backtesting predictions on test data
 # ==============================================================================
 metric, predictions = backtesting_forecaster(
-                          forecaster         = forecaster,
-                          y                  = data['users'],
-                          initial_train_size = len(data.loc[:end_train]),
-                          fixed_train_size   = False,
-                          steps              = 24,
-                          refit              = False,
-                          metric             = 'mean_squared_error',
-                          verbose            = False
+                          forecaster            = forecaster,
+                          y                     = data['users'],
+                          steps                 = 24,
+                          metric                = 'mean_squared_error',
+                          initial_train_size    = len(data.loc[:end_train]),
+                          fixed_train_size      = False,
+                          gap                   = 0,
+                          allow_incomplete_fold = True,
+                          refit                 = False,
+                          verbose               = False,
+                          show_progress         = True  
                       )
 
 print(f"Backtesting metric: {metric}")
@@ -3594,8 +3658,31 @@ predictions.head()</div>
     <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 
 
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
+<pre>100%|██████████| 11/11 [00:00&lt;00:00, 458.28it/s]</pre>
+</div>
+</div>
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
 <pre>Backtesting metric: 1991.9332571759883
+</pre>
+</div>
+</div>
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
+<pre>
 </pre>
 </div>
 </div>
@@ -3668,7 +3755,7 @@ predictions.head()</div>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[16]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[15]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
         
         
         <div class="CodeMirror cm-s-jupyter">

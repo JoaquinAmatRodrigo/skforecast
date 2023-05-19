@@ -1966,9 +1966,9 @@ up to 1000 values in the form <code>{level: residuals}</code>. Use
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/ForecasterAutoregMultiSeriesCustom/ForecasterAutoregMultiSeriesCustom.py</code></summary>
+          <summary>Source code in <code>skforecast\forecasterautoregmultiseriescustom\forecasterautoregmultiseriescustom.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">ForecasterAutoregMultiSeriesCustom</span><span class="p">(</span><span class="n">ForecasterBase</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This class turns any regressor compatible with the scikit-learn API into a</span>
 <span class="sd">    recursive autoregressive (multi-step) forecaster for multiple series with a custom</span>
 <span class="sd">    function to create predictors.</span>
@@ -2260,7 +2260,7 @@ up to 1000 values in the form <code>{level: residuals}</code>. Use
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span>
         <span class="bp">self</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Information displayed when a ForecasterAutoregMultiSeriesCustom object is printed.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -2272,9 +2272,9 @@ up to 1000 values in the form <code>{level: residuals}</code>. Use
             <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">regressor</span><span class="o">.</span><span class="n">get_params</span><span class="p">()</span>
 
         <span class="n">info</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;=&#39;</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
             <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;=&#39;</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
             <span class="sa">f</span><span class="s2">&quot;Regressor: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">regressor</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
             <span class="sa">f</span><span class="s2">&quot;Predictors created with function: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">fun_predictors</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
             <span class="sa">f</span><span class="s2">&quot;Transformer for series: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">transformer_series</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
@@ -2282,13 +2282,13 @@ up to 1000 values in the form <code>{level: residuals}</code>. Use
             <span class="sa">f</span><span class="s2">&quot;Window size: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">window_size</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
             <span class="sa">f</span><span class="s2">&quot;Series levels (names): </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">series_col_names</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
             <span class="sa">f</span><span class="s2">&quot;Series weights: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">series_weights</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;Weight function included: </span><span class="si">{</span><span class="kc">True</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">weight_func</span><span class="w"> </span><span class="ow">is</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="kc">None</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="kc">False</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;Weight function included: </span><span class="si">{</span><span class="kc">True</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight_func</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">False</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
             <span class="sa">f</span><span class="s2">&quot;Exogenous included: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">included_exog</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
             <span class="sa">f</span><span class="s2">&quot;Type of exogenous variable: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">exog_type</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
             <span class="sa">f</span><span class="s2">&quot;Exogenous variables names: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">exog_col_names</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;Training range: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">training_range</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">fitted</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="kc">None</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;Training index type: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">index_type</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">][:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">fitted</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="kc">None</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;Training index frequency: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">index_freq</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">fitted</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="kc">None</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;Training range: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">training_range</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitted</span> <span class="k">else</span> <span class="kc">None</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;Training index type: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">index_type</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">][:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitted</span> <span class="k">else</span> <span class="kc">None</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;Training index frequency: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">index_freq</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitted</span> <span class="k">else</span> <span class="kc">None</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
             <span class="sa">f</span><span class="s2">&quot;Regressor parameters: </span><span class="si">{</span><span class="n">params</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
             <span class="sa">f</span><span class="s2">&quot;fit_kwargs: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">fit_kwargs</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
             <span class="sa">f</span><span class="s2">&quot;Creation date: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">creation_date</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
@@ -2306,7 +2306,7 @@ up to 1000 values in the form <code>{level: residuals}</code>. Use
         <span class="n">series</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
         <span class="n">exog</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create training matrices from multiple time series and exogenous</span>
 <span class="sd">        variables.</span>
 
@@ -2342,7 +2342,7 @@ up to 1000 values in the form <code>{level: residuals}</code>. Use
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;`series` must have as many values as the windows_size needed by &quot;</span>
                  <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">fun_predictors</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">. For this Forecaster the &quot;</span>
-                 <span class="sa">f</span><span class="s2">&quot;minimum length is </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">window_size</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                 <span class="sa">f</span><span class="s2">&quot;minimum length is </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">window_size</span> <span class="o">+</span> <span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="p">)</span>
 
         <span class="n">series_col_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
@@ -2506,7 +2506,7 @@ up to 1000 values in the form <code>{level: residuals}</code>. Use
         <span class="n">X_train</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
         <span class="n">y_train_index</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">,</span>
     <span class="p">)</span><span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Crate weights for each observation according to the forecaster&#39;s attributes</span>
 <span class="sd">        `series_weights` and `weight_func`. The resulting weights are product of both</span>
 <span class="sd">        types of weights.</span>
@@ -2600,7 +2600,7 @@ up to 1000 values in the form <code>{level: residuals}</code>. Use
         <span class="n">exog</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">store_in_sample_residuals</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Training Forecaster.</span>
 
 <span class="sd">        Parameters</span>
@@ -2715,7 +2715,7 @@ up to 1000 values in the form <code>{level: residuals}</code>. Use
         <span class="n">last_window</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
         <span class="n">exog</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Predict n steps ahead. It is an iterative process in which, each prediction,</span>
 <span class="sd">        is used as a predictor for the next step.</span>
 
@@ -2774,7 +2774,7 @@ up to 1000 values in the form <code>{level: residuals}</code>. Use
         <span class="n">last_window</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">exog</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Predict n steps ahead. It is an recursive process in which, each prediction,</span>
 <span class="sd">        is used as a predictor for the next step.</span>
 
@@ -2906,7 +2906,7 @@ up to 1000 values in the form <code>{level: residuals}</code>. Use
         <span class="n">random_state</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span>
         <span class="n">in_sample_residuals</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate multiple forecasting predictions using a bootstrapping process. </span>
 <span class="sd">        By sampling from a collection of past observed errors (the residuals),</span>
 <span class="sd">        each iteration of bootstrapping generates a different set of predictions. </span>
@@ -2969,7 +2969,7 @@ up to 1000 values in the form <code>{level: residuals}</code>. Use
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">set</span><span class="p">(</span><span class="n">levels</span><span class="p">)</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">in_sample_residuals</span><span class="o">.</span><span class="n">keys</span><span class="p">())):</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                     <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Not `forecaster.in_sample_residuals` for levels: &quot;</span>
-                     <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">set</span><span class="p">(</span><span class="n">levels</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">in_sample_residuals</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+                     <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">set</span><span class="p">(</span><span class="n">levels</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">in_sample_residuals</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
                 <span class="p">)</span>
             <span class="n">residuals_levels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_sample_residuals</span>
         <span class="k">else</span><span class="p">:</span>
@@ -2984,7 +2984,7 @@ up to 1000 values in the form <code>{level: residuals}</code>. Use
                 <span class="k">if</span> <span class="ow">not</span> <span class="nb">set</span><span class="p">(</span><span class="n">levels</span><span class="p">)</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">out_sample_residuals</span><span class="o">.</span><span class="n">keys</span><span class="p">())):</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                         <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Not `forecaster.out_sample_residuals` for levels: &quot;</span>
-                         <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">set</span><span class="p">(</span><span class="n">levels</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">out_sample_residuals</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">. &quot;</span>
+                         <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">set</span><span class="p">(</span><span class="n">levels</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">out_sample_residuals</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">. &quot;</span>
                          <span class="sa">f</span><span class="s2">&quot;Use method `set_out_sample_residuals()`.&quot;</span><span class="p">)</span>
                     <span class="p">)</span>
             <span class="n">residuals_levels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_sample_residuals</span>
@@ -3132,7 +3132,7 @@ up to 1000 values in the form <code>{level: residuals}</code>. Use
         <span class="n">random_state</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span>
         <span class="n">in_sample_residuals</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Iterative process in which, each prediction, is used as a predictor</span>
 <span class="sd">        for the next step and bootstrapping is used to estimate prediction</span>
 <span class="sd">        intervals. Both predictions and intervals are returned.</span>
@@ -3242,7 +3242,7 @@ up to 1000 values in the form <code>{level: residuals}</code>. Use
         <span class="n">random_state</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span>
         <span class="n">in_sample_residuals</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Fit a given probability distribution for each step. After generating </span>
 <span class="sd">        multiple forecasting predictions through a bootstrapping process, each </span>
 <span class="sd">        step is fitted to the given distribution.</span>
@@ -3330,7 +3330,7 @@ up to 1000 values in the form <code>{level: residuals}</code>. Use
         <span class="bp">self</span><span class="p">,</span> 
         <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set new values to the parameters of the scikit learn model stored in the</span>
 <span class="sd">        forecaster.</span>
 
@@ -3353,7 +3353,7 @@ up to 1000 values in the form <code>{level: residuals}</code>. Use
         <span class="bp">self</span><span class="p">,</span> 
         <span class="n">fit_kwargs</span><span class="p">:</span> <span class="nb">dict</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set new values for the additional keyword arguments passed to the `fit` </span>
 <span class="sd">        method of the regressor.</span>
 
@@ -3378,7 +3378,7 @@ up to 1000 values in the form <code>{level: residuals}</code>. Use
         <span class="n">transform</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">random_state</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">123</span>
     <span class="p">)</span><span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set new values to the attribute `out_sample_residuals`. Out of sample</span>
 <span class="sd">        residuals are meant to be calculated using observations that did not</span>
 <span class="sd">        participate in the training process.</span>
@@ -3484,7 +3484,7 @@ up to 1000 values in the form <code>{level: residuals}</code>. Use
     <span class="k">def</span> <span class="nf">get_feature_importances</span><span class="p">(</span>
         <span class="bp">self</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return feature importances of the regressor stored in the</span>
 <span class="sd">        forecaster. Only valid when regressor stores internally the feature</span>
 <span class="sd">        importances in the attribute `feature_importances_` or `coef_`.</span>
@@ -3536,7 +3536,7 @@ up to 1000 values in the form <code>{level: residuals}</code>. Use
     <span class="k">def</span> <span class="nf">get_feature_importance</span><span class="p">(</span>
         <span class="bp">self</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This method has been replaced by `get_feature_importances()`.</span>
 
 <span class="sd">        Return feature importances of the regressor stored in the</span>
@@ -3638,14 +3638,14 @@ types of weights.</p>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/ForecasterAutoregMultiSeriesCustom/ForecasterAutoregMultiSeriesCustom.py</code></summary>
+          <summary>Source code in <code>skforecast\forecasterautoregmultiseriescustom\forecasterautoregmultiseriescustom.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">create_sample_weights</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">series</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
     <span class="n">X_train</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
     <span class="n">y_train_index</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">,</span>
 <span class="p">)</span><span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Crate weights for each observation according to the forecaster&#39;s attributes</span>
 <span class="sd">    `series_weights` and `weight_func`. The resulting weights are product of both</span>
 <span class="sd">    types of weights.</span>
@@ -3796,13 +3796,13 @@ number of observations as <code>series</code> and their indexes must be aligned.
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/ForecasterAutoregMultiSeriesCustom/ForecasterAutoregMultiSeriesCustom.py</code></summary>
+          <summary>Source code in <code>skforecast\forecasterautoregmultiseriescustom\forecasterautoregmultiseriescustom.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">create_train_X_y</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">series</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
     <span class="n">exog</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create training matrices from multiple time series and exogenous</span>
 <span class="sd">    variables.</span>
 
@@ -3838,7 +3838,7 @@ number of observations as <code>series</code> and their indexes must be aligned.
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
             <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;`series` must have as many values as the windows_size needed by &quot;</span>
              <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">fun_predictors</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">. For this Forecaster the &quot;</span>
-             <span class="sa">f</span><span class="s2">&quot;minimum length is </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">window_size</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+             <span class="sa">f</span><span class="s2">&quot;minimum length is </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">window_size</span> <span class="o">+</span> <span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="p">)</span>
 
     <span class="n">series_col_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
@@ -4050,14 +4050,14 @@ that series[i] is regressed on exog[i].</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/ForecasterAutoregMultiSeriesCustom/ForecasterAutoregMultiSeriesCustom.py</code></summary>
+          <summary>Source code in <code>skforecast\forecasterautoregmultiseriescustom\forecasterautoregmultiseriescustom.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">fit</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">series</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
     <span class="n">exog</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">store_in_sample_residuals</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Training Forecaster.</span>
 
 <span class="sd">    Parameters</span>
@@ -4223,11 +4223,11 @@ importances in the attribute <code>feature_importances_</code> or <code>coef_</c
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/ForecasterAutoregMultiSeriesCustom/ForecasterAutoregMultiSeriesCustom.py</code></summary>
+          <summary>Source code in <code>skforecast\forecasterautoregmultiseriescustom\forecasterautoregmultiseriescustom.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">get_feature_importance</span><span class="p">(</span>
     <span class="bp">self</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This method has been replaced by `get_feature_importances()`.</span>
 
 <span class="sd">    Return feature importances of the regressor stored in the</span>
@@ -4310,11 +4310,11 @@ importances in the attribute <code>feature_importances_</code> or <code>coef_</c
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/ForecasterAutoregMultiSeriesCustom/ForecasterAutoregMultiSeriesCustom.py</code></summary>
+          <summary>Source code in <code>skforecast\forecasterautoregmultiseriescustom\forecasterautoregmultiseriescustom.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">get_feature_importances</span><span class="p">(</span>
     <span class="bp">self</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return feature importances of the regressor stored in the</span>
 <span class="sd">    forecaster. Only valid when regressor stores internally the feature</span>
 <span class="sd">    importances in the attribute `feature_importances_` or `coef_`.</span>
@@ -4441,7 +4441,7 @@ right after training data.</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/ForecasterAutoregMultiSeriesCustom/ForecasterAutoregMultiSeriesCustom.py</code></summary>
+          <summary>Source code in <code>skforecast\forecasterautoregmultiseriescustom\forecasterautoregmultiseriescustom.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">predict</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
@@ -4449,7 +4449,7 @@ right after training data.</p></td>
     <span class="n">last_window</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">exog</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Predict n steps ahead. It is an recursive process in which, each prediction,</span>
 <span class="sd">    is used as a predictor for the next step.</span>
 
@@ -4676,7 +4676,7 @@ calculated and stored the residuals within the forecaster (see
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/ForecasterAutoregMultiSeriesCustom/ForecasterAutoregMultiSeriesCustom.py</code></summary>
+          <summary>Source code in <code>skforecast\forecasterautoregmultiseriescustom\forecasterautoregmultiseriescustom.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">predict_bootstrapping</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
@@ -4687,7 +4687,7 @@ calculated and stored the residuals within the forecaster (see
     <span class="n">random_state</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span>
     <span class="n">in_sample_residuals</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generate multiple forecasting predictions using a bootstrapping process. </span>
 <span class="sd">    By sampling from a collection of past observed errors (the residuals),</span>
 <span class="sd">    each iteration of bootstrapping generates a different set of predictions. </span>
@@ -4750,7 +4750,7 @@ calculated and stored the residuals within the forecaster (see
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">set</span><span class="p">(</span><span class="n">levels</span><span class="p">)</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">in_sample_residuals</span><span class="o">.</span><span class="n">keys</span><span class="p">())):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Not `forecaster.in_sample_residuals` for levels: &quot;</span>
-                 <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">set</span><span class="p">(</span><span class="n">levels</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">in_sample_residuals</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+                 <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">set</span><span class="p">(</span><span class="n">levels</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">in_sample_residuals</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
             <span class="p">)</span>
         <span class="n">residuals_levels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_sample_residuals</span>
     <span class="k">else</span><span class="p">:</span>
@@ -4765,7 +4765,7 @@ calculated and stored the residuals within the forecaster (see
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">set</span><span class="p">(</span><span class="n">levels</span><span class="p">)</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">out_sample_residuals</span><span class="o">.</span><span class="n">keys</span><span class="p">())):</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                     <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Not `forecaster.out_sample_residuals` for levels: &quot;</span>
-                     <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">set</span><span class="p">(</span><span class="n">levels</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">out_sample_residuals</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">. &quot;</span>
+                     <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">set</span><span class="p">(</span><span class="n">levels</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">out_sample_residuals</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">. &quot;</span>
                      <span class="sa">f</span><span class="s2">&quot;Use method `set_out_sample_residuals()`.&quot;</span><span class="p">)</span>
                 <span class="p">)</span>
         <span class="n">residuals_levels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_sample_residuals</span>
@@ -5011,7 +5011,7 @@ calculated and stored the residuals within the forecaster (see
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/ForecasterAutoregMultiSeriesCustom/ForecasterAutoregMultiSeriesCustom.py</code></summary>
+          <summary>Source code in <code>skforecast\forecasterautoregmultiseriescustom\forecasterautoregmultiseriescustom.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">predict_dist</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
@@ -5023,7 +5023,7 @@ calculated and stored the residuals within the forecaster (see
     <span class="n">random_state</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span>
     <span class="n">in_sample_residuals</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Fit a given probability distribution for each step. After generating </span>
 <span class="sd">    multiple forecasting predictions through a bootstrapping process, each </span>
 <span class="sd">    step is fitted to the given distribution.</span>
@@ -5221,7 +5221,7 @@ calculated and stored the residuals within the forecaster (see
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/ForecasterAutoregMultiSeriesCustom/ForecasterAutoregMultiSeriesCustom.py</code></summary>
+          <summary>Source code in <code>skforecast\forecasterautoregmultiseriescustom\forecasterautoregmultiseriescustom.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">predict_interval</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
@@ -5233,7 +5233,7 @@ calculated and stored the residuals within the forecaster (see
     <span class="n">random_state</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span>
     <span class="n">in_sample_residuals</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Iterative process in which, each prediction, is used as a predictor</span>
 <span class="sd">    for the next step and bootstrapping is used to estimate prediction</span>
 <span class="sd">    intervals. Both predictions and intervals are returned.</span>
@@ -5373,12 +5373,12 @@ calculated and stored the residuals within the forecaster (see
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/ForecasterAutoregMultiSeriesCustom/ForecasterAutoregMultiSeriesCustom.py</code></summary>
+          <summary>Source code in <code>skforecast\forecasterautoregmultiseriescustom\forecasterautoregmultiseriescustom.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">set_fit_kwargs</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> 
     <span class="n">fit_kwargs</span><span class="p">:</span> <span class="nb">dict</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Set new values for the additional keyword arguments passed to the `fit` </span>
 <span class="sd">    method of the regressor.</span>
 
@@ -5461,7 +5461,7 @@ is overwritten with the new residuals.</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/ForecasterAutoregMultiSeriesCustom/ForecasterAutoregMultiSeriesCustom.py</code></summary>
+          <summary>Source code in <code>skforecast\forecasterautoregmultiseriescustom\forecasterautoregmultiseriescustom.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">set_out_sample_residuals</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> 
     <span class="n">residuals</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
@@ -5469,7 +5469,7 @@ is overwritten with the new residuals.</p></td>
     <span class="n">transform</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="n">random_state</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">123</span>
 <span class="p">)</span><span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Set new values to the attribute `out_sample_residuals`. Out of sample</span>
 <span class="sd">    residuals are meant to be calculated using observations that did not</span>
 <span class="sd">    participate in the training process.</span>
@@ -5613,12 +5613,12 @@ is overwritten with the new residuals.</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/ForecasterAutoregMultiSeriesCustom/ForecasterAutoregMultiSeriesCustom.py</code></summary>
+          <summary>Source code in <code>skforecast\forecasterautoregmultiseriescustom\forecasterautoregmultiseriescustom.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">set_params</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> 
     <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Set new values to the parameters of the scikit learn model stored in the</span>
 <span class="sd">    forecaster.</span>
 
@@ -5725,7 +5725,7 @@ first iteration of the prediction (t + 1).</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>skforecast/ForecasterAutoregMultiSeriesCustom/ForecasterAutoregMultiSeriesCustom.py</code></summary>
+          <summary>Source code in <code>skforecast\forecasterautoregmultiseriescustom\forecasterautoregmultiseriescustom.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">_recursive_predict</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
@@ -5733,7 +5733,7 @@ first iteration of the prediction (t + 1).</p></td>
     <span class="n">last_window</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">exog</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Predict n steps ahead. It is an iterative process in which, each prediction,</span>
 <span class="sd">    is used as a predictor for the next step.</span>
 
@@ -5809,11 +5809,11 @@ first iteration of the prediction (t + 1).</p></td>
       <p>Information displayed when a ForecasterAutoregMultiSeriesCustom object is printed.</p>
 
         <details class="quote">
-          <summary>Source code in <code>skforecast/ForecasterAutoregMultiSeriesCustom/ForecasterAutoregMultiSeriesCustom.py</code></summary>
+          <summary>Source code in <code>skforecast\forecasterautoregmultiseriescustom\forecasterautoregmultiseriescustom.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span>
     <span class="bp">self</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Information displayed when a ForecasterAutoregMultiSeriesCustom object is printed.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -5825,9 +5825,9 @@ first iteration of the prediction (t + 1).</p></td>
         <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">regressor</span><span class="o">.</span><span class="n">get_params</span><span class="p">()</span>
 
     <span class="n">info</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;=&#39;</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;=&#39;</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="sa">f</span><span class="s2">&quot;Regressor: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">regressor</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="sa">f</span><span class="s2">&quot;Predictors created with function: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">fun_predictors</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="sa">f</span><span class="s2">&quot;Transformer for series: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">transformer_series</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
@@ -5835,13 +5835,13 @@ first iteration of the prediction (t + 1).</p></td>
         <span class="sa">f</span><span class="s2">&quot;Window size: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">window_size</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="sa">f</span><span class="s2">&quot;Series levels (names): </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">series_col_names</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="sa">f</span><span class="s2">&quot;Series weights: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">series_weights</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;Weight function included: </span><span class="si">{</span><span class="kc">True</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">weight_func</span><span class="w"> </span><span class="ow">is</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="kc">None</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="kc">False</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;Weight function included: </span><span class="si">{</span><span class="kc">True</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight_func</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">False</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="sa">f</span><span class="s2">&quot;Exogenous included: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">included_exog</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="sa">f</span><span class="s2">&quot;Type of exogenous variable: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">exog_type</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="sa">f</span><span class="s2">&quot;Exogenous variables names: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">exog_col_names</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;Training range: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">training_range</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">fitted</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="kc">None</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;Training index type: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">index_type</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">][:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">fitted</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="kc">None</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;Training index frequency: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">index_freq</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">fitted</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="kc">None</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;Training range: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">training_range</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitted</span> <span class="k">else</span> <span class="kc">None</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;Training index type: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">index_type</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">][:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitted</span> <span class="k">else</span> <span class="kc">None</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;Training index frequency: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">index_freq</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitted</span> <span class="k">else</span> <span class="kc">None</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="sa">f</span><span class="s2">&quot;Regressor parameters: </span><span class="si">{</span><span class="n">params</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="sa">f</span><span class="s2">&quot;fit_kwargs: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">fit_kwargs</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="sa">f</span><span class="s2">&quot;Creation date: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">creation_date</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>

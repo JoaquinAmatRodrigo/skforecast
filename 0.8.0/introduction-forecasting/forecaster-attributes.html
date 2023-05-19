@@ -2705,9 +2705,10 @@ Training range: [Timestamp(&#39;1991-07-01 00:00:00&#39;), Timestamp(&#39;2008-0
 Training index type: DatetimeIndex 
 Training index frequency: MS 
 Regressor parameters: {&#39;bootstrap&#39;: True, &#39;ccp_alpha&#39;: 0.0, &#39;criterion&#39;: &#39;squared_error&#39;, &#39;max_depth&#39;: None, &#39;max_features&#39;: 1.0, &#39;max_leaf_nodes&#39;: None, &#39;max_samples&#39;: None, &#39;min_impurity_decrease&#39;: 0.0, &#39;min_samples_leaf&#39;: 1, &#39;min_samples_split&#39;: 2, &#39;min_weight_fraction_leaf&#39;: 0.0, &#39;n_estimators&#39;: 100, &#39;n_jobs&#39;: None, &#39;oob_score&#39;: False, &#39;random_state&#39;: 123, &#39;verbose&#39;: 0, &#39;warm_start&#39;: False} 
-Creation date: 2023-05-03 07:56:21 
-Last fit date: 2023-05-03 07:56:21 
-Skforecast version: 0.7.0 
+fit_kwargs: {} 
+Creation date: 2023-05-19 20:48:12 
+Last fit date: 2023-05-19 20:48:12 
+Skforecast version: 0.8.0 
 Python version: 3.9.13 
 Forecaster id: None </pre>
 </div>
@@ -2781,6 +2782,7 @@ index_freq
 training_range
 included_exog
 exog_type
+exog_dtypes
 exog_col_names
 X_train_col_names
 in_sample_residuals
@@ -2794,6 +2796,7 @@ forecaster_id
 lags
 max_lag
 window_size
+fit_kwargs
 </pre>
 </div>
 </div>
@@ -2882,11 +2885,11 @@ forecaster.regressor</div>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<script src="https://kit.fontawesome.com/d20edc211b.js" crossorigin="anonymous"></script><div class="admonition note" name="html-admonition" style="background: rgba(0,184,212,.1); padding-top: 0px; padding-bottom: 6px; border-radius: 8px; border-left: 8px solid #00b8d4;">
+<div class="admonition note" name="html-admonition" style="background: rgba(0,184,212,.1); padding-top: 0px; padding-bottom: 6px; border-radius: 8px; border-left: 8px solid #00b8d4; padding-left: 10px;">
 
 <p class="title">
-    <i class="fa-circle-exclamation fa" style="font-size: 18px; color:#00b8d4;"></i>
-    <b> &nbsp Note</b>
+    <i style="font-size: 18px; color:#00b8d4;"></i>
+    <b style="color: #00b8d4;">🖉 Note</b>
 </p>
 
 In the forecasters that follows a <a href="https://skforecast.org/latest/user_guides/direct-multi-step-forecasting.html">Direct Strategy</a>, one instance of the regressor is trained for each step. All of them are stored in <code>self.regressors_</code>
@@ -3054,11 +3057,11 @@ Freq: MS, Name: y, dtype: float64</pre>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<script src="https://kit.fontawesome.com/d20edc211b.js" crossorigin="anonymous"></script><div class="admonition note" name="html-admonition" style="background: rgba(0,184,212,.1); padding-top: 0px; padding-bottom: 6px; border-radius: 8px; border-left: 8px solid #00b8d4;">
+<div class="admonition note" name="html-admonition" style="background: rgba(0,184,212,.1); padding-top: 0px; padding-bottom: 6px; border-radius: 8px; border-left: 8px solid #00b8d4; padding-left: 10px;">
 
 <p class="title">
-    <i class="fa-circle-exclamation fa" style="font-size: 18px; color:#00b8d4;"></i>
-    <b> &nbsp Note</b>
+    <i style="font-size: 18px; color:#00b8d4;"></i>
+    <b style="color: #00b8d4;">🖉 Note</b>
 </p>
 
 learn how to get your forecasters into production and get the most out of them with <code>last_window</code>. <a href="https://skforecast.org/latest/user_guides/forecaster-in-production.html">Using forecaster models in production</a>.
@@ -3159,11 +3162,11 @@ forecaster.window_size</div>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<script src="https://kit.fontawesome.com/d20edc211b.js" crossorigin="anonymous"></script><div class="admonition note" name="html-admonition" style="background: rgba(0,184,212,.1); padding-top: 0px; padding-bottom: 6px; border-radius: 8px; border-left: 8px solid #00b8d4;">
+<div class="admonition note" name="html-admonition" style="background: rgba(0,184,212,.1); padding-top: 0px; padding-bottom: 6px; border-radius: 8px; border-left: 8px solid #00b8d4; padding-left: 10px;">
 
 <p class="title">
-    <i class="fa-circle-exclamation fa" style="font-size: 18px; color:#00b8d4;"></i>
-    <b> &nbsp Note</b>
+    <i style="font-size: 18px; color:#00b8d4;"></i>
+    <b style="color: #00b8d4;">🖉 Note</b>
 </p>
 
 In the forecasters that follows a <a href="https://skforecast.org/latest/user_guides/direct-multi-step-forecasting.html">Direct Strategy</a> and in the <a href="https://skforecast.org/latest/user_guides/independent-multi-time-series-forecasting.html">
@@ -3179,7 +3182,7 @@ Independent multi-series forecasting</a> this parameter is a <code>dict</code> c
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[10]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[8]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
         
         
         <div class="CodeMirror cm-s-jupyter">
@@ -3232,7 +3235,7 @@ forecaster.in_sample_residuals[:5]</div>
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[10]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[8]:</div>
 
 
 
@@ -3267,7 +3270,7 @@ forecaster.in_sample_residuals[:5]</div>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[11]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[9]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
         
         
         <div class="CodeMirror cm-s-jupyter">
@@ -3303,7 +3306,7 @@ forecaster.out_sample_residuals</div>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[12]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[10]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
         
         
         <div class="CodeMirror cm-s-jupyter">

@@ -32,7 +32,7 @@ All significant changes to this project are documented in this release file.
 
 + Rename optional dependency package `statsmodels` to `sarimax`. Now only `pmdarima` will be installed, `statsmodels` is no longer needed.
 
-+ Rename `get_feature_importance()` to `get_feature_importances()` in all Forecasters. `get_feature_importance()` method will me removed in skforecast 0.8.0.
++ Rename `get_feature_importance()` to `get_feature_importances()` in all Forecasters. `get_feature_importance()` method will me removed in skforecast 0.9.0.
 
 + Refactor `get_feature_importances()` in all Forecasters.
 
