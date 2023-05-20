@@ -2578,7 +2578,7 @@ Licensed under the Apache License, Version 2.0.
 
 <p class="title">
     <i style="font-size: 18px; color:#00b8d4;"></i>
-    <b style="color: #00b8d4;">🖉 Note</b>
+    <b style="color: #00b8d4;">&#128393 Note</b>
 </p>
 
 See <a href="https://skforecast.org/latest/user_guides/dependent-multi-series-multivariate-forecasting.html">ForecasterAutoregMultiVariate</a> for dependent multi-series forecasting (multivariate time series).
@@ -3898,7 +3898,7 @@ results</div>
             <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Weights in Multi-Series</span>
 <span class="c1"># ==============================================================================</span>
 <span class="k">def</span> <span class="nf">custom_weights</span><span class="p">(</span><span class="n">index</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return 0 if index is between &#39;2013-01-01&#39; and &#39;2013-01-31&#39;, 1 otherwise.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
@@ -4033,7 +4033,7 @@ forecaster.predict(steps=24).head(3)</div>
 
 <p class="title">
     <i style="font-size: 18px; color:#ff9100; border-color: #ff1744;"></i>
-    <b style="color: #ff9100;">⚠ Warning</b>
+    <b style="color: #ff9100;">&#9888 Warning</b>
 </p>
 
 The <code>weight_func</code> and <code>series_weights</code> arguments will be ignored if the regressor does not accept <code>sample_weight</code> in its <code>fit</code> method.
@@ -4291,7 +4291,7 @@ Forecaster id: None </pre>
              <span class="p">)</span>
 
 <span class="k">def</span> <span class="nf">custom_metric</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate the mean absolute error using only the predicted values of the last</span>
 <span class="sd">    3 months of the year.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -4515,7 +4515,7 @@ results</div>
 
 <p class="title">
     <i style="font-size: 18px; color:#ff9100; border-color: #ff1744;"></i>
-    <b style="color: #ff9100;">⚠ Warning</b>
+    <b style="color: #ff9100;">&#9888 Warning</b>
 </p>
 
 <code>bayesian_search_forecaster_multiseries</code> will be released in a future version of <b>skforecast</b>.

@@ -2506,7 +2506,7 @@ Licensed under the Apache License, Version 2.0.
 
 <p class="title">
     <i style="font-size: 18px; color:#00b8d4;"></i>
-    <b style="color: #00b8d4;">🖉 Note</b>
+    <b style="color: #00b8d4;">&#128393 Note</b>
 </p>
 
 The examples that follow demonstrate how a portion of the time series can be excluded from model training by assigning it a weight of zero. However, the use of weights extends beyond the inclusion or exclusion of observations and can also balance the degree of influence that each observation has on the forecasting model. For instance, an observation assigned a weight of 10 will have ten times more impact on the model training than an observation assigned a weight of 1.
@@ -2526,7 +2526,7 @@ The examples that follow demonstrate how a portion of the time series can be exc
 
 <p class="title">
     <i style="font-size: 18px; color:#ff9100; border-color: #ff1744;"></i>
-    <b style="color: #ff9100;">⚠ Warning</b>
+    <b style="color: #ff9100;">&#9888 Warning</b>
 </p>
 
 In most gradient boosting implementations, such as LightGBM, XGBoost, and CatBoost, samples with zero weight are typically excluded when calculating gradients and Hessians. However, these samples are still taken into account when constructing the feature histograms, which can result in a model that differs from one trained without zero-weighted samples. For more information on this issue, please refer to <a href="https://github.com/microsoft/LightGBM/issues/5553">this GitHub issue</a>.
@@ -2944,7 +2944,7 @@ class="
             <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Custom function to create weights</span>
 <span class="c1"># ==============================================================================</span>
 <span class="k">def</span> <span class="nf">custom_weights</span><span class="p">(</span><span class="n">index</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return 0 if index is between 2012-06-01 and 2012-10-21.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
@@ -3043,7 +3043,7 @@ forecaster = ForecasterAutoreg(
 
 <p class="title">
     <i style="font-size: 18px; color:#ff9100; border-color: #ff1744;"></i>
-    <b style="color: #ff9100;">⚠ Warning</b>
+    <b style="color: #ff9100;">&#9888 Warning</b>
 </p>
 
 If the regressor used in the model's fitting method does not support <code>sample_weight</code> within its <code>fit</code> method, the <code>weight_func</code> argument will be ignored.

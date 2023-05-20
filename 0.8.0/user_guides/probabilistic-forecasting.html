@@ -2529,7 +2529,7 @@ Licensed under the Apache License, Version 2.0.
 
 <p class="title">
     <i style="font-size: 18px; color:#ff9100; border-color: #ff1744;"></i>
-    <b style="color: #ff9100;">⚠ Warning</b>
+    <b style="color: #ff9100;">&#9888 Warning</b>
 </p>
 
 As Rob J Hyndman explains in his <a href="https://robjhyndman.com/hyndsight/narrow-pi/">blog</a>, in real-world problems, almost all prediction intervals are too narrow. For example, nominal 95% intervals may only provide coverage between 71% and 87%. This is a well-known phenomenon and arises because they do not account for all sources of uncertainty. With forecasting models, there are at least four sources of uncertainty:
@@ -3773,7 +3773,7 @@ predictions.head(4)</div>
                   <span class="p">)</span>
 
 <span class="n">coverage</span> <span class="o">=</span> <span class="n">inside_interval</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Coverage of the predicted interval on test data: </span><span class="si">{</span><span class="mi">100</span> <span class="o">*</span> <span class="n">coverage</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Coverage of the predicted interval on test data: </span><span class="si">{</span><span class="mi">100</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">coverage</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
 <div id="cell-10" class="clipboard-copy-txt"># Interval coverage on test data
 # ==============================================================================
@@ -4286,7 +4286,7 @@ predictions_2.head(4)</div>
                   <span class="p">)</span>
 
 <span class="n">coverage</span> <span class="o">=</span> <span class="n">inside_interval</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Coverage of the predicted interval on test data: </span><span class="si">{</span><span class="mi">100</span> <span class="o">*</span> <span class="n">coverage</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Coverage of the predicted interval on test data: </span><span class="si">{</span><span class="mi">100</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">coverage</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
 <span class="c1"># Plot</span>
 <span class="c1"># ==============================================================================</span>
@@ -4422,7 +4422,7 @@ class="
 
 <p class="title">
     <i style="font-size: 18px; color:#00b8d4;"></i>
-    <b style="color: #00b8d4;">🖉 Note</b>
+    <b style="color: #00b8d4;">&#128393 Note</b>
 </p>
 
 In the case of <code>ForecasterAutoregDirect</code>, <code>ForecasterAutoregMultiSeries</code>, <code>ForecasterAutoregMultiSeriesCustom</code> and <code>ForecasterAutoregMultiVariate</code>, the residuals must be provided using a dictionary to indicate to which step or level (series) they belong to.
@@ -4755,14 +4755,14 @@ predictions </div>
             <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Loss function for each quantile (pinball_loss)</span>
 <span class="c1"># ==============================================================================</span>
 <span class="k">def</span> <span class="nf">mean_pinball_loss_q10</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Pinball loss for quantile 10.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">mean_pinball_loss</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">mean_pinball_loss_q90</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Pinball loss for quantile 90.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">mean_pinball_loss</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.9</span><span class="p">)</span>
@@ -4930,7 +4930,7 @@ metric_q90, predictions_q90 = backtesting_forecaster(
                   <span class="p">)</span>
 
 <span class="n">coverage</span> <span class="o">=</span> <span class="n">inside_interval</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Coverage of the predicted interval: </span><span class="si">{</span><span class="mi">100</span> <span class="o">*</span> <span class="n">coverage</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Coverage of the predicted interval: </span><span class="si">{</span><span class="mi">100</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">coverage</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
 <div id="cell-20" class="clipboard-copy-txt"># Interval coverage on test data
 # ==============================================================================
@@ -5413,7 +5413,7 @@ class="
                   <span class="p">)</span>
 
 <span class="n">coverage</span> <span class="o">=</span> <span class="n">inside_interval</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Coverage of the predicted interval: </span><span class="si">{</span><span class="mi">100</span> <span class="o">*</span> <span class="n">coverage</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Coverage of the predicted interval: </span><span class="si">{</span><span class="mi">100</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">coverage</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
 <div id="cell-24" class="clipboard-copy-txt"># Interval coverage
 # ==============================================================================
