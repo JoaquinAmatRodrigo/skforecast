@@ -99,6 +99,7 @@ theme:
     text: Open Sans
     code: Ubuntu Mono
   logo: img/logo-skforecast-orange-no-backgound.png
+  favicon: img/favicon.png
   highlightjs: true
   features:
     - navigation.tabs
