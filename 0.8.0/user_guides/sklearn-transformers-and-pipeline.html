@@ -2551,11 +2551,13 @@ Licensed under the Apache License, Version 2.0.
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<div class="admonition note" name="html-admonition" style="background: rgba(0,184,212,.1); padding-top: 0px; padding-bottom: 6px; border-radius: 8px; border-left: 8px solid #00b8d4; padding-left: 10px;">
+<p><script src="https://kit.fontawesome.com/d20edc211b.js" crossorigin="anonymous"></script></p>
+<div class="admonition note" name="html-admonition" style="background: rgba(0,184,212,.1); padding-top: 0px; padding-bottom: 6px; border-radius: 8px;
+border-left: 8px solid #00b8d4; padding-left: 10px;">
 
 <p class="title">
-    <i style="font-size: 18px; color:#00b8d4;"></i>
-    <b style="color: #00b8d4;">&#128393 Note</b>
+    <i class="fa-light fa-pencil fa" style="font-size: 18px; color:#00b8d4;"></i>
+    <b> &nbsp Note</b>
 </p>
 
 When using <a href="https://joaquinamatrodrigo.github.io/skforecast/latest/user_guides/multi-time-series-forecasting.html#scikit-learn-transformers-in-multi-series">ForecasterAutoregMultiSeries</a> or <a href="https://joaquinamatrodrigo.github.io/skforecast/latest/user_guides/multivariate-forecasting.html#scikit-learn-transformers-in-multivariate">ForecasterAutoregMultiVariate</a> the <code>transformer_series</code> argument replaces <code>transformer_y</code>. If it is a <code>transformer</code>, the same transformation will be applied to all series. If it is a <code>dict</code> a different transformation can be set for each series.
@@ -3432,11 +3434,11 @@ Freq: MS, Name: y, dtype: float64</pre>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p><script src="https://kit.fontawesome.com/d20edc211b.js" crossorigin="anonymous"></script></p>
 <div class="admonition note" name="html-admonition" style="background: rgba(255,145,0,.1); padding-top: 0px; padding-bottom: 6px; border-radius: 8px; border-left: 8px solid #ff9100; padding-left: 10px;">
-
 <p class="title">
-    <i style="font-size: 18px; color:#ff9100; border-color: #ff1744;"></i>
-    <b style="color: #ff9100;">&#9888 Warning</b>
+    <i class="fa-triangle-exclamation fa" style="font-size: 18px; color:#ff9100;"></i>
+    <b style="color: #ff9100;"> &nbsp Warning</b>
 </p>
 
 For versions 1.1.0 >= scikit-learn <= 1.2.0 <code>sklearn.preprocessing.FunctionTransformer.inverse_transform</code> does not support DataFrames that are all numerical when <code>check_inverse=True</code>. It will raise an Exception which is fixed in scikit-learn 1.2.1.
@@ -3618,11 +3620,11 @@ Freq: MS, Name: pred, dtype: float64</pre>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p><script src="https://kit.fontawesome.com/d20edc211b.js" crossorigin="anonymous"></script></p>
 <div class="admonition note" name="html-admonition" style="background: rgba(255,145,0,.1); padding-top: 0px; padding-bottom: 6px; border-radius: 8px; border-left: 8px solid #ff9100; padding-left: 10px;">
-
 <p class="title">
-    <i style="font-size: 18px; color:#ff9100; border-color: #ff1744;"></i>
-    <b style="color: #ff9100;">&#9888 Warning</b>
+    <i class="fa-triangle-exclamation fa" style="font-size: 18px; color:#ff9100;"></i>
+    <b style="color: #ff9100;"> &nbsp Warning</b>
 </p>
 
 Starting from version 0.4.0, skforecast permits the usage of scikit-learn pipelines as regressors. It is important to note that ColumnTransformer cannot be included in the pipeline; thus, the same transformation will be applied to both the modeled series and all exogenous variables. However, if the preprocessing transformations only apply to specific columns, then they need to be applied separately using <code>transformer_y</code> and <code>transformer_exog</code>.
