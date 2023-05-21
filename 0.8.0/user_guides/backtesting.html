@@ -834,8 +834,8 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#backtesting-with-gap" class="md-nav__link">
-    Backtesting with gap
+  <a href="#backtesting-including-a-gap" class="md-nav__link">
+    Backtesting including a gap
   </a>
   
 </li>
@@ -862,7 +862,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#backtesting-with-gap_1" class="md-nav__link">
+  <a href="#backtesting-with-gap" class="md-nav__link">
     Backtesting with gap
   </a>
   
@@ -1503,8 +1503,8 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#backtesting-with-gap" class="md-nav__link">
-    Backtesting with gap
+  <a href="#backtesting-including-a-gap" class="md-nav__link">
+    Backtesting including a gap
   </a>
   
 </li>
@@ -1531,7 +1531,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#backtesting-with-gap_1" class="md-nav__link">
+  <a href="#backtesting-with-gap" class="md-nav__link">
     Backtesting with gap
   </a>
   
@@ -2635,11 +2635,15 @@ Licensed under the Apache License, Version 2.0.
 <p>Overall, backtesting is an essential step in the development of a time series forecasting model. By rigorously testing the model on historical data, one can improve its accuracy and ensure that it is effective at predicting future values of the time series.</p>
 <h2 id="backtesting-with-refit-and-increasing-training-size-fixed-origin">Backtesting with refit and increasing training size (fixed origin)<a class="anchor-link" href="#backtesting-with-refit-and-increasing-training-size-fixed-origin">&#182;</a></h2><p>In this strategy, the model is trained before making predictions each time, and all available data up to that point is used in the training process. This differs from standard cross-validation, where the data is randomly distributed between training and validation sets.</p>
 <p>Instead of randomizing the data, this backtesting sequentially increases the size of the training set while maintaining the temporal order of the data. By doing this, the model can be tested on progressively larger amounts of historical data, providing a more accurate assessment of its predictive capabilities.</p>
-<p align="center"><img src="../img/diagram-backtesting-refit.png" style="width: 500px;"></p><p align="center"><img src="../img/backtesting_refit.gif" style="width: 600px;"></p><center><font size="2.5"> <i>Backtesting with refit and increasing training size (fixed origin).</i></font></center><h2 id="backtesting-with-refit-and-fixed-training-size-rolling-origin">Backtesting with refit and fixed training size (rolling origin)<a class="anchor-link" href="#backtesting-with-refit-and-fixed-training-size-rolling-origin">&#182;</a></h2><p>In this approach, the model is trained using a fixed window of past observations, and the testing is performed on a rolling basis, where the training window is moved forward in time. The size of the training window is kept constant, allowing for the model to be tested on different sections of the data. This technique is particularly useful when there is a limited amount of data available, or when the data is non-stationary, and the model's performance may vary over time. Is also known as time series cross-validation or walk-forward validation.</p>
-<p align="center"><img src="../img/diagram-backtesting-refit-fixed-train-size.png" style="width: 500px;"></p><p align="center"><img src="../img/backtesting_refit_fixed_train_size.gif" style="width: 600px;"></p><center><font size="2.5"> <i>Backtesting with refit and fixed training size (rolling origin).</i></font></center><h2 id="backtesting-without-refit">Backtesting without refit<a class="anchor-link" href="#backtesting-without-refit">&#182;</a></h2><p>Backtesting without refit is a strategy where the model is trained only once and used sequentially without updating it, following the temporal order of the data. This approach is advantageous as it is much faster than other methods that require retraining the model each time. However, the model may lose its predictive power over time as it does not incorporate the latest information available.</p>
-<p align="center"><img src="../img/diagram-backtesting-no-refit.png" style="width: 500px;"></p><p align="center"><img src="../img/backtesting_no_refit.gif" style="width: 600px;"></p><center><font size="2.5"> <i>Backtesting without refit.</i></font></center><h2 id="backtesting-with-gap">Backtesting with gap<a class="anchor-link" href="#backtesting-with-gap">&#182;</a></h2><p>This approach introduces a time gap between the training and test sets, replicating a scenario where predictions cannot be made immediately after the end of the training data.</p>
+<center><p align="center"><img src="../img/diagram-backtesting-refit.png" style="width: 500px;"></p></center><center><p align="center"><img src="../img/backtesting_refit.gif" style="width: 600px;"></p></center>
+<center><font size="2.5"> <i>Backtesting with refit and increasing training size (fixed origin).</i></font></center><h2 id="backtesting-with-refit-and-fixed-training-size-rolling-origin">Backtesting with refit and fixed training size (rolling origin)<a class="anchor-link" href="#backtesting-with-refit-and-fixed-training-size-rolling-origin">&#182;</a></h2><p>In this approach, the model is trained using a fixed window of past observations, and the testing is performed on a rolling basis, where the training window is moved forward in time. The size of the training window is kept constant, allowing for the model to be tested on different sections of the data. This technique is particularly useful when there is a limited amount of data available, or when the data is non-stationary, and the model's performance may vary over time. Is also known as time series cross-validation or walk-forward validation.</p>
+<center><p align="center"><img src="../img/diagram-backtesting-refit-fixed-train-size.png" style="width: 500px;"></p></center><center><p align="center"><img src="../img/backtesting_refit_fixed_train_size.gif" style="width: 600px;"></p></center>
+<center><font size="2.5"> <i>Backtesting with refit and fixed training size (rolling origin).</i></font></center><h2 id="backtesting-without-refit">Backtesting without refit<a class="anchor-link" href="#backtesting-without-refit">&#182;</a></h2><p>Backtesting without refit is a strategy where the model is trained only once and used sequentially without updating it, following the temporal order of the data. This approach is advantageous as it is much faster than other methods that require retraining the model each time. However, the model may lose its predictive power over time as it does not incorporate the latest information available.</p>
+<center><p align="center"><img src="../img/diagram-backtesting-no-refit.png" style="width: 500px;"></p></center><center><p align="center"><img src="../img/backtesting_no_refit.gif" style="width: 600px;"></p></center>
+<center><font size="2.5"> <i>Backtesting without refit.</i></font></center><h2 id="backtesting-including-a-gap">Backtesting including a gap<a class="anchor-link" href="#backtesting-including-a-gap">&#182;</a></h2><p>This approach introduces a time gap between the training and test sets, replicating a scenario where predictions cannot be made immediately after the end of the training data.</p>
 <p>For example, consider the goal of predicting the 24 hours of day D+1, but the predictions need to be made at 11:00 to allow sufficient flexibility. At 11:00 on day D, the task is to forecast hours [12 - 23] of the same day and hours [0 - 23] of day D+1. Thus, a total of 36 hours into the future must be predicted, with only the last 24 hours to be stored.</p>
-<p align="center"><img src="../img/backtesting_refit_gap.gif" style="width: 600px;"></p><center><font size="2.5"> <i>Backtesting with refit and gap.</i></font></center>
+<center><p align="center"><img src="../img/backtesting_refit_gap.gif" style="width: 600px;"></p></center>
+<center><font size="2.5"> <i>Backtesting with refit and gap.</i></font></center>
 </div>
 </div>
 </div>
@@ -3271,8 +3275,18 @@ class="
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <h2 id="backtesting-with-gap">Backtesting with gap<a class="anchor-link" href="#backtesting-with-gap">&#182;</a></h2><p>The gap size can be adjusted with the <code>gap</code> argument. In addition, the <code>allow_incomplete_fold</code> parameter allows the last fold to be excluded from the analysis if it doesn't have the same size as the required number of <code>steps</code>.</p>
 <p>These arguments can be used in conjunction with either refit set to <code>True</code> or <code>False</code>, depending on the needs and objectives of the use case.</p>
-<p><script src="https://kit.fontawesome.com/d20edc211b.js" crossorigin="anonymous"></script></p>
-<div class="admonition note" name="html-admonition" style="background: rgba(0,184,212,.1); padding-top: 0px; padding-bottom: 6px; border-radius: 8px;
+
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<script src="https://kit.fontawesome.com/d20edc211b.js" crossorigin="anonymous"></script><div class="admonition note" name="html-admonition" style="background: rgba(0,184,212,.1); padding-top: 0px; padding-bottom: 6px; border-radius: 8px;
 border-left: 8px solid #00b8d4; padding-left: 10px;">
 
 <p class="title">
