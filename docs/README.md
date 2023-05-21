@@ -29,6 +29,7 @@ The fields of statistics and machine learning have developed many excellent regr
 + Models must be deployed in production. :hammer:
 + Models must be interpretable. :crystal_ball:
 
+
 ## Installation
 
 The default installation of skforecast only installs hard dependencies.
@@ -65,6 +66,7 @@ pip install skforecast[sarimax]
 pip install skforecast[plotting]
 ```
 
+
 ## Dependencies
 
 + Python >= 3.8
@@ -84,6 +86,7 @@ pip install skforecast[plotting]
 + seaborn>=0.11, <0.13
 + statsmodels>=0.12, <0.14
 + pmdarima>=2.0, <2.1
+
 
 ## Features
 
@@ -152,11 +155,13 @@ Universidad de Deusto / Deustuko Unibertsitatea**](https://youtu.be/MlktVhReO0E)
 
 For more information on how to contribute to skforecast, see our [Contribution Guide](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/CONTRIBUTING.md).
 
+
 ## Donating
 
 If you found skforecast useful, you can support us with a donation. Your contribution will help to continue developing and improving this project. Many thanks! :hugging_face: :heart_eyes:
 
 [![paypal](https://www.paypalobjects.com/en_US/ES/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate/?hosted_button_id=D2JZSWRLTZDL6)
+
 
 ## Citation
 
