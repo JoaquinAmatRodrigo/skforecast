@@ -116,7 +116,6 @@ Instead of randomizing the data, this backtesting sequentially increases the siz
 <p align="center"><img src="../img/diagram-backtesting-refit.png" style="width: 500px;"></p>
 
 <p align="center"><img src="../img/backtesting_refit.gif" style="width: 600px;"></p>
-
 <center><font size="2.5"> <i>Backtesting with refit and increasing training size (fixed origin).</i></font></center>
 
 
@@ -127,7 +126,6 @@ In this approach, the model is trained using a fixed window of past observations
 <p align="center"><img src="../img/diagram-backtesting-refit-fixed-train-size.png" style="width: 500px;"></p>
 
 <p align="center"><img src="../img/backtesting_refit_fixed_train_size.gif" style="width: 600px;"></p>
-
 <center><font size="2.5"> <i>Backtesting with refit and fixed training size (rolling origin).</i></font></center>
 
 
@@ -138,7 +136,16 @@ Backtesting without refit is a strategy where the model is trained only once and
 <p align="center"><img src="../img/diagram-backtesting-no-refit.png" style="width: 500px;"></p>
 
 <p align="center"><img src="../img/backtesting_no_refit.gif" style="width: 600px;"></p>
-
 <center><font size="2.5"> <i>Backtesting without refit.</i></font></center>
+
+
+## Backtesting including gap
+
+This approach introduces a time gap between the training and test sets, replicating a scenario where predictions cannot be made immediately after the end of the training data.
+
+For example, consider the goal of predicting the 24 hours of day D+1, but the predictions need to be made at 11:00 to allow sufficient flexibility. At 11:00 on day D, the task is to forecast hours [12 - 23] of the same day and hours [0 - 23] of day D+1. Thus, a total of 36 hours into the future must be predicted, with only the last 24 hours to be stored.
+
+<center><p align="center"><img src="../img/backtesting_refit_gap.gif" style="width: 600px;"></p></center>
+<center><font size="2.5"> <i>Backtesting with refit and gap.</i></font></center>
 
 Check the [Backtesting user guide](https://skforecast.org/latest/user_guides/backtesting.html) for a code example.
