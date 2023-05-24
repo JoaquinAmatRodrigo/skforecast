@@ -327,7 +327,7 @@ def check_exog_dtypes(
     Raise Exception if `exog` has categorical columns with non integer values.
     This is needed when using machine learning regressors that allow categorical
     features.
-    Rise a Warning if values are not `init`, `float`, or `category`.
+    Issue a Warning if `exog` has columns that are not `init`, `float`, or `category`.
     
     Parameters
     ----------        
@@ -357,8 +357,8 @@ def check_exog_dtypes(
                      "latest/user_guides/categorical-features.html")
                 )
     else:
-        if exog.dtype.name not in ['int8','int16','int32','int64','float16','float32',
-        'float64','category']:
+        if exog.dtype.name not in ['int', 'int8', 'int16', 'int32', 'int64', 'float', 
+        'float16', 'float32', 'float64', 'uint8', 'uint16', 'uint32', 'uint64', 'category']:
             warnings.warn(
                 ("`exog` may contain only `int`, `float` or `category` dtypes. Most "
                  "machine learning models do not allow other types of values. "
