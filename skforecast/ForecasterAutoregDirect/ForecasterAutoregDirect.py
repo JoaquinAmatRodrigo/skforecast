@@ -509,28 +509,27 @@ class ForecasterAutoregDirect(ForecasterBase):
             Values (target) of the time series related to each row of `X_train`.
 
         """
-    
+
         if (step < 1) or (step > self.steps):
             raise ValueError(
                 (f"Invalid value `step`. For this forecaster, minimum value is 1 "
-                 f"and the maximum step is {self.steps}.")
+                f"and the maximum step is {self.steps}.")
             )
 
-        step = step - 1 # Matrices X_train and y_train start at index 0.
-        y_train_step = y_train.iloc[:, step]
+        y_train_step = y_train.iloc[:, step-1]
 
         if not self.included_exog:
             X_train_step = X_train
         else:
             idx_columns_lags = np.arange(len(self.lags))
-            idx_columns_exog = np.arange(X_train.shape[1])[len(self.lags) + step::self.steps]
+            idx_columns_exog = np.flatnonzero(X_train.columns.str.endswith(f'step_{step}'))
             idx_columns = np.hstack((idx_columns_lags, idx_columns_exog))
             X_train_step = X_train.iloc[:, idx_columns]
 
         if remove_suffix:
-            X_train_step.columns = [col_name.replace(f"_step_{step + 1}", "")
+            X_train_step.columns = [col_name.replace(f"_step_{step}", "")
                                     for col_name in X_train_step.columns]
-            y_train_step.name = y_train_step.name.replace(f"_step_{step + 1}", "")
+            y_train_step.name = y_train_step.name.replace(f"_step_{step}", "")
 
         return  X_train_step, y_train_step
 
