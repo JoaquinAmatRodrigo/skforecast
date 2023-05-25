@@ -513,10 +513,11 @@ class ForecasterAutoregDirect(ForecasterBase):
         if (step < 1) or (step > self.steps):
             raise ValueError(
                 (f"Invalid value `step`. For this forecaster, minimum value is 1 "
-                f"and the maximum step is {self.steps}.")
+                 f"and the maximum step is {self.steps}.")
             )
 
-        y_train_step = y_train.iloc[:, step-1]
+        # Matrices X_train and y_train start at index 0.
+        y_train_step = y_train.iloc[:, step - 1] 
 
         if not self.included_exog:
             X_train_step = X_train

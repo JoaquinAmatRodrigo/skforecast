@@ -984,7 +984,7 @@ def cast_exog_dtypes(
 
 
 def exog_to_direct(
-    exog: pd.DataFrame,
+    exog: Union[pd.Series, pd.DataFrame],
     steps: int
 )-> pd.DataFrame:
     """
@@ -1023,7 +1023,7 @@ def exog_to_direct(
         exog_transformed.append(exog_column_transformed)
 
     if len(exog_transformed) > 1:
-        exog_transformed = pd.concat(exog_transformed, axis=1, copy=False) # Se nota diferencia con el copy
+        exog_transformed = pd.concat(exog_transformed, axis=1, copy=False)
     else:
         exog_transformed = exog_column_transformed
 
