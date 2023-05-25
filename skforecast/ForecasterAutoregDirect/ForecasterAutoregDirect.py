@@ -1398,11 +1398,11 @@ class ForecasterAutoregDirect(ForecasterBase):
         step: int
     ) -> pd.DataFrame:
         """
-        Return impurity-based feature importance of the model stored in
-        the forecaster for a specific step. Since a separate model is created for
-        each forecast time step, it is necessary to select the model from which
-        retrieve information. Only valid when regressor stores internally the 
-        feature importances in the attribute `feature_importances_` or `coef_`.
+        Return feature importance of the model stored in the forecaster for a
+        specific step. Since a separate model is created for each forecast time
+        step, it is necessary to select the model from which retrieve information.
+        Only valid when regressor stores internally the feature importances in
+        the attribute `feature_importances_` or `coef_`.
 
         Parameters
         ----------
@@ -1441,7 +1441,9 @@ class ForecasterAutoregDirect(ForecasterBase):
 
         idx_columns_lags = np.arange(len(self.lags))
         if self.included_exog:
-            idx_columns_exog = np.arange(len(self.X_train_col_names))[len(self.lags) + step-1::self.steps]
+            idx_columns_exog = np.flatnonzero(
+                                [name.endswith(f"step_{step}") for name in self.X_train_col_names]
+                               )
         else:
             idx_columns_exog = np.array([], dtype=int)
 
