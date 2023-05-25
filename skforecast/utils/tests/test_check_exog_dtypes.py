@@ -27,6 +27,25 @@ def test_check_exog_dtypes_DataTypeWarning_when_exog_has_str_values(exog):
         check_exog_dtypes(exog)
 
 
+@pytest.mark.parametrize("exog", 
+                         [pd.Series([True, True, True]),
+                          pd.Series([True, True, True]).to_frame()], 
+                         ids = lambda exog : f'exog type: {type(exog)}'
+                        )
+def test_check_exog_dtypes_DataTypeWarning_when_exog_has_bool_values(exog):
+    """
+    Check DataTypeWarning is issued when exog is pandas Series or DataFrame 
+    with missing values.
+    """
+    warn_msg = re.escape(
+        ("`exog` may contain only `int`, `float` or `category` dtypes. Most "
+         "machine learning models do not allow other types of values. "
+         "Fitting the forecaster may fail.")
+    )
+    with pytest.warns(DataTypeWarning, match = warn_msg):
+        check_exog_dtypes(exog)
+
+
 def test_check_exog_dtypes_TypeError_when_exog_is_Series_with_no_int_categories():
     """
     Check TypeError is raised when exog is pandas Series with no integer
