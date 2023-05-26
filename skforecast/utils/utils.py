@@ -327,7 +327,7 @@ def check_exog_dtypes(
     Raise Exception if `exog` has categorical columns with non integer values.
     This is needed when using machine learning regressors that allow categorical
     features.
-    Rise a Warning if values are not `init`, `float`, or `category`.
+    Issue a Warning if `exog` has columns that are not `init`, `float`, or `category`.
     
     Parameters
     ----------        
@@ -342,7 +342,7 @@ def check_exog_dtypes(
     check_exog(exog=exog, allow_nan=False)
 
     if isinstance(exog, pd.DataFrame):
-        if not all([dtype in ['float', 'int', 'category'] for dtype in exog.dtypes]):
+        if not exog.select_dtypes(exclude=[np.number, 'category']).columns.empty:
             warnings.warn(
                 ("`exog` may contain only `int`, `float` or `category` dtypes. Most "
                  "machine learning models do not allow other types of values. "
@@ -357,13 +357,15 @@ def check_exog_dtypes(
                      "latest/user_guides/categorical-features.html")
                 )
     else:
-        if exog.dtypes not in ['float', 'int', 'category']:
+        if exog.dtype.name not in ['int', 'int8', 'int16', 'int32', 'int64', 'float', 
+        'float16', 'float32', 'float64', 'uint8', 'uint16', 'uint32', 'uint64', 'category']:
             warnings.warn(
                 ("`exog` may contain only `int`, `float` or `category` dtypes. Most "
                  "machine learning models do not allow other types of values. "
                  "Fitting the forecaster may fail."), DataTypeWarning
             )
-        if exog.dtypes == 'category' and exog.cat.categories.dtype not in [int, np.int32, np.int64]:
+        if exog.dtype.name == 'category' and exog.cat.categories.dtype not in [int,
+        np.int32, np.int64]:
             raise TypeError(
                 ("If exog is of type category, it must contain only integer values. "
                  "See skforecast docs for more info about how to include "
@@ -1010,27 +1012,23 @@ def exog_to_direct(
     if isinstance(exog, pd.Series):
         exog = exog.to_frame()
 
-    len_columns = len(exog)
+    n_rows = len(exog)
     exog_idx = exog.index
     exog_transformed = []
-    for column in exog.columns:
 
-        exog_column_transformed = [
-            (exog[column].iloc[i : len_columns - (steps - 1 - i)]).reset_index(drop=True)
-            for i in range(steps)
-        ]
-        exog_column_transformed = pd.concat(exog_column_transformed, axis=1)
-        exog_column_transformed.columns = [f"{column}_step_{i+1}" for i in range(steps)]
-
+    for i in range(steps):
+        exog_column_transformed = exog.iloc[i : n_rows - (steps - 1 - i), ]
+        exog_column_transformed.index = pd.RangeIndex(len(exog_column_transformed))
+        exog_column_transformed.columns = [f"{col}_step_{i+1}" for col in exog_column_transformed.columns]
         exog_transformed.append(exog_column_transformed)
 
     if len(exog_transformed) > 1:
-        exog_transformed = pd.concat(exog_transformed, axis=1)
+        exog_transformed = pd.concat(exog_transformed, axis=1, copy=False)
     else:
         exog_transformed = exog_column_transformed
 
     exog_transformed.index = exog_idx[-len(exog_transformed):]
-
+    
     return exog_transformed
 
 

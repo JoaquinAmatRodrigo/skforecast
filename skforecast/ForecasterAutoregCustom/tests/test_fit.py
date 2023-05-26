@@ -9,7 +9,6 @@ from xgboost import XGBRegressor
 # Fixtures
 from .fixtures_ForecasterAutoregCustom import y
 
-
 def create_predictors(y): # pragma: no cover
     """
     Create first 5 lags of a time series.
@@ -128,6 +127,22 @@ def test_fit_same_residuals_when_residuals_greater_than_1000():
     np.testing.assert_array_equal(results_1, results_2)
 
 
+def test_fit_in_sample_residuals_not_stored():
+    """
+    Test that values of in_sample_residuals are not stored after fitting
+    when `store_in_sample_residuals=False`.
+    """
+    forecaster = ForecasterAutoregCustom(
+                     regressor      = LinearRegression(),
+                     fun_predictors = create_predictors,
+                     window_size    = 5
+                 )
+    forecaster.fit(y=pd.Series(np.arange(10)), store_in_sample_residuals=False)
+    results = forecaster.in_sample_residuals
+
+    assert results is None
+
+
 def test_fit_last_window_stored():
     """
     Test that values of last window are stored after fitting.
@@ -171,6 +186,6 @@ def test_fit_model_coef_when_not_using_weight_func():
                  )
     forecaster.fit(y=y)
     results = forecaster.regressor.coef_
-    expected = np.array([ 0.16773502, -0.09712939,  0.10046413, -0.09971515, -0.15849756])
+    expected = np.array([0.16773502, -0.09712939,  0.10046413, -0.09971515, -0.15849756])
 
     np.testing.assert_almost_equal(results, expected)

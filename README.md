@@ -37,7 +37,7 @@ pip install skforecast
 Specific version:
 
 ```bash
-pip install skforecast==0.8.0
+pip install skforecast==0.8.1
 ```
 
 Latest (unstable):
@@ -96,7 +96,7 @@ pip install skforecast[plotting]
 + Get predictor importance
 + Forecaster in production
 
-## What is new in skforecast 0.8.0?
+## What is new in skforecast 0.8.1?
 
 - [x] Support for `pandas 2.0.x`.
 - [x] New user guide on how to include **categorical variables** in the Forecasters.
@@ -136,7 +136,7 @@ Recent improvements are highlighted in the [release notes](https://skforecast.or
 
 **English**
 
-+ [**Skforecast: time series forecasting with Python and Scikit-learn**](https://www.cienciadedatos.net/documentos/py27-time-series-forecasting-python-scikitlearn.html)
++ [**Skforecast: time series forecasting with Python and Scikit-learn**](https://www.cienciadedatos.net/documentos/py27-time-series-forecasting-python-scikitlearn.html) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1X1DJF4pZlklIt5srQnyTYoyFVLunr_OQ)
 
 + [**Forecasting electricity demand with Python**](https://www.cienciadedatos.net/documentos/py29-forecasting-electricity-power-demand-python.html)
 
@@ -159,7 +159,7 @@ Recent improvements are highlighted in the [release notes](https://skforecast.or
 
 **Español**
 
-+ [**Skforecast: forecasting series temporales con Python y Scikit-learn**](https://www.cienciadedatos.net/documentos/py27-forecasting-series-temporales-python-scikitlearn.html)
++ [**Skforecast: forecasting series temporales con Python y Scikit-learn**](https://www.cienciadedatos.net/documentos/py27-forecasting-series-temporales-python-scikitlearn.html) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1mjmccrMA-XxOVXm-3wKSIQ9__oo9dJ5a)
 
 + [**Forecasting de la demanda eléctrica**](https://www.cienciadedatos.net/documentos/py29-forecasting-demanda-energia-electrica-python.html)
 
@@ -196,7 +196,7 @@ If you use this software, please cite it using the following metadata.
 
 **APA**:
 ```
-Amat Rodrigo, J., & Escobar Ortiz, J. skforecast (Version 0.8.0) [Computer software]
+Amat Rodrigo, J., & Escobar Ortiz, J. skforecast (Version 0.8.1) [Computer software]
 ```
 
 **BibTeX**:
@@ -206,7 +206,7 @@ author = {Amat Rodrigo, Joaquin and Escobar Ortiz, Javier},
 license = {MIT},
 month = {5},
 title = {{skforecast}},
-version = {0.8.0},
+version = {0.8.1},
 year = {2023}
 }
 ```

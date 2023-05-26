@@ -463,7 +463,8 @@ class ForecasterAutoreg(ForecasterBase):
     def fit(
         self,
         y: pd.Series,
-        exog: Optional[Union[pd.Series, pd.DataFrame]]=None
+        exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+        store_in_sample_residuals: bool=True
     ) -> None:
         """
         Training Forecaster.
@@ -480,6 +481,9 @@ class ForecasterAutoreg(ForecasterBase):
             Exogenous variable/s included as predictor/s. Must have the same
             number of observations as `y` and their indexes must be aligned so
             that y[i] is regressed on exog[i].
+
+        store_in_sample_residuals : bool, default `True`
+            if True, in_sample_residuals are stored.
 
         Returns 
         -------
@@ -523,19 +527,22 @@ class ForecasterAutoreg(ForecasterBase):
             self.index_freq = X_train.index.freqstr
         else: 
             self.index_freq = X_train.index.step
+        
+        # This is done to save time during fit in functions such as backtesting()
+        if store_in_sample_residuals:
 
-        residuals = (y_train - self.regressor.predict(X_train)).to_numpy()
+            residuals = (y_train - self.regressor.predict(X_train)).to_numpy()
 
-        if len(residuals) > 1000:
-            # Only up to 1000 residuals are stored
-            rng = np.random.default_rng(seed=123)
-            residuals = rng.choice(
-                            a       = residuals, 
-                            size    = 1000, 
-                            replace = False
-                        )
-                                                  
-        self.in_sample_residuals = residuals
+            if len(residuals) > 1000:
+                # Only up to 1000 residuals are stored
+                rng = np.random.default_rng(seed=123)
+                residuals = rng.choice(
+                                a       = residuals, 
+                                size    = 1000, 
+                                replace = False
+                            )
+                                                    
+            self.in_sample_residuals = residuals
         
         # The last time window of training data is stored so that lags needed as
         # predictors in the first iteration of `predict()` can be calculated.

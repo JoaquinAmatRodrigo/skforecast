@@ -41,7 +41,7 @@ pip install skforecast
 Specific version:
 
 ```bash
-pip install skforecast==0.8.0
+pip install skforecast==0.8.1
 ```
 
 Latest (unstable):
@@ -169,7 +169,7 @@ If you use this software, please cite it using the following metadata.
 
 **APA**:
 ```
-Amat Rodrigo, J., & Escobar Ortiz, J. skforecast (Version 0.8.0) [Computer software]
+Amat Rodrigo, J., & Escobar Ortiz, J. skforecast (Version 0.8.1) [Computer software]
 ```
 
 **BibTeX**:
@@ -179,7 +179,7 @@ author = {Amat Rodrigo, Joaquin and Escobar Ortiz, Javier},
 license = {MIT},
 month = {5},
 title = {{skforecast}},
-version = {0.8.0},
+version = {0.8.1},
 year = {2023}
 }
 ```

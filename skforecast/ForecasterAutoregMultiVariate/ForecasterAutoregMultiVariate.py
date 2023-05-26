@@ -631,26 +631,27 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
 
         if (step < 1) or (step > self.steps):
             raise ValueError(
-                f"Invalid value `step`. For this forecaster, minimum value is 1 "
-                f"and the maximum step is {self.steps}."
+                (f"Invalid value `step`. For this forecaster, minimum value is 1 "
+                 f"and the maximum step is {self.steps}.")
             )
 
-        step = step - 1 # Matrices X_train and y_train start at index 0.
-        y_train_step = y_train.iloc[:, step]
+        # Matrices X_train and y_train start at index 0.
+        y_train_step = y_train.iloc[:, step - 1]
 
         if not self.included_exog:
             X_train_step = X_train
         else:
             len_columns_lags = len(list(chain(*self.lags_.values())))
             idx_columns_lags = np.arange(len_columns_lags)
-            idx_columns_exog = np.arange(X_train.shape[1])[len_columns_lags + step::self.steps]
+            n_exog = (len(self.X_train_col_names) - len_columns_lags) / self.steps
+            idx_columns_exog = np.arange((step-1)*n_exog, (step)*n_exog) + idx_columns_lags[-1] + 1  
             idx_columns = np.hstack((idx_columns_lags, idx_columns_exog))
             X_train_step = X_train.iloc[:, idx_columns]
 
         if remove_suffix:
-            X_train_step.columns = [col_name.replace(f"_step_{step + 1}", "")
+            X_train_step.columns = [col_name.replace(f"_step_{step}", "")
                                     for col_name in X_train_step.columns]
-            y_train_step.name = y_train_step.name.replace(f"_step_{step + 1}", "")
+            y_train_step.name = y_train_step.name.replace(f"_step_{step}", "")
 
         return  X_train_step, y_train_step
 
@@ -911,7 +912,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                            inverse_transform = False
                        )
             check_exog_dtypes(exog=exog)
-            exog_values = exog_to_direct(exog=exog.iloc[:max(steps), ], steps=max(steps)).to_numpy()
+            exog_values = exog_to_direct(exog=exog.iloc[:max(steps), ], steps=max(steps)).to_numpy()[0]
         else:
             exog_values = None
 
@@ -937,8 +938,9 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         if exog is None:
             Xs = [X_lags] * len(steps)
         else:
+            n_exog = exog.shape[1] if isinstance(exog, pd.DataFrame) else 1
             Xs = [
-                np.hstack([X_lags, exog_values[0][step-1::max(steps)].reshape(1, -1)])
+                np.hstack([X_lags, exog_values[(step-1)*n_exog:(step)*n_exog].reshape(1, -1)])
                 for step in steps
             ]
 
@@ -1306,7 +1308,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                            in_sample_residuals = in_sample_residuals
                        )       
 
-        param_names = [p for p in inspect.signature(distribution._pdf).parameters if not p=='x'] + ["loc","scale"]
+        param_names = [p for p in inspect.signature(distribution._pdf).parameters 
+                       if not p=='x'] + ["loc","scale"]
         param_values = np.apply_along_axis(lambda x: distribution.fit(x), axis=1, arr=boot_samples)
         predictions = pd.DataFrame(
                           data    = param_values,
@@ -1565,7 +1568,9 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         len_columns_lags = len(list(chain(*self.lags_.values())))
         idx_columns_lags = np.arange(len_columns_lags)
         if self.included_exog:
-            idx_columns_exog = np.arange(len(self.X_train_col_names))[len_columns_lags + step-1::self.steps]
+            idx_columns_exog = np.flatnonzero(
+                                [name.endswith(f"step_{step}") for name in self.X_train_col_names]
+                               )
         else:
             idx_columns_exog = np.array([], dtype=int)
         
@@ -1594,7 +1599,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
 
         return feature_importances
 
-    
+
     def get_feature_importance(
         self,
         step: int
