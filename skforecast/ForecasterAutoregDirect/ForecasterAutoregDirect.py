@@ -385,8 +385,9 @@ class ForecasterAutoregDirect(ForecasterBase):
 
         Returns 
         -------
-        X_train : pandas DataFrame, shape (len(y) - self.max_lag, len(self.lags) + exog.shape[1]*steps)
+        X_train : pandas DataFrame
             Pandas DataFrame with the training values (predictors) for each step.
+            Shape (len(y) - self.max_lag, len(self.lags) + exog.shape[1]*steps)
             
         y_train : pandas DataFrame, shape (len(y) - self.max_lag, )
             Values (target) of the time series related to each row of `X_train` 
@@ -458,7 +459,10 @@ class ForecasterAutoregDirect(ForecasterBase):
             # Transform exog to match direct format
             # The first `self.max_lag` positions have to be removed from X_exog
             # since they are not in X_lags.
-            exog_to_train = exog_to_direct(exog=exog, steps=self.steps).iloc[-X_train.shape[0]:, :]
+            exog_to_train = exog_to_direct(
+                                exog  = exog,
+                                steps = self.steps
+                            ).iloc[-X_train.shape[0]:, :]
             X_train = pd.concat((X_train, exog_to_train), axis=1)
 
         self.X_train_col_names = X_train.columns.to_list()
@@ -524,7 +528,9 @@ class ForecasterAutoregDirect(ForecasterBase):
         else:
             idx_columns_lags = np.arange(len(self.lags))
             n_exog = (len(self.X_train_col_names) - len(self.lags)) / self.steps
-            idx_columns_exog = np.arange((step-1)*n_exog, (step)*n_exog) + idx_columns_lags[-1] + 1
+            idx_columns_exog = (
+                np.arange((step-1)*n_exog, (step)*n_exog) + idx_columns_lags[-1] + 1
+            )
             idx_columns = np.hstack((idx_columns_lags, idx_columns_exog))
             X_train_step = X_train.iloc[:, idx_columns]
 
@@ -603,7 +609,8 @@ class ForecasterAutoregDirect(ForecasterBase):
             that y[i] is regressed on exog[i].
 
         store_in_sample_residuals : bool, default `True`
-            if True, in_sample_residuals are stored.
+            If True, in-sample residuals will be stored in the forecaster object
+            after fitting.
 
         Returns 
         -------
@@ -660,7 +667,9 @@ class ForecasterAutoregDirect(ForecasterBase):
             # This is done to save time during fit in functions such as backtesting()
             if store_in_sample_residuals:
                 
-                residuals = (y_train_step - self.regressors_[step].predict(X_train_step)).to_numpy()
+                residuals = (
+                    (y_train_step - self.regressors_[step].predict(X_train_step))
+                ).to_numpy()
 
                 if len(residuals) > 1000:
                     # Only up to 1000 residuals are stored
@@ -780,7 +789,10 @@ class ForecasterAutoregDirect(ForecasterBase):
                            inverse_transform = False
                        )
             check_exog_dtypes(exog=exog)
-            exog_values = exog_to_direct(exog=exog.iloc[:max(steps), ], steps=max(steps)).to_numpy()[0]
+            exog_values = exog_to_direct(
+                            exog  = exog.iloc[:max(steps), ],
+                            steps = max(steps)
+                          ).to_numpy()[0]
         else:
             exog_values = None
 
@@ -931,15 +943,20 @@ class ForecasterAutoregDirect(ForecasterBase):
                     )
             residuals = self.out_sample_residuals
         
-        check_residuals = "forecaster.in_sample_residuals" if in_sample_residuals else "forecaster.out_sample_residuals"
+        check_residuals = (
+            "forecaster.in_sample_residuals" if in_sample_residuals
+             else "forecaster.out_sample_residuals"
+        )
         for step in steps:
             if residuals[step] is None:
                 raise ValueError(
-                    (f"forecaster residuals for step {step} are `None`. Check {check_residuals}.")
+                    (f"forecaster residuals for step {step} are `None`. "
+                     f"Check {check_residuals}.")
                 )
             elif (residuals[step] == None).any():
                 raise ValueError(
-                    (f"forecaster residuals for step {step} contains `None` values. Check {check_residuals}.")
+                    (f"forecaster residuals for step {step} contains `None` values. "
+                     f"Check {check_residuals}.")
                 )
 
         predictions = self.predict(
@@ -1157,8 +1174,13 @@ class ForecasterAutoregDirect(ForecasterBase):
                            in_sample_residuals = in_sample_residuals
                        )       
 
-        param_names = [p for p in inspect.signature(distribution._pdf).parameters if not p=='x'] + ["loc","scale"]
-        param_values = np.apply_along_axis(lambda x: distribution.fit(x), axis=1, arr=boot_samples)
+        param_names = [p for p in inspect.signature(distribution._pdf).parameters
+                       if not p=='x'] + ["loc","scale"]
+        param_values = np.apply_along_axis(
+                            lambda x: distribution.fit(x),
+                            axis = 1,
+                            arr  = boot_samples
+                       )
         predictions = pd.DataFrame(
                           data    = param_values,
                           columns = param_names,
@@ -1190,7 +1212,8 @@ class ForecasterAutoregDirect(ForecasterBase):
         
         self.regressor = clone(self.regressor)
         self.regressor.set_params(**params)
-        self.regressors_ = {step: clone(self.regressor) for step in range(1, self.steps + 1)}
+        self.regressors_ = {step: clone(self.regressor)
+                            for step in range(1, self.steps + 1)}
 
 
     def set_fit_kwargs(
@@ -1434,11 +1457,12 @@ class ForecasterAutoregDirect(ForecasterBase):
         """
         This method has been replaced by `get_feature_importances()`.
 
-        Return impurity-based feature importance of the model stored in
-        the forecaster for a specific step. Since a separate model is created for
-        each forecast time step, it is necessary to select the model from which
-        retrieve information. Only valid when regressor stores internally the 
-        feature importances in the attribute `feature_importances_` or `coef_`.
+        Return feature importance of the model stored in the forecaster for a
+        specific step. Since a separate model is created for each forecast time
+        step, it is necessary to select the model from which retrieve information.
+        Only valid when regressor stores internally the feature importances in
+        the attribute `feature_importances_` or `coef_`. Otherwise, it returns  
+        `None`.
 
         Parameters
         ----------
