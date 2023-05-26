@@ -459,7 +459,8 @@ def _backtesting_forecaster_refit(
         )
 
     backtest_predictions = []
-    
+    store_in_sample_residuals = False if interval is None else True
+
     for fold in tqdm(folds) if show_progress else folds:
         # In each iteration the model is fitted before making predictions. 
         # if fixed_train_size the train size doesn't increase but moves by `steps` 
@@ -474,7 +475,11 @@ def _backtesting_forecaster_refit(
         exog_train = exog.iloc[train_idx_start:train_idx_end, ] if exog is not None else None
         next_window_exog = exog.iloc[test_idx_start:test_idx_end, ] if exog is not None else None
 
-        forecaster.fit(y=y_train, exog=exog_train)
+        forecaster.fit(
+            y                         = y_train, 
+            exog                      = exog_train, 
+            store_in_sample_residuals = store_in_sample_residuals
+        )
         steps = len(range(test_idx_start, test_idx_end))
         if interval is None:
             pred = forecaster.predict(steps=steps, exog=next_window_exog)
@@ -629,7 +634,12 @@ def _backtesting_forecaster_no_refit(
     # Initial model training
     if initial_train_size is not None:
         exog_train = exog.iloc[:initial_train_size, ] if exog is not None else None
-        forecaster.fit(y=y.iloc[:initial_train_size], exog=exog_train)
+        store_in_sample_residuals = False if interval is None else True
+        forecaster.fit(
+            y                         = y.iloc[:initial_train_size], 
+            exog                      = exog_train,
+            store_in_sample_residuals = store_in_sample_residuals
+        )
         window_size = forecaster.window_size
         externally_fitted = False
     else:

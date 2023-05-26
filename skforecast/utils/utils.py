@@ -1012,27 +1012,23 @@ def exog_to_direct(
     if isinstance(exog, pd.Series):
         exog = exog.to_frame()
 
-    len_columns = len(exog)
+    n_rows = len(exog)
     exog_idx = exog.index
     exog_transformed = []
-    for column in exog.columns:
 
-        exog_column_transformed = [
-            (exog[column].iloc[i : len_columns - (steps - 1 - i)]).reset_index(drop=True)
-            for i in range(steps)
-        ]
-        exog_column_transformed = pd.concat(exog_column_transformed, axis=1)
-        exog_column_transformed.columns = [f"{column}_step_{i+1}" for i in range(steps)]
-
+    for i in range(steps):
+        exog_column_transformed = exog.iloc[i : n_rows - (steps - 1 - i), ]
+        exog_column_transformed.index = pd.RangeIndex(len(exog_column_transformed))
+        exog_column_transformed.columns = [f"{col}_step_{i+1}" for col in exog_column_transformed.columns]
         exog_transformed.append(exog_column_transformed)
 
     if len(exog_transformed) > 1:
-        exog_transformed = pd.concat(exog_transformed, axis=1)
+        exog_transformed = pd.concat(exog_transformed, axis=1, copy=False)
     else:
         exog_transformed = exog_column_transformed
 
     exog_transformed.index = exog_idx[-len(exog_transformed):]
-
+    
     return exog_transformed
 
 
