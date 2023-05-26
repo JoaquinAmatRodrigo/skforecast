@@ -6,15 +6,15 @@ All significant changes to this project are documented in this release file.
 
 **Added**
 
-- Argument `store_in_sample_residuals=True` in `fit` method to all forecasters.
+- Argument `store_in_sample_residuals=True` in `fit` method added to all forecasters to speed up functions such as backtesting.
 
 **Changed**
 
-- Refactor `utils.exog_to_direct`.
+- Refactor `utils.exog_to_direct` and `utils.exog_to_direct_numpy`.
 
 **Fixed**
 
-- `utils.check_exog_dtypes`.
+- `utils.check_exog_dtypes` now compares the `dtype.name` instead of the `dtype`. (suggested by Metaming https://github.com/Metaming)
 
 
 ## [0.8.0] - [2023-05-16]

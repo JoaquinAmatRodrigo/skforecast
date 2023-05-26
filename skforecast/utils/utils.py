@@ -1037,7 +1037,7 @@ def exog_to_direct_numpy(
     steps: int
 )-> np.ndarray:
     """
-    Transforms `exog` to `np.ndarray` with the shape needed for direct
+    Transforms `exog` to `np.ndarray` with the shape needed for Direct
     forecasting.
     
     Parameters
@@ -1055,24 +1055,24 @@ def exog_to_direct_numpy(
 
     """
 
-    exog_transformed = []
-    
+    if not isinstance(exog, np.ndarray):
+        raise TypeError(f"`exog` must be a numpy ndarray. Got {type(exog)}.")
+
     if exog.ndim == 1:
         exog = np.expand_dims(exog, axis=1)
 
-    for i in range(exog.shape[1]):
-        exog_column = exog[:, i]
-        exog_column_transformed = np.vstack(
-            [np.roll(exog_column, j) for j in range(steps)]
-        ).T[steps - 1:]
-        exog_column_transformed = exog_column_transformed[:, ::-1]
+    n_rows = len(exog)
+    exog_transformed = []
+
+    for i in range(steps):
+        exog_column_transformed = exog[i : n_rows - (steps - 1 - i)]
         exog_transformed.append(exog_column_transformed)
 
     if len(exog_transformed) > 1:
         exog_transformed = np.concatenate(exog_transformed, axis=1)
     else:
         exog_transformed = exog_column_transformed
-
+    
     return exog_transformed
 
 
