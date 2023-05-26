@@ -665,7 +665,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             that series[i] is regressed on exog[i].
 
         store_in_sample_residuals : bool, default `True`
-            if True, in_sample_residuals are stored.
+            If True, in-sample residuals will be stored in the forecaster object
+            after fitting.
 
         Returns 
         -------

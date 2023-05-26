@@ -483,8 +483,8 @@ class ForecasterAutoreg(ForecasterBase):
             that y[i] is regressed on exog[i].
 
         store_in_sample_residuals : bool, default `True`
-            if True, in_sample_residuals are stored.
-
+            If True, in-sample residuals will be stored in the forecaster object
+            after fitting.
         Returns 
         -------
         None
@@ -1050,8 +1050,13 @@ class ForecasterAutoreg(ForecasterBase):
                            in_sample_residuals = in_sample_residuals
                        )       
 
-        param_names = [p for p in inspect.signature(distribution._pdf).parameters if not p=='x'] + ["loc","scale"]
-        param_values = np.apply_along_axis(lambda x: distribution.fit(x), axis=1, arr=boot_samples)
+        param_names = [p for p in inspect.signature(distribution._pdf).parameters
+                       if not p=='x'] + ["loc","scale"]
+        param_values = np.apply_along_axis(
+                            lambda x: distribution.fit(x),
+                            axis = 1,
+                            arr  = boot_samples
+                       )
         predictions = pd.DataFrame(
                           data    = param_values,
                           columns = param_names,
@@ -1218,9 +1223,9 @@ class ForecasterAutoreg(ForecasterBase):
         self
     ) -> pd.DataFrame:
         """
-        Return feature importances of the regressor stored in the
-        forecaster. Only valid when regressor stores internally the feature
-        importances in the attribute `feature_importances_` or `coef_`.
+        Return feature importances of the regressor stored in the forecaster.
+        Only valid when regressor stores internally the feature importances in the
+        attribute `feature_importances_` or `coef_`. Otherwise, returns `None`.
 
         Parameters
         ----------

@@ -315,7 +315,11 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                         )
 
         self.lags_ = self.lags
-        self.max_lag = max(list(chain(*self.lags.values()))) if isinstance(self.lags, dict) else max(self.lags)
+        self.max_lag = (
+            max(list(chain(*self.lags.values())))
+            if isinstance(self.lags, dict)
+            else max(self.lags)
+        )
         self.window_size = self.max_lag
             
         self.weight_func, self.source_code_weight_func, _ = initialize_weights(
@@ -449,8 +453,9 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
 
         Returns 
         -------
-        X_train : pandas DataFrame, shape (len(series) - self.max_lag, len(self.lags)*len(series.columns) + exog.shape[1]*steps)
+        X_train : pandas DataFrame
             Pandas DataFrame with the training values (predictors) for each step.
+            Shape (len(series) - self.max_lag, len(self.lags)*len(series.columns) + exog.shape[1]*steps)
             
         y_train : pandas DataFrame, shape (len(series) - self.max_lag, )
             Values (target) of the time series related to each row of `X_train` 
@@ -499,9 +504,12 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             self.transformer_series_ = {serie: None for serie in series_col_names}
             # Only elements already present in transformer_series_ are updated
             self.transformer_series_.update(
-                (k, v) for k, v in deepcopy(self.transformer_series).items() if k in self.transformer_series_
+                (k, v) for k, v in deepcopy(self.transformer_series).items()
+                if k in self.transformer_series_
             )
-            series_not_in_transformer_series = set(series.columns) - set(self.transformer_series.keys())
+            series_not_in_transformer_series = (
+                set(series.columns) - set(self.transformer_series.keys())
+            )
             if series_not_in_transformer_series:
                 warnings.warn(
                     (f"{series_not_in_transformer_series} not present in `transformer_series`."
@@ -556,8 +564,10 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                 )
 
             y_values, y_index = preprocess_y(y=y)
-            X_train_values, y_train_values = self._create_lags(y=y_values, lags=self.lags_[serie])
-
+            X_train_values, y_train_values = self._create_lags(
+                                                y    = y_values,
+                                                lags = self.lags_[serie]
+                                            )
             if i == 0:
                 X_train = X_train_values
             else:
@@ -566,7 +576,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             if serie == self.level:
                 y_train = y_train_values
 
-        X_train_col_names = [f"{key}_lag_{lag}" for key in self.lags_ for lag in self.lags_[key]]
+        X_train_col_names = [f"{key}_lag_{lag}" for key in self.lags_
+                             for lag in self.lags_[key]]
         X_train = pd.DataFrame(
                       data    = X_train,
                       columns = X_train_col_names,
@@ -577,7 +588,10 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             # Transform exog to match direct format
             # The first `self.max_lag` positions have to be removed from X_exog
             # since they are not in X_lags.
-            exog_to_train = exog_to_direct(exog=exog, steps=self.steps).iloc[-X_train.shape[0]:, :]
+            exog_to_train = exog_to_direct(
+                                exog  = exog,
+                                steps = self.steps
+                            ).iloc[-X_train.shape[0]:, :]
             X_train = pd.concat((X_train, exog_to_train), axis=1)
         
         self.X_train_col_names = X_train.columns.to_list()
@@ -644,7 +658,9 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             len_columns_lags = len(list(chain(*self.lags_.values())))
             idx_columns_lags = np.arange(len_columns_lags)
             n_exog = (len(self.X_train_col_names) - len_columns_lags) / self.steps
-            idx_columns_exog = np.arange((step-1)*n_exog, (step)*n_exog) + idx_columns_lags[-1] + 1  
+            idx_columns_exog = (
+                np.arange((step-1)*n_exog, (step)*n_exog) + idx_columns_lags[-1] + 1 
+            )
             idx_columns = np.hstack((idx_columns_lags, idx_columns_exog))
             X_train_step = X_train.iloc[:, idx_columns]
 
@@ -720,7 +736,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             that series[i] is regressed on exog[i].
 
         store_in_sample_residuals : bool, default `True`
-            if True, in_sample_residuals are stored.
+            If True, in-sample residuals will be stored in the forecaster object
+            after fitting.
 
         Returns 
         -------
@@ -787,8 +804,9 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
 
             # This is done to save time during fit in functions such as backtesting()
             if store_in_sample_residuals:
-            
-                residuals = (y_train_step - self.regressors_[step].predict(X_train_step)).to_numpy()
+                residuals = (
+                    (y_train_step - self.regressors_[step].predict(X_train_step))
+                ).to_numpy()
 
                 if len(residuals) > 1000:
                     # Only up to 1000 residuals are stored
@@ -803,7 +821,10 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         
         self.fitted = True
         self.fit_date = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
-        self.training_range = preprocess_y(y=series[self.level], return_values=False)[1][[0, -1]]
+        self.training_range = preprocess_y(
+                                y = series[self.level],
+                                return_values = False
+                              )[1][[0, -1]]
         self.index_type = type(X_train.index)
         if isinstance(X_train.index, pd.DatetimeIndex):
             self.index_freq = X_train.index.freqstr
@@ -912,7 +933,10 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                            inverse_transform = False
                        )
             check_exog_dtypes(exog=exog)
-            exog_values = exog_to_direct(exog=exog.iloc[:max(steps), ], steps=max(steps)).to_numpy()[0]
+            exog_values = exog_to_direct(
+                            exog  = exog.iloc[:max(steps), ],
+                            steps = max(steps)
+                          ).to_numpy()[0]
         else:
             exog_values = None
 
@@ -931,7 +955,9 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                                                         last_window = last_window_serie
                                                     )
 
-            X_lags = np.hstack([X_lags, last_window_values[-self.lags_[serie]].reshape(1, -1)])
+            X_lags = np.hstack(
+                        [X_lags, last_window_values[-self.lags_[serie]].reshape(1, -1)]
+                     )
 
         predictions = np.full(shape=len(steps), fill_value=np.nan)
 
@@ -940,7 +966,9 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         else:
             n_exog = exog.shape[1] if isinstance(exog, pd.DataFrame) else 1
             Xs = [
-                np.hstack([X_lags, exog_values[(step-1)*n_exog:(step)*n_exog].reshape(1, -1)])
+                np.hstack(
+                    [X_lags, exog_values[(step-1)*n_exog:(step)*n_exog].reshape(1, -1)]
+                )
                 for step in steps
             ]
 
@@ -1074,15 +1102,20 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                     )
             residuals = self.out_sample_residuals
         
-        check_residuals = 'forecaster.in_sample_residuals' if in_sample_residuals else 'forecaster.out_sample_residuals'
+        check_residuals = (
+            'forecaster.in_sample_residuals' if in_sample_residuals
+            else 'forecaster.out_sample_residuals'
+        )
         for step in steps:
             if residuals[step] is None:
                 raise ValueError(
-                    (f"forecaster residuals for step {step} are `None`. Check {check_residuals}.")
+                    (f"forecaster residuals for step {step} are `None`. "
+                     f"Check {check_residuals}.")
                 )
             elif (residuals[step] == None).any():
                 raise ValueError(
-                    (f"forecaster residuals for step {step} contains `None` values. Check {check_residuals}.")
+                    (f"forecaster residuals for step {step} contains `None` values. "
+                     f"Check {check_residuals}.")
                 )
 
         predictions = self.predict(
@@ -1310,7 +1343,11 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
 
         param_names = [p for p in inspect.signature(distribution._pdf).parameters 
                        if not p=='x'] + ["loc","scale"]
-        param_values = np.apply_along_axis(lambda x: distribution.fit(x), axis=1, arr=boot_samples)
+        param_values = np.apply_along_axis(
+                            lambda x: distribution.fit(x),
+                            axis = 1,
+                            arr  = boot_samples
+                       )
         predictions = pd.DataFrame(
                           data    = param_values,
                           columns = param_names,
@@ -1342,7 +1379,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
 
         self.regressor = clone(self.regressor)
         self.regressor.set_params(**params)
-        self.regressors_ = {step: clone(self.regressor) for step in range(1, self.steps + 1)}
+        self.regressors_ = {step: clone(self.regressor)
+                            for step in range(1, self.steps + 1)}
 
 
     def set_fit_kwargs(
@@ -1409,7 +1447,10 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                         )
         
         self.lags_ = self.lags
-        self.max_lag = max(list(chain(*self.lags.values()))) if isinstance(self.lags, dict) else max(self.lags)
+        self.max_lag = (
+            max(list(chain(*self.lags.values()))) if isinstance(self.lags, dict)
+            else max(self.lags)
+        )
         self.window_size = self.max_lag
 
 
@@ -1475,7 +1516,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                 """), IgnoredArgumentWarning
             )
 
-        residuals = {key: value for key, value in residuals.items() if key in self.out_sample_residuals.keys()}
+        residuals = {key: value for key, value in residuals.items()
+                     if key in self.out_sample_residuals.keys()}
 
         if not transform and self.transformer_series_[self.level] is not None:
             warnings.warn(
@@ -1524,11 +1566,12 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         step: int
     ) -> pd.DataFrame:
         """
-        Return impurity-based feature importance of the model stored in
-        the forecaster for a specific step. Since a separate model is created for
-        each forecast time step, it is necessary to select the model from which
-        retrieve information. Only valid when regressor stores internally the 
-        feature importances in the attribute `feature_importances_` or `coef_`.
+        Return feature importance of the model stored in the forecaster for a
+        specific step. Since a separate model is created for each forecast time
+        step, it is necessary to select the model from which retrieve information.
+        Only valid when regressor stores internally the feature importances in
+        the attribute `feature_importances_` or `coef_`. Otherwise, it returns  
+        `None`.
 
         Parameters
         ----------
@@ -1569,7 +1612,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         idx_columns_lags = np.arange(len_columns_lags)
         if self.included_exog:
             idx_columns_exog = np.flatnonzero(
-                                [name.endswith(f"step_{step}") for name in self.X_train_col_names]
+                                [name.endswith(f"step_{step}")
+                                 for name in self.X_train_col_names]
                                )
         else:
             idx_columns_exog = np.array([], dtype=int)
