@@ -91,6 +91,21 @@ def test_fit_same_residuals_when_residuals_greater_than_1000():
     assert all(all(results_1[k] == results_2[k]) for k in results_2.keys())
 
 
+def test_fit_in_sample_residuals_not_stored():
+    """
+    Test that values of in_sample_residuals are not stored after fitting
+    when `store_in_sample_residuals=False`.
+    """
+    forecaster = ForecasterAutoregDirect(LinearRegression(), lags=3, steps=2)
+    forecaster.fit(y=pd.Series(np.arange(5)), store_in_sample_residuals=False)
+    expected = {1: None, 2: None}
+    results = forecaster.in_sample_residuals
+
+    assert isinstance(results, dict)
+    assert results.keys() == expected.keys()
+    assert all(results[k] == expected[k] for k in expected.keys())
+
+
 def test_fit_last_window_stored():
     """
     Test that values of last window are stored after fitting.

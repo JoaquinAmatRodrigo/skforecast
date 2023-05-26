@@ -6,6 +6,21 @@ from skforecast.ForecasterAutoreg import ForecasterAutoreg
 from sklearn.linear_model import LinearRegression
 from xgboost import XGBRegressor
 
+# Fixtures
+from .fixtures_ForecasterAutoreg import y
+
+def custom_weights(index): # pragma: no cover
+    """
+    Return 0 if index is one of '2022-01-05', '2022-01-06', 1 otherwise.
+    """
+    weights = np.where(
+                (index >= 20) & (index <= 40),
+                0,
+                1
+              )
+    
+    return weights
+
 
 def test_forecaster_DatetimeIndex_index_freq_stored():
     """
@@ -79,6 +94,18 @@ def test_fit_same_residuals_when_residuals_greater_than_1000():
     np.testing.assert_array_equal(results_1, results_2)
 
 
+def test_fit_in_sample_residuals_not_stored():
+    """
+    Test that values of in_sample_residuals are not stored after fitting
+    when `store_in_sample_residuals=False`.
+    """
+    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
+    forecaster.fit(y=pd.Series(np.arange(5)), store_in_sample_residuals=False)
+    results = forecaster.in_sample_residuals
+
+    assert results is None
+
+
 def test_fit_last_window_stored():
     """
     Test that values of last window are stored after fitting.
@@ -88,3 +115,31 @@ def test_fit_last_window_stored():
     expected = pd.Series(np.array([47, 48, 49]), index=[47, 48, 49])
 
     pd.testing.assert_series_equal(forecaster.last_window, expected)
+
+
+def test_fit_model_coef_when_using_weight_func():
+    """
+    Check the value of the regressor coefs when using a `weight_func`.
+    """
+    forecaster = ForecasterAutoreg(
+                     regressor   = LinearRegression(),
+                     lags        = 5,
+                     weight_func = custom_weights
+                 )
+    forecaster.fit(y=y)
+    results = forecaster.regressor.coef_
+    expected = np.array([0.01211677, -0.20981367,  0.04214442, -0.0369663, -0.18796105])
+
+    np.testing.assert_almost_equal(results, expected)
+
+
+def test_fit_model_coef_when_not_using_weight_func():
+    """
+    Check the value of the regressor coefs when not using a `weight_func`.
+    """
+    forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=5)
+    forecaster.fit(y=y)
+    results = forecaster.regressor.coef_
+    expected = np.array([0.16773502, -0.09712939,  0.10046413, -0.09971515, -0.15849756])
+
+    np.testing.assert_almost_equal(results, expected)

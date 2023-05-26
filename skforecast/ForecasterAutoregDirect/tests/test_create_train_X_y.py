@@ -307,15 +307,17 @@ def test_create_train_X_y_output_when_y_is_series_10_steps_3_and_exog_is_datafra
     expected = (
         pd.DataFrame(
             data = np.array([[4, 3, 2, 1, 0, 105, 1005, 106, 1006, 107, 1007],
-                            [5, 4, 3, 2, 1, 106, 1006, 107, 1007, 108, 1008],
-                            [6, 5, 4, 3, 2, 107, 1007, 108, 1008, 109, 1009]],
+                             [5, 4, 3, 2, 1, 106, 1006, 107, 1007, 108, 1008],
+                             [6, 5, 4, 3, 2, 107, 1007, 108, 1008, 109, 1009]],
                             dtype=float),
             index = pd.RangeIndex(start=7, stop=10, step=1),
-            columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 'exog_1_step_1',
-                       'exog_2_step_1', 'exog_1_step_2', 'exog_2_step_2', 'exog_1_step_3',
-                       'exog_2_step_3']
-        ).astype({'exog_1_step_1': dtype, 'exog_1_step_2': dtype, 'exog_1_step_3': dtype,
-                  'exog_2_step_1': dtype, 'exog_2_step_2': dtype, 'exog_2_step_3': dtype}),
+            columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 
+                       'exog_1_step_1', 'exog_2_step_1', 
+                       'exog_1_step_2', 'exog_2_step_2', 
+                       'exog_1_step_3', 'exog_2_step_3']
+        ).astype({'exog_1_step_1': dtype, 'exog_2_step_1': dtype, 
+                  'exog_1_step_2': dtype, 'exog_2_step_2': dtype, 
+                  'exog_1_step_3': dtype, 'exog_2_step_3': dtype}),
         pd.DataFrame(
             data = np.array([[5., 6., 7.],
                              [6., 7., 8.],
@@ -477,12 +479,18 @@ def test_create_train_X_y_output_when_y_is_series_10_steps_3_and_exog_is_datafra
             index = pd.RangeIndex(start=7, stop=10, step=1),
             columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5']
         ).assign(exog_1_step_1=v_exog_1*3,
-                 exog_1_step_2=v_exog_1*3,
-                 exog_1_step_3=v_exog_1*3,
                  exog_2_step_1=v_exog_2*3,
+                 exog_1_step_2=v_exog_1*3,
                  exog_2_step_2=v_exog_2*3,
-                 exog_2_step_3=v_exog_2*3).astype({'exog_1_step_1': dtype, 'exog_1_step_2': dtype, 'exog_1_step_3': dtype,
-                                                   'exog_2_step_1': dtype, 'exog_2_step_2': dtype, 'exog_2_step_3': dtype}),
+                 exog_1_step_3=v_exog_1*3,
+                 exog_2_step_3=v_exog_2*3
+        ).astype({'exog_1_step_1': dtype, 
+                  'exog_2_step_1': dtype, 
+                  'exog_1_step_2': dtype, 
+                  'exog_2_step_2': dtype, 
+                  'exog_1_step_3': dtype,
+                  'exog_2_step_3': dtype}
+        ),
         pd.DataFrame(
             data = np.array([[5., 6., 7.],
                              [6., 7., 8.],
@@ -697,22 +705,22 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_dataframe_of_fl
     results = forecaster.create_train_X_y(y=y, exog=exog)        
     expected = (
         pd.DataFrame(
-            data = np.array([[4, 3, 2, 1, 0, 105, 1005,  105, 106, 1006, 106, 107, 1007, 107],
-                             [5, 4, 3, 2, 1, 106, 1006, 106, 107, 1007, 107, 108, 1008,  108],
-                             [6, 5, 4, 3, 2, 107, 1007, 107, 108, 1008, 108, 109, 1009,  109]],
+            data = np.array([[4, 3, 2, 1, 0, 105, 1005, 105, 106, 1006, 106, 107, 1007, 107],
+                             [5, 4, 3, 2, 1, 106, 1006, 106, 107, 1007, 107, 108, 1008, 108],
+                             [6, 5, 4, 3, 2, 107, 1007, 107, 108, 1008, 108, 109, 1009, 109]],
                             dtype=float),
             index   = pd.RangeIndex(start=7, stop=10, step=1),
-            columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 'exog_1_step_1',
-                       'exog_2_step_1', 'exog_3_step_1', 'exog_1_step_2', 'exog_2_step_2',
-                       'exog_3_step_2', 'exog_1_step_3', 'exog_2_step_3', 'exog_3_step_3']
-        ).astype({'exog_1_step_1': float, 
-                  'exog_1_step_2': float, 
-                  'exog_1_step_3': float, 
-                  'exog_2_step_1': int,
-                  'exog_2_step_2': int,
-                  'exog_2_step_3': int}).assign(exog_3_step_1=pd.Categorical(range(105, 108), categories=range(100, 110)),
-                                                exog_3_step_2=pd.Categorical(range(106, 109), categories=range(100, 110)),
-                                                exog_3_step_3=pd.Categorical(range(107, 110), categories=range(100, 110))),
+            columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 
+                       'exog_1_step_1', 'exog_2_step_1', 'exog_3_step_1', 
+                       'exog_1_step_2', 'exog_2_step_2', 'exog_3_step_2', 
+                       'exog_1_step_3', 'exog_2_step_3', 'exog_3_step_3']
+        ).astype({'exog_1_step_1': float, 'exog_2_step_1': int,
+                  'exog_1_step_2': float, 'exog_2_step_2': int,
+                  'exog_1_step_3': float, 'exog_2_step_3': int}
+        ).assign(exog_3_step_1=pd.Categorical(range(105, 108), categories=range(100, 110)),
+                 exog_3_step_2=pd.Categorical(range(106, 109), categories=range(100, 110)),
+                 exog_3_step_3=pd.Categorical(range(107, 110), categories=range(100, 110))
+        ),
         pd.DataFrame(
             data = np.array([[5., 6., 7.],
                              [6., 7., 8.],

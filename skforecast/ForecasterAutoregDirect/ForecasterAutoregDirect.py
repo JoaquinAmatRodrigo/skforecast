@@ -523,7 +523,8 @@ class ForecasterAutoregDirect(ForecasterBase):
             X_train_step = X_train
         else:
             idx_columns_lags = np.arange(len(self.lags))
-            idx_columns_exog = np.flatnonzero(X_train.columns.str.endswith(f'step_{step}'))
+            n_exog = (len(self.X_train_col_names) - len(self.lags)) / self.steps
+            idx_columns_exog = np.arange((step-1)*n_exog, (step)*n_exog) + idx_columns_lags[-1] + 1
             idx_columns = np.hstack((idx_columns_lags, idx_columns_exog))
             X_train_step = X_train.iloc[:, idx_columns]
 
@@ -582,7 +583,8 @@ class ForecasterAutoregDirect(ForecasterBase):
     def fit(
         self,
         y: pd.Series,
-        exog: Optional[Union[pd.Series, pd.DataFrame]]=None
+        exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+        store_in_sample_residuals: bool=True
     ) -> None:
         """
         Training Forecaster.
@@ -599,6 +601,9 @@ class ForecasterAutoregDirect(ForecasterBase):
             Exogenous variable/s included as predictor/s. Must have the same
             number of observations as `y` and their indexes must be aligned so
             that y[i] is regressed on exog[i].
+
+        store_in_sample_residuals : bool, default `True`
+            if True, in_sample_residuals are stored.
 
         Returns 
         -------
@@ -651,19 +656,22 @@ class ForecasterAutoregDirect(ForecasterBase):
                     y = y_train_step,
                     **self.fit_kwargs
                 )
+
+            # This is done to save time during fit in functions such as backtesting()
+            if store_in_sample_residuals:
                 
-            residuals = (y_train_step - self.regressors_[step].predict(X_train_step)).to_numpy()
+                residuals = (y_train_step - self.regressors_[step].predict(X_train_step)).to_numpy()
 
-            if len(residuals) > 1000:
-                # Only up to 1000 residuals are stored
-                    rng = np.random.default_rng(seed=123)
-                    residuals = rng.choice(
-                                    a       = residuals, 
-                                    size    = 1000, 
-                                    replace = False
-                                )
+                if len(residuals) > 1000:
+                    # Only up to 1000 residuals are stored
+                        rng = np.random.default_rng(seed=123)
+                        residuals = rng.choice(
+                                        a       = residuals, 
+                                        size    = 1000, 
+                                        replace = False
+                                    )
 
-            self.in_sample_residuals[step] = residuals
+                self.in_sample_residuals[step] = residuals
 
         self.fitted = True
         self.fit_date = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
@@ -772,7 +780,7 @@ class ForecasterAutoregDirect(ForecasterBase):
                            inverse_transform = False
                        )
             check_exog_dtypes(exog=exog)
-            exog_values = exog_to_direct(exog=exog.iloc[:max(steps), ], steps=max(steps)).to_numpy()
+            exog_values = exog_to_direct(exog=exog.iloc[:max(steps), ], steps=max(steps)).to_numpy()[0]
         else:
             exog_values = None
 
@@ -787,12 +795,13 @@ class ForecasterAutoregDirect(ForecasterBase):
                                                 )
 
         X_lags = last_window_values[-self.lags].reshape(1, -1)
-        
+
         if exog is None:
             Xs = [X_lags] * len(steps)
         else:
+            n_exog = exog.shape[1] if isinstance(exog, pd.DataFrame) else 1
             Xs = [
-                np.hstack([X_lags, exog_values[0][step-1::max(steps)].reshape(1, -1)])
+                np.hstack([X_lags, exog_values[(step-1)*n_exog:(step)*n_exog].reshape(1, -1)])
                 for step in steps
             ]
 
@@ -817,61 +826,6 @@ class ForecasterAutoregDirect(ForecasterBase):
                           transformer       = self.transformer_y,
                           fit               = False,
                           inverse_transform = True
-                      )
-
-        return predictions
-    
-
-    def predict_pandas( 
-        self,
-        steps: Optional[Union[int, list]]=None,
-        last_window: Optional[pd.Series]=None,
-        exog: Optional[Union[pd.Series, pd.DataFrame]]=None
-    ) -> pd.Series:                                          # pragma: no cover
-        """
-        Equivalent to predict() but using pandas instead of numpy.
-        """
-
-        if isinstance(steps, int):
-            steps = list(np.arange(steps) + 1)
-        elif steps is None:
-            steps = list(np.arange(self.steps) + 1)
-        elif isinstance(steps, list):
-            steps = list(np.array(steps))
-
-        for step in steps:
-            if not isinstance(step, (int, np.int64, np.int32)):
-                raise TypeError(
-                    (f"`steps` argument must be an int, a list of ints or `None`. "
-                     f"Got {type(steps)}.")
-                )
-
-        if last_window is None:
-            last_window = copy(self.last_window)
-
-        _, last_window_index = preprocess_last_window(
-                                   last_window   = last_window,
-                                   return_values = False
-                               )
-        idx = expand_index(index=last_window_index, steps=max(steps))
-        X_lags = last_window.iloc[-self.lags]
-        X_lags.index = [f"lag_{lag}" for lag in self.lags]
-        X_lags = X_lags.to_frame().T
-
-        if exog is None:
-            Xs = [X_lags] * len(steps)
-        else:
-            Xs = [
-                pd.concat([X_lags, exog.iloc[step-1::max(steps)]], axis=1)
-                for step in steps
-            ]
-
-        regressors = [self.regressors_[step] for step in steps]
-        predictions = [regressor.predict(X)[0] for regressor, X in zip(regressors, Xs)]
-        predictions = pd.Series(
-                          data  = predictions,
-                          index = idx[np.array(steps)-1],
-                          name  = 'pred',
                       )
 
         return predictions

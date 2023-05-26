@@ -2,6 +2,21 @@
 
 All significant changes to this project are documented in this release file.
 
+## [0.8.1] - [2023-05-27]
+
+**Added**
+
+- Argument `store_in_sample_residuals=True` in `fit` method to all forecasters.
+
+**Changed**
+
+- Refactor `utils.exog_to_direct`.
+
+**Fixed**
+
+- `utils.check_exog_dtypes`.
+
+
 ## [0.8.0] - [2023-05-16]
 
 **Added**

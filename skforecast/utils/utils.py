@@ -1028,7 +1028,7 @@ def exog_to_direct(
         exog_transformed = exog_column_transformed
 
     exog_transformed.index = exog_idx[-len(exog_transformed):]
-
+    
     return exog_transformed
 
 

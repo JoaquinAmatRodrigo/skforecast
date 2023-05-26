@@ -11,8 +11,7 @@ from skforecast.exceptions import DataTypeWarning
 @pytest.mark.parametrize("exog", 
                          [pd.Series(['A', 'B', 'C']),
                           pd.Series(['A', 'B', 'C']).to_frame()], 
-                         ids = lambda exog : f'exog type: {type(exog)}'
-                        )
+                         ids = lambda exog : f'exog type: {type(exog)}')
 def test_check_exog_dtypes_DataTypeWarning_when_exog_has_str_values(exog):
     """
     Check DataTypeWarning is issued when exog is pandas Series or DataFrame 
@@ -30,8 +29,7 @@ def test_check_exog_dtypes_DataTypeWarning_when_exog_has_str_values(exog):
 @pytest.mark.parametrize("exog", 
                          [pd.Series([True, True, True]),
                           pd.Series([True, True, True]).to_frame()], 
-                         ids = lambda exog : f'exog type: {type(exog)}'
-                        )
+                         ids = lambda exog : f'exog type: {type(exog)}')
 def test_check_exog_dtypes_DataTypeWarning_when_exog_has_bool_values(exog):
     """
     Check DataTypeWarning is issued when exog is pandas Series or DataFrame 
@@ -74,3 +72,29 @@ def test_check_exog_dtypes_TypeError_when_exog_is_DataFrame_with_no_int_categori
     )
     with pytest.raises(TypeError, match = err_msg):
         check_exog_dtypes(pd.Series(['A', 'B', 'C'], dtype='category').to_frame())
+
+
+@pytest.mark.parametrize("dtype", 
+                         ['int8','int16','int32','int64',
+                          'float16','float32', 'float64',
+                          'category'], 
+                         ids = lambda exog : f'exog type: {type(exog)}')
+def test_check_exog_dtypes_pandas_Series(dtype):
+    """
+    Test check_exog_dtypes accepts all dtypes in a pandas Series.
+    """
+    series = pd.Series(np.array([1, 2, 3]), name='exog', dtype=dtype) 
+    _ = check_exog_dtypes(series)
+
+    assert _ is None
+
+
+def test_check_exog_dtypes_pandas_DataFrame():
+    """
+    Test check_exog_dtypes accepts all dtypes in a pandas DataFrame.
+    """
+    df = pd.DataFrame({'col1': [1., 2., 3.], 'col2': [4, 5, 6]}) 
+    df['col2'] = df['col2'].astype('category')
+    _ = check_exog_dtypes(df)
+
+    assert _ is None
