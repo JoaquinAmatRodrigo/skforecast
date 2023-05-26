@@ -33,6 +33,7 @@ from ..utils import preprocess_y
 from ..utils import preprocess_last_window
 from ..utils import preprocess_exog
 from ..utils import exog_to_direct
+from ..utils import exog_to_direct_numpy
 from ..utils import expand_index
 from ..utils import transform_series
 from ..utils import transform_dataframe
@@ -789,10 +790,10 @@ class ForecasterAutoregDirect(ForecasterBase):
                            inverse_transform = False
                        )
             check_exog_dtypes(exog=exog)
-            exog_values = exog_to_direct(
-                            exog  = exog.iloc[:max(steps), ],
-                            steps = max(steps)
-                          ).to_numpy()[0]
+            exog_values = exog_to_direct_numpy(
+                              exog  = exog.to_numpy()[:max(steps)],
+                              steps = max(steps)
+                          )[0]
         else:
             exog_values = None
 
