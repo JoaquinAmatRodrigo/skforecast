@@ -1,5 +1,5 @@
 <h1 align="left">
-<img src="images/banner-landing-page-skforecast.png#only-light" style= margin-top: 0px;">
+<img src="https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/images/banner-landing-page-skforecast.png?raw=true#only-light" style= margin-top: 0px;>
 </h1><br>
 
 ![Python](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-blue)
