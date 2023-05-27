@@ -48,6 +48,30 @@ def test_exog_to_direct_when_steps_2_exog_1d_float_int(exog, dtype):
     pd.testing.assert_frame_equal(results, expected)
 
 
+@pytest.mark.parametrize("exog                                              , dtype", 
+                         [(pd.Series(np.arange(5), name='exog', dtype=int)  , int),
+                          (pd.Series(np.arange(5), name='exog', dtype=float), float),
+                          (pd.DataFrame(pd.Series(np.arange(5), dtype=int)  , columns=['exog']), int),
+                          (pd.DataFrame(pd.Series(np.arange(5), dtype=float), columns=['exog']), float)], 
+                         ids = lambda exog : f'exog: {exog}')
+def test_exog_to_direct_when_steps_series_len_exog_1d_float_int(exog, dtype):
+    """
+    Test exog_to_direct results when using steps equal to series len (5) and 
+    exog is a 1d pandas Series or 1 column DataFrame of ints or floats.
+    """
+    results = exog_to_direct(exog=exog, steps=len(exog))
+    expected = pd.DataFrame(
+        data    = np.array([[0, 1, 2, 3, 4]]),
+        index   = pd.RangeIndex(start=4, stop=5, step=1),
+        columns = ['exog_step_1', 'exog_step_2', 'exog_step_3',
+                    'exog_step_4', 'exog_step_5']
+    ).astype({'exog_step_1': dtype, 'exog_step_2': dtype,
+              'exog_step_3': dtype, 'exog_step_4': dtype,
+              'exog_step_5': dtype})
+
+    pd.testing.assert_frame_equal(results, expected)
+
+
 @pytest.mark.parametrize("dtype", 
                          [float, int], 
                          ids = lambda dt : f'dtype: {dt}')
@@ -121,15 +145,15 @@ def test_exog_to_direct_when_steps_2_exog_DataFrame_3d_float_int_category():
                          'exog_3': pd.Categorical(range(100, 110))})
     results = exog_to_direct(exog=exog, steps=2)
     expected = pd.DataFrame(
-        data = np.array([[100., 1000.,  100.,  101., 1001.,  101.],
-                         [101., 1001.,  101.,  102., 1002.,  102.],
-                         [102., 1002.,  102.,  103., 1003.,  103.],
-                         [103., 1003.,  103.,  104., 1004.,  104.],
-                         [104., 1004.,  104.,  105., 1005.,  105.],
-                         [105., 1005.,  105.,  106., 1006.,  106.],
-                         [106., 1006.,  106.,  107., 1007.,  107.],
-                         [107., 1007.,  107.,  108., 1008.,  108.],
-                         [108., 1008.,  108.,  109., 1009.,  109.]]),
+        data = np.array([[100., 1000., 100., 101., 1001., 101.],
+                         [101., 1001., 101., 102., 1002., 102.],
+                         [102., 1002., 102., 103., 1003., 103.],
+                         [103., 1003., 103., 104., 1004., 104.],
+                         [104., 1004., 104., 105., 1005., 105.],
+                         [105., 1005., 105., 106., 1006., 106.],
+                         [106., 1006., 106., 107., 1007., 107.],
+                         [107., 1007., 107., 108., 1008., 108.],
+                         [108., 1008., 108., 109., 1009., 109.]]),
         index   = pd.RangeIndex(start=1, stop=10, step=1),
         columns = ['exog_1_step_1', 'exog_2_step_1', 'exog_3_step_1', 
                    'exog_1_step_2', 'exog_2_step_2', 'exog_3_step_2']
@@ -143,6 +167,40 @@ def test_exog_to_direct_when_steps_2_exog_DataFrame_3d_float_int_category():
     ).astype(
         {'exog_3_step_1': CategoricalDtype(categories=[100, 101, 102, 103, 104, 105, 106, 107, 108, 109], ordered=False),
          'exog_3_step_2': CategoricalDtype(categories=[100, 101, 102, 103, 104, 105, 106, 107, 108, 109], ordered=False)}
+    )
+
+    pd.testing.assert_frame_equal(results, expected)
+
+
+def test_exog_to_direct_when_steps_len_exog_exog_DataFrame_3d_float_int_category():
+    """
+    Test exog_to_direct results when using steps len exog (5) and exog is a  
+    pandas DataFrame with 3 columns of float, int, category.
+    """
+    exog = pd.DataFrame({'exog_1': pd.Series(np.arange(100, 103), dtype='float64'),
+                         'exog_2': pd.Series(np.arange(1000, 1003), dtype='int64'),
+                         'exog_3': pd.Categorical(range(100, 103))})
+    results = exog_to_direct(exog=exog, steps=len(exog))
+    expected = pd.DataFrame(
+        data = np.array([[100., 1000., 100., 101., 1001., 101., 102., 1002., 102.]]),
+        index   = pd.RangeIndex(start=2, stop=3, step=1),
+        columns = ['exog_1_step_1', 'exog_2_step_1', 'exog_3_step_1', 
+                   'exog_1_step_2', 'exog_2_step_2', 'exog_3_step_2', 
+                   'exog_1_step_3', 'exog_2_step_3', 'exog_3_step_3']
+    ).astype(
+        {'exog_1_step_1': 'float64',
+         'exog_2_step_1': 'int64',
+         'exog_3_step_1': 'int64',
+         'exog_1_step_2': 'float64',
+         'exog_2_step_2': 'int64',
+         'exog_3_step_2': 'int64',
+         'exog_1_step_3': 'float64',
+         'exog_2_step_3': 'int64',
+         'exog_3_step_3': 'int64'}
+    ).astype(
+        {'exog_3_step_1': CategoricalDtype(categories=[100, 101, 102], ordered=False),
+         'exog_3_step_2': CategoricalDtype(categories=[100, 101, 102], ordered=False),
+         'exog_3_step_3': CategoricalDtype(categories=[100, 101, 102], ordered=False)}
     )
 
     pd.testing.assert_frame_equal(results, expected)
