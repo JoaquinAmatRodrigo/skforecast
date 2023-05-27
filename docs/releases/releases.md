@@ -10,7 +10,7 @@ All significant changes to this project are documented in this release file.
 
 **Changed**
 
-- Refactor `utils.exog_to_direct` and `utils.exog_to_direct_numpy`.
+- Refactor `utils.exog_to_direct` and `utils.exog_to_direct_numpy` to increase performance.
 
 **Fixed**
 

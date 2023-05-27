@@ -670,7 +670,7 @@ class ForecasterAutoreg(ForecasterBase):
                            inverse_transform = False
                        )
             check_exog_dtypes(exog=exog)
-            exog_values = exog.iloc[:steps, ].to_numpy()
+            exog_values = exog.to_numpy()[:steps]
         else:
             exog_values = None
         
@@ -814,7 +814,7 @@ class ForecasterAutoreg(ForecasterBase):
                            fit               = False,
                            inverse_transform = False
                        )
-            exog_values = exog.iloc[:steps, ].to_numpy()
+            exog_values = exog.to_numpy()[:steps]
         else:
             exog_values = None
         

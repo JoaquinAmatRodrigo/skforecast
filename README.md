@@ -216,4 +216,4 @@ View the [citation file](https://github.com/JoaquinAmatRodrigo/skforecast/blob/m
 
 # License
 
-**joaquinAmatRodrigo/skforecast** is licensed under the **MIT License**, a short and simple permissive license with conditions only requiring the preservation of copyright and license notices. Licensed works, modifications and larger works may be distributed under different terms and without source code.
+[BSD 3-Clause License](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/LICENSE)

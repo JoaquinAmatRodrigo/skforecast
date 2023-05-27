@@ -59,6 +59,18 @@ def test_exog_to_direct_numpy_when_steps_2_exog_numpy_array_1d():
     np.testing.assert_array_equal(results, expected)
 
 
+def test_exog_to_direct_numpy_when_steps_len_exog_numpy_array_1d():
+    """
+    Test exog_to_direct_numpy results when using steps len_exog (5) and exog 
+    is a 1d numpy array.
+    """
+    exog = np.arange(5)
+    results = exog_to_direct_numpy(exog=exog, steps=len(exog))
+    expected = np.array([[0, 1, 2, 3, 4]])
+
+    np.testing.assert_array_equal(results, expected)
+
+
 def test_exog_to_direct_numpy_when_steps_1_exog_numpy_array_2d():
     """
     Test exog_to_direct_numpy results when using steps 1 and exog is a  
@@ -115,5 +127,18 @@ def test_exog_to_direct_numpy_when_steps_3_exog_numpy_array_2d():
                          [105, 1005, 106, 1006, 107, 1007],
                          [106, 1006, 107, 1007, 108, 1008],
                          [107, 1007, 108, 1008, 109, 1009]])
+
+    np.testing.assert_array_equal(results, expected)
+
+
+def test_exog_to_direct_numpy_when_steps_len_exog_numpy_array_2d():
+    """
+    Test exog_to_direct_numpy results when using steps len exog (5) and 
+    exog is a 2d numpy array.
+    """
+    exog = np.column_stack([np.arange(100, 105), np.arange(1000, 1005)])
+    results = exog_to_direct_numpy(exog=exog, steps=len(exog))
+    expected = np.array([[100, 1000, 101, 1001, 102, 1002, 
+                          103, 1003, 104, 1004]])
 
     np.testing.assert_array_equal(results, expected)
