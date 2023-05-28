@@ -98,9 +98,8 @@ The following table provides an overview of the various forecasters available in
 |[ForecasterAutoregDirect](https://skforecast.org/latest/user_guides/direct-multi-step-forecasting.html)|✔️|||✔️|✔️||
 |[ForecasterMultiSeries](https://skforecast.org/latest/user_guides/independent-multi-time-series-forecasting.html)||✔️|✔️|✔️|✔️||
 |[ForecasterMultiSeriesCustom](https://skforecast.org/latest/user_guides/custom-predictors.html)||✔️|✔️|✔️|✔️|✔️|✔️|
-|[ForecasterMultiVariate](https://skforecast.org/latest/user_guides/dependent-multi-series-multivariate-forecasting.html)||✔️|✔️|✔️|✔️||
+|[ForecasterMultiVariate](https://skforecast.org/latest/user_guides/dependent-multi-series-multivariate-forecasting.html)||✔️||✔️|✔️||
 |[ForecasterSarimax](https://skforecast.org/latest/user_guides/forecasting-sarimax-arima.html)|✔️||✔️|✔️|✔️||
-
 ## Features
 
 + Create recursive autoregressive forecasters from any regressor that follows the scikit-learn API
