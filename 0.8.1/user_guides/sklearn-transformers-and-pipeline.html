@@ -2672,12 +2672,12 @@ from skforecast.model_selection import grid_search_forecaster</div>
     <span class="s1">&#39;data/h2o_exog.csv&#39;</span>
 <span class="p">)</span>
 <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
-        <span class="n">url</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;exog_1&#39;</span><span class="p">,</span> <span class="s1">&#39;exog_2&#39;</span><span class="p">]</span>
+           <span class="n">url</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;exog_1&#39;</span><span class="p">,</span> <span class="s1">&#39;exog_2&#39;</span><span class="p">]</span>
        <span class="p">)</span>
 
 <span class="c1"># Data preprocessing</span>
 <span class="c1"># ==============================================================================</span>
-<span class="n">data</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">],</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;%Y/%m/</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="n">data</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">],</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span>
 <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;date&#39;</span><span class="p">)</span>
 <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">asfreq</span><span class="p">(</span><span class="s1">&#39;MS&#39;</span><span class="p">)</span>
 <span class="c1"># Add an extra categorical variable</span>
@@ -2691,12 +2691,12 @@ url = (
     'data/h2o_exog.csv'
 )
 data = pd.read_csv(
-        url, sep=',', header=0, names=['date', 'y', 'exog_1', 'exog_2']
+           url, sep=',', header=0, names=['date', 'y', 'exog_1', 'exog_2']
        )
 
 # Data preprocessing
 # ==============================================================================
-data['date'] = pd.to_datetime(data['date'], format='%Y/%m/%d')
+data['date'] = pd.to_datetime(data['date'], format='%Y-%m-%d')
 data = data.set_index('date')
 data = data.asfreq('MS')
 # Add an extra categorical variable
@@ -2899,10 +2899,10 @@ Training index type: DatetimeIndex
 Training index frequency: MS 
 Regressor parameters: {&#39;alpha&#39;: 1.0, &#39;copy_X&#39;: True, &#39;fit_intercept&#39;: True, &#39;max_iter&#39;: None, &#39;positive&#39;: False, &#39;random_state&#39;: 123, &#39;solver&#39;: &#39;auto&#39;, &#39;tol&#39;: 0.0001} 
 fit_kwargs: {} 
-Creation date: 2023-05-19 21:25:16 
-Last fit date: 2023-05-19 21:25:16 
-Skforecast version: 0.8.0 
-Python version: 3.9.13 
+Creation date: 2023-05-29 13:21:40 
+Last fit date: 2023-05-29 13:21:40 
+Skforecast version: 0.8.1 
+Python version: 3.10.11 
 Forecaster id: None </pre>
 </div>
 
@@ -3009,10 +3009,10 @@ Training index type: DatetimeIndex
 Training index frequency: MS 
 Regressor parameters: {&#39;alpha&#39;: 1.0, &#39;copy_X&#39;: True, &#39;fit_intercept&#39;: True, &#39;max_iter&#39;: None, &#39;positive&#39;: False, &#39;random_state&#39;: 123, &#39;solver&#39;: &#39;auto&#39;, &#39;tol&#39;: 0.0001} 
 fit_kwargs: {} 
-Creation date: 2023-05-19 21:25:16 
-Last fit date: 2023-05-19 21:25:16 
-Skforecast version: 0.8.0 
-Python version: 3.9.13 
+Creation date: 2023-05-29 13:21:40 
+Last fit date: 2023-05-29 13:21:40 
+Skforecast version: 0.8.1 
+Python version: 3.10.11 
 Forecaster id: None </pre>
 </div>
 
@@ -3141,10 +3141,10 @@ Training index type: DatetimeIndex
 Training index frequency: MS 
 Regressor parameters: {&#39;alpha&#39;: 1.0, &#39;copy_X&#39;: True, &#39;fit_intercept&#39;: True, &#39;max_iter&#39;: None, &#39;positive&#39;: False, &#39;random_state&#39;: 123, &#39;solver&#39;: &#39;auto&#39;, &#39;tol&#39;: 0.0001} 
 fit_kwargs: {} 
-Creation date: 2023-05-19 21:25:17 
-Last fit date: 2023-05-19 21:25:17 
-Skforecast version: 0.8.0 
-Python version: 3.9.13 
+Creation date: 2023-05-29 13:21:40 
+Last fit date: 2023-05-29 13:21:40 
+Skforecast version: 0.8.1 
+Python version: 3.10.11 
 Forecaster id: None </pre>
 </div>
 
@@ -3771,10 +3771,10 @@ Training index type: DatetimeIndex
 Training index frequency: MS 
 Regressor parameters: {&#39;standardscaler__copy&#39;: True, &#39;standardscaler__with_mean&#39;: True, &#39;standardscaler__with_std&#39;: True, &#39;ridge__alpha&#39;: 1.0, &#39;ridge__copy_X&#39;: True, &#39;ridge__fit_intercept&#39;: True, &#39;ridge__max_iter&#39;: None, &#39;ridge__positive&#39;: False, &#39;ridge__random_state&#39;: None, &#39;ridge__solver&#39;: &#39;auto&#39;, &#39;ridge__tol&#39;: 0.0001} 
 fit_kwargs: {} 
-Creation date: 2023-05-19 21:25:18 
-Last fit date: 2023-05-19 21:25:18 
-Skforecast version: 0.8.0 
-Python version: 3.9.13 
+Creation date: 2023-05-29 13:21:41 
+Last fit date: 2023-05-29 13:21:41 
+Skforecast version: 0.8.1 
+Python version: 3.10.11 
 Forecaster id: None </pre>
 </div>
 
@@ -3909,9 +3909,54 @@ results_grid.head(4)</div>
     <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 
 
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
-<pre>lags grid: 100%|██████████| 3/3 [00:01&lt;00:00,  2.24it/s]</pre>
+
+
+<div class="jp-RenderedText jp-OutputArea-output " data-mime-type="text/plain">
+<pre>lags grid:   0%|          | 0/3 [00:00&lt;?, ?it/s]</pre>
 </div>
+
+</div>
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+
+
+<div class="jp-RenderedText jp-OutputArea-output " data-mime-type="text/plain">
+<pre>params grid:   0%|          | 0/10 [00:00&lt;?, ?it/s]</pre>
+</div>
+
+</div>
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+
+
+<div class="jp-RenderedText jp-OutputArea-output " data-mime-type="text/plain">
+<pre>params grid:   0%|          | 0/10 [00:00&lt;?, ?it/s]</pre>
+</div>
+
+</div>
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+
+
+<div class="jp-RenderedText jp-OutputArea-output " data-mime-type="text/plain">
+<pre>params grid:   0%|          | 0/10 [00:00&lt;?, ?it/s]</pre>
+</div>
+
 </div>
 
 <div class="jp-OutputArea-child">
@@ -3926,18 +3971,6 @@ results_grid.head(4)</div>
   Parameters: {&#39;ridge__alpha&#39;: 0.001}
   Backtesting metric: 6.845311709632476e-05
 
-</pre>
-</div>
-</div>
-
-<div class="jp-OutputArea-child">
-
-    
-    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-
-
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
-<pre>
 </pre>
 </div>
 </div>

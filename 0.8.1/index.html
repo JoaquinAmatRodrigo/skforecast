@@ -494,6 +494,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#forecasters" class="md-nav__link">
+    Forecasters
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#features" class="md-nav__link">
     Features
   </a>
@@ -1515,6 +1522,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#forecasters" class="md-nav__link">
+    Forecasters
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#features" class="md-nav__link">
     Features
   </a>
@@ -1661,27 +1675,113 @@
 <li>statsmodels&gt;=0.12, &lt;0.14</li>
 <li>pmdarima&gt;=2.0, &lt;2.1</li>
 </ul>
+<h2 id="forecasters">Forecasters<a class="headerlink" href="#forecasters" title="Permanent link">&para;</a></h2>
+<p>A Forecaster object in the skforecast library is a comprehensive container that provides essential functionality and methods for training a forecasting model and generating predictions for future points in time.</p>
+<p>The skforecast library offers a variety of forecaster types, each tailored to specific requirements such as single or multiple time series, direct or recursive strategies, or custom predictors. Regardless of the specific forecaster type, all instances share the same API.</p>
+<table>
+<thead>
+<tr>
+<th align="left">Forecaster</th>
+<th align="center">Single series</th>
+<th align="center">Multiple series</th>
+<th align="center">Recursive strategy</th>
+<th align="center">Direct strategy</th>
+<th align="center">Probabilistic prediction</th>
+<th align="center">Exogenous features</th>
+<th align="center">Custom features</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><a href="https://skforecast.org/latest/user_guides/autoregresive-forecaster.html">ForecasterAutoreg</a></td>
+<td align="center">✔️</td>
+<td align="center"></td>
+<td align="center">✔️</td>
+<td align="center"></td>
+<td align="center">✔️</td>
+<td align="center">✔️</td>
+<td align="center"></td>
+</tr>
+<tr>
+<td align="left"><a href="https://skforecast.org/latest/user_guides/custom-predictors.html">ForecasterAutoregCustom</a></td>
+<td align="center">✔️</td>
+<td align="center"></td>
+<td align="center">✔️</td>
+<td align="center"></td>
+<td align="center">✔️</td>
+<td align="center">✔️</td>
+<td align="center">✔️</td>
+</tr>
+<tr>
+<td align="left"><a href="https://skforecast.org/latest/user_guides/direct-multi-step-forecasting.html">ForecasterAutoregDirect</a></td>
+<td align="center">✔️</td>
+<td align="center"></td>
+<td align="center"></td>
+<td align="center">✔️</td>
+<td align="center">✔️</td>
+<td align="center">✔️</td>
+<td align="center"></td>
+</tr>
+<tr>
+<td align="left"><a href="https://skforecast.org/latest/user_guides/independent-multi-time-series-forecasting.html">ForecasterMultiSeries</a></td>
+<td align="center"></td>
+<td align="center">✔️</td>
+<td align="center">✔️</td>
+<td align="center"></td>
+<td align="center">✔️</td>
+<td align="center">✔️</td>
+<td align="center"></td>
+</tr>
+<tr>
+<td align="left"><a href="https://skforecast.org/latest/user_guides/custom-predictors.html">ForecasterMultiSeriesCustom</a></td>
+<td align="center"></td>
+<td align="center">✔️</td>
+<td align="center">✔️</td>
+<td align="center"></td>
+<td align="center">✔️</td>
+<td align="center">✔️</td>
+<td align="center">✔️</td>
+</tr>
+<tr>
+<td align="left"><a href="https://skforecast.org/latest/user_guides/dependent-multi-series-multivariate-forecasting.html">ForecasterMultiVariate</a></td>
+<td align="center"></td>
+<td align="center">✔️</td>
+<td align="center"></td>
+<td align="center">✔️</td>
+<td align="center">✔️</td>
+<td align="center">✔️</td>
+<td align="center"></td>
+</tr>
+<tr>
+<td align="left"><a href="https://skforecast.org/latest/user_guides/forecasting-sarimax-arima.html">ForecasterSarimax</a></td>
+<td align="center">✔️</td>
+<td align="center"></td>
+<td align="center">✔️</td>
+<td align="center"></td>
+<td align="center">✔️</td>
+<td align="center">✔️</td>
+<td align="center"></td>
+</tr>
+</tbody>
+</table>
 <h2 id="features">Features<a class="headerlink" href="#features" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Create recursive autoregressive forecasters from any regressor that follows the scikit-learn API</li>
-<li>Create direct autoregressive forecasters from any regressor that follows the scikit-learn API</li>
-<li>Create multi-time series autoregressive forecasters from any regressor that follows the scikit-learn API</li>
-<li>Create multivariate autoregressive forecasters from any regressor that follows the scikit-learn API</li>
+<li>Create Forecasters from any regressor that follows the scikit-learn API</li>
 <li>Include exogenous variables as predictors</li>
 <li>Include custom predictors (rolling mean, rolling variance ...)</li>
 <li>Multiple backtesting methods for model validation</li>
 <li>Grid search, random search and Bayesian search to find optimal lags (predictors) and best hyperparameters</li>
-<li>Include custom metrics for model validation and grid search</li>
 <li>Prediction interval estimated by bootstrapping and quantile regression</li>
+<li>Include custom metrics for model validation and grid search</li>
 <li>Get predictor importance</li>
 <li>Forecaster in production</li>
 </ul>
 <h2 id="examples-and-tutorials">Examples and tutorials<a class="headerlink" href="#examples-and-tutorials" title="Permanent link">&para;</a></h2>
 <h3 id="english">English<a class="headerlink" href="#english" title="Permanent link">&para;</a></h3>
-<p><i class="fa-duotone fa-chart-line fa" style="font-size: 25px; color:#1DA1F2;"></i>  <a href="https://www.cienciadedatos.net/documentos/py27-time-series-forecasting-python-scikitlearn.html"><strong>Skforecast: time series forecasting with Python and Scikit-learn</strong></a></p>
-<p><i class="fa-duotone fa-lightbulb fa" style="font-size: 25px; color:#fcea2b;"></i> <a href="https://www.cienciadedatos.net/documentos/py29-forecasting-electricity-power-demand-python.html"><strong>Forecasting electricity demand with Python</strong></a></p>
-<p><i class="fa-duotone fa-rss fa" style="font-size: 25px; color:#666666;"></i> <a href="https://www.cienciadedatos.net/documentos/py37-forecasting-web-traffic-machine-learning.html"><strong>Forecasting web traffic with machine learning and Python</strong></a></p>
-<p><i class="fa-solid fa-bicycle fa" style="font-size: 25px; color:#00cc99;"></i> <a href="https://www.cienciadedatos.net/documentos/py39-forecasting-time-series-with-skforecast-xgboost-lightgbm-catboost.html"><strong>Forecasting time series with gradient boosting: Skforecast, XGBoost, LightGBM and CatBoost</strong></a></p>
+<p><i class="fa-duotone fa-chart-line fa" style="font-size: 25px; color:#1DA1F2;"></i>  <a href="https://www.cienciadedatos.net/documentos/py27-time-series-forecasting-python-scikitlearn.html"><strong>Skforecast: time series forecasting with Python and Scikit-learn</strong></a> <a href="https://colab.research.google.com/drive/1X1DJF4pZlklIt5srQnyTYoyFVLunr_OQ"><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a></p>
+<p><i class="fa-duotone fa-lightbulb fa" style="font-size: 25px; color:#fcea2b;"></i> <a href="https://www.cienciadedatos.net/documentos/py29-forecasting-electricity-power-demand-python.html"><strong>Forecasting electricity demand with Python</strong></a> <a href="https://colab.research.google.com/drive/1efCKQtuHOlw7MLojIwqi2zrU2NZbG-FP"><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a></p>
+<p><i class="fa-duotone fa-rss fa" style="font-size: 25px; color:#666666;"></i> <a href="https://www.cienciadedatos.net/documentos/py37-forecasting-web-traffic-machine-learning.html"><strong>Forecasting web traffic with machine learning and Python</strong></a> <a href="https://colab.research.google.com/drive/1QhLkJAAEfvgYoVkQXy58-T_sloNFCV1o"><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a></p>
+<p><i class="fa-solid fa-bicycle fa" style="font-size: 25px; color:#00cc99;"></i> <a href="https://www.cienciadedatos.net/documentos/py39-forecasting-time-series-with-skforecast-xgboost-lightgbm-catboost.html"><strong>Forecasting with gradient boosting: Skforecast, XGBoost, LightGBM and CatBoost</strong></a> <a href="https://colab.research.google.com/drive/1Imy8ZM3DqPXg7UllRDH9gqWb_XSrqzzh"><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a></p>
 <p><i class="fa-brands fa-bitcoin fa" style="font-size: 25px; color:#f7931a;"></i> <a href="https://www.cienciadedatos.net/documentos/py41-forecasting-cryptocurrency-bitcoin-machine-learning-python.html"><strong>Bitcoin price prediction with Python</strong></a></p>
 <p><i class="fa-light fa-chart-line fa" style="font-size: 25px; color:#f26e1d;"></i>  <a href="https://www.cienciadedatos.net/documentos/py42-forecasting-prediction-intervals-machine-learning.html"><strong>Prediction intervals in forecasting models</strong></a></p>
 <p><i class="fa-duotone fa-water fa" style="font-size: 25px; color:teal;"></i> <a href="https://www.cienciadedatos.net/documentos/py44-multi-series-forecasting-skforecast.html"><strong>Multi-series forecasting</strong></a></p>
@@ -1689,10 +1789,10 @@
 <p><i class="fa-solid fa-magnifying-glass" style="font-size: 25px; color:purple;"></i> <a href="https://www.cienciadedatos.net/documentos/py46-forecasting-time-series-missing-values.html"><strong>Forecasting time series with missing values</strong></a></p>
 <p><i class="fa-solid fa-wave-square" style="color: #fbbb09;"></i> <a href="https://www.cienciadedatos.net/documentos/py48-intermittent-demand-forecasting.html"><strong>Intermittent demand forecasting</strong></a></p>
 <h3 id="espanol">Español<a class="headerlink" href="#espanol" title="Permanent link">&para;</a></h3>
-<p><i class="fa-duotone fa-chart-line fa" style="font-size: 25px; color:#1DA1F2;"></i> <a href="https://www.cienciadedatos.net/documentos/py27-forecasting-series-temporales-python-scikitlearn.html"><strong>Skforecast: forecasting series temporales con Python y Scikit-learn</strong></a></p>
-<p><i class="fa-duotone fa-lightbulb fa" style="font-size: 25px; color:#fcea2b;"></i> <a href="https://www.cienciadedatos.net/documentos/py29-forecasting-demanda-energia-electrica-python.html"><strong>Forecasting de la demanda eléctrica</strong></a></p>
-<p><i class="fa-duotone fa-rss fa" style="font-size: 25px; color:#666666;"></i>  <a href="https://www.cienciadedatos.net/documentos/py37-forecasting-visitas-web-machine-learning.html"><strong>Forecasting de las visitas a una página web</strong></a></p>
-<p><i class="fa-solid fa-bicycle fa" style="font-size: 25px; color:#00cc99;"></i> <a href="https://www.cienciadedatos.net/documentos/py39-forecasting-series-temporales-con-skforecast-xgboost-lightgbm-catboost.html"><strong>Forecasting series temporales con gradient boosting: Skforecast, XGBoost, LightGBM y CatBoost</strong></a></p>
+<p><i class="fa-duotone fa-chart-line fa" style="font-size: 25px; color:#1DA1F2;"></i> <a href="https://www.cienciadedatos.net/documentos/py27-forecasting-series-temporales-python-scikitlearn.html"><strong>Skforecast: forecasting series temporales con Python y Scikit-learn</strong></a> <a href="https://colab.research.google.com/drive/1mjmccrMA-XxOVXm-3wKSIQ9__oo9dJ5a"><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a></p>
+<p><i class="fa-duotone fa-lightbulb fa" style="font-size: 25px; color:#fcea2b;"></i> <a href="https://www.cienciadedatos.net/documentos/py29-forecasting-demanda-energia-electrica-python.html"><strong>Forecasting de la demanda eléctrica</strong></a> <a href="https://colab.research.google.com/drive/15kQpANRBCLfNf77nmNcV6GjGPoYdOmmF"><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a></p>
+<p><i class="fa-duotone fa-rss fa" style="font-size: 25px; color:#666666;"></i>  <a href="https://www.cienciadedatos.net/documentos/py37-forecasting-visitas-web-machine-learning.html"><strong>Forecasting de las visitas a una página web</strong></a> <a href="https://colab.research.google.com/drive/1uw2nyjA9XMcstfkpbWC4zCULN7Qp7MWV"><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a></p>
+<p><i class="fa-solid fa-bicycle fa" style="font-size: 25px; color:#00cc99;"></i> <a href="https://www.cienciadedatos.net/documentos/py39-forecasting-series-temporales-con-skforecast-xgboost-lightgbm-catboost.html"><strong>Forecasting con gradient boosting: Skforecast, XGBoost, LightGBM y CatBoost</strong></a> <a href="https://colab.research.google.com/drive/1UAjX8vUKDoY0XJtq5WtHlJ4qwPvSgLrD"><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a></p>
 <p><i class="fa-brands fa-bitcoin fa" style="font-size: 25px; color:#f7931a;"></i> <a href="https://www.cienciadedatos.net/documentos/py41-forecasting-criptomoneda-bitcoin-machine-learning-python.html"><strong>Predicción del precio de Bitcoin con Python</strong></a></p>
 <p><i class="fa-brands fa-youtube" style="font-size: 25px; color:#c4302b;"></i> <a href="https://youtu.be/MlktVhReO0E"><strong>Workshop predicción de series temporales con machine learning 
 Universidad de Deusto / Deustuko Unibertsitatea</strong></a></p>
@@ -1719,7 +1819,7 @@ Universidad de Deusto / Deustuko Unibertsitatea</strong></a></p>
 <span class="normal">7</span>
 <span class="normal">8</span></pre></div></td><td class="code"><div><pre><span></span><code>@software{skforecast,
 author = {Amat Rodrigo, Joaquin and Escobar Ortiz, Javier},
-license = {MIT},
+license = {BSD 3-Clause License},
 month = {5},
 title = {{skforecast}},
 version = {0.8.1},

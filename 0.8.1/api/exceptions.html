@@ -1265,6 +1265,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#skforecast.exceptions.exceptions.IgnoredArgumentWarning" class="md-nav__link">
+    IgnoredArgumentWarning
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1432,6 +1439,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#skforecast.exceptions.exceptions.IgnoredArgumentWarning" class="md-nav__link">
+    IgnoredArgumentWarning
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1581,6 +1595,50 @@ LongTrainingWarning            (<span title="UserWarning">UserWarning</span>)
         <span class="n">extra_message</span> <span class="o">=</span> <span class="p">(</span>
             <span class="s2">&quot;</span><span class="se">\n</span><span class="s2"> You can suppress this warning using: &quot;</span>
             <span class="s2">&quot;warnings.simplefilter(&#39;ignore&#39;, category=LongTrainingWarning)&quot;</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="n">extra_message</span>
+</code></pre></div>
+        </details>
+
+
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-class">
+
+
+
+<h2 id="skforecast.exceptions.exceptions.IgnoredArgumentWarning" class="doc doc-heading">
+        <code>
+IgnoredArgumentWarning            (<span title="UserWarning">UserWarning</span>)
+        </code>
+
+
+
+<a href="#skforecast.exceptions.exceptions.IgnoredArgumentWarning" class="headerlink" title="Permanent link">&para;</a></h2>
+
+    <div class="doc doc-contents first">
+
+      <p>Warning used to notify that an argument is ignored when using a method </p>
+<p>or a function.</p>
+
+        <details class="quote">
+          <summary>Source code in <code>skforecast\exceptions\exceptions.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">IgnoredArgumentWarning</span><span class="p">(</span><span class="ne">UserWarning</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Warning used to notify that an argument is ignored when using a method </span>
+<span class="sd">    or a function.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="n">message</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">extra_message</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s2">&quot;</span><span class="se">\n</span><span class="s2"> You can suppress this warning using: &quot;</span>
+            <span class="s2">&quot;warnings.simplefilter(&#39;ignore&#39;, category=IgnoredArgumentWarning)&quot;</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="n">extra_message</span>
 </code></pre></div>
