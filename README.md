@@ -112,15 +112,15 @@ Visit the [release notes](https://github.com/JoaquinAmatRodrigo/skforecast/blob/
 
 The following table provides an overview of the various forecasters available in the skforecast library.
 
-| Forecaster | Single series | Multiple series | Recursive prediction| Probabilistic prediction | Exogenous features | Custom features |
-|:-----------|:-------------:|:---------------:|:-------------------:|:------------------------:|:-------------------:|:-----------------:|
-|[ForecasterAutoreg](https://skforecast.org/latest/user_guides/autoregresive-forecaster.html)|✔️||✔️|✔️|✔️||
-|[ForecasterAutoregCustom](https://skforecast.org/latest/user_guides/custom-predictors.html)|✔️||✔️|✔️|✔️|✔️|✔️|
-|[ForecasterAutoregDirect](https://skforecast.org/latest/user_guides/direct-multi-step-forecasting.html)|✔️|||✔️|✔️||
-|[ForecasterMultiSeries](https://skforecast.org/latest/user_guides/independent-multi-time-series-forecasting.html)||✔️|✔️|✔️|✔️||
-|[ForecasterMultiSeriesCustom](https://skforecast.org/latest/user_guides/custom-predictors.html)||✔️|✔️|✔️|✔️|✔️|✔️|
-|[ForecasterMultiVariate](https://skforecast.org/latest/user_guides/dependent-multi-series-multivariate-forecasting.html)||✔️||✔️|✔️||
-|[ForecasterSarimax](https://skforecast.org/latest/user_guides/forecasting-sarimax-arima.html)|✔️||✔️|✔️|✔️||
+| Forecaster | Single series | Multiple series | Recursive strategy| Direct strategy | Probabilistic prediction | Exogenous features | Custom features |
+|:-----------|:-------------:|:---------------:|:-----------------:|:-----------------:|:------------------------:|:-------------------:|:-----------------:|
+|[ForecasterAutoreg](https://skforecast.org/latest/user_guides/autoregresive-forecaster.html)|✔️||✔️||✔️|✔️||
+|[ForecasterAutoregCustom](https://skforecast.org/latest/user_guides/custom-predictors.html)|✔️||✔️||✔️|✔️|✔️|✔️|
+|[ForecasterAutoregDirect](https://skforecast.org/latest/user_guides/direct-multi-step-forecasting.html)|✔️|||✔️|✔️|✔️||
+|[ForecasterMultiSeries](https://skforecast.org/latest/user_guides/independent-multi-time-series-forecasting.html)||✔️|✔️||✔️|✔️||
+|[ForecasterMultiSeriesCustom](https://skforecast.org/latest/user_guides/custom-predictors.html)||✔️|✔️||✔️|✔️|✔️|✔️|
+|[ForecasterMultiVariate](https://skforecast.org/latest/user_guides/dependent-multi-series-multivariate-forecasting.html)||✔️||✔️|✔️|✔️||
+|[ForecasterSarimax](https://skforecast.org/latest/user_guides/forecasting-sarimax-arima.html)|✔️||✔️||✔️|✔️||
 
 
 # Documentation
