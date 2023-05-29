@@ -2,7 +2,7 @@
 #                            ForecasterSarimax                                 #
 #                                                                              #
 # This work by Joaquin Amat Rodrigo and Javier Escobar Ortiz is licensed       #
-# under a Creative Commons Attribution 4.0 International License.              #
+# under the BSD 3-Clause License.                                              #
 ################################################################################
 # coding=utf-8
 

@@ -25,6 +25,6 @@ keywords:
   - forecasting
   - machine learning
   - python
-license: MIT
+license: BSD 3-Clause License
 version: 0.8.1
 date-released: '2023-05'

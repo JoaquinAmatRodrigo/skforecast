@@ -1,6 +1,7 @@
+<br>
 <h1 align="left">
 <img src="https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/images/banner-landing-page-skforecast.png?raw=true#only-light" style= margin-top: 0px;>
-</h1><br>
+</h1>
 
 ![Python](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-blue)
 [![PyPI](https://img.shields.io/pypi/v/skforecast)](https://pypi.org/project/skforecast/)
@@ -82,21 +83,9 @@ pip install skforecast[plotting]
 + statsmodels>=0.12, <0.14
 + pmdarima>=2.0, <2.1
 
-# Features
-
-+ Create recursive autoregressive forecasters from any regressor that follows the scikit-learn API
-+ Create direct autoregressive forecasters from any regressor that follows the scikit-learn API
-+ Create multi-series autoregressive forecasters from any regressor that follows the scikit-learn API
-+ Include exogenous variables as predictors
-+ Include custom predictors (rolling mean, rolling variance ...)
-+ Multiple backtesting methods for model validation
-+ Grid search, random search and Bayesian search to find optimal lags (predictors) and best hyperparameters
-+ Include custom metrics for model validation and grid search
-+ Prediction interval estimated by bootstrapping and quantile regression
-+ Get predictor importance
-+ Forecaster in production
-
 ## What is new in skforecast 0.8.1?
+
+Visit the [release notes](https://github.com/JoaquinAmatRodrigo/skforecast/blob/feature_update_category_docs/changelog.md) to view all notable changes.
 
 - [x] Support for `pandas 2.0.x`.
 - [x] New user guide on how to include **categorical variables** in the Forecasters.
@@ -106,14 +95,15 @@ pip install skforecast[plotting]
 - [x] Include `gap` argument in backtesting functions to omit observations between training and prediction.
 - [x] Bug fixes and performance improvements.
 
-Visit the [release notes](https://github.com/JoaquinAmatRodrigo/skforecast/blob/feature_update_category_docs/changelog.md) to view all notable changes.
 
 # Forecasters
 
-The following table provides an overview of the various forecasters available in the skforecast library.
+A Forecaster object in the skforecast library is a comprehensive container that provides essential functionality and methods for training a forecasting model and generating predictions for future points in time.
 
-| Forecaster | Single series | Multiple series | Recursive strategy| Direct strategy | Probabilistic prediction | Exogenous features | Custom features |
-|:-----------|:-------------:|:---------------:|:-----------------:|:-----------------:|:------------------------:|:-------------------:|:-----------------:|
+The skforecast library offers a variety of forecaster types, each tailored to specific requirements such as single or multiple time series, direct or recursive strategies, or custom predictors. Regardless of the specific forecaster type, all instances share the same API.
+
+| Forecaster | Single series | Multiple series | Recursive strategy | Direct strategy | Probabilistic prediction | Exogenous features | Custom features |
+|:-----------|:-------------:|:---------------:|:------------------:|:---------------:|:------------------------:|:------------------:|:---------------:|
 |[ForecasterAutoreg](https://skforecast.org/latest/user_guides/autoregresive-forecaster.html)|✔️||✔️||✔️|✔️||
 |[ForecasterAutoregCustom](https://skforecast.org/latest/user_guides/custom-predictors.html)|✔️||✔️||✔️|✔️|✔️|✔️|
 |[ForecasterAutoregDirect](https://skforecast.org/latest/user_guides/direct-multi-step-forecasting.html)|✔️|||✔️|✔️|✔️||
@@ -127,11 +117,11 @@ The following table provides an overview of the various forecasters available in
 
 The documentation for the latest release is at [skforecast docs](https://skforecast.org).
 
-Recent improvements are highlighted in the [release notes](https://skforecast.org/latest/releases/releases.html).
-
 + [Introduction to time series and forecasting](https://skforecast.org/latest/user_guides/quick-start-skforecast.html)
 
 + [Recursive multi-step forecasting](https://skforecast.org/latest/user_guides/autoregresive-forecaster.html)
+
++ [Direct multi-step forecasting](https://skforecast.org/latest/user_guides/direct-multi-step-forecasting.html)
 
 + [Independent multi-series forecasting](https://skforecast.org/latest/user_guides/independent-multi-time-series-forecasting.html)
 
@@ -146,7 +136,7 @@ Recent improvements are highlighted in the [release notes](https://skforecast.or
 + [Using forecasters in production](https://skforecast.org/latest/user_guides/forecaster-in-production.html)
 
 
-# Examples and tutorials 
+# Examples and tutorials
 
 **English**
 
@@ -217,7 +207,7 @@ Amat Rodrigo, J., & Escobar Ortiz, J. skforecast (Version 0.8.1) [Computer softw
 ```
 @software{skforecast,
 author = {Amat Rodrigo, Joaquin and Escobar Ortiz, Javier},
-license = {MIT},
+license = {BSD 3-Clause License},
 month = {5},
 title = {{skforecast}},
 version = {0.8.1},
