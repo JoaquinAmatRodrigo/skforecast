@@ -91,7 +91,7 @@ plugins:
       execute: False
       allow_errors: False
   - search
-copyright: 
+copyright: Copyright &copy; 2021 - 2023 Joaquín Amat Rodrigo, Javier Escobar Ortiz
 theme:
   name: material
   custom_dir: docs/overrides
