@@ -89,10 +89,12 @@ pip install skforecast[plotting]
 
 ## Forecasters
 
-The following table provides an overview of the various forecasters available in the skforecast library.
+A Forecaster object in the skforecast library is a comprehensive container that provides essential functionality and methods for training a forecasting model and generating predictions for future points in time.
 
-| Forecaster | Single series | Multiple series | Recursive prediction| Probabilistic prediction | Exogenous features | Custom features |
-|:-----------|:-------------:|:---------------:|:-------------------:|:------------------------:|:-------------------:|:-----------------:|
+The skforecast library offers a variety of forecaster types, each tailored to specific requirements such as single or multiple time series, direct or recursive strategies, or custom predictors. Regardless of the specific forecaster type, all instances share the same API.
+
+| Forecaster | Single series | Multiple series | Recursive strategy | Direct strategy | Probabilistic prediction | Exogenous features | Custom features |
+|:-----------|:-------------:|:---------------:|:------------------:|:---------------:|:------------------------:|:------------------:|:---------------:|
 |[ForecasterAutoreg](https://skforecast.org/latest/user_guides/autoregresive-forecaster.html)|✔️||✔️||✔️|✔️||
 |[ForecasterAutoregCustom](https://skforecast.org/latest/user_guides/custom-predictors.html)|✔️||✔️||✔️|✔️|✔️|✔️|
 |[ForecasterAutoregDirect](https://skforecast.org/latest/user_guides/direct-multi-step-forecasting.html)|✔️|||✔️|✔️|✔️||
@@ -100,18 +102,17 @@ The following table provides an overview of the various forecasters available in
 |[ForecasterMultiSeriesCustom](https://skforecast.org/latest/user_guides/custom-predictors.html)||✔️|✔️||✔️|✔️|✔️|✔️|
 |[ForecasterMultiVariate](https://skforecast.org/latest/user_guides/dependent-multi-series-multivariate-forecasting.html)||✔️||✔️|✔️|✔️||
 |[ForecasterSarimax](https://skforecast.org/latest/user_guides/forecasting-sarimax-arima.html)|✔️||✔️||✔️|✔️||
+
+
 ## Features
 
-+ Create recursive autoregressive forecasters from any regressor that follows the scikit-learn API
-+ Create direct autoregressive forecasters from any regressor that follows the scikit-learn API
-+ Create multi-time series autoregressive forecasters from any regressor that follows the scikit-learn API
-+ Create multivariate autoregressive forecasters from any regressor that follows the scikit-learn API
++ Create Forecasters from any regressor that follows the scikit-learn API
 + Include exogenous variables as predictors
 + Include custom predictors (rolling mean, rolling variance ...)
 + Multiple backtesting methods for model validation
 + Grid search, random search and Bayesian search to find optimal lags (predictors) and best hyperparameters
-+ Include custom metrics for model validation and grid search
 + Prediction interval estimated by bootstrapping and quantile regression
++ Include custom metrics for model validation and grid search
 + Get predictor importance
 + Forecaster in production
 
@@ -188,7 +189,7 @@ Amat Rodrigo, J., & Escobar Ortiz, J. skforecast (Version 0.8.1) [Computer softw
 ```
 @software{skforecast,
 author = {Amat Rodrigo, Joaquin and Escobar Ortiz, Javier},
-license = {MIT},
+license = {BSD 3-Clause License},
 month = {5},
 title = {{skforecast}},
 version = {0.8.1},
