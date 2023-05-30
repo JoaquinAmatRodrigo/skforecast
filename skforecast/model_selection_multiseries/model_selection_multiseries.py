@@ -132,7 +132,7 @@ def _backtesting_forecaster_multiseries_refit(
     show_progress: bool, default `True`
         Whether to show a progress bar. Defaults to True.
 
-    Returns 
+    Returns
     -------
     metrics_levels : pandas DataFrame
         Value(s) of the metric(s). Index are the levels and columns the metrics.
@@ -350,7 +350,7 @@ def _backtesting_forecaster_multiseries_no_refit(
     show_progress: bool, default `True`
         Whether to show a progress bar. Defaults to True.
 
-    Returns 
+    Returns
     -------
     metrics_levels : pandas DataFrame
         Value(s) of the metric(s). Index are the levels and columns the metrics.
@@ -576,7 +576,7 @@ def backtesting_forecaster_multiseries(
     show_progress: bool, default `True`
         Whether to show a progress bar. Defaults to True.
 
-    Returns 
+    Returns
     -------
     metrics_levels : pandas DataFrame
         Value(s) of the metric(s). Index are the levels and columns the metrics.
@@ -765,7 +765,7 @@ def grid_search_forecaster_multiseries(
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
 
-    Returns 
+    Returns
     -------
     results : pandas DataFrame
         Results for each combination of parameters.
@@ -897,7 +897,7 @@ def random_search_forecaster_multiseries(
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
 
-    Returns 
+    Returns
     -------
     results : pandas DataFrame
         Results for each combination of parameters.
@@ -1020,7 +1020,7 @@ def _evaluate_grid_hyperparameters_multiseries(
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
 
-    Returns 
+    Returns
     -------
     results : pandas DataFrame
         Results for each combination of parameters.
@@ -1268,7 +1268,7 @@ def backtesting_forecaster_multivariate(
     show_progress: bool, default `True`
         Whether to show a progress bar. Defaults to True.
 
-    Returns 
+    Returns
     -------
     metrics_levels : pandas DataFrame
         Value(s) of the metric(s). Index are the levels and columns the metrics.
@@ -1394,7 +1394,7 @@ def grid_search_forecaster_multivariate(
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
 
-    Returns 
+    Returns
     -------
     results : pandas DataFrame
         Results for each combination of parameters.
@@ -1526,7 +1526,7 @@ def random_search_forecaster_multivariate(
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
 
-    Returns 
+    Returns
     -------
     results : pandas DataFrame
         Results for each combination of parameters.

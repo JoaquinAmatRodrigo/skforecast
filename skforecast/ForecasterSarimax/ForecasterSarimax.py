@@ -235,7 +235,7 @@ class ForecasterSarimax():
             number of observations as `y` and their indexes must be aligned so
             that y[i] is regressed on exog[i].
 
-        Returns 
+        Returns
         -------
         None
         
@@ -345,7 +345,7 @@ class ForecasterSarimax():
         exog : pandas Series, pandas DataFrame, default `None`
             Value of the exogenous variable/s for the next steps.
 
-        Returns 
+        Returns
         -------
         predictions : pandas Series
             Predicted values.
@@ -535,7 +535,7 @@ class ForecasterSarimax():
             `interval = [2.5, 97.5]`. If both, `alpha` and `interval` are 
             provided, `alpha` will be used.
 
-        Returns 
+        Returns
         -------
         predictions : pandas DataFrame
             Values predicted by the forecaster and their estimated interval:
@@ -705,7 +705,7 @@ class ForecasterSarimax():
         params : dict
             Parameters values.
 
-        Returns 
+        Returns
         -------
         self
         
@@ -729,7 +729,7 @@ class ForecasterSarimax():
         fit_kwargs : dict
             Dict of the form {"argument": new_value}.
 
-        Returns 
+        Returns
         -------
         None
         

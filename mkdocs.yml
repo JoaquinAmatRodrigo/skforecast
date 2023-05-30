@@ -6,6 +6,8 @@ site_url: https://joaquinamatrodrigo.github.io/skforecast/
 site_description: Python library that eases using scikit-learn regressors as multi-step forecasters. It also works with any regressor compatible with the scikit-learn API (XGBoost, LightGBM, Ranger...).
 site_author: Joaquin Amat Rodrigo and Javier Escobar Ortiz
 use_directory_urls: false
+copyright: Copyright &copy; 2021 - 2023 Joaquín Amat Rodrigo, Javier Escobar Ortiz
+
 nav:
   - Home:
     - Welcome to skforecast: README.md
@@ -77,21 +79,23 @@ plugins:
   - mkdocstrings:
       handlers:
         python:
-          selection:
+          options:
             docstring_style: numpy
-            filters:
-              - "!^_"  # exclude all members starting with _
-          rendering:
-            show_root_heading: True
-            show_root_full_path: False
             docstring_section_style: table
+            show_root_heading: true
+            show_root_full_path: false
+            merge_init_into_class: true
+            filters: ["!__"] # exclude all members starting with __
+            members_order: source
+            docstring_options:
+              ignore_init_summary: true
   - mkdocs-jupyter:
       ignore_h1_titles: True
       include_source: True
       execute: False
       allow_errors: False
   - search
-copyright: Copyright &copy; 2021 - 2023 Joaquín Amat Rodrigo, Javier Escobar Ortiz
+
 theme:
   name: material
   custom_dir: docs/overrides
@@ -117,7 +121,7 @@ theme:
     #     name: Switch to light mode
 
     # Palette toggle for light mode
-    - media: "(prefers-color-scheme)"
+    - media: "(prefers-color-scheme: light)"
       scheme: light
       toggle:
         icon: material/brightness-7

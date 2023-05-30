@@ -42,7 +42,7 @@ class ForecasterBase(ABC):
             Exogenous variable/s included as predictor/s. Must have the same
             number of observations as `y` and their indexes must be aligned.
 
-        Returns 
+        Returns
         -------
         X_train : pandas DataFrame, shape (len(y) - self.max_lag, len(self.lags))
             Pandas DataFrame with the training values (predictors).
@@ -75,7 +75,7 @@ class ForecasterBase(ABC):
             that y[i] is regressed on exog[i].
 
 
-        Returns 
+        Returns
         -------
         None
         
@@ -110,7 +110,7 @@ class ForecasterBase(ABC):
         exog : pandas Series, pandas DataFrame, default `None`
             Exogenous variable/s included as predictor/s.
 
-        Returns 
+        Returns
         -------
         predictions : pandas Series
             Predicted values.
@@ -131,7 +131,7 @@ class ForecasterBase(ABC):
         params : dict
             Parameters values.
 
-        Returns 
+        Returns
         -------
         self
         
@@ -152,7 +152,7 @@ class ForecasterBase(ABC):
             `int`: include lags from 1 to `lags`.
             `list` or `np.array`: include only lags present in `lags`.
 
-        Returns 
+        Returns
         -------
         self
         

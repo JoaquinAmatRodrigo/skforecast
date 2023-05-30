@@ -285,7 +285,7 @@ def _get_metric(
         {'mean_squared_error', 'mean_absolute_error', 
          'mean_absolute_percentage_error', 'mean_squared_log_error'}
     
-    Returns 
+    Returns
     -------
     metric : Callable
         scikit-learn function to calculate the desired metric.
@@ -412,7 +412,7 @@ def _backtesting_forecaster_refit(
     show_progress: bool, default `True`
         Whether to show a progress bar. Defaults to True.
 
-    Returns 
+    Returns
     -------
     metrics_value : float, list
         Value(s) of the metric(s).
@@ -611,7 +611,7 @@ def _backtesting_forecaster_no_refit(
     show_progress: bool, default `True`
         Whether to show a progress bar. Defaults to True.
 
-    Returns 
+    Returns
     -------
     metrics_value : float, list
         Value(s) of the metric(s).
@@ -817,7 +817,7 @@ def backtesting_forecaster(
     show_progress: bool, default `True`
         Whether to show a progress bar. Defaults to True.
 
-    Returns 
+    Returns
     -------
     metrics_value : float, list
         Value(s) of the metric(s).
@@ -984,7 +984,7 @@ def grid_search_forecaster(
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
 
-    Returns 
+    Returns
     -------
     results : pandas DataFrame
         Results for each combination of parameters.
@@ -1106,7 +1106,7 @@ def random_search_forecaster(
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
 
-    Returns 
+    Returns
     -------
     results : pandas DataFrame
         Results for each combination of parameters.
@@ -1218,7 +1218,7 @@ def _evaluate_grid_hyperparameters(
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
 
-    Returns 
+    Returns
     -------
     results : pandas DataFrame
         Results for each combination of parameters.
@@ -1441,7 +1441,7 @@ def bayesian_search_forecaster(
             Other keyword arguments (key, value mappings) to pass to skopt.gp_minimize().
             **Deprecated in version 0.7.0**
 
-    Returns 
+    Returns
     -------
     results : pandas DataFrame
         Results for each combination of parameters.
@@ -1600,7 +1600,7 @@ def _bayesian_search_optuna(
     kwargs_study_optimize : dict, default `{}`
         Other keyword arguments (key, value mappings) to pass to study.optimize().
 
-    Returns 
+    Returns
     -------
     results : pandas DataFrame
         Results for each combination of parameters.

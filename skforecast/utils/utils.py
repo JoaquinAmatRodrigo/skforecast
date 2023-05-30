@@ -755,7 +755,7 @@ def preprocess_y(
     return_values: bool=True
 ) -> Tuple[Union[None, np.ndarray], pd.Index]:
     """
-    Returns values and index of series separately. Index is overwritten 
+    Return values and index of series separately. Index is overwritten 
     according to the next rules:
         If index is of type DatetimeIndex and has frequency, nothing is 
         changed.
@@ -773,7 +773,7 @@ def preprocess_y(
         If `True` return the values of `y` as numpy ndarray. This option is 
         intended to avoid copying data when it is not necessary.
 
-    Returns 
+    Returns
     -------
     y_values : None, numpy ndarray
         Numpy array with values of `y`.
@@ -818,7 +818,7 @@ def preprocess_last_window(
     return_values: bool=True
  ) -> Tuple[np.ndarray, pd.Index]:
     """
-    Returns values and index of series separately. Index is overwritten 
+    Return values and index of series separately. Index is overwritten 
     according to the next rules:
         If index is of type DatetimeIndex and has frequency, nothing is 
         changed.
@@ -836,7 +836,7 @@ def preprocess_last_window(
         If `True` return the values of `last_window` as numpy ndarray. This option 
         is intended to avoid copying data when it is not necessary.
 
-    Returns 
+    Returns
     -------
     last_window_values : numpy ndarray
         Numpy array with values of `last_window`.
@@ -881,7 +881,7 @@ def preprocess_exog(
     return_values: bool=True
 ) -> Tuple[Union[None, np.ndarray], pd.Index]:
     """
-    Returns values and index of series or data frame separately. Index is
+    Return values and index of series or data frame separately. Index is
     overwritten  according to the next rules:
         If index is of type DatetimeIndex and has frequency, nothing is 
         changed.
@@ -899,7 +899,7 @@ def preprocess_exog(
         If `True` return the values of `exog` as numpy ndarray. This option is 
         intended to avoid copying data when it is not necessary.
 
-    Returns 
+    Returns
     -------
     exog_values : None, numpy ndarray
         Numpy array with values of `exog`.
@@ -961,7 +961,7 @@ def cast_exog_dtypes(
     exog_dtypes: dict
         Dictionary with name and type of the series or data frame columns.
 
-    Returns 
+    Returns
     -------
     exog
 
@@ -999,7 +999,7 @@ def exog_to_direct(
     steps : int.
         Number of steps that will be predicted using exog.
 
-    Returns 
+    Returns
     -------
     exog_transformed : pandas DataFrame
         Exogenous variables transformed.
@@ -1048,7 +1048,7 @@ def exog_to_direct_numpy(
     steps : int.
         Number of steps that will be predicted using exog.
 
-    Returns 
+    Returns
     -------
     exog_transformed : numpy ndarray
         Exogenous variables transformed.
@@ -1091,7 +1091,7 @@ def expand_index(
     steps : int
         Number of steps to expand.
 
-    Returns 
+    Returns
     -------
     new_index : pd.Index
         New index.
@@ -1298,7 +1298,7 @@ def save_forecaster(
     verbose: bool, default `True`
         Print summary about the forecaster saved.
 
-    Returns 
+    Returns
     -------
     None
 
@@ -1325,7 +1325,7 @@ def load_forecaster(
     verbose: bool, default `True`
         Print summary about the forecaster loaded.
 
-    Returns 
+    Returns
     -------
     Forecaster
         Forecaster created with skforecast library.
@@ -1546,7 +1546,7 @@ def check_backtesting_input(
     show_progress: bool, default `True`
         Whether to show a progress bar. Defaults to True.
 
-    Returns 
+    Returns
     -------
         
     """

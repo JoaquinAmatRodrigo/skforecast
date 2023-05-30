@@ -119,7 +119,7 @@ def _backtesting_sarimax_refit(
     show_progress: bool, default `True`
         Whether to show a progress bar. Defaults to True.
 
-    Returns 
+    Returns
     -------
     metrics_value : float, list
         Value(s) of the metric(s).
@@ -278,7 +278,7 @@ def _backtesting_sarimax_no_refit(
     show_progress: bool, default `True`
         Whether to show a progress bar. Defaults to True.
 
-    Returns 
+    Returns
     -------
     metrics_value : float, list
         Value(s) of the metric(s).
@@ -456,7 +456,7 @@ def backtesting_sarimax(
     show_progress: bool, default `True`
         Whether to show a progress bar. Defaults to True.
 
-    Returns 
+    Returns
     -------
     metrics_value : float, list
         Value(s) of the metric(s).
@@ -608,7 +608,7 @@ def grid_search_sarimax(
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
 
-    Returns 
+    Returns
     -------
     results : pandas DataFrame
         Results for each combination of parameters.
@@ -725,7 +725,7 @@ def random_search_sarimax(
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
 
-    Returns 
+    Returns
     -------
     results : pandas DataFrame
         Results for each combination of parameters.
@@ -832,7 +832,7 @@ def _evaluate_grid_hyperparameters_sarimax(
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
 
-    Returns 
+    Returns
     -------
     results : pandas DataFrame
         Results for each combination of parameters.
