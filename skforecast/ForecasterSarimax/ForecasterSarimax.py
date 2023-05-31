@@ -43,102 +43,80 @@ class ForecasterSarimax():
     regressor : pmdarima.arima.ARIMA
         An instance of an ARIMA from pmdarima library. This model internally wraps the
         statsmodels SARIMAX class.
-
     transformer_y : object transformer (preprocessor), default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API with methods: fit, transform, fit_transform and inverse_transform.
         ColumnTransformers are not allowed since they do not have inverse_transform method.
         The transformation is applied to `y` before training the forecaster. 
-
     transformer_exog : object transformer (preprocessor), default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API. The transformation is applied to `exog` before training the
         forecaster. `inverse_transform` is not available when using ColumnTransformers.
-
     fit_kwargs : dict, default `None`
         Additional arguments to be passed to the `fit` method of the regressor.
         **New in version 0.8.0**
-
     forecaster_id : str, int default `None`
         Name used as an identifier of the forecaster.
+        **New in version 0.7.0**
     
     Attributes
     ----------
     regressor : pmdarima.arima.ARIMA
         An instance of an ARIMA from pmdarima library. The model internally wraps the
         statsmodels SARIMAX class
-
     params: dict
         Parameters of the sarimax model.
-        
-    transformer_y : object transformer (preprocessor), default `None`
+    transformer_y : object transformer (preprocessor)
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API with methods: fit, transform, fit_transform and inverse_transform.
         ColumnTransformers are not allowed since they do not have inverse_transform method.
         The transformation is applied to `y` before training the forecaster.
-
-    transformer_exog : object transformer (preprocessor), default `None`
+    transformer_exog : object transformer (preprocessor)
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API. The transformation is applied to `exog` before training the
         forecaster. `inverse_transform` is not available when using ColumnTransformers.
-   
-    window_size : int, `1` 
+    window_size : int
         Not used, present here for API consistency by convention.
-
     last_window : pandas Series
         Last window the forecaster has seen during training. It stores the
         values needed to predict the next `step` immediately after the training data.
-
     extended_index : pandas Index
         When predicting using `last_window` and `last_window_exog`, the internal
         statsmodels SARIMAX will be updated using its append method. To do this,
         `last_window` data must start at the end of the index seen by the 
         forecaster, this is stored in forecaster.extended_index.
-
         Check https://www.statsmodels.org/dev/generated/statsmodels.tsa.arima.model.ARIMAResults.append.html
         to know more about statsmodels append method.
-        
-    fitted : Bool
+    fitted : bool
         Tag to identify if the regressor has been fitted (trained).
-        
     index_type : type
         Type of index of the input used in training.
-        
     index_freq : str
         Frequency of Index of the input used in training.
-        
     training_range : pandas Index
         First and last values of index of the data used during training.
-        
     included_exog : bool
         If the forecaster has been trained using exogenous variable/s.
-        
     exog_type : type
         Type of exogenous variable/s used in training.
-        
     exog_col_names : list
         Names of columns of `exog` if `exog` used in training was a pandas
         DataFrame.
-
     fit_kwargs : dict
         Additional arguments to be passed to the `fit` method of the regressor.
         **New in version 0.8.0**
-
     creation_date : str
         Date of creation.
-
     fit_date : str
         Date of last fit.
-
     skforcast_version : str
         Version of skforecast library used to create the forecaster.
-
     python_version : str
         Version of python used to create the forecaster.
-
     forecaster_id : str, int default `None`
         Name used as an identifier of the forecaster.
-     
+        **New in version 0.7.0**
+    
     """
     
     def __init__(
@@ -224,12 +202,14 @@ class ForecasterSarimax():
     ) -> None:
         """
         Training Forecaster.
+
+        Additional arguments to be passed to the `fit` method of the regressor 
+        can be added with the `fit_kwargs` argument when initializing the forecaster.
         
         Parameters
-        ----------        
+        ----------
         y : pandas Series
             Training time series.
-            
         exog : pandas Series, pandas DataFrame, default `None`
             Exogenous variable/s included as predictor/s. Must have the same
             number of observations as `y` and their indexes must be aligned so
@@ -329,19 +309,16 @@ class ForecasterSarimax():
         ----------
         steps : int
             Number of future steps predicted.
-            
         last_window : pandas Series, default `None`
             Series values used to create the predictors needed in the 
             predictions. Used to make predictions unrelated to the original data. 
             Values have to start at the end of the training data.
-
         last_window_exog : pandas Series, pandas DataFrame, default `None`
             Values of the exogenous variables aligned with `last_window`. Only
             needed when `last_window` is not None and the forecaster has been
             trained including exogenous variables. Used to make predictions 
             unrelated to the original data. Values have to start at the end 
             of the training data.
-            
         exog : pandas Series, pandas DataFrame, default `None`
             Value of the exogenous variable/s for the next steps.
 
@@ -349,7 +326,7 @@ class ForecasterSarimax():
         -------
         predictions : pandas Series
             Predicted values.
-            
+        
         """
 
         # Needs to be a new variable to avoid arima_res_.append if not needed
@@ -497,7 +474,7 @@ class ForecasterSarimax():
         Generate predictions (forecasts) n steps in the future with confidence
         intervals. Note that if exogenous variables were used in the model fit, 
         they will be expected for the predict procedure and will fail otherwise.
-        
+
         When predicting using `last_window` and `last_window_exog`, the internal
         statsmodels SARIMAX will be updated using its append method. To do this,
         `last_window` data must start at the end of the index seen by the 
@@ -507,27 +484,22 @@ class ForecasterSarimax():
         to know more about statsmodels append method.
 
         Parameters
-        ---------- 
+        ----------
         steps : int
             Number of future steps predicted.
-            
         last_window : pandas Series, default `None`
             Series values used to create the predictors needed in the 
             predictions. Used to make predictions unrelated to the original data. 
             Values have to start at the end of the training data.
-
         last_window_exog : pandas Series, pandas DataFrame, default `None`
             Values of the exogenous variables aligned with `last_window`. Only
             need when `last_window` is not None and the forecaster has been
             trained including exogenous variables.
-            
         exog : pandas Series, pandas DataFrame, default `None`
             Exogenous variable/s included as predictor/s.
-            
         alpha : float, default `0.05`
             The confidence intervals for the forecasts are (1 - alpha) %.
             If both, `alpha` and `interval` are provided, `alpha` will be used.
-            
         interval : list, default `None`
             Confidence of the prediction interval estimated. The values must be
             symmetric. Sequence of percentiles to compute, which must be between 
@@ -538,11 +510,11 @@ class ForecasterSarimax():
         Returns
         -------
         predictions : pandas DataFrame
-            Values predicted by the forecaster and their estimated interval:
+            Values predicted by the forecaster and their estimated interval.
 
-            - pred: predictions.
-            - lower_bound: lower bound of the interval.
-            - upper_bound: upper bound interval of the interval.
+                - pred: predictions.
+                - lower_bound: lower bound of the interval.
+                - upper_bound: upper bound interval of the interval.
 
         """
 
@@ -707,7 +679,7 @@ class ForecasterSarimax():
 
         Returns
         -------
-        self
+        None
         
         """
 
@@ -742,8 +714,7 @@ class ForecasterSarimax():
         self
     ) -> pd.DataFrame:
         """
-        Return feature importances of the regressor stored in the
-        forecaster.
+        Return feature importances of the regressor stored in the forecaster.
 
         Parameters
         ----------
@@ -774,8 +745,7 @@ class ForecasterSarimax():
         """
         This method has been replaced by `get_feature_importances()`.
 
-        Return feature importance of the regressor stored in the
-        forecaster.
+        Return feature importance of the regressor stored in the forecaster.
 
         Parameters
         ----------

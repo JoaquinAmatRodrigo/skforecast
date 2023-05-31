@@ -93,16 +93,16 @@ class ForecasterAutoregCustom(ForecasterBase):
         **New in version 0.7.0**
     window_size : int
         Size of the window needed by `fun_predictors` to create the predictors.
-    name_predictors : list, default `None`
+    name_predictors : list
         Name of the predictors returned by `fun_predictors`. If `None`, predictors are
         named using the prefix 'custom_predictor_<i>' where `i` is the index of the position
         the predictor has in the returned array of `fun_predictors`.
-    transformer_y : object transformer (preprocessor), default `None`
+    transformer_y : object transformer (preprocessor)
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API with methods: fit, transform, fit_transform and inverse_transform.
         ColumnTransformers are not allowed since they do not have inverse_transform method.
         The transformation is applied to `y` before training the forecaster.
-    transformer_exog : object transformer (preprocessor), default `None`
+    transformer_exog : object transformer (preprocessor)
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API. The transformation is applied to `exog` before training the
         forecaster. `inverse_transform` is not available when using ColumnTransformers.
@@ -924,11 +924,11 @@ class ForecasterAutoregCustom(ForecasterBase):
         Returns
         -------
         predictions : pandas DataFrame
-            Values predicted by the forecaster and their estimated interval:
+            Values predicted by the forecaster and their estimated interval.
 
-            - pred: predictions.
-            - lower_bound: lower bound of the interval.
-            - upper_bound: upper bound interval of the interval.
+                - pred: predictions.
+                - lower_bound: lower bound of the interval.
+                - upper_bound: upper bound interval of the interval.
 
         Notes
         -----

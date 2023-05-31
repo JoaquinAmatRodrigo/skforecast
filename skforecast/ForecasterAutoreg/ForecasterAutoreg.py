@@ -84,12 +84,12 @@ class ForecasterAutoreg(ForecasterBase):
         An instance of a regressor or pipeline compatible with the scikit-learn API.
     lags : numpy ndarray
         Lags used as predictors.
-    transformer_y : object transformer (preprocessor), default `None`
+    transformer_y : object transformer (preprocessor)
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API with methods: fit, transform, fit_transform and inverse_transform.
         ColumnTransformers are not allowed since they do not have inverse_transform method.
         The transformation is applied to `y` before training the forecaster.
-    transformer_exog : object transformer (preprocessor), default `None`
+    transformer_exog : object transformer (preprocessor)
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API. The transformation is applied to `exog` before training the
         forecaster. `inverse_transform` is not available when using ColumnTransformers.
@@ -97,16 +97,13 @@ class ForecasterAutoreg(ForecasterBase):
         Function that defines the individual weights for each sample based on the
         index. For example, a function that assigns a lower weight to certain dates.
         Ignored if `regressor` does not have the argument `sample_weight` in its `fit`
-        method.
-        **New in version 0.6.0**
+        method. The resulting `sample_weight` cannot have negative values.
     source_code_weight_func : str
         Source code of the custom function used to create weights.
-        **New in version 0.6.0**
     max_lag : int
         Maximum value of lag included in `lags`.
     window_size : int
-        Size of the window needed to create the predictors. It is equal to
-        `max_lag`.
+        Size of the window needed to create the predictors. It is equal to `max_lag`.
     last_window : pandas Series
         Last window the forecaster has seen during training. It stores the
         values needed to predict the next `step` immediately after the training data.
@@ -307,7 +304,7 @@ class ForecasterAutoreg(ForecasterBase):
         Parameters
         ----------
         y : pandas Series
-            Training time series.  
+            Training time series.
         exog : pandas Series, pandas DataFrame, default `None`
             Exogenous variable/s included as predictor/s. Must have the same
             number of observations as `y` and their indexes must be aligned.
@@ -731,10 +728,10 @@ class ForecasterAutoreg(ForecasterBase):
 
         if not in_sample_residuals and self.out_sample_residuals is None:
             raise ValueError(
-                ('`forecaster.out_sample_residuals` is `None`. Use '
-                 '`in_sample_residuals=True` or method `set_out_sample_residuals()` '
-                 'before `predict_interval()`, `predict_bootstrapping()` or '
-                 '`predict_dist()`.')
+                ("`forecaster.out_sample_residuals` is `None`. Use "
+                 "`in_sample_residuals=True` or method `set_out_sample_residuals()` "
+                 "before `predict_interval()`, `predict_bootstrapping()` or "
+                 "`predict_dist()`.")
             )
 
         if last_window is None:
@@ -868,7 +865,7 @@ class ForecasterAutoreg(ForecasterBase):
         intervals. Both predictions and intervals are returned.
         
         Parameters
-        ---------- 
+        ----------
         steps : int
             Number of future steps predicted.
         last_window : pandas Series, default `None`
@@ -899,11 +896,11 @@ class ForecasterAutoreg(ForecasterBase):
         Returns
         -------
         predictions : pandas DataFrame
-            Values predicted by the forecaster and their estimated interval:
+            Values predicted by the forecaster and their estimated interval.
 
-            - pred: predictions.
-            - lower_bound: lower bound of the interval.
-            - upper_bound: upper bound interval of the interval.
+                - pred: predictions.
+                - lower_bound: lower bound of the interval.
+                - upper_bound: upper bound interval of the interval.
 
         Notes
         -----

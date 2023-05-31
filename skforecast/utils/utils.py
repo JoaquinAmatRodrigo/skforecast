@@ -239,7 +239,7 @@ def check_y(
     Raise Exception if `y` is not pandas Series or if it has missing values.
     
     Parameters
-    ----------        
+    ----------
     y : Any
         Time series values.
         
@@ -267,7 +267,7 @@ def check_exog(
     If `allow_nan = True`, issue a warning if `exog` contains NaN values.
     
     Parameters
-    ----------        
+    ----------
     exog :  Any
         Exogenous variable/s included as predictor/s.
     allow_nan: bool, default True
@@ -330,7 +330,7 @@ def check_exog_dtypes(
     Issue a Warning if `exog` has columns that are not `init`, `float`, or `category`.
     
     Parameters
-    ----------        
+    ----------
     exog :  pandas DataFrame, pandas Series
         Exogenous variable/s included as predictor/s.
 
@@ -765,7 +765,7 @@ def preprocess_y(
         If index is not of type DatetimeIndex, a RangeIndex is created.
     
     Parameters
-    ----------        
+    ----------
     y : pandas Series
         Time series.
 
@@ -828,7 +828,7 @@ def preprocess_last_window(
         If index is not of type DatetimeIndex, a RangeIndex is created.
     
     Parameters
-    ----------        
+    ----------
     last_window : pandas Series, pandas DataFrame
         Time series values.
 
@@ -891,7 +891,7 @@ def preprocess_exog(
         If index is not of type DatetimeIndex, a RangeIndex is created.
 
     Parameters
-    ----------        
+    ----------
     exog : pandas Series, pandas DataFrame
         Exogenous variables.
 
@@ -1041,7 +1041,7 @@ def exog_to_direct_numpy(
     forecasting.
     
     Parameters
-    ----------        
+    ----------
     exog : numpy ndarray, shape(samples,)
         Exogenous variables.
 
@@ -1084,7 +1084,7 @@ def expand_index(
     Create a new index of length `steps` starting at the end of the index.
     
     Parameters
-    ----------        
+    ----------
     index : pd.Index, None
         Index of last window.
     

@@ -47,7 +47,7 @@ def _backtesting_forecaster_verbose(
     Verbose for backtesting_forecaster functions.
     
     Parameters
-    ----------        
+    ----------
     index_values : pandas Index
         Values of the index of the series.
     
@@ -142,7 +142,7 @@ def _create_backtesting_folds(
     be `[[0, 1, 2, 3], [4, 5, 6, 7], [5, 6, 7]]`, and so on.
     
     Parameters
-    ----------        
+    ----------
     data : pandas Series, pandas DataFrame
         Time series values.
     

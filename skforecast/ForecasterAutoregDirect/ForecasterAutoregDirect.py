@@ -54,16 +54,16 @@ class ForecasterAutoregDirect(ForecasterBase):
     ----------
     regressor : regressor or pipeline compatible with the scikit-learn API
         An instance of a regressor or pipeline compatible with the scikit-learn API.
+    steps : int
+        Maximum number of future steps the forecaster will predict when using
+        method `predict()`. Since a different model is created for each step,
+        this value should be defined before training.
     lags : int, list, numpy ndarray, range
         Lags used as predictors. Index starts at 1, so lag 1 is equal to t-1.
 
             - `int`: include lags from 1 to `lags` (included).
             - `list`, `1d numpy ndarray` or `range`: include only lags present in 
             `lags`, all elements must be int.
-    steps : int
-        Maximum number of future steps the forecaster will predict when using
-        method `predict()`. Since a different model is created for each step,
-        this value should be defined before training.
     transformer_y : object transformer (preprocessor), default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API with methods: fit, transform, fit_transform and inverse_transform.
@@ -83,6 +83,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         **New in version 0.8.0**
     forecaster_id : str, int, default `None`
         Name used as an identifier of the forecaster.
+        **New in version 0.7.0**
     
     Attributes
     ----------
@@ -99,12 +100,12 @@ class ForecasterAutoregDirect(ForecasterBase):
         should be defined before training.
     lags : numpy ndarray
         Lags used as predictors.
-    transformer_y : object transformer (preprocessor), default `None`
+    transformer_y : object transformer (preprocessor)
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API with methods: fit, transform, fit_transform and inverse_transform.
         ColumnTransformers are not allowed since they do not have inverse_transform method.
         The transformation is applied to `y` before training the forecaster.
-    transformer_exog : object transformer (preprocessor), default `None`
+    transformer_exog : object transformer (preprocessor)
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API. The transformation is applied to `exog` before training the
         forecaster. `inverse_transform` is not available when using ColumnTransformers.
@@ -112,14 +113,13 @@ class ForecasterAutoregDirect(ForecasterBase):
         Function that defines the individual weights for each sample based on the
         index. For example, a function that assigns a lower weight to certain dates.
         Ignored if `regressor` does not have the argument `sample_weight` in its `fit`
-        method.
+        method. The resulting `sample_weight` cannot have negative values.
     source_code_weight_func : str
         Source code of the custom function used to create weights.
     max_lag : int
         Maximum value of lag included in `lags`.
     window_size : int
-        Size of the window needed to create the predictors. It is equal to
-        `max_lag`.
+        Size of the window needed to create the predictors. It is equal to `max_lag`.
     last_window : pandas Series
         Last window the forecaster has seen during training. It stores the
         values needed to predict the next `step` immediately after the training data.
@@ -354,7 +354,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         X_train : pandas DataFrame
             Training values (predictors) for each step.
             Shape: (len(y) - self.max_lag, len(self.lags))
-        y_train : pandas DataFrame, shape (len(y) - self.max_lag, )
+        y_train : pandas DataFrame
             Values (target) of the time series related to each row of `X_train` 
             for each step.
             Shape: (len(y) - self.max_lag, )
@@ -447,7 +447,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         self,
         step: int,
         X_train: pd.DataFrame,
-        y_train: pd.Series,
+        y_train: pd.DataFrame,
         remove_suffix: bool=False
     ) -> Tuple[pd.DataFrame, pd.Series]:
         """
@@ -461,9 +461,9 @@ class ForecasterAutoregDirect(ForecasterBase):
         step : int
             Step for which columns must be selected selected. Starts at 1.
         X_train : pandas DataFrame
-            Training values (predictors).
-        y_train : pandas Series
-            Values (target) of the time series related to each row of `X_train`.
+            Dataframe generated with the method `create_train_X_y`, first return.
+        y_train : pandas DataFrame
+            Dataframe generated with the method `create_train_X_y`, second return.
         remove_suffix : bool, default `False`
             If True, suffix "_step_i" is removed from the column names.
 
@@ -560,7 +560,7 @@ class ForecasterAutoregDirect(ForecasterBase):
 
         Additional arguments to be passed to the `fit` method of the regressor 
         can be added with the `fit_kwargs` argument when initializing the forecaster.
-        
+
         Parameters
         ----------
         y : pandas Series
@@ -996,11 +996,11 @@ class ForecasterAutoregDirect(ForecasterBase):
         Returns
         -------
         predictions : pandas DataFrame
-            Values predicted by the forecaster and their estimated interval:
+            Values predicted by the forecaster and their estimated interval.
 
-            - pred: predictions.
-            - lower_bound: lower bound of the interval.
-            - upper_bound: upper bound interval of the interval.
+                - pred: predictions.
+                - lower_bound: lower bound of the interval.
+                - upper_bound: upper bound interval of the interval.
 
         Notes
         -----
@@ -1241,7 +1241,8 @@ class ForecasterAutoregDirect(ForecasterBase):
             )
         
         if self.out_sample_residuals is None:
-            self.out_sample_residuals = {step: None for step in range(1, self.steps + 1)}
+            self.out_sample_residuals = {step: None 
+                                         for step in range(1, self.steps + 1)}
         
         if not set(self.out_sample_residuals.keys()).issubset(set(residuals.keys())):
             warnings.warn(
@@ -1252,13 +1253,15 @@ class ForecasterAutoregDirect(ForecasterBase):
                 """
             )
 
-        residuals = {key: value for key, value in residuals.items() if key in self.out_sample_residuals.keys()}
+        residuals = {key: value 
+                     for key, value in residuals.items() 
+                     if key in self.out_sample_residuals.keys()}
 
         if not transform and self.transformer_y is not None:
             warnings.warn(
                 (f"Argument `transform` is set to `False` but forecaster was trained "
-                 f"using a transformer {self.transformer_y}. Ensure that the new residuals "
-                 f"are already transformed or set `transform=True`.")
+                 f"using a transformer {self.transformer_y}. Ensure that the new "
+                 f"residuals are already transformed or set `transform=True`.")
             )
 
         if transform and self.transformer_y is not None:
@@ -1305,7 +1308,8 @@ class ForecasterAutoregDirect(ForecasterBase):
         specific step. Since a separate model is created for each forecast time
         step, it is necessary to select the model from which retrieve information.
         Only valid when regressor stores internally the feature importances in
-        the attribute `feature_importances_` or `coef_`.
+        the attribute `feature_importances_` or `coef_`. Otherwise, it returns  
+        `None`.
 
         Parameters
         ----------
