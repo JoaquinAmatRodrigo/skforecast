@@ -51,204 +51,171 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
     ----------
     regressor : regressor or pipeline compatible with the scikit-learn API
         An instance of a regressor or pipeline compatible with the scikit-learn API.
-        
     lags : int, list, numpy ndarray, range
-        Lags used as predictors. Index starts at 1, so lag 1 is equal to t-1.
-            `int`: include lags from 1 to `lags` (included).
-            `list`, `numpy ndarray` or `range`: include only lags present in `lags`,
-            all elements must be int.
-
-    transformer_series : transformer (preprocessor) or dict of transformers, default `None`
-        An instance of a transformer (preprocessor) compatible with the scikit-learn
-        preprocessing API with methods: fit, transform, fit_transform and inverse_transform.
-        If a single transformer is passed, it is cloned and applied to all series. If a
-        dict, a different transformer can be used for each series. Transformation is
-        applied to each `series` before training the forecaster.
-        ColumnTransformers are not allowed since they do not have inverse_transform method.
+        Lags used as predictors. Index starts at 1, so lag 1 is equal to t-1. 
     
+            - `int`: include lags from 1 to `lags` (included).
+            - `list`, `1d numpy ndarray` or `range`: include only lags present in 
+            `lags`, all elements must be int.
+    transformer_series : transformer (preprocessor), dict, default `None`
+        An instance of a transformer (preprocessor) compatible with the scikit-learn
+        preprocessing API with methods: fit, transform, fit_transform and 
+        inverse_transform. Transformation is applied to each `series` before training 
+        the forecaster. ColumnTransformers are not allowed since they do not have 
+        inverse_transform method.
+
+            - If single transformer: it is cloned and applied to all series. 
+            - If `dict` of transformers: a different transformer can be used for each 
+            series.
     transformer_exog : transformer, default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API. The transformation is applied to `exog` before training the
         forecaster. `inverse_transform` is not available when using ColumnTransformers.
-
     weight_func : Callable, dict, default `None`
         Function that defines the individual weights for each sample based on the
-        index. For example, a function that assigns a lower weight to certain dates.
-        If dict {'series_column_name' : Callable} a different function can be
-        used for each series, a weight of 1 is given to all series not present
-        in `weight_func`. Ignored if `regressor` does not have the argument 
-        `sample_weight` in its `fit` method. See Notes section for more details 
-        on the use of the weights.
-        **New in version 0.6.0**
+        index. For example, a function that assigns a lower weight to certain dates. 
+        Ignored if `regressor` does not have the argument `sample_weight` in its 
+        `fit` method. See Notes section for more details on the use of the weights.
 
+            - If single function: it is applied to all series. 
+            - If `dict` {'series_column_name' : Callable}: a different function can be
+              used for each series, a weight of 1 is given to all series not present 
+              in `weight_func`.
     series_weights : dict, default `None`
         Weights associated with each series {'series_column_name' : float}. It is only
-        applied if the `regressor` used accepts `sample_weight` in its `fit` method.
-        If `series_weights` is provided, a weight of 1 is given to all series not present
-        in `series_weights`. If `None`, all levels have the same weight. See Notes section
-        for more details on the use of the weights.
-        **New in version 0.6.0**
+        applied if the `regressor` used accepts `sample_weight` in its `fit` method. 
+        See Notes section for more details on the use of the weights.
 
+            - If a `dict` is provided, a weight of 1 is given to all series not present
+            in `series_weights`.
+            - If `None`, all levels have the same weight.
     fit_kwargs : dict, default `None`
         Additional arguments to be passed to the `fit` method of the regressor.
         **New in version 0.8.0**
-
     forecaster_id : str, int, default `None`
         Name used as an identifier of the forecaster.
         **New in version 0.7.0**
 
-    
     Attributes
     ----------
     regressor : regressor or pipeline compatible with the scikit-learn API
         An instance of a regressor or pipeline compatible with the scikit-learn API.
-        
     lags : numpy ndarray
         Lags used as predictors.
-
-    transformer_series : transformer (preprocessor) or dict of transformers, default `None`
+    transformer_series : transformer (preprocessor), dict
         An instance of a transformer (preprocessor) compatible with the scikit-learn
-        preprocessing API with methods: fit, transform, fit_transform and inverse_transform.
-        If a single transformer is passed, it is cloned and applied to all series. If a
-        dict, a different transformer can be used for each series. Transformation is
-        applied to each `series` before training the forecaster.
-        ColumnTransformers are not allowed since they do not have inverse_transform method.
-        
-    transformer_series_ : dict
-        Dictionary with the transformer for each series. It is created cloning the objects
-        in `transformer_series` and is used internally to avoid overwriting.
+        preprocessing API with methods: fit, transform, fit_transform and 
+        inverse_transform. Transformation is applied to each `series` before training 
+        the forecaster. ColumnTransformers are not allowed since they do not have 
+        inverse_transform method.
 
-    transformer_exog : transformer (preprocessor), default `None`
+            - If single transformer: it is cloned and applied to all series. 
+            - If `dict` of transformers: a different transformer can be used for each 
+            series.
+    transformer_series_ : dict
+        Dictionary with the transformer for each series. It is created cloning the 
+        objects in `transformer_series` and is used internally to avoid overwriting.
+    transformer_exog : transformer (preprocessor)
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API. The transformation is applied to `exog` before training the
         forecaster. `inverse_transform` is not available when using ColumnTransformers.
+    weight_func : Callable, dict
+        Function that defines the individual weights for each sample based on the
+        index. For example, a function that assigns a lower weight to certain dates. 
+        Ignored if `regressor` does not have the argument `sample_weight` in its 
+        `fit` method. See Notes section for more details on the use of the weights.
 
-    weight_func : Callable, dict, default `None`
-        Function that defines the individual weights of each sample based on the
-        index. For example, a function that assigns a lower weight to certain dates.
-        If dict {'series_column_name': Callable} a different function can be
-        used for each series, a weight of 1 is given to all series not present
-        in `weight_func`. Ignored if `regressor` does not have the argument 
-        `sample_weight` in its `fit` method. See Notes section for more details 
-        on the use of the weights.
-        **New in version 0.6.0**
-
+            - If single function: it is applied to all series. 
+            - If `dict` {'series_column_name' : Callable}: a different function can be
+              used for each series, a weight of 1 is given to all series not present 
+              in `weight_func`.
     weight_func_ : dict
-        Dictionary with the `weight_func` for each series. It is created cloning the objects
-        in `weight_func` and is used internally to avoid overwriting.
-        **New in version 0.6.0**
-
+        Dictionary with the `weight_func` for each series. It is created cloning the 
+        objects in `weight_func` and is used internally to avoid overwriting.
     source_code_weight_func : str, dict
         Source code of the custom function(s) used to create weights.
-        **New in version 0.6.0**
-
     series_weights : dict, default `None`
-        Weights associated with each series {'series_column_name': float}. It is only
-        applied if the `regressor` used accepts `sample_weight` in its `fit` method.
-        If `series_weights` is provided, a weight of 1 is given to all series not present
-        in `series_weights`. If `None`, all levels have the same weight. See Notes section
-        for more details on the use of the weights.
-        **New in version 0.6.0**
+        Weights associated with each series {'series_column_name' : float}. It is only
+        applied if the `regressor` used accepts `sample_weight` in its `fit` method. 
+        See Notes section for more details on the use of the weights.
 
+            - If a `dict` is provided, a weight of 1 is given to all series not present
+            in `series_weights`.
+            - If `None`, all levels have the same weight.
     series_weights_ : dict
         Weights associated with each series.It is created as a clone of `series_weights`
         and is used internally to avoid overwriting.
-        **New in version 0.6.0**
-
     max_lag : int
         Maximum value of lag included in `lags`.
-        
     window_size : int
-        Size of the window needed to create the predictors. It is equal to
-        `max_lag`.
-
+        Size of the window needed to create the predictors. It is equal to `max_lag`.
     last_window : pandas Series
         Last window seen by the forecaster during training. It stores the values 
         needed to predict the next `step` immediately after the training data.
-        
     index_type : type
         Type of index of the input used in training.
-        
     index_freq : str
         Frequency of Index of the input used in training.
-
     index_values : pandas Index
         Values of Index of the input used in training.
-
     training_range: pandas Index
         First and last values of index of the data used during training.
-        
     included_exog : bool
         If the forecaster has been trained using exogenous variable/s.
-        
     exog_type : type
         Type of exogenous variable/s used in training.
-
     exog_dtypes : dict
         Type of each exogenous variable/s used in training. If `transformer_exog` 
         is used, the dtypes are calculated after the transformation.
-        
     exog_col_names : list
         Names of columns of `exog` if `exog` used in training was a pandas
         DataFrame.
-
     series_col_names : list
         Names of the series (levels) used during training.
-
     X_train_col_names : list
         Names of columns of the matrix created internally for training.
-
     fit_kwargs : dict
         Additional arguments to be passed to the `fit` method of the regressor.
         **New in version 0.8.0**
-        
     in_sample_residuals : dict
         Residuals of the model when predicting training data. Only stored up to
         1000 values in the form `{level: residuals}`. If `transformer_series` 
         is not `None`, residuals are stored in the transformed scale.
-        
     out_sample_residuals : dict
         Residuals of the models when predicting non training data. Only stored
         up to 1000 values in the form `{level: residuals}`. If `transformer_series` 
         is not `None`, residuals are assumed to be in the transformed scale. Use 
         `set_out_sample_residuals()` method to set values.
-        
     fitted : bool
         Tag to identify if the regressor has been fitted (trained).
-
     creation_date : str
         Date of creation.
-
     fit_date : str
         Date of last fit.
-
     skforcast_version : str
         Version of skforecast library used to create the forecaster.
-
     python_version : str
         Version of python used to create the forecaster.
-
     forecaster_id : str, int default `None`
         Name used as an identifier of the forecaster.
         **New in version 0.7.0**
-
 
     Notes
     -----
 
     The weights are used to control the influence that each observation has on the
-    training of the model. `ForecasterAutoregMultiseries` accepts two types of weights:
-
-    + series_weights : controls the relative importance of each series. If a series has
-    twice as much weight as the others, the observations of that series influence the
-    training twice as much. The higher the weight of a series relative to the others,
-    the more the model will focus on trying to learn that series.
-
-    + weight_func : controls the relative importance of each observation according to its
-    index value. For example, a function that assigns a lower weight to certain dates.
-
+    training of the model. `ForecasterAutoregMultiseries` accepts two types of weights. 
     If the two types of weights are indicated, they are multiplied to create the final
     weights. The resulting `sample_weight` cannot have negative values.
+
+        - `series_weights` : controls the relative importance of each series. If a 
+        series has twice as much weight as the others, the observations of that series 
+        influence the training twice as much. The higher the weight of a series 
+        relative to the others, the more the model will focus on trying to learn 
+        that series.
+        - `weight_func` : controls the relative importance of each observation 
+        according to its index value. For example, a function that assigns a lower 
+        weight to certain dates.
     
     """
     
@@ -367,25 +334,27 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         column, the lag 2 in the second column and so on.
         
         Parameters
-        ----------        
-        y : 1d numpy ndarray
-            Training time series.
+        ----------
+        y : numpy ndarray
+            1d numpy ndarray Training time series.
 
-        Returns 
+        Returns
         -------
-        X_data : 2d numpy ndarray, shape (samples - max(self.lags), len(self.lags))
-            2d numpy array with the lagged values (predictors).
-        
-        y_data : 1d numpy ndarray, shape (samples - max(self.lags),)
-            Values of the time series related to each row of `X_data`.
+        X_data : numpy ndarray
+            2d numpy ndarray with the lagged values (predictors). 
+            Shape: (samples - max(self.lags), len(self.lags))
+        y_data : numpy ndarray
+            1d numpy ndarray with the values of the time series related to each 
+            row of `X_data`. 
+            Shape: (samples - max(self.lags), )
         
         """
           
         n_splits = len(y) - self.max_lag
         if n_splits <= 0:
             raise ValueError(
-                f"The maximum lag ({self.max_lag}) must be less than the length "
-                f"of the series ({len(y)})."
+                (f"The maximum lag ({self.max_lag}) must be less than the length "
+                 f"of the series ({len(y)}).")
             )
         
         X_data = np.full(shape=(n_splits, len(self.lags)), fill_value=np.nan, dtype=float)
@@ -408,25 +377,22 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         variables.
         
         Parameters
-        ----------        
+        ----------
         series : pandas DataFrame
             Training time series.
-            
         exog : pandas Series, pandas DataFrame, default `None`
             Exogenous variable/s included as predictor/s. Must have the same
             number of observations as `series` and their indexes must be aligned.
 
-        Returns 
+        Returns
         -------
         X_train : pandas DataFrame
-            Pandas DataFrame with the training values (predictors).
-            
-        y_train : pandas Series, shape (len(series) - self.max_lag, )
+            Training values (predictors).
+        y_train : pandas Series
             Values (target) of the time series related to each row of `X_train`.
-
+            Shape: (len(series) - self.max_lag, )
         y_index : pandas Index
             Index of `series`.
-
         y_train_index: pandas Index
             Index of `y_train`.
         
@@ -569,7 +535,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         X_train : pandas DataFrame
             Dataframe generated with the method `create_train_X_y`, first return.
         y_train_index : pandas Index
-            Index of `y_train` generated with the method `create_train_X_y`, fourth return.
+            Index generated with the method `create_train_X_y`, fourth return.
 
         Returns
         -------
@@ -600,7 +566,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         if self.weight_func is not None:
             if isinstance(self.weight_func, Callable):
-                self.weight_func_ = {col: copy(self.weight_func) for col in series.columns}
+                self.weight_func_ = {col: copy(self.weight_func) 
+                                     for col in series.columns}
             else:
                 # Series not present in weight_func have a weight of 1 in all their samples
                 series_not_in_weight_func = set(series.columns) - set(self.weight_func.keys())
@@ -610,7 +577,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                          f"A weight of 1 is given to all their samples."),
                          IgnoredArgumentWarning
                     )
-                self.weight_func_ = {col: lambda x: np.ones_like(x, dtype=float) for col in series.columns}
+                self.weight_func_ = {col: lambda x: np.ones_like(x, dtype=float) 
+                                     for col in series.columns}
                 self.weight_func_.update((k, v) for k, v in self.weight_func.items() if k in self.weight_func_)
                 
             weights_samples = []
@@ -653,22 +621,23 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
     ) -> None:
         """
         Training Forecaster.
+
+        Additional arguments to be passed to the `fit` method of the regressor 
+        can be added with the `fit_kwargs` argument when initializing the forecaster.
         
         Parameters
-        ----------        
+        ----------
         series : pandas DataFrame
             Training time series.
-            
         exog : pandas Series, pandas DataFrame, default `None`
             Exogenous variable/s included as predictor/s. Must have the same
             number of observations as `series` and their indexes must be aligned so
             that series[i] is regressed on exog[i].
-
         store_in_sample_residuals : bool, default `True`
             If True, in-sample residuals will be stored in the forecaster object
             after fitting.
 
-        Returns 
+        Returns
         -------
         None
         
@@ -699,8 +668,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
             if len(set(self.exog_col_names) - set(self.series_col_names)) != len(self.exog_col_names):
                 raise ValueError(
-                    (f"`exog` cannot contain a column named the same as one of the series"
-                     f" (column names of series).\n"
+                    (f"`exog` cannot contain a column named the same as one of the "
+                     f"series (column names of series).\n"
                      f"    `series` columns : {self.series_col_names}.\n"
                      f"    `exog`   columns : {self.exog_col_names}.")
                 )
@@ -775,18 +744,15 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         ----------
         steps : int
             Number of future steps predicted.
-            
         level : str
             Time series to be predicted.
-        
         last_window : numpy ndarray
             Series values used to create the predictors (lags) needed in the 
             first iteration of the prediction (t + 1).
-            
         exog : numpy ndarray, default `None`
             Exogenous variable/s included as predictor/s.
 
-        Returns 
+        Returns
         -------
         predictions : numpy ndarray
             Predicted values.
@@ -834,19 +800,14 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         ----------
         steps : int
             Number of future steps predicted.
-
         levels : str, list, default `None`
             Time series to be predicted. If `None` all levels will be predicted.
-            **New in version 0.6.0**
-
         last_window : pandas DataFrame, default `None`
             Series values used to create the predictors (lags) needed in the 
             first iteration of the prediction (t + 1).
-
             If `last_window = None`, the values stored in `self.last_window` are
             used to calculate the initial predictors, and the predictions start
             right after training data.
-
         exog : pandas Series, pandas DataFrame, default `None`
             Exogenous variable/s included as predictor/s.
 
@@ -966,32 +927,25 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         See the Notes section for more information. 
         
         Parameters
-        ----------   
+        ----------
         steps : int
             Number of future steps predicted.
-
         levels : str, list, default `None`
             Time series to be predicted. If `None` all levels will be predicted.
-            
         last_window : pandas DataFrame, default `None`
             Series values used to create the predictors (lags) needed in the 
             first iteration of the prediction (t + 1).
-    
             If `last_window = None`, the values stored in `self.last_window` are
             used to calculate the initial predictors, and the predictions start
             right after training data.
-            
         exog : pandas Series, pandas DataFrame, default `None`
-            Exogenous variable/s included as predictor/s.
-            
+            Exogenous variable/s included as predictor/s. 
         n_boot : int, default `500`
             Number of bootstrapping iterations used to estimate prediction
             intervals.
-
         random_state : int, default `123`
             Sets a seed to the random generator, so that boot intervals are always 
-            deterministic.
-                        
+            deterministic.      
         in_sample_residuals : bool, default `True`
             If `True`, residuals from the training data are used as proxy of
             prediction error to create prediction intervals. If `False`, out of
@@ -999,10 +953,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             calculated and stored the residuals within the forecaster (see
             `set_out_sample_residuals()`).
 
-        Returns 
+        Returns
         -------
         boot_predictions : dict
-            Predictions generated by bootstrapping for each level. 
+            Predictions generated by bootstrapping for each level.
             {level: pandas DataFrame, shape (steps, n_boot)}
 
         Notes
@@ -1029,9 +983,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             if self.out_sample_residuals is None:
                 raise ValueError(
                     ("`forecaster.out_sample_residuals` is `None`. Use "
-                     "`in_sample_residuals=True` or method `set_out_sample_residuals()` "
-                     "before `predict_interval()`, `predict_bootstrapping()` or "
-                     "`predict_dist()`.")
+                     "`in_sample_residuals=True` or method "
+                     "`set_out_sample_residuals()` before `predict_interval()`, "
+                     "`predict_bootstrapping()` or `predict_dist()`.")
                 )
             else:
                 if not set(levels).issubset(set(self.out_sample_residuals.keys())):
@@ -1042,15 +996,20 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                     )
             residuals_levels = self.out_sample_residuals
                 
-        check_residuals = 'forecaster.in_sample_residuals' if in_sample_residuals else 'forecaster.out_sample_residuals'
+        check_residuals = (
+            "forecaster.in_sample_residuals" if in_sample_residuals
+             else "forecaster.out_sample_residuals"
+        )
         for level in levels:
             if residuals_levels[level] is None:
                 raise ValueError(
-                    (f"forecaster residuals for level '{level}' are `None`. Check `{check_residuals}`.")
+                    (f"forecaster residuals for level '{level}' are `None`. "
+                     f"Check `{check_residuals}`.")
                 )
             elif (residuals_levels[level] == None).any():
                 raise ValueError(
-                    (f"forecaster residuals for level '{level}' contains `None` values. Check `{check_residuals}`.")
+                    (f"forecaster residuals for level '{level}' contains `None` "
+                     f"values. Check `{check_residuals}`.")
                 )
 
         if last_window is None:
@@ -1188,38 +1147,29 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         intervals. Both predictions and intervals are returned.
         
         Parameters
-        ---------- 
+        ----------
         steps : int
             Number of future steps predicted.
-
         levels : str, list, default `None`
-            Time series to be predicted. If `None` all levels will be predicted.  
-            **New in version 0.6.0**  
-            
+            Time series to be predicted. If `None` all levels will be predicted.
         last_window : pandas DataFrame, default `None`
             Series values used to create the predictors (lags) needed in the 
             first iteration of the prediction (t + 1).
-    
             If `last_window = None`, the values stored in` self.last_window` are
             used to calculate the initial predictors, and the predictions start
             right after training data.
-            
         exog : pandas Series, pandas DataFrame, default `None`
-            Exogenous variable/s included as predictor/s.
-            
+            Exogenous variable/s included as predictor/s.  
         interval : list, default `[5, 95]`
             Confidence of the prediction interval estimated. Sequence of 
             percentiles to compute, which must be between 0 and 100 inclusive. 
             For example, interval of 95% should be as `interval = [2.5, 97.5]`.
-            
         n_boot : int, default `500`
-            Number of bootstrapping iterations used to estimate prediction
+            Number of bootstrapping iterations used to estimate prediction 
             intervals.
-
         random_state : int, default `123`
             Sets a seed to the random generator, so that boot intervals are always 
             deterministic.
-            
         in_sample_residuals : bool, default `True`
             If `True`, residuals from the training data are used as proxy of
             prediction error to create prediction intervals. If `False`, out of
@@ -1227,13 +1177,14 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             calculated and stored the residuals within the forecaster (see
             `set_out_sample_residuals()`).
 
-        Returns 
+        Returns
         -------
         predictions : pandas DataFrame
             Values predicted by the forecaster and their estimated interval.
-                level: predictions.
-                level_lower_bound: lower bound of the interval.
-                level_upper_bound: upper bound interval of the interval.
+
+                - level: predictions.
+                - level_lower_bound: lower bound of the interval.
+                - level_upper_bound: upper bound of the interval.
 
         Notes
         -----
@@ -1299,36 +1250,27 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         step is fitted to the given distribution.
         
         Parameters
-        ---------- 
+        ----------
         steps : int
             Number of future steps predicted.
-
         distribution : Object
             A distribution object from scipy.stats.
-
         levels : str, list, default `None`
-            Time series to be predicted. If `None` all levels will be predicted.  
-            **New in version 0.6.0**  
-            
+            Time series to be predicted. If `None` all levels will be predicted.
         last_window : pandas DataFrame, default `None`
             Series values used to create the predictors (lags) needed in the 
             first iteration of the prediction (t + 1).
-    
             If `last_window = None`, the values stored in` self.last_window` are
             used to calculate the initial predictors, and the predictions start
             right after training data.
-            
         exog : pandas Series, pandas DataFrame, default `None`
             Exogenous variable/s included as predictor/s.
-            
         n_boot : int, default `500`
             Number of bootstrapping iterations used to estimate prediction
             intervals.
-
         random_state : int, default `123`
             Sets a seed to the random generator, so that boot intervals are always 
             deterministic.
-            
         in_sample_residuals : bool, default `True`
             If `True`, residuals from the training data are used as proxy of
             prediction error to create prediction intervals. If `False`, out of
@@ -1336,7 +1278,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             calculated and stored the residuals within the forecaster (see
             `set_out_sample_residuals()`).
 
-        Returns 
+        Returns
         -------
         predictions : pandas DataFrame
             Distribution parameters estimated for each step and level.
@@ -1391,9 +1333,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         params : dict
             Parameters values.
 
-        Returns 
+        Returns
         -------
-        self
+        None
         
         """
 
@@ -1414,7 +1356,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         fit_kwargs : dict
             Dict of the form {"argument": new_value}.
 
-        Returns 
+        Returns
         -------
         None
         
@@ -1433,12 +1375,14 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         
         Parameters
         ----------
-        lags : int, list, 1D np.array, range
+        lags : int, list, numpy ndarray, range
             Lags used as predictors. Index starts at 1, so lag 1 is equal to t-1.
-                `int`: include lags from 1 to `lags`.
-                `list` or `np.array`: include only lags present in `lags`.
 
-        Returns 
+            - `int`: include lags from 1 to `lags` (included).
+            - `list`, `1d numpy ndarray` or `range`: include only lags present in 
+            `lags`, all elements must be int.
+
+        Returns
         -------
         None
         
@@ -1467,30 +1411,27 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             Dictionary of numpy ndarrays with the residuals of each level in the
             form {level: residuals}. If len(residuals) > 1000, only a random 
             sample of 1000 values are stored. Keys must be the same as `levels`.
-            
         append : bool, default `True`
             If `True`, new residuals are added to the once already stored in the
             attribute `out_sample_residuals`. Once the limit of 1000 values is
             reached, no more values are appended. If False, `out_sample_residuals`
             is overwritten with the new residuals.
-
         transform : bool, default `True`
             If `True`, new residuals are transformed using self.transformer_series.
-
         random_state : int, default `123`
             Sets a seed to the random sampling for reproducible output.
         
-        Returns 
+        Returns
         -------
-        self
+        None
 
         """
 
         if not isinstance(residuals, dict) or not all(isinstance(x, np.ndarray) for x in residuals.values()):
             raise TypeError(
-                f"`residuals` argument must be a dict of numpy ndarrays in the form "
-                "`{level: residuals}`. " 
-                f"Got {type(residuals)}."
+                (f"`residuals` argument must be a dict of numpy ndarrays in the form "
+                 "`{level: residuals}`. " 
+                 f"Got {type(residuals)}.")
             )
 
         if not self.fitted:
@@ -1511,7 +1452,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 """), IgnoredArgumentWarning
             )
 
-        residuals = {key: value for key, value in residuals.items() if key in self.out_sample_residuals.keys()}
+        residuals = {key: value 
+                     for key, value in residuals.items() 
+                     if key in self.out_sample_residuals.keys()}
 
         for level, value in residuals.items():
 

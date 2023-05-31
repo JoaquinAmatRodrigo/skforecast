@@ -1,4 +1,3 @@
-<br>
 <h1 align="left">
 <img src="https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/images/banner-landing-page-skforecast.png?raw=true#only-light" style= margin-top: 0px;>
 </h1>

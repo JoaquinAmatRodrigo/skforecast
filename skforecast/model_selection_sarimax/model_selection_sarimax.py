@@ -62,73 +62,57 @@ def _backtesting_sarimax_refit(
     ----------
     forecaster : ForecasterSarimax
         Forecaster model.
-        
     y : pandas Series
         Training time series.
-        
     steps : int
         Number of steps to predict.
-        
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-        If string:
-            {'mean_squared_error', 'mean_absolute_error',
+            - If string: {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
-    
-        If Callable:
-            Function with arguments y_true, y_pred that returns a float.
-
-        If list:
-            List containing multiple strings and/or Callables.
-    
+            - If Callable: Function with arguments y_true, y_pred that returns a float.
+            - If list: List containing multiple strings and/or Callables.
     initial_train_size : int
         Number of samples in the initial train split. The backtest forecaster is
         trained using the first `initial_train_size` observations.
-        
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
-
     gap : int, default `0`
         Number of samples to be excluded after the end of each training set and 
         before the test set.
-        
     allow_incomplete_fold : bool, default `True`
         Last fold is allowed to have a smaller number of samples than the 
         `test_size`. If `False`, the last fold is excluded.
-        
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
-            
     alpha : float, default `0.05`
         The confidence intervals for the forecasts are (1 - alpha) %.
         If both, `alpha` and `interval` are provided, `alpha` will be used.
-        
     interval : list, default `None`
         Confidence of the prediction interval estimated. The values must be
         symmetric. Sequence of percentiles to compute, which must be between 
         0 and 100 inclusive. For example, interval of 95% should be as 
         `interval = [2.5, 97.5]`. If both, `alpha` and `interval` are 
-        provided, `alpha` will be used.
-            
+        provided, `alpha` will be used.  
     verbose : bool, default `False`
-        Print number of folds and index of training and validation sets used for backtesting.
-
+        Print number of folds and index of training and validation sets used 
+        for backtesting.
     show_progress: bool, default `True`
         Whether to show a progress bar. Defaults to True.
 
-    Returns 
+    Returns
     -------
     metrics_value : float, list
         Value(s) of the metric(s).
-
     backtest_predictions : pandas Dataframe
         Value of predictions and their estimated interval if `interval` is not `None`.
-            column pred = predictions.
-            column lower_bound = lower bound of the interval.
-            column upper_bound = upper bound interval of the interval.
+
+            - column pred: predictions.
+            - column lower_bound: lower bound of the interval.
+            - column upper_bound: upper bound of the interval.
     
     """
 
@@ -231,63 +215,49 @@ def _backtesting_sarimax_no_refit(
     ----------
     forecaster : ForecasterSarimax
         Forecaster model.
-        
     y : pandas Series
         Training time series.
-        
     steps : int
         Number of steps to predict.
-        
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-        If string:
-            {'mean_squared_error', 'mean_absolute_error',
+            - If string: {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
-    
-        If Callable:
-            Function with arguments y_true, y_pred that returns a float.
-
-        If list:
-            List containing multiple strings and/or Callables.
-    
+            - If Callable: Function with arguments y_true, y_pred that returns a float.
+            - If list: List containing multiple strings and/or Callables.
     initial_train_size : int
         Number of samples in the initial train split. The backtest forecaster is
         trained using the first `initial_train_size` observations.
-        
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
-            
     alpha : float, default `0.05`
         The confidence intervals for the forecasts are (1 - alpha) %.
         If both, `alpha` and `interval` are provided, `alpha` will be used.
-        
     interval : list, default `None`
         Confidence of the prediction interval estimated. The values must be
         symmetric. Sequence of percentiles to compute, which must be between 
         0 and 100 inclusive. For example, interval of 95% should be as 
         `interval = [2.5, 97.5]`. If both, `alpha` and `interval` are 
         provided, `alpha` will be used.
-            
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
         for backtesting.
-
     show_progress: bool, default `True`
         Whether to show a progress bar. Defaults to True.
 
-    Returns 
+    Returns
     -------
     metrics_value : float, list
         Value(s) of the metric(s).
-
-    backtest_predictions : pandas DataFrame
+    backtest_predictions : pandas DataFrame 
         Value of predictions and their estimated interval if `interval` is not `None`.
-            column pred = predictions.
-            column lower_bound = lower bound of the interval.
-            column upper_bound = upper bound interval of the interval.
+
+            - column pred: predictions.
+            - column lower_bound: lower bound of the interval.
+            - column upper_bound: upper bound of the interval.
     
     """
 
@@ -395,77 +365,59 @@ def backtesting_sarimax(
     ----------
     forecaster : ForecasterSarimax
         Forecaster model.
-        
     y : pandas Series
         Training time series.
-    
     steps : int
         Number of steps to predict.
-        
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-        If string:
-            {'mean_squared_error', 'mean_absolute_error',
+            - If string: {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
-    
-        If Callable:
-            Function with arguments y_true, y_pred that returns a float.
-
-        If list:
-            List containing multiple strings and/or Callables.
-    
+            - If Callable: Function with arguments y_true, y_pred that returns a float.
+            - If list: List containing multiple strings and/or Callables.
     initial_train_size : int
         Number of samples in the initial train split. The backtest forecaster is
         trained using the first `initial_train_size` observations.
-    
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
-
     gap : int, default `0`
         Number of samples to be excluded after the end of each training set and 
         before the test set.
-        
     allow_incomplete_fold : bool, default `True`
         Last fold is allowed to have a smaller number of samples than the 
         `test_size`. If `False`, the last fold is excluded.
-
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
-
     refit : bool, default `False`
         Whether to re-fit the forecaster in each iteration.
-            
     alpha : float, default `0.05`
         The confidence intervals for the forecasts are (1 - alpha) %.
         If both, `alpha` and `interval` are provided, `alpha` will be used.
-        
     interval : list, default `None`
         Confidence of the prediction interval estimated. The values must be
         symmetric. Sequence of percentiles to compute, which must be between 
         0 and 100 inclusive. For example, interval of 95% should be as 
         `interval = [2.5, 97.5]`. If both, `alpha` and `interval` are 
-        provided, `alpha` will be used.
-                  
+        provided, `alpha` will be used.     
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
         for backtesting.
-
     show_progress: bool, default `True`
         Whether to show a progress bar. Defaults to True.
 
-    Returns 
+    Returns
     -------
     metrics_value : float, list
         Value(s) of the metric(s).
-
     backtest_predictions : pandas DataFrame
         Value of predictions and their estimated interval if `interval` is not `None`.
-            column pred = predictions.
-            column lower_bound = lower bound of the interval.
-            column upper_bound = upper bound interval of the interval.
+
+            - column pred: predictions.
+            - column lower_bound: lower bound of the interval.
+            - column upper_bound: upper bound of the interval.
     
     """
     
@@ -555,67 +507,50 @@ def grid_search_sarimax(
     ----------
     forecaster : ForecasterSarimax
         Forcaster model.
-        
     y : pandas Series
         Training time series values. 
-        
     param_grid : dict
         Dictionary with parameters names (`str`) as keys and lists of parameter
         settings to try as values.
-
     steps : int
         Number of steps to predict.
-        
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-        If string:
-            {'mean_squared_error', 'mean_absolute_error',
+            - If string: {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
-    
-        If Callable:
-            Function with arguments y_true, y_pred that returns a float.
-
-        If list:
-            List containing multiple strings and/or Callables.
-
+            - If Callable: Function with arguments y_true, y_pred that returns a float.
+            - If list: List containing multiple strings and/or Callables.
     initial_train_size : int 
         Number of samples in the initial train split. The backtest forecaster is
         trained using the first `initial_train_size` observations.
- 
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
-
     gap : int, default `0`
         Number of samples to be excluded after the end of each training set and 
         before the test set.
-        
     allow_incomplete_fold : bool, default `True`
         Last fold is allowed to have a smaller number of samples than the 
         `test_size`. If `False`, the last fold is excluded.
-
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
-        
     refit : bool, default `False`
         Whether to re-fit the forecaster in each iteration of backtesting.
-        
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
-        
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
 
-    Returns 
+    Returns
     -------
     results : pandas DataFrame
         Results for each combination of parameters.
-            column lags = predictions.
-            column params = lower bound of the interval.
-            column metric = metric value estimated for the combination of parameters.
-            additional n columns with param = value.
+
+            - column params: parameters configuration for each iteration.
+            - column metric: metric value estimated for each iteration.
+            - additional n columns with param = value.
     
     """
 
@@ -658,81 +593,62 @@ def random_search_sarimax(
     verbose: bool=True
 ) -> pd.DataFrame:
     """
-    Random search over specified parameter values or distributions for a Forecaster object.
-    Validation is done using time series backtesting.
+    Random search over specified parameter values or distributions for a Forecaster 
+    object. Validation is done using time series backtesting.
     
     Parameters
     ----------
     forecaster : ForecasterSarimax
         Forcaster model.
-        
     y : pandas Series
         Training time series. 
-        
     param_distributions : dict
         Dictionary with parameters names (`str`) as keys and 
         distributions or lists of parameters to try.
-
     steps : int
         Number of steps to predict.
-        
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-        If string:
-            {'mean_squared_error', 'mean_absolute_error',
+            - If string: {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
-    
-        If Callable:
-            Function with arguments y_true, y_pred that returns a float.
-
-        If list:
-            List containing multiple strings and/or Callables.
-
+            - If Callable: Function with arguments y_true, y_pred that returns a float.
+            - If list: List containing multiple strings and/or Callables.
     initial_train_size : int 
         Number of samples in the initial train split. The backtest forecaster is
         trained using the first `initial_train_size` observations.
- 
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
-
     gap : int, default `0`
         Number of samples to be excluded after the end of each training set and 
         before the test set.
-        
     allow_incomplete_fold : bool, default `True`
         Last fold is allowed to have a smaller number of samples than the 
         `test_size`. If `False`, the last fold is excluded.
-
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
-        
     refit : bool, default `False`
         Whether to re-fit the forecaster in each iteration of backtesting.
-
     n_iter : int, default `10`
         Number of parameter settings that are sampled. 
         n_iter trades off runtime vs quality of the solution.
-
     random_state : int, default `123`
         Sets a seed to the random sampling for reproducible output.
-
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
-        
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
 
-    Returns 
+    Returns
     -------
     results : pandas DataFrame
         Results for each combination of parameters.
-            column lags = predictions.
-            column params = lower bound of the interval.
-            column metric = metric value estimated for the combination of parameters.
-            additional n columns with param = value.
+
+            - column params: parameters configuration for each iteration.
+            - column metric: metric value estimated for each iteration.
+            - additional n columns with param = value.
     
     """
 
@@ -779,66 +695,50 @@ def _evaluate_grid_hyperparameters_sarimax(
     ----------
     forecaster : ForecasterSarimax
         Forcaster model.
-        
     y : pandas Series
         Training time series values. 
-        
     param_grid : dict
         Dictionary with parameters names (`str`) as keys and lists of parameter
         settings to try as values.
-
     steps : int
         Number of steps to predict.
-        
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-        If string:
-            {'mean_squared_error', 'mean_absolute_error',
+            - If string: {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
-    
-        If Callable:
-            Function with arguments y_true, y_pred that returns a float.
-
-        If list:
-            List containing multiple strings and/or Callables.
-
+            - If Callable: Function with arguments y_true, y_pred that returns a float.
+            - If list: List containing multiple strings and/or Callables.
     initial_train_size : int 
         Number of samples in the initial train split. The backtest forecaster is
         trained using the first `initial_train_size` observations.
- 
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
-
     gap : int, default `0`
         Number of samples to be excluded after the end of each training set and 
         before the test set.
-        
     allow_incomplete_fold : bool, default `True`
         Last fold is allowed to have a smaller number of samples than the 
         `test_size`. If `False`, the last fold is excluded.
-
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
-        
     refit : bool, default `False`
         Whether to re-fit the forecaster in each iteration of backtesting.
-        
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
-        
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
 
-    Returns 
+    Returns
     -------
     results : pandas DataFrame
         Results for each combination of parameters.
-            column params = lower bound of the interval.
-            column metric = metric value estimated for the combination of parameters.
-            additional n columns with param = value.
+
+            - column params: lower bound of the interval.
+            - column metric: metric value estimated for the combination of parameters.
+            - additional n columns with param = value.
 
     """
 
