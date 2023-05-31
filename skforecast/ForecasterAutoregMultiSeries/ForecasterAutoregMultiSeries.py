@@ -1184,7 +1184,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
                 - level: predictions.
                 - level_lower_bound: lower bound of the interval.
-                - level_upper_bound: upper bound interval of the interval.
+                - level_upper_bound: upper bound of the interval.
 
         Notes
         -----

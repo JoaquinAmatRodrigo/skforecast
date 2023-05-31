@@ -34,19 +34,18 @@ def initialize_lags(
 ) -> np.ndarray:
     """
     Check lags argument input and generate the corresponding numpy ndarray.
-    
+
     Parameters
     ----------
     forecaster_name : str
         Forecaster name. ForecasterAutoreg, ForecasterAutoregCustom, 
         ForecasterAutoregDirect, ForecasterAutoregMultiSeries, 
-        ForecasterAutoregMultiVariate.
-
+        ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate.
     lags : Any
         Lags used as predictors.
-        
+
     Returns
-    ----------
+    -------
     lags : numpy ndarray
         Lags used as predictors.
     
@@ -89,7 +88,7 @@ def initialize_weights(
     regressor: object,
     weight_func: Union[Callable, dict],
     series_weights: dict
-) -> Tuple[Union[Callable, dict], Union[Callable, dict], dict]:
+) -> Tuple[Union[Callable, dict], Union[str, dict], dict]:
     """
     Check weights arguments, `weight_func` and `series_weights` for the different 
     forecasters. Create `source_code_weight_func`, source code of the custom 
@@ -100,26 +99,20 @@ def initialize_weights(
     forecaster_name : str
         Forecaster name. ForecasterAutoreg, ForecasterAutoregCustom, 
         ForecasterAutoregDirect, ForecasterAutoregMultiSeries, 
-        ForecasterAutoregMultiVariate, ForecasterAutoregMultiSeriesCustom.
-
+        ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate.
     regressor : regressor or pipeline compatible with the scikit-learn API
         Regressor of the forecaster.
-
     weight_func : Callable, dict
         Argument `weight_func` of the forecaster.
-
     series_weights : dict
         Argument `series_weights` of the forecaster.
-        
-        
+
     Returns
-    ----------
+    -------
     weight_func : Callable, dict
         Argument `weight_func` of the forecaster.
-
     source_code_weight_func : str, dict
         Argument `source_code_weight_func` of the forecaster.
-
     series_weights : dict
         Argument `series_weights` of the forecaster.
     
@@ -185,10 +178,8 @@ def check_select_fit_kwargs(
     ----------
     regressor : object
         Regressor object.
-
     fit_kwargs : dict, default `None`
-        Dictionary with the arguments to pass to the `fit' method of the 
-        forecaster.
+        Dictionary with the arguments to pass to the `fit' method of the forecaster.
 
     Returns
     -------
@@ -242,9 +233,9 @@ def check_y(
     ----------
     y : Any
         Time series values.
-        
+    
     Returns
-    ----------
+    -------
     None
     
     """
@@ -268,18 +259,18 @@ def check_exog(
     
     Parameters
     ----------
-    exog :  Any
+    exog : Any
         Exogenous variable/s included as predictor/s.
-    allow_nan: bool, default True
+    allow_nan : bool, default `True`
         If True, allows the presence of NaN values in `exog`. If False (default),
         issue a warning if `exog` contains NaN values.
 
     Returns
-    ----------
+    -------
     None
 
     """
-        
+    
     if not isinstance(exog, (pd.Series, pd.DataFrame)):
         raise TypeError("`exog` must be a pandas Series or DataFrame.")
 
@@ -290,7 +281,7 @@ def check_exog(
                  "missing values. Fitting the forecaster may fail."), 
                  MissingValuesExogWarning
             )
-         
+    
     return
 
 
@@ -302,7 +293,7 @@ def get_exog_dtypes(
 
     Parameters
     ----------
-    exog :  pandas DataFrame, pandas Series
+    exog : pandas DataFrame, pandas Series
         Exogenous variable/s included as predictor/s.
 
     Returns
@@ -331,14 +322,15 @@ def check_exog_dtypes(
     
     Parameters
     ----------
-    exog :  pandas DataFrame, pandas Series
+    exog : pandas DataFrame, pandas Series
         Exogenous variable/s included as predictor/s.
 
     Returns
-    ----------
+    -------
     None
 
     """
+
     check_exog(exog=exog, allow_nan=False)
 
     if isinstance(exog, pd.DataFrame):
@@ -389,9 +381,12 @@ def check_interval(
         Confidence of the prediction interval estimated. Sequence of percentiles
         to compute, which must be between 0 and 100 inclusive. For example, 
         interval of 95% should be as `interval = [2.5, 97.5]`.
-
     alpha : float, default `None`
         The confidence intervals used in ForecasterSarimax are (1 - alpha) %.
+
+    Returns
+    -------
+    None
     
     """
 
@@ -469,65 +464,53 @@ def check_predict_input(
     forecaster_name : str
         Forecaster name. ForecasterAutoreg, ForecasterAutoregCustom, 
         ForecasterAutoregDirect, ForecasterAutoregMultiSeries, 
-        ForecasterAutoregMultiVariate, ForecasterAutoregMultiSeriesCustom.
-
+        ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate.
     steps : int, list
         Number of future steps predicted.
-
-    fitted: Bool
+    fitted: bool
         Tag to identify if the regressor has been fitted (trained).
-
     included_exog : bool
         If the forecaster has been trained using exogenous variable/s.
-
     index_type : type
         Type of index of the input used in training.
-
     index_freq : str
         Frequency of Index of the input used in training.
-
     window_size: int
-        Size of the window needed to create the predictors. It is equal to
+        Size of the window needed to create the predictors. It is equal to 
         `max_lag`.
-
     last_window : pandas Series, pandas DataFrame, default `None`
         Values of the series used to create the predictors (lags) need in the 
         first iteration of prediction (t + 1).
-
     last_window_exog : pandas Series, pandas DataFrame, default `None`
         Values of the exogenous variables aligned with `last_window` in 
         ForecasterSarimax predictions.
-
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s.
-
     exog_type : type, default `None`
         Type of exogenous variable/s used in training.
-        
     exog_col_names : list, default `None`
         Names of columns of `exog` if `exog` used in training was a pandas
         DataFrame.
-
     interval : list, default `None`
         Confidence of the prediction interval estimated. Sequence of percentiles
         to compute, which must be between 0 and 100 inclusive. For example, 
         interval of 95% should be as `interval = [2.5, 97.5]`.
-
     alpha : float, default `None`
         The confidence intervals used in ForecasterSarimax are (1 - alpha) %.
-
     max_steps: int, default `None`
         Maximum number of steps allowed (`ForecasterAutoregDirect` and 
         `ForecasterAutoregMultiVariate`).
-            
     levels : str, list, default `None`
         Time series to be predicted (`ForecasterAutoregMultiSeries` and
         `ForecasterAutoregMultiSeriesCustom`).
-
     series_col_names : list, default `None`
         Names of the columns used during fit (`ForecasterAutoregMultiSeries`, 
-        `ForecasterAutoregMultiVariate` and `ForecasterAutoregMultiSeriesCustom`).
-    
+        `ForecasterAutoregMultiSeriesCustom` and `ForecasterAutoregMultiVariate`).
+
+    Returns
+    -------
+    None
+
     """
 
     if not fitted:
@@ -558,10 +541,12 @@ def check_predict_input(
     if interval is not None or alpha is not None:
         check_interval(interval=interval, alpha=alpha)
     
-    if forecaster_name in ['ForecasterAutoregMultiSeries', 'ForecasterAutoregMultiSeriesCustom']:
+    if forecaster_name in ['ForecasterAutoregMultiSeries', 
+                           'ForecasterAutoregMultiSeriesCustom']:
         if levels is not None and not isinstance(levels, (str, list)):
             raise TypeError(
-                "`levels` must be a `list` of column names, a `str` of a column name or `None`."
+                ("`levels` must be a `list` of column names, a `str` of a "
+                 "column name or `None`.")
             )
         if len(set(levels) - set(series_col_names)) != 0:
             raise ValueError(
@@ -582,14 +567,16 @@ def check_predict_input(
         
     # Checks last_window
     # Check last_window type (pd.Series or pd.DataFrame according to forecaster)
-    if forecaster_name in ['ForecasterAutoregMultiSeries', 'ForecasterAutoregMultiVariate',
-                           'ForecasterAutoregMultiSeriesCustom']:
+    if forecaster_name in ['ForecasterAutoregMultiSeries', 
+                           'ForecasterAutoregMultiSeriesCustom',
+                           'ForecasterAutoregMultiVariate']:
         if not isinstance(last_window, pd.DataFrame):
             raise TypeError(
                 f"`last_window` must be a pandas DataFrame. Got {type(last_window)}."
             )
         
-        if forecaster_name in ['ForecasterAutoregMultiSeries', 'ForecasterAutoregMultiSeriesCustom'] and \
+        if forecaster_name in ['ForecasterAutoregMultiSeries', 
+                               'ForecasterAutoregMultiSeriesCustom'] and \
             len(set(levels) - set(last_window.columns)) != 0:
             raise ValueError(
                 (f"`last_window` must contain a column(s) named as the level(s) to be predicted.\n"
@@ -757,18 +744,17 @@ def preprocess_y(
     """
     Return values and index of series separately. Index is overwritten 
     according to the next rules:
-        If index is of type DatetimeIndex and has frequency, nothing is 
+        - If index is of type DatetimeIndex and has frequency, nothing is 
         changed.
-        If index is of type RangeIndex, nothing is changed.
-        If index is of type DatetimeIndex but has no frequency, a 
+        - If index is of type RangeIndex, nothing is changed.
+        - If index is of type DatetimeIndex but has no frequency, a 
         RangeIndex is created.
-        If index is not of type DatetimeIndex, a RangeIndex is created.
+        - If index is not of type DatetimeIndex, a RangeIndex is created.
     
     Parameters
     ----------
     y : pandas Series
         Time series.
-
     return_values : bool, default `True`
         If `True` return the values of `y` as numpy ndarray. This option is 
         intended to avoid copying data when it is not necessary.
@@ -777,7 +763,6 @@ def preprocess_y(
     -------
     y_values : None, numpy ndarray
         Numpy array with values of `y`.
-
     y_index : pandas Index
         Index of `y` modified according to the rules.
     
@@ -820,18 +805,17 @@ def preprocess_last_window(
     """
     Return values and index of series separately. Index is overwritten 
     according to the next rules:
-        If index is of type DatetimeIndex and has frequency, nothing is 
+        - If index is of type DatetimeIndex and has frequency, nothing is 
         changed.
-        If index is of type RangeIndex, nothing is changed.
-        If index is of type DatetimeIndex but has no frequency, a 
+        - If index is of type RangeIndex, nothing is changed.
+        - If index is of type DatetimeIndex but has no frequency, a 
         RangeIndex is created.
-        If index is not of type DatetimeIndex, a RangeIndex is created.
+        - If index is not of type DatetimeIndex, a RangeIndex is created.
     
     Parameters
     ----------
     last_window : pandas Series, pandas DataFrame
         Time series values.
-
     return_values : bool, default `True`
         If `True` return the values of `last_window` as numpy ndarray. This option 
         is intended to avoid copying data when it is not necessary.
@@ -840,7 +824,6 @@ def preprocess_last_window(
     -------
     last_window_values : numpy ndarray
         Numpy array with values of `last_window`.
-
     last_window_index : pandas Index
         Index of `last_window` modified according to the rules.
     
@@ -883,18 +866,17 @@ def preprocess_exog(
     """
     Return values and index of series or data frame separately. Index is
     overwritten  according to the next rules:
-        If index is of type DatetimeIndex and has frequency, nothing is 
+        - If index is of type DatetimeIndex and has frequency, nothing is 
         changed.
-        If index is of type RangeIndex, nothing is changed.
-        If index is of type DatetimeIndex but has no frequency, a 
+        - If index is of type RangeIndex, nothing is changed.
+        - If index is of type DatetimeIndex but has no frequency, a 
         RangeIndex is created.
-        If index is not of type DatetimeIndex, a RangeIndex is created.
+        - If index is not of type DatetimeIndex, a RangeIndex is created.
 
     Parameters
     ----------
     exog : pandas Series, pandas DataFrame
         Exogenous variables.
-
     return_values : bool, default `True`
         If `True` return the values of `exog` as numpy ndarray. This option is 
         intended to avoid copying data when it is not necessary.
@@ -903,7 +885,6 @@ def preprocess_exog(
     -------
     exog_values : None, numpy ndarray
         Numpy array with values of `exog`.
-
     exog_index : pandas Index
         Index of `exog` modified according to the rules.
     
@@ -945,25 +926,27 @@ def cast_exog_dtypes(
     exog_dtypes: dict,
 ) -> Union[pd.Series, pd.DataFrame]: # pragma: no cover
     """
-    Cast `exog` to a specified types.
-    If `exog` is a pandas Series, `exog_dtypes` must be a dict with a single value.
-    If `exog_dtypes` is `category` but the current type of `exog` is `float`, then
-    the type is cast to `int` and then to `category`. This is done because, for
-    a forecaster to accept a categorical exog, it must contain only integer values.
-    Due to the internal modifications of numpy, the values may be casted to `float`,
-    so they have to be re-converted to `int`.
+    Cast `exog` to a specified types. This is done because, for a forecaster to 
+    accept a categorical exog, it must contain only integer values. Due to the 
+    internal modifications of numpy, the values may be casted to `float`, so 
+    they have to be re-converted to `int`.
+
+        - If `exog` is a pandas Series, `exog_dtypes` must be a dict with a 
+        single value.
+        - If `exog_dtypes` is `category` but the current type of `exog` is `float`, 
+        then the type is cast to `int` and then to `category`. 
 
     Parameters
     ----------
     exog : pandas Series, pandas DataFrame
         Exogenous variables.
-    
     exog_dtypes: dict
         Dictionary with name and type of the series or data frame columns.
 
     Returns
     -------
-    exog
+    exog : pandas Series, pandas DataFrame
+        Exogenous variables casted to the indicated dtypes.
 
     """
 
@@ -995,7 +978,6 @@ def exog_to_direct(
     ----------
     exog : pandas Series, pandas DataFrame
         Exogenous variables.
-
     steps : int.
         Number of steps that will be predicted using exog.
 
@@ -1037,14 +1019,13 @@ def exog_to_direct_numpy(
     steps: int
 )-> np.ndarray:
     """
-    Transforms `exog` to `np.ndarray` with the shape needed for Direct
+    Transforms `exog` to numpy ndarray with the shape needed for Direct
     forecasting.
     
     Parameters
     ----------
     exog : numpy ndarray, shape(samples,)
         Exogenous variables.
-
     steps : int.
         Number of steps that will be predicted using exog.
 
@@ -1085,15 +1066,14 @@ def expand_index(
     
     Parameters
     ----------
-    index : pd.Index, None
-        Index of last window.
-    
+    index : pandas Index, None
+        Original index.
     steps : int
         Number of steps to expand.
 
     Returns
     -------
-    new_index : pd.Index
+    new_index : pandas Index
         New index.
 
     """
@@ -1128,23 +1108,20 @@ def transform_series(
 ) -> Union[pd.Series, pd.DataFrame]:
     """      
     Transform raw values of pandas Series with a scikit-learn alike transformer
-    (preprocessor). The transformer used must have the following methods: fit, transform,
-    fit_transform and inverse_transform. ColumnTransformers are not allowed since they
-    do not have inverse_transform method.
+    (preprocessor). The transformer used must have the following methods: fit, 
+    transform, fit_transform and inverse_transform. ColumnTransformers are not 
+    allowed since they do not have inverse_transform method.
 
     Parameters
     ----------
     series : pandas Series
         Series to be transformed.
-
     transformer : scikit-learn alike transformer (preprocessor).
         scikit-learn alike transformer (preprocessor) with methods: fit, transform,
         fit_transform and inverse_transform. ColumnTransformers are not allowed 
         since they do not have inverse_transform method.
-
     fit : bool, default `False`
         Train the transformer before applying it.
-
     inverse_transform : bool, default `False`
         Transform back the data to the original representation.
 
@@ -1219,14 +1196,11 @@ def transform_dataframe(
     Parameters
     ----------
     df : pandas DataFrame
-        Pandas DataFrame to be transformed.
-
+        DataFrame to be transformed.
     transformer : scikit-learn alike transformer, preprocessor or ColumnTransformer.
         scikit-learn alike transformer, preprocessor or ColumnTransformer.
-
     fit : bool, default `False`
         Train the transformer before applying it.
-
     inverse_transform : bool, default `False`
         Transform back the data to the original representation. This is not available
         when using transformers of class scikit-learn ColumnTransformers.
@@ -1235,7 +1209,7 @@ def transform_dataframe(
     -------
     df_transformed : pandas DataFrame
         Transformed DataFrame.
-    
+
     """
     
     if not isinstance(df, pd.DataFrame):
@@ -1289,12 +1263,10 @@ def save_forecaster(
 
     Parameters
     ----------
-    forecaster: forecaster object from skforecast library.
+    forecaster: forecaster
         Forecaster created with skforecast library.
-
     file_name: str
         File name given to the object.
-        
     verbose: bool, default `True`
         Print summary about the forecaster saved.
 
@@ -1321,13 +1293,12 @@ def load_forecaster(
     ----------
     file_name: str
         Object file name.
-
     verbose: bool, default `True`
         Print summary about the forecaster loaded.
 
     Returns
     -------
-    Forecaster
+    forecaster: forecaster
         Forecaster created with skforecast library.
     
     """
@@ -1345,22 +1316,20 @@ def _find_optional_dependency(
     optional_dependencies: dict=optional_dependencies
 ) -> Tuple[str, str]:
     """
-    Find if a package is an optional dependency. If true, find the version and 
+    Find if a package is an optional dependency. If True, find the version and 
     the extension it belongs to.
 
     Parameters
     ----------
     package_name : str
         Name of the package to check.
-
-    optional_dependencies : dict, default optional_dependencies
+    optional_dependencies : dict, default `optional_dependencies`
         Skforecast optional dependencies.
 
-    Return
-    ------
+    Returns
+    -------
     extra: str
         Name of the extra extension where the optional dependency is needed.
-
     package_version: srt
         Name and versions of the dependency.
 
@@ -1383,6 +1352,10 @@ def check_optional_dependency(
     ----------
     package_name : str
         Name of the package to check.
+
+    Returns
+    -------
+    None
     
     """
 
@@ -1414,18 +1387,15 @@ def multivariate_time_series_corr(
     ----------
     time_series : pandas Series
         Target time series.
-
     other : pandas DataFrame
         Time series whose lagged values are correlated to `time_series`.
-
-    lags : Union[int, list, numpy ndarray]
+    lags : int, list, numpy ndarray
         Lags to be included in the correlation analysis.
-    
     method : str, default 'pearson'
-        - pearson : standard correlation coefficient.
-        - kendall : Kendall Tau correlation coefficient.
-        - spearman : Spearman rank correlation.
-        
+        - pearson: standard correlation coefficient.
+        - kendall: Kendall Tau correlation coefficient.
+        - spearman: Spearman rank correlation.
+
     Returns
     -------
     corr : pandas DataFrame
@@ -1487,70 +1457,55 @@ def check_backtesting_input(
     ----------
     forecaster : object
         Forecaster model.
-
     steps : int, list
         Number of future steps predicted.
-        
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
-        
     y : pandas Series
         Training time series for uni-series forecasters.
-
     series : pandas DataFrame
         Training time series for multi-series forecasters.
-    
     initial_train_size : int, default `None`
         Number of samples in the initial train split. If `None` and `forecaster` 
         is already trained, no initial train is done and all data is used to 
         evaluate the model.
-    
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
-
     gap : int, default `0`
         Number of samples to be excluded after the end of each training set and 
         before the test set.
-        
     allow_incomplete_fold : bool, default `True`
         Last fold is allowed to have a smaller number of samples than the 
         `test_size`. If `False`, the last fold is excluded.
-
     refit : bool, default `False`
         Whether to re-fit the forecaster in each iteration.
-
     interval : list, default `None`
         Confidence of the prediction interval estimated. Sequence of percentiles
         to compute, which must be between 0 and 100 inclusive.
-
     alpha : float, default `None`
-        The confidence intervals used in ForecasterSarimax are (1 - alpha) %.
-            
+        The confidence intervals used in ForecasterSarimax are (1 - alpha) %. 
     n_boot : int, default `500`
         Number of bootstrapping iterations used to estimate prediction
         intervals.
-
     random_state : int, default `123`
         Sets a seed to the random generator, so that boot intervals are always 
         deterministic.
-
     in_sample_residuals : bool, default `True`
         If `True`, residuals from the training data are used as proxy of prediction 
         error to create prediction intervals.  If `False`, out_sample_residuals 
-        are used if they are already stored inside the forecaster.
-                  
+        are used if they are already stored inside the forecaster.  
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
         for backtesting.
-
     show_progress: bool, default `True`
         Whether to show a progress bar. Defaults to True.
 
     Returns
     -------
-        
+    None
+    
     """
-
+    
     forecasters_uni = ['ForecasterAutoreg', 'ForecasterAutoregCustom', 
                        'ForecasterAutoregDirect', 'ForecasterSarimax']
     forecasters_multi = ['ForecasterAutoregMultiSeries', 

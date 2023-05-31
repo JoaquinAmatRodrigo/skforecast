@@ -50,30 +50,28 @@ def _backtesting_forecaster_verbose(
     ----------
     index_values : pandas Index
         Values of the index of the series.
-    
     steps : int
         Number of steps to predict.
-
     initial_train_size : int
         Number of samples in the initial train split. The backtest forecaster is
         trained using the first `initial_train_size` observations.
-        
     folds : int
         Number of backtesting stages.
-
     remainder : int
         Number of observations in the last backtesting stage. 
-
     refit : bool, default `False`
         Whether to re-fit the forecaster in each iteration.
-
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
+
+    Returns
+    -------
+    None
     
     """
 
-    print(f"Information of backtesting process")
-    print(f"----------------------------------")
+    print("Information of backtesting process")
+    print("----------------------------------")
     print(f"Number of observations used for initial training: {initial_train_size}")
     print(f"Number of observations used for backtesting: {len(index_values) - initial_train_size}")
     print(f"    Number of folds: {folds}")
@@ -145,41 +143,32 @@ def _create_backtesting_folds(
     ----------
     data : pandas Series, pandas DataFrame
         Time series values.
-    
     initial_train_size : int, None
         Size of the training set in the first fold. If `None` or 0, the initial
         fold does not include a training set.
-        
     test_size : int
         Size of the test set in each fold.
-
     externally_fitted : bool, default `False`
         Flag indicating whether the forecaster is already trained. Only used when 
         `initial_train_size` is None and `refit` is False.
-
     refit : bool, default `False`
         Whether to re-fit the forecaster in each iteration.
-
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
-
     gap : int, default `0`
         Number of samples to be excluded after the end of each training set and 
         before the test set.
-        
     allow_incomplete_fold : bool, default `True`
         Last fold is allowed to have a smaller number of samples than the 
         `test_size`. If `False`, the last fold is excluded.
-
     return_all_indexes : bool, default `False`
         If `True`, return all the indexes included in each fold. If `False`, return
         only the first and last index of each partition in each fold.
-        
     verbose : bool, default `True`
         Print information if the folds created.
 
     Returns
-    ------
+    -------
     folds : list
         List containing the indices (position) of `y` for training, test including
         the gap, and test excluding the gap for each fold.
@@ -346,69 +335,50 @@ def _backtesting_forecaster_refit(
     ----------
     forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect
         Forecaster model.
-        
     y : pandas Series
         Training time series.
-        
     steps : int
         Number of steps to predict.
-        
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-        If string:
-            {'mean_squared_error', 'mean_absolute_error',
+            - If string: {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
-    
-        If Callable:
-            Function with arguments y_true, y_pred that returns a float.
-
-        If list:
-            List containing multiple strings and/or Callables.
-    
+            - If Callable: Function with arguments y_true, y_pred that returns a float.
+            - If list: List containing multiple strings and/or Callables.
     initial_train_size : int
         Number of samples in the initial train split. The backtest forecaster is
         trained using the first `initial_train_size` observations.
-        
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
-
     gap : int, default `0`
         Number of samples to be excluded after the end of each training set and 
         before the test set.
-        
     allow_incomplete_fold : bool, default `True`
         Last fold is allowed to have a smaller number of samples than the 
         `test_size`. If `False`, the last fold is excluded.
-        
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
-
     interval : list, default `None`
         Confidence of the prediction interval estimated. Sequence of percentiles
         to compute, which must be between 0 and 100 inclusive. For example, 
         interval of 95% should be as `interval = [2.5, 97.5]`. If `None`, no
-        intervals are estimated. Only available for forecaster of type 
-        ForecasterAutoreg and ForecasterAutoregCustom.
-    
+        intervals are estimated.
     n_boot : int, default `500`
         Number of bootstrapping iterations used to estimate prediction
         intervals.
-
     random_state : int, default `123`
         Sets a seed to the random generator, so that boot intervals are always 
         deterministic.
-
     in_sample_residuals : bool, default `True`
-        If `True`, residuals from the training data are used as proxy of
-        prediction error to create prediction intervals. If `False`, out_sample_residuals
+        If `True`, residuals from the training data are used as proxy of prediction
+        error to create prediction intervals. If `False`, out_sample_residuals 
         are used if they are already stored inside the forecaster.
-            
     verbose : bool, default `False`
-        Print number of folds and index of training and validation sets used for backtesting.
-
+        Print number of folds and index of training and validation sets used 
+        for backtesting.
     show_progress: bool, default `True`
         Whether to show a progress bar. Defaults to True.
 
@@ -416,12 +386,12 @@ def _backtesting_forecaster_refit(
     -------
     metrics_value : float, list
         Value(s) of the metric(s).
-
     backtest_predictions : pandas Dataframe
         Value of predictions and their estimated interval if `interval` is not `None`.
-            column pred = predictions.
-            column lower_bound = lower bound of the interval.
-            column upper_bound = upper bound interval of the interval.
+
+            - column pred: predictions.
+            - column lower_bound: lower bound of the interval.
+            - column upper_bound: upper bound of the interval.
     
     """
 
@@ -446,8 +416,8 @@ def _backtesting_forecaster_refit(
         
     if type(forecaster).__name__ != 'ForecasterAutoregDirect' and len(folds) > 50:
         warnings.warn(
-            (f"The forecaster will be fit {len(folds)} times. This can take substantial "
-             f"amounts of time. If not feasible, try with `refit = False`.\n"),
+            (f"The forecaster will be fit {len(folds)} times. This can take substantial"
+             f" amounts of time. If not feasible, try with `refit = False`.\n"),
             LongTrainingWarning
         )
     elif type(forecaster).__name__ == 'ForecasterAutoregDirect' and len(folds)*forecaster.steps > 50:
@@ -542,72 +512,53 @@ def _backtesting_forecaster_no_refit(
     ----------
     forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect
         Forecaster model.
-        
     y : pandas Series
         Training time series.
-        
     steps : int
         Number of steps to predict.
-        
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-        If string:
-            {'mean_squared_error', 'mean_absolute_error',
+            - If string: {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
-    
-        If Callable:
-            Function with arguments y_true, y_pred that returns a float.
-
-        If list:
-            List containing multiple strings and/or Callables.
-    
+            - If Callable: Function with arguments y_true, y_pred that returns a float.
+            - If list: List containing multiple strings and/or Callables.
     initial_train_size : int, default `None`
-        Number of samples in the initial train split. If `None` and `forecaster` is already
-        trained, no initial train is done and all data is used to evaluate the model. However, 
-        the first `len(forecaster.last_window)` observations are needed to create the 
-        initial predictors, so no predictions are calculated for them. This useful
-        to backtest the model on the same data used to train it.
-
+        Number of samples in the initial train split. If `None` and `forecaster` is 
+        already trained, no initial train is done and all data is used to evaluate the 
+        model. However, the first `len(forecaster.last_window)` observations are needed 
+        to create the initial predictors, so no predictions are calculated for them. 
+        This useful to backtest the model on the same data used to train it.
         `None` is only allowed when `refit` is `False` and `forecaster` is already
         trained.
-
     gap : int, default `0`
         Number of samples to be excluded after the end of each training set and 
         before the test set.
-        
     allow_incomplete_fold : bool, default `True`
         Last fold is allowed to have a smaller number of samples than the 
         `test_size`. If `False`, the last fold is excluded.
-        
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
-
     interval : list, default `None`
         Confidence of the prediction interval estimated. Sequence of percentiles
         to compute, which must be between 0 and 100 inclusive. For example, 
         interval of 95% should be as `interval = [2.5, 97.5]`. If `None`, no
-        intervals are estimated. Only available for forecaster of type 
-        ForecasterAutoreg and ForecasterAutoregCustom.
-            
+        intervals are estimated.
     n_boot : int, default `500`
         Number of bootstrapping iterations used to estimate prediction
         intervals.
-
     random_state : int, default `123`
         Sets a seed to the random generator, so that boot intervals are always 
         deterministic.
-
     in_sample_residuals : bool, default `True`
-        If `True`, residuals from the training data are used as proxy of
-        prediction error to create prediction intervals.  If `False`, out_sample_residuals
+        If `True`, residuals from the training data are used as proxy of prediction 
+        error to create prediction intervals.  If `False`, out_sample_residuals 
         are used if they are already stored inside the forecaster.
-            
     verbose : bool, default `False`
-        Print number of folds and index of training and validation sets used for backtesting.
-
+        Print number of folds and index of training and validation sets used 
+        for backtesting.
     show_progress: bool, default `True`
         Whether to show a progress bar. Defaults to True.
 
@@ -615,12 +566,12 @@ def _backtesting_forecaster_no_refit(
     -------
     metrics_value : float, list
         Value(s) of the metric(s).
-
     backtest_predictions : pandas DataFrame
         Value of predictions and their estimated interval if `interval` is not `None`.
-            column pred = predictions.
-            column lower_bound = lower bound of the interval.
-            column upper_bound = upper bound interval of the interval.
+
+            - column pred: predictions.
+            - column lower_bound: lower bound of the interval.
+            - column upper_bound: upper bound of the interval.
     
     """
 
@@ -742,78 +693,57 @@ def backtesting_forecaster(
     ----------
     forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect
         Forecaster model.
-        
     y : pandas Series
         Training time series.
-    
     steps : int
         Number of steps to predict.
-        
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-        If string:
-            {'mean_squared_error', 'mean_absolute_error',
+            - If string: {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
-    
-        If Callable:
-            Function with arguments y_true, y_pred that returns a float.
-
-        If list:
-            List containing multiple strings and/or Callables.
-    
+            - If Callable: Function with arguments y_true, y_pred that returns a float.
+            - If list: List containing multiple strings and/or Callables.
     initial_train_size : int, default `None`
-        Number of samples in the initial train split. If `None` and `forecaster` is already 
-        trained, no initial train is done and all data is used to evaluate the model. However, 
-        the first `len(forecaster.last_window)` observations are needed to create the 
-        initial predictors, so no predictions are calculated for them. This useful
-        to backtest the model on the same data used to train it.
-
-        `None` is only allowed when `refit` is `False` and `forecaster` is already trained.
-    
+        Number of samples in the initial train split. If `None` and `forecaster` is 
+        already trained, no initial train is done and all data is used to evaluate the 
+        model. However, the first `len(forecaster.last_window)` observations are needed 
+        to create the initial predictors, so no predictions are calculated for them. 
+        This useful to backtest the model on the same data used to train it.
+        `None` is only allowed when `refit` is `False` and `forecaster` is already
+        trained.
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
-
     gap : int, default `0`
         Number of samples to be excluded after the end of each training set and 
         before the test set.
-        
     allow_incomplete_fold : bool, default `True`
         Last fold is allowed to have a smaller number of samples than the 
         `test_size`. If `False`, the last fold is excluded.
-        
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
-
     refit : bool, default `False`
         Whether to re-fit the forecaster in each iteration.
-
     interval : list, default `None`
         Confidence of the prediction interval estimated. Sequence of percentiles
         to compute, which must be between 0 and 100 inclusive. For example, 
         interval of 95% should be as `interval = [2.5, 97.5]`. If `None`, no
-        intervals are estimated. Only available for forecaster of type 
-        ForecasterAutoreg and ForecasterAutoregCustom.
-            
+        intervals are estimated.
     n_boot : int, default `500`
         Number of bootstrapping iterations used to estimate prediction
         intervals.
-
     random_state : int, default `123`
         Sets a seed to the random generator, so that boot intervals are always 
         deterministic.
-
     in_sample_residuals : bool, default `True`
-        If `True`, residuals from the training data are used as proxy of
-        prediction error to create prediction intervals.  If `False`, out_sample_residuals
+        If `True`, residuals from the training data are used as proxy of prediction 
+        error to create prediction intervals.  If `False`, out_sample_residuals 
         are used if they are already stored inside the forecaster.
-                  
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
         for backtesting.
-
     show_progress: bool, default `True`
         Whether to show a progress bar. Defaults to True.
 
@@ -821,12 +751,12 @@ def backtesting_forecaster(
     -------
     metrics_value : float, list
         Value(s) of the metric(s).
-
     backtest_predictions : pandas DataFrame
         Value of predictions and their estimated interval if `interval` is not `None`.
-            column pred = predictions.
-            column lower_bound = lower bound of the interval.
-            column upper_bound = upper bound interval of the interval.
+
+            - column pred: predictions.
+            - column lower_bound: lower bound of the interval.
+            - column upper_bound: upper bound of the interval.
     
     """
     
@@ -928,59 +858,41 @@ def grid_search_forecaster(
     ----------
     forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect
         Forcaster model.
-        
     y : pandas Series
         Training time series values. 
-        
     param_grid : dict
         Dictionary with parameters names (`str`) as keys and lists of parameter
         settings to try as values.
-
     steps : int
         Number of steps to predict.
-        
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-        If string:
-            {'mean_squared_error', 'mean_absolute_error',
+            - If string: {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
-    
-        If Callable:
-            Function with arguments y_true, y_pred that returns a float.
-
-        If list:
-            List containing multiple strings and/or Callables.
-
+            - If Callable: Function with arguments y_true, y_pred that returns a float.
+            - If list: List containing multiple strings and/or Callables.
     initial_train_size : int 
         Number of samples in the initial train split.
- 
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
-
     gap : int, default `0`
         Number of samples to be excluded after the end of each training set and 
         before the test set.
-        
     allow_incomplete_fold : bool, default `True`
         Last fold is allowed to have a smaller number of samples than the 
         `test_size`. If `False`, the last fold is excluded.
-
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
-           
     lags_grid : list of int, lists, numpy ndarray or range, default `None`
         Lists of `lags` to try. Only used if forecaster is an instance of 
         `ForecasterAutoreg` or `ForecasterAutoregDirect`.
-        
     refit : bool, default `False`
         Whether to re-fit the forecaster in each iteration of backtesting.
-        
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
-        
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
 
@@ -988,10 +900,11 @@ def grid_search_forecaster(
     -------
     results : pandas DataFrame
         Results for each combination of parameters.
-            column lags = predictions.
-            column params = lower bound of the interval.
-            column metric = metric value estimated for the combination of parameters.
-            additional n columns with param = value.
+
+            - column lags: lags configuration for each iteration.
+            - column params: parameters configuration for each iteration.
+            - column metric: metric value estimated for each iteration.
+            - additional n columns with param = value.
     
     """
 
@@ -1036,73 +949,53 @@ def random_search_forecaster(
     verbose: bool=True
 ) -> pd.DataFrame:
     """
-    Random search over specified parameter values or distributions for a Forecaster object.
-    Validation is done using time series backtesting.
+    Random search over specified parameter values or distributions for a Forecaster 
+    object. Validation is done using time series backtesting.
     
     Parameters
     ----------
     forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect
         Forcaster model.
-        
     y : pandas Series
         Training time series. 
-        
     param_distributions : dict
         Dictionary with parameters names (`str`) as keys and 
         distributions or lists of parameters to try.
-
     steps : int
         Number of steps to predict.
-        
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-        If string:
-            {'mean_squared_error', 'mean_absolute_error',
+            - If string: {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
-    
-        If Callable:
-            Function with arguments y_true, y_pred that returns a float.
-
-        If list:
-            List containing multiple strings and/or Callables.
-
+            - If Callable: Function with arguments y_true, y_pred that returns a float.
+            - If list: List containing multiple strings and/or Callables.
     initial_train_size : int 
         Number of samples in the initial train split.
- 
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
-
     gap : int, default `0`
         Number of samples to be excluded after the end of each training set and 
         before the test set.
-        
     allow_incomplete_fold : bool, default `True`
         Last fold is allowed to have a smaller number of samples than the 
         `test_size`. If `False`, the last fold is excluded.
-
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
-        regressed on exog[i].
-           
+        regressed on exog[i]. 
     lags_grid : list of int, lists, numpy ndarray or range, default `None`
         Lists of `lags` to try. Only used if forecaster is an instance of 
         `ForecasterAutoreg` or `ForecasterAutoregDirect`.
-        
     refit : bool, default `False`
         Whether to re-fit the forecaster in each iteration of backtesting.
-
     n_iter : int, default `10`
         Number of parameter settings that are sampled per lags configuration. 
         n_iter trades off runtime vs quality of the solution.
-
     random_state : int, default `123`
         Sets a seed to the random sampling for reproducible output.
-
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
-        
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
 
@@ -1110,10 +1003,11 @@ def random_search_forecaster(
     -------
     results : pandas DataFrame
         Results for each combination of parameters.
-            column lags = predictions.
-            column params = lower bound of the interval.
-            column metric = metric value estimated for the combination of parameters.
-            additional n columns with param = value.
+
+            - column lags: lags configuration for each iteration.
+            - column params: parameters configuration for each iteration.
+            - column metric: metric value estimated for each iteration.
+            - additional n columns with param = value.
     
     """
 
@@ -1162,59 +1056,41 @@ def _evaluate_grid_hyperparameters(
     ----------
     forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect
         Forcaster model.
-        
     y : pandas Series
         Training time series values. 
-        
     param_grid : dict
         Dictionary with parameters names (`str`) as keys and lists of parameter
         settings to try as values.
-
     steps : int
         Number of steps to predict.
-        
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-        If string:
-            {'mean_squared_error', 'mean_absolute_error',
+            - If string: {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
-    
-        If Callable:
-            Function with arguments y_true, y_pred that returns a float.
-
-        If list:
-            List containing multiple strings and/or Callables.
-
+            - If Callable: Function with arguments y_true, y_pred that returns a float.
+            - If list: List containing multiple strings and/or Callables.
     initial_train_size : int 
         Number of samples in the initial train split.
- 
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
-
     gap : int, default `0`
         Number of samples to be excluded after the end of each training set and 
         before the test set.
-        
     allow_incomplete_fold : bool, default `True`
         Last fold is allowed to have a smaller number of samples than the 
         `test_size`. If `False`, the last fold is excluded.
-
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
-        regressed on exog[i].
-           
+        regressed on exog[i]. 
     lags_grid : list of int, lists, numpy ndarray or range, default `None`
         Lists of `lags` to try. Only used if forecaster is an instance of 
         `ForecasterAutoreg` or `ForecasterAutoregDirect`.
-        
     refit : bool, default `False`
         Whether to re-fit the forecaster in each iteration of backtesting.
-        
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
-        
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
 
@@ -1222,10 +1098,11 @@ def _evaluate_grid_hyperparameters(
     -------
     results : pandas DataFrame
         Results for each combination of parameters.
-            column lags = predictions.
-            column params = lower bound of the interval.
-            column metric = metric value estimated for the combination of parameters.
-            additional n columns with param = value.
+
+            - column lags: lags configuration for each iteration.
+            - column params: parameters configuration for each iteration.
+            - column metric: metric value estimated for each iteration.
+            - additional n columns with param = value.
 
     """
 
@@ -1323,7 +1200,7 @@ def _evaluate_grid_hyperparameters(
 def bayesian_search_forecaster(
     forecaster,
     y: pd.Series,
-    search_space: Union[Callable, dict],
+    search_space: Callable,
     steps: int,
     metric: Union[str, Callable, list],
     initial_train_size: int,
@@ -1350,113 +1227,72 @@ def bayesian_search_forecaster(
     ----------
     forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect
         Forcaster model.
-        
     y : pandas Series
         Training time series. 
-        
-    search_space : Callable (optuna), dict (skopt)
-        If optuna engine: Callable
-            Function with argument `trial` which returns a dictionary with parameters names 
-            (`str`) as keys and Trial object from optuna (trial.suggest_float, 
-            trial.suggest_int, trial.suggest_categorical) as values.
-
-        If skopt engine: dict
-            Dictionary with parameters names (`str`) as keys and Space object from skopt 
-            (Real, Integer, Categorical) as values.
-            **Deprecated in version 0.7.0**
-
+    search_space : Callable (optuna)
+        Function with argument `trial` which returns a dictionary with parameters names 
+        (`str`) as keys and Trial object from optuna (trial.suggest_float, 
+        trial.suggest_int, trial.suggest_categorical) as values.
     steps : int
         Number of steps to predict.
-        
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-        If string:
-            {'mean_squared_error', 'mean_absolute_error',
+            - If string: {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
-    
-        If Callable:
-            Function with arguments y_true, y_pred that returns a float.
-
-        If list:
-            List containing multiple strings and/or Callables.
-
+            - If Callable: Function with arguments y_true, y_pred that returns a float.
+            - If list: List containing multiple strings and/or Callables.
     initial_train_size : int 
         Number of samples in the initial train split.
- 
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
-
     gap : int, default `0`
         Number of samples to be excluded after the end of each training set and 
         before the test set.
-        
     allow_incomplete_fold : bool, default `True`
         Last fold is allowed to have a smaller number of samples than the 
         `test_size`. If `False`, the last fold is excluded.
-
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
-        regressed on exog[i].
-           
+        regressed on exog[i]. 
     lags_grid : list of int, lists, numpy ndarray or range, default `None`
         Lists of `lags` to try. Only used if forecaster is an instance of 
         `ForecasterAutoreg` or `ForecasterAutoregDirect`.
-        
     refit : bool, default `False`
         Whether to re-fit the forecaster in each iteration of backtesting.
-        
     n_trials : int, default `10`
         Number of parameter settings that are sampled in each lag configuration.
-        When using engine "skopt", the minimum value is 10.
-
     random_state : int, default `123`
         Sets a seed to the sampling for reproducible output.
-
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
-        
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
-
     engine : str, default `'optuna'`
-        If 'optuna':
-            Bayesian optimization runs through the optuna library.
-
-        If 'skopt':
-            Bayesian optimization runs through the skopt library.
-            **Deprecated in version 0.7.0**
-
+        Bayesian optimization runs through the optuna library.
     kwargs_create_study : dict, default `{'direction':'minimize', 'sampler':TPESampler(seed=123)}`
-        Only applies to engine='optuna'.
-            Keyword arguments (key, value mappings) to pass to optuna.create_study.
-
+        Only applies to engine='optuna'. Keyword arguments (key, value mappings) 
+        to pass to optuna.create_study.
     kwargs_study_optimize : dict, default `{}`
-        Only applies to engine='optuna'.
-            Other keyword arguments (key, value mappings) to pass to study.optimize().
-
+        Only applies to engine='optuna'. Other keyword arguments (key, value mappings) 
+        to pass to study.optimize().
     kwargs_gp_minimize : dict, default `{}`
-        Only applies to engine='skopt'.
-            Other keyword arguments (key, value mappings) to pass to skopt.gp_minimize().
-            **Deprecated in version 0.7.0**
+        Only applies to engine='skopt'. Other keyword arguments (key, value mappings) 
+        to pass to skopt.gp_minimize().
+        **Deprecated in version 0.7.0**
 
     Returns
     -------
     results : pandas DataFrame
         Results for each combination of parameters.
-            column lags = predictions.
-            column params = lower bound of the interval.
-            column metric = metric value estimated for the combination of parameters.
-            additional n columns with param = value.
 
-    results_opt_best : optuna object (optuna), scipy object (skopt)   
-        If optuna engine:
-            The best optimization result returned as a FrozenTrial optuna object.
-
-        If skopt engine:
-            The best optimization result returned as a OptimizeResult object.
-            **Deprecated in version 0.7.0**
+            - column lags: lags configuration for each iteration.
+            - column params: parameters configuration for each iteration.
+            - column metric: metric value estimated for each iteration.
+            - additional n columns with param = value.
+    results_opt_best : optuna object (optuna)  
+        The best optimization result returned as a FrozenTrial optuna object.
     
     """
 
@@ -1531,72 +1367,50 @@ def _bayesian_search_optuna(
     ----------
     forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect
         Forcaster model.
-        
     y : pandas Series
         Training time series. 
-        
     search_space : Callable
         Function with argument `trial` which returns a dictionary with parameters names 
         (`str`) as keys and Trial object from optuna (trial.suggest_float, 
         trial.suggest_int, trial.suggest_categorical) as values.
-
     steps : int
         Number of steps to predict.
-        
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-        If string:
-            {'mean_squared_error', 'mean_absolute_error',
+            - If string: {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
-    
-        If Callable:
-            Function with arguments y_true, y_pred that returns a float.
-
-        If list:
-            List containing multiple strings and/or Callables.
-
+            - If Callable: Function with arguments y_true, y_pred that returns a float.
+            - If list: List containing multiple strings and/or Callables.
     initial_train_size : int 
         Number of samples in the initial train split.
- 
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
-
     gap : int, default `0`
         Number of samples to be excluded after the end of each training set and 
         before the test set.
-        
     allow_incomplete_fold : bool, default `True`
         Last fold is allowed to have a smaller number of samples than the 
         `test_size`. If `False`, the last fold is excluded.
-
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
-           
     lags_grid : list of int, lists, numpy ndarray or range, default `None`
         Lists of `lags` to try. Only used if forecaster is an instance of 
         `ForecasterAutoreg` or `ForecasterAutoregDirect`.
-        
     refit : bool, default `False`
         Whether to re-fit the forecaster in each iteration of backtesting.
-        
     n_trials : int, default `10`
         Number of parameter settings that are sampled in each lag configuration.
-
     random_state : int, default `123`
         Sets a seed to the sampling for reproducible output.
-
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
-        
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
-
     kwargs_create_study : dict, default `{'direction':'minimize', 'sampler':TPESampler(seed=123)}`
         Keyword arguments (key, value mappings) to pass to optuna.create_study.
-
     kwargs_study_optimize : dict, default `{}`
         Other keyword arguments (key, value mappings) to pass to study.optimize().
 
@@ -1604,11 +1418,11 @@ def _bayesian_search_optuna(
     -------
     results : pandas DataFrame
         Results for each combination of parameters.
-            column lags = predictions.
-            column params = lower bound of the interval.
-            column metric = metric value estimated for the combination of parameters.
-            additional n columns with param = value.
 
+            - column lags: lags configuration for each iteration.
+            - column params: parameters configuration for each iteration.
+            - column metric: metric value estimated for each iteration.
+            - additional n columns with param = value.
     results_opt_best : optuna object
         The best optimization result returned as a FrozenTrial optuna object.
 
@@ -1746,7 +1560,8 @@ def _bayesian_search_optuna(
         forecaster.fit(y=y, exog=exog)
         
         print(
-            f"`Forecaster` refitted using the best-found lags and parameters, and the whole data set: \n"
+            f"`Forecaster` refitted using the best-found lags and parameters, "
+            f"and the whole data set: \n"
             f"  Lags: {best_lags} \n"
             f"  Parameters: {best_params}\n"
             f"  Backtesting metric: {best_metric}\n"

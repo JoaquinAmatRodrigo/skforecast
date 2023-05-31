@@ -34,23 +34,20 @@ def plot_residuals(
     residuals : pandas Series, numpy ndarray, default `None`.
         Values of residuals. If `None`, residuals are calculated internally using
         `y_true` and `y_true`.
-
     y_true : pandas Series, numpy ndarray, default `None`.
         Ground truth (correct) values. Ignored if residuals is not `None`.
-
     y_pred : pandas Series, numpy ndarray, default `None`. 
         Values of predictions. Ignored if residuals is not `None`.
-        
     fig : matplotlib.figure.Figure, default `None`. 
         Pre-existing fig for the plot. Otherwise, call matplotlib.pyplot.figure()
         internally.
-        
     fig_kw : dict
         Other keyword arguments are passed to matplotlib.pyplot.figure()
-        
+
     Returns
     -------
     fig: matplotlib.figure.Figure
+        Matplotlib Figure.
     
     """
     
@@ -93,17 +90,16 @@ def plot_multivariate_time_series_corr(
     ----------
     corr : pandas DataFrame
         correlation matrix
-
     ax : matplotlib.axes.Axes, default `None`. 
-        Pre-existing ax for the plot. Otherwise, call matplotlib.pyplot.subplots()
+        Pre-existing ax for the plot. Otherwise, call matplotlib.pyplot.subplots() 
         internally.
-
     fig_kw : dict
         Other keyword arguments are passed to matplotlib.pyplot.subplots()
     
     Returns
     -------
     fig: matplotlib.figure.Figure
+        Matplotlib Figure.
 
     """
 
@@ -129,26 +125,25 @@ def plot_prediction_distribution(
     **fig_kw
 ) -> matplotlib.figure.Figure:
     """
-    Ridge plot of bootstrapping predictions. This plot is very useful to understand the
-    uncertainty of forecasting predictions.
+    Ridge plot of bootstrapping predictions. This plot is very useful to understand 
+    the uncertainty of forecasting predictions.
 
     Parameters
     ----------
     bootstrapping_predictions : pandas DataFrame
         Bootstrapping predictions created with `Forecaster.predict_bootstrapping`.
-
     bw_method : str, scalar, Callable, default `None`
-        The method used to calculate the estimator bandwidth. This can be 'scott',
-        'silverman', a scalar constant or a Callable. If None (default), 'scott' is used.
-        See scipy.stats.gaussian_kde for more information.
-
+        The method used to calculate the estimator bandwidth. This can be 'scott', 
+        'silverman', a scalar constant or a Callable. If None (default), 'scott' 
+        is used. See scipy.stats.gaussian_kde for more information.
     fig_kw : dict
         All additional keyword arguments are passed to the `pyplot.figure` call.
 
     Returns
-    ------
+    -------
     fig : matplotlib.figure.Figure
-    axes: numpy.ndarray of matplotlib.axes.Axes
+        Matplotlib Figure.
+    
     """
 
     index = bootstrapping_predictions.index.astype(str).to_list()[::-1]

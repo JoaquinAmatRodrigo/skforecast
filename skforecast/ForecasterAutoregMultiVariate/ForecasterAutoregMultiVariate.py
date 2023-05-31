@@ -1152,7 +1152,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
 
                 - pred: predictions.
                 - lower_bound: lower bound of the interval.
-                - upper_bound: upper bound interval of the interval.
+                - upper_bound: upper bound of the interval.
 
         Notes
         -----

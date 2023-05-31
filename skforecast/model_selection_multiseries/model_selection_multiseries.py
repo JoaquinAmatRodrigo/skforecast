@@ -64,71 +64,51 @@ def _backtesting_forecaster_multiseries_refit(
     ----------
     forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate
         Forecaster model.
-        
     series : pandas DataFrame
         Training time series.
-        
     steps : int
         Number of steps to predict.
-        
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-        If string:
-            {'mean_squared_error', 'mean_absolute_error',
+            - If string: {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
-    
-        If Callable:
-            Function with arguments y_true, y_pred that returns a float.
-
-        If list:
-            List containing multiple strings and/or Callables.
-    
+            - If Callable: Function with arguments y_true, y_pred that returns a float.
+            - If list: List containing multiple strings and/or Callables.
     initial_train_size : int
         Number of samples in the initial train split. The backtest forecaster is
         trained using the first `initial_train_size` observations.
-        
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
-
     gap : int, default `0`
         Number of samples to be excluded after the end of each training set and 
         before the test set.
-        
     allow_incomplete_fold : bool, default `True`
         Last fold is allowed to have a smaller number of samples than the 
         `test_size`. If `False`, the last fold is excluded.
-
     levels : str, list, default `None`
         Time series to be predicted. If `None` all levels will be predicted.
-
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
-
     interval : list, default `None`
         Confidence of the prediction interval estimated. Sequence of percentiles
         to compute, which must be between 0 and 100 inclusive. If `None`, no
-        intervals are estimated. Only available for forecaster of type ForecasterAutoreg
-        and ForecasterAutoregCustom.
-            
+        intervals are estimated.
     n_boot : int, default `500`
         Number of bootstrapping iterations used to estimate prediction
         intervals.
-
     random_state : int, default `123`
         Sets a seed to the random generator, so that boot intervals are always 
         deterministic.
-
     in_sample_residuals : bool, default `True`
-        If `True`, residuals from the training data are used as proxy of
-        prediction error to create prediction intervals. If `False`, out_sample_residuals
+        If `True`, residuals from the training data are used as proxy of prediction
+        error to create prediction intervals. If `False`, out_sample_residuals 
         are used if they are already stored inside the forecaster.
-            
     verbose : bool, default `False`
-        Print number of folds and index of training and validation sets used for backtesting.
-
+        Print number of folds and index of training and validation sets used 
+        for backtesting.
     show_progress: bool, default `True`
         Whether to show a progress bar. Defaults to True.
 
@@ -136,13 +116,13 @@ def _backtesting_forecaster_multiseries_refit(
     -------
     metrics_levels : pandas DataFrame
         Value(s) of the metric(s). Index are the levels and columns the metrics.
-
     backtest_predictions : pandas Dataframe
         Value of predictions and their estimated interval if `interval` is not `None`.
         If there is more than one level, this structure will be repeated for each of them.
-            column pred = predictions.
-            column lower_bound = lower bound of the interval.
-            column upper_bound = upper bound interval of the interval.
+
+            - column pred: predictions.
+            - column lower_bound: lower bound of the interval.
+            - column upper_bound: upper bound of the interval.
     
     """
 
@@ -283,70 +263,54 @@ def _backtesting_forecaster_multiseries_no_refit(
     ----------
     forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate
         Forecaster model.
-        
     series : pandas DataFrame
         Training time series.
-        
     steps : int
         Number of steps to predict.
-        
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-        If string:
-            {'mean_squared_error', 'mean_absolute_error',
+            - If string: {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
-    
-        If Callable:
-            Function with arguments y_true, y_pred that returns a float.
-
-        If list:
-            List containing multiple strings and/or Callables.
-    
+            - If Callable: Function with arguments y_true, y_pred that returns a float.
+            - If list: List containing multiple strings and/or Callables.
     initial_train_size : int, default `None`
-        Number of samples in the initial train split. If `None` and `forecaster` is already
-        trained, no initial train is done and all data is used to evaluate the model. However, 
-        the first `len(forecaster.last_window)` observations are needed to create the 
-        initial predictors, so no predictions are calculated for them.
-
+        Number of samples in the initial train split. If `None` and `forecaster` is 
+        already trained, no initial train is done and all data is used to evaluate the 
+        model. However, the first `len(forecaster.last_window)` observations are needed 
+        to create the initial predictors, so no predictions are calculated for them. 
+        This useful to backtest the model on the same data used to train it.
+        `None` is only allowed when `refit` is `False` and `forecaster` is already
+        trained.
     gap : int, default `0`
         Number of samples to be excluded after the end of each training set and 
         before the test set.
-    
     allow_incomplete_fold : bool, default `True`
         Last fold is allowed to have a smaller number of samples than the 
         `test_size`. If `False`, the last fold is excluded.
-
     levels : str, list, default `None`
         Time series to be predicted. If `None` all levels will be predicted.
-        
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
-
     interval : list, default `None`
         Confidence of the prediction interval estimated. Sequence of percentiles
         to compute, which must be between 0 and 100 inclusive. If `None`, no
-        intervals are estimated. Only available for forecaster of type ForecasterAutoreg
-        and ForecasterAutoregCustom.
-            
+        intervals are estimated.
     n_boot : int, default `500`
         Number of bootstrapping iterations used to estimate prediction
         intervals.
-
     random_state : int, default `123`
         Sets a seed to the random generator, so that boot intervals are always 
         deterministic.
-
     in_sample_residuals : bool, default `True`
-        If `True`, residuals from the training data are used as proxy of
-        prediction error to create prediction intervals.  If `False`, out_sample_residuals
+        If `True`, residuals from the training data are used as proxy of prediction 
+        error to create prediction intervals.  If `False`, out_sample_residuals 
         are used if they are already stored inside the forecaster.
-            
     verbose : bool, default `False`
-        Print number of folds and index of training and validation sets used for backtesting.
-
+        Print number of folds and index of training and validation sets used 
+        for backtesting.
     show_progress: bool, default `True`
         Whether to show a progress bar. Defaults to True.
 
@@ -354,13 +318,13 @@ def _backtesting_forecaster_multiseries_no_refit(
     -------
     metrics_levels : pandas DataFrame
         Value(s) of the metric(s). Index are the levels and columns the metrics.
-
     backtest_predictions : pandas DataFrame
         Value of predictions and their estimated interval if `interval` is not `None`.
         If there is more than one level, this structure will be repeated for each of them.
-            column pred = predictions.
-            column lower_bound = lower bound of the interval.
-            column upper_bound = upper bound interval of the interval.
+
+            - column pred: predictions.
+            - column lower_bound: lower bound of the interval.
+            - column upper_bound: upper bound of the interval.     
     
     """
 
@@ -499,80 +463,58 @@ def backtesting_forecaster_multiseries(
     ----------
     forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate
         Forecaster model.
-
     series : pandas DataFrame
         Training time series.
-        
     steps : int
         Number of steps to predict.
-        
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-        If string:
-            {'mean_squared_error', 'mean_absolute_error',
+            - If string: {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
-    
-        If Callable:
-            Function with arguments y_true, y_pred that returns a float.
-
-        If list:
-            List containing multiple strings and/or Callables.
-    
+            - If Callable: Function with arguments y_true, y_pred that returns a float.
+            - If list: List containing multiple strings and/or Callables.
     initial_train_size : int, default `None`
-        Number of samples in the initial train split. If `None` and `forecaster` is already 
-        trained, no initial train is done and all data is used to evaluate the model. However, 
-        the first `len(forecaster.last_window)` observations are needed to create the 
-        initial predictors, so no predictions are calculated for them.
-
-        `None` is only allowed when `refit` is `False`.
-    
+        Number of samples in the initial train split. If `None` and `forecaster` is 
+        already trained, no initial train is done and all data is used to evaluate the 
+        model. However, the first `len(forecaster.last_window)` observations are needed 
+        to create the initial predictors, so no predictions are calculated for them. 
+        This useful to backtest the model on the same data used to train it.
+        `None` is only allowed when `refit` is `False` and `forecaster` is already
+        trained.
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
-
     gap : int, default `0`
         Number of samples to be excluded after the end of each training set and 
         before the test set.
-        
     allow_incomplete_fold : bool, default `True`
         Last fold is allowed to have a smaller number of samples than the 
         `test_size`. If `False`, the last fold is excluded.
-
     levels : str, list, default `None`
         Time series to be predicted. If `None` all levels will be predicted.
-        **New in version 0.6.0**
-        
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
-
     refit : bool, default `False`
         Whether to re-fit the forecaster in each iteration.
-
     interval : list, default `None`
         Confidence of the prediction interval estimated. Sequence of percentiles
         to compute, which must be between 0 and 100 inclusive. If `None`, no
-        intervals are estimated. Only available for forecaster of type ForecasterAutoreg
-        and ForecasterAutoregCustom.
-            
+        intervals are estimated.
     n_boot : int, default `500`
         Number of bootstrapping iterations used to estimate prediction
         intervals.
-
     random_state : int, default `123`
         Sets a seed to the random generator, so that boot intervals are always 
         deterministic.
-
     in_sample_residuals : bool, default `True`
-        If `True`, residuals from the training data are used as proxy of
-        prediction error to create prediction intervals.  If `False`, out_sample_residuals
-        are used if they are already stored inside the forecaster.
-                  
+        If `True`, residuals from the training data are used as proxy of prediction 
+        error to create prediction intervals.  If `False`, out_sample_residuals 
+        are used if they are already stored inside the forecaster.   
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
         for backtesting.
-
     show_progress: bool, default `True`
         Whether to show a progress bar. Defaults to True.
 
@@ -580,13 +522,13 @@ def backtesting_forecaster_multiseries(
     -------
     metrics_levels : pandas DataFrame
         Value(s) of the metric(s). Index are the levels and columns the metrics.
-
     backtest_predictions : pandas DataFrame
         Value of predictions and their estimated interval if `interval` is not `None`.
         If there is more than one level, this structure will be repeated for each of them.
-            column pred = predictions.
-            column lower_bound = lower bound of the interval.
-            column upper_bound = upper bound interval of the interval.
+
+            - column pred: predictions.
+            - column lower_bound: lower bound of the interval.
+            - column upper_bound: upper bound of the interval.
     
     """
 
@@ -704,64 +646,45 @@ def grid_search_forecaster_multiseries(
     ----------
     forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate
         Forcaster model.
-        
     series : pandas DataFrame
         Training time series.
-        
     param_grid : dict
         Dictionary with parameters names (`str`) as keys and lists of parameter
         settings to try as values.
-
     steps : int
         Number of steps to predict.
-        
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-        If string:
-            {'mean_squared_error', 'mean_absolute_error',
+            - If string: {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
-    
-        If Callable:
-            Function with arguments y_true, y_pred that returns a float.
-
-        If list:
-            List containing multiple strings and/or Callables.
-
+            - If Callable: Function with arguments y_true, y_pred that returns a float.
+            - If list: List containing multiple strings and/or Callables.
     initial_train_size : int 
         Number of samples in the initial train split.
- 
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
-
     gap : int, default `0`
         Number of samples to be excluded after the end of each training set and 
         before the test set.
-        
     allow_incomplete_fold : bool, default `True`
         Last fold is allowed to have a smaller number of samples than the 
         `test_size`. If `False`, the last fold is excluded.
-
     levels : str, list, default `None`
         level (`str`) or levels (`list`) at which the forecaster is optimized. 
         If `None`, all levels are taken into account. The resulting metric will be
         the average of the optimization of all levels.
-
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
-           
     lags_grid : list of int, lists, np.narray or range, default `None`
         Lists of `lags` to try. Only used if forecaster is an instance of 
         `ForecasterAutoregMultiSeries` or `ForecasterAutoregMultiVariate`.
-        
     refit : bool, default `False`
         Whether to re-fit the forecaster in each iteration of backtesting.
-        
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
-        
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
 
@@ -769,13 +692,13 @@ def grid_search_forecaster_multiseries(
     -------
     results : pandas DataFrame
         Results for each combination of parameters.
-            column levels = levels.
-            column lags = predictions.
-            column params = lower bound of the interval.
-            column metric = metric(s) value(s) estimated for each combination of 
-                            parameters. The resulting metric will be the average 
-                            of the optimization of all levels.
-            additional n columns with param = value.
+
+            - column levels: levels configuration for each iteration.
+            - column lags: lags configuration for each iteration.
+            - column params: parameters configuration for each iteration.
+            - column metric: metric value estimated for each iteration. The resulting 
+            metric will be the average of the optimization of all levels.
+            - additional n columns with param = value.
     
     """
 
@@ -829,71 +752,50 @@ def random_search_forecaster_multiseries(
     ----------
     forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate
         Forcaster model.
-        
     series : pandas DataFrame
         Training time series.
-        
     param_distributions : dict
-        Dictionary with parameters names (`str`) as keys and 
-        distributions or lists of parameters to try.
-
+        Dictionary with parameters names (`str`) as keys and distributions or 
+        lists of parameters to try.
     steps : int
         Number of steps to predict.
-        
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-        If string:
-            {'mean_squared_error', 'mean_absolute_error',
+            - If string: {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
-    
-        If Callable:
-            Function with arguments y_true, y_pred that returns a float.
-
-        If list:
-            List containing multiple strings and/or Callables.
-
+            - If Callable: Function with arguments y_true, y_pred that returns a float.
+            - If list: List containing multiple strings and/or Callables.
     initial_train_size : int 
         Number of samples in the initial train split.
- 
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
-
     gap : int, default `0`
         Number of samples to be excluded after the end of each training set and 
         before the test set.
-        
     allow_incomplete_fold : bool, default `True`
         Last fold is allowed to have a smaller number of samples than the 
         `test_size`. If `False`, the last fold is excluded.
-
     levels : str, list, default `None`
         level (`str`) or levels (`list`) at which the forecaster is optimized. 
         If `None`, all levels are taken into account. The resulting metric will be
         the average of the optimization of all levels.
-
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
-           
     lags_grid : list of int, lists, np.narray or range, default `None`
         Lists of `lags` to try. Only used if forecaster is an instance of 
         `ForecasterAutoregMultiSeries` or `ForecasterAutoregMultiVariate`.
-        
     refit : bool, default `False`
         Whether to re-fit the forecaster in each iteration of backtesting.
-
     n_iter : int, default `10`
         Number of parameter settings that are sampled per lags configuration. 
         n_iter trades off runtime vs quality of the solution.
-
     random_state : int, default `123`
         Sets a seed to the random sampling for reproducible output.
-
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
-        
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
 
@@ -901,13 +803,13 @@ def random_search_forecaster_multiseries(
     -------
     results : pandas DataFrame
         Results for each combination of parameters.
-            column levels = levels.
-            column lags = predictions.
-            column params = lower bound of the interval.
-            column metric = metric(s) value(s) estimated for each combination of 
-                            parameters. The resulting metric will be the average 
-                            of the optimization of all levels.
-            additional n columns with param = value.
+
+            - column levels: levels configuration for each iteration.
+            - column lags: lags configuration for each iteration.
+            - column params: parameters configuration for each iteration.
+            - column metric: metric value estimated for each iteration. The resulting 
+            metric will be the average of the optimization of all levels.
+            - additional n columns with param = value.
     
     """
 
@@ -959,64 +861,45 @@ def _evaluate_grid_hyperparameters_multiseries(
     ----------
     forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate
         Forcaster model.
-
     series : pandas DataFrame
         Training time series.
-        
     param_grid : dict
         Dictionary with parameters names (`str`) as keys and lists of parameter
         settings to try as values.
-
     steps : int
         Number of steps to predict.
-        
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-        If string:
-            {'mean_squared_error', 'mean_absolute_error',
+            - If string: {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
-    
-        If Callable:
-            Function with arguments y_true, y_pred that returns a float.
-
-        If list:
-            List containing multiple strings and/or Callables.
-
+            - If Callable: Function with arguments y_true, y_pred that returns a float.
+            - If list: List containing multiple strings and/or Callables.
     initial_train_size : int 
         Number of samples in the initial train split.
- 
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
-
     gap : int, default `0`
         Number of samples to be excluded after the end of each training set and 
         before the test set.
-        
     allow_incomplete_fold : bool, default `True`
         Last fold is allowed to have a smaller number of samples than the 
         `test_size`. If `False`, the last fold is excluded.
-
     levels : str, list, default `None`
         level (`str`) or levels (`list`) at which the forecaster is optimized. 
         If `None`, all levels are taken into account. The resulting metric will be
         the average of the optimization of all levels.
-
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
-           
     lags_grid : list of int, lists, np.narray or range, default `None`
         Lists of `lags` to try. Only used if forecaster is an instance of 
         `ForecasterAutoregMultiSeries` or `ForecasterAutoregMultiVariate`.
-        
     refit : bool, default `False`
         Whether to re-fit the forecaster in each iteration of backtesting.
-        
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
-        
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
 
@@ -1024,13 +907,13 @@ def _evaluate_grid_hyperparameters_multiseries(
     -------
     results : pandas DataFrame
         Results for each combination of parameters.
-            column levels = levels.
-            column lags = predictions.
-            column params = lower bound of the interval.
-            column metric = metric(s) value(s) estimated for each combination of 
-                            parameters. The resulting metric will be the average 
-                            of the optimization of all levels.
-            additional n columns with param = value.
+
+            - column levels: levels configuration for each iteration.
+            - column lags: lags configuration for each iteration.
+            - column params: parameters configuration for each iteration.
+            - column metric: metric value estimated for each iteration. The resulting 
+            metric will be the average of the optimization of all levels.
+            - additional n columns with param = value.
     
     """
 
@@ -1192,79 +1075,58 @@ def backtesting_forecaster_multivariate(
     ----------
     forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate
         Forecaster model.
-
     series : pandas DataFrame
         Training time series.
-        
     steps : int
         Number of steps to predict.
-        
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-        If string:
-            {'mean_squared_error', 'mean_absolute_error',
+            - If string: {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
-    
-        If Callable:
-            Function with arguments y_true, y_pred that returns a float.
-
-        If list:
-            List containing multiple strings and/or Callables.
-    
+            - If Callable: Function with arguments y_true, y_pred that returns a float.
+            - If list: List containing multiple strings and/or Callables.
     initial_train_size : int, default `None`
-        Number of samples in the initial train split. If `None` and `forecaster` is already 
-        trained, no initial train is done and all data is used to evaluate the model. However, 
-        the first `len(forecaster.last_window)` observations are needed to create the 
-        initial predictors, so no predictions are calculated for them.
-
-        `None` is only allowed when `refit` is `False`.
-    
+        Number of samples in the initial train split. If `None` and `forecaster` is 
+        already trained, no initial train is done and all data is used to evaluate the 
+        model. However, the first `len(forecaster.last_window)` observations are needed 
+        to create the initial predictors, so no predictions are calculated for them. 
+        This useful to backtest the model on the same data used to train it.
+        `None` is only allowed when `refit` is `False` and `forecaster` is already
+        trained.
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
-
     gap : int, default `0`
         Number of samples to be excluded after the end of each training set and 
         before the test set.
-        
     allow_incomplete_fold : bool, default `True`
         Last fold is allowed to have a smaller number of samples than the 
         `test_size`. If `False`, the last fold is excluded.
-
     levels : str, list, default `None`
         Time series to be predicted. If `None` all levels will be predicted.
-        **New in version 0.6.0**
-        
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
-
     refit : bool, default `False`
         Whether to re-fit the forecaster in each iteration.
-
     interval : list, default `None`
         Confidence of the prediction interval estimated. Sequence of percentiles
         to compute, which must be between 0 and 100 inclusive. If `None`, no
-        intervals are estimated. Only available for forecaster of type ForecasterAutoreg
-        and ForecasterAutoregCustom.
-            
+        intervals are estimated.
     n_boot : int, default `500`
         Number of bootstrapping iterations used to estimate prediction
         intervals.
-
     random_state : int, default `123`
         Sets a seed to the random generator, so that boot intervals are always 
         deterministic.
-
     in_sample_residuals : bool, default `True`
-        If `True`, residuals from the training data are used as proxy of
-        prediction error to create prediction intervals.  If `False`, out_sample_residuals
-        are used if they are already stored inside the forecaster.
-                  
+        If `True`, residuals from the training data are used as proxy of prediction 
+        error to create prediction intervals.  If `False`, out_sample_residuals 
+        are used if they are already stored inside the forecaster.   
     verbose : bool, default `False`
-        Print number of folds and index of training and validation sets used for backtesting.
-
+        Print number of folds and index of training and validation sets used 
+        for backtesting.
     show_progress: bool, default `True`
         Whether to show a progress bar. Defaults to True.
 
@@ -1272,13 +1134,13 @@ def backtesting_forecaster_multivariate(
     -------
     metrics_levels : pandas DataFrame
         Value(s) of the metric(s). Index are the levels and columns the metrics.
-
     backtest_predictions : pandas DataFrame
         Value of predictions and their estimated interval if `interval` is not `None`.
         If there is more than one level, this structure will be repeated for each of them.
-            column pred = predictions.
-            column lower_bound = lower bound of the interval.
-            column upper_bound = upper bound interval of the interval.
+
+            - column pred: predictions.
+            - column lower_bound: lower bound of the interval.
+            - column upper_bound: upper bound of the interval.
     
     """
 
@@ -1333,64 +1195,45 @@ def grid_search_forecaster_multivariate(
     ----------
     forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate
         Forcaster model.
-        
     series : pandas DataFrame
         Training time series.
-        
     param_grid : dict
         Dictionary with parameters names (`str`) as keys and lists of parameter
         settings to try as values.
-
     steps : int
         Number of steps to predict.
-        
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-        If string:
-            {'mean_squared_error', 'mean_absolute_error',
+            - If string: {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
-    
-        If Callable:
-            Function with arguments y_true, y_pred that returns a float.
-
-        If list:
-            List containing multiple strings and/or Callables.
-
+            - If Callable: Function with arguments y_true, y_pred that returns a float.
+            - If list: List containing multiple strings and/or Callables.
     initial_train_size : int 
         Number of samples in the initial train split.
- 
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
-
     gap : int, default `0`
         Number of samples to be excluded after the end of each training set and 
         before the test set.
-        
     allow_incomplete_fold : bool, default `True`
         Last fold is allowed to have a smaller number of samples than the 
         `test_size`. If `False`, the last fold is excluded.
-
     levels : str, list, default `None`
         level (`str`) or levels (`list`) at which the forecaster is optimized. 
         If `None`, all levels are taken into account. The resulting metric will be
         the average of the optimization of all levels.
-
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
-           
     lags_grid : list of int, lists, np.narray or range, default `None`
         Lists of `lags` to try. Only used if forecaster is an instance of 
         `ForecasterAutoregMultiSeries` or `ForecasterAutoregMultiVariate`.
-        
     refit : bool, default `False`
         Whether to re-fit the forecaster in each iteration of backtesting.
-        
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
-        
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
 
@@ -1398,13 +1241,13 @@ def grid_search_forecaster_multivariate(
     -------
     results : pandas DataFrame
         Results for each combination of parameters.
-            column levels = levels.
-            column lags = predictions.
-            column params = lower bound of the interval.
-            column metric = metric(s) value(s) estimated for each combination of 
-                            parameters. The resulting metric will be the average 
-                            of the optimization of all levels.
-            additional n columns with param = value.
+
+            - column levels: levels configuration for each iteration.
+            - column lags: lags configuration for each iteration.
+            - column params: parameters configuration for each iteration.
+            - column metric: metric value estimated for each iteration. The resulting 
+            metric will be the average of the optimization of all levels.
+            - additional n columns with param = value.
     
     """
 
@@ -1453,76 +1296,55 @@ def random_search_forecaster_multivariate(
 
     Random search over specified parameter values or distributions for a Forecaster 
     object. Validation is done using multi-series backtesting.
-    
+
     Parameters
     ----------
     forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate
         Forcaster model.
-        
     series : pandas DataFrame
         Training time series.
-        
     param_distributions : dict
-        Dictionary with parameters names (`str`) as keys and 
-        distributions or lists of parameters to try.
-
+        Dictionary with parameters names (`str`) as keys and distributions or 
+        lists of parameters to try.
     steps : int
         Number of steps to predict.
-        
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-        If string:
-            {'mean_squared_error', 'mean_absolute_error',
+            - If string: {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
-    
-        If Callable:
-            Function with arguments y_true, y_pred that returns a float.
-
-        If list:
-            List containing multiple strings and/or Callables.
-
+            - If Callable: Function with arguments y_true, y_pred that returns a float.
+            - If list: List containing multiple strings and/or Callables.
     initial_train_size : int 
         Number of samples in the initial train split.
- 
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
-
     gap : int, default `0`
         Number of samples to be excluded after the end of each training set and 
         before the test set.
-        
     allow_incomplete_fold : bool, default `True`
         Last fold is allowed to have a smaller number of samples than the 
         `test_size`. If `False`, the last fold is excluded.
-
     levels : str, list, default `None`
         level (`str`) or levels (`list`) at which the forecaster is optimized. 
         If `None`, all levels are taken into account. The resulting metric will be
         the average of the optimization of all levels.
-
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
-           
     lags_grid : list of int, lists, np.narray or range, default `None`
         Lists of `lags` to try. Only used if forecaster is an instance of 
         `ForecasterAutoregMultiSeries` or `ForecasterAutoregMultiVariate`.
-        
     refit : bool, default `False`
         Whether to re-fit the forecaster in each iteration of backtesting.
-
     n_iter : int, default `10`
         Number of parameter settings that are sampled per lags configuration. 
         n_iter trades off runtime vs quality of the solution.
-
     random_state : int, default `123`
         Sets a seed to the random sampling for reproducible output.
-
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
-        
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
 
@@ -1530,14 +1352,14 @@ def random_search_forecaster_multivariate(
     -------
     results : pandas DataFrame
         Results for each combination of parameters.
-            column levels = levels.
-            column lags = predictions.
-            column params = lower bound of the interval.
-            column metric = metric(s) value(s) estimated for each combination of 
-                            parameters. The resulting metric will be the average 
-                            of the optimization of all levels.
-            additional n columns with param = value.
-    
+
+            - column levels: levels configuration for each iteration.
+            - column lags: lags configuration for each iteration.
+            - column params: parameters configuration for each iteration.
+            - column metric: metric value estimated for each iteration. The resulting 
+            metric will be the average of the optimization of all levels.
+            - additional n columns with param = value.
+
     """
 
     results = random_search_forecaster_multiseries(
