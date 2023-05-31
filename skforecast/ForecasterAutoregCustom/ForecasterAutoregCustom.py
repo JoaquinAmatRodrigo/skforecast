@@ -50,41 +50,32 @@ class ForecasterAutoregCustom(ForecasterBase):
     ----------
     regressor : regressor or pipeline compatible with the scikit-learn API
         An instance of a regressor or pipeline compatible with the scikit-learn API.
-        
     fun_predictors : Callable
-        Function that receives a time series as input (numpy ndarray) and returns
+        Function that receives a time series as input (numpy ndarray) and returns 
         another numpy ndarray with the predictors.
-        
     window_size : int
         Size of the window needed by `fun_predictors` to create the predictors.
-
     name_predictors : list, default `None`
         Name of the predictors returned by `fun_predictors`. If `None`, predictors are
         named using the prefix 'custom_predictor_<i>' where `i` is the index of the position
         the predictor has in the returned array of `fun_predictors`.
-
     transformer_y : object transformer (preprocessor), default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API with methods: fit, transform, fit_transform and inverse_transform.
         ColumnTransformers are not allowed since they do not have inverse_transform method.
         The transformation is applied to `y` before training the forecaster.
-
     transformer_exog : object transformer (preprocessor), default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API. The transformation is applied to `exog` before training the
         forecaster. `inverse_transform` is not available when using ColumnTransformers.
-    
     weight_func : Callable, default `None`
         Function that defines the individual weights for each sample based on the
         index. For example, a function that assigns a lower weight to certain dates.
         Ignored if `regressor` does not have the argument `sample_weight` in its `fit`
         method. The resulting `sample_weight` cannot have negative values.
-        **New in version 0.6.0**
-
     fit_kwargs : dict, default `None`
         Additional arguments to be passed to the `fit` method of the regressor.
         **New in version 0.8.0**
-
     forecaster_id : str, int, default `None`
         Name used as an identifier of the forecaster.
         **New in version 0.7.0**
@@ -93,106 +84,78 @@ class ForecasterAutoregCustom(ForecasterBase):
     ----------
     regressor : regressor compatible with the scikit-learn API
         An instance of a regressor compatible with the scikit-learn API.
-
     fun_predictors : Callable
         Function that receives a time series as input (numpy ndarray) and returns
         another numpy ndarray with the predictors.
         **New in version 0.7.0**
-
     source_code_fun_predictors : str
         Source code of the custom function used to create the predictors.
         **New in version 0.7.0**
-        
     window_size : int
         Size of the window needed by `fun_predictors` to create the predictors.
-
     name_predictors : list, default `None`
         Name of the predictors returned by `fun_predictors`. If `None`, predictors are
         named using the prefix 'custom_predictor_<i>' where `i` is the index of the position
         the predictor has in the returned array of `fun_predictors`.
-
     transformer_y : object transformer (preprocessor), default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API with methods: fit, transform, fit_transform and inverse_transform.
         ColumnTransformers are not allowed since they do not have inverse_transform method.
         The transformation is applied to `y` before training the forecaster.
-
     transformer_exog : object transformer (preprocessor), default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API. The transformation is applied to `exog` before training the
         forecaster. `inverse_transform` is not available when using ColumnTransformers.
-        
     weight_func : Callable
         Function that defines the individual weights for each sample based on the
         index. For example, a function that assigns a lower weight to certain dates.
         Ignored if `regressor` does not have the argument `sample_weight` in its `fit`
         method.
-        **New in version 0.6.0**
-
     source_code_weight_func : str
         Source code of the custom function used to create weights.
-        **New in version 0.6.0**
-
     last_window : pandas Series
         Last window the forecaster has seen during training. It stores the
         values needed to predict the next `step` immediately after the training data.
-        
     index_type : type
         Type of index of the input used in training.
-        
     index_freq : str
         Frequency of Index of the input used in training.
-        
     training_range : pandas Index
         First and last values of index of the data used during training.
-        
     included_exog : bool
         If the forecaster has been trained using exogenous variable/s.
-        
     exog_type : type
         Type of exogenous variable/s used in training.
-
     exog_dtypes : dict
         Type of each exogenous variable/s used in training. If `transformer_exog` 
         is used, the dtypes are calculated after the transformation.
-        
     exog_col_names : list
         Names of columns of `exog` if `exog` used in training was a pandas
         DataFrame.
-
     X_train_col_names : list
         Names of columns of the matrix created internally for training.
-
     fit_kwargs : dict
         Additional arguments to be passed to the `fit` method of the regressor.
         **New in version 0.8.0**
-        
     in_sample_residuals : numpy ndarray
         Residuals of the model when predicting training data. Only stored up to
         1000 values. If `transformer_y` is not `None`, residuals are stored in the
         transformed scale.
-        
     out_sample_residuals : numpy ndarray
         Residuals of the model when predicting non training data. Only stored
         up to 1000 values. If `transformer_y` is not `None`, residuals
         are assumed to be in the transformed scale. Use `set_out_sample_residuals` 
         method to set values.
-        
     fitted : bool
         Tag to identify if the regressor has been fitted (trained).
-
     creation_date : str
         Date of creation.
-
     fit_date : str
         Date of last fit.
-
     skforcast_version : str
         Version of skforecast library used to create the forecaster.
-
     python_version : str
         Version of python used to create the forecaster.
-
     forecaster_id : str, int, default `None`
         Name used as an identifier of the forecaster.
         **New in version 0.7.0**
@@ -316,10 +279,9 @@ class ForecasterAutoregCustom(ForecasterBase):
         variables.
         
         Parameters
-        ----------        
+        ----------
         y : pandas Series
             Training time series.
-            
         exog : pandas Series, pandas DataFrame, default `None`
             Exogenous variable/s included as predictor/s. Must have the same
             number of observations as `y` and their indexes must be aligned.
@@ -329,7 +291,6 @@ class ForecasterAutoregCustom(ForecasterBase):
         -------
         X_train : pandas DataFrame
             Pandas DataFrame with the training values (predictors).
-            
         y_train : pandas Series
             Values (target) of the time series related to each row of `X_train`.
         
@@ -502,15 +463,13 @@ class ForecasterAutoregCustom(ForecasterBase):
         can be added with the `fit_kwargs` argument when initializing the forecaster.
         
         Parameters
-        ----------        
+        ----------
         y : pandas Series
             Training time series.
-            
         exog : pandas Series, pandas DataFrame, default `None`
             Exogenous variable/s included as predictor/s. Must have the same
             number of observations as `y` and their indexes must be aligned so
             that y[i] is regressed on exog[i].
-
         store_in_sample_residuals : bool, default `True`
             If True, in-sample residuals will be stored in the forecaster object
             after fitting.
@@ -593,11 +552,9 @@ class ForecasterAutoregCustom(ForecasterBase):
         ----------
         steps : int
             Number of future steps predicted.
-            
         last_window : numpy ndarray
             Series values used to create the predictors (lags) needed in the 
             first iteration of the prediction (t + 1).
-            
         exog : numpy ndarray, default `None`
             Exogenous variable/s included as predictor/s.
 
@@ -605,7 +562,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         -------
         predictions : numpy ndarray
             Predicted values.
-            
+        
         """
 
         predictions = np.full(shape=steps, fill_value=np.nan)
@@ -647,15 +604,12 @@ class ForecasterAutoregCustom(ForecasterBase):
         ----------
         steps : int
             Number of future steps predicted.
-            
         last_window : pandas Series, default `None`
             Series values used to create the predictors (lags) needed in the 
             first iteration of the prediction (t + 1).
-    
             If `last_window = None`, the values stored in `self.last_window` are
             used to calculate the initial predictors, and the predictions start
             right after training data.
-            
         exog : pandas Series, pandas DataFrame, default `None`
             Exogenous variable/s included as predictor/s.
 
@@ -663,7 +617,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         -------
         predictions : pandas Series
             Predicted values.
-            
+        
         """
 
         if last_window is None:
@@ -762,29 +716,23 @@ class ForecasterAutoregCustom(ForecasterBase):
         See the Notes section for more information. 
         
         Parameters
-        ----------   
+        ----------
         steps : int
             Number of future steps predicted.
-            
         last_window : pandas Series, default `None`
             Series values used to create the predictors (lags) needed in the 
             first iteration of the prediction (t + 1).
-    
             If `last_window = None`, the values stored in `self.last_window` are
             used to calculate the initial predictors, and the predictions start
             right after training data.
-            
         exog : pandas Series, pandas DataFrame, default `None`
             Exogenous variable/s included as predictor/s.
-            
         n_boot : int, default `500`
             Number of bootstrapping iterations used to estimate prediction
             intervals.
-
         random_state : int, default `123`
             Sets a seed to the random generator, so that boot intervals are always 
             deterministic.
-                        
         in_sample_residuals : bool, default `True`
             If `True`, residuals from the training data are used as proxy of
             prediction error to create prediction intervals. If `False`, out of
@@ -794,8 +742,9 @@ class ForecasterAutoregCustom(ForecasterBase):
 
         Returns
         -------
-        boot_predictions : pandas DataFrame, shape (steps, n_boot)
+        boot_predictions : pandas DataFrame
             Predictions generated by bootstrapping.
+            Shape: (steps, n_boot)
 
         Notes
         -----
@@ -944,34 +893,27 @@ class ForecasterAutoregCustom(ForecasterBase):
         intervals. Both predictions and intervals are returned.
         
         Parameters
-        ---------- 
+        ----------
         steps : int
             Number of future steps predicted.
-            
         last_window : pandas Series, default `None`
             Series values used to create the predictors (lags) needed in the 
             first iteration of the prediction (t + 1).
-    
             If `last_window = None`, the values stored in` self.last_window` are
             used to calculate the initial predictors, and the predictions start
             right after training data.
-            
         exog : pandas Series, pandas DataFrame, default `None`
             Exogenous variable/s included as predictor/s.
-            
         interval : list, default `[5, 95]`
             Confidence of the prediction interval estimated. Sequence of 
             percentiles to compute, which must be between 0 and 100 inclusive. 
             For example, interval of 95% should be as `interval = [2.5, 97.5]`.
-            
         n_boot : int, default `500`
             Number of bootstrapping iterations used to estimate prediction
             intervals.
-
         random_state : int, default `123`
             Sets a seed to the random generator, so that boot intervals are always 
             deterministic.
-            
         in_sample_residuals : bool, default `True`
             If `True`, residuals from the training data are used as proxy of
             prediction error to create prediction intervals. If `False`, out of
@@ -994,7 +936,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         https://otexts.com/fpp2/prediction-intervals.html
         Forecasting: Principles and Practice (2nd ed) Rob J Hyndman and
         George Athanasopoulos.
-            
+        
         """
         
         check_interval(interval=interval)
@@ -1038,32 +980,25 @@ class ForecasterAutoregCustom(ForecasterBase):
         step is fitted to the given distribution.
         
         Parameters
-        ---------- 
+        ----------
         steps : int
             Number of future steps predicted.
-
         distribution : Object
             A distribution object from scipy.stats.
-            
         last_window : pandas Series, default `None`
             Series values used to create the predictors (lags) needed in the 
             first iteration of the prediction (t + 1).
-    
             If `last_window = None`, the values stored in` self.last_window` are
             used to calculate the initial predictors, and the predictions start
             right after training data.
-            
         exog : pandas Series, pandas DataFrame, default `None`
             Exogenous variable/s included as predictor/s.
-            
         n_boot : int, default `500`
             Number of bootstrapping iterations used to estimate prediction
             intervals.
-
         random_state : int, default `123`
             Sets a seed to the random generator, so that boot intervals are always 
             deterministic.
-            
         in_sample_residuals : bool, default `True`
             If `True`, residuals from the training data are used as proxy of
             prediction error to create prediction intervals. If `False`, out of
@@ -1118,7 +1053,7 @@ class ForecasterAutoregCustom(ForecasterBase):
 
         Returns
         -------
-        self
+        None
         
         """
         
@@ -1165,22 +1100,19 @@ class ForecasterAutoregCustom(ForecasterBase):
         residuals : numpy ndarray
             Values of residuals. If len(residuals) > 1000, only a random sample
             of 1000 values are stored.
-            
         append : bool, default `True`
             If `True`, new residuals are added to the once already stored in the
             attribute `out_sample_residuals`. Once the limit of 1000 values is
             reached, no more values are appended. If False, `out_sample_residuals`
             is overwritten with the new residuals.
-
         transform : bool, default `True`
             If `True`, new residuals are transformed using self.transformer_y.
-
         random_state : int, default `123`
             Sets a seed to the random sampling for reproducible output.
-            
+
         Returns
         -------
-        self
+        None
 
         """
 
