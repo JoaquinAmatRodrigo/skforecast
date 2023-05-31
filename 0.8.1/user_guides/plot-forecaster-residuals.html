@@ -2549,12 +2549,12 @@ from skforecast.plot import plot_residuals</div>
 <span class="n">url</span> <span class="o">=</span> <span class="p">(</span>
     <span class="s1">&#39;https://raw.githubusercontent.com/JoaquinAmatRodrigo/skforecast/master/&#39;</span>
     <span class="s1">&#39;data/h2o.csv&#39;</span>
-    <span class="p">)</span>
+<span class="p">)</span>
 <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;date&#39;</span><span class="p">])</span>
 
 <span class="c1"># Data preprocessing</span>
 <span class="c1"># ==============================================================================</span>
-<span class="n">data</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">],</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;%Y/%m/</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="n">data</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">],</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span>
 <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;date&#39;</span><span class="p">)</span>
 <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">asfreq</span><span class="p">(</span><span class="s1">&#39;MS&#39;</span><span class="p">)</span>
 
@@ -2568,12 +2568,12 @@ from skforecast.plot import plot_residuals</div>
 url = (
     'https://raw.githubusercontent.com/JoaquinAmatRodrigo/skforecast/master/'
     'data/h2o.csv'
-    )
+)
 data = pd.read_csv(url, sep=',', header=0, names=['y', 'date'])
 
 # Data preprocessing
 # ==============================================================================
-data['date'] = pd.to_datetime(data['date'], format='%Y/%m/%d')
+data['date'] = pd.to_datetime(data['date'], format='%Y-%m-%d')
 data = data.set_index('date')
 data = data.asfreq('MS')
 

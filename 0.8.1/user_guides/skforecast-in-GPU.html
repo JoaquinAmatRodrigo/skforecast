@@ -3081,8 +3081,8 @@ data = pd.Series(np.random.normal(size=1000000))</div>
             <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Create and train forecaster with a LGBMRegressor using GPU</span>
 <span class="c1"># ==============================================================================</span>
 <span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
-                <span class="n">regressor</span> <span class="o">=</span> <span class="n">LGBMRegressor</span><span class="p">(</span><span class="n">n_estimators</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span> <span class="n">device_type</span><span class="o">=</span><span class="s1">&#39;gpu&#39;</span><span class="p">),</span>
-                <span class="n">lags</span> <span class="o">=</span> <span class="mi">20</span>
+                 <span class="n">regressor</span> <span class="o">=</span> <span class="n">LGBMRegressor</span><span class="p">(</span><span class="n">n_estimators</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span> <span class="n">device_type</span><span class="o">=</span><span class="s1">&#39;gpu&#39;</span><span class="p">),</span>
+                 <span class="n">lags</span> <span class="o">=</span> <span class="mi">20</span>
              <span class="p">)</span>
 
 <span class="n">forecaster</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
@@ -3090,8 +3090,8 @@ data = pd.Series(np.random.normal(size=1000000))</div>
 <div id="cell-13" class="clipboard-copy-txt"># Create and train forecaster with a LGBMRegressor using GPU
 # ==============================================================================
 forecaster = ForecasterAutoreg(
-                regressor = LGBMRegressor(n_estimators=5000, device_type='gpu'),
-                lags = 20
+                 regressor = LGBMRegressor(n_estimators=5000, device_type='gpu'),
+                 lags = 20
              )
 
 forecaster.fit(y=data)</div>
