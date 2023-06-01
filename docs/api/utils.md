@@ -22,3 +22,4 @@
 ::: skforecast.utils.utils.transform_dataframe
 ::: skforecast.utils.utils.check_optional_dependency
 ::: skforecast.utils.utils.multivariate_time_series_corr
+::: skforecast.utils.utils.check_backtesting_input
