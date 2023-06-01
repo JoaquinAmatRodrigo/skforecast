@@ -1558,10 +1558,11 @@ it is not modified during the process.</p>
           </td>
           <td><p>Metric used to quantify the goodness of fit of the model.</p>
 <ul>
-<li>If string: {'mean_squared_error', 'mean_absolute_error',
+<li>If <code>string</code>: {'mean_squared_error', 'mean_absolute_error',
 'mean_absolute_percentage_error', 'mean_squared_log_error'}</li>
-<li>If Callable: Function with arguments y_true, y_pred that returns a float.</li>
-<li>If list: List containing multiple strings and/or Callables.</li>
+<li>If <code>Callable</code>: Function with arguments y_true, y_pred that returns 
+a float.</li>
+<li>If <code>list</code>: List containing multiple strings and/or Callables.</li>
 </ul></td>
           <td>
               <em>required</em>
@@ -1738,10 +1739,8 @@ for backtesting.</p></td>
   </table>
 
       <details class="quote">
-        <summary>Source code in <code>skforecast/model_selection/model_selection.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">666</span>
-<span class="normal">667</span>
-<span class="normal">668</span>
+        <summary>Source code in <code>skforecast\model_selection\model_selection.py</code></summary>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">668</span>
 <span class="normal">669</span>
 <span class="normal">670</span>
 <span class="normal">671</span>
@@ -1907,7 +1906,10 @@ for backtesting.</p></td>
 <span class="normal">831</span>
 <span class="normal">832</span>
 <span class="normal">833</span>
-<span class="normal">834</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">backtesting_forecaster</span><span class="p">(</span>
+<span class="normal">834</span>
+<span class="normal">835</span>
+<span class="normal">836</span>
+<span class="normal">837</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">backtesting_forecaster</span><span class="p">(</span>
     <span class="n">forecaster</span><span class="p">,</span>
     <span class="n">y</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
     <span class="n">steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
@@ -1944,10 +1946,11 @@ for backtesting.</p></td>
 <span class="sd">    metric : str, Callable, list</span>
 <span class="sd">        Metric used to quantify the goodness of fit of the model.</span>
 
-<span class="sd">            - If string: {&#39;mean_squared_error&#39;, &#39;mean_absolute_error&#39;,</span>
+<span class="sd">            - If `string`: {&#39;mean_squared_error&#39;, &#39;mean_absolute_error&#39;,</span>
 <span class="sd">             &#39;mean_absolute_percentage_error&#39;, &#39;mean_squared_log_error&#39;}</span>
-<span class="sd">            - If Callable: Function with arguments y_true, y_pred that returns a float.</span>
-<span class="sd">            - If list: List containing multiple strings and/or Callables.</span>
+<span class="sd">            - If `Callable`: Function with arguments y_true, y_pred that returns </span>
+<span class="sd">            a float.</span>
+<span class="sd">            - If `list`: List containing multiple strings and/or Callables.</span>
 <span class="sd">    initial_train_size : int, default `None`</span>
 <span class="sd">        Number of samples in the initial train split. If `None` and `forecaster` is </span>
 <span class="sd">        already trained, no initial train is done and all data is used to evaluate the </span>
@@ -2156,10 +2159,11 @@ settings to try as values.</p></td>
           </td>
           <td><p>Metric used to quantify the goodness of fit of the model.</p>
 <ul>
-<li>If string: {'mean_squared_error', 'mean_absolute_error',
+<li>If <code>string</code>: {'mean_squared_error', 'mean_absolute_error',
 'mean_absolute_percentage_error', 'mean_squared_log_error'}</li>
-<li>If Callable: Function with arguments y_true, y_pred that returns a float.</li>
-<li>If list: List containing multiple strings and/or Callables.</li>
+<li>If <code>Callable</code>: Function with arguments y_true, y_pred that returns 
+a float.</li>
+<li>If <code>list</code>: List containing multiple strings and/or Callables.</li>
 </ul></td>
           <td>
               <em>required</em>
@@ -2288,11 +2292,8 @@ regressed on exog[i].</p></td>
   </table>
 
       <details class="quote">
-        <summary>Source code in <code>skforecast/model_selection/model_selection.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">837</span>
-<span class="normal">838</span>
-<span class="normal">839</span>
-<span class="normal">840</span>
+        <summary>Source code in <code>skforecast\model_selection\model_selection.py</code></summary>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">840</span>
 <span class="normal">841</span>
 <span class="normal">842</span>
 <span class="normal">843</span>
@@ -2382,7 +2383,11 @@ regressed on exog[i].</p></td>
 <span class="normal">927</span>
 <span class="normal">928</span>
 <span class="normal">929</span>
-<span class="normal">930</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">grid_search_forecaster</span><span class="p">(</span>
+<span class="normal">930</span>
+<span class="normal">931</span>
+<span class="normal">932</span>
+<span class="normal">933</span>
+<span class="normal">934</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">grid_search_forecaster</span><span class="p">(</span>
     <span class="n">forecaster</span><span class="p">,</span>
     <span class="n">y</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
     <span class="n">param_grid</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
@@ -2416,10 +2421,11 @@ regressed on exog[i].</p></td>
 <span class="sd">    metric : str, Callable, list</span>
 <span class="sd">        Metric used to quantify the goodness of fit of the model.</span>
 
-<span class="sd">            - If string: {&#39;mean_squared_error&#39;, &#39;mean_absolute_error&#39;,</span>
+<span class="sd">            - If `string`: {&#39;mean_squared_error&#39;, &#39;mean_absolute_error&#39;,</span>
 <span class="sd">             &#39;mean_absolute_percentage_error&#39;, &#39;mean_squared_log_error&#39;}</span>
-<span class="sd">            - If Callable: Function with arguments y_true, y_pred that returns a float.</span>
-<span class="sd">            - If list: List containing multiple strings and/or Callables.</span>
+<span class="sd">            - If `Callable`: Function with arguments y_true, y_pred that returns </span>
+<span class="sd">            a float.</span>
+<span class="sd">            - If `list`: List containing multiple strings and/or Callables.</span>
 <span class="sd">    initial_train_size : int </span>
 <span class="sd">        Number of samples in the initial train split.</span>
 <span class="sd">    fixed_train_size : bool, default `True`</span>
@@ -2556,10 +2562,11 @@ distributions or lists of parameters to try.</p></td>
           </td>
           <td><p>Metric used to quantify the goodness of fit of the model.</p>
 <ul>
-<li>If string: {'mean_squared_error', 'mean_absolute_error',
+<li>If <code>string</code>: {'mean_squared_error', 'mean_absolute_error',
 'mean_absolute_percentage_error', 'mean_squared_log_error'}</li>
-<li>If Callable: Function with arguments y_true, y_pred that returns a float.</li>
-<li>If list: List containing multiple strings and/or Callables.</li>
+<li>If <code>Callable</code>: Function with arguments y_true, y_pred that returns 
+a float.</li>
+<li>If <code>list</code>: List containing multiple strings and/or Callables.</li>
 </ul></td>
           <td>
               <em>required</em>
@@ -2709,12 +2716,8 @@ n_iter trades off runtime vs quality of the solution.</p></td>
   </table>
 
       <details class="quote">
-        <summary>Source code in <code>skforecast/model_selection/model_selection.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 933</span>
-<span class="normal"> 934</span>
-<span class="normal"> 935</span>
-<span class="normal"> 936</span>
-<span class="normal"> 937</span>
+        <summary>Source code in <code>skforecast\model_selection\model_selection.py</code></summary>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 937</span>
 <span class="normal"> 938</span>
 <span class="normal"> 939</span>
 <span class="normal"> 940</span>
@@ -2810,7 +2813,12 @@ n_iter trades off runtime vs quality of the solution.</p></td>
 <span class="normal">1030</span>
 <span class="normal">1031</span>
 <span class="normal">1032</span>
-<span class="normal">1033</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">random_search_forecaster</span><span class="p">(</span>
+<span class="normal">1033</span>
+<span class="normal">1034</span>
+<span class="normal">1035</span>
+<span class="normal">1036</span>
+<span class="normal">1037</span>
+<span class="normal">1038</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">random_search_forecaster</span><span class="p">(</span>
     <span class="n">forecaster</span><span class="p">,</span>
     <span class="n">y</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
     <span class="n">param_distributions</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
@@ -2846,10 +2854,11 @@ n_iter trades off runtime vs quality of the solution.</p></td>
 <span class="sd">    metric : str, Callable, list</span>
 <span class="sd">        Metric used to quantify the goodness of fit of the model.</span>
 
-<span class="sd">            - If string: {&#39;mean_squared_error&#39;, &#39;mean_absolute_error&#39;,</span>
+<span class="sd">            - If `string`: {&#39;mean_squared_error&#39;, &#39;mean_absolute_error&#39;,</span>
 <span class="sd">             &#39;mean_absolute_percentage_error&#39;, &#39;mean_squared_log_error&#39;}</span>
-<span class="sd">            - If Callable: Function with arguments y_true, y_pred that returns a float.</span>
-<span class="sd">            - If list: List containing multiple strings and/or Callables.</span>
+<span class="sd">            - If `Callable`: Function with arguments y_true, y_pred that returns </span>
+<span class="sd">            a float.</span>
+<span class="sd">            - If `list`: List containing multiple strings and/or Callables.</span>
 <span class="sd">    initial_train_size : int </span>
 <span class="sd">        Number of samples in the initial train split.</span>
 <span class="sd">    fixed_train_size : bool, default `True`</span>
@@ -2992,10 +3001,11 @@ trial.suggest_int, trial.suggest_categorical) as values.</p></td>
           </td>
           <td><p>Metric used to quantify the goodness of fit of the model.</p>
 <ul>
-<li>If string: {'mean_squared_error', 'mean_absolute_error',
+<li>If <code>string</code>: {'mean_squared_error', 'mean_absolute_error',
 'mean_absolute_percentage_error', 'mean_squared_log_error'}</li>
-<li>If Callable: Function with arguments y_true, y_pred that returns a float.</li>
-<li>If list: List containing multiple strings and/or Callables.</li>
+<li>If <code>Callable</code>: Function with arguments y_true, y_pred that returns 
+a float.</li>
+<li>If <code>list</code>: List containing multiple strings and/or Callables.</li>
 </ul></td>
           <td>
               <em>required</em>
@@ -3194,14 +3204,8 @@ to pass to skopt.gp_minimize().
   </table>
 
       <details class="quote">
-        <summary>Source code in <code>skforecast/model_selection/model_selection.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1200</span>
-<span class="normal">1201</span>
-<span class="normal">1202</span>
-<span class="normal">1203</span>
-<span class="normal">1204</span>
-<span class="normal">1205</span>
-<span class="normal">1206</span>
+        <summary>Source code in <code>skforecast\model_selection\model_selection.py</code></summary>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1206</span>
 <span class="normal">1207</span>
 <span class="normal">1208</span>
 <span class="normal">1209</span>
@@ -3334,7 +3338,14 @@ to pass to skopt.gp_minimize().
 <span class="normal">1336</span>
 <span class="normal">1337</span>
 <span class="normal">1338</span>
-<span class="normal">1339</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">bayesian_search_forecaster</span><span class="p">(</span>
+<span class="normal">1339</span>
+<span class="normal">1340</span>
+<span class="normal">1341</span>
+<span class="normal">1342</span>
+<span class="normal">1343</span>
+<span class="normal">1344</span>
+<span class="normal">1345</span>
+<span class="normal">1346</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">bayesian_search_forecaster</span><span class="p">(</span>
     <span class="n">forecaster</span><span class="p">,</span>
     <span class="n">y</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
     <span class="n">search_space</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
@@ -3375,10 +3386,11 @@ to pass to skopt.gp_minimize().
 <span class="sd">    metric : str, Callable, list</span>
 <span class="sd">        Metric used to quantify the goodness of fit of the model.</span>
 
-<span class="sd">            - If string: {&#39;mean_squared_error&#39;, &#39;mean_absolute_error&#39;,</span>
+<span class="sd">            - If `string`: {&#39;mean_squared_error&#39;, &#39;mean_absolute_error&#39;,</span>
 <span class="sd">             &#39;mean_absolute_percentage_error&#39;, &#39;mean_squared_log_error&#39;}</span>
-<span class="sd">            - If Callable: Function with arguments y_true, y_pred that returns a float.</span>
-<span class="sd">            - If list: List containing multiple strings and/or Callables.</span>
+<span class="sd">            - If `Callable`: Function with arguments y_true, y_pred that returns </span>
+<span class="sd">            a float.</span>
+<span class="sd">            - If `list`: List containing multiple strings and/or Callables.</span>
 <span class="sd">    initial_train_size : int </span>
 <span class="sd">        Number of samples in the initial train split.</span>
 <span class="sd">    fixed_train_size : bool, default `True`</span>

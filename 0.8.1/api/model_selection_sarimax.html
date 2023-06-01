@@ -1544,10 +1544,11 @@ it is not modified during the process.</p>
           </td>
           <td><p>Metric used to quantify the goodness of fit of the model.</p>
 <ul>
-<li>If string: {'mean_squared_error', 'mean_absolute_error',
+<li>If <code>string</code>: {'mean_squared_error', 'mean_absolute_error',
 'mean_absolute_percentage_error', 'mean_squared_log_error'}</li>
-<li>If Callable: Function with arguments y_true, y_pred that returns a float.</li>
-<li>If list: List containing multiple strings and/or Callables.</li>
+<li>If <code>Callable</code>: Function with arguments y_true, y_pred that returns 
+a float.</li>
+<li>If <code>list</code>: List containing multiple strings and/or Callables.</li>
 </ul></td>
           <td>
               <em>required</em>
@@ -1697,10 +1698,8 @@ for backtesting.</p></td>
   </table>
 
       <details class="quote">
-        <summary>Source code in <code>skforecast/model_selection_sarimax/model_selection_sarimax.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">340</span>
-<span class="normal">341</span>
-<span class="normal">342</span>
+        <summary>Source code in <code>skforecast\model_selection_sarimax\model_selection_sarimax.py</code></summary>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">342</span>
 <span class="normal">343</span>
 <span class="normal">344</span>
 <span class="normal">345</span>
@@ -1842,7 +1841,10 @@ for backtesting.</p></td>
 <span class="normal">481</span>
 <span class="normal">482</span>
 <span class="normal">483</span>
-<span class="normal">484</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">backtesting_sarimax</span><span class="p">(</span>
+<span class="normal">484</span>
+<span class="normal">485</span>
+<span class="normal">486</span>
+<span class="normal">487</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">backtesting_sarimax</span><span class="p">(</span>
     <span class="n">forecaster</span><span class="p">,</span>
     <span class="n">y</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
     <span class="n">steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
@@ -1877,10 +1879,11 @@ for backtesting.</p></td>
 <span class="sd">    metric : str, Callable, list</span>
 <span class="sd">        Metric used to quantify the goodness of fit of the model.</span>
 
-<span class="sd">            - If string: {&#39;mean_squared_error&#39;, &#39;mean_absolute_error&#39;,</span>
+<span class="sd">            - If `string`: {&#39;mean_squared_error&#39;, &#39;mean_absolute_error&#39;,</span>
 <span class="sd">             &#39;mean_absolute_percentage_error&#39;, &#39;mean_squared_log_error&#39;}</span>
-<span class="sd">            - If Callable: Function with arguments y_true, y_pred that returns a float.</span>
-<span class="sd">            - If list: List containing multiple strings and/or Callables.</span>
+<span class="sd">            - If `Callable`: Function with arguments y_true, y_pred that returns </span>
+<span class="sd">            a float.</span>
+<span class="sd">            - If `list`: List containing multiple strings and/or Callables.</span>
 <span class="sd">    initial_train_size : int</span>
 <span class="sd">        Number of samples in the initial train split. The backtest forecaster is</span>
 <span class="sd">        trained using the first `initial_train_size` observations.</span>
@@ -2067,10 +2070,11 @@ settings to try as values.</p></td>
           </td>
           <td><p>Metric used to quantify the goodness of fit of the model.</p>
 <ul>
-<li>If string: {'mean_squared_error', 'mean_absolute_error',
+<li>If <code>string</code>: {'mean_squared_error', 'mean_absolute_error',
 'mean_absolute_percentage_error', 'mean_squared_log_error'}</li>
-<li>If Callable: Function with arguments y_true, y_pred that returns a float.</li>
-<li>If list: List containing multiple strings and/or Callables.</li>
+<li>If <code>Callable</code>: Function with arguments y_true, y_pred that returns 
+a float.</li>
+<li>If <code>list</code>: List containing multiple strings and/or Callables.</li>
 </ul></td>
           <td>
               <em>required</em>
@@ -2188,11 +2192,8 @@ regressed on exog[i].</p></td>
   </table>
 
       <details class="quote">
-        <summary>Source code in <code>skforecast/model_selection_sarimax/model_selection_sarimax.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">487</span>
-<span class="normal">488</span>
-<span class="normal">489</span>
-<span class="normal">490</span>
+        <summary>Source code in <code>skforecast\model_selection_sarimax\model_selection_sarimax.py</code></summary>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">490</span>
 <span class="normal">491</span>
 <span class="normal">492</span>
 <span class="normal">493</span>
@@ -2277,7 +2278,11 @@ regressed on exog[i].</p></td>
 <span class="normal">572</span>
 <span class="normal">573</span>
 <span class="normal">574</span>
-<span class="normal">575</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">grid_search_sarimax</span><span class="p">(</span>
+<span class="normal">575</span>
+<span class="normal">576</span>
+<span class="normal">577</span>
+<span class="normal">578</span>
+<span class="normal">579</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">grid_search_sarimax</span><span class="p">(</span>
     <span class="n">forecaster</span><span class="p">,</span>
     <span class="n">y</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
     <span class="n">param_grid</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
@@ -2310,10 +2315,11 @@ regressed on exog[i].</p></td>
 <span class="sd">    metric : str, Callable, list</span>
 <span class="sd">        Metric used to quantify the goodness of fit of the model.</span>
 
-<span class="sd">            - If string: {&#39;mean_squared_error&#39;, &#39;mean_absolute_error&#39;,</span>
+<span class="sd">            - If `string`: {&#39;mean_squared_error&#39;, &#39;mean_absolute_error&#39;,</span>
 <span class="sd">             &#39;mean_absolute_percentage_error&#39;, &#39;mean_squared_log_error&#39;}</span>
-<span class="sd">            - If Callable: Function with arguments y_true, y_pred that returns a float.</span>
-<span class="sd">            - If list: List containing multiple strings and/or Callables.</span>
+<span class="sd">            - If `Callable`: Function with arguments y_true, y_pred that returns </span>
+<span class="sd">            a float.</span>
+<span class="sd">            - If `list`: List containing multiple strings and/or Callables.</span>
 <span class="sd">    initial_train_size : int </span>
 <span class="sd">        Number of samples in the initial train split. The backtest forecaster is</span>
 <span class="sd">        trained using the first `initial_train_size` observations.</span>
@@ -2446,10 +2452,11 @@ distributions or lists of parameters to try.</p></td>
           </td>
           <td><p>Metric used to quantify the goodness of fit of the model.</p>
 <ul>
-<li>If string: {'mean_squared_error', 'mean_absolute_error',
+<li>If <code>string</code>: {'mean_squared_error', 'mean_absolute_error',
 'mean_absolute_percentage_error', 'mean_squared_log_error'}</li>
-<li>If Callable: Function with arguments y_true, y_pred that returns a float.</li>
-<li>If list: List containing multiple strings and/or Callables.</li>
+<li>If <code>Callable</code>: Function with arguments y_true, y_pred that returns 
+a float.</li>
+<li>If <code>list</code>: List containing multiple strings and/or Callables.</li>
 </ul></td>
           <td>
               <em>required</em>
@@ -2588,12 +2595,8 @@ n_iter trades off runtime vs quality of the solution.</p></td>
   </table>
 
       <details class="quote">
-        <summary>Source code in <code>skforecast/model_selection_sarimax/model_selection_sarimax.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">578</span>
-<span class="normal">579</span>
-<span class="normal">580</span>
-<span class="normal">581</span>
-<span class="normal">582</span>
+        <summary>Source code in <code>skforecast\model_selection_sarimax\model_selection_sarimax.py</code></summary>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">582</span>
 <span class="normal">583</span>
 <span class="normal">584</span>
 <span class="normal">585</span>
@@ -2684,7 +2687,12 @@ n_iter trades off runtime vs quality of the solution.</p></td>
 <span class="normal">670</span>
 <span class="normal">671</span>
 <span class="normal">672</span>
-<span class="normal">673</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">random_search_sarimax</span><span class="p">(</span>
+<span class="normal">673</span>
+<span class="normal">674</span>
+<span class="normal">675</span>
+<span class="normal">676</span>
+<span class="normal">677</span>
+<span class="normal">678</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">random_search_sarimax</span><span class="p">(</span>
     <span class="n">forecaster</span><span class="p">,</span>
     <span class="n">y</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
     <span class="n">param_distributions</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
@@ -2719,10 +2727,11 @@ n_iter trades off runtime vs quality of the solution.</p></td>
 <span class="sd">    metric : str, Callable, list</span>
 <span class="sd">        Metric used to quantify the goodness of fit of the model.</span>
 
-<span class="sd">            - If string: {&#39;mean_squared_error&#39;, &#39;mean_absolute_error&#39;,</span>
+<span class="sd">            - If `string`: {&#39;mean_squared_error&#39;, &#39;mean_absolute_error&#39;,</span>
 <span class="sd">             &#39;mean_absolute_percentage_error&#39;, &#39;mean_squared_log_error&#39;}</span>
-<span class="sd">            - If Callable: Function with arguments y_true, y_pred that returns a float.</span>
-<span class="sd">            - If list: List containing multiple strings and/or Callables.</span>
+<span class="sd">            - If `Callable`: Function with arguments y_true, y_pred that returns </span>
+<span class="sd">            a float.</span>
+<span class="sd">            - If `list`: List containing multiple strings and/or Callables.</span>
 <span class="sd">    initial_train_size : int </span>
 <span class="sd">        Number of samples in the initial train split. The backtest forecaster is</span>
 <span class="sd">        trained using the first `initial_train_size` observations.</span>

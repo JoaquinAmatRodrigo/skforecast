@@ -1586,10 +1586,11 @@ it is not modified during the process.</p>
           </td>
           <td><p>Metric used to quantify the goodness of fit of the model.</p>
 <ul>
-<li>If string: {'mean_squared_error', 'mean_absolute_error',
+<li>If <code>string</code>: {'mean_squared_error', 'mean_absolute_error',
 'mean_absolute_percentage_error', 'mean_squared_log_error'}</li>
-<li>If Callable: Function with arguments y_true, y_pred that returns a float.</li>
-<li>If list: List containing multiple strings and/or Callables.</li>
+<li>If <code>Callable</code>: Function with arguments y_true, y_pred that returns 
+a float.</li>
+<li>If <code>list</code>: List containing multiple strings and/or Callables.</li>
 </ul></td>
           <td>
               <em>required</em>
@@ -1776,10 +1777,8 @@ If there is more than one level, this structure will be repeated for each of the
   </table>
 
       <details class="quote">
-        <summary>Source code in <code>skforecast/model_selection_multiseries/model_selection_multiseries.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">435</span>
-<span class="normal">436</span>
-<span class="normal">437</span>
+        <summary>Source code in <code>skforecast\model_selection_multiseries\model_selection_multiseries.py</code></summary>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">437</span>
 <span class="normal">438</span>
 <span class="normal">439</span>
 <span class="normal">440</span>
@@ -1963,7 +1962,10 @@ If there is more than one level, this structure will be repeated for each of the
 <span class="normal">618</span>
 <span class="normal">619</span>
 <span class="normal">620</span>
-<span class="normal">621</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">backtesting_forecaster_multiseries</span><span class="p">(</span>
+<span class="normal">621</span>
+<span class="normal">622</span>
+<span class="normal">623</span>
+<span class="normal">624</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">backtesting_forecaster_multiseries</span><span class="p">(</span>
     <span class="n">forecaster</span><span class="p">,</span>
     <span class="n">series</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
     <span class="n">steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
@@ -2001,10 +2003,11 @@ If there is more than one level, this structure will be repeated for each of the
 <span class="sd">    metric : str, Callable, list</span>
 <span class="sd">        Metric used to quantify the goodness of fit of the model.</span>
 
-<span class="sd">            - If string: {&#39;mean_squared_error&#39;, &#39;mean_absolute_error&#39;,</span>
+<span class="sd">            - If `string`: {&#39;mean_squared_error&#39;, &#39;mean_absolute_error&#39;,</span>
 <span class="sd">             &#39;mean_absolute_percentage_error&#39;, &#39;mean_squared_log_error&#39;}</span>
-<span class="sd">            - If Callable: Function with arguments y_true, y_pred that returns a float.</span>
-<span class="sd">            - If list: List containing multiple strings and/or Callables.</span>
+<span class="sd">            - If `Callable`: Function with arguments y_true, y_pred that returns </span>
+<span class="sd">            a float.</span>
+<span class="sd">            - If `list`: List containing multiple strings and/or Callables.</span>
 <span class="sd">    initial_train_size : int, default `None`</span>
 <span class="sd">        Number of samples in the initial train split. If `None` and `forecaster` is </span>
 <span class="sd">        already trained, no initial train is done and all data is used to evaluate the </span>
@@ -2230,10 +2233,11 @@ settings to try as values.</p></td>
           </td>
           <td><p>Metric used to quantify the goodness of fit of the model.</p>
 <ul>
-<li>If string: {'mean_squared_error', 'mean_absolute_error',
+<li>If <code>string</code>: {'mean_squared_error', 'mean_absolute_error',
 'mean_absolute_percentage_error', 'mean_squared_log_error'}</li>
-<li>If Callable: Function with arguments y_true, y_pred that returns a float.</li>
-<li>If list: List containing multiple strings and/or Callables.</li>
+<li>If <code>Callable</code>: Function with arguments y_true, y_pred that returns 
+a float.</li>
+<li>If <code>list</code>: List containing multiple strings and/or Callables.</li>
 </ul></td>
           <td>
               <em>required</em>
@@ -2376,11 +2380,8 @@ metric will be the average of the optimization of all levels.</li>
   </table>
 
       <details class="quote">
-        <summary>Source code in <code>skforecast/model_selection_multiseries/model_selection_multiseries.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">624</span>
-<span class="normal">625</span>
-<span class="normal">626</span>
-<span class="normal">627</span>
+        <summary>Source code in <code>skforecast\model_selection_multiseries\model_selection_multiseries.py</code></summary>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">627</span>
 <span class="normal">628</span>
 <span class="normal">629</span>
 <span class="normal">630</span>
@@ -2478,7 +2479,11 @@ metric will be the average of the optimization of all levels.</li>
 <span class="normal">722</span>
 <span class="normal">723</span>
 <span class="normal">724</span>
-<span class="normal">725</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">grid_search_forecaster_multiseries</span><span class="p">(</span>
+<span class="normal">725</span>
+<span class="normal">726</span>
+<span class="normal">727</span>
+<span class="normal">728</span>
+<span class="normal">729</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">grid_search_forecaster_multiseries</span><span class="p">(</span>
     <span class="n">forecaster</span><span class="p">,</span>
     <span class="n">series</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
     <span class="n">param_grid</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
@@ -2513,10 +2518,11 @@ metric will be the average of the optimization of all levels.</li>
 <span class="sd">    metric : str, Callable, list</span>
 <span class="sd">        Metric used to quantify the goodness of fit of the model.</span>
 
-<span class="sd">            - If string: {&#39;mean_squared_error&#39;, &#39;mean_absolute_error&#39;,</span>
+<span class="sd">            - If `string`: {&#39;mean_squared_error&#39;, &#39;mean_absolute_error&#39;,</span>
 <span class="sd">             &#39;mean_absolute_percentage_error&#39;, &#39;mean_squared_log_error&#39;}</span>
-<span class="sd">            - If Callable: Function with arguments y_true, y_pred that returns a float.</span>
-<span class="sd">            - If list: List containing multiple strings and/or Callables.</span>
+<span class="sd">            - If `Callable`: Function with arguments y_true, y_pred that returns </span>
+<span class="sd">            a float.</span>
+<span class="sd">            - If `list`: List containing multiple strings and/or Callables.</span>
 <span class="sd">    initial_train_size : int </span>
 <span class="sd">        Number of samples in the initial train split.</span>
 <span class="sd">    fixed_train_size : bool, default `True`</span>
@@ -2660,10 +2666,11 @@ lists of parameters to try.</p></td>
           </td>
           <td><p>Metric used to quantify the goodness of fit of the model.</p>
 <ul>
-<li>If string: {'mean_squared_error', 'mean_absolute_error',
+<li>If <code>string</code>: {'mean_squared_error', 'mean_absolute_error',
 'mean_absolute_percentage_error', 'mean_squared_log_error'}</li>
-<li>If Callable: Function with arguments y_true, y_pred that returns a float.</li>
-<li>If list: List containing multiple strings and/or Callables.</li>
+<li>If <code>Callable</code>: Function with arguments y_true, y_pred that returns 
+a float.</li>
+<li>If <code>list</code>: List containing multiple strings and/or Callables.</li>
 </ul></td>
           <td>
               <em>required</em>
@@ -2827,12 +2834,8 @@ metric will be the average of the optimization of all levels.</li>
   </table>
 
       <details class="quote">
-        <summary>Source code in <code>skforecast/model_selection_multiseries/model_selection_multiseries.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">728</span>
-<span class="normal">729</span>
-<span class="normal">730</span>
-<span class="normal">731</span>
-<span class="normal">732</span>
+        <summary>Source code in <code>skforecast\model_selection_multiseries\model_selection_multiseries.py</code></summary>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">732</span>
 <span class="normal">733</span>
 <span class="normal">734</span>
 <span class="normal">735</span>
@@ -2937,7 +2940,12 @@ metric will be the average of the optimization of all levels.</li>
 <span class="normal">834</span>
 <span class="normal">835</span>
 <span class="normal">836</span>
-<span class="normal">837</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">random_search_forecaster_multiseries</span><span class="p">(</span>
+<span class="normal">837</span>
+<span class="normal">838</span>
+<span class="normal">839</span>
+<span class="normal">840</span>
+<span class="normal">841</span>
+<span class="normal">842</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">random_search_forecaster_multiseries</span><span class="p">(</span>
     <span class="n">forecaster</span><span class="p">,</span>
     <span class="n">series</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
     <span class="n">param_distributions</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
@@ -2974,10 +2982,11 @@ metric will be the average of the optimization of all levels.</li>
 <span class="sd">    metric : str, Callable, list</span>
 <span class="sd">        Metric used to quantify the goodness of fit of the model.</span>
 
-<span class="sd">            - If string: {&#39;mean_squared_error&#39;, &#39;mean_absolute_error&#39;,</span>
+<span class="sd">            - If `string`: {&#39;mean_squared_error&#39;, &#39;mean_absolute_error&#39;,</span>
 <span class="sd">             &#39;mean_absolute_percentage_error&#39;, &#39;mean_squared_log_error&#39;}</span>
-<span class="sd">            - If Callable: Function with arguments y_true, y_pred that returns a float.</span>
-<span class="sd">            - If list: List containing multiple strings and/or Callables.</span>
+<span class="sd">            - If `Callable`: Function with arguments y_true, y_pred that returns </span>
+<span class="sd">            a float.</span>
+<span class="sd">            - If `list`: List containing multiple strings and/or Callables.</span>
 <span class="sd">    initial_train_size : int </span>
 <span class="sd">        Number of samples in the initial train split.</span>
 <span class="sd">    fixed_train_size : bool, default `True`</span>
@@ -3120,10 +3129,11 @@ it is not modified during the process.</p>
           </td>
           <td><p>Metric used to quantify the goodness of fit of the model.</p>
 <ul>
-<li>If string: {'mean_squared_error', 'mean_absolute_error',
+<li>If <code>string</code>: {'mean_squared_error', 'mean_absolute_error',
 'mean_absolute_percentage_error', 'mean_squared_log_error'}</li>
-<li>If Callable: Function with arguments y_true, y_pred that returns a float.</li>
-<li>If list: List containing multiple strings and/or Callables.</li>
+<li>If <code>Callable</code>: Function with arguments y_true, y_pred that returns 
+a float.</li>
+<li>If <code>list</code>: List containing multiple strings and/or Callables.</li>
 </ul></td>
           <td>
               <em>required</em>
@@ -3310,14 +3320,8 @@ If there is more than one level, this structure will be repeated for each of the
   </table>
 
       <details class="quote">
-        <summary>Source code in <code>skforecast/model_selection_multiseries/model_selection_multiseries.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1045</span>
-<span class="normal">1046</span>
-<span class="normal">1047</span>
-<span class="normal">1048</span>
-<span class="normal">1049</span>
-<span class="normal">1050</span>
-<span class="normal">1051</span>
+        <summary>Source code in <code>skforecast\model_selection_multiseries\model_selection_multiseries.py</code></summary>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1051</span>
 <span class="normal">1052</span>
 <span class="normal">1053</span>
 <span class="normal">1054</span>
@@ -3434,7 +3438,14 @@ If there is more than one level, this structure will be repeated for each of the
 <span class="normal">1165</span>
 <span class="normal">1166</span>
 <span class="normal">1167</span>
-<span class="normal">1168</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">backtesting_forecaster_multivariate</span><span class="p">(</span>
+<span class="normal">1168</span>
+<span class="normal">1169</span>
+<span class="normal">1170</span>
+<span class="normal">1171</span>
+<span class="normal">1172</span>
+<span class="normal">1173</span>
+<span class="normal">1174</span>
+<span class="normal">1175</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">backtesting_forecaster_multivariate</span><span class="p">(</span>
     <span class="n">forecaster</span><span class="p">,</span>
     <span class="n">series</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
     <span class="n">steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
@@ -3474,10 +3485,11 @@ If there is more than one level, this structure will be repeated for each of the
 <span class="sd">    metric : str, Callable, list</span>
 <span class="sd">        Metric used to quantify the goodness of fit of the model.</span>
 
-<span class="sd">            - If string: {&#39;mean_squared_error&#39;, &#39;mean_absolute_error&#39;,</span>
+<span class="sd">            - If `string`: {&#39;mean_squared_error&#39;, &#39;mean_absolute_error&#39;,</span>
 <span class="sd">             &#39;mean_absolute_percentage_error&#39;, &#39;mean_squared_log_error&#39;}</span>
-<span class="sd">            - If Callable: Function with arguments y_true, y_pred that returns a float.</span>
-<span class="sd">            - If list: List containing multiple strings and/or Callables.</span>
+<span class="sd">            - If `Callable`: Function with arguments y_true, y_pred that returns </span>
+<span class="sd">            a float.</span>
+<span class="sd">            - If `list`: List containing multiple strings and/or Callables.</span>
 <span class="sd">    initial_train_size : int, default `None`</span>
 <span class="sd">        Number of samples in the initial train split. If `None` and `forecaster` is </span>
 <span class="sd">        already trained, no initial train is done and all data is used to evaluate the </span>
@@ -3639,10 +3651,11 @@ settings to try as values.</p></td>
           </td>
           <td><p>Metric used to quantify the goodness of fit of the model.</p>
 <ul>
-<li>If string: {'mean_squared_error', 'mean_absolute_error',
+<li>If <code>string</code>: {'mean_squared_error', 'mean_absolute_error',
 'mean_absolute_percentage_error', 'mean_squared_log_error'}</li>
-<li>If Callable: Function with arguments y_true, y_pred that returns a float.</li>
-<li>If list: List containing multiple strings and/or Callables.</li>
+<li>If <code>Callable</code>: Function with arguments y_true, y_pred that returns 
+a float.</li>
+<li>If <code>list</code>: List containing multiple strings and/or Callables.</li>
 </ul></td>
           <td>
               <em>required</em>
@@ -3785,15 +3798,8 @@ metric will be the average of the optimization of all levels.</li>
   </table>
 
       <details class="quote">
-        <summary>Source code in <code>skforecast/model_selection_multiseries/model_selection_multiseries.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1171</span>
-<span class="normal">1172</span>
-<span class="normal">1173</span>
-<span class="normal">1174</span>
-<span class="normal">1175</span>
-<span class="normal">1176</span>
-<span class="normal">1177</span>
-<span class="normal">1178</span>
+        <summary>Source code in <code>skforecast\model_selection_multiseries\model_selection_multiseries.py</code></summary>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1178</span>
 <span class="normal">1179</span>
 <span class="normal">1180</span>
 <span class="normal">1181</span>
@@ -3887,7 +3893,15 @@ metric will be the average of the optimization of all levels.</li>
 <span class="normal">1269</span>
 <span class="normal">1270</span>
 <span class="normal">1271</span>
-<span class="normal">1272</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">grid_search_forecaster_multivariate</span><span class="p">(</span>
+<span class="normal">1272</span>
+<span class="normal">1273</span>
+<span class="normal">1274</span>
+<span class="normal">1275</span>
+<span class="normal">1276</span>
+<span class="normal">1277</span>
+<span class="normal">1278</span>
+<span class="normal">1279</span>
+<span class="normal">1280</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">grid_search_forecaster_multivariate</span><span class="p">(</span>
     <span class="n">forecaster</span><span class="p">,</span>
     <span class="n">series</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
     <span class="n">param_grid</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
@@ -3924,10 +3938,11 @@ metric will be the average of the optimization of all levels.</li>
 <span class="sd">    metric : str, Callable, list</span>
 <span class="sd">        Metric used to quantify the goodness of fit of the model.</span>
 
-<span class="sd">            - If string: {&#39;mean_squared_error&#39;, &#39;mean_absolute_error&#39;,</span>
+<span class="sd">            - If `string`: {&#39;mean_squared_error&#39;, &#39;mean_absolute_error&#39;,</span>
 <span class="sd">             &#39;mean_absolute_percentage_error&#39;, &#39;mean_squared_log_error&#39;}</span>
-<span class="sd">            - If Callable: Function with arguments y_true, y_pred that returns a float.</span>
-<span class="sd">            - If list: List containing multiple strings and/or Callables.</span>
+<span class="sd">            - If `Callable`: Function with arguments y_true, y_pred that returns </span>
+<span class="sd">            a float.</span>
+<span class="sd">            - If `list`: List containing multiple strings and/or Callables.</span>
 <span class="sd">    initial_train_size : int </span>
 <span class="sd">        Number of samples in the initial train split.</span>
 <span class="sd">    fixed_train_size : bool, default `True`</span>
@@ -4070,10 +4085,11 @@ lists of parameters to try.</p></td>
           </td>
           <td><p>Metric used to quantify the goodness of fit of the model.</p>
 <ul>
-<li>If string: {'mean_squared_error', 'mean_absolute_error',
+<li>If <code>string</code>: {'mean_squared_error', 'mean_absolute_error',
 'mean_absolute_percentage_error', 'mean_squared_log_error'}</li>
-<li>If Callable: Function with arguments y_true, y_pred that returns a float.</li>
-<li>If list: List containing multiple strings and/or Callables.</li>
+<li>If <code>Callable</code>: Function with arguments y_true, y_pred that returns 
+a float.</li>
+<li>If <code>list</code>: List containing multiple strings and/or Callables.</li>
 </ul></td>
           <td>
               <em>required</em>
@@ -4237,16 +4253,8 @@ metric will be the average of the optimization of all levels.</li>
   </table>
 
       <details class="quote">
-        <summary>Source code in <code>skforecast/model_selection_multiseries/model_selection_multiseries.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1275</span>
-<span class="normal">1276</span>
-<span class="normal">1277</span>
-<span class="normal">1278</span>
-<span class="normal">1279</span>
-<span class="normal">1280</span>
-<span class="normal">1281</span>
-<span class="normal">1282</span>
-<span class="normal">1283</span>
+        <summary>Source code in <code>skforecast\model_selection_multiseries\model_selection_multiseries.py</code></summary>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1283</span>
 <span class="normal">1284</span>
 <span class="normal">1285</span>
 <span class="normal">1286</span>
@@ -4348,7 +4356,16 @@ metric will be the average of the optimization of all levels.</li>
 <span class="normal">1382</span>
 <span class="normal">1383</span>
 <span class="normal">1384</span>
-<span class="normal">1385</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">random_search_forecaster_multivariate</span><span class="p">(</span>
+<span class="normal">1385</span>
+<span class="normal">1386</span>
+<span class="normal">1387</span>
+<span class="normal">1388</span>
+<span class="normal">1389</span>
+<span class="normal">1390</span>
+<span class="normal">1391</span>
+<span class="normal">1392</span>
+<span class="normal">1393</span>
+<span class="normal">1394</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">random_search_forecaster_multivariate</span><span class="p">(</span>
     <span class="n">forecaster</span><span class="p">,</span>
     <span class="n">series</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
     <span class="n">param_distributions</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
@@ -4387,10 +4404,11 @@ metric will be the average of the optimization of all levels.</li>
 <span class="sd">    metric : str, Callable, list</span>
 <span class="sd">        Metric used to quantify the goodness of fit of the model.</span>
 
-<span class="sd">            - If string: {&#39;mean_squared_error&#39;, &#39;mean_absolute_error&#39;,</span>
+<span class="sd">            - If `string`: {&#39;mean_squared_error&#39;, &#39;mean_absolute_error&#39;,</span>
 <span class="sd">             &#39;mean_absolute_percentage_error&#39;, &#39;mean_squared_log_error&#39;}</span>
-<span class="sd">            - If Callable: Function with arguments y_true, y_pred that returns a float.</span>
-<span class="sd">            - If list: List containing multiple strings and/or Callables.</span>
+<span class="sd">            - If `Callable`: Function with arguments y_true, y_pred that returns </span>
+<span class="sd">            a float.</span>
+<span class="sd">            - If `list`: List containing multiple strings and/or Callables.</span>
 <span class="sd">    initial_train_size : int </span>
 <span class="sd">        Number of samples in the initial train split.</span>
 <span class="sd">    fixed_train_size : bool, default `True`</span>
