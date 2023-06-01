@@ -84,7 +84,7 @@ pip install skforecast[plotting]
 
 ## What is new in skforecast 0.8.1?
 
-Visit the [release notes](https://github.com/JoaquinAmatRodrigo/skforecast/blob/feature_update_category_docs/changelog.md) to view all notable changes.
+Visit the [release notes](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/changelog.md) to view all notable changes.
 
 - [x] Support for `pandas 2.0.x`.
 - [x] New user guide on how to include **categorical variables** in the Forecasters.
