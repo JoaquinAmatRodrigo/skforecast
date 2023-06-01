@@ -71,10 +71,11 @@ def _backtesting_forecaster_multiseries_refit(
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-            - If string: {'mean_squared_error', 'mean_absolute_error',
+            - If `string`: {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
-            - If Callable: Function with arguments y_true, y_pred that returns a float.
-            - If list: List containing multiple strings and/or Callables.
+            - If `Callable`: Function with arguments y_true, y_pred that returns 
+            a float.
+            - If `list`: List containing multiple strings and/or Callables.
     initial_train_size : int
         Number of samples in the initial train split. The backtest forecaster is
         trained using the first `initial_train_size` observations.
@@ -270,10 +271,11 @@ def _backtesting_forecaster_multiseries_no_refit(
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-            - If string: {'mean_squared_error', 'mean_absolute_error',
+            - If `string`: {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
-            - If Callable: Function with arguments y_true, y_pred that returns a float.
-            - If list: List containing multiple strings and/or Callables.
+            - If `Callable`: Function with arguments y_true, y_pred that returns 
+            a float.
+            - If `list`: List containing multiple strings and/or Callables.
     initial_train_size : int, default `None`
         Number of samples in the initial train split. If `None` and `forecaster` is 
         already trained, no initial train is done and all data is used to evaluate the 
@@ -470,10 +472,11 @@ def backtesting_forecaster_multiseries(
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-            - If string: {'mean_squared_error', 'mean_absolute_error',
+            - If `string`: {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
-            - If Callable: Function with arguments y_true, y_pred that returns a float.
-            - If list: List containing multiple strings and/or Callables.
+            - If `Callable`: Function with arguments y_true, y_pred that returns 
+            a float.
+            - If `list`: List containing multiple strings and/or Callables.
     initial_train_size : int, default `None`
         Number of samples in the initial train split. If `None` and `forecaster` is 
         already trained, no initial train is done and all data is used to evaluate the 
@@ -656,10 +659,11 @@ def grid_search_forecaster_multiseries(
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-            - If string: {'mean_squared_error', 'mean_absolute_error',
+            - If `string`: {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
-            - If Callable: Function with arguments y_true, y_pred that returns a float.
-            - If list: List containing multiple strings and/or Callables.
+            - If `Callable`: Function with arguments y_true, y_pred that returns 
+            a float.
+            - If `list`: List containing multiple strings and/or Callables.
     initial_train_size : int 
         Number of samples in the initial train split.
     fixed_train_size : bool, default `True`
@@ -762,10 +766,11 @@ def random_search_forecaster_multiseries(
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-            - If string: {'mean_squared_error', 'mean_absolute_error',
+            - If `string`: {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
-            - If Callable: Function with arguments y_true, y_pred that returns a float.
-            - If list: List containing multiple strings and/or Callables.
+            - If `Callable`: Function with arguments y_true, y_pred that returns 
+            a float.
+            - If `list`: List containing multiple strings and/or Callables.
     initial_train_size : int 
         Number of samples in the initial train split.
     fixed_train_size : bool, default `True`
@@ -871,10 +876,11 @@ def _evaluate_grid_hyperparameters_multiseries(
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-            - If string: {'mean_squared_error', 'mean_absolute_error',
+            - If `string`: {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
-            - If Callable: Function with arguments y_true, y_pred that returns a float.
-            - If list: List containing multiple strings and/or Callables.
+            - If `Callable`: Function with arguments y_true, y_pred that returns 
+            a float.
+            - If `list`: List containing multiple strings and/or Callables.
     initial_train_size : int 
         Number of samples in the initial train split.
     fixed_train_size : bool, default `True`
@@ -1082,10 +1088,11 @@ def backtesting_forecaster_multivariate(
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-            - If string: {'mean_squared_error', 'mean_absolute_error',
+            - If `string`: {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
-            - If Callable: Function with arguments y_true, y_pred that returns a float.
-            - If list: List containing multiple strings and/or Callables.
+            - If `Callable`: Function with arguments y_true, y_pred that returns 
+            a float.
+            - If `list`: List containing multiple strings and/or Callables.
     initial_train_size : int, default `None`
         Number of samples in the initial train split. If `None` and `forecaster` is 
         already trained, no initial train is done and all data is used to evaluate the 
@@ -1205,10 +1212,11 @@ def grid_search_forecaster_multivariate(
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-            - If string: {'mean_squared_error', 'mean_absolute_error',
+            - If `string`: {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
-            - If Callable: Function with arguments y_true, y_pred that returns a float.
-            - If list: List containing multiple strings and/or Callables.
+            - If `Callable`: Function with arguments y_true, y_pred that returns 
+            a float.
+            - If `list`: List containing multiple strings and/or Callables.
     initial_train_size : int 
         Number of samples in the initial train split.
     fixed_train_size : bool, default `True`
@@ -1311,10 +1319,11 @@ def random_search_forecaster_multivariate(
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-            - If string: {'mean_squared_error', 'mean_absolute_error',
+            - If `string`: {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
-            - If Callable: Function with arguments y_true, y_pred that returns a float.
-            - If list: List containing multiple strings and/or Callables.
+            - If `Callable`: Function with arguments y_true, y_pred that returns 
+            a float.
+            - If `list`: List containing multiple strings and/or Callables.
     initial_train_size : int 
         Number of samples in the initial train split.
     fixed_train_size : bool, default `True`
