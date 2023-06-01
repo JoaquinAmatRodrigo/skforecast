@@ -579,7 +579,8 @@ def check_predict_input(
                                'ForecasterAutoregMultiSeriesCustom'] and \
             len(set(levels) - set(last_window.columns)) != 0:
             raise ValueError(
-                (f"`last_window` must contain a column(s) named as the level(s) to be predicted.\n"
+                (f"`last_window` must contain a column(s) named as the level(s) "
+                 f"to be predicted.\n"
                  f"    `levels` : {levels}.\n"
                  f"    `last_window` columns : {list(last_window.columns)}.")
             )
@@ -744,12 +745,13 @@ def preprocess_y(
     """
     Return values and index of series separately. Index is overwritten 
     according to the next rules:
-        - If index is of type DatetimeIndex and has frequency, nothing is 
+    
+        - If index is of type `DatetimeIndex` and has frequency, nothing is 
         changed.
-        - If index is of type RangeIndex, nothing is changed.
-        - If index is of type DatetimeIndex but has no frequency, a 
-        RangeIndex is created.
-        - If index is not of type DatetimeIndex, a RangeIndex is created.
+        - If index is of type `RangeIndex`, nothing is changed.
+        - If index is of type `DatetimeIndex` but has no frequency, a 
+        `RangeIndex` is created.
+        - If index is not of type `DatetimeIndex`, a `RangeIndex` is created.
     
     Parameters
     ----------
@@ -805,12 +807,13 @@ def preprocess_last_window(
     """
     Return values and index of series separately. Index is overwritten 
     according to the next rules:
-        - If index is of type DatetimeIndex and has frequency, nothing is 
+    
+        - If index is of type `DatetimeIndex` and has frequency, nothing is 
         changed.
-        - If index is of type RangeIndex, nothing is changed.
-        - If index is of type DatetimeIndex but has no frequency, a 
-        RangeIndex is created.
-        - If index is not of type DatetimeIndex, a RangeIndex is created.
+        - If index is of type `RangeIndex`, nothing is changed.
+        - If index is of type `DatetimeIndex` but has no frequency, a 
+        `RangeIndex` is created.
+        - If index is not of type `DatetimeIndex`, a `RangeIndex` is created.
     
     Parameters
     ----------
@@ -866,12 +869,13 @@ def preprocess_exog(
     """
     Return values and index of series or data frame separately. Index is
     overwritten  according to the next rules:
-        - If index is of type DatetimeIndex and has frequency, nothing is 
+    
+        - If index is of type `DatetimeIndex` and has frequency, nothing is 
         changed.
-        - If index is of type RangeIndex, nothing is changed.
-        - If index is of type DatetimeIndex but has no frequency, a 
-        RangeIndex is created.
-        - If index is not of type DatetimeIndex, a RangeIndex is created.
+        - If index is of type `RangeIndex`, nothing is changed.
+        - If index is of type `DatetimeIndex` but has no frequency, a 
+        `RangeIndex` is created.
+        - If index is not of type `DatetimeIndex`, a `RangeIndex` is created.
 
     Parameters
     ----------
@@ -1001,7 +1005,8 @@ def exog_to_direct(
     for i in range(steps):
         exog_column_transformed = exog.iloc[i : n_rows - (steps - 1 - i), ]
         exog_column_transformed.index = pd.RangeIndex(len(exog_column_transformed))
-        exog_column_transformed.columns = [f"{col}_step_{i+1}" for col in exog_column_transformed.columns]
+        exog_column_transformed.columns = [f"{col}_step_{i+1}" 
+                                           for col in exog_column_transformed.columns]
         exog_transformed.append(exog_column_transformed)
 
     if len(exog_transformed) > 1:
@@ -1082,7 +1087,7 @@ def expand_index(
         
         if isinstance(index, pd.DatetimeIndex):
             new_index = pd.date_range(
-                            index[-1] + index.freq,
+                            start   = index[-1] + index.freq,
                             periods = steps,
                             freq    = index.freq
                         )
@@ -1392,9 +1397,9 @@ def multivariate_time_series_corr(
     lags : int, list, numpy ndarray
         Lags to be included in the correlation analysis.
     method : str, default 'pearson'
-        - pearson: standard correlation coefficient.
-        - kendall: Kendall Tau correlation coefficient.
-        - spearman: Spearman rank correlation.
+        - 'pearson': standard correlation coefficient.
+        - 'kendall': Kendall Tau correlation coefficient.
+        - 'spearman': Spearman rank correlation.
 
     Returns
     -------
