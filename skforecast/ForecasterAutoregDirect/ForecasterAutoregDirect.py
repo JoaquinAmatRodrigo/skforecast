@@ -516,7 +516,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         Parameters
         ----------
         X_train : pandas DataFrame
-           Dataframe generated with the methods `create_train_X_y` and 
+            Dataframe generated with the methods `create_train_X_y` and 
             `filter_train_X_y_for_step`, first return.
 
         Returns
