@@ -69,9 +69,10 @@ nav:
 
   - FAQ and Tips:
       - Table of contents: faq/faq.md
-      - Profiling skforecast: faq/profiling-skforecast.ipynb
       - Avoid negative predictions when forecasting: faq/non-negative-predictions.ipynb
       - Forecasting time series with missing values: faq/forecasting-time-series-with-missing-values.ipynb
+      - Cyclical features in time series: faq/cyclical-features-time-series.ipynb
+      - Profiling skforecast: faq/profiling-skforecast.ipynb
 
   - Releases: releases/releases.md
 
