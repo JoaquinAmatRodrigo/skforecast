@@ -325,7 +325,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self, 
         y: np.ndarray
     ) -> Tuple[np.ndarray, np.ndarray]:
-        """       
+        """
         Transforms a 1d array into a 2d array (X) and a 1d array (y). Each row
         in X is associated with a value of y and it represents the lags that
         precede it.
