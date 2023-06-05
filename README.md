@@ -31,7 +31,7 @@ Thank you for choosing skforecast! We value your suggestions, bug reports and re
 
 **Documentation**
 
-https://skforecast.org** :books:
+**https://skforecast.org** :books:
 
 
 # Installation
