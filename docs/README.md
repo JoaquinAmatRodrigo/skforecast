@@ -24,7 +24,9 @@
 [![Downloads](https://static.pepy.tech/personalized-badge/skforecast?period=total&units=international_system&left_color=grey&right_color=blue&left_text=Downloads)](https://pepy.tech/project/skforecast)
 
 
-**Skforecast** is a Python library that eases using scikit-learn regressors as single and multi-step forecasters. It also works with any regressor compatible with the scikit-learn API (pipelines, CatBoost, LightGBM, XGBoost, Ranger...).
+## About The Project
+
+**Skforecast** is a Python library that eases using scikit-learn regressors as single and multi-step forecasters. It also works with any regressor compatible with the scikit-learn API (LightGBM, XGBoost, CatBoost, ...).
 
 **Why use skforecast?**
 
@@ -34,6 +36,10 @@ The fields of statistics and machine learning have developed many excellent regr
 + Validation and backtesting methods to have a realistic assessment of model performance. :mag:
 + Models must be deployed in production. :hammer:
 + Models must be interpretable. :crystal_ball:
+
+**Share Your Thoughts with Us**
+
+Thank you for choosing skforecast! We value your suggestions, bug reports and recommendations as they help us identify areas for improvement and ensure that skforecast meets the needs of the community. Please consider sharing your experiences, reporting bugs, making suggestions or even contributing to the codebase on GitHub. Together, let's make time series forecasting more accessible and accurate for everyone.
 
 
 ## Installation
