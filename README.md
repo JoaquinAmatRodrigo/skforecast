@@ -93,17 +93,14 @@ pip install skforecast[plotting]
 + statsmodels>=0.12, <0.14
 + pmdarima>=2.0, <2.1
 
-## What is new in skforecast 0.8.1?
+## What is new in skforecast 0.9.0?
 
 Visit the [release notes](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/changelog.md) to view all notable changes.
 
-- [x] Support for `pandas 2.0.x`.
-- [x] New user guide on how to include **categorical variables** in the Forecasters.
-- [x] New user guide on how to use **GPU in Google Colab** with XGBoost and LightGBM regressors.
-- [x] Include custom kwargs during fit.
-- [x] The dtypes of exogenous variables are maintained when generating the training matrices with the `create_train_X_y` method in all the Forecasters.
-- [x] Include `gap` argument in backtesting functions to omit observations between training and prediction.
-- [x] Bug fixes and performance improvements.
+- [] Parallelization in model_selection modules.
+- [] ForecasterMultiSeries allows series of different lengths.
+- [] New ARIMA functionalities.
+- [] Bug fixes and performance improvements.
 
 
 # Forecasters
