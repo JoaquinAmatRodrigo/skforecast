@@ -29,7 +29,10 @@ The fields of statistics and machine learning have developed many excellent regr
 
 Thank you for choosing skforecast! We value your suggestions, bug reports and recommendations as they help us identify areas for improvement and ensure that skforecast meets the needs of the community. Please consider sharing your experiences, reporting bugs, making suggestions or even contributing to the codebase on GitHub. Together, let's make time series forecasting more accessible and accurate for everyone.
 
-**Documentation**
+
+# Documentation
+
+For detailed information on how to use and leverage the full potential of **skforecast** please refer to the comprehensive documentation available at:
 
 **https://skforecast.org** :books:
 
