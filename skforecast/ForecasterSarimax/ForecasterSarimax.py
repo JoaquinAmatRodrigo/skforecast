@@ -737,30 +737,3 @@ class ForecasterSarimax():
         feature_importances.columns = ['feature', 'importance']
 
         return feature_importances
-
-
-    def get_feature_importance(
-        self
-    ) -> pd.DataFrame:
-        """
-        This method has been replaced by `get_feature_importances()`.
-
-        Return feature importance of the regressor stored in the forecaster.
-
-        Parameters
-        ----------
-        self
-
-        Returns
-        -------
-        feature_importances : pandas DataFrame
-            Feature importances associated with each predictor.
-
-        """
-
-        warnings.warn(
-            ("get_feature_importance() method has been renamed to get_feature_importances()."
-             "This method will be removed in skforecast 0.9.0.")
-        )
-
-        return self.get_feature_importances()
