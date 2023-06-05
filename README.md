@@ -120,9 +120,7 @@ The skforecast library offers a variety of forecaster types, each tailored to sp
 |[ForecasterSarimax](https://skforecast.org/latest/user_guides/forecasting-sarimax-arima.html)|✔️||✔️||✔️|✔️||
 
 
-# Documentation
-
-The documentation for the latest release is at [skforecast docs](https://skforecast.org).
+# Main User Guides
 
 + [Introduction to time series and forecasting](https://skforecast.org/latest/user_guides/quick-start-skforecast.html)
 
