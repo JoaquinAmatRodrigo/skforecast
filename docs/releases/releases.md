@@ -2,6 +2,17 @@
 
 All significant changes to this project are documented in this release file.
 
+## [0.9.0] - [2023-XX-XX]
+
+**Added**
+
+**Changed**
+
++ Remove `get_feature_importance()` in favor of `get_feature_importances()` in all Forecasters, (deprecated since 0.8.0).
+
+**Fixed**
+
+
 ## [0.8.1] - [2023-05-27]
 
 **Added**
