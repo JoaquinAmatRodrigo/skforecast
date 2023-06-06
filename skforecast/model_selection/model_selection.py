@@ -12,6 +12,7 @@ import pandas as pd
 import warnings
 import logging
 from copy import deepcopy
+from joblib import Parallel, delayed, cpu_count
 from tqdm.auto import tqdm
 from sklearn.metrics import mean_squared_error 
 from sklearn.metrics import mean_absolute_error
@@ -314,6 +315,7 @@ def _backtesting_forecaster_refit(
     n_boot: int=500,
     random_state: int=123,
     in_sample_residuals: bool=True,
+    n_jobs: int=-1,
     verbose: bool=False,
     show_progress: bool=True
 ) -> Tuple[Union[float, list], pd.DataFrame]:
@@ -342,11 +344,10 @@ def _backtesting_forecaster_refit(
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-            - If `string`: {'mean_squared_error', 'mean_absolute_error',
+            - If string: {'mean_squared_error', 'mean_absolute_error',
              'mean_absolute_percentage_error', 'mean_squared_log_error'}
-            - If `Callable`: Function with arguments y_true, y_pred that returns 
-            a float.
-            - If `list`: List containing multiple strings and/or Callables.
+            - If Callable: Function with arguments y_true, y_pred that returns a float.
+            - If list: List containing multiple strings and/or Callables.
     initial_train_size : int
         Number of samples in the initial train split. The backtest forecaster is
         trained using the first `initial_train_size` observations.
@@ -377,6 +378,9 @@ def _backtesting_forecaster_refit(
         If `True`, residuals from the training data are used as proxy of prediction
         error to create prediction intervals. If `False`, out_sample_residuals 
         are used if they are already stored inside the forecaster.
+    n_jobs : int, default -1
+        The number of jobs to run in parallel. If -1, then the number of jobs is 
+        set to the number of cores.
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
         for backtesting.
@@ -397,6 +401,7 @@ def _backtesting_forecaster_refit(
     """
 
     forecaster = deepcopy(forecaster)
+    n_jobs = n_jobs if n_jobs > 0 else cpu_count()
 
     if not isinstance(metric, list):
         metrics = [_get_metric(metric=metric) if isinstance(metric, str) else metric]
@@ -414,7 +419,10 @@ def _backtesting_forecaster_refit(
                 return_all_indexes    = False,
                 verbose               = verbose  
             )
-        
+    
+    if show_progress:
+        folds = tqdm(folds)
+
     if type(forecaster).__name__ != 'ForecasterAutoregDirect' and len(folds) > 50:
         warnings.warn(
             (f"The forecaster will be fit {len(folds)} times. This can take substantial"
@@ -429,10 +437,14 @@ def _backtesting_forecaster_refit(
              LongTrainingWarning
         )
 
-    backtest_predictions = []
     store_in_sample_residuals = False if interval is None else True
 
-    for fold in tqdm(folds) if show_progress else folds:
+    def _fit_predict_forecaster(y, exog, forecaster, interval, fold):
+        """
+        Fit the forecaster and predict `steps` ahead. This is an auxiliary 
+        function used to parallelize the backtesting_forecaster function.
+        """
+
         # In each iteration the model is fitted before making predictions. 
         # if fixed_train_size the train size doesn't increase but moves by `steps` 
         # in each iteration. if False the train size increases by `steps` in each 
@@ -441,7 +453,7 @@ def _backtesting_forecaster_refit(
         train_idx_end   = fold[0][1]
         test_idx_start  = fold[1][0]
         test_idx_end    = fold[1][1]
-        
+
         y_train = y.iloc[train_idx_start:train_idx_end, ]
         exog_train = exog.iloc[train_idx_start:train_idx_end, ] if exog is not None else None
         next_window_exog = exog.iloc[test_idx_start:test_idx_end, ] if exog is not None else None
@@ -463,9 +475,16 @@ def _backtesting_forecaster_refit(
                        random_state        = random_state,
                        in_sample_residuals = in_sample_residuals
                    )
-
         pred = pred.iloc[gap:, ]
-        backtest_predictions.append(pred)
+
+        return pred
+
+    backtest_predictions = (
+        Parallel(n_jobs=n_jobs)
+        (delayed(_fit_predict_forecaster)
+        (y=y, exog=exog, forecaster=forecaster, interval=interval, fold=fold)
+        for fold in folds)
+    )
     
     backtest_predictions = pd.concat(backtest_predictions)
     if isinstance(backtest_predictions, pd.Series):
@@ -496,6 +515,7 @@ def _backtesting_forecaster_no_refit(
     n_boot: int=500,
     random_state: int=123,
     in_sample_residuals: bool=True,
+    n_jobs: int=-1,
     verbose: bool=False,
     show_progress: bool=True
 ) -> Tuple[Union[float, list], pd.DataFrame]:
@@ -558,6 +578,9 @@ def _backtesting_forecaster_no_refit(
         If `True`, residuals from the training data are used as proxy of prediction 
         error to create prediction intervals.  If `False`, out_sample_residuals 
         are used if they are already stored inside the forecaster.
+    n_jobs : int, default -1
+        The number of jobs to run in parallel. If -1, then the number of jobs is 
+        set to the number of cores.
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
         for backtesting.
@@ -578,6 +601,7 @@ def _backtesting_forecaster_no_refit(
     """
 
     forecaster = deepcopy(forecaster)
+    n_jobs = n_jobs if n_jobs > 0 else cpu_count()
 
     if not isinstance(metric, list):
         metrics = [_get_metric(metric=metric) if isinstance(metric, str) else metric]
@@ -613,10 +637,16 @@ def _backtesting_forecaster_no_refit(
                 return_all_indexes    = False,
                 verbose               = verbose  
             )
-
-    backtest_predictions = []
     
-    for fold in tqdm(folds) if show_progress else folds:
+    if show_progress:
+        folds = tqdm(folds)
+
+    def _predict_forecaster(y, exog, forecaster, interval, fold):
+        """
+        Predict `steps` ahead. This is an auxiliary function used to parallelize 
+        the backtesting_forecaster function.
+        """
+
         # Since the model is only fitted with the initial_train_size, last_window
         # and next_window_exog must be updated to include the data needed to make
         # predictions.
@@ -626,7 +656,7 @@ def _backtesting_forecaster_no_refit(
         last_window_end   = test_idx_start
         last_window_start = last_window_end - window_size 
         last_window_y     = y.iloc[last_window_start:last_window_end]
-        
+
         next_window_exog = exog.iloc[test_idx_start:test_idx_end, ] if exog is not None else None
         steps = len(range(test_idx_start, test_idx_end))
         if interval is None:
@@ -645,9 +675,16 @@ def _backtesting_forecaster_no_refit(
                        random_state        = random_state,
                        in_sample_residuals = in_sample_residuals
                    )
-        
         pred = pred.iloc[gap:, ]
-        backtest_predictions.append(pred)
+
+        return pred
+    
+    backtest_predictions = (
+        Parallel(n_jobs=n_jobs)
+        (delayed(_predict_forecaster)
+        (y=y, exog=exog, forecaster=forecaster, interval=interval, fold=fold)
+        for fold in folds)
+    )
 
     backtest_predictions = pd.concat(backtest_predictions)
     if isinstance(backtest_predictions, pd.Series):
@@ -680,6 +717,7 @@ def backtesting_forecaster(
     n_boot: int=500,
     random_state: int=123,
     in_sample_residuals: bool=True,
+    n_jobs: int=-1,
     verbose: bool=False,
     show_progress: bool=True
 ) -> Tuple[Union[float, list], pd.DataFrame]:
@@ -744,6 +782,9 @@ def backtesting_forecaster(
         If `True`, residuals from the training data are used as proxy of prediction 
         error to create prediction intervals.  If `False`, out_sample_residuals 
         are used if they are already stored inside the forecaster.
+    n_jobs : int, default -1
+        The number of jobs to run in parallel. If -1, then the number of jobs is 
+        set to the number of cores.
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
         for backtesting.
@@ -813,6 +854,7 @@ def backtesting_forecaster(
             n_boot                = n_boot,
             random_state          = random_state,
             in_sample_residuals   = in_sample_residuals,
+            n_jobs                = n_jobs,
             verbose               = verbose,
             show_progress         = show_progress
         )
@@ -830,6 +872,7 @@ def backtesting_forecaster(
             n_boot                = n_boot,
             random_state          = random_state,
             in_sample_residuals   = in_sample_residuals,
+            n_jobs                = n_jobs,
             verbose               = verbose,
             show_progress         = show_progress
         )  
@@ -851,7 +894,9 @@ def grid_search_forecaster(
     lags_grid: Optional[list]=None,
     refit: bool=False,
     return_best: bool=True,
-    verbose: bool=True
+    n_jobs: int=-1,
+    verbose: bool=True,
+    show_progress: bool=True
 ) -> pd.DataFrame:
     """
     Exhaustive search over specified parameter values for a Forecaster object.
@@ -897,8 +942,13 @@ def grid_search_forecaster(
         Whether to re-fit the forecaster in each iteration of backtesting.
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
+    n_jobs : int, default -1
+        The number of jobs to run in parallel. If -1, then the number of jobs is 
+        set to the number of cores.
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
+    show_progress: bool, default `True`
+        Whether to show a progress bar. Defaults to True.
 
     Returns
     -------
@@ -928,7 +978,9 @@ def grid_search_forecaster(
         lags_grid             = lags_grid,
         refit                 = refit,
         return_best           = return_best,
-        verbose               = verbose
+        n_jobs                = n_jobs,
+        verbose               = verbose,
+        show_progress         = show_progress
     )
 
     return results
@@ -950,7 +1002,9 @@ def random_search_forecaster(
     n_iter: int=10,
     random_state: int=123,
     return_best: bool=True,
-    verbose: bool=True
+    n_jobs: int=-1,
+    verbose: bool=True,
+    show_progress: bool=True
 ) -> pd.DataFrame:
     """
     Random search over specified parameter values or distributions for a Forecaster 
@@ -1001,8 +1055,13 @@ def random_search_forecaster(
         Sets a seed to the random sampling for reproducible output.
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
+    n_jobs : int, default -1
+        The number of jobs to run in parallel. If -1, then the number of jobs is 
+        set to the number of cores.
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
+    show_progress: bool, default `True`
+        Whether to show a progress bar. Defaults to True.
 
     Returns
     -------
@@ -1032,7 +1091,9 @@ def random_search_forecaster(
         lags_grid             = lags_grid,
         refit                 = refit,
         return_best           = return_best,
-        verbose               = verbose
+        n_jobs                = n_jobs,
+        verbose               = verbose,
+        show_progress         = show_progress
     )
 
     return results
@@ -1052,7 +1113,9 @@ def _evaluate_grid_hyperparameters(
     lags_grid: Optional[list]=None,
     refit: bool=False,
     return_best: bool=True,
-    verbose: bool=True
+    n_jobs: int=-1,
+    verbose: bool=True,
+    show_progress: bool=True
 ) -> pd.DataFrame:
     """
     Evaluate parameter values for a Forecaster object using time series backtesting.
@@ -1097,8 +1160,13 @@ def _evaluate_grid_hyperparameters(
         Whether to re-fit the forecaster in each iteration of backtesting.
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
+    n_jobs : int, default -1
+        The number of jobs to run in parallel. If -1, then the number of jobs is 
+        set to the number of cores.
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
+    show_progress: bool, default `True`
+        Whether to show a progress bar. Defaults to True.
 
     Returns
     -------
@@ -1142,13 +1210,17 @@ def _evaluate_grid_hyperparameters(
 
     print(f"Number of models compared: {len(param_grid)*len(lags_grid)}.")
 
-    for lags in tqdm(lags_grid, desc='lags grid', position=0): #ncols=90
+    if show_progress:
+        lags_grid = tqdm(lags_grid, desc='lags grid', position=0) #ncols=90
+        param_grid = tqdm(param_grid, desc='params grid', position=1, leave=False)
+
+    for lags in lags_grid:
         
         if type(forecaster).__name__ in ['ForecasterAutoreg', 'ForecasterAutoregDirect']:
             forecaster.set_lags(lags)
             lags = forecaster.lags.copy()
         
-        for params in tqdm(param_grid, desc='params grid', position=1, leave=False): #ncols=90
+        for params in param_grid:
 
             forecaster.set_params(params)
             metrics_values = backtesting_forecaster(
@@ -1163,6 +1235,7 @@ def _evaluate_grid_hyperparameters(
                                  exog                  = exog,
                                  refit                 = refit,
                                  interval              = None,
+                                 n_jobs                = n_jobs,
                                  verbose               = verbose,
                                  show_progress         = False
                              )[0]
@@ -1219,7 +1292,9 @@ def bayesian_search_forecaster(
     n_trials: int=10,
     random_state: int=123,
     return_best: bool=True,
+    n_jobs: int=-1,
     verbose: bool=True,
+    show_progress: bool=True,
     engine: str='optuna',
     kwargs_create_study: dict={},
     kwargs_study_optimize: dict={},
@@ -1274,8 +1349,13 @@ def bayesian_search_forecaster(
         Sets a seed to the sampling for reproducible output.
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
+    n_jobs : int, default -1
+        The number of jobs to run in parallel. If -1, then the number of jobs is 
+        set to the number of cores.
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
+    show_progress: bool, default `True`
+        Whether to show a progress bar. Defaults to True.
     engine : str, default `'optuna'`
         Bayesian optimization runs through the optuna library.
     kwargs_create_study : dict, default `{'direction':'minimize', 'sampler':TPESampler(seed=123)}`
@@ -1338,7 +1418,9 @@ def bayesian_search_forecaster(
                                     n_trials              = n_trials,
                                     random_state          = random_state,
                                     return_best           = return_best,
+                                    n_jobs                = n_jobs,
                                     verbose               = verbose,
+                                    show_progress         = show_progress,
                                     kwargs_create_study   = kwargs_create_study,
                                     kwargs_study_optimize = kwargs_study_optimize
                                 )
@@ -1362,7 +1444,9 @@ def _bayesian_search_optuna(
     n_trials: int=10,
     random_state: int=123,
     return_best: bool=True,
+    n_jobs: int=-1,
     verbose: bool=True,
+    show_progress: bool=True,
     kwargs_create_study: dict={},
     kwargs_study_optimize: dict={}
 ) -> Tuple[pd.DataFrame, object]:
@@ -1415,8 +1499,13 @@ def _bayesian_search_optuna(
         Sets a seed to the sampling for reproducible output.
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
+    n_jobs : int, default -1
+        The number of jobs to run in parallel. If -1, then the number of jobs is 
+        set to the number of cores.
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
+    show_progress: bool, default `True`
+        Whether to show a progress bar. Defaults to True.
     kwargs_create_study : dict, default `{'direction':'minimize', 'sampler':TPESampler(seed=123)}`
         Keyword arguments (key, value mappings) to pass to optuna.create_study.
     kwargs_study_optimize : dict, default `{}`
@@ -1472,6 +1561,7 @@ def _bayesian_search_optuna(
         steps                 = steps,
         metric                = metric,
         refit                 = refit,
+        n_jobs                = n_jobs,
         verbose               = verbose,
         search_space          = search_space,
     ) -> float:
@@ -1489,6 +1579,7 @@ def _bayesian_search_optuna(
                          gap                   = gap,
                          allow_incomplete_fold = allow_incomplete_fold,
                          refit                 = refit,
+                         n_jobs                = n_jobs,
                          verbose               = verbose,
                          show_progress         = False
                      )
@@ -1503,8 +1594,10 @@ def _bayesian_search_optuna(
          {n_trials} bayesian search in each lag configuration."""
     )
 
-    for lags in tqdm(lags_grid, desc='lags grid', position=0): #ncols=90
-                
+    if show_progress:
+        lags_grid = tqdm(lags_grid, desc='lags grid', position=0)
+
+    for lags in lags_grid:
         metric_values = [] # This variable will be modified inside _objective function. 
         # It is a trick to extract multiple values from _objective function since
         # only the optimized value can be returned.
