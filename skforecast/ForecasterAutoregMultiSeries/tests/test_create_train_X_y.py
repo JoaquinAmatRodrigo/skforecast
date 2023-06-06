@@ -123,6 +123,62 @@ def test_create_train_X_y_ValueError_when_series_and_exog_have_different_index()
         forecaster.fit(series=series, exog=exog)
 
 
+def test_create_train_X_y_ValueError_when_all_series_values_are_missing():
+    """
+    Test ValueError is raised when all series values are missing.
+    """
+    series = pd.DataFrame({'1': pd.Series(np.arange(7)), 
+                           '2': pd.Series([np.nan]*7)})
+    series.index = pd.date_range(start='2022-01-01', periods=7, freq='1D')
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5)
+
+    err_msg = re.escape("All values of series '2' are missing.")
+    with pytest.raises(ValueError, match = err_msg):
+        forecaster.create_train_X_y(series=series)
+
+
+@pytest.mark.parametrize("values", 
+                         [[0, 1, 2, 3, 4, 5, np.nan], 
+                          [0, 1]+[np.nan]*5, 
+                          [np.nan, 1, 2, 3, 4, 5, np.nan]])
+def test_create_train_X_y_ValueError_when_last_series_values_are_missing(values):
+    """
+    Test ValueError is raised when last self.max_lag values are missing.
+    """
+    series = pd.DataFrame({'1': pd.Series(values), 
+                           '2': pd.Series(np.arange(7))})
+    series.index = pd.date_range(start='2022-01-01', periods=7, freq='1D')
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5)
+
+    err_msg = re.escape(
+                (f"The last {forecaster.max_lag} values of '1' cannot be NaN. "
+                 f"All series must end with the same index.")
+              )
+    with pytest.raises(ValueError, match = err_msg):
+        forecaster.create_train_X_y(series=series)
+
+
+@pytest.mark.parametrize("values", 
+                         [[0, 1, np.nan, 3, np.nan, 5, 6], 
+                          [np.nan, np.nan, np.nan, 3, np.nan, 5, 6]])
+def test_create_train_X_y_ValueError_when_series_has_missing_values_between_observations(values):
+    """
+    Test ValueError is raised when series has missing values between observations.
+    """
+    series = pd.DataFrame({'1': pd.Series(values), 
+                           '2': pd.Series(np.arange(7))})
+    series.index = pd.date_range(start='2022-01-01', periods=7, freq='1D')
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5)
+
+    err_msg = re.escape(
+                ("'1' has missing values between observations. When "
+                 "working with series of different lengths, all series must "
+                 "be complete after the first non-null value.")
+              )
+    with pytest.raises(ValueError, match = err_msg):
+        forecaster.create_train_X_y(series=series)
+
+
 def test_create_train_X_y_output_when_series_and_exog_is_None():
     """
     Test the output of create_train_X_y when series has 2 columns and 
