@@ -739,7 +739,7 @@ def check_predict_input(
 
 
 def preprocess_y(
-    y: pd.Series,
+    y: Union[pd.Series, pd.DataFrame],
     return_values: bool=True
 ) -> Tuple[Union[None, np.ndarray], pd.Index]:
     """
@@ -755,7 +755,7 @@ def preprocess_y(
     
     Parameters
     ----------
-    y : pandas Series
+    y : pandas Series, pandas DataFrame
         Time series.
     return_values : bool, default `True`
         If `True` return the values of `y` as numpy ndarray. This option is 
