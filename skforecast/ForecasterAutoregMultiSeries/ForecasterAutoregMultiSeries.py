@@ -470,26 +470,19 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             if np.isnan(y_values).all():
                 raise ValueError(f"All values of series '{serie}' are NaN.")
             
-            values_idx = np.where(~np.isnan(y_values))[0]
-            first_value_idx = values_idx[0]
-            last_value_idx = values_idx[-1]
-            y_values = y_values[first_value_idx:last_value_idx]
-
-            if len(series) != last_value_idx+1:
-                raise ValueError(
-                    (f"The last {self.max_lag} values of '{serie}' cannot be NaN. "
-                     f"All series must end with the same index.")
-                )
+            first_nonan_idx = np.argmax(~np.isnan(y_values))
+            y_values = y_values[first_nonan_idx:]
 
             if np.isnan(y_values).any():
                 raise ValueError(
-                    (f"'{serie}' has missing values between observations. When "
-                     f"working with series of different lengths, all series must "
-                     f"be complete after the first non-null value.")
+                    (f"'{serie}' Time series has missing values in between or "
+                     f"at the end of the time series. When working with series "
+                     f"of different lengths, all series must be complete after "
+                     f"the first non-null value.")
                 )
             
             y = transform_series(
-                    series            = y.iloc[first_value_idx:],
+                    series            = y.iloc[first_nonan_idx:],
                     transformer       = self.transformer_series_[serie],
                     fit               = True,
                     inverse_transform = False
