@@ -323,9 +323,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
     
     def _create_lags(
         self, 
-        y: np.ndarray
+        y: np.ndarray, 
+        series_name: str
     ) -> Tuple[np.ndarray, np.ndarray]:
-        """       
+        """
         Transforms a 1d array into a 2d array (X) and a 1d array (y). Each row
         in X is associated with a value of y and it represents the lags that
         precede it.
@@ -337,6 +338,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         ----------
         y : numpy ndarray
             1d numpy ndarray Training time series.
+        series_name : str
+            Name of the series.
 
         Returns
         -------
@@ -354,7 +357,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         if n_splits <= 0:
             raise ValueError(
                 (f"The maximum lag ({self.max_lag}) must be less than the length "
-                 f"of the series ({len(y)}).")
+                 f"of the series '{series_name}', ({len(y)}).")
             )
         
         X_data = np.full(shape=(n_splits, len(self.lags)), fill_value=np.nan, dtype=float)
@@ -456,31 +459,48 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 )
         
         X_levels = []
+        len_series = []
         X_train_col_names = [f"lag_{lag}" for lag in self.lags]
 
         for i, serie in enumerate(series.columns):
 
             y = series[serie]
-            check_y(y=y)
+            y_values = y.to_numpy()
+
+            if np.isnan(y_values).all():
+                raise ValueError(f"All values of series '{serie}' are NaN.")
+            
+            first_nonan_idx = np.argmax(~np.isnan(y_values))
+            y_values = y_values[first_nonan_idx:]
+
+            if np.isnan(y_values).any():
+                raise ValueError(
+                    (f"'{serie}' Time series has missing values in between or "
+                     f"at the end of the time series. When working with series "
+                     f"of different lengths, all series must be complete after "
+                     f"the first non-null value.")
+                )
+            
             y = transform_series(
-                    series            = y,
+                    series            = y.iloc[first_nonan_idx:],
                     transformer       = self.transformer_series_[serie],
                     fit               = True,
                     inverse_transform = False
                 )
 
-            y_values, y_index = preprocess_y(y=y)
-            X_train_values, y_train_values = self._create_lags(y=y_values)
+            y_values = y.to_numpy()
+            X_train_values, y_train_values = self._create_lags(y=y_values, series_name=serie)
 
             if i == 0:
                 X_train = X_train_values
                 y_train = y_train_values
             else:
-                X_train = np.vstack((X_train, X_train_values))
-                y_train = np.append(y_train, y_train_values)
+                X_train = np.concatenate((X_train, X_train_values), axis=0)
+                y_train = np.concatenate((y_train, y_train_values), axis=0)
 
             X_level = [serie]*len(X_train_values)
             X_levels.extend(X_level)
+            len_series.append(len(y_train_values))
         
         X_levels = pd.Series(X_levels)
         X_levels = pd.get_dummies(X_levels, dtype=float)
@@ -492,10 +512,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         if exog is not None:
             # The first `self.max_lag` positions have to be removed from exog
-            # since they are not in X_train. Then exog is cloned as many times
-            # as series.
-            exog_to_train = exog.iloc[self.max_lag:, ]
-            exog_to_train = pd.concat([exog_to_train]*len(series_col_names)).reset_index(drop=True)
+            # since they are not in X_train. Then Exog is cloned as many times 
+            # as there are series, taking into account the length of the series.
+            exog_to_train = [exog.iloc[-length:, ] for length in len_series]
+            exog_to_train = pd.concat(exog_to_train).reset_index(drop=True)
         else:
             exog_to_train = None
         
@@ -507,10 +527,12 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                       name = 'y'
                   )
 
+        _, y_index = preprocess_y(y=series, return_values=False)
+
+        y_index_numpy = y_index.to_numpy()
         y_train_index = pd.Index(
-                            np.tile(
-                                y_index[self.max_lag: ].to_numpy(),
-                                reps = len(series_col_names)
+                            np.concatenate(
+                                [y_index_numpy[-length:, ] for length in len_series]
                             )
                         )
 
