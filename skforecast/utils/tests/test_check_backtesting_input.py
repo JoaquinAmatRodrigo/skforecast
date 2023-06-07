@@ -381,6 +381,45 @@ def test_check_backtesting_input_ValueError_when_initial_train_size_plus_gap_les
         )
 
 
+def test_check_backtesting_input_ValueError_when_series_different_length_initial_train_size():
+    """
+    Test ValueError is raised in check_backtesting_input when series have different 
+    length and initial_train_size is not enough to reach the first non-null value.
+    """
+    forecaster = ForecasterAutoregMultiSeries(
+                     regressor = Ridge(random_state=123),
+                     lags      = 2
+                 )
+    series_nan = series.copy()
+    series_nan['l2'].iloc[:20] = np.nan
+    
+    err_msg = re.escape(
+                    ("All values of series 'l2' are NaN. When working "
+                     "with series of different lengths, make sure that "
+                     "`initial_train_size` has an appropriate value so that "
+                     "all series reach the first non-null value.")
+                )
+    with pytest.raises(ValueError, match = err_msg):
+        check_backtesting_input(
+            forecaster            = forecaster,
+            steps                 = 3,
+            metric                = 'mean_absolute_error',
+            y                     = None,
+            series                = series_nan,
+            initial_train_size    = 15,
+            fixed_train_size      = False,
+            gap                   = 0,
+            allow_incomplete_fold = False,
+            refit                 = False,
+            interval              = None,
+            n_boot                = 500,
+            random_state          = 123,
+            in_sample_residuals   = True,
+            verbose               = False,
+            show_progress         = False
+        )
+
+
 def test_check_backtesting_input_ValueError_ForecasterSarimax_when_initial_train_size_is_None():
     """
     Test ValueError is raised in check_backtesting_input when initial_train_size 

@@ -468,7 +468,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             y_values = y.to_numpy()
 
             if np.isnan(y_values).all():
-                raise ValueError(f"All values of series '{serie}' are missing.")
+                raise ValueError(f"All values of series '{serie}' are NaN.")
             
             values_idx = np.where(~np.isnan(y_values))[0]
             first_value_idx = values_idx[0]

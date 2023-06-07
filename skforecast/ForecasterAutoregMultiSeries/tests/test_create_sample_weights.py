@@ -118,9 +118,9 @@ def test_create_sample_weights_output_using_series_weights():
                      lags           = 3,
                      series_weights = {'series_1': 1., 'series_2': 2.}
                  )
+    results = forecaster.create_sample_weights(series=series, X_train=X_train, y_train_index=y_train_index)
 
     expected = np.array([1., 1., 1., 1., 1., 1., 1., 2., 2., 2., 2., 2., 2., 2.])
-    results = forecaster.create_sample_weights(series=series, X_train=X_train, y_train_index=y_train_index)
     
     assert np.array_equal(results, expected)
 
@@ -134,23 +134,23 @@ def test_create_sample_weights_output_using_weight_func():
                      lags        = 3,
                      weight_func = custom_weights
                  )
+    results = forecaster.create_sample_weights(series=series, X_train=X_train, 
+                                               y_train_index=y_train_index)
 
     expected = np.array([1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1])
-    results = forecaster.create_sample_weights(series=series, X_train=X_train, y_train_index=y_train_index)
     
     assert np.array_equal(results, expected)
 
 
 @pytest.mark.parametrize("weight_func, expected", 
                          [({'series_1': custom_weights}, 
-                           np.array([1., 0., 0., 0., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1.])),                            
+                           np.array([1., 0., 0., 0., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1.])), 
                           ({'series_2': custom_weights_2}, 
                            np.array([1., 1., 1., 1., 1., 1., 1., 3., 3., 3., 3., 2., 2., 2.])), 
                           ({'series_1': custom_weights, 
                             'series_2': custom_weights_2}, 
                            np.array([1, 0, 0, 0, 1, 1, 1, 3, 3, 3, 3, 2, 2, 2]))], 
-                         ids = lambda values : f'levels: {values}'
-                        )
+                         ids = lambda values : f'levels: {values}')
 def test_create_sample_weights_output_using_weight_func_dict(weight_func, expected):
     """
     Test `sample_weights` creation using `weight_func`.
@@ -160,8 +160,42 @@ def test_create_sample_weights_output_using_weight_func_dict(weight_func, expect
                      lags        = 3,
                      weight_func = weight_func
                  )
+    results = forecaster.create_sample_weights(series=series, X_train=X_train, 
+                                               y_train_index=y_train_index)
+    
+    assert np.array_equal(results, expected)
 
-    results = forecaster.create_sample_weights(series=series, X_train=X_train, y_train_index=y_train_index)
+
+@pytest.mark.parametrize("weight_func, expected", 
+                         [({'series_1': custom_weights}, 
+                           np.array([1., 0., 0., 0., 1., 1., 1., 1., 1., 1., 1.,])), 
+                          ({'series_2': custom_weights_2}, 
+                           np.array([1., 1., 1., 1., 1., 1., 1., 3., 2., 2., 2.])), 
+                          ({'series_1': custom_weights, 
+                            'series_2': custom_weights_2}, 
+                           np.array([1, 0, 0, 0, 1, 1, 1, 3, 2, 2, 2]))], 
+                         ids = lambda values : f'levels: {values}')
+def test_create_sample_weights_output_using_weight_func_dict_different_series_lengths(weight_func, expected):
+    """
+    Test `sample_weights` creation using `weight_func` with series of different lengths.
+    """
+    new_series = series.copy()
+    new_series['series_2'].iloc[:3] = np.nan
+    new_X_train = X_train.drop([7, 8, 9]).reset_index(drop=True)
+    new_y_train_index = pd.DatetimeIndex(
+                            ['2022-01-07', '2022-01-08', '2022-01-09', '2022-01-10',
+                             '2022-01-11', '2022-01-12', '2022-01-13',
+                             '2022-01-10', '2022-01-11', '2022-01-12', '2022-01-13'],
+                            dtype='datetime64[ns]', freq=None
+                        )
+
+    forecaster = ForecasterAutoregMultiSeries(
+                     regressor   = LinearRegression(),
+                     lags        = 3,
+                     weight_func = weight_func
+                 )
+    results = forecaster.create_sample_weights(series=new_series, X_train=new_X_train, 
+                                               y_train_index=new_y_train_index)
     
     assert np.array_equal(results, expected)
 
@@ -176,16 +210,46 @@ def test_create_sample_weights_output_using_series_weights_and_weight_func():
                      series_weights = {'series_1': 1., 'series_2': 2.},
                      weight_func    = custom_weights
                  )
+    results = forecaster.create_sample_weights(series=series, X_train=X_train, 
+                                               y_train_index=y_train_index)
 
     expected = np.array([1, 0, 0, 0, 1, 1, 1, 2, 0, 0, 0, 2, 2, 2], dtype=float)
-    results = forecaster.create_sample_weights(series=series, X_train=X_train, y_train_index=y_train_index)
     
     assert np.array_equal(results, expected)
 
 
-def test_create_sample_weights_exceptions_when_weights_has_nan():
+def test_create_sample_weights_output_using_series_weights_and_weight_func_different_series_lengths():
     """
-    Test sample_weights exception when sample_weight contains NaNs.
+    Test `sample_weights` creation using `series_weights` and `weight_func` 
+    with series of different lengths.
+    """
+    new_series = series.copy()
+    new_series['series_2'].iloc[:3] = np.nan
+    new_X_train = X_train.drop([7, 8, 9]).reset_index(drop=True)
+    new_y_train_index = pd.DatetimeIndex(
+                            ['2022-01-07', '2022-01-08', '2022-01-09', '2022-01-10',
+                             '2022-01-11', '2022-01-12', '2022-01-13',
+                             '2022-01-10', '2022-01-11', '2022-01-12', '2022-01-13'],
+                            dtype='datetime64[ns]', freq=None
+                        )
+    
+    forecaster = ForecasterAutoregMultiSeries(
+                     regressor      = LinearRegression(),
+                     lags           = 3,
+                     series_weights = {'series_1': 1., 'series_2': 2.},
+                     weight_func    = custom_weights
+                 )
+    results = forecaster.create_sample_weights(series=new_series, X_train=new_X_train, 
+                                               y_train_index=new_y_train_index)
+
+    expected = np.array([1, 0, 0, 0, 1, 1, 1, 0, 2, 2, 2], dtype=float)
+    
+    assert np.array_equal(results, expected)
+
+
+def test_create_sample_weights_ValueError_when_weights_has_nan():
+    """
+    Test sample_weights ValueError when sample_weight contains NaNs.
     """
     forecaster = ForecasterAutoregMultiSeries(
                      regressor   = LinearRegression(),
@@ -198,9 +262,9 @@ def test_create_sample_weights_exceptions_when_weights_has_nan():
         forecaster.create_sample_weights(series=series, X_train=X_train, y_train_index=y_train_index)
 
 
-def test_create_sample_weights_exceptions_when_weights_has_negative_values():
+def test_create_sample_weights_ValueError_when_weights_has_negative_values():
     """
-    Test sample_weights exception when sample_weight contains negative values.
+    Test sample_weights ValueError when sample_weight contains negative values.
     """
     forecaster = ForecasterAutoregMultiSeries(
                      regressor   = LinearRegression(),
@@ -213,9 +277,9 @@ def test_create_sample_weights_exceptions_when_weights_has_negative_values():
         forecaster.create_sample_weights(series=series, X_train=X_train, y_train_index=y_train_index)
    
 
-def test_create_sample_weights_exceptions_when_weights_all_zeros():
+def test_create_sample_weights_ValueError_when_weights_all_zeros():
     """
-    Test sample_weights exception when the sum of the weights is zero.
+    Test sample_weights ValueError when the sum of the weights is zero.
     """
     forecaster = ForecasterAutoregMultiSeries(
                      regressor      = LinearRegression(),
