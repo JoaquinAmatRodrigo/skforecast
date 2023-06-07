@@ -1565,6 +1565,15 @@ def check_backtesting_input(
                  f"gap {gap} cannot be greater than the length of `{data_name}` "
                  f"({data_length}).")
             )
+        if data_name == 'series':
+            for serie in series:
+                if np.isnan(series[serie].to_numpy()[:initial_train_size]).all():
+                    raise ValueError(
+                        (f"All values of series '{serie}' are NaN. When working "
+                         f"with series of different lengths, make sure that "
+                         f"`initial_train_size` has an appropriate value so that "
+                         f"all series reach the first non-null value.")
+                    )
     else:
         if type(forecaster).__name__ == 'ForecasterSarimax':
             raise ValueError(
