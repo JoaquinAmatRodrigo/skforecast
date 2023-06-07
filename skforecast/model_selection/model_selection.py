@@ -6,7 +6,7 @@
 ################################################################################
 # coding=utf-8
 
-from typing import Union, Tuple, Optional, Any, Callable
+from typing import Union, Tuple, Optional, Callable
 import numpy as np
 import pandas as pd
 import warnings
@@ -82,8 +82,9 @@ def _backtesting_forecaster_verbose(
     print("")
     for i in range(folds):
         if refit:
-            # if fixed_train_size the train size doesn't increase but moves by `steps` in each iteration.
-            # if false the train size increases by `steps` in each iteration.
+            # if fixed_train_size the train size doesn't increase but moves by
+            # `steps` in each iteration. if false the train size increases by `steps`
+            # in each iteration.
             train_idx_start = i * steps if fixed_train_size else 0
             train_idx_end = initial_train_size + i * steps
         else:
@@ -93,11 +94,23 @@ def _backtesting_forecaster_verbose(
         last_window_end = initial_train_size + i * steps
         print(f"Data partition in fold: {i}")
         if i < folds - 1:
-            print(f"    Training:   {index_values[train_idx_start]} -- {index_values[train_idx_end - 1]}  (n={len(index_values[train_idx_start:train_idx_end])})")
-            print(f"    Validation: {index_values[last_window_end]} -- {index_values[last_window_end + steps - 1]}  (n={len(index_values[last_window_end:last_window_end + steps])})")
+            print(
+                f"    Training:   {index_values[train_idx_start]} -- {index_values[train_idx_end - 1]}"
+                f"  (n={len(index_values[train_idx_start:train_idx_end])})"
+            )
+            print(
+                f"    Validation: {index_values[last_window_end]} -- {index_values[last_window_end + steps - 1]}"
+                f"  (n={len(index_values[last_window_end:last_window_end + steps])})"
+            )
         else:
-            print(f"    Training:   {index_values[train_idx_start]} -- {index_values[train_idx_end - 1]}  (n={len(index_values[train_idx_start:train_idx_end])})")
-            print(f"    Validation: {index_values[last_window_end]} -- {index_values[-1]}  (n={len(index_values[last_window_end:])})")
+            print(
+                f"    Training:   {index_values[train_idx_start]} -- {index_values[train_idx_end - 1]}"
+                f"  (n={len(index_values[train_idx_start:train_idx_end])})"
+            )
+            print(
+                f"    Validation: {index_values[last_window_end]} -- {index_values[-1]}"
+                F"  (n={len(index_values[last_window_end:])})"
+            )
     print("")
 
     return
