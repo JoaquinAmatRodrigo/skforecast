@@ -132,7 +132,7 @@ def test_create_train_X_y_ValueError_when_all_series_values_are_missing():
     series.index = pd.date_range(start='2022-01-01', periods=7, freq='1D')
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5)
 
-    err_msg = re.escape("All values of series '2' are Nan.")
+    err_msg = re.escape("All values of series '2' are NaN.")
     with pytest.raises(ValueError, match = err_msg):
         forecaster.create_train_X_y(series=series)
 
