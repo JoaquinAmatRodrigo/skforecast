@@ -151,8 +151,10 @@ def test_create_train_X_y_ValueError_when_last_series_values_are_missing(values)
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5)
 
     err_msg = re.escape(
-                (f"The last {forecaster.max_lag} values of '1' cannot be NaN. "
-                 f"All series must end with the same index.")
+                (f"'1' Time series has missing values in between or "
+                 f"at the end of the time series. When working with series "
+                 f"of different lengths, all series must be complete after "
+                 f"the first non-null value.")
               )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.create_train_X_y(series=series)
@@ -171,9 +173,10 @@ def test_create_train_X_y_ValueError_when_series_has_missing_values_between_obse
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5)
 
     err_msg = re.escape(
-                ("'1' has missing values between observations. When "
-                 "working with series of different lengths, all series must "
-                 "be complete after the first non-null value.")
+                (f"'1' Time series has missing values in between or "
+                 f"at the end of the time series. When working with series "
+                 f"of different lengths, all series must be complete after "
+                 f"the first non-null value.")
               )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.create_train_X_y(series=series)
