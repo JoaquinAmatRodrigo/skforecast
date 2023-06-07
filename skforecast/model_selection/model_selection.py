@@ -1297,8 +1297,7 @@ def bayesian_search_forecaster(
     show_progress: bool=True,
     engine: str='optuna',
     kwargs_create_study: dict={},
-    kwargs_study_optimize: dict={},
-    kwargs_gp_minimize: Any='deprecated'
+    kwargs_study_optimize: dict={}
 ) -> Tuple[pd.DataFrame, object]:
     """
     Bayesian optimization for a Forecaster object using time series backtesting and 
@@ -1364,10 +1363,6 @@ def bayesian_search_forecaster(
     kwargs_study_optimize : dict, default `{}`
         Only applies to engine='optuna'. Other keyword arguments (key, value mappings) 
         to pass to study.optimize().
-    kwargs_gp_minimize : dict, default `{}`
-        Only applies to engine='skopt'. Other keyword arguments (key, value mappings) 
-        to pass to skopt.gp_minimize().
-        **Deprecated in version 0.7.0**
 
     Returns
     -------
