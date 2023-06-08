@@ -658,3 +658,40 @@ def test_check_backtesting_input_ValueError_when_not_enough_data_to_create_a_fol
             verbose               = False,
             show_progress         = False
         )
+
+@pytest.mark.parametrize("n_jobs", 
+                         [1.0, 'not_int'], 
+                         ids = lambda value : f'n_jobs: {value}')
+def test_check_backtesting_input_TypeError_when_initial_train_size_is_not_an_int_or_None(n_jobs):
+    """
+    Test TypeError is raised in check_backtesting_input when 
+    initial_train_size is not an integer.
+    """
+    forecaster = ForecasterAutoreg(
+                     regressor = Ridge(random_state=123),
+                     lags      = 2
+                 )
+    
+    err_msg = re.escape(
+            (f"`n_jobs` must be a integer. Got {n_jobs}.")
+        )
+    with pytest.raises(TypeError, match = err_msg):
+        check_backtesting_input(
+            forecaster            = forecaster,
+            steps                 = 3,
+            metric                = 'mean_absolute_error',
+            y                     = y,
+            series                = None,
+            initial_train_size    = len(y[:-12]),
+            fixed_train_size      = False,
+            gap                   = 0,
+            allow_incomplete_fold = False,
+            refit                 = False,
+            interval              = None,
+            n_boot                = 500,
+            random_state          = 123,
+            in_sample_residuals   = True,
+            n_jobs                = n_jobs,
+            verbose               = False,
+            show_progress         = False
+        )
