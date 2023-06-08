@@ -230,7 +230,7 @@ def _backtesting_forecaster_multiseries_refit(
     backtest_predictions = (
         Parallel(n_jobs=n_jobs)
         (delayed(_fit_predict_forecaster)
-        (y=series, exog=exog, forecaster=forecaster, interval=interval, fold=fold)
+        (series=series, exog=exog, forecaster=forecaster, interval=interval, fold=fold)
         for fold in folds)
     )
 
@@ -448,7 +448,7 @@ def _backtesting_forecaster_multiseries_no_refit(
     backtest_predictions = (
         Parallel(n_jobs=n_jobs)
         (delayed(_predict_forecaster)
-        (y=series, exog=exog, forecaster=forecaster, interval=interval, fold=fold)
+        (series=series, exog=exog, forecaster=forecaster, interval=interval, fold=fold)
         for fold in folds)
     )
 
