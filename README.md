@@ -48,7 +48,7 @@ pip install skforecast
 Specific version:
 
 ```bash
-pip install skforecast==0.8.1
+pip install skforecast==0.9.0
 ```
 
 Latest (unstable):
@@ -97,10 +97,9 @@ pip install skforecast[plotting]
 
 Visit the [release notes](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/changelog.md) to view all notable changes.
 
-- [] Parallelization in model_selection modules.
-- [] ForecasterMultiSeries allows series of different lengths.
-- [] New ARIMA functionalities.
-- [] Bug fixes and performance improvements.
+- [x] Parallelization in model selection modules. New argument `n_jobs` in functions such as `backtesting_forecaster`.
+- [x] `ForecasterAutoregMultiSeries` and `ForecasterAutoregMultiSeriesCUstom` allow series of different lengths.
+- [x] Bug fixes and performance improvements.
 
 
 # Forecasters
@@ -205,7 +204,7 @@ If you use this software, please cite it using the following metadata.
 
 **APA**:
 ```
-Amat Rodrigo, J., & Escobar Ortiz, J. skforecast (Version 0.8.1) [Computer software]
+Amat Rodrigo, J., & Escobar Ortiz, J. skforecast (Version 0.9.0) [Computer software]
 ```
 
 **BibTeX**:
@@ -213,9 +212,9 @@ Amat Rodrigo, J., & Escobar Ortiz, J. skforecast (Version 0.8.1) [Computer softw
 @software{skforecast,
 author = {Amat Rodrigo, Joaquin and Escobar Ortiz, Javier},
 license = {BSD 3-Clause License},
-month = {5},
+month = {6},
 title = {{skforecast}},
-version = {0.8.1},
+version = {0.9.0},
 year = {2023}
 }
 ```
