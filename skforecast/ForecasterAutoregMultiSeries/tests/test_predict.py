@@ -1,7 +1,6 @@
 # Unit test predict ForecasterAutoregMultiSeries
 # ==============================================================================
 import pytest
-from pytest import approx
 import numpy as np
 import pandas as pd
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
