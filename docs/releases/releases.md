@@ -4,7 +4,14 @@ All significant changes to this project are documented in this release file.
 
 ## [0.9.0] - [2023-XX-XX]
 
+Enhanced all backtesting and grid search functions by adding the n_jobs argument, enabling multi-threaded parallelization for improved performance.
+
 **Added**
+
++ Added `n_jobs` argument to all backtesting and gridsearch funtions to allow multi-threaded parallelization.
+
++ Added `show_progress` to grid search functions.
+
 
 **Changed**
 
