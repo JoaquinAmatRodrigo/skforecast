@@ -475,19 +475,19 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
 
             y_values = y.to_numpy()
 
-            temp_X_train  = []
-            temp_y_train  = []
+            X_train_values  = []
+            y_train_values  = []
 
             for j in range(len(y) - self.window_size):
 
                 temp_X_index = np.arange(j, self.window_size + j)
                 temp_y_index  = self.window_size + j
 
-                temp_X_train.append(self.fun_predictors(y=y_values[temp_X_index]))
-                temp_y_train.append(y_values[temp_y_index])
+                X_train_values.append(self.fun_predictors(y=y_values[temp_X_index]))
+                y_train_values.append(y_values[temp_y_index])
 
-            X_train_values = np.vstack(temp_X_train)
-            y_train_values = np.array(temp_y_train)
+            X_train_values = np.vstack(X_train_values)
+            y_train_values = np.array(y_train_values)
 
             if np.isnan(X_train_values).any():
                 raise ValueError(
