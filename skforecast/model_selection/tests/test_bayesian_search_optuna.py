@@ -309,6 +309,7 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_mocked_whe
                     fixed_train_size      = True,
                     n_trials              = 10,
                     random_state          = 123,
+                    n_jobs                = 1,
                     return_best           = False,
                     verbose               = False,
                     kwargs_study_optimize = {'timeout': timeout}
