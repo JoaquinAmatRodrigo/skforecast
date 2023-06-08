@@ -6,7 +6,7 @@
 ################################################################################
 # coding=utf-8
 
-from typing import Union, Dict, List, Tuple, Any, Optional, Callable
+from typing import Union, Tuple, Optional, Callable
 import warnings
 import logging
 import sys
@@ -24,7 +24,6 @@ from ..exceptions import IgnoredArgumentWarning
 from ..utils import initialize_lags
 from ..utils import initialize_weights
 from ..utils import check_select_fit_kwargs
-from ..utils import check_y
 from ..utils import check_exog
 from ..utils import get_exog_dtypes
 from ..utils import check_exog_dtypes
@@ -415,7 +414,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             self.transformer_series_ = {serie: None for serie in series_col_names}
             # Only elements already present in transformer_series_ are updated
             self.transformer_series_.update(
-                (k, v) for k, v in deepcopy(self.transformer_series).items() if k in self.transformer_series_
+                (k, v) for k, v in deepcopy(self.transformer_series).items() 
+                if k in self.transformer_series_
             )
             series_not_in_transformer_series = set(series.columns) - set(self.transformer_series.keys())
             if series_not_in_transformer_series:
@@ -470,8 +470,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             if np.isnan(y_values).all():
                 raise ValueError(f"All values of series '{serie}' are NaN.")
             
-            first_nonan_idx = np.argmax(~np.isnan(y_values))
-            y_values = y_values[first_nonan_idx:]
+            first_no_nan_idx = np.argmax(~np.isnan(y_values))
+            y_values = y_values[first_no_nan_idx:]
 
             if np.isnan(y_values).any():
                 raise ValueError(
@@ -482,7 +482,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 )
             
             y = transform_series(
-                    series            = y.iloc[first_nonan_idx:],
+                    series            = y.iloc[first_no_nan_idx:],
                     transformer       = self.transformer_series_[serie],
                     fit               = True,
                     inverse_transform = False
@@ -581,7 +581,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                      IgnoredArgumentWarning
                 )
             self.series_weights_ = {col: 1. for col in series.columns}
-            self.series_weights_.update((k, v) for k, v in self.series_weights.items() if k in self.series_weights_)
+            self.series_weights_.update((k, v) for k, v in self.series_weights.items() 
+                                        if k in self.series_weights_)
             weights_series = [np.repeat(self.series_weights_[serie], sum(X_train[serie])) 
                               for serie in series.columns]
             weights_series = np.concatenate(weights_series)
@@ -601,7 +602,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                     )
                 self.weight_func_ = {col: lambda x: np.ones_like(x, dtype=float) 
                                      for col in series.columns}
-                self.weight_func_.update((k, v) for k, v in self.weight_func.items() if k in self.weight_func_)
+                self.weight_func_.update((k, v) for k, v in self.weight_func.items() 
+                                         if k in self.weight_func_)
                 
             weights_samples = []
             for key in self.weight_func_.keys():
