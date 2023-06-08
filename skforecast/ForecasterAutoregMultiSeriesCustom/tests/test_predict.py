@@ -1,7 +1,6 @@
 # Unit test predict ForecasterAutoregMultiSeriesCustom
 # ==============================================================================
 import pytest
-from pytest import approx
 import numpy as np
 import pandas as pd
 from skforecast.ForecasterAutoregMultiSeriesCustom import ForecasterAutoregMultiSeriesCustom
@@ -79,6 +78,7 @@ def test_predict_output_when_regressor_is_LinearRegression_with_fixture(expected
                 )
     forecaster.fit(series=series_2)
     predictions = forecaster.predict(steps=5, levels=expected_pandas_dataframe[0])
+    
     expected = expected_pandas_dataframe[1]
 
     pd.testing.assert_frame_equal(predictions, expected)
@@ -183,6 +183,7 @@ def test_predict_output_when_regressor_is_LinearRegression_with_transform_series
                  )
     forecaster.fit(series=series)
     predictions = forecaster.predict(steps=5, levels='1')
+    
     expected = pd.DataFrame(
                    data    = np.array([0.52791431, 0.44509712, 0.42176045, 0.48087237, 0.48268008]),
                    index   = pd.RangeIndex(start=50, stop=55, step=1),
@@ -205,6 +206,7 @@ def test_predict_output_when_regressor_is_LinearRegression_with_transform_series
                  )
     forecaster.fit(series=series)
     predictions = forecaster.predict(steps=5, levels=['1'])
+    
     expected = pd.DataFrame(
                    data    = np.array([0.59619193, 0.46282914, 0.41738496, 0.48522676, 0.47525733]),
                    index   = pd.RangeIndex(start=50, stop=55, step=1),
@@ -214,7 +216,11 @@ def test_predict_output_when_regressor_is_LinearRegression_with_transform_series
     pd.testing.assert_frame_equal(predictions, expected)
 
 
-def test_predict_output_when_regressor_is_LinearRegression_with_transform_series_and_transform_exog():
+@pytest.mark.parametrize("transformer_series", 
+                         [StandardScaler(),
+                          {'1': StandardScaler(), '2': StandardScaler()}], 
+                         ids = lambda tr : f'transformer_series type: {type(tr)}')
+def test_predict_output_when_regressor_is_LinearRegression_with_transform_series_and_transform_exog(transformer_series):
     """
     Test predict output when using LinearRegression as regressor, StandardScaler
     as transformer_series and transformer_exog as transformer_exog.
@@ -229,15 +235,58 @@ def test_predict_output_when_regressor_is_LinearRegression_with_transform_series
                      regressor          = LinearRegression(),
                      fun_predictors     = create_predictors,
                      window_size        = 5,
-                     transformer_series = StandardScaler(),
+                     transformer_series = transformer_series,
                      transformer_exog   = transformer_exog,
                  )
     forecaster.fit(series=series, exog=exog)
     predictions = forecaster.predict(steps=5, levels='1', exog=exog_predict)
+   
     expected = pd.DataFrame(
                    data    = np.array([0.53267333, 0.44478046, 0.52579563, 0.57391142, 0.54633594]),
                    index   = pd.RangeIndex(start=50, stop=55, step=1),
                    columns = ['1']
+               )
+    
+    pd.testing.assert_frame_equal(predictions, expected)
+
+
+@pytest.mark.parametrize("transformer_series", 
+                         [StandardScaler(),
+                          {'1': StandardScaler(), '2': StandardScaler()}], 
+                         ids = lambda tr : f'transformer_series type: {type(tr)}')
+def test_predict_output_when_regressor_is_LinearRegression_with_transform_series_and_transform_exog_different_length_series(transformer_series):
+    """
+    Test predict output when using LinearRegression as regressor, StandardScaler
+    as transformer_series and transformer_exog as transformer_exog with series 
+    of different lengths.
+    """
+    new_series = series.copy()
+    new_series['2'].iloc[:10] = np.nan
+
+    transformer_exog = ColumnTransformer(
+                           [('scale', StandardScaler(), ['col_1']),
+                            ('onehot', OneHotEncoder(), ['col_2'])],
+                           remainder = 'passthrough',
+                           verbose_feature_names_out = False
+                       )
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                     regressor          = LinearRegression(),
+                     fun_predictors     = create_predictors,
+                     window_size        = 5,
+                     transformer_series = transformer_series,
+                     transformer_exog   = transformer_exog,
+                 )
+    forecaster.fit(series=series, exog=exog)
+    predictions = forecaster.predict(steps=5, exog=exog_predict)
+
+    expected = pd.DataFrame(
+                   data    = np.array([[0.53267333, 0.55496412],
+                                       [0.44478046, 0.57787982],
+                                       [0.52579563, 0.66389117],
+                                       [0.57391142, 0.65789846],
+                                       [0.54633594, 0.5841187 ]]),
+                   index   = pd.RangeIndex(start=50, stop=55, step=1),
+                   columns = ['1', '2']
                )
     
     pd.testing.assert_frame_equal(predictions, expected)

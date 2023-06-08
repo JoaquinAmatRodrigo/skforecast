@@ -140,32 +140,13 @@ def test_create_train_X_y_ValueError_when_all_series_values_are_missing():
 @pytest.mark.parametrize("values", 
                          [[0, 1, 2, 3, 4, 5, np.nan], 
                           [0, 1]+[np.nan]*5, 
-                          [np.nan, 1, 2, 3, 4, 5, np.nan]])
-def test_create_train_X_y_ValueError_when_last_series_values_are_missing(values):
-    """
-    Test ValueError is raised when last self.max_lag values are missing.
-    """
-    series = pd.DataFrame({'1': pd.Series(values), 
-                           '2': pd.Series(np.arange(7))})
-    series.index = pd.date_range(start='2022-01-01', periods=7, freq='1D')
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5)
-
-    err_msg = re.escape(
-                (f"'1' Time series has missing values in between or "
-                 f"at the end of the time series. When working with series "
-                 f"of different lengths, all series must be complete after "
-                 f"the first non-null value.")
-              )
-    with pytest.raises(ValueError, match = err_msg):
-        forecaster.create_train_X_y(series=series)
-
-
-@pytest.mark.parametrize("values", 
-                         [[0, 1, np.nan, 3, np.nan, 5, 6], 
+                          [np.nan, 1, 2, 3, 4, 5, np.nan],
+                          [0, 1, np.nan, 3, np.nan, 5, 6], 
                           [np.nan, np.nan, np.nan, 3, np.nan, 5, 6]])
-def test_create_train_X_y_ValueError_when_series_has_missing_values_between_observations(values):
+def test_create_train_X_y_ValueError_when_series_values_are_missing(values):
     """
-    Test ValueError is raised when series has missing values between observations.
+    Test ValueError is raised when series values are missing in different
+    locations.
     """
     series = pd.DataFrame({'1': pd.Series(values), 
                            '2': pd.Series(np.arange(7))})
@@ -173,10 +154,10 @@ def test_create_train_X_y_ValueError_when_series_has_missing_values_between_obse
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5)
 
     err_msg = re.escape(
-                (f"'1' Time series has missing values in between or "
-                 f"at the end of the time series. When working with series "
-                 f"of different lengths, all series must be complete after "
-                 f"the first non-null value.")
+                ("'1' Time series has missing values in between or "
+                 "at the end of the time series. When working with series "
+                 "of different lengths, all series must be complete after "
+                 "the first non-null value.")
               )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.create_train_X_y(series=series)

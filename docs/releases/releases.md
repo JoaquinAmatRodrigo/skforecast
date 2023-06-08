@@ -6,9 +6,15 @@ All significant changes to this project are documented in this release file.
 
 **Added**
 
+- Argument `n_jobs=-1` to all backtesting dependent functions in modules `model_selection`, `model_selection_multiseries` and `model_selection_sarimax` to allow parallelization.
+
+- `ForecasterAutoregMultiSeries` and `ForecasterAutoregMultiSeriesCustom` allow to use series of different lengths for training.
+
 **Changed**
 
 + Remove `get_feature_importance()` in favor of `get_feature_importances()` in all Forecasters, (deprecated since 0.8.0).
+
++ `utils.preprocess_y` allows a pandas DataFrame as input.
 
 **Fixed**
 
