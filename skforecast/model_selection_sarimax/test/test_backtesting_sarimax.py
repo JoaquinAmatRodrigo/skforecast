@@ -122,11 +122,13 @@ def test_output_backtesting_sarimax_no_refit_no_exog_remainder_with_mocked():
     pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions, atol=0.0001)
 
 
-def test_output_backtesting_sarimax_yes_refit_no_exog_no_remainder_with_mocked():
+@pytest.mark.parametrize("n_jobs", [-1, 1],
+                         ids=lambda n: f'n_jobs: {n}')
+def test_output_backtesting_sarimax_yes_refit_no_exog_no_remainder_with_mocked(n_jobs):
     """
-    Test output of backtesting_sarimax with backtesting mocked, Series y is mocked, no exog, 
-    yes refit, 12 observations to backtest, steps=3 (no remainder), metric='mean_squared_error'. 
-    Mocked done with skforecast 0.7.0.
+    Test output of backtesting_sarimax with backtesting mocked, Series y is mocked, 
+    no exog, yes refit, 12 observations to backtest, steps=3 (no remainder), 
+    metric='mean_squared_error'. (Mocked done with skforecast 0.7.0.)
     """
     forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=10000, trend=None, method='nm', ftol=1e-19,  order=(2,2,2)))
 
@@ -140,6 +142,7 @@ def test_output_backtesting_sarimax_yes_refit_no_exog_no_remainder_with_mocked()
                                         refit              = True,
                                         alpha              = None,
                                         interval           = None,
+                                        n_jobs             = n_jobs,
                                         verbose            = False
                                    )
     
@@ -157,11 +160,13 @@ def test_output_backtesting_sarimax_yes_refit_no_exog_no_remainder_with_mocked()
     pd.testing.assert_frame_equal(expected_values, backtest_predictions, atol=0.0001)
 
 
-def test_output_backtesting_sarimax_yes_refit_no_exog_remainder_with_mocked():
+@pytest.mark.parametrize("n_jobs", [-1, 1],
+                         ids=lambda n: f'n_jobs: {n}')
+def test_output_backtesting_sarimax_yes_refit_no_exog_remainder_with_mocked(n_jobs):
     """
-    Test output of backtesting_sarimax with backtesting mocked, Series y is mocked, no exog, 
-    yes refit, 12 observations to backtest, steps=5 (remainder), metric='mean_squared_error'. 
-    Mocked done with skforecast 0.7.0.
+    Test output of backtesting_sarimax with backtesting mocked, Series y is mocked, 
+    no exog, yes refit, 12 observations to backtest, steps=5 (remainder), 
+    metric='mean_squared_error'. (Mocked done with skforecast 0.7.0.)
     """
     forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=10000, trend=None, method='nm', ftol=1e-19,  order=(2,2,2)))
 
@@ -175,6 +180,7 @@ def test_output_backtesting_sarimax_yes_refit_no_exog_remainder_with_mocked():
                                         refit              = True,
                                         alpha              = None,
                                         interval           = None,
+                                        n_jobs             = n_jobs,
                                         verbose            = False
                                    )
     

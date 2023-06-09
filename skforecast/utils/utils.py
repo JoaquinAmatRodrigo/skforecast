@@ -1450,6 +1450,7 @@ def check_backtesting_input(
     n_boot: int=500,
     random_state: int=123,
     in_sample_residuals: bool=True,
+    n_jobs: Optional[int]=-1,
     verbose: bool=False,
     show_progress: bool=True
 ) -> None:
@@ -1603,6 +1604,8 @@ def check_backtesting_input(
         raise TypeError(f"`random_state` must be an integer greater than 0. Got {random_state}.")
     if not isinstance(in_sample_residuals, bool):
         raise TypeError("`in_sample_residuals` must be a boolean: `True`, `False`.")
+    if not isinstance(n_jobs, int):
+        raise TypeError(f"`n_jobs` must be an integer. Got {n_jobs}.")
     if not isinstance(verbose, bool):
         raise TypeError("`verbose` must be a boolean: `True`, `False`.")
     if not isinstance(show_progress, bool):

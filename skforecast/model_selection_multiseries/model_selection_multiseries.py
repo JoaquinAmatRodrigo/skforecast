@@ -6,12 +6,12 @@
 ################################################################################
 # coding=utf-8
 
-from typing import Union, Tuple, Optional, Any, Callable
-import numpy as np
+from typing import Union, Tuple, Optional, Callable
 import pandas as pd
 import warnings
 import logging
 from copy import deepcopy
+from joblib import Parallel, delayed, cpu_count
 from tqdm.auto import tqdm
 from sklearn.model_selection import ParameterGrid
 from sklearn.model_selection import ParameterSampler
@@ -43,6 +43,7 @@ def _backtesting_forecaster_multiseries_refit(
     n_boot: int=500,
     random_state: int=123,
     in_sample_residuals: bool=True,
+    n_jobs: int=-1,
     verbose: bool=False,
     show_progress: bool=True
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
@@ -62,7 +63,8 @@ def _backtesting_forecaster_multiseries_refit(
     
     Parameters
     ----------
-    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate
+    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom,
+    ForecasterAutoregMultiVariate
         Forecaster model.
     series : pandas DataFrame
         Training time series.
@@ -107,6 +109,10 @@ def _backtesting_forecaster_multiseries_refit(
         If `True`, residuals from the training data are used as proxy of prediction
         error to create prediction intervals. If `False`, out_sample_residuals 
         are used if they are already stored inside the forecaster.
+    n_jobs : int, default -1
+        The number of jobs to run in parallel. If -1, then the number of jobs is 
+        set to the number of cores.
+        **New in version 0.9.0**
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
         for backtesting.
@@ -128,6 +134,7 @@ def _backtesting_forecaster_multiseries_refit(
     """
 
     forecaster = deepcopy(forecaster)
+    n_jobs = n_jobs if n_jobs > 0 else cpu_count()
 
     if type(forecaster).__name__ == 'ForecasterAutoregMultiVariate':
         levels = [forecaster.level]
@@ -155,6 +162,9 @@ def _backtesting_forecaster_multiseries_refit(
                 verbose               = verbose  
             )
 
+    if show_progress:
+        folds = tqdm(folds)
+
     if type(forecaster).__name__ != 'ForecasterAutoregMultiVariate' and len(folds) > 50:
         warnings.warn(
             (f"The forecaster will be fit {len(folds)} times. This can take substantial "
@@ -169,10 +179,15 @@ def _backtesting_forecaster_multiseries_refit(
              LongTrainingWarning
         )
     
-    backtest_predictions = []
     store_in_sample_residuals = False if interval is None else True
 
-    for fold in tqdm(folds) if show_progress else folds:
+    def _fit_predict_forecaster(series, exog, forecaster, interval, fold):
+        """
+        Fit the forecaster and predict `steps` ahead. This is an auxiliary 
+        function used to parallelize the backtesting_forecaster_multiseries
+        function.
+        """
+
         # In each iteration the model is fitted before making predictions.
         # if fixed_train_size the train size doesn't increase but moves by `steps` 
         # in each iteration. if False the train size increases by `steps` in each 
@@ -210,8 +225,16 @@ def _backtesting_forecaster_multiseries_refit(
                    )
 
         pred = pred.iloc[gap:, ]
-        backtest_predictions.append(pred)
+        
+        return pred
     
+    backtest_predictions = (
+        Parallel(n_jobs=n_jobs)
+        (delayed(_fit_predict_forecaster)
+        (series=series, exog=exog, forecaster=forecaster, interval=interval, fold=fold)
+         for fold in folds)
+    )
+
     backtest_predictions = pd.concat(backtest_predictions)
 
     metrics_levels = [[m(
@@ -247,6 +270,7 @@ def _backtesting_forecaster_multiseries_no_refit(
     n_boot: int=500,
     random_state: int=123,
     in_sample_residuals: bool=True,
+    n_jobs: int=-1,
     verbose: bool=False,
     show_progress: bool=True
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
@@ -262,7 +286,8 @@ def _backtesting_forecaster_multiseries_no_refit(
     
     Parameters
     ----------
-    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate
+    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom,
+    ForecasterAutoregMultiVariate
         Forecaster model.
     series : pandas DataFrame
         Training time series.
@@ -310,6 +335,10 @@ def _backtesting_forecaster_multiseries_no_refit(
         If `True`, residuals from the training data are used as proxy of prediction 
         error to create prediction intervals.  If `False`, out_sample_residuals 
         are used if they are already stored inside the forecaster.
+    n_jobs : int, default -1
+        The number of jobs to run in parallel. If -1, then the number of jobs is 
+        set to the number of cores.
+        **New in version 0.9.0**
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
         for backtesting.
@@ -331,6 +360,7 @@ def _backtesting_forecaster_multiseries_no_refit(
     """
 
     forecaster = deepcopy(forecaster)
+    n_jobs = n_jobs if n_jobs > 0 else cpu_count()
 
     if type(forecaster).__name__ == 'ForecasterAutoregMultiVariate':
         levels = [forecaster.level]
@@ -376,9 +406,14 @@ def _backtesting_forecaster_multiseries_no_refit(
                 verbose               = verbose  
             )
     
-    backtest_predictions = []
+    if show_progress:
+        folds = tqdm(folds)
 
-    for fold in tqdm(folds) if show_progress else folds:
+    def _predict_forecaster(series, exog, forecaster, interval, fold):
+        """
+        Predict `steps` ahead. This is an auxiliary function used to parallelize 
+        the backtesting_forecaster_multiseries function.
+        """
         # Since the model is only fitted with the initial_train_size, last_window
         # and next_window_exog must be updated to include the data needed to make
         # predictions.
@@ -411,7 +446,15 @@ def _backtesting_forecaster_multiseries_no_refit(
                    )
         
         pred = pred.iloc[gap:, ]
-        backtest_predictions.append(pred)
+        
+        return pred
+
+    backtest_predictions = (
+        Parallel(n_jobs=n_jobs)
+        (delayed(_predict_forecaster)
+        (series=series, exog=exog, forecaster=forecaster, interval=interval, fold=fold)
+         for fold in folds)
+    )
 
     backtest_predictions = pd.concat(backtest_predictions)
 
@@ -450,6 +493,7 @@ def backtesting_forecaster_multiseries(
     n_boot: int=500,
     random_state: int=123,
     in_sample_residuals: bool=True,
+    n_jobs: int=-1,
     verbose: bool=False,
     show_progress: bool=True
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
@@ -463,7 +507,8 @@ def backtesting_forecaster_multiseries(
 
     Parameters
     ----------
-    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate
+    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom,
+    ForecasterAutoregMultiVariate
         Forecaster model.
     series : pandas DataFrame
         Training time series.
@@ -514,7 +559,11 @@ def backtesting_forecaster_multiseries(
     in_sample_residuals : bool, default `True`
         If `True`, residuals from the training data are used as proxy of prediction 
         error to create prediction intervals.  If `False`, out_sample_residuals 
-        are used if they are already stored inside the forecaster.   
+        are used if they are already stored inside the forecaster.
+    n_jobs : int, default -1
+        The number of jobs to run in parallel. If -1, then the number of jobs is 
+        set to the number of cores.
+        **New in version 0.9.0**
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
         for backtesting.
@@ -559,6 +608,7 @@ def backtesting_forecaster_multiseries(
         n_boot                = n_boot,
         random_state          = random_state,
         in_sample_residuals   = in_sample_residuals,
+        n_jobs                = n_jobs,
         verbose               = verbose,
         show_progress         = show_progress
     )
@@ -578,7 +628,7 @@ def backtesting_forecaster_multiseries(
         warnings.warn(
             (f"`levels` argument have no use when the forecaster is of type "
              f"`ForecasterAutoregMultiVariate`. The level of this forecaster is "
-             f"{forecaster.level}, to predict another level, change the `level` "
+             f"'{forecaster.level}', to predict another level, change the `level` "
              f"argument when initializing the forecaster."),
              IgnoredArgumentWarning
         )
@@ -599,6 +649,7 @@ def backtesting_forecaster_multiseries(
             n_boot                = n_boot,
             random_state          = random_state,
             in_sample_residuals   = in_sample_residuals,
+            n_jobs                = n_jobs,
             verbose               = verbose,
             show_progress         = show_progress
         )
@@ -617,6 +668,7 @@ def backtesting_forecaster_multiseries(
             n_boot                = n_boot,
             random_state          = random_state,
             in_sample_residuals   = in_sample_residuals,
+            n_jobs                = n_jobs,
             verbose               = verbose,
             show_progress         = show_progress
         )
@@ -639,7 +691,9 @@ def grid_search_forecaster_multiseries(
     lags_grid: Optional[list]=None,
     refit: bool=False,
     return_best: bool=True,
-    verbose: bool=True
+    n_jobs: int=-1,
+    verbose: bool=True,
+    show_progress: bool=True
 ) -> pd.DataFrame:
     """
     Exhaustive search over specified parameter values for a Forecaster object.
@@ -647,7 +701,8 @@ def grid_search_forecaster_multiseries(
     
     Parameters
     ----------
-    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate
+    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom,
+    ForecasterAutoregMultiVariate
         Forcaster model.
     series : pandas DataFrame
         Training time series.
@@ -689,8 +744,14 @@ def grid_search_forecaster_multiseries(
         Whether to re-fit the forecaster in each iteration of backtesting.
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
+    n_jobs : int, default -1
+        The number of jobs to run in parallel. If -1, then the number of jobs is 
+        set to the number of cores.
+        **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
+    show_progress: bool, default `True`
+        Whether to show a progress bar. Defaults to True.
 
     Returns
     -------
@@ -722,8 +783,10 @@ def grid_search_forecaster_multiseries(
                   exog                  = exog,
                   lags_grid             = lags_grid,
                   refit                 = refit,
+                  n_jobs                = n_jobs,
                   return_best           = return_best,
-                  verbose               = verbose
+                  verbose               = verbose,
+                  show_progress         = show_progress
               )
 
     return results
@@ -746,7 +809,9 @@ def random_search_forecaster_multiseries(
     n_iter: int=10,
     random_state: int=123,
     return_best: bool=True,
-    verbose: bool=True
+    n_jobs: int=-1,
+    verbose: bool=True,
+    show_progress: bool=True
 ) -> pd.DataFrame:
     """
     Random search over specified parameter values or distributions for a Forecaster 
@@ -754,7 +819,8 @@ def random_search_forecaster_multiseries(
     
     Parameters
     ----------
-    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate
+    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, 
+    ForecasterAutoregMultiVariate
         Forcaster model.
     series : pandas DataFrame
         Training time series.
@@ -801,8 +867,14 @@ def random_search_forecaster_multiseries(
         Sets a seed to the random sampling for reproducible output.
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
+    n_jobs : int, default -1
+        The number of jobs to run in parallel. If -1, then the number of jobs is 
+        set to the number of cores.
+        **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
+    show_progress: bool, default `True`
+        Whether to show a progress bar. Defaults to True.
 
     Returns
     -------
@@ -836,7 +908,9 @@ def random_search_forecaster_multiseries(
                   lags_grid             = lags_grid,
                   refit                 = refit,
                   return_best           = return_best,
-                  verbose               = verbose
+                  n_jobs                = n_jobs,
+                  verbose               = verbose,
+                  show_progress         = show_progress
               )
 
     return results
@@ -857,14 +931,17 @@ def _evaluate_grid_hyperparameters_multiseries(
     lags_grid: Optional[list]=None,
     refit: bool=False,
     return_best: bool=True,
-    verbose: bool=True
+    n_jobs: int=-1,
+    verbose: bool=True,
+    show_progress: bool=True
 ) -> pd.DataFrame:
     """
     Evaluate parameter values for a Forecaster object using multi-series backtesting.
     
     Parameters
     ----------
-    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate
+    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom,
+    ForecasterAutoregMultiVariate
         Forcaster model.
     series : pandas DataFrame
         Training time series.
@@ -981,14 +1058,18 @@ def _evaluate_grid_hyperparameters_multiseries(
         f'Number of iterations: {len(param_grid)*len(lags_grid)}.'
     )
 
-    for lags in tqdm(lags_grid, desc='lags grid', position=0):
+    if show_progress:
+        lags_grid = tqdm(lags_grid, desc='lags grid', position=0) #ncols=90
+        param_grid = tqdm(param_grid, desc='params grid', position=1, leave=False)
+
+    for lags in lags_grid:
 
         if type(forecaster).__name__ in ['ForecasterAutoregMultiSeries', 
                                          'ForecasterAutoregMultiVariate']:
             forecaster.set_lags(lags)
             lags = forecaster.lags.copy()
         
-        for params in tqdm(param_grid, desc='params grid', position=1, leave=False):
+        for params in param_grid:
 
             forecaster.set_params(params)
             metrics_levels = backtesting_forecaster_multiseries(
@@ -1005,9 +1086,12 @@ def _evaluate_grid_hyperparameters_multiseries(
                                  refit                 = refit,
                                  interval              = None,
                                  verbose               = verbose,
+                                 n_jobs                = n_jobs,
                                  show_progress         = False
                              )[0]
-            warnings.filterwarnings('ignore', category=RuntimeWarning, message= "The forecaster will be fit.*")
+            warnings.filterwarnings(
+                'ignore', category=RuntimeWarning, message= "The forecaster will be fit.*"
+            )
             lags_list.append(lags)
             params_list.append(params)
             for m in metric:
@@ -1064,6 +1148,7 @@ def backtesting_forecaster_multivariate(
     n_boot: int=500,
     random_state: int=123,
     in_sample_residuals: bool=True,
+    n_jobs: int=-1,
     verbose: bool=False,
     show_progress: bool=True
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
@@ -1079,7 +1164,8 @@ def backtesting_forecaster_multivariate(
 
     Parameters
     ----------
-    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate
+    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, 
+    ForecasterAutoregMultiVariate
         Forecaster model.
     series : pandas DataFrame
         Training time series.
@@ -1130,7 +1216,11 @@ def backtesting_forecaster_multivariate(
     in_sample_residuals : bool, default `True`
         If `True`, residuals from the training data are used as proxy of prediction 
         error to create prediction intervals.  If `False`, out_sample_residuals 
-        are used if they are already stored inside the forecaster.   
+        are used if they are already stored inside the forecaster.
+    n_jobs : int, default -1
+        The number of jobs to run in parallel. If -1, then the number of jobs is 
+        set to the number of cores.
+        **New in version 0.9.0** 
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
         for backtesting.
@@ -1167,6 +1257,7 @@ def backtesting_forecaster_multivariate(
         n_boot                = n_boot,
         random_state          = random_state,
         in_sample_residuals   = in_sample_residuals,
+        n_jobs                = n_jobs,
         verbose               = verbose,
         show_progress         = show_progress
         
@@ -1190,7 +1281,9 @@ def grid_search_forecaster_multivariate(
     lags_grid: Optional[list]=None,
     refit: bool=False,
     return_best: bool=True,
-    verbose: bool=True
+    n_jobs: int=-1,
+    verbose: bool=True,
+    show_progress: bool=True
 ) -> pd.DataFrame:
     """
     This function is an alias of grid_search_forecaster_multiseries.
@@ -1200,7 +1293,8 @@ def grid_search_forecaster_multivariate(
     
     Parameters
     ----------
-    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate
+    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, 
+    ForecasterAutoregMultiVariate
         Forcaster model.
     series : pandas DataFrame
         Training time series.
@@ -1242,8 +1336,14 @@ def grid_search_forecaster_multivariate(
         Whether to re-fit the forecaster in each iteration of backtesting.
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
+    n_jobs : int, default -1
+        The number of jobs to run in parallel. If -1, then the number of jobs is 
+        set to the number of cores.
+        **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
+    show_progress: bool, default `True`
+        Whether to show a progress bar. Defaults to True.
 
     Returns
     -------
@@ -1274,7 +1374,9 @@ def grid_search_forecaster_multivariate(
         lags_grid             = lags_grid,
         refit                 = refit,
         return_best           = return_best,
-        verbose               = verbose
+        n_jobs                = n_jobs,
+        verbose               = verbose,
+        show_progress         = show_progress
     )
 
     return results
@@ -1297,7 +1399,9 @@ def random_search_forecaster_multivariate(
     n_iter: int=10,
     random_state: int=123,
     return_best: bool=True,
-    verbose: bool=True
+    n_jobs: int=-1,
+    verbose: bool=True,
+    show_progress: bool=True
 ) -> pd.DataFrame:
     """
     This function is an alias of random_search_forecaster_multiseries.
@@ -1307,7 +1411,8 @@ def random_search_forecaster_multivariate(
 
     Parameters
     ----------
-    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate
+    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom,
+    ForecasterAutoregMultiVariate
         Forcaster model.
     series : pandas DataFrame
         Training time series.
@@ -1354,8 +1459,14 @@ def random_search_forecaster_multivariate(
         Sets a seed to the random sampling for reproducible output.
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
+    n_jobs : int, default -1
+        The number of jobs to run in parallel. If -1, then the number of jobs is 
+        set to the number of cores.
+        **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
+    show_progress: bool, default `True`
+        Whether to show a progress bar. Defaults to True.
 
     Returns
     -------
@@ -1388,7 +1499,9 @@ def random_search_forecaster_multivariate(
         n_iter                = n_iter,
         random_state          = random_state,
         return_best           = return_best,
-        verbose               = verbose
+        n_jobs                = n_jobs,
+        verbose               = verbose,
+        show_progress         = show_progress
     ) 
 
     return results

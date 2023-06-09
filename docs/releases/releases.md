@@ -4,11 +4,15 @@ All significant changes to this project are documented in this release file.
 
 ## [0.9.0] - [2023-XX-XX]
 
+Enhanced all backtesting and grid search functions by adding the n_jobs argument, enabling multi-threaded parallelization for improved performance.
+
 **Added**
 
-- Argument `n_jobs=-1` to all backtesting dependent functions in modules `model_selection`, `model_selection_multiseries` and `model_selection_sarimax` to allow parallelization.
++ Argument `n_jobs=-1` to all backtesting dependent functions in modules `model_selection`, `model_selection_multiseries` and `model_selection_sarimax` to allow  multi-threaded parallelization.
 
-- `ForecasterAutoregMultiSeries` and `ForecasterAutoregMultiSeriesCustom` allow to use series of different lengths for training.
++ `ForecasterAutoregMultiSeries` and `ForecasterAutoregMultiSeriesCustom` allow to use series of different lengths for training.
+
++ Added `show_progress` to grid search functions.
 
 **Changed**
 

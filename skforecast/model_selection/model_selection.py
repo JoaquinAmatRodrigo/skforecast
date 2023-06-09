@@ -843,6 +843,7 @@ def backtesting_forecaster(
         n_boot                = n_boot,
         random_state          = random_state,
         in_sample_residuals   = in_sample_residuals,
+        n_jobs                = n_jobs,
         verbose               = verbose,
         show_progress         = show_progress
     )

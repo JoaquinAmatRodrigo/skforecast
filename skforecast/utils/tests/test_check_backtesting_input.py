@@ -614,6 +614,44 @@ def test_check_backtesting_input_TypeError_when_integer_arguments_not_int_or_gre
         )
 
 
+@pytest.mark.parametrize("n_jobs", 
+                         [1.0, 'not_int'], 
+                         ids = lambda value : f'n_jobs: {value}')
+def test_check_backtesting_input_TypeError_when_n_jobs_not_int(n_jobs):
+    """
+    Test TypeError is raised in check_backtesting_input when n_jobs  
+    is not an integer.
+    """
+    forecaster = ForecasterAutoreg(
+                     regressor = Ridge(random_state=123),
+                     lags      = 2
+                 )
+    
+    err_msg = re.escape(
+            (f"`n_jobs` must be an integer. Got {n_jobs}.")
+        )
+    with pytest.raises(TypeError, match = err_msg):
+        check_backtesting_input(
+            forecaster            = forecaster,
+            steps                 = 3,
+            metric                = 'mean_absolute_error',
+            y                     = y,
+            series                = None,
+            initial_train_size    = len(y[:-12]),
+            fixed_train_size      = False,
+            gap                   = 0,
+            allow_incomplete_fold = False,
+            refit                 = False,
+            interval              = None,
+            n_boot                = 500,
+            random_state          = 123,
+            in_sample_residuals   = True,
+            n_jobs                = n_jobs,
+            verbose               = False,
+            show_progress         = False
+        )
+
+
 @pytest.mark.parametrize("forecaster", 
                          [ForecasterAutoreg(regressor=Ridge(), lags=2),
                           ForecasterAutoregMultiSeries(regressor=Ridge(), lags=2)], 
