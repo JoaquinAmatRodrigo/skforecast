@@ -110,8 +110,9 @@ def _backtesting_forecaster_multiseries_refit(
         error to create prediction intervals. If `False`, out_sample_residuals 
         are used if they are already stored inside the forecaster.
     n_jobs : int, default -1
-        The number of jobs to run in parallel. If -1, then the number of jobs is
+        The number of jobs to run in parallel. If -1, then the number of jobs is 
         set to the number of cores.
+        **New in version 0.9.0**
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
         for backtesting.
@@ -208,20 +209,20 @@ def _backtesting_forecaster_multiseries_refit(
         steps = len(range(test_idx_start, test_idx_end))
         if interval is None:
             pred = forecaster.predict(
-                    steps       = steps, 
-                    levels      = levels, 
-                    exog        = next_window_exog
-                )
+                       steps       = steps, 
+                       levels      = levels, 
+                       exog        = next_window_exog
+                   )
         else:
             pred = forecaster.predict_interval(
-                    steps               = steps,
-                    levels              = levels, 
-                    exog                = next_window_exog,
-                    interval            = interval,
-                    n_boot              = n_boot,
-                    random_state        = random_state,
-                    in_sample_residuals = in_sample_residuals
-                )
+                       steps               = steps,
+                       levels              = levels, 
+                       exog                = next_window_exog,
+                       interval            = interval,
+                       n_boot              = n_boot,
+                       random_state        = random_state,
+                       in_sample_residuals = in_sample_residuals
+                   )
 
         pred = pred.iloc[gap:, ]
         
@@ -231,8 +232,10 @@ def _backtesting_forecaster_multiseries_refit(
         Parallel(n_jobs=n_jobs)
         (delayed(_fit_predict_forecaster)
         (series=series, exog=exog, forecaster=forecaster, interval=interval, fold=fold)
-        for fold in folds)
+         for fold in folds)
     )
+
+    backtest_predictions = pd.concat(backtest_predictions)
 
     metrics_levels = [[m(
                          y_true = series[level].loc[backtest_predictions.index],
@@ -333,8 +336,9 @@ def _backtesting_forecaster_multiseries_no_refit(
         error to create prediction intervals.  If `False`, out_sample_residuals 
         are used if they are already stored inside the forecaster.
     n_jobs : int, default -1
-        The number of jobs to run in parallel. If -1, then the number of jobs is
+        The number of jobs to run in parallel. If -1, then the number of jobs is 
         set to the number of cores.
+        **New in version 0.9.0**
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
         for backtesting.
@@ -449,8 +453,10 @@ def _backtesting_forecaster_multiseries_no_refit(
         Parallel(n_jobs=n_jobs)
         (delayed(_predict_forecaster)
         (series=series, exog=exog, forecaster=forecaster, interval=interval, fold=fold)
-        for fold in folds)
+         for fold in folds)
     )
+
+    backtest_predictions = pd.concat(backtest_predictions)
 
     metrics_levels = [[m(
                          y_true = series[level].loc[backtest_predictions.index],
@@ -555,8 +561,9 @@ def backtesting_forecaster_multiseries(
         error to create prediction intervals.  If `False`, out_sample_residuals 
         are used if they are already stored inside the forecaster.
     n_jobs : int, default -1
-        The number of jobs to run in parallel. If -1, then the number of jobs is
+        The number of jobs to run in parallel. If -1, then the number of jobs is 
         set to the number of cores.
+        **New in version 0.9.0**
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
         for backtesting.
@@ -621,7 +628,7 @@ def backtesting_forecaster_multiseries(
         warnings.warn(
             (f"`levels` argument have no use when the forecaster is of type "
              f"`ForecasterAutoregMultiVariate`. The level of this forecaster is "
-             f"{forecaster.level}, to predict another level, change the `level` "
+             f"'{forecaster.level}', to predict another level, change the `level` "
              f"argument when initializing the forecaster."),
              IgnoredArgumentWarning
         )
@@ -738,8 +745,9 @@ def grid_search_forecaster_multiseries(
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
     n_jobs : int, default -1
-        The number of jobs to run in parallel. If -1, then the number of jobs is
+        The number of jobs to run in parallel. If -1, then the number of jobs is 
         set to the number of cores.
+        **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
     show_progress: bool, default `True`
@@ -811,7 +819,8 @@ def random_search_forecaster_multiseries(
     
     Parameters
     ----------
-    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate
+    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, 
+    ForecasterAutoregMultiVariate
         Forcaster model.
     series : pandas DataFrame
         Training time series.
@@ -859,8 +868,9 @@ def random_search_forecaster_multiseries(
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
     n_jobs : int, default -1
-        The number of jobs to run in parallel. If -1, then the number of jobs is
+        The number of jobs to run in parallel. If -1, then the number of jobs is 
         set to the number of cores.
+        **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
     show_progress: bool, default `True`
@@ -1154,7 +1164,8 @@ def backtesting_forecaster_multivariate(
 
     Parameters
     ----------
-    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate
+    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, 
+    ForecasterAutoregMultiVariate
         Forecaster model.
     series : pandas DataFrame
         Training time series.
@@ -1207,8 +1218,9 @@ def backtesting_forecaster_multivariate(
         error to create prediction intervals.  If `False`, out_sample_residuals 
         are used if they are already stored inside the forecaster.
     n_jobs : int, default -1
-        The number of jobs to run in parallel. If -1, then the number of jobs is
-        set to the number of cores. 
+        The number of jobs to run in parallel. If -1, then the number of jobs is 
+        set to the number of cores.
+        **New in version 0.9.0** 
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
         for backtesting.
@@ -1281,7 +1293,8 @@ def grid_search_forecaster_multivariate(
     
     Parameters
     ----------
-    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate
+    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, 
+    ForecasterAutoregMultiVariate
         Forcaster model.
     series : pandas DataFrame
         Training time series.
@@ -1324,8 +1337,9 @@ def grid_search_forecaster_multivariate(
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
     n_jobs : int, default -1
-        The number of jobs to run in parallel. If -1, then the number of jobs is
+        The number of jobs to run in parallel. If -1, then the number of jobs is 
         set to the number of cores.
+        **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
     show_progress: bool, default `True`
@@ -1446,8 +1460,9 @@ def random_search_forecaster_multivariate(
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
     n_jobs : int, default -1
-        The number of jobs to run in parallel. If -1, then the number of jobs is
+        The number of jobs to run in parallel. If -1, then the number of jobs is 
         set to the number of cores.
+        **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
     show_progress: bool, default `True`
