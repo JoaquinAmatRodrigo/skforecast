@@ -4,7 +4,11 @@ All significant changes to this project are documented in this release file.
 
 ## [0.9.0] - [2023-XX-XX]
 
-Enhanced all backtesting and grid search functions by adding the n_jobs argument, enabling multi-threaded parallelization for improved performance.
+The main changes in this release are 
+
++ All backtesting and grid search functions have been extended to include the n_jobs argument, allowing multi-threaded parallelization for improved performance.
+
++ Multiseries can be trained using series of different lengths. This means that the model can handle datasets with different numbers of data points in each series.
 
 **Added**
 
