@@ -3,7 +3,7 @@
 import numpy as np
 import pandas as pd
 
-# Fixtures
+# Fixtures 
 # np.random.seed(123)
 # series_1 = np.random.rand(50)
 # series_2 = np.random.rand(50)

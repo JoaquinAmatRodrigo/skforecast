@@ -6,12 +6,13 @@
 ################################################################################
 # coding=utf-8
 
-from typing import Union, Tuple, Optional, Any, Callable
+from typing import Union, Tuple, Optional, Callable
 import numpy as np
 import pandas as pd
 import warnings
 import logging
 from copy import deepcopy
+from joblib import Parallel, delayed, cpu_count
 from tqdm.auto import tqdm
 from sklearn.model_selection import ParameterGrid
 from sklearn.model_selection import ParameterSampler
@@ -41,6 +42,7 @@ def _backtesting_sarimax_refit(
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     alpha: Optional[float]=None,
     interval: Optional[list]=None,
+    n_jobs: int=-1,
     verbose: bool=False,
     show_progress: bool=True
 ) -> Tuple[Union[float, list], pd.DataFrame]:
@@ -97,7 +99,11 @@ def _backtesting_sarimax_refit(
         symmetric. Sequence of percentiles to compute, which must be between 
         0 and 100 inclusive. For example, interval of 95% should be as 
         `interval = [2.5, 97.5]`. If both, `alpha` and `interval` are 
-        provided, `alpha` will be used.  
+        provided, `alpha` will be used. 
+    n_jobs : int, default -1
+        The number of jobs to run in parallel. If -1, then the number of jobs is 
+        set to the number of cores.
+        **New in version 0.9.0** 
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
         for backtesting.
@@ -118,6 +124,7 @@ def _backtesting_sarimax_refit(
     """
 
     forecaster = deepcopy(forecaster)
+    n_jobs = n_jobs if n_jobs > 0 else cpu_count()
 
     if not isinstance(metric, list):
         metrics = [_get_metric(metric=metric) if isinstance(metric, str) else metric]
@@ -136,6 +143,9 @@ def _backtesting_sarimax_refit(
                 verbose               = verbose  
             )
     
+    if show_progress:
+        folds = tqdm(folds)
+    
     if len(folds) > 50:
         warnings.warn(
             (f"The forecaster will be fit {len(folds)} times. This can take substantial "
@@ -143,9 +153,12 @@ def _backtesting_sarimax_refit(
             LongTrainingWarning
         )
 
-    backtest_predictions = []
-    
-    for fold in tqdm(folds) if show_progress else folds:
+    def _fit_predict_forecaster(y, exog, forecaster, alpha, interval, fold):
+        """
+        Fit the forecaster and predict `steps` ahead. This is an auxiliary 
+        function used to parallelize the backtesting_forecaster function.
+        """
+
         # In each iteration the model is fitted before making predictions. 
         # if fixed_train_size the train size doesn't increase but moves by `steps` 
         # in each iteration. if False the train size increases by `steps` in each 
@@ -172,7 +185,15 @@ def _backtesting_sarimax_refit(
                    )
 
         pred = pred.iloc[gap:, ]            
-        backtest_predictions.append(pred)
+        
+        return pred
+
+    backtest_predictions = (
+        Parallel(n_jobs=n_jobs)
+        (delayed(_fit_predict_forecaster)
+        (y=y, exog=exog, forecaster=forecaster, alpha=alpha, interval=interval, fold=fold)
+         for fold in folds)
+    )
     
     backtest_predictions = pd.concat(backtest_predictions)
     if isinstance(backtest_predictions, pd.Series):
@@ -352,6 +373,7 @@ def backtesting_sarimax(
     refit: bool=False,
     alpha: Optional[float]=None,
     interval: Optional[list]=None,
+    n_jobs: int=-1,
     verbose: bool=False,
     show_progress: bool=True
 ) -> Tuple[Union[float, list], pd.DataFrame]:
@@ -404,7 +426,11 @@ def backtesting_sarimax(
         symmetric. Sequence of percentiles to compute, which must be between 
         0 and 100 inclusive. For example, interval of 95% should be as 
         `interval = [2.5, 97.5]`. If both, `alpha` and `interval` are 
-        provided, `alpha` will be used.     
+        provided, `alpha` will be used. 
+    n_jobs : int, default -1
+        The number of jobs to run in parallel. If -1, then the number of jobs is 
+        set to the number of cores.
+        **New in version 0.9.0**     
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
         for backtesting.
@@ -443,6 +469,7 @@ def backtesting_sarimax(
         refit                 = refit,
         interval              = interval,
         alpha                 = alpha,
+        n_jobs                = n_jobs,
         verbose               = verbose,
         show_progress         = show_progress
     )
@@ -460,6 +487,7 @@ def backtesting_sarimax(
             exog                  = exog,
             alpha                 = alpha,
             interval              = interval,
+            n_jobs                = n_jobs,
             verbose               = verbose,
             show_progress         = show_progress
         )

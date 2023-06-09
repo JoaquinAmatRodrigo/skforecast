@@ -739,7 +739,7 @@ def check_predict_input(
 
 
 def preprocess_y(
-    y: pd.Series,
+    y: Union[pd.Series, pd.DataFrame],
     return_values: bool=True
 ) -> Tuple[Union[None, np.ndarray], pd.Index]:
     """
@@ -755,7 +755,7 @@ def preprocess_y(
     
     Parameters
     ----------
-    y : pandas Series
+    y : pandas Series, pandas DataFrame
         Time series.
     return_values : bool, default `True`
         If `True` return the values of `y` as numpy ndarray. This option is 
@@ -1450,6 +1450,7 @@ def check_backtesting_input(
     n_boot: int=500,
     random_state: int=123,
     in_sample_residuals: bool=True,
+    n_jobs: Optional[int]=-1,
     verbose: bool=False,
     show_progress: bool=True
 ) -> None:
@@ -1565,6 +1566,15 @@ def check_backtesting_input(
                  f"gap {gap} cannot be greater than the length of `{data_name}` "
                  f"({data_length}).")
             )
+        if data_name == 'series':
+            for serie in series:
+                if np.isnan(series[serie].to_numpy()[:initial_train_size]).all():
+                    raise ValueError(
+                        (f"All values of series '{serie}' are NaN. When working "
+                         f"with series of different lengths, make sure that "
+                         f"`initial_train_size` has an appropriate value so that "
+                         f"all series reach the first non-null value.")
+                    )
     else:
         if type(forecaster).__name__ == 'ForecasterSarimax':
             raise ValueError(
@@ -1594,6 +1604,8 @@ def check_backtesting_input(
         raise TypeError(f"`random_state` must be an integer greater than 0. Got {random_state}.")
     if not isinstance(in_sample_residuals, bool):
         raise TypeError("`in_sample_residuals` must be a boolean: `True`, `False`.")
+    if not isinstance(n_jobs, int):
+        raise TypeError(f"`n_jobs` must be an integer. Got {n_jobs}.")
     if not isinstance(verbose, bool):
         raise TypeError("`verbose` must be a boolean: `True`, `False`.")
     if not isinstance(show_progress, bool):

@@ -16,6 +16,8 @@ from skforecast.model_selection_multiseries import backtesting_forecaster_multiv
 
 # Fixtures
 from .fixtures_model_selection_multiseries import series
+series_with_nans = series.copy()
+series_with_nans['l2'].iloc[:10] = np.nan
 
 def create_predictors(y): # pragma: no cover
     """
@@ -114,10 +116,10 @@ def test_backtesting_forecaster_multiseries_IgnoredArgumentWarning_forecaster_mu
                  )
     
     warn_msg = re.escape(
-                (f"`levels` argument have no use when the forecaster is of type "
-                 f"`ForecasterAutoregMultiVariate`. The level of this forecaster is "
-                 f"{forecaster.level}, to predict another level, change the `level` "
-                 f"argument when initializing the forecaster.")
+                ("`levels` argument have no use when the forecaster is of type "
+                 "`ForecasterAutoregMultiVariate`. The level of this forecaster is "
+                 "'l1', to predict another level, change the `level` "
+                 "argument when initializing the forecaster.")
             )
     with pytest.warns(IgnoredArgumentWarning, match = warn_msg):
         backtesting_forecaster_multiseries(
@@ -134,20 +136,26 @@ def test_backtesting_forecaster_multiseries_IgnoredArgumentWarning_forecaster_mu
             n_boot              = 500,
             random_state        = 123,
             in_sample_residuals = True,
-            verbose             = False
+            verbose             = False,
+            n_jobs=1
         )
 
 
 # ForecasterAutoregMultiSeries and ForecasterAutoregMultiSeriesCustom
 # ======================================================================================================================
-@pytest.mark.parametrize("forecaster", 
-                         [ForecasterAutoregMultiSeries(regressor=Ridge(random_state=123), 
-                                                       lags=2), 
-                          ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
-                                                             fun_predictors=create_predictors, 
-                                                             window_size=2)], 
-                         ids=lambda fc: f'forecaster: {type(fc).__name__}')
-def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_not_refit_with_mocked(forecaster):
+@pytest.mark.parametrize("forecaster, n_jobs", 
+                         [(ForecasterAutoregMultiSeries(regressor=Ridge(random_state=123), 
+                                                        lags=2), -1),
+                          (ForecasterAutoregMultiSeries(regressor=Ridge(random_state=123), 
+                                                        lags=2), 1),
+                          (ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
+                                                              fun_predictors=create_predictors, 
+                                                              window_size=2), -1),
+                          (ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
+                                                              fun_predictors=create_predictors, 
+                                                              window_size=2), 1)], 
+                         ids=lambda fc: f'forecaster, n_jobs: {fc}')
+def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_not_refit_with_mocked(forecaster, n_jobs):
     """
     Test output of backtesting_forecaster_multiseries in ForecasterAutoregMultiSeries 
     and ForecasterAutoregMultiSeriesCustom without refit with mocked 
@@ -170,7 +178,8 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                n_boot              = 500,
                                                random_state        = 123,
                                                in_sample_residuals = True,
-                                               verbose             = True
+                                               verbose             = True,
+                                               n_jobs              = n_jobs
                                            )
     
     expected_metric = pd.DataFrame({'levels': ['l1'],
@@ -243,14 +252,19 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
     pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
 
 
-@pytest.mark.parametrize("forecaster", 
-                         [ForecasterAutoregMultiSeries(regressor=Ridge(random_state=123), 
-                                                       lags=2), 
-                          ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
-                                                             fun_predictors=create_predictors, 
-                                                             window_size=2)], 
-                         ids=lambda forecaster: f'forecaster: {type(forecaster).__name__}')
-def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_refit_fixed_train_size_with_mocked(forecaster):
+@pytest.mark.parametrize("forecaster, n_jobs", 
+                         [(ForecasterAutoregMultiSeries(regressor=Ridge(random_state=123), 
+                                                        lags=2), -1),
+                          (ForecasterAutoregMultiSeries(regressor=Ridge(random_state=123), 
+                                                        lags=2), 1),
+                          (ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
+                                                              fun_predictors=create_predictors, 
+                                                              window_size=2), -1),
+                          (ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
+                                                              fun_predictors=create_predictors, 
+                                                              window_size=2), 1)], 
+                         ids=lambda fc: f'forecaster, n_jobs: {fc}')
+def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_refit_fixed_train_size_with_mocked(forecaster, n_jobs):
     """
     Test output of backtesting_forecaster_multiseries in ForecasterAutoregMultiSeries 
     and ForecasterAutoregMultiSeriesCustom with refit, fixed_train_size and 
@@ -281,7 +295,8 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                n_boot              = 500,
                                                random_state        = 123,
                                                in_sample_residuals = True,
-                                               verbose             = True
+                                               verbose             = True,
+                                               n_jobs              = n_jobs
                                            )
     
     expected_metric = pd.DataFrame({'levels': ['l1'],
@@ -298,14 +313,19 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
     pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
 
 
-@pytest.mark.parametrize("forecaster", 
-                         [ForecasterAutoregMultiSeries(regressor=Ridge(random_state=123), 
-                                                       lags=2), 
-                          ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
-                                                             fun_predictors=create_predictors, 
-                                                             window_size=2)], 
-                         ids=lambda forecaster: f'forecaster: {type(forecaster).__name__}')
-def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_refit_with_mocked(forecaster):
+@pytest.mark.parametrize("forecaster, n_jobs", 
+                         [(ForecasterAutoregMultiSeries(regressor=Ridge(random_state=123), 
+                                                        lags=2), -1),
+                          (ForecasterAutoregMultiSeries(regressor=Ridge(random_state=123), 
+                                                        lags=2), 1),
+                          (ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
+                                                              fun_predictors=create_predictors, 
+                                                              window_size=2), -1),
+                          (ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
+                                                              fun_predictors=create_predictors, 
+                                                              window_size=2), 1)], 
+                         ids=lambda fc: f'forecaster, n_jobs: {fc}')
+def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_refit_with_mocked(forecaster, n_jobs):
     """
     Test output of backtesting_forecaster_multiseries in ForecasterAutoregMultiSeries 
     and ForecasterAutoregMultiSeriesCustom with refit with mocked 
@@ -329,7 +349,8 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                n_boot              = 500,
                                                random_state        = 123,
                                                in_sample_residuals = True,
-                                               verbose             = False
+                                               verbose             = False,
+                                               n_jobs              = n_jobs
                                            )
     
     expected_metric = pd.DataFrame({'levels': ['l1'], 
@@ -807,9 +828,203 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
     pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
 
 
+@pytest.mark.parametrize("forecaster", 
+                         [ForecasterAutoregMultiSeries(regressor=Ridge(random_state=123), 
+                                                       lags=2), 
+                          ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
+                                                             fun_predictors=create_predictors, 
+                                                             window_size=2)], 
+                         ids=lambda forecaster: f'forecaster: {type(forecaster).__name__}')
+def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_no_refit_different_lengths_with_mocked(forecaster):
+    """
+    Test output of backtesting_forecaster_multiseries in ForecasterAutoregMultiSeries 
+    and ForecasterAutoregMultiSeriesCustom with no refit and gap with 
+    mocked using exog and intervals and series with different lengths 
+    (mocked done in Skforecast v0.5.0).
+    """
+    n_validation = 20
+    steps = 5
+    gap = 3
+
+    metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
+                                               forecaster            = forecaster,
+                                               series                = series_with_nans,
+                                               steps                 = steps,
+                                               levels                = 'l1',
+                                               metric                = 'mean_absolute_error',
+                                               initial_train_size    = len(series_with_nans) - n_validation,
+                                               gap                   = gap,
+                                               allow_incomplete_fold = True,
+                                               refit                 = False,
+                                               fixed_train_size      = False,
+                                               exog                  = series_with_nans['l1'].rename('exog_1'),
+                                               interval              = [5, 95],
+                                               n_boot                = 150,
+                                               random_state          = 123,
+                                               in_sample_residuals   = True,
+                                               verbose               = False
+                                           )
+    
+    expected_metric = pd.DataFrame({'levels': ['l1'], 
+                                    'mean_absolute_error': [0.11243765852459384]})
+    expected_predictions = pd.DataFrame(
+                               data = np.array([[0.49746847, 0.24620019, 0.74208308],
+                                                [0.46715961, 0.27280913, 0.69897019],
+                                                [0.42170236, 0.21384761, 0.6338432 ],
+                                                [0.47242371, 0.23550111, 0.68264162],
+                                                [0.66450589, 0.4128072 , 0.87549193],
+                                                [0.67311291, 0.42184464, 0.91772752],
+                                                [0.48788629, 0.29353581, 0.71969688],
+                                                [0.55141437, 0.34355962, 0.76355521],
+                                                [0.33369285, 0.09677024, 0.54391075],
+                                                [0.43287852, 0.18117983, 0.64386456],
+                                                [0.46643379, 0.21516552, 0.7110484 ],
+                                                [0.6535986 , 0.45924812, 0.88540919],
+                                                [0.38328273, 0.17542798, 0.59542356],
+                                                [0.49931045, 0.26238785, 0.70952835],
+                                                [0.70119564, 0.44949695, 0.91218168],
+                                                [0.49290276, 0.24163448, 0.73751736],
+                                                [0.54653561, 0.35218513, 0.7783462 ]]),
+                               columns = ['l1', 'l1_lower_bound', 'l1_upper_bound'],
+                               index = pd.RangeIndex(start=33, stop=50, step=1)
+                           )
+                                   
+    pd.testing.assert_frame_equal(expected_metric, metrics_levels)
+    pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
+
+
+@pytest.mark.parametrize("forecaster", 
+                         [ForecasterAutoregMultiSeries(regressor=Ridge(random_state=123), 
+                                                       lags=2), 
+                          ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
+                                                             fun_predictors=create_predictors, 
+                                                             window_size=2)], 
+                         ids=lambda forecaster: f'forecaster: {type(forecaster).__name__}')
+def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_refit_different_lengths_with_mocked(forecaster):
+    """
+    Test output of backtesting_forecaster_multiseries in ForecasterAutoregMultiSeries 
+    and ForecasterAutoregMultiSeriesCustom with refit, gap, allow_incomplete_fold 
+    False with mocked using exog and intervals (mocked done in Skforecast v0.5.0).
+    """
+    n_validation = 20
+    steps = 5
+    gap = 3
+
+    metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
+                                               forecaster            = forecaster,
+                                               series                = series_with_nans,
+                                               steps                 = steps,
+                                               levels                = 'l1',
+                                               metric                = 'mean_absolute_error',
+                                               initial_train_size    = len(series_with_nans) - n_validation,
+                                               gap                   = gap,
+                                               allow_incomplete_fold = False,
+                                               refit                 = True,
+                                               fixed_train_size      = False,
+                                               exog                  = series_with_nans['l1'].rename('exog_1'),
+                                               interval              = [5, 95],
+                                               n_boot                = 150,
+                                               random_state          = 123,
+                                               in_sample_residuals   = True,
+                                               verbose               = False
+                                           )
+    
+    expected_metric = pd.DataFrame({'levels': ['l1'], 
+                                    'mean_absolute_error': [0.12472922864372042]})
+    expected_predictions = pd.DataFrame(
+                               data = np.array([[0.49746847, 0.24620019, 0.74208308],
+                                                [0.46715961, 0.27280913, 0.69897019],
+                                                [0.42170236, 0.21384761, 0.6338432 ],
+                                                [0.47242371, 0.23550111, 0.68264162],
+                                                [0.66450589, 0.4128072 , 0.87549193],
+                                                [0.66852682, 0.46973936, 0.89016477],
+                                                [0.47796299, 0.2686537 , 0.69760042],
+                                                [0.5477168 , 0.35928395, 0.75677995],
+                                                [0.31418572, 0.10972171, 0.51376307],
+                                                [0.42390085, 0.22962754, 0.65199941],
+                                                [0.46927962, 0.25401323, 0.72621914],
+                                                [0.63294789, 0.39385723, 0.89726095],
+                                                [0.41355599, 0.20713645, 0.62092038],
+                                                [0.48437311, 0.24174172, 0.73198965],
+                                                [0.67731074, 0.46831444, 0.9265058 ]]),
+                               columns = ['l1', 'l1_lower_bound', 'l1_upper_bound'],
+                               index = pd.RangeIndex(start=33, stop=48, step=1)
+                           )
+                                   
+    pd.testing.assert_frame_equal(expected_metric, metrics_levels)
+    pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
+
+
+@pytest.mark.parametrize("forecaster", 
+                         [ForecasterAutoregMultiSeries(regressor=Ridge(random_state=123), 
+                                                       lags=2), 
+                          ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
+                                                             fun_predictors=create_predictors, 
+                                                             window_size=2)], 
+                         ids=lambda forecaster: f'forecaster: {type(forecaster).__name__}')
+def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_refit_fixed_train_size_different_lengths_with_mocked(forecaster):
+    """
+    Test output of backtesting_forecaster_multiseries in ForecasterAutoregMultiSeries 
+    and ForecasterAutoregMultiSeriesCustom with refit, fixed_train_size, gap, 
+    with mocked using exog and intervals (mocked done in Skforecast v0.5.0).
+    """
+    series_with_nans_datetime = series_with_nans.copy()
+    series_with_nans_datetime.index = pd.date_range(start='2022-01-01', periods=50, freq='D')
+
+    n_validation = 20
+    steps = 5
+    gap = 5
+
+    metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
+                                               forecaster            = forecaster,
+                                               series                = series_with_nans_datetime,
+                                               steps                 = steps,
+                                               levels                = 'l1',
+                                               metric                = 'mean_absolute_error',
+                                               initial_train_size    = len(series_with_nans_datetime) - n_validation,
+                                               gap                   = gap,
+                                               allow_incomplete_fold = False,
+                                               refit                 = True,
+                                               fixed_train_size      = True,
+                                               exog                  = series_with_nans_datetime['l1'].rename('exog_1'),
+                                               interval              = [5, 95],
+                                               n_boot                = 150,
+                                               random_state          = 123,
+                                               in_sample_residuals   = True,
+                                               verbose               = False
+                                           )
+    
+    expected_metric = pd.DataFrame({'levels': ['l1'], 
+                                    'mean_absolute_error': [0.1355099897175138]})
+    expected_predictions = pd.DataFrame(
+        data = np.array([[0.42170236, 0.21384761, 0.6338432 ],
+                         [0.47242371, 0.23550111, 0.68264162],
+                         [0.66450589, 0.4128072 , 0.87549193],
+                         [0.67311586, 0.46534536, 0.89662809],
+                         [0.487886  , 0.27487735, 0.65050566],
+                         [0.52759202, 0.30254031, 0.7316064 ],
+                         [0.33021382, 0.11679102, 0.52056867],
+                         [0.4226274 , 0.16874895, 0.61548288],
+                         [0.44647715, 0.22033296, 0.65301466],
+                         [0.61435678, 0.37793909, 0.81285962],
+                         [0.41671844, 0.13568381, 0.67943385],
+                         [0.47385345, 0.19025177, 0.76849597],
+                         [0.62360146, 0.39888165, 0.85075261],
+                         [0.49407875, 0.24011478, 0.78855477],
+                         [0.51234652, 0.26828928, 0.81339595]]),
+        columns = ['l1', 'l1_lower_bound', 'l1_upper_bound'],
+        index = pd.date_range(start='2022-02-05', periods=15, freq='D')
+    )
+                                   
+    pd.testing.assert_frame_equal(expected_metric, metrics_levels)
+    pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
+
+
 # ForecasterAutoregMultiVariate
 # ======================================================================================================================
-def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate_not_refit_with_mocked():
+@pytest.mark.parametrize("n_jobs", [-1, 1],
+                         ids=lambda n: f'n_jobs: {n}')
+def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate_not_refit_with_mocked(n_jobs):
     """
     Test output of backtesting_forecaster_multiseries in ForecasterAutoregMultiVariate without refit
     with mocked (mocked done in Skforecast v0.6.0).
@@ -839,6 +1054,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
                                                n_boot              = 500,
                                                random_state        = 123,
                                                in_sample_residuals = True,
+                                               n_jobs              = n_jobs,
                                                verbose             = True
                                            )
     
@@ -911,7 +1127,9 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
     pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
 
 
-def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate_refit_fixed_train_size_with_mocked():
+@pytest.mark.parametrize("n_jobs", [-1, 1],
+                         ids=lambda n: f'n_jobs: {n}')
+def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate_refit_fixed_train_size_with_mocked(n_jobs):
     """
     Test output of backtesting_forecaster_multiseries in ForecasterAutoregMultiVariate with refit,
     fixed_train_size and custom metric with mocked (mocked done in Skforecast v0.6.0).
@@ -948,6 +1166,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
                                                n_boot              = 500,
                                                random_state        = 123,
                                                in_sample_residuals = True,
+                                               n_jobs              = n_jobs,
                                                verbose             = True
                                            )
     
@@ -965,7 +1184,9 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
     pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
 
 
-def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate_refit_with_mocked():
+@pytest.mark.parametrize("n_jobs", [-1, 1],
+                         ids=lambda n: f'n_jobs: {n}')
+def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate_refit_with_mocked(n_jobs):
     """
     Test output of backtesting_forecaster_multiseries in ForecasterAutoregMultiVariate 
     with refit with mocked (mocked done in Skforecast v0.6.0).
@@ -995,6 +1216,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
                                                n_boot              = 500,
                                                random_state        = 123,
                                                in_sample_residuals = True,
+                                               n_jobs              = n_jobs,
                                                verbose             = False
                                            )
     

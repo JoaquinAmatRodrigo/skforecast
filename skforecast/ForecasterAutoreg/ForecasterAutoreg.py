@@ -250,7 +250,7 @@ class ForecasterAutoreg(ForecasterBase):
         self, 
         y: np.ndarray
     ) -> Tuple[np.ndarray, np.ndarray]:
-        """       
+        """
         Transforms a 1d array into a 2d array (X) and a 1d array (y). Each row
         in X is associated with a value of y and it represents the lags that
         precede it.
@@ -1212,32 +1212,3 @@ class ForecasterAutoreg(ForecasterBase):
                                   })
 
         return feature_importances
-
-
-    def get_feature_importance(
-        self
-    ) -> pd.DataFrame:
-        """
-        This method has been replaced by `get_feature_importances()`.
-
-        Return feature importances of the regressor stored in the
-        forecaster. Only valid when regressor stores internally the feature
-        importances in the attribute `feature_importances_` or `coef_`.
-
-        Parameters
-        ----------
-        self
-
-        Returns
-        -------
-        feature_importances : pandas DataFrame
-            Feature importances associated with each predictor.
-
-        """
-
-        warnings.warn(
-            ("get_feature_importance() method has been renamed to get_feature_importances(). "
-             "This method will be removed in skforecast 0.9.0.")
-        )
-
-        return self.get_feature_importances()

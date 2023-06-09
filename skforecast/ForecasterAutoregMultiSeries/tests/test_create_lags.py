@@ -16,11 +16,11 @@ def test_create_lags_exception_when_len_of_y_is_lower_than_maximum_lag():
     y = pd.Series(np.arange(5), name='y')
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=10)
     err_msg = re.escape(
-                (f'The maximum lag ({forecaster.max_lag}) must be less than the length '
-                 f'of the series ({len(y)}).')
+                (f"The maximum lag ({forecaster.max_lag}) must be less than the length "
+                 f"of the series 'y', ({len(y)}).")
               )
     with pytest.raises(ValueError, match = err_msg):
-        forecaster._create_lags(y=y)
+        forecaster._create_lags(y=y, series_name=y.name)
 
 
 def test_create_lags_output():
@@ -28,7 +28,7 @@ def test_create_lags_output():
     Test matrix of lags is created properly when langs=3 and y=np.arange(10).
     """
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
-    results = forecaster._create_lags(y=np.arange(10))
+    results = forecaster._create_lags(y=np.arange(10), series_name='y')
     expected = (np.array([[2., 1., 0.],
                           [3., 2., 1.],
                           [4., 3., 2.],
@@ -47,7 +47,7 @@ def test_create_lags_output_interspersed_lags():
     Test matrix of lags is is a list with interspersed lags.
     """
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=[4, 7])
-    results = forecaster._create_lags(y=np.arange(10))
+    results = forecaster._create_lags(y=np.arange(10), series_name='y')
     expected = (np.array([[3., 0.],
                           [4., 1.],
                           [5., 2.]]),

@@ -29,7 +29,10 @@ The fields of statistics and machine learning have developed many excellent regr
 
 Thank you for choosing skforecast! We value your suggestions, bug reports and recommendations as they help us identify areas for improvement and ensure that skforecast meets the needs of the community. Please consider sharing your experiences, reporting bugs, making suggestions or even contributing to the codebase on GitHub. Together, let's make time series forecasting more accessible and accurate for everyone.
 
-**Documentation**
+
+# Documentation
+
+For detailed information on how to use and leverage the full potential of **skforecast** please refer to the comprehensive documentation available at:
 
 **https://skforecast.org** :books:
 
@@ -45,7 +48,7 @@ pip install skforecast
 Specific version:
 
 ```bash
-pip install skforecast==0.8.1
+pip install skforecast==0.9.0
 ```
 
 Latest (unstable):
@@ -90,16 +93,12 @@ pip install skforecast[plotting]
 + statsmodels>=0.12, <0.14
 + pmdarima>=2.0, <2.1
 
-## What is new in skforecast 0.8.1?
+## What is new in skforecast 0.9.0?
 
 Visit the [release notes](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/changelog.md) to view all notable changes.
 
-- [x] Support for `pandas 2.0.x`.
-- [x] New user guide on how to include **categorical variables** in the Forecasters.
-- [x] New user guide on how to use **GPU in Google Colab** with XGBoost and LightGBM regressors.
-- [x] Include custom kwargs during fit.
-- [x] The dtypes of exogenous variables are maintained when generating the training matrices with the `create_train_X_y` method in all the Forecasters.
-- [x] Include `gap` argument in backtesting functions to omit observations between training and prediction.
+- [x] Parallelization in model selection modules. New argument `n_jobs` in functions such as `backtesting_forecaster`.
+- [x] `ForecasterAutoregMultiSeries` and `ForecasterAutoregMultiSeriesCUstom` allow series of different lengths.
 - [x] Bug fixes and performance improvements.
 
 
@@ -120,9 +119,7 @@ The skforecast library offers a variety of forecaster types, each tailored to sp
 |[ForecasterSarimax](https://skforecast.org/latest/user_guides/forecasting-sarimax-arima.html)|✔️||✔️||✔️|✔️||
 
 
-# Documentation
-
-The documentation for the latest release is at [skforecast docs](https://skforecast.org).
+# Main User Guides
 
 + [Introduction to time series and forecasting](https://skforecast.org/latest/user_guides/quick-start-skforecast.html)
 
@@ -207,7 +204,7 @@ If you use this software, please cite it using the following metadata.
 
 **APA**:
 ```
-Amat Rodrigo, J., & Escobar Ortiz, J. skforecast (Version 0.8.1) [Computer software]
+Amat Rodrigo, J., & Escobar Ortiz, J. skforecast (Version 0.9.0) [Computer software]
 ```
 
 **BibTeX**:
@@ -215,9 +212,9 @@ Amat Rodrigo, J., & Escobar Ortiz, J. skforecast (Version 0.8.1) [Computer softw
 @software{skforecast,
 author = {Amat Rodrigo, Joaquin and Escobar Ortiz, Javier},
 license = {BSD 3-Clause License},
-month = {5},
+month = {6},
 title = {{skforecast}},
-version = {0.8.1},
+version = {0.9.0},
 year = {2023}
 }
 ```

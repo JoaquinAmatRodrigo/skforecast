@@ -1,5 +1,6 @@
 # Unit test _backtesting_forecaster_refit
 # ==============================================================================
+import pytest
 import numpy as np
 import pandas as pd
 from pytest import approx
@@ -20,7 +21,9 @@ from .fixtures_model_selection import out_sample_residuals
 # * Test _backtesting_forecaster_refit No Interval                             *
 # ******************************************************************************
 
-def test_output_backtesting_forecaster_refit_no_exog_no_remainder_ForecasterAutoreg_with_mocked():
+@pytest.mark.parametrize("n_jobs", [-1, 1],
+                         ids=lambda n: f'n_jobs: {n}')
+def test_output_backtesting_forecaster_refit_no_exog_no_remainder_ForecasterAutoreg_with_mocked(n_jobs):
     """
     Test output of _backtesting_forecaster_refit with backtesting mocked, interval no.
     Regressor is LinearRegression with lags=3, Series y is mocked, no exog, 
@@ -29,9 +32,11 @@ def test_output_backtesting_forecaster_refit_no_exog_no_remainder_ForecasterAuto
     """
     expected_metric = 0.06598802629306816
     expected_predictions = pd.DataFrame({
-    'pred':np.array([0.55717779, 0.43355138, 0.54969767, 0.52945466, 0.38969292, 0.52778339,
-                     0.49152015, 0.4841678 , 0.4076433 , 0.50904672, 0.50249462, 0.49232817])
-                                                                }, index=pd.RangeIndex(start=38, stop=50, step=1))
+        'pred':np.array([0.55717779, 0.43355138, 0.54969767, 0.52945466, 
+                         0.38969292, 0.52778339, 0.49152015, 0.4841678 , 
+                         0.4076433 , 0.50904672, 0.50249462, 0.49232817])}, 
+        index=pd.RangeIndex(start=38, stop=50, step=1)
+    )
 
     forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3)
 
@@ -50,6 +55,7 @@ def test_output_backtesting_forecaster_refit_no_exog_no_remainder_ForecasterAuto
                                         n_boot              = 500,
                                         random_state        = 123,
                                         in_sample_residuals = True,
+                                        n_jobs              = n_jobs,
                                         verbose             = False
                                    )
                                    

@@ -6,7 +6,7 @@
 ################################################################################
 # coding=utf-8
 
-from typing import Union, Dict, List, Tuple, Any, Optional, Callable
+from typing import Union, Tuple, Optional, Callable
 import warnings
 import logging
 import sys
@@ -400,7 +400,8 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
             self.transformer_series_ = {serie: None for serie in series_col_names}
             # Only elements already present in transformer_series_ are updated
             self.transformer_series_.update(
-                (k, v) for k, v in deepcopy(self.transformer_series).items() if k in self.transformer_series_
+                (k, v) for k, v in deepcopy(self.transformer_series).items() 
+                if k in self.transformer_series_
             )
             series_not_in_transformer_series = set(series.columns) - set(self.transformer_series.keys())
             if series_not_in_transformer_series:
@@ -444,48 +445,65 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
                 )
 
         X_levels = []
+        len_series = []
         
         for i, serie in enumerate(series.columns):
 
             y = series[serie]
-            check_y(y=y)
+            y_values = y.to_numpy()
+
+            if np.isnan(y_values).all():
+                raise ValueError(f"All values of series '{serie}' are NaN.")
+            
+            first_no_nan_idx = np.argmax(~np.isnan(y_values))
+            y_values = y_values[first_no_nan_idx:]
+
+            if np.isnan(y_values).any():
+                raise ValueError(
+                    (f"'{serie}' Time series has missing values in between or "
+                     f"at the end of the time series. When working with series "
+                     f"of different lengths, all series must be complete after "
+                     f"the first non-null value.")
+                )
+            
             y = transform_series(
-                    series            = y,
+                    series            = y.iloc[first_no_nan_idx:],
                     transformer       = self.transformer_series_[serie],
                     fit               = True,
                     inverse_transform = False
                 )
 
-            y_values, y_index = preprocess_y(y=y)
+            y_values = y.to_numpy()
 
-            temp_X_train  = []
-            temp_y_train  = []
+            X_train_values  = []
+            y_train_values  = []
 
             for j in range(len(y) - self.window_size):
 
-                train_index = np.arange(j, self.window_size + j)
-                test_index  = self.window_size + j
+                temp_X_index = np.arange(j, self.window_size + j)
+                temp_y_index  = self.window_size + j
 
-                temp_X_train.append(self.fun_predictors(y=y_values[train_index]))
-                temp_y_train.append(y_values[test_index])
+                X_train_values.append(self.fun_predictors(y=y_values[temp_X_index]))
+                y_train_values.append(y_values[temp_y_index])
 
-            X_train_values = np.vstack(temp_X_train)
-            y_train_values = np.array(temp_y_train)
+            X_train_values = np.vstack(X_train_values)
+            y_train_values = np.array(y_train_values)
 
             if np.isnan(X_train_values).any():
                 raise ValueError(
-                    f"`fun_predictors()` is returning `NaN` values for series {serie}."
+                    f"`fun_predictors()` is returning `NaN` values for series '{serie}'."
                 )
 
             if i == 0:
                 X_train = X_train_values
                 y_train = y_train_values
             else:
-                X_train = np.vstack((X_train, X_train_values))
-                y_train = np.append(y_train, y_train_values)
+                X_train = np.concatenate((X_train, X_train_values), axis=0)
+                y_train = np.concatenate((y_train, y_train_values), axis=0)
 
             X_level = [serie]*len(X_train_values)
             X_levels.extend(X_level)
+            len_series.append(len(y_train_values))
 
         if self.name_predictors is None:
             X_train_col_names = [f"custom_predictor_{i}" 
@@ -520,10 +538,10 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
 
         if exog is not None:
             # The first `self.window_size` positions have to be removed from exog
-            # since they are not in X_train. Then exog is cloned as many times
-            # as series.
-            exog_to_train = exog.iloc[self.window_size:, ]
-            exog_to_train = pd.concat([exog_to_train]*len(series_col_names)).reset_index(drop=True)
+            # since they are not in X_train. Then Exog is cloned as many times 
+            # as there are series, taking into account the length of the series.
+            exog_to_train = [exog.iloc[-length:, ] for length in len_series]
+            exog_to_train = pd.concat(exog_to_train).reset_index(drop=True)
         else:
             exog_to_train = None
 
@@ -535,10 +553,12 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
                       name = 'y'
                   )
 
+        _, y_index = preprocess_y(y=series, return_values=False)
+
+        y_index_numpy = y_index.to_numpy()
         y_train_index = pd.Index(
-                            np.tile(
-                                y_index[self.window_size: ].values,
-                                reps = len(series_col_names)
+                            np.concatenate(
+                                [y_index_numpy[-length:, ] for length in len_series]
                             )
                         )
 
@@ -587,7 +607,8 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
                     IgnoredArgumentWarning
                 )
             self.series_weights_ = {col: 1. for col in series.columns}
-            self.series_weights_.update((k, v) for k, v in self.series_weights.items() if k in self.series_weights_)
+            self.series_weights_.update((k, v) for k, v in self.series_weights.items() 
+                                        if k in self.series_weights_)
             weights_series = [np.repeat(self.series_weights_[serie], sum(X_train[serie])) 
                               for serie in series.columns]
             weights_series = np.concatenate(weights_series)
@@ -607,7 +628,8 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
                     )
                 self.weight_func_ = {col: lambda x: np.ones_like(x, dtype=float) 
                                      for col in series.columns}
-                self.weight_func_.update((k, v) for k, v in self.weight_func.items() if k in self.weight_func_)
+                self.weight_func_.update((k, v) for k, v in self.weight_func.items() 
+                                         if k in self.weight_func_)
                 
             weights_samples = []
             for key in self.weight_func_.keys():
@@ -1555,32 +1577,3 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
                                   })
 
         return feature_importances
-    
-
-    def get_feature_importance(
-        self
-    ) -> pd.DataFrame:
-        """
-        This method has been replaced by `get_feature_importances()`.
-
-        Return feature importances of the regressor stored in the
-        forecaster. Only valid when regressor stores internally the feature
-        importances in the attribute `feature_importances_` or `coef_`.
-
-        Parameters
-        ----------
-        self
-
-        Returns
-        -------
-        feature_importances : pandas DataFrame
-            Feature importances associated with each predictor.
-        
-        """
-
-        warnings.warn(
-            ("get_feature_importance() method has been renamed to get_feature_importances()."
-             "This method will be removed in skforecast 0.9.0.")
-        )
-
-        return self.get_feature_importances()
