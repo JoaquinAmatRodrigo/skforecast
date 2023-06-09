@@ -1604,12 +1604,12 @@ def check_backtesting_input(
         raise TypeError(f"`random_state` must be an integer greater than 0. Got {random_state}.")
     if not isinstance(in_sample_residuals, bool):
         raise TypeError("`in_sample_residuals` must be a boolean: `True`, `False`.")
+    if not isinstance(n_jobs, int):
+        raise TypeError(f"`n_jobs` must be an integer. Got {n_jobs}.")
     if not isinstance(verbose, bool):
         raise TypeError("`verbose` must be a boolean: `True`, `False`.")
     if not isinstance(show_progress, bool):
         raise TypeError("`show_progress` must be a boolean: `True`, `False`.")
-    if not isinstance(n_jobs, int):
-        raise TypeError(f"`n_jobs` must be a integer. Got {n_jobs}.")
 
     if interval is not None or alpha is not None:
         check_interval(interval=interval, alpha=alpha)
