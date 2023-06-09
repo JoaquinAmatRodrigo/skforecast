@@ -394,6 +394,7 @@ def _backtesting_forecaster_refit(
     n_jobs : int, default -1
         The number of jobs to run in parallel. If -1, then the number of jobs is 
         set to the number of cores.
+        **New in version 0.9.0**
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
         for backtesting.
@@ -594,6 +595,7 @@ def _backtesting_forecaster_no_refit(
     n_jobs : int, default -1
         The number of jobs to run in parallel. If -1, then the number of jobs is 
         set to the number of cores.
+        **New in version 0.9.0**
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
         for backtesting.
@@ -798,6 +800,7 @@ def backtesting_forecaster(
     n_jobs : int, default -1
         The number of jobs to run in parallel. If -1, then the number of jobs is 
         set to the number of cores.
+        **New in version 0.9.0**
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
         for backtesting.
@@ -959,6 +962,7 @@ def grid_search_forecaster(
     n_jobs : int, default -1
         The number of jobs to run in parallel. If -1, then the number of jobs is 
         set to the number of cores.
+        **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
     show_progress: bool, default `True`
@@ -1072,6 +1076,7 @@ def random_search_forecaster(
     n_jobs : int, default -1
         The number of jobs to run in parallel. If -1, then the number of jobs is 
         set to the number of cores.
+        **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
     show_progress: bool, default `True`
@@ -1177,6 +1182,7 @@ def _evaluate_grid_hyperparameters(
     n_jobs : int, default -1
         The number of jobs to run in parallel. If -1, then the number of jobs is 
         set to the number of cores.
+        **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
     show_progress: bool, default `True`
@@ -1365,6 +1371,7 @@ def bayesian_search_forecaster(
     n_jobs : int, default -1
         The number of jobs to run in parallel. If -1, then the number of jobs is 
         set to the number of cores.
+        **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
     show_progress: bool, default `True`
@@ -1511,6 +1518,7 @@ def _bayesian_search_optuna(
     n_jobs : int, default -1
         The number of jobs to run in parallel. If -1, then the number of jobs is 
         set to the number of cores.
+        **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
     show_progress: bool, default `True`
