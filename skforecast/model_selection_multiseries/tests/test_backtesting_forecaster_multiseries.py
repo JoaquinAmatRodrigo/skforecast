@@ -114,10 +114,10 @@ def test_backtesting_forecaster_multiseries_IgnoredArgumentWarning_forecaster_mu
                  )
     
     warn_msg = re.escape(
-                (f"`levels` argument have no use when the forecaster is of type "
-                 f"`ForecasterAutoregMultiVariate`. The level of this forecaster is "
-                 f"{forecaster.level}, to predict another level, change the `level` "
-                 f"argument when initializing the forecaster.")
+                ("`levels` argument have no use when the forecaster is of type "
+                 "`ForecasterAutoregMultiVariate`. The level of this forecaster is "
+                 "'l1', to predict another level, change the `level` "
+                 "argument when initializing the forecaster.")
             )
     with pytest.warns(IgnoredArgumentWarning, match = warn_msg):
         backtesting_forecaster_multiseries(
@@ -134,20 +134,26 @@ def test_backtesting_forecaster_multiseries_IgnoredArgumentWarning_forecaster_mu
             n_boot              = 500,
             random_state        = 123,
             in_sample_residuals = True,
-            verbose             = False
+            verbose             = False,
+            n_jobs=1
         )
 
 
 # ForecasterAutoregMultiSeries and ForecasterAutoregMultiSeriesCustom
 # ======================================================================================================================
-@pytest.mark.parametrize("forecaster", 
-                         [ForecasterAutoregMultiSeries(regressor=Ridge(random_state=123), 
-                                                       lags=2), 
-                          ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
-                                                             fun_predictors=create_predictors, 
-                                                             window_size=2)], 
-                         ids=lambda fc: f'forecaster: {type(fc).__name__}')
-def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_not_refit_with_mocked(forecaster):
+@pytest.mark.parametrize("forecaster, n_jobs", 
+                         [(ForecasterAutoregMultiSeries(regressor=Ridge(random_state=123), 
+                                                        lags=2), -1),
+                          (ForecasterAutoregMultiSeries(regressor=Ridge(random_state=123), 
+                                                        lags=2), 1),
+                          (ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
+                                                              fun_predictors=create_predictors, 
+                                                              window_size=2), -1),
+                          (ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
+                                                              fun_predictors=create_predictors, 
+                                                              window_size=2), 1)], 
+                         ids=lambda fc: f'forecaster, n_jobs: {fc}')
+def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_not_refit_with_mocked(forecaster, n_jobs):
     """
     Test output of backtesting_forecaster_multiseries in ForecasterAutoregMultiSeries 
     and ForecasterAutoregMultiSeriesCustom without refit with mocked 
@@ -170,7 +176,8 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                n_boot              = 500,
                                                random_state        = 123,
                                                in_sample_residuals = True,
-                                               verbose             = True
+                                               verbose             = True,
+                                               n_jobs              = n_jobs
                                            )
     
     expected_metric = pd.DataFrame({'levels': ['l1'],
@@ -243,14 +250,19 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
     pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
 
 
-@pytest.mark.parametrize("forecaster", 
-                         [ForecasterAutoregMultiSeries(regressor=Ridge(random_state=123), 
-                                                       lags=2), 
-                          ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
-                                                             fun_predictors=create_predictors, 
-                                                             window_size=2)], 
-                         ids=lambda forecaster: f'forecaster: {type(forecaster).__name__}')
-def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_refit_fixed_train_size_with_mocked(forecaster):
+@pytest.mark.parametrize("forecaster, n_jobs", 
+                         [(ForecasterAutoregMultiSeries(regressor=Ridge(random_state=123), 
+                                                        lags=2), -1),
+                          (ForecasterAutoregMultiSeries(regressor=Ridge(random_state=123), 
+                                                        lags=2), 1),
+                          (ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
+                                                              fun_predictors=create_predictors, 
+                                                              window_size=2), -1),
+                          (ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
+                                                              fun_predictors=create_predictors, 
+                                                              window_size=2), 1)], 
+                         ids=lambda fc: f'forecaster, n_jobs: {fc}')
+def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_refit_fixed_train_size_with_mocked(forecaster, n_jobs):
     """
     Test output of backtesting_forecaster_multiseries in ForecasterAutoregMultiSeries 
     and ForecasterAutoregMultiSeriesCustom with refit, fixed_train_size and 
@@ -281,7 +293,8 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                n_boot              = 500,
                                                random_state        = 123,
                                                in_sample_residuals = True,
-                                               verbose             = True
+                                               verbose             = True,
+                                               n_jobs              = n_jobs
                                            )
     
     expected_metric = pd.DataFrame({'levels': ['l1'],
@@ -298,14 +311,19 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
     pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
 
 
-@pytest.mark.parametrize("forecaster", 
-                         [ForecasterAutoregMultiSeries(regressor=Ridge(random_state=123), 
-                                                       lags=2), 
-                          ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
-                                                             fun_predictors=create_predictors, 
-                                                             window_size=2)], 
-                         ids=lambda forecaster: f'forecaster: {type(forecaster).__name__}')
-def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_refit_with_mocked(forecaster):
+@pytest.mark.parametrize("forecaster, n_jobs", 
+                         [(ForecasterAutoregMultiSeries(regressor=Ridge(random_state=123), 
+                                                        lags=2), -1),
+                          (ForecasterAutoregMultiSeries(regressor=Ridge(random_state=123), 
+                                                        lags=2), 1),
+                          (ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
+                                                              fun_predictors=create_predictors, 
+                                                              window_size=2), -1),
+                          (ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
+                                                              fun_predictors=create_predictors, 
+                                                              window_size=2), 1)], 
+                         ids=lambda fc: f'forecaster, n_jobs: {fc}')
+def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_refit_with_mocked(forecaster, n_jobs):
     """
     Test output of backtesting_forecaster_multiseries in ForecasterAutoregMultiSeries 
     and ForecasterAutoregMultiSeriesCustom with refit with mocked 
@@ -329,7 +347,8 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                n_boot              = 500,
                                                random_state        = 123,
                                                in_sample_residuals = True,
-                                               verbose             = False
+                                               verbose             = False,
+                                               n_jobs              = n_jobs
                                            )
     
     expected_metric = pd.DataFrame({'levels': ['l1'], 
@@ -809,7 +828,9 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
 
 # ForecasterAutoregMultiVariate
 # ======================================================================================================================
-def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate_not_refit_with_mocked():
+@pytest.mark.parametrize("n_jobs", [-1, 1],
+                         ids=lambda n: f'n_jobs: {n}')
+def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate_not_refit_with_mocked(n_jobs):
     """
     Test output of backtesting_forecaster_multiseries in ForecasterAutoregMultiVariate without refit
     with mocked (mocked done in Skforecast v0.6.0).
@@ -839,6 +860,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
                                                n_boot              = 500,
                                                random_state        = 123,
                                                in_sample_residuals = True,
+                                               n_jobs              = n_jobs,
                                                verbose             = True
                                            )
     
@@ -911,7 +933,9 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
     pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
 
 
-def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate_refit_fixed_train_size_with_mocked():
+@pytest.mark.parametrize("n_jobs", [-1, 1],
+                         ids=lambda n: f'n_jobs: {n}')
+def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate_refit_fixed_train_size_with_mocked(n_jobs):
     """
     Test output of backtesting_forecaster_multiseries in ForecasterAutoregMultiVariate with refit,
     fixed_train_size and custom metric with mocked (mocked done in Skforecast v0.6.0).
@@ -948,6 +972,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
                                                n_boot              = 500,
                                                random_state        = 123,
                                                in_sample_residuals = True,
+                                               n_jobs              = n_jobs,
                                                verbose             = True
                                            )
     
@@ -965,7 +990,9 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
     pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
 
 
-def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate_refit_with_mocked():
+@pytest.mark.parametrize("n_jobs", [-1, 1],
+                         ids=lambda n: f'n_jobs: {n}')
+def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate_refit_with_mocked(n_jobs):
     """
     Test output of backtesting_forecaster_multiseries in ForecasterAutoregMultiVariate 
     with refit with mocked (mocked done in Skforecast v0.6.0).
@@ -995,6 +1022,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
                                                n_boot              = 500,
                                                random_state        = 123,
                                                in_sample_residuals = True,
+                                               n_jobs              = n_jobs,
                                                verbose             = False
                                            )
     
