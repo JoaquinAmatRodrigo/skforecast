@@ -5,7 +5,7 @@ mkdocs-material==9.1.15
 mkdocstrings==0.22.0
 mkdocstrings-python==1.1.0
 jupyter-contrib-nbextensions==0.7.0
-skforecast==0.8.1
+#skforecast
 
 # No blanck line bewteen arguments
 # No Notes sections
