@@ -14,7 +14,6 @@ Enhanced all backtesting and grid search functions by adding the n_jobs argument
 
 + Added `show_progress` to grid search functions.
 
-
 **Changed**
 
 + Remove `get_feature_importance()` in favor of `get_feature_importances()` in all Forecasters, (deprecated since 0.8.0).

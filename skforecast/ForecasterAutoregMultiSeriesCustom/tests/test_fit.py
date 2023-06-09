@@ -2,7 +2,6 @@
 # ==============================================================================
 import re
 import pytest
-from pytest import approx
 import numpy as np
 import pandas as pd
 from skforecast.ForecasterAutoregMultiSeriesCustom import ForecasterAutoregMultiSeriesCustom
@@ -21,9 +20,9 @@ def create_predictors(y): # pragma: no cover
 
 
 @pytest.mark.parametrize('exog', ['l1', ['l1'], ['l1', 'l2']])
-def test_fit_exception_when_exog_columns_same_as_series_col_names(exog):
+def test_fit_ValueError_when_exog_columns_same_as_series_col_names(exog):
     """
-    Test exception is raised when an exog column is named the same as
+    Test ValueError is raised when an exog column is named the same as
     the series levels.
     """
     series = pd.DataFrame({'l1': pd.Series(np.arange(10)), 
