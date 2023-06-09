@@ -8,7 +8,9 @@ Enhanced all backtesting and grid search functions by adding the n_jobs argument
 
 **Added**
 
-+ Added `n_jobs` argument to all backtesting and gridsearch funtions to allow multi-threaded parallelization.
++ Argument `n_jobs=-1` to all backtesting dependent functions in modules `model_selection`, `model_selection_multiseries` and `model_selection_sarimax` to allow  multi-threaded parallelization.
+
++ `ForecasterAutoregMultiSeries` and `ForecasterAutoregMultiSeriesCustom` allow to use series of different lengths for training.
 
 + Added `show_progress` to grid search functions.
 
@@ -16,6 +18,8 @@ Enhanced all backtesting and grid search functions by adding the n_jobs argument
 **Changed**
 
 + Remove `get_feature_importance()` in favor of `get_feature_importances()` in all Forecasters, (deprecated since 0.8.0).
+
++ `utils.preprocess_y` allows a pandas DataFrame as input.
 
 **Fixed**
 
