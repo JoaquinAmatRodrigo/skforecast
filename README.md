@@ -97,8 +97,8 @@ pip install skforecast[plotting]
 
 Visit the [release notes](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/changelog.md) to view all notable changes.
 
-- [x] Parallelization in model selection modules. New argument `n_jobs` in functions such as `backtesting_forecaster`.
-- [x] `ForecasterAutoregMultiSeries` and `ForecasterAutoregMultiSeriesCUstom` allow series of different lengths.
+- [x] All backtesting and grid search functions have been extended to include the `n_jobs` argument, allowing multi-threaded parallelization for improved performance.
+- [x] `ForecasterAutoregMultiSeries` and `ForecasterAutoregMultiSeriesCustom` can be trained using series of different lengths. This means that the model can handle datasets with different numbers of data points in each series.
 - [x] Bug fixes and performance improvements.
 
 
