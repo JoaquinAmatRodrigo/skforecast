@@ -112,7 +112,7 @@ theme:
     - navigation.sections
     - navigation.expand
     - navigation.top
-  palette:    
+  palette:
     # # Palette toggle for automatic mode
     # - media: "(prefers-color-scheme)"
     #   primary: custom
