@@ -528,7 +528,9 @@ def grid_search_sarimax(
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     refit: bool=False,
     return_best: bool=True,
-    verbose: bool=True
+    n_jobs: int=-1,
+    verbose: bool=True,
+    show_progress: bool=True
 ) -> pd.DataFrame:
     """
     Exhaustive search over specified parameter values for a ForecasterSarimax object.
@@ -572,8 +574,14 @@ def grid_search_sarimax(
         Whether to re-fit the forecaster in each iteration of backtesting.
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
+    n_jobs : int, default -1
+        The number of jobs to run in parallel. If -1, then the number of jobs is 
+        set to the number of cores.
+        **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
+    show_progress: bool, default `True`
+        Whether to show a progress bar. Defaults to True.
 
     Returns
     -------
@@ -601,7 +609,9 @@ def grid_search_sarimax(
         exog                  = exog,
         refit                 = refit,
         return_best           = return_best,
-        verbose               = verbose
+        n_jobs                = n_jobs,
+        verbose               = verbose,
+        show_progress         = show_progress
     )
 
     return results
@@ -622,7 +632,9 @@ def random_search_sarimax(
     n_iter: int=10,
     random_state: int=123,
     return_best: bool=True,
-    verbose: bool=True
+    n_jobs: int=-1,
+    verbose: bool=True,
+    show_progress: bool=True
 ) -> pd.DataFrame:
     """
     Random search over specified parameter values or distributions for a Forecaster 
@@ -671,8 +683,14 @@ def random_search_sarimax(
         Sets a seed to the random sampling for reproducible output.
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
+    n_jobs : int, default -1
+        The number of jobs to run in parallel. If -1, then the number of jobs is 
+        set to the number of cores.
+        **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
+    show_progress: bool, default `True`
+        Whether to show a progress bar. Defaults to True.
 
     Returns
     -------
@@ -700,7 +718,9 @@ def random_search_sarimax(
         exog                  = exog,
         refit                 = refit,
         return_best           = return_best,
-        verbose               = verbose
+        n_jobs                = n_jobs,
+        verbose               = verbose,
+        show_progress         = show_progress
     )
 
     return results
@@ -719,7 +739,9 @@ def _evaluate_grid_hyperparameters_sarimax(
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     refit: bool=False,
     return_best: bool=True,
-    verbose: bool=True
+    n_jobs: int=-1,
+    verbose: bool=True,
+    show_progress: bool=True
 ) -> pd.DataFrame:
     """
     Evaluate parameter values for a Forecaster object using time series backtesting.
@@ -762,8 +784,14 @@ def _evaluate_grid_hyperparameters_sarimax(
         Whether to re-fit the forecaster in each iteration of backtesting.
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
+    n_jobs : int, default -1
+        The number of jobs to run in parallel. If -1, then the number of jobs is 
+        set to the number of cores.
+        **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
+    show_progress: bool, default `True`
+        Whether to show a progress bar. Defaults to True.
 
     Returns
     -------
@@ -793,8 +821,11 @@ def _evaluate_grid_hyperparameters_sarimax(
         )
 
     print(f"Number of models compared: {len(param_grid)}.")
+
+    if show_progress:
+        param_grid = tqdm(param_grid, desc='params grid', position=0)
   
-    for params in tqdm(param_grid, desc='params grid', position=0):
+    for params in param_grid:
 
         forecaster.set_params(params)
         metrics_values = backtesting_sarimax(
@@ -810,6 +841,7 @@ def _evaluate_grid_hyperparameters_sarimax(
                             refit                 = refit,
                             alpha                 = None,
                             interval              = None,
+                            n_jobs                = n_jobs,
                             verbose               = verbose,
                             show_progress         = False
                          )[0]
