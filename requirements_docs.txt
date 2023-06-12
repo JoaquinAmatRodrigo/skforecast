@@ -5,7 +5,19 @@ mkdocs-material==9.1.15
 mkdocstrings==0.22.0
 mkdocstrings-python==1.1.0
 jupyter-contrib-nbextensions==0.7.0
+
+# Requirements for core
+jinja2>=3.0
+markdown>=3.2
+mkdocs-material-extensions>=1.1
+pygments>=2.14
+pymdown-extensions>=9.9.1
+
+# Requirements for plugins
+colorama>=0.4
+regex>=2022.4.24
+requests>=2.26
 #skforecast
 
-# No blanck line bewteen arguments
+# No blank line between arguments
 # No Notes sections
