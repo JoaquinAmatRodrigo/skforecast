@@ -7,5 +7,5 @@ mkdocstrings-python==1.1.0
 jupyter-contrib-nbextensions==0.7.0
 #skforecast
 
-# No blanck line bewteen arguments
+# No blank line between arguments
 # No Notes sections
