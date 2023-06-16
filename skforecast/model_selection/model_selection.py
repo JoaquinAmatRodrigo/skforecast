@@ -228,6 +228,20 @@ def _create_backtesting_folds(
     folds = [[partition if len(partition) > 0 else None 
               for partition in fold] 
              for fold in folds]
+
+    # Create a flag to know whether to train the forecaster
+    if isinstance(refit, bool):
+        fit_forecaster = [refit]*len(folds)
+        fit_forecaster[0] = True
+    else:
+        fit_forecaster = [False]*len(folds)
+        for i in range(0, len(fit_forecaster), refit): 
+            fit_forecaster[i] = True
+    
+    for i in range(len(folds)): 
+        folds[i].append(fit_forecaster[i])
+        if fit_forecaster[i] is False:
+            folds[i][0] = folds[i-1][0]
     
     if verbose:
         print("Information of backtesting process")
@@ -268,7 +282,8 @@ def _create_backtesting_folds(
         folds = [
             [[fold[0][0], fold[0][-1]+1], 
              [fold[1][0], fold[1][-1]+1], 
-             [fold[2][0], fold[2][-1]+1]] 
+             [fold[2][0], fold[2][-1]+1],
+             fold[3]] 
             for fold in folds
         ]
 
@@ -472,11 +487,12 @@ def _backtesting_forecaster_refit(
         exog_train = exog.iloc[train_idx_start:train_idx_end, ] if exog is not None else None
         next_window_exog = exog.iloc[test_idx_start:test_idx_end, ] if exog is not None else None
 
-        forecaster.fit(
-            y                         = y_train, 
-            exog                      = exog_train, 
-            store_in_sample_residuals = store_in_sample_residuals
-        )
+        if fold[3] is True:
+            forecaster.fit(
+                y                         = y_train, 
+                exog                      = exog_train, 
+                store_in_sample_residuals = store_in_sample_residuals
+            )
         steps = len(range(test_idx_start, test_idx_end))
         if interval is None:
             pred = forecaster.predict(steps=steps, exog=next_window_exog)
