@@ -41,7 +41,7 @@ def _backtesting_forecaster_verbose(
     initial_train_size: int,
     folds: int,
     remainder: int,
-    refit: bool=False,
+    refit: Optional[Union[bool, int]]=False,
     fixed_train_size: bool=True
 ) -> None:
     """
@@ -60,8 +60,9 @@ def _backtesting_forecaster_verbose(
         Number of backtesting stages.
     remainder : int
         Number of observations in the last backtesting stage. 
-    refit : bool, default `False`
-        Whether to re-fit the forecaster in each iteration.
+    refit : bool, int, default `False`
+        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
+        the Forecaster will be trained every that number of iterations.
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
 
@@ -121,7 +122,7 @@ def _create_backtesting_folds(
     initial_train_size: Union[int, None],
     test_size: int,
     externally_fitted: bool=False,
-    refit: bool=False,
+    refit: Optional[Union[bool, int]]=False,
     fixed_train_size: bool=True,
     gap: int=0,
     allow_incomplete_fold: bool=True,
@@ -165,8 +166,9 @@ def _create_backtesting_folds(
     externally_fitted : bool, default `False`
         Flag indicating whether the forecaster is already trained. Only used when 
         `initial_train_size` is None and `refit` is False.
-    refit : bool, default `False`
-        Whether to re-fit the forecaster in each iteration.
+    refit : bool, int, default `False`
+        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
+        the Forecaster will be trained every that number of iterations.
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
     gap : int, default `0`
@@ -340,6 +342,7 @@ def _backtesting_forecaster_refit(
     gap: int=0,
     allow_incomplete_fold: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+    refit: Optional[Union[bool, int]]=True,
     interval: Optional[list]=None,
     n_boot: int=500,
     random_state: int=123,
@@ -361,6 +364,9 @@ def _backtesting_forecaster_refit(
     In order to apply backtesting with refit, an initial training set must be
     available, otherwise it would not be possible to increase the training set 
     after each iteration. `initial_train_size` must be provided.
+
+    If parameter `refit` is an integer in `backtesting_forecaster`, the Forecaster 
+    will be trained every that number of iterations.
     
     Parameters
     ----------
@@ -392,6 +398,9 @@ def _backtesting_forecaster_refit(
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
+    refit : bool, int, default `True`
+        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
+        the Forecaster will be trained every that number of iterations.
     interval : list, default `None`
         Confidence of the prediction interval estimated. Sequence of percentiles
         to compute, which must be between 0 and 100 inclusive. For example, 
@@ -443,7 +452,7 @@ def _backtesting_forecaster_refit(
                 test_size             = steps,
                 initial_train_size    = initial_train_size,
                 gap                   = gap,
-                refit                 = True,
+                refit                 = refit,
                 fixed_train_size      = fixed_train_size,
                 allow_incomplete_fold = allow_incomplete_fold,
                 return_all_indexes    = False,
@@ -453,16 +462,17 @@ def _backtesting_forecaster_refit(
     if show_progress:
         folds = tqdm(folds)
 
-    if type(forecaster).__name__ != 'ForecasterAutoregDirect' and len(folds) > 50:
+    n_of_fits = len(folds)/refit
+    if type(forecaster).__name__ != 'ForecasterAutoregDirect' and n_of_fits > 50:
         warnings.warn(
-            (f"The forecaster will be fit {len(folds)} times. This can take substantial"
+            (f"The forecaster will be fit {n_of_fits} times. This can take substantial"
              f" amounts of time. If not feasible, try with `refit = False`.\n"),
             LongTrainingWarning
         )
-    elif type(forecaster).__name__ == 'ForecasterAutoregDirect' and len(folds)*forecaster.steps > 50:
+    elif type(forecaster).__name__ == 'ForecasterAutoregDirect' and n_of_fits*forecaster.steps > 50:
         warnings.warn(
-            (f"The forecaster will be fit {len(folds)*forecaster.steps} times "
-             f"({len(folds)} folds * {forecaster.steps} regressors). This can take "
+            (f"The forecaster will be fit {n_of_fits*forecaster.steps} times "
+             f"({n_of_fits} folds * {forecaster.steps} regressors). This can take "
              f"substantial amounts of time. If not feasible, try with `refit = False`.\n"),
              LongTrainingWarning
         )
@@ -744,7 +754,7 @@ def backtesting_forecaster(
     gap: int=0,
     allow_incomplete_fold: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-    refit: bool=False,
+    refit: Optional[Union[bool, int]]=False,
     interval: Optional[list]=None,
     n_boot: int=500,
     random_state: int=123,
@@ -797,8 +807,9 @@ def backtesting_forecaster(
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
-    refit : bool, default `False`
-        Whether to re-fit the forecaster in each iteration.
+    refit : bool, int, default `False`
+        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
+        the Forecaster will be trained every that number of iterations.
     interval : list, default `None`
         Confidence of the prediction interval estimated. Sequence of percentiles
         to compute, which must be between 0 and 100 inclusive. For example, 
@@ -884,6 +895,7 @@ def backtesting_forecaster(
             gap                   = gap,
             allow_incomplete_fold = allow_incomplete_fold,
             exog                  = exog,
+            refit                 = refit,
             interval              = interval,
             n_boot                = n_boot,
             random_state          = random_state,
@@ -926,7 +938,7 @@ def grid_search_forecaster(
     allow_incomplete_fold: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Optional[list]=None,
-    refit: bool=False,
+    refit: Optional[Union[bool, int]]=False,
     return_best: bool=True,
     n_jobs: int=-1,
     verbose: bool=True,
@@ -972,8 +984,9 @@ def grid_search_forecaster(
     lags_grid : list of int, lists, numpy ndarray or range, default `None`
         Lists of `lags` to try. Only used if forecaster is an instance of 
         `ForecasterAutoreg` or `ForecasterAutoregDirect`.
-    refit : bool, default `False`
-        Whether to re-fit the forecaster in each iteration of backtesting.
+    refit : bool, int, default `False`
+        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
+        the Forecaster will be trained every that number of iterations.
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
     n_jobs : int, default -1
@@ -1033,7 +1046,7 @@ def random_search_forecaster(
     allow_incomplete_fold: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Optional[list]=None,
-    refit: bool=False,
+    refit: Optional[Union[bool, int]]=False,
     n_iter: int=10,
     random_state: int=123,
     return_best: bool=True,
@@ -1081,8 +1094,9 @@ def random_search_forecaster(
     lags_grid : list of int, lists, numpy ndarray or range, default `None`
         Lists of `lags` to try. Only used if forecaster is an instance of 
         `ForecasterAutoreg` or `ForecasterAutoregDirect`.
-    refit : bool, default `False`
-        Whether to re-fit the forecaster in each iteration of backtesting.
+    refit : bool, int, default `False`
+        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
+        the Forecaster will be trained every that number of iterations.
     n_iter : int, default `10`
         Number of parameter settings that are sampled per lags configuration. 
         n_iter trades off runtime vs quality of the solution.
@@ -1147,7 +1161,7 @@ def _evaluate_grid_hyperparameters(
     allow_incomplete_fold: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Optional[list]=None,
-    refit: bool=False,
+    refit: Optional[Union[bool, int]]=False,
     return_best: bool=True,
     n_jobs: int=-1,
     verbose: bool=True,
@@ -1192,8 +1206,9 @@ def _evaluate_grid_hyperparameters(
     lags_grid : list of int, lists, numpy ndarray or range, default `None`
         Lists of `lags` to try. Only used if forecaster is an instance of 
         `ForecasterAutoreg` or `ForecasterAutoregDirect`.
-    refit : bool, default `False`
-        Whether to re-fit the forecaster in each iteration of backtesting.
+    refit : bool, int, default `False`
+        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
+        the Forecaster will be trained every that number of iterations.
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
     n_jobs : int, default -1
@@ -1325,7 +1340,7 @@ def bayesian_search_forecaster(
     allow_incomplete_fold: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Optional[list]=None,
-    refit: bool=False,
+    refit: Optional[Union[bool, int]]=False,
     n_trials: int=10,
     random_state: int=123,
     return_best: bool=True,
@@ -1377,8 +1392,9 @@ def bayesian_search_forecaster(
     lags_grid : list of int, lists, numpy ndarray or range, default `None`
         Lists of `lags` to try. Only used if forecaster is an instance of 
         `ForecasterAutoreg` or `ForecasterAutoregDirect`.
-    refit : bool, default `False`
-        Whether to re-fit the forecaster in each iteration of backtesting.
+    refit : bool, int, default `False`
+        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
+        the Forecaster will be trained every that number of iterations.
     n_trials : int, default `10`
         Number of parameter settings that are sampled in each lag configuration.
     random_state : int, default `123`
@@ -1473,7 +1489,7 @@ def _bayesian_search_optuna(
     allow_incomplete_fold: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Optional[list]=None,
-    refit: bool=False,
+    refit: Optional[Union[bool, int]]=False,
     n_trials: int=10,
     random_state: int=123,
     return_best: bool=True,
@@ -1524,8 +1540,9 @@ def _bayesian_search_optuna(
     lags_grid : list of int, lists, numpy ndarray or range, default `None`
         Lists of `lags` to try. Only used if forecaster is an instance of 
         `ForecasterAutoreg` or `ForecasterAutoregDirect`.
-    refit : bool, default `False`
-        Whether to re-fit the forecaster in each iteration of backtesting.
+    refit : bool, int, default `False`
+        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
+        the Forecaster will be trained every that number of iterations.
     n_trials : int, default `10`
         Number of parameter settings that are sampled in each lag configuration.
     random_state : int, default `123`

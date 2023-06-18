@@ -488,7 +488,7 @@ def backtesting_forecaster_multiseries(
     allow_incomplete_fold: bool=True,
     levels: Optional[Union[str, list]]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-    refit: bool=False,
+    refit: Optional[Union[bool, int]]=False,
     interval: Optional[list]=None,
     n_boot: int=500,
     random_state: int=123,
@@ -544,8 +544,9 @@ def backtesting_forecaster_multiseries(
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
-    refit : bool, default `False`
-        Whether to re-fit the forecaster in each iteration.
+    refit : bool, int, default `False`
+        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
+        the Forecaster will be trained every that number of iterations.
     interval : list, default `None`
         Confidence of the prediction interval estimated. Sequence of percentiles
         to compute, which must be between 0 and 100 inclusive. If `None`, no
@@ -689,7 +690,7 @@ def grid_search_forecaster_multiseries(
     levels: Optional[Union[str, list]]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Optional[list]=None,
-    refit: bool=False,
+    refit: Optional[Union[bool, int]]=False,
     return_best: bool=True,
     n_jobs: int=-1,
     verbose: bool=True,
@@ -740,8 +741,9 @@ def grid_search_forecaster_multiseries(
     lags_grid : list of int, lists, np.narray or range, default `None`
         Lists of `lags` to try. Only used if forecaster is an instance of 
         `ForecasterAutoregMultiSeries` or `ForecasterAutoregMultiVariate`.
-    refit : bool, default `False`
-        Whether to re-fit the forecaster in each iteration of backtesting.
+    refit : bool, int, default `False`
+        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
+        the Forecaster will be trained every that number of iterations.
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
     n_jobs : int, default -1
@@ -805,7 +807,7 @@ def random_search_forecaster_multiseries(
     levels: Optional[Union[str, list]]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Optional[list]=None,
-    refit: bool=False,
+    refit: Optional[Union[bool, int]]=False,
     n_iter: int=10,
     random_state: int=123,
     return_best: bool=True,
@@ -858,8 +860,9 @@ def random_search_forecaster_multiseries(
     lags_grid : list of int, lists, np.narray or range, default `None`
         Lists of `lags` to try. Only used if forecaster is an instance of 
         `ForecasterAutoregMultiSeries` or `ForecasterAutoregMultiVariate`.
-    refit : bool, default `False`
-        Whether to re-fit the forecaster in each iteration of backtesting.
+    refit : bool, int, default `False`
+        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
+        the Forecaster will be trained every that number of iterations.
     n_iter : int, default `10`
         Number of parameter settings that are sampled per lags configuration. 
         n_iter trades off runtime vs quality of the solution.
@@ -929,7 +932,7 @@ def _evaluate_grid_hyperparameters_multiseries(
     levels: Optional[Union[str, list]]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Optional[list]=None,
-    refit: bool=False,
+    refit: Optional[Union[bool, int]]=False,
     return_best: bool=True,
     n_jobs: int=-1,
     verbose: bool=True,
@@ -979,8 +982,9 @@ def _evaluate_grid_hyperparameters_multiseries(
     lags_grid : list of int, lists, np.narray or range, default `None`
         Lists of `lags` to try. Only used if forecaster is an instance of 
         `ForecasterAutoregMultiSeries` or `ForecasterAutoregMultiVariate`.
-    refit : bool, default `False`
-        Whether to re-fit the forecaster in each iteration of backtesting.
+    refit : bool, int, default `False`
+        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
+        the Forecaster will be trained every that number of iterations.
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
     verbose : bool, default `True`
@@ -1143,7 +1147,7 @@ def backtesting_forecaster_multivariate(
     allow_incomplete_fold: bool=True,
     levels: Optional[Union[str, list]]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-    refit: bool=False,
+    refit: Optional[Union[bool, int]]=False,
     interval: Optional[list]=None,
     n_boot: int=500,
     random_state: int=123,
@@ -1201,8 +1205,9 @@ def backtesting_forecaster_multivariate(
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
-    refit : bool, default `False`
-        Whether to re-fit the forecaster in each iteration.
+    refit : bool, int, default `False`
+        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
+        the Forecaster will be trained every that number of iterations.
     interval : list, default `None`
         Confidence of the prediction interval estimated. Sequence of percentiles
         to compute, which must be between 0 and 100 inclusive. If `None`, no
@@ -1279,7 +1284,7 @@ def grid_search_forecaster_multivariate(
     levels: Optional[Union[str, list]]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Optional[list]=None,
-    refit: bool=False,
+    refit: Optional[Union[bool, int]]=False,
     return_best: bool=True,
     n_jobs: int=-1,
     verbose: bool=True,
@@ -1332,8 +1337,9 @@ def grid_search_forecaster_multivariate(
     lags_grid : list of int, lists, np.narray or range, default `None`
         Lists of `lags` to try. Only used if forecaster is an instance of 
         `ForecasterAutoregMultiSeries` or `ForecasterAutoregMultiVariate`.
-    refit : bool, default `False`
-        Whether to re-fit the forecaster in each iteration of backtesting.
+    refit : bool, int, default `False`
+        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
+        the Forecaster will be trained every that number of iterations.
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
     n_jobs : int, default -1
@@ -1395,7 +1401,7 @@ def random_search_forecaster_multivariate(
     levels: Optional[Union[str, list]]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Optional[list]=None,
-    refit: bool=False,
+    refit: Optional[Union[bool, int]]=False,
     n_iter: int=10,
     random_state: int=123,
     return_best: bool=True,
@@ -1450,8 +1456,9 @@ def random_search_forecaster_multivariate(
     lags_grid : list of int, lists, np.narray or range, default `None`
         Lists of `lags` to try. Only used if forecaster is an instance of 
         `ForecasterAutoregMultiSeries` or `ForecasterAutoregMultiVariate`.
-    refit : bool, default `False`
-        Whether to re-fit the forecaster in each iteration of backtesting.
+    refit : bool, int, default `False`
+        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
+        the Forecaster will be trained every that number of iterations.
     n_iter : int, default `10`
         Number of parameter settings that are sampled per lags configuration. 
         n_iter trades off runtime vs quality of the solution.

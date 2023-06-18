@@ -830,3 +830,8 @@ def test_output_backtesting_forecaster_refit_interval_yes_exog_not_allow_remaind
 
     assert expected_metric == approx(metric)
     pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
+
+
+# ******************************************************************************
+# * Refit int is in test_backtesting_forecaster file                           *
+# ******************************************************************************

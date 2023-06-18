@@ -370,7 +370,7 @@ def backtesting_sarimax(
     gap: int=0,
     allow_incomplete_fold: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-    refit: bool=False,
+    refit: Optional[Union[bool, int]]=False,
     alpha: Optional[float]=None,
     interval: Optional[list]=None,
     n_jobs: int=-1,
@@ -416,8 +416,9 @@ def backtesting_sarimax(
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
-    refit : bool, default `False`
-        Whether to re-fit the forecaster in each iteration.
+    refit : bool, int, default `False`
+        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
+        the Forecaster will be trained every that number of iterations.
     alpha : float, default `0.05`
         The confidence intervals for the forecasts are (1 - alpha) %.
         If both, `alpha` and `interval` are provided, `alpha` will be used.
@@ -526,7 +527,7 @@ def grid_search_sarimax(
     gap: int=0,
     allow_incomplete_fold: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-    refit: bool=False,
+    refit: Optional[Union[bool, int]]=False,
     return_best: bool=True,
     n_jobs: int=-1,
     verbose: bool=True,
@@ -570,8 +571,9 @@ def grid_search_sarimax(
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
-    refit : bool, default `False`
-        Whether to re-fit the forecaster in each iteration of backtesting.
+    refit : bool, int, default `False`
+        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
+        the Forecaster will be trained every that number of iterations.
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
     n_jobs : int, default -1
@@ -628,7 +630,7 @@ def random_search_sarimax(
     gap: int=0,
     allow_incomplete_fold: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-    refit: bool=False,
+    refit: Optional[Union[bool, int]]=False,
     n_iter: int=10,
     random_state: int=123,
     return_best: bool=True,
@@ -674,8 +676,9 @@ def random_search_sarimax(
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
-    refit : bool, default `False`
-        Whether to re-fit the forecaster in each iteration of backtesting.
+    refit : bool, int, default `False`
+        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
+        the Forecaster will be trained every that number of iterations.
     n_iter : int, default `10`
         Number of parameter settings that are sampled. 
         n_iter trades off runtime vs quality of the solution.
@@ -737,7 +740,7 @@ def _evaluate_grid_hyperparameters_sarimax(
     gap: int=0,
     allow_incomplete_fold: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-    refit: bool=False,
+    refit: Optional[Union[bool, int]]=False,
     return_best: bool=True,
     n_jobs: int=-1,
     verbose: bool=True,
@@ -780,8 +783,9 @@ def _evaluate_grid_hyperparameters_sarimax(
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
-    refit : bool, default `False`
-        Whether to re-fit the forecaster in each iteration of backtesting.
+    refit : bool, int, default `False`
+        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
+        the Forecaster will be trained every that number of iterations.
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
     n_jobs : int, default -1
