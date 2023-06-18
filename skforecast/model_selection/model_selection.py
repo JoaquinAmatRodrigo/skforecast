@@ -232,7 +232,8 @@ def _create_backtesting_folds(
     # Create a flag to know whether to train the forecaster
     if isinstance(refit, bool):
         fit_forecaster = [refit]*len(folds)
-        fit_forecaster[0] = True
+        if not externally_fitted:
+            fit_forecaster[0] = True
     else:
         fit_forecaster = [False]*len(folds)
         for i in range(0, len(fit_forecaster), refit): 
