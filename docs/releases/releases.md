@@ -5,9 +5,11 @@ All significant changes to this project are documented in this release file.
 
 ## [0.9.0] - [2023-06-XX]
 
-The main changes in this release are 
+The main changes in this release are:
 
 + All backtesting and grid search functions have been extended to include the `n_jobs` argument, allowing multi-threaded parallelization for improved performance.
+
++ Argument `refit` now can be also an `integer` in all backtesting dependent functions in modules `model_selection`, `model_selection_multiseries` and `model_selection_sarimax`. This allows the Forecaster to be trained every this number of iterations.
 
 + `ForecasterAutoregMultiSeries` and `ForecasterAutoregMultiSeriesCustom` can be trained using series of different lengths. This means that the model can handle datasets with different numbers of data points in each series.
 
@@ -15,13 +17,19 @@ The main changes in this release are
 
 + Argument `n_jobs=-1` to all backtesting dependent functions in modules `model_selection`, `model_selection_multiseries` and `model_selection_sarimax` to allow  multi-threaded parallelization.
 
++ Argument `refit` now can be also an `integer` in all backtesting dependent functions in modules `model_selection`, `model_selection_multiseries` and `model_selection_sarimax`. This allows the Forecaster to be trained every this number of iterations.
+
 + `ForecasterAutoregMultiSeries` and `ForecasterAutoregMultiSeriesCustom` allow to use series of different lengths for training.
 
 + Added `show_progress` to grid search functions.
 
 **Changed**
 
-+ Remove `get_feature_importance()` in favor of `get_feature_importances()` in all Forecasters, (deprecated since 0.8.0).
++ Remove `get_feature_importance` in favor of `get_feature_importances` in all Forecasters, (deprecated since 0.8.0).
+
++ The `model_selection._create_backtesting_folds` function now also returns whether or not to train the forecaster.
+
++ The model selection functions `_backtesting_forecaster_refit` and `_backtesting_forecaster_no_refit` have been unified in `_backtesting_forecaster`.
 
 + `utils.preprocess_y` allows a pandas DataFrame as input.
 
@@ -62,6 +70,8 @@ The main changes in this release are
 + Added function `utils.cast_exog_dtypes` to cast data types of the exogenous variables using a dictionary as a mapping.
 
 + Added function `utils.check_select_fit_kwargs` to check if the argument `fit_kwargs` is a dictionary and select only the keys used by the `fit` method of the regressor.
+
++ Added function `model_selection._create_backtesting_folds` to provide train/test indices (position) for backtesting functions.
 
 + Added argument `gap` to functions in `model_selection`, `model_selection_multiseries` and `model_selection_sarimax` to omit observations between training and prediction.
 
