@@ -72,14 +72,14 @@ def test_create_backtesting_folds_no_refit_no_gap_no_remainder(capfd, return_all
                          ids = lambda argument : f'{argument}' )
 def test_create_backtesting_folds_no_refit_no_gap_allow_incomplete_fold_False(capfd, return_all_indexes, expected):
     """
-    Test _create_backtesting_folds output when refit is False, gap=0, 
+    Test _create_backtesting_folds output when refit is 0 (False), gap=0, 
     remainder and allow_incomplete_fold=False.
     """
     y = pd.Series(np.arange(100))
     y.index = pd.date_range(start='2022-01-01', periods=100, freq='D')
     initial_train_size = 65
     test_size = 10
-    refit = False
+    refit = 0
     allow_incomplete_fold = False
 
     folds = _create_backtesting_folds(
@@ -325,14 +325,14 @@ def test_create_backtesting_folds_refit_no_fixed_no_gap_no_remainder(capfd, retu
                          ids = lambda argument : f'{argument}' )
 def test_create_backtesting_folds_refit_fixed_train_size_no_gap_no_remainder(capfd, return_all_indexes, expected):
     """
-    Test _create_backtesting_folds output when refit is True, fixed_train_size is 
-    True, gap=0 and not remainder.
+    Test _create_backtesting_folds output when refit is 1 (True), fixed_train_size 
+    is True, gap=0 and not remainder.
     """
     y = pd.Series(np.arange(100))
     y.index = pd.date_range(start='2022-01-01', periods=100, freq='D')
     initial_train_size = 70
     test_size = 10
-    refit = True
+    refit = 1
     fixed_train_size = True
 
     folds = _create_backtesting_folds(
