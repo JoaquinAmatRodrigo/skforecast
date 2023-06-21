@@ -119,6 +119,7 @@ def _backtesting_forecaster_verbose(
 
 def _create_backtesting_folds(
     data: Union[pd.Series, pd.DataFrame],
+    window_size: int,
     initial_train_size: Union[int, None],
     test_size: int,
     externally_fitted: bool=False,
@@ -137,8 +138,8 @@ def _create_backtesting_folds(
     are observed at fixed time intervals, in train/test sets. In each split, test
     indices must be higher than before.
 
-    Three arrays are returned for each fold with the position of train, test
-    including the gap, and test excluding the gap. The gap is the number of
+    Four arrays are returned for each fold with the position of train, window size, 
+    test including the gap, and test excluding the gap. The gap is the number of
     samples to exclude from the end of each train set before the test set. The
     test excluding the gap is the one that must be used to make evaluate the
     model. The test including the gap is provided for convenience.
@@ -147,20 +148,24 @@ def _create_backtesting_folds(
     positional indexes of the samples in the time series. For example, if the   
     original time series is `y = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19]`, the
     returned indexes for the first fold if  `test_size = 4`, `gap = 1` and 
-    `initial_train_size = 2` are: `[[0, 1], [2, 3, 4, 5], [3, 4, 5]]]`. This means
-    that the first fold is using the samples with positional indexes 0 and 1 in
-    the time series as training set, and the samples with positional indexes 2,
-    3, 4 and 5 as test set, but only the samples with positional indexes 3, 4 and
-    5 should be used to evaluate the model since `gap = 1`. The second fold would
-    be `[[0, 1, 2, 3], [4, 5, 6, 7], [5, 6, 7]]`, and so on.
+    `initial_train_size = 2` with `window_size = 2` are: `[[0, 1], [0, 1], 
+    [2, 3, 4, 5], [3, 4, 5]]]`. This means that the first fold is using the samples 
+    with positional indexes 0 and 1 in the time series as training set, the samples 
+    with positional indexes 0 and 1 as last window, and the samples with positional 
+    indexes 2, 3, 4 and 5 as test set, but only the samples with positional indexes 
+    3, 4 and 5 should be used to evaluate the model since `gap = 1`. The second fold 
+    would be `[[0, 1, 2, 3], [2, 3], [4, 5, 6, 7], [5, 6, 7]]`, and so on.
 
-    Each fold also provides information as to whether the Forecaster needs to 
-    be trained or not.
+    Each fold also provides information on whether the Forecaster needs to be 
+    trained, `True` or `False`. The first fold flag will be always `False` since 
+    the first fit is done inside _backtesting_forecaster function.
     
     Parameters
     ----------
     data : pandas Series, pandas DataFrame
         Time series values.
+    window_size : int
+        Size of the window needed to create the predictors.
     initial_train_size : int, None
         Size of the training set in the first fold. If `None` or 0, the initial
         fold does not include a training set.
@@ -189,8 +194,9 @@ def _create_backtesting_folds(
     Returns
     -------
     folds : list
-        List containing the indices (position) of `y` for training, test including
-        the gap, test excluding the gap for each fold, and whether fir the Forecaster.
+        List containing the `y` indices (position) for training, last window, test 
+        including the gap and test excluding the gap for each fold, and whether to
+        fit the Forecaster.
     
     """
     
@@ -202,8 +208,8 @@ def _create_backtesting_folds(
     while initial_train_size + (i * test_size) + gap < len(data):
 
         if refit:
-            # If fixed_train_size the train size doesn't increase but moves by 
-            # `test_size` positions in each iteration. If False, the train size
+            # If `fixed_train_size` the train size doesn't increase but moves by 
+            # `test_size` positions in each iteration. If `False`, the train size
             # increases by `test_size` in each iteration.
             train_idx_start = i * (test_size) if fixed_train_size else 0
             train_idx_end = initial_train_size + i * (test_size)
@@ -213,11 +219,13 @@ def _create_backtesting_folds(
             train_idx_start = 0
             train_idx_end = initial_train_size
             test_idx_start = initial_train_size + i * (test_size)
-
+            
+        last_window_start = test_idx_start - window_size 
         test_idx_end = test_idx_start + gap + test_size
     
         partitions = [
             idx[train_idx_start : train_idx_end],
+            idx[last_window_start : test_idx_start],
             idx[test_idx_start : test_idx_end],
             idx[test_idx_start + gap : test_idx_end]
         ]
@@ -225,11 +233,11 @@ def _create_backtesting_folds(
         i += 1
 
     if not allow_incomplete_fold:
-        if len(folds[-1][2]) < test_size:
+        if len(folds[-1][3]) < test_size:
             folds = folds[:-1]
             last_fold_excluded = True
 
-    # Replace partitions inside folds with length 0 with None
+    # Replace partitions inside folds with length 0 with `None`
     folds = [[partition if len(partition) > 0 else None 
               for partition in fold] 
              for fold in folds]
@@ -240,8 +248,7 @@ def _create_backtesting_folds(
         
     if isinstance(refit, bool):
         fit_forecaster = [refit]*len(folds)
-        if not externally_fitted:
-            fit_forecaster[0] = True
+        fit_forecaster[0] = True
     else:
         fit_forecaster = [False]*len(folds)
         for i in range(0, len(fit_forecaster), refit): 
@@ -251,12 +258,16 @@ def _create_backtesting_folds(
         folds[i].append(fit_forecaster[i])
         if fit_forecaster[i] is False:
             folds[i][0] = folds[i-1][0]
+
+    # This is done to allow parallelization when `refit` is `False`. The initial 
+    # Forecaster fit is outside the auxiliary function.
+    folds[0][4] = False
     
     if verbose:
         print("Information of backtesting process")
         print("----------------------------------")
         if externally_fitted:
-            print(f"An already trained forecaster is to be used. Window size: {initial_train_size}")
+            print(f"An already trained forecaster is to be used. Window size: {window_size}")
         else:
             print(f"Number of observations used for initial training: {initial_train_size}")
         print(f"Number of observations used for backtesting: {len(data) - initial_train_size}")
@@ -265,17 +276,17 @@ def _create_backtesting_folds(
         print(f"    Number of steps to exclude from the end of each train set before test (gap): {gap}")
         if last_fold_excluded:
             print("    Last fold has been excluded because it was incomplete.")
-        if len(folds[-1][2]) < test_size:
-            print(f"    Last fold only includes {len(folds[-1][2])} observations.")
+        if len(folds[-1][3]) < test_size:
+            print(f"    Last fold only includes {len(folds[-1][3])} observations.")
         print("")
 
         for i, fold in enumerate(folds):
             training_start    = data.index[fold[0][0]] if fold[0] is not None else None
             training_end      = data.index[fold[0][-1]] if fold[0] is not None else None
             training_length   = len(fold[0]) if fold[0] is not None else 0
-            validation_start  = data.index[fold[2][0]]
-            validation_end    = data.index[fold[2][-1]]
-            validation_length = len(fold[2])
+            validation_start  = data.index[fold[3][0]]
+            validation_end    = data.index[fold[3][-1]]
+            validation_length = len(fold[3])
             print(f"Fold: {i}")
             if not externally_fitted:
                 print(
@@ -292,12 +303,13 @@ def _create_backtesting_folds(
             [[fold[0][0], fold[0][-1]+1], 
              [fold[1][0], fold[1][-1]+1], 
              [fold[2][0], fold[2][-1]+1],
-             fold[3]] 
+             [fold[3][0], fold[3][-1]+1],
+             fold[4]] 
             for fold in folds
         ]
 
     return folds
-        
+
         
 def _get_metric(
     metric: str
@@ -457,7 +469,7 @@ def _backtesting_forecaster(
     forecaster = deepcopy(forecaster)
     n_jobs = n_jobs if n_jobs > 0 else cpu_count()
 
-    if refit != True:
+    if isinstance(refit, int):
         n_jobs = 1
 
     if not isinstance(metric, list):
@@ -465,17 +477,29 @@ def _backtesting_forecaster(
     else:
         metrics = [_get_metric(metric=m) if isinstance(m, str) else m for m in metric]
 
-    window_size = forecaster.window_size
+    store_in_sample_residuals = False if interval is None else True
+
     if initial_train_size is not None:
+        # First model training, this is done to allow parallelization when `refit` 
+        # is `False`. The initial Forecaster fit is outside the auxiliary function.
+        exog_train = exog.iloc[:initial_train_size, ] if exog is not None else None
+        forecaster.fit(
+            y                         = y.iloc[:initial_train_size, ],
+            exog                      = exog_train,
+            store_in_sample_residuals = store_in_sample_residuals
+        )
+        window_size = forecaster.window_size
         externally_fitted = False
     else:
         # Although not used for training, first observations are needed to create
         # the initial predictors
+        window_size = forecaster.window_size
         initial_train_size = window_size
         externally_fitted = True
 
     folds = _create_backtesting_folds(
                 data                  = y,
+                window_size           = window_size,
                 initial_train_size    = initial_train_size,
                 test_size             = steps,
                 externally_fitted     = externally_fitted,
@@ -505,25 +529,23 @@ def _backtesting_forecaster(
              LongTrainingWarning
         )
 
-    store_in_sample_residuals = False if interval is None else True
-
     def _fit_predict_forecaster(y, exog, forecaster, interval, fold):
         """
         Fit the forecaster and predict `steps` ahead. This is an auxiliary 
         function used to parallelize the backtesting_forecaster function.
         """
 
-        train_idx_start = fold[0][0]
-        train_idx_end   = fold[0][1]
-        test_idx_start  = fold[1][0]
-        test_idx_end    = fold[1][1]
+        train_idx_start   = fold[0][0]
+        train_idx_end     = fold[0][1]
+        last_window_start = fold[1][0]
+        last_window_end   = fold[1][1]
+        test_idx_start    = fold[2][0]
+        test_idx_end      = fold[2][1]
 
-        if fold[3] is False:
+        if fold[4] is False:
             # When the model is not fitted, last_window and next_window_exog must 
             # be updated to include the data needed to make predictions.
-            last_window_end   = test_idx_start
-            last_window_start = last_window_end - window_size 
-            last_window_y     = y.iloc[last_window_start:last_window_end]
+            last_window_y = y.iloc[last_window_start:last_window_end]
         else:
             # The model is fitted before making predictions. If `fixed_train_size`  
             # the train size doesn't increase but moves by `steps` in each iteration. 
@@ -556,6 +578,7 @@ def _backtesting_forecaster(
                        random_state        = random_state,
                        in_sample_residuals = in_sample_residuals
                    )
+        
         pred = pred.iloc[gap:, ]
 
         return pred
@@ -564,7 +587,7 @@ def _backtesting_forecaster(
         Parallel(n_jobs=n_jobs)
         (delayed(_fit_predict_forecaster)
         (y=y, exog=exog, forecaster=forecaster, interval=interval, fold=fold)
-        for fold in folds)
+         for fold in folds)
     )
     
     backtest_predictions = pd.concat(backtest_predictions)
