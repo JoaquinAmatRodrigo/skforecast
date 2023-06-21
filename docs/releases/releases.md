@@ -27,7 +27,7 @@ The main changes in this release are:
 
 + Remove `get_feature_importance` in favor of `get_feature_importances` in all Forecasters, (deprecated since 0.8.0).
 
-+ The `model_selection._create_backtesting_folds` function now also returns whether or not to train the forecaster.
++ The `model_selection._create_backtesting_folds` function now also returns the last window indices and whether or not to train the forecaster.
 
 + The model selection functions `_backtesting_forecaster_refit` and `_backtesting_forecaster_no_refit` have been unified in `_backtesting_forecaster`.
 
