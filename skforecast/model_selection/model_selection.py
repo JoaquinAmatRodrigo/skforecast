@@ -219,7 +219,7 @@ def _create_backtesting_folds(
             train_idx_start = 0
             train_idx_end = initial_train_size
             test_idx_start = initial_train_size + i * (test_size)
-            
+        
         last_window_start = test_idx_start - window_size 
         test_idx_end = test_idx_start + gap + test_size
     
@@ -514,20 +514,21 @@ def _backtesting_forecaster(
     if show_progress:
         folds = tqdm(folds)
 
-    n_of_fits = 1 if refit == False else np.floor(len(folds)/refit)
-    if type(forecaster).__name__ != 'ForecasterAutoregDirect' and n_of_fits > 50:
-        warnings.warn(
-            (f"The forecaster will be fit {n_of_fits} times. This can take substantial"
-             f" amounts of time. If not feasible, try with `refit = False`.\n"),
-            LongTrainingWarning
-        )
-    elif type(forecaster).__name__ == 'ForecasterAutoregDirect' and n_of_fits*forecaster.steps > 50:
-        warnings.warn(
-            (f"The forecaster will be fit {n_of_fits*forecaster.steps} times "
-             f"({n_of_fits} folds * {forecaster.steps} regressors). This can take "
-             f"substantial amounts of time. If not feasible, try with `refit = False`.\n"),
-             LongTrainingWarning
-        )
+    if refit:
+        n_of_fits = int(len(folds)/refit)
+        if type(forecaster).__name__ != 'ForecasterAutoregDirect' and n_of_fits > 50:
+            warnings.warn(
+                (f"The forecaster will be fit {n_of_fits} times. This can take substantial"
+                f" amounts of time. If not feasible, try with `refit = False`.\n"),
+                LongTrainingWarning
+            )
+        elif type(forecaster).__name__ == 'ForecasterAutoregDirect' and n_of_fits*forecaster.steps > 50:
+            warnings.warn(
+                (f"The forecaster will be fit {n_of_fits*forecaster.steps} times "
+                f"({n_of_fits} folds * {forecaster.steps} regressors). This can take "
+                f"substantial amounts of time. If not feasible, try with `refit = False`.\n"),
+                LongTrainingWarning
+            )
 
     def _fit_predict_forecaster(y, exog, forecaster, interval, fold):
         """
@@ -562,6 +563,12 @@ def _backtesting_forecaster(
         next_window_exog = exog.iloc[test_idx_start:test_idx_end, ] if exog is not None else None
 
         steps = len(range(test_idx_start, test_idx_end))
+        if type(forecaster).__name__ == 'ForecasterAutoregDirect' and gap > 0:
+            # Select only the steps that need to be predicted if gap > 0
+            test_idx_start = fold[3][0]
+            test_idx_end   = fold[3][1]
+            steps = list(np.arange(len(range(test_idx_start, test_idx_end))) + gap + 1)
+
         if interval is None:
             pred = forecaster.predict(
                        steps       = steps,
@@ -579,7 +586,8 @@ def _backtesting_forecaster(
                        in_sample_residuals = in_sample_residuals
                    )
         
-        pred = pred.iloc[gap:, ]
+        if type(forecaster).__name__ != 'ForecasterAutoregDirect':
+            pred = pred.iloc[gap:, ]
 
         return pred
 
