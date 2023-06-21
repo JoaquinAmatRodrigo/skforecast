@@ -1,0 +1,49 @@
+regressor,method,elapsed_time,parallel
+HistGradientBoostingRegressor(random_state=77),backtest_no_refit,1.5967955589294434,False
+HistGradientBoostingRegressor(random_state=77),backtest_no_refit,0.8679533004760742,True
+HistGradientBoostingRegressor(random_state=77),backtest_refit,12.101030349731445,False
+HistGradientBoostingRegressor(random_state=77),backtest_refit,2.1445977687835693,True
+HistGradientBoostingRegressor(random_state=77),create_train_X_y,0.0054759979248046875,False
+HistGradientBoostingRegressor(random_state=77),fit,0.701714277267456,False
+HistGradientBoostingRegressor(random_state=77),gridSearch_no_refit,21.350188970565796,False
+HistGradientBoostingRegressor(random_state=77),gridSearch_no_refit,11.435353517532349,True
+"LGBMRegressor(n_jobs=1, random_state=77)",backtest_no_refit,0.32776498794555664,False
+"LGBMRegressor(n_jobs=1, random_state=77)",backtest_no_refit,0.2976980209350586,True
+"LGBMRegressor(n_jobs=1, random_state=77)",backtest_refit,7.169870853424072,False
+"LGBMRegressor(n_jobs=1, random_state=77)",backtest_refit,1.4008617401123047,True
+"LGBMRegressor(n_jobs=1, random_state=77)",create_train_X_y,0.005619049072265625,False
+"LGBMRegressor(n_jobs=1, random_state=77)",fit,0.5036771297454834,False
+"LGBMRegressor(n_jobs=1, random_state=77)",gridSearch_no_refit,3.805314064025879,False
+"LGBMRegressor(n_jobs=1, random_state=77)",gridSearch_no_refit,3.4692862033843994,True
+LGBMRegressor(random_state=77),backtest_no_refit,0.3295111656188965,False
+LGBMRegressor(random_state=77),backtest_no_refit,0.29897427558898926,True
+LGBMRegressor(random_state=77),backtest_refit,7.213289022445679,False
+LGBMRegressor(random_state=77),backtest_refit,1.2537384033203125,True
+LGBMRegressor(random_state=77),create_train_X_y,0.00563359260559082,False
+LGBMRegressor(random_state=77),fit,0.505629301071167,False
+LGBMRegressor(random_state=77),gridSearch_no_refit,3.8162076473236084,False
+LGBMRegressor(random_state=77),gridSearch_no_refit,3.493375062942505,True
+"RandomForestRegressor(n_jobs=-1, random_state=77)",backtest_no_refit,11.591224431991577,False
+"RandomForestRegressor(n_jobs=-1, random_state=77)",backtest_no_refit,1.9775283336639404,True
+"RandomForestRegressor(n_jobs=-1, random_state=77)",backtest_refit,17.506164073944092,False
+"RandomForestRegressor(n_jobs=-1, random_state=77)",backtest_refit,6.367720127105713,True
+"RandomForestRegressor(n_jobs=-1, random_state=77)",create_train_X_y,0.0071659088134765625,False
+"RandomForestRegressor(n_jobs=-1, random_state=77)",fit,0.5550973415374756,False
+"RandomForestRegressor(n_jobs=-1, random_state=77)",gridSearch_no_refit,161.5840883255005,False
+"RandomForestRegressor(n_jobs=-1, random_state=77)",gridSearch_no_refit,26.995007514953613,True
+"RandomForestRegressor(n_jobs=1, random_state=77)",backtest_no_refit,6.01313328742981,False
+"RandomForestRegressor(n_jobs=1, random_state=77)",backtest_no_refit,2.5196101665496826,True
+"RandomForestRegressor(n_jobs=1, random_state=77)",backtest_refit,60.95852279663086,False
+"RandomForestRegressor(n_jobs=1, random_state=77)",backtest_refit,7.281936168670654,True
+"RandomForestRegressor(n_jobs=1, random_state=77)",create_train_X_y,0.005576372146606445,False
+"RandomForestRegressor(n_jobs=1, random_state=77)",fit,4.042436122894287,False
+"RandomForestRegressor(n_jobs=1, random_state=77)",gridSearch_no_refit,82.83883905410767,False
+"RandomForestRegressor(n_jobs=1, random_state=77)",gridSearch_no_refit,29.37276339530945,True
+Ridge(random_state=77),backtest_no_refit,0.1670210361480713,False
+Ridge(random_state=77),backtest_no_refit,0.1553497314453125,True
+Ridge(random_state=77),backtest_refit,0.4068717956542969,False
+Ridge(random_state=77),backtest_refit,2.0842084884643555,True
+Ridge(random_state=77),create_train_X_y,0.006496906280517578,False
+Ridge(random_state=77),fit,0.013893842697143555,False
+Ridge(random_state=77),gridSearch_no_refit,1.4289836883544922,False
+Ridge(random_state=77),gridSearch_no_refit,1.3392701148986816,True
