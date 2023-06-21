@@ -37,6 +37,8 @@ The main changes in this release are:
 
 **Fixed**
 
++ Ensure reproducibility of Direct Forecasters when using `predict_bootstrapping` with a `list` of steps.
+
 
 ## [0.8.1] - [2023-05-27]
 
