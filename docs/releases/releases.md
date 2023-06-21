@@ -9,7 +9,7 @@ The main changes in this release are:
 
 + All backtesting and grid search functions have been extended to include the `n_jobs` argument, allowing multi-threaded parallelization for improved performance.
 
-+ Argument `refit` now can be also an `integer` in all backtesting dependent functions in modules `model_selection`, `model_selection_multiseries` and `model_selection_sarimax`. This allows the Forecaster to be trained every this number of iterations.
++ Argument `refit` now can be also an `integer` in all backtesting dependent functions in modules `model_selection` and `model_selection_multiseries`. This allows the Forecaster to be trained every this number of iterations.
 
 + `ForecasterAutoregMultiSeries` and `ForecasterAutoregMultiSeriesCustom` can be trained using series of different lengths. This means that the model can handle datasets with different numbers of data points in each series.
 
@@ -17,7 +17,7 @@ The main changes in this release are:
 
 + Argument `n_jobs=-1` to all backtesting dependent functions in modules `model_selection`, `model_selection_multiseries` and `model_selection_sarimax` to allow  multi-threaded parallelization.
 
-+ Argument `refit` now can be also an `integer` in all backtesting dependent functions in modules `model_selection`, `model_selection_multiseries` and `model_selection_sarimax`. This allows the Forecaster to be trained every this number of iterations.
++ Argument `refit` now can be also an `integer` in all backtesting dependent functions in modules `model_selection` and `model_selection_multiseries`. This allows the Forecaster to be trained every this number of iterations.
 
 + `ForecasterAutoregMultiSeries` and `ForecasterAutoregMultiSeriesCustom` allow to use series of different lengths for training.
 
@@ -29,7 +29,9 @@ The main changes in this release are:
 
 + The `model_selection._create_backtesting_folds` function now also returns the last window indices and whether or not to train the forecaster.
 
-+ The model selection functions `_backtesting_forecaster_refit` and `_backtesting_forecaster_no_refit` have been unified in `_backtesting_forecaster`.
++ The `model_selection` functions `_backtesting_forecaster_refit` and `_backtesting_forecaster_no_refit` have been unified in `_backtesting_forecaster`.
+
++ The `model_selection_multiseries` functions `_backtesting_forecaster_multiseries_refit` and `_backtesting_forecaster_multiseries_no_refit` have been unified in `_backtesting_forecaster_multiseries`.
 
 + `utils.preprocess_y` allows a pandas DataFrame as input.
 
