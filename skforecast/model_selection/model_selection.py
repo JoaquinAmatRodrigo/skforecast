@@ -519,14 +519,14 @@ def _backtesting_forecaster(
         if type(forecaster).__name__ != 'ForecasterAutoregDirect' and n_of_fits > 50:
             warnings.warn(
                 (f"The forecaster will be fit {n_of_fits} times. This can take substantial"
-                f" amounts of time. If not feasible, try with `refit = False`.\n"),
+                 f" amounts of time. If not feasible, try with `refit = False`.\n"),
                 LongTrainingWarning
             )
         elif type(forecaster).__name__ == 'ForecasterAutoregDirect' and n_of_fits*forecaster.steps > 50:
             warnings.warn(
                 (f"The forecaster will be fit {n_of_fits*forecaster.steps} times "
-                f"({n_of_fits} folds * {forecaster.steps} regressors). This can take "
-                f"substantial amounts of time. If not feasible, try with `refit = False`.\n"),
+                 f"({n_of_fits} folds * {forecaster.steps} regressors). This can take "
+                 f"substantial amounts of time. If not feasible, try with `refit = False`.\n"),
                 LongTrainingWarning
             )
 
@@ -586,7 +586,7 @@ def _backtesting_forecaster(
                        in_sample_residuals = in_sample_residuals
                    )
         
-        if type(forecaster).__name__ != 'ForecasterAutoregDirect':
+        if type(forecaster).__name__ != 'ForecasterAutoregDirect' and gap > 0:
             pred = pred.iloc[gap:, ]
 
         return pred
