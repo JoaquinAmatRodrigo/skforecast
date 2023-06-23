@@ -133,6 +133,7 @@ def _backtesting_sarimax_refit(
     
     folds = _create_backtesting_folds(
                 data                  = y,
+                window_size           = forecaster.window_size,
                 test_size             = steps,
                 initial_train_size    = initial_train_size,
                 gap                   = gap,
@@ -165,8 +166,8 @@ def _backtesting_sarimax_refit(
         # iteration.
         train_idx_start = fold[0][0]
         train_idx_end   = fold[0][1]
-        test_idx_start  = fold[1][0]
-        test_idx_end    = fold[1][1]
+        test_idx_start  = fold[2][0]
+        test_idx_end    = fold[2][1]
         
         y_train = y.iloc[train_idx_start:train_idx_end, ]
         exog_train = exog.iloc[train_idx_start:train_idx_end, ] if exog is not None else None
