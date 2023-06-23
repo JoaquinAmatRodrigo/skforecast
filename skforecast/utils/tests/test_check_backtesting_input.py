@@ -530,10 +530,41 @@ def test_check_backtesting_input_ValueError_when_initial_train_size_None_and_ref
             verbose               = False,
             show_progress         = False
         )
+        
+
+@pytest.mark.parametrize("refit", 
+                         ['not_bool_int', -1, 1.5], 
+                         ids = lambda value : f'refit: {value}' )
+def test_check_backtesting_input_TypeError_when_refit_not_bool_or_int(refit):
+    """
+    Test TypeError is raised in check_backtesting_input when `refit` is not a 
+    boolean or a integer greater than 0.
+    """
+    forecaster = ForecasterAutoreg(
+                    regressor = Ridge(random_state=123),
+                    lags      = 2
+                 )
+    
+    err_msg = re.escape(f"`refit` must be a boolean or an integer greater than 0. Got {refit}.")
+    with pytest.raises(TypeError, match = err_msg):
+        check_backtesting_input(
+            forecaster            = forecaster,
+            steps                 = 3,
+            metric                = 'mean_absolute_error',
+            y                     = y,
+            series                = series,
+            initial_train_size    = len(y[:-12]),
+            refit                 = refit,
+            gap                   = 0,
+            interval              = None,
+            alpha                 = None,
+            n_boot                = 500,
+            random_state          = 123,
+        )
 
 
 @pytest.mark.parametrize("boolean_argument", 
-                         ['fixed_train_size', 'allow_incomplete_fold', 'refit',
+                         ['fixed_train_size', 'allow_incomplete_fold', 
                           'in_sample_residuals', 'verbose', 'show_progress'], 
                          ids = lambda argument : f'{argument}' )
 def test_check_backtesting_input_TypeError_when_boolean_arguments_not_bool(boolean_argument):
@@ -548,7 +579,6 @@ def test_check_backtesting_input_TypeError_when_boolean_arguments_not_bool(boole
     
     boolean_arguments = {'fixed_train_size': False,
                          'allow_incomplete_fold': False,
-                         'refit': False,
                          'in_sample_residuals': False,
                          'verbose': False,
                          'show_progress': False}
@@ -563,6 +593,7 @@ def test_check_backtesting_input_TypeError_when_boolean_arguments_not_bool(boole
             y                     = y,
             series                = series,
             initial_train_size    = len(y[:-12]),
+            refit                 = False,
             gap                   = 0,
             interval              = None,
             alpha                 = None,

@@ -24,9 +24,9 @@ def test_predict_bootstrapping_ValueError_when_not_in_sample_residuals_for_some_
     forecaster.in_sample_residuals = {2: np.array([1, 2, 3])}
 
     err_msg = re.escape(
-                (f'Not `forecaster.in_sample_residuals` for steps: '
-                 f'{set([1, 2]) - set(forecaster.in_sample_residuals.keys())}.')
-                )
+                (f"Not `forecaster.in_sample_residuals` for steps: "
+                 f"{set([1, 2]) - set(forecaster.in_sample_residuals.keys())}.")
+              )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.predict_bootstrapping(steps=None, in_sample_residuals=True)
 
@@ -40,10 +40,10 @@ def test_predict_bootstrapping_ValueError_when_out_sample_residuals_is_None():
     forecaster.fit(y=pd.Series(np.arange(10)))
 
     err_msg = re.escape(
-                ('`forecaster.out_sample_residuals` is `None`. Use '
-                 '`in_sample_residuals=True` or method `set_out_sample_residuals()` '
-                 'before `predict_interval()`, `predict_bootstrapping()` or '
-                 '`predict_dist()`.')
+                ("`forecaster.out_sample_residuals` is `None`. Use "
+                 "`in_sample_residuals=True` or method `set_out_sample_residuals()` "
+                 "before `predict_interval()`, `predict_bootstrapping()` or "
+                 "`predict_dist()`.")
               )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.predict_bootstrapping(steps=1, in_sample_residuals=False)
@@ -61,9 +61,9 @@ def test_predict_bootstrapping_ValueError_when_not_out_sample_residuals_for_all_
     forecaster.out_sample_residuals = residuals
 
     err_msg = re.escape(
-                    (f'Not `forecaster.out_sample_residuals` for steps: '
-                     f'{set([1, 2]) - set(forecaster.out_sample_residuals.keys())}. '
-                     f'Use method `set_out_sample_residuals()`.')
+                    (f"Not `forecaster.out_sample_residuals` for steps: "
+                     f"{set([1, 2]) - set(forecaster.out_sample_residuals.keys())}. "
+                     f"Use method `set_out_sample_residuals()`.")
                 )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.predict_bootstrapping(steps=[1, 2], in_sample_residuals=False)
@@ -81,8 +81,8 @@ def test_predict_bootstrapping_ValueError_when_step_out_sample_residuals_value_i
     forecaster.set_out_sample_residuals(residuals = residuals)
 
     err_msg = re.escape(
-                    (f"forecaster residuals for step 3 are `None`. Check forecaster.out_sample_residuals.")
-                )
+                ("forecaster residuals for step 3 are `None`. Check forecaster.out_sample_residuals.")
+            )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.predict_bootstrapping(steps=3, in_sample_residuals=False)
 
@@ -100,7 +100,7 @@ def test_predict_bootstrapping_ValueError_when_step_out_sample_residuals_value_c
     forecaster.set_out_sample_residuals(residuals = residuals)
 
     err_msg = re.escape(
-                    (f"forecaster residuals for step 3 contains `None` values. Check forecaster.out_sample_residuals.")
+                    ("forecaster residuals for step 3 contains `None` values. Check forecaster.out_sample_residuals.")
                 )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.predict_bootstrapping(steps=3, in_sample_residuals=False)
@@ -124,11 +124,11 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_steps_
     forecaster.fit(y=y, exog=exog)
     results = forecaster.predict_bootstrapping(steps=steps, exog=exog_predict, n_boot=4, in_sample_residuals=True)
     expected = pd.DataFrame(
-                    data = np.array([[0.73195423, 0.6896871 , 0.20248689, 0.54685553],
-                                     [0.13621074, 0.29541489, 0.51606685, 0.3341628 ]]),
-                    columns = [f"pred_boot_{i}" for i in range(4)],
-                    index   = pd.RangeIndex(start=50, stop=52)
-                )
+                   data = np.array([[0.73195423, 0.6896871 , 0.20248689, 0.54685553],
+                                    [0.58019048, 0.25711887, 0.35256064, 0.82034106]]),
+                   columns = [f"pred_boot_{i}" for i in range(4)],
+                   index   = pd.RangeIndex(start=50, stop=52)
+               )
     
     pd.testing.assert_frame_equal(expected, results)
 
@@ -150,11 +150,11 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_steps_
     forecaster.out_sample_residuals = forecaster.in_sample_residuals
     results = forecaster.predict_bootstrapping(steps=2, exog=exog_predict, n_boot=4, in_sample_residuals=False)
     expected = pd.DataFrame(
-                    data = np.array([[0.73195423, 0.6896871 , 0.20248689, 0.54685553],
-                                     [0.13621074, 0.29541489, 0.51606685, 0.3341628 ]]),
-                    columns = [f"pred_boot_{i}" for i in range(4)],
-                    index   = pd.RangeIndex(start=50, stop=52)
-                )
+                   data = np.array([[0.73195423, 0.6896871 , 0.20248689, 0.54685553],
+                                    [0.58019048, 0.25711887, 0.35256064, 0.82034106]]),
+                   columns = [f"pred_boot_{i}" for i in range(4)],
+                   index   = pd.RangeIndex(start=50, stop=52)
+               )
     
     pd.testing.assert_frame_equal(expected, results)
 
@@ -174,10 +174,10 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_steps_
                                       2: pd.Series([5, 5, 5, 5, 5, 5, 5])}
     results = forecaster.predict_bootstrapping(steps=2, exog=exog_predict, n_boot=4, in_sample_residuals=True)
     expected = pd.DataFrame(
-                    data = np.array([[1.67523588, 1.67523588, 1.67523588, 1.67523588],
-                                     [5.38024988, 5.38024988, 5.38024988, 5.38024988]]),
-                    columns = [f"pred_boot_{i}" for i in range(4)],
-                    index   = pd.RangeIndex(start=50, stop=52)
-                )
+                   data = np.array([[1.67523588, 1.67523588, 1.67523588, 1.67523588],
+                                    [5.38024988, 5.38024988, 5.38024988, 5.38024988]]),
+                   columns = [f"pred_boot_{i}" for i in range(4)],
+                   index   = pd.RangeIndex(start=50, stop=52)
+               )
     
     pd.testing.assert_frame_equal(expected, results)        

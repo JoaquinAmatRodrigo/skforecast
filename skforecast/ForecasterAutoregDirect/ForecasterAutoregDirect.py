@@ -921,9 +921,9 @@ class ForecasterAutoregDirect(ForecasterBase):
                       )
         boot_predictions = pd.concat([predictions] * n_boot, axis=1)
         boot_predictions.columns= [f"pred_boot_{i}" for i in range(n_boot)]
-
-        rng = np.random.default_rng(seed=random_state)
+        
         for i, step in enumerate(steps):
+            rng = np.random.default_rng(seed=random_state)
             sample_residuals = rng.choice(
                                    a       = residuals[step],
                                    size    = n_boot,

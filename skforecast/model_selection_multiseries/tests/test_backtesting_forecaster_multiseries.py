@@ -137,7 +137,7 @@ def test_backtesting_forecaster_multiseries_IgnoredArgumentWarning_forecaster_mu
             random_state        = 123,
             in_sample_residuals = True,
             verbose             = False,
-            n_jobs=1
+            n_jobs              = 1
         )
 
 
@@ -1020,6 +1020,166 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
     pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
 
 
+@pytest.mark.parametrize("forecaster", 
+                         [ForecasterAutoregMultiSeries(regressor=Ridge(random_state=123), 
+                                                       lags=2), 
+                          ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
+                                                             fun_predictors=create_predictors, 
+                                                             window_size=2)], 
+                         ids=lambda forecaster: f'forecaster: {type(forecaster).__name__}')
+def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_refit_int_interval_yes_exog_yes_remainder_with_mocked(forecaster):
+    """
+    Test output of backtesting_forecaster_multiseries in ForecasterAutoregMultiSeries 
+    and ForecasterAutoregMultiSeriesCustom with refit int, interval, gap, 
+    with mocked using exog and intervals (mocked done in Skforecast v0.9.0).
+    """
+    refit = 2
+    n_validation = 20
+    steps = 2
+
+    metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
+                                               forecaster            = forecaster,
+                                               series                = series,
+                                               steps                 = steps,
+                                               levels                = None,
+                                               metric                = 'mean_absolute_error',
+                                               initial_train_size    = len(series) - n_validation,
+                                               gap                   = 0,
+                                               allow_incomplete_fold = False,
+                                               refit                 = refit,
+                                               fixed_train_size      = True,
+                                               exog                  = series['l1'].rename('exog_1'),
+                                               interval              = [5, 95],
+                                               n_boot                = 150,
+                                               random_state          = 123,
+                                               in_sample_residuals   = True,
+                                               verbose               = False
+                                           )
+    
+    expected_metric = pd.DataFrame(
+        {'levels': ['l1', 'l2'], 
+         'mean_absolute_error': [0.13341641696298234, 0.2532943228025243]}
+    )
+    expected_predictions = pd.DataFrame(
+        data = np.array([[ 3.62121311e-01,  1.50820320e-01,  5.93493644e-01,
+                             3.65807102e-01, -1.66846896e-01,  7.41872674e-01],
+                         [ 4.75603912e-01,  2.64338068e-01,  7.55477618e-01,
+                             4.77660870e-01, -2.09016888e-02,  8.50640767e-01],
+                         [ 4.78856340e-01,  2.67555349e-01,  7.10228673e-01,
+                             4.79828611e-01, -5.28253867e-02,  8.55894183e-01],
+                         [ 4.97626059e-01,  2.86360215e-01,  7.77499764e-01,
+                             4.98181879e-01, -3.80679351e-04,  8.71161776e-01],
+                         [ 4.57502853e-01,  2.34854548e-01,  6.90295515e-01,
+                             4.93394245e-01, -8.59476649e-02,  8.26877562e-01],
+                         [ 4.19762089e-01,  1.89123646e-01,  5.98698797e-01,
+                             4.37345761e-01, -2.47590943e-02,  8.09946951e-01],
+                         [ 4.64704145e-01,  2.42055840e-01,  6.97496807e-01,
+                             4.95977483e-01, -8.33644270e-02,  8.29460800e-01],
+                         [ 6.27792451e-01,  3.97154009e-01,  8.06729160e-01,
+                             6.80737238e-01,  2.18632382e-01,  1.05333843e+00],
+                         [ 5.87334375e-01,  3.26921031e-01,  8.69376004e-01,
+                             6.65280778e-01,  1.23472110e-01,  1.05838353e+00],
+                         [ 4.53164888e-01,  1.98770357e-01,  7.31112253e-01,
+                             5.17357914e-01, -3.46981422e-02,  9.17114685e-01],
+                         [ 4.91347698e-01,  2.30934354e-01,  7.73389327e-01,
+                             5.56066550e-01,  1.42578818e-02,  9.49169307e-01],
+                         [ 3.58133021e-01,  1.03738489e-01,  6.36080385e-01,
+                             3.94861192e-01, -1.57194865e-01,  7.94617962e-01],
+                         [ 4.23074894e-01,  1.46402575e-01,  6.85243368e-01,
+                             4.56570627e-01, -8.44076809e-02,  9.13597456e-01],
+                         [ 4.77639455e-01,  2.00288697e-01,  7.45269910e-01,
+                             4.52788025e-01, -6.08964382e-02,  9.16193940e-01],
+                         [ 5.90866263e-01,  3.14193944e-01,  8.53034737e-01,
+                             6.06068550e-01,  6.50902424e-02,  1.06309538e+00],
+                         [ 4.29943139e-01,  1.52592381e-01,  6.97573594e-01,
+                             4.22379461e-01, -9.13050017e-02,  8.85785376e-01],
+                         [ 4.71297777e-01,  1.92467142e-01,  7.32960612e-01,
+                             5.16307783e-01, -5.04225194e-02,  9.64821047e-01],
+                         [ 6.45316619e-01,  4.47497018e-01,  9.25177996e-01,
+                             6.51701762e-01,  1.69673821e-01,  1.01740457e+00],
+                         [ 5.42727946e-01,  2.63897311e-01,  8.04390781e-01,
+                             5.10069712e-01, -5.66605897e-02,  9.58582976e-01],
+                         [ 5.30915933e-01,  3.33096333e-01,  8.10777311e-01,
+                             5.43494604e-01,  6.14666630e-02,  9.09197415e-01]]),
+        columns = ['l1', 'l1_lower_bound', 'l1_upper_bound', 'l2', 'l2_lower_bound', 'l2_upper_bound'],
+        index = pd.RangeIndex(start=30, stop=50, step=1)
+    )
+                                   
+    pd.testing.assert_frame_equal(expected_metric, metrics_levels)
+    pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
+
+
+@pytest.mark.parametrize("forecaster", 
+                         [ForecasterAutoregMultiSeries(regressor=Ridge(random_state=123), 
+                                                       lags=2), 
+                          ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
+                                                             fun_predictors=create_predictors, 
+                                                             window_size=2)], 
+                         ids=lambda forecaster: f'forecaster: {type(forecaster).__name__}')
+def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_refit_int_interval_yes_exog_not_allow_remainder_gap_with_mocked(forecaster):
+    """
+    Test output of backtesting_forecaster_multiseries in ForecasterAutoregMultiSeries 
+    and ForecasterAutoregMultiSeriesCustom with refit int, interval, gap, 
+    with mocked using exog and intervals (mocked done in Skforecast v0.9.0).
+    """
+    series_with_index = series.copy()
+    series_with_index.index = pd.date_range(start='2022-01-01', periods=50, freq='D')
+    exog_with_index = series['l1'].rename('exog_1').copy()
+    exog_with_index.index = pd.date_range(start='2022-01-01', periods=50, freq='D')
+
+    refit = 3
+    n_validation = 20
+    steps = 4
+    gap = 3
+
+    metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
+                                               forecaster            = forecaster,
+                                               series                = series_with_index,
+                                               steps                 = steps,
+                                               levels                = ['l2'],
+                                               metric                = 'mean_absolute_error',
+                                               initial_train_size    = len(series_with_index) - n_validation,
+                                               gap                   = gap,
+                                               allow_incomplete_fold = False,
+                                               refit                 = refit,
+                                               fixed_train_size      = False,
+                                               exog                  = exog_with_index,
+                                               interval              = [5, 95],
+                                               n_boot                = 100,
+                                               random_state          = 123,
+                                               in_sample_residuals   = True,
+                                               verbose               = False
+                                           )
+    
+    expected_metric = pd.DataFrame(
+        {'levels': ['l2'], 
+         'mean_absolute_error': [0.2791832310123065]}
+    )
+    expected_predictions = pd.DataFrame(
+        data = np.array([[ 0.49984026,  0.00509982,  0.82464616],
+                         [ 0.4767447 , -0.0798953 ,  0.80487146],
+                         [ 0.43791384, -0.12045877,  0.81344287],
+                         [ 0.47690063, -0.01831127,  0.85480226],
+                         [ 0.63619086,  0.14145042,  0.96099675],
+                         [ 0.65328344,  0.09664345,  0.98141021],
+                         [ 0.50150406, -0.05686855,  0.8770331 ],
+                         [ 0.54283634,  0.04762444,  0.92073797],
+                         [ 0.37097633, -0.1237641 ,  0.69578223],
+                         [ 0.43922059, -0.11741941,  0.76734736],
+                         [ 0.47379722, -0.08457539,  0.84932626],
+                         [ 0.62696782,  0.13175592,  1.00486945],
+                         [ 0.45263688, -0.09848725,  0.84471127],
+                         [ 0.5005012 , -0.02743982,  0.95029956],
+                         [ 0.66342359,  0.10579924,  1.20771224],
+                         [ 0.53547991,  0.02357046,  0.89862351]]),
+        columns = ['l2', 'l2_lower_bound', 'l2_upper_bound'],
+        index = pd.date_range(start='2022-02-03', periods=16, freq='D')
+    )
+                                   
+    pd.testing.assert_frame_equal(expected_metric, metrics_levels)
+    pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
+
+
 # ForecasterAutoregMultiVariate
 # ======================================================================================================================
 @pytest.mark.parametrize("n_jobs", [-1, 1],
@@ -1319,20 +1479,20 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
                                            )
     
     expected_metric = pd.DataFrame({'levels': ['l1'], 
-                                    'mean_absolute_error': [0.080981301131163]})
+                                    'mean_absolute_error': [0.08098130113116303]})
     expected_predictions = pd.DataFrame(
                                data = np.array([[0.79017158, 0.65165001, 0.92309077],
-                                                [0.49318335, 0.37085985, 0.6403262 ],
-                                                [0.58563228, 0.46560056, 0.72877519],
+                                                [0.49318335, 0.33877981, 0.59549335],
+                                                [0.58563228, 0.45036051, 0.72877519],
                                                 [0.26135924, 0.12283767, 0.39427843],
-                                                [0.37825777, 0.25593427, 0.52540062],
-                                                [0.45697738, 0.33694566, 0.60012028],
+                                                [0.37825777, 0.22385422, 0.48056776],
+                                                [0.45697738, 0.3217056 , 0.60012028],
                                                 [0.70804671, 0.56952514, 0.8409659 ],
-                                                [0.33222686, 0.20990336, 0.47936971],
-                                                [0.49603977, 0.37600804, 0.63918267],
+                                                [0.33222686, 0.17782331, 0.43453685],
+                                                [0.49603977, 0.36076799, 0.63918267],
                                                 [0.79614494, 0.65762337, 0.92906413],
-                                                [0.50007531, 0.37775181, 0.64721816],
-                                                [0.55280975, 0.43277803, 0.69595266]]),
+                                                [0.50007531, 0.34567176, 0.60238531],
+                                                [0.55280975, 0.41753798, 0.69595266]]),
                                columns = ['l1', 'lower_bound', 'upper_bound'],
                                index = pd.RangeIndex(start=38, stop=50, step=1)
                            )
@@ -1379,13 +1539,13 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
                                     'mean_absolute_error': [0.07705832858897509]})
     expected_predictions = pd.DataFrame(
                                data = np.array([[0.79017158, 0.65165001, 0.92309077],
-                                                [0.49318335, 0.37085985, 0.6403262 ],
-                                                [0.58563228, 0.46560056, 0.72877519],
+                                                [0.49318335, 0.33877981, 0.59549335],
+                                                [0.58563228, 0.45036051, 0.72877519],
                                                 [0.25636363, 0.10743222, 0.37710866],
                                                 [0.37604542, 0.24241796, 0.52792491],
-                                                [0.45439247, 0.32888843, 0.59559781],
+                                                [0.45439247, 0.31741445, 0.6007327 ],
                                                 [0.70488052, 0.5596997 , 0.84559181],
-                                                [0.32693583, 0.20085419, 0.47910327],
+                                                [0.32693583, 0.19870532, 0.47910327],
                                                 [0.49099895, 0.35617576, 0.63524443],
                                                 [0.82066806, 0.67917812, 0.95193044],
                                                 [0.51109877, 0.39178411, 0.66186064],
@@ -1437,23 +1597,23 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
     expected_metric = pd.DataFrame({'levels': ['l1'], 
                                     'mean_absolute_error': [0.10867753185751189]})
     expected_predictions = pd.DataFrame(
-                               data = np.array([[0.5137416 , 0.34426563, 0.73028006],
-                                                [0.51578881, 0.33968421, 0.71123006],
-                                                [0.38569703, 0.20685029, 0.57366884],
-                                                [0.41784889, 0.24557264, 0.5874939 ],
+                               data = np.array([[0.5137416 , 0.28565005, 0.64960534],
+                                                [0.51578881, 0.36235612, 0.71123006],
+                                                [0.38569703, 0.20965762, 0.51379331],
+                                                [0.41784889, 0.23241384, 0.58140101],
                                                 [0.69352545, 0.51075098, 0.88011232],
-                                                [0.7137808 , 0.54430484, 0.93031927],
-                                                [0.52155299, 0.34544839, 0.71699424],
-                                                [0.51871169, 0.33986495, 0.7066835 ],
-                                                [0.31342947, 0.14115321, 0.48307448],
+                                                [0.7137808 , 0.48568926, 0.84964454],
+                                                [0.52155299, 0.3681203 , 0.71699424],
+                                                [0.51871169, 0.34267227, 0.64680796],
+                                                [0.31342947, 0.12799441, 0.47698158],
                                                 [0.4337246 , 0.25095013, 0.62031147],
-                                                [0.44486807, 0.2753921 , 0.66140653],
-                                                [0.67773806, 0.50163345, 0.87317931],
-                                                [0.3732339 , 0.19438716, 0.56120571],
-                                                [0.44959589, 0.27731963, 0.6192409 ],
+                                                [0.44486807, 0.21677652, 0.58073181],
+                                                [0.67773806, 0.52430536, 0.87317931],
+                                                [0.3732339 , 0.19719449, 0.50133018],
+                                                [0.44959589, 0.26416083, 0.613148  ],
                                                 [0.69181652, 0.50904205, 0.87840338],
-                                                [0.51679906, 0.34732309, 0.73333753],
-                                                [0.49803962, 0.32193501, 0.69348087]]),
+                                                [0.51679906, 0.28870751, 0.6526628 ],
+                                                [0.49803962, 0.34460692, 0.69348087]]),
                                columns = ['l1', 'lower_bound', 'upper_bound'],
                                index = pd.RangeIndex(start=33, stop=50, step=1)
                            )
@@ -1501,21 +1661,21 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
     expected_metric = pd.DataFrame({'levels': ['l1'], 
                                     'mean_absolute_error': [0.09906557188440204]})
     expected_predictions = pd.DataFrame(
-                               data = np.array([[0.5137416 , 0.34426563, 0.73028006],
-                                                [0.51578881, 0.33968421, 0.71123006],
-                                                [0.38569703, 0.20685029, 0.57366884],
-                                                [0.41784889, 0.24557264, 0.5874939 ],
+                               data = np.array([[0.5137416 , 0.28565005, 0.64960534],
+                                                [0.51578881, 0.36235612, 0.71123006],
+                                                [0.38569703, 0.20965762, 0.51379331],
+                                                [0.41784889, 0.23241384, 0.58140101],
                                                 [0.69352545, 0.51075098, 0.88011232],
-                                                [0.73709708, 0.58168569, 0.87889663],
-                                                [0.49379408, 0.290055  , 0.70108827],
-                                                [0.54129634, 0.38342955, 0.66728576],
-                                                [0.2889167 , 0.12235121, 0.43445229],
-                                                [0.41762991, 0.26652975, 0.56954018],
+                                                [0.73709708, 0.60256116, 0.87889663],
+                                                [0.49379408, 0.34235281, 0.70108827],
+                                                [0.54129634, 0.38342955, 0.66423569],
+                                                [0.2889167 , 0.13545924, 0.45541277],
+                                                [0.41762991, 0.26652975, 0.58517659],
                                                 [0.4281944 , 0.26680135, 0.56842703],
                                                 [0.6800295 , 0.53425961, 0.86349246],
-                                                [0.3198172 , 0.19262494, 0.44498576],
-                                                [0.45269985, 0.30700229, 0.63937102],
-                                                [0.76214215, 0.62904194, 0.89487036]]),
+                                                [0.3198172 , 0.18545173, 0.44111693],
+                                                [0.45269985, 0.29948117, 0.57043644],
+                                                [0.76214215, 0.63320969, 0.90810797]]),
                                columns = ['l1', 'lower_bound', 'upper_bound'],
                                index = pd.RangeIndex(start=33, stop=48, step=1)
                            )
@@ -1566,23 +1726,172 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
     expected_metric = pd.DataFrame({'levels': ['l1'], 
                                     'mean_absolute_error': [0.12073089072357064]})
     expected_predictions = pd.DataFrame(
-        data = np.array([[0.40010139, 0.2013807 , 0.55634946],
-                         [0.42717215, 0.23434534, 0.57988887],
-                         [0.68150611, 0.48700348, 0.82602514],
-                         [0.66167269, 0.49643682, 0.87762411],
-                         [0.48946946, 0.27161248, 0.69919005],
-                         [0.52955424, 0.36121274, 0.67655883],
-                         [0.30621348, 0.11465701, 0.46321967],
-                         [0.44140106, 0.27062974, 0.59142153],
-                         [0.41294246, 0.25357362, 0.64296396],
-                         [0.66798745, 0.51402456, 0.89221746],
-                         [0.35206832, 0.15233485, 0.50524599],
-                         [0.41828203, 0.28154037, 0.5840278 ],
-                         [0.6605119 , 0.44992937, 0.83942143],
-                         [0.49225437, 0.33605182, 0.7232556 ],
-                         [0.52528842, 0.35971141, 0.7220394 ]]),
+        data = np.array([[0.40010139, 0.21491844, 0.52790634],
+                         [0.42717215, 0.23067944, 0.57988887],
+                         [0.68150611, 0.48700348, 0.81952219],
+                         [0.66167269, 0.46929506, 0.87762411],
+                         [0.48946946, 0.36803878, 0.69919005],
+                         [0.52955424, 0.36121274, 0.7342489 ],
+                         [0.30621348, 0.11465701, 0.46702924],
+                         [0.44140106, 0.27497225, 0.62523765],
+                         [0.41294246, 0.26739719, 0.58273245],
+                         [0.66798745, 0.51402456, 0.82567436],
+                         [0.35206832, 0.19485472, 0.6001923 ],
+                         [0.41828203, 0.28154037, 0.58081107],
+                         [0.6605119 , 0.44992937, 0.79751069],
+                         [0.49225437, 0.31367508, 0.67624609],
+                         [0.52528842, 0.33700505, 0.74482225]]),
         columns = ['l1', 'lower_bound', 'upper_bound'],
         index = pd.date_range(start='2022-02-05', periods=15, freq='D')
+    )
+    backtest_predictions = backtest_predictions.asfreq('D')
+                                   
+    pd.testing.assert_frame_equal(expected_metric, metrics_levels)
+    pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
+
+
+def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate_refit_int_interval_yes_exog_yes_remainder_with_mocked():
+    """
+    Test output of backtesting_forecaster_multiseries in ForecasterAutoregMultiVariate 
+    with refit int, interval, gap, with mocked using exog and intervals 
+    (mocked done in Skforecast v0.9.0).
+    """
+    forecaster = ForecasterAutoregMultiVariate(
+                     regressor = Ridge(random_state=123),
+                     level     = 'l1',
+                     lags      = 2,
+                     steps     = 2
+                 )
+    
+    refit = 2
+    n_validation = 20
+    steps = 2
+
+    metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
+                                               forecaster            = forecaster,
+                                               series                = series,
+                                               steps                 = steps,
+                                               levels                = 'l1',
+                                               metric                = 'mean_absolute_error',
+                                               initial_train_size    = len(series) - n_validation,
+                                               gap                   = 0,
+                                               allow_incomplete_fold = False,
+                                               refit                 = refit,
+                                               fixed_train_size      = True,
+                                               exog                  = series['l1'].rename('exog_1'),
+                                               interval              = [5, 95],
+                                               n_boot                = 100,
+                                               random_state          = 123,
+                                               in_sample_residuals   = True,
+                                               verbose               = False
+                                           )
+    
+    expected_metric = pd.DataFrame(
+        {'levels': ['l1'], 
+         'mean_absolute_error': [0.09237017311770493]}
+    )
+    expected_predictions = pd.DataFrame(
+        data = np.array([[0.2983264 , 0.14814112, 0.52611729],
+                         [0.45367569, 0.3061465 , 0.56042116],
+                         [0.4802857 , 0.33010042, 0.70807659],
+                         [0.48384823, 0.33631904, 0.59059371],
+                         [0.44991269, 0.27452568, 0.6567239 ],
+                         [0.38062305, 0.20946396, 0.50828437],
+                         [0.42817363, 0.25278662, 0.63498485],
+                         [0.68209515, 0.51093605, 0.80975646],
+                         [0.72786565, 0.58843297, 0.8652939 ],
+                         [0.45147711, 0.32772617, 0.57845425],
+                         [0.52904599, 0.38961331, 0.66647424],
+                         [0.28657426, 0.16282332, 0.4135514 ],
+                         [0.36296117, 0.24577117, 0.52321437],
+                         [0.46902166, 0.37455162, 0.62846802],
+                         [0.68519422, 0.56800422, 0.84544742],
+                         [0.35197602, 0.25750597, 0.51142238],
+                         [0.47338638, 0.29477692, 0.61652158],
+                         [0.74059646, 0.6075235 , 0.88275308],
+                         [0.55112717, 0.37251772, 0.69426237],
+                         [0.55778417, 0.4247112 , 0.69994079]]),
+        columns = ['l1', 'lower_bound', 'upper_bound'],
+        index = pd.RangeIndex(start=30, stop=50, step=1)
+    )
+                                   
+    pd.testing.assert_frame_equal(expected_metric, metrics_levels)
+    pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
+
+
+def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate_refit_int_interval_yes_exog_not_allow_remainder_gap_with_mocked():
+    """
+    Test output of backtesting_forecaster_multiseries in ForecasterAutoregMultiVariate 
+    with refit int, interval, gap, with mocked using exog and intervals 
+    (mocked done in Skforecast v0.9.0).
+    """
+    series_with_index = series.copy()
+    series_with_index.index = pd.date_range(start='2022-01-01', periods=50, freq='D')
+    exog_with_index = series['l1'].rename('exog_1').copy()
+    exog_with_index.index = pd.date_range(start='2022-01-01', periods=50, freq='D')
+
+    forecaster = ForecasterAutoregMultiVariate(
+                     regressor = Ridge(random_state=123),
+                     level     = 'l1',
+                     lags      = 2,
+                     steps     = 7
+                 )
+
+    refit = 3
+    n_validation = 30
+    steps = 4
+    gap = 3
+
+    metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
+                                               forecaster            = forecaster,
+                                               series                = series_with_index,
+                                               steps                 = steps,
+                                               levels                = ['l1'],
+                                               metric                = 'mean_absolute_error',
+                                               initial_train_size    = len(series_with_index) - n_validation,
+                                               gap                   = gap,
+                                               allow_incomplete_fold = False,
+                                               refit                 = refit,
+                                               fixed_train_size      = False,
+                                               exog                  = exog_with_index,
+                                               interval              = [5, 95],
+                                               n_boot                = 100,
+                                               random_state          = 123,
+                                               in_sample_residuals   = True,
+                                               verbose               = False
+                                           )
+    
+    expected_metric = pd.DataFrame(
+        {'levels': ['l1'], 
+         'mean_absolute_error': [0.10066454067329249]}
+    )
+    expected_predictions = pd.DataFrame(
+        data = np.array([[0.53203113, 0.27318916, 0.69931226],
+                         [0.62129188, 0.46220068, 0.85870486],
+                         [0.40145922, 0.17189084, 0.59797159],
+                         [0.38821275, 0.17098498, 0.61456487],
+                         [0.37636995, 0.11752798, 0.54365108],
+                         [0.36599243, 0.20690123, 0.60340541],
+                         [0.47654862, 0.24698023, 0.67306099],
+                         [0.33725755, 0.12002978, 0.56360967],
+                         [0.46122163, 0.20237966, 0.62850276],
+                         [0.47541934, 0.31632814, 0.71283232],
+                         [0.50601999, 0.27645161, 0.70253236],
+                         [0.39293452, 0.17570675, 0.61928664],
+                         [0.43793405, 0.27695885, 0.5990429 ],
+                         [0.52600886, 0.38167775, 0.72224797],
+                         [0.70882239, 0.55319058, 0.83377003],
+                         [0.70063755, 0.51962777, 0.85415566],
+                         [0.48631217, 0.32533698, 0.64742102],
+                         [0.52248417, 0.37815306, 0.71872328],
+                         [0.30010035, 0.14446853, 0.42504798],
+                         [0.43342987, 0.25242008, 0.58694797],
+                         [0.42479569, 0.2638205 , 0.58590454],
+                         [0.68566159, 0.54133048, 0.8819007 ],
+                         [0.34632377, 0.19069195, 0.4712714 ],
+                         [0.44695116, 0.26594138, 0.60046927]]),
+        columns = ['l1', 'lower_bound', 'upper_bound'],
+        index = pd.date_range(start='2022-01-24', periods=24, freq='D')
     )
     backtest_predictions = backtest_predictions.asfreq('D')
                                    

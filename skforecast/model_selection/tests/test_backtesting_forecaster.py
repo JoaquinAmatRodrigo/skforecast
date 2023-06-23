@@ -5,12 +5,14 @@ import pytest
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import Ridge
+from skforecast.ForecasterAutoreg import ForecasterAutoreg
 from skforecast.ForecasterAutoregDirect import ForecasterAutoregDirect
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 from skforecast.model_selection import backtesting_forecaster
 
 # Fixtures
 from .fixtures_model_selection import y
+from .fixtures_model_selection import exog
 
 
 def test_backtesting_forecaster_TypeError_when_forecaster_not_supported_types():
