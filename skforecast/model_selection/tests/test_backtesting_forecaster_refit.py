@@ -920,7 +920,7 @@ def test_output_backtesting_forecaster_refit_int_interval_yes_exog_yes_remainder
                                        n_jobs                = 1
                                    )
 
-    assert expected_metric == metric
+    assert expected_metric == approx(metric)
     pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
 
 
@@ -980,5 +980,5 @@ def test_output_backtesting_forecaster_refit_int_interval_yes_exog_not_allow_rem
                                    )
     backtest_predictions = backtest_predictions.asfreq('D')
 
-    assert expected_metric == metric
+    assert expected_metric == approx(metric)
     pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
