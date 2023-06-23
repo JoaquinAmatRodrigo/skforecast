@@ -1444,7 +1444,7 @@ def check_backtesting_input(
     fixed_train_size: bool=True,
     gap: int=0,
     allow_incomplete_fold: bool=True,
-    refit: bool=False,
+    refit: Optional[Union[bool, int]]=False,
     interval: Optional[list]=None,
     alpha: Optional[float]=None,
     n_boot: int=500,
@@ -1483,8 +1483,9 @@ def check_backtesting_input(
     allow_incomplete_fold : bool, default `True`
         Last fold is allowed to have a smaller number of samples than the 
         `test_size`. If `False`, the last fold is excluded.
-    refit : bool, default `False`
-        Whether to re-fit the forecaster in each iteration.
+    refit : bool, int, default `False`
+        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
+        the Forecaster will be trained every that number of iterations.
     interval : list, default `None`
         Confidence of the prediction interval estimated. Sequence of percentiles
         to compute, which must be between 0 and 100 inclusive.
@@ -1596,8 +1597,8 @@ def check_backtesting_input(
         raise TypeError("`fixed_train_size` must be a boolean: `True`, `False`.")
     if not isinstance(allow_incomplete_fold, bool):
         raise TypeError("`allow_incomplete_fold` must be a boolean: `True`, `False`.")
-    if not isinstance(refit, bool):
-        raise TypeError("`refit` must be a boolean: `True`, `False`.")
+    if not isinstance(refit, (bool, int, np.integer)) or refit < 0:
+        raise TypeError(f"`refit` must be a boolean or an integer greater than 0. Got {refit}.")
     if not isinstance(n_boot, (int, np.integer)) or n_boot < 0:
         raise TypeError(f"`n_boot` must be an integer greater than 0. Got {n_boot}.")
     if not isinstance(random_state, (int, np.integer)) or random_state < 0:
