@@ -35,7 +35,7 @@ def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_2_
               )
     expected = pd.DataFrame(
                    data    = np.array([[0.67523588, 0.25414219, 0.72561416],
-                                       [0.38024988, 0.16009136, 0.48878124]]),
+                                       [0.38024988, 0.27143513, 0.78431847]]),
                    columns = ['pred', 'lower_bound', 'upper_bound'],
                    index   = pd.RangeIndex(start=50, stop=52)
                )
@@ -67,7 +67,7 @@ def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_2_
               )
     expected = pd.DataFrame(
                    data    = np.array([[0.67523588, 0.25414219, 0.72561416],
-                                       [0.38024988, 0.16009136, 0.48878124]]),
+                                       [0.38024988, 0.27143513, 0.78431847]]),
                    columns = ['pred', 'lower_bound', 'upper_bound'],
                    index   = pd.RangeIndex(start=50, stop=52)
                )

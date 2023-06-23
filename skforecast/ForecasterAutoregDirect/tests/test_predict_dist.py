@@ -19,7 +19,6 @@ def test_predict_dist_output_when_forecaster_is_LinearRegression_steps_is_2_in_s
     2 steps are predicted, using in-sample residuals, exog is included and both
     inputs are transformed.
     """
-
     forecaster = ForecasterAutoregDirect(
                      regressor        = LinearRegression(),
                      steps            = 2,
@@ -37,7 +36,7 @@ def test_predict_dist_output_when_forecaster_is_LinearRegression_steps_is_2_in_s
               )
     expected = pd.DataFrame(
                    data    = np.array([[0.54274594, 0.20807726],
-                                       [0.32046382, 0.13511556]]),
+                                       [0.50255276, 0.21780292]]),
                    columns = ['loc', 'scale'],
                    index   = pd.RangeIndex(start=50, stop=52)
                )
@@ -51,7 +50,6 @@ def test_predict_dist_output_when_forecaster_is_LinearRegression_steps_is_2_in_s
     2 steps are predicted, using out-sample residuals, exog is included and both
     inputs are transformed.
     """
-
     forecaster = ForecasterAutoregDirect(
                      regressor        = LinearRegression(),
                      steps            = 2,
@@ -70,7 +68,7 @@ def test_predict_dist_output_when_forecaster_is_LinearRegression_steps_is_2_in_s
               )
     expected = pd.DataFrame(
                    data    = np.array([[0.54274594, 0.20807726],
-                                       [0.32046382, 0.13511556]]),
+                                       [0.50255276, 0.21780292]]),
                    columns = ['loc', 'scale'],
                    index   = pd.RangeIndex(start=50, stop=52)
                )
