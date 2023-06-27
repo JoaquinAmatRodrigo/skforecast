@@ -7,7 +7,7 @@ All significant changes to this project are documented in this release file.
 
 The main changes in this release are:
 
-+ All backtesting and grid search functions have been extended to include the `n_jobs` argument, allowing multi-threaded parallelization for improved performance.
++ All backtesting and grid search functions have been extended to include the `n_jobs` argument, allowing multi-process parallelization for improved performance.
 
 + Argument `refit` now can be also an `integer` in all backtesting dependent functions in modules `model_selection` and `model_selection_multiseries`. This allows the Forecaster to be trained every this number of iterations.
 
@@ -15,7 +15,7 @@ The main changes in this release are:
 
 **Added**
 
-+ Argument `n_jobs=-1` to all backtesting dependent functions in modules `model_selection`, `model_selection_multiseries` and `model_selection_sarimax` to allow  multi-threaded parallelization.
++ Argument `n_jobs=-1` to all backtesting dependent functions in modules `model_selection`, `model_selection_multiseries` and `model_selection_sarimax` to allow  multi-process parallelization.
 
 + Argument `refit` now can be also an `integer` in all backtesting dependent functions in modules `model_selection` and `model_selection_multiseries`. This allows the Forecaster to be trained every this number of iterations.
 
