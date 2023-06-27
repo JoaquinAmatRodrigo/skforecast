@@ -218,12 +218,12 @@ For example, consider the goal of predicting the 24 hours of day D+1, but the pr
 
 ### Which Backtesting should I use?
 
-In order to correctly evaluate your model and feel comfortable with the metric obtained, it is very important to apply an appropriate backtesting strategy.
+To ensure an accurate evaluation of your model and gain confidence in its predictive performance on new data, it is critical to employ an appropriate backtesting strategy.
 
-A good knowledge of the use case is needed to choose it, as well as the computational resources and the time available between predictions. It determines when the model will be refitted and the prediction horizon
+To determine an appropriate strategy, factors such as use case characteristics, available computing resources, and time intervals between predictions must be considered. These factors determine when the model should be refitted and the prediction horizon that should be used.
 
-+ Prediction horizon: For example, if you need to predict the users of an app every Monday for the whole week, this will result in a 7 `steps` prediction in each iteration. 
++ Prediction Horizon: Suppose you need to predict the users of an App every Monday for the entire week. In this case, each iteration would be a seven-step prediction representing the seven days of the week.
   
-+ Refit strategy: Following this example, at the end of the week, you will need to decide whether to refit the model.
++ Refit Strategy: Continuing with the example above, at the end of the week you need to decide whether or not to update the model. Training the model with additional data can improve its predictive ability, but it requires more time and computational resources, which may not always be readily available. A reasonable approach is to retrain the model when the error metric shows a consistent upward trend. This behavior can be effectively simulated using the backtesting framework.
 
-Check the [Backtesting user guide](https://skforecast.org/latest/user_guides/backtesting.html) for a code example.
+For a code example illustrating the backtesting process, refer to the [Backtesting user guide](https://skforecast.org/latest/user_guides/backtesting.html).
