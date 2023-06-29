@@ -101,14 +101,14 @@ def _backtesting_sarimax_refit(
         `interval = [2.5, 97.5]`. If both, `alpha` and `interval` are 
         provided, `alpha` will be used. 
     n_jobs : int, default -1
-        The number of jobs to run in parallel. If -1, then the number of jobs is 
+        The number of jobs to run in parallel. If `-1`, then the number of jobs is 
         set to the number of cores.
         **New in version 0.9.0** 
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
         for backtesting.
     show_progress: bool, default `True`
-        Whether to show a progress bar. Defaults to True.
+        Whether to show a progress bar.
 
     Returns
     -------
@@ -270,7 +270,7 @@ def _backtesting_sarimax_no_refit(
         Print number of folds and index of training and validation sets used 
         for backtesting.
     show_progress: bool, default `True`
-        Whether to show a progress bar. Defaults to True.
+        Whether to show a progress bar.
 
     Returns
     -------
@@ -430,14 +430,14 @@ def backtesting_sarimax(
         `interval = [2.5, 97.5]`. If both, `alpha` and `interval` are 
         provided, `alpha` will be used. 
     n_jobs : int, default -1
-        The number of jobs to run in parallel. If -1, then the number of jobs is 
+        The number of jobs to run in parallel. If `-1`, then the number of jobs is 
         set to the number of cores.
         **New in version 0.9.0**     
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
         for backtesting.
     show_progress: bool, default `True`
-        Whether to show a progress bar. Defaults to True.
+        Whether to show a progress bar.
 
     Returns
     -------
@@ -578,13 +578,13 @@ def grid_search_sarimax(
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
     n_jobs : int, default -1
-        The number of jobs to run in parallel. If -1, then the number of jobs is 
+        The number of jobs to run in parallel. If `-1`, then the number of jobs is 
         set to the number of cores.
         **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
     show_progress: bool, default `True`
-        Whether to show a progress bar. Defaults to True.
+        Whether to show a progress bar.
 
     Returns
     -------
@@ -688,13 +688,13 @@ def random_search_sarimax(
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
     n_jobs : int, default -1
-        The number of jobs to run in parallel. If -1, then the number of jobs is 
+        The number of jobs to run in parallel. If `-1`, then the number of jobs is 
         set to the number of cores.
         **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
     show_progress: bool, default `True`
-        Whether to show a progress bar. Defaults to True.
+        Whether to show a progress bar.
 
     Returns
     -------
@@ -790,13 +790,13 @@ def _evaluate_grid_hyperparameters_sarimax(
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
     n_jobs : int, default -1
-        The number of jobs to run in parallel. If -1, then the number of jobs is 
+        The number of jobs to run in parallel. If `-1`, then the number of jobs is 
         set to the number of cores.
         **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
     show_progress: bool, default `True`
-        Whether to show a progress bar. Defaults to True.
+        Whether to show a progress bar.
 
     Returns
     -------

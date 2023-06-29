@@ -163,10 +163,8 @@ class ForecasterAutoregDirect(ForecasterBase):
         Version of skforecast library used to create the forecaster.
     python_version : str
         Version of python used to create the forecaster.
-    forecaster_id : str, int default `None`
+    forecaster_id : str, int
         Name used as an identifier of the forecaster.
-    fit_kwargs : dict, default `None`
-        Additional parameters passed to the `fit` method of the regressor.
 
     Notes
     -----

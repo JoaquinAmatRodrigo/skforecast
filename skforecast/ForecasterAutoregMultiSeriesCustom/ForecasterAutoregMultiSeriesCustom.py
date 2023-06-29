@@ -209,9 +209,8 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         Version of skforecast library used to create the forecaster.
     python_version : str
         Version of python used to create the forecaster.
-    forecaster_id : str, int default `None`
+    forecaster_id : str, int
         Name used as an identifier of the forecaster.
-        **New in version 0.7.0**
 
     Notes
     -----
@@ -221,14 +220,14 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
     If the two types of weights are indicated, they are multiplied to create the final
     weights. The resulting `sample_weight` cannot have negative values.
 
-        - `series_weights` : controls the relative importance of each series. If a 
-        series has twice as much weight as the others, the observations of that series 
-        influence the training twice as much. The higher the weight of a series 
-        relative to the others, the more the model will focus on trying to learn 
-        that series.
-        - `weight_func` : controls the relative importance of each observation 
-        according to its index value. For example, a function that assigns a lower 
-        weight to certain dates.
+    - `series_weights` : controls the relative importance of each series. If a 
+    series has twice as much weight as the others, the observations of that series 
+    influence the training twice as much. The higher the weight of a series 
+    relative to the others, the more the model will focus on trying to learn 
+    that series.
+    - `weight_func` : controls the relative importance of each observation 
+    according to its index value. For example, a function that assigns a lower 
+    weight to certain dates.
     
     """
     
