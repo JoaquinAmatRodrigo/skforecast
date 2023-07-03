@@ -93,7 +93,7 @@ pip install skforecast[plotting]
 + statsmodels>=0.12, <0.14
 + pmdarima>=2.0, <2.1
 
-## What is new in skforecast 0.9.0?
+# What is new in skforecast 0.9.0?
 
 Visit the [release notes](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/changelog.md) to view all notable changes.
 
@@ -122,7 +122,7 @@ The skforecast library offers a variety of forecaster types, each tailored to sp
 
 # Main User Guides
 
-+ [Introduction to time series and forecasting](https://skforecast.org/latest/user_guides/quick-start-skforecast.html)
++ [Introduction to time series and forecasting](https://skforecast.org/latest/introduction-forecasting/introduction-forecasting.html)
 
 + [Recursive multi-step forecasting](https://skforecast.org/latest/user_guides/autoregresive-forecaster.html)
 
@@ -222,7 +222,7 @@ Amat Rodrigo, J., & Escobar Ortiz, J. skforecast (Version 0.9.0) [Computer softw
 @software{skforecast,
 author = {Amat Rodrigo, Joaquin and Escobar Ortiz, Javier},
 license = {BSD 3-Clause License},
-month = {6},
+month = {7},
 title = {{skforecast}},
 version = {0.9.0},
 year = {2023}
