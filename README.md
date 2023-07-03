@@ -105,7 +105,7 @@ Visit the [release notes](https://github.com/JoaquinAmatRodrigo/skforecast/blob/
 
 # Forecasters
 
-A Forecaster object in the skforecast library is a comprehensive container that provides essential functionality and methods for training a forecasting model and generating predictions for future points in time.
+A **Forecaster** object in the skforecast library is a comprehensive container that provides essential functionality and methods for training a forecasting model and generating predictions for future points in time.
 
 The skforecast library offers a variety of forecaster types, each tailored to specific requirements such as single or multiple time series, direct or recursive strategies, or custom predictors. Regardless of the specific forecaster type, all instances share the same API.
 
@@ -187,13 +187,6 @@ The skforecast library offers a variety of forecaster types, each tailored to sp
 + [**Predicción de demanda intermitente**](https://www.cienciadedatos.net/documentos/py48-forecasting-demanda-intermitente.html)
 
 
-# Donating
-
-If you found skforecast useful, you can support us with a donation. Your contribution will help to continue developing and improving this project. Many thanks!
-
-[![paypal](https://www.paypalobjects.com/en_US/ES/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate/?hosted_button_id=D2JZSWRLTZDL6)
-
-
 # How to contribute
 
 Primarily, skforecast development consists of adding and creating new *Forecasters*, new validation strategies, or improving the performance of the current code. However, there are many other ways to contribute:
@@ -230,6 +223,13 @@ year = {2023}
 ```
 
 View the [citation file](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/CITATION.cff).
+
+
+# Donating
+
+If you found skforecast useful, you can support us with a donation. Your contribution will help to continue developing and improving this project. Many thanks!
+
+[![paypal](https://www.paypalobjects.com/en_US/ES/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate/?hosted_button_id=D2JZSWRLTZDL6)
 
 
 # License
