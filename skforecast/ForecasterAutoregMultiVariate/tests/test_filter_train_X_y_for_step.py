@@ -49,13 +49,13 @@ def test_filter_train_X_y_for_step_output_when_lags_3_steps_2_exog_is_None_for_s
                              [5., 4., 3., 105., 104., 103.],
                              [6., 5., 4., 106., 105., 104.],
                              [7., 6., 5., 107., 106., 105.]], dtype=float),
-            index   = pd.RangeIndex(start=4, stop=10, step=1),
+            index   = pd.RangeIndex(start=3, stop=9, step=1),
             columns = ['l1_lag_1', 'l1_lag_2', 'l1_lag_3',
                        'l2_lag_1', 'l2_lag_2', 'l2_lag_3']
         ),
         pd.Series(
             data  = np.array([3., 4., 5., 6., 7., 8.], dtype=float),
-            index = pd.RangeIndex(start=4, stop=10, step=1),
+            index = pd.RangeIndex(start=3, stop=9, step=1),
             name  = 'l1_step_1'
         )
     )

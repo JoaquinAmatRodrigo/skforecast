@@ -216,20 +216,27 @@ def test_create_train_X_y_output_when_lags_3_steps_1_and_exog_is_None(level, exp
             columns = ['l1_lag_1', 'l1_lag_2', 'l1_lag_3',
                        'l2_lag_1', 'l2_lag_2', 'l2_lag_3']
         ),
-        pd.DataFrame(
-            data    = np.array(expected_y_values, dtype=float),
-            index   = pd.RangeIndex(start=3, stop=10, step=1),
-            columns = [f'{level}_step_1'])
+        {1: pd.Series(
+                data  = np.array(expected_y_values, dtype=float), 
+                index = pd.RangeIndex(start=3, stop=10, step=1),
+                name  = f'{level}_step_1'
+            )
+        }
     )
 
     pd.testing.assert_frame_equal(results[0], expected[0])
-    pd.testing.assert_frame_equal(results[1], expected[1])
+    assert isinstance(results[1], dict)
+    assert all(isinstance(x, pd.Series) for x in results[1].values())
+    assert results[1].keys() == expected[1].keys()
+    for key in expected[1]: 
+        pd.testing.assert_series_equal(results[1][key], expected[1][key]) 
 
 
 @pytest.mark.parametrize("level, expected_y_values", 
-                         [('l1', [[3., 4.], [4., 5.], [5., 6.], [6., 7.], [7., 8.], [8., 9.]]), 
-                          ('l2', [[103., 104.], [104., 105.], [105., 106.], 
-                                  [106., 107.], [107., 108.], [108., 109.]])])
+                         [('l1', ([3., 4., 5., 6., 7., 8.], 
+                                  [4., 5., 6., 7., 8., 9.])), 
+                          ('l2', ([103., 104., 105., 106., 107., 108.], 
+                                  [104., 105., 106., 107., 108., 109.]))])
 def test_create_train_X_y_output_when_interspersed_lags_steps_2_and_exog_is_None(level, expected_y_values):
     """
     Test output of create_train_X_y when regressor is LinearRegression, 
@@ -255,20 +262,32 @@ def test_create_train_X_y_output_when_interspersed_lags_steps_2_and_exog_is_None
             columns = ['l1_lag_1', 'l1_lag_3',
                        'l2_lag_1', 'l2_lag_3']
         ),
-        pd.DataFrame(
-            data    = np.array(expected_y_values, dtype=float),
-            index   = pd.RangeIndex(start=4, stop=10, step=1),
-            columns = [f'{level}_step_1', f'{level}_step_2']
-        )
+        {1: pd.Series(
+                data  = np.array(expected_y_values[0], dtype=float), 
+                index = pd.RangeIndex(start=3, stop=9, step=1),
+                name  = f'{level}_step_1'
+            ),
+         2: pd.Series(
+                data  = np.array(expected_y_values[1], dtype=float), 
+                index = pd.RangeIndex(start=4, stop=10, step=1),
+                name  = f'{level}_step_2'
+            )
+        }
     )
 
     pd.testing.assert_frame_equal(results[0], expected[0])
-    pd.testing.assert_frame_equal(results[1], expected[1])
+    assert isinstance(results[1], dict)
+    assert all(isinstance(x, pd.Series) for x in results[1].values())
+    assert results[1].keys() == expected[1].keys()
+    for key in expected[1]: 
+        pd.testing.assert_series_equal(results[1][key], expected[1][key]) 
 
 
 @pytest.mark.parametrize("level, expected_y_values", 
-                         [('l1', [[5., 6.], [6., 7.], [7., 8.], [8., 9.]]), 
-                          ('l2', [[105., 106.], [106., 107.], [107., 108.], [108., 109.]])])
+                         [('l1', ([5., 6., 7., 8.], 
+                                  [6., 7., 8., 9.])), 
+                          ('l2', ([105., 106., 107., 108.], 
+                                  [106., 107., 108., 109.]))])
 def test_create_train_X_y_output_when_different_lags_steps_2_and_exog_is_None(level, expected_y_values):
     """
     Test output of create_train_X_y when regressor is LinearRegression, 
@@ -293,15 +312,25 @@ def test_create_train_X_y_output_when_different_lags_steps_2_and_exog_is_None(le
             columns = ['l1_lag_1', 'l1_lag_2', 'l1_lag_3',
                        'l2_lag_1', 'l2_lag_5']
         ),
-        pd.DataFrame(
-            data    = np.array(expected_y_values, dtype=float),
-            index   = pd.RangeIndex(start=6, stop=10, step=1),
-            columns = [f'{level}_step_1', f'{level}_step_2']
-        )
+        {1: pd.Series(
+                data  = np.array(expected_y_values[0], dtype=float), 
+                index = pd.RangeIndex(start=5, stop=9, step=1),
+                name  = f'{level}_step_1'
+            ),
+         2: pd.Series(
+                data  = np.array(expected_y_values[1], dtype=float), 
+                index = pd.RangeIndex(start=6, stop=10, step=1),
+                name  = f'{level}_step_2'
+            )
+        }
     )
 
     pd.testing.assert_frame_equal(results[0], expected[0])
-    pd.testing.assert_frame_equal(results[1], expected[1])
+    assert isinstance(results[1], dict)
+    assert all(isinstance(x, pd.Series) for x in results[1].values())
+    assert results[1].keys() == expected[1].keys()
+    for key in expected[1]: 
+        pd.testing.assert_series_equal(results[1][key], expected[1][key]) 
 
 
 @pytest.mark.parametrize("dtype", 
@@ -333,19 +362,20 @@ def test_create_train_X_y_output_when_lags_5_steps_1_and_exog_is_series_of_float
                        'l2_lag_1', 'l2_lag_2', 'l2_lag_3', 'l2_lag_4', 'l2_lag_5',
                        'exog_step_1']
         ).astype({'exog_step_1': dtype}),
-        pd.DataFrame(
-            data = np.array([[5.],
-                             [6.],
-                             [7.],
-                             [8.],
-                             [9.]], dtype=float),
-            index = pd.RangeIndex(start=5, stop=10, step=1),
-            columns = ['l1_step_1']
-        )
+        {1: pd.Series(
+                data  = np.array([5., 6., 7., 8., 9.], dtype=float), 
+                index = pd.RangeIndex(start=5, stop=10, step=1),
+                name  = "l1_step_1"
+            )
+        }
     )
 
     pd.testing.assert_frame_equal(results[0], expected[0])
-    pd.testing.assert_frame_equal(results[1], expected[1])
+    assert isinstance(results[1], dict)
+    assert all(isinstance(x, pd.Series) for x in results[1].values())
+    assert results[1].keys() == expected[1].keys()
+    for key in expected[1]: 
+        pd.testing.assert_series_equal(results[1][key], expected[1][key]) 
 
 
 @pytest.mark.parametrize("dtype", 
@@ -376,18 +406,25 @@ def test_create_train_X_y_output_when_lags_5_steps_2_and_exog_is_series_of_float
                        'l2_lag_1', 'l2_lag_2', 'l2_lag_3', 'l2_lag_4', 'l2_lag_5',
                        'exog_step_1', 'exog_step_2']
         ).astype({'exog_step_1': dtype, 'exog_step_2': dtype}),
-        pd.DataFrame(
-            data = np.array([[5., 6.],
-                             [6., 7.],
-                             [7., 8.],
-                             [8., 9.]], dtype=float),
-            index = pd.RangeIndex(start=6, stop=10, step=1),
-            columns = ['l1_step_1', 'l1_step_2']
-        )
+        {1: pd.Series(
+                data  = np.array([5., 6., 7., 8.], dtype=float), 
+                index = pd.RangeIndex(start=5, stop=9, step=1),
+                name  = "l1_step_1"
+            ),
+         2: pd.Series(
+                data  = np.array([6., 7., 8., 9.], dtype=float), 
+                index = pd.RangeIndex(start=6, stop=10, step=1),
+                name  = "l1_step_2"
+            )
+        }
     )
 
     pd.testing.assert_frame_equal(results[0], expected[0])
-    pd.testing.assert_frame_equal(results[1], expected[1])
+    assert isinstance(results[1], dict)
+    assert all(isinstance(x, pd.Series) for x in results[1].values())
+    assert results[1].keys() == expected[1].keys()
+    for key in expected[1]: 
+        pd.testing.assert_series_equal(results[1][key], expected[1][key]) 
 
 
 @pytest.mark.parametrize("dtype", 
@@ -420,19 +457,20 @@ def test_create_train_X_y_output_when_lags_5_steps_1_and_exog_is_dataframe_of_fl
                        'l2_lag_1', 'l2_lag_2', 'l2_lag_3', 'l2_lag_4', 'l2_lag_5',
                        'exog_1_step_1', 'exog_2_step_1']
         ).astype({'exog_1_step_1': dtype, 'exog_2_step_1': dtype}),
-        pd.DataFrame(
-            data = np.array([[55.],
-                             [56.],
-                             [57.],
-                             [58.],
-                             [59.]], dtype=float),
-            index = pd.RangeIndex(start=5, stop=10, step=1),
-            columns = ['l2_step_1']
-        )      
+        {1: pd.Series(
+                data  = np.array([55., 56., 57., 58., 59.], dtype=float), 
+                index = pd.RangeIndex(start=5, stop=10, step=1),
+                name  = "l2_step_1"
+            )
+        }
     )
 
     pd.testing.assert_frame_equal(results[0], expected[0])
-    pd.testing.assert_frame_equal(results[1], expected[1])
+    assert isinstance(results[1], dict)
+    assert all(isinstance(x, pd.Series) for x in results[1].values())
+    assert results[1].keys() == expected[1].keys()
+    for key in expected[1]: 
+        pd.testing.assert_series_equal(results[1][key], expected[1][key]) 
 
 
 @pytest.mark.parametrize("dtype", 
@@ -467,17 +505,30 @@ def test_create_train_X_y_output_when_lags_5_steps_3_and_exog_is_dataframe_of_fl
         ).astype({'exog_1_step_1': dtype, 'exog_2_step_1': dtype, 
                   'exog_1_step_2': dtype, 'exog_2_step_2': dtype, 
                   'exog_1_step_3': dtype, 'exog_2_step_3': dtype}),
-        pd.DataFrame(
-            data = np.array([[55., 56., 57.],
-                             [56., 57., 58.],
-                             [57., 58., 59.]], dtype=float),
-            index = pd.RangeIndex(start=7, stop=10, step=1),
-            columns = ['l2_step_1', 'l2_step_2', 'l2_step_3']
-        )
+        {1: pd.Series(
+                data  = np.array([55., 56., 57.], dtype=float), 
+                index = pd.RangeIndex(start=5, stop=8, step=1),
+                name  = "l2_step_1"
+            ),
+         2: pd.Series(
+                data  = np.array([56., 57., 58.], dtype=float), 
+                index = pd.RangeIndex(start=6, stop=9, step=1),
+                name  = "l2_step_2"
+            ),
+         3: pd.Series(
+                data  = np.array([57., 58., 59.], dtype=float), 
+                index = pd.RangeIndex(start=7, stop=10, step=1),
+                name  = "l2_step_3"
+            )
+        }
     )
 
     pd.testing.assert_frame_equal(results[0], expected[0])
-    pd.testing.assert_frame_equal(results[1], expected[1])
+    assert isinstance(results[1], dict)
+    assert all(isinstance(x, pd.Series) for x in results[1].values())
+    assert results[1].keys() == expected[1].keys()
+    for key in expected[1]: 
+        pd.testing.assert_series_equal(results[1][key], expected[1][key]) 
 
 
 @pytest.mark.parametrize("exog_values, dtype", 
@@ -509,19 +560,20 @@ def test_create_train_X_y_output_when_lags_5_steps_1_and_exog_is_series_of_bool_
             columns = ['l1_lag_1', 'l1_lag_2', 'l1_lag_3', 'l1_lag_4', 'l1_lag_5', 
                        'l2_lag_1', 'l2_lag_2', 'l2_lag_3', 'l2_lag_4', 'l2_lag_5']
         ).assign(exog_step_1=exog_values*5).astype({'exog_step_1': dtype}),
-        pd.DataFrame(
-            data = np.array([[5.],
-                             [6.],
-                             [7.],
-                             [8.],
-                             [9.]], dtype=float),
-            index = pd.RangeIndex(start=5, stop=10, step=1),
-            columns = ['l1_step_1']
-        )
+        {1: pd.Series(
+                data  = np.array([5., 6., 7., 8., 9.], dtype=float), 
+                index = pd.RangeIndex(start=5, stop=10, step=1),
+                name  = "l1_step_1"
+            )
+        }
     )
 
     pd.testing.assert_frame_equal(results[0], expected[0])
-    pd.testing.assert_frame_equal(results[1], expected[1])
+    assert isinstance(results[1], dict)
+    assert all(isinstance(x, pd.Series) for x in results[1].values())
+    assert results[1].keys() == expected[1].keys()
+    for key in expected[1]: 
+        pd.testing.assert_series_equal(results[1][key], expected[1][key]) 
 
 
 @pytest.mark.parametrize("exog_values, dtype", 
@@ -554,18 +606,25 @@ def test_create_train_X_y_output_when_lags_5_steps_2_and_exog_is_series_of_bool_
         ).assign(exog_step_1=exog_values*4,
                  exog_step_2=exog_values*4).astype({'exog_step_1': dtype, 
                                                     'exog_step_2': dtype}),
-        pd.DataFrame(
-            data = np.array([[5., 6.],
-                             [6., 7.],
-                             [7., 8.],
-                             [8., 9.]], dtype=float),
-            index = pd.RangeIndex(start=6, stop=10, step=1),
-            columns = ['l1_step_1', 'l1_step_2']
-        )
+        {1: pd.Series(
+                data  = np.array([5., 6., 7., 8.], dtype=float), 
+                index = pd.RangeIndex(start=5, stop=9, step=1),
+                name  = "l1_step_1"
+            ),
+         2: pd.Series(
+                data  = np.array([6., 7., 8., 9.], dtype=float), 
+                index = pd.RangeIndex(start=6, stop=10, step=1),
+                name  = "l1_step_2"
+            )
+        }
     )
 
     pd.testing.assert_frame_equal(results[0], expected[0])
-    pd.testing.assert_frame_equal(results[1], expected[1])
+    assert isinstance(results[1], dict)
+    assert all(isinstance(x, pd.Series) for x in results[1].values())
+    assert results[1].keys() == expected[1].keys()
+    for key in expected[1]: 
+        pd.testing.assert_series_equal(results[1][key], expected[1][key]) 
 
 
 @pytest.mark.parametrize("v_exog_1   , v_exog_2  , dtype", 
@@ -600,19 +659,20 @@ def test_create_train_X_y_output_when_lags_5_steps_1_and_exog_is_dataframe_of_bo
         ).assign(exog_1_step_1=v_exog_1*5,
                  exog_2_step_1=v_exog_2*5).astype({'exog_1_step_1': dtype, 
                                                    'exog_2_step_1': dtype}),
-        pd.DataFrame(
-            data = np.array([[55.],
-                             [56.],
-                             [57.],
-                             [58.],
-                             [59.]], dtype=float),
-            index = pd.RangeIndex(start=5, stop=10, step=1),
-            columns = ['l2_step_1']
-        )      
+        {1: pd.Series(
+                data  = np.array([55., 56., 57., 58., 59.], dtype=float), 
+                index = pd.RangeIndex(start=5, stop=10, step=1),
+                name  = "l2_step_1"
+            )
+        }
     )
 
     pd.testing.assert_frame_equal(results[0], expected[0])
-    pd.testing.assert_frame_equal(results[1], expected[1])
+    assert isinstance(results[1], dict)
+    assert all(isinstance(x, pd.Series) for x in results[1].values())
+    assert results[1].keys() == expected[1].keys()
+    for key in expected[1]: 
+        pd.testing.assert_series_equal(results[1][key], expected[1][key]) 
 
 
 @pytest.mark.parametrize("v_exog_1   , v_exog_2  , dtype", 
@@ -652,17 +712,30 @@ def test_create_train_X_y_output_when_lags_5_steps_3_and_exog_is_dataframe_of_bo
                   'exog_1_step_2': dtype, 'exog_2_step_2': dtype, 
                   'exog_1_step_3': dtype, 'exog_2_step_3': dtype}
         ),
-        pd.DataFrame(
-            data = np.array([[55., 56., 57.],
-                             [56., 57., 58.],
-                             [57., 58., 59.]], dtype=float),
-            index = pd.RangeIndex(start=7, stop=10, step=1),
-            columns = ['l2_step_1', 'l2_step_2', 'l2_step_3']
-        )
+        {1: pd.Series(
+                data  = np.array([55., 56., 57.], dtype=float), 
+                index = pd.RangeIndex(start=5, stop=8, step=1),
+                name  = "l2_step_1"
+            ),
+         2: pd.Series(
+                data  = np.array([56., 57., 58.], dtype=float), 
+                index = pd.RangeIndex(start=6, stop=9, step=1),
+                name  = "l2_step_2"
+            ),
+         3: pd.Series(
+                data  = np.array([57., 58., 59.], dtype=float), 
+                index = pd.RangeIndex(start=7, stop=10, step=1),
+                name  = "l2_step_3"
+            )
+        }
     )
 
     pd.testing.assert_frame_equal(results[0], expected[0])
-    pd.testing.assert_frame_equal(results[1], expected[1])
+    assert isinstance(results[1], dict)
+    assert all(isinstance(x, pd.Series) for x in results[1].values())
+    assert results[1].keys() == expected[1].keys()
+    for key in expected[1]: 
+        pd.testing.assert_series_equal(results[1][key], expected[1][key]) 
 
 
 def test_create_train_X_y_output_when_lags_5_steps_1_and_exog_is_series_of_category():
@@ -690,19 +763,20 @@ def test_create_train_X_y_output_when_lags_5_steps_1_and_exog_is_series_of_categ
             columns = ['l1_lag_1', 'l1_lag_2', 'l1_lag_3', 'l1_lag_4', 'l1_lag_5', 
                        'l2_lag_1', 'l2_lag_2', 'l2_lag_3', 'l2_lag_4', 'l2_lag_5']
         ).assign(exog_step_1=pd.Categorical(range(5, 10), categories=range(10))),
-        pd.DataFrame(
-            data = np.array([[5.],
-                             [6.],
-                             [7.],
-                             [8.],
-                             [9.]], dtype=float),
-            index = pd.RangeIndex(start=5, stop=10, step=1),
-            columns = ['l1_step_1']
-        )
+        {1: pd.Series(
+                data  = np.array([5., 6., 7., 8., 9.], dtype=float), 
+                index = pd.RangeIndex(start=5, stop=10, step=1),
+                name  = "l1_step_1"
+            )
+        }
     )
 
     pd.testing.assert_frame_equal(results[0], expected[0])
-    pd.testing.assert_frame_equal(results[1], expected[1])
+    assert isinstance(results[1], dict)
+    assert all(isinstance(x, pd.Series) for x in results[1].values())
+    assert results[1].keys() == expected[1].keys()
+    for key in expected[1]: 
+        pd.testing.assert_series_equal(results[1][key], expected[1][key]) 
 
 
 def test_create_train_X_y_output_when_lags_5_steps_2_and_exog_is_series_of_category():
@@ -730,18 +804,25 @@ def test_create_train_X_y_output_when_lags_5_steps_2_and_exog_is_series_of_categ
                        'l2_lag_1', 'l2_lag_2', 'l2_lag_3', 'l2_lag_4', 'l2_lag_5']
         ).assign(exog_step_1=pd.Categorical(range(5, 9), categories=range(10)),
                  exog_step_2=pd.Categorical(range(6, 10), categories=range(10))),
-        pd.DataFrame(
-            data = np.array([[5., 6.],
-                             [6., 7.],
-                             [7., 8.],
-                             [8., 9.]], dtype=float),
-            index = pd.RangeIndex(start=6, stop=10, step=1),
-            columns = ['l1_step_1', 'l1_step_2']
-        )
+        {1: pd.Series(
+                data  = np.array([5., 6., 7., 8.], dtype=float), 
+                index = pd.RangeIndex(start=5, stop=9, step=1),
+                name  = "l1_step_1"
+            ),
+         2: pd.Series(
+                data  = np.array([6., 7., 8., 9.], dtype=float), 
+                index = pd.RangeIndex(start=6, stop=10, step=1),
+                name  = "l1_step_2"
+            )
+        }
     )
 
     pd.testing.assert_frame_equal(results[0], expected[0])
-    pd.testing.assert_frame_equal(results[1], expected[1])
+    assert isinstance(results[1], dict)
+    assert all(isinstance(x, pd.Series) for x in results[1].values())
+    assert results[1].keys() == expected[1].keys()
+    for key in expected[1]: 
+        pd.testing.assert_series_equal(results[1][key], expected[1][key]) 
 
 
 def test_create_train_X_y_output_when_lags_5_steps_1_and_exog_is_dataframe_of_category():
@@ -773,19 +854,20 @@ def test_create_train_X_y_output_when_lags_5_steps_1_and_exog_is_dataframe_of_ca
             exog_1_step_1=pd.Categorical(range(5, 10), categories=range(10)),
             exog_2_step_1=pd.Categorical(range(105, 110), categories=range(100, 110))
         ),
-        pd.DataFrame(
-            data = np.array([[55.],
-                             [56.],
-                             [57.],
-                             [58.],
-                             [59.]], dtype=float),
-            index = pd.RangeIndex(start=5, stop=10, step=1),
-            columns = ['l2_step_1']
-        )      
+        {1: pd.Series(
+                data  = np.array([55., 56., 57., 58., 59.], dtype=float), 
+                index = pd.RangeIndex(start=5, stop=10, step=1),
+                name  = "l2_step_1"
+            )
+        }
     )
 
     pd.testing.assert_frame_equal(results[0], expected[0])
-    pd.testing.assert_frame_equal(results[1], expected[1])
+    assert isinstance(results[1], dict)
+    assert all(isinstance(x, pd.Series) for x in results[1].values())
+    assert results[1].keys() == expected[1].keys()
+    for key in expected[1]: 
+        pd.testing.assert_series_equal(results[1][key], expected[1][key]) 
 
 
 def test_create_train_X_y_output_when_lags_5_steps_3_and_exog_is_dataframe_of_category():
@@ -819,17 +901,30 @@ def test_create_train_X_y_output_when_lags_5_steps_3_and_exog_is_dataframe_of_ca
             exog_1_step_3=pd.Categorical(range(7, 10), categories=range(10)),
             exog_2_step_3=pd.Categorical(range(107, 110), categories=range(100, 110))
         ),
-        pd.DataFrame(
-            data = np.array([[55., 56., 57.],
-                             [56., 57., 58.],
-                             [57., 58., 59.]], dtype=float),
-            index = pd.RangeIndex(start=7, stop=10, step=1),
-            columns = ['l2_step_1', 'l2_step_2', 'l2_step_3']
-        )
+        {1: pd.Series(
+                data  = np.array([55., 56., 57.], dtype=float), 
+                index = pd.RangeIndex(start=5, stop=8, step=1),
+                name  = "l2_step_1"
+            ),
+         2: pd.Series(
+                data  = np.array([56., 57., 58.], dtype=float), 
+                index = pd.RangeIndex(start=6, stop=9, step=1),
+                name  = "l2_step_2"
+            ),
+         3: pd.Series(
+                data  = np.array([57., 58., 59.], dtype=float), 
+                index = pd.RangeIndex(start=7, stop=10, step=1),
+                name  = "l2_step_3"
+            )
+        }
     )
 
     pd.testing.assert_frame_equal(results[0], expected[0])
-    pd.testing.assert_frame_equal(results[1], expected[1])
+    assert isinstance(results[1], dict)
+    assert all(isinstance(x, pd.Series) for x in results[1].values())
+    assert results[1].keys() == expected[1].keys()
+    for key in expected[1]: 
+        pd.testing.assert_series_equal(results[1][key], expected[1][key]) 
 
 
 def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_dataframe_of_float_int_category_steps_1():
@@ -859,16 +954,22 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_dataframe_of_fl
                        'l2_lag_1', 'l2_lag_2', 'l2_lag_3', 'l2_lag_4', 'l2_lag_5',
                        'exog_1_step_1', 'exog_2_step_1']
         ).astype({'exog_1_step_1': float, 
-                  'exog_2_step_1': int}).assign(exog_3_step_1=pd.Categorical(range(105, 110), categories=range(100, 110))),
-        pd.DataFrame(
-            data    = np.array([5, 6, 7, 8, 9], dtype=float),
-            index   = pd.RangeIndex(start=5, stop=10, step=1),
-            columns = ['l1_step_1']
-        )
+                  'exog_2_step_1': int}).assign(exog_3_step_1=pd.Categorical(range(105, 110), categories=range(100, 110))
+        ),
+        {1: pd.Series(
+                data  = np.array([5., 6., 7., 8., 9.], dtype=float), 
+                index = pd.RangeIndex(start=5, stop=10, step=1),
+                name  = "l1_step_1"
+            )
+        }
     )
 
     pd.testing.assert_frame_equal(results[0], expected[0])
-    pd.testing.assert_frame_equal(results[1], expected[1])
+    assert isinstance(results[1], dict)
+    assert all(isinstance(x, pd.Series) for x in results[1].values())
+    assert results[1].keys() == expected[1].keys()
+    for key in expected[1]: 
+        pd.testing.assert_series_equal(results[1][key], expected[1][key]) 
 
 
 def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_dataframe_of_float_int_category_steps_3():
@@ -904,17 +1005,30 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_dataframe_of_fl
                  exog_3_step_2=pd.Categorical(range(106, 109), categories=range(100, 110)),
                  exog_3_step_3=pd.Categorical(range(107, 110), categories=range(100, 110))
         ),
-        pd.DataFrame(
-            data = np.array([[5., 6., 7.],
-                             [6., 7., 8.],
-                             [7., 8., 9.]], dtype=float),
-            index = pd.RangeIndex(start=7, stop=10, step=1),
-            columns = ['l1_step_1', 'l1_step_2', 'l1_step_3']
-        )
+        {1: pd.Series(
+                data  = np.array([5., 6., 7.], dtype=float), 
+                index = pd.RangeIndex(start=5, stop=8, step=1),
+                name  = "l1_step_1"
+            ),
+         2: pd.Series(
+                data  = np.array([6., 7., 8.], dtype=float), 
+                index = pd.RangeIndex(start=6, stop=9, step=1),
+                name  = "l1_step_2"
+            ),
+         3: pd.Series(
+                data  = np.array([7., 8., 9.], dtype=float), 
+                index = pd.RangeIndex(start=7, stop=10, step=1),
+                name  = "l1_step_3"
+            )
+        }
     )
 
     pd.testing.assert_frame_equal(results[0], expected[0])
-    pd.testing.assert_frame_equal(results[1], expected[1])
+    assert isinstance(results[1], dict)
+    assert all(isinstance(x, pd.Series) for x in results[1].values())
+    assert results[1].keys() == expected[1].keys()
+    for key in expected[1]: 
+        pd.testing.assert_series_equal(results[1][key], expected[1][key]) 
 
 
 @pytest.mark.parametrize("transformer_series", 
@@ -954,19 +1068,21 @@ def test_create_train_X_y_output_when_lags_5_steps_1_and_transformer_series_Stan
             columns = ['l1_lag_1', 'l1_lag_2', 'l1_lag_3', 'l1_lag_4', 'l1_lag_5', 
                        'l2_lag_1', 'l2_lag_2', 'l2_lag_3', 'l2_lag_4', 'l2_lag_5']
         ),
-        pd.DataFrame(
-            data  = np.array([[0.17407766],
-                              [0.52223297],
-                              [0.87038828],
-                              [1.21854359],
-                              [1.5666989 ]]),
-            index = pd.RangeIndex(start=5, stop=10, step=1),
-            columns  = ['l1_step_1']
-        )
+        {1: pd.Series(
+                data  = np.array([0.17407766, 0.52223297, 0.87038828, 
+                                  1.21854359, 1.5666989]), 
+                index = pd.RangeIndex(start=5, stop=10, step=1),
+                name  = "l1_step_1"
+            )
+        }
     )
 
     pd.testing.assert_frame_equal(results[0], expected[0])
-    pd.testing.assert_frame_equal(results[1], expected[1])
+    assert isinstance(results[1], dict)
+    assert all(isinstance(x, pd.Series) for x in results[1].values())
+    assert results[1].keys() == expected[1].keys()
+    for key in expected[1]: 
+        pd.testing.assert_series_equal(results[1][key], expected[1][key]) 
 
 
 @pytest.mark.parametrize("level, expected_y_values", 
@@ -998,14 +1114,20 @@ def test_create_train_X_y_output_when_lags_3_steps_1_and_exog_is_None_and_transf
             columns = ['l1_lag_1', 'l1_lag_2', 'l1_lag_3',
                        'l2_lag_1', 'l2_lag_2', 'l2_lag_3']
         ),
-        pd.DataFrame(
-            data    = np.array(expected_y_values, dtype=float),
-            index   = pd.RangeIndex(start=3, stop=10, step=1),
-            columns = [f'{level}_step_1'])
+        {1: pd.Series(
+                data  = np.array(expected_y_values, dtype=float), 
+                index = pd.RangeIndex(start=3, stop=10, step=1),
+                name  = f'{level}_step_1'
+            )
+        }
     )
 
     pd.testing.assert_frame_equal(results[0], expected[0])
-    pd.testing.assert_frame_equal(results[1], expected[1])
+    assert isinstance(results[1], dict)
+    assert all(isinstance(x, pd.Series) for x in results[1].values())
+    assert results[1].keys() == expected[1].keys()
+    for key in expected[1]: 
+        pd.testing.assert_series_equal(results[1][key], expected[1][key]) 
 
 
 @pytest.mark.parametrize("transformer_series", 
@@ -1066,15 +1188,22 @@ def test_create_train_X_y_output_when_transformer_series_and_transformer_exog_st
                        'col_1_step_1', 'col_2_a_step_1', 'col_2_b_step_1',
                        'col_1_step_2', 'col_2_a_step_2', 'col_2_b_step_2']
         ),
-        pd.DataFrame(
-            data  = np.array([[0.17407766, 0.52223297],
-                              [0.52223297, 0.87038828],
-                              [0.87038828, 1.21854359],
-                              [1.21854359, 1.5666989 ]]),
-            index = pd.date_range("1990-01-07", periods=4, freq='D'),
-            columns = ['l1_step_1', 'l1_step_2']
-        )
+        {1: pd.Series(
+                data  = np.array([0.17407766, 0.52223297, 0.87038828, 1.21854359]), 
+                index = pd.date_range("1990-01-06", periods=4, freq='D'),
+                name  = "l1_step_1"
+            ),
+         2: pd.Series(
+                data  = np.array([0.52223297, 0.87038828, 1.21854359, 1.5666989]), 
+                index = pd.date_range("1990-01-07", periods=4, freq='D'),
+                name  = "l1_step_2"
+            )
+        }
     )
 
     pd.testing.assert_frame_equal(results[0], expected[0])
-    pd.testing.assert_frame_equal(results[1], expected[1])
+    assert isinstance(results[1], dict)
+    assert all(isinstance(x, pd.Series) for x in results[1].values())
+    assert results[1].keys() == expected[1].keys()
+    for key in expected[1]: 
+        pd.testing.assert_series_equal(results[1][key], expected[1][key]) 
