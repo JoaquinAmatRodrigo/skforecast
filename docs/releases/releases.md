@@ -3,7 +3,7 @@
 All significant changes to this project are documented in this release file.
 
 
-## [0.9.0] - [2023-06-XX]
+## [0.9.0] - [2023-07-XX]
 
 The main changes in this release are:
 
@@ -14,6 +14,8 @@ The main changes in this release are:
 + `ForecasterAutoregMultiSeries` and `ForecasterAutoregMultiSeriesCustom` can be trained using series of different lengths. This means that the model can handle datasets with different numbers of data points in each series.
 
 **Added**
+
++ Support for `scikit-learn 1.3.x`.
 
 + Argument `n_jobs=-1` to all backtesting dependent functions in modules `model_selection`, `model_selection_multiseries` and `model_selection_sarimax` to allow  multi-process parallelization.
 
@@ -38,6 +40,10 @@ The main changes in this release are:
 **Fixed**
 
 + Ensure reproducibility of Direct Forecasters when using `predict_bootstrapping`, `predict_dist` and `predict_interval` with a `list` of steps.
+
++ The `create_train_X_y` method returns a dict of pandas Series as `y_train` in `ForecasterAutoregDirect` and `ForecasterAutoregMultiVariate`. This ensures that each series has the appropriate index according to the step to be trained.
+
++ The `filter_train_X_y_for_step` method in `ForecasterAutoregDirect` and `ForecasterAutoregMultiVariate` now updates the index of `X_train_step` to ensure correct alignment with `y_train_step`.
 
 
 ## [0.8.1] - [2023-05-27]
