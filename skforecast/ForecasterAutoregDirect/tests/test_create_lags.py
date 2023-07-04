@@ -16,8 +16,8 @@ def test_check_create_lags_exception_when_n_splits_less_than_0():
     y = pd.Series(np.arange(10))
 
     err_msg = re.escape(
-                f'The maximum lag ({forecaster.max_lag}) must be less than the length '
-                f'of the series minus the number of steps ({len(y)-(forecaster.steps-1)}).'
+                (f"The maximum lag ({forecaster.max_lag}) must be less than the length "
+                 f"of the series minus the number of steps ({len(y)-(forecaster.steps-1)}).")
             )
     with pytest.raises(ValueError, match = err_msg):
         forecaster._create_lags(y=y)
@@ -37,13 +37,8 @@ def test_create_lags_when_lags_is_3_steps_1_and_y_is_numpy_arange_10():
                           [6., 5., 4.],
                           [7., 6., 5.],
                           [8., 7., 6.]]),
-                np.array([[3.],
-                          [4.],
-                          [5.],
-                          [6.],
-                          [7.],
-                          [8.],
-                          [9.]]))
+                np.array([[3., 4., 5., 6., 7., 8., 9.]])
+                )
 
     assert (results[0] == expected[0]).all()
     assert (results[1] == expected[1]).all()
@@ -61,11 +56,8 @@ def test_create_lags_when_lags_is_list_interspersed_lags_steps_1_and_y_is_numpy_
                           [6., 2.],
                           [7., 3.],
                           [8., 4.]]),
-                np.array([[5.],
-                          [6.],
-                          [7.],
-                          [8.],
-                          [9.]]))
+                np.array([[5., 6., 7., 8., 9.]])
+                )
 
     assert (results[0] == expected[0]).all()
     assert (results[1] == expected[1]).all()
@@ -84,12 +76,9 @@ def test_create_lags_when_lags_is_3_steps_2_and_y_is_numpy_arange_10():
                           [5., 4., 3.],
                           [6., 5., 4.],
                           [7., 6., 5.]]),
-                np.array([[3., 4.],
-                          [4., 5.],
-                          [5., 6.],
-                          [6., 7.],
-                          [7., 8.],
-                          [8., 9.]]))
+                np.array([[3., 4., 5., 6., 7., 8.],
+                          [4., 5., 6., 7., 8., 9.]])
+                )
 
     assert (results[0] == expected[0]).all()
     assert (results[1] == expected[1]).all()
@@ -105,9 +94,12 @@ def test_create_lags_when_lags_is_3_steps_5_and_y_is_numpy_arange_10():
     expected = (np.array([[2., 1., 0.],
                           [3., 2., 1.],
                           [4., 3., 2.]]),
-                np.array([[3., 4., 5., 6., 7.],
-                          [4., 5., 6., 7., 8.],
-                          [5., 6., 7., 8., 9.]]))
+                np.array([[3., 4., 5.],
+                          [4., 5., 6.],
+                          [5., 6., 7.],
+                          [6., 7., 8.],
+                          [7., 8., 9.]])
+                )
 
     assert (results[0] == expected[0]).all()
     assert (results[1] == expected[1]).all()

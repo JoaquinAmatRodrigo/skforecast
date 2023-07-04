@@ -16,8 +16,9 @@ import sklearn
 import sklearn.pipeline
 from sklearn.base import clone
 import inspect
-from copy import deepcopy
+from copy import copy, deepcopy
 from itertools import chain
+from joblib import Parallel, delayed, cpu_count
 
 import skforecast
 from ..ForecasterBase import ForecasterBase
@@ -187,9 +188,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         Version of skforecast library used to create the forecaster.
     python_version : str
         Version of python used to create the forecaster.
-    forecaster_id : str, int default `None`
+    forecaster_id : str, int
         Name used as an identifier of the forecaster.
-        **New in version 0.7.0**
 
     Notes
     -----
@@ -344,7 +344,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         lags: np.ndarray,
     ) -> Tuple[np.ndarray, np.ndarray]:
         """
-        Transforms a 1d array into a 2d array (X) and a 1d array (y). Each row
+        Transforms a 1d array into a 2d array (X) and a 2d array (y). Each row
         in X is associated with a value of y and it represents the lags that
         precede it.
         
@@ -364,9 +364,9 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             2d numpy ndarray with the lagged values (predictors). 
             Shape: (samples - max(self.lags), len(self.lags))
         y_data : numpy ndarray
-            1d numpy ndarray with the values of the time series related to each 
-            row of `X_data`. 
-            Shape: (samples - max(self.lags), )
+            2d numpy ndarray with the values of the time series related to each 
+            row of `X_data` for each step. 
+            Shape: (len(self.steps), samples - max(self.lags))
         
         """
           
@@ -381,9 +381,9 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         for i, lag in enumerate(lags):
             X_data[:, i] = y[self.max_lag - lag : -(lag + self.steps - 1)] 
 
-        y_data = np.full(shape=(n_splits, self.steps), fill_value=np.nan, dtype=float)
+        y_data = np.full(shape=(self.steps, n_splits), fill_value=np.nan, dtype=float)
         for step in range(self.steps):
-            y_data[:, step] = y[self.max_lag + step : self.max_lag + step + n_splits]
+            y_data[step, ] = y[self.max_lag + step : self.max_lag + step + n_splits]
             
         return X_data, y_data
 
@@ -392,7 +392,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         self,
         series: pd.DataFrame,
         exog: Optional[Union[pd.Series, pd.DataFrame]]=None
-    ) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    ) -> Tuple[pd.DataFrame, dict]:
         """
         Create training matrices from multiple time series and exogenous
         variables. The resulting matrices contain the target variable and predictors
@@ -409,12 +409,14 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         Returns
         -------
         X_train : pandas DataFrame
-            Training values (predictors) for each step.
+            Training values (predictors) for each step. Note that the index 
+            corresponds to that of the last step. It is updated for the corresponding 
+            step in the filter_train_X_y_for_step method.
             Shape: (len(series) - self.max_lag, len(self.lags)*len(series.columns) + exog.shape[1]*steps)
-        y_train : pandas DataFrame
+        y_train : dict
             Values (target) of the time series related to each row of `X_train` 
-            for each step.
-            Shape: (len(series) - self.max_lag, )
+            for each step of the form {step: y_step_[i]}.
+            Shape of each series: (len(y) - self.max_lag, )
         
         """
 
@@ -520,9 +522,9 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
 
             y_values, y_index = preprocess_y(y=y)
             X_train_values, y_train_values = self._create_lags(
-                                                y    = y_values,
-                                                lags = self.lags_[serie]
-                                            )
+                                                 y    = y_values,
+                                                 lags = self.lags_[serie]
+                                             )
             if i == 0:
                 X_train = X_train_values
             else:
@@ -551,12 +553,12 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         
         self.X_train_col_names = X_train.columns.to_list()
 
-        y_train_col_names = [f"{self.level}_step_{i+1}" for i in range(self.steps)]
-        y_train = pd.DataFrame(
-                      data    = y_train,
-                      index   = y_index[self.max_lag + (self.steps -1): ],
-                      columns = y_train_col_names,
-                  )
+        y_train = {step: pd.Series(
+                             data  = y_train[step-1], 
+                             index = y_index[self.max_lag + step-1:][:len(y_train[0])],
+                             name  = f"{self.level}_step_{step}"
+                         )
+                   for step in range(1, self.steps + 1)}
                         
         return X_train, y_train
 
@@ -565,23 +567,24 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         self,
         step: int,
         X_train: pd.DataFrame,
-        y_train: pd.DataFrame,
+        y_train: dict,
         remove_suffix: bool=False
     ) -> Tuple[pd.DataFrame, pd.Series]:
         """
         Select the columns needed to train a forecaster for a specific step.  
-        The input matrices should be created using `create_train_X_y()`. If 
-        `remove_suffix=True` the suffix "_step_i" will be removed from the 
-        column names.      
+        The input matrices should be created using `create_train_X_y` method. 
+        This method updates the index of `X_train` to the corresponding one 
+        according to `y_train`. If `remove_suffix=True` the suffix "_step_i" 
+        will be removed from the column names. 
 
         Parameters
         ----------
         step : int
             step for which columns must be selected selected. Starts at 1.
         X_train : pandas DataFrame
-            Dataframe generated with the method `create_train_X_y`, first return.
-        y_train : pandas DataFrame
-            Dataframe generated with the method `create_train_X_y`, second return.
+            Dataframe created with the `create_train_X_y` method, first return.
+        y_train : dict
+            Dict created with the `create_train_X_y` method, second return.
         remove_suffix : bool, default `False`
             If True, suffix "_step_i" is removed from the column names.
 
@@ -601,9 +604,9 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                  f"and the maximum step is {self.steps}.")
             )
 
-        # Matrices X_train and y_train start at index 0.
-        y_train_step = y_train.iloc[:, step - 1]
+        y_train_step = y_train[step]
 
+        # Matrix X_train starts at index 0.
         if not self.included_exog:
             X_train_step = X_train
         else:
@@ -615,6 +618,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             )
             idx_columns = np.hstack((idx_columns_lags, idx_columns_exog))
             X_train_step = X_train.iloc[:, idx_columns]
+
+        X_train_step.index = y_train_step.index
 
         if remove_suffix:
             X_train_step.columns = [col_name.replace(f"_step_{step}", "")
@@ -635,8 +640,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         Parameters
         ----------
         X_train : pandas DataFrame
-            Dataframe generated with the methods `create_train_X_y` and 
-            `filter_train_X_y_for_step`, first return.
+            Dataframe created with `create_train_X_y` and filter_train_X_y_for_step`
+            methods, first return.
 
         Returns
         -------
@@ -672,7 +677,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         self,
         series: pd.DataFrame,
         exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-        store_in_sample_residuals: bool=True
+        store_in_sample_residuals: bool=True,
+        n_jobs: int=-1
     ) -> None:
         """
         Training Forecaster.
@@ -689,8 +695,12 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             number of observations as `series` and their indexes must be aligned so
             that series[i] is regressed on exog[i].
         store_in_sample_residuals : bool, default `True`
-            If True, in-sample residuals will be stored in the forecaster object
+            If `True`, in-sample residuals will be stored in the forecaster object
             after fitting.
+        n_jobs : int, default `-1`
+            The number of jobs to run in parallel. If -1, then the number of jobs is 
+            set to the number of cores.
+            **New in version 0.9.0**
 
         Returns
         -------
@@ -711,7 +721,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         self.in_sample_residuals = {step: None for step in range(1, self.steps + 1)}
         self.fitted              = False
         self.training_range      = None
-        
+
+        n_jobs = n_jobs if n_jobs > 0 else cpu_count()
         self.series_col_names = list(series.columns)
 
         if exog is not None:
@@ -729,11 +740,31 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                 )
 
         X_train, y_train = self.create_train_X_y(series=series, exog=exog)
-       
-        # Train one regressor for each step
-        for step in range(1, self.steps + 1):
-            # self.regressors_ and self.filter_train_X_y_for_step expect
-            # first step to start at value 1
+
+        def fit_forecaster(regressor, X_train, y_train, step, store_in_sample_residuals):
+            """
+            Auxiliary function to fit each of the forecaster's regressors in parallel.
+
+            Parameters
+            ----------
+            regressor : object
+                Regressor to be fitted.
+            X_train : pandas DataFrame
+                Dataframe created with the `create_train_X_y` method, first return.
+            y_train : dict
+                Dict created with the `create_train_X_y` method, second return.
+            step : int
+                Step of the forecaster to be fitted.
+            store_in_sample_residuals : bool
+                If `True`, in-sample residuals will be stored in the forecaster object
+                after fitting.
+            
+            Returns
+            -------
+            Tuple with the step, fitted regressor and in-sample residuals.
+
+            """
+
             X_train_step, y_train_step = self.filter_train_X_y_for_step(
                                              step          = step,
                                              X_train       = X_train,
@@ -742,35 +773,57 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                                          )
             sample_weight = self.create_sample_weights(X_train=X_train_step)
             if sample_weight is not None:
-                self.regressors_[step].fit(
+                regressor.fit(
                     X             = X_train_step,
                     y             = y_train_step,
                     sample_weight = sample_weight,
                     **self.fit_kwargs
                 )
             else:
-                self.regressors_[step].fit(
-                    X = X_train_step, 
-                    y = y_train_step, 
+                regressor.fit(
+                    X = X_train_step,
+                    y = y_train_step,
                     **self.fit_kwargs
                 )
 
             # This is done to save time during fit in functions such as backtesting()
             if store_in_sample_residuals:
                 residuals = (
-                    (y_train_step - self.regressors_[step].predict(X_train_step))
+                    (y_train_step - regressor.predict(X_train_step))
                 ).to_numpy()
 
                 if len(residuals) > 1000:
                     # Only up to 1000 residuals are stored
-                    rng = np.random.default_rng(seed=123)
-                    residuals = rng.choice(
-                                    a       = residuals, 
-                                    size    = 1000, 
-                                    replace = False
-                                )
+                        rng = np.random.default_rng(seed=123)
+                        residuals = rng.choice(
+                                        a       = residuals, 
+                                        size    = 1000, 
+                                        replace = False
+                                    )
+            else:
+                residuals = None
 
-                self.in_sample_residuals[step] = residuals
+            return step, regressor, residuals
+
+        results_fit = (
+            Parallel(n_jobs=n_jobs)
+            (delayed(fit_forecaster)
+            (
+                regressor=copy(self.regressor),
+                X_train=X_train,
+                y_train=y_train,
+                step=step,
+                store_in_sample_residuals=store_in_sample_residuals
+            )
+            for step in range(1, self.steps + 1))
+        )
+
+        self.regressors_ = {step: regressor 
+                            for step, regressor, _ in results_fit}
+
+        if store_in_sample_residuals:
+            self.in_sample_residuals = {step: residuals 
+                                        for step, _, residuals in results_fit}
         
         self.fitted = True
         self.fit_date = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')

@@ -26,7 +26,11 @@
 
 .md-content__button {
     display: none;
-  }
+}
+
+.md-typeset code {
+    font-size: 1em;
+}
 
 p {
     text-align: justify;

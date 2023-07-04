@@ -56,15 +56,16 @@ forecaster = ForecasterAutoreg(
 To apply machine learning models to forecasting problems, the time series needs to be transformed into a matrix where each value is associated with a specific time window (known as lags) that precedes it. In the context of time series, a lag with respect to a time step *t* is defined as the value of the series at previous time steps. For instance, lag 1 represents the value at time step *t-1*, while lag *m* represents the value at time step *t-m*.
 
 This transformation is essential for machine learning models to capture the dependencies and patterns that exist between past and future values in a time series. By using lags as input features, machine learning models can learn from the past and make predictions about future values. The number of lags used as input features in the matrix is an important hyperparameter that needs to be carefully tuned to obtain the best performance of the model.
+<br><br>
 
-<p align="center"><img src="../img/transform_timeseries.gif" style="width: 500px;"></p>
-
-<center><font size="2.5"> <i>Time series transformation into a matrix of 5 lags and a vector with the value of the series that follows each row of the matrix.</i></font></center>
+<p style="text-align: center">
+<img src="../img/transform_timeseries.gif" style="width: 500px;">
 <br>
-
+<font size="2.5"> <i>Time series transformation into a matrix of 5 lags and a vector with the value of the series that follows each row of the matrix.</i></font>
+</p>
 
 ```python
-# Create a forecaster
+# Create a forecaster using 5 lags
 # ==============================================================================
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
 from sklearn.ensemble import RandomForestRegressor
