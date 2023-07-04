@@ -7,6 +7,8 @@ All significant changes to this project are documented in this release file.
 
 The main changes in this release are:
 
++ `ForecasterAutoregDirect` and `ForecasterAutoregMultiVariate` include the `n_jobs` argument in their `fit` method, allowing multi-threaded parallelization for improved performance.
+
 + All backtesting and grid search functions have been extended to include the `n_jobs` argument, allowing multi-process parallelization for improved performance.
 
 + Argument `refit` now can be also an `integer` in all backtesting dependent functions in modules `model_selection` and `model_selection_multiseries`. This allows the Forecaster to be trained every this number of iterations.
@@ -16,6 +18,8 @@ The main changes in this release are:
 **Added**
 
 + Support for `scikit-learn 1.3.x`.
+
++ Argument `n_jobs=-1` to `fit` method in `ForecasterAutoregDirect` and `ForecasterAutoregMultiVariate` to allow  multi-process parallelization.
 
 + Argument `n_jobs=-1` to all backtesting dependent functions in modules `model_selection`, `model_selection_multiseries` and `model_selection_sarimax` to allow  multi-process parallelization.
 
