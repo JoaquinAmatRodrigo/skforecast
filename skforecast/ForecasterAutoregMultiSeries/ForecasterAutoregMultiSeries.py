@@ -554,9 +554,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         series : pandas DataFrame
             Time series used to create `X_train` with the method `create_train_X_y`.
         X_train : pandas DataFrame
-            Dataframe generated with the method `create_train_X_y`, first return.
+            Dataframe created with the `create_train_X_y` method, first return.
         y_train_index : pandas Index
-            Index generated with the method `create_train_X_y`, fourth return.
+            Index created with the `create_train_X_y` method, fourth return.
 
         Returns
         -------
@@ -657,7 +657,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             number of observations as `series` and their indexes must be aligned so
             that series[i] is regressed on exog[i].
         store_in_sample_residuals : bool, default `True`
-            If True, in-sample residuals will be stored in the forecaster object
+            If `True`, in-sample residuals will be stored in the forecaster object
             after fitting.
 
         Returns

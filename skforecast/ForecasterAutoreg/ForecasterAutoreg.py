@@ -396,7 +396,7 @@ class ForecasterAutoreg(ForecasterBase):
         Parameters
         ----------
         X_train : pandas DataFrame
-            Dataframe generated with the method `create_train_X_y`, first return.
+            Dataframe created with the `create_train_X_y` method, first return.
 
         Returns
         -------
@@ -449,7 +449,7 @@ class ForecasterAutoreg(ForecasterBase):
             number of observations as `y` and their indexes must be aligned so
             that y[i] is regressed on exog[i].
         store_in_sample_residuals : bool, default `True`
-            If True, in-sample residuals will be stored in the forecaster object
+            If `True`, in-sample residuals will be stored in the forecaster object
             after fitting.
 
         Returns
