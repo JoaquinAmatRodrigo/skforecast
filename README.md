@@ -79,18 +79,18 @@ pip install skforecast[plotting]
 
 ## Hard dependencies
 
-+ numpy>=1.20, <1.25
++ numpy>=1.20, <1.26
 + pandas>=1.2, <2.1
-+ tqdm>=4.57.0, <4.65
-+ scikit-learn>=1.0, <1.3
-+ optuna>=2.10.0, <3.2
-+ joblib>=1.1.0, <1.3.0
++ tqdm>=4.57.0, <4.66
++ scikit-learn>=1.0, <1.4
++ optuna>=2.10.0, <3.3
++ joblib>=1.1.0, <1.4
 
 ## Optional dependencies
 
 + matplotlib>=3.3, <3.8
 + seaborn>=0.11, <0.13
-+ statsmodels>=0.12, <0.14
++ statsmodels>=0.12, <0.15
 + pmdarima>=2.0, <2.1
 
 # What is new in skforecast 0.9.0?
