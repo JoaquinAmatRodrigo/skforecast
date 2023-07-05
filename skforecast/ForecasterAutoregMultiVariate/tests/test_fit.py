@@ -95,8 +95,10 @@ def test_forecaster_index_step_stored():
 
     assert results == expected
     
-    
-def test_fit_in_sample_residuals_stored():
+
+@pytest.mark.parametrize("n_jobs", [1, -1], 
+                         ids=lambda n_jobs: f'n_jobs: {n_jobs}')
+def test_fit_in_sample_residuals_stored(n_jobs):
     """
     Test that values of in_sample_residuals are stored after fitting.
     """
@@ -105,7 +107,7 @@ def test_fit_in_sample_residuals_stored():
     
     forecaster = ForecasterAutoregMultiVariate(LinearRegression(), 
                                                level='l1', lags=3, steps=2)
-    forecaster.fit(series=series)
+    forecaster.fit(series=series, n_jobs=n_jobs)
     expected = {1: np.array([0.0000000e+00, 0.0000000e+00, 0.0000000e+00, 
                              0.0000000e+00, 0.0000000e+00, 8.8817842e-16]),
                 2: np.array([0., 0., 0., 0., 0., 0.])}
@@ -117,7 +119,9 @@ def test_fit_in_sample_residuals_stored():
     assert all(all(np.isclose(results[k], expected[k])) for k in expected.keys())
 
 
-def test_fit_in_sample_residuals_stored_XGBRegressor():
+@pytest.mark.parametrize("n_jobs", [1, -1], 
+                         ids=lambda n_jobs: f'n_jobs: {n_jobs}')
+def test_fit_in_sample_residuals_stored_XGBRegressor(n_jobs):
     """
     Test that values of in_sample_residuals are stored after fitting with XGBRegressor.
     """
@@ -126,7 +130,7 @@ def test_fit_in_sample_residuals_stored_XGBRegressor():
     
     forecaster = ForecasterAutoregMultiVariate(XGBRegressor(random_state=123),  
                                                level='l2', lags=3, steps=2)
-    forecaster.fit(series=series)
+    forecaster.fit(series=series, n_jobs=n_jobs)
     expected = {1: np.array([-7.98702240e-05, -7.86781311e-05, -9.74178314e-04, 
                               1.15251541e-03, -1.14297867e-03,  1.12581253e-03]),
                 2: np.array([-0.00083256,  0.00097084, -0.00123358,  
@@ -139,7 +143,9 @@ def test_fit_in_sample_residuals_stored_XGBRegressor():
     assert all(all(np.isclose(results[k], expected[k])) for k in expected.keys())
 
 
-def test_fit_same_residuals_when_residuals_greater_than_1000():
+@pytest.mark.parametrize("n_jobs", [1, -1], 
+                         ids=lambda n_jobs: f'n_jobs: {n_jobs}')
+def test_fit_same_residuals_when_residuals_greater_than_1000(n_jobs):
     """
     Test fit return same residuals when residuals len is greater than 1000.
     Testing with two different forecaster.
@@ -149,11 +155,12 @@ def test_fit_same_residuals_when_residuals_greater_than_1000():
     
     forecaster = ForecasterAutoregMultiVariate(LinearRegression(),  
                                                level='l1', lags=3, steps=2)
-    forecaster.fit(series=series)
+    forecaster.fit(series=series, n_jobs=n_jobs)
     results_1 = forecaster.in_sample_residuals
+
     forecaster = ForecasterAutoregMultiVariate(LinearRegression(),  
                                                level='l1', lags=3, steps=2)
-    forecaster.fit(series=series)
+    forecaster.fit(series=series, n_jobs=n_jobs)
     results_2 = forecaster.in_sample_residuals
 
     assert isinstance(results_1, dict)
@@ -166,7 +173,9 @@ def test_fit_same_residuals_when_residuals_greater_than_1000():
     assert all(all(results_1[k] == results_2[k]) for k in results_2.keys())
 
 
-def test_fit_in_sample_residuals_not_stored():
+@pytest.mark.parametrize("n_jobs", [1, -1], 
+                         ids=lambda n_jobs: f'n_jobs: {n_jobs}')
+def test_fit_in_sample_residuals_not_stored(n_jobs):
     """
     Test that values of in_sample_residuals are not stored after fitting
     when `store_in_sample_residuals=False`.
@@ -176,7 +185,7 @@ def test_fit_in_sample_residuals_not_stored():
 
     forecaster = ForecasterAutoregMultiVariate(LinearRegression(),  
                                                level='l1', lags=3, steps=2)
-    forecaster.fit(series=series, store_in_sample_residuals=False)
+    forecaster.fit(series=series, store_in_sample_residuals=False, n_jobs=n_jobs)
     expected = {1: None, 2: None}
     results = forecaster.in_sample_residuals
 
