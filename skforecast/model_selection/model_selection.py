@@ -507,9 +507,6 @@ def _backtesting_forecaster(
                 return_all_indexes    = False,
                 verbose               = verbose  
             )
-    
-    if show_progress:
-        folds = tqdm(folds)
 
     if refit:
         n_of_fits = int(len(folds)/refit)
@@ -526,6 +523,9 @@ def _backtesting_forecaster(
                  f"substantial amounts of time. If not feasible, try with `refit = False`.\n"),
                 LongTrainingWarning
             )
+    
+    if show_progress:
+        folds = tqdm(folds)
 
     def _fit_predict_forecaster(y, exog, forecaster, interval, fold):
         """
@@ -541,8 +541,8 @@ def _backtesting_forecaster(
         test_idx_end      = fold[2][1]
 
         if fold[4] is False:
-            # When the model is not fitted, last_window and next_window_exog must 
-            # be updated to include the data needed to make predictions.
+            # When the model is not fitted, last_window must be updated to include 
+            # the data needed to make predictions.
             last_window_y = y.iloc[last_window_start:last_window_end]
         else:
             # The model is fitted before making predictions. If `fixed_train_size`  
