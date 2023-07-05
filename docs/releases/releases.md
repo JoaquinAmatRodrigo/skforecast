@@ -7,7 +7,7 @@ All significant changes to this project are documented in this release file.
 
 The main changes in this release are:
 
-+ `ForecasterAutoregDirect` and `ForecasterAutoregMultiVariate` include the `n_jobs` argument in their `fit` method, allowing multi-threaded parallelization for improved performance.
++ `ForecasterAutoregDirect` and `ForecasterAutoregMultiVariate` include the `n_jobs` argument in their `fit` method, allowing multi-process parallelization for improved performance.
 
 + All backtesting and grid search functions have been extended to include the `n_jobs` argument, allowing multi-process parallelization for improved performance.
 
