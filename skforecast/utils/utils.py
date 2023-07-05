@@ -24,7 +24,9 @@ from ..exceptions import IgnoredArgumentWarning
 
 optional_dependencies = {
     "sarimax": ['pmdarima>=2.0, <2.1'],
-    "plotting": ['matplotlib>=3.3, <3.8', 'seaborn>=0.11, <0.13', 'statsmodels>=0.12, <0.15']
+    "plotting": ['matplotlib>=3.3, <3.8', 
+                 'seaborn>=0.11, <0.13', 
+                 'statsmodels>=0.12, <0.15']
 }
 
 
@@ -746,12 +748,12 @@ def preprocess_y(
     Return values and index of series separately. Index is overwritten 
     according to the next rules:
     
-        - If index is of type `DatetimeIndex` and has frequency, nothing is 
-        changed.
-        - If index is of type `RangeIndex`, nothing is changed.
-        - If index is of type `DatetimeIndex` but has no frequency, a 
-        `RangeIndex` is created.
-        - If index is not of type `DatetimeIndex`, a `RangeIndex` is created.
+    - If index is of type `DatetimeIndex` and has frequency, nothing is 
+    changed.
+    - If index is of type `RangeIndex`, nothing is changed.
+    - If index is of type `DatetimeIndex` but has no frequency, a 
+    `RangeIndex` is created.
+    - If index is not of type `DatetimeIndex`, a `RangeIndex` is created.
     
     Parameters
     ----------
@@ -808,12 +810,12 @@ def preprocess_last_window(
     Return values and index of series separately. Index is overwritten 
     according to the next rules:
     
-        - If index is of type `DatetimeIndex` and has frequency, nothing is 
-        changed.
-        - If index is of type `RangeIndex`, nothing is changed.
-        - If index is of type `DatetimeIndex` but has no frequency, a 
-        `RangeIndex` is created.
-        - If index is not of type `DatetimeIndex`, a `RangeIndex` is created.
+    - If index is of type `DatetimeIndex` and has frequency, nothing is 
+    changed.
+    - If index is of type `RangeIndex`, nothing is changed.
+    - If index is of type `DatetimeIndex` but has no frequency, a 
+    `RangeIndex` is created.
+    - If index is not of type `DatetimeIndex`, a `RangeIndex` is created.
     
     Parameters
     ----------
@@ -870,12 +872,12 @@ def preprocess_exog(
     Return values and index of series or data frame separately. Index is
     overwritten  according to the next rules:
     
-        - If index is of type `DatetimeIndex` and has frequency, nothing is 
-        changed.
-        - If index is of type `RangeIndex`, nothing is changed.
-        - If index is of type `DatetimeIndex` but has no frequency, a 
-        `RangeIndex` is created.
-        - If index is not of type `DatetimeIndex`, a `RangeIndex` is created.
+    - If index is of type `DatetimeIndex` and has frequency, nothing is 
+    changed.
+    - If index is of type `RangeIndex`, nothing is changed.
+    - If index is of type `DatetimeIndex` but has no frequency, a 
+    `RangeIndex` is created.
+    - If index is not of type `DatetimeIndex`, a `RangeIndex` is created.
 
     Parameters
     ----------
@@ -935,10 +937,10 @@ def cast_exog_dtypes(
     internal modifications of numpy, the values may be casted to `float`, so 
     they have to be re-converted to `int`.
 
-        - If `exog` is a pandas Series, `exog_dtypes` must be a dict with a 
-        single value.
-        - If `exog_dtypes` is `category` but the current type of `exog` is `float`, 
-        then the type is cast to `int` and then to `category`. 
+    - If `exog` is a pandas Series, `exog_dtypes` must be a dict with a 
+    single value.
+    - If `exog_dtypes` is `category` but the current type of `exog` is `float`, 
+    then the type is cast to `int` and then to `category`. 
 
     Parameters
     ----------
@@ -1505,7 +1507,7 @@ def check_backtesting_input(
         Print number of folds and index of training and validation sets used 
         for backtesting.
     show_progress: bool, default `True`
-        Whether to show a progress bar. Defaults to True.
+        Whether to show a progress bar.
 
     Returns
     -------

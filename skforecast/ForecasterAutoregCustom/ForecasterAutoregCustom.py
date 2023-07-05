@@ -156,9 +156,8 @@ class ForecasterAutoregCustom(ForecasterBase):
         Version of skforecast library used to create the forecaster.
     python_version : str
         Version of python used to create the forecaster.
-    forecaster_id : str, int, default `None`
+    forecaster_id : str, int
         Name used as an identifier of the forecaster.
-        **New in version 0.7.0**
 
     """
     
@@ -418,7 +417,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         Parameters
         ----------
         X_train : pandas DataFrame
-            Dataframe generated with the method `create_train_X_y`, first return.
+            Dataframe created with the `create_train_X_y` method, first return.
 
         Returns
         -------
@@ -471,7 +470,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             number of observations as `y` and their indexes must be aligned so
             that y[i] is regressed on exog[i].
         store_in_sample_residuals : bool, default `True`
-            If True, in-sample residuals will be stored in the forecaster object
+            If `True`, in-sample residuals will be stored in the forecaster object
             after fitting.
 
         Returns

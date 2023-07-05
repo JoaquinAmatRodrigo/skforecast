@@ -79,23 +79,23 @@ pip install skforecast[plotting]
 
 ### Hard dependencies
 
-+ numpy>=1.20, <1.25
++ numpy>=1.20, <1.26
 + pandas>=1.2, <2.1
-+ tqdm>=4.57.0, <4.65
-+ scikit-learn>=1.0, <1.3
-+ optuna>=2.10.0, <3.2
-+ joblib>=1.1.0, <1.3.0
++ tqdm>=4.57.0, <4.66
++ scikit-learn>=1.0, <1.4
++ optuna>=2.10.0, <3.3
++ joblib>=1.1.0, <1.4
 
 ### Optional dependencies
 
 + matplotlib>=3.3, <3.8
 + seaborn>=0.11, <0.13
-+ statsmodels>=0.12, <0.14
++ statsmodels>=0.12, <0.15
 + pmdarima>=2.0, <2.1
 
 ## Forecasters
 
-A Forecaster object in the skforecast library is a comprehensive container that provides essential functionality and methods for training a forecasting model and generating predictions for future points in time.
+A **Forecaster** object in the skforecast library is a comprehensive container that provides essential functionality and methods for training a forecasting model and generating predictions for future points in time.
 
 The skforecast library offers a variety of forecaster types, each tailored to specific requirements such as single or multiple time series, direct or recursive strategies, or custom predictors. Regardless of the specific forecaster type, all instances share the same API.
 
@@ -172,14 +172,16 @@ Universidad de Deusto / Deustuko Unibertsitatea**](https://youtu.be/MlktVhReO0E)
 
 ## How to contribute
 
+Primarily, skforecast development consists of adding and creating new *Forecasters*, new validation strategies, or improving the performance of the current code. However, there are many other ways to contribute:
+
+- Submit a bug report or feature request on [GitHub Issues](https://github.com/JoaquinAmatRodrigo/skforecast/issues).
+- Contribute a Jupyter notebook to our [examples](https://joaquinamatrodrigo.github.io/skforecast/latest/examples/examples.html).
+- Write [unit or integration tests](https://docs.pytest.org/en/latest/) for our project.
+- Answer questions on our issues, Stack Overflow, and elsewhere.
+- Translate our documentation into another language.
+- Write a blog post, tweet, or share our project with others.
+
 For more information on how to contribute to skforecast, see our [Contribution Guide](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/CONTRIBUTING.md).
-
-
-## Donating
-
-If you found skforecast useful, you can support us with a donation. Your contribution will help to continue developing and improving this project. Many thanks! :hugging_face: :heart_eyes:
-
-[![paypal](https://www.paypalobjects.com/en_US/ES/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate/?hosted_button_id=D2JZSWRLTZDL6)
 
 
 ## Citation
@@ -204,6 +206,13 @@ year = {2023}
 ```
 
 View the [citation file](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/CITATION.cff).
+
+
+## Donating
+
+If you found skforecast useful, you can support us with a donation. Your contribution will help to continue developing and improving this project. Many thanks! :hugging_face: :heart_eyes:
+
+[![paypal](https://www.paypalobjects.com/en_US/ES/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate/?hosted_button_id=D2JZSWRLTZDL6)
 
 
 ## License

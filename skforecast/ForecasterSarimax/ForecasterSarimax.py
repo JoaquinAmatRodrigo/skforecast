@@ -113,9 +113,8 @@ class ForecasterSarimax():
         Version of skforecast library used to create the forecaster.
     python_version : str
         Version of python used to create the forecaster.
-    forecaster_id : str, int default `None`
+    forecaster_id : str, int
         Name used as an identifier of the forecaster.
-        **New in version 0.7.0**
     
     """
     

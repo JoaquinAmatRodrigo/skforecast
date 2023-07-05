@@ -3,11 +3,13 @@
 All significant changes to this project are documented in this release file.
 
 
-## [0.9.0] - [2023-06-XX]
+## [0.9.0] - [2023-07-XX]
 
 The main changes in this release are:
 
-+ All backtesting and grid search functions have been extended to include the `n_jobs` argument, allowing multi-threaded parallelization for improved performance.
++ `ForecasterAutoregDirect` and `ForecasterAutoregMultiVariate` include the `n_jobs` argument in their `fit` method, allowing multi-threaded parallelization for improved performance.
+
++ All backtesting and grid search functions have been extended to include the `n_jobs` argument, allowing multi-process parallelization for improved performance.
 
 + Argument `refit` now can be also an `integer` in all backtesting dependent functions in modules `model_selection` and `model_selection_multiseries`. This allows the Forecaster to be trained every this number of iterations.
 
@@ -15,7 +17,11 @@ The main changes in this release are:
 
 **Added**
 
-+ Argument `n_jobs=-1` to all backtesting dependent functions in modules `model_selection`, `model_selection_multiseries` and `model_selection_sarimax` to allow  multi-threaded parallelization.
++ Support for `scikit-learn 1.3.x`.
+
++ Argument `n_jobs=-1` to `fit` method in `ForecasterAutoregDirect` and `ForecasterAutoregMultiVariate` to allow  multi-process parallelization.
+
++ Argument `n_jobs=-1` to all backtesting dependent functions in modules `model_selection`, `model_selection_multiseries` and `model_selection_sarimax` to allow  multi-process parallelization.
 
 + Argument `refit` now can be also an `integer` in all backtesting dependent functions in modules `model_selection` and `model_selection_multiseries`. This allows the Forecaster to be trained every this number of iterations.
 
@@ -38,6 +44,10 @@ The main changes in this release are:
 **Fixed**
 
 + Ensure reproducibility of Direct Forecasters when using `predict_bootstrapping`, `predict_dist` and `predict_interval` with a `list` of steps.
+
++ The `create_train_X_y` method returns a dict of pandas Series as `y_train` in `ForecasterAutoregDirect` and `ForecasterAutoregMultiVariate`. This ensures that each series has the appropriate index according to the step to be trained.
+
++ The `filter_train_X_y_for_step` method in `ForecasterAutoregDirect` and `ForecasterAutoregMultiVariate` now updates the index of `X_train_step` to ensure correct alignment with `y_train_step`.
 
 
 ## [0.8.1] - [2023-05-27]

@@ -79,24 +79,25 @@ pip install skforecast[plotting]
 
 ## Hard dependencies
 
-+ numpy>=1.20, <1.25
++ numpy>=1.20, <1.26
 + pandas>=1.2, <2.1
-+ tqdm>=4.57.0, <4.65
-+ scikit-learn>=1.0, <1.3
-+ optuna>=2.10.0, <3.2
-+ joblib>=1.1.0, <1.3.0
++ tqdm>=4.57.0, <4.66
++ scikit-learn>=1.0, <1.4
++ optuna>=2.10.0, <3.3
++ joblib>=1.1.0, <1.4
 
 ## Optional dependencies
 
 + matplotlib>=3.3, <3.8
 + seaborn>=0.11, <0.13
-+ statsmodels>=0.12, <0.14
++ statsmodels>=0.12, <0.15
 + pmdarima>=2.0, <2.1
 
-## What is new in skforecast 0.9.0?
+# What is new in skforecast 0.9.0?
 
 Visit the [release notes](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/changelog.md) to view all notable changes.
 
+- [x] `ForecasterAutoregDirect` and `ForecasterAutoregMultiVariate` include the `n_jobs` argument in their `fit` method, allowing multi-threaded parallelization for improved performance.
 - [x] All backtesting and grid search functions have been extended to include the `n_jobs` argument, allowing multi-threaded parallelization for improved performance.
 - [x] Argument `refit` now can be also an `integer` in all backtesting dependent functions in modules `model_selection`, `model_selection_multiseries` and `model_selection_sarimax`. This allows the Forecaster to be trained every this number of iterations.
 - [x] `ForecasterAutoregMultiSeries` and `ForecasterAutoregMultiSeriesCustom` can be trained using series of different lengths. This means that the model can handle datasets with different numbers of data points in each series.
@@ -105,9 +106,9 @@ Visit the [release notes](https://github.com/JoaquinAmatRodrigo/skforecast/blob/
 
 # Forecasters
 
-A Forecaster object in the skforecast library is a comprehensive container that provides essential functionality and methods for training a forecasting model and generating predictions for future points in time.
+A **Forecaster** object in the skforecast library is a comprehensive container that provides essential functionality and methods for training a forecasting model and generating predictions for future points in time.
 
-The skforecast library offers a variety of forecaster types, each tailored to specific requirements such as single or multiple time series, direct or recursive strategies, or custom predictors. Regardless of the specific forecaster type, all instances share the same API.
+The **skforecast** library offers a variety of forecaster types, each tailored to specific requirements such as single or multiple time series, direct or recursive strategies, or custom predictors. Regardless of the specific forecaster type, all instances share the same API.
 
 | Forecaster | Single series | Multiple series | Recursive strategy | Direct strategy | Probabilistic prediction | Exogenous features | Custom features |
 |:-----------|:-------------:|:---------------:|:------------------:|:---------------:|:------------------------:|:------------------:|:---------------:|
@@ -122,7 +123,7 @@ The skforecast library offers a variety of forecaster types, each tailored to sp
 
 # Main User Guides
 
-+ [Introduction to time series and forecasting](https://skforecast.org/latest/user_guides/quick-start-skforecast.html)
++ [Introduction to time series and forecasting](https://skforecast.org/latest/introduction-forecasting/introduction-forecasting.html)
 
 + [Recursive multi-step forecasting](https://skforecast.org/latest/user_guides/autoregresive-forecaster.html)
 
@@ -187,13 +188,6 @@ The skforecast library offers a variety of forecaster types, each tailored to sp
 + [**Predicción de demanda intermitente**](https://www.cienciadedatos.net/documentos/py48-forecasting-demanda-intermitente.html)
 
 
-# Donating
-
-If you found skforecast useful, you can support us with a donation. Your contribution will help to continue developing and improving this project. Many thanks!
-
-[![paypal](https://www.paypalobjects.com/en_US/ES/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate/?hosted_button_id=D2JZSWRLTZDL6)
-
-
 # How to contribute
 
 Primarily, skforecast development consists of adding and creating new *Forecasters*, new validation strategies, or improving the performance of the current code. However, there are many other ways to contribute:
@@ -222,7 +216,7 @@ Amat Rodrigo, J., & Escobar Ortiz, J. skforecast (Version 0.9.0) [Computer softw
 @software{skforecast,
 author = {Amat Rodrigo, Joaquin and Escobar Ortiz, Javier},
 license = {BSD 3-Clause License},
-month = {6},
+month = {7},
 title = {{skforecast}},
 version = {0.9.0},
 year = {2023}
@@ -230,6 +224,13 @@ year = {2023}
 ```
 
 View the [citation file](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/CITATION.cff).
+
+
+# Donating
+
+If you found skforecast useful, you can support us with a donation. Your contribution will help to continue developing and improving this project. Many thanks!
+
+[![paypal](https://www.paypalobjects.com/en_US/ES/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate/?hosted_button_id=D2JZSWRLTZDL6)
 
 
 # License

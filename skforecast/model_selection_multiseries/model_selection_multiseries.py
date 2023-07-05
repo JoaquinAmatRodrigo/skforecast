@@ -50,17 +50,14 @@ def _backtesting_forecaster_multiseries(
     show_progress: bool=True
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
-    Backtesting of forecaster model.
+    Backtesting for multi-series and multivariate forecasters.
 
     - If `refit` is `False`, the model will be trained only once using the 
     `initial_train_size` first observations. 
-
     - If `refit` is `True`, the model is trained on each iteration, increasing
     the training set. 
-
     - If `refit` is an `integer`, the model will be trained every that number 
     of iterations.
-
     - If `forecaster` is already trained and `initial_train_size` is `None`,
     no initial train will be done and all data will be used to evaluate the model.
     However, the first `len(forecaster.last_window)` observations are needed
@@ -125,15 +122,15 @@ def _backtesting_forecaster_multiseries(
         If `True`, residuals from the training data are used as proxy of prediction
         error to create prediction intervals. If `False`, out_sample_residuals 
         are used if they are already stored inside the forecaster.
-    n_jobs : int, default -1
-        The number of jobs to run in parallel. If -1, then the number of jobs is 
+    n_jobs : int, default `-1`
+        The number of jobs to run in parallel. If `-1`, then the number of jobs is 
         set to the number of cores.
         **New in version 0.9.0**
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
         for backtesting.
     show_progress: bool, default `True`
-        Whether to show a progress bar. Defaults to True.
+        Whether to show a progress bar.
 
     Returns
     -------
@@ -152,7 +149,7 @@ def _backtesting_forecaster_multiseries(
     forecaster = deepcopy(forecaster)
     n_jobs = n_jobs if n_jobs > 0 else cpu_count()
 
-    if isinstance(refit, int):
+    if isinstance(refit, int) and refit != 1:
         n_jobs = 1
 
     if type(forecaster).__name__ == 'ForecasterAutoregMultiVariate':
@@ -337,10 +334,19 @@ def backtesting_forecaster_multiseries(
     """
     Backtesting for multi-series and multivariate forecasters.
 
-    If `refit` is False, the model is trained only once using the `initial_train_size`
-    first observations. If `refit` is True, the model is trained in each iteration
-    increasing the training set. A copy of the original forecaster is created so 
-    it is not modified during the process.
+    - If `refit` is `False`, the model will be trained only once using the 
+    `initial_train_size` first observations. 
+    - If `refit` is `True`, the model is trained on each iteration, increasing
+    the training set. 
+    - If `refit` is an `integer`, the model will be trained every that number 
+    of iterations.
+    - If `forecaster` is already trained and `initial_train_size` is `None`,
+    no initial train will be done and all data will be used to evaluate the model.
+    However, the first `len(forecaster.last_window)` observations are needed
+    to create the initial predictors, so no predictions are calculated for them.
+    
+    A copy of the original forecaster is created so that it is not modified during 
+    the process.
 
     Parameters
     ----------
@@ -398,15 +404,15 @@ def backtesting_forecaster_multiseries(
         If `True`, residuals from the training data are used as proxy of prediction 
         error to create prediction intervals.  If `False`, out_sample_residuals 
         are used if they are already stored inside the forecaster.
-    n_jobs : int, default -1
-        The number of jobs to run in parallel. If -1, then the number of jobs is 
+    n_jobs : int, default `-1`
+        The number of jobs to run in parallel. If `-1`, then the number of jobs is 
         set to the number of cores.
         **New in version 0.9.0**
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
         for backtesting.
     show_progress: bool, default `True`
-        Whether to show a progress bar. Defaults to True.
+        Whether to show a progress bar.
 
     Returns
     -------
@@ -565,14 +571,14 @@ def grid_search_forecaster_multiseries(
         the Forecaster will be trained every that number of iterations.
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
-    n_jobs : int, default -1
-        The number of jobs to run in parallel. If -1, then the number of jobs is 
+    n_jobs : int, default `-1`
+        The number of jobs to run in parallel. If `-1`, then the number of jobs is 
         set to the number of cores.
         **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
     show_progress: bool, default `True`
-        Whether to show a progress bar. Defaults to True.
+        Whether to show a progress bar.
 
     Returns
     -------
@@ -689,14 +695,14 @@ def random_search_forecaster_multiseries(
         Sets a seed to the random sampling for reproducible output.
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
-    n_jobs : int, default -1
-        The number of jobs to run in parallel. If -1, then the number of jobs is 
+    n_jobs : int, default `-1`
+        The number of jobs to run in parallel. If `-1`, then the number of jobs is 
         set to the number of cores.
         **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
     show_progress: bool, default `True`
-        Whether to show a progress bar. Defaults to True.
+        Whether to show a progress bar.
 
     Returns
     -------
@@ -1041,15 +1047,15 @@ def backtesting_forecaster_multivariate(
         If `True`, residuals from the training data are used as proxy of prediction 
         error to create prediction intervals.  If `False`, out_sample_residuals 
         are used if they are already stored inside the forecaster.
-    n_jobs : int, default -1
-        The number of jobs to run in parallel. If -1, then the number of jobs is 
+    n_jobs : int, default `-1`
+        The number of jobs to run in parallel. If `-1`, then the number of jobs is 
         set to the number of cores.
         **New in version 0.9.0** 
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
         for backtesting.
     show_progress: bool, default `True`
-        Whether to show a progress bar. Defaults to True.
+        Whether to show a progress bar.
 
     Returns
     -------
@@ -1161,14 +1167,14 @@ def grid_search_forecaster_multivariate(
         the Forecaster will be trained every that number of iterations.
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
-    n_jobs : int, default -1
-        The number of jobs to run in parallel. If -1, then the number of jobs is 
+    n_jobs : int, default `-1`
+        The number of jobs to run in parallel. If `-1`, then the number of jobs is 
         set to the number of cores.
         **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
     show_progress: bool, default `True`
-        Whether to show a progress bar. Defaults to True.
+        Whether to show a progress bar.
 
     Returns
     -------
@@ -1285,14 +1291,14 @@ def random_search_forecaster_multivariate(
         Sets a seed to the random sampling for reproducible output.
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
-    n_jobs : int, default -1
-        The number of jobs to run in parallel. If -1, then the number of jobs is 
+    n_jobs : int, default `-1`
+        The number of jobs to run in parallel. If `-1`, then the number of jobs is 
         set to the number of cores.
         **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
     show_progress: bool, default `True`
-        Whether to show a progress bar. Defaults to True.
+        Whether to show a progress bar.
 
     Returns
     -------
