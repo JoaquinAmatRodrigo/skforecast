@@ -7,11 +7,11 @@ All significant changes to this project are documented in this release file.
 
 The main changes in this release are:
 
-+ `ForecasterAutoregDirect` and `ForecasterAutoregMultiVariate` include the `n_jobs` argument in their `fit` method, allowing multi-threaded parallelization for improved performance.
++ `ForecasterAutoregDirect` and `ForecasterAutoregMultiVariate` include the `n_jobs` argument in their `fit` method, allowing multi-process parallelization for improved performance.
 
 + All backtesting and grid search functions have been extended to include the `n_jobs` argument, allowing multi-process parallelization for improved performance.
 
-+ Argument `refit` now can be also an `integer` in all backtesting dependent functions in modules `model_selection` and `model_selection_multiseries`. This allows the Forecaster to be trained every this number of iterations.
++ Argument `refit` now can be also an `integer` in all backtesting dependent functions in modules `model_selection`, `model_selection_multiseries`, and `model_selection_sarimax`. This allows the Forecaster to be trained every this number of iterations.
 
 + `ForecasterAutoregMultiSeries` and `ForecasterAutoregMultiSeriesCustom` can be trained using series of different lengths. This means that the model can handle datasets with different numbers of data points in each series.
 
@@ -19,11 +19,11 @@ The main changes in this release are:
 
 + Support for `scikit-learn 1.3.x`.
 
-+ Argument `n_jobs=-1` to `fit` method in `ForecasterAutoregDirect` and `ForecasterAutoregMultiVariate` to allow  multi-process parallelization.
++ Argument `n_jobs=-1` to `fit` method in `ForecasterAutoregDirect` and `ForecasterAutoregMultiVariate` to allow multi-process parallelization.
 
-+ Argument `n_jobs=-1` to all backtesting dependent functions in modules `model_selection`, `model_selection_multiseries` and `model_selection_sarimax` to allow  multi-process parallelization.
++ Argument `n_jobs=-1` to all backtesting dependent functions in modules `model_selection`, `model_selection_multiseries` and `model_selection_sarimax` to allow multi-process parallelization.
 
-+ Argument `refit` now can be also an `integer` in all backtesting dependent functions in modules `model_selection` and `model_selection_multiseries`. This allows the Forecaster to be trained every this number of iterations.
++ Argument `refit` now can be also an `integer` in all backtesting dependent functions in modules `model_selection`, `model_selection_multiseries`, and `model_selection_sarimax`. This allows the Forecaster to be trained every this number of iterations.
 
 + `ForecasterAutoregMultiSeries` and `ForecasterAutoregMultiSeriesCustom` allow to use series of different lengths for training.
 
@@ -38,6 +38,8 @@ The main changes in this release are:
 + The `model_selection` functions `_backtesting_forecaster_refit` and `_backtesting_forecaster_no_refit` have been unified in `_backtesting_forecaster`.
 
 + The `model_selection_multiseries` functions `_backtesting_forecaster_multiseries_refit` and `_backtesting_forecaster_multiseries_no_refit` have been unified in `_backtesting_forecaster_multiseries`.
+
++ The `model_selection_sarimax` functions `_backtesting_refit_sarimax` and `_backtesting_no_refit_sarimax` have been unified in `_backtesting_sarimax`.
 
 + `utils.preprocess_y` allows a pandas DataFrame as input.
 
