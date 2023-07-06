@@ -38,6 +38,7 @@ from ..utils import exog_to_direct_numpy
 from ..utils import expand_index
 from ..utils import transform_series
 from ..utils import transform_dataframe
+from ..utils import select_n_jobs_fit_forecaster
 
 logging.basicConfig(
     format = '%(name)-10s %(levelname)-5s %(message)s', 
@@ -558,7 +559,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         y: pd.Series,
         exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
         store_in_sample_residuals: bool=True,
-        n_jobs: int=-1
+        n_jobs: Union[int, str]='auto',
     ) -> None:
         """
         Training Forecaster.
@@ -577,10 +578,11 @@ class ForecasterAutoregDirect(ForecasterBase):
         store_in_sample_residuals : bool, default `True`
             If `True`, in-sample residuals will be stored in the forecaster object
             after fitting.
-        n_jobs : int, default `-1`
-            The number of jobs to run in parallel. If -1, then the number of jobs is 
-            set to the number of cores.
-            **New in version 0.9.0**
+        n_jobs : 'auto' or int, default='auto'
+        The number of jobs to run in parallel. If `-1`, then the number of jobs is 
+        set to the number of cores. If 'auto', `n_jobs` is set using the fuction
+        skforecast.utils.select_n_jobs_fit_forecaster.
+        **New in version 0.9.0**
 
         Returns
         -------
@@ -601,7 +603,13 @@ class ForecasterAutoregDirect(ForecasterBase):
         self.fitted              = False
         self.training_range      = None
 
-        n_jobs = n_jobs if n_jobs > 0 else cpu_count()
+        if n_jobs == 'auto':
+            n_jobs = select_n_jobs_fit_forecaster(
+                        forecaster_type  = type(self).__name__,
+                        regressor_type   = type(self.regressor).__name__,
+                    )
+        else:
+            n_jobs = n_jobs if n_jobs > 0 else cpu_count()
 
         if exog is not None:
             self.included_exog = True
