@@ -151,8 +151,8 @@ def _backtesting_forecaster_multiseries(
     forecaster = deepcopy(forecaster)
     if n_jobs == 'auto':
         n_jobs = select_n_jobs_backtesting(
-                     forecaster_type = type(forecaster).__name__,
-                     regressor_type  = type(forecaster.regressor).__name__,
+                     forecaster_name = type(forecaster).__name__,
+                     regressor_name  = type(forecaster.regressor).__name__,
                      refit           = refit
                  )
     else:

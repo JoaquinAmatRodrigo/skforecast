@@ -253,8 +253,8 @@ class ForecasterAutoregDirect(ForecasterBase):
 
         if n_jobs == 'auto':
             self.n_jobs = select_n_jobs_fit_forecaster(
-                        forecaster_type  = type(self).__name__,
-                        regressor_type   = type(self.regressor).__name__,
+                        forecaster_name  = type(self).__name__,
+                        regressor_name   = type(self.regressor).__name__,
                     )
         else:
             self.n_jobs = n_jobs if n_jobs > 0 else cpu_count()
