@@ -1452,7 +1452,7 @@ def check_backtesting_input(
     n_boot: int=500,
     random_state: int=123,
     in_sample_residuals: bool=True,
-    n_jobs: Optional[int]=-1,
+    n_jobs: Optional[Union[int, str]]='auto',
     verbose: bool=False,
     show_progress: bool=True
 ) -> None:
@@ -1502,7 +1502,12 @@ def check_backtesting_input(
     in_sample_residuals : bool, default `True`
         If `True`, residuals from the training data are used as proxy of prediction 
         error to create prediction intervals.  If `False`, out_sample_residuals 
-        are used if they are already stored inside the forecaster.  
+        are used if they are already stored inside the forecaster.
+    n_jobs : 'auto' or int, default='auto'
+            The number of jobs to run in parallel. If `-1`, then the number of jobs is 
+            set to the number of cores. If 'auto', `n_jobs` is set using the fuction
+            skforecast.utils.select_n_jobs_fit_forecaster.
+            **New in version 0.9.0**
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
         for backtesting.
@@ -1607,8 +1612,8 @@ def check_backtesting_input(
         raise TypeError(f"`random_state` must be an integer greater than 0. Got {random_state}.")
     if not isinstance(in_sample_residuals, bool):
         raise TypeError("`in_sample_residuals` must be a boolean: `True`, `False`.")
-    if not isinstance(n_jobs, int):
-        raise TypeError(f"`n_jobs` must be an integer. Got {n_jobs}.")
+    if not isinstance(n_jobs, int) and n_jobs != 'auto':
+        raise ValueError(f"Parameter 'n_jobs' must be an integer or 'auto'. Got {n_jobs}.")
     if not isinstance(verbose, bool):
         raise TypeError("`verbose` must be a boolean: `True`, `False`.")
     if not isinstance(show_progress, bool):

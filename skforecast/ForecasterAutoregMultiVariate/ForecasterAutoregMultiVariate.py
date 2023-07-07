@@ -40,6 +40,7 @@ from ..utils import exog_to_direct_numpy
 from ..utils import expand_index
 from ..utils import transform_series
 from ..utils import transform_dataframe
+from ..utils import select_n_jobs_fit_forecaster
 
 logging.basicConfig(
     format = '%(name)-10s %(levelname)-5s %(message)s', 
@@ -92,6 +93,11 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
     fit_kwargs : dict, default `None`
         Additional arguments to be passed to the `fit` method of the regressor.
         **New in version 0.8.0**
+    n_jobs : 'auto' or int, default='auto'
+        The number of jobs to run in parallel. If `-1`, then the number of jobs is 
+        set to the number of cores. If 'auto', `n_jobs` is set using the fuction
+        skforecast.utils.select_n_jobs_fit_forecaster.
+        **New in version 0.9.0**
     forecaster_id : str, int, default `None`
         Name used as an identifier of the forecaster.
         **New in version 0.7.0**
@@ -188,6 +194,11 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         Version of skforecast library used to create the forecaster.
     python_version : str
         Version of python used to create the forecaster.
+    n_jobs : 'auto' or int, default='auto'
+        The number of jobs to run in parallel. If `-1`, then the number of jobs is 
+        set to the number of cores. If 'auto', `n_jobs` is set using the fuction
+        skforecast.utils.select_n_jobs_fit_forecaster.
+        **New in version 0.9.0**
     forecaster_id : str, int
         Name used as an identifier of the forecaster.
 
@@ -208,6 +219,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         transformer_exog: Optional[object]=None,
         weight_func: Optional[Callable]=None,
         fit_kwargs: Optional[dict]=None,
+        n_jobs: Union[int, str]='auto',
         forecaster_id: Optional[Union[str, int]]=None
     ) -> None:
         
@@ -291,6 +303,14 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
 
         self.in_sample_residuals = {step: None for step in range(1, steps + 1)}
         self.out_sample_residuals = None
+
+        if n_jobs == 'auto':
+            self.n_jobs = select_n_jobs_fit_forecaster(
+                        forecaster_type  = type(self).__name__,
+                        regressor_type   = type(self.regressor).__name__,
+                    )
+        else:
+            self.n_jobs = n_jobs if n_jobs > 0 else cpu_count()
     
 
     def __repr__(
@@ -677,8 +697,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         self,
         series: pd.DataFrame,
         exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-        store_in_sample_residuals: bool=True,
-        n_jobs: int=-1
+        store_in_sample_residuals: bool=True
     ) -> None:
         """
         Training Forecaster.
@@ -697,10 +716,6 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         store_in_sample_residuals : bool, default `True`
             If `True`, in-sample residuals will be stored in the forecaster object
             after fitting.
-        n_jobs : int, default `-1`
-            The number of jobs to run in parallel. If -1, then the number of jobs is 
-            set to the number of cores.
-            **New in version 0.9.0**
 
         Returns
         -------
@@ -722,7 +737,6 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         self.fitted              = False
         self.training_range      = None
 
-        n_jobs = n_jobs if n_jobs > 0 else cpu_count()
         self.series_col_names = list(series.columns)
 
         if exog is not None:
@@ -806,7 +820,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             return step, regressor, residuals
 
         results_fit = (
-            Parallel(n_jobs=n_jobs)
+            Parallel(n_jobs=self.n_jobs)
             (delayed(fit_forecaster)
             (
                 regressor=copy(self.regressor),
