@@ -46,7 +46,7 @@ def _backtesting_forecaster_multiseries(
     n_boot: int=500,
     random_state: int=123,
     in_sample_residuals: bool=True,
-    n_jobs: Union[int, str]='auto',
+    n_jobs: Optional[Union[int, str]]='auto',
     verbose: bool=False,
     show_progress: bool=True
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
@@ -123,7 +123,7 @@ def _backtesting_forecaster_multiseries(
         If `True`, residuals from the training data are used as proxy of prediction
         error to create prediction intervals. If `False`, out_sample_residuals 
         are used if they are already stored inside the forecaster.
-    n_jobs : 'auto' or int, default='auto'
+    n_jobs : int, 'auto', default `'auto'`
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
         set to the number of cores. If 'auto', `n_jobs` is set using the fuction
         skforecast.utils.select_n_jobs_backtesting.
@@ -336,7 +336,7 @@ def backtesting_forecaster_multiseries(
     n_boot: int=500,
     random_state: int=123,
     in_sample_residuals: bool=True,
-    n_jobs: Union[int, str]='auto',
+    n_jobs: Optional[Union[int, str]]='auto',
     verbose: bool=False,
     show_progress: bool=True
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
@@ -413,7 +413,7 @@ def backtesting_forecaster_multiseries(
         If `True`, residuals from the training data are used as proxy of prediction 
         error to create prediction intervals.  If `False`, out_sample_residuals 
         are used if they are already stored inside the forecaster.
-    n_jobs : 'auto' or int, default='auto'
+    n_jobs : int, 'auto', default `'auto'`
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
         set to the number of cores. If 'auto', `n_jobs` is set using the fuction
         skforecast.utils.select_n_jobs_backtesting.
@@ -527,7 +527,7 @@ def grid_search_forecaster_multiseries(
     lags_grid: Optional[list]=None,
     refit: Optional[Union[bool, int]]=False,
     return_best: bool=True,
-    n_jobs: Union[int, str]='auto',
+    n_jobs: Optional[Union[int, str]]='auto',
     verbose: bool=True,
     show_progress: bool=True
 ) -> pd.DataFrame:
@@ -581,7 +581,7 @@ def grid_search_forecaster_multiseries(
         the Forecaster will be trained every that number of iterations.
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
-    n_jobs : 'auto' or int, default='auto'
+    n_jobs : int, 'auto', default `'auto'`
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
         set to the number of cores. If 'auto', `n_jobs` is set using the fuction
         skforecast.utils.select_n_jobs_backtesting.
@@ -647,7 +647,7 @@ def random_search_forecaster_multiseries(
     n_iter: int=10,
     random_state: int=123,
     return_best: bool=True,
-    n_jobs: Union[int, str]='auto',
+    n_jobs: Optional[Union[int, str]]='auto',
     verbose: bool=True,
     show_progress: bool=True
 ) -> pd.DataFrame:
@@ -706,7 +706,7 @@ def random_search_forecaster_multiseries(
         Sets a seed to the random sampling for reproducible output.
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
-    n_jobs : 'auto' or int, default='auto'
+    n_jobs : int, 'auto', default `'auto'`
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
         set to the number of cores. If 'auto', `n_jobs` is set using the fuction
         skforecast.utils.select_n_jobs_backtesting.
@@ -771,7 +771,7 @@ def _evaluate_grid_hyperparameters_multiseries(
     lags_grid: Optional[list]=None,
     refit: Optional[Union[bool, int]]=False,
     return_best: bool=True,
-    n_jobs: Union[int, str]='auto',
+    n_jobs: Optional[Union[int, str]]='auto',
     verbose: bool=True,
     show_progress: bool=True
 ) -> pd.DataFrame:
@@ -989,7 +989,7 @@ def backtesting_forecaster_multivariate(
     n_boot: int=500,
     random_state: int=123,
     in_sample_residuals: bool=True,
-    n_jobs: Union[int, str]='auto',
+    n_jobs: Optional[Union[int, str]]='auto',
     verbose: bool=False,
     show_progress: bool=True
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
@@ -1059,7 +1059,7 @@ def backtesting_forecaster_multivariate(
         If `True`, residuals from the training data are used as proxy of prediction 
         error to create prediction intervals.  If `False`, out_sample_residuals 
         are used if they are already stored inside the forecaster.
-    n_jobs : 'auto' or int, default='auto'
+    n_jobs : int, 'auto', default `'auto'`
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
         set to the number of cores. If 'auto', `n_jobs` is set using the fuction
         skforecast.utils.select_n_jobs_backtesting.
@@ -1124,7 +1124,7 @@ def grid_search_forecaster_multivariate(
     lags_grid: Optional[list]=None,
     refit: Optional[Union[bool, int]]=False,
     return_best: bool=True,
-    n_jobs: Union[int, str]='auto',
+    n_jobs: Optional[Union[int, str]]='auto',
     verbose: bool=True,
     show_progress: bool=True
 ) -> pd.DataFrame:
@@ -1180,7 +1180,7 @@ def grid_search_forecaster_multivariate(
         the Forecaster will be trained every that number of iterations.
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
-    n_jobs : 'auto' or int, default='auto'
+    n_jobs : int, 'auto', default `'auto'`
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
         set to the number of cores. If 'auto', `n_jobs` is set using the fuction
         skforecast.utils.select_n_jobs_backtesting.
@@ -1244,7 +1244,7 @@ def random_search_forecaster_multivariate(
     n_iter: int=10,
     random_state: int=123,
     return_best: bool=True,
-    n_jobs: Union[int, str]='auto',
+    n_jobs: Optional[Union[int, str]]='auto',
     verbose: bool=True,
     show_progress: bool=True
 ) -> pd.DataFrame:
@@ -1305,7 +1305,7 @@ def random_search_forecaster_multivariate(
         Sets a seed to the random sampling for reproducible output.
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
-    n_jobs : 'auto' or int, default='auto'
+    n_jobs : int, 'auto', default `'auto'`
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
         set to the number of cores. If 'auto', `n_jobs` is set using the fuction
         skforecast.utils.select_n_jobs_backtesting.
