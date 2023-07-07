@@ -125,7 +125,7 @@ def _backtesting_forecaster_multiseries(
         are used if they are already stored inside the forecaster.
     n_jobs : int, 'auto', default `'auto'`
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
-        set to the number of cores. If 'auto', `n_jobs` is set using the fuction
+        set to the number of cores. If 'auto', `n_jobs` is set using the function
         skforecast.utils.select_n_jobs_backtesting.
         **New in version 0.9.0**
     verbose : bool, default `False`
@@ -151,10 +151,10 @@ def _backtesting_forecaster_multiseries(
     forecaster = deepcopy(forecaster)
     if n_jobs == 'auto':
         n_jobs = select_n_jobs_backtesting(
-                    forecaster_type  = type(forecaster).__name__,
-                    regressor_type   = type(forecaster.regressor).__name__,
-                    refit_forecaster = refit
-                )
+                     forecaster_type = type(forecaster).__name__,
+                     regressor_type  = type(forecaster.regressor).__name__,
+                     refit           = refit
+                 )
     else:
         n_jobs = n_jobs if n_jobs > 0 else cpu_count()
 
@@ -415,7 +415,7 @@ def backtesting_forecaster_multiseries(
         are used if they are already stored inside the forecaster.
     n_jobs : int, 'auto', default `'auto'`
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
-        set to the number of cores. If 'auto', `n_jobs` is set using the fuction
+        set to the number of cores. If 'auto', `n_jobs` is set using the function
         skforecast.utils.select_n_jobs_backtesting.
         **New in version 0.9.0**
     verbose : bool, default `False`
@@ -583,7 +583,7 @@ def grid_search_forecaster_multiseries(
         Refit the `forecaster` using the best found parameters on the whole data.
     n_jobs : int, 'auto', default `'auto'`
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
-        set to the number of cores. If 'auto', `n_jobs` is set using the fuction
+        set to the number of cores. If 'auto', `n_jobs` is set using the function
         skforecast.utils.select_n_jobs_backtesting.
         **New in version 0.9.0**
     verbose : bool, default `True`
@@ -708,7 +708,7 @@ def random_search_forecaster_multiseries(
         Refit the `forecaster` using the best found parameters on the whole data.
     n_jobs : int, 'auto', default `'auto'`
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
-        set to the number of cores. If 'auto', `n_jobs` is set using the fuction
+        set to the number of cores. If 'auto', `n_jobs` is set using the function
         skforecast.utils.select_n_jobs_backtesting.
         **New in version 0.9.0**
     verbose : bool, default `True`
@@ -1061,7 +1061,7 @@ def backtesting_forecaster_multivariate(
         are used if they are already stored inside the forecaster.
     n_jobs : int, 'auto', default `'auto'`
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
-        set to the number of cores. If 'auto', `n_jobs` is set using the fuction
+        set to the number of cores. If 'auto', `n_jobs` is set using the function
         skforecast.utils.select_n_jobs_backtesting.
         **New in version 0.9.0** 
     verbose : bool, default `False`
@@ -1182,7 +1182,7 @@ def grid_search_forecaster_multivariate(
         Refit the `forecaster` using the best found parameters on the whole data.
     n_jobs : int, 'auto', default `'auto'`
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
-        set to the number of cores. If 'auto', `n_jobs` is set using the fuction
+        set to the number of cores. If 'auto', `n_jobs` is set using the function
         skforecast.utils.select_n_jobs_backtesting.
         **New in version 0.9.0**
     verbose : bool, default `True`
@@ -1307,7 +1307,7 @@ def random_search_forecaster_multivariate(
         Refit the `forecaster` using the best found parameters on the whole data.
     n_jobs : int, 'auto', default `'auto'`
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
-        set to the number of cores. If 'auto', `n_jobs` is set using the fuction
+        set to the number of cores. If 'auto', `n_jobs` is set using the function
         skforecast.utils.select_n_jobs_backtesting.
         **New in version 0.9.0**
     verbose : bool, default `True`
