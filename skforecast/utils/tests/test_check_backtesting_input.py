@@ -646,9 +646,9 @@ def test_check_backtesting_input_TypeError_when_integer_arguments_not_int_or_gre
 
 
 @pytest.mark.parametrize("n_jobs", 
-                         [1.0, 'not_int'], 
+                         [1.0, 'not_int_auto'], 
                          ids = lambda value : f'n_jobs: {value}')
-def test_check_backtesting_input_TypeError_when_n_jobs_not_int(n_jobs):
+def test_check_backtesting_input_TypeError_when_n_jobs_not_int_or_auto(n_jobs):
     """
     Test TypeError is raised in check_backtesting_input when n_jobs  
     is not an integer.
@@ -659,7 +659,7 @@ def test_check_backtesting_input_TypeError_when_n_jobs_not_int(n_jobs):
                  )
     
     err_msg = re.escape(
-            (f"`n_jobs` must be an integer. Got {n_jobs}.")
+            (f"`n_jobs` must be an integer or `'auto'`. Got {n_jobs}.")
         )
     with pytest.raises(TypeError, match = err_msg):
         check_backtesting_input(
