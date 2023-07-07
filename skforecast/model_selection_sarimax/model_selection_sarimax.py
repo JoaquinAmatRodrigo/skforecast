@@ -14,15 +14,15 @@ import logging
 from copy import deepcopy
 from joblib import Parallel, delayed, cpu_count
 from tqdm.auto import tqdm
+import sklearn.pipeline
 from sklearn.model_selection import ParameterGrid
 from sklearn.model_selection import ParameterSampler
 
 from ..exceptions import LongTrainingWarning
-from ..exceptions import IgnoredArgumentWarning
 from ..model_selection.model_selection import _get_metric
-from ..model_selection.model_selection import _backtesting_forecaster_verbose
 from ..model_selection.model_selection import _create_backtesting_folds
 from ..utils import check_backtesting_input
+from ..utils import select_n_jobs_backtesting
 
 logging.basicConfig(
     format = '%(name)-10s %(levelname)-5s %(message)s', 
@@ -43,7 +43,7 @@ def _backtesting_sarimax(
     refit: Optional[Union[bool, int]]=False,
     alpha: Optional[float]=None,
     interval: Optional[list]=None,
-    n_jobs: int=-1,
+    n_jobs: Optional[Union[int, str]]='auto',
     verbose: bool=False,
     show_progress: bool=True
 ) -> Tuple[Union[float, list], pd.DataFrame]:
@@ -103,9 +103,10 @@ def _backtesting_sarimax(
         0 and 100 inclusive. For example, interval of 95% should be as 
         `interval = [2.5, 97.5]`. If both, `alpha` and `interval` are 
         provided, `alpha` will be used.
-    n_jobs : int, default `-1`
+    n_jobs : int, 'auto', default `'auto'`
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
-        set to the number of cores.
+        set to the number of cores. If 'auto', `n_jobs` is set using the function
+        skforecast.utils.select_n_jobs_backtesting.
         **New in version 0.9.0**
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
@@ -127,10 +128,18 @@ def _backtesting_sarimax(
     """
 
     forecaster = deepcopy(forecaster)
-    n_jobs = n_jobs if n_jobs > 0 else cpu_count()
-
-    if isinstance(refit, int) and refit != 1:
+    
+    if refit == False:
         n_jobs = 1
+    else:
+        if n_jobs == 'auto':        
+            n_jobs = select_n_jobs_backtesting(
+                         forecaster_name = type(forecaster).__name__,
+                         regressor_name  = type(forecaster.regressor).__name__,
+                         refit           = refit
+                     )
+        else:
+            n_jobs = n_jobs if n_jobs > 0 else cpu_count()
 
     if not isinstance(metric, list):
         metrics = [_get_metric(metric=metric) if isinstance(metric, str) else metric]
@@ -283,7 +292,7 @@ def backtesting_sarimax(
     refit: Optional[Union[bool, int]]=False,
     alpha: Optional[float]=None,
     interval: Optional[list]=None,
-    n_jobs: int=-1,
+    n_jobs: Optional[Union[int, str]]='auto',
     verbose: bool=False,
     show_progress: bool=True
 ) -> Tuple[Union[float, list], pd.DataFrame]:
@@ -342,10 +351,11 @@ def backtesting_sarimax(
         symmetric. Sequence of percentiles to compute, which must be between 
         0 and 100 inclusive. For example, interval of 95% should be as 
         `interval = [2.5, 97.5]`. If both, `alpha` and `interval` are 
-        provided, `alpha` will be used. 
-    n_jobs : int, default -1
+        provided, `alpha` will be used.
+    n_jobs : int, 'auto', default `'auto'`
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
-        set to the number of cores.
+        set to the number of cores. If 'auto', `n_jobs` is set using the function
+        skforecast.utils.select_n_jobs_backtesting.
         **New in version 0.9.0**     
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
@@ -424,7 +434,7 @@ def grid_search_sarimax(
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     refit: Optional[Union[bool, int]]=False,
     return_best: bool=True,
-    n_jobs: int=-1,
+    n_jobs: Optional[Union[int, str]]='auto',
     verbose: bool=True,
     show_progress: bool=True
 ) -> pd.DataFrame:
@@ -471,9 +481,10 @@ def grid_search_sarimax(
         the Forecaster will be trained every that number of iterations.
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
-    n_jobs : int, default -1
+    n_jobs : int, 'auto', default `'auto'`
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
-        set to the number of cores.
+        set to the number of cores. If 'auto', `n_jobs` is set using the function
+        skforecast.utils.select_n_jobs_backtesting.
         **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
@@ -529,7 +540,7 @@ def random_search_sarimax(
     n_iter: int=10,
     random_state: int=123,
     return_best: bool=True,
-    n_jobs: int=-1,
+    n_jobs: Optional[Union[int, str]]='auto',
     verbose: bool=True,
     show_progress: bool=True
 ) -> pd.DataFrame:
@@ -581,9 +592,10 @@ def random_search_sarimax(
         Sets a seed to the random sampling for reproducible output.
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
-    n_jobs : int, default -1
+    n_jobs : int, 'auto', default `'auto'`
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
-        set to the number of cores.
+        set to the number of cores. If 'auto', `n_jobs` is set using the function
+        skforecast.utils.select_n_jobs_backtesting.
         **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
@@ -637,7 +649,7 @@ def _evaluate_grid_hyperparameters_sarimax(
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     refit: Optional[Union[bool, int]]=False,
     return_best: bool=True,
-    n_jobs: int=-1,
+    n_jobs: Optional[Union[int, str]]='auto',
     verbose: bool=True,
     show_progress: bool=True
 ) -> pd.DataFrame:
@@ -683,9 +695,10 @@ def _evaluate_grid_hyperparameters_sarimax(
         the Forecaster will be trained every that number of iterations.
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
-    n_jobs : int, default -1
+    n_jobs : int, 'auto', default `'auto'`
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
-        set to the number of cores.
+        set to the number of cores. If 'auto', `n_jobs` is set using the function
+        skforecast.utils.select_n_jobs_backtesting.
         **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.

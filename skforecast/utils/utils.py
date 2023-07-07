@@ -1682,6 +1682,7 @@ def select_n_jobs_backtesting(
         if not regressor_name.startswith('_')
     ]
     
+    refit = False if refit == 0 else refit
     if not isinstance(refit, bool) and refit != 1:
         n_jobs = 1
     else:

@@ -50,7 +50,9 @@ def test_backtesting_forecaster_TypeError_when_forecaster_not_supported_types():
         )
 
 
-def test_output_backtesting_sarimax_no_refit_no_exog_no_remainder_with_mocked():
+@pytest.mark.parametrize("n_jobs", [1, -1, 'auto'],
+                         ids=lambda n: f'n_jobs: {n}')
+def test_output_backtesting_sarimax_no_refit_no_exog_no_remainder_with_mocked(n_jobs):
     """
     Test output of backtesting_sarimax with backtesting mocked, Series y is mocked, no exog, 
     no refit, 12 observations to backtest, steps=3 (no remainder), metric='mean_squared_error'. 
@@ -68,6 +70,7 @@ def test_output_backtesting_sarimax_no_refit_no_exog_no_remainder_with_mocked():
                                         refit              = False,
                                         alpha              = None,
                                         interval           = None,
+                                        n_jobs             = n_jobs,
                                         verbose            = True
                                    )
     
@@ -122,7 +125,7 @@ def test_output_backtesting_sarimax_no_refit_no_exog_remainder_with_mocked():
     pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions, atol=0.0001)
 
 
-@pytest.mark.parametrize("n_jobs", [-1, 1],
+@pytest.mark.parametrize("n_jobs", [1, -1, 'auto'],
                          ids=lambda n: f'n_jobs: {n}')
 def test_output_backtesting_sarimax_yes_refit_no_exog_no_remainder_with_mocked(n_jobs):
     """
@@ -160,7 +163,7 @@ def test_output_backtesting_sarimax_yes_refit_no_exog_no_remainder_with_mocked(n
     pd.testing.assert_frame_equal(expected_values, backtest_predictions, atol=0.0001)
 
 
-@pytest.mark.parametrize("n_jobs", [-1, 1],
+@pytest.mark.parametrize("n_jobs", [1, -1, "auto"],
                          ids=lambda n: f'n_jobs: {n}')
 def test_output_backtesting_sarimax_yes_refit_no_exog_remainder_with_mocked(n_jobs):
     """
