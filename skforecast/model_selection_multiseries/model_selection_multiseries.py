@@ -212,9 +212,6 @@ def _backtesting_forecaster_multiseries(
                 verbose               = verbose  
             )
 
-    if show_progress:
-        folds = tqdm(folds)
-
     if refit:
         n_of_fits = int(len(folds)/refit)
         if type(forecaster).__name__ != 'ForecasterAutoregMultiVariate' and n_of_fits > 50:
@@ -231,6 +228,9 @@ def _backtesting_forecaster_multiseries(
                 LongTrainingWarning
             )
 
+    if show_progress:
+        folds = tqdm(folds)
+
     def _fit_predict_forecaster(series, exog, forecaster, interval, fold):
         """
         Fit the forecaster and predict `steps` ahead. This is an auxiliary 
@@ -246,8 +246,8 @@ def _backtesting_forecaster_multiseries(
         test_idx_end      = fold[2][1]
 
         if fold[4] is False:
-            # When the model is not fitted, last_window and next_window_exog must 
-            # be updated to include the data needed to make predictions.
+            # When the model is not fitted, last_window must be updated to include 
+            # the data needed to make predictions.
             last_window_series = series.iloc[last_window_start:last_window_end, ]
         else:
             # The model is fitted before making predictions. If `fixed_train_size`  

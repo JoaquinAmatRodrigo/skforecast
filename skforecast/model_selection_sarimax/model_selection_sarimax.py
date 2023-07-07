@@ -30,7 +30,7 @@ logging.basicConfig(
 )
 
 
-def _backtesting_sarimax_refit(
+def _backtesting_sarimax(
     forecaster,
     y: pd.Series,
     steps: int,
@@ -40,6 +40,7 @@ def _backtesting_sarimax_refit(
     gap: int=0,
     allow_incomplete_fold: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+    refit: Optional[Union[bool, int]]=False,
     alpha: Optional[float]=None,
     interval: Optional[list]=None,
     n_jobs: int=-1,
@@ -47,18 +48,17 @@ def _backtesting_sarimax_refit(
     show_progress: bool=True
 ) -> Tuple[Union[float, list], pd.DataFrame]:
     """
-    Backtesting of ForecasterSarimax model with a re-fitting strategy. A copy of the  
-    original forecaster is created so it is not modified during the process.
-    
-    In each iteration:
-        - Fit forecaster with the training set.
-        - A number of `steps` ahead are predicted.
-        - The training set increases with `steps` observations.
-        - The model is re-fitted using the new training set.
+    Backtesting of ForecasterSarimax.
 
-    In order to apply backtesting with refit, an initial training set must be
-    available, otherwise it would not be possible to increase the training set 
-    after each iteration. `initial_train_size` must be provided.
+    - If `refit` is `False`, the model will be trained only once using the 
+    `initial_train_size` first observations. 
+    - If `refit` is `True`, the model is trained on each iteration, increasing
+    the training set. 
+    - If `refit` is an `integer`, the model will be trained every that number 
+    of iterations.
+    
+    A copy of the original forecaster is created so that it is not modified during 
+    the process.
     
     Parameters
     ----------
@@ -91,6 +91,9 @@ def _backtesting_sarimax_refit(
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
+    refit : bool, int, default `False`
+        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
+        the Forecaster will be trained every that number of iterations.
     alpha : float, default `0.05`
         The confidence intervals for the forecasts are (1 - alpha) %.
         If both, `alpha` and `interval` are provided, `alpha` will be used.
@@ -99,11 +102,11 @@ def _backtesting_sarimax_refit(
         symmetric. Sequence of percentiles to compute, which must be between 
         0 and 100 inclusive. For example, interval of 95% should be as 
         `interval = [2.5, 97.5]`. If both, `alpha` and `interval` are 
-        provided, `alpha` will be used. 
-    n_jobs : int, default -1
+        provided, `alpha` will be used.
+    n_jobs : int, default `-1`
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
         set to the number of cores.
-        **New in version 0.9.0** 
+        **New in version 0.9.0**
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
         for backtesting.
@@ -114,7 +117,7 @@ def _backtesting_sarimax_refit(
     -------
     metrics_value : float, list
         Value(s) of the metric(s).
-    backtest_predictions : pandas Dataframe
+    backtest_predictions : pandas DataFrame
         Value of predictions and their estimated interval if `interval` is not `None`.
 
             - column pred: predictions.
@@ -126,35 +129,51 @@ def _backtesting_sarimax_refit(
     forecaster = deepcopy(forecaster)
     n_jobs = n_jobs if n_jobs > 0 else cpu_count()
 
+    if isinstance(refit, int) and refit != 1:
+        n_jobs = 1
+
     if not isinstance(metric, list):
         metrics = [_get_metric(metric=metric) if isinstance(metric, str) else metric]
     else:
         metrics = [_get_metric(metric=m) if isinstance(m, str) else m for m in metric]
+
+    # initial_train_size cannot be None because of append method in Sarimax
+    # First model training, this is done to allow parallelization when `refit` 
+    # is `False`. The initial Forecaster fit is outside the auxiliary function.
+    exog_train = exog.iloc[:initial_train_size, ] if exog is not None else None
+    forecaster.fit(
+        y    = y.iloc[:initial_train_size, ],
+        exog = exog_train
+    )
+    window_size = forecaster.window_size
+    externally_fitted = False
     
     folds = _create_backtesting_folds(
                 data                  = y,
-                window_size           = forecaster.window_size,
-                test_size             = steps,
+                window_size           = window_size,
                 initial_train_size    = initial_train_size,
-                gap                   = gap,
-                refit                 = True,
+                test_size             = steps,
+                externally_fitted     = externally_fitted,
+                refit                 = refit,
                 fixed_train_size      = fixed_train_size,
+                gap                   = gap,
                 allow_incomplete_fold = allow_incomplete_fold,
                 return_all_indexes    = False,
                 verbose               = verbose  
             )
     
-    if show_progress:
-        folds = tqdm(folds)
-    
-    if len(folds) > 50:
-        warnings.warn(
-            (f"The forecaster will be fit {len(folds)} times. This can take substantial "
-             f"amounts of time. If not feasible, try with `refit = False`.\n"),
-            LongTrainingWarning
-        )
+    if refit:
+        n_of_fits = int(len(folds)/refit)
+        if n_of_fits > 50:
+            warnings.warn(
+                (f"The forecaster will be fit {n_of_fits} times. This can take substantial "
+                f"amounts of time. If not feasible, try with `refit = False`.\n"),
+                LongTrainingWarning
+            )
+       
+    folds_tqdm = tqdm(folds) if show_progress else folds
 
-    def _fit_predict_forecaster(y, exog, forecaster, alpha, interval, fold):
+    def _fit_predict_forecaster(y, exog, forecaster, alpha, interval, fold, steps):
         """
         Fit the forecaster and predict `steps` ahead. This is an auxiliary 
         function used to parallelize the backtesting_forecaster function.
@@ -168,164 +187,37 @@ def _backtesting_sarimax_refit(
         train_idx_end   = fold[0][1]
         test_idx_start  = fold[2][0]
         test_idx_end    = fold[2][1]
-        
-        y_train = y.iloc[train_idx_start:train_idx_end, ]
-        exog_train = exog.iloc[train_idx_start:train_idx_end, ] if exog is not None else None
+
+        if refit:
+            last_window_start = fold[0][1] # Same as train_idx_end
+            last_window_end   = fold[1][1]
+        else:
+            last_window_end   = fold[2][0] # test_idx_start
+            last_window_start = last_window_end - steps
+
+        if fold[4] is False:
+            # When the model is not fitted, last_window and last_window_exog must 
+            # be updated to include the data needed to make predictions.
+            last_window_y = y.iloc[last_window_start:last_window_end]
+            last_window_exog = exog.iloc[last_window_start:last_window_end] if exog is not None else None 
+        else:
+            # The model is fitted before making predictions. If `fixed_train_size`  
+            # the train size doesn't increase but moves by `steps` in each iteration. 
+            # If `False` the train size increases by `steps` in each  iteration.
+            y_train = y.iloc[train_idx_start:train_idx_end, ]
+            exog_train = exog.iloc[train_idx_start:train_idx_end, ] if exog is not None else None
+            last_window_y = None
+            last_window_exog = None
+            forecaster.fit(y=y_train, exog=exog_train)
+
         next_window_exog = exog.iloc[test_idx_start:test_idx_end, ] if exog is not None else None
 
-        forecaster.fit(y=y_train, exog=exog_train)
+        # After the first fit, ARIMA must use the last windows stored in the model
+        if fold == folds[0]:
+            last_window_y = None
+            last_window_exog = None
+
         steps = len(range(test_idx_start, test_idx_end))
-        if alpha is None and interval is None:
-            pred = forecaster.predict(steps=steps, exog=next_window_exog)
-        else:
-            pred = forecaster.predict_interval(
-                       steps    = steps,
-                       alpha    = alpha,
-                       interval = interval,
-                       exog     = next_window_exog,
-                   )
-
-        pred = pred.iloc[gap:, ]            
-        
-        return pred
-
-    backtest_predictions = (
-        Parallel(n_jobs=n_jobs)
-        (delayed(_fit_predict_forecaster)
-        (y=y, exog=exog, forecaster=forecaster, alpha=alpha, interval=interval, fold=fold)
-         for fold in folds)
-    )
-    
-    backtest_predictions = pd.concat(backtest_predictions)
-    if isinstance(backtest_predictions, pd.Series):
-        backtest_predictions = pd.DataFrame(backtest_predictions)
-
-    metrics_values = [m(
-                        y_true = y.loc[backtest_predictions.index],
-                        y_pred = backtest_predictions['pred']
-                      ) for m in metrics
-                     ]
-    
-    if not isinstance(metric, list):
-        metrics_values = metrics_values[0]
-
-    return metrics_values, backtest_predictions
-
-
-def _backtesting_sarimax_no_refit(
-    forecaster,
-    y: pd.Series,
-    steps: int,
-    metric: Union[str, Callable, list],
-    initial_train_size: int,
-    exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-    alpha: Optional[float]=None,
-    interval: Optional[list]=None,
-    verbose: bool=False,
-    show_progress: bool=True
-) -> Tuple[Union[float, list], pd.DataFrame]:
-    """
-    Backtesting of ForecasterSarimax without iterative re-fitting. In each iteration,
-    a number of `steps` are predicted. A copy of the original forecaster is
-    created so it is not modified during the process.
-
-    If `forecaster` is already trained and `initial_train_size` is `None`,
-    no initial train is done and all data is used to evaluate the model.
-    However, the first `len(forecaster.last_window)` observations are needed
-    to create the initial predictors, so no predictions are calculated for them.
-    
-    Parameters
-    ----------
-    forecaster : ForecasterSarimax
-        Forecaster model.
-    y : pandas Series
-        Training time series.
-    steps : int
-        Number of steps to predict.
-    metric : str, Callable, list
-        Metric used to quantify the goodness of fit of the model.
-        
-            - If `string`: {'mean_squared_error', 'mean_absolute_error',
-             'mean_absolute_percentage_error', 'mean_squared_log_error'}
-            - If `Callable`: Function with arguments y_true, y_pred that returns 
-            a float.
-            - If `list`: List containing multiple strings and/or Callables.
-    initial_train_size : int
-        Number of samples in the initial train split. The backtest forecaster is
-        trained using the first `initial_train_size` observations.
-    exog : pandas Series, pandas DataFrame, default `None`
-        Exogenous variable/s included as predictor/s. Must have the same
-        number of observations as `y` and should be aligned so that y[i] is
-        regressed on exog[i].
-    alpha : float, default `0.05`
-        The confidence intervals for the forecasts are (1 - alpha) %.
-        If both, `alpha` and `interval` are provided, `alpha` will be used.
-    interval : list, default `None`
-        Confidence of the prediction interval estimated. The values must be
-        symmetric. Sequence of percentiles to compute, which must be between 
-        0 and 100 inclusive. For example, interval of 95% should be as 
-        `interval = [2.5, 97.5]`. If both, `alpha` and `interval` are 
-        provided, `alpha` will be used.
-    verbose : bool, default `False`
-        Print number of folds and index of training and validation sets used 
-        for backtesting.
-    show_progress: bool, default `True`
-        Whether to show a progress bar.
-
-    Returns
-    -------
-    metrics_value : float, list
-        Value(s) of the metric(s).
-    backtest_predictions : pandas DataFrame 
-        Value of predictions and their estimated interval if `interval` is not `None`.
-
-            - column pred: predictions.
-            - column lower_bound: lower bound of the interval.
-            - column upper_bound: upper bound of the interval.
-    
-    """
-
-    forecaster = deepcopy(forecaster)
-
-    if not isinstance(metric, list):
-        metrics = [_get_metric(metric=metric) if isinstance(metric, str) else metric]
-    else:
-        metrics = [_get_metric(metric=m) if isinstance(m, str) else m for m in metric]
-
-    # initial_train_size cannot be None because of append method in Sarimax
-    exog_train = exog.iloc[:initial_train_size, ] if exog is not None else None
-    forecaster.fit(y=y.iloc[:initial_train_size], exog=exog_train)
-    
-    folds     = int(np.ceil((len(y) - initial_train_size) / steps))
-    remainder = (len(y) - initial_train_size) % steps
-    
-    if verbose:
-        _backtesting_forecaster_verbose(
-            index_values       = y.index,
-            steps              = steps,
-            initial_train_size = initial_train_size,
-            folds              = folds,
-            remainder          = remainder,
-            refit              = False
-        )
-
-    backtest_predictions = []
-
-    for i in tqdm(range(folds)) if show_progress else range(folds):
-        # Since the model is only fitted with the initial_train_size, last_window
-        # and next_window_exog must be updated to include the data needed to make
-        # predictions.
-        last_window_start = initial_train_size + steps * (i-1)
-        last_window_end   = initial_train_size + steps * i
-
-        last_window_y    = y.iloc[last_window_start:last_window_end] if i != 0 else None
-        last_window_exog = exog.iloc[last_window_start:last_window_end, ] if exog is not None and i != 0 else None 
-        next_window_exog = exog.iloc[last_window_end:last_window_end + steps, ] if exog is not None else None
-
-        if i == folds - 1: # last fold
-            # If remainder > 0, only the remaining steps need to be predicted
-            steps = steps if remainder == 0 else remainder
-
         if alpha is None and interval is None:
             pred = forecaster.predict(
                        steps            = steps,
@@ -342,9 +234,26 @@ def _backtesting_sarimax_no_refit(
                        last_window      = last_window_y,
                        last_window_exog = last_window_exog
                    )
-        
-        backtest_predictions.append(pred)
 
+        pred = pred.iloc[gap:, ]            
+        
+        return pred
+
+    backtest_predictions = (
+        Parallel(n_jobs=n_jobs)
+        (delayed(_fit_predict_forecaster)
+        (
+            y=y, 
+            exog=exog, 
+            forecaster=forecaster, 
+            alpha=alpha, 
+            interval=interval, 
+            fold=fold, 
+            steps=steps
+        )
+        for fold in folds_tqdm)
+    )
+    
     backtest_predictions = pd.concat(backtest_predictions)
     if isinstance(backtest_predictions, pd.Series):
         backtest_predictions = pd.DataFrame(backtest_predictions)
@@ -381,10 +290,15 @@ def backtesting_sarimax(
     """
     Backtesting of ForecasterSarimax.
 
-    If `refit` is False, the model is trained only once using the `initial_train_size`
-    first observations. If `refit` is True, the model is trained in each iteration
-    increasing the training set. A copy of the original forecaster is created so 
-    it is not modified during the process.
+    - If `refit` is `False`, the model will be trained only once using the 
+    `initial_train_size` first observations. 
+    - If `refit` is `True`, the model is trained on each iteration, increasing
+    the training set. 
+    - If `refit` is an `integer`, the model will be trained every that number 
+    of iterations.
+    
+    A copy of the original forecaster is created so that it is not modified during 
+    the process.
 
     Parameters
     ----------
@@ -476,43 +390,23 @@ def backtesting_sarimax(
         show_progress         = show_progress
     )
     
-    if refit:
-        metrics_values, backtest_predictions = _backtesting_sarimax_refit(
-            forecaster            = forecaster,
-            y                     = y,
-            steps                 = steps,
-            metric                = metric,
-            initial_train_size    = initial_train_size,
-            fixed_train_size      = fixed_train_size,
-            gap                   = gap,
-            allow_incomplete_fold = allow_incomplete_fold,
-            exog                  = exog,
-            alpha                 = alpha,
-            interval              = interval,
-            n_jobs                = n_jobs,
-            verbose               = verbose,
-            show_progress         = show_progress
-        )
-    else:
-        if gap != 0 or allow_incomplete_fold is not True:
-            warnings.warn(
-                ("When using `refit=False`, the `gap` and `allow_incomplete_fold`"
-                 "arguments are ignored. Set `refit=True` to used them."), 
-                 IgnoredArgumentWarning
-            )
-
-        metrics_values, backtest_predictions = _backtesting_sarimax_no_refit(
-            forecaster            = forecaster,
-            y                     = y,
-            steps                 = steps,
-            metric                = metric,
-            initial_train_size    = initial_train_size,
-            exog                  = exog,
-            alpha                 = alpha,
-            interval              = interval,
-            verbose               = verbose,
-            show_progress         = show_progress
-        )
+    metrics_values, backtest_predictions = _backtesting_sarimax(
+        forecaster            = forecaster,
+        y                     = y,
+        steps                 = steps,
+        metric                = metric,
+        initial_train_size    = initial_train_size,
+        fixed_train_size      = fixed_train_size,
+        gap                   = gap,
+        allow_incomplete_fold = allow_incomplete_fold,
+        exog                  = exog,
+        refit                 = refit,
+        alpha                 = alpha,
+        interval              = interval,
+        n_jobs                = n_jobs,
+        verbose               = verbose,
+        show_progress         = show_progress
+    )
 
     return metrics_values, backtest_predictions
 
