@@ -1452,7 +1452,7 @@ def check_backtesting_input(
     n_boot: int=500,
     random_state: int=123,
     in_sample_residuals: bool=True,
-    n_jobs: Optional[int]=-1,
+    n_jobs: Optional[Union[int, str]]='auto',
     verbose: bool=False,
     show_progress: bool=True
 ) -> None:
@@ -1502,7 +1502,12 @@ def check_backtesting_input(
     in_sample_residuals : bool, default `True`
         If `True`, residuals from the training data are used as proxy of prediction 
         error to create prediction intervals.  If `False`, out_sample_residuals 
-        are used if they are already stored inside the forecaster.  
+        are used if they are already stored inside the forecaster.
+    n_jobs : int, 'auto', default `'auto'`
+            The number of jobs to run in parallel. If `-1`, then the number of jobs is 
+            set to the number of cores. If 'auto', `n_jobs` is set using the fuction
+            skforecast.utils.select_n_jobs_fit_forecaster.
+            **New in version 0.9.0**
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
         for backtesting.
@@ -1607,8 +1612,8 @@ def check_backtesting_input(
         raise TypeError(f"`random_state` must be an integer greater than 0. Got {random_state}.")
     if not isinstance(in_sample_residuals, bool):
         raise TypeError("`in_sample_residuals` must be a boolean: `True`, `False`.")
-    if not isinstance(n_jobs, int):
-        raise TypeError(f"`n_jobs` must be an integer. Got {n_jobs}.")
+    if not isinstance(n_jobs, int) and n_jobs != 'auto':
+        raise TypeError(f"`n_jobs` must be an integer or `'auto'`. Got {n_jobs}.")
     if not isinstance(verbose, bool):
         raise TypeError("`verbose` must be a boolean: `True`, `False`.")
     if not isinstance(show_progress, bool):
@@ -1626,3 +1631,116 @@ def check_backtesting_input(
         )
     
     return
+
+
+def select_n_jobs_backtesting(
+    forecaster_name: str,
+    regressor_name: str,
+    refit: Union[bool, int]
+) -> int:
+    """
+    Select the optimal number of jobs to use in the backtesting process. This
+    selection is based on heuristics and is not guaranteed to be optimal.
+
+    The number of jobs is chosen as follows:
+
+    - If `refit` is an integer, then n_jobs=1. This is because parallelization doesn't 
+    work with intermittent refit.
+    - If forecaster_name is 'ForecasterAutoreg' or 'ForecasterAutoregCustom' and
+    regressor_name is a linear regressor, then n_jobs=1.
+    - If forecaster_name is 'ForecasterAutoreg' or 'ForecasterAutoregCustom',
+    regressor_name is not a linear regressor and refit=`True`, then
+    n_jobs=cpu_count().
+    - If forecaster_name is 'ForecasterAutoreg' or 'ForecasterAutoregCustom',
+    regressor_name is not a linear regressor and refit=`False`, then
+    n_jobs=1.
+    - If forecaster_name is 'ForecasterAutoregDirect' or 'ForecasterAutoregMultiVariate'
+    and refit=`True`, then n_jobs=cpu_count().
+    - If forecaster_name is 'ForecasterAutoregDirect' or 'ForecasterAutoregMultiVariate'
+    and refit=`False`, then n_jobs=1.
+    - If forecaster_name is 'ForecasterAutoregMultiseries', then n_jobs=cpu_count().
+
+    Parameters
+    ----------
+    forecaster_name : str
+        The type of Forecaster.
+    regressor_name : str
+        The type of regressor.
+    refit : bool, int
+        If the forecaster is refitted during the backtesting process.
+
+    Returns
+    -------
+    n_jobs : int
+        The number of jobs to run in parallel.
+    
+    """
+
+    linear_regressors = [
+        regressor_name
+        for regressor_name in dir(sklearn.linear_model)
+        if not regressor_name.startswith('_')
+    ]
+    
+    if not isinstance(refit, bool) and refit != 1:
+        n_jobs = 1
+    else:
+        if forecaster_name in ['ForecasterAutoreg', 'ForecasterAutoregCustom']:
+            if regressor_name in linear_regressors:
+                n_jobs = 1
+            else:
+                n_jobs = joblib.cpu_count() if refit else 1
+        elif forecaster_name in ['ForecasterAutoregDirect', 'ForecasterAutoregMultiVariate']:
+            n_jobs = 1
+        elif forecaster_name in ['ForecasterAutoregMultiseries', 'ForecasterAutoregMultiSeriesCustom']:
+            n_jobs = joblib.cpu_count()
+        elif forecaster_name in ['ForecasterSarimax']:
+            n_jobs = 1
+        else:
+            n_jobs = 1
+
+    return n_jobs
+
+
+def select_n_jobs_fit_forecaster(
+    forecaster_name: str,
+    regressor_name: str,
+) -> int:
+    """
+    Select the optimal number of jobs to use in the fitting process. This
+    selection is based on heuristics and is not guaranteed to be optimal. 
+    
+    The number of jobs is chosen as follows:
+    
+    - If forecaster_name is 'ForecasterAutoregDirect' or 'ForecasterAutoregMultiVariate'
+    and regressor_name is a linear regressor, then n_jobs=1, otherwise n_jobs=cpu_count().
+    
+    Parameters
+    ----------
+    forecaster_name : str
+        The type of Forecaster.
+    regressor_name : str
+        The type of regressor.
+
+    Returns
+    -------
+    n_jobs : int
+        The number of jobs to run in parallel.
+    
+    """
+
+    linear_regressors = [
+        regressor_name
+        for regressor_name in dir(sklearn.linear_model)
+        if not regressor_name.startswith('_')
+    ]
+
+    if forecaster_name in ['ForecasterAutoregDirect', 'ForecasterAutoregMultiVariate']:
+        if regressor_name in linear_regressors:
+            n_jobs = 1
+        else:
+            n_jobs = joblib.cpu_count()
+    else:
+        n_jobs = 1
+
+    return n_jobs
