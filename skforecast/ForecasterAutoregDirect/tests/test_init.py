@@ -6,12 +6,11 @@ import numpy as np
 import pandas as pd
 from skforecast.ForecasterAutoregDirect import ForecasterAutoregDirect
 from sklearn.linear_model import LinearRegression
-from sklearn.neighbors import KNeighborsRegressor
 
 
-def test_init_exception_when_steps_is_not_int():
+def test_init_TypeError_when_steps_is_not_int():
     """
-    Test exception is raised when steps is not an int.
+    Test TypeError is raised when steps is not an int.
     """
     steps = 'not_valid_type'
     err_msg = re.escape(
@@ -22,11 +21,23 @@ def test_init_exception_when_steps_is_not_int():
         ForecasterAutoregDirect(LinearRegression(), lags=2, steps=steps)
 
 
-def test_init_exception_when_steps_is_less_than_1():
+def test_init_ValueError_when_steps_is_less_than_1():
     """
-    Test exception is raised when steps is less than 1.
+    Test ValueError is raised when steps is less than 1.
     """
     steps = 0
     err_msg = re.escape(f"`steps` argument must be greater than or equal to 1. Got {steps}.")
     with pytest.raises(ValueError, match = err_msg):
         ForecasterAutoregDirect(LinearRegression(), lags=2, steps=steps)
+
+
+@pytest.mark.parametrize("n_jobs", 
+                         [1.0, 'not_int_auto'], 
+                         ids = lambda value : f'n_jobs: {value}')
+def test_init_TypeError_when_n_jobs_not_int_or_auto(n_jobs):
+    """
+    Test TypeError is raised in when n_jobs is not an integer or 'auto'.
+    """
+    err_msg = re.escape(f"`n_jobs` must be an integer or `'auto'`. Got {type(n_jobs)}.")
+    with pytest.raises(TypeError, match = err_msg):
+        ForecasterAutoregDirect(LinearRegression(), lags=2, steps=2, n_jobs=n_jobs)

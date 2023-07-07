@@ -14,6 +14,7 @@ import logging
 from copy import deepcopy
 from joblib import Parallel, delayed, cpu_count
 from tqdm.auto import tqdm
+import sklearn.pipeline
 from sklearn.metrics import mean_squared_error 
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import mean_absolute_percentage_error
@@ -468,16 +469,18 @@ def _backtesting_forecaster(
     forecaster = deepcopy(forecaster)
     
     if n_jobs == 'auto':
+        if isinstance(forecaster.regressor, sklearn.pipeline.Pipeline):
+            regressor_name = type(forecaster.regressor[-1]).__name__
+        else:
+            regressor_name = type(forecaster.regressor).__name__
+        
         n_jobs = select_n_jobs_backtesting(
                      forecaster_name = type(forecaster).__name__,
-                     regressor_name  = type(forecaster.regressor).__name__,
+                     regressor_name  = regressor_name,
                      refit           = refit
                  )
     else:
         n_jobs = n_jobs if n_jobs > 0 else cpu_count()
-
-    if isinstance(refit, int) and refit != 1:
-        n_jobs = 1
 
     if not isinstance(metric, list):
         metrics = [_get_metric(metric=metric) if isinstance(metric, str) else metric]

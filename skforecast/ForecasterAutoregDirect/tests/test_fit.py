@@ -38,14 +38,14 @@ def test_forecaster_index_step_stored():
     assert results == expected
     
 
-@pytest.mark.parametrize("n_jobs", [1, -1], 
+@pytest.mark.parametrize("n_jobs", [1, -1, 'auto'], 
                          ids=lambda n_jobs: f'n_jobs: {n_jobs}')
 def test_fit_in_sample_residuals_stored(n_jobs):
     """
     Test that values of in_sample_residuals are stored after fitting.
     """
-    forecaster = ForecasterAutoregDirect(LinearRegression(), lags=3, steps=2)
-    forecaster.fit(y=pd.Series(np.arange(5)), n_jobs=n_jobs)
+    forecaster = ForecasterAutoregDirect(LinearRegression(), lags=3, steps=2, n_jobs=n_jobs)
+    forecaster.fit(y=pd.Series(np.arange(5)))
     expected = {1: np.array([0.]),
                 2: np.array([0.])}
     results = forecaster.in_sample_residuals
@@ -56,14 +56,14 @@ def test_fit_in_sample_residuals_stored(n_jobs):
     assert all(all(np.isclose(results[k], expected[k])) for k in expected.keys())
 
 
-@pytest.mark.parametrize("n_jobs", [1, -1], 
+@pytest.mark.parametrize("n_jobs", [1, -1, 'auto'], 
                          ids=lambda n_jobs: f'n_jobs: {n_jobs}')
 def test_fit_in_sample_residuals_stored_XGBRegressor(n_jobs):
     """
     Test that values of in_sample_residuals are stored after fitting with XGBRegressor.
     """
-    forecaster = ForecasterAutoregDirect(XGBRegressor(random_state=123), lags=3, steps=2)
-    forecaster.fit(y=pd.Series(np.arange(5)), n_jobs=n_jobs)
+    forecaster = ForecasterAutoregDirect(XGBRegressor(random_state=123), lags=3, steps=2, n_jobs=n_jobs)
+    forecaster.fit(y=pd.Series(np.arange(5)))
     expected = {1: np.array([7.15255737e-07]),
                 2: np.array([7.15255737e-07])}
     results = forecaster.in_sample_residuals
@@ -74,19 +74,19 @@ def test_fit_in_sample_residuals_stored_XGBRegressor(n_jobs):
     assert all(all(np.isclose(results[k], expected[k])) for k in expected.keys())
 
 
-@pytest.mark.parametrize("n_jobs", [1, -1], 
+@pytest.mark.parametrize("n_jobs", [1, -1, 'auto'], 
                          ids=lambda n_jobs: f'n_jobs: {n_jobs}')
 def test_fit_same_residuals_when_residuals_greater_than_1000(n_jobs):
     """
     Test fit return same residuals when residuals len is greater than 1000.
     Testing with two different forecaster.
     """
-    forecaster = ForecasterAutoregDirect(LinearRegression(), lags=3, steps=2)
-    forecaster.fit(y=pd.Series(np.arange(1200)), n_jobs=n_jobs)
+    forecaster = ForecasterAutoregDirect(LinearRegression(), lags=3, steps=2, n_jobs=n_jobs)
+    forecaster.fit(y=pd.Series(np.arange(1200)))
     results_1 = forecaster.in_sample_residuals
 
-    forecaster = ForecasterAutoregDirect(LinearRegression(), lags=3, steps=2)
-    forecaster.fit(y=pd.Series(np.arange(1200)), n_jobs=n_jobs)
+    forecaster = ForecasterAutoregDirect(LinearRegression(), lags=3, steps=2, n_jobs=n_jobs)
+    forecaster.fit(y=pd.Series(np.arange(1200)))
     results_2 = forecaster.in_sample_residuals
 
     assert isinstance(results_1, dict)
@@ -99,15 +99,15 @@ def test_fit_same_residuals_when_residuals_greater_than_1000(n_jobs):
     assert all(all(results_1[k] == results_2[k]) for k in results_2.keys())
 
 
-@pytest.mark.parametrize("n_jobs", [1, -1], 
+@pytest.mark.parametrize("n_jobs", [1, -1, 'auto'], 
                          ids=lambda n_jobs: f'n_jobs: {n_jobs}')
 def test_fit_in_sample_residuals_not_stored(n_jobs):
     """
     Test that values of in_sample_residuals are not stored after fitting
     when `store_in_sample_residuals=False`.
     """
-    forecaster = ForecasterAutoregDirect(LinearRegression(), lags=3, steps=2)
-    forecaster.fit(y=pd.Series(np.arange(5)), store_in_sample_residuals=False, n_jobs=n_jobs)
+    forecaster = ForecasterAutoregDirect(LinearRegression(), lags=3, steps=2, n_jobs=n_jobs)
+    forecaster.fit(y=pd.Series(np.arange(5)), store_in_sample_residuals=False)
     expected = {1: None, 2: None}
     results = forecaster.in_sample_residuals
 

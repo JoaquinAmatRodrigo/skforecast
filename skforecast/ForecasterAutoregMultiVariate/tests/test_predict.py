@@ -191,7 +191,7 @@ def test_predict_output_when_regressor_is_LinearRegression_with_transform_series
     pd.testing.assert_frame_equal(results, expected)
 
 
-@pytest.mark.parametrize("n_jobs", [1, -1], 
+@pytest.mark.parametrize("n_jobs", [1, -1, 'auto'], 
                          ids=lambda n_jobs: f'n_jobs: {n_jobs}')
 def test_predict_output_when_regressor_is_LinearRegression_with_transform_series_and_transform_exog(n_jobs):
     """
@@ -204,9 +204,10 @@ def test_predict_output_when_regressor_is_LinearRegression_with_transform_series
                      lags               = 5,
                      steps              = 5,
                      transformer_series = StandardScaler(),
-                     transformer_exog   = transformer_exog
+                     transformer_exog   = transformer_exog,
+                     n_jobs             = n_jobs
                  )
-    forecaster.fit(series=series, exog=exog, n_jobs=n_jobs)
+    forecaster.fit(series=series, exog=exog)
     results = forecaster.predict(steps=[1, 2, 3, 4, 5], exog=exog_predict)
     expected = pd.DataFrame(
                    data    = np.array([0.61043227, 0.46658137, 0.54994519, 0.52561227, 0.46596527]),

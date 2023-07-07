@@ -1503,7 +1503,7 @@ def check_backtesting_input(
         If `True`, residuals from the training data are used as proxy of prediction 
         error to create prediction intervals.  If `False`, out_sample_residuals 
         are used if they are already stored inside the forecaster.
-    n_jobs : 'auto' or int, default='auto'
+    n_jobs : int, 'auto', default `'auto'`
             The number of jobs to run in parallel. If `-1`, then the number of jobs is 
             set to the number of cores. If 'auto', `n_jobs` is set using the fuction
             skforecast.utils.select_n_jobs_fit_forecaster.
@@ -1644,6 +1644,8 @@ def select_n_jobs_backtesting(
 
     The number of jobs is chosen as follows:
 
+    - If `refit` is an integer, then n_jobs=1. This is because parallelization doesn't 
+    work with intermittent refit.
     - If forecaster_name is 'ForecasterAutoreg' or 'ForecasterAutoregCustom' and
     regressor_name is a linear regressor, then n_jobs=1.
     - If forecaster_name is 'ForecasterAutoreg' or 'ForecasterAutoregCustom',
@@ -1679,21 +1681,26 @@ def select_n_jobs_backtesting(
         for regressor_name in dir(sklearn.linear_model)
         if not regressor_name.startswith('_')
     ]
-        
-    if forecaster_name in ['ForecasterAutoreg', 'ForecasterAutoregCustom']:
-        if regressor_name in linear_regressors:
+    
+    if not isinstance(refit, bool) and refit != 1:
+        n_jobs = 1
+    else:
+        if forecaster_name in ['ForecasterAutoreg', 'ForecasterAutoregCustom']:
+            if regressor_name in linear_regressors:
+                n_jobs = 1
+            else:
+                n_jobs = joblib.cpu_count() if refit else 1
+        elif forecaster_name in ['ForecasterAutoregDirect', 'ForecasterAutoregMultiVariate']:
+            n_jobs = 1
+        elif forecaster_name in ['ForecasterAutoregMultiseries', 'ForecasterAutoregMultiSeriesCustom']:
+            n_jobs = joblib.cpu_count()
+        elif forecaster_name in ['ForecasterSarimax']:
             n_jobs = 1
         else:
-            n_jobs = joblib.cpu_count() if refit else 1
-    
-    if forecaster_name in ['ForecasterAutoregDirect', 'ForecasterAutoregMultiVariate']:
-        n_jobs = 1
-
-    if forecaster_name in ['ForecasterAutoregMultiseries', 'ForecasterAutoregMultiSeriesCustom']:
-        n_jobs = joblib.cpu_count()
+            n_jobs = 1
 
     return n_jobs
-    
+
 
 def select_n_jobs_fit_forecaster(
     forecaster_name: str,

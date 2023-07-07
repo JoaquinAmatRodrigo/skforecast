@@ -14,6 +14,7 @@ import logging
 from copy import deepcopy
 from joblib import Parallel, delayed, cpu_count
 from tqdm.auto import tqdm
+import sklearn.pipeline
 from sklearn.model_selection import ParameterGrid
 from sklearn.model_selection import ParameterSampler
 
@@ -150,16 +151,18 @@ def _backtesting_forecaster_multiseries(
 
     forecaster = deepcopy(forecaster)
     if n_jobs == 'auto':
+        if isinstance(forecaster.regressor, sklearn.pipeline.Pipeline):
+            regressor_name = type(forecaster.regressor[-1]).__name__
+        else:
+            regressor_name = type(forecaster.regressor).__name__
+        
         n_jobs = select_n_jobs_backtesting(
                      forecaster_name = type(forecaster).__name__,
-                     regressor_name  = type(forecaster.regressor).__name__,
+                     regressor_name  = regressor_name,
                      refit           = refit
                  )
     else:
         n_jobs = n_jobs if n_jobs > 0 else cpu_count()
-
-    if isinstance(refit, int) and refit != 1:
-        n_jobs = 1
 
     if type(forecaster).__name__ == 'ForecasterAutoregMultiVariate':
         levels = [forecaster.level]
@@ -486,7 +489,6 @@ def backtesting_forecaster_multiseries(
              f"argument when initializing the forecaster."),
              IgnoredArgumentWarning
         )
-    
 
     metrics_levels, backtest_predictions = _backtesting_forecaster_multiseries(
         forecaster            = forecaster,

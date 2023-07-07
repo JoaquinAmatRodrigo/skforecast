@@ -83,9 +83,9 @@ class ForecasterAutoregDirect(ForecasterBase):
     fit_kwargs : dict, default `None`
         Additional arguments to be passed to the `fit` method of the regressor.
         **New in version 0.8.0**
-    n_jobs : 'auto' or int, default='auto'
+    n_jobs : int, 'auto', default `'auto'`
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
-        set to the number of cores. If 'auto', `n_jobs` is set using the fuction
+        set to the number of cores. If 'auto', `n_jobs` is set using the function
         skforecast.utils.select_n_jobs_fit_forecaster.
         **New in version 0.9.0**
     forecaster_id : str, int, default `None`
@@ -170,9 +170,9 @@ class ForecasterAutoregDirect(ForecasterBase):
         Version of skforecast library used to create the forecaster.
     python_version : str
         Version of python used to create the forecaster.
-    n_jobs : 'auto' or int, default='auto'
+    n_jobs : int, 'auto', default `'auto'`
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
-        set to the number of cores. If 'auto', `n_jobs` is set using the fuction
+        set to the number of cores. If 'auto', `n_jobs` is set using the function
         skforecast.utils.select_n_jobs_fit_forecaster.
         **New in version 0.9.0**
     forecaster_id : str, int
@@ -194,7 +194,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         transformer_exog: Optional[object]=None,
         weight_func: Optional[Callable]=None,
         fit_kwargs: Optional[dict]=None,
-        n_jobs: Union[int, str]='auto',
+        n_jobs: Optional[Union[int, str]]='auto',
         forecaster_id: Optional[Union[str, int]]=None,
     ) -> None:
         
@@ -231,6 +231,11 @@ class ForecasterAutoregDirect(ForecasterBase):
                 f"`steps` argument must be greater than or equal to 1. Got {steps}."
             )
         
+        if not isinstance(n_jobs, int) and n_jobs != 'auto':
+            raise TypeError(
+                f"`n_jobs` must be an integer or `'auto'`. Got {type(n_jobs)}."
+            )
+
         self.regressors_ = {step: clone(self.regressor) for step in range(1, steps + 1)}
         self.lags = initialize_lags(type(self).__name__, lags)
         self.max_lag = max(self.lags)
@@ -253,9 +258,9 @@ class ForecasterAutoregDirect(ForecasterBase):
 
         if n_jobs == 'auto':
             self.n_jobs = select_n_jobs_fit_forecaster(
-                        forecaster_name  = type(self).__name__,
-                        regressor_name   = type(self.regressor).__name__,
-                    )
+                              forecaster_name = type(self).__name__,
+                              regressor_name  = type(self.regressor).__name__,
+                          )
         else:
             self.n_jobs = n_jobs if n_jobs > 0 else cpu_count()
     

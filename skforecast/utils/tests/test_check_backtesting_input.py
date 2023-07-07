@@ -651,7 +651,7 @@ def test_check_backtesting_input_TypeError_when_integer_arguments_not_int_or_gre
 def test_check_backtesting_input_TypeError_when_n_jobs_not_int_or_auto(n_jobs):
     """
     Test TypeError is raised in check_backtesting_input when n_jobs  
-    is not an integer.
+    is not an integer or 'auto'.
     """
     forecaster = ForecasterAutoreg(
                      regressor = Ridge(random_state=123),

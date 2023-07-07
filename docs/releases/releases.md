@@ -29,6 +29,8 @@ The main changes in this release are:
 
 + Added `show_progress` to grid search functions.
 
++ Added functions `select_n_jobs_backtesting` and `select_n_jobs_fit_forecaster` to `utils` to select the number of jobs to use during multi-process parallelization.
+
 **Changed**
 
 + Remove `get_feature_importance` in favor of `get_feature_importances` in all Forecasters, (deprecated since 0.8.0).
