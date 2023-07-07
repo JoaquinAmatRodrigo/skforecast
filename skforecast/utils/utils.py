@@ -1634,96 +1634,106 @@ def check_backtesting_input(
 
 
 def select_n_jobs_backtesting(
-    forecaster_type:str,
-    regressor_type:str,
-    refit_forecaster:Union[bool, int]
+    forecaster_type: str,
+    regressor_type: str,
+    refit: Union[bool, int]
 ) -> int:
     """
-    Select the optimal number of jobs to be used in the backtesting process. This
+    Select the optimal number of jobs to use in the backtesting process. This
     selection is based on heuristics and is not guaranteed to be optimal.
-    
-    The number of jobs is selected as follows:
+
+    The number of jobs is chosen as follows:
+
     - If forecaster_type is 'ForecasterAutoreg' or 'ForecasterAutoregCustom' and
-        regressor_type is a linear regressor, then n_jobs=1.
+    regressor_type is a linear regressor, then n_jobs=1.
     - If forecaster_type is 'ForecasterAutoreg' or 'ForecasterAutoregCustom',
-        regressor_type is not a linear regressor and refit_forecaster=True, then
-        n_jobs=cpu_count().
+    regressor_type is not a linear regressor and refit=`True`, then
+    n_jobs=cpu_count().
     - If forecaster_type is 'ForecasterAutoreg' or 'ForecasterAutoregCustom',
-        regressor_type is not a linear regressor and refit_forecaster=False, then
-        n_jobs=1.
+    regressor_type is not a linear regressor and refit=`False`, then
+    n_jobs=1.
     - If forecaster_type is 'ForecasterAutoregDirect' or 'ForecasterAutoregMultiVariate'
-        and refit_forecaster=True, then n_jobs=cpu_count().
+    and refit=`True`, then n_jobs=cpu_count().
     - If forecaster_type is 'ForecasterAutoregDirect' or 'ForecasterAutoregMultiVariate'
-        and refit_forecaster=False, then n_jobs=1.
+    and refit=`False`, then n_jobs=1.
     - If forecaster_type is 'ForecasterAutoregMultiseries', then n_jobs=cpu_count().
-   
+
     Parameters
     ----------
     forecaster_type : str
-        The type of forecaster to be used.
+        The type of Forecaster.
     regressor_type : str
-        The type of regressor to be used.
-    refit_forecaster : Union[bool, int]
+        The type of regressor.
+    refit : bool, int
         If the forecaster is refitted during the backtesting process.
 
     Returns
     -------
     n_jobs : int
-        The number of jobs to be used in the model fitting process.
+        The number of jobs to run in parallel.
+    
     """
 
-    linear_regresors = [
+    linear_regressors = [
         regressor_name
         for regressor_name in dir(sklearn.linear_model)
         if not regressor_name.startswith('_')
     ]
         
     if forecaster_type in ['ForecasterAutoreg', 'ForecasterAutoregCustom']:
-        if regressor_type in linear_regresors:
-            return 1
+        if regressor_type in linear_regressors:
+            n_jobs = 1
         else:
-            if refit_forecaster:
-                return joblib.cpu_count()
-            else:
-                return 1
+            n_jobs = joblib.cpu_count() if refit else 1
+    
     if forecaster_type in ['ForecasterAutoregDirect', 'ForecasterAutoregMultiVariate']:
-            return 1
+        n_jobs = 1
+
     if forecaster_type in ['ForecasterAutoregMultiseries', 'ForecasterAutoregMultiSeriesCustom']:
-        return joblib.cpu_count()
+        n_jobs = joblib.cpu_count()
+
+    return n_jobs
     
 
 def select_n_jobs_fit_forecaster(
-    forecaster_type:str,
-    regressor_type:str,
+    forecaster_type: str,
+    regressor_type: str,
 ) -> int:
     """
-    Select the optimal number of jobs to be used in the fitting process. This
+    Select the optimal number of jobs to use in the fitting process. This
     selection is based on heuristics and is not guaranteed to be optimal. 
     
-    The number of jobs is selected as follows:
+    The number of jobs is chosen as follows:
     
-   
+    - If forecaster_type is 'ForecasterAutoregDirect' or 'ForecasterAutoregMultiVariate'
+    and regressor_type is a linear regressor, then n_jobs=1, otherwise n_jobs=cpu_count().
+    
     Parameters
     ----------
+    forecaster_type : str
+        The type of Forecaster.
     regressor_type : str
-        The type of regressor to be used.
+        The type of regressor.
 
     Returns
     -------
     n_jobs : int
-        The number of jobs to be used in the model fitting process.
+        The number of jobs to run in parallel.
+    
     """
 
-    linear_regresors = [
+    linear_regressors = [
         regressor_name
         for regressor_name in dir(sklearn.linear_model)
         if not regressor_name.startswith('_')
     ]
 
     if forecaster_type in ['ForecasterAutoregDirect', 'ForecasterAutoregMultiVariate']:
-        if regressor_type in linear_regresors:
-            return 1
+        if regressor_type in linear_regressors:
+            n_jobs = 1
         else:
-            return joblib.cpu_count()
+            n_jobs = joblib.cpu_count()
     else:
-        return 1
+        n_jobs = n_jobs
+    
+    return n_jobs
