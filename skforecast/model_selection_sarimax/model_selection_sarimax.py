@@ -129,16 +129,17 @@ def _backtesting_sarimax(
 
     forecaster = deepcopy(forecaster)
     
-    if n_jobs == 'auto':        
-        n_jobs = select_n_jobs_backtesting(
-                     forecaster_name = type(forecaster).__name__,
-                     regressor_name  = type(forecaster.regressor).__name__,
-                     refit           = refit
-                 )
-    elif refit == False:
+    if refit == False:
         n_jobs = 1
     else:
-        n_jobs = n_jobs if n_jobs > 0 else cpu_count()
+        if n_jobs == 'auto':        
+            n_jobs = select_n_jobs_backtesting(
+                         forecaster_name = type(forecaster).__name__,
+                         regressor_name  = type(forecaster.regressor).__name__,
+                         refit           = refit
+                     )
+        else:
+            n_jobs = n_jobs if n_jobs > 0 else cpu_count()
 
     if not isinstance(metric, list):
         metrics = [_get_metric(metric=metric) if isinstance(metric, str) else metric]
