@@ -1613,7 +1613,7 @@ def check_backtesting_input(
     if not isinstance(in_sample_residuals, bool):
         raise TypeError("`in_sample_residuals` must be a boolean: `True`, `False`.")
     if not isinstance(n_jobs, int) and n_jobs != 'auto':
-        raise ValueError(f"Parameter 'n_jobs' must be an integer or 'auto'. Got {n_jobs}.")
+        raise TypeError(f"`n_jobs` must be an integer or `'auto'`. Got {n_jobs}.")
     if not isinstance(verbose, bool):
         raise TypeError("`verbose` must be a boolean: `True`, `False`.")
     if not isinstance(show_progress, bool):
@@ -1634,8 +1634,8 @@ def check_backtesting_input(
 
 
 def select_n_jobs_backtesting(
-    forecaster_type: str,
-    regressor_type: str,
+    forecaster_name: str,
+    regressor_name: str,
     refit: Union[bool, int]
 ) -> int:
     """
@@ -1644,25 +1644,25 @@ def select_n_jobs_backtesting(
 
     The number of jobs is chosen as follows:
 
-    - If forecaster_type is 'ForecasterAutoreg' or 'ForecasterAutoregCustom' and
-    regressor_type is a linear regressor, then n_jobs=1.
-    - If forecaster_type is 'ForecasterAutoreg' or 'ForecasterAutoregCustom',
-    regressor_type is not a linear regressor and refit=`True`, then
+    - If forecaster_name is 'ForecasterAutoreg' or 'ForecasterAutoregCustom' and
+    regressor_name is a linear regressor, then n_jobs=1.
+    - If forecaster_name is 'ForecasterAutoreg' or 'ForecasterAutoregCustom',
+    regressor_name is not a linear regressor and refit=`True`, then
     n_jobs=cpu_count().
-    - If forecaster_type is 'ForecasterAutoreg' or 'ForecasterAutoregCustom',
-    regressor_type is not a linear regressor and refit=`False`, then
+    - If forecaster_name is 'ForecasterAutoreg' or 'ForecasterAutoregCustom',
+    regressor_name is not a linear regressor and refit=`False`, then
     n_jobs=1.
-    - If forecaster_type is 'ForecasterAutoregDirect' or 'ForecasterAutoregMultiVariate'
+    - If forecaster_name is 'ForecasterAutoregDirect' or 'ForecasterAutoregMultiVariate'
     and refit=`True`, then n_jobs=cpu_count().
-    - If forecaster_type is 'ForecasterAutoregDirect' or 'ForecasterAutoregMultiVariate'
+    - If forecaster_name is 'ForecasterAutoregDirect' or 'ForecasterAutoregMultiVariate'
     and refit=`False`, then n_jobs=1.
-    - If forecaster_type is 'ForecasterAutoregMultiseries', then n_jobs=cpu_count().
+    - If forecaster_name is 'ForecasterAutoregMultiseries', then n_jobs=cpu_count().
 
     Parameters
     ----------
-    forecaster_type : str
+    forecaster_name : str
         The type of Forecaster.
-    regressor_type : str
+    regressor_name : str
         The type of regressor.
     refit : bool, int
         If the forecaster is refitted during the backtesting process.
@@ -1680,24 +1680,24 @@ def select_n_jobs_backtesting(
         if not regressor_name.startswith('_')
     ]
         
-    if forecaster_type in ['ForecasterAutoreg', 'ForecasterAutoregCustom']:
-        if regressor_type in linear_regressors:
+    if forecaster_name in ['ForecasterAutoreg', 'ForecasterAutoregCustom']:
+        if regressor_name in linear_regressors:
             n_jobs = 1
         else:
             n_jobs = joblib.cpu_count() if refit else 1
     
-    if forecaster_type in ['ForecasterAutoregDirect', 'ForecasterAutoregMultiVariate']:
+    if forecaster_name in ['ForecasterAutoregDirect', 'ForecasterAutoregMultiVariate']:
         n_jobs = 1
 
-    if forecaster_type in ['ForecasterAutoregMultiseries', 'ForecasterAutoregMultiSeriesCustom']:
+    if forecaster_name in ['ForecasterAutoregMultiseries', 'ForecasterAutoregMultiSeriesCustom']:
         n_jobs = joblib.cpu_count()
 
     return n_jobs
     
 
 def select_n_jobs_fit_forecaster(
-    forecaster_type: str,
-    regressor_type: str,
+    forecaster_name: str,
+    regressor_name: str,
 ) -> int:
     """
     Select the optimal number of jobs to use in the fitting process. This
@@ -1705,14 +1705,14 @@ def select_n_jobs_fit_forecaster(
     
     The number of jobs is chosen as follows:
     
-    - If forecaster_type is 'ForecasterAutoregDirect' or 'ForecasterAutoregMultiVariate'
-    and regressor_type is a linear regressor, then n_jobs=1, otherwise n_jobs=cpu_count().
+    - If forecaster_name is 'ForecasterAutoregDirect' or 'ForecasterAutoregMultiVariate'
+    and regressor_name is a linear regressor, then n_jobs=1, otherwise n_jobs=cpu_count().
     
     Parameters
     ----------
-    forecaster_type : str
+    forecaster_name : str
         The type of Forecaster.
-    regressor_type : str
+    regressor_name : str
         The type of regressor.
 
     Returns
@@ -1728,12 +1728,12 @@ def select_n_jobs_fit_forecaster(
         if not regressor_name.startswith('_')
     ]
 
-    if forecaster_type in ['ForecasterAutoregDirect', 'ForecasterAutoregMultiVariate']:
-        if regressor_type in linear_regressors:
+    if forecaster_name in ['ForecasterAutoregDirect', 'ForecasterAutoregMultiVariate']:
+        if regressor_name in linear_regressors:
             n_jobs = 1
         else:
             n_jobs = joblib.cpu_count()
     else:
-        n_jobs = n_jobs
-    
+        n_jobs = 1
+
     return n_jobs
