@@ -678,7 +678,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         series: pd.DataFrame,
         exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
         store_in_sample_residuals: bool=True,
-        n_jobs: int=-1
+        n_jobs: Optional[Union[int, str]]='auto'
     ) -> None:
         """
         Training Forecaster.
@@ -697,7 +697,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         store_in_sample_residuals : bool, default `True`
             If `True`, in-sample residuals will be stored in the forecaster object
             after fitting.
-        n_jobs : int, default `-1`
+        n_jobs : int, 'auto', default `'auto'`
             The number of jobs to run in parallel. If -1, then the number of jobs is 
             set to the number of cores.
             **New in version 0.9.0**

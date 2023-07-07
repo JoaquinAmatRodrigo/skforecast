@@ -559,7 +559,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         y: pd.Series,
         exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
         store_in_sample_residuals: bool=True,
-        n_jobs: Union[int, str]='auto',
+        n_jobs: Optional[Union[int, str]]='auto',
     ) -> None:
         """
         Training Forecaster.
@@ -578,7 +578,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         store_in_sample_residuals : bool, default `True`
             If `True`, in-sample residuals will be stored in the forecaster object
             after fitting.
-        n_jobs : 'auto' or int, default='auto'
+        n_jobs : int, 'auto', default `'auto'`
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
         set to the number of cores. If 'auto', `n_jobs` is set using the fuction
         skforecast.utils.select_n_jobs_fit_forecaster.
