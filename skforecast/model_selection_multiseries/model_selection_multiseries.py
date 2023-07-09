@@ -14,6 +14,7 @@ import logging
 from copy import deepcopy
 from joblib import Parallel, delayed, cpu_count
 from tqdm.auto import tqdm
+import sklearn.pipeline
 from sklearn.model_selection import ParameterGrid
 from sklearn.model_selection import ParameterSampler
 
@@ -22,6 +23,7 @@ from ..exceptions import IgnoredArgumentWarning
 from ..model_selection.model_selection import _get_metric
 from ..model_selection.model_selection import _create_backtesting_folds
 from ..utils import check_backtesting_input
+from ..utils import select_n_jobs_backtesting
 
 logging.basicConfig(
     format = '%(name)-10s %(levelname)-5s %(message)s', 
@@ -45,7 +47,7 @@ def _backtesting_forecaster_multiseries(
     n_boot: int=500,
     random_state: int=123,
     in_sample_residuals: bool=True,
-    n_jobs: int=-1,
+    n_jobs: Optional[Union[int, str]]='auto',
     verbose: bool=False,
     show_progress: bool=True
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
@@ -122,9 +124,10 @@ def _backtesting_forecaster_multiseries(
         If `True`, residuals from the training data are used as proxy of prediction
         error to create prediction intervals. If `False`, out_sample_residuals 
         are used if they are already stored inside the forecaster.
-    n_jobs : int, default `-1`
+    n_jobs : int, 'auto', default `'auto'`
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
-        set to the number of cores.
+        set to the number of cores. If 'auto', `n_jobs` is set using the function
+        skforecast.utils.select_n_jobs_backtesting.
         **New in version 0.9.0**
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
@@ -147,10 +150,19 @@ def _backtesting_forecaster_multiseries(
     """
 
     forecaster = deepcopy(forecaster)
-    n_jobs = n_jobs if n_jobs > 0 else cpu_count()
-
-    if isinstance(refit, int) and refit != 1:
-        n_jobs = 1
+    if n_jobs == 'auto':
+        if isinstance(forecaster.regressor, sklearn.pipeline.Pipeline):
+            regressor_name = type(forecaster.regressor[-1]).__name__
+        else:
+            regressor_name = type(forecaster.regressor).__name__
+        
+        n_jobs = select_n_jobs_backtesting(
+                     forecaster_name = type(forecaster).__name__,
+                     regressor_name  = regressor_name,
+                     refit           = refit
+                 )
+    else:
+        n_jobs = n_jobs if n_jobs > 0 else cpu_count()
 
     if type(forecaster).__name__ == 'ForecasterAutoregMultiVariate':
         levels = [forecaster.level]
@@ -200,9 +212,6 @@ def _backtesting_forecaster_multiseries(
                 verbose               = verbose  
             )
 
-    if show_progress:
-        folds = tqdm(folds)
-
     if refit:
         n_of_fits = int(len(folds)/refit)
         if type(forecaster).__name__ != 'ForecasterAutoregMultiVariate' and n_of_fits > 50:
@@ -219,6 +228,9 @@ def _backtesting_forecaster_multiseries(
                 LongTrainingWarning
             )
 
+    if show_progress:
+        folds = tqdm(folds)
+
     def _fit_predict_forecaster(series, exog, forecaster, interval, fold):
         """
         Fit the forecaster and predict `steps` ahead. This is an auxiliary 
@@ -234,8 +246,8 @@ def _backtesting_forecaster_multiseries(
         test_idx_end      = fold[2][1]
 
         if fold[4] is False:
-            # When the model is not fitted, last_window and next_window_exog must 
-            # be updated to include the data needed to make predictions.
+            # When the model is not fitted, last_window must be updated to include 
+            # the data needed to make predictions.
             last_window_series = series.iloc[last_window_start:last_window_end, ]
         else:
             # The model is fitted before making predictions. If `fixed_train_size`  
@@ -327,7 +339,7 @@ def backtesting_forecaster_multiseries(
     n_boot: int=500,
     random_state: int=123,
     in_sample_residuals: bool=True,
-    n_jobs: int=-1,
+    n_jobs: Optional[Union[int, str]]='auto',
     verbose: bool=False,
     show_progress: bool=True
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
@@ -404,9 +416,10 @@ def backtesting_forecaster_multiseries(
         If `True`, residuals from the training data are used as proxy of prediction 
         error to create prediction intervals.  If `False`, out_sample_residuals 
         are used if they are already stored inside the forecaster.
-    n_jobs : int, default `-1`
+    n_jobs : int, 'auto', default `'auto'`
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
-        set to the number of cores.
+        set to the number of cores. If 'auto', `n_jobs` is set using the function
+        skforecast.utils.select_n_jobs_backtesting.
         **New in version 0.9.0**
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
@@ -476,7 +489,6 @@ def backtesting_forecaster_multiseries(
              f"argument when initializing the forecaster."),
              IgnoredArgumentWarning
         )
-    
 
     metrics_levels, backtest_predictions = _backtesting_forecaster_multiseries(
         forecaster            = forecaster,
@@ -517,7 +529,7 @@ def grid_search_forecaster_multiseries(
     lags_grid: Optional[list]=None,
     refit: Optional[Union[bool, int]]=False,
     return_best: bool=True,
-    n_jobs: int=-1,
+    n_jobs: Optional[Union[int, str]]='auto',
     verbose: bool=True,
     show_progress: bool=True
 ) -> pd.DataFrame:
@@ -571,9 +583,10 @@ def grid_search_forecaster_multiseries(
         the Forecaster will be trained every that number of iterations.
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
-    n_jobs : int, default `-1`
+    n_jobs : int, 'auto', default `'auto'`
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
-        set to the number of cores.
+        set to the number of cores. If 'auto', `n_jobs` is set using the function
+        skforecast.utils.select_n_jobs_backtesting.
         **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
@@ -636,7 +649,7 @@ def random_search_forecaster_multiseries(
     n_iter: int=10,
     random_state: int=123,
     return_best: bool=True,
-    n_jobs: int=-1,
+    n_jobs: Optional[Union[int, str]]='auto',
     verbose: bool=True,
     show_progress: bool=True
 ) -> pd.DataFrame:
@@ -695,9 +708,10 @@ def random_search_forecaster_multiseries(
         Sets a seed to the random sampling for reproducible output.
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
-    n_jobs : int, default `-1`
+    n_jobs : int, 'auto', default `'auto'`
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
-        set to the number of cores.
+        set to the number of cores. If 'auto', `n_jobs` is set using the function
+        skforecast.utils.select_n_jobs_backtesting.
         **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
@@ -759,7 +773,7 @@ def _evaluate_grid_hyperparameters_multiseries(
     lags_grid: Optional[list]=None,
     refit: Optional[Union[bool, int]]=False,
     return_best: bool=True,
-    n_jobs: int=-1,
+    n_jobs: Optional[Union[int, str]]='auto',
     verbose: bool=True,
     show_progress: bool=True
 ) -> pd.DataFrame:
@@ -977,7 +991,7 @@ def backtesting_forecaster_multivariate(
     n_boot: int=500,
     random_state: int=123,
     in_sample_residuals: bool=True,
-    n_jobs: int=-1,
+    n_jobs: Optional[Union[int, str]]='auto',
     verbose: bool=False,
     show_progress: bool=True
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
@@ -1047,9 +1061,10 @@ def backtesting_forecaster_multivariate(
         If `True`, residuals from the training data are used as proxy of prediction 
         error to create prediction intervals.  If `False`, out_sample_residuals 
         are used if they are already stored inside the forecaster.
-    n_jobs : int, default `-1`
+    n_jobs : int, 'auto', default `'auto'`
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
-        set to the number of cores.
+        set to the number of cores. If 'auto', `n_jobs` is set using the function
+        skforecast.utils.select_n_jobs_backtesting.
         **New in version 0.9.0** 
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
@@ -1111,7 +1126,7 @@ def grid_search_forecaster_multivariate(
     lags_grid: Optional[list]=None,
     refit: Optional[Union[bool, int]]=False,
     return_best: bool=True,
-    n_jobs: int=-1,
+    n_jobs: Optional[Union[int, str]]='auto',
     verbose: bool=True,
     show_progress: bool=True
 ) -> pd.DataFrame:
@@ -1167,9 +1182,10 @@ def grid_search_forecaster_multivariate(
         the Forecaster will be trained every that number of iterations.
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
-    n_jobs : int, default `-1`
+    n_jobs : int, 'auto', default `'auto'`
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
-        set to the number of cores.
+        set to the number of cores. If 'auto', `n_jobs` is set using the function
+        skforecast.utils.select_n_jobs_backtesting.
         **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
@@ -1230,7 +1246,7 @@ def random_search_forecaster_multivariate(
     n_iter: int=10,
     random_state: int=123,
     return_best: bool=True,
-    n_jobs: int=-1,
+    n_jobs: Optional[Union[int, str]]='auto',
     verbose: bool=True,
     show_progress: bool=True
 ) -> pd.DataFrame:
@@ -1291,9 +1307,10 @@ def random_search_forecaster_multivariate(
         Sets a seed to the random sampling for reproducible output.
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
-    n_jobs : int, default `-1`
+    n_jobs : int, 'auto', default `'auto'`
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
-        set to the number of cores.
+        set to the number of cores. If 'auto', `n_jobs` is set using the function
+        skforecast.utils.select_n_jobs_backtesting.
         **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.

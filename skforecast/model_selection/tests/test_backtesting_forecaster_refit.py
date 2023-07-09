@@ -22,7 +22,7 @@ from .fixtures_model_selection import out_sample_residuals
 # * Test _backtesting_forecaster No Interval                                   *
 # ******************************************************************************
 
-@pytest.mark.parametrize("n_jobs", [-1, 1],
+@pytest.mark.parametrize("n_jobs", [-1, 1, 'auto'],
                          ids=lambda n: f'n_jobs: {n}')
 def test_output_backtesting_forecaster_no_exog_no_remainder_ForecasterAutoreg_with_mocked(n_jobs):
     """
