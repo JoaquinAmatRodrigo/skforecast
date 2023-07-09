@@ -66,7 +66,7 @@ setuptools.setup(
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
-        "License :: BSD 3-Clause License"
+        "License :: OSI Approved :: BSD License"
     ],
     install_requires=requirements_base,
     extras_require=extras_require,
