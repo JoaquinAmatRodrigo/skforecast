@@ -2708,7 +2708,7 @@ Licensed under the Apache License, Version 2.0.
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h1 id="backtesting">Backtesting<a class="anchor-link" href="#backtesting">&#182;</a></h1><p>In time series forecasting, backtesting refers to the process of validating a predictive model using historical data. The technique involves moving backwards in time, step-by-step, to assess how well a model would have performed if it had been used to make predictions during that time period. Backtesting is a form of cross-validation that is applied to previous periods in the time series.</p>
+<h1 id="backtesting">Backtesting<a class="anchor-link" href="#backtesting">&#182;</a></h1><p>In time series forecasting, the process of <em>backtesting</em> consists of evaluating the performance of a predictive model by applying it retrospectively to historical data. Therefore, it is a special type of cross-validation applied to the previous period(s).</p>
 <p>The purpose of backtesting is to evaluate the accuracy and effectiveness of a model and identify any potential issues or areas of improvement. By testing the model on historical data, one can assess how well it performs on data that it has not seen before. This is an important step in the modeling process, as it helps to ensure that the model is robust and reliable.</p>
 <p>Backtesting can be done using a variety of techniques, such as simple train-test splits or more sophisticated methods like rolling windows or expanding windows. The choice of method depends on the specific needs of the analysis and the characteristics of the time series data.</p>
 <p>Overall, backtesting is an essential step in the development of a time series forecasting model. By rigorously testing the model on historical data, one can improve its accuracy and ensure that it is effective at predicting future values of the time series.</p>
@@ -2746,8 +2746,17 @@ Licensed under the Apache License, Version 2.0.
 <font size="2.5"> <i>Backtesting with refit and fixed training size (rolling origin).</i></font>
 </p>
 
-<h2 id="backtesting-with-intermittent-refit">Backtesting with intermittent refit<a class="anchor-link" href="#backtesting-with-intermittent-refit">&#182;</a></h2><p>The model is retrained every $n$ iterations, a method often used when the model retraining is limited to certain time intervals, such as weekly, but a different time window, such as a day, needs to be used for prediction.</p>
-<p>This refit strategy can be implemented using either a fixed or rolling origin, providing flexibility in adapting the model to new data.</p>
+<h2 id="backtesting-with-intermittent-refit">Backtesting with intermittent refit<a class="anchor-link" href="#backtesting-with-intermittent-refit">&#182;</a></h2><p>The model is retrained every $n$ iterations of prediction. This method is often used when the frequency of retraining and prediction is different. It can be implemented using either a fixed or rolling origin, providing flexibility in adapting the model to new data.</p>
+<div class="admonition note" name="html-admonition" style="background: rgba(0,184,212,.1); padding-top: 0px; padding-bottom: 6px; border-radius: 8px; border-left: 8px solid #00b8d4; padding-left: 10px;">
+
+<p class="title">
+    <i style="font-size: 18px; color:#00b8d4;"></i>
+    <b style="color: #00b8d4;">🖉 Note</b>
+</p>
+
+<p>This strategy usually achieves a good balance between the computational cost of retraining and avoiding model degradation.</p>
+</div>
+
 <p style="text-align: center">
 <img src="../img/backtesting_intermittent_refit.gif" style="width: 600px;">
 <br>
@@ -2806,6 +2815,9 @@ Licensed under the Apache License, Version 2.0.
 </tr>
 </tbody>
 </table>
+<br>
+
+<p><strong>In general, the more closely the backtesting process resembles the actual scenario in which the model is used, the more reliable the estimated metric will be.</strong></p>
 
 </div>
 </div>

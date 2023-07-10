@@ -2658,8 +2658,8 @@ border-left: 8px solid #00bfa5; border-color: #00bfa5; padding-left: 10px;">
     <b> &nbsp Tip</b>
 </p>
 
-<p>The computational cost of hyperparameter tuning depends heavily on the backtesting approach chosen to evaluate each hyperparameter combination. In general, the duration of the tuning process increases as the number of re-trains involved in the backtesting grows.</p>
-<p>To effectively speed up the prototyping phase, it is highly recommended to adopt a two-step strategy. First, use a <code>refit=False</code> strategy during the initial search to narrow down the range of values. Then, focus on the identified region of interest and apply a tailored backtesting strategy that meets the specific requirements of the use case. For additional tips on backtesting strategies, refer to the following resource: <a href="https://skforecast.org/latest/user_guides/backtesting.html#which-strategy-should-i-use">Which backtesting strategy should I use?</a>.</p>
+<p>The computational cost of hyperparameter tuning depends heavily on the backtesting approach chosen to evaluate each hyperparameter combination. In general, the duration of the tuning process increases with the number of re-trains involved in the backtesting.</p>
+<p>To effectively speed up the prototyping phase, it is highly recommended to adopt a two-step strategy. First, use <code>refit=False</code> during the initial search to narrow down the range of values. Then, focus on the identified region of interest and apply a tailored backtesting strategy that meets the specific requirements of the use case. For additional tips on backtesting strategies, refer to the following resource: <a href="https://skforecast.org/latest/user_guides/backtesting.html#which-strategy-should-i-use">Which backtesting strategy should I use?</a>.</p>
 </div>
 
 
@@ -2706,7 +2706,7 @@ border-left: 8px solid #00b8d4; border-color: #00b8d4; padding-left: 10px;">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[17]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[1]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
         
         
         <div class="CodeMirror cm-s-jupyter">
@@ -2771,7 +2771,7 @@ from sklearn.metrics import mean_squared_error</div>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[18]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[2]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
         
         
         <div class="CodeMirror cm-s-jupyter">
@@ -2944,7 +2944,7 @@ class="
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[19]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[3]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
         
         
         <div class="CodeMirror cm-s-jupyter">
@@ -3095,7 +3095,7 @@ results_grid = grid_search_forecaster(
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[20]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[4]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
         
         
         <div class="CodeMirror cm-s-jupyter">
@@ -3128,7 +3128,7 @@ results_grid = grid_search_forecaster(
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[20]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[4]:</div>
 
 
 
@@ -3333,7 +3333,7 @@ results_grid = grid_search_forecaster(
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[21]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[5]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
         
         
         <div class="CodeMirror cm-s-jupyter">
@@ -3366,7 +3366,7 @@ results_grid = grid_search_forecaster(
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[21]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[5]:</div>
 
 
 
@@ -3389,8 +3389,8 @@ Training index type: DatetimeIndex
 Training index frequency: MS 
 Regressor parameters: {&#39;bootstrap&#39;: True, &#39;ccp_alpha&#39;: 0.0, &#39;criterion&#39;: &#39;squared_error&#39;, &#39;max_depth&#39;: 15, &#39;max_features&#39;: 1.0, &#39;max_leaf_nodes&#39;: None, &#39;max_samples&#39;: None, &#39;min_impurity_decrease&#39;: 0.0, &#39;min_samples_leaf&#39;: 1, &#39;min_samples_split&#39;: 2, &#39;min_weight_fraction_leaf&#39;: 0.0, &#39;n_estimators&#39;: 50, &#39;n_jobs&#39;: None, &#39;oob_score&#39;: False, &#39;random_state&#39;: 123, &#39;verbose&#39;: 0, &#39;warm_start&#39;: False} 
 fit_kwargs: {} 
-Creation date: 2023-07-08 18:09:41 
-Last fit date: 2023-07-08 18:09:48 
+Creation date: 2023-07-10 08:27:10 
+Last fit date: 2023-07-10 08:27:17 
 Skforecast version: 0.9.0 
 Python version: 3.11.4 
 Forecaster id: None </pre>
@@ -3422,7 +3422,7 @@ Forecaster id: None </pre>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[22]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[6]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
         
         
         <div class="CodeMirror cm-s-jupyter">
@@ -3571,7 +3571,7 @@ results_grid.head(4)</div>
 </div>
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[22]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[6]:</div>
 
 
 
@@ -3680,7 +3680,7 @@ results_grid.head(4)</div>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[23]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[7]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
         
         
         <div class="CodeMirror cm-s-jupyter">
@@ -3816,7 +3816,7 @@ results_grid.head(4)</div>
 </div>
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[23]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[7]:</div>
 
 
 
@@ -3909,7 +3909,7 @@ results_grid.head(4)</div>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[24]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[8]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
         
         
         <div class="CodeMirror cm-s-jupyter">
@@ -3942,13 +3942,13 @@ results_grid.head(4)</div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[24]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[8]:</div>
 
 
 
 
 <div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain">
-<pre>FrozenTrial(number=3, state=1, values=[0.13263306663095237], datetime_start=datetime.datetime(2023, 7, 8, 18, 9, 54, 339577), datetime_complete=datetime.datetime(2023, 7, 8, 18, 9, 54, 436045), params={&#39;n_estimators&#39;: 14, &#39;min_samples_leaf&#39;: 1, &#39;max_features&#39;: &#39;sqrt&#39;}, user_attrs={}, system_attrs={}, intermediate_values={}, distributions={&#39;n_estimators&#39;: IntDistribution(high=20, log=False, low=10, step=1), &#39;min_samples_leaf&#39;: IntDistribution(high=10, log=False, low=1, step=1), &#39;max_features&#39;: CategoricalDistribution(choices=(&#39;log2&#39;, &#39;sqrt&#39;))}, trial_id=3, value=None)</pre>
+<pre>FrozenTrial(number=3, state=1, values=[0.13263306663095237], datetime_start=datetime.datetime(2023, 7, 10, 8, 27, 22, 66756), datetime_complete=datetime.datetime(2023, 7, 10, 8, 27, 22, 152335), params={&#39;n_estimators&#39;: 14, &#39;min_samples_leaf&#39;: 1, &#39;max_features&#39;: &#39;sqrt&#39;}, user_attrs={}, system_attrs={}, intermediate_values={}, distributions={&#39;n_estimators&#39;: IntDistribution(high=20, log=False, low=10, step=1), &#39;min_samples_leaf&#39;: IntDistribution(high=10, log=False, low=1, step=1), &#39;max_features&#39;: CategoricalDistribution(choices=(&#39;log2&#39;, &#39;sqrt&#39;))}, trial_id=3, value=None)</pre>
 </div>
 
 </div>
@@ -4015,7 +4015,7 @@ User guide: <a href="https://joaquinamatrodrigo.github.io/skforecast/0.6.0/user_
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[25]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[9]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
         
         
         <div class="CodeMirror cm-s-jupyter">
@@ -4067,7 +4067,7 @@ def custom_metric(y_true, y_pred):
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[26]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[10]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
         
         
         <div class="CodeMirror cm-s-jupyter">
@@ -4208,7 +4208,7 @@ results_grid.head(4)</div>
 </div>
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[26]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[10]:</div>
 
 
 
@@ -4303,7 +4303,7 @@ results_grid.head(4)</div>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[27]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[11]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
         
         
         <div class="CodeMirror cm-s-jupyter">
@@ -4450,7 +4450,7 @@ results_grid.head(4)</div>
 </div>
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[27]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[11]:</div>
 
 
 
@@ -4553,7 +4553,7 @@ results_grid.head(4)</div>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[31]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[12]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
         
         
         <div class="CodeMirror cm-s-jupyter">
@@ -4800,7 +4800,7 @@ Number of models compared: 6.
 </div>
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[31]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[12]:</div>
 
 
 
@@ -4951,7 +4951,7 @@ Number of models compared: 6.
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[29]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[13]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
         
         
         <div class="CodeMirror cm-s-jupyter">
