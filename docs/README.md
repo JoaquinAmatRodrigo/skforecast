@@ -47,7 +47,7 @@ pip install skforecast
 Specific version:
 
 ```bash
-pip install skforecast==0.8.1
+pip install skforecast==0.9.0
 ```
 
 Latest (unstable):
@@ -97,7 +97,7 @@ pip install skforecast[plotting]
 
 A **Forecaster** object in the skforecast library is a comprehensive container that provides essential functionality and methods for training a forecasting model and generating predictions for future points in time.
 
-The skforecast library offers a variety of forecaster types, each tailored to specific requirements such as single or multiple time series, direct or recursive strategies, or custom predictors. Regardless of the specific forecaster type, all instances share the same API.
+The **skforecast** library offers a variety of forecaster types, each tailored to specific requirements such as single or multiple time series, direct or recursive strategies, or custom predictors. Regardless of the specific forecaster type, all instances share the same API.
 
 | Forecaster | Single series | Multiple series | Recursive strategy | Direct strategy | Probabilistic prediction | Exogenous features | Custom features |
 |:-----------|:-------------:|:---------------:|:------------------:|:---------------:|:------------------------:|:------------------:|:---------------:|
@@ -190,7 +190,7 @@ If you use this software, please cite it using the following metadata.
 
 **APA**:
 ```
-Amat Rodrigo, J., & Escobar Ortiz, J. skforecast (Version 0.8.1) [Computer software]
+Amat Rodrigo, J., & Escobar Ortiz, J. skforecast (Version 0.9.0) [Computer software]
 ```
 
 **BibTeX**:
@@ -198,9 +198,9 @@ Amat Rodrigo, J., & Escobar Ortiz, J. skforecast (Version 0.8.1) [Computer softw
 @software{skforecast,
 author = {Amat Rodrigo, Joaquin and Escobar Ortiz, Javier},
 license = {BSD 3-Clause License},
-month = {5},
+month = {7},
 title = {{skforecast}},
-version = {0.8.1},
+version = {0.9.0},
 year = {2023}
 }
 ```
