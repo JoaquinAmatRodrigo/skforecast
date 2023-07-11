@@ -153,7 +153,7 @@ Backtesting without refit is a strategy where the model is trained only once and
 </p>
 
 <p style="text-align: center">
-<img src="../img/backtesting_no_refit.gif" style="width: 600px;">
+<img src="../img/backtesting_no_refit.gif" style="width: 650px;">
 <br>
 <font size="2.5"> <i>Backtesting without refit.</i></font>
 </p>
@@ -169,7 +169,7 @@ Instead of randomizing the data, this backtesting sequentially increases the siz
 </p>
 
 <p style="text-align: center">
-<img src="../img/backtesting_refit.gif" style="width: 600px;">
+<img src="../img/backtesting_refit.gif" style="width: 650px;">
 <br>
 <font size="2.5"> <i>Backtesting with refit and increasing training size (fixed origin).</i></font>
 </p>
@@ -184,7 +184,7 @@ In this approach, the model is trained using a fixed window of past observations
 </p>
 
 <p style="text-align: center">
-<img src="../img/backtesting_refit_fixed_train_size.gif" style="width: 600px;">
+<img src="../img/backtesting_refit_fixed_train_size.gif" style="width: 650px;">
 <br>
 <font size="2.5"> <i>Backtesting with refit and fixed training size (rolling origin).</i></font>
 </p>
@@ -197,7 +197,7 @@ The model is retrained every $n$ iterations, a method often used when the model 
 This refit strategy can be implemented using either a fixed or rolling origin, providing flexibility in adapting the model to new data.
 
 <p style="text-align: center">
-<img src="../img/backtesting_intermittent_refit.gif" style="width: 600px;">
+<img src="../img/backtesting_intermittent_refit.gif" style="width: 650px;">
 <br>
 <font size="2.5"> <i>Backtesting with intermittent refit.</i></font>
 </p>
@@ -210,7 +210,7 @@ This approach introduces a time gap between the training and test sets, replicat
 For example, consider the goal of predicting the 24 hours of day D+1, but the predictions need to be made at 11:00 to allow sufficient flexibility. At 11:00 on day D, the task is to forecast hours [12 - 23] of the same day and hours [0 - 23] of day D+1. Thus, a total of 36 hours into the future must be predicted, with only the last 24 hours to be stored.
 
 <p style="text-align: center">
-<img src="../img/backtesting_refit_gap.gif" style="width: 600px;">
+<img src="../img/backtesting_refit_gap.gif" style="width: 650px;">
 <br>
 <font size="2.5"> <i>Backtesting with refit and gap.</i></font>
 </p>

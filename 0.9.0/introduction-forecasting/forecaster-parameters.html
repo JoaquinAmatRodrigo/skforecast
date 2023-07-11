@@ -637,44 +637,84 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#general-parameters" class="md-nav__link">
+    General parameters
+  </a>
+  
+    <nav class="md-nav" aria-label="General parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#regressor" class="md-nav__link">
     Regressor
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#lags" class="md-nav__link">
     Lags
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#transformers" class="md-nav__link">
     Transformers
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#weighted-time-series-forecasting" class="md-nav__link">
     Weighted time series forecasting
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#inclusion-of-kwargs-in-the-regressor-fit-method" class="md-nav__link">
     Inclusion of kwargs in the regressor fit method
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#forecaster-id" class="md-nav__link">
     Forecaster ID
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#direct-multi-step-parameters" class="md-nav__link">
+    Direct multi-step parameters
+  </a>
+  
+    <nav class="md-nav" aria-label="Direct multi-step parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#steps" class="md-nav__link">
+    Steps
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#number-of-jobs" class="md-nav__link">
+    Number of jobs
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1472,44 +1512,84 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#general-parameters" class="md-nav__link">
+    General parameters
+  </a>
+  
+    <nav class="md-nav" aria-label="General parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#regressor" class="md-nav__link">
     Regressor
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#lags" class="md-nav__link">
     Lags
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#transformers" class="md-nav__link">
     Transformers
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#weighted-time-series-forecasting" class="md-nav__link">
     Weighted time series forecasting
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#inclusion-of-kwargs-in-the-regressor-fit-method" class="md-nav__link">
     Inclusion of kwargs in the regressor fit method
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#forecaster-id" class="md-nav__link">
     Forecaster ID
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#direct-multi-step-parameters" class="md-nav__link">
+    Direct multi-step parameters
+  </a>
+  
+    <nav class="md-nav" aria-label="Direct multi-step parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#steps" class="md-nav__link">
+    Steps
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#number-of-jobs" class="md-nav__link">
+    Number of jobs
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1566,7 +1646,8 @@
 <p class="admonition-title">Tip</p>
 <p>To be able to create and train a forecaster, at least <code>regressor</code> and <code>lags</code> must be specified.</p>
 </div>
-<h2 id="regressor">Regressor<a class="headerlink" href="#regressor" title="Permanent link">&para;</a></h2>
+<h2 id="general-parameters">General parameters<a class="headerlink" href="#general-parameters" title="Permanent link">&para;</a></h2>
+<h3 id="regressor">Regressor<a class="headerlink" href="#regressor" title="Permanent link">&para;</a></h3>
 <p>Skforecast is a Python library that facilitates using scikit-learn regressors as multi-step forecasters and also works with any regressor compatible with the scikit-learn API. Therefore, any of these regressors can be used to create a forecaster:</p>
 <ul>
 <li>
@@ -1600,7 +1681,7 @@
                  <span class="n">lags</span>      <span class="o">=</span> <span class="kc">None</span>
              <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-<h2 id="lags">Lags<a class="headerlink" href="#lags" title="Permanent link">&para;</a></h2>
+<h3 id="lags">Lags<a class="headerlink" href="#lags" title="Permanent link">&para;</a></h3>
 <p>To apply machine learning models to forecasting problems, the time series needs to be transformed into a matrix where each value is associated with a specific time window (known as lags) that precedes it. In the context of time series, a lag with respect to a time step <em>t</em> is defined as the value of the series at previous time steps. For instance, lag 1 represents the value at time step <em>t-1</em>, while lag <em>m</em> represents the value at time step <em>t-m</em>.</p>
 <p>This transformation is essential for machine learning models to capture the dependencies and patterns that exist between past and future values in a time series. By using lags as input features, machine learning models can learn from the past and make predictions about future values. The number of lags used as input features in the matrix is an important hyperparameter that needs to be carefully tuned to obtain the best performance of the model.
 <br><br></p>
@@ -1628,7 +1709,7 @@
                  <span class="n">lags</span>      <span class="o">=</span> <span class="mi">5</span>
              <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-<h2 id="transformers">Transformers<a class="headerlink" href="#transformers" title="Permanent link">&para;</a></h2>
+<h3 id="transformers">Transformers<a class="headerlink" href="#transformers" title="Permanent link">&para;</a></h3>
 <p>Skforecast has two arguments in all the forecasters that allow more detailed control over input data transformations. This feature is particularly useful as many machine learning models require specific data pre-processing transformations. For example, linear models may benefit from features being scaled, or categorical features being transformed into numerical values.</p>
 <p>Both arguments expect an instance of a transformer (preprocessor) compatible with the scikit-learn preprocessing API with the methods: fit, transform, fit_transform and, inverse_transform.</p>
 <p>More information: <a href="https://skforecast.org/latest/user_guides/sklearn-transformers-and-pipeline.html">Scikit-learn transformers and pipelines</a>.</p>
@@ -1660,7 +1741,7 @@
                  <span class="n">transformer_exog</span> <span class="o">=</span> <span class="n">StandardScaler</span><span class="p">()</span>
              <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-<h2 id="weighted-time-series-forecasting">Weighted time series forecasting<a class="headerlink" href="#weighted-time-series-forecasting" title="Permanent link">&para;</a></h2>
+<h3 id="weighted-time-series-forecasting">Weighted time series forecasting<a class="headerlink" href="#weighted-time-series-forecasting" title="Permanent link">&para;</a></h3>
 <p>The presence of unreliable or unrepresentative values in the data history poses a significant challenge, as it hinders model learning. However, most forecasting algorithms require complete time series data, making it impossible to remove these observations. An alternative solution is to reduce the weight of the affected observations during model training. <strong>Skforecast</strong> facilitates the control of data weights with the <code>weight_func</code> argument.</p>
 <p>More information: <a href="https://skforecast.org/latest/user_guides/weighted-time-series-forecasting.html">Weighted time series forecasting</a>.</p>
 <div class="admonition example">
@@ -1721,7 +1802,7 @@
                  <span class="n">weight_func</span>      <span class="o">=</span> <span class="n">custom_weights</span><span class="p">,</span>
              <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-<h2 id="inclusion-of-kwargs-in-the-regressor-fit-method">Inclusion of kwargs in the regressor fit method<a class="headerlink" href="#inclusion-of-kwargs-in-the-regressor-fit-method" title="Permanent link">&para;</a></h2>
+<h3 id="inclusion-of-kwargs-in-the-regressor-fit-method">Inclusion of kwargs in the regressor fit method<a class="headerlink" href="#inclusion-of-kwargs-in-the-regressor-fit-method" title="Permanent link">&para;</a></h3>
 <p>Some regressors include the possibility to add some additional configuration during the fitting method. The predictor parameter <code>fit_kwargs</code> allows these arguments to be set when the forecaster is declared.</p>
 <div class="admonition danger">
 <p class="admonition-title">Danger</p>
@@ -1758,7 +1839,7 @@
                  <span class="n">fit_kwargs</span>       <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;categorical_feature&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;exog_1&#39;</span><span class="p">,</span> <span class="s1">&#39;exog_2&#39;</span><span class="p">]}</span>
              <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-<h2 id="forecaster-id">Forecaster ID<a class="headerlink" href="#forecaster-id" title="Permanent link">&para;</a></h2>
+<h3 id="forecaster-id">Forecaster ID<a class="headerlink" href="#forecaster-id" title="Permanent link">&para;</a></h3>
 <p>Name used as an identifier of the forecaster. It may be used, for example to identify the time series being modeled.</p>
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
@@ -1785,6 +1866,78 @@
                  <span class="n">transformer_exog</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">weight_func</span>      <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">fit_kwargs</span>       <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">forecaster_id</span>    <span class="o">=</span> <span class="s1">&#39;my_forecaster&#39;</span>
+             <span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="direct-multi-step-parameters">Direct multi-step parameters<a class="headerlink" href="#direct-multi-step-parameters" title="Permanent link">&para;</a></h2>
+<p>For the Forecasters that follow a <a href="https://skforecast.org/latest/introduction-forecasting/introduction-forecasting#direct-multi-step-forecasting">direct multi-step strategy</a> (<code>ForecasterAutoregDirect</code> and <code>ForecasterAutoregMultiVariate</code>), there are two additional parameters in addition to those mentioned above.</p>
+<h3 id="steps">Steps<a class="headerlink" href="#steps" title="Permanent link">&para;</a></h3>
+<p>Direct multi-step forecasting consists of training a different model for each step of the forecast horizon. For example, to predict the next 5 values of a time series, 5 different models are trained, one for each step. As a result, the predictions are independent of each other. </p>
+<p>The number of models to be trained is specified by the <code>steps</code> parameter.</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Create a forecaster</span>
+<span class="c1"># ==============================================================================</span>
+<span class="kn">from</span> <span class="nn">skforecast.ForecasterAutoreg</span> <span class="kn">import</span> <span class="n">ForecasterAutoregDirect</span>
+<span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestRegressor</span>
+
+<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoregDirect</span><span class="p">(</span>
+                 <span class="n">regressor</span>        <span class="o">=</span> <span class="n">RandomForestRegressor</span><span class="p">(),</span>
+                 <span class="n">steps</span>            <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+                 <span class="n">lags</span>             <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+                 <span class="n">transformer_y</span>    <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">transformer_exog</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">weight_func</span>      <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">fit_kwargs</span>       <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">n_jobs</span>           <span class="o">=</span> <span class="s1">&#39;auto&#39;</span><span class="p">,</span>
+                 <span class="n">forecaster_id</span>    <span class="o">=</span> <span class="s1">&#39;my_forecaster&#39;</span>
+             <span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="number-of-jobs">Number of jobs<a class="headerlink" href="#number-of-jobs" title="Permanent link">&para;</a></h3>
+<p>The <code>n_jobs</code> parameter allows multi-process parallelization to train regressors for all <code>steps</code> simultaneously. </p>
+<p>The benefits of parallelization depend on several factors, including the regressor used, the number of fits to be performed, and the volume of data involved. When the <code>n_jobs</code> parameter is set to <code>'auto'</code>, the level of parallelization is automatically selected based on heuristic rules that aim to choose the best option for each scenario.</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Create a forecaster</span>
+<span class="c1"># ==============================================================================</span>
+<span class="kn">from</span> <span class="nn">skforecast.ForecasterAutoreg</span> <span class="kn">import</span> <span class="n">ForecasterAutoregDirect</span>
+<span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestRegressor</span>
+
+<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoregDirect</span><span class="p">(</span>
+                 <span class="n">regressor</span>        <span class="o">=</span> <span class="n">RandomForestRegressor</span><span class="p">(),</span>
+                 <span class="n">steps</span>            <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+                 <span class="n">lags</span>             <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+                 <span class="n">transformer_y</span>    <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">transformer_exog</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">weight_func</span>      <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">fit_kwargs</span>       <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">n_jobs</span>           <span class="o">=</span> <span class="s1">&#39;auto&#39;</span><span class="p">,</span>
                  <span class="n">forecaster_id</span>    <span class="o">=</span> <span class="s1">&#39;my_forecaster&#39;</span>
              <span class="p">)</span>
 </code></pre></div></td></tr></table></div>

@@ -2650,18 +2650,15 @@ Licensed under the Apache License, Version 2.0.
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <script src="https://kit.fontawesome.com/d20edc211b.js" crossorigin="anonymous"></script>
-
 <div class="admonition note" name="html-admonition" style="background: rgba(0,191,191,.1); padding-top: 0px; padding-bottom: 6px; border-radius: 8px;
 border-left: 8px solid #00bfa5; border-color: #00bfa5; padding-left: 10px;">
 <p class="title">
     <i class="fa-solid fa-fire-flame-curved" style="font-size: 18px; color:#00bfa5;"></i>
     <b> &nbsp Tip</b>
 </p>
-
 <p>The computational cost of hyperparameter tuning depends heavily on the backtesting approach chosen to evaluate each hyperparameter combination. In general, the duration of the tuning process increases with the number of re-trains involved in the backtesting.</p>
 <p>To effectively speed up the prototyping phase, it is highly recommended to adopt a two-step strategy. First, use <code>refit=False</code> during the initial search to narrow down the range of values. Then, focus on the identified region of interest and apply a tailored backtesting strategy that meets the specific requirements of the use case. For additional tips on backtesting strategies, refer to the following resource: <a href="https://skforecast.org/latest/user_guides/backtesting.html#which-strategy-should-i-use">Which backtesting strategy should I use?</a>.</p>
 </div>
-
 
 </div>
 </div>
@@ -2674,17 +2671,15 @@ border-left: 8px solid #00bfa5; border-color: #00bfa5; padding-left: 10px;">
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <script src="https://kit.fontawesome.com/d20edc211b.js" crossorigin="anonymous"></script>
-
 <div class="admonition note" name="html-admonition" style="background: rgba(0,184,212,.1); padding-top: 0px; padding-bottom: 6px; border-radius: 8px;
 border-left: 8px solid #00b8d4; border-color: #00b8d4; padding-left: 10px;">
 <p class="title">
     <i class="fa-light fa-pencil fa" style="font-size: 18px; color:#00b8d4;"></i>
     <b> &nbsp Note</b>
 </p>
-
-<p>Since <b>skforecast 0.9.0</b>, all backtesting and grid search functions have been extended to include the <code>n_jobs</code> argument, allowing multi-process parallelization for improved performance. This applies to all functions of the different <code>model_selection</code> modules. The benefits of parallelization depend on several factors, including the regressor used, the number of fits to be performed, and the volume of data involved. When the <code>n_jobs</code> parameter is set to <code>'auto'</code>, the level of parallelization is automatically selected based on heuristic rules that aim to choose the best option for each scenario.</p>
+<p>Since <b>skforecast 0.9.0</b>, all backtesting and grid search functions have been extended to include the <code>n_jobs</code> argument, allowing multi-process parallelization for improved performance. This applies to all functions of the different <code>model_selection</code> modules.</p>
+<p>The benefits of parallelization depend on several factors, including the regressor used, the number of fits to be performed, and the volume of data involved. When the <code>n_jobs</code> parameter is set to <code>'auto'</code>, the level of parallelization is automatically selected based on heuristic rules that aim to choose the best option for each scenario.</p>
 </div>
-
 
 </div>
 </div>
@@ -3978,18 +3973,15 @@ results_grid.head(4)</div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <script src="https://kit.fontawesome.com/d20edc211b.js" crossorigin="anonymous"></script>
-
 <div class="admonition note" name="html-admonition" style="background: rgba(255,145,0,.1); padding-top: 0px; padding-bottom: 6px; border-radius: 8px; border-left: 8px solid #ff9100; border-color: #ff9100; padding-left: 10px;">
 <p class="title">
     <i class="fa-triangle-exclamation fa" style="font-size: 18px; color:#ff9100;"></i>
     <b style="color: #ff9100;"> &nbsp Warning</b>
 </p>
-
 <p>This engine is deprecated since skforecast 0.7.0 in favor of optuna engine. To continue using it, install skforecast 0.6.0.
 <br><br>
 User guide: <a href="https://joaquinamatrodrigo.github.io/skforecast/0.6.0/user_guides/hyperparameter-tuning-and-lags-selection.html#scikit-optimize">https://joaquinamatrodrigo.github.io/skforecast/0.6.0/user_guides/hyperparameter-tuning-and-lags-selection.html#scikit-optimize</a></p>
 </div>
-
 
 </div>
 </div>

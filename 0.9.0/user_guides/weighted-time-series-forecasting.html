@@ -2540,17 +2540,14 @@ Licensed under the Apache License, Version 2.0.
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <script src="https://kit.fontawesome.com/d20edc211b.js" crossorigin="anonymous"></script>
-
 <div class="admonition note" name="html-admonition" style="background: rgba(0,184,212,.1); padding-top: 0px; padding-bottom: 6px; border-radius: 8px;
 border-left: 8px solid #00b8d4; border-color: #00b8d4; padding-left: 10px;">
 <p class="title">
     <i class="fa-light fa-pencil fa" style="font-size: 18px; color:#00b8d4;"></i>
     <b> &nbsp Note</b>
 </p>
-
 <p>The examples that follow demonstrate how a portion of the time series can be excluded from model training by assigning it a weight of zero. However, the use of weights extends beyond the inclusion or exclusion of observations and can also balance the degree of influence that each observation has on the forecasting model. For instance, an observation assigned a weight of 10 will have ten times more impact on the model training than an observation assigned a weight of 1.</p>
 </div>
-
 
 </div>
 </div>
@@ -2563,16 +2560,13 @@ border-left: 8px solid #00b8d4; border-color: #00b8d4; padding-left: 10px;">
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <script src="https://kit.fontawesome.com/d20edc211b.js" crossorigin="anonymous"></script>
-
 <div class="admonition note" name="html-admonition" style="background: rgba(255,145,0,.1); padding-top: 0px; padding-bottom: 6px; border-radius: 8px; border-left: 8px solid #ff9100; border-color: #ff9100; padding-left: 10px;">
 <p class="title">
     <i class="fa-triangle-exclamation fa" style="font-size: 18px; color:#ff9100;"></i>
     <b style="color: #ff9100;"> &nbsp Warning</b>
 </p>
-
 <p>In most gradient boosting implementations, such as LightGBM, XGBoost, and CatBoost, samples with zero weight are typically excluded when calculating gradients and Hessians. However, these samples are still taken into account when constructing the feature histograms, which can result in a model that differs from one trained without zero-weighted samples. For more information on this issue, please refer to <a href="https://github.com/microsoft/LightGBM/issues/5553">this GitHub issue</a>.</p>
 </div>
-
 
 </div>
 </div>
@@ -3074,16 +3068,13 @@ forecaster = ForecasterAutoreg(
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <script src="https://kit.fontawesome.com/d20edc211b.js" crossorigin="anonymous"></script>
-
 <div class="admonition note" name="html-admonition" style="background: rgba(255,145,0,.1); padding-top: 0px; padding-bottom: 6px; border-radius: 8px; border-left: 8px solid #ff9100; border-color: #ff9100; padding-left: 10px;">
 <p class="title">
     <i class="fa-triangle-exclamation fa" style="font-size: 18px; color:#ff9100;"></i>
     <b style="color: #ff9100;"> &nbsp Warning</b>
 </p>
-
 <p>If the regressor used in the model's fitting method does not support <code>sample_weight</code> within its <code>fit</code> method, the <code>weight_func</code> argument will be ignored.</p>
 </div>
-
 
 </div>
 </div>

@@ -23,3 +23,5 @@
 ::: skforecast.utils.utils.check_optional_dependency
 ::: skforecast.utils.utils.multivariate_time_series_corr
 ::: skforecast.utils.utils.check_backtesting_input
+::: skforecast.utils.utils.select_n_jobs_backtesting
+::: skforecast.utils.utils.select_n_jobs_fit_forecaster
