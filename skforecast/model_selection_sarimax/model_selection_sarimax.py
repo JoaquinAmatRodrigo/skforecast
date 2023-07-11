@@ -445,9 +445,9 @@ def grid_search_sarimax(
     Parameters
     ----------
     forecaster : ForecasterSarimax
-        Forcaster model.
+        Forecaster model.
     y : pandas Series
-        Training time series values. 
+        Training time series. 
     param_grid : dict
         Dictionary with parameters names (`str`) as keys and lists of parameter
         settings to try as values.
@@ -551,7 +551,7 @@ def random_search_sarimax(
     Parameters
     ----------
     forecaster : ForecasterSarimax
-        Forcaster model.
+        Forecaster model.
     y : pandas Series
         Training time series. 
     param_distributions : dict
@@ -659,9 +659,9 @@ def _evaluate_grid_hyperparameters_sarimax(
     Parameters
     ----------
     forecaster : ForecasterSarimax
-        Forcaster model.
+        Forecaster model.
     y : pandas Series
-        Training time series values. 
+        Training time series. 
     param_grid : dict
         Dictionary with parameters names (`str`) as keys and lists of parameter
         settings to try as values.
