@@ -3,7 +3,7 @@
 All significant changes to this project are documented in this release file.
 
 
-## [0.9.0] - [2023-07-XX]
+## [0.9.0] - [2023-07-09]
 
 The main changes in this release are:
 
