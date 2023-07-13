@@ -13,6 +13,7 @@ import joblib
 import numpy as np
 import pandas as pd
 import sklearn
+import sklearn.linear_model
 from sklearn.compose import ColumnTransformer
 from sklearn.exceptions import NotFittedError
 import inspect
