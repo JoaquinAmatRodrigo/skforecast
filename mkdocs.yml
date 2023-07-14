@@ -21,10 +21,11 @@ nav:
 
   - Introduction to forecasting: 
     - Introduction to forecasting: introduction-forecasting/introduction-forecasting.md
+
+  - Quick start:
+    - Quick start: user_guides/quick-start-skforecast.ipynb
     - Forecaster Parameters: introduction-forecasting/forecaster-parameters.md
     - Forecaster Attributes: introduction-forecasting/forecaster-attributes.ipynb
-
-  - Quick start: user_guides/quick-start-skforecast.ipynb
 
   - User Guides:
       - Input data: user_guides/input-data.ipynb

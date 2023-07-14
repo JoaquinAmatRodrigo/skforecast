@@ -117,6 +117,7 @@ All series are modeled together in a single model, considering that each time se
 
 The [`ForecasterAutoregMultiVariate`](https://skforecast.org/latest/user_guides/dependent-multi-series-multivariate-forecasting.html) class covers this process. 
 
+
 ## Forecasters
 
 A Forecaster object in the skforecast library is a comprehensive container that provides essential functionality and methods for training a forecasting model and generating predictions for future points in time.
@@ -132,6 +133,9 @@ The skforecast library offers a variety of forecaster types, each tailored to sp
 |[ForecasterMultiSeriesCustom](https://skforecast.org/latest/user_guides/custom-predictors.html)||✔️|✔️||✔️|✔️|✔️|✔️|
 |[ForecasterMultiVariate](https://skforecast.org/latest/user_guides/dependent-multi-series-multivariate-forecasting.html)||✔️||✔️|✔️|✔️||
 |[ForecasterSarimax](https://skforecast.org/latest/user_guides/forecasting-sarimax-arima.html)|✔️||✔️||✔️|✔️||
+
+To understand what can be done when initializing a forecaster with **skforecast** visit [Forecaster parameters](https://skforecast.org/latest/introduction-forecasting/forecaster-parameters) and [Forecaster attributes](https://skforecast.org/latest/introduction-forecasting/forecaster-attributes).
+
 
 ## Backtesting forecasting models
 
@@ -157,6 +161,7 @@ Backtesting without refit is a strategy where the model is trained only once and
 <br>
 <font size="2.5"> <i>Backtesting without refit.</i></font>
 </p>
+
 
 ### Backtesting with refit and increasing training size (fixed origin)
 
