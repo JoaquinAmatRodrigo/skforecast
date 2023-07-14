@@ -822,9 +822,9 @@ def grid_search_forecaster(
     Parameters
     ----------
     forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect
-        Forcaster model.
+        Forecaster model.
     y : pandas Series
-        Training time series values. 
+        Training time series. 
     param_grid : dict
         Dictionary with parameters names (`str`) as keys and lists of parameter
         settings to try as values.
@@ -933,7 +933,7 @@ def random_search_forecaster(
     Parameters
     ----------
     forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect
-        Forcaster model.
+        Forecaster model.
     y : pandas Series
         Training time series. 
     param_distributions : dict
@@ -1046,9 +1046,9 @@ def _evaluate_grid_hyperparameters(
     Parameters
     ----------
     forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect
-        Forcaster model.
+        Forecaster model.
     y : pandas Series
-        Training time series values. 
+        Training time series. 
     param_grid : dict
         Dictionary with parameters names (`str`) as keys and lists of parameter
         settings to try as values.
@@ -1232,7 +1232,7 @@ def bayesian_search_forecaster(
     Parameters
     ----------
     forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect
-        Forcaster model.
+        Forecaster model.
     y : pandas Series
         Training time series. 
     search_space : Callable (optuna)
@@ -1381,7 +1381,7 @@ def _bayesian_search_optuna(
     Parameters
     ----------
     forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect
-        Forcaster model.
+        Forecaster model.
     y : pandas Series
         Training time series. 
     search_space : Callable

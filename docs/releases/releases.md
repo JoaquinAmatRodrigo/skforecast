@@ -3,7 +3,22 @@
 All significant changes to this project are documented in this release file.
 
 
-## [0.9.0] - [2023-07-XX]
+## [0.9.1] - [2023-07-14]
+
+The main changes in this release are:
+
++ Fix imports in `skforecast.utils` module to correctly import `sklearn.linear_model` into the `select_n_jobs_backtesting` and `select_n_jobs_fit_forecaster` functions.
+
+**Added**
+
+**Changed**
+
+**Fixed**
+
++ Fix imports in `skforecast.utils` module to correctly import `sklearn.linear_model` into the `select_n_jobs_backtesting` and `select_n_jobs_fit_forecaster` functions.
+
+
+## [0.9.0] - [2023-07-09]
 
 The main changes in this release are:
 
@@ -19,9 +34,9 @@ The main changes in this release are:
 
 + Support for `scikit-learn 1.3.x`.
 
-+ Argument `n_jobs=-1` to `fit` method in `ForecasterAutoregDirect` and `ForecasterAutoregMultiVariate` to allow multi-process parallelization.
++ Argument `n_jobs='auto'` to `fit` method in `ForecasterAutoregDirect` and `ForecasterAutoregMultiVariate` to allow multi-process parallelization.
 
-+ Argument `n_jobs=-1` to all backtesting dependent functions in modules `model_selection`, `model_selection_multiseries` and `model_selection_sarimax` to allow multi-process parallelization.
++ Argument `n_jobs='auto'` to all backtesting dependent functions in modules `model_selection`, `model_selection_multiseries` and `model_selection_sarimax` to allow multi-process parallelization.
 
 + Argument `refit` now can be also an `integer` in all backtesting dependent functions in modules `model_selection`, `model_selection_multiseries`, and `model_selection_sarimax`. This allows the Forecaster to be trained every this number of iterations.
 

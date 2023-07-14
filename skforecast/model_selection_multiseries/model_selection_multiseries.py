@@ -70,8 +70,7 @@ def _backtesting_forecaster_multiseries(
     
     Parameters
     ----------
-    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom,
-    ForecasterAutoregMultiVariate
+    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate
         Forecaster model.
     series : pandas DataFrame
         Training time series.
@@ -362,8 +361,7 @@ def backtesting_forecaster_multiseries(
 
     Parameters
     ----------
-    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom,
-    ForecasterAutoregMultiVariate
+    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate
         Forecaster model.
     series : pandas DataFrame
         Training time series.
@@ -539,9 +537,8 @@ def grid_search_forecaster_multiseries(
     
     Parameters
     ----------
-    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom,
-    ForecasterAutoregMultiVariate
-        Forcaster model.
+    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate
+        Forecaster model.
     series : pandas DataFrame
         Training time series.
     param_grid : dict
@@ -659,9 +656,8 @@ def random_search_forecaster_multiseries(
     
     Parameters
     ----------
-    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, 
-    ForecasterAutoregMultiVariate
-        Forcaster model.
+    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate
+        Forecaster model.
     series : pandas DataFrame
         Training time series.
     param_distributions : dict
@@ -782,9 +778,8 @@ def _evaluate_grid_hyperparameters_multiseries(
     
     Parameters
     ----------
-    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom,
-    ForecasterAutoregMultiVariate
-        Forcaster model.
+    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate
+        Forecaster model.
     series : pandas DataFrame
         Training time series.
     param_grid : dict
@@ -1007,8 +1002,7 @@ def backtesting_forecaster_multivariate(
 
     Parameters
     ----------
-    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, 
-    ForecasterAutoregMultiVariate
+    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate
         Forecaster model.
     series : pandas DataFrame
         Training time series.
@@ -1138,9 +1132,8 @@ def grid_search_forecaster_multivariate(
     
     Parameters
     ----------
-    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, 
-    ForecasterAutoregMultiVariate
-        Forcaster model.
+    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate
+        Forecaster model.
     series : pandas DataFrame
         Training time series.
     param_grid : dict
@@ -1258,9 +1251,8 @@ def random_search_forecaster_multivariate(
 
     Parameters
     ----------
-    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom,
-    ForecasterAutoregMultiVariate
-        Forcaster model.
+    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate
+        Forecaster model.
     series : pandas DataFrame
         Training time series.
     param_distributions : dict

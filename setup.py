@@ -43,7 +43,7 @@ if sys.version_info[:2] < (3, 8):
     raise RuntimeError("Python version >= 3.8 required.")
 
 if sys.version_info[:2] > (3, 11):
-    fmt = "Skforecast {} may not yet support Python {}.{}."
+    fmt = "skforecast {} may not yet support Python {}.{}."
     warnings.warn(
         fmt.format(VERSION, *sys.version_info[:2]),
         RuntimeWarning)
