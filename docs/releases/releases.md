@@ -3,6 +3,21 @@
 All significant changes to this project are documented in this release file.
 
 
+## [0.9.1] - [2023-07-14]
+
+The main changes in this release are:
+
++ Fix imports in `skforecast.utils` module to correctly import `sklearn.linear_model` into the `select_n_jobs_backtesting` and `select_n_jobs_fit_forecaster` functions.
+
+**Added**
+
+**Changed**
+
+**Fixed**
+
++ Fix imports in `skforecast.utils` module to correctly import `sklearn.linear_model` into the `select_n_jobs_backtesting` and `select_n_jobs_fit_forecaster` functions.
+
+
 ## [0.9.0] - [2023-07-09]
 
 The main changes in this release are:
