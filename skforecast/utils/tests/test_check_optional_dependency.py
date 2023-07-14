@@ -8,12 +8,24 @@ def test_skforecast_utils_optional_dependencies_match_requirements_optional():
     requirements_optional.txt
     """
 
-    with open('requirements_optional.txt') as f:
-        requirements_optional = f.read()
+    with open('pyproject.toml') as f:
+        pyproject = f.read().splitlines()
+
+    # Find the element in the list that starts with sarimax
+    for element in pyproject:
+        if element.startswith('sarimax'):
+            # Split the element into a list of strings
+            sarimax_list = element.split(" = ")
+            # Get the second element of the list, i.e. the version number
+            sarimax_dependences = sarimax_list[1][2:-2]
+            break
+    sarimax_dependences
+
+    # Find the element in the list that starts with sarimax
 
     requirements_optional = {
-        "sarimax": requirements_optional.split("\n\n")[0].splitlines(),
-        "plotting": requirements_optional.split("\n\n")[1].splitlines()
+        "sarimax": sarimax_dependences,
+        "plotting": 
     }
 
     requirements_optional = {k: v[1:] for k, v in requirements_optional.items()}
