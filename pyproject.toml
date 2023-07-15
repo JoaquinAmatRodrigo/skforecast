@@ -1,6 +1,6 @@
 [project]
 name = "skforecast"
-version = "0.9.2"
+version = "0.10.0rc1"
 description="Forecasting time series with scikit-learn regressors. It also works with any regressor compatible with the scikit-learn API (pipelines, CatBoost, LightGBM, XGBoost, Ranger...)."
 readme = "README.md"
 authors = [
@@ -43,23 +43,27 @@ requires-python = ">=3.8"
 
 [project.optional-dependencies]
 sarimax = ["pmdarima>=2.0, <2.1"]
+
 plotting = [
     "matplotlib>=3.3, <3.8",
     "seaborn>=0.11, <0.13",
     "statsmodels>=0.12, <0.15",
 ]
+
 all = [
     "pmdarima>=2.0, <2.1",
     "matplotlib>=3.3, <3.8",
     "seaborn>=0.11, <0.13",
     "statsmodels>=0.12, <0.15",
 ]
+
 full = [
     "pmdarima>=2.0, <2.1",
     "matplotlib>=3.3, <3.8",
     "seaborn>=0.11, <0.13",
     "statsmodels>=0.12, <0.15",
 ]
+
 docs = [
     "mike==1.1.2",
     "mkdocs==1.4.3",
@@ -69,19 +73,21 @@ docs = [
     "mkdocstrings-python==1.1.0",
     "jupyter-contrib-nbextensions==0.7.0",
 ]
+
 test = [
     "pytest>=7.1.2, <7.5",
     "pytest-cov>=3.0.0, <4.2",
     "xgboost>=1.6.1, <1.8",
     "lightgbm <3.4",
     "pytest-xdist <3.4",
+    "toml"
 ]
 
 
 [project.urls]
-"Homepage" = "https://www.skforecast.org"
-"Repository" = "https://github.com/JoaquinAmatRodrigo/skforecast"
-"Documentation" = "https://www.skforecast.org"
+Homepage = "https://www.skforecast.org"
+Repository = "https://github.com/JoaquinAmatRodrigo/skforecast"
+Documentation = "https://www.skforecast.org"
 "Release Notes" = "https://skforecast.org/latest/releases/releases"
 
 
@@ -94,3 +100,4 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 include = ["skforecast", "skforecast*"]
+exclude = ["skforecast/**/tests/*"]
