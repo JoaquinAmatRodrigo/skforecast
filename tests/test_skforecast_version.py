@@ -1,20 +1,23 @@
 from skforecast import __version__
+import tomli
 
-def test_version(version="0.9.2"):
+def test_version_in_init_and_pyproject_toml(version="0.10.0rc1"):
+    """
+    Test that version in __init__.py and pyproject.toml are the same.
 
-    with open('pyproject.toml') as f:
-        pyproject = f.read().splitlines()
+    Parameters
+    ----------
+    version : str, optional
+    """
 
-    # Find the element in the list that starts with "version ="
-    for element in pyproject:
-        if element.startswith('version ='):
-            # Split the element into a list of strings
-            version_list = element.split()
-            # Get the second element of the list, i.e. the version number
-            version_in_tolm = version_list[2][1:-1]
-        break
+    with open("/home/ubuntu/varios/skforecast/pyproject.toml", mode='rb') as fp:
+        pyproject = tomli.load(fp)
 
-    assert __version__ ==  version_in_tolm == version
+    version_in_tolm = pyproject['project']['version']
+    version_in_init = __version__
+
+    assert version_in_init ==  version
+    assert version_in_tolm == version    
 
 
 # Test are located inside each module's folder
