@@ -2657,12 +2657,14 @@ Licensed under the Apache License, Version 2.0.
 <br>
 <font size="2.5"> <i>Transformation of two time series and an exogenous variable into the matrices needed to train a machine learning model in a multi-series context.</i></font>
 </p>
+
 <p>To predict the next <em>n</em> steps, the strategy of <a href="https://skforecast.org/latest/introduction-forecasting/introduction-forecasting.html#recursive-multi-step-forecasting">recursive multi-step forecasting</a> is applied, with the only difference being that the series name for which to estimate the predictions needs to be indicated.</p>
 <p style="text-align: center">
 <img src="../img/forecaster_multi_series_prediction_diagram.png" style="width: 700px">
 <br>
 <font size="2.5"> <i>Diagram of recursive forecasting with multiple independent time series.</i></font>
 </p>
+
 <p>Using the <code>ForecasterAutoregMultiSeries</code> and <code>ForecasterAutoregMultiSeriesCustom</code> classes, it is possible to easily build machine learning models for independent multi-series forecasting.</p>
 
 </div>
@@ -2676,14 +2678,17 @@ Licensed under the Apache License, Version 2.0.
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <script src="https://kit.fontawesome.com/d20edc211b.js" crossorigin="anonymous"></script>
+
 <div class="admonition note" name="html-admonition" style="background: rgba(0,184,212,.1); padding-top: 0px; padding-bottom: 6px; border-radius: 8px;
 border-left: 8px solid #00b8d4; border-color: #00b8d4; padding-left: 10px;">
 <p class="title">
     <i class="fa-light fa-pencil fa" style="font-size: 18px; color:#00b8d4;"></i>
     <b> &nbsp Note</b>
 </p>
+
 <p>See <a href="https://skforecast.org/latest/user_guides/dependent-multi-series-multivariate-forecasting.html">ForecasterAutoregMultiVariate</a> for dependent multi-series forecasting (multivariate time series).</p>
 </div>
+
 
 </div>
 </div>
@@ -4467,6 +4472,7 @@ Total length: 1909
 <br>
 <font size="2.5"> <i>Weights in multi-series.</i></font>
 </p>
+
 <ul>
 <li><p><code>series_weights</code> is a dict of the form <code>{'series_column_name': float}</code>. If a series is used during <code>fit</code> and is not present in <code>series_weights</code>, it will have a weight of 1.</p>
 </li>
@@ -4637,13 +4643,16 @@ forecaster.predict(steps=24).head(3)</div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <script src="https://kit.fontawesome.com/d20edc211b.js" crossorigin="anonymous"></script>
+
 <div class="admonition note" name="html-admonition" style="background: rgba(255,145,0,.1); padding-top: 0px; padding-bottom: 6px; border-radius: 8px; border-left: 8px solid #ff9100; border-color: #ff9100; padding-left: 10px;">
 <p class="title">
     <i class="fa-triangle-exclamation fa" style="font-size: 18px; color:#ff9100;"></i>
     <b style="color: #ff9100;"> &nbsp Warning</b>
 </p>
+
 <p>The <code>weight_func</code> and <code>series_weights</code> arguments will be ignored if the regressor does not accept <code>sample_weight</code> in its <code>fit</code> method.</p>
 </div>
+
 
 </div>
 </div>
@@ -4998,15 +5007,18 @@ results</div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <script src="https://kit.fontawesome.com/d20edc211b.js" crossorigin="anonymous"></script>
+
 <div class="admonition note" name="html-admonition" style="background: rgba(0,191,191,.1); padding-top: 0px; padding-bottom: 6px; border-radius: 8px;
 border-left: 8px solid #00bfa5; border-color: #00bfa5; padding-left: 10px;">
 <p class="title">
     <i class="fa-solid fa-fire-flame-curved" style="font-size: 18px; color:#00bfa5;"></i>
     <b> &nbsp Tip</b>
 </p>
+
 <p><code>bayesian_search_forecaster_multiseries</code> will be released in a future version of <b>skforecast</b>.</p>
 <p>Stay tuned!</p>
 </div>
+
 
 </div>
 </div>
