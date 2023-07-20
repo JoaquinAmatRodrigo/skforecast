@@ -110,9 +110,14 @@ class ForecasterAutoregDiff(ForecasterBase):
         Maximum value of lag included in `lags`.
     window_size : int
         Size of the window needed to create the predictors. It is equal to `max_lag`.
+        If `differentiation` is not `None`, the size of the window is `max_lag +
+        differentiation`.
     last_window : pandas Series
         Last window the forecaster has seen during training. It stores the
         values needed to predict the next `step` immediately after the training data.
+        It is in the original scale of the time series, before applying any transformation
+        or differencing. If `differentiation` is not `None`, the size of `last_window`
+        is extended by `differentiation` values.
     index_type : type
         Type of index of the input used in training.
     index_freq : str
@@ -197,6 +202,8 @@ class ForecasterAutoregDiff(ForecasterBase):
         self.lags = initialize_lags(type(self).__name__, lags)
         self.max_lag = max(self.lags)
         self.window_size = self.max_lag
+        if self.differentiation is not None:
+            self.window_size += self.differentiation
             
         self.weight_func, self.source_code_weight_func, _ = initialize_weights(
             forecaster_name = type(self).__name__, 
@@ -532,8 +539,9 @@ class ForecasterAutoregDiff(ForecasterBase):
             self.in_sample_residuals = residuals
         
         # The last time window of training data is stored so that lags needed as
-        # predictors in the first iteration of `predict()` can be calculated.
-        self.last_window = y.iloc[-self.max_lag:].copy()
+        # predictors in the first iteration of `predict()` can be calculated. It
+        # also includes the values need to calculate the diferenctiation.
+        self.last_window = y.iloc[-self.window_size:].copy()
     
 
     def _recursive_predict(
@@ -616,9 +624,6 @@ class ForecasterAutoregDiff(ForecasterBase):
         if last_window is None:
             last_window = copy(self.last_window)
 
-        if self.differentiation is not None:
-            last_window_tail = last_window.iloc[-self.differentiation: ].to_numpy()
-
         check_predict_input(
             forecaster_name  = type(self).__name__,
             steps            = steps,
@@ -668,12 +673,30 @@ class ForecasterAutoregDiff(ForecasterBase):
         last_window_values, last_window_index = preprocess_last_window(
                                                     last_window = last_window
                                                 )
+        if self.differentiation is not None:
+            # Store the original values of the last window before differentiation
+            last_window_values_original = copy(last_window_values)
+            last_window_values = np.diff(
+                                     a       = last_window_values,
+                                     n       = self.differentiation
+                                 )
             
         predictions = self._recursive_predict(
                           steps       = steps,
                           last_window = copy(last_window_values),
                           exog        = copy(exog_values)
                       )
+        
+        if self.differentiation is not None:
+            diff = self.differentiation
+            for i in range(diff):
+                if i == 0:
+                    predictions = np.insert(predictions, 0, last_window_values_original[diff-1])
+                    predictions = np.cumsum(predictions)
+                else:
+                    predictions = np.insert(predictions, 0, last_window_values_original[diff-i-1])
+                    predictions = np.cumsum(predictions)
+            predictions = predictions[diff:]
 
         predictions = pd.Series(
                           data  = predictions,
@@ -690,10 +713,6 @@ class ForecasterAutoregDiff(ForecasterBase):
                           fit               = False,
                           inverse_transform = True
                       )
-
-        if self.differentiation is  not None:
-                predictions = np.cumsum(predictions) + last_window_tail[-1]
-
 
         return predictions
 
