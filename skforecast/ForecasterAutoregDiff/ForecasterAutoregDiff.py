@@ -674,7 +674,8 @@ class ForecasterAutoregDiff(ForecasterBase):
                                                     last_window = last_window
                                                 )
         if self.differentiation is not None:
-            # Store the original values of the last window before differentiation
+            # Store the values of the last window after transformation but before
+            # differentiation. They are needed reverse the differentiation.
             last_window_values_original = copy(last_window_values)
             last_window_values = np.diff(
                                      a       = last_window_values,
