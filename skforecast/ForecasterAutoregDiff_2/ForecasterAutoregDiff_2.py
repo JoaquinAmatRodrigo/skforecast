@@ -35,7 +35,7 @@ from ..utils import preprocess_exog
 from ..utils import expand_index
 from ..utils import transform_series
 from ..utils import transform_dataframe
-from ..utils import TimeSeriesDifferentiator
+from ..preprocessing import TimeSeriesDifferentiator
 
 logging.basicConfig(
     format = '%(name)-10s %(levelname)-5s %(message)s', 
