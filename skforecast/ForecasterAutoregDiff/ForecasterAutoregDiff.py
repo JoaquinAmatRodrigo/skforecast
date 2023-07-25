@@ -1,5 +1,5 @@
 ################################################################################
-#                            ForecasterAutoreg                                 #
+#                          ForecasterAutoregDiff                               #
 #                                                                              #
 # This work by Joaquin Amat Rodrigo and Javier Escobar Ortiz is licensed       #
 # under the BSD 3-Clause License.                                              #
@@ -35,6 +35,7 @@ from ..utils import preprocess_exog
 from ..utils import expand_index
 from ..utils import transform_series
 from ..utils import transform_dataframe
+from ..preprocessing import TimeSeriesDifferentiator
 
 logging.basicConfig(
     format = '%(name)-10s %(levelname)-5s %(message)s', 
@@ -180,6 +181,7 @@ class ForecasterAutoregDiff(ForecasterBase):
         self.transformer_exog        = transformer_exog
         self.weight_func             = weight_func
         self.differentiation         = differentiation
+        self.diferentiator           = None
         self.source_code_weight_func = None
         self.last_window             = None
         self.index_type              = None
@@ -202,8 +204,13 @@ class ForecasterAutoregDiff(ForecasterBase):
         self.lags = initialize_lags(type(self).__name__, lags)
         self.max_lag = max(self.lags)
         self.window_size = self.max_lag
+        if differentiation is not None and differentiation < 1:
+            raise ValueError(
+                f"`differentiation` must be greater than 0. Got {differentiation}."
+            )
         if self.differentiation is not None:
             self.window_size += self.differentiation
+            self.diferentiator = TimeSeriesDifferentiator(order=self.differentiation)
             
         self.weight_func, self.source_code_weight_func, _ = initialize_weights(
             forecaster_name = type(self).__name__, 
@@ -345,11 +352,7 @@ class ForecasterAutoregDiff(ForecasterBase):
         y_values, y_index = preprocess_y(y=y)
 
         if self.differentiation is not None:
-            y_values = np.diff(
-                            a       = y_values,
-                            n       = self.differentiation,
-                            prepend = np.full(self.differentiation, np.nan)
-                       )
+            y_values = self.diferentiator.fit_transform(y_values)
         
         if exog is not None:
             if len(exog) != len(y):
@@ -674,13 +677,7 @@ class ForecasterAutoregDiff(ForecasterBase):
                                                     last_window = last_window
                                                 )
         if self.differentiation is not None:
-            # Store the values of the last window after transformation but before
-            # differentiation. They are needed reverse the differentiation.
-            last_window_values_original = copy(last_window_values)
-            last_window_values = np.diff(
-                                     a       = last_window_values,
-                                     n       = self.differentiation
-                                 )
+            last_window_values = self.diferentiator.fit_transform(last_window_values)
             
         predictions = self._recursive_predict(
                           steps       = steps,
@@ -689,15 +686,8 @@ class ForecasterAutoregDiff(ForecasterBase):
                       )
         
         if self.differentiation is not None:
-            diff = self.differentiation
-            for i in range(diff):
-                if i == 0:
-                    predictions = np.insert(predictions, 0, last_window_values_original[diff-1])
-                    predictions = np.cumsum(predictions)
-                else:
-                    predictions = np.insert(predictions, 0, last_window_values_original[diff-i-1])
-                    predictions = np.cumsum(predictions)
-            predictions = predictions[diff:]
+            predictions = self.diferentiator.inverse_transform(predictions)
+            predictions = predictions[self.differentiation:]
 
         predictions = pd.Series(
                           data  = predictions,
