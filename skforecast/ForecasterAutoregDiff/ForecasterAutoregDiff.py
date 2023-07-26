@@ -821,6 +821,8 @@ class ForecasterAutoregDiff(ForecasterBase):
         last_window_values, last_window_index = preprocess_last_window(
                                                     last_window = last_window
                                                 )
+        if self.differentiation is not None:
+            last_window_values = self.diferentiator.fit_transform(last_window_values)
 
         boot_predictions = np.full(
                                shape      = (steps, n_boot),
@@ -855,6 +857,9 @@ class ForecasterAutoregDiff(ForecasterBase):
                                  last_window = last_window_boot,
                                  exog        = exog_boot 
                              )
+                if self.differentiation is not None:
+                    prediction = self.diferentiator.inverse_transform(prediction)
+                    prediction = prediction[self.differentiation:]
                 
                 prediction_with_residual  = prediction + sample_residuals[step]
                 boot_predictions[step, i] = prediction_with_residual
