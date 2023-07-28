@@ -1016,18 +1016,12 @@
   
 </li>
         
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
+          <li class="md-nav__item">
   <a href="#forecaster-initial-train" class="md-nav__link">
     Forecaster initial train
   </a>
   
-    <nav class="md-nav" aria-label="Forecaster initial train">
-      <ul class="md-nav__list">
+</li>
         
           <li class="md-nav__item">
   <a href="#future-predictions" class="md-nav__link">
@@ -1566,18 +1560,12 @@
   
 </li>
         
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
+          <li class="md-nav__item">
   <a href="#forecaster-initial-train" class="md-nav__link">
     Forecaster initial train
   </a>
   
-    <nav class="md-nav" aria-label="Forecaster initial train">
-      <ul class="md-nav__list">
+</li>
         
           <li class="md-nav__item">
   <a href="#future-predictions" class="md-nav__link">
@@ -3262,7 +3250,7 @@ class="
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h2 id="forecaster-initial-train">Forecaster initial train<a class="anchor-link" href="#forecaster-initial-train">&#182;</a></h2>
+<h3 id="forecaster-initial-train">Forecaster initial train<a class="anchor-link" href="#forecaster-initial-train">&#182;</a></h3>
 </div>
 </div>
 </div>
@@ -3349,12 +3337,14 @@ forecaster.fit(y=data_train['y'])</div>
             </div>
             <div class="highlight-ipynb hl-python "><pre><span></span><span class="c1"># Forecaster Attributes</span>
 <span class="c1"># ==============================================================================</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">forecaster</span><span class="o">.</span><span class="n">window_size</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Window size:&#39;</span><span class="p">,</span> <span class="n">forecaster</span><span class="o">.</span><span class="n">window_size</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Forecaster last window:&quot;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">forecaster</span><span class="o">.</span><span class="n">last_window</span><span class="p">)</span>
 </pre></div>
 <div id="cell-9" class="clipboard-copy-txt"># Forecaster Attributes
 # ==============================================================================
-print(forecaster.window_size)
+print('Window size:', forecaster.window_size)
+print("Forecaster last window:")
 print(forecaster.last_window)</div>
         
         </div>
@@ -3375,7 +3365,8 @@ print(forecaster.last_window)</div>
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>5
+<pre>Window size: 5
+Forecaster last window:
 date
 2004-09-01    1.134432
 2004-10-01    1.181011
@@ -3486,7 +3477,7 @@ border-left: 8px solid #00bfa5; border-color: #00bfa5; padding-left: 10px;">
     <i class="fa-solid fa-fire-flame-curved" style="font-size: 18px; color:#00bfa5;"></i>
     <b> &nbsp Tip</b>
 </p>
-<p>Since the Forecaster has already been trained, there is no need to re-fit the model.</p>
+<p>Since the Forecaster has already been trained, there is <b>no need to re-fit the model</b>.</p>
 </div>
 
 </div>
@@ -3556,8 +3547,8 @@ Training index type: DatetimeIndex
 Training index frequency: MS 
 Regressor parameters: {&#39;bootstrap&#39;: True, &#39;ccp_alpha&#39;: 0.0, &#39;criterion&#39;: &#39;squared_error&#39;, &#39;max_depth&#39;: None, &#39;max_features&#39;: 1.0, &#39;max_leaf_nodes&#39;: None, &#39;max_samples&#39;: None, &#39;min_impurity_decrease&#39;: 0.0, &#39;min_samples_leaf&#39;: 1, &#39;min_samples_split&#39;: 2, &#39;min_weight_fraction_leaf&#39;: 0.0, &#39;n_estimators&#39;: 100, &#39;n_jobs&#39;: None, &#39;oob_score&#39;: False, &#39;random_state&#39;: 123, &#39;verbose&#39;: 0, &#39;warm_start&#39;: False} 
 fit_kwargs: {} 
-Creation date: 2023-07-28 20:52:19 
-Last fit date: 2023-07-28 20:52:19 
+Creation date: 2023-07-28 21:16:26 
+Last fit date: 2023-07-28 21:16:26 
 Skforecast version: 0.9.1 
 Python version: 3.10.11 
 Forecaster id: forecasting_series_y 
