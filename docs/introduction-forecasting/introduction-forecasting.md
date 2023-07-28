@@ -197,7 +197,7 @@ In this approach, the model is trained using a fixed window of past observations
 
 ### Backtesting with intermittent refit
 
-The model is retrained every $n$ iterations, a method often used when the model retraining is limited to certain time intervals, such as weekly, but a different time window, such as a day, needs to be used for prediction.
+The model is retrained every *n* iterations, a method often used when the model retraining is limited to certain time intervals, such as weekly, but a different time window, such as a day, needs to be used for prediction.
 
 This refit strategy can be implemented using either a fixed or rolling origin, providing flexibility in adapting the model to new data.
 
