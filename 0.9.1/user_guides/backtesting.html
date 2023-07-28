@@ -2756,55 +2756,45 @@ Licensed under the Apache License, Version 2.0.
 <p style="text-align: center">
 <img src="../img/diagram-backtesting-no-refit.png" style="width: 500px;">
 </p>
-
 <p style="text-align: center">
 <img src="../img/backtesting_no_refit.gif" style="width: 650px;">
 <br>
 <font size="2.5"> <i>Backtesting without refit.</i></font>
 </p>
-
 <h2 id="backtesting-with-refit-and-increasing-training-size-fixed-origin">Backtesting with refit and increasing training size (fixed origin)<a class="anchor-link" href="#backtesting-with-refit-and-increasing-training-size-fixed-origin">&#182;</a></h2><p>In this strategy, the model is trained before making predictions each time, and all available data up to that point is used in the training process. This differs from standard cross-validation, where the data is randomly distributed between training and validation sets.</p>
 <p>Instead of randomizing the data, this backtesting sequentially increases the size of the training set while maintaining the temporal order of the data. By doing this, the model can be tested on progressively larger amounts of historical data, providing a more accurate assessment of its predictive capabilities.</p>
 <p style="text-align: center">
 <img src="../img/diagram-backtesting-refit.png" style="width: 500px;">
 </p>
-
 <p style="text-align: center">
 <img src="../img/backtesting_refit.gif" style="width: 650px;">
 <br>
 <font size="2.5"> <i>Backtesting with refit and increasing training size (fixed origin).</i></font>
 </p>
-
 <h2 id="backtesting-with-refit-and-fixed-training-size-rolling-origin">Backtesting with refit and fixed training size (rolling origin)<a class="anchor-link" href="#backtesting-with-refit-and-fixed-training-size-rolling-origin">&#182;</a></h2><p>In this approach, the model is trained using a fixed window of past observations, and the testing is performed on a rolling basis, where the training window is moved forward in time. The size of the training window is kept constant, allowing for the model to be tested on different sections of the data. This technique is particularly useful when there is a limited amount of data available, or when the data is non-stationary, and the model's performance may vary over time. Is also known as time series cross-validation or walk-forward validation.</p>
 <p style="text-align: center">
 <img src="../img/diagram-backtesting-refit-fixed-train-size.png" style="width: 500px;">
 </p>
-
 <p style="text-align: center">
 <img src="../img/backtesting_refit_fixed_train_size.gif" style="width: 650px;">
 <br>
 <font size="2.5"> <i>Backtesting with refit and fixed training size (rolling origin).</i></font>
 </p>
-
 <h2 id="backtesting-with-intermittent-refit">Backtesting with intermittent refit<a class="anchor-link" href="#backtesting-with-intermittent-refit">&#182;</a></h2><p>The model is retrained every $n$ iterations of prediction. This method is often used when the frequency of retraining and prediction is different. It can be implemented using either a fixed or rolling origin, providing flexibility in adapting the model to new data.</p>
 <script src="https://kit.fontawesome.com/d20edc211b.js" crossorigin="anonymous"></script>
-
 <div class="admonition note" name="html-admonition" style="background: rgba(0,191,191,.1); padding-top: 0px; padding-bottom: 6px; border-radius: 8px;
 border-left: 8px solid #00bfa5; border-color: #00bfa5; padding-left: 10px;">
 <p class="title">
     <i class="fa-solid fa-fire-flame-curved" style="font-size: 18px; color:#00bfa5;"></i>
     <b> &nbsp Tip</b>
 </p>
-
 <p>This strategy usually achieves a good balance between the computational cost of retraining and avoiding model degradation.</p>
 </div>
-
 <p style="text-align: center">
 <img src="../img/backtesting_intermittent_refit.gif" style="width: 650px;">
 <br>
 <font size="2.5"> <i>Backtesting with intermittent refit.</i></font>
 </p>
-
 <h2 id="backtesting-including-gap">Backtesting including gap<a class="anchor-link" href="#backtesting-including-gap">&#182;</a></h2><p>This approach introduces a time gap between the training and test sets, replicating a scenario where predictions cannot be made immediately after the end of the training data.</p>
 <p>For example, consider the goal of predicting the 24 hours of day D+1, but the predictions need to be made at 11:00 to allow sufficient flexibility. At 11:00 on day D, the task is to forecast hours [12 - 23] of the same day and hours [0 - 23] of day D+1. Thus, a total of 36 hours into the future must be predicted, with only the last 24 hours to be stored.</p>
 <p style="text-align: center">
@@ -2812,7 +2802,6 @@ border-left: 8px solid #00bfa5; border-color: #00bfa5; padding-left: 10px;">
 <br>
 <font size="2.5"> <i>Backtesting with refit and gap.</i></font>
 </p>
-
 <h2 id="which-strategy-should-i-use">Which strategy should I use?<a class="anchor-link" href="#which-strategy-should-i-use">&#182;</a></h2><p>To ensure an accurate evaluation of your model and gain confidence in its predictive performance on new data, it is critical to employ an appropriate backtesting strategy. Factors such as use case characteristics, available computing resources and time intervals between predictions need to be considered to determine which strategy to use. These factors determine when the model should be refitted and the prediction horizon that should be used.</p>
 <ul>
 <li><p><strong>Prediction horizon</strong> (<code>steps</code>): suppose you need to predict the users of an application every Monday for the whole week. In this case, each iteration of backtesting would be a seven-step prediction, representing the seven days of the week.</p>
@@ -2858,7 +2847,6 @@ border-left: 8px solid #00bfa5; border-color: #00bfa5; padding-left: 10px;">
 </tbody>
 </table>
 <br>
-
 <p><strong>In general, the more closely the backtesting process resembles the actual scenario in which the model is used, the more reliable the estimated metric will be.</strong></p>
 
 </div>
@@ -2872,18 +2860,15 @@ border-left: 8px solid #00bfa5; border-color: #00bfa5; padding-left: 10px;">
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <script src="https://kit.fontawesome.com/d20edc211b.js" crossorigin="anonymous"></script>
-
 <div class="admonition note" name="html-admonition" style="background: rgba(0,184,212,.1); padding-top: 0px; padding-bottom: 6px; border-radius: 8px;
 border-left: 8px solid #00b8d4; border-color: #00b8d4; padding-left: 10px;">
 <p class="title">
     <i class="fa-light fa-pencil fa" style="font-size: 18px; color:#00b8d4;"></i>
     <b> &nbsp Note</b>
 </p>
-
 <p>Since <b>skforecast 0.9.0</b>, all backtesting and grid search functions have been extended to include the <code>n_jobs</code> argument, allowing multi-process parallelization for improved performance. This applies to all functions of the different <code>model_selection</code> modules.</p>
 <p>The benefits of parallelization depend on several factors, including the regressor used, the number of fits to be performed, and the volume of data involved. When the <code>n_jobs</code> parameter is set to <code>'auto'</code>, the level of parallelization is automatically selected based on heuristic rules that aim to choose the best option for each scenario.</p>
 </div>
-
 
 </div>
 </div>
@@ -3515,17 +3500,14 @@ class="
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <script src="https://kit.fontawesome.com/d20edc211b.js" crossorigin="anonymous"></script>
-
 <div class="admonition note" name="html-admonition" style="background: rgba(0,184,212,.1); padding-top: 0px; padding-bottom: 6px; border-radius: 8px;
 border-left: 8px solid #00b8d4; border-color: #00b8d4; padding-left: 10px;">
 <p class="title">
     <i class="fa-light fa-pencil fa" style="font-size: 18px; color:#00b8d4;"></i>
     <b> &nbsp Note</b>
 </p>
-
 <p>With an intermittent refit, the model is trained every <code>refit</code> * <code>steps</code> observations. In this case, 3 * 10 = 30 observations. This can be easily observed in the <code>verbose</code> logs.</p>
 </div>
-
 
 </div>
 </div>
@@ -3685,17 +3667,14 @@ Fold: 7
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <script src="https://kit.fontawesome.com/d20edc211b.js" crossorigin="anonymous"></script>
-
 <div class="admonition note" name="html-admonition" style="background: rgba(0,184,212,.1); padding-top: 0px; padding-bottom: 6px; border-radius: 8px;
 border-left: 8px solid #00b8d4; border-color: #00b8d4; padding-left: 10px;">
 <p class="title">
     <i class="fa-light fa-pencil fa" style="font-size: 18px; color:#00b8d4;"></i>
     <b> &nbsp Note</b>
 </p>
-
 <p>In this example, although only the last 10 predictions (steps) are stored for model evaluation, the total number of predicted steps in each fold is 15 (steps + gap).</p>
 </div>
-
 
 </div>
 </div>
