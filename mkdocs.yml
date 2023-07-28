@@ -44,8 +44,8 @@ nav:
       - Categorical features: user_guides/categorical-features.ipynb
       - Forecasting with XGBoost and LightGBM: user_guides/forecasting-xgboost-lightgbm.ipynb
       - Forecasting SARIMAX and ARIMA models: user_guides/forecasting-sarimax-arima.ipynb
-      - Save and load forecaster: user_guides/save-load-forecaster.ipynb
       - Forecaster in production: user_guides/forecaster-in-production.ipynb
+      - Save and load forecaster: user_guides/save-load-forecaster.ipynb
       - Shap-values: user_guides/shap-values-skforecast.ipynb
       - Skforecast in GPU: user_guides/skforecast-in-GPU.ipynb
       - Plot forecaster residuals: user_guides/plot-forecaster-residuals.ipynb
