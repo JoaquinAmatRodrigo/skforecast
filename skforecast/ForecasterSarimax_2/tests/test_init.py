@@ -24,7 +24,7 @@ def test_TypeError_when_regressor_is_not_pmdarima_ARIMA_when_initialization():
         ForecasterSarimax(regressor = regressor)
 
 
-def test_pmdarima_ARIMA_params_are_stored_when_initialization():
+def test_pmdarima_ARIMA_params_are_stored_during_initialization():
     """
     Check `params` are stored in the forecaster.
     """

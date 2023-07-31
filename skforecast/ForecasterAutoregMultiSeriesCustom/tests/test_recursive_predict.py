@@ -31,19 +31,19 @@ def test_recursive_predict_output_when_regressor_is_LinearRegression():
     forecaster.fit(series=series)
     level = '1'
     predictions_1 = forecaster._recursive_predict(
-                        steps = 5,
-                        level = level,
-                        last_window = forecaster.last_window[level].values,
-                        exog = None
+                        steps       = 5,
+                        level       = level,
+                        last_window = forecaster.last_window[level].to_numpy(),
+                        exog        = None
                     )
     expected_1 = np.array([50., 51., 52., 53., 54.])
 
     level = '2'
     predictions_2 = forecaster._recursive_predict(
-                        steps = 5,
-                        level = level,
-                        last_window = forecaster.last_window[level].values,
-                        exog = None
+                        steps       = 5,
+                        level       = level,
+                        last_window = forecaster.last_window[level].to_numpy(),
+                        exog        = None
                     )
     expected_2 = np.array([100., 101., 102., 103., 104.])
 

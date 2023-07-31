@@ -214,7 +214,6 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
 
     Notes
     -----
-
     The weights are used to control the influence that each observation has on the
     training of the model. `ForecasterAutoregMultiseries` accepts two types of weights. 
     If the two types of weights are indicated, they are multiplied to create the final

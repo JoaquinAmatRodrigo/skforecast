@@ -188,9 +188,9 @@ def test_predict_ValueError_when_last_window_index_does_not_follow_training_set(
     Raise ValueError if `last_window` index does not start at the end 
     of the index seen by the forecaster.
     """
-    y_test = pd.Series(data=y_datetime.values)
+    y_test = pd.Series(data=y_datetime.to_numpy())
     y_test.index = pd.date_range(start='2022-01-01', periods=50, freq='D')
-    lw_test = pd.Series(data=lw_datetime.values)
+    lw_test = pd.Series(data=lw_datetime.to_numpy())
     lw_test.index = pd.date_range(start='2022-03-01', periods=50, freq='D')
 
     forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, trend=None, method='nm', ftol=1e-19,order=(1,1,1)))
@@ -212,16 +212,16 @@ def test_predict_ValueError_when_last_window_exog_index_does_not_follow_training
     Raise ValueError if `last_window_exog` index does not start at the end 
     of the index seen by the forecaster.
     """
-    y_test = pd.Series(data=y_datetime.values)
+    y_test = pd.Series(data=y_datetime.to_numpy())
     y_test.index = pd.date_range(start='2022-01-01', periods=50, freq='D')
-    lw_test = pd.Series(data=lw_datetime.values)
+    lw_test = pd.Series(data=lw_datetime.to_numpy())
     lw_test.index = pd.date_range(start='2022-02-20', periods=50, freq='D')
     
-    exog_test = pd.Series(data=exog_datetime.values)
+    exog_test = pd.Series(data=exog_datetime.to_numpy())
     exog_test.index = pd.date_range(start='2022-01-01', periods=50, freq='D')
-    exog_pred_test = pd.Series(data=exog_predict_datetime.values)
+    exog_pred_test = pd.Series(data=exog_predict_datetime.to_numpy())
     exog_pred_test.index = pd.date_range(start='2022-04-11', periods=10, freq='D')
-    lw_exog_test = pd.Series(data=lw_exog_datetime.values)
+    lw_exog_test = pd.Series(data=lw_exog_datetime.to_numpy())
     lw_exog_test.index = pd.date_range(start='2022-03-01', periods=50, freq='D')
 
     forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, trend=None, method='nm', ftol=1e-19,order=(1,1,1)))
