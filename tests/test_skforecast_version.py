@@ -10,7 +10,7 @@ def test_version_in_init_and_pyproject_toml(version="0.10.0rc1"):
     version : str, optional
     """
 
-    with open("/home/ubuntu/varios/skforecast/pyproject.toml", mode='rb') as fp:
+    with open("./pyproject.toml", mode='rb') as fp:
         pyproject = tomli.load(fp)
 
     version_in_tolm = pyproject['project']['version']

@@ -9,7 +9,7 @@ def test_skforecast_utils_optional_dependencies_match_dependences_in_toml():
     match optional-dependencies in pyproject.toml
     """
 
-    with open("/home/ubuntu/varios/skforecast/pyproject.toml", mode='rb') as fp:
+    with open("./pyproject.toml", mode='rb') as fp:
         pyproject = tomli.load(fp)
     
     optional_dependencies_in_toml = {
