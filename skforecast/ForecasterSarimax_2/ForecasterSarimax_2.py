@@ -275,7 +275,11 @@ class ForecasterSarimax():
                        inverse_transform = False
                    )
         
-        self.regressor.fit(y=y, X=exog, **self.fit_kwargs)
+        if self.engine == 'pmdarima':
+            self.regressor.fit(y=y, X=exog, **self.fit_kwargs)
+        else:
+            self.regressor.fit(y=y, exog=exog)
+
         self.fitted = True
         self.fit_date = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
         self.training_range = y.index[[0, -1]]
@@ -303,7 +307,7 @@ class ForecasterSarimax():
         exog: Optional[Union[pd.Series, pd.DataFrame]]=None
     ) -> pd.Series:
         """
-        Forecast future values
+        Forecast future values.
 
         Generate predictions (forecasts) n steps in the future. Note that if 
         exogenous variables were used in the model fit, they will be expected 
@@ -496,7 +500,7 @@ class ForecasterSarimax():
         interval: list=None,
     ) -> pd.DataFrame:
         """
-        Forecast future values and their confidence intervals
+        Forecast future values and their confidence intervals.
 
         Generate predictions (forecasts) n steps in the future with confidence
         intervals. Note that if exogenous variables were used in the model fit, 
