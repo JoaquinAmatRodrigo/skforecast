@@ -1,12 +1,12 @@
-# Fixtures ForecasterSarimax
+# Fixtures Sarimax
 # ==============================================================================
 import numpy as np
 import pandas as pd
 
 # Fixtures
-# np.random.seed(123)
-# y = np.random.rand(50)
-# exog = np.random.rand(50)
+# From 'https://raw.githubusercontent.com/JoaquinAmatRodrigo/skforecast/master/data/h2o_exog.csv'
+
+# Series y from observation 0 to 50
 y = pd.Series(
         data = np.array(
                    [0.379808  , 0.361801  , 0.410534  , 0.48338867, 0.47546342,
@@ -20,9 +20,28 @@ y = pd.Series(
                     0.74083723, 0.72537176, 0.81580302, 0.81400947, 0.92665305,
                     0.93727594, 0.52876165, 0.55933994, 0.57787166, 0.61492741]
                ),
-        name = 'y'
+        name = 'y',
+        index = pd.RangeIndex(start=0, stop=50, step=1)
     )
 
+# Series y from observation 50 to 100
+y_lw = pd.Series(
+        data = np.array(
+                   [0.59418877, 0.70775844, 0.71950195, 0.74432369, 0.80485511,
+                    0.78854235, 0.9710894 , 0.84683354, 0.46382252, 0.48527317,
+                    0.5280586 , 0.56233647, 0.5885704 , 0.66948036, 0.67799365,
+                    0.76299549, 0.79972374, 0.77052192, 0.99438934, 0.80054443,
+                    0.49055721, 0.52440799, 0.53664948, 0.55209054, 0.60336564,
+                    0.68124538, 0.67807535, 0.79489265, 0.7846239 , 0.8130087 ,
+                    0.9777323 , 0.89308148, 0.51269597, 0.65299589, 0.5739764 ,
+                    0.63923842, 0.70387188, 0.77064824, 0.84618588, 0.89272889,
+                    0.89789988, 0.94728069, 1.05070727, 0.96965567, 0.57329151,
+                    0.61850684, 0.61899573, 0.66520922, 0.72652015, 0.85586494]),
+        name = 'y',
+        index = pd.RangeIndex(start=50, stop=100, step=1)
+    )
+
+# Series exog_2 from observation 0 to 50
 exog = pd.Series(
            data = np.array(
                       [1.1660294 , 1.1178592 , 1.0679422 , 1.09737593, 1.12219902,
@@ -36,18 +55,76 @@ exog = pd.Series(
                        1.30826123, 1.34791401, 1.39882465, 1.44383102, 1.50453491,
                        1.54382265, 1.50450063, 1.45320801, 1.40598045, 1.34363532]
                   ),
-           name = 'exog'
+           name = 'exog',
+           index = pd.RangeIndex(start=0, stop=50, step=1)
        )
 
+# Series exog_2 from observation 50 to 100
+exog_lw = pd.Series(
+           data = np.array([
+                      1.27501789, 1.31081724, 1.34284965, 1.37614005, 1.41412559,
+                      1.45299631, 1.5056625 , 1.53112882, 1.47502858, 1.4111122 ,
+                      1.35901545, 1.27726486, 1.22561223, 1.2667438 , 1.3052879 ,
+                      1.35227527, 1.39975273, 1.43614303, 1.50112483, 1.52563498,
+                      1.47114733, 1.41608418, 1.36930969, 1.28084993, 1.24141417,
+                      1.27955181, 1.31028528, 1.36193391, 1.40844058, 1.4503692 ,
+                      1.50966658, 1.55266781, 1.49622847, 1.46990287, 1.42209641,
+                      1.35439763, 1.31655571, 1.36814617, 1.40678416, 1.47053466,
+                      1.52226695, 1.57094872, 1.62696052, 1.65165448, 1.587767  ,
+                      1.5318884 , 1.4662314 , 1.38913179, 1.34050469, 1.39701938]
+                  ),
+           name = 'exog',
+           index = pd.RangeIndex(start=50, stop=100, step=1)
+       )
+
+# Series exog_2 from observation 50 to 60
 exog_predict = pd.Series(
                    data = np.array(
                               [1.27501789, 1.31081724, 1.34284965, 1.37614005, 1.41412559,
                                1.45299631, 1.5056625 , 1.53112882, 1.47502858, 1.4111122 ]
                           ),
                    name = 'exog',
-                   index = pd.RangeIndex(start=50, stop=60)
+                   index = pd.RangeIndex(start=50, stop=60, step=1)
                )
 
+# Series exog_2 from observation 100 to 110
+exog_lw_predict = pd.Series(
+                   data = np.array(
+                              [1.44651487, 1.48776549, 1.54580785, 1.58822301, 1.6196549 ,
+                               1.65521912, 1.5922988 , 1.5357284 , 1.47770322, 1.41592127]
+                          ),
+                   name = 'exog',
+                   index = pd.RangeIndex(start=100, stop=110, step=1)
+               )
+
+
+# Datetime Series
+y_datetime = pd.Series(data=y.to_numpy())
+y_datetime.index = pd.date_range(start='2000', periods=50, freq='A')
+y_datetime.name = 'y'
+
+y_lw_datetime = pd.Series(data=y_lw.to_numpy())
+y_lw_datetime.index = pd.date_range(start='2050', periods=50, freq='A')
+y_lw_datetime.name = 'y'
+
+exog_datetime = pd.Series(data=exog.to_numpy())
+exog_datetime.index = pd.date_range(start='2000', periods=50, freq='A')
+exog_datetime.name = 'exog'
+
+exog_lw_datetime = pd.Series(data=exog_lw.to_numpy())
+exog_lw_datetime.index = pd.date_range(start='2050', periods=50, freq='A')
+exog_lw_datetime.name = 'exog'
+
+exog_predict_datetime = pd.Series(data=exog_predict.to_numpy())
+exog_predict_datetime.index = pd.date_range(start='2050', periods=10, freq='A')
+exog_predict_datetime.name = 'exog'
+
+exog_lw_predict_datetime = pd.Series(data=exog_lw_predict.to_numpy())
+exog_lw_predict_datetime.index = pd.date_range(start='2100', periods=10, freq='A')
+exog_lw_predict_datetime.name = 'exog'
+
+
+# Pandas DataFrames
 df_exog = pd.DataFrame({
               'exog_1': exog.to_numpy(),
               'exog_2': ['a']*25+['b']*25}
@@ -55,35 +132,17 @@ df_exog = pd.DataFrame({
 df_exog_predict = df_exog.copy()
 df_exog_predict.index = pd.RangeIndex(start=50, stop=100)
 
-y_datetime = pd.Series(data=y.to_numpy())
-y_datetime.index = pd.date_range(start='2000', periods=50, freq='A')
-y_datetime.name = 'y'
-
-lw_datetime = pd.Series(data=y.to_numpy())
-lw_datetime.index = pd.date_range(start='2050', periods=50, freq='A')
-lw_datetime.name = 'y'
-
-exog_datetime = pd.Series(data=exog.to_numpy())
-exog_datetime.index = pd.date_range(start='2000', periods=50, freq='A')
-exog_datetime.name = 'exog'
-
-exog_predict_datetime = pd.Series(data=exog_predict.to_numpy())
-exog_predict_datetime.index = pd.date_range(start='2050', periods=10, freq='A')
-exog_predict_datetime.name = 'exog'
-
-lw_exog_datetime = pd.Series(data=exog.to_numpy())
-lw_exog_datetime.index = pd.date_range(start='2050', periods=50, freq='A')
-lw_exog_datetime.name = 'exog'
-
-exog_predict_lw_datetime = pd.Series(data=exog_predict.to_numpy())
-exog_predict_lw_datetime.index = pd.date_range(start='2100', periods=10, freq='A')
-exog_predict_lw_datetime.name = 'exog'
+df_exog_lw_predict = df_exog.copy()
+df_exog_lw_predict.index = pd.RangeIndex(start=100, stop=150)
 
 df_exog_datetime = df_exog.copy()
 df_exog_datetime.index = pd.date_range(start='2000', periods=50, freq='A')
 
-df_lw_exog_datetime = df_exog.copy()
-df_lw_exog_datetime.index = pd.date_range(start='2050', periods=50, freq='A')
+df_exog_lw_datetime = df_exog.copy()
+df_exog_lw_datetime.index = pd.date_range(start='2050', periods=50, freq='A')
 
 df_exog_predict_datetime = df_exog.copy()
-df_exog_predict_datetime.index = pd.date_range(start='2100', periods=50, freq='A')
+df_exog_predict_datetime.index = pd.date_range(start='2050', periods=50, freq='A')
+
+df_exog_lw_predict_datetime = df_exog.copy()
+df_exog_lw_predict_datetime.index = pd.date_range(start='2100', periods=50, freq='A')
