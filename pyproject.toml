@@ -83,7 +83,7 @@ test = [
     "xgboost>=1.6.1, <1.8",
     "lightgbm <3.4",
     "pytest-xdist <3.4",
-    "toml"
+    "tomli >=2.0.0"
 ]
 
 
