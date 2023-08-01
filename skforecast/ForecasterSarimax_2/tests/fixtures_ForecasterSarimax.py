@@ -67,13 +67,17 @@ exog_datetime = pd.Series(data=exog.to_numpy())
 exog_datetime.index = pd.date_range(start='2000', periods=50, freq='A')
 exog_datetime.name = 'exog'
 
+exog_predict_datetime = pd.Series(data=exog_predict.to_numpy())
+exog_predict_datetime.index = pd.date_range(start='2050', periods=10, freq='A')
+exog_predict_datetime.name = 'exog'
+
 lw_exog_datetime = pd.Series(data=exog.to_numpy())
 lw_exog_datetime.index = pd.date_range(start='2050', periods=50, freq='A')
 lw_exog_datetime.name = 'exog'
 
-exog_predict_datetime = pd.Series(data=exog_predict.to_numpy())
-exog_predict_datetime.index = pd.date_range(start='2100', periods=10, freq='A')
-exog_predict_datetime.name = 'exog'
+exog_predict_lw_datetime = pd.Series(data=exog_predict.to_numpy())
+exog_predict_lw_datetime.index = pd.date_range(start='2100', periods=10, freq='A')
+exog_predict_lw_datetime.name = 'exog'
 
 df_exog_datetime = df_exog.copy()
 df_exog_datetime.index = pd.date_range(start='2000', periods=50, freq='A')

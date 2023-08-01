@@ -27,7 +27,19 @@ logging.basicConfig(
 def _check_fitted(func):
     """
     This decorator checks if the model is fitted before using the desired method.
+
+    Parameters
+    ----------
+    func : Callable
+        Function to wrap.
+    
+    Returns
+    -------
+    wrapper : wrapper
+        Function wrapped.
+
     """
+
     def wrapper(self, *args, **kwargs):
 
         if not self.fitted:
@@ -436,6 +448,12 @@ class Sarimax(BaseEstimator, RegressorMixin):
 
         """
 
+        # Reset values in case the model has already been fitted.
+        self.output_type    = None
+        self.sarimax_res    = None
+        self.fitted         = False
+        self.training_index = None
+
         self.output_type = 'numpy' if isinstance(y, np.ndarray) else 'pandas'
         
         self._create_sarimax(endog=y, exog=exog)
@@ -720,8 +738,9 @@ class Sarimax(BaseEstimator, RegressorMixin):
         self._consolidate_kwargs()
 
         # Reset values in case the model has already been fitted.
-        self.fitted = False
-        self.sarimax_res = None
+        self.output_type    = None
+        self.sarimax_res    = None
+        self.fitted         = False
         self.training_index = None
 
 
