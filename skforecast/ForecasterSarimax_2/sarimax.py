@@ -524,7 +524,7 @@ class Sarimax(BaseEstimator, RegressorMixin):
                               )
             else:
                 predictions = pd.concat((
-                                  predictions.predicted_mean.rename("pred"),
+                                  predictions.predicted_mean,
                                   predictions.conf_int(alpha=alpha)),
                                   axis = 1
                               )
