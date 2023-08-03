@@ -686,8 +686,9 @@ class ForecasterAutoregDiff(ForecasterBase):
                       )
         
         if self.differentiation is not None:
-            predictions = self.diferentiator.inverse_transform(predictions)
-            predictions = predictions[self.differentiation:]
+            #predictions = self.diferentiator.inverse_transform(predictions)
+            predictions = predictions.cumsum() + last_window[-1]
+            #predictions = predictions[self.differentiation:]
 
         predictions = pd.Series(
                           data  = predictions,
