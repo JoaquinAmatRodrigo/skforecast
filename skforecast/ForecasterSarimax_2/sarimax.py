@@ -488,7 +488,8 @@ class Sarimax(BaseEstimator, RegressorMixin):
         steps : int
             Number of future steps predicted.
         exog : numpy ndarray, pandas Series, pandas DataFrame, default `None`
-            Value of the exogenous variable/s for the next steps.
+            Value of the exogenous variable/s for the next steps. The number of 
+            observations needed is the number of steps to predict. 
         return_conf_int : bool, default `False`
             Whether to get the confidence intervals of the forecasts.
         alpha : float, default `0.05`
@@ -505,6 +506,16 @@ class Sarimax(BaseEstimator, RegressorMixin):
                 - upper_bound: upper bound of the interval. (if `return_conf_int`)
 
         """
+
+        # This is done because statsmodels doesn't allow `exog` length greater than
+        # the number of steps
+        if exog is not None and len(exog) > steps:
+            warnings.warn(
+                (f"when predicting using exogenous variables, the `exog` parameter "
+                 f"must have the same length as the number of predicted steps. Since "
+                 f"len(exog) > steps, only the first {steps} observations are used.")
+            )
+            exog = exog[:steps]
 
         predictions = self.sarimax_res.get_forecast(
                           steps = steps,

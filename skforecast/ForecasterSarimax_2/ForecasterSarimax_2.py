@@ -18,6 +18,7 @@ from sklearn.base import clone
 from sklearn.exceptions import NotFittedError
 
 import skforecast
+from ..exceptions import IgnoredArgumentWarning
 from ..utils import check_select_fit_kwargs
 from ..utils import check_y
 from ..utils import check_exog
@@ -164,7 +165,12 @@ class ForecasterSarimax():
                                   fit_kwargs = fit_kwargs
                               )
         else:
-            # TODO: include warning engine skforecast doesn't allow fit_kwargs in the forecaster
+            if fit_kwargs:
+                warnings.warn(
+                    ("When using the skforecast Sarimax model, the fit kwargs should "
+                     "be passed using the model parameter `sm_fit_kwargs`."),
+                     IgnoredArgumentWarning
+                )
             self.fit_kwargs = {}
 
 
@@ -410,7 +416,8 @@ class ForecasterSarimax():
             # TODO -----------------------------------------------------------------------------------------------------
             # This is done because pmdarima deletes the series name
             # Check issue: https://github.com/alkaline-ml/pmdarima/issues/535
-            last_window.name = None
+            if self.engine == 'pmdarima':
+                last_window.name = None
             # ----------------------------------------------------------------------------------------------------------
 
             # last_window_exog
@@ -446,7 +453,7 @@ class ForecasterSarimax():
             else:
                 self.regressor.append(
                     y     = last_window,
-                    X     = last_window_exog,
+                    exog  = last_window_exog,
                     refit = False
                 )
                 self.extended_index = self.regressor.sarimax_res.fittedvalues.index

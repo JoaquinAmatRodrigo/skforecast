@@ -69,7 +69,7 @@ def test_init_TypeError_when_weight_func_argument_is_not_Callable():
 
 def test_init_IgnoredArgumentWarning_when_series_weights_is_provided_and_regressor_has_not_sample_weights():
     """
-    Test IgnoredArgumentWarning is created when weight_func is provided but the 
+    Test IgnoredArgumentWarning is raised when weight_func is provided but the 
     regressor has no argument sample_weights in his fit method.
     """
     def weight_func(index): # pragma: no cover

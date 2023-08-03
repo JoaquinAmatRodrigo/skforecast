@@ -11,18 +11,15 @@ from statsmodels.tsa.statespace.sarimax import SARIMAXResults
 from statsmodels.tsa.statespace.sarimax import SARIMAXResultsWrapper
 
 # Fixtures
-from skforecast.ForecasterSarimax_2.tests.fixtures_ForecasterSarimax import y
-from skforecast.ForecasterSarimax_2.tests.fixtures_ForecasterSarimax import y_lw
-from skforecast.ForecasterSarimax_2.tests.fixtures_ForecasterSarimax import exog
-from skforecast.ForecasterSarimax_2.tests.fixtures_ForecasterSarimax import exog_lw
-from skforecast.ForecasterSarimax_2.tests.fixtures_ForecasterSarimax import exog_predict
-from skforecast.ForecasterSarimax_2.tests.fixtures_ForecasterSarimax import exog_lw_predict
-from skforecast.ForecasterSarimax_2.tests.fixtures_ForecasterSarimax import y_datetime
-from skforecast.ForecasterSarimax_2.tests.fixtures_ForecasterSarimax import y_lw_datetime
-from skforecast.ForecasterSarimax_2.tests.fixtures_ForecasterSarimax import exog_datetime
-from skforecast.ForecasterSarimax_2.tests.fixtures_ForecasterSarimax import exog_lw_datetime
-from skforecast.ForecasterSarimax_2.tests.fixtures_ForecasterSarimax import exog_predict_datetime
-from skforecast.ForecasterSarimax_2.tests.fixtures_ForecasterSarimax import exog_lw_predict_datetime
+from .fixtures_ForecasterSarimax import y
+from .fixtures_ForecasterSarimax import y_lw
+from .fixtures_ForecasterSarimax import exog
+from .fixtures_ForecasterSarimax import exog_lw
+from .fixtures_ForecasterSarimax import exog_predict
+from .fixtures_ForecasterSarimax import exog_lw_predict
+from .fixtures_ForecasterSarimax import y_datetime
+from .fixtures_ForecasterSarimax import exog_datetime
+from .fixtures_ForecasterSarimax import exog_predict_datetime
 
 # Fixtures numpy
 y_numpy = y.to_numpy()
@@ -341,6 +338,33 @@ def test_Sarimax_predict_with_pandas(y, exog, exog_predict):
 
     pd.testing.assert_frame_equal(preds_skforecast, expected)
     pd.testing.assert_frame_equal(preds_statsmodels, expected)
+
+
+@pytest.mark.parametrize("y, exog, exog_predict", 
+                         [(y_numpy, exog_numpy, exog_predict_numpy),
+                          (y_datetime, exog_datetime, exog_predict_datetime),
+                          (y_datetime.to_frame(), exog_datetime.to_frame(), 
+                           exog_predict_datetime.to_frame())], 
+                         ids = lambda values : f'y, exog, exog_predict: {type(values)}')
+def test_Sarimax_predict_UserWarning_exog_length_greater_that_steps(y, exog, exog_predict):
+    """
+    Test Sarimax predict UserWarning is raised with numpy and pandas when length 
+    exog is greater than the number of steps.
+    """
+
+    # skforecast
+    sarimax = Sarimax(order=(1, 1, 1), maxiter=1000, method='cg', disp=False)
+    sarimax.fit(y=y, exog=exog)
+
+    steps = 5
+
+    warn_msg = re.escape(
+                 (f"when predicting using exogenous variables, the `exog` parameter "
+                  f"must have the same length as the number of predicted steps. Since "
+                  f"len(exog) > steps, only the first {steps} observations are used.")
+             )
+    with pytest.warns(UserWarning, match = warn_msg):
+        sarimax.predict(steps=steps, exog=exog_predict)
 
 
 def test_Sarimax_predict_interval_with_numpy():

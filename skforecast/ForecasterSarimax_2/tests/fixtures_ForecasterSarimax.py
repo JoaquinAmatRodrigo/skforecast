@@ -127,22 +127,35 @@ exog_lw_predict_datetime.name = 'exog'
 # Pandas DataFrames
 df_exog = pd.DataFrame({
               'exog_1': exog.to_numpy(),
-              'exog_2': ['a']*25+['b']*25}
+              'exog_2': ['a', 'b']*25}
           )
-df_exog_predict = df_exog.copy()
-df_exog_predict.index = pd.RangeIndex(start=50, stop=100)
 
-df_exog_lw_predict = df_exog.copy()
-df_exog_lw_predict.index = pd.RangeIndex(start=100, stop=150)
+df_exog_lw = pd.DataFrame({
+                 'exog_1': exog_lw.to_numpy(),
+                 'exog_2': ['a', 'b']*25}
+             )
+df_exog_lw.index = pd.RangeIndex(start=50, stop=100)
+
+df_exog_predict = pd.DataFrame({
+                      'exog_1': exog_predict.to_numpy(),
+                      'exog_2': ['a', 'b']*5}
+                  )
+df_exog_predict.index = pd.RangeIndex(start=50, stop=60)
+
+df_exog_lw_predict = pd.DataFrame({
+                         'exog_1': exog_lw_predict.to_numpy(),
+                         'exog_2': ['a', 'b']*5}
+                     )
+df_exog_lw_predict.index = pd.RangeIndex(start=100, stop=110)
 
 df_exog_datetime = df_exog.copy()
 df_exog_datetime.index = pd.date_range(start='2000', periods=50, freq='A')
 
-df_exog_lw_datetime = df_exog.copy()
+df_exog_lw_datetime = df_exog_lw.copy()
 df_exog_lw_datetime.index = pd.date_range(start='2050', periods=50, freq='A')
 
-df_exog_predict_datetime = df_exog.copy()
-df_exog_predict_datetime.index = pd.date_range(start='2050', periods=50, freq='A')
+df_exog_predict_datetime = df_exog_predict.copy()
+df_exog_predict_datetime.index = pd.date_range(start='2050', periods=10, freq='A')
 
-df_exog_lw_predict_datetime = df_exog.copy()
-df_exog_lw_predict_datetime.index = pd.date_range(start='2100', periods=50, freq='A')
+df_exog_lw_predict_datetime = df_exog_lw_predict.copy()
+df_exog_lw_predict_datetime.index = pd.date_range(start='2100', periods=10, freq='A')
