@@ -62,6 +62,16 @@ class TimeSeriesDifferentiator(BaseEstimator, TransformerMixin):
         self.initial_values = []
         self.last_values = []
 
+        for i in range(self.order):
+            if i == 0:
+                self.initial_values.append(X[0])
+                self.last_values.append(X[-1])
+                X_diff = np.diff(X, n=1)
+            else:
+                self.initial_values.append(X_diff[0])
+                self.last_values.append(X_diff[-1])
+                X_diff = np.diff(X_diff, n=1)
+
         return self
     
 
@@ -86,12 +96,8 @@ class TimeSeriesDifferentiator(BaseEstimator, TransformerMixin):
         """
         for i in range(self.order):
             if i == 0:
-                self.initial_values.append(X[0])
-                self.last_values.append(X[-1])
                 X_diff = np.diff(X, n=1)
             else:
-                self.initial_values.append(X_diff[0])
-                self.last_values.append(X_diff[-1])
                 X_diff = np.diff(X_diff, n=1)
                 
         X_diff = np.append((np.full(shape=self.order, fill_value=np.nan)), X_diff)
