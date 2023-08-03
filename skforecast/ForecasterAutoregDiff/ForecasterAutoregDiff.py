@@ -857,8 +857,7 @@ class ForecasterAutoregDiff(ForecasterBase):
                                  exog        = exog_boot 
                              )
                 if self.differentiation is not None:
-                    prediction = self.diferentiator.inverse_transform(prediction)
-                    prediction = prediction[self.differentiation:]
+                    predictions = self.diferentiator.inverse_transform_next_window(predictions)
                 
                 prediction_with_residual  = prediction + sample_residuals[step]
                 boot_predictions[step, i] = prediction_with_residual
