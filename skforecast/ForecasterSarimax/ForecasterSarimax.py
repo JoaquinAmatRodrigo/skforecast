@@ -18,6 +18,7 @@ from sklearn.base import clone
 from sklearn.exceptions import NotFittedError
 
 import skforecast
+from ..exceptions import IgnoredArgumentWarning
 from ..utils import check_select_fit_kwargs
 from ..utils import check_y
 from ..utils import check_exog
@@ -146,18 +147,31 @@ class ForecasterSarimax():
         self.python_version    = sys.version.split(" ")[0]
         self.forecaster_id     = forecaster_id
         
-        if not isinstance(self.regressor, pmdarima.arima.ARIMA):
+        if isinstance(self.regressor, pmdarima.arima.ARIMA):
+            self.engine = 'pmdarima'
+        elif isinstance(self.regressor, skforecast.ForecasterSarimax.Sarimax):
+            self.engine = 'skforecast'
+        else:
             raise TypeError(
-                (f"`regressor` must be an instance of type pmdarima.arima.ARIMA. "
-                 f"Got {type(regressor)}.")
+                (f"`regressor` must be an instance of type pmdarima.arima.ARIMA "
+                 f"or skforecast.ForecasterSarimax.Sarimax. Got {type(regressor)}.")
             )
 
         self.params = self.regressor.get_params(deep=True)
 
-        self.fit_kwargs = check_select_fit_kwargs(
-                              regressor  = regressor,
-                              fit_kwargs = fit_kwargs
-                          )
+        if self.engine == 'pmdarima':
+            self.fit_kwargs = check_select_fit_kwargs(
+                                  regressor  = regressor,
+                                  fit_kwargs = fit_kwargs
+                              )
+        else:
+            if fit_kwargs:
+                warnings.warn(
+                    ("When using the skforecast Sarimax model, the fit kwargs should "
+                     "be passed using the model parameter `sm_fit_kwargs`."),
+                     IgnoredArgumentWarning
+                )
+            self.fit_kwargs = {}
 
 
     def __repr__(
@@ -267,7 +281,11 @@ class ForecasterSarimax():
                        inverse_transform = False
                    )
         
-        self.regressor.fit(y=y, X=exog, **self.fit_kwargs)
+        if self.engine == 'pmdarima':
+            self.regressor.fit(y=y, X=exog, **self.fit_kwargs)
+        else:
+            self.regressor.fit(y=y, exog=exog)
+
         self.fitted = True
         self.fit_date = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
         self.training_range = y.index[[0, -1]]
@@ -278,7 +296,12 @@ class ForecasterSarimax():
             self.index_freq = y.index.step
 
         self.last_window = y.copy()
-        self.extended_index = self.regressor.arima_res_.fittedvalues.index.copy()
+        
+        if self.engine == 'pmdarima':
+            self.extended_index = self.regressor.arima_res_.fittedvalues.index.copy()
+        else:
+            self.extended_index = self.regressor.sarimax_res.fittedvalues.index.copy()
+
         self.params = self.regressor.get_params(deep=True)
 
 
@@ -290,7 +313,7 @@ class ForecasterSarimax():
         exog: Optional[Union[pd.Series, pd.DataFrame]]=None
     ) -> pd.Series:
         """
-        Forecast future values
+        Forecast future values.
 
         Generate predictions (forecasts) n steps in the future. Note that if 
         exogenous variables were used in the model fit, they will be expected 
@@ -393,7 +416,8 @@ class ForecasterSarimax():
             # TODO -----------------------------------------------------------------------------------------------------
             # This is done because pmdarima deletes the series name
             # Check issue: https://github.com/alkaline-ml/pmdarima/issues/535
-            last_window.name = None
+            if self.engine == 'pmdarima':
+                last_window.name = None
             # ----------------------------------------------------------------------------------------------------------
 
             # last_window_exog
@@ -419,13 +443,21 @@ class ForecasterSarimax():
                                        inverse_transform = False
                                    )
 
-            self.regressor.arima_res_ = self.regressor.arima_res_.append(
-                                            endog = last_window,
-                                            exog  = last_window_exog,
-                                            refit = False
-                                        )
-            self.extended_index = self.regressor.arima_res_.fittedvalues.index
-                        
+            if self.engine == 'pmdarima':
+                self.regressor.arima_res_ = self.regressor.arima_res_.append(
+                                                endog = last_window,
+                                                exog  = last_window_exog,
+                                                refit = False
+                                            )
+                self.extended_index = self.regressor.arima_res_.fittedvalues.index
+            else:
+                self.regressor.append(
+                    y     = last_window,
+                    exog  = last_window_exog,
+                    refit = False
+                )
+                self.extended_index = self.regressor.sarimax_res.fittedvalues.index
+                            
         # Exog
         if exog is not None:
             if isinstance(exog, pd.Series):
@@ -441,10 +473,17 @@ class ForecasterSarimax():
             exog = exog.iloc[:steps, ]
 
         # Get following n steps predictions
-        predictions = self.regressor.predict(
-                          n_periods = steps,
-                          X         = exog
-                      )
+        if self.engine == 'pmdarima':
+            predictions = self.regressor.predict(
+                              n_periods = steps,
+                              X         = exog
+                          )
+        else:
+            predictions = self.regressor.predict(
+                              steps = steps,
+                              exog  = exog
+                          )
+            predictions = predictions.iloc[:, 0]
 
         # Reverse the transformation if needed
         predictions = transform_series(
@@ -468,7 +507,7 @@ class ForecasterSarimax():
         interval: list=None,
     ) -> pd.DataFrame:
         """
-        Forecast future values and their confidence intervals
+        Forecast future values and their confidence intervals.
 
         Generate predictions (forecasts) n steps in the future with confidence
         intervals. Note that if exogenous variables were used in the model fit, 
@@ -592,7 +631,8 @@ class ForecasterSarimax():
             # TODO -----------------------------------------------------------------------------------------------------
             # This is done because pmdarima deletes the series name
             # Check issue: https://github.com/alkaline-ml/pmdarima/issues/535
-            last_window.name = None
+            if self.engine == 'pmdarima':
+                last_window.name = None
             # ----------------------------------------------------------------------------------------------------------
 
             # Transform last_window_exog    
@@ -618,12 +658,20 @@ class ForecasterSarimax():
                                        inverse_transform = False
                                    )
 
-            self.regressor.arima_res_ = self.regressor.arima_res_.append(
-                                            endog = last_window,
-                                            exog  = last_window_exog,
-                                            refit = False
-                                        )
-            self.extended_index = self.regressor.arima_res_.fittedvalues.index
+            if self.engine == 'pmdarima':
+                self.regressor.arima_res_ = self.regressor.arima_res_.append(
+                                                endog = last_window,
+                                                exog  = last_window_exog,
+                                                refit = False
+                                            )
+                self.extended_index = self.regressor.arima_res_.fittedvalues.index
+            else:
+                self.regressor.append(
+                    y     = last_window,
+                    exog  = last_window_exog,
+                    refit = False
+                )
+                self.extended_index = self.regressor.sarimax_res.fittedvalues.index
 
         # Exog
         if exog is not None:
@@ -640,16 +688,25 @@ class ForecasterSarimax():
             exog = exog.iloc[:steps, ]
 
         # Get following n steps predictions with intervals
-        predicted_mean, conf_int = self.regressor.predict(
-                                       n_periods       = steps,
-                                       X               = exog,
-                                       alpha           = alpha,
-                                       return_conf_int = True
-                                   )
-                                    
-        predictions = predicted_mean.to_frame(name="pred")
-        predictions['lower_bound'] = conf_int[:, 0]
-        predictions['upper_bound'] = conf_int[:, 1]
+        if self.engine == 'pmdarima':
+            predicted_mean, conf_int = self.regressor.predict(
+                                           n_periods       = steps,
+                                           X               = exog,
+                                           return_conf_int = True,
+                                           alpha           = alpha
+                                       )
+                                        
+            predictions = predicted_mean.to_frame(name="pred")
+            predictions['lower_bound'] = conf_int[:, 0]
+            predictions['upper_bound'] = conf_int[:, 1]
+        else:
+            predictions = self.regressor.predict(
+                              steps = steps,
+                              exog  = exog,
+                              return_conf_int = True,
+                              alpha = alpha
+                          )
+
 
         # Reverse the transformation if needed
         if self.transformer_y:
@@ -706,7 +763,15 @@ class ForecasterSarimax():
         
         """
 
-        self.fit_kwargs = check_select_fit_kwargs(self.regressor, fit_kwargs=fit_kwargs)
+        if self.engine == 'pmdarima':
+            self.fit_kwargs = check_select_fit_kwargs(self.regressor, fit_kwargs=fit_kwargs)
+        else:
+            warnings.warn(
+                ("When using the skforecast Sarimax model, the fit kwargs should "
+                 "be passed using the model parameter `sm_fit_kwargs`."),
+                 IgnoredArgumentWarning
+            )
+            self.fit_kwargs = {}
 
 
     def get_feature_importances(
