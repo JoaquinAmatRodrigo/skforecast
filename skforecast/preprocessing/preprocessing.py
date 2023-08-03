@@ -2,7 +2,7 @@
 import numpy as np
 from sklearn.base import BaseEstimator
 from sklearn.base import TransformerMixin
-from typing import Any, Union
+from typing import Any
 from typing_extensions import Self
 
 class TimeSeriesDifferentiator(BaseEstimator, TransformerMixin):
@@ -31,6 +31,11 @@ class TimeSeriesDifferentiator(BaseEstimator, TransformerMixin):
     """
     
     def __init__(self, order: int=1) -> None:
+
+        if not isinstance(order, int):
+            raise TypeError(f"Parameter 'order' must be an integer. Found {type(order)}.")
+        if order < 1:
+            raise ValueError(f"Parameter 'order' must be an integer greater than 0. Found {order}.")
 
         self.order = order
         self.initial_values = []
