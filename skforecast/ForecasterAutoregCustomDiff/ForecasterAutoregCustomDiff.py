@@ -428,10 +428,6 @@ class ForecasterAutoregCustomDiff(ForecasterBase):
                       name  = 'y'
                   )
 
-        if self.differentiation is not None:
-            y_train = y_train.iloc[self.differentiation: ]
-            X_train = X_train.iloc[self.differentiation: ]
-                        
         return X_train, y_train
 
 
