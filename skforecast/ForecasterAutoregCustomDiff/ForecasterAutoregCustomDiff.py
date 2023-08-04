@@ -883,9 +883,7 @@ class ForecasterAutoregCustomDiff(ForecasterBase):
                                  last_window = last_window_boot,
                                  exog        = exog_boot 
                              )
-                if self.differentiation is not None:
-                    predictions = self.diferentiator.inverse_transform_next_window(predictions)
-                
+
                 prediction_with_residual  = prediction + sample_residuals[step]
                 boot_predictions[step, i] = prediction_with_residual
 
@@ -896,6 +894,11 @@ class ForecasterAutoregCustomDiff(ForecasterBase):
                 
                 if exog is not None:
                     exog_boot = exog_boot[1:]
+
+            if self.differentiation is not None:
+                boot_predictions[:, i] = (
+                    self.diferentiator.inverse_transform_next_window(boot_predictions[:, i])
+                )
 
         boot_predictions = pd.DataFrame(
                                data    = boot_predictions,
