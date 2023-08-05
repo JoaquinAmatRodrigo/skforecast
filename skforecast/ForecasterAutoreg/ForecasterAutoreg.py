@@ -74,7 +74,10 @@ class ForecasterAutoreg(ForecasterBase):
         method. The resulting `sample_weight` cannot have negative values.
     differentiation : int, default `None`
         Order of differencing applied to the time series before training the forecaster.
-        If `None`, no differencing is applied.
+        If `None`, no differencing is applied. The order of differentiation is the number
+        of times the differencing operation is applied to a time series. Differencing
+        involves computing the differences between consecutive data points in the series.
+        Differentiation is reversed in the output of `predict()` and `predict_interval()`.
     fit_kwargs : dict, default `None`
         Additional arguments to be passed to the `fit` method of the regressor.
         **New in version 0.8.0**
@@ -104,7 +107,10 @@ class ForecasterAutoreg(ForecasterBase):
         method. The resulting `sample_weight` cannot have negative values.
     differentiation : int, default `None`
         Order of differencing applied to the time series before training the forecaster.
-        If `None`, no differencing is applied.
+        If `None`, no differencing is applied. The order of differentiation is the number
+        of times the differencing operation is applied to a time series. Differencing
+        involves computing the differences between consecutive data points in the series.
+        Differentiation is reversed in the output of `predict()` and `predict_interval()`.
     source_code_weight_func : str
         Source code of the custom function used to create weights.
     max_lag : int
@@ -114,11 +120,14 @@ class ForecasterAutoreg(ForecasterBase):
         If `differentiation` is not `None`, the size of the window is `max_lag` +
         `differentiation`.
     last_window : pandas Series
-        Last window the forecaster has seen during training. It stores the
-        values needed to predict the next `step` immediately after the training data.
-        It is in the original scale of the time series, before applying any transformation
-        or differencing. If `differentiation` is not `None`, the size of `last_window`
-        is extended by `differentiation` values.
+        This window represents the most recent data observed by the predictor
+        during its training phase. It contains the values needed to predict the
+        next step immediately after the training data. These values are stored
+        in the original scale of the time series before undergoing any transformations
+        or differentiation. When `differentiation` parameter is specified, the
+        dimensions of the `last_window` are expanded as many values as the order
+        of differentiation. For example, if `lags` = 7 and `differentiation` = 1,
+        `last_window` will have 8 values.
     index_type : type
         Type of index of the input used in training.
     index_freq : str

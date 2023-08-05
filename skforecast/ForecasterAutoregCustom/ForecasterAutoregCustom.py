@@ -76,7 +76,10 @@ class ForecasterAutoregCustom(ForecasterBase):
         method. The resulting `sample_weight` cannot have negative values.
     differentiation : int, default `None`
         Order of differencing applied to the time series before training the forecaster.
-        If `None`, no differencing is applied.
+        If `None`, no differencing is applied. The order of differentiation is the number
+        of times the differencing operation is applied to a time series. Differencing
+        involves computing the differences between consecutive data points in the series.
+        Diferentiarion is reversed in the output of `predict()` and `predict_interval()`.
     fit_kwargs : dict, default `None`
         Additional arguments to be passed to the `fit` method of the regressor.
         **New in version 0.8.0**
@@ -97,6 +100,8 @@ class ForecasterAutoregCustom(ForecasterBase):
         **New in version 0.7.0**
     window_size : int
         Size of the window needed by `fun_predictors` to create the predictors.
+        If `differentiation` is not `None`, `window_size` is increased by the
+        order of differentiation.
     name_predictors : list
         Name of the predictors returned by `fun_predictors`. If `None`, predictors are
         named using the prefix 'custom_predictor_<i>' where `i` is the index of the position
@@ -117,15 +122,21 @@ class ForecasterAutoregCustom(ForecasterBase):
         method. The resulting `sample_weight` cannot have negative values.
     differentiation : int, default `None`
         Order of differencing applied to the time series before training the forecaster.
-        If `None`, no differencing is applied.
+        If `None`, no differencing is applied. The order of differentiation is the number
+        of times the differencing operation is applied to a time series. Differencing
+        involves computing the differences between consecutive data points in the series.
+        Differentiation is reversed in the output of `predict()` and `predict_interval()`.
     source_code_weight_func : str
         Source code of the custom function used to create weights.
     last_window : pandas Series
-        Last window the forecaster has seen during training. It stores the
-        values needed to predict the next `step` immediately after the training data.
-        It is in the original scale of the time series, before applying any transformation
-        or differencing. If `differentiation` is not `None`, the size of `last_window`
-        is extended by `differentiation` values.
+        This window represents the most recent data observed by the predictor
+        during its training phase. It contains the values needed to predict the
+        next step immediately after the training data. These values are stored
+        in the original scale of the time series before undergoing any transformations
+        or differentiation. When `differentiation` parameter is specified, the
+        dimensions of the `last_window` are expanded as many values as the order
+        of differentiation. For example, if `fun_predictors()` requires 7 lagged
+        values and `differentiation=1`, `last_window` will contain 8 values.
     index_type : type
         Type of index of the input used in training.
     index_freq : str
