@@ -230,7 +230,7 @@ def _create_backtesting_folds(
             train_idx_end = initial_train_size
             test_idx_start = initial_train_size + i * (test_size)
         
-        last_window_start = test_idx_start - window_size 
+        last_window_start = test_idx_start - window_size
         test_idx_end = test_idx_start + gap + test_size
     
         partitions = [
@@ -283,7 +283,7 @@ def _create_backtesting_folds(
                 print(f"Number of observations used for initial training: {initial_train_size}")
             else:
                 print(f"Number of observations used for initial training: {initial_train_size - differentiation}")
-                print(f"    Number of observations used for differentiation: {differentiation}")
+                print(f"    First {differentiation} observation/s in training sets are used for differentiation")
         print(f"Number of observations used for backtesting: {len(data) - initial_train_size}")
         print(f"    Number of folds: {len(folds)}")
         print(f"    Number of steps per fold: {test_size}")
@@ -303,11 +303,11 @@ def _create_backtesting_folds(
                 validation_end    = data.index[fold[3][-1]]
                 validation_length = len(fold[3])
             else:
-                training_start = data.index[fold[0][0] + differentiation] if fold[0] is not None else None
-                training_end   = data.index[fold[0][-1] + differentiation] if fold[0] is not None else None
-                training_length = len(fold[0]) - differentiation if fold[0] is not None else 0
-                validation_start = data.index[fold[3][0]]
-                validation_end   = data.index[fold[3][-1]]
+                training_start    = data.index[fold[0][0] + differentiation] if fold[0] is not None else None
+                training_end      = data.index[fold[0][-1]] if fold[0] is not None else None
+                training_length   = len(fold[0]) - differentiation if fold[0] is not None else 0
+                validation_start  = data.index[fold[3][0]]
+                validation_end    = data.index[fold[3][-1]]
                 validation_length = len(fold[3])
 
 
@@ -630,7 +630,7 @@ def _backtesting_forecaster(
         (y=y, exog=exog, forecaster=forecaster, interval=interval, fold=fold)
          for fold in folds)
     )
-    
+
     backtest_predictions = pd.concat(backtest_predictions)
     if isinstance(backtest_predictions, pd.Series):
         backtest_predictions = pd.DataFrame(backtest_predictions)
