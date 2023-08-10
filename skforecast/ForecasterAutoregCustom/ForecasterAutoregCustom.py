@@ -205,7 +205,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         self.transformer_exog           = transformer_exog
         self.weight_func                = weight_func
         self.differentiation            = differentiation
-        self.diferentiator              = None
+        self.differentiator             = None
         self.source_code_weight_func    = None
         self.last_window                = None
         self.index_type                 = None
@@ -236,7 +236,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             )
         if self.differentiation is not None:
             self.window_size += self.differentiation
-            self.diferentiator = TimeSeriesDifferentiator(order=self.differentiation)
+            self.differentiator = TimeSeriesDifferentiator(order=self.differentiation)
 
         if not isinstance(fun_predictors, Callable):
             raise TypeError(
@@ -345,7 +345,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         y_values, y_index = preprocess_y(y=y)
 
         if self.differentiation is not None:
-            y_values = self.diferentiator.fit_transform(y_values)
+            y_values = self.differentiator.fit_transform(y_values)
         
         if exog is not None:
             if len(exog) != len(y):
@@ -711,7 +711,7 @@ class ForecasterAutoregCustom(ForecasterBase):
                                                     last_window = last_window
                                                 )
         if self.differentiation is not None:
-            last_window_values = self.diferentiator.fit_transform(last_window_values)
+            last_window_values = self.differentiator.fit_transform(last_window_values)
             
         predictions = self._recursive_predict(
                           steps       = steps,
@@ -720,7 +720,7 @@ class ForecasterAutoregCustom(ForecasterBase):
                       )
         
         if self.differentiation is not None:
-            predictions = self.diferentiator.inverse_transform_next_window(predictions)
+            predictions = self.differentiator.inverse_transform_next_window(predictions)
 
         predictions = pd.Series(
                           data  = predictions,
@@ -855,7 +855,7 @@ class ForecasterAutoregCustom(ForecasterBase):
                                                     last_window = last_window
                                                 )
         if self.differentiation is not None:
-            last_window_values = self.diferentiator.fit_transform(last_window_values)
+            last_window_values = self.differentiator.fit_transform(last_window_values)
 
         boot_predictions = np.full(
                                shape      = (steps, n_boot),
@@ -904,7 +904,7 @@ class ForecasterAutoregCustom(ForecasterBase):
 
             if self.differentiation is not None:
                 boot_predictions[:, i] = (
-                    self.diferentiator.inverse_transform_next_window(boot_predictions[:, i])
+                    self.differentiator.inverse_transform_next_window(boot_predictions[:, i])
                 )
 
         boot_predictions = pd.DataFrame(
