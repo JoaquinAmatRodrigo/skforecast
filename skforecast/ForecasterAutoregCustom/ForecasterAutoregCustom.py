@@ -80,6 +80,9 @@ class ForecasterAutoregCustom(ForecasterBase):
         of times the differencing operation is applied to a time series. Differencing
         involves computing the differences between consecutive data points in the series.
         Diferentiarion is reversed in the output of `predict()` and `predict_interval()`.
+        **WARNING: This argument is newly introduced and requires special attention. It
+        is still experimental and may undergo changes.**
+        **New in version 0.10.0**
     fit_kwargs : dict, default `None`
         Additional arguments to be passed to the `fit` method of the regressor.
         **New in version 0.8.0**
@@ -126,6 +129,9 @@ class ForecasterAutoregCustom(ForecasterBase):
         of times the differencing operation is applied to a time series. Differencing
         involves computing the differences between consecutive data points in the series.
         Differentiation is reversed in the output of `predict()` and `predict_interval()`.
+        **WARNING: This argument is newly introduced and requires special attention. It
+        is still experimental and may undergo changes.**
+        **New in version 0.10.0**
     source_code_weight_func : str
         Source code of the custom function used to create weights.
     last_window : pandas Series
