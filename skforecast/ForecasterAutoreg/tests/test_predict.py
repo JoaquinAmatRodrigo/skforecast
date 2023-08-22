@@ -3,6 +3,7 @@
 import numpy as np
 import pandas as pd
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
+from skforecast.preprocessing import TimeSeriesDifferentiator
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import OneHotEncoder
@@ -18,6 +19,7 @@ from lightgbm import LGBMRegressor
 # Fixtures
 from .fixtures_ForecasterAutoreg import y as y_categorical
 from .fixtures_ForecasterAutoreg import exog as exog_categorical
+from .fixtures_ForecasterAutoreg import data # to test results when using differentiation
 
 
 def test_predict_output_when_regressor_is_LinearRegression():
@@ -291,3 +293,110 @@ def test_predict_output_when_categorical_features_native_implementation_LGBMRegr
                )
     
     pd.testing.assert_series_equal(predictions, expected)
+
+
+def test_predict_output_when_regressor_is_LinearRegression_with_exog_and_differentiation_is_1():
+    """
+    Test predict output when using LinearRegression as regressor and differentiation=1.
+    """
+
+    # Data differentiated
+    diferenciator = TimeSeriesDifferentiator(order=1)
+    data_diff = diferenciator.fit_transform(data)
+    data_diff = pd.Series(data_diff, index=data.index).dropna()
+    # Simulated exogenous variable
+    rng = np.random.default_rng(9876)
+    exog = pd.Series(
+        rng.normal(loc=0, scale=1, size=len(data)), index=data.index, name='exog'
+    )
+    exog_diff = exog.iloc[1:]
+    end_train = '2003-03-01 23:59:00'
+    steps = len(data.loc[end_train:])
+
+    forecaster_1 = ForecasterAutoreg(regressor=LinearRegression(),lags=15)
+    forecaster_1.fit(y=data_diff.loc[:end_train], exog=exog_diff.loc[:end_train])
+    predictions_diff = forecaster_1.predict(steps=steps, exog=exog_diff.loc[end_train:])
+    # Revert the differentiation
+    last_value_train = data.loc[:end_train].iloc[[-1]]
+    predictions_1 = pd.concat([last_value_train, predictions_diff]).cumsum()[1:]
+
+    forecaster_2 = ForecasterAutoreg(regressor=LinearRegression(),lags=15,differentiation=1)
+    forecaster_2.fit(y=data.loc[:end_train], exog=exog.loc[:end_train])
+    predictions_2 = forecaster_2.predict(steps=steps, exog=exog.loc[end_train:])
+
+    pd.testing.assert_series_equal(predictions_1.asfreq('MS'), predictions_2, check_names=False)
+
+
+def test_predict_output_when_regressor_is_LinearRegression_with_exog_differentiation_is_1_and_transformer_y():
+    """
+    Test predict output when using LinearRegression as regressor and differentiation=1,
+    and transformer_y is StandardScaler.
+    """
+
+    end_train = '2003-03-01 23:59:00'
+    # Data scaled and differentiated
+    scaler = StandardScaler()
+    scaler.fit(data.loc[:end_train].to_numpy().reshape(-1, 1))
+    data_scaled = scaler.transform(data.to_numpy().reshape(-1, 1))
+    data_scaled = pd.Series(data_scaled.flatten(), index=data.index)
+    data_scaled_diff = TimeSeriesDifferentiator(order=1).fit_transform(data_scaled)
+    data_scaled_diff = pd.Series(data_scaled_diff, index=data.index).dropna()
+    # Simulated exogenous variable
+    rng = np.random.default_rng(9876)
+    exog = pd.Series(
+        rng.normal(loc=0, scale=1, size=len(data)), index=data.index, name='exog'
+    )
+    exog_diff = exog.iloc[1:]
+    steps = len(data.loc[end_train:])
+
+    forecaster_1 = ForecasterAutoreg(regressor=LinearRegression(),lags=15)
+    forecaster_1.fit(y=data_scaled_diff.loc[:end_train], exog=exog_diff.loc[:end_train])
+    predictions_diff = forecaster_1.predict(steps=steps, exog=exog_diff.loc[end_train:])
+    # Revert the differentiation
+    last_value_train = data_scaled.loc[:end_train].iloc[[-1]]
+    predictions_1 = pd.concat([last_value_train, predictions_diff]).cumsum()[1:]
+    # Revert the scaling
+    predictions_1 = scaler.inverse_transform(predictions_1.to_numpy().reshape(-1, 1))
+    predictions_1 = pd.Series(predictions_1.flatten(), index=data.loc[end_train:].index)
+
+    forecaster_2 = ForecasterAutoreg(regressor=LinearRegression(),lags=15,differentiation=1)
+    forecaster_2.fit(y=data.loc[:end_train], exog=exog.loc[:end_train])
+    predictions_2 = forecaster_2.predict(steps=steps, exog=exog.loc[end_train:])
+
+    pd.testing.assert_series_equal(predictions_1.asfreq('MS'), predictions_2, check_names=False)
+
+
+def test_predict_output_when_regressor_is_LinearRegression_with_exog_and_differentiation_is_2():
+    """
+    Test predict output when using LinearRegression as regressor and differentiation=2.
+    """
+
+    # Data differentiated
+    diferenciator_1 = TimeSeriesDifferentiator(order=1)
+    diferenciator_2 = TimeSeriesDifferentiator(order=2)
+    data_diff_1 = diferenciator_1.fit_transform(data)
+    data_diff_1 = pd.Series(data_diff_1, index=data.index).dropna()
+    data_diff_2 = diferenciator_2.fit_transform(data)
+    data_diff_2 = pd.Series(data_diff_2, index=data.index).dropna()
+    # Simulated exogenous variable
+    rng = np.random.default_rng(9876)
+    exog = pd.Series(
+        rng.normal(loc=0, scale=1, size=len(data)), index=data.index, name='exog'
+    )
+    exog_diff_2 = exog.iloc[2:]
+    end_train = '2003-03-01 23:59:00'
+    steps = len(data.loc[end_train:])
+    forecaster_1 = ForecasterAutoreg(regressor=LinearRegression(),lags=15)
+    forecaster_1.fit(y=data_diff_2.loc[:end_train], exog=exog_diff_2.loc[:end_train])
+    predictions_diff_2 = forecaster_1.predict(steps=steps, exog=exog_diff_2.loc[end_train:])
+    # Revert the differentiation
+    last_value_train_diff = data_diff_1.loc[:end_train].iloc[[-1]]
+    predictions_diff_1 = pd.concat([last_value_train_diff, predictions_diff_2]).cumsum()[1:]
+    last_value_train = data.loc[:end_train].iloc[[-1]]
+    predictions_1 = pd.concat([last_value_train, predictions_diff_1]).cumsum()[1:]
+
+    forecaster_2 = ForecasterAutoreg(regressor=LinearRegression(),lags=15,differentiation=2)
+    forecaster_2.fit(y=data.loc[:end_train], exog=exog.loc[:end_train])
+    predictions_2 = forecaster_2.predict(steps=steps, exog=exog.loc[end_train:])
+
+    pd.testing.assert_series_equal(predictions_1.asfreq('MS'), predictions_2, check_names=False)
