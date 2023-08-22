@@ -359,7 +359,7 @@ def test_predict_output_when_regressor_is_LinearRegression_with_exog_differentia
     predictions_1 = scaler.inverse_transform(predictions_1.to_numpy().reshape(-1, 1))
     predictions_1 = pd.Series(predictions_1.flatten(), index=data.loc[end_train:].index)
 
-    forecaster_2 = ForecasterAutoreg(regressor=LinearRegression(),lags=15,differentiation=1)
+    forecaster_2 = ForecasterAutoreg(regressor=LinearRegression(), lags=15, differentiation=1)
     forecaster_2.fit(y=data.loc[:end_train], exog=exog.loc[:end_train])
     predictions_2 = forecaster_2.predict(steps=steps, exog=exog.loc[end_train:])
 
@@ -395,7 +395,7 @@ def test_predict_output_when_regressor_is_LinearRegression_with_exog_and_differe
     last_value_train = data.loc[:end_train].iloc[[-1]]
     predictions_1 = pd.concat([last_value_train, predictions_diff_1]).cumsum()[1:]
 
-    forecaster_2 = ForecasterAutoreg(regressor=LinearRegression(),lags=15,differentiation=2)
+    forecaster_2 = ForecasterAutoreg(regressor=LinearRegression(), lags=15, differentiation=2)
     forecaster_2.fit(y=data.loc[:end_train], exog=exog.loc[:end_train])
     predictions_2 = forecaster_2.predict(steps=steps, exog=exog.loc[end_train:])
 

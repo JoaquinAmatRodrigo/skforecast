@@ -495,7 +495,6 @@ def test_create_train_X_y_output_when_y_is_series_exog_is_series_and_differentia
     )
     exog_diff = exog.iloc[1:]
     end_train = '2003-03-01 23:59:00'
-    steps = len(data.loc[end_train:])
 
     forecaster_1 = ForecasterAutoreg(LinearRegression(), lags=5)
     forecaster_2 = ForecasterAutoreg(LinearRegression(), lags=5, differentiation=1)
