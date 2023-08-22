@@ -529,6 +529,12 @@ def _backtesting_forecaster(
         initial_train_size = window_size
         externally_fitted = True
 
+    # TODO: remove when all forecaster include differentiation
+    if type(forecaster).__name__ != 'ForecasterAutoregDirect':
+        differentiation = forecaster.differentiation
+    else:
+        differentiation = None
+
     folds = _create_backtesting_folds(
                 data                  = y,
                 window_size           = window_size,
@@ -540,7 +546,7 @@ def _backtesting_forecaster(
                 gap                   = gap,
                 allow_incomplete_fold = allow_incomplete_fold,
                 return_all_indexes    = False,
-                differentiation       = forecaster.differentiation,
+                differentiation       = differentiation,
                 verbose               = verbose  
             )
 
