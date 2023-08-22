@@ -5,11 +5,15 @@ import pytest
 import numpy as np
 import pandas as pd
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
+from skforecast.preprocessing import TimeSeriesDifferentiator
 from skforecast.exceptions import MissingValuesExogWarning
 from sklearn.linear_model import LinearRegression
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import OneHotEncoder
+
+# Fixtures
+from .fixtures_ForecasterAutoreg import data # to test results when using differentiation
 
 
 def test_create_train_X_y_TypeError_when_exog_is_categorical_of_no_int():
@@ -474,3 +478,65 @@ def test_create_train_X_y_output_when_transformer_y_and_transformer_exog():
 
     pd.testing.assert_frame_equal(results[0], expected[0])
     pd.testing.assert_series_equal(results[1], expected[1])
+
+
+def test_create_train_X_y_output_when_y_is_series_exog_is_series_and_differentiation_is_1():
+    """
+    Test the output of create_train_X_y when using differentiation=1.
+    """
+    # Data differentiated
+    diferenciator = TimeSeriesDifferentiator(order=1)
+    data_diff = diferenciator.fit_transform(data)
+    data_diff = pd.Series(data_diff, index=data.index).dropna()
+    # Simulated exogenous variable
+    rng = np.random.default_rng(9876)
+    exog = pd.Series(
+        rng.normal(loc=0, scale=1, size=len(data)), index=data.index, name='exog'
+    )
+    exog_diff = exog.iloc[1:]
+    end_train = '2003-03-01 23:59:00'
+    steps = len(data.loc[end_train:])
+
+    forecaster_1 = ForecasterAutoreg(LinearRegression(), lags=5)
+    forecaster_2 = ForecasterAutoreg(LinearRegression(), lags=5, differentiation=1)
+    X_train_1, y_train_1 = forecaster_1.create_train_X_y(
+                                    data_diff.loc[:end_train],
+                                    exog=exog_diff.loc[:end_train]
+                            )
+    X_train_2, y_train_2 = forecaster_2.create_train_X_y(
+                            data.loc[:end_train],
+                            exog=exog.loc[:end_train]
+                        )
+    pd.testing.assert_frame_equal(X_train_1, X_train_2, check_names=True)
+    pd.testing.assert_series_equal(y_train_1, y_train_2, check_names=True)
+
+
+def test_create_train_X_y_output_when_y_is_series_10_exog_is_series_and_differentiation_is_2():
+    """
+    Test the output of create_train_X_y when using differentiation=1.
+    """
+
+    # Data differentiated
+    diferenciator = TimeSeriesDifferentiator(order=2)
+    data_diff_2 = diferenciator.fit_transform(data)
+    data_diff_2 = pd.Series(data_diff_2, index=data.index).dropna()
+    # Simulated exogenous variable
+    rng = np.random.default_rng(9876)
+    exog = pd.Series(
+        rng.normal(loc=0, scale=1, size=len(data)), index=data.index, name='exog'
+    )
+    exog_diff_2 = exog.iloc[2:]
+    end_train = '2003-03-01 23:59:00'
+
+    forecaster_1 = ForecasterAutoreg(LinearRegression(), lags=5)
+    forecaster_2 = ForecasterAutoreg(LinearRegression(), lags=5, differentiation=2)
+    X_train_1, y_train_1 = forecaster_1.create_train_X_y(
+                                    data_diff_2.loc[:end_train],
+                                    exog=exog_diff_2.loc[:end_train]
+                            )
+    X_train_2, y_train_2 = forecaster_2.create_train_X_y(
+                            data.loc[:end_train],
+                            exog=exog.loc[:end_train]
+                        )
+    pd.testing.assert_frame_equal(X_train_1, X_train_2, check_names=True)
+    pd.testing.assert_series_equal(y_train_1, y_train_2, check_names=True)
