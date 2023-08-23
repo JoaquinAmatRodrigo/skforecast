@@ -2,6 +2,25 @@
 
 All significant changes to this project are documented in this release file.
 
+## [0.10.0] - [ongoing]
+
+The main changes in this release are:
+
++ Added `differentiation` argument to `ForecasterAutoreg` and `ForecasterAutoregCustom` to model the n-order differenciated time series.
+
++ New `Sarimax` model. A wrapper of `statsmodels.SARIMAX` that follows the sklearn API.
+
+**Added**
+
++ Added `differentiation` argument to `ForecasterAutoreg` and `ForecasterAutoregCustom` to model the n-order differenciated time series.
+
++ New `Sarimax` model. A wrapper of `statsmodels.SARIMAX` that follows the sklearn API.
+
+**Changed**
+
+**Fixed**
+
+
 
 ## [0.9.1] - [2023-07-14]
 
