@@ -294,21 +294,15 @@ def _create_backtesting_folds(
             print(f"    Last fold only includes {len(folds[-1][3])} observations.")
         print("")
 
+        if differentiation is None:
+            differentiation = 0
         for i, fold in enumerate(folds):
-            if differentiation is None:
-                training_start    = data.index[fold[0][0]] if fold[0] is not None else None
-                training_end      = data.index[fold[0][-1]] if fold[0] is not None else None
-                training_length   = len(fold[0]) if fold[0] is not None else 0
-                validation_start  = data.index[fold[3][0]]
-                validation_end    = data.index[fold[3][-1]]
-                validation_length = len(fold[3])
-            else:
-                training_start    = data.index[fold[0][0] + differentiation] if fold[0] is not None else None
-                training_end      = data.index[fold[0][-1]] if fold[0] is not None else None
-                training_length   = len(fold[0]) - differentiation if fold[0] is not None else 0
-                validation_start  = data.index[fold[3][0]]
-                validation_end    = data.index[fold[3][-1]]
-                validation_length = len(fold[3])
+            training_start    = data.index[fold[0][0] + differentiation] if fold[0] is not None else None
+            training_end      = data.index[fold[0][-1]] if fold[0] is not None else None
+            training_length   = len(fold[0]) - differentiation if fold[0] is not None else 0
+            validation_start  = data.index[fold[3][0]]
+            validation_end    = data.index[fold[3][-1]]
+            validation_length = len(fold[3])
 
 
             print(f"Fold: {i}")
