@@ -5,6 +5,7 @@ import pytest
 import numpy as np
 import pandas as pd
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
+from skforecast.preprocessing import TimeSeriesDifferentiator
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
 
@@ -12,6 +13,7 @@ from sklearn.preprocessing import StandardScaler
 from .fixtures_ForecasterAutoreg import y
 from .fixtures_ForecasterAutoreg import exog
 from .fixtures_ForecasterAutoreg import exog_predict
+from .fixtures_ForecasterAutoreg import data # to test results when using differentiation
 
 
 def test_predict_bootstrapping_ValueError_when_out_sample_residuals_is_None():
@@ -154,3 +156,46 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_steps_
                 )
 
     pd.testing.assert_frame_equal(expected, results)
+
+
+def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_and_differentiation_is_1():
+    """
+    Test output of predict_bootstrapping when regressor is LinearRegression and
+    differentiation is 1.
+    """
+    # Data differentiated
+    diferenciator = TimeSeriesDifferentiator(order=1)
+    data_diff = diferenciator.fit_transform(data)
+    data_diff = pd.Series(data_diff, index=data.index).dropna()
+    # Simulated exogenous variable
+    rng = np.random.default_rng(9876)
+    exog = pd.Series(
+        rng.normal(loc=0, scale=1, size=len(data)), index=data.index, name='exog'
+    )
+    exog_diff = exog.iloc[1:]
+    end_train = '2003-03-01 23:59:00'
+    steps = len(data.loc[end_train:])
+
+    forecaster_1 = ForecasterAutoreg(regressor=LinearRegression(), lags=15)
+    forecaster_1.fit(y=data_diff.loc[:end_train], exog=exog_diff.loc[:end_train])
+    boot_predictions_diff = forecaster_1.predict_bootstrapping(
+                                steps=steps,
+                                exog=exog_diff.loc[end_train:],
+                                n_boot=10
+                            )
+    last_value_train = data.loc[:end_train].iloc[[-1]]
+    boot_predictions_1 = boot_predictions_diff.copy()
+    boot_predictions_1.loc[last_value_train.index[0]] = last_value_train.values[0]
+    boot_predictions_1 = boot_predictions_1.sort_index()
+    boot_predictions_1 = boot_predictions_1.cumsum(axis=0).iloc[1:,]
+    boot_predictions_1 = boot_predictions_1.asfreq('MS')
+    forecaster_2 = ForecasterAutoreg(regressor=LinearRegression(), lags=15, differentiation=1)
+    forecaster_2.fit(y=data.loc[:end_train], exog=exog.loc[:end_train])
+    boot_predictions_2 = forecaster_2.predict_bootstrapping(
+                            steps=steps,
+                            exog=exog_diff.loc[end_train:],
+                            n_boot=10
+                        )
+    
+    pd.testing.assert_frame_equal(boot_predictions_1, boot_predictions_2)
+
