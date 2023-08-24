@@ -13,11 +13,11 @@ def test_TimeSeriesDifferentiator_fit():
 
 def test_TimeSeriesDifferentiator_fit_initial_values():
     """
-    Test that TimeSeriesDifferentiator fit method returns self.
+    Test that TimeSeriesDifferentiator fit method sets initial_values attribute.
     """
     X = np.arange(10)
     tsd = TimeSeriesDifferentiator(order=1)
     tsd.fit(X)
-    assert tsd.initial_values == []
-    assert tsd.last_values == []
+    assert tsd.initial_values == [0]
+    assert tsd.last_values == [9]
 
