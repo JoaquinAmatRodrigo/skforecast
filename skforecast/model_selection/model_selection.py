@@ -44,7 +44,8 @@ def _backtesting_forecaster_verbose(
     folds: int,
     remainder: int,
     refit: Optional[Union[bool, int]]=False,
-    fixed_train_size: bool=True
+    fixed_train_size: bool=True,
+    differentiation: Optional[int]=None
 ) -> None:
     """
     Verbose for backtesting_forecaster functions.
@@ -67,6 +68,8 @@ def _backtesting_forecaster_verbose(
         the Forecaster will be trained every that number of iterations.
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
+    differentiation : int, default `None`
+        Order of differencing applied to the time series before training the forecaster.
 
     Returns
     -------
@@ -77,6 +80,8 @@ def _backtesting_forecaster_verbose(
     print("Information of backtesting process")
     print("----------------------------------")
     print(f"Number of observations used for initial training: {initial_train_size}")
+    if differentiation is not None:
+        print(f"Number of observations used for initial differentiation: {differentiation}")
     print(f"Number of observations used for backtesting: {len(index_values) - initial_train_size}")
     print(f"    Number of folds: {folds}")
     print(f"    Number of steps per fold: {steps}")
@@ -130,6 +135,7 @@ def _create_backtesting_folds(
     gap: int=0,
     allow_incomplete_fold: bool=True,
     return_all_indexes: bool=False,
+    differentiation: Optional[int]=None,
     verbose: bool=True
 ) -> list:
     """
@@ -190,6 +196,8 @@ def _create_backtesting_folds(
     return_all_indexes : bool, default `False`
         If `True`, return all the indexes included in each fold. If `False`, return
         only the first and last index of each partition in each fold.
+    differentiation : int, default `None`
+        Order of differencing applied to the time series before training the forecaster.
     verbose : bool, default `True`
         Print information if the folds created.
 
@@ -222,7 +230,7 @@ def _create_backtesting_folds(
             train_idx_end = initial_train_size
             test_idx_start = initial_train_size + i * (test_size)
         
-        last_window_start = test_idx_start - window_size 
+        last_window_start = test_idx_start - window_size
         test_idx_end = test_idx_start + gap + test_size
     
         partitions = [
@@ -271,7 +279,11 @@ def _create_backtesting_folds(
         if externally_fitted:
             print(f"An already trained forecaster is to be used. Window size: {window_size}")
         else:
-            print(f"Number of observations used for initial training: {initial_train_size}")
+            if differentiation is None:
+                print(f"Number of observations used for initial training: {initial_train_size}")
+            else:
+                print(f"Number of observations used for initial training: {initial_train_size - differentiation}")
+                print(f"    First {differentiation} observation/s in training sets are used for differentiation")
         print(f"Number of observations used for backtesting: {len(data) - initial_train_size}")
         print(f"    Number of folds: {len(folds)}")
         print(f"    Number of steps per fold: {test_size}")
@@ -282,13 +294,17 @@ def _create_backtesting_folds(
             print(f"    Last fold only includes {len(folds[-1][3])} observations.")
         print("")
 
+        if differentiation is None:
+            differentiation = 0
         for i, fold in enumerate(folds):
-            training_start    = data.index[fold[0][0]] if fold[0] is not None else None
+            training_start    = data.index[fold[0][0] + differentiation] if fold[0] is not None else None
             training_end      = data.index[fold[0][-1]] if fold[0] is not None else None
-            training_length   = len(fold[0]) if fold[0] is not None else 0
+            training_length   = len(fold[0]) - differentiation if fold[0] is not None else 0
             validation_start  = data.index[fold[3][0]]
             validation_end    = data.index[fold[3][-1]]
             validation_length = len(fold[3])
+
+
             print(f"Fold: {i}")
             if not externally_fitted:
                 print(
@@ -507,6 +523,12 @@ def _backtesting_forecaster(
         initial_train_size = window_size
         externally_fitted = True
 
+    # TODO: remove when all forecaster include differentiation
+    if type(forecaster).__name__ != 'ForecasterAutoregDirect':
+        differentiation = forecaster.differentiation
+    else:
+        differentiation = None
+
     folds = _create_backtesting_folds(
                 data                  = y,
                 window_size           = window_size,
@@ -518,6 +540,7 @@ def _backtesting_forecaster(
                 gap                   = gap,
                 allow_incomplete_fold = allow_incomplete_fold,
                 return_all_indexes    = False,
+                differentiation       = differentiation,
                 verbose               = verbose  
             )
 
@@ -607,7 +630,7 @@ def _backtesting_forecaster(
         (y=y, exog=exog, forecaster=forecaster, interval=interval, fold=fold)
          for fold in folds)
     )
-    
+
     backtest_predictions = pd.concat(backtest_predictions)
     if isinstance(backtest_predictions, pd.Series):
         backtest_predictions = pd.DataFrame(backtest_predictions)
