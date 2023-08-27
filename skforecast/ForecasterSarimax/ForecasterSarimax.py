@@ -801,3 +801,44 @@ class ForecasterSarimax():
         feature_importances.columns = ['feature', 'importance']
 
         return feature_importances
+    
+
+    def get_info_criteria(self, criteria:str='aic', method:str='standard') -> float:
+        """
+        Get the selected information criteria.
+
+        Parameters
+        ----------
+        criteria : str, default 'aic'
+            The information criteria to compute. Valid options are {'aic', 'bic',
+            'hqic'}.
+        method : str, default 'standard'
+            The method for information criteria computation. Default is 'standard'
+            method; 'lutkepohl' computes the information criteria as in Lütkepohl
+            (2007). See more instatsmodels.tsa.statespace.sarimax.SARIMAXResults.info_criteria
+
+        Returns
+        -------
+        float
+            The value of the selected information criteria.
+
+        """
+
+        if criteria not in ['aic', 'bic', 'hqic']:
+            raise ValueError(
+                f"Invalid value for `criteria`. Valid options are 'aic', 'bic', "
+                f"and 'hqic'."
+            )
+        
+        if method not in ['standard', 'lutkepohl']:
+            raise ValueError(
+                f"Invalid value for `method`. Valid options are 'standard' and "
+                f"'lutkepohl'."
+            )
+        
+        if self.engine == 'pmdarima':
+            value = self.regressor.arima_res_.info_criteria(criteria=criteria, method=method)
+        else:
+            value = self.regressor.get_info_criteria(criteria=criteria, method=method)
+        
+        return value

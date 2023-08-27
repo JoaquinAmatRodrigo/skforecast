@@ -801,7 +801,11 @@ class Sarimax(BaseEstimator, RegressorMixin):
         return self.sarimax_res.summary(alpha=alpha, start=start)
     
     @_check_fitted
-    def get_info_criteria(criteria:str='aic', method:str='standard') -> float:
+    def get_info_criteria(
+        self,
+        criteria:str = 'aic',
+        method:str = 'standard'
+    ) -> float:
         """
         Get the selected information criteria.
 
