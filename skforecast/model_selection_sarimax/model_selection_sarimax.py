@@ -7,14 +7,12 @@
 # coding=utf-8
 
 from typing import Union, Tuple, Optional, Callable
-import numpy as np
 import pandas as pd
 import warnings
 import logging
 from copy import deepcopy
 from joblib import Parallel, delayed, cpu_count
 from tqdm.auto import tqdm
-import sklearn.pipeline
 from sklearn.model_selection import ParameterGrid
 from sklearn.model_selection import ParameterSampler
 
