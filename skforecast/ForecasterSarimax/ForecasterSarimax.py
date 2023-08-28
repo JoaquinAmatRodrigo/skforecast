@@ -846,8 +846,8 @@ class ForecasterSarimax():
             )
         
         if self.engine == 'pmdarima':
-            value = self.regressor.arima_res_.info_criteria(criteria=criteria, method=method)
+            metric = self.regressor.arima_res_.info_criteria(criteria=criteria, method=method)
         else:
-            value = self.regressor.get_info_criteria(criteria=criteria, method=method)
+            metric = self.regressor.get_info_criteria(criteria=criteria, method=method)
         
-        return value
+        return metric
