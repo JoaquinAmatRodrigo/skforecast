@@ -42,7 +42,7 @@ def _backtesting_sarimax(
     alpha: Optional[float]=None,
     interval: Optional[list]=None,
     n_jobs: Optional[Union[int, str]]='auto',
-    supress_warnings_fit: bool=False,
+    suppress_warnings_fit: bool=False,
     verbose: bool=False,
     show_progress: bool=True,
 ) -> Tuple[Union[float, list], pd.DataFrame]:
@@ -110,7 +110,7 @@ def _backtesting_sarimax(
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
         for backtesting.
-    supress_warnings_fit : bool, default `False`
+    suppress_warnings_fit : bool, default `False`
         If `True`, warnings generated during fitting will be ignored.
         **New in version 0.10.0**
     show_progress: bool, default `True`
@@ -153,9 +153,9 @@ def _backtesting_sarimax(
     # is `False`. The initial Forecaster fit is outside the auxiliary function.
     exog_train = exog.iloc[:initial_train_size, ] if exog is not None else None
     forecaster.fit(
-        y                = y.iloc[:initial_train_size, ],
-        exog             = exog_train,
-        supress_warnings = supress_warnings_fit
+        y                 = y.iloc[:initial_train_size, ],
+        exog              = exog_train,
+        suppress_warnings = suppress_warnings_fit
     )
     window_size = forecaster.window_size
     externally_fitted = False
@@ -220,7 +220,7 @@ def _backtesting_sarimax(
             exog_train = exog.iloc[train_idx_start:train_idx_end, ] if exog is not None else None
             last_window_y = None
             last_window_exog = None
-            forecaster.fit(y=y_train, exog=exog_train, supress_warnings=supress_warnings_fit)
+            forecaster.fit(y=y_train, exog=exog_train, suppress_warnings=suppress_warnings_fit)
 
         next_window_exog = exog.iloc[test_idx_start:test_idx_end, ] if exog is not None else None
 
@@ -297,7 +297,7 @@ def backtesting_sarimax(
     interval: Optional[list]=None,
     n_jobs: Optional[Union[int, str]]='auto',
     verbose: bool=False,
-    supress_warnings_fit: bool=False,
+    suppress_warnings_fit: bool=False,
     show_progress: bool=True
 ) -> Tuple[Union[float, list], pd.DataFrame]:
     """
@@ -364,7 +364,7 @@ def backtesting_sarimax(
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
         for backtesting.
-    supress_warnings_fit : bool, default `False`
+    suppress_warnings_fit : bool, default `False`
         If `True`, warnings generated during fitting will be ignored.
         **New in version 0.10.0**
     show_progress: bool, default `True`
@@ -422,7 +422,7 @@ def backtesting_sarimax(
         interval              = interval,
         n_jobs                = n_jobs,
         verbose               = verbose,
-        supress_warnings_fit  = supress_warnings_fit,
+        suppress_warnings_fit = suppress_warnings_fit,
         show_progress         = show_progress
     )
 
@@ -444,7 +444,7 @@ def grid_search_sarimax(
     return_best: bool=True,
     n_jobs: Optional[Union[int, str]]='auto',
     verbose: bool=True,
-    supress_warnings_fit: bool=False,
+    suppress_warnings_fit: bool=False,
     show_progress: bool=True
 ) -> pd.DataFrame:
     """
@@ -497,7 +497,7 @@ def grid_search_sarimax(
         **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
-    supress_warnings_fit : bool, default `False`
+    suppress_warnings_fit : bool, default `False`
         If `True`, warnings generated during fitting will be ignored.
         **New in version 0.10.0**
     show_progress: bool, default `True`
@@ -531,7 +531,7 @@ def grid_search_sarimax(
         return_best           = return_best,
         n_jobs                = n_jobs,
         verbose               = verbose,
-        supress_warnings_fit  = supress_warnings_fit,
+        suppress_warnings_fit = suppress_warnings_fit,
         show_progress         = show_progress
     )
 
@@ -555,7 +555,7 @@ def random_search_sarimax(
     return_best: bool=True,
     n_jobs: Optional[Union[int, str]]='auto',
     verbose: bool=True,
-    supress_warnings_fit: bool=False,
+    suppress_warnings_fit: bool=False,
     show_progress: bool=True
 ) -> pd.DataFrame:
     """
@@ -613,7 +613,7 @@ def random_search_sarimax(
         **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
-    supress_warnings_fit : bool, default `False`
+    suppress_warnings_fit : bool, default `False`
         If `True`, warnings generated during fitting will be ignored.
         **New in version 0.10.0**
     show_progress: bool, default `True`
@@ -647,7 +647,7 @@ def random_search_sarimax(
         return_best           = return_best,
         n_jobs                = n_jobs,
         verbose               = verbose,
-        supress_warnings_fit  = supress_warnings_fit,
+        suppress_warnings_fit = suppress_warnings_fit,
         show_progress         = show_progress
     )
 
@@ -669,7 +669,7 @@ def _evaluate_grid_hyperparameters_sarimax(
     return_best: bool=True,
     n_jobs: Optional[Union[int, str]]='auto',
     verbose: bool=True,
-    supress_warnings_fit: bool=False,
+    suppress_warnings_fit: bool=False,
     show_progress: bool=True
 ) -> pd.DataFrame:
     """
@@ -721,7 +721,7 @@ def _evaluate_grid_hyperparameters_sarimax(
         **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
-    supress_warnings_fit : bool, default `False`
+    suppress_warnings_fit : bool, default `False`
         If `True`, warnings generated during fitting will be ignored.
     show_progress: bool, default `True`
         Whether to show a progress bar.
@@ -776,7 +776,7 @@ def _evaluate_grid_hyperparameters_sarimax(
                             interval              = None,
                             n_jobs                = n_jobs,
                             verbose               = verbose,
-                            supress_warnings_fit  = supress_warnings_fit,
+                            suppress_warnings_fit = suppress_warnings_fit,
                             show_progress         = False
                          )[0]
         warnings.filterwarnings('ignore', category=RuntimeWarning, message= "The forecaster will be fit.*")   

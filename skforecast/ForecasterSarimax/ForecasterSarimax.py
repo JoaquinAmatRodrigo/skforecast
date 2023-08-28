@@ -212,7 +212,7 @@ class ForecasterSarimax():
         self,
         y: pd.Series,
         exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-        supress_warnings: bool=False
+        suppress_warnings: bool=False
     ) -> None:
         """
         Training Forecaster.
@@ -228,7 +228,7 @@ class ForecasterSarimax():
             Exogenous variable/s included as predictor/s. Must have the same
             number of observations as `y` and their indexes must be aligned so
             that y[i] is regressed on exog[i].
-        supress_warnings : bool, default `False`
+        suppress_warnings : bool, default `False`
             If `True`, warnings generated during fitting will be ignored.
 
         Returns
@@ -284,7 +284,7 @@ class ForecasterSarimax():
                        inverse_transform = False
                    )
             
-        if supress_warnings:
+        if suppress_warnings:
             warnings.filterwarnings("ignore")
         
         if self.engine == 'pmdarima':
@@ -292,7 +292,7 @@ class ForecasterSarimax():
         else:
             self.regressor.fit(y=y, exog=exog)
 
-        if supress_warnings:
+        if suppress_warnings:
             warnings.filterwarnings("default")
 
         self.fitted = True
