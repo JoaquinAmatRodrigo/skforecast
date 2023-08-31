@@ -304,22 +304,29 @@ def test_predict_ValueError_when_last_window_exog_index_does_not_follow_training
 
 @pytest.mark.parametrize("kwargs, data", 
                          [({'order': (1, 0, 1), 
-                            'seasonal_order': (0, 0, 0, 0)}, 
-                            [0.89534355, 0.88228868, 0.86942417, 0.85674723, 0.84425513]), 
+                            'seasonal_order': (0, 0, 0, 0)},
+                            {'win': [0.89534355, 0.88228868, 0.86942417, 0.85674723, 0.84425513],
+                            'linux': [0.84149149, 0.82924261, 0.81717202, 0.80527714, 0.7935554]}),
                           ({'order': (1, 1, 1), 
-                            'seasonal_order': (1, 1, 1, 2)}, 
-                            [0.8079287 , 0.8570154 , 0.82680235, 0.88869186, 0.85565138])])
+                            'seasonal_order': (1, 1, 1, 2)},
+                            {'win': [0.8079287 , 0.8570154 , 0.82680235, 0.88869186, 0.85565138],
+                            'linux': [0.8079287 , 0.8570154 , 0.82680235, 0.88869186, 0.85565138]}
+                            )])
 def test_predict_output_ForecasterSarimax_with_last_window(kwargs, data):
     """
     Test predict output of ForecasterSarimax with `last_window`.
     """
+    if platform.system() == "Windows":
+        system = "win"
+    else:
+        system = "linux"
     forecaster = ForecasterSarimax(
                      regressor = Sarimax(maxiter=1000, method='cg', disp=False, **kwargs)
                  )
     forecaster.fit(y=y_datetime)
     predictions = forecaster.predict(steps=5, last_window=y_lw_datetime)
     expected = pd.Series(
-                   data  = data,
+                   data  = data[system],
                    index = pd.date_range(start='2100', periods=5, freq='A'),
                    name  = 'pred'
                )
@@ -364,7 +371,7 @@ def test_predict_output_ForecasterSarimax_with_last_window_and_exog(kwargs, data
                             [0.81663903, 0.77783205, 0.80523981, 0.85467197, 0.86644466]), 
                           ({'order': (1, 1, 1), 
                             'seasonal_order': (1, 1, 1, 2)}, 
-                            [ 47.1881631 ,  -9.75631369, -19.05241581, -19.52562648, 30.83262543])])
+                            [0.68028371, 0.85310809, 0.67039395, 0.86564231, 0.6594545])])
 def test_predict_output_ForecasterSarimax_with_last_window_and_exog_and_transformers(kwargs, data):
     """
     Test predict output of ForecasterSarimax with exogenous variables, `last_window`

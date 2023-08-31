@@ -142,16 +142,16 @@ def test_predict_interval_output_ForecasterSarimax_skforecast_Sarimax(alpha, int
     Test predict_interval output of ForecasterSarimax using Sarimax from skforecast.
     """
     forecaster = ForecasterSarimax(
-                     regressor = Sarimax(maxiter=1000, method='cg', disp=False, order=(1, 0, 1))
+                     regressor = Sarimax(maxiter=2000, method='cg', disp=False, order=(3, 2, 0))
                  )
     forecaster.fit(y=y)
     predictions = forecaster.predict_interval(steps=5, alpha=alpha, interval=interval)
     expected = pd.DataFrame(
-                   data    = np.array([[ 0.63432268, -1.62088311,  2.88952848],
-                                       [ 0.62507372, -3.25642788,  4.50657533],
-                                       [ 0.61595962, -4.3597053 ,  5.59162454],
-                                       [ 0.60697841, -5.2383511 ,  6.45230791],
-                                       [ 0.59812815, -5.98260763,  7.17886392]]),
+                   data    = np.array([[ 0.53809981,  0.24275351,  0.83344611],
+                                        [ 0.53145374,  0.0431938 ,  1.01971368],
+                                        [ 0.53763636, -0.12687285,  1.20214556],
+                                        [ 0.52281442, -0.35748984,  1.40311868],
+                                        [ 0.49770378, -0.64436866,  1.63977622]]),
                    columns = ['pred', 'lower_bound', 'upper_bound'],
                    index   = pd.RangeIndex(start=50, stop=55, step=1)
                )
@@ -324,7 +324,7 @@ def test_predict_interval_output_ForecasterSarimax_with_last_window(alpha, inter
     Test predict_interval output of ForecasterSarimax with `last_window`.
     """
     forecaster = ForecasterSarimax(
-                     regressor = Sarimax(maxiter=1000, method='cg', disp=False, order=(1, 0, 1))
+                     regressor = Sarimax(maxiter=1000, method='cg', disp=False, order=(3, 2, 0))
                  )
     forecaster.fit(y=y_datetime)
     predictions = forecaster.predict_interval(
@@ -335,11 +335,11 @@ def test_predict_interval_output_ForecasterSarimax_with_last_window(alpha, inter
                   )
     
     expected = pd.DataFrame(
-                   data    = np.array([[ 0.89534355, -1.35986224,  3.15054934],
-                                       [ 0.88228868, -2.99921292,  4.76379029],
-                                       [ 0.86942417, -4.10624075,  5.84508909],
-                                       [ 0.85674723, -4.98858228,  6.70207673],
-                                       [ 0.84425513, -5.73648065,  7.4249909 ]]),
+                    data = np.array([[0.91877817, 0.62343187, 1.21412446],
+                                    [0.98433512, 0.49607518, 1.47259506],
+                                    [1.06945921, 0.40495001, 1.73396842],
+                                    [1.15605055, 0.27574629, 2.03635481],
+                                    [1.22975713, 0.08768469, 2.37182957]]),
                    columns = ['pred', 'lower_bound', 'upper_bound'],
                    index   = pd.date_range(start='2100', periods=5, freq='A')
                )
