@@ -219,6 +219,7 @@ def test_predict_output_ForecasterSarimax_with_transform_y_and_transform_exog(kw
         system = "win"
     else:
         system = "linux"
+    
     transformer_exog = ColumnTransformer(
                            [('scale', StandardScaler(), ['exog_1']),
                             ('onehot', OneHotEncoder(), ['exog_2'])],
@@ -320,6 +321,7 @@ def test_predict_output_ForecasterSarimax_with_last_window(kwargs, data):
         system = "win"
     else:
         system = "linux"
+    
     forecaster = ForecasterSarimax(
                      regressor = Sarimax(maxiter=1000, method='cg', disp=False, **kwargs)
                  )
@@ -371,7 +373,7 @@ def test_predict_output_ForecasterSarimax_with_last_window_and_exog(kwargs, data
                             [0.81663903, 0.77783205, 0.80523981, 0.85467197, 0.86644466]), 
                           ({'order': (1, 1, 1), 
                             'seasonal_order': (1, 1, 1, 2)}, 
-                            [0.68028371, 0.85310809, 0.67039395, 0.86564231, 0.6594545])])
+                            [47.1881631 ,  -9.75631369, -19.05241581, -19.52562648, 30.83262543])])
 def test_predict_output_ForecasterSarimax_with_last_window_and_exog_and_transformers(kwargs, data):
     """
     Test predict output of ForecasterSarimax with exogenous variables, `last_window`

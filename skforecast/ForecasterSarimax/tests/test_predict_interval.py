@@ -148,10 +148,10 @@ def test_predict_interval_output_ForecasterSarimax_skforecast_Sarimax(alpha, int
     predictions = forecaster.predict_interval(steps=5, alpha=alpha, interval=interval)
     expected = pd.DataFrame(
                    data    = np.array([[ 0.53809981,  0.24275351,  0.83344611],
-                                        [ 0.53145374,  0.0431938 ,  1.01971368],
-                                        [ 0.53763636, -0.12687285,  1.20214556],
-                                        [ 0.52281442, -0.35748984,  1.40311868],
-                                        [ 0.49770378, -0.64436866,  1.63977622]]),
+                                       [ 0.53145374,  0.0431938 ,  1.01971368],
+                                       [ 0.53763636, -0.12687285,  1.20214556],
+                                       [ 0.52281442, -0.35748984,  1.40311868],
+                                       [ 0.49770378, -0.64436866,  1.63977622]]),
                    columns = ['pred', 'lower_bound', 'upper_bound'],
                    index   = pd.RangeIndex(start=50, stop=55, step=1)
                )
@@ -336,10 +336,10 @@ def test_predict_interval_output_ForecasterSarimax_with_last_window(alpha, inter
     
     expected = pd.DataFrame(
                     data = np.array([[0.91877817, 0.62343187, 1.21412446],
-                                    [0.98433512, 0.49607518, 1.47259506],
-                                    [1.06945921, 0.40495001, 1.73396842],
-                                    [1.15605055, 0.27574629, 2.03635481],
-                                    [1.22975713, 0.08768469, 2.37182957]]),
+                                     [0.98433512, 0.49607518, 1.47259506],
+                                     [1.06945921, 0.40495001, 1.73396842],
+                                     [1.15605055, 0.27574629, 2.03635481],
+                                     [1.22975713, 0.08768469, 2.37182957]]),
                    columns = ['pred', 'lower_bound', 'upper_bound'],
                    index   = pd.date_range(start='2100', periods=5, freq='A')
                )
