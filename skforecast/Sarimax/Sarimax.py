@@ -298,8 +298,6 @@ class Sarimax(BaseEstimator, RegressorMixin):
         self.start_params            = start_params
         self.disp                    = disp
 
-        # TODO: supress warnings fit?
-
         # Create the dictionaries with the additional statsmodels parameters to be  
         # used during the init, fit and predict methods. Note that the statsmodels 
         # SARIMAX.fit parameters `method`, `max_iter`, `start_params` and `disp` 

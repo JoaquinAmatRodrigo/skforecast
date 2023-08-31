@@ -371,9 +371,9 @@ def test_predict_output_ForecasterSarimax_with_last_window_and_exog(kwargs, data
                          [({'order': (1, 0, 1), 
                             'seasonal_order': (0, 0, 0, 0)}, 
                             [0.81663903, 0.77783205, 0.80523981, 0.85467197, 0.86644466]), 
-                          ({'order': (1, 1, 1), 
-                            'seasonal_order': (1, 1, 1, 2)}, 
-                            [47.1881631 ,  -9.75631369, -19.05241581, -19.52562648, 30.83262543])])
+                          ({'order': (2, 2, 0), 
+                            'seasonal_order': (0, 2, 0, 2)}, 
+                            [ 0.88408379,  0.75000182,  0.46925336,  0.0199138 , -0.70882638])])
 def test_predict_output_ForecasterSarimax_with_last_window_and_exog_and_transformers(kwargs, data):
     """
     Test predict output of ForecasterSarimax with exogenous variables, `last_window`

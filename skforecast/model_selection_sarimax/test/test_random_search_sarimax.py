@@ -2,11 +2,12 @@
 # ==============================================================================
 import re
 import pytest
+import platform
 import numpy as np
 import pandas as pd
+from skforecast.Sarimax import Sarimax
 from skforecast.ForecasterSarimax import ForecasterSarimax
 from skforecast.model_selection_sarimax import random_search_sarimax
-from pmdarima.arima import ARIMA
 
 from tqdm import tqdm
 from functools import partialmethod
@@ -21,21 +22,17 @@ def test_output_random_search_sarimax_sarimax_with_mocked():
     Test output of random_search_sarimax in ForecasterSarimax with mocked
     (mocked done in Skforecast v0.7.0).
     """
-    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=10000, trend=None, method='nm', ftol=1e-19,  order=(1,1,1)))
+    forecaster = ForecasterSarimax(
+                     regressor = Sarimax(order=(3, 2, 0), maxiter=1000, method='cg', disp=False)
+                 )
 
-    # Generate 15 random `order`
-    np.random.seed(123)
-    values = [(p,d,q) for p,d,q in zip(np.random.randint(0, high=4, size=3, dtype=int), 
-                                       np.random.randint(0, high=4, size=3, dtype=int),
-                                       np.random.randint(0, high=4, size=3, dtype=int))]
-
-    param_distributions = {'order': values}
+    param_distributions = {'order': [(2, 2, 0), (3, 2, 0)]}
 
     results = random_search_sarimax(
                   forecaster          = forecaster,
                   y                   = y_datetime,
                   param_distributions = param_distributions,
-                  n_iter              = 3,
+                  n_iter              = 2,
                   random_state        = 123,
                   steps               = 3,
                   refit               = False,
@@ -47,11 +44,10 @@ def test_output_random_search_sarimax_sarimax_with_mocked():
               )
     
     expected_results = pd.DataFrame(
-        data  = {'params': np.array([{'order': (1, 0, 1)}, {'order': (2, 2, 3)}, {'order': (2, 2, 2)}],
-                                    dtype=object),
-                'mean_absolute_error': np.array([0.20379714167503413, 0.24736436822367514, 0.2501673978304879]),
-                'order'              : [(1, 0, 1), (2, 2, 3), (2, 2, 2)]},
-        index = pd.Index(np.array([1, 2, 0]), dtype="int64")
+        data  = {'params': np.array([{'order': (3, 2, 0)}, {'order': (2, 2, 0)}], dtype=object),
+                'mean_absolute_error': np.array([0.15357204, 0.19853423]),
+                'order'              : [(3, 2, 0), (2, 2, 0)]},
+        index = pd.Index(np.array([1, 0]), dtype="int64")
     )
 
     pd.testing.assert_frame_equal(results, expected_results, atol=0.001)
