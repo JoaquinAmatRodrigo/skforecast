@@ -1123,7 +1123,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                                  )
                     
                     prediction_with_residual = prediction + sample_residuals[step]
-                    level_boot_predictions[step, i] = prediction_with_residual
+                    level_boot_predictions[step, i] = prediction_with_residual[0]
 
                     last_window_boot = np.append(
                                            last_window_boot[1:],

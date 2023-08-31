@@ -848,7 +848,7 @@ class ForecasterAutoregCustom(ForecasterBase):
                              )
                 
                 prediction_with_residual  = prediction + sample_residuals[step]
-                boot_predictions[step, i] = prediction_with_residual
+                boot_predictions[step, i] = prediction_with_residual[0]
 
                 last_window_boot = np.append(
                                        last_window_boot[1:],
