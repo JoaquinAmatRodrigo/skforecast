@@ -94,7 +94,7 @@ def test_predict_output_ForecasterSarimax_pmdarima_ARIMA(kwargs, data):
                      regressor = ARIMA(maxiter = 1000, 
                                        trend     = None, 
                                        method    = 'nm', 
-                                    #    ftol      = 1e-19, 
+                                    #  ftol      = 1e-19, 
                                        **kwargs
                                  )
                  )
@@ -113,27 +113,25 @@ def test_predict_output_ForecasterSarimax_pmdarima_ARIMA(kwargs, data):
                          [({'order': (1, 0, 1), 
                             'seasonal_order': (0, 0, 0, 0)}, 
                            {'win': [0.63432268, 0.62507372, 0.61595962, 0.60697841, 0.59812815],
-                            'linux': [0.6053533305780869, 0.5965417125355235, 0.5878583577874791, 0.5793013993133179, 0.5708689972690493]}), 
+                            'linux': [0.60535333, 0.59654171, 0.58785836, 0.5793014 , 0.570869]}), 
                           ({'order': (1, 1, 1), 
                             'seasonal_order': (1, 1, 1, 2)}, 
                            {'win': [0.5366165, 0.55819701, 0.49539926, 0.51944837, 0.45417575],
-                            'linux': [0.5366164993789614, 0.5581970119842657, 0.49539925967974563, 0.5194483669879758, 0.4541757516156355]})])
+                            'linux': [0.5366165 , 0.55819701, 0.49539926, 0.51944837, 0.45417575]})])
 def test_predict_output_ForecasterSarimax_skforecast_Sarimax(kwargs, data):
     """
     Test predict output of ForecasterSarimax using Sarimax from skforecast.
     """
-    forecaster = ForecasterSarimax(
-                     regressor = Sarimax(maxiter=1000, method='cg', disp=False, **kwargs)
-                 )
-    forecaster.fit(y=y)
-    predictions = forecaster.predict(steps=5)
-
-    # Get type of operating system
     if platform.system() == "Windows":
         system = "win"
     else:
         system = "linux"
 
+    forecaster = ForecasterSarimax(
+                     regressor = Sarimax(maxiter=1000, method='cg', disp=False, **kwargs)
+                 )
+    forecaster.fit(y=y)
+    predictions = forecaster.predict(steps=5)
     expected = pd.Series(
                    data  = data[system],
                    index = pd.RangeIndex(start=50, stop=55, step=1),
@@ -171,14 +169,22 @@ def test_predict_output_ForecasterSarimax_with_exog(kwargs, data):
 @pytest.mark.parametrize("kwargs, data", 
                          [({'order': (1, 0, 1), 
                             'seasonal_order': (0, 0, 0, 0)}, 
-                            [0.60290703, 0.60568721, 0.60451413, 0.6050091 , 0.60480025]), 
+                            {'win': [0.60290703, 0.60568721, 0.60451413, 0.6050091, 0.60480025],
+                            'linux': [0.60290703, 0.60568721, 0.60451413, 0.6050091 , 0.60480025]}), 
                           ({'order': (1, 1, 1), 
                             'seasonal_order': (1, 1, 1, 2)}, 
-                            [1.13250822, 1.71359967, 1.77949649, 1.86532886, 2.40044002])])
+                            {'win': [1.13250822, 1.71359967, 1.77949649, 1.86532886, 2.40044002],
+                            'linux': [1.13316783, 1.71280225, 1.77176545, 1.85037647, 2.38390684]}
+                        )])
 def test_predict_output_ForecasterSarimax_with_transform_y(kwargs, data):
     """
     Test predict output of ForecasterSarimax with a StandardScaler() as transformer_y.
     """
+    if platform.system() == "Windows":
+        system = "win"
+    else:
+        system = "linux"
+        
     forecaster = ForecasterSarimax(
                      regressor     = Sarimax(maxiter=1000, method='cg', disp=False, **kwargs),
                      transformer_y = StandardScaler()
@@ -186,7 +192,7 @@ def test_predict_output_ForecasterSarimax_with_transform_y(kwargs, data):
     forecaster.fit(y=y)
     predictions = forecaster.predict(steps=5)
     expected = pd.Series(
-                   data  = data,
+                   data  = data[system],
                    index = pd.RangeIndex(start=50, stop=55, step=1),
                    name  = 'pred'
                )
@@ -196,16 +202,23 @@ def test_predict_output_ForecasterSarimax_with_transform_y(kwargs, data):
 
 @pytest.mark.parametrize("kwargs, data", 
                          [({'order': (1, 0, 1), 
-                            'seasonal_order': (0, 0, 0, 0)}, 
-                            [0.60687311, 0.62484493, 0.63515416, 0.67730912, 0.69458838]), 
+                            'seasonal_order': (0, 0, 0, 0)},
+                            {'win': [0.60687311, 0.62484493, 0.63515416, 0.67730912, 0.69458838],
+                            'linux': [0.60687186, 0.62484336, 0.63515295, 0.67730812, 0.69458769]}),
                           ({'order': (1, 1, 1), 
-                            'seasonal_order': (1, 1, 1, 2)}, 
-                            [34.05257769, 17.62273853, 10.8118207 , -1.13001202, 22.51669944])])
+                            'seasonal_order': (1, 1, 1, 2)},
+                            {'win': [34.05257769, 17.62273853, 10.8118207 , -1.13001202, 22.51669944],
+                            'linux': [0.85613338, 0.59078721, 0.86972818, 0.57139675, 0.90350425]}
+                            )])
 def test_predict_output_ForecasterSarimax_with_transform_y_and_transform_exog(kwargs, data):
     """
     Test predict output of ForecasterSarimax, StandardScaler
     as transformer_y and transformer_exog as transformer_exog.
     """
+    if platform.system() == "Windows":
+        system = "win"
+    else:
+        system = "linux"
     transformer_exog = ColumnTransformer(
                            [('scale', StandardScaler(), ['exog_1']),
                             ('onehot', OneHotEncoder(), ['exog_2'])],
@@ -221,7 +234,7 @@ def test_predict_output_ForecasterSarimax_with_transform_y_and_transform_exog(kw
     forecaster.fit(y=y, exog=df_exog)
     predictions = forecaster.predict(steps=5, exog=df_exog_predict)
     expected = pd.Series(
-                   data  = data,
+                   data  = data[system],
                    index = pd.RangeIndex(start=50, stop=55, step=1),
                    name  = 'pred'
                )

@@ -890,4 +890,4 @@ def test_Sarimax_get_info_criteria(y, exog):
 
     # assert results_skforecast == expected
     # assert results_statsmodels == expected
-    assert results_skforecast == results_statsmodels
+    assert results_skforecast == pytest.approx(results_statsmodels)

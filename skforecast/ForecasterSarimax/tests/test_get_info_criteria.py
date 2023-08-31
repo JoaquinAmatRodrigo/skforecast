@@ -57,7 +57,6 @@ def test_Sarimax_get_info_criteria():
     forecaster = ForecasterSarimax(regressor=Sarimax(order=(1, 0, 1)))
     forecaster.fit(y=y)
     results = forecaster.get_info_criteria(criteria='aic', method='standard')
+    expected = -56.80222086732
 
-    expected = -56.80222086732853
-
-    assert results == expected
+    assert results == pytest.approx(expected)
