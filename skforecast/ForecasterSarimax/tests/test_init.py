@@ -6,7 +6,7 @@ from pytest import approx
 import numpy as np
 import pandas as pd
 from pmdarima.arima import ARIMA
-from skforecast.ForecasterSarimax import Sarimax
+from skforecast.Sarimax import Sarimax
 from skforecast.ForecasterSarimax import ForecasterSarimax
 from skforecast.exceptions import IgnoredArgumentWarning
 from sklearn.linear_model import LinearRegression
@@ -15,13 +15,13 @@ from sklearn.linear_model import LinearRegression
 def test_TypeError_when_regressor_is_not_pmdarima_ARIMA_when_initialization():
     """
     Raise TypeError if regressor is not of type pmdarima.arima.ARIMA or 
-    skforecast.ForecasterSarimax.Sarimax when initializing the forecaster.
+    skforecast.Sarimax.Sarimax when initializing the forecaster.
     """
     regressor = LinearRegression()
 
     err_msg = re.escape(
             (f"`regressor` must be an instance of type pmdarima.arima.ARIMA "
-             f"or skforecast.ForecasterSarimax.Sarimax. Got {type(regressor)}.")
+             f"or skforecast.Sarimax.Sarimax. Got {type(regressor)}.")
         ) 
     with pytest.raises(TypeError, match = err_msg):
         ForecasterSarimax(regressor = regressor)

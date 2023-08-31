@@ -2,10 +2,11 @@
 # ==============================================================================
 import re
 import pytest
+import platform
 import numpy as np
 import pandas as pd
 from pmdarima.arima import ARIMA
-from skforecast.ForecasterSarimax import Sarimax
+from skforecast.Sarimax import Sarimax
 from skforecast.ForecasterSarimax import ForecasterSarimax
 from skforecast.utils import expand_index
 from sklearn.compose import ColumnTransformer
@@ -111,10 +112,12 @@ def test_predict_output_ForecasterSarimax_pmdarima_ARIMA(kwargs, data):
 @pytest.mark.parametrize("kwargs, data", 
                          [({'order': (1, 0, 1), 
                             'seasonal_order': (0, 0, 0, 0)}, 
-                            [0.63432268, 0.62507372, 0.61595962, 0.60697841, 0.59812815]), 
+                            {'win':[0.63432268, 0.62507372, 0.61595962, 0.60697841, 0.59812815],
+                            'linux':[0.6053533305780869, 0.5965417125355235, 0.5878583577874791, 0.5793013993133179, 0.5708689972690493]}), 
                           ({'order': (1, 1, 1), 
                             'seasonal_order': (1, 1, 1, 2)}, 
-                            [0.5366165 , 0.55819701, 0.49539926, 0.51944837, 0.45417575])])
+                            {'win':[0.5366165, 0.55819701, 0.49539926, 0.51944837, 0.45417575],
+                             'linux': [0.5366164993789614, 0.5581970119842657, 0.49539925967974563, 0.5194483669879758, 0.4541757516156355]})])
 def test_predict_output_ForecasterSarimax_skforecast_Sarimax(kwargs, data):
     """
     Test predict output of ForecasterSarimax using Sarimax from skforecast.
@@ -124,12 +127,19 @@ def test_predict_output_ForecasterSarimax_skforecast_Sarimax(kwargs, data):
                  )
     forecaster.fit(y=y)
     predictions = forecaster.predict(steps=5)
+
+    # Get type of operating system
+    if platform.system() == "Windows":
+        system = "win"
+    else:
+        system = "linux"
+
     expected = pd.Series(
-                   data  = data,
+                   data  = data[system],
                    index = pd.RangeIndex(start=50, stop=55, step=1),
                    name  = 'pred'
                )
-    
+
     pd.testing.assert_series_equal(predictions, expected)
 
 

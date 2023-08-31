@@ -15,7 +15,6 @@ import pandas as pd
 from sklearn.base import clone, BaseEstimator, RegressorMixin
 from sklearn.exceptions import NotFittedError
 from statsmodels.tsa.statespace.sarimax import SARIMAX
-
 import skforecast
 
 logging.basicConfig(

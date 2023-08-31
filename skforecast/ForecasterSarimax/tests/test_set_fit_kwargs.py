@@ -3,7 +3,7 @@
 import re
 import pytest
 from pmdarima.arima import ARIMA
-from skforecast.ForecasterSarimax import Sarimax
+from skforecast.Sarimax import Sarimax
 from skforecast.ForecasterSarimax import ForecasterSarimax
 from skforecast.exceptions import IgnoredArgumentWarning
 

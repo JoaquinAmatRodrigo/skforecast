@@ -5,7 +5,7 @@ import pytest
 import numpy as np
 import pandas as pd
 from sklearn.exceptions import NotFittedError
-from skforecast.ForecasterSarimax import Sarimax
+from skforecast.Sarimax import Sarimax
 from statsmodels.tsa.statespace.sarimax import SARIMAX
 from statsmodels.tsa.statespace.sarimax import SARIMAXResults
 from statsmodels.tsa.statespace.sarimax import SARIMAXResultsWrapper

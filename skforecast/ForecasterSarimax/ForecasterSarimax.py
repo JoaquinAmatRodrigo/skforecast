@@ -149,12 +149,12 @@ class ForecasterSarimax():
         
         if isinstance(self.regressor, pmdarima.arima.ARIMA):
             self.engine = 'pmdarima'
-        elif isinstance(self.regressor, skforecast.ForecasterSarimax.Sarimax):
+        elif isinstance(self.regressor, skforecast.Sarimax.Sarimax):
             self.engine = 'skforecast'
         else:
             raise TypeError(
                 (f"`regressor` must be an instance of type pmdarima.arima.ARIMA "
-                 f"or skforecast.ForecasterSarimax.Sarimax. Got {type(regressor)}.")
+                 f"or skforecast.Sarimax.Sarimax. Got {type(regressor)}.")
             )
 
         self.params = self.regressor.get_params(deep=True)
