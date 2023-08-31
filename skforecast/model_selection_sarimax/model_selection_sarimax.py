@@ -218,8 +218,10 @@ def _backtesting_sarimax(
             # If `False` the train size increases by `steps` in each  iteration.
             y_train = y.iloc[train_idx_start:train_idx_end, ]
             exog_train = exog.iloc[train_idx_start:train_idx_end, ] if exog is not None else None
+            
             last_window_y = None
             last_window_exog = None
+
             forecaster.fit(y=y_train, exog=exog_train, suppress_warnings=suppress_warnings_fit)
 
         next_window_exog = exog.iloc[test_idx_start:test_idx_end, ] if exog is not None else None
