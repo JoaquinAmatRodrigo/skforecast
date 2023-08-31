@@ -35,15 +35,14 @@ logging.basicConfig(
 
 class ForecasterSarimax():
     """
-    This class turns ARIMA model from pmdarima library into a Forecaster 
-    compatible with the skforecast API.
-    **New in version 0.7.0**
+    This class turns ARIMA model from either the skforecast or pmdarima library 
+    into a Forecaster compatible with the skforecast API.
+    **New in version 0.10.0**
     
     Parameters
     ----------
-    regressor : pmdarima.arima.ARIMA
-        An instance of an ARIMA from pmdarima library. This model internally wraps the
-        statsmodels SARIMAX class.
+    regressor : skforecast.Sarimax.Sarimax, pmdarima.arima.ARIMA
+        An ARIMA model instance from either the skforecast or pmdarima library.
     transformer_y : object transformer (preprocessor), default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API with methods: fit, transform, fit_transform and inverse_transform.
@@ -54,17 +53,16 @@ class ForecasterSarimax():
         preprocessing API. The transformation is applied to `exog` before training the
         forecaster. `inverse_transform` is not available when using ColumnTransformers.
     fit_kwargs : dict, default `None`
-        Additional arguments to be passed to the `fit` method of the regressor.
-        **New in version 0.8.0**
+        Additional arguments to be passed to the `fit` method of the regressor. 
+        When using the skforecast Sarimax model, the fit kwargs should be passed 
+        using the model parameter `sm_fit_kwargs` and not this one.
     forecaster_id : str, int default `None`
         Name used as an identifier of the forecaster.
-        **New in version 0.7.0**
     
     Attributes
     ----------
-    regressor : pmdarima.arima.ARIMA
-        An instance of an ARIMA from pmdarima library. The model internally wraps the
-        statsmodels SARIMAX class
+    regressor : skforecast.Sarimax.Sarimax, pmdarima.arima.ARIMA
+        An ARIMA model instance from either the skforecast or pmdarima library.
     params: dict
         Parameters of the sarimax model.
     transformer_y : object transformer (preprocessor)
@@ -105,7 +103,6 @@ class ForecasterSarimax():
         DataFrame.
     fit_kwargs : dict
         Additional arguments to be passed to the `fit` method of the regressor.
-        **New in version 0.8.0**
     creation_date : str
         Date of creation.
     fit_date : str
@@ -810,39 +807,43 @@ class ForecasterSarimax():
         feature_importances.columns = ['feature', 'importance']
 
         return feature_importances
-    
 
-    def get_info_criteria(self, criteria:str='aic', method:str='standard') -> float:
+
+    def get_info_criteria(
+        self, 
+        criteria: str='aic', 
+        method: str='standard'
+    ) -> float:
         """
         Get the selected information criteria.
 
         Parameters
         ----------
-        criteria : str, default 'aic'
+        criteria : str, default `'aic'`
             The information criteria to compute. Valid options are {'aic', 'bic',
             'hqic'}.
-        method : str, default 'standard'
+        method : str, default `'standard'`
             The method for information criteria computation. Default is 'standard'
             method; 'lutkepohl' computes the information criteria as in Lütkepohl
             (2007). See more instatsmodels.tsa.statespace.sarimax.SARIMAXResults.info_criteria
 
         Returns
         -------
-        float
+        metric : float
             The value of the selected information criteria.
 
         """
 
         if criteria not in ['aic', 'bic', 'hqic']:
             raise ValueError(
-                f"Invalid value for `criteria`. Valid options are 'aic', 'bic', "
-                f"and 'hqic'."
+                (f"Invalid value for `criteria`. Valid options are 'aic', 'bic', "
+                 f"and 'hqic'.")
             )
         
         if method not in ['standard', 'lutkepohl']:
             raise ValueError(
-                f"Invalid value for `method`. Valid options are 'standard' and "
-                f"'lutkepohl'."
+                (f"Invalid value for `method`. Valid options are 'standard' and "
+                 f"'lutkepohl'.")
             )
         
         if self.engine == 'pmdarima':
