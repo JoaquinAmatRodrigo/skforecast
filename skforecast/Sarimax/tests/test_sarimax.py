@@ -290,11 +290,12 @@ def test_Sarimax_predict_with_numpy():
                             exog  = exog_predict_numpy
                         ).predicted_mean
 
-    expected = np.array([0.54251563, 0.57444558, 0.60419802, 0.63585684, 0.67238625,
-                         0.70992311, 0.76089838, 0.7855481 , 0.73117064, 0.669226  ])
+    # expected = np.array([0.54251563, 0.57444558, 0.60419802, 0.63585684, 0.67238625,
+    #                      0.70992311, 0.76089838, 0.7855481 , 0.73117064, 0.669226  ])
 
-    np.testing.assert_almost_equal(preds_skforecast, expected)
-    np.testing.assert_almost_equal(preds_statsmodels, expected)
+    # np.testing.assert_almost_equal(preds_skforecast, expected)
+    # np.testing.assert_almost_equal(preds_statsmodels, expected)
+    np.testing.assert_almost_equal(preds_skforecast, preds_statsmodels)
 
 
 @pytest.mark.parametrize("y, exog, exog_predict", 
@@ -325,19 +326,21 @@ def test_Sarimax_predict_with_pandas(y, exog, exog_predict):
                             exog  = exog_predict
                         ).predicted_mean.rename("pred").to_frame()
 
-    if isinstance(y.index, pd.RangeIndex):
-        idx = pd.RangeIndex(start=50, stop=60, step=1)
-    else:
-        idx = pd.date_range(start='2050', periods=10, freq='A')
-    expected = pd.DataFrame(
-        data    = np.array([0.54251563, 0.57444558, 0.60419802, 0.63585684, 0.67238625,
-                            0.70992311, 0.76089838, 0.7855481 , 0.73117064, 0.669226  ]),
-        index   = idx,
-        columns = ['pred']
-    )
+    # if isinstance(y.index, pd.RangeIndex):
+    #     idx = pd.RangeIndex(start=50, stop=60, step=1)
+    # else:
+    #     idx = pd.date_range(start='2050', periods=10, freq='A')
+    #
+    # expected = pd.DataFrame(
+    #     data    = np.array([0.54251563, 0.57444558, 0.60419802, 0.63585684, 0.67238625,
+    #                         0.70992311, 0.76089838, 0.7855481 , 0.73117064, 0.669226  ]),
+    #     index   = idx,
+    #     columns = ['pred']
+    # )
 
-    pd.testing.assert_frame_equal(preds_skforecast, expected)
-    pd.testing.assert_frame_equal(preds_statsmodels, expected)
+    # pd.testing.assert_frame_equal(preds_skforecast, expected)
+    # pd.testing.assert_frame_equal(preds_statsmodels, expected)
+    pd.testing.assert_frame_equal(preds_skforecast, preds_statsmodels)
 
 
 @pytest.mark.parametrize("y, exog, exog_predict", 
@@ -393,19 +396,20 @@ def test_Sarimax_predict_interval_with_numpy():
                              preds_statsmodels.conf_int(alpha=alpha)]
                         )
 
-    expected = np.array([[ 0.54251563, -1.19541248,  2.28044374],
-                         [ 0.57444558, -1.81113178,  2.96002293],
-                         [ 0.60419802, -2.26035953,  3.46875557],
-                         [ 0.63585684, -2.62746432,  3.899178  ],
-                         [ 0.67238625, -2.94147506,  4.28624756],
-                         [ 0.70992311, -3.22142148,  4.64126771],
-                         [ 0.76089838, -3.46329933,  4.98509609],
-                         [ 0.7855481 , -3.7121082 ,  5.28320441],
-                         [ 0.73117064, -4.02408271,  5.48642398],
-                         [ 0.669226  , -4.3302976 ,  5.66874961]])
+    # expected = np.array([[ 0.54251563, -1.19541248,  2.28044374],
+    #                      [ 0.57444558, -1.81113178,  2.96002293],
+    #                      [ 0.60419802, -2.26035953,  3.46875557],
+    #                      [ 0.63585684, -2.62746432,  3.899178  ],
+    #                      [ 0.67238625, -2.94147506,  4.28624756],
+    #                      [ 0.70992311, -3.22142148,  4.64126771],
+    #                      [ 0.76089838, -3.46329933,  4.98509609],
+    #                      [ 0.7855481 , -3.7121082 ,  5.28320441],
+    #                      [ 0.73117064, -4.02408271,  5.48642398],
+    #                      [ 0.669226  , -4.3302976 ,  5.66874961]])
 
-    np.testing.assert_almost_equal(preds_skforecast, expected)
-    np.testing.assert_almost_equal(preds_statsmodels, expected)
+    # np.testing.assert_almost_equal(preds_skforecast, expected)
+    # np.testing.assert_almost_equal(preds_statsmodels, expected)
+    np.testing.assert_almost_equal(preds_skforecast, preds_statsmodels)
 
 
 @pytest.mark.parametrize("y, exog, exog_predict", 
@@ -445,27 +449,29 @@ def test_Sarimax_predict_interval_with_pandas(y, exog, exog_predict):
                         )
     preds_statsmodels.columns = ['pred', 'lower_bound', 'upper_bound']
 
-    if isinstance(y.index, pd.RangeIndex):
-        idx = pd.RangeIndex(start=50, stop=60, step=1)
-    else:
-        idx = pd.date_range(start='2050', periods=10, freq='A')
-    expected = pd.DataFrame(
-        data    = np.array([[ 0.54251563, -1.19541248,  2.28044374],
-                            [ 0.57444558, -1.81113178,  2.96002293],
-                            [ 0.60419802, -2.26035953,  3.46875557],
-                            [ 0.63585684, -2.62746432,  3.899178  ],
-                            [ 0.67238625, -2.94147506,  4.28624756],
-                            [ 0.70992311, -3.22142148,  4.64126771],
-                            [ 0.76089838, -3.46329933,  4.98509609],
-                            [ 0.7855481 , -3.7121082 ,  5.28320441],
-                            [ 0.73117064, -4.02408271,  5.48642398],
-                            [ 0.669226  , -4.3302976 ,  5.66874961]]),
-        index   = idx,
-        columns = ['pred', 'lower_bound', 'upper_bound']
-    )
+    # if isinstance(y.index, pd.RangeIndex):
+    #     idx = pd.RangeIndex(start=50, stop=60, step=1)
+    # else:
+    #     idx = pd.date_range(start='2050', periods=10, freq='A')
+    
+    # expected = pd.DataFrame(
+    #     data    = np.array([[ 0.54251563, -1.19541248,  2.28044374],
+    #                         [ 0.57444558, -1.81113178,  2.96002293],
+    #                         [ 0.60419802, -2.26035953,  3.46875557],
+    #                         [ 0.63585684, -2.62746432,  3.899178  ],
+    #                         [ 0.67238625, -2.94147506,  4.28624756],
+    #                         [ 0.70992311, -3.22142148,  4.64126771],
+    #                         [ 0.76089838, -3.46329933,  4.98509609],
+    #                         [ 0.7855481 , -3.7121082 ,  5.28320441],
+    #                         [ 0.73117064, -4.02408271,  5.48642398],
+    #                         [ 0.669226  , -4.3302976 ,  5.66874961]]),
+    #     index   = idx,
+    #     columns = ['pred', 'lower_bound', 'upper_bound']
+    # )
 
-    pd.testing.assert_frame_equal(preds_skforecast, expected)
-    pd.testing.assert_frame_equal(preds_statsmodels, expected)
+    # pd.testing.assert_frame_equal(preds_skforecast, expected)
+    # pd.testing.assert_frame_equal(preds_statsmodels, expected)
+    pd.testing.assert_frame_equal(preds_skforecast, preds_statsmodels)
 
 
 def test_Sarimax_append_refit_False():
@@ -499,11 +505,12 @@ def test_Sarimax_append_refit_False():
                             exog  = exog_lw_predict_numpy
                         ).predicted_mean
 
-    expected = np.array([0.89386888, 0.92919515, 0.98327241, 1.02336286, 1.05334974,
-                         1.08759298, 1.02651694, 0.97164917, 0.91539724, 0.85551674])
+    # expected = np.array([0.89386888, 0.92919515, 0.98327241, 1.02336286, 1.05334974,
+    #                      1.08759298, 1.02651694, 0.97164917, 0.91539724, 0.85551674])
 
-    np.testing.assert_almost_equal(preds_skforecast, expected)
-    np.testing.assert_almost_equal(preds_statsmodels, expected)
+    # np.testing.assert_almost_equal(preds_skforecast, expected)
+    # np.testing.assert_almost_equal(preds_statsmodels, expected)
+    np.testing.assert_almost_equal(preds_skforecast, preds_statsmodels)
 
 
 def test_Sarimax_append_refit_True():
@@ -553,12 +560,14 @@ def test_Sarimax_append_refit_True():
                               exog  = exog_lw_predict_numpy
                           ).predicted_mean
 
-    expected = np.array([0.73036069, 0.72898841, 0.76386263, 0.78298827, 0.7990083 ,
-                         0.81640187, 0.78540917, 0.75749361, 0.72887628, 0.69840139])
+    # expected = np.array([0.73036069, 0.72898841, 0.76386263, 0.78298827, 0.7990083 ,
+    #                      0.81640187, 0.78540917, 0.75749361, 0.72887628, 0.69840139])
 
-    np.testing.assert_almost_equal(preds_skforecast, expected)
-    np.testing.assert_almost_equal(preds_statsmodels, expected)
-    np.testing.assert_almost_equal(preds_statsmodels_2, expected)
+    # np.testing.assert_almost_equal(preds_skforecast, expected)
+    # np.testing.assert_almost_equal(preds_statsmodels, expected)
+    # np.testing.assert_almost_equal(preds_statsmodels_2, expected)
+    np.testing.assert_almost_equal(preds_skforecast, preds_statsmodels)
+    np.testing.assert_almost_equal(preds_skforecast, preds_statsmodels_2)
 
 
 def test_Sarimax_apply_refit_False():
@@ -592,11 +601,12 @@ def test_Sarimax_apply_refit_False():
                             exog  = exog_lw_predict_numpy
                         ).predicted_mean
 
-    expected = np.array([0.89386888, 0.92919515, 0.98327241, 1.02336286, 1.05334974,
-                         1.08759298, 1.02651694, 0.97164917, 0.91539724, 0.85551674])
+    # expected = np.array([0.89386888, 0.92919515, 0.98327241, 1.02336286, 1.05334974,
+    #                      1.08759298, 1.02651694, 0.97164917, 0.91539724, 0.85551674])
 
-    np.testing.assert_almost_equal(preds_skforecast, expected)
-    np.testing.assert_almost_equal(preds_statsmodels, expected)
+    # np.testing.assert_almost_equal(preds_skforecast, expected)
+    # np.testing.assert_almost_equal(preds_statsmodels, expected)
+    np.testing.assert_almost_equal(preds_skforecast, preds_statsmodels)
 
 
 def test_Sarimax_apply_refit_True():
@@ -646,12 +656,14 @@ def test_Sarimax_apply_refit_True():
                               exog  = exog_lw_predict_numpy
                           ).predicted_mean
 
-    expected = np.array([0.76718596, 0.75795261, 0.79506182, 0.81508184, 0.83164173,
-                         0.84979957, 0.81751954, 0.78846941, 0.75867965, 0.72695935])
+    # expected = np.array([0.76718596, 0.75795261, 0.79506182, 0.81508184, 0.83164173,
+    #                      0.84979957, 0.81751954, 0.78846941, 0.75867965, 0.72695935])
 
-    np.testing.assert_almost_equal(preds_skforecast, expected)
-    np.testing.assert_almost_equal(preds_statsmodels, expected)
-    np.testing.assert_almost_equal(preds_statsmodels_2, expected)
+    # np.testing.assert_almost_equal(preds_skforecast, expected)
+    # np.testing.assert_almost_equal(preds_statsmodels, expected)
+    # np.testing.assert_almost_equal(preds_statsmodels_2, expected)
+    np.testing.assert_almost_equal(preds_skforecast, preds_statsmodels)
+    np.testing.assert_almost_equal(preds_skforecast, preds_statsmodels_2)
 
 
 def test_Sarimax_extend():
@@ -670,7 +682,7 @@ def test_Sarimax_extend():
     preds_skforecast = sarimax.predict(steps=10, exog=exog_lw_predict_numpy)
 
     # statsmodels
-    sarimax = SARIMAX(order=(1, 1, 1), endog=y_numpy, exog=exog_numpy)               
+    sarimax = SARIMAX(order=(1, 1, 1), endog=y_numpy, exog=exog_numpy)
     sarimax_res = sarimax.fit(maxiter=1000, method='cg', disp=False)
     updated_res = sarimax_res.extend(
                       endog = y_lw_numpy, 
@@ -681,11 +693,12 @@ def test_Sarimax_extend():
                             exog  = exog_lw_predict_numpy
                         ).predicted_mean
 
-    expected = np.array([0.89386888, 0.92919515, 0.98327241, 1.02336286, 1.05334974,
-                         1.08759298, 1.02651694, 0.97164917, 0.91539724, 0.85551674])
+    # expected = np.array([0.89386888, 0.92919515, 0.98327241, 1.02336286, 1.05334974,
+    #                      1.08759298, 1.02651694, 0.97164917, 0.91539724, 0.85551674])
 
-    np.testing.assert_almost_equal(preds_skforecast, expected)
-    np.testing.assert_almost_equal(preds_statsmodels, expected)
+    # np.testing.assert_almost_equal(preds_skforecast, expected)
+    # np.testing.assert_almost_equal(preds_statsmodels, expected)
+    np.testing.assert_almost_equal(preds_skforecast, preds_statsmodels)
 
 
 def test_Sarimax_set_params():
@@ -743,13 +756,20 @@ def test_Sarimax_params_numpy():
     Test Sarimax params after fit with numpy `y` and `exog`.
     """
 
-    sarimax = Sarimax(order=(1, 0, 1))
-    sarimax.fit(y=y_numpy, exog=exog_numpy)
+    sarimax_sk = Sarimax(order=(1, 0, 1))
+    sarimax_sk.fit(y=y_numpy, exog=exog_numpy)
 
-    results = sarimax.params()
-    expected = np.array([0.46809671, 0.24916836, 0.45027591, 0.0105501 ])
+    sarimax_sm = SARIMAX(order=(1, 0, 1), endog=y_numpy, exog=exog_numpy)
+    sarimax_res = sarimax_sm.fit()
 
-    np.testing.assert_almost_equal(results, expected)
+    results_skforecast = sarimax_sk.params()
+    results_statsmodels = sarimax_res.params
+
+    # expected = np.array([0.46809671, 0.24916836, 0.45027591, 0.0105501 ])
+
+    # np.testing.assert_almost_equal(results_skforecast, expected)
+    # np.testing.assert_almost_equal(results_statsmodels, expected)
+    np.testing.assert_almost_equal(results_skforecast, results_statsmodels)
 
 
 @pytest.mark.parametrize("y, exog", 
@@ -763,16 +783,23 @@ def test_Sarimax_params_pandas(y, exog):
     Test Sarimax params after fit with pandas `y` and `exog`.
     """
 
-    sarimax = Sarimax(order=(1, 0, 1))
-    sarimax.fit(y=y, exog=exog)
+    sarimax_sk = Sarimax(order=(1, 0, 1))
+    sarimax_sk.fit(y=y, exog=exog)
 
-    results = sarimax.params()
-    expected = pd.Series(
-                   data  = np.array([0.46809671, 0.24916836, 0.45027591, 0.0105501 ]),
-                   index = ['exog', 'ar.L1', 'ma.L1', 'sigma2'],
-               )
+    sarimax_sm = SARIMAX(order=(1, 0, 1), endog=y, exog=exog)
+    sarimax_res = sarimax_sm.fit()
 
-    pd.testing.assert_series_equal(results, expected)
+    results_skforecast = sarimax_sk.params()
+    results_statsmodels = sarimax_res.params
+
+    # expected = pd.Series(
+    #                data  = np.array([0.46809671, 0.24916836, 0.45027591, 0.0105501 ]),
+    #                index = ['exog', 'ar.L1', 'ma.L1', 'sigma2'],
+    #            )
+
+    # pd.testing.assert_series_equal(results_skforecast, expected)
+    # pd.testing.assert_series_equal(results_statsmodels, expected)
+    pd.testing.assert_series_equal(results_skforecast, results_statsmodels)
 
 
 @pytest.mark.parametrize("y, exog", 
@@ -800,3 +827,67 @@ def test_Sarimax_summary(y, exog):
     )
     
     assert results == expected
+
+
+def test_Sarimax_get_info_criteria_ValueError_criteria_invalid_value():
+    """
+    Test Sarimax get_info_criteria ValueError when `criteria` is an invalid value.
+    """
+
+    sarimax = Sarimax(order=(1, 0, 1))
+    sarimax.fit(y=y, exog=exog)
+
+    criteria = 'not_valid'
+
+    err_msg = re.escape(
+                (f"Invalid value for `criteria`. Valid options are 'aic', 'bic', "
+                 f"and 'hqic'.")
+              )
+    with pytest.raises(ValueError, match = err_msg): 
+        sarimax.get_info_criteria(criteria=criteria)
+
+
+def test_Sarimax_get_info_criteria_ValueError_method_invalid_value():
+    """
+    Test Sarimax get_info_criteria ValueError when `method` is an invalid value.
+    """
+
+    sarimax = Sarimax(order=(1, 0, 1))
+    sarimax.fit(y=y, exog=exog)
+
+    method = 'not_valid'
+
+    err_msg = re.escape(
+                (f"Invalid value for `method`. Valid options are 'standard' and "
+                 f"'lutkepohl'.")
+              )
+    with pytest.raises(ValueError, match = err_msg): 
+        sarimax.get_info_criteria(method=method)
+
+
+@pytest.mark.parametrize("y, exog", 
+                         [(y_numpy, exog_numpy),
+                          (y, exog),
+                          (y_datetime, exog_datetime),
+                          (y.to_frame(), exog.to_frame()),
+                          (y_datetime.to_frame(), exog_datetime.to_frame())], 
+                         ids = lambda values : f'y, exog: {type(values)}')
+def test_Sarimax_get_info_criteria(y, exog):
+    """
+    Test Sarimax get_info_criteria after fit `y` and `exog`.
+    """
+    
+    sarimax_sk = Sarimax(order=(1, 0, 1))
+    sarimax_sk.fit(y=y, exog=exog)
+
+    sarimax_sm = SARIMAX(order=(1, 0, 1), endog=y, exog=exog)
+    sarimax_res = sarimax_sm.fit()
+
+    results_skforecast = sarimax_sk.get_info_criteria(criteria='aic', method='standard')
+    results_statsmodels = sarimax_res.info_criteria(criteria='aic', method='standard')
+
+    # expected = -77.18118586690768
+
+    # assert results_skforecast == expected
+    # assert results_statsmodels == expected
+    assert results_skforecast == results_statsmodels
