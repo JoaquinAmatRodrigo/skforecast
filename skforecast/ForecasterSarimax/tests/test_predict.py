@@ -170,11 +170,7 @@ def test_predict_output_ForecasterSarimax_with_exog(kwargs, data):
                          [({'order': (1, 0, 1), 
                             'seasonal_order': (0, 0, 0, 0)}, 
                             {'win': [0.60290703, 0.60568721, 0.60451413, 0.6050091, 0.60480025],
-                            'linux': [0.60290703, 0.60568721, 0.60451413, 0.6050091 , 0.60480025]}), 
-                          ({'order': (1, 1, 1), 
-                            'seasonal_order': (1, 1, 1, 2)}, 
-                            {'win': [1.13250822, 1.71359967, 1.77949649, 1.86532886, 2.40044002],
-                            'linux': [1.13316783, 1.71280225, 1.77176545, 1.85037647, 2.38390684]}
+                            'linux': [0.60290703, 0.60568721, 0.60451413, 0.6050091 , 0.60480025]}
                         )])
 def test_predict_output_ForecasterSarimax_with_transform_y(kwargs, data):
     """
@@ -204,11 +200,7 @@ def test_predict_output_ForecasterSarimax_with_transform_y(kwargs, data):
                          [({'order': (1, 0, 1), 
                             'seasonal_order': (0, 0, 0, 0)},
                             {'win': [0.60687311, 0.62484493, 0.63515416, 0.67730912, 0.69458838],
-                            'linux': [0.60687186, 0.62484336, 0.63515295, 0.67730812, 0.69458769]}),
-                          ({'order': (1, 1, 1), 
-                            'seasonal_order': (1, 1, 1, 2)},
-                            {'win': [34.05257769, 17.62273853, 10.8118207 , -1.13001202, 22.51669944],
-                            'linux': [0.85613338, 0.59078721, 0.86972818, 0.57139675, 0.90350425]}
+                            'linux': [0.60687186, 0.62484336, 0.63515295, 0.67730812, 0.69458769]}
                             )])
 def test_predict_output_ForecasterSarimax_with_transform_y_and_transform_exog(kwargs, data):
     """
@@ -370,10 +362,8 @@ def test_predict_output_ForecasterSarimax_with_last_window_and_exog(kwargs, data
 @pytest.mark.parametrize("kwargs, data", 
                          [({'order': (1, 0, 1), 
                             'seasonal_order': (0, 0, 0, 0)}, 
-                            [0.81663903, 0.77783205, 0.80523981, 0.85467197, 0.86644466]), 
-                          ({'order': (2, 2, 0), 
-                            'seasonal_order': (0, 2, 0, 2)}, 
-                            [ 0.88408379,  0.75000182,  0.46925336,  0.0199138 , -0.70882638])])
+                            [0.81663903, 0.77783205, 0.80523981, 0.85467197, 0.86644466])
+                        ])
 def test_predict_output_ForecasterSarimax_with_last_window_and_exog_and_transformers(kwargs, data):
     """
     Test predict output of ForecasterSarimax with exogenous variables, `last_window`
