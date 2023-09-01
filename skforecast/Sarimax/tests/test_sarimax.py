@@ -756,11 +756,11 @@ def test_Sarimax_params_numpy():
     Test Sarimax params after fit with numpy `y` and `exog`.
     """
 
-    sarimax_sk = Sarimax(order=(1, 0, 1))
+    sarimax_sk = Sarimax(order=(3, 2, 0), disp=0)
     sarimax_sk.fit(y=y_numpy, exog=exog_numpy)
 
-    sarimax_sm = SARIMAX(order=(1, 0, 1), endog=y_numpy, exog=exog_numpy)
-    sarimax_res = sarimax_sm.fit()
+    sarimax_sm = SARIMAX(order=(3, 2, 0), endog=y_numpy, exog=exog_numpy)
+    sarimax_res = sarimax_sm.fit(disp=0)
 
     results_skforecast = sarimax_sk.params()
     results_statsmodels = sarimax_res.params
@@ -783,11 +783,11 @@ def test_Sarimax_params_pandas(y, exog):
     Test Sarimax params after fit with pandas `y` and `exog`.
     """
 
-    sarimax_sk = Sarimax(order=(1, 0, 1))
+    sarimax_sk = Sarimax(order=(3, 2, 0), disp=0)
     sarimax_sk.fit(y=y, exog=exog)
 
-    sarimax_sm = SARIMAX(order=(1, 0, 1), endog=y, exog=exog)
-    sarimax_res = sarimax_sm.fit()
+    sarimax_sm = SARIMAX(order=(3, 2, 0), endog=y, exog=exog)
+    sarimax_res = sarimax_sm.fit(disp=0)
 
     results_skforecast = sarimax_sk.params()
     results_statsmodels = sarimax_res.params
@@ -877,16 +877,16 @@ def test_Sarimax_get_info_criteria(y, exog):
     Test Sarimax get_info_criteria after fit `y` and `exog`.
     """
     
-    sarimax_sk = Sarimax(order=(1, 0, 1))
+    sarimax_sk = Sarimax(order=(3, 2, 0), disp=0)
     sarimax_sk.fit(y=y, exog=exog)
 
-    sarimax_sm = SARIMAX(order=(1, 0, 1), endog=y, exog=exog)
-    sarimax_res = sarimax_sm.fit()
+    sarimax_sm = SARIMAX(order=(3, 2, 0), endog=y, exog=exog)
+    sarimax_res = sarimax_sm.fit(disp=0)
 
     results_skforecast = sarimax_sk.get_info_criteria(criteria='aic', method='standard')
     results_statsmodels = sarimax_res.info_criteria(criteria='aic', method='standard')
 
-    # expected = -77.18118586690768
+    # expected = -42.00040332298444
 
     # assert results_skforecast == expected
     # assert results_statsmodels == expected

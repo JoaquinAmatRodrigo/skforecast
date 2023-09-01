@@ -58,12 +58,16 @@ def test_forecaster_index_step_stored():
     assert results == expected
 
 
-def test_fit_last_window_stored():
+@pytest.mark.parametrize("suppress_warnings", 
+                         [True, False], 
+                         ids = lambda v : f'suppress_warnings: {v}')
+def test_fit_last_window_stored_with_suppress_warnings(suppress_warnings):
     """
     Test that values of last window are stored after fitting.
     """
     forecaster = ForecasterSarimax(regressor=Sarimax(order=(1, 0, 0)))
-    forecaster.fit(y=pd.Series(np.arange(50)))
+    forecaster.fit(y=pd.Series(np.arange(50)), 
+                   suppress_warnings=suppress_warnings)
     expected = pd.Series(np.arange(50))
 
     pd.testing.assert_series_equal(forecaster.last_window, expected)
