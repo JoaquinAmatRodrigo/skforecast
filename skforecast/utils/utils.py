@@ -288,6 +288,45 @@ def check_exog(
     return
 
 
+def check_exog_per_serie(
+    exog_per_serie: Any,
+    allow_nan: bool=True
+) -> None:
+    """
+    Raise Exception if `exog` is not a dictionary with at least one key and either a pandas Series or Dataframe as value.
+    If `allow_nan = True`, issue a warning if `exog` contains NaN values.
+    
+    Parameters
+    ----------
+    exog_per_serie : Any
+        Exogenous variable/s included as predictor/s.
+    allow_nan : bool, default `True`
+        If True, allows the presence of NaN values in `exog`. If False (default),
+        issue a warning if `exog` contains NaN values.
+
+    Returns
+    -------
+    None
+
+    """
+    
+    if not isinstance(exog_per_serie, dict):
+        raise TypeError(f"`exog_per_serie` must be a dict. Got {type(exog_per_serie)}")
+
+    if not allow_nan:
+        if exog_per_serie.isnull().any().any():
+            warnings.warn(
+                ("`exog_per_serie` has missing values. Most machine learning models do not allow "
+                 "missing values. Fitting the forecaster may fail."), 
+                 MissingValuesExogWarning
+            )
+
+    for value in exog_per_serie.values(): 
+        if not isinstance(value,  (pd.Series, pd.DataFrame)):
+            raise TypeError("The values of `exog_per_serie` should be pandas Series or pandas DataFrame.")
+    return
+
+
 def get_exog_dtypes(
     exog: Union[pd.DataFrame, pd.Series]
 ) -> dict:

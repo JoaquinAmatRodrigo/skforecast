@@ -6,7 +6,7 @@
 ################################################################################
 # coding=utf-8
 
-from typing import Union, Tuple, Optional, Callable
+from typing import Union, Tuple, Optional, Callable, Dict
 import warnings
 import logging
 import sys
@@ -24,7 +24,7 @@ from ..exceptions import IgnoredArgumentWarning
 from ..utils import initialize_lags
 from ..utils import initialize_weights
 from ..utils import check_select_fit_kwargs
-from ..utils import check_exog
+from ..utils import check_exog, check_exog_per_serie
 from ..utils import get_exog_dtypes
 from ..utils import check_exog_dtypes
 from ..utils import check_interval
@@ -371,7 +371,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
     def create_train_X_y(
         self,
         series: pd.DataFrame,
-        exog: Optional[Union[pd.Series, pd.DataFrame]]=None
+        exog: Optional[Union[pd.Series, pd.DataFrame]]=None, 
+        exog_per_serie: Dict[str, pd.DataFrame]=None,
     ) -> Tuple[pd.DataFrame, pd.Series, pd.Index, pd.Index]:
         """
         Create training matrices from multiple time series and exogenous
@@ -384,7 +385,12 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         exog : pandas Series, pandas DataFrame, default `None`
             Exogenous variable/s included as predictor/s. Must have the same
             number of observations as `series` and their indexes must be aligned.
-
+        exog_per_serie : Dict, default `False`
+            If not None, associate each serie with their respective feature values. 
+            This is useful when the value of each serie's exogenous features is different. 
+            Set exog_per_serie to False in the case you would like to study different series under the same feature values    
+            
+            
         Returns
         -------
         X_train : pandas DataFrame
@@ -430,7 +436,12 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                     (f"`exog` must have same number of samples as `series`. "
                      f"length `exog`: ({len(exog)}), length `series`: ({len(series)})")
                 )
+            # TODO : do a better job here 
             check_exog(exog=exog, allow_nan=True)
+            if exog_per_serie: 
+                check_exog_per_serie(exog_per_serie)
+            
+            
             if isinstance(exog, pd.Series):
                 exog = transform_series(
                            series            = exog,
@@ -445,9 +456,21 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                            fit               = True,
                            inverse_transform = False
                        )
+
+            if isinstance(exog_per_serie, dict): 
+                for key_serie, exog_values in exog_per_serie.items(): 
+                    exog_per_serie[key_serie] = transform_dataframe(
+                                df             = exog_values, 
+                                transformer    = self.transformer_exog, 
+                                fit            = True,
+                                inverse_transform = False
+                    )
             
             check_exog(exog=exog, allow_nan=False)
             check_exog_dtypes(exog)
+            if exog_per_serie: 
+                check_exog_per_serie(exog_per_serie)
+
             self.exog_dtypes = get_exog_dtypes(exog=exog)
 
             _, exog_index = preprocess_exog(exog=exog, return_values=False)
@@ -460,6 +483,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         X_levels = []
         len_series = []
         X_train_col_names = [f"lag_{lag}" for lag in self.lags]
+        X_exog_per_serie = []
 
         for i, serie in enumerate(series.columns):
 
@@ -500,6 +524,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             X_level = [serie]*len(X_train_values)
             X_levels.extend(X_level)
             len_series.append(len(y_train_values))
+
+            if exog_per_serie is not None: 
+                X_exog_per_serie.append(exog_per_serie[serie].iloc[-len(y_train_values):, ])
         
         X_levels = pd.Series(X_levels)
         X_levels = pd.get_dummies(X_levels, dtype=float)
@@ -517,8 +544,12 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             exog_to_train = pd.concat(exog_to_train).reset_index(drop=True)
         else:
             exog_to_train = None
-        
-        X_train = pd.concat([X_train, exog_to_train, X_levels], axis=1)
+            
+        exog_per_serie_to_train = []
+        if exog_per_serie is not None: 
+            exog_per_serie_to_train = pd.concat(X_exog_per_serie).reset_index(drop=True)
+
+        X_train = pd.concat([X_train, exog_to_train, exog_per_serie_to_train, X_levels], axis=1)
         self.X_train_col_names = X_train.columns.to_list()
 
         y_train = pd.Series(

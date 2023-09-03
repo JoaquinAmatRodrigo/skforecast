@@ -151,7 +151,7 @@ def test_create_train_X_y_ValueError_when_series_values_are_missing(values):
     series = pd.DataFrame({'1': pd.Series(values), 
                            '2': pd.Series(np.arange(7))})
     series.index = pd.date_range(start='2022-01-01', periods=7, freq='1D')
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5)
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=2)
 
     err_msg = re.escape(
                 ("'1' Time series has missing values in between or "
@@ -161,6 +161,32 @@ def test_create_train_X_y_ValueError_when_series_values_are_missing(values):
               )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.create_train_X_y(series=series)
+
+
+# TODO : add serie test 
+@pytest.mark.parametrize("exog", 
+                         [pd.DataFrame(np.arange(10, 24).reshape(7, 2))])
+def test_create_train_X_y_output_when_series_and_exog_per_serie_is_defined(exog):
+    """
+    Test ValueError is raised when length of series is not equal to length exog.
+    """
+    series = pd.DataFrame({'1': pd.Series(np.arange(7)), 
+                           '2': pd.Series(np.arange(7))})
+
+    exog_per_serie = {
+        "1": pd.DataFrame({
+            "X1" : np.arange(100, 107), 
+            "X2" : np.arange(200, 207)
+        }),
+        "2": pd.DataFrame({
+            "X1" : np.arange(300, 307), 
+            "X2" : np.arange(400, 407)
+        }),
+    }
+
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5)
+    forecaster.create_train_X_y(series=series, exog=exog, exog_per_serie=exog_per_serie)
+
 
 
 def test_create_train_X_y_output_when_series_and_exog_is_None():
