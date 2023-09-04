@@ -50,13 +50,25 @@ def test_ForecasterSarimax_get_info_criteria_ValueError_method_invalid_value():
         forecaster.get_info_criteria(method=method)
 
 
-def test_Sarimax_get_info_criteria():
+def test_Sarimax_get_info_criteria_skforecast():
     """
-    Test ForecasterSarimax get_info_criteria after fit `y`.
+    Test ForecasterSarimax get_info_criteria after fit `y` with skforecast.
     """
     forecaster = ForecasterSarimax(regressor=Sarimax(order=(1, 0, 1)))
     forecaster.fit(y=y)
     results = forecaster.get_info_criteria(criteria='aic', method='standard')
     expected = -56.80222086732
+
+    assert results == pytest.approx(expected)
+
+
+def test_Sarimax_get_info_criteria_pmdarima():
+    """
+    Test ForecasterSarimax get_info_criteria after fit `y` with pmdarima.
+    """
+    forecaster = ForecasterSarimax(regressor=ARIMA(maxiter=1000, trend=None, method='nm', order=(1,1,1)))
+    forecaster.fit(y=y)
+    results = forecaster.get_info_criteria(criteria='aic', method='standard')
+    expected = -64.77746178902339
 
     assert results == pytest.approx(expected)

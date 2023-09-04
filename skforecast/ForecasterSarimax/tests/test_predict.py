@@ -122,10 +122,7 @@ def test_predict_output_ForecasterSarimax_skforecast_Sarimax(kwargs, data):
     """
     Test predict output of ForecasterSarimax using Sarimax from skforecast.
     """
-    if platform.system() == "Windows":
-        system = "win"
-    else:
-        system = "linux"
+    system = "win" if platform.system() == "Windows" else 'linux'
 
     forecaster = ForecasterSarimax(
                      regressor = Sarimax(maxiter=1000, method='cg', disp=False, **kwargs)
@@ -176,10 +173,7 @@ def test_predict_output_ForecasterSarimax_with_transform_y(kwargs, data):
     """
     Test predict output of ForecasterSarimax with a StandardScaler() as transformer_y.
     """
-    if platform.system() == "Windows":
-        system = "win"
-    else:
-        system = "linux"
+    system = "win" if platform.system() == "Windows" else 'linux'
         
     forecaster = ForecasterSarimax(
                      regressor     = Sarimax(maxiter=1000, method='cg', disp=False, **kwargs),
@@ -207,10 +201,7 @@ def test_predict_output_ForecasterSarimax_with_transform_y_and_transform_exog(kw
     Test predict output of ForecasterSarimax, StandardScaler
     as transformer_y and transformer_exog as transformer_exog.
     """
-    if platform.system() == "Windows":
-        system = "win"
-    else:
-        system = "linux"
+    system = "win" if platform.system() == "Windows" else 'linux'
     
     transformer_exog = ColumnTransformer(
                            [('scale', StandardScaler(), ['exog_1']),
@@ -309,10 +300,7 @@ def test_predict_output_ForecasterSarimax_with_last_window(kwargs, data):
     """
     Test predict output of ForecasterSarimax with `last_window`.
     """
-    if platform.system() == "Windows":
-        system = "win"
-    else:
-        system = "linux"
+    system = "win" if platform.system() == "Windows" else 'linux'
     
     forecaster = ForecasterSarimax(
                      regressor = Sarimax(maxiter=1000, method='cg', disp=False, **kwargs)

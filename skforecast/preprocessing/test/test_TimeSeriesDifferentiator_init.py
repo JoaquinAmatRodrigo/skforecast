@@ -1,6 +1,9 @@
+# Unit test TimeSeriesDifferentiator init
+# ==============================================================================
 import re
 import pytest
 from skforecast.preprocessing import TimeSeriesDifferentiator
+
 
 def test_TypeError_when_order_is_not_int_when_initialization():
     """
@@ -14,6 +17,7 @@ def test_TypeError_when_order_is_not_int_when_initialization():
             ) 
     with pytest.raises(TypeError, match = err_msg):
         TimeSeriesDifferentiator(order = order)
+
 
 def test_ValueError_when_order_is_less_than_1_when_initialization():
     """

@@ -48,7 +48,7 @@ pip install skforecast
 Specific version:
 
 ```bash
-pip install skforecast==0.9.1
+pip install skforecast==0.10.0
 ```
 
 Latest (unstable):
@@ -93,14 +93,13 @@ pip install skforecast[plotting]
 + statsmodels>=0.12, <0.15
 + pmdarima>=2.0, <2.1
 
-# What is new in skforecast 0.9.1?
+# What is new in skforecast 0.10.0?
 
 Visit the [release notes](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/changelog.md) to view all notable changes.
 
-- [x] `ForecasterAutoregDirect` and `ForecasterAutoregMultiVariate` include the `n_jobs` argument in their `fit` method, allowing multi-process parallelization for improved performance.
-- [x] All backtesting and grid search functions have been extended to include the `n_jobs` argument, allowing multi-process parallelization for improved performance.
-- [x] Argument `refit` now can be also an `integer` in all backtesting dependent functions in modules `model_selection`, `model_selection_multiseries`, and `model_selection_sarimax`. This allows the Forecaster to be trained every this number of iterations.
-- [x] `ForecasterAutoregMultiSeries` and `ForecasterAutoregMultiSeriesCustom` can be trained using series of different lengths. This means that the model can handle datasets with different numbers of data points in each series.
+- [x] New `Sarimax.Sarimax` model. A wrapper of `statsmodels.SARIMAX` that follows the scikit-learn API and can be used with the `ForecasterSarimax`.
+- [x] Added `skforecast.preprocessing.TimeSeriesDifferentiator` to preprocess time series by differentiating or integrating them (reverse differentiation).
+- [x] Added `differentiation` argument to `ForecasterAutoreg` and `ForecasterAutoregCustom` to model the n-order differentiated time series using the new skforecast preprocessor `TimeSeriesDifferentiator`.
 - [x] Bug fixes and performance improvements.
 
 
@@ -208,7 +207,7 @@ If you use this software, please cite it using the following metadata.
 
 **APA**:
 ```
-Amat Rodrigo, J., & Escobar Ortiz, J. skforecast (Version 0.9.1) [Computer software]
+Amat Rodrigo, J., & Escobar Ortiz, J. skforecast (Version 0.10.0) [Computer software]
 ```
 
 **BibTeX**:
@@ -216,9 +215,9 @@ Amat Rodrigo, J., & Escobar Ortiz, J. skforecast (Version 0.9.1) [Computer softw
 @software{skforecast,
 author = {Amat Rodrigo, Joaquin and Escobar Ortiz, Javier},
 license = {BSD 3-Clause License},
-month = {7},
+month = {9},
 title = {{skforecast}},
-version = {0.9.1},
+version = {0.10.0},
 year = {2023}
 }
 ```
