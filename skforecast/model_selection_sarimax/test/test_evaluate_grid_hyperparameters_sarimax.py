@@ -211,6 +211,7 @@ def test_evaluate_grid_hyperparameters_sarimax_when_return_best():
         initial_train_size = len(y_datetime)-12,
         fixed_train_size   = True,
         return_best        = True,
+        suppress_warnings  = False,
         verbose            = False
     )
     

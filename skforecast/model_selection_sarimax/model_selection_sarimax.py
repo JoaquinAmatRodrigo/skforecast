@@ -801,7 +801,7 @@ def _evaluate_grid_hyperparameters_sarimax(
         best_metric = results[list(metric_dict.keys())[0]].iloc[0]
         
         forecaster.set_params(best_params)
-        forecaster.fit(y=y, exog=exog)
+        forecaster.fit(y=y, exog=exog, suppress_warnings=suppress_warnings_fit)
         
         print(
             f"`Forecaster` refitted using the best-found parameters, and the whole data set: \n"
