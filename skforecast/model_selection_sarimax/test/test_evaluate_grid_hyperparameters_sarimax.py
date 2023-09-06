@@ -202,16 +202,17 @@ def test_evaluate_grid_hyperparameters_sarimax_when_return_best():
                   {'order': (3, 2, 0), 'trend': 'c'}]
 
     _evaluate_grid_hyperparameters_sarimax(
-        forecaster         = forecaster,
-        y                  = y_datetime,
-        param_grid         = param_grid,
-        steps              = 3,
-        refit              = True,
-        metric             = mean_absolute_error,
-        initial_train_size = len(y_datetime)-12,
-        fixed_train_size   = True,
-        return_best        = True,
-        verbose            = False
+        forecaster            = forecaster,
+        y                     = y_datetime,
+        param_grid            = param_grid,
+        steps                 = 3,
+        refit                 = True,
+        metric                = mean_absolute_error,
+        initial_train_size    = len(y_datetime)-12,
+        fixed_train_size      = True,
+        return_best           = True,
+        suppress_warnings_fit = False,
+        verbose               = False
     )
     
     expected_params = {

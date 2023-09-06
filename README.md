@@ -109,15 +109,15 @@ A **Forecaster** object in the skforecast library is a comprehensive container t
 
 The **skforecast** library offers a variety of forecaster types, each tailored to specific requirements such as single or multiple time series, direct or recursive strategies, or custom predictors. Regardless of the specific forecaster type, all instances share the same API.
 
-| Forecaster | Single series | Multiple series | Recursive strategy | Direct strategy | Probabilistic prediction | Exogenous features | Custom features |
-|:-----------|:-------------:|:---------------:|:------------------:|:---------------:|:------------------------:|:------------------:|:---------------:|
-|[ForecasterAutoreg](https://skforecast.org/latest/user_guides/autoregresive-forecaster.html)|:heavy_check_mark:||:heavy_check_mark:||:heavy_check_mark:|:heavy_check_mark:||
-|[ForecasterAutoregCustom](https://skforecast.org/latest/user_guides/custom-predictors.html)|:heavy_check_mark:||:heavy_check_mark:||:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|
-|[ForecasterAutoregDirect](https://skforecast.org/latest/user_guides/direct-multi-step-forecasting.html)|:heavy_check_mark:|||:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:||
-|[ForecasterMultiSeries](https://skforecast.org/latest/user_guides/independent-multi-time-series-forecasting.html)||:heavy_check_mark:|:heavy_check_mark:||:heavy_check_mark:|:heavy_check_mark:||
-|[ForecasterMultiSeriesCustom](https://skforecast.org/latest/user_guides/custom-predictors.html)||:heavy_check_mark:|:heavy_check_mark:||:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|
-|[ForecasterMultiVariate](https://skforecast.org/latest/user_guides/dependent-multi-series-multivariate-forecasting.html)||:heavy_check_mark:||:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:||
-|[ForecasterSarimax](https://skforecast.org/latest/user_guides/forecasting-sarimax-arima.html)|:heavy_check_mark:||:heavy_check_mark:||:heavy_check_mark:|:heavy_check_mark:||
+| Forecaster | Single series | Multiple series | Recursive strategy | Direct strategy | Probabilistic prediction | Time series differentiation | Exogenous features | Custom features |
+|:-----------|:-------------:|:---------------:|:------------------:|:---------------:|:------------------------:|:---------------------------:|:------------------:|:---------------:|
+|[ForecasterAutoreg](https://skforecast.org/latest/user_guides/autoregresive-forecaster.html)|:heavy_check_mark:||:heavy_check_mark:||:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:||
+|[ForecasterAutoregCustom](https://skforecast.org/latest/user_guides/custom-predictors.html)|:heavy_check_mark:||:heavy_check_mark:||:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|
+|[ForecasterAutoregDirect](https://skforecast.org/latest/user_guides/direct-multi-step-forecasting.html)|:heavy_check_mark:|||:heavy_check_mark:|:heavy_check_mark:||:heavy_check_mark:||
+|[ForecasterMultiSeries](https://skforecast.org/latest/user_guides/independent-multi-time-series-forecasting.html)||:heavy_check_mark:|:heavy_check_mark:||:heavy_check_mark:||:heavy_check_mark:||
+|[ForecasterMultiSeriesCustom](https://skforecast.org/latest/user_guides/custom-predictors.html)||:heavy_check_mark:|:heavy_check_mark:||:heavy_check_mark:||:heavy_check_mark:|:heavy_check_mark:|
+|[ForecasterMultiVariate](https://skforecast.org/latest/user_guides/dependent-multi-series-multivariate-forecasting.html)||:heavy_check_mark:||:heavy_check_mark:|:heavy_check_mark:||:heavy_check_mark:||
+|[ForecasterSarimax](https://skforecast.org/latest/user_guides/forecasting-sarimax-arima.html)|:heavy_check_mark:||:heavy_check_mark:||:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:||
 
 
 # Main User Guides

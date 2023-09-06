@@ -61,15 +61,18 @@ nav:
       - ForecasterMultiSeriesCustom: api/ForecasterMultiSeriesCustom.md
       - ForecasterMultiVariate: api/ForecasterMultiVariate.md
       - ForecasterSarimax: api/ForecasterSarimax.md
+      - Sarimax: api/Sarimax.md
       - model_selection: api/model_selection.md
       - model_selection_multiseries: api/model_selection_multiseries.md
       - model_selection_sarimax: api/model_selection_sarimax.md
+      - preprocessing: api/preprocessing.md
       - plot: api/plot.md
       - utils: api/utils.md
       - exceptions: api/exceptions.md
 
   - FAQ and Tips:
       - Table of contents: faq/faq.md
+      - Time series differentiation: faq/time-series-differentiation.ipynb
       - Avoid negative predictions when forecasting: faq/non-negative-predictions.ipynb
       - Forecasting time series with missing values: faq/forecasting-time-series-with-missing-values.ipynb
       - Cyclical features in time series: faq/cyclical-features-time-series.ipynb
