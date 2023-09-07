@@ -14,3 +14,7 @@ dependences_all
 with open("requirements.txt", mode='w') as fp:
     for dependency in dependences_all:
         fp.write(f"{dependency}\n")
+
+if __name__ == "__main__":
+    import os
+    os.system("python extract_dependences.py")
