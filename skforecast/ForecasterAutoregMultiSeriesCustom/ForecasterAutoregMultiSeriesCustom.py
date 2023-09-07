@@ -214,7 +214,6 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
 
     Notes
     -----
-
     The weights are used to control the influence that each observation has on the
     training of the model. `ForecasterAutoregMultiseries` accepts two types of weights. 
     If the two types of weights are indicated, they are multiplied to create the final
@@ -1153,7 +1152,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
                                  )
                     
                     prediction_with_residual = prediction + sample_residuals[step]
-                    level_boot_predictions[step, i] = prediction_with_residual
+                    level_boot_predictions[step, i] = prediction_with_residual[0]
 
                     last_window_boot = np.append(
                                            last_window_boot[1:],

@@ -1,0 +1,106 @@
+[project]
+name = "skforecast"
+version = "0.10.0"
+description="Forecasting time series with scikit-learn regressors. It also works with any regressor compatible with the scikit-learn API (pipelines, CatBoost, LightGBM, XGBoost, Ranger...)."
+readme = "README.md"
+authors = [
+    { name = "Joaquin Amat Rodrigo", email = "j.amatrodrigo@gmail.com" },
+    { name = "Javier Escobar Ortiz", email = "javier.escobar.ortiz@gmail.com" }
+]
+
+maintainers = [
+    { name = "Joaquin Amat Rodrigo", email = "j.amatrodrigo@gmail.com" },
+    { name = "Javier Escobar Ortiz", email = "javier.escobar.ortiz@gmail.com" }
+]
+
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "License :: OSI Approved :: BSD License"
+]
+keywords = [
+    "data-science",
+    "machine-learning",
+    "data-mining",
+    "time-series",
+    "scikit-learn",
+    "forecasting",
+    "time-series-analysis",
+    "time-series-regression",
+]
+dependencies = [
+    "numpy>=1.20, <1.26",
+    "pandas>=1.2, <2.1",
+    "tqdm>=4.57.0, <4.66",
+    "scikit-learn>=1.0, <1.4",
+    "optuna>=2.10.0, <3.3",
+    "joblib>=1.1.0, <1.4",
+]
+requires-python = ">=3.8"
+
+[project.optional-dependencies]
+sarimax = [
+    "pmdarima>=2.0, <2.1",
+    "statsmodels>=0.12, <0.15",
+]
+
+plotting = [
+    "matplotlib>=3.3, <3.8",
+    "seaborn>=0.11, <0.13",
+    "statsmodels>=0.12, <0.15",
+]
+
+all = [
+    "pmdarima>=2.0, <2.1",
+    "matplotlib>=3.3, <3.8",
+    "seaborn>=0.11, <0.13",
+    "statsmodels>=0.12, <0.15",
+]
+
+full = [
+    "pmdarima>=2.0, <2.1",
+    "matplotlib>=3.3, <3.8",
+    "seaborn>=0.11, <0.13",
+    "statsmodels>=0.12, <0.15",
+]
+
+docs = [
+    "mike==1.1.2",
+    "mkdocs==1.4.3",
+    "mkdocs-jupyter==0.24.1",
+    "mkdocs-material==9.1.15",
+    "mkdocstrings==0.22.0",
+    "mkdocstrings-python==1.1.0",
+    "jupyter-contrib-nbextensions==0.7.0",
+]
+
+test = [
+    "pytest>=7.1.2, <7.5",
+    "pytest-cov>=3.0.0, <4.2",
+    "xgboost>=1.6.1, <1.8",
+    "lightgbm <3.4",
+    "pytest-xdist <3.4",
+    "tomli >=2.0.0"
+]
+
+
+[project.urls]
+Homepage = "https://www.skforecast.org"
+Repository = "https://github.com/JoaquinAmatRodrigo/skforecast"
+Documentation = "https://www.skforecast.org"
+"Release Notes" = "https://skforecast.org/latest/releases/releases"
+
+
+[project.license]
+file = "LICENSE"
+
+[build-system]
+requires = ["setuptools>=61", "toml", "build"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["skforecast", "skforecast*"]
+exclude = ["skforecast/**/tests/*"]

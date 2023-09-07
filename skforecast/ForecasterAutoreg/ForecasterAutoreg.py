@@ -35,6 +35,7 @@ from ..utils import preprocess_exog
 from ..utils import expand_index
 from ..utils import transform_series
 from ..utils import transform_dataframe
+from ..preprocessing import TimeSeriesDifferentiator
 
 logging.basicConfig(
     format = '%(name)-10s %(levelname)-5s %(message)s', 
@@ -71,6 +72,15 @@ class ForecasterAutoreg(ForecasterBase):
         index. For example, a function that assigns a lower weight to certain dates.
         Ignored if `regressor` does not have the argument `sample_weight` in its `fit`
         method. The resulting `sample_weight` cannot have negative values.
+    differentiation : int, default `None`
+        Order of differencing applied to the time series before training the forecaster.
+        If `None`, no differencing is applied. The order of differentiation is the number
+        of times the differencing operation is applied to a time series. Differencing
+        involves computing the differences between consecutive data points in the series.
+        Differentiation is reversed in the output of `predict()` and `predict_interval()`.
+        **WARNING: This argument is newly introduced and requires special attention. It
+        is still experimental and may undergo changes.**
+        **New in version 0.10.0**
     fit_kwargs : dict, default `None`
         Additional arguments to be passed to the `fit` method of the regressor.
         **New in version 0.8.0**
@@ -98,15 +108,32 @@ class ForecasterAutoreg(ForecasterBase):
         index. For example, a function that assigns a lower weight to certain dates.
         Ignored if `regressor` does not have the argument `sample_weight` in its `fit`
         method. The resulting `sample_weight` cannot have negative values.
+    differentiation : int, default `None`
+        Order of differencing applied to the time series before training the forecaster.
+        If `None`, no differencing is applied. The order of differentiation is the number
+        of times the differencing operation is applied to a time series. Differencing
+        involves computing the differences between consecutive data points in the series.
+        Differentiation is reversed in the output of `predict()` and `predict_interval()`.
+        **WARNING: This argument is newly introduced and requires special attention. It
+        is still experimental and may undergo changes.**
+        **New in version 0.10.0**
     source_code_weight_func : str
         Source code of the custom function used to create weights.
     max_lag : int
         Maximum value of lag included in `lags`.
     window_size : int
         Size of the window needed to create the predictors. It is equal to `max_lag`.
+        If `differentiation` is not `None`, the size of the window is `max_lag` +
+        `differentiation`.
     last_window : pandas Series
-        Last window the forecaster has seen during training. It stores the
-        values needed to predict the next `step` immediately after the training data.
+        This window represents the most recent data observed by the predictor
+        during its training phase. It contains the values needed to predict the
+        next step immediately after the training data. These values are stored
+        in the original scale of the time series before undergoing any transformations
+        or differentiation. When `differentiation` parameter is specified, the
+        dimensions of the `last_window` are expanded as many values as the order
+        of differentiation. For example, if `lags` = 7 and `differentiation` = 1,
+        `last_window` will have 8 values.
     index_type : type
         Type of index of the input used in training.
     index_freq : str
@@ -159,6 +186,7 @@ class ForecasterAutoreg(ForecasterBase):
         transformer_y: Optional[object]=None,
         transformer_exog: Optional[object]=None,
         weight_func: Optional[Callable]=None,
+        differentiation: Optional[int]=None,
         fit_kwargs: Optional[dict]=None,
         forecaster_id: Optional[Union[str, int]]=None
     ) -> None:
@@ -167,6 +195,8 @@ class ForecasterAutoreg(ForecasterBase):
         self.transformer_y           = transformer_y
         self.transformer_exog        = transformer_exog
         self.weight_func             = weight_func
+        self.differentiation         = differentiation
+        self.differentiator          = None
         self.source_code_weight_func = None
         self.last_window             = None
         self.index_type              = None
@@ -189,6 +219,13 @@ class ForecasterAutoreg(ForecasterBase):
         self.lags = initialize_lags(type(self).__name__, lags)
         self.max_lag = max(self.lags)
         self.window_size = self.max_lag
+        if differentiation is not None and differentiation < 1:
+            raise ValueError(
+                f"`differentiation` must be greater than 0. Got {differentiation}."
+            )
+        if self.differentiation is not None:
+            self.window_size += self.differentiation
+            self.differentiator = TimeSeriesDifferentiator(order=self.differentiation)
             
         self.weight_func, self.source_code_weight_func, _ = initialize_weights(
             forecaster_name = type(self).__name__, 
@@ -227,6 +264,7 @@ class ForecasterAutoreg(ForecasterBase):
             f"Transformer for exog: {self.transformer_exog} \n"
             f"Window size: {self.window_size} \n"
             f"Weight function included: {True if self.weight_func is not None else False} \n"
+            f"Differentiation order: {self.differentiation} \n"
             f"Exogenous included: {self.included_exog} \n"
             f"Type of exogenous variable: {self.exog_type} \n"
             f"Exogenous variables names: {self.exog_col_names} \n"
@@ -327,6 +365,9 @@ class ForecasterAutoreg(ForecasterBase):
                 inverse_transform = False
             )
         y_values, y_index = preprocess_y(y=y)
+
+        if self.differentiation is not None:
+            y_values = self.differentiator.fit_transform(y_values)
         
         if exog is not None:
             if len(exog) != len(y):
@@ -381,6 +422,10 @@ class ForecasterAutoreg(ForecasterBase):
                       index = y_index[self.max_lag: ],
                       name  = 'y'
                   )
+
+        if self.differentiation is not None:
+            y_train = y_train.iloc[self.differentiation: ]
+            X_train = X_train.iloc[self.differentiation: ]
                         
         return X_train, y_train
 
@@ -512,8 +557,9 @@ class ForecasterAutoreg(ForecasterBase):
             self.in_sample_residuals = residuals
         
         # The last time window of training data is stored so that lags needed as
-        # predictors in the first iteration of `predict()` can be calculated.
-        self.last_window = y.iloc[-self.max_lag:].copy()
+        # predictors in the first iteration of `predict()` can be calculated. It
+        # also includes the values need to calculate the diferenctiation.
+        self.last_window = y.iloc[-self.window_size:].copy()
     
 
     def _recursive_predict(
@@ -614,7 +660,7 @@ class ForecasterAutoreg(ForecasterBase):
             max_steps        = None,
             levels           = None,
             series_col_names = None
-        ) 
+        )
 
         if exog is not None:
             if isinstance(exog, pd.DataFrame):
@@ -645,12 +691,17 @@ class ForecasterAutoreg(ForecasterBase):
         last_window_values, last_window_index = preprocess_last_window(
                                                     last_window = last_window
                                                 )
+        if self.differentiation is not None:
+            last_window_values = self.differentiator.fit_transform(last_window_values)
             
         predictions = self._recursive_predict(
                           steps       = steps,
                           last_window = copy(last_window_values),
                           exog        = copy(exog_values)
                       )
+        
+        if self.differentiation is not None:
+            predictions = self.differentiator.inverse_transform_next_window(predictions)
 
         predictions = pd.Series(
                           data  = predictions,
@@ -667,7 +718,7 @@ class ForecasterAutoreg(ForecasterBase):
                           fit               = False,
                           inverse_transform = True
                       )
-
+        
         return predictions
 
     
@@ -784,6 +835,8 @@ class ForecasterAutoreg(ForecasterBase):
         last_window_values, last_window_index = preprocess_last_window(
                                                     last_window = last_window
                                                 )
+        if self.differentiation is not None:
+            last_window_values = self.differentiator.fit_transform(last_window_values)
 
         boot_predictions = np.full(
                                shape      = (steps, n_boot),
@@ -820,7 +873,7 @@ class ForecasterAutoreg(ForecasterBase):
                              )
                 
                 prediction_with_residual  = prediction + sample_residuals[step]
-                boot_predictions[step, i] = prediction_with_residual
+                boot_predictions[step, i] = prediction_with_residual[0]
 
                 last_window_boot = np.append(
                                        last_window_boot[1:],
@@ -829,6 +882,11 @@ class ForecasterAutoreg(ForecasterBase):
                 
                 if exog is not None:
                     exog_boot = exog_boot[1:]
+
+            if self.differentiation is not None:
+                boot_predictions[:, i] = (
+                    self.differentiator.inverse_transform_next_window(boot_predictions[:, i])
+                )
 
         boot_predictions = pd.DataFrame(
                                data    = boot_predictions,
@@ -844,7 +902,7 @@ class ForecasterAutoreg(ForecasterBase):
                                             fit               = False,
                                             inverse_transform = True
                                         )
-                                    
+
         return boot_predictions
 
 

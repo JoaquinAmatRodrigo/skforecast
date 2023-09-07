@@ -2,6 +2,30 @@
 
 All significant changes to this project are documented in this release file.
 
+## [0.10.0] - [ongoing]
+
+The main changes in this release are:
+
++ New `Sarimax.Sarimax` model. A wrapper of `statsmodels.SARIMAX` that follows the scikit-learn API and can be used with the `ForecasterSarimax`.
+
++ Added `differentiation` argument to `ForecasterAutoreg` and `ForecasterAutoregCustom` to model the n-order differentiated time series using the new skforecast preprocessor `TimeSeriesDifferentiator`.
+
+**Added**
+
++ New `Sarimax.Sarimax` model. A wrapper of `statsmodels.SARIMAX` that follows the scikit-learn API.
+
++ Added `skforecast.preprocessing.TimeSeriesDifferentiator` to preprocess time series by differentiating or integrating them (reverse differentiation).
+
++ Added `differentiation` argument to `ForecasterAutoreg` and `ForecasterAutoregCustom` to model the n-order differentiated time series.
+
+**Changed**
+
++ Refactor `ForecasterSarimax` to work with both skforecast Sarimax and pmdarima ARIMA models.
+
++ Replace `setup.py` with `pyproject.toml`.
+
+**Fixed**
+
 
 ## [0.9.1] - [2023-07-14]
 

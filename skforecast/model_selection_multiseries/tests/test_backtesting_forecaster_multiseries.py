@@ -105,8 +105,8 @@ def test_backtesting_forecaster_multiseries_TypeError_when_levels_not_list_str_N
 
 def test_backtesting_forecaster_multiseries_IgnoredArgumentWarning_forecaster_multivariate_and_levels():
     """
-    Test IgnoredArgumentWarning is raised when levels is not forecaster.level or None in
-    ForecasterAutoregMultiVariate.
+    Test IgnoredArgumentWarning is raised when levels is not forecaster.level or 
+    None in ForecasterAutoregMultiVariate.
     """
     forecaster = ForecasterAutoregMultiVariate(
                      regressor = Ridge(random_state=123),

@@ -33,6 +33,7 @@ nav:
       - Direct multi-step forecasting: user_guides/direct-multi-step-forecasting.ipynb
       - Independent multi-time series forecasting: user_guides/independent-multi-time-series-forecasting.ipynb
       - Dependent multivariate series forecasting: user_guides/dependent-multi-series-multivariate-forecasting.ipynb
+      - ARIMA and SARIMAX forecasting: user_guides/forecasting-sarimax-arima.ipynb
       - Exogenous variables: user_guides/exogenous-variables.ipynb
       - Custom predictors: user_guides/custom-predictors.ipynb
       - Weighted time series forecasting: user_guides/weighted-time-series-forecasting.ipynb
@@ -43,7 +44,6 @@ nav:
       - Feature importances: user_guides/feature-importances.ipynb
       - Categorical features: user_guides/categorical-features.ipynb
       - Forecasting with XGBoost and LightGBM: user_guides/forecasting-xgboost-lightgbm.ipynb
-      - Forecasting SARIMAX and ARIMA models: user_guides/forecasting-sarimax-arima.ipynb
       - Forecaster in production: user_guides/forecaster-in-production.ipynb
       - Save and load forecaster: user_guides/save-load-forecaster.ipynb
       - Shap-values: user_guides/shap-values-skforecast.ipynb
@@ -61,18 +61,22 @@ nav:
       - ForecasterMultiSeriesCustom: api/ForecasterMultiSeriesCustom.md
       - ForecasterMultiVariate: api/ForecasterMultiVariate.md
       - ForecasterSarimax: api/ForecasterSarimax.md
+      - Sarimax: api/Sarimax.md
       - model_selection: api/model_selection.md
       - model_selection_multiseries: api/model_selection_multiseries.md
       - model_selection_sarimax: api/model_selection_sarimax.md
+      - preprocessing: api/preprocessing.md
       - plot: api/plot.md
       - utils: api/utils.md
       - exceptions: api/exceptions.md
 
   - FAQ and Tips:
       - Table of contents: faq/faq.md
+      - Time series differentiation: faq/time-series-differentiation.ipynb
       - Avoid negative predictions when forecasting: faq/non-negative-predictions.ipynb
       - Forecasting time series with missing values: faq/forecasting-time-series-with-missing-values.ipynb
       - Cyclical features in time series: faq/cyclical-features-time-series.ipynb
+      - Parallelization in skforecast: faq/parallelization-skforecast.ipynb
       - Profiling skforecast: faq/profiling-skforecast.ipynb
 
   - Releases: releases/releases.md

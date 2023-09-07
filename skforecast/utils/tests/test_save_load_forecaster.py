@@ -18,8 +18,8 @@ def test_save_and_load_forecaster_persistence():
     rng = np.random.default_rng(12345)
     y = pd.Series(rng.normal(size=100))
     forecaster.fit(y=y)
-    save_forecaster(forecaster=forecaster, file_name='forecaster.py', verbose=False)
-    forecaster_loaded = load_forecaster(file_name='forecaster.py', verbose=False)
+    save_forecaster(forecaster=forecaster, file_name='forecaster.py', verbose=True)
+    forecaster_loaded = load_forecaster(file_name='forecaster.py', verbose=True)
     os.remove('forecaster.py')
 
     for key in vars(forecaster).keys():

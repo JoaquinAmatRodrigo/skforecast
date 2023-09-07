@@ -16,6 +16,8 @@ import sklearn
 import sklearn.linear_model
 from sklearn.compose import ColumnTransformer
 from sklearn.exceptions import NotFittedError
+from sklearn.base import BaseEstimator
+from sklearn.base import TransformerMixin
 import inspect
 from copy import deepcopy
 
@@ -24,10 +26,15 @@ from ..exceptions import DataTypeWarning
 from ..exceptions import IgnoredArgumentWarning
 
 optional_dependencies = {
-    "sarimax": ['pmdarima>=2.0, <2.1'],
-    "plotting": ['matplotlib>=3.3, <3.8', 
-                 'seaborn>=0.11, <0.13', 
-                 'statsmodels>=0.12, <0.15']
+    "sarimax": [
+        'pmdarima>=2.0, <2.1',
+        'statsmodels>=0.12, <0.15'
+    ],
+    "plotting": [
+        'matplotlib>=3.3, <3.8', 
+        'seaborn>=0.11, <0.13', 
+        'statsmodels>=0.12, <0.15'
+    ]
 }
 
 
