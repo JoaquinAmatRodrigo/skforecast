@@ -807,6 +807,9 @@ class Sarimax(BaseEstimator, RegressorMixin):
         """
         Get the selected information criteria.
 
+        Check https://www.statsmodels.org/dev/generated/statsmodels.tsa.statespace.sarimax.SARIMAXResults.info_criteria.html
+        to know more about statsmodels info_criteria method.
+
         Parameters
         ----------
         criteria : str, default `'aic'`
@@ -821,10 +824,6 @@ class Sarimax(BaseEstimator, RegressorMixin):
         -------
         metric : float
             The value of the selected information criteria.
-
-        Notes
-        -----
-        See more in https://www.statsmodels.org/dev/generated/statsmodels.tsa.statespace.sarimax.SARIMAXResults.info_criteria.html
         
         """
 
