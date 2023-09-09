@@ -721,14 +721,21 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#weighted-time-series-forecasting" class="md-nav__link">
-    Weighted time series forecasting
+  <a href="#inclusion-of-kwargs-in-the-regressor-fit-method" class="md-nav__link">
+    Inclusion of kwargs in the regressor fit method
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#inclusion-of-kwargs-in-the-regressor-fit-method" class="md-nav__link">
+  <a href="#differentiation" class="md-nav__link">
+    Differentiation
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#inclusion-of-kwargs-in-the-regressor-fit-method_1" class="md-nav__link">
     Inclusion of kwargs in the regressor fit method
   </a>
   
@@ -1637,14 +1644,21 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#weighted-time-series-forecasting" class="md-nav__link">
-    Weighted time series forecasting
+  <a href="#inclusion-of-kwargs-in-the-regressor-fit-method" class="md-nav__link">
+    Inclusion of kwargs in the regressor fit method
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#inclusion-of-kwargs-in-the-regressor-fit-method" class="md-nav__link">
+  <a href="#differentiation" class="md-nav__link">
+    Differentiation
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#inclusion-of-kwargs-in-the-regressor-fit-method_1" class="md-nav__link">
     Inclusion of kwargs in the regressor fit method
   </a>
   
@@ -1723,7 +1737,8 @@
 <span class="normal">11</span>
 <span class="normal">12</span>
 <span class="normal">13</span>
-<span class="normal">14</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Create a forecaster</span>
+<span class="normal">14</span>
+<span class="normal">15</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Create a forecaster</span>
 <span class="c1"># ==============================================================================</span>
 <span class="kn">from</span> <span class="nn">skforecast.ForecasterAutoreg</span> <span class="kn">import</span> <span class="n">ForecasterAutoreg</span>
 <span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestRegressor</span>
@@ -1734,6 +1749,7 @@
                  <span class="n">transformer_y</span>    <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">transformer_exog</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">weight_func</span>      <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">differentiation</span>  <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">fit_kwargs</span>       <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">forecaster_id</span>    <span class="o">=</span> <span class="kc">None</span>
              <span class="p">)</span>
@@ -1837,12 +1853,11 @@
                  <span class="n">transformer_exog</span> <span class="o">=</span> <span class="n">StandardScaler</span><span class="p">()</span>
              <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-<h3 id="weighted-time-series-forecasting">Weighted time series forecasting<a class="headerlink" href="#weighted-time-series-forecasting" title="Permanent link">&para;</a></h3>
-<p>The presence of unreliable or unrepresentative values in the data history poses a significant challenge, as it hinders model learning. However, most forecasting algorithms require complete time series data, making it impossible to remove these observations. An alternative solution is to reduce the weight of the affected observations during model training. <strong>Skforecast</strong> facilitates the control of data weights with the <code>weight_func</code> argument.</p>
-<p>More information: <a href="https://skforecast.org/latest/user_guides/weighted-time-series-forecasting.html">Weighted time series forecasting</a>.</p>
-<div class="admonition example">
-<p class="admonition-title">Example</p>
-<p>The following example shows how a part of the time series can be excluded from the model training by assigning it a weight of zero using the <code>custom_weights</code> function, depending on the index.</p>
+<h3 id="inclusion-of-kwargs-in-the-regressor-fit-method">Inclusion of kwargs in the regressor fit method<a class="headerlink" href="#inclusion-of-kwargs-in-the-regressor-fit-method" title="Permanent link">&para;</a></h3>
+<p>Some regressors include the possibility to add some additional configuration during the fitting method. The predictor parameter <code>fit_kwargs</code> allows these arguments to be set when the forecaster is declared.</p>
+<div class="admonition danger">
+<p class="admonition-title">Danger</p>
+<p>To add weights to the forecaster, it must be done through the <code>weight_func</code> argument and not through a <code>fit_kwargs</code>.</p>
 </div>
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
@@ -1898,7 +1913,42 @@
                  <span class="n">weight_func</span>      <span class="o">=</span> <span class="n">custom_weights</span><span class="p">,</span>
              <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-<h3 id="inclusion-of-kwargs-in-the-regressor-fit-method">Inclusion of kwargs in the regressor fit method<a class="headerlink" href="#inclusion-of-kwargs-in-the-regressor-fit-method" title="Permanent link">&para;</a></h3>
+<h3 id="differentiation">Differentiation<a class="headerlink" href="#differentiation" title="Permanent link">&para;</a></h3>
+<p>Time series differentiation involves computing the differences between consecutive observations in the time series. When it comes to training forecasting models, differentiation offers the advantage of focusing on relative rates of change rather than directly attempting to model the absolute values. <strong>Skforecast</strong>, version 0.10.0 or higher, introduces a novel differentiation parameter within its Forecasters. </p>
+<p>More information: <a href="https://skforecast.org/latest/faq/time-series-differentiation">Time series differentiation</a>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The <code>differentiation</code> parameter is only available for the <code>ForecasterAutoreg</code> and <code>ForecasterAutoregCustom</code>, in the following versions it will be incorporated to the rest of the Forecasters.</p>
+</div>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Create a forecaster</span>
+<span class="c1"># ==============================================================================</span>
+<span class="kn">from</span> <span class="nn">skforecast.ForecasterAutoreg</span> <span class="kn">import</span> <span class="n">ForecasterAutoreg</span>
+<span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestRegressor</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">StandardScaler</span>
+
+<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
+                 <span class="n">regressor</span>        <span class="o">=</span> <span class="n">RandomForestRegressor</span><span class="p">(),</span>
+                 <span class="n">lags</span>             <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+                 <span class="n">transformer_y</span>    <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">transformer_exog</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">weight_func</span>      <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">differentiation</span>  <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+             <span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="inclusion-of-kwargs-in-the-regressor-fit-method_1">Inclusion of kwargs in the regressor fit method<a class="headerlink" href="#inclusion-of-kwargs-in-the-regressor-fit-method_1" title="Permanent link">&para;</a></h3>
 <p>Some regressors include the possibility to add some additional configuration during the fitting method. The predictor parameter <code>fit_kwargs</code> allows these arguments to be set when the forecaster is declared.</p>
 <div class="admonition danger">
 <p class="admonition-title">Danger</p>
@@ -1921,7 +1971,8 @@
 <span class="normal">10</span>
 <span class="normal">11</span>
 <span class="normal">12</span>
-<span class="normal">13</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Create a forecaster</span>
+<span class="normal">13</span>
+<span class="normal">14</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Create a forecaster</span>
 <span class="c1"># ==============================================================================</span>
 <span class="kn">from</span> <span class="nn">skforecast.ForecasterAutoreg</span> <span class="kn">import</span> <span class="n">ForecasterAutoreg</span>
 <span class="kn">from</span> <span class="nn">lightgbm</span> <span class="kn">import</span> <span class="n">LGBMRegressor</span>
@@ -1932,6 +1983,7 @@
                  <span class="n">transformer_y</span>    <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">transformer_exog</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">weight_func</span>      <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">differentiation</span>  <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">fit_kwargs</span>       <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;categorical_feature&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;exog_1&#39;</span><span class="p">,</span> <span class="s1">&#39;exog_2&#39;</span><span class="p">]}</span>
              <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -1950,7 +2002,8 @@
 <span class="normal">11</span>
 <span class="normal">12</span>
 <span class="normal">13</span>
-<span class="normal">14</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Create a forecaster</span>
+<span class="normal">14</span>
+<span class="normal">15</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Create a forecaster</span>
 <span class="c1"># ==============================================================================</span>
 <span class="kn">from</span> <span class="nn">skforecast.ForecasterAutoreg</span> <span class="kn">import</span> <span class="n">ForecasterAutoreg</span>
 <span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestRegressor</span>
@@ -1961,6 +2014,7 @@
                  <span class="n">transformer_y</span>    <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">transformer_exog</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">weight_func</span>      <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">differentiation</span>  <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">fit_kwargs</span>       <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">forecaster_id</span>    <span class="o">=</span> <span class="s1">&#39;my_forecaster&#39;</span>
              <span class="p">)</span>
@@ -2005,6 +2059,7 @@
 <h3 id="number-of-jobs">Number of jobs<a class="headerlink" href="#number-of-jobs" title="Permanent link">&para;</a></h3>
 <p>The <code>n_jobs</code> parameter allows multi-process parallelization to train regressors for all <code>steps</code> simultaneously. </p>
 <p>The benefits of parallelization depend on several factors, including the regressor used, the number of fits to be performed, and the volume of data involved. When the <code>n_jobs</code> parameter is set to <code>'auto'</code>, the level of parallelization is automatically selected based on heuristic rules that aim to choose the best option for each scenario.</p>
+<p>For a more detailed look at parallelization, visit <a href="https://skforecast.org/latest/faq/parallelization-skforecast">Parallelization in skforecast</a>.</p>
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
 <span class="normal"> 3</span>

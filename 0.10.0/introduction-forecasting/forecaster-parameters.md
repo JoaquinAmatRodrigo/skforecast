@@ -16,6 +16,7 @@ forecaster = ForecasterAutoreg(
                  transformer_y    = None,
                  transformer_exog = None,
                  weight_func      = None,
+                 differentiation  = None,
                  fit_kwargs       = None,
                  forecaster_id    = None
              )
@@ -107,15 +108,13 @@ forecaster = ForecasterAutoreg(
 ```
 
 
-### Weighted time series forecasting
+### Inclusion of kwargs in the regressor fit method
 
-The presence of unreliable or unrepresentative values in the data history poses a significant challenge, as it hinders model learning. However, most forecasting algorithms require complete time series data, making it impossible to remove these observations. An alternative solution is to reduce the weight of the affected observations during model training. **Skforecast** facilitates the control of data weights with the `weight_func` argument.
+Some regressors include the possibility to add some additional configuration during the fitting method. The predictor parameter `fit_kwargs` allows these arguments to be set when the forecaster is declared.
 
-More information: [Weighted time series forecasting](https://skforecast.org/latest/user_guides/weighted-time-series-forecasting.html).
+!!! danger
 
-!!! example
-
-    The following example shows how a part of the time series can be excluded from the model training by assigning it a weight of zero using the `custom_weights` function, depending on the index.
+    To add weights to the forecaster, it must be done through the `weight_func` argument and not through a `fit_kwargs`.
 
 ```python
 # Create a forecaster
@@ -148,6 +147,34 @@ forecaster = ForecasterAutoreg(
 ```
 
 
+### Differentiation
+
+Time series differentiation involves computing the differences between consecutive observations in the time series. When it comes to training forecasting models, differentiation offers the advantage of focusing on relative rates of change rather than directly attempting to model the absolute values. **Skforecast**, version 0.10.0 or higher, introduces a novel differentiation parameter within its Forecasters. 
+
+More information: [Time series differentiation](https://skforecast.org/latest/faq/time-series-differentiation).
+
+!!! warning
+
+    The `differentiation` parameter is only available for the `ForecasterAutoreg` and `ForecasterAutoregCustom`, in the following versions it will be incorporated to the rest of the Forecasters.
+
+```python
+# Create a forecaster
+# ==============================================================================
+from skforecast.ForecasterAutoreg import ForecasterAutoreg
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.preprocessing import StandardScaler
+
+forecaster = ForecasterAutoreg(
+                 regressor        = RandomForestRegressor(),
+                 lags             = 5,
+                 transformer_y    = None,
+                 transformer_exog = None,
+                 weight_func      = None,
+                 differentiation  = 1,
+             )
+```
+
+
 ### Inclusion of kwargs in the regressor fit method
 
 Some regressors include the possibility to add some additional configuration during the fitting method. The predictor parameter `fit_kwargs` allows these arguments to be set when the forecaster is declared.
@@ -174,6 +201,7 @@ forecaster = ForecasterAutoreg(
                  transformer_y    = None,
                  transformer_exog = None,
                  weight_func      = None,
+                 differentiation  = None,
                  fit_kwargs       = {'categorical_feature': ['exog_1', 'exog_2']}
              )
 ```
@@ -195,6 +223,7 @@ forecaster = ForecasterAutoreg(
                  transformer_y    = None,
                  transformer_exog = None,
                  weight_func      = None,
+                 differentiation  = None,
                  fit_kwargs       = None,
                  forecaster_id    = 'my_forecaster'
              )
@@ -236,6 +265,8 @@ forecaster = ForecasterAutoregDirect(
 The `n_jobs` parameter allows multi-process parallelization to train regressors for all `steps` simultaneously. 
 
 The benefits of parallelization depend on several factors, including the regressor used, the number of fits to be performed, and the volume of data involved. When the `n_jobs` parameter is set to `'auto'`, the level of parallelization is automatically selected based on heuristic rules that aim to choose the best option for each scenario.
+
+For a more detailed look at parallelization, visit [Parallelization in skforecast](https://skforecast.org/latest/faq/parallelization-skforecast).
 
 ```python
 # Create a forecaster

@@ -2685,17 +2685,14 @@ Licensed under the Apache License, Version 2.0.
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <script src="https://kit.fontawesome.com/d20edc211b.js" crossorigin="anonymous"></script>
-
 <div class="admonition note" name="html-admonition" style="background: rgba(0,184,212,.1); padding-top: 0px; padding-bottom: 6px; border-radius: 8px;
 border-left: 8px solid #00b8d4; border-color: #00b8d4; padding-left: 10px;">
 <p class="title">
     <i class="fa-light fa-pencil fa" style="font-size: 18px; color:#00b8d4;"></i>
     <b> &nbsp Note</b>
 </p>
-
 <p>When using <a href="https://skforecast.org/latest/user_guides/independent-multi-time-series-forecasting.html#scikit-learn-transformers-in-multi-series">ForecasterAutoregMultiSeries</a> or <a href="https://skforecast.org/latest/user_guides/dependent-multi-series-multivariate-forecasting.html#scikit-learn-transformers-in-multivariate">ForecasterAutoregMultiVariate</a> the <code>transformer_series</code> argument replaces <code>transformer_y</code>. If it is a <code>transformer</code>, the same transformation will be applied to all series. If it is a <code>dict</code> a different transformation can be set for each series.</p>
 </div>
-
 
 </div>
 </div>
@@ -3021,6 +3018,7 @@ Transformer for y: StandardScaler()
 Transformer for exog: None 
 Window size: 3 
 Weight function included: False 
+Differentiation order: None 
 Exogenous included: True 
 Type of exogenous variable: &lt;class &#39;pandas.core.frame.DataFrame&#39;&gt; 
 Exogenous variables names: [&#39;exog_1&#39;, &#39;exog_2&#39;] 
@@ -3029,10 +3027,10 @@ Training index type: DatetimeIndex
 Training index frequency: MS 
 Regressor parameters: {&#39;alpha&#39;: 1.0, &#39;copy_X&#39;: True, &#39;fit_intercept&#39;: True, &#39;max_iter&#39;: None, &#39;positive&#39;: False, &#39;random_state&#39;: 123, &#39;solver&#39;: &#39;auto&#39;, &#39;tol&#39;: 0.0001} 
 fit_kwargs: {} 
-Creation date: 2023-07-08 18:13:04 
-Last fit date: 2023-07-08 18:13:04 
-Skforecast version: 0.9.0 
-Python version: 3.11.4 
+Creation date: 2023-09-09 17:09:45 
+Last fit date: 2023-09-09 17:09:45 
+Skforecast version: 0.10.0 
+Python version: 3.10.11 
 Forecaster id: None </pre>
 </div>
 
@@ -3129,6 +3127,7 @@ Transformer for y: None
 Transformer for exog: StandardScaler() 
 Window size: 3 
 Weight function included: False 
+Differentiation order: None 
 Exogenous included: True 
 Type of exogenous variable: &lt;class &#39;pandas.core.frame.DataFrame&#39;&gt; 
 Exogenous variables names: [&#39;exog_1&#39;, &#39;exog_2&#39;] 
@@ -3137,10 +3136,10 @@ Training index type: DatetimeIndex
 Training index frequency: MS 
 Regressor parameters: {&#39;alpha&#39;: 1.0, &#39;copy_X&#39;: True, &#39;fit_intercept&#39;: True, &#39;max_iter&#39;: None, &#39;positive&#39;: False, &#39;random_state&#39;: 123, &#39;solver&#39;: &#39;auto&#39;, &#39;tol&#39;: 0.0001} 
 fit_kwargs: {} 
-Creation date: 2023-07-08 18:13:04 
-Last fit date: 2023-07-08 18:13:04 
-Skforecast version: 0.9.0 
-Python version: 3.11.4 
+Creation date: 2023-09-09 17:09:45 
+Last fit date: 2023-09-09 17:09:45 
+Skforecast version: 0.10.0 
+Python version: 3.10.11 
 Forecaster id: None </pre>
 </div>
 
@@ -3259,6 +3258,7 @@ Transformer for exog: ColumnTransformer(remainder=&#39;passthrough&#39;,
                   verbose_feature_names_out=False) 
 Window size: 3 
 Weight function included: False 
+Differentiation order: None 
 Exogenous included: True 
 Type of exogenous variable: &lt;class &#39;pandas.core.frame.DataFrame&#39;&gt; 
 Exogenous variables names: [&#39;exog_1&#39;, &#39;exog_2&#39;, &#39;exog_3&#39;] 
@@ -3267,10 +3267,10 @@ Training index type: DatetimeIndex
 Training index frequency: MS 
 Regressor parameters: {&#39;alpha&#39;: 1.0, &#39;copy_X&#39;: True, &#39;fit_intercept&#39;: True, &#39;max_iter&#39;: None, &#39;positive&#39;: False, &#39;random_state&#39;: 123, &#39;solver&#39;: &#39;auto&#39;, &#39;tol&#39;: 0.0001} 
 fit_kwargs: {} 
-Creation date: 2023-07-08 18:13:04 
-Last fit date: 2023-07-08 18:13:04 
-Skforecast version: 0.9.0 
-Python version: 3.11.4 
+Creation date: 2023-09-09 17:09:45 
+Last fit date: 2023-09-09 17:09:45 
+Skforecast version: 0.10.0 
+Python version: 3.10.11 
 Forecaster id: None </pre>
 </div>
 
@@ -3557,17 +3557,14 @@ Freq: MS, Name: y, dtype: float64</pre>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <script src="https://kit.fontawesome.com/d20edc211b.js" crossorigin="anonymous"></script>
-
 <div class="admonition note" name="html-admonition" style="background: rgba(255,145,0,.1); padding-top: 0px; padding-bottom: 6px; border-radius: 8px; border-left: 8px solid #ff9100; border-color: #ff9100; padding-left: 10px;">
 <p class="title">
     <i class="fa-triangle-exclamation fa" style="font-size: 18px; color:#ff9100;"></i>
     <b style="color: #ff9100;"> &nbsp Warning</b>
 </p>
-
 <p>For versions 1.1.0 &gt;= scikit-learn &lt;= 1.2.0 <code>sklearn.preprocessing.FunctionTransformer.inverse_transform</code> does not support DataFrames that are all numerical when <code>check_inverse=True</code>. It will raise an Exception which is fixed in scikit-learn 1.2.1.</p>
 <p>More info: <a href="https://scikit-learn.org/stable/whats_new/v1.2.html#version-1-2-1">https://scikit-learn.org/stable/whats_new/v1.2.html#version-1-2-1</a></p>
 </div>
-
 
 </div>
 </div>
@@ -3742,16 +3739,13 @@ Freq: MS, Name: pred, dtype: float64</pre>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <script src="https://kit.fontawesome.com/d20edc211b.js" crossorigin="anonymous"></script>
-
 <div class="admonition note" name="html-admonition" style="background: rgba(255,145,0,.1); padding-top: 0px; padding-bottom: 6px; border-radius: 8px; border-left: 8px solid #ff9100; border-color: #ff9100; padding-left: 10px;">
 <p class="title">
     <i class="fa-triangle-exclamation fa" style="font-size: 18px; color:#ff9100;"></i>
     <b style="color: #ff9100;"> &nbsp Warning</b>
 </p>
-
 <p>Starting from version 0.4.0, skforecast permits the usage of scikit-learn pipelines as regressors. It is important to note that ColumnTransformer cannot be included in the pipeline; thus, the same transformation will be applied to both the modeled series and all exogenous variables. However, if the preprocessing transformations only apply to specific columns, then they need to be applied separately using <code>transformer_y</code> and <code>transformer_exog</code>.</p>
 </div>
-
 
 </div>
 </div>
@@ -3882,6 +3876,7 @@ Transformer for y: None
 Transformer for exog: None 
 Window size: 10 
 Weight function included: False 
+Differentiation order: None 
 Exogenous included: True 
 Type of exogenous variable: &lt;class &#39;pandas.core.frame.DataFrame&#39;&gt; 
 Exogenous variables names: [&#39;exog_1&#39;, &#39;exog_2&#39;] 
@@ -3890,10 +3885,10 @@ Training index type: DatetimeIndex
 Training index frequency: MS 
 Regressor parameters: {&#39;standardscaler__copy&#39;: True, &#39;standardscaler__with_mean&#39;: True, &#39;standardscaler__with_std&#39;: True, &#39;ridge__alpha&#39;: 1.0, &#39;ridge__copy_X&#39;: True, &#39;ridge__fit_intercept&#39;: True, &#39;ridge__max_iter&#39;: None, &#39;ridge__positive&#39;: False, &#39;ridge__random_state&#39;: None, &#39;ridge__solver&#39;: &#39;auto&#39;, &#39;ridge__tol&#39;: 0.0001} 
 fit_kwargs: {} 
-Creation date: 2023-07-08 18:13:04 
-Last fit date: 2023-07-08 18:13:04 
-Skforecast version: 0.9.0 
-Python version: 3.11.4 
+Creation date: 2023-09-09 17:09:45 
+Last fit date: 2023-09-09 17:09:45 
+Skforecast version: 0.10.0 
+Python version: 3.10.11 
 Forecaster id: None </pre>
 </div>
 
@@ -4054,7 +4049,7 @@ results_grid.head(4)</div>
 <pre>`Forecaster` refitted using the best-found lags and parameters, and the whole data set: 
   Lags: [1 2 3 4 5] 
   Parameters: {&#39;ridge__alpha&#39;: 0.001}
-  Backtesting metric: 6.845311709559406e-05
+  Backtesting metric: 6.845311709632476e-05
 
 </pre>
 </div>

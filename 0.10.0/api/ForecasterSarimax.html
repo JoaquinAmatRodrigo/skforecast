@@ -1925,7 +1925,7 @@ DataFrame.</p></td>
 
 
           <details class="quote">
-            <summary>Source code in <code>skforecast/ForecasterSarimax/ForecasterSarimax.py</code></summary>
+            <summary>Source code in <code>skforecast\ForecasterSarimax\ForecasterSarimax.py</code></summary>
             <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">119</span>
 <span class="normal">120</span>
 <span class="normal">121</span>
@@ -2127,7 +2127,7 @@ that y[i] is regressed on exog[i].</p></td>
   </table>
 
       <details class="quote">
-        <summary>Source code in <code>skforecast/ForecasterSarimax/ForecasterSarimax.py</code></summary>
+        <summary>Source code in <code>skforecast\ForecasterSarimax\ForecasterSarimax.py</code></summary>
         <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">208</span>
 <span class="normal">209</span>
 <span class="normal">210</span>
@@ -2443,7 +2443,7 @@ of the training data.</p></td>
   </table>
 
       <details class="quote">
-        <summary>Source code in <code>skforecast/ForecasterSarimax/ForecasterSarimax.py</code></summary>
+        <summary>Source code in <code>skforecast\ForecasterSarimax\ForecasterSarimax.py</code></summary>
         <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">314</span>
 <span class="normal">315</span>
 <span class="normal">316</span>
@@ -2959,7 +2959,7 @@ provided, <code>alpha</code> will be used.</p></td>
   </table>
 
       <details class="quote">
-        <summary>Source code in <code>skforecast/ForecasterSarimax/ForecasterSarimax.py</code></summary>
+        <summary>Source code in <code>skforecast\ForecasterSarimax\ForecasterSarimax.py</code></summary>
         <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">506</span>
 <span class="normal">507</span>
 <span class="normal">508</span>
@@ -3466,7 +3466,7 @@ provided, <code>alpha</code> will be used.</p></td>
   </table>
 
       <details class="quote">
-        <summary>Source code in <code>skforecast/ForecasterSarimax/ForecasterSarimax.py</code></summary>
+        <summary>Source code in <code>skforecast\ForecasterSarimax\ForecasterSarimax.py</code></summary>
         <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">730</span>
 <span class="normal">731</span>
 <span class="normal">732</span>
@@ -3572,7 +3572,7 @@ method of the regressor.</p>
   </table>
 
       <details class="quote">
-        <summary>Source code in <code>skforecast/ForecasterSarimax/ForecasterSarimax.py</code></summary>
+        <summary>Source code in <code>skforecast\ForecasterSarimax\ForecasterSarimax.py</code></summary>
         <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">753</span>
 <span class="normal">754</span>
 <span class="normal">755</span>
@@ -3690,7 +3690,7 @@ method of the regressor.</p>
   </table>
 
       <details class="quote">
-        <summary>Source code in <code>skforecast/ForecasterSarimax/ForecasterSarimax.py</code></summary>
+        <summary>Source code in <code>skforecast\ForecasterSarimax\ForecasterSarimax.py</code></summary>
         <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">783</span>
 <span class="normal">784</span>
 <span class="normal">785</span>
@@ -3763,6 +3763,8 @@ method of the regressor.</p>
   <div class="doc doc-contents ">
   
       <p>Get the selected information criteria.</p>
+<p>Check <a href="https://www.statsmodels.org/dev/generated/statsmodels.tsa.statespace.sarimax.SARIMAXResults.info_criteria.html">https://www.statsmodels.org/dev/generated/statsmodels.tsa.statespace.sarimax.SARIMAXResults.info_criteria.html</a>
+to know more about statsmodels info_criteria method.</p>
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -3793,7 +3795,7 @@ method of the regressor.</p>
           </td>
           <td><p>The method for information criteria computation. Default is 'standard'
 method; 'lutkepohl' computes the information criteria as in Lütkepohl
-(2007). See more instatsmodels.tsa.statespace.sarimax.SARIMAXResults.info_criteria</p></td>
+(2007).</p></td>
           <td>
                 <code>`&#39;standard&#39;`</code>
           </td>
@@ -3820,7 +3822,7 @@ method; 'lutkepohl' computes the information criteria as in Lütkepohl
   </table>
 
       <details class="quote">
-        <summary>Source code in <code>skforecast/ForecasterSarimax/ForecasterSarimax.py</code></summary>
+        <summary>Source code in <code>skforecast\ForecasterSarimax\ForecasterSarimax.py</code></summary>
         <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">812</span>
 <span class="normal">813</span>
 <span class="normal">814</span>
@@ -3863,13 +3865,19 @@ method; 'lutkepohl' computes the information criteria as in Lütkepohl
 <span class="normal">851</span>
 <span class="normal">852</span>
 <span class="normal">853</span>
-<span class="normal">854</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_info_criteria</span><span class="p">(</span>
+<span class="normal">854</span>
+<span class="normal">855</span>
+<span class="normal">856</span>
+<span class="normal">857</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_info_criteria</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> 
     <span class="n">criteria</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;aic&#39;</span><span class="p">,</span> 
     <span class="n">method</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;standard&#39;</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get the selected information criteria.</span>
+
+<span class="sd">    Check https://www.statsmodels.org/dev/generated/statsmodels.tsa.statespace.sarimax.SARIMAXResults.info_criteria.html</span>
+<span class="sd">    to know more about statsmodels info_criteria method.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -3879,7 +3887,7 @@ method; 'lutkepohl' computes the information criteria as in Lütkepohl
 <span class="sd">    method : str, default `&#39;standard&#39;`</span>
 <span class="sd">        The method for information criteria computation. Default is &#39;standard&#39;</span>
 <span class="sd">        method; &#39;lutkepohl&#39; computes the information criteria as in Lütkepohl</span>
-<span class="sd">        (2007). See more instatsmodels.tsa.statespace.sarimax.SARIMAXResults.info_criteria</span>
+<span class="sd">        (2007).</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>

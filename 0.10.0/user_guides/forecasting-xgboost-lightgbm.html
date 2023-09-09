@@ -2570,17 +2570,14 @@ Licensed under the Apache License, Version 2.0.
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <script src="https://kit.fontawesome.com/d20edc211b.js" crossorigin="anonymous"></script>
-
 <div class="admonition note" name="html-admonition" style="background: rgba(0,184,212,.1); padding-top: 0px; padding-bottom: 6px; border-radius: 8px;
 border-left: 8px solid #00b8d4; border-color: #00b8d4; padding-left: 10px;">
 <p class="title">
     <i class="fa-light fa-pencil fa" style="font-size: 18px; color:#00b8d4;"></i>
     <b> &nbsp Note</b>
 </p>
-
 <p>All of the gradient boosting libraries mentioned above - XGBoost, Lightgbm, HistGradientBoostingRegressor, and CatBoost - can handle categorical features natively, but they require specific encoding techniques that may not be entirely intuitive. Detailed information can be found in <a href="https://skforecast.org/latest/user_guides/categorical-features.html#native-implementation-for-categorical-features">categorical features</a> and in this <a href="https://www.cienciadedatos.net/documentos/py39-forecasting-time-series-with-skforecast-xgboost-lightgbm-catboost.html">example</a>.</p>
 </div>
-
 
 </div>
 </div>
@@ -2593,16 +2590,15 @@ border-left: 8px solid #00b8d4; border-color: #00b8d4; padding-left: 10px;">
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <script src="https://kit.fontawesome.com/d20edc211b.js" crossorigin="anonymous"></script>
-
 <div class="admonition note" name="html-admonition" style="background: rgba(0,184,212,.1); padding-top: 0px; padding-bottom: 6px; border-radius: 8px;
 border-left: 8px solid #00b8d4; border-color: #00b8d4; padding-left: 10px;">
 <p class="title">
     <i class="fa-light fa-pencil fa" style="font-size: 18px; color:#00b8d4;"></i>
     <b> &nbsp Note</b>
 </p>
-
 <p>Tree-based models, including decision trees, random forests and gradient boosting machines (GBMs) have limitations when it comes to extrapolation, i.e. making predictions or estimates beyond the range of observed data. This limitation becomes particularly critical when forecasting time series data with a trend. Because these models cannot predict values beyond the observed range during training, their predicted values will deviate from the underlying trend.</p>
-<p>Several strategies have been proposed to address this challenge, with one of the most common approaches being the use of differentiation. The differentiation process involves computing the differences between consecutive observations in the time series. Instead of directly modeling the absolute values, the focus shifts to modeling the relative change ratios. Skforecast, version 0.10.0 or higher, introduces a novel <code>differentiation</code> parameter within its forecaster classes to indicate that a differentiation process must be applied before training the model. It is worth noting that the entire differentiation process has been automated and its effects are seamlessly reversed during the prediction phase. This ensures that the resulting forecast values are in the original scale of the time series data. For more details in this topic visit: <a href="https://www.cienciadedatos.net/documentos/py49-modelling-time-series-trend-with-tree-based-models.html">Modelling time series trend with tree based models</a>.</p>
+<p>Several strategies have been proposed to address this challenge, with one of the most common approaches being the use of differentiation. The differentiation process involves computing the differences between consecutive observations in the time series. Instead of directly modeling the absolute values, the focus shifts to modeling the relative change ratios. Skforecast, version 0.10.0 or higher, introduces a novel <code>differentiation</code> parameter within its forecaster classes to indicate that a differentiation process must be applied before training the model. It is worth noting that the entire differentiation process has been automated and its effects are seamlessly reversed during the prediction phase. This ensures that the resulting forecast values are in the original scale of the time series data.</p>
+<p>For more details in this topic visit: <a href="https://www.cienciadedatos.net/documentos/py49-modelling-time-series-trend-with-tree-based-models.html">Modelling time series trend with tree based models</a>.</p>
 
 </div>
 </div>
@@ -2776,8 +2772,9 @@ data_test  = data.iloc[-steps:, :]</div>
             <div class="highlight-ipynb hl-python "><pre><span></span><span class="c1"># Create and fit forecaster</span>
 <span class="c1"># ==============================================================================</span>
 <span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
-                 <span class="n">regressor</span> <span class="o">=</span> <span class="n">LGBMRegressor</span><span class="p">(</span><span class="n">random_state</span> <span class="o">=</span> <span class="mi">123</span><span class="p">),</span>
-                 <span class="n">lags</span>      <span class="o">=</span> <span class="mi">8</span>
+                 <span class="n">regressor</span>       <span class="o">=</span> <span class="n">LGBMRegressor</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">),</span>
+                 <span class="n">lags</span>            <span class="o">=</span> <span class="mi">8</span><span class="p">,</span>
+                 <span class="n">differentiation</span> <span class="o">=</span> <span class="kc">None</span>
              <span class="p">)</span>
 
 <span class="n">forecaster</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">data_train</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">],</span> <span class="n">exog</span><span class="o">=</span><span class="n">data_train</span><span class="p">[[</span><span class="s1">&#39;exog_1&#39;</span><span class="p">,</span> <span class="s1">&#39;exog_2&#39;</span><span class="p">]])</span>
@@ -2786,8 +2783,9 @@ data_test  = data.iloc[-steps:, :]</div>
 <div id="cell-3" class="clipboard-copy-txt"># Create and fit forecaster
 # ==============================================================================
 forecaster = ForecasterAutoreg(
-                 regressor = LGBMRegressor(random_state = 123),
-                 lags      = 8
+                 regressor       = LGBMRegressor(random_state=123),
+                 lags            = 8,
+                 differentiation = None
              )
 
 forecaster.fit(y=data_train['y'], exog=data_train[['exog_1', 'exog_2']])
@@ -2822,6 +2820,7 @@ Transformer for y: None
 Transformer for exog: None 
 Window size: 8 
 Weight function included: False 
+Differentiation order: None 
 Exogenous included: True 
 Type of exogenous variable: &lt;class &#39;pandas.core.frame.DataFrame&#39;&gt; 
 Exogenous variables names: [&#39;exog_1&#39;, &#39;exog_2&#39;] 
@@ -2830,10 +2829,10 @@ Training index type: DatetimeIndex
 Training index frequency: MS 
 Regressor parameters: {&#39;boosting_type&#39;: &#39;gbdt&#39;, &#39;class_weight&#39;: None, &#39;colsample_bytree&#39;: 1.0, &#39;importance_type&#39;: &#39;split&#39;, &#39;learning_rate&#39;: 0.1, &#39;max_depth&#39;: -1, &#39;min_child_samples&#39;: 20, &#39;min_child_weight&#39;: 0.001, &#39;min_split_gain&#39;: 0.0, &#39;n_estimators&#39;: 100, &#39;n_jobs&#39;: -1, &#39;num_leaves&#39;: 31, &#39;objective&#39;: None, &#39;random_state&#39;: 123, &#39;reg_alpha&#39;: 0.0, &#39;reg_lambda&#39;: 0.0, &#39;silent&#39;: &#39;warn&#39;, &#39;subsample&#39;: 1.0, &#39;subsample_for_bin&#39;: 200000, &#39;subsample_freq&#39;: 0} 
 fit_kwargs: {} 
-Creation date: 2023-07-09 13:46:19 
-Last fit date: 2023-07-09 13:46:19 
-Skforecast version: 0.9.0 
-Python version: 3.11.4 
+Creation date: 2023-09-09 16:58:11 
+Last fit date: 2023-09-09 16:58:11 
+Skforecast version: 0.10.0 
+Python version: 3.10.11 
 Forecaster id: None </pre>
 </div>
 
@@ -3081,8 +3080,9 @@ forecaster.get_feature_importances()</div>
             <div class="highlight-ipynb hl-python "><pre><span></span><span class="c1"># Create and fit forecaster</span>
 <span class="c1"># ==============================================================================</span>
 <span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
-                 <span class="n">regressor</span> <span class="o">=</span> <span class="n">XGBRegressor</span><span class="p">(</span><span class="n">random_state</span> <span class="o">=</span> <span class="mi">123</span><span class="p">),</span>
-                 <span class="n">lags</span>      <span class="o">=</span> <span class="mi">8</span>
+                 <span class="n">regressor</span>       <span class="o">=</span> <span class="n">XGBRegressor</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">),</span>
+                 <span class="n">lags</span>            <span class="o">=</span> <span class="mi">8</span><span class="p">,</span>
+                 <span class="n">differentiation</span> <span class="o">=</span> <span class="kc">None</span>
              <span class="p">)</span>
 
 <span class="n">forecaster</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">data_train</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">],</span> <span class="n">exog</span><span class="o">=</span><span class="n">data_train</span><span class="p">[[</span><span class="s1">&#39;exog_1&#39;</span><span class="p">,</span> <span class="s1">&#39;exog_2&#39;</span><span class="p">]])</span>
@@ -3091,8 +3091,9 @@ forecaster.get_feature_importances()</div>
 <div id="cell-6" class="clipboard-copy-txt"># Create and fit forecaster
 # ==============================================================================
 forecaster = ForecasterAutoreg(
-                 regressor = XGBRegressor(random_state = 123),
-                 lags      = 8
+                 regressor       = XGBRegressor(random_state=123),
+                 lags            = 8,
+                 differentiation = None
              )
 
 forecaster.fit(y=data_train['y'], exog=data_train[['exog_1', 'exog_2']])
@@ -3137,6 +3138,7 @@ Transformer for y: None
 Transformer for exog: None 
 Window size: 8 
 Weight function included: False 
+Differentiation order: None 
 Exogenous included: True 
 Type of exogenous variable: &lt;class &#39;pandas.core.frame.DataFrame&#39;&gt; 
 Exogenous variables names: [&#39;exog_1&#39;, &#39;exog_2&#39;] 
@@ -3145,10 +3147,10 @@ Training index type: DatetimeIndex
 Training index frequency: MS 
 Regressor parameters: {&#39;objective&#39;: &#39;reg:squarederror&#39;, &#39;base_score&#39;: None, &#39;booster&#39;: None, &#39;callbacks&#39;: None, &#39;colsample_bylevel&#39;: None, &#39;colsample_bynode&#39;: None, &#39;colsample_bytree&#39;: None, &#39;early_stopping_rounds&#39;: None, &#39;enable_categorical&#39;: False, &#39;eval_metric&#39;: None, &#39;feature_types&#39;: None, &#39;gamma&#39;: None, &#39;gpu_id&#39;: None, &#39;grow_policy&#39;: None, &#39;importance_type&#39;: None, &#39;interaction_constraints&#39;: None, &#39;learning_rate&#39;: None, &#39;max_bin&#39;: None, &#39;max_cat_threshold&#39;: None, &#39;max_cat_to_onehot&#39;: None, &#39;max_delta_step&#39;: None, &#39;max_depth&#39;: None, &#39;max_leaves&#39;: None, &#39;min_child_weight&#39;: None, &#39;missing&#39;: nan, &#39;monotone_constraints&#39;: None, &#39;n_estimators&#39;: 100, &#39;n_jobs&#39;: None, &#39;num_parallel_tree&#39;: None, &#39;predictor&#39;: None, &#39;random_state&#39;: 123, &#39;reg_alpha&#39;: None, &#39;reg_lambda&#39;: None, &#39;sampling_method&#39;: None, &#39;scale_pos_weight&#39;: None, &#39;subsample&#39;: None, &#39;tree_method&#39;: None, &#39;validate_parameters&#39;: None, &#39;verbosity&#39;: None} 
 fit_kwargs: {} 
-Creation date: 2023-07-09 13:46:19 
-Last fit date: 2023-07-09 13:46:19 
-Skforecast version: 0.9.0 
-Python version: 3.11.4 
+Creation date: 2023-09-09 16:58:12 
+Last fit date: 2023-09-09 16:58:13 
+Skforecast version: 0.10.0 
+Python version: 3.10.11 
 Forecaster id: None </pre>
 </div>
 

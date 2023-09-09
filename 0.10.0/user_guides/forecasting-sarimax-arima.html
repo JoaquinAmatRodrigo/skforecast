@@ -2846,17 +2846,14 @@ Licensed under the Apache License, Version 2.0.
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <script src="https://kit.fontawesome.com/d20edc211b.js" crossorigin="anonymous"></script>
-
 <div class="admonition note" name="html-admonition" style="background: rgba(0,191,191,.1); padding-top: 0px; padding-bottom: 6px; border-radius: 8px;
 border-left: 8px solid #00bfa5; border-color: #00bfa5; padding-left: 10px;">
 <p class="title">
     <i class="fa-solid fa-fire-flame-curved" style="font-size: 18px; color:#00bfa5;"></i>
     <b> &nbsp Tip</b>
 </p>
-
-<p>To learn more about modeling time series with ARIMA models, visit our example: <a href="https://www.cienciadedatos.net/documentos/py51-arima-models-skforecast.html">ARIMA and SARIMAX models with Python</a>.</p>
+<p>To learn more about modeling time series with ARIMA models, visit our example: <a href="https://www.cienciadedatos.net/documentos/py51-arima-sarimax-models-python.html">ARIMA and SARIMAX models with Python</a>.</p>
 </div>
-
 
 </div>
 </div>
@@ -3164,10 +3161,10 @@ arima_res.summary()</div>
   <th>Model:</th>           <td>SARIMAX(1, 1, 1)</td> <th>  Log Likelihood     </th>  <td>89.934</td> 
 </tr>
 <tr>
-  <th>Date:</th>            <td>Wed, 06 Sep 2023</td> <th>  AIC                </th> <td>-173.869</td>
+  <th>Date:</th>            <td>Sat, 09 Sep 2023</td> <th>  AIC                </th> <td>-173.869</td>
 </tr>
 <tr>
-  <th>Time:</th>                <td>17:41:38</td>     <th>  BIC                </th> <td>-164.681</td>
+  <th>Time:</th>                <td>16:56:02</td>     <th>  BIC                </th> <td>-164.681</td>
 </tr>
 <tr>
   <th>Sample:</th>             <td>04-01-1992</td>    <th>  HQIC               </th> <td>-170.137</td>
@@ -3354,10 +3351,10 @@ arima.summary()</div>
   <th>Model:</th>           <td>SARIMAX(1, 1, 1)</td> <th>  Log Likelihood     </th>  <td>93.643</td> 
 </tr>
 <tr>
-  <th>Date:</th>            <td>Wed, 06 Sep 2023</td> <th>  AIC                </th> <td>-179.287</td>
+  <th>Date:</th>            <td>Sat, 09 Sep 2023</td> <th>  AIC                </th> <td>-179.287</td>
 </tr>
 <tr>
-  <th>Time:</th>                <td>17:41:38</td>     <th>  BIC                </th> <td>-167.036</td>
+  <th>Time:</th>                <td>16:56:02</td>     <th>  BIC                </th> <td>-167.036</td>
 </tr>
 <tr>
   <th>Sample:</th>             <td>04-01-1992</td>    <th>  HQIC               </th> <td>-174.312</td>
@@ -3547,10 +3544,10 @@ arima.summary()</div>
   <th>Model:</th>           <td>SARIMAX(1, 1, 1)</td> <th>  Log Likelihood     </th>  <td>89.934</td> 
 </tr>
 <tr>
-  <th>Date:</th>            <td>Wed, 06 Sep 2023</td> <th>  AIC                </th> <td>-173.869</td>
+  <th>Date:</th>            <td>Sat, 09 Sep 2023</td> <th>  AIC                </th> <td>-173.869</td>
 </tr>
 <tr>
-  <th>Time:</th>                <td>17:41:39</td>     <th>  BIC                </th> <td>-164.681</td>
+  <th>Time:</th>                <td>16:56:02</td>     <th>  BIC                </th> <td>-164.681</td>
 </tr>
 <tr>
   <th>Sample:</th>             <td>04-01-1992</td>    <th>  HQIC               </th> <td>-170.137</td>
@@ -3808,8 +3805,8 @@ Exogenous variables names: None
 Training range: [Timestamp(&#39;1992-04-01 00:00:00&#39;), Timestamp(&#39;2005-06-01 00:00:00&#39;)] 
 Training index type: DatetimeIndex 
 Training index frequency: MS 
-Creation date: 2023-09-06 17:41:39 
-Last fit date: 2023-09-06 17:41:48 
+Creation date: 2023-09-09 16:56:02 
+Last fit date: 2023-09-09 16:56:04 
 Index seen by the forecaster: DatetimeIndex([&#39;1992-04-01&#39;, &#39;1992-05-01&#39;, &#39;1992-06-01&#39;, &#39;1992-07-01&#39;,
                &#39;1992-08-01&#39;, &#39;1992-09-01&#39;, &#39;1992-10-01&#39;, &#39;1992-11-01&#39;,
                &#39;1992-12-01&#39;, &#39;1993-01-01&#39;,
@@ -3818,7 +3815,7 @@ Index seen by the forecaster: DatetimeIndex([&#39;1992-04-01&#39;, &#39;1992-05-
                &#39;2005-01-01&#39;, &#39;2005-02-01&#39;, &#39;2005-03-01&#39;, &#39;2005-04-01&#39;,
                &#39;2005-05-01&#39;, &#39;2005-06-01&#39;],
               dtype=&#39;datetime64[ns]&#39;, name=&#39;datetime&#39;, length=159, freq=&#39;MS&#39;) 
-Skforecast version: 0.10.0rc1 
+Skforecast version: 0.10.0 
 Python version: 3.10.11 
 Forecaster id: None </pre>
 </div>
@@ -4183,10 +4180,8 @@ border-left: 8px solid #00bfa5; border-color: #00bfa5; padding-left: 10px;">
     <i class="fa-solid fa-fire-flame-curved" style="font-size: 18px; color:#00bfa5;"></i>
     <b> &nbsp Tip</b>
 </p>
-
 <p>To learn more about exogenous variables and how to correctly manage them with skforecast visit: <a href="https://skforecast.org/latest/user_guides/exogenous-variables">Exogenous variables (features) user guide</a>.</p>
 </div>
-
 
 </div>
 </div>
@@ -4324,7 +4319,7 @@ Freq: MS, Name: pred, dtype: float64</pre>
             <div class="highlight-ipynb hl-python "><pre><span></span><span class="c1"># Split data Train - Last window - Test</span>
 <span class="c1"># ==============================================================================</span>
 <span class="n">end_train</span> <span class="o">=</span> <span class="s1">&#39;2005-06-01 23:59:59&#39;</span>
-<span class="n">end_last_window</span> <span class="o">=</span> <span class="s1">&#39;2007-06-01 23:59:00&#39;</span>
+<span class="n">end_last_window</span> <span class="o">=</span> <span class="s1">&#39;2007-06-01 23:59:59&#39;</span>
 
 <span class="nb">print</span><span class="p">(</span>
     <span class="sa">f</span><span class="s2">&quot;Train dates       : </span><span class="si">{</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="si">}</span><span class="s2"> --- </span><span class="si">{</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:</span><span class="n">end_train</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">}</span><span class="s2">  &quot;</span>
@@ -4353,7 +4348,7 @@ Freq: MS, Name: pred, dtype: float64</pre>
 <div id="cell-15" class="clipboard-copy-txt"># Split data Train - Last window - Test
 # ==============================================================================
 end_train = '2005-06-01 23:59:59'
-end_last_window = '2007-06-01 23:59:00'
+end_last_window = '2007-06-01 23:59:59'
 
 print(
     f"Train dates       : {data.index.min()} --- {data.loc[:end_train].index.max()}  "
@@ -5436,8 +5431,8 @@ Exogenous variables names: None
 Training range: [Timestamp(&#39;1992-04-01 00:00:00&#39;), Timestamp(&#39;2006-01-01 00:00:00&#39;)] 
 Training index type: DatetimeIndex 
 Training index frequency: MS 
-Creation date: 2023-09-06 17:43:03 
-Last fit date: 2023-09-06 17:44:11 
+Creation date: 2023-09-09 16:56:27 
+Last fit date: 2023-09-09 16:56:49 
 Index seen by the forecaster: DatetimeIndex([&#39;1992-04-01&#39;, &#39;1992-05-01&#39;, &#39;1992-06-01&#39;, &#39;1992-07-01&#39;,
                &#39;1992-08-01&#39;, &#39;1992-09-01&#39;, &#39;1992-10-01&#39;, &#39;1992-11-01&#39;,
                &#39;1992-12-01&#39;, &#39;1993-01-01&#39;,
@@ -5446,7 +5441,7 @@ Index seen by the forecaster: DatetimeIndex([&#39;1992-04-01&#39;, &#39;1992-05-
                &#39;2005-08-01&#39;, &#39;2005-09-01&#39;, &#39;2005-10-01&#39;, &#39;2005-11-01&#39;,
                &#39;2005-12-01&#39;, &#39;2006-01-01&#39;],
               dtype=&#39;datetime64[ns]&#39;, name=&#39;datetime&#39;, length=166, freq=&#39;MS&#39;) 
-Skforecast version: 0.10.0rc1 
+Skforecast version: 0.10.0 
 Python version: 3.10.11 
 Forecaster id: None </pre>
 </div>
