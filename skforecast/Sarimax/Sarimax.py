@@ -807,6 +807,9 @@ class Sarimax(BaseEstimator, RegressorMixin):
         """
         Get the selected information criteria.
 
+        Check https://www.statsmodels.org/dev/generated/statsmodels.tsa.statespace.sarimax.SARIMAXResults.info_criteria.html
+        to know more about statsmodels info_criteria method.
+
         Parameters
         ----------
         criteria : str, default `'aic'`
@@ -815,13 +818,13 @@ class Sarimax(BaseEstimator, RegressorMixin):
         method : str, default `'standard'`
             The method for information criteria computation. Default is 'standard'
             method; 'lutkepohl' computes the information criteria as in Lütkepohl
-            (2007). See more instatsmodels.tsa.statespace.sarimax.SARIMAXResults.info_criteria
+            (2007).
 
         Returns
         -------
         metric : float
             The value of the selected information criteria.
-
+        
         """
 
         if criteria not in ['aic', 'bic', 'hqic']:
