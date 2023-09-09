@@ -345,7 +345,7 @@ class Sarimax(BaseEstimator, RegressorMixin):
 
         Parameters
         ----------
-        None
+        self
         
         Returns
         -------
