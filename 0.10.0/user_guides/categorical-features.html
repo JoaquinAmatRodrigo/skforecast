@@ -2747,14 +2747,17 @@ Licensed under the Apache License, Version 2.0.
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <script src="https://kit.fontawesome.com/d20edc211b.js" crossorigin="anonymous"></script>
+
 <div class="admonition note" name="html-admonition" style="background: rgba(0,184,212,.1); padding-top: 0px; padding-bottom: 6px; border-radius: 8px;
 border-left: 8px solid #00b8d4; border-color: #00b8d4; padding-left: 10px;">
 <p class="title">
     <i class="fa-light fa-pencil fa" style="font-size: 18px; color:#00b8d4;"></i>
     <b> &nbsp Note</b>
 </p>
+
 <p>All of the transformations described in this document can be applied to the entire dataset, regardless of the forecaster. However, it is important to ensure that the transformations are learned only from the training data to avoid information leakage. Furthermore, the same transformation should be applied to the input data during prediction. To reduce the likelihood of errors and to ensure consistent application of the transformations, it is advisable to include the transformation within the forecaster object, so that it is handled internally.</p>
 </div>
+
 
 </div>
 </div>
@@ -3453,15 +3456,18 @@ Freq: H, Name: pred, dtype: float64</pre>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <script src="https://kit.fontawesome.com/d20edc211b.js" crossorigin="anonymous"></script>
+
 <div class="admonition note" name="html-admonition" style="background: rgba(0,184,212,.1); padding-top: 0px; padding-bottom: 6px; border-radius: 8px;
 border-left: 8px solid #00b8d4; border-color: #00b8d4; padding-left: 10px;">
 <p class="title">
     <i class="fa-light fa-pencil fa" style="font-size: 18px; color:#00b8d4;"></i>
     <b> &nbsp Note</b>
 </p>
+
 <p>It is possible to apply a transformation to the entire dataset independent of the forecaster. However, it is crucial to ensure that the transformations are only learned from the training data to avoid information leakage. In addition, the same transformation should be applied to the input data during prediction. It is therefore advisable to incorporate the transformation into the forecaster, so that it is handled internally. This approach ensures consistency in the application of transformations and reduces the likelihood of errors.</p>
 <p>To examine how data is being transformed, it is possible to use the <code>create_train_X_y()</code> method to generate the matrices used by the forecaster to train the model. This approach enables gaining insight into the specific data manipulations that occur during the training process.</p>
 </div>
+
 
 </div>
 </div>
@@ -4295,13 +4301,16 @@ Freq: H, Name: pred, dtype: float64</pre>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <script src="https://kit.fontawesome.com/d20edc211b.js" crossorigin="anonymous"></script>
+
 <div class="admonition note" name="html-admonition" style="background: rgba(255,145,0,.1); padding-top: 0px; padding-bottom: 6px; border-radius: 8px; border-left: 8px solid #ff9100; border-color: #ff9100; padding-left: 10px;">
 <p class="title">
     <i class="fa-triangle-exclamation fa" style="font-size: 18px; color:#ff9100;"></i>
     <b style="color: #ff9100;"> &nbsp Warning</b>
 </p>
+
 <p>We are currently working on adapting this encoding strategy to time series to avoid data leakage.</p>
 </div>
+
 
 </div>
 </div>
@@ -4332,15 +4341,18 @@ Freq: H, Name: pred, dtype: float64</pre>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <script src="https://kit.fontawesome.com/d20edc211b.js" crossorigin="anonymous"></script>
+
 <div class="admonition note" name="html-admonition" style="background: rgba(255,145,0,.1); padding-top: 0px; padding-bottom: 6px; border-radius: 8px; border-left: 8px solid #ff9100; border-color: #ff9100; padding-left: 10px;">
 <p class="title">
     <i class="fa-triangle-exclamation fa" style="font-size: 18px; color:#ff9100;"></i>
     <b style="color: #ff9100;"> &nbsp Warning</b>
 </p>
+
 <p>When deploying models in production, it is strongly recommended to <b>avoid using automatic detection</b> based on pandas <code>category</code> type columns. Although pandas provides an internal coding for these columns, it is not consistent across different datasets and may vary depending on the categories present in each one. It is therefore crucial to be aware of this issue and to take appropriate measures to ensure consistency in the coding of categorical features when deploying models in production.</p>
 <p>At the time of writing, the only thing the authors have observed is that LightGBM internally manages changes in the coding of categories. More details on this issue can be found in  <a href=https://github.com/microsoft/LightGBM/issues/2826>github issue</a> and  <a href=https://stackoverflow.com/questions/60191643/are-lightgbm-treating-pandas-categoricals-based-on-name-or-cat-code-value>stackoverflow</a>.</p>
 <p>If the user still wishes to rely on automatic detection of categorical features based on pandas data types, categorical variables must first be encoded as integers (ordinal encoding) and then stored as category type. This is necessary because skforecast uses a numeric numpy array internally to speed up the calculation.</p>
 </div>
+
 
 </div>
 </div>
@@ -4615,13 +4627,16 @@ Freq: H, Name: pred, dtype: float64</pre>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <script src="https://kit.fontawesome.com/d20edc211b.js" crossorigin="anonymous"></script>
+
 <div class="admonition note" name="html-admonition" style="background: rgba(255,145,0,.1); padding-top: 0px; padding-bottom: 6px; border-radius: 8px; border-left: 8px solid #ff9100; border-color: #ff9100; padding-left: 10px;">
 <p class="title">
     <i class="fa-triangle-exclamation fa" style="font-size: 18px; color:#ff9100;"></i>
     <b style="color: #ff9100;"> &nbsp Warning</b>
 </p>
+
 <p>Handling categorical variables by relying on the automatic detection of the <code>category</code> datatype can be achieved by setting <code>categorical_features='auto'</code> during model initialization. However, this approach can lead to significant problems when the model is exposed to new datasets that have a different pandas encoding for categorical columns than the one used during training. Therefore, it's crucial to ensure that the encoding is consistent between the training and the testing datasets to avoid any potential errors.</p>
 </div>
+
 
 </div>
 </div>
@@ -5852,13 +5867,16 @@ Freq: H, Name: pred, dtype: float64</pre>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <script src="https://kit.fontawesome.com/d20edc211b.js" crossorigin="anonymous"></script>
+
 <div class="admonition note" name="html-admonition" style="background: rgba(255,145,0,.1); padding-top: 0px; padding-bottom: 6px; border-radius: 8px; border-left: 8px solid #ff9100; border-color: #ff9100; padding-left: 10px;">
 <p class="title">
     <i class="fa-triangle-exclamation fa" style="font-size: 18px; color:#ff9100;"></i>
     <b style="color: #ff9100;"> &nbsp Warning</b>
 </p>
+
 <p>Handling categorical variables by relying on the automatic detection of the <code>category</code> datatype can be achieved by setting <code>enable_categorical=True</code> during model initialization. However, this approach can lead to significant problems when the model is exposed to new datasets that have a different pandas encoding for categorical columns than the one used during training. Therefore, it's crucial to ensure that the encoding is consistent between the training and the testing datasets to avoid any potential errors.</p>
 </div>
+
 
 </div>
 </div>
