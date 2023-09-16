@@ -2673,14 +2673,12 @@ Licensed under the Apache License, Version 2.0.
 <br>
 <font size="2.5"> <i>Diagram of direct multi-step forecasting.</i></font>
 </p>
-
 <p>To train a <code>ForecasterAutoregDirect</code> a different training matrix is created for each model.</p>
 <p style="text-align: center">
 <img src="../img/diagram_skforecast_multioutput.png" style="width: 700px">
 <br>
 <font size="2.5"> <i>Transformation of a time series into matrices to train a direct multi-step forecasting model.</i></font>
 </p>
-
 
 </div>
 </div>
@@ -2693,19 +2691,16 @@ Licensed under the Apache License, Version 2.0.
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <script src="https://kit.fontawesome.com/d20edc211b.js" crossorigin="anonymous"></script>
-
 <div class="admonition note" name="html-admonition" style="background: rgba(0,184,212,.1); padding-top: 0px; padding-bottom: 6px; border-radius: 8px;
 border-left: 8px solid #00b8d4; border-color: #00b8d4; padding-left: 10px;">
 <p class="title">
     <i class="fa-light fa-pencil fa" style="font-size: 18px; color:#00b8d4;"></i>
     <b> &nbsp Note</b>
 </p>
-
 <p>Starting from version <b>skforecast 0.9.0</b>, the <code>ForecasterAutoregDirect</code> now includes the <code>n_jobs</code> parameter, allowing multi-process parallelization. This allows to train regressors for all steps simultaneously.</p>
 <p>The benefits of parallelization depend on several factors, including the regressor used, the number of fits to be performed, and the volume of data involved. When the <code>n_jobs</code> parameter is set to <code>'auto'</code>, the level of parallelization is automatically selected based on heuristic rules that aim to choose the best option for each scenario.</p>
 <p>For a more detailed look at parallelization, visit <a href="https://skforecast.org/latest/faq/parallelization-skforecast">Parallelization in skforecast</a>.</p>
 </div>
-
 
 </div>
 </div>

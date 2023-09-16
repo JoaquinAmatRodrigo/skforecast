@@ -2662,17 +2662,14 @@ Licensed under the Apache License, Version 2.0.
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <script src="https://kit.fontawesome.com/d20edc211b.js" crossorigin="anonymous"></script>
-
 <div class="admonition note" name="html-admonition" style="background: rgba(0,191,191,.1); padding-top: 0px; padding-bottom: 6px; border-radius: 8px;
 border-left: 8px solid #00bfa5; border-color: #00bfa5; padding-left: 10px;">
 <p class="title">
     <i class="fa-solid fa-fire-flame-curved" style="font-size: 18px; color:#00bfa5;"></i>
     <b> &nbsp Tip</b>
 </p>
-
 <p>To learn more about modeling time series differentiation, visit our example: <a href="https://www.cienciadedatos.net/documentos/py49-modelling-time-series-trend-with-tree-based-models.html">Modelling time series trend with tree based models</a>.</p>
 </div>
-
 
 </div>
 </div>
@@ -2874,18 +2871,14 @@ Differenced time series: [nan  3.  4. -2.  4.  3.  4. -2.]
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <script src="https://kit.fontawesome.com/d20edc211b.js" crossorigin="anonymous"></script>
-
 <div class="admonition note" name="html-admonition" style="background: rgba(255,145,0,.1); padding-top: 0px; padding-bottom: 6px; border-radius: 8px; border-left: 8px solid #ff9100; border-color: #ff9100; padding-left: 10px;">
 <p class="title">
     <i class="fa-triangle-exclamation fa" style="font-size: 18px; color:#ff9100;"></i>
     <b style="color: #ff9100;"> &nbsp Warning</b>
 </p>
-
 <p>The inverse transformation process, <code>inverse_transform</code>, is applicable only to the same time series that was previously differentiated using the same <code>TimeSeriesDifferentiator</code> object. This limitation arises from the need to use the initial <i>n</i> values of the time series (<i>n</i> equals the order of differentiation) to successfully reverse the differentiation. These values are stored when the <code>fit</code> method is executed.</p>
 </div>
-
 <br>
-
 
 </div>
 </div>
@@ -2898,17 +2891,14 @@ Differenced time series: [nan  3.  4. -2.  4.  3.  4. -2.]
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <script src="https://kit.fontawesome.com/d20edc211b.js" crossorigin="anonymous"></script>
-
 <div class="admonition note" name="html-admonition" style="background: rgba(0,184,212,.1); padding-top: 0px; padding-bottom: 6px; border-radius: 8px;
 border-left: 8px solid #00b8d4; border-color: #00b8d4; padding-left: 10px;">
 <p class="title">
     <i class="fa-light fa-pencil fa" style="font-size: 18px; color:#00b8d4;"></i>
     <b> &nbsp Note</b>
 </p>
-
 <p>An additional method <code>inverse_transform_next_window</code> is available in the <code>TimeSeriesDifferentiator</code>. This method is designed to be used inside the Forecasters to reverse the differentiation of the predicted values. If the Forecaster regressor is trained with a differentiated time series, then the predicted values will be differentiated as well. The <code>inverse_transform_next_window</code> method allows to return the predictions to the original scale, with the assumption that they start immediately after the last values observed (<code>last_window</code>).</p>
 </div>
-
 
 </div>
 </div>
