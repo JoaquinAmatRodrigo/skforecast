@@ -108,13 +108,11 @@ forecaster = ForecasterAutoreg(
 ```
 
 
-### Inclusion of kwargs in the regressor fit method
+### Custom weights
 
-Some regressors include the possibility to add some additional configuration during the fitting method. The predictor parameter `fit_kwargs` allows these arguments to be set when the forecaster is declared.
+The weight_func parameter allows you to define custom weights for each observation in your time series. These custom weights can be used to assign different levels of importance to different time periods within your time series data. For example, you might want to assign higher weights to recent data points and lower weights to older data points to emphasize the significance of recent observations in your forecasting model.
 
-!!! danger
-
-    To add weights to the forecaster, it must be done through the `weight_func` argument and not through a `fit_kwargs`.
+To use the weight_func parameter, you need to define a custom weighting function that takes the index of the time series as input and returns a weight for each observation. The function should return a weight of 0 for time periods that you want to assign low importance and a weight of 1 for time periods that you want to assign high importance. The function should be compatible with NumPy's array operations.
 
 ```python
 # Create a forecaster
@@ -179,10 +177,6 @@ forecaster = ForecasterAutoreg(
 
 Some regressors include the possibility to add some additional configuration during the fitting method. The predictor parameter `fit_kwargs` allows these arguments to be set when the forecaster is declared.
 
-!!! danger
-
-    To add weights to the forecaster, it must be done through the `weight_func` argument and not through a `fit_kwargs`.
-
 !!! example
 
     The following example demonstrates the inclusion of categorical features in an LGBM regressor. This must be done during the `LGBMRegressor` fit method. [Fit parameters lightgbm](https://lightgbm.readthedocs.io/en/latest/pythonapi/lightgbm.LGBMRegressor.html#lightgbm.LGBMRegressor.fit)
@@ -243,7 +237,7 @@ The number of models to be trained is specified by the `steps` parameter.
 ```python
 # Create a forecaster
 # ==============================================================================
-from skforecast.ForecasterAutoreg import ForecasterAutoregDirect
+from skforecast.ForecasterAutoregDirect import ForecasterAutoregDirect
 from sklearn.ensemble import RandomForestRegressor
 
 forecaster = ForecasterAutoregDirect(
@@ -271,7 +265,7 @@ For a more detailed look at parallelization, visit [Parallelization in skforecas
 ```python
 # Create a forecaster
 # ==============================================================================
-from skforecast.ForecasterAutoreg import ForecasterAutoregDirect
+from skforecast.ForecasterAutoregDirect import ForecasterAutoregDirect
 from sklearn.ensemble import RandomForestRegressor
 
 forecaster = ForecasterAutoregDirect(
