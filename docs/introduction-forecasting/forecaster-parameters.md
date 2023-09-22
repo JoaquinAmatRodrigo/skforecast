@@ -177,6 +177,10 @@ forecaster = ForecasterAutoreg(
 
 Some regressors include the possibility to add some additional configuration during the fitting method. The predictor parameter `fit_kwargs` allows these arguments to be set when the forecaster is declared.
 
+!!! danger
+
+    To add weights to the forecaster, it must be done through the `weight_func` argument and not through a `fit_kwargs`.
+
 !!! example
 
     The following example demonstrates the inclusion of categorical features in an LGBM regressor. This must be done during the `LGBMRegressor` fit method. [Fit parameters lightgbm](https://lightgbm.readthedocs.io/en/latest/pythonapi/lightgbm.LGBMRegressor.html#lightgbm.LGBMRegressor.fit)
