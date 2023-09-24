@@ -25,11 +25,6 @@ The fields of statistics and machine learning have developed many excellent regr
 + Models must be deployed in production. :hammer:
 + Models must be interpretable. :crystal_ball:
 
-**Author's Note**
-
-We believe in being a reliable and practical tool. We do not aim to be the best or the fastest, but to provide a useful framework to help you get things done efficiently.
-
-
 **Share Your Thoughts with Us**
 
 Thank you for choosing skforecast! We value your suggestions, bug reports and recommendations as they help us identify areas for improvement and ensure that skforecast meets the needs of the community. Please consider sharing your experiences, reporting bugs, making suggestions or even contributing to the codebase on GitHub. Together, let's make time series forecasting more accessible and accurate for everyone.
