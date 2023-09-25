@@ -110,9 +110,9 @@ forecaster = ForecasterAutoreg(
 
 ### Custom weights
 
-The weight_func parameter allows you to define custom weights for each observation in your time series. These custom weights can be used to assign different levels of importance to different time periods within your time series data. For example, you might want to assign higher weights to recent data points and lower weights to older data points to emphasize the significance of recent observations in your forecasting model.
+The `weight_func` parameter allows the user to define custom weights for each observation in the time series. These custom weights can be used to assign different levels of importance to different time periods. For example, assign higher weights to recent data points and lower weights to older data points to emphasize the importance of recent observations in the forecast model.
 
-To use the weight_func parameter, you need to define a custom weighting function that takes the index of the time series as input and returns a weight for each observation. The function should return a weight of 0 for time periods that you want to assign low importance and a weight of 1 for time periods that you want to assign high importance. The function should be compatible with NumPy's array operations.
+More information: [Weighted time series forecasting](https://skforecast.org/latest/user_guides/weighted-time-series-forecasting).
 
 ```python
 # Create a forecaster
