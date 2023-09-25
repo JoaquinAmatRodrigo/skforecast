@@ -1,0 +1,16 @@
+numpy>=1.20, <1.26
+pandas>=1.2, <2.1
+tqdm>=4.57.0, <4.66
+scikit-learn>=1.0, <1.4
+optuna>=2.10.0, <3.3
+joblib>=1.1.0, <1.4
+pmdarima>=2.0, <2.1
+seaborn>=0.11, <0.13
+xgboost>=1.6.1, <1.8
+pytest>=7.1.2, <7.5
+matplotlib>=3.3, <3.8
+tomli >=2.0.0
+pytest-xdist <3.4
+statsmodels>=0.12, <0.15
+lightgbm <3.4
+pytest-cov>=3.0.0, <4.2
