@@ -742,14 +742,14 @@
       
         <li class="md-nav__item">
   <a href="#in-sample-residuals" class="md-nav__link">
-    In sample residuals
+    In-sample residuals
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#out-sample-residuals" class="md-nav__link">
-    Out sample residuals
+  <a href="#out-of-sample-residuals" class="md-nav__link">
+    Out-of-sample residuals
   </a>
   
 </li>
@@ -1611,14 +1611,14 @@
       
         <li class="md-nav__item">
   <a href="#in-sample-residuals" class="md-nav__link">
-    In sample residuals
+    In-sample residuals
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#out-sample-residuals" class="md-nav__link">
-    Out sample residuals
+  <a href="#out-of-sample-residuals" class="md-nav__link">
+    Out-of-sample residuals
   </a>
   
 </li>
@@ -3349,7 +3349,7 @@ forecaster.window_size</div>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h2 id="in-sample-residuals">In sample residuals<a class="anchor-link" href="#in-sample-residuals">&#182;</a></h2><p>Residuals from models predicting training data. Only stored up to 1000 values. If <code>transformer_series</code> is not <code>None</code>, the residuals are stored in the transformed scale.</p>
+<h2 id="in-sample-residuals">In-sample residuals<a class="anchor-link" href="#in-sample-residuals">&#182;</a></h2><p>Residuals from models predicting training data. Only stored up to 1000 values. If <code>transformer_series</code> is not <code>None</code>, the residuals are stored in the transformed scale.</p>
 
 </div>
 </div>
@@ -3396,12 +3396,12 @@ Independent multi-series forecasting</a> this parameter is a <code>dict</code> c
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="c1"># Forecaster in sample residuals</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="c1"># Forecaster in-sample residuals</span>
 <span class="c1"># ==============================================================================</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Length:&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">forecaster</span><span class="o">.</span><span class="n">in_sample_residuals</span><span class="p">))</span>
 <span class="n">forecaster</span><span class="o">.</span><span class="n">in_sample_residuals</span><span class="p">[:</span><span class="mi">5</span><span class="p">]</span>
 </pre></div>
-<div id="cell-9" class="clipboard-copy-txt"># Forecaster in sample residuals
+<div id="cell-9" class="clipboard-copy-txt"># Forecaster in-sample residuals
 # ==============================================================================
 print("Length:", len(forecaster.in_sample_residuals))
 forecaster.in_sample_residuals[:5]</div>
@@ -3453,7 +3453,7 @@ forecaster.in_sample_residuals[:5]</div>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h2 id="out-sample-residuals">Out sample residuals<a class="anchor-link" href="#out-sample-residuals">&#182;</a></h2><p>Residuals from models predicting non training data. Only stored up to 1000 values. If <code>transformer_y</code> is not <code>None</code>, residuals are assumed to be in the transformed scale. Use <code>set_out_sample_residuals</code>  method to set values.</p>
+<h2 id="out-of-sample-residuals">Out-of-sample residuals<a class="anchor-link" href="#out-of-sample-residuals">&#182;</a></h2><p>Residuals from models predicting non training data. Only stored up to 1000 values. If <code>transformer_y</code> is not <code>None</code>, residuals are assumed to be in the transformed scale. Use <code>set_out_sample_residuals</code>  method to set values.</p>
 <p>As no values have been added, the parameter is <code>None</code>.</p>
 
 </div>
@@ -3480,11 +3480,11 @@ forecaster.in_sample_residuals[:5]</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="c1"># Forecaster out sample residuals</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="c1"># Forecaster out-of-sample residuals</span>
 <span class="c1"># ==============================================================================</span>
 <span class="n">forecaster</span><span class="o">.</span><span class="n">out_sample_residuals</span>
 </pre></div>
-<div id="cell-10" class="clipboard-copy-txt"># Forecaster out sample residuals
+<div id="cell-10" class="clipboard-copy-txt"># Forecaster out-of-sample residuals
 # ==============================================================================
 forecaster.out_sample_residuals</div>
         

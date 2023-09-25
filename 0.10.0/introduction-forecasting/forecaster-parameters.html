@@ -721,8 +721,8 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#inclusion-of-kwargs-in-the-regressor-fit-method" class="md-nav__link">
-    Inclusion of kwargs in the regressor fit method
+  <a href="#custom-weights" class="md-nav__link">
+    Custom weights
   </a>
   
 </li>
@@ -735,7 +735,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#inclusion-of-kwargs-in-the-regressor-fit-method_1" class="md-nav__link">
+  <a href="#inclusion-of-kwargs-in-the-regressor-fit-method" class="md-nav__link">
     Inclusion of kwargs in the regressor fit method
   </a>
   
@@ -1644,8 +1644,8 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#inclusion-of-kwargs-in-the-regressor-fit-method" class="md-nav__link">
-    Inclusion of kwargs in the regressor fit method
+  <a href="#custom-weights" class="md-nav__link">
+    Custom weights
   </a>
   
 </li>
@@ -1658,7 +1658,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#inclusion-of-kwargs-in-the-regressor-fit-method_1" class="md-nav__link">
+  <a href="#inclusion-of-kwargs-in-the-regressor-fit-method" class="md-nav__link">
     Inclusion of kwargs in the regressor fit method
   </a>
   
@@ -1853,12 +1853,9 @@
                  <span class="n">transformer_exog</span> <span class="o">=</span> <span class="n">StandardScaler</span><span class="p">()</span>
              <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-<h3 id="inclusion-of-kwargs-in-the-regressor-fit-method">Inclusion of kwargs in the regressor fit method<a class="headerlink" href="#inclusion-of-kwargs-in-the-regressor-fit-method" title="Permanent link">&para;</a></h3>
-<p>Some regressors include the possibility to add some additional configuration during the fitting method. The predictor parameter <code>fit_kwargs</code> allows these arguments to be set when the forecaster is declared.</p>
-<div class="admonition danger">
-<p class="admonition-title">Danger</p>
-<p>To add weights to the forecaster, it must be done through the <code>weight_func</code> argument and not through a <code>fit_kwargs</code>.</p>
-</div>
+<h3 id="custom-weights">Custom weights<a class="headerlink" href="#custom-weights" title="Permanent link">&para;</a></h3>
+<p>The <code>weight_func</code> parameter allows the user to define custom weights for each observation in the time series. These custom weights can be used to assign different levels of importance to different time periods. For example, assign higher weights to recent data points and lower weights to older data points to emphasize the importance of recent observations in the forecast model.</p>
+<p>More information: <a href="https://skforecast.org/latest/user_guides/weighted-time-series-forecasting">Weighted time series forecasting</a>.</p>
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
 <span class="normal"> 3</span>
@@ -1948,7 +1945,7 @@
                  <span class="n">differentiation</span>  <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
              <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-<h3 id="inclusion-of-kwargs-in-the-regressor-fit-method_1">Inclusion of kwargs in the regressor fit method<a class="headerlink" href="#inclusion-of-kwargs-in-the-regressor-fit-method_1" title="Permanent link">&para;</a></h3>
+<h3 id="inclusion-of-kwargs-in-the-regressor-fit-method">Inclusion of kwargs in the regressor fit method<a class="headerlink" href="#inclusion-of-kwargs-in-the-regressor-fit-method" title="Permanent link">&para;</a></h3>
 <p>Some regressors include the possibility to add some additional configuration during the fitting method. The predictor parameter <code>fit_kwargs</code> allows these arguments to be set when the forecaster is declared.</p>
 <div class="admonition danger">
 <p class="admonition-title">Danger</p>
@@ -2041,7 +2038,7 @@
 <span class="normal">15</span>
 <span class="normal">16</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Create a forecaster</span>
 <span class="c1"># ==============================================================================</span>
-<span class="kn">from</span> <span class="nn">skforecast.ForecasterAutoreg</span> <span class="kn">import</span> <span class="n">ForecasterAutoregDirect</span>
+<span class="kn">from</span> <span class="nn">skforecast.ForecasterAutoregDirect</span> <span class="kn">import</span> <span class="n">ForecasterAutoregDirect</span>
 <span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestRegressor</span>
 
 <span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoregDirect</span><span class="p">(</span>
@@ -2077,7 +2074,7 @@
 <span class="normal">15</span>
 <span class="normal">16</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Create a forecaster</span>
 <span class="c1"># ==============================================================================</span>
-<span class="kn">from</span> <span class="nn">skforecast.ForecasterAutoreg</span> <span class="kn">import</span> <span class="n">ForecasterAutoregDirect</span>
+<span class="kn">from</span> <span class="nn">skforecast.ForecasterAutoregDirect</span> <span class="kn">import</span> <span class="n">ForecasterAutoregDirect</span>
 <span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestRegressor</span>
 
 <span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoregDirect</span><span class="p">(</span>
