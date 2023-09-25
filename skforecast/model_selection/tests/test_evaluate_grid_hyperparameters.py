@@ -119,6 +119,50 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoreg_with_mocked():
                                    )
 
     pd.testing.assert_frame_equal(results, expected_results)
+
+
+def test_output_evaluate_grid_hyperparameters_ForecasterAutoreg_with_diferentiation_mocked():
+    """
+    Test output of _evaluate_grid_hyperparameters in ForecasterAutoreg with mocked
+    (mocked done in Skforecast v0.4.3) when differentiation is used.
+    """
+    forecaster = ForecasterAutoreg(
+                    regressor = Ridge(random_state=123),
+                    lags      = 2, # Placeholder, the value will be overwritten
+                    differentiation=1
+                 )
+
+    steps = 3
+    n_validation = 12
+    y_train = y[:-n_validation]
+    lags_grid = [2, 4]
+    param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
+    idx = len(lags_grid)*len(param_grid)
+
+    results = _evaluate_grid_hyperparameters(
+                            forecaster  = forecaster,
+                            y           = y,
+                            lags_grid   = lags_grid,
+                            param_grid  = param_grid,
+                            steps       = steps,
+                            refit       = False,
+                            metric      = 'mean_squared_error',
+                            initial_train_size = len(y_train),
+                            fixed_train_size   = False,
+                            return_best = False,
+                            verbose     = False
+              ).reset_index(drop=True)
+    
+    expected_results = pd.DataFrame({
+            'lags'  :[[1, 2, 3, 4], [1, 2], [1, 2, 3, 4], [1, 2], [1, 2], [1, 2, 3, 4]],
+            'params':[{'alpha': 1}, {'alpha': 1}, {'alpha': 0.1}, {'alpha': 0.1}, {'alpha': 0.01}, {'alpha': 0.01}],
+            'mean_squared_error':np.array([0.09168123, 0.09300068, 0.09930084, 0.09960109, 0.10102995, 0.1012931]),                                                               
+            'alpha' :np.array([1., 1., 0.1, 0.1, 0.01 , 0.01])
+                                     },
+            index=pd.RangeIndex(start=0, stop=idx, step=1)
+                                   )
+
+    pd.testing.assert_frame_equal(results, expected_results)
     
 
 def test_output_evaluate_grid_hyperparameters_ForecasterAutoreg_lags_grid_is_None_with_mocked():
