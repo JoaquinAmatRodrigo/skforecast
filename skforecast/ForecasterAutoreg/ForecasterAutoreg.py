@@ -1138,8 +1138,10 @@ class ForecasterAutoreg(ForecasterBase):
         self.lags = initialize_lags(type(self).__name__, lags)
         self.max_lag = max(self.lags)
         self.window_size = max(self.lags)
+        if self.differentiation is not None:
+            self.window_size += self.differentiation        
         
-        
+
     def set_out_sample_residuals(
         self, 
         residuals: np.ndarray, 
