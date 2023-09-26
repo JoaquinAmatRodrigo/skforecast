@@ -115,11 +115,7 @@ class TimeSeriesDifferentiator(BaseEstimator, TransformerMixin):
 
         """
         
-        for i in range(self.order):
-            if i == 0:
-                X_diff = np.diff(X, n=1)
-            else:
-                X_diff = np.diff(X_diff, n=1)
+        X_diff = np.diff(X, n=self.order)
                 
         X_diff = np.append((np.full(shape=self.order, fill_value=np.nan)), X_diff)
 

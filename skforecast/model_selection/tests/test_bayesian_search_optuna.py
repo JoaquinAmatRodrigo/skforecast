@@ -141,19 +141,19 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_mocked():
         return search_space
 
     results = _bayesian_search_optuna(
-                    forecaster         = forecaster,
-                    y                  = y,
-                    lags_grid          = lags_grid,
-                    search_space       = search_space,
-                    steps              = steps,
-                    metric             = 'mean_absolute_error',
-                    refit              = True,
-                    initial_train_size = len(y_train),
-                    fixed_train_size   = True,
-                    n_trials           = 10,
-                    random_state       = 123,
-                    return_best        = False,
-                    verbose            = False
+                  forecaster         = forecaster,
+                  y                  = y,
+                  lags_grid          = lags_grid,
+                  search_space       = search_space,
+                  steps              = steps,
+                  metric             = 'mean_absolute_error',
+                  refit              = True,
+                  initial_train_size = len(y_train),
+                  fixed_train_size   = True,
+                  n_trials           = 10,
+                  random_state       = 123,
+                  return_best        = False,
+                  verbose            = False
               )[0]
     
     expected_results = pd.DataFrame({
@@ -227,20 +227,20 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_mocked_whe
     sampler = TPESampler(seed=123, prior_weight=2.0, consider_magic_clip=False)
 
     results = _bayesian_search_optuna(
-                    forecaster          = forecaster,
-                    y                   = y,
-                    lags_grid           = lags_grid,
-                    search_space        = search_space,
-                    steps               = steps,
-                    metric              = 'mean_absolute_error',
-                    refit               = True,
-                    initial_train_size  = len(y_train),
-                    fixed_train_size    = True,
-                    n_trials            = 10,
-                    random_state        = 123,
-                    return_best         = False,
-                    verbose             = False,
-                    kwargs_create_study = {'sampler':sampler}
+                  forecaster          = forecaster,
+                  y                   = y,
+                  lags_grid           = lags_grid,
+                  search_space        = search_space,
+                  steps               = steps,
+                  metric              = 'mean_absolute_error',
+                  refit               = True,
+                  initial_train_size  = len(y_train),
+                  fixed_train_size    = True,
+                  n_trials            = 10,
+                  random_state        = 123,
+                  return_best         = False,
+                  verbose             = False,
+                  kwargs_create_study = {'sampler':sampler}
               )[0]
     
     expected_results = pd.DataFrame({
@@ -298,21 +298,21 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_mocked_whe
     timeout = 2.0
 
     results = _bayesian_search_optuna(
-                    forecaster            = forecaster,
-                    y                     = y,
-                    lags_grid             = lags_grid,
-                    search_space          = search_space,
-                    steps                 = steps,
-                    metric                = 'mean_absolute_error',
-                    refit                 = True,
-                    initial_train_size    = len(y_train),
-                    fixed_train_size      = True,
-                    n_trials              = 10,
-                    random_state          = 123,
-                    n_jobs                = 1,
-                    return_best           = False,
-                    verbose               = False,
-                    kwargs_study_optimize = {'timeout': timeout}
+                  forecaster            = forecaster,
+                  y                     = y,
+                  lags_grid             = lags_grid,
+                  search_space          = search_space,
+                  steps                 = steps,
+                  metric                = 'mean_absolute_error',
+                  refit                 = True,
+                  initial_train_size    = len(y_train),
+                  fixed_train_size      = True,
+                  n_trials              = 10,
+                  random_state          = 123,
+                  n_jobs                = 1,
+                  return_best           = False,
+                  verbose               = False,
+                  kwargs_study_optimize = {'timeout': timeout}
               )[0].reset_index(drop=True)
     
     expected_results = pd.DataFrame({
@@ -357,19 +357,19 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_mocked_whe
         return search_space
 
     results = _bayesian_search_optuna(
-                    forecaster         = forecaster,
-                    y                  = y,
-                    lags_grid          = lags_grid,
-                    search_space       = search_space,
-                    steps              = steps,
-                    metric             = 'mean_absolute_error',
-                    refit              = True,
-                    initial_train_size = len(y_train),
-                    fixed_train_size   = True,
-                    n_trials           = 10,
-                    random_state       = 123,
-                    return_best        = False,
-                    verbose            = False
+                  forecaster         = forecaster,
+                  y                  = y,
+                  lags_grid          = lags_grid,
+                  search_space       = search_space,
+                  steps              = steps,
+                  metric             = 'mean_absolute_error',
+                  refit              = True,
+                  initial_train_size = len(y_train),
+                  fixed_train_size   = True,
+                  n_trials           = 10,
+                  random_state       = 123,
+                  return_best        = False,
+                  verbose            = False
               )[0]
     
     expected_results = pd.DataFrame({
@@ -412,18 +412,18 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoregCustom_with_mock
         return search_space
 
     results = _bayesian_search_optuna(
-                    forecaster         = forecaster,
-                    y                  = y,
-                    search_space       = search_space,
-                    steps              = steps,
-                    metric             = 'mean_absolute_error',
-                    refit              = True,
-                    initial_train_size = len(y_train),
-                    fixed_train_size   = True,
-                    n_trials           = 10,
-                    random_state       = 123,
-                    return_best        = False,
-                    verbose            = False
+                  forecaster         = forecaster,
+                  y                  = y,
+                  search_space       = search_space,
+                  steps              = steps,
+                  metric             = 'mean_absolute_error',
+                  refit              = True,
+                  initial_train_size = len(y_train),
+                  fixed_train_size   = True,
+                  n_trials           = 10,
+                  random_state       = 123,
+                  return_best        = False,
+                  verbose            = False
               )[0]
     
     expected_results = pd.DataFrame({
@@ -511,16 +511,16 @@ def test_results_opt_best_output_bayesian_search_optuna_with_output_study_best_t
     random_state = 123
 
     def objective(
-            trial,
-            forecaster = forecaster,
-            y          = y,
-            steps      = steps,
-            metric     = metric,
-            initial_train_size = initial_train_size,
-            fixed_train_size   = fixed_train_size,
-            refit      = refit,
-            verbose    = verbose,
-        ) -> float:
+        trial,
+        forecaster         = forecaster,
+        y                  = y,
+        steps              = steps,
+        metric             = metric,
+        initial_train_size = initial_train_size,
+        fixed_train_size   = fixed_train_size,
+        refit              = refit,
+        verbose            = verbose,
+    ) -> float:
         
         alpha = trial.suggest_float('alpha', 1e-2, 1.0)
         
@@ -557,18 +557,18 @@ def test_results_opt_best_output_bayesian_search_optuna_with_output_study_best_t
     return_best  = False
 
     results_opt_best = _bayesian_search_optuna(
-                            forecaster         = forecaster,
-                            y                  = y,
-                            lags_grid          = lags_grid,
-                            search_space       = search_space,
-                            steps              = steps,
-                            metric             = metric,
-                            refit              = refit,
-                            initial_train_size = initial_train_size,
-                            fixed_train_size   = fixed_train_size,
-                            n_trials           = n_trials,
-                            return_best        = return_best,
-                            verbose            = verbose
+                           forecaster         = forecaster,
+                           y                  = y,
+                           lags_grid          = lags_grid,
+                           search_space       = search_space,
+                           steps              = steps,
+                           metric             = metric,
+                           refit              = refit,
+                           initial_train_size = initial_train_size,
+                           fixed_train_size   = fixed_train_size,
+                           n_trials           = n_trials,
+                           return_best        = return_best,
+                           verbose            = verbose
                        )[1]
 
     assert best_trial.number == results_opt_best.number

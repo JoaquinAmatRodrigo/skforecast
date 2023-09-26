@@ -48,7 +48,7 @@ pip install skforecast
 Specific version:
 
 ```bash
-pip install skforecast==0.10.0
+pip install skforecast==0.10.1
 ```
 
 Latest (unstable):
@@ -93,7 +93,7 @@ pip install skforecast[plotting]
 + statsmodels>=0.12, <0.15
 + pmdarima>=2.0, <2.1
 
-# What is new in skforecast 0.10.0?
+# What is new in skforecast 0.10?
 
 Visit the [release notes](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/changelog.md) to view all notable changes.
 
@@ -215,7 +215,7 @@ If you use this software, please cite it using the following metadata.
 
 **APA**:
 ```
-Amat Rodrigo, J., & Escobar Ortiz, J. skforecast (Version 0.10.0) [Computer software]
+Amat Rodrigo, J., & Escobar Ortiz, J. skforecast (Version 0.10.1) [Computer software]
 ```
 
 **BibTeX**:
@@ -225,7 +225,7 @@ author = {Amat Rodrigo, Joaquin and Escobar Ortiz, Javier},
 license = {BSD 3-Clause License},
 month = {9},
 title = {{skforecast}},
-version = {0.10.0},
+version = {0.10.1},
 year = {2023}
 }
 ```
