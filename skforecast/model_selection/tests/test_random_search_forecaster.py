@@ -33,20 +33,20 @@ def test_output_random_search_forecaster_ForecasterAutoreg_with_mocked():
     n_iter = 3
 
     results = random_search_forecaster(
-                        forecaster   = forecaster,
-                        y            = y,
-                        lags_grid    = lags_grid,
-                        param_distributions  = param_distributions,
-                        steps        = steps,
-                        refit        = False,
-                        metric       = 'mean_squared_error',
-                        initial_train_size = len(y_train),
-                        fixed_train_size   = False,
-                        n_iter       = n_iter,
-                        random_state = 123,
-                        return_best  = False,
-                        verbose      = False
-                        )
+                  forecaster   = forecaster,
+                  y            = y,
+                  lags_grid    = lags_grid,
+                  param_distributions  = param_distributions,
+                  steps        = steps,
+                  refit        = False,
+                  metric       = 'mean_squared_error',
+                  initial_train_size = len(y_train),
+                  fixed_train_size   = False,
+                  n_iter       = n_iter,
+                  random_state = 123,
+                  return_best  = False,
+                  verbose      = False
+              )
     
     expected_results = pd.DataFrame({
             'lags'  :[[1, 2], [1, 2], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2]],
