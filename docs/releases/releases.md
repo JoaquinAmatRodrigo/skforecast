@@ -2,7 +2,7 @@
 
 All significant changes to this project are documented in this release file.
 
-## [0.10.1] - [2023-09-25]
+## [0.10.1] - [2023-09-26]
 
 This is a minor release to fix a bug when using `grid_search_forecaster`, `random_search_forecaster` or `bayesian_search_forecaster` with a Forecaster that includes differentiation.
 
