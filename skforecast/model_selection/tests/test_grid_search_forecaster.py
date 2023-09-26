@@ -33,18 +33,18 @@ def test_output_grid_search_forecaster_ForecasterAutoreg_with_mocked():
     idx = len(lags_grid)*len(param_grid['alpha'])
 
     results = grid_search_forecaster(
-                            forecaster  = forecaster,
-                            y           = y,
-                            lags_grid   = lags_grid,
-                            param_grid  = param_grid,
-                            steps       = steps,
-                            refit       = False,
-                            metric      = 'mean_squared_error',
-                            initial_train_size = len(y_train),
-                            fixed_train_size   = False,
-                            return_best = False,
-                            verbose     = False
-                            )
+                  forecaster  = forecaster,
+                  y           = y,
+                  lags_grid   = lags_grid,
+                  param_grid  = param_grid,
+                  steps       = steps,
+                  refit       = False,
+                  metric      = 'mean_squared_error',
+                  initial_train_size = len(y_train),
+                  fixed_train_size   = False,
+                  return_best = False,
+                  verbose     = False
+              )
     
     expected_results = pd.DataFrame({
             'lags'  :[[1, 2], [1, 2], [1, 2], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]],

@@ -20,20 +20,63 @@ def create_predictors(y): # pragma: no cover
     return lags  
 
 
-def test_init_TypeError_when_window_size_argument_is_string():
+@pytest.mark.parametrize("window_size", 
+                         [0, 0.5, 1.5, 'not_int'], 
+                         ids = lambda ws : f'window_size: {ws}')
+def test_init_ValueError_when_window_size_argument_is_not_int_or_greater_than_0(window_size):
     """
-    Test TypeError is raised when window_size is not an int.
+    Test ValueError is raised when window_size is not an int or greater than 0.
     """
-    window_size = '5'
     err_msg = re.escape(
-                 f"Argument `window_size` must be an int. Got {type(window_size)}."
+                (f"Argument `window_size` must be an integer equal to or "
+                 f"greater than 1. Got {window_size}.")
              )
-    with pytest.raises(TypeError, match = err_msg):
+    with pytest.raises(ValueError, match = err_msg):
          ForecasterAutoregCustom(
              regressor      = LinearRegression(),
              fun_predictors = create_predictors,
              window_size    = window_size
          )
+
+
+@pytest.mark.parametrize("dif", 
+                         [0, 0.5, 1.5, 'not_int'], 
+                         ids = lambda dif : f'differentiation: {dif}')
+def test_init_ValueError_when_differentiation_argument_is_not_int_or_greater_than_0(dif):
+    """
+    Test ValueError is raised when differentiation is not an int or greater than 0.
+    """
+    err_msg = re.escape(
+                (f"Argument `differentiation` must be an integer equal to or "
+                 f"greater than 1. Got {dif}.")
+             )
+    with pytest.raises(ValueError, match = err_msg):
+         ForecasterAutoregCustom(
+             regressor       = LinearRegression(),
+             fun_predictors  = create_predictors,
+             window_size     = 5,
+             differentiation = dif
+         )
+
+
+@pytest.mark.parametrize("dif", 
+                         [1, 2], 
+                         ids = lambda dif : f'differentiation: {dif}')
+def test_init_window_size_is_increased_when_differentiation(dif):
+    """
+    Test window_size is increased when including differentiation.
+    """
+    window_size = 5
+
+    forecaster = ForecasterAutoregCustom(
+                     regressor       = LinearRegression(),
+                     fun_predictors  = create_predictors,
+                     window_size     = window_size,
+                     differentiation = dif
+                 )
+    
+    assert forecaster.window_size == window_size + dif
+
 
 def test_init_TypeError_when_fun_predictors_argument_is_not_Callable():
     """

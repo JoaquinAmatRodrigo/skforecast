@@ -1,7 +1,11 @@
+# Extract dependences from pyproject.toml
+# ==============================================================================
 import tomli
 from itertools import chain
 
 def main():
+    """
+    """
     with open("./pyproject.toml", mode='rb') as fp:
         pyproject = tomli.load(fp)
 
