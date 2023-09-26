@@ -219,11 +219,13 @@ class ForecasterAutoreg(ForecasterBase):
         self.lags = initialize_lags(type(self).__name__, lags)
         self.max_lag = max(self.lags)
         self.window_size = self.max_lag
-        if differentiation is not None and differentiation < 1:
-            raise ValueError(
-                f"`differentiation` must be greater than 0. Got {differentiation}."
-            )
+
         if self.differentiation is not None:
+            if not isinstance(differentiation, int) or differentiation < 1:
+                raise ValueError(
+                    (f"Argument `differentiation` must be an integer equal to or "
+                     f"greater than 1. Got {differentiation}.")
+                )
             self.window_size += self.differentiation
             self.differentiator = TimeSeriesDifferentiator(order=self.differentiation)
             

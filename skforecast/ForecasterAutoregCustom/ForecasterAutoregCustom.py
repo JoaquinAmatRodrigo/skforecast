@@ -231,16 +231,18 @@ class ForecasterAutoregCustom(ForecasterBase):
         self.python_version             = sys.version.split(" ")[0]
         self.forecaster_id              = forecaster_id
         
-        if not isinstance(window_size, int):
-            raise TypeError(
-                f"Argument `window_size` must be an int. Got {type(window_size)}."
+        if not isinstance(window_size, int) or window_size < 1:
+            raise ValueError(
+                (f"Argument `window_size` must be an integer equal to or "
+                 f"greater than 1. Got {window_size}.")
             )
         
-        if differentiation is not None and differentiation < 1:
-            raise ValueError(
-                f"`differentiation` must be greater than 0. Got {differentiation}."
-            )
         if self.differentiation is not None:
+            if not isinstance(differentiation, int) or differentiation < 1:
+                raise ValueError(
+                    (f"Argument `differentiation` must be an integer equal to or "
+                     f"greater than 1. Got {differentiation}.")
+                )
             self.window_size += self.differentiation
             self.differentiator = TimeSeriesDifferentiator(order=self.differentiation)
 
