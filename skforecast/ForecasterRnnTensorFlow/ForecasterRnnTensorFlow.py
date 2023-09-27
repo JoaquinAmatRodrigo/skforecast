@@ -250,7 +250,7 @@ class ForecasterRnnTensorFlow(ForecasterBase):
         self.python_version          = sys.version.split(" ")[0]
         self.forecaster_id           = forecaster_id
 
-        if not isinstance(levels, list):
+        if not isinstance(levels, (list, type(None))):
             raise TypeError(
                 f"`levels` argument must be a list. Got {type(levels)}."
             )
@@ -417,44 +417,51 @@ class ForecasterRnnTensorFlow(ForecasterBase):
         self,
         series: pd.DataFrame,
     ) -> Tuple[pd.DataFrame, dict]:
-                # Crear un DataFrame vacío para almacenar las columnas de lags
+        # Create an empty DataFrame to store lagged columns
         lag_df = pd.DataFrame()
-        
-        df = series[self.levels].copy()
-        df = pd.DataFrame(self.transformer_series.fit_transform(df), columns=df.columns)
-        # Paso 1: Crear lags para todas las columnas
-        for col in df.columns:
-            for i in self.lags:
-                lag_df[f'{col}_lag_{i}'] = df[col].shift(i)         
-        
-        # lag_df = lag_df.dropna()
 
-        # Paso 3: Escalar los datos
-        # self.transformer_series = MinMaxself.transformer_series()
-        
+        df = series.copy()
+
+        if self.transformer_series is not None:
+            df = pd.DataFrame(self.transformer_series.fit_transform(df), columns=df.columns)
+
+        # Step 1: Create lags for all columns
+        lagged_cols = []
+
+        for col in df.columns:
+            col_lagged = pd.concat([df[col].shift(i) for i in self.lags], axis=1)
+            col_lagged.columns = [f'{col}_lag_{i}' for i in self.lags]
+            lagged_cols.append(col_lagged)
+
+        lag_df = pd.concat(lagged_cols, axis=1)
+
         n_features = df.shape[1]
 
         X_train = []
+        n_lags = len(self.lags)
         for i in range(n_features):
-            X_train.append(lag_df.iloc[:, (self.lags*i):(self.lags*(i+1))])
-            
+            X_train.append(lag_df.iloc[:, (n_lags * i):(n_lags * (i + 1))])
+
         X_train = np.array(X_train)
-        X_train = np.transpose(X_train, (1,2,0))
+        X_train = np.transpose(X_train, (1, 2, 0))
+
                     
         # Prepare Y
         y_df = pd.DataFrame()
-        
-        if self.levels == None:
-            n_levels = 1
-            for col in df.columns:
+
+        if self.levels is None:
+            df_levels = df.copy()
+            n_levels = df_levels.shape[1]
+            for col in df_levels.columns:
                 for i in range(1, self.steps + 1):
-                    y_df[f'{col}_step_{i}'] = df[col].shift(-i)
+                    y_df[f'{col}_step_{i}'] = df_levels[col].shift(-i)
         
         else:
-            n_levels = len(self.levels)
+            df_levels = df[self.levels].copy()
+            n_levels = df_levels.shape[1]
             for col in self.levels:
                 for i in range(1, self.steps + 1):
-                    y_df[f'{col}_step_{i}'] = df[col].shift(-i)
+                    y_df[f'{col}_step_{i}'] = df_levels[col].shift(-i)
 
         y_train = []
         for i in range(n_levels):
@@ -465,189 +472,11 @@ class ForecasterRnnTensorFlow(ForecasterBase):
         
         
         # Remove NAs 
-        X_train = X_train[self.lags:-self.lags, :, :]
-        y_train = y_train[self.lags:-self.lags, :, :]
+        n_rm = max(n_lags, n_levels)
+        X_train = X_train[n_rm:-n_rm, :, :]
+        y_train = y_train[n_rm:-n_rm, :, :]
         
         return X_train, y_train
-
-    #     return X_train, y_train
-
-
-    # Ejemplo de uso:
-
-    # def create_train_X_y(
-    #     self,
-    #     series: pd.DataFrame,
-    #     exog: Optional[Union[pd.Series, pd.DataFrame]]=None
-    # ) -> Tuple[pd.DataFrame, dict]:
-    #     """
-    #     Create training matrices from multiple time series and exogenous
-    #     variables. The resulting matrices contain the target variable and predictors
-    #     needed to train all the regressors (one per step).
-        
-    #     Parameters
-    #     ----------
-    #     series : pandas DataFrame
-    #         Training time series.
-    #     exog : pandas Series, pandas DataFrame, default `None`
-    #         Exogenous variable/s included as predictor/s. Must have the same
-    #         number of observations as `series` and their indexes must be aligned.
-
-    #     Returns
-    #     -------
-    #     X_train : pandas DataFrame
-    #         Training values (predictors) for each step. Note that the index 
-    #         corresponds to that of the last step. It is updated for the corresponding 
-    #         step in the filter_train_X_y_for_step method.
-    #         Shape: (len(series) - self.max_lag, len(self.lags)*len(series.columns) + exog.shape[1]*steps)
-    #     y_train : dict
-    #         Values (target) of the time series related to each row of `X_train` 
-    #         for each step of the form {step: y_step_[i]}.
-    #         Shape of each series: (len(y) - self.max_lag, )
-        
-    #     """
-
-    #     if not isinstance(series, pd.DataFrame):
-    #         raise TypeError(f"`series` must be a pandas DataFrame. Got {type(series)}.")
-        
-    #     series_col_names = list(series.columns)
-
-    #     if self.levels not in series_col_names:
-    #         raise ValueError(
-    #             (f"One of the `series` columns must be named as the `levels` of the forecaster.\n"
-    #              f"    forecaster `levels` : {self.levels}.\n"
-    #              f"    `series` columns   : {series_col_names}.")
-    #         )
-
-    #     self.lags_ = self.lags
-    #     if isinstance(self.lags_, dict):
-    #         if list(self.lags_.keys()) != series_col_names:
-    #             raise ValueError(
-    #                 (f"When `lags` parameter is a `dict`, its keys must be the "
-    #                  f"same as `series` column names.\n"
-    #                  f"    Lags keys        : {list(self.lags_.keys())}.\n"
-    #                  f"    `series` columns : {series_col_names}.")
-    #             )
-    #     else:
-    #         self.lags_ = {serie: self.lags_ for serie in series_col_names}
-
-    #     if len(series) < self.max_lag + self.steps:
-    #         raise ValueError(
-    #             (f"Minimum length of `series` for training this forecaster is "
-    #              f"{self.max_lag + self.steps}. Got {len(series)}. Reduce the "
-    #              f"number of predicted steps, {self.steps}, or the maximum "
-    #              f"lag, {self.max_lag}, if no more data is available.")
-    #         )
-
-    #     if self.transformer_series is None:
-    #         self.transformer_series_ = {serie: None for serie in series_col_names}
-    #     elif not isinstance(self.transformer_series, dict):
-    #         self.transformer_series_ = {serie: clone(self.transformer_series) 
-    #                                     for serie in series_col_names}
-    #     else:
-    #         self.transformer_series_ = {serie: None for serie in series_col_names}
-    #         # Only elements already present in transformer_series_ are updated
-    #         self.transformer_series_.update(
-    #             (k, v) for k, v in deepcopy(self.transformer_series).items()
-    #             if k in self.transformer_series_
-    #         )
-    #         series_not_in_transformer_series = (
-    #             set(series.columns) - set(self.transformer_series.keys())
-    #         )
-    #         if series_not_in_transformer_series:
-    #             warnings.warn(
-    #                 (f"{series_not_in_transformer_series} not present in `transformer_series`."
-    #                  f" No transformation is applied to these series."),
-    #                  IgnoredArgumentWarning
-    #             )
-
-    #     if exog is not None:
-    #         if len(exog) != len(series):
-    #             raise ValueError(
-    #                 (f"`exog` must have same number of samples as `series`. "
-    #                  f"length `exog`: ({len(exog)}), length `series`: ({len(series)})")
-    #             )
-    #         check_exog(exog=exog, allow_nan=True)
-    #         # Need here for filter_train_X_y_for_step to work without fitting
-    #         self.included_exog = True 
-    #         if isinstance(exog, pd.Series):
-    #             exog = transform_series(
-    #                         series            = exog,
-    #                         transformer       = self.transformer_exog,
-    #                         fit               = True,
-    #                         inverse_transform = False
-    #                    )
-    #         else:
-    #             exog = transform_dataframe(
-    #                         df                = exog,
-    #                         transformer       = self.transformer_exog,
-    #                         fit               = True,
-    #                         inverse_transform = False
-    #                    )
-                
-    #         check_exog(exog=exog, allow_nan=False)
-    #         check_exog_dtypes(exog)
-    #         self.exog_dtypes = get_exog_dtypes(exog=exog)
-
-    #         _, exog_index = preprocess_exog(exog=exog, return_values=False)
-    #         if not (exog_index[:len(series.index)] == series.index).all():
-    #             raise ValueError(
-    #                 ("Different index for `series` and `exog`. They must be equal "
-    #                  "to ensure the correct alignment of values.") 
-    #             )
-
-    #     for i, serie in enumerate(series.columns):
-
-    #         y = series[serie]
-    #         check_y(y=y)
-    #         y = transform_series(
-    #                 series            = y,
-    #                 transformer       = self.transformer_series_[serie],
-    #                 fit               = True,
-    #                 inverse_transform = False
-    #             )
-
-    #         y_values, y_index = preprocess_y(y=y)
-    #         X_train_values, y_train_values = self._create_lags(
-    #                                              y    = y_values,
-    #                                              lags = self.lags_[serie]
-    #                                          )
-    #         if i == 0:
-    #             X_train = X_train_values
-    #         else:
-    #             X_train = np.hstack((X_train, X_train_values))
-
-    #         if serie == self.levels:
-    #             y_train = y_train_values
-
-    #     X_train_col_names = [f"{key}_lag_{lag}" for key in self.lags_
-    #                          for lag in self.lags_[key]]
-    #     X_train = pd.DataFrame(
-    #                   data    = X_train,
-    #                   columns = X_train_col_names,
-    #                   index   = y_index[self.max_lag + (self.steps -1): ]
-    #               )
-
-    #     if exog is not None:
-    #         # Transform exog to match direct format
-    #         # The first `self.max_lag` positions have to be removed from X_exog
-    #         # since they are not in X_lags.
-    #         exog_to_train = exog_to_direct(
-    #                             exog  = exog,
-    #                             steps = self.steps
-    #                         ).iloc[-X_train.shape[0]:, :]
-    #         X_train = pd.concat((X_train, exog_to_train), axis=1)
-        
-    #     self.X_train_col_names = X_train.columns.to_list()
-
-    #     y_train = {step: pd.Series(
-    #                          data  = y_train[step-1], 
-    #                          index = y_index[self.max_lag + step-1:][:len(y_train[0])],
-    #                          name  = f"{self.levels}_step_{step}"
-    #                      )
-    #                for step in range(1, self.steps + 1)}
-                        
-    #     return X_train, y_train
 
     
     def filter_train_X_y_for_step(
