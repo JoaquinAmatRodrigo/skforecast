@@ -247,4 +247,4 @@ If you found skforecast useful, you can support us with a donation. Your contrib
 
 # License
 
-[BSD 3-Clause License](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/LICENSE)
+[BSD-3-Clause License](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/LICENSE)

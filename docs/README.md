@@ -198,16 +198,17 @@ If you use this software, please cite it using the following metadata.
 
 **APA**:
 ```
-Amat Rodrigo, J., & Escobar Ortiz, J. skforecast (Version 0.10.1) [Computer software]
+Amat Rodrigo, J., & Escobar Ortiz, J. (2023). skforecast (Version 0.10.1) [Computer software]. https://skforecast.org/
 ```
 
 **BibTeX**:
 ```
 @software{skforecast,
 author = {Amat Rodrigo, Joaquin and Escobar Ortiz, Javier},
-license = {BSD 3-Clause License},
+license = {BSD-3-Clause},
 month = {9},
 title = {{skforecast}},
+url = {https://skforecast.org/},
 version = {0.10.1},
 year = {2023}
 }
@@ -228,4 +229,4 @@ If you found skforecast useful, you can support us with a donation. Your contrib
 
 ## License
 
-[BSD 3-Clause License](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/LICENSE)
+[BSD-3-Clause License](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/LICENSE)
