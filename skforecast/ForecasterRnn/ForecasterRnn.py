@@ -1,5 +1,5 @@
 ################################################################################
-#                        ForecasterRnnTensorFlow                         #
+#                        ForecasterRnn                         #
 #                                                                              #
 # This work by Joaquin Amat Rodrigo and Javier Escobar Ortiz is licensed       #
 # under the BSD 3-Clause License.                                              #
@@ -47,7 +47,7 @@ logging.basicConfig(
     levels  = logging.INFO,
 )
 
-class ForecasterRnnTensorFlow(ForecasterBase):
+class ForecasterRnn(ForecasterBase):
     """
     This class turns any regressor compatible with the TensorFlow API into a
     TensorFlow RNN multi-serie multi-step forecaster. A unique model 
@@ -322,7 +322,7 @@ class ForecasterRnnTensorFlow(ForecasterBase):
         self
     ) -> str:
         """
-        Information displayed when a ForecasterRnnTensorFlow object is printed.
+        Information displayed when a ForecasterRnn object is printed.
         """
 
         if isinstance(self.regressor, sklearn.pipeline.Pipeline):
