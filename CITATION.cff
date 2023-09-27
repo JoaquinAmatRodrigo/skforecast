@@ -24,7 +24,7 @@ keywords:
   - forecasting
   - machine learning
   - python
-license: BSD-3-Clause
 doi: 10.5281/zenodo.8382788
+license: bsd-3-clause
 version: 0.10.1
 date-released: '2023-09-26'
