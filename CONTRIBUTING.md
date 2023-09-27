@@ -7,13 +7,15 @@ Skforecast is a community-driven open-source project that relies on contribution
 Primarily, skforecast development consists of adding and creating new *Forecasters*, new validation strategies, or improving the performance of the current code. However, there are many other ways to contribute:
 
 - Submit a bug report or feature request on [GitHub Issues](https://github.com/JoaquinAmatRodrigo/skforecast/issues).
-- Contribute a Jupyter notebook to our [examples](https://joaquinamatrodrigo.github.io/skforecast/latest/examples/examples.html).
+- Contribute a Jupyter notebook to our [examples](https://skforecast.org/latest/examples/examples).
 - Write [unit or integration tests](https://docs.pytest.org/en/latest/) for our project.
 - Answer questions on our issues, Stack Overflow, and elsewhere.
 - Translate our documentation into another language.
 - Write a blog post, tweet, or share our project with others.
 
 As you can see, there are lots of ways to get involved and we would be very happy for you to join us! Before you start, please open an issue with a brief proposal description so we can align.
+
+Visit our [authors section](https://skforecast.org/latest/authors/authors) to meet all the contributors to skforecast.
 
 
 ## Testing
