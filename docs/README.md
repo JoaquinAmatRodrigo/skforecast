@@ -196,7 +196,14 @@ Visit our [authors section](https://skforecast.org/latest/authors/authors) to me
 
 ## Citation
 
-If you use this software, please cite it using the following metadata.
+If you use skforecast for a scientific publication, we would appreciate citations to the published software.
+
+**Zenodo**
+
+```
+Amat Rodrigo, Joaquin, & Escobar Ortiz, Javier. (2023). skforecast (v0.10.1). Zenodo. https://doi.org/10.5281/zenodo.8382788
+```
+
 
 **APA**:
 ```
@@ -207,16 +214,15 @@ Amat Rodrigo, J., & Escobar Ortiz, J. (2023). skforecast (Version 0.10.1) [Compu
 ```
 @software{skforecast,
 author = {Amat Rodrigo, Joaquin and Escobar Ortiz, Javier},
-license = {BSD-3-Clause},
+title = {skforecast},
 month = {9},
-title = {{skforecast}},
-url = {https://skforecast.org/},
+year = {2023},
+license = {BSD-3-Clause},
 version = {0.10.1},
-year = {2023}
+url = {https://skforecast.org/},
+doi = {10.5281/zenodo.8382788}
 }
 ```
-
-View the [citation file](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/CITATION.cff).
 
 
 ## Donating
