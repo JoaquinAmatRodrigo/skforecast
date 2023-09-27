@@ -183,13 +183,15 @@ Universidad de Deusto / Deustuko Unibertsitatea**](https://youtu.be/MlktVhReO0E)
 Primarily, skforecast development consists of adding and creating new *Forecasters*, new validation strategies, or improving the performance of the current code. However, there are many other ways to contribute:
 
 - Submit a bug report or feature request on [GitHub Issues](https://github.com/JoaquinAmatRodrigo/skforecast/issues).
-- Contribute a Jupyter notebook to our [examples](https://joaquinamatrodrigo.github.io/skforecast/latest/examples/examples.html).
+- Contribute a Jupyter notebook to our [examples](https://skforecast.org/latest/examples/examples).
 - Write [unit or integration tests](https://docs.pytest.org/en/latest/) for our project.
 - Answer questions on our issues, Stack Overflow, and elsewhere.
 - Translate our documentation into another language.
 - Write a blog post, tweet, or share our project with others.
 
 For more information on how to contribute to skforecast, see our [Contribution Guide](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/CONTRIBUTING.md).
+
+Visit our [authors section](https://skforecast.org/latest/authors/authors) to meet all the contributors to skforecast.
 
 
 ## Citation
@@ -198,16 +200,17 @@ If you use this software, please cite it using the following metadata.
 
 **APA**:
 ```
-Amat Rodrigo, J., & Escobar Ortiz, J. skforecast (Version 0.10.1) [Computer software]
+Amat Rodrigo, J., & Escobar Ortiz, J. (2023). skforecast (Version 0.10.1) [Computer software]. https://skforecast.org/
 ```
 
 **BibTeX**:
 ```
 @software{skforecast,
 author = {Amat Rodrigo, Joaquin and Escobar Ortiz, Javier},
-license = {BSD 3-Clause License},
+license = {BSD-3-Clause},
 month = {9},
 title = {{skforecast}},
+url = {https://skforecast.org/},
 version = {0.10.1},
 year = {2023}
 }
@@ -228,4 +231,4 @@ If you found skforecast useful, you can support us with a donation. Your contrib
 
 ## License
 
-[BSD 3-Clause License](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/LICENSE)
+[BSD-3-Clause License](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/LICENSE)
