@@ -213,24 +213,24 @@ class ForecasterRnn(ForecasterBase):
         self,
         regressor: object,
         levels: list,
-        steps: int,
-        lags: Union[int, np.ndarray, list, dict],
+        # steps: int,
+        # lags: Union[int, np.ndarray, list, dict],
         transformer_series: Optional[Union[object, dict]]=None,
-        transformer_exog: Optional[object]=None,
-        weight_func: Optional[Callable]=None,
         fit_kwargs: Optional[dict]=None,
-        n_jobs: Optional[Union[int, str]]='auto',
-        forecaster_id: Optional[Union[str, int]]=None
     ) -> None:
         
-        self.regressor               = regressor
+        # ----------------------- Infer features from regressor ---------------------- #
+        self.regressor = regressor
+        l_ini = self.regressor.layers[0]
+        self.lags = l_ini.input_shape[0][1]
+        self.series = l_ini.input_shape[0][2]
+        l_end = self.regressor.layers[-1]
+        self.steps = l_end.output_shape[1]
+        self.outputs = l_end.output_shape[-1]
+        
         self.levels                   = levels
-        self.steps                   = steps
         self.transformer_series      = transformer_series
         self.transformer_series_     = None
-        self.transformer_exog        = transformer_exog
-        self.weight_func             = weight_func
-        self.source_code_weight_func = None
         self.max_lag                 = None
         self.window_size             = None
         self.last_window             = None
@@ -238,9 +238,6 @@ class ForecasterRnn(ForecasterBase):
         self.index_freq              = None
         self.training_range          = None
         self.included_exog           = False
-        self.exog_type               = None
-        self.exog_dtypes             = None
-        self.exog_col_names          = None
         self.series_col_names        = None
         self.X_train_col_names       = None
         self.fitted                  = False
@@ -248,42 +245,34 @@ class ForecasterRnn(ForecasterBase):
         self.fit_date                = None
         self.skforcast_version       = skforecast.__version__
         self.python_version          = sys.version.split(" ")[0]
-        self.forecaster_id           = forecaster_id
 
         if not isinstance(levels, (list, type(None))):
             raise TypeError(
                 f"`levels` argument must be a list. Got {type(levels)}."
             )
 
-        if not isinstance(steps, int):
+        if not isinstance(self.steps, int):
             raise TypeError(
                 (f"`steps` argument must be an int greater than or equal to 1. "
-                 f"Got {type(steps)}.")
+                 f"Got {type(self.steps)}.")
             )
 
-        if steps < 1:
+        if self.steps < 1:
             raise ValueError(
-                f"`steps` argument must be greater than or equal to 1. Got {steps}."
+                f"`steps` argument must be greater than or equal to 1. Got {self.steps}."
             )
         
-        if not isinstance(n_jobs, int) and n_jobs != 'auto':
-            raise TypeError(
-                f"`n_jobs` must be an integer or `'auto'`. Got {type(n_jobs)}."
-            )
-        
-        self.regressors_ = {step: clone(self.regressor) for step in range(1, steps + 1)}
-
-        if isinstance(lags, dict):
+        if isinstance(self.lags, dict):
             self.lags = {}
-            for key in lags:
+            for key in self.lags:
                 self.lags[key] = initialize_lags(
                                      forecaster_name = type(self).__name__,
-                                     lags            = lags[key]
+                                     lags            = self.lags[key]
                                  )
         else:
             self.lags = initialize_lags(
                             forecaster_name = type(self).__name__, 
-                            lags            = lags
+                            lags            = self.lags
                         )
 
         self.lags_ = self.lags
@@ -293,29 +282,11 @@ class ForecasterRnn(ForecasterBase):
             else max(self.lags)
         )
         self.window_size = self.max_lag
-            
-        self.weight_func, self.source_code_weight_func, _ = initialize_weights(
-            forecaster_name = type(self).__name__, 
-            regressor       = regressor, 
-            weight_func     = weight_func, 
-            series_weights  = None
-        )
 
         self.fit_kwargs = check_select_fit_kwargs(
                               regressor  = regressor,
                               fit_kwargs = fit_kwargs
                           )
-
-        self.in_sample_residuals = {step: None for step in range(1, steps + 1)}
-        self.out_sample_residuals = None
-
-        if n_jobs == 'auto':
-            self.n_jobs = select_n_jobs_fit_forecaster(
-                              forecaster_name = type(self).__name__,
-                              regressor_name  = type(self.regressor).__name__,
-                          )
-        else:
-            self.n_jobs = n_jobs if n_jobs > 0 else cpu_count()
     
 
     def __repr__(
@@ -339,15 +310,10 @@ class ForecasterRnn(ForecasterBase):
             f"Regressor: {self.regressor} \n"
             f"Lags: {self.lags} \n"
             f"Transformer for series: {self.transformer_series} \n"
-            f"Transformer for exog: {self.transformer_exog} \n"
-            f"Weight function included: {True if self.weight_func is not None else False} \n"
             f"Window size: {self.window_size} \n"
             f"Target series, levels: {self.levels} \n"
             f"Multivariate series (names): {self.series_col_names} \n"
             f"Maximum steps predicted: {self.steps} \n"
-            f"Exogenous included: {self.included_exog} \n"
-            f"Type of exogenous variable: {self.exog_type} \n"
-            f"Exogenous variables names: {self.exog_col_names} \n"
             f"Training range: {self.training_range.to_list() if self.fitted else None} \n"
             f"Training index type: {str(self.index_type).split('.')[-1][:-2] if self.fitted else None} \n"
             f"Training index frequency: {self.index_freq if self.fitted else None} \n"
@@ -357,7 +323,6 @@ class ForecasterRnn(ForecasterBase):
             f"Last fit date: {self.fit_date} \n"
             f"Skforecast version: {self.skforcast_version} \n"
             f"Python version: {self.python_version} \n"
-            f"Forecaster id: {self.forecaster_id} \n"
         )
 
         return info
@@ -470,130 +435,26 @@ class ForecasterRnn(ForecasterBase):
         y_train = np.array(y_train)
         y_train = np.transpose(y_train, (1,2,0))
         
-        
         # Remove NAs 
         n_rm = max(n_lags, n_levels)
         X_train = X_train[n_rm:-n_rm, :, :]
         y_train = y_train[n_rm:-n_rm, :, :]
         
         return X_train, y_train
-
     
-    def filter_train_X_y_for_step(
+    def compile(
         self,
-        step: int,
-        X_train: pd.DataFrame,
-        y_train: dict,
-        remove_suffix: bool=False
-    ) -> Tuple[pd.DataFrame, pd.Series]:
-        """
-        Select the columns needed to train a forecaster for a specific step.  
-        The input matrices should be created using `create_train_X_y` method. 
-        This method updates the index of `X_train` to the corresponding one 
-        according to `y_train`. If `remove_suffix=True` the suffix "_step_i" 
-        will be removed from the column names. 
-
-        Parameters
-        ----------
-        step : int
-            step for which columns must be selected selected. Starts at 1.
-        X_train : pandas DataFrame
-            Dataframe created with the `create_train_X_y` method, first return.
-        y_train : dict
-            Dict created with the `create_train_X_y` method, second return.
-        remove_suffix : bool, default `False`
-            If True, suffix "_step_i" is removed from the column names.
-
-        Returns
-        -------
-        X_train_step : pandas DataFrame
-            Training values (predictors) for the selected step.
-        y_train_step : pandas Series
-            Values (target) of the time series related to each row of `X_train`.
-            Shape: (len(y) - self.max_lag)
-
-        """
-
-        if (step < 1) or (step > self.steps):
-            raise ValueError(
-                (f"Invalid value `step`. For this forecaster, minimum value is 1 "
-                 f"and the maximum step is {self.steps}.")
-            )
-
-        y_train_step = y_train[step]
-
-        # Matrix X_train starts at index 0.
-        if not self.included_exog:
-            X_train_step = X_train
-        else:
-            len_columns_lags = len(list(chain(*self.lags_.values())))
-            idx_columns_lags = np.arange(len_columns_lags)
-            n_exog = (len(self.X_train_col_names) - len_columns_lags) / self.steps
-            idx_columns_exog = (
-                np.arange((step-1)*n_exog, (step)*n_exog) + idx_columns_lags[-1] + 1 
-            )
-            idx_columns = np.hstack((idx_columns_lags, idx_columns_exog))
-            X_train_step = X_train.iloc[:, idx_columns]
-
-        X_train_step.index = y_train_step.index
-
-        if remove_suffix:
-            X_train_step.columns = [col_name.replace(f"_step_{step}", "")
-                                    for col_name in X_train_step.columns]
-            y_train_step.name = y_train_step.name.replace(f"_step_{step}", "")
-
-        return  X_train_step, y_train_step
-
-    
-    def create_sample_weights(
-        self,
-        X_train: pd.DataFrame
-    )-> np.ndarray:
-        """
-        Crate weights for each observation according to the forecaster's attribute
-        `weight_func`. 
-
-        Parameters
-        ----------
-        X_train : pandas DataFrame
-            Dataframe created with `create_train_X_y` and filter_train_X_y_for_step`
-            methods, first return.
-
-        Returns
-        -------
-        sample_weight : numpy ndarray
-            Weights to use in `fit` method.
-        
-        """
-
-        sample_weight = None
-
-        if self.weight_func is not None:
-            sample_weight = self.weight_func(X_train.index)
-
-        if sample_weight is not None:
-            if np.isnan(sample_weight).any():
-                raise ValueError(
-                    "The resulting `sample_weight` cannot have NaN values."
-                )
-            if np.any(sample_weight < 0):
-                raise ValueError(
-                    "The resulting `sample_weight` cannot have negative values."
-                )
-            if np.sum(sample_weight) == 0:
-                raise ValueError(
-                    ("The resulting `sample_weight` cannot be normalized because "
-                     "the sum of the weights is zero.")
-                )
-
-        return sample_weight
-
+        optimizer,
+        loss
+    ):
+        self.optimizer = optimizer
+        self.loss = loss
+        self.regressor.compile(optimizer=optimizer, loss=loss)
         
     def fit(
         self,
         series: pd.DataFrame,
-        exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-        store_in_sample_residuals: bool=True
+        series_val: pd.DataFrame
     ) -> None:
         """
         Training Forecaster.
@@ -623,10 +484,6 @@ class ForecasterRnn(ForecasterBase):
         self.index_type          = None
         self.index_freq          = None
         self.last_window         = None
-        self.included_exog       = False
-        self.exog_type           = None
-        self.exog_dtypes         = None
-        self.exog_col_names      = None
         self.series_col_names    = None
         self.X_train_col_names   = None
         self.in_sample_residuals = {step: None for step in range(1, self.steps + 1)}
@@ -635,23 +492,11 @@ class ForecasterRnn(ForecasterBase):
 
         self.series_col_names = list(series.columns)
 
-        if exog is not None:
-            self.included_exog = True
-            self.exog_type = type(exog)
-            self.exog_col_names = \
-                exog.columns.to_list() if isinstance(exog, pd.DataFrame) else [exog.name]
 
-            if len(set(self.exog_col_names) - set(self.series_col_names)) != len(self.exog_col_names):
-                raise ValueError(
-                    (f"`exog` cannot contain a column named the same as one of the "
-                     f"series (column names of series).\n"
-                     f"    `series` columns : {self.series_col_names}.\n"
-                     f"    `exog`   columns : {self.exog_col_names}.")
-                )
+        X_train, y_train = self.create_train_X_y(series=series)
+        X_val, y_val = self.create_train_X_y(series=series_val)
 
-        X_train, y_train = self.create_train_X_y(series=series, exog=exog)
-
-        def fit_forecaster(regressor, X_train, y_train, step, store_in_sample_residuals):
+        def fit_forecaster(regressor, X_train, y_train, X_val, y_val):
             """
             Auxiliary function to fit each of the forecaster's regressors in parallel.
 
@@ -663,11 +508,6 @@ class ForecasterRnn(ForecasterBase):
                 Dataframe created with the `create_train_X_y` method, first return.
             y_train : dict
                 Dict created with the `create_train_X_y` method, second return.
-            step : int
-                Step of the forecaster to be fitted.
-            store_in_sample_residuals : bool
-                If `True`, in-sample residuals will be stored in the forecaster object
-                after fitting.
             
             Returns
             -------
@@ -675,79 +515,34 @@ class ForecasterRnn(ForecasterBase):
 
             """
 
-            X_train_step, y_train_step = self.filter_train_X_y_for_step(
-                                             step          = step,
-                                             X_train       = X_train,
-                                             y_train       = y_train,
-                                             remove_suffix = True
-                                         )
-            sample_weight = self.create_sample_weights(X_train=X_train_step)
-            if sample_weight is not None:
-                regressor.fit(
-                    X             = X_train_step,
-                    y             = y_train_step,
-                    sample_weight = sample_weight,
-                    **self.fit_kwargs
-                )
-            else:
-                regressor.fit(
-                    X = X_train_step,
-                    y = y_train_step,
-                    **self.fit_kwargs
-                )
+            
+            X_train, y_train = self.create_train_X_y(series=series)
+            
 
-            # This is done to save time during fit in functions such as backtesting()
-            if store_in_sample_residuals:
-                residuals = (
-                    (y_train_step - regressor.predict(X_train_step))
-                ).to_numpy()
-
-                if len(residuals) > 1000:
-                    # Only up to 1000 residuals are stored
-                        rng = np.random.default_rng(seed=123)
-                        residuals = rng.choice(
-                                        a       = residuals, 
-                                        size    = 1000, 
-                                        replace = False
-                                    )
-            else:
-                residuals = None
-
-            return step, regressor, residuals
-
-        results_fit = (
-            Parallel(n_jobs=self.n_jobs)
-            (delayed(fit_forecaster)
-            (
-                regressor=copy(self.regressor),
-                X_train=X_train,
-                y_train=y_train,
-                step=step,
-                store_in_sample_residuals=store_in_sample_residuals
+            history = regressor.fit(
+                X_train,
+                y_train,
+                validation_data=(X_val, y_val),
+                **self.fit_kwargs
             )
-            for step in range(1, self.steps + 1))
-        )
 
-        self.regressors_ = {step: regressor 
-                            for step, regressor, _ in results_fit}
+            return regressor, history
 
-        if store_in_sample_residuals:
-            self.in_sample_residuals = {step: residuals 
-                                        for step, _, residuals in results_fit}
-        
+        results_fit = fit_forecaster(self.regressor, X_train, y_train, X_val, y_val)
+
         self.fitted = True
         self.fit_date = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
-        self.training_range = preprocess_y(
-                                y = series[self.levels],
-                                return_values = False
-                              )[1][[0, -1]]
-        self.index_type = type(X_train.index)
-        if isinstance(X_train.index, pd.DatetimeIndex):
-            self.index_freq = X_train.index.freqstr
-        else: 
-            self.index_freq = X_train.index.step
+        # self.training_range = preprocess_y(
+        #                         y = series[self.levels],
+        #                         return_values = False
+        #                       )[1][[0, -1]]
+        # self.index_type = type(X_train.index)
+        # if isinstance(X_train.index, pd.DatetimeIndex):
+        #     self.index_freq = X_train.index.freqstr
+        # else: 
+        #     self.index_freq = X_train.index.step
 
-        self.last_window = series.iloc[-self.max_lag:].copy()
+        # self.last_window = series.iloc[-self.max_lag:].copy()
 
             
     def predict(
