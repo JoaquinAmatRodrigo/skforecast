@@ -38,7 +38,7 @@ def create_model_lstm(
     series:pd.DataFrame, 
     lags:Union[int, list], 
     steps:Union[int, list], 
-    outputs:Union[str, int, list]=None, 
+    levels:Union[str, int, list]=None, 
     lstm_unit:int=100, 
     dense_units:list=[64],
     optimizer:object=Adam(learning_rate=0.01),
@@ -52,15 +52,15 @@ def create_model_lstm(
         lags = len(lags)
     if isinstance(steps, list):
         steps = len(steps)
-    if isinstance(outputs, list):
-        outputs = len(outputs)
-    elif isinstance(outputs, (str)):
-        outputs = 1
-    elif isinstance(outputs, type(None)):
-        outputs = series.shape[1]
+    if isinstance(levels, list):
+        levels = len(levels)
+    elif isinstance(levels, (str)):
+        levels = 1
+    elif isinstance(levels, type(None)):
+        levels = series.shape[1]
     else:
         raise TypeError(
-            f"`outputs` argument must be a string, list or int. Got {type(outputs)}."
+            f"`levels` argument must be a string, list or int. Got {type(levels)}."
         )
     
     # ---------------------------------- Layers ---------------------------------- #
@@ -74,10 +74,10 @@ def create_model_lstm(
     for nn in dense_units:
         x = Dense(nn, activation='relu')(x)
     
-    x = Dense(outputs * steps, activation='linear')(x)
+    x = Dense(levels * steps, activation='linear')(x)
 
     # Reshape layer
-    output_layer = Reshape((steps, outputs))(x)
+    output_layer = Reshape((steps, levels))(x)
 
     # Create the model
     model = Model(inputs=input_layer, outputs=output_layer)
