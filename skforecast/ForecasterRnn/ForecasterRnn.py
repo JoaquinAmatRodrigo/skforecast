@@ -500,16 +500,7 @@ class ForecasterRnn(ForecasterBase):
         
         return X_train, y_train
     
-    # TODO: añadir a la función auxiliar para crear el modelo
-    
-    # def compile(
-    #     self,
-    #     optimizer,
-    #     loss
-    # ):
-    #     self.optimizer = optimizer
-    #     self.loss = loss
-    #     self.regressor.compile(optimizer=optimizer, loss=loss)
+
         
     def fit(
         self,

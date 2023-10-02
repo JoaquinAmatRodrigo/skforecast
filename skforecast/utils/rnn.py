@@ -35,21 +35,37 @@ from tensorflow.keras.losses import MeanSquaredError
 from tensorflow.keras.callbacks import EarlyStopping
 
 def create_model_lstm(
-    series, 
-    n_lags, 
-    n_steps, 
-    levels, 
+    series:pd.DataFrame, 
+    lags:Union[int, list], 
+    steps:Union[int, list], 
+    outputs:Union[str, int, list]=None, 
     lstm_unit:int=100, 
-    dense_units:list=[64]
+    dense_units:list=[64],
+    optimizer:object=Adam(learning_rate=0.01),
+    loss:object=MeanSquaredError(),
 ):
     
     # ----------------------------- Start parameters ----------------------------- #
     n_series = series.shape[1]
-    n_levels = len(levels)
+    
+    if isinstance(lags, list):
+        lags = len(lags)
+    if isinstance(steps, list):
+        steps = len(steps)
+    if isinstance(outputs, list):
+        outputs = len(outputs)
+    elif isinstance(outputs, (str)):
+        outputs = 1
+    elif isinstance(outputs, type(None)):
+        outputs = series.shape[1]
+    else:
+        raise TypeError(
+            f"`outputs` argument must be a string, list or int. Got {type(outputs)}."
+        )
     
     # ---------------------------------- Layers ---------------------------------- #
     # Define the input layer
-    input_layer = Input(shape=(n_lags, n_series))
+    input_layer = Input(shape=(lags, n_series))
 
     # LSTM layer
     x = LSTM(lstm_unit, activation='relu')(input_layer)
@@ -58,12 +74,20 @@ def create_model_lstm(
     for nn in dense_units:
         x = Dense(nn, activation='relu')(x)
     
-    x = Dense(n_levels * n_steps, activation='linear')(x)
+    x = Dense(outputs * steps, activation='linear')(x)
 
     # Reshape layer
-    output_layer = Reshape((n_steps, n_levels))(x)
+    output_layer = Reshape((steps, outputs))(x)
 
     # Create the model
     model = Model(inputs=input_layer, outputs=output_layer)
+    
+    # Compile model
+    
+    if loss is not None:
+        model.compile(
+            optimizer=optimizer,
+            loss=loss
+        )
     
     return model
