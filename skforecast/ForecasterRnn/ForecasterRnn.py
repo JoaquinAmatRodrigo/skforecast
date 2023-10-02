@@ -210,16 +210,8 @@ class ForecasterRnn(ForecasterBase):
         n_jobs=None,
         forecaster_id: Optional[Union[str, int]]=None
     ) -> None:
-        
-        self.regressor = regressor
-        l_ini = self.regressor.layers[0] #TODO: nombre mas descriptivo
-        self.lags = l_ini.input_shape[0][1]
-        self.series = l_ini.input_shape[0][2]
-        l_end = self.regressor.layers[-1]
-        self.steps = l_end.output_shape[1]
-        self.outputs = l_end.output_shape[-1]
-        
-        self.levels                   = levels
+                
+        self.levels                  = levels
         self.transformer_series      = transformer_series
         self.transformer_series_     = None
         self.transformer_exog        = None #TODO: remove if no needed
@@ -243,6 +235,16 @@ class ForecasterRnn(ForecasterBase):
         self.skforcast_version       = skforecast.__version__
         self.python_version          = sys.version.split(" ")[0]
         self.forecaster_id           = forecaster_id
+        
+        
+        # Infer parameters from the model
+        self.regressor = regressor
+        layer_ini = self.regressor.layers[0]
+        self.lags = layer_ini.input_shape[0][1]
+        self.series = layer_ini.input_shape[0][2]
+        layer_end = self.regressor.layers[-1]
+        self.steps = layer_end.output_shape[1]
+        self.outputs = layer_end.output_shape[-1]
 
         if not isinstance(levels, (list, str, type(None))):
             raise TypeError(
