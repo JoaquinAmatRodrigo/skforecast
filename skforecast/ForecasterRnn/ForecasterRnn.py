@@ -241,6 +241,7 @@ class ForecasterRnn(ForecasterBase):
         self.regressor = regressor
         layer_ini = self.regressor.layers[0]
         self.lags = layer_ini.input_shape[0][1]
+        self.set_lags(self.lags)
         self.series = layer_ini.input_shape[0][2]
         layer_end = self.regressor.layers[-1]
         self.steps = layer_end.output_shape[1]
@@ -274,6 +275,11 @@ class ForecasterRnn(ForecasterBase):
         )
 
         # TODO: This is a temporary solution. Move as an argument in fit.
+        self.series_val = None
+        if "series_val" in fit_kwargs:
+            self.series_val = fit_kwargs["series_val"]
+            fit_kwargs.pop("series_val")
+            
         self.fit_kwargs = check_select_fit_kwargs(
                               regressor  = regressor,
                               fit_kwargs = fit_kwargs
@@ -364,9 +370,9 @@ class ForecasterRnn(ForecasterBase):
         for i, lag in enumerate(lags):
             X_data[:, i] = y[self.max_lag - lag : -(lag + self.steps - 1)] 
 
-        y_data = np.full(shape=(self.steps, n_splits), fill_value=np.nan, dtype=float)
+        y_data = np.full(shape=(n_splits, self.steps), fill_value=np.nan, dtype=float)
         for step in range(self.steps):
-            y_data[step, ] = y[self.max_lag + step : self.max_lag + step + n_splits]
+            y_data[:, step] = y[self.max_lag + step : self.max_lag + step + n_splits]
             
         return X_data, y_data
 
@@ -391,9 +397,9 @@ class ForecasterRnn(ForecasterBase):
         Returns
         -------
         X_train : np.ndarray
-            Training values (predictors) for each step. #TODO: explicar dimensiones
+            Training values (predictors) for each step. The resulting array has 3 dimensions: (time_points X n_lags X n_series)
         y_train : dict
-            Values (target) of the time series related to each row of `X_train`. TODO: explicar dimensiones
+            Values (target) of the time series related to each row of `X_train`. The resulting array has 3 dimensions: (time_points X n_steps X n_levels)
         
         """
         if not isinstance(series, pd.DataFrame):
@@ -401,7 +407,7 @@ class ForecasterRnn(ForecasterBase):
         
         series_col_names = list(series.columns)
 
-        if not set(self.levels).issubset(set(series.col)):
+        if not set(self.levels).issubset(set(series.columns)):
             raise ValueError(
                 (f"`levels` defined when initializing the forecaster must be included "
                  f"in `series` used for trainng. {set(self.levels) - set(series.columns)} "
@@ -438,74 +444,44 @@ class ForecasterRnn(ForecasterBase):
                      IgnoredArgumentWarning
                 )
 
-        #TODO: añadir transformacion de cada serie, utilizar self._create_lags
-            
-        # Create an empty DataFrame to store lagged columns
-        lag_df = pd.DataFrame()
-
-        df = series.copy()
-
-        if self.transformer_series is not None:
-            df = pd.DataFrame(self.transformer_series.fit_transform(df), columns=df.columns)
-
         # Step 1: Create lags for all columns
-        lagged_cols = []
-
-        for col in df.columns:
-            col_lagged = pd.concat([df[col].shift(i) for i in self.lags], axis=1)
-            col_lagged.columns = [f'{col}_lag_{i}' for i in self.lags]
-            lagged_cols.append(col_lagged)
-
-        lag_df = pd.concat(lagged_cols, axis=1)
-
-        n_features = df.shape[1]
-
         X_train = []
-        n_lags = len(self.lags)
-        for i in range(n_features):
-            X_train.append(lag_df.iloc[:, (n_lags * i):(n_lags * (i + 1))])
-
-        X_train = np.array(X_train)
-        X_train = np.transpose(X_train, (1, 2, 0))
-
-                    
-        # Prepare Y
-        y_df = pd.DataFrame()
-
-        if self.levels is None:
-            df_levels = df.copy()
-            n_levels = df_levels.shape[1]
-            for col in df_levels.columns:
-                for i in range(1, self.steps + 1):
-                    y_df[f'{col}_step_{i}'] = df_levels[col].shift(-i)
-        
-        else:
-            df_levels = df[self.levels].copy()
-            n_levels = df_levels.shape[1]
-            for col in self.levels:
-                for i in range(1, self.steps + 1):
-                    y_df[f'{col}_step_{i}'] = df_levels[col].shift(-i)
-
         y_train = []
-        for i in range(n_levels):
-            y_train.append(y_df.iloc[:, (self.steps*i):(self.steps*(i+1))])
         
-        y_train = np.array(y_train)
-        y_train = np.transpose(y_train, (1,2,0))
+        for i, serie in enumerate(series.columns):
+            x = series[serie]
+            check_y(y=x)
+            x = transform_series(
+                    series            = x,
+                    transformer       = self.transformer_series_[serie],
+                    fit               = True,
+                    inverse_transform = False
+                )
+            X, _ = self._create_lags(x, self.lags)
+            X_train.append(X)
+            
+        for i, serie in enumerate(self.levels):
+            y = series[serie]
+            check_y(y=y)
+            y = transform_series(
+                    series            = y,
+                    transformer       = self.transformer_series_[serie],
+                    fit               = True,
+                    inverse_transform = False
+                )
         
-        # Remove NAs 
-        n_rm = max(n_lags, n_levels)
-        X_train = X_train[n_rm:-n_rm, :, :]
-        y_train = y_train[n_rm:-n_rm, :, :]
+            _, y = self._create_lags(y, self.lags)
+            y_train.append(y)
+            
+        X_train = np.stack(X_train, axis=2)
+        y_train = np.stack(y_train, axis=2)
         
         return X_train, y_train
     
 
-        
     def fit(
         self,
         series: pd.DataFrame,
-        series_val: pd.DataFrame, #TODO: llevar a fit_kwg
         exog=None,
         store_in_sample_residuals: bool=True
     ) -> None:
@@ -519,8 +495,6 @@ class ForecasterRnn(ForecasterBase):
         ----------
         series : pandas DataFrame
             Training time series.
-        series_val : pandas DataFrame
-        #TODO: explicar
         exog : Ignored
             Not used, present here for API consistency by convention. This type of
             forecaster does not allow exogenous variables.
@@ -548,17 +522,17 @@ class ForecasterRnn(ForecasterBase):
 
 
         X_train, y_train = self.create_train_X_y(series=series)
-        if "series_val" in self.fit_kwargs:
-            X_val, y_val = self.create_train_X_y(series=series_val)
+        if self.series_val is not None:
+            X_val, y_val = self.create_train_X_y(series=self.series_val)
             history = self.regressor.fit(
-                X = X_train,
+                x = X_train,
                 y = y_train,
                 validation_data=(X_val, y_val),
                 **self.fit_kwargs
             )
         else:
             history = self.regressor.fit(
-                X = X_train,
+                x = X_train,
                 y = y_train,
                 **self.fit_kwargs
             )
