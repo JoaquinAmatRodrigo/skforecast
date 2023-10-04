@@ -7,14 +7,14 @@
 ################################################################################
 # coding=utf-8
 
-
 import pandas as pd
+
 
 def fetch_dataset(
         name : str,
-        version: str = 'active',
+        version: str = 'latest',
         raw: bool = False,
-        read_csv_kwargs: dict = None,
+        read_csv_kwargs: dict = {},
         verbose: bool = True
 ) -> pd.DataFrame:
     """
@@ -24,15 +24,15 @@ def fetch_dataset(
     ----------
     name: str
         Name of the dataset to fetch.
-    version: str or int, default 'active'
-        Version of the dataset to fetch. If 'active', the last version will be fetched
+    version: str or int, default 'latest'
+        Version of the dataset to fetch. If 'latest', the last version will be fetched
         (the one in the master branch). For a list of available versions, see the
         repository branchs.
     raw: bool, default False
         If True, the raw dataset will be fetched. If False, the preprocessed dataset will
         be fetched. The preprocessing consists in seting the column with the date/time as index,
         and convert the index to datetime. Also, a frequency is setted to the index.
-    read_csv_kwargs: dict, default None
+    read_csv_kwargs: dict, default {}
         Kwargs to pass to pandas read_csv function.
     verbose: bool, default True
         If True, print information about the dataset.
@@ -47,23 +47,38 @@ def fetch_dataset(
 
     datasets = {
         'h2o': {
-            'filename': 'file_1.csv',
             'url': 'https://raw.githubusercontent.com/JoaquinAmatRodrigo/skforecast/master/data/h2o.csv',
-            'index_col': 'date',
-            'freq': 'D',
-            'description': 'This dataset contains information about X.'
+            'sep': ',',
+            'index_col': 'fecha',
+            'date_format': '%Y-%m-%d',
+            'freq': 'MS',
+            'description': (
+                'Monthly expenditure ($AUD) on corticosteroid drugs that the Australian '
+                'health system had between 1991 and 2008.\nObtained from the book: '
+                'Forecasting: Principles and Practice by Rob J Hyndman and George Athanasopoulos.'
+            )
             },
-        'dataset_2': {
-            'filename': 'file_2.csv',
+        'items_sales': {
+            'url': (
+                'https://raw.githubusercontent.com/JoaquinAmatRodrigo/skforecast/master/'
+                'data/simulated_items_sales.csv'
+            ),
+            'sep': ',',
             'index_col': 'date',
+            'date_format': '%Y-%m-%d',
             'freq': 'D',
-            'description': 'This dataset contains information about Y.'
+            'description': 'Simulated time series for the sales of 3 different items.'
             },
-        'dataset_3': {
-            'filename': 'file_3.csv',
+        'air_pollution': {
+            'url' : (
+                'https://raw.githubusercontent.com/JoaquinAmatRodrigo/skforecast/master/'
+                'data/guangyuan_air_pollution.csv'
+            ),
+            'sep': ',',
             'index_col': 'date',
+            'date_format': '%Y-%m-%d',
             'freq': 'D',
-            'description': 'This dataset contains information about Z.'
+            'description': ''
             }
         }
     
@@ -72,22 +87,54 @@ def fetch_dataset(
             f"Dataset {name} not found. Available datasets are: {list(datasets.keys())}"
         )
     
-    if version != 'active':
+    url = datasets[name]['url']
+    if version != 'latest':
         url = url.replace('master', f'{version}')
 
     try:
-        df = pd.read_csv(datasets['name']['url'], **read_csv_kwargs)
+        sep = datasets[name]['sep']
+        df = pd.read_csv(url, sep=sep, **read_csv_kwargs)
     except:
         raise ValueError(
-            f"Error reading dataset {name} from {url}. Try to version = 'active'"
+            f"Error reading dataset {name} from {url}. Try to version = 'latest'"
         )
 
     if not raw:
-        df = df.set_index(datasets['name']['index_col'])
-        df.index = pd.to_datetime(df.index)
-        df.index.freq = datasets['name']['freq']
+        index_col = datasets[name]['index_col']
+        freq = datasets[name]['freq']
+        date_format = datasets[name]['date_format']
+        df = df.set_index(index_col)
+        df.index = pd.to_datetime(df.index, format=date_format)
+        df.index.freq = freq
+        df = df.sort_index()
     
     if verbose:
-        print(datasets['name']['info'])
+        print(datasets[name]['description'])
+        print(f"Shape of the dataset: {df.shape}")
+
+    return df
+
+
+def load_demo_dataset() -> pd.Series:
+    """
+    Load demo data set.
+
+    Returns
+    -------
+    df: pandas Series
+        Dataset.
+    """
+
+    url = (
+        'https://raw.githubusercontent.com/JoaquinAmatRodrigo/skforecast/master/'
+        'data/h2o.csv'
+    )
+
+    df = pd.read_csv(url, sep=',', header=0, names=['y', 'datetime'])
+    df['datetime'] = pd.to_datetime(df['datetime'], format='%Y-%m-%d')
+    df = df.set_index('datetime')
+    df = df.asfreq('MS')
+    df = df['y']
+    df = df.sort_index()
 
     return df
