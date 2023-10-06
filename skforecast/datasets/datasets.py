@@ -117,7 +117,10 @@ def fetch_dataset(
 
 def load_demo_dataset() -> pd.Series:
     """
-    Load demo data set.
+    Load demo data set with monthly expenditure ($AUD) on corticosteroid drugs that
+    the Australian health system had between 1991 and 2008. Obtained from the book:
+    Forecasting: Principles and Practice by Rob J Hyndman and George Athanasopoulos.
+    Index is set to datetime with monthly frequency and sorted.
 
     Returns
     -------
