@@ -10,39 +10,41 @@ import pandas as pd
 
 
 def fetch_dataset(
-        name : str,
-        version: str = 'latest',
-        raw: bool = False,
-        read_csv_kwargs: dict = {},
-        verbose: bool = True
+    name : str,
+    version: str = 'latest',
+    raw: bool = False,
+    kwargs_read_csv: dict = {},
+    verbose: bool = True
 ) -> pd.DataFrame:
     """
-    Fetch a dataset from skforecast repository.
+    Fetch a dataset from the skforecast repository.
 
     Parameters
     ----------
     name: str
         Name of the dataset to fetch.
-    version: str or int, default 'latest'
-        Version of the dataset to fetch. If 'latest', the last version will be fetched
-        (the one in the master branch). For a list of available versions, see the
-        repository branchs.
-    raw: bool, default False
-        If True, the raw dataset will be fetched. If False, the preprocessed dataset will
-        be fetched. The preprocessing consists in seting the column with the date/time as index,
-        and convert the index to datetime. Also, a frequency is setted to the index.
-    read_csv_kwargs: dict, default {}
-        Kwargs to pass to pandas read_csv function.
-    verbose: bool, default True
+    version: str, int, default `'latest'`
+        Version of the dataset to fetch. If 'latest', the lastest version will be 
+        fetched (the one in the master branch). For a list of available versions, 
+        see the repository branches.
+    raw: bool, default `False`
+        If True, the raw dataset is fetched. If False, the preprocessed dataset 
+        is fetched. The preprocessing consists of setting the column with the 
+        date/time as index and converting the index to datetime. A frequency is 
+        also set to the index.
+    kwargs_read_csv: dict, default `{}`
+        Kwargs to pass to pandas `read_csv` function.
+    verbose: bool, default `True`
         If True, print information about the dataset.
     
     Returns
     -------
-    df: pandas dataframe
+    df: pandas DataFrame
         Dataset.
+    
     """
 
-    version = 'master' if version == 'active' else f'{version}'
+    version = 'master' if version == 'latest' else f'{version}'
 
     datasets = {
         'h2o': {
@@ -56,7 +58,7 @@ def fetch_dataset(
                 'health system had between 1991 and 2008.\nObtained from the book: '
                 'Forecasting: Principles and Practice by Rob J Hyndman and George Athanasopoulos.'
             )
-            },
+        },
         'items_sales': {
             'url': (
                 'https://raw.githubusercontent.com/JoaquinAmatRodrigo/skforecast/master/'
@@ -67,7 +69,7 @@ def fetch_dataset(
             'date_format': '%Y-%m-%d',
             'freq': 'D',
             'description': 'Simulated time series for the sales of 3 different items.'
-            },
+        },
         'air_pollution': {
             'url' : (
                 'https://raw.githubusercontent.com/JoaquinAmatRodrigo/skforecast/master/'
@@ -78,8 +80,8 @@ def fetch_dataset(
             'date_format': '%Y-%m-%d',
             'freq': 'D',
             'description': ''
-            }
         }
+    }
     
     if name not in datasets.keys():
         raise ValueError(
@@ -92,7 +94,7 @@ def fetch_dataset(
 
     try:
         sep = datasets[name]['sep']
-        df = pd.read_csv(url, sep=sep, **read_csv_kwargs)
+        df = pd.read_csv(url, sep=sep, **kwargs_read_csv)
     except:
         raise ValueError(
             f"Error reading dataset {name} from {url}. Try to version = 'latest'"
@@ -108,6 +110,8 @@ def fetch_dataset(
         df = df.sort_index()
     
     if verbose:
+        print(name)
+        print('-'*len(name))
         print(datasets[name]['description'])
         print(f"Shape of the dataset: {df.shape}")
 
@@ -121,10 +125,15 @@ def load_demo_dataset() -> pd.Series:
     Forecasting: Principles and Practice by Rob J Hyndman and George Athanasopoulos.
     Index is set to datetime with monthly frequency and sorted.
 
+    Parameters
+    ----------
+    None
+
     Returns
     -------
     df: pandas Series
         Dataset.
+    
     """
 
     url = (
