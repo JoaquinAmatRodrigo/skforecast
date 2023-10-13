@@ -474,7 +474,8 @@ def check_predict_input(
     forecaster_name : str
         Forecaster name. ForecasterAutoreg, ForecasterAutoregCustom, 
         ForecasterAutoregDirect, ForecasterAutoregMultiSeries, 
-        ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate.
+        ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate,
+        ForecasterRnn
     steps : int, list
         Number of future steps predicted.
     fitted: bool
@@ -579,7 +580,8 @@ def check_predict_input(
     # Check last_window type (pd.Series or pd.DataFrame according to forecaster)
     if forecaster_name in ['ForecasterAutoregMultiSeries', 
                            'ForecasterAutoregMultiSeriesCustom',
-                           'ForecasterAutoregMultiVariate']:
+                           'ForecasterAutoregMultiVariate',
+                           'ForecasterRnn']:
         if not isinstance(last_window, pd.DataFrame):
             raise TypeError(
                 f"`last_window` must be a pandas DataFrame. Got {type(last_window)}."
