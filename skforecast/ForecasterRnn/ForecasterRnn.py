@@ -648,7 +648,7 @@ class ForecasterRnn(ForecasterBase):
             levels=levels,
             series_col_names=self.series_col_names,
         )
-        X = []
+
         for serie_name in self.series_col_names:
             last_window_serie = transform_series(
                 series=last_window[serie_name],
@@ -661,23 +661,20 @@ class ForecasterRnn(ForecasterBase):
             )
             last_window[serie_name] = last_window_values
 
-        X = np.reshape(last_window.values, (1, self.max_lag, last_window.shape[1]))
+        X = np.reshape(last_window.to_numpy(), (1, self.max_lag, last_window.shape[1]))
         predictions = self.regressor.predict(X)
         predictions_reshaped = np.reshape(
             predictions, (predictions.shape[1], predictions.shape[2])
         )
         idx = expand_index(index=last_window_index, steps=max(steps))
         predictions = pd.DataFrame(
-            data=predictions_reshaped,
+            data=predictions_reshaped[np.array(steps) - 1],
             columns=[self.levels],
             index=idx[np.array(steps) - 1],
         )
 
-        predictions_transformed = []
         for i, serie in enumerate(self.levels):
-            x = predictions[
-                serie
-            ].squeeze()  # TODO check with Ximo, why did I need to squeeze?
+            x = predictions[serie].squeeze()  # TODO check
             check_y(y=x)
             x = transform_series(
                 series=x,
@@ -685,16 +682,9 @@ class ForecasterRnn(ForecasterBase):
                 fit=False,
                 inverse_transform=True,
             )
-            predictions_transformed.append(x)
+            predictions[serie] = x
 
-        predictions_transformed = pd.concat(predictions_transformed, axis=1)
-        predictions_transformed = pd.DataFrame(
-            data=predictions_transformed,
-            columns=predictions.columns,
-            index=predictions.index,
-        )
-
-        return predictions_transformed
+        return predictions
 
     def predict_bootstrapping(
         self,
@@ -1017,7 +1007,9 @@ class ForecasterRnn(ForecasterBase):
 
         return predictions
 
-    def set_params(self, params: dict) -> None:
+    def set_params(
+        self, params: dict
+    ) -> None:  # TODO llamar al compile actualizando argumentos
         """
         Set new values to the parameters of the scikit learn model stored in the
         forecaster. It is important to note that all models share the same
@@ -1213,85 +1205,3 @@ class ForecasterRnn(ForecasterBase):
                     )
 
             self.out_sample_residuals[key] = value
-
-    def get_feature_importances(self, step: int) -> pd.DataFrame:
-        """
-        Return feature importance of the model stored in the forecaster for a
-        specific step. Since a separate model is created for each forecast time
-        step, it is necessary to select the model from which retrieve information.
-        Only valid when regressor stores internally the feature importances in
-        the attribute `feature_importances_` or `coef_`. Otherwise, it returns
-        `None`.
-
-        Parameters
-        ----------
-        step : int
-            Model from which retrieve information (a separate model is created
-            for each forecast time step). First step is 1.
-
-        Returns
-        -------
-        feature_importances : pandas DataFrame
-            Feature importances associated with each predictor.
-
-        """
-
-        if not isinstance(step, int):
-            raise TypeError(f"`step` must be an integer. Got {type(step)}.")
-
-        if not self.fitted:
-            raise sklearn.exceptions.NotFittedError(
-                (
-                    "This forecaster is not fitted yet. Call `fit` with appropriate "
-                    "arguments before using `get_feature_importances()`."
-                )
-            )
-
-        if (step < 1) or (step > self.steps):
-            raise ValueError(
-                (
-                    f"The step must have a value from 1 to the maximum number of steps "
-                    f"({self.steps}). Got {step}."
-                )
-            )
-
-        if isinstance(self.regressor, sklearn.pipeline.Pipeline):
-            estimator = self.regressors_[step][-1]
-        else:
-            estimator = self.regressors_[step]
-
-        len_columns_lags = len(list(chain(*self.lags_.values())))
-        idx_columns_lags = np.arange(len_columns_lags)
-        if self.included_exog:
-            idx_columns_exog = np.flatnonzero(
-                [name.endswith(f"step_{step}") for name in self.X_train_col_names]
-            )
-        else:
-            idx_columns_exog = np.array([], dtype=int)
-
-        idx_columns = np.hstack((idx_columns_lags, idx_columns_exog))
-        feature_names = [
-            self.X_train_col_names[i].replace(f"_step_{step}", "") for i in idx_columns
-        ]
-
-        if hasattr(estimator, "feature_importances_"):
-            feature_importances = estimator.feature_importances_
-        elif hasattr(estimator, "coef_"):
-            feature_importances = estimator.coef_
-        else:
-            warnings.warn(
-                (
-                    f"Impossible to access feature importances for regressor of type "
-                    f"{type(estimator)}. This method is only valid when the "
-                    f"regressor stores internally the feature importances in the "
-                    f"attribute `feature_importances_` or `coef_`."
-                )
-            )
-            feature_importances = None
-
-        if feature_importances is not None:
-            feature_importances = pd.DataFrame(
-                {"feature": feature_names, "importance": feature_importances}
-            )
-
-        return feature_importances
