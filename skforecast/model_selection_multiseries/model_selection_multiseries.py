@@ -34,7 +34,7 @@ logging.basicConfig(
 def _backtesting_forecaster_multiseries(
     forecaster,
     series: pd.DataFrame,
-    steps: int,
+    steps: int, # TODO lo falsearemos, no necesario
     metric: Union[str, Callable, list],
     initial_train_size: Optional[int]=None,
     fixed_train_size: bool=True,
@@ -325,7 +325,7 @@ def _backtesting_forecaster_multiseries(
 def backtesting_forecaster_multiseries(
     forecaster,
     series: pd.DataFrame,
-    steps: int,
+    steps: int, # 
     metric: Union[str, Callable, list],
     initial_train_size: Optional[int],
     fixed_train_size: bool=True,
@@ -441,7 +441,8 @@ def backtesting_forecaster_multiseries(
 
     if type(forecaster).__name__ not in ['ForecasterAutoregMultiSeries', 
                                          'ForecasterAutoregMultiSeriesCustom', 
-                                         'ForecasterAutoregMultiVariate']:
+                                         'ForecasterAutoregMultiVariate',
+                                         'ForecasterRnn']:
         raise TypeError(
             ("`forecaster` must be of type `ForecasterAutoregMultiSeries`, "
              "`ForecasterAutoregMultiSeriesCustom` or `ForecasterAutoregMultiVariate`, "

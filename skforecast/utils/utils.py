@@ -1534,7 +1534,8 @@ def check_backtesting_input(
                        'ForecasterAutoregDirect', 'ForecasterSarimax']
     forecasters_multi = ['ForecasterAutoregMultiSeries', 
                          'ForecasterAutoregMultiSeriesCustom', 
-                         'ForecasterAutoregMultiVariate']
+                         'ForecasterAutoregMultiVariate',
+                         'ForecasterRnn']
 
     if type(forecaster).__name__ in forecasters_uni:
         if not isinstance(y, pd.Series):

@@ -245,10 +245,11 @@ class ForecasterRnn(ForecasterBase):
 
         # Infer parameters from the model
         self.regressor = regressor
-        layer_ini = self.regressor.layers[0]
-        self.lags = layer_ini.input_shape[0][1]
-        self.set_lags(self.lags)
-        self.series = layer_ini.input_shape[0][2]
+        layer_init = self.regressor.layers[0]
+        self.lags = np.arange(layer_init.input_shape[0][1]) + 1
+        self.max_lag = np.max(self.lags)
+        self.window_size = self.max_lag
+        self.series = layer_init.input_shape[0][2]
         layer_end = self.regressor.layers[-1]
         self.steps = layer_end.output_shape[1]
         self.outputs = layer_end.output_shape[-1]
@@ -273,9 +274,6 @@ class ForecasterRnn(ForecasterBase):
             raise ValueError(
                 f"`steps` argument must be greater than or equal to 1. Got {self.steps}."
             )
-
-        self.max_lag = np.max(self.lags)
-        self.window_size = self.max_lag
 
         self.weight_func, self.source_code_weight_func, _ = initialize_weights(
             forecaster_name=type(self).__name__,
@@ -610,6 +608,10 @@ class ForecasterRnn(ForecasterBase):
 
         """
 
+        if levels is None:
+            levels = self.levels
+        elif isinstance(levels, str):
+            levels = [levels]
         if isinstance(steps, int):
             steps = list(np.arange(steps) + 1)
         elif steps is None:
@@ -672,8 +674,9 @@ class ForecasterRnn(ForecasterBase):
             columns=[self.levels],
             index=idx[np.array(steps) - 1],
         )
+        predictions = predictions[levels]
 
-        for i, serie in enumerate(self.levels):
+        for serie in levels:
             x = predictions[serie].squeeze()  # TODO check
             check_y(y=x)
             x = transform_series(
@@ -1052,19 +1055,7 @@ class ForecasterRnn(ForecasterBase):
 
     def set_lags(self, lags: Union[int, np.ndarray, list, dict]) -> None:
         """
-        Set new value to the attribute `lags`.
-        Attributes `max_lag` and `window_size` are also updated.
-
-        Parameters
-        ----------
-        lags : int, list, numpy ndarray, range, dict
-            Lags used as predictors. Index starts at 1, so lag 1 is equal to t-1.
-
-                - `int`: include lags from 1 to `lags` (included).
-                - `list`, `1d numpy ndarray` or `range`: include only lags present in
-                `lags`, all elements must be int.
-                - `dict`: create different lags for each series.
-                {'series_column_name': lags}.
+        Not used, present here for API consistency by convention.
 
         Returns
         -------
@@ -1072,22 +1063,7 @@ class ForecasterRnn(ForecasterBase):
 
         """
 
-        if isinstance(lags, dict):
-            self.lags = {}
-            for key in lags:
-                self.lags[key] = initialize_lags(
-                    forecaster_name=type(self).__name__, lags=lags[key]
-                )
-        else:
-            self.lags = initialize_lags(forecaster_name=type(self).__name__, lags=lags)
-
-        self.lags_ = self.lags
-        self.max_lag = (
-            max(list(chain(*self.lags.values())))
-            if isinstance(self.lags, dict)
-            else max(self.lags)
-        )
-        self.window_size = self.max_lag
+        pass
 
     def set_out_sample_residuals(
         self,
