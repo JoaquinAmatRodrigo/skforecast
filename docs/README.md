@@ -225,6 +225,49 @@ doi = {10.5281/zenodo.8382788}
 }
 ```
 
+### Publications citing skforecast
+
+<ul>
+<li><p style="color:#808080; font-size:0.95em;">Polo J, Martín-Chivelet N, Alonso-Abella M, Sanz-Saiz C, Cuenca J, de la Cruz M. Exploring the PV Power Forecasting at Building Façades Using Gradient Boosting Methods. Energies. 2023; 16(3):1495. <a href="https://doi.org/10.3390/en16031495">https://doi.org/10.3390/en16031495</a></p>
+</li>
+
+<li><p style="color:#808080; font-size:0.95em;">Popławski T, Dudzik S, Szeląg P. Forecasting of Energy Balance in Prosumer Micro-Installations Using Machine Learning Models. Energies. 2023; 16(18):6726. <a href="https://doi.org/10.3390/en16186726">https://doi.org/10.3390/en16186726</a></p>
+</li>
+<li><p style="color:#808080; font-size:0.95em;">Harrou F, Sun Y, Taghezouit B, Dairi A. Artificial Intelligence Techniques for Solar Irradiance and PV Modeling and Forecasting. Energies. 2023; 16(18):6731. <a href="https://doi.org/10.3390/en16186731">https://doi.org/10.3390/en16186731</a></p>
+</li>
+
+<li><p style="color:#808080; font-size:0.95em;">Amara-Ouali, Y., Goude, Y., Doumèche, N., Veyret, P., Thomas, A., Hebenstreit, D., ... &amp; Phe-Neau, T. (2023). Forecasting Electric Vehicle Charging Station Occupancy: Smarter Mobility Data Challenge. arXiv preprint arXiv:2306.06142.</p>
+</li>
+
+<li><p style="color:#808080; font-size:0.95em;">Emami, P., Sahu, A., &amp; Graf, P. (2023). BuildingsBench: A Large-Scale Dataset of 900K Buildings and Benchmark for Short-Term Load Forecasting. arXiv preprint arXiv:2307.00142.</p>
+</li>
+
+<li><p style="color:#808080; font-size:0.95em;">Dang, HA., Dao, VD. (2023). Building Power Demand Forecasting Using Machine Learning: Application for an Office Building in Danang. In: Nguyen, D.C., Vu, N.P., Long, B.T., Puta, H., Sattler, KU. (eds) Advances in Engineering Research and Application. ICERA 2022. Lecture Notes in Networks and Systems, vol 602. Springer, Cham. <a href="https://doi.org/10.1007/978-3-031-22200-9_32">https://doi.org/10.1007/978-3-031-22200-9_32</a></p>
+</li>
+
+<li><p style="color:#808080; font-size:0.95em;">Morate del Moral, Iván (2023). Predición de llamadas realizadas a un Call Center. Proyecto Fin de Carrera / Trabajo Fin de Grado, E.T.S.I. de Sistemas Informáticos (UPM), Madrid.</p>
+</li>
+
+<li><p style="color:#808080; font-size:0.95em;">Lopez Vega, A., &amp; Villanueva Vargas, R. A. (2022). Sistema para la automatización de procesos hospitalarios de control para pacientes para COVID-19 usando machine learning para el Centro de Salud San Fernando.</p>
+</li>
+
+<li><p style="color:#808080; font-size:0.95em;">García Álvarez, J. D. (2022). Modelo predictivo de rentabilidad de criptomonedas para un futuro cercano.</p>
+</li>
+
+<li><p style="color:#808080; font-size:0.95em;">Chilet Vera, Á. (2023). Elaboración de un algoritmo predictivo para la reposición de hipoclorito en los depósitos mediante técnicas de Machine Learning (Doctoral dissertation, Universitat Politècnica de València).</p>
+</li>
+
+<li><p style="color:#808080; font-size:0.95em;">Bustinza Barrial, A. A., Bautista Abanto, A. M., Alva Alfaro, D. A., Villena Sotomayor, G. M., &amp; Trujillo Sabrera, J. M. (2022). Predicción de los valores de la demanda máxima de energía eléctrica empleando técnicas de machine learning para la empresa Nexa Resources–Cajamarquilla.</p>
+</li>
+
+<li><p style="color:#808080; font-size:0.95em;">Morgado, K. Desarrollo de una técnica de gestión de activos para transformadores de distribución basada en sistema de monitoreo (Doctoral dissertation, Universidad Nacional de Colombia).</p>
+</li>
+
+<li><p style="color:#808080; font-size:0.95em;">Zafeiriou A., Chantzis G., Jonkaitis T., Fokaides P., Papadopoulos A., 2023, Smart Energy Strategy - A Comparative Study of Energy Consumption Forecasting Machine Learning Models, Chemical Engineering Transactions, 103, 691-696.</p>
+</li>
+
+</ul>
+
 
 ## Donating
 
