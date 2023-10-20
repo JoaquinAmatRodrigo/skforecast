@@ -1173,9 +1173,9 @@ class ForecasterAutoregDirect(ForecasterBase):
         param_names = [p for p in inspect.signature(distribution._pdf).parameters
                        if not p=='x'] + ["loc","scale"]
         param_values = np.apply_along_axis(
-                            lambda x: distribution.fit(x),
-                            axis = 1,
-                            arr  = boot_samples
+                           lambda x: distribution.fit(x),
+                           axis = 1,
+                           arr  = boot_samples
                        )
         predictions = pd.DataFrame(
                           data    = param_values,
