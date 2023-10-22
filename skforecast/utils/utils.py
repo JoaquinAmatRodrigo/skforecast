@@ -379,6 +379,7 @@ def check_exog_dtypes(
 
 def check_interval(
     interval: list=None,
+    percentiles: float=None,
     alpha: float=None
 ) -> None:
     """
@@ -390,6 +391,10 @@ def check_interval(
         Confidence of the prediction interval estimated. Sequence of percentiles
         to compute, which must be between 0 and 100 inclusive. For example, 
         interval of 95% should be as `interval = [2.5, 97.5]`.
+    percentiles : list, default `None`
+        Sequence of percentiles to compute, which must be between 0 and 100 
+        inclusive. For example, percentiles of 5, 50. and 95 should be as 
+        `percentiles = [5, 50, 95]`.
     alpha : float, default `None`
         The confidence intervals used in ForecasterSarimax are (1 - alpha) %.
 
@@ -428,6 +433,19 @@ def check_interval(
                 f"Lower interval bound ({interval[0]}) must be less than the "
                 f"upper interval bound ({interval[1]})."
             )
+        
+    if percentiles is not None:
+        if not isinstance(percentiles, list):
+            raise TypeError(
+                ("`percentiles` must be a `list`. For example, percentiles 5, "
+                 "50, and 95 should be as `percentiles = [5, 50, 95]`.")
+            )
+        
+        for p in percentiles:
+            if (p < 0.) or (p > 100.):
+                raise ValueError(
+                    ("All elements in `percentiles` must be >= 0 and <= 100.")
+                )
     
     if alpha is not None:
         if not isinstance(alpha, float):

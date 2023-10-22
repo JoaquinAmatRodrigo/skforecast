@@ -751,15 +751,14 @@ class ForecasterAutoreg(ForecasterBase):
         exog : pandas Series, pandas DataFrame, default `None`
             Exogenous variable/s included as predictor/s.
         n_boot : int, default `500`
-            Number of bootstrapping iterations used to estimate prediction
-            intervals.
+            Number of bootstrapping iterations used to estimate predictions.
         random_state : int, default `123`
-            Sets a seed to the random generator, so that boot intervals are always 
+            Sets a seed to the random generator, so that boot predictions are always 
             deterministic.
         in_sample_residuals : bool, default `True`
             If `True`, residuals from the training data are used as proxy of
-            prediction error to create prediction intervals. If `False`, out of
-            sample residuals are used. In the latter case, the user should have
+            prediction error to create predictions. If `False`, out of sample 
+            residuals are used. In the latter case, the user should have
             calculated and stored the residuals within the forecaster (see
             `set_out_sample_residuals()`).
 
@@ -939,15 +938,14 @@ class ForecasterAutoreg(ForecasterBase):
             percentiles to compute, which must be between 0 and 100 inclusive. 
             For example, interval of 95% should be as `interval = [2.5, 97.5]`.
         n_boot : int, default `500`
-            Number of bootstrapping iterations used to estimate prediction
-            intervals.
+            Number of bootstrapping iterations used to estimate predictions.
         random_state : int, default `123`
-            Sets a seed to the random generator, so that boot intervals are always 
+            Sets a seed to the random generator, so that boot predictions are always 
             deterministic.
         in_sample_residuals : bool, default `True`
             If `True`, residuals from the training data are used as proxy of
-            prediction error to create prediction intervals. If `False`, out of
-            sample residuals are used. In the latter case, the user should have
+            prediction error to create predictions. If `False`, out of sample 
+            residuals are used. In the latter case, the user should have
             calculated and stored the residuals within the forecaster (see
             `set_out_sample_residuals()`).
 
@@ -994,6 +992,81 @@ class ForecasterAutoreg(ForecasterBase):
         return predictions
 
 
+    def predict_percentiles(
+        self,
+        steps: int,
+        last_window: Optional[pd.Series]=None,
+        exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+        percentiles: list=[5, 50, 95],
+        n_boot: int=500,
+        random_state: int=123,
+        in_sample_residuals: bool=True
+    ) -> pd.DataFrame:
+        """
+        Calculate the specified percentiles for each step. After generating 
+        multiple forecasting predictions through a bootstrapping process, each 
+        percentile is calculated for each step.
+        
+        Parameters
+        ----------
+        steps : int
+            Number of future steps predicted.
+        last_window : pandas Series, default `None`
+            Series values used to create the predictors (lags) needed in the 
+            first iteration of the prediction (t + 1).
+            If `last_window = None`, the values stored in` self.last_window` are
+            used to calculate the initial predictors, and the predictions start
+            right after training data.
+        exog : pandas Series, pandas DataFrame, default `None`
+            Exogenous variable/s included as predictor/s.
+        percentiles : list, default `[5, 50, 95]`
+            Sequence of percentiles to compute, which must be between 0 and 100 
+            inclusive. For example, percentiles of 5, 50. and 95 should be as 
+            `percentiles = [5, 50, 95]`.
+        n_boot : int, default `500`
+            Number of bootstrapping iterations used to estimate percentiles.
+        random_state : int, default `123`
+            Sets a seed to the random generator, so that boot percentiles are always 
+            deterministic.
+        in_sample_residuals : bool, default `True`
+            If `True`, residuals from the training data are used as proxy of
+            prediction error to create prediction percentiles. If `False`, out of
+            sample residuals are used. In the latter case, the user should have
+            calculated and stored the residuals within the forecaster (see
+            `set_out_sample_residuals()`).
+
+        Returns
+        -------
+        predictions : pandas DataFrame
+            Percentiles predicted by the forecaster.
+
+        Notes
+        -----
+        More information about prediction intervals in forecasting:
+        https://otexts.com/fpp2/prediction-intervals.html
+        Forecasting: Principles and Practice (2nd ed) Rob J Hyndman and
+        George Athanasopoulos.
+        
+        """
+        
+        check_interval(percentiles=percentiles)
+
+        boot_predictions = self.predict_bootstrapping(
+                               steps               = steps,
+                               last_window         = last_window,
+                               exog                = exog,
+                               n_boot              = n_boot,
+                               random_state        = random_state,
+                               in_sample_residuals = in_sample_residuals
+                           )
+
+        quantiles = np.array(percentiles)/100
+        predictions = boot_predictions.quantile(q=quantiles, axis=1).transpose()
+        predictions.columns = [f'p{p}' for p in percentiles]
+
+        return predictions
+
+
     def predict_dist(
         self,
         steps: int,
@@ -1024,15 +1097,14 @@ class ForecasterAutoreg(ForecasterBase):
         exog : pandas Series, pandas DataFrame, default `None`
             Exogenous variable/s included as predictor/s.
         n_boot : int, default `500`
-            Number of bootstrapping iterations used to estimate prediction
-            intervals.
+            Number of bootstrapping iterations used to estimate predictions.
         random_state : int, default `123`
-            Sets a seed to the random generator, so that boot intervals are always 
+            Sets a seed to the random generator, so that boot predictions are always 
             deterministic.
         in_sample_residuals : bool, default `True`
             If `True`, residuals from the training data are used as proxy of
-            prediction error to create prediction intervals. If `False`, out of
-            sample residuals are used. In the latter case, the user should have
+            prediction error to create predictions. If `False`, out of sample 
+            residuals are used. In the latter case, the user should have
             calculated and stored the residuals within the forecaster (see
             `set_out_sample_residuals()`).
 
