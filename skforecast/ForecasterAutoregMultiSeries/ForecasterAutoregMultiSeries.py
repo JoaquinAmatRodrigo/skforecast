@@ -962,15 +962,14 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         exog : pandas Series, pandas DataFrame, default `None`
             Exogenous variable/s included as predictor/s. 
         n_boot : int, default `500`
-            Number of bootstrapping iterations used to estimate prediction
-            intervals.
+            Number of bootstrapping iterations used to estimate predictions.
         random_state : int, default `123`
-            Sets a seed to the random generator, so that boot intervals are always 
+            Sets a seed to the random generator, so that boot predictions are always 
             deterministic.      
         in_sample_residuals : bool, default `True`
             If `True`, residuals from the training data are used as proxy of
-            prediction error to create prediction intervals. If `False`, out of
-            sample residuals are used. In the latter case, the user should have
+            prediction error to create predictions. If `False`, out of sample 
+            residuals are used. In the latter case, the user should have
             calculated and stored the residuals within the forecaster (see
             `set_out_sample_residuals()`).
 
@@ -1189,12 +1188,12 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             Number of bootstrapping iterations used to estimate prediction 
             intervals.
         random_state : int, default `123`
-            Sets a seed to the random generator, so that boot intervals are always 
+            Sets a seed to the random generator, so that boot predictions are always 
             deterministic.
         in_sample_residuals : bool, default `True`
             If `True`, residuals from the training data are used as proxy of
-            prediction error to create prediction intervals. If `False`, out of
-            sample residuals are used. In the latter case, the user should have
+            prediction error to create predictions. If `False`, out of sample 
+            residuals are used. In the latter case, the user should have
             calculated and stored the residuals within the forecaster (see
             `set_out_sample_residuals()`).
 
@@ -1287,15 +1286,14 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         exog : pandas Series, pandas DataFrame, default `None`
             Exogenous variable/s included as predictor/s.
         n_boot : int, default `500`
-            Number of bootstrapping iterations used to estimate prediction
-            intervals.
+            Number of bootstrapping iterations used to estimate predictions.
         random_state : int, default `123`
-            Sets a seed to the random generator, so that boot intervals are always 
+            Sets a seed to the random generator, so that boot predictions are always 
             deterministic.
         in_sample_residuals : bool, default `True`
             If `True`, residuals from the training data are used as proxy of
-            prediction error to create prediction intervals. If `False`, out of
-            sample residuals are used. In the latter case, the user should have
+            prediction error to create predictions. If `False`, out of sample 
+            residuals are used. In the latter case, the user should have
             calculated and stored the residuals within the forecaster (see
             `set_out_sample_residuals()`).
 
