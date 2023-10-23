@@ -37,7 +37,7 @@ series = pd.DataFrame({'1': pd.Series(np.array(
                       }
          )
     
-exog = pd.DataFrame({'col_1': pd.Series(np.array(
+exog = pd.DataFrame({'exog_1': pd.Series(np.array(
                                 [0.51312815, 0.66662455, 0.10590849, 0.13089495, 0.32198061,
                                  0.66156434, 0.84650623, 0.55325734, 0.85445249, 0.38483781,
                                  0.3167879 , 0.35426468, 0.17108183, 0.82911263, 0.33867085,
@@ -50,7 +50,7 @@ exog = pd.DataFrame({'col_1': pd.Series(np.array(
                                  0.75352599, 0.74186215, 0.04857903, 0.7086974 , 0.83924335]
                                 )
                               ),
-                     'col_2': ['a']*25 + ['b']*25}
+                     'exog_2': ['a']*25 + ['b']*25}
        )
 
 exog_predict = exog.copy()

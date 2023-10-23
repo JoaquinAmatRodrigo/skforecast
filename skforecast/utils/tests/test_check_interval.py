@@ -98,31 +98,31 @@ def test_check_interval_ValueError_when_interval_lower_bound_greater_than_or_equ
         check_interval(interval = interval)
 
 
-def test_check_interval_TypeError_when_percentiles_is_not_a_list():
+def test_check_interval_TypeError_when_quantiles_is_not_a_list():
     """
-    Check `TypeError` is raised when `percentiles` is not a `list`.
+    Check `TypeError` is raised when `quantiles` is not a `list`.
     """
     err_msg = re.escape(
-                ("`percentiles` must be a `list`. For example, percentiles 5, "
-                 "50, and 95 should be as `percentiles = [5, 50, 95]`.")
-              )
+                ("`quantiles` must be a `list`. For example, quantiles 0.05, "
+                 "0.5, and 0.95 should be as `quantiles = [0.05, 0.5, 0.95]`.")
+            )
     with pytest.raises(TypeError, match = err_msg):
-        check_interval(percentiles = 'not_a_list')
+        check_interval(quantiles = 'not_a_list')
 
 
-@pytest.mark.parametrize("percentiles", 
-                         [[-1, 1, 50], [0., 100., 101.], [-2], [-2, 102]], 
-                         ids = lambda value : f'percentiles: {value}' )
-def test_check_interval_ValueError_when_elements_in_percentiles_are_out_of_bounds(percentiles):
+@pytest.mark.parametrize("quantiles", 
+                         [[-0.01, 0.01, 0.5], [0., 1., 1.1], [-2], [-2, 2]], 
+                         ids = lambda value : f'quantiles: {value}' )
+def test_check_interval_ValueError_when_elements_in_quantiles_are_out_of_bounds(quantiles):
     """
-    Check `ValueError` is raised when any element in `percentiles` is 
+    Check `ValueError` is raised when any element in `quantiles` is 
     not between 0 and 100.
     """
     err_msg = re.escape(
-                ("All elements in `percentiles` must be >= 0 and <= 100.")
+                ("All elements in `quantiles` must be >= 0 and <= 1.")
             )
     with pytest.raises(ValueError, match = err_msg):
-        check_interval(percentiles=percentiles)
+        check_interval(quantiles=quantiles)
 
 
 def test_check_interval_TypeError_when_alpha_is_not_float():

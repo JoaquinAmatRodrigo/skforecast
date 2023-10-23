@@ -1,10 +1,9 @@
-# Unit test predict_dist ForecasterAutoregMultiSeriesCustom
+# Unit test predict_quantiles ForecasterAutoregMultiSeriesCustom
 # ==============================================================================
 import pytest
 import numpy as np
 import pandas as pd
 from skforecast.ForecasterAutoregMultiSeriesCustom import ForecasterAutoregMultiSeriesCustom
-from scipy.stats import norm
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import OneHotEncoder
@@ -34,9 +33,9 @@ def create_predictors(y): # pragma: no cover
 @pytest.mark.parametrize("level", 
                          ['1', ['1']], 
                          ids=lambda lvl: f'level: {lvl}')
-def test_predict_dist_output_when_forecaster_is_LinearRegression_steps_is_2_in_sample_residuals_True_exog_and_transformer(level):
+def test_predict_quantiles_output_when_forecaster_is_LinearRegression_steps_is_2_in_sample_residuals_True_exog_and_transformer(level):
     """
-    Test output of predict_dist when regressor is LinearRegression,
+    Test output of predict_quantiles when regressor is LinearRegression,
     2 steps are predicted, using in-sample residuals, exog is included and both
     inputs are transformed. Single level.
     """
@@ -49,9 +48,9 @@ def test_predict_dist_output_when_forecaster_is_LinearRegression_steps_is_2_in_s
                  )
     
     forecaster.fit(series=series, exog=exog)
-    results = forecaster.predict_dist(
+    results = forecaster.predict_quantiles(
                   steps               = 2,
-                  distribution        = norm,
+                  quantiles           = [0.05, 0.55, 0.95],
                   levels              = level,
                   exog                = exog_predict,
                   n_boot              = 4,
@@ -59,9 +58,9 @@ def test_predict_dist_output_when_forecaster_is_LinearRegression_steps_is_2_in_s
               )
     
     expected = pd.DataFrame(
-                   data    = np.array([[0.38172712, 0.13932345],
-                                       [0.22554853, 0.16819172]]),
-                   columns = ['1_loc', '1_scale'],
+                   data    = np.array([[0.20133572, 0.40460928, 0.53761911],
+                                       [0.07739771, 0.19454095, 0.45374409]]),
+                   columns = ['1_0.05', '1_0.55', '1_0.95'],
                    index   = pd.RangeIndex(start=50, stop=52)
                )
     
@@ -71,9 +70,9 @@ def test_predict_dist_output_when_forecaster_is_LinearRegression_steps_is_2_in_s
 @pytest.mark.parametrize("levels", 
                          [['1', '2'], None], 
                          ids=lambda lvl: f'levels: {lvl}')
-def test_predict_dist_output_when_forecaster_is_LinearRegression_steps_is_2_in_sample_residuals_False_exog_and_transformer(levels):
+def test_predict_quantiles_output_when_forecaster_is_LinearRegression_steps_is_2_in_sample_residuals_False_exog_and_transformer(levels):
     """
-    Test output of predict_dist when regressor is LinearRegression,
+    Test output of predict_quantiles when regressor is LinearRegression,
     2 steps are predicted, using out-sample residuals, exog is included and both
     inputs are transformed. Multiple levels.
     """
@@ -87,9 +86,9 @@ def test_predict_dist_output_when_forecaster_is_LinearRegression_steps_is_2_in_s
     
     forecaster.fit(series=series, exog=exog)
     forecaster.out_sample_residuals = forecaster.in_sample_residuals
-    results = forecaster.predict_dist(
+    results = forecaster.predict_quantiles(
                   steps               = 2,
-                  distribution        = norm,
+                  quantiles           = [0.05, 0.55, 0.95],
                   levels              = levels,
                   exog                = exog_predict,
                   n_boot              = 4,
@@ -97,9 +96,9 @@ def test_predict_dist_output_when_forecaster_is_LinearRegression_steps_is_2_in_s
               )
     
     expected = pd.DataFrame(
-                   data    = np.array([[0.38172712, 0.13932345, 0.54404355, 0.20840904],
-                                       [0.22554853, 0.16819172, 0.42133164, 0.21519488]]),
-                   columns = ['1_loc', '1_scale', '2_loc', '2_scale'],
+                   data    = np.array([[0.20133572, 0.40460928, 0.53761911, 0.27660015, 0.61593304, 0.7616801 ],
+                                       [0.07739771, 0.19454095, 0.45374409, 0.18601931, 0.40403914, 0.70461714]]),
+                   columns = ['1_0.05', '1_0.55', '1_0.95', '2_0.05', '2_0.55', '2_0.95'],
                    index   = pd.RangeIndex(start=50, stop=52)
                )
 

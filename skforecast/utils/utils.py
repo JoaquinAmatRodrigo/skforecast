@@ -379,7 +379,7 @@ def check_exog_dtypes(
 
 def check_interval(
     interval: list=None,
-    percentiles: float=None,
+    quantiles: float=None,
     alpha: float=None
 ) -> None:
     """
@@ -391,10 +391,10 @@ def check_interval(
         Confidence of the prediction interval estimated. Sequence of percentiles
         to compute, which must be between 0 and 100 inclusive. For example, 
         interval of 95% should be as `interval = [2.5, 97.5]`.
-    percentiles : list, default `None`
-        Sequence of percentiles to compute, which must be between 0 and 100 
-        inclusive. For example, percentiles of 5, 50. and 95 should be as 
-        `percentiles = [5, 50, 95]`.
+    quantiles : list, default `None`
+        Sequence of quantiles to compute, which must be between 0 and 1 
+        inclusive. For example, quantiles of 0.05, 0.5 and 0.95 should be as 
+        `quantiles = [0.05, 0.5, 0.95]`.
     alpha : float, default `None`
         The confidence intervals used in ForecasterSarimax are (1 - alpha) %.
 
@@ -434,17 +434,17 @@ def check_interval(
                 f"upper interval bound ({interval[1]})."
             )
         
-    if percentiles is not None:
-        if not isinstance(percentiles, list):
+    if quantiles is not None:
+        if not isinstance(quantiles, list):
             raise TypeError(
-                ("`percentiles` must be a `list`. For example, percentiles 5, "
-                 "50, and 95 should be as `percentiles = [5, 50, 95]`.")
+                ("`quantiles` must be a `list`. For example, quantiles 0.05, "
+                 "0.5, and 0.95 should be as `quantiles = [0.05, 0.5, 0.95]`.")
             )
         
-        for p in percentiles:
-            if (p < 0.) or (p > 100.):
+        for q in quantiles:
+            if (q < 0.) or (q > 1.):
                 raise ValueError(
-                    ("All elements in `percentiles` must be >= 0 and <= 100.")
+                    ("All elements in `quantiles` must be >= 0 and <= 1.")
                 )
     
     if alpha is not None:
