@@ -992,20 +992,20 @@ class ForecasterAutoreg(ForecasterBase):
         return predictions
 
 
-    def predict_percentiles(
+    def predict_quantiles(
         self,
         steps: int,
         last_window: Optional[pd.Series]=None,
         exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-        percentiles: list=[5, 50, 95],
+        quantiles: list=[0.05, 0.5, 0.95],
         n_boot: int=500,
         random_state: int=123,
         in_sample_residuals: bool=True
     ) -> pd.DataFrame:
         """
-        Calculate the specified percentiles for each step. After generating 
+        Calculate the specified quantiles for each step. After generating 
         multiple forecasting predictions through a bootstrapping process, each 
-        percentile is calculated for each step.
+        quantile is calculated for each step.
         
         Parameters
         ----------
@@ -1019,18 +1019,18 @@ class ForecasterAutoreg(ForecasterBase):
             right after training data.
         exog : pandas Series, pandas DataFrame, default `None`
             Exogenous variable/s included as predictor/s.
-        percentiles : list, default `[5, 50, 95]`
-            Sequence of percentiles to compute, which must be between 0 and 100 
-            inclusive. For example, percentiles of 5, 50. and 95 should be as 
-            `percentiles = [5, 50, 95]`.
+        quantiles : list, default `[0.05, 0.5, 0.95]`
+            Sequence of quantiles to compute, which must be between 0 and 1 
+            inclusive. For example, quantiles of 0.05, 0.5 and 0.95 should be as 
+            `quantiles = [0.05, 0.5, 0.95]`.
         n_boot : int, default `500`
-            Number of bootstrapping iterations used to estimate percentiles.
+            Number of bootstrapping iterations used to estimate quantiles.
         random_state : int, default `123`
-            Sets a seed to the random generator, so that boot percentiles are always 
+            Sets a seed to the random generator, so that boot quantiles are always 
             deterministic.
         in_sample_residuals : bool, default `True`
             If `True`, residuals from the training data are used as proxy of
-            prediction error to create prediction percentiles. If `False`, out of
+            prediction error to create prediction quantiles. If `False`, out of
             sample residuals are used. In the latter case, the user should have
             calculated and stored the residuals within the forecaster (see
             `set_out_sample_residuals()`).
@@ -1038,7 +1038,7 @@ class ForecasterAutoreg(ForecasterBase):
         Returns
         -------
         predictions : pandas DataFrame
-            Percentiles predicted by the forecaster.
+            Quantiles predicted by the forecaster.
 
         Notes
         -----
@@ -1049,7 +1049,7 @@ class ForecasterAutoreg(ForecasterBase):
         
         """
         
-        check_interval(percentiles=percentiles)
+        check_interval(quantiles=quantiles)
 
         boot_predictions = self.predict_bootstrapping(
                                steps               = steps,
@@ -1060,9 +1060,7 @@ class ForecasterAutoreg(ForecasterBase):
                                in_sample_residuals = in_sample_residuals
                            )
 
-        quantiles = np.array(percentiles)/100
         predictions = boot_predictions.quantile(q=quantiles, axis=1).transpose()
-        predictions.columns = [f'p{p}' for p in percentiles]
 
         return predictions
 
