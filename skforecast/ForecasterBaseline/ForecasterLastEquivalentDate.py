@@ -30,7 +30,7 @@ logging.basicConfig(
 )
 
 
-class ForecasterLastEquivalentDate(ForecasterBase):
+class ForecasterLastEquivalentDate():
     """
     This forecaster predicts future values based on the most recent observed data
     similar to the target period. This approach is useful as a baseline. However,
@@ -101,6 +101,7 @@ class ForecasterLastEquivalentDate(ForecasterBase):
         forecaster_id: Optional[Union[str, int]]=None
     ) -> None:
         
+        self.offset                  = offset
         self.regressor               = None
         self.transformer_y           = None
         self.transformer_exog        = None
@@ -126,7 +127,7 @@ class ForecasterLastEquivalentDate(ForecasterBase):
         self.python_version          = sys.version.split(" ")[0]
         self.forecaster_id           = forecaster_id
        
-        self.window_size = self.max_lag
+        self.window_size = self.offset
 
 
     def __repr__(
@@ -163,9 +164,6 @@ class ForecasterLastEquivalentDate(ForecasterBase):
     ) -> None:
         """
         Training Forecaster.
-
-        Additional arguments to be passed to the `fit` method of the regressor 
-        can be added with the `fit_kwargs` argument when initializing the forecaster.
         
         Parameters
         ----------
@@ -189,106 +187,24 @@ class ForecasterLastEquivalentDate(ForecasterBase):
         self.index_type          = None
         self.index_freq          = None
         self.last_window         = None
-        self.included_exog       = False
-        self.exog_type           = None
-        self.exog_dtypes         = None
-        self.exog_col_names      = None
-        self.X_train_col_names   = None
-        self.in_sample_residuals = None
         self.fitted              = False
         self.training_range      = None
-        
-        if exog is not None:
-            self.included_exog = True
-            self.exog_type = type(exog)
-            self.exog_col_names = \
-                 exog.columns.to_list() if isinstance(exog, pd.DataFrame) else exog.name
 
-        X_train, y_train = self.create_train_X_y(y=y, exog=exog)
-        sample_weight = self.create_sample_weights(X_train=X_train)
-
-        if sample_weight is not None:
-            self.regressor.fit(X=X_train, y=y_train, sample_weight=sample_weight,
-                               **self.fit_kwargs)
-        else:
-            self.regressor.fit(X=X_train, y=y_train, **self.fit_kwargs)
 
         self.fitted = True
         self.fit_date = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
-        self.training_range = preprocess_y(y=y, return_values=False)[1][[0, -1]]
-        self.index_type = type(X_train.index)
-        if isinstance(X_train.index, pd.DatetimeIndex):
-            self.index_freq = X_train.index.freqstr
+
+        y_values, y_index = preprocess_y(y=y, return_values=True)
+        self.training_range = y_index[[0, -1]]
+        self.index_type = type(y_index)
+        if isinstance(y_index, pd.DatetimeIndex):
+            self.index_freq = y_index.freqstr
         else: 
-            self.index_freq = X_train.index.step
-        
-        # This is done to save time during fit in functions such as backtesting()
-        if store_in_sample_residuals:
-
-            residuals = (y_train - self.regressor.predict(X_train)).to_numpy()
-
-            if len(residuals) > 1000:
-                # Only up to 1000 residuals are stored
-                rng = np.random.default_rng(seed=123)
-                residuals = rng.choice(
-                                a       = residuals, 
-                                size    = 1000, 
-                                replace = False
-                            )
-                                                    
-            self.in_sample_residuals = residuals
+            self.index_freq = y_index.step
         
         # The last time window of training data is stored so that lags needed as
-        # predictors in the first iteration of `predict()` can be calculated. It
-        # also includes the values need to calculate the diferenctiation.
+        # predictors in the first iteration of `predict()` can be calculated.
         self.last_window = y.iloc[-self.window_size:].copy()
-    
-
-    def _recursive_predict(
-        self,
-        steps: int,
-        last_window: np.ndarray,
-        exog: Optional[np.ndarray]=None
-    ) -> np.ndarray:
-        """
-        Predict n steps ahead. It is an iterative process in which, each prediction,
-        is used as a predictor for the next step.
-        
-        Parameters
-        ----------
-        steps : int
-            Number of future steps predicted.
-        last_window : numpy ndarray
-            Series values used to create the predictors (lags) needed in the 
-            first iteration of the prediction (t + 1).
-        exog : numpy ndarray, default `None`
-            Exogenous variable/s included as predictor/s.
-
-        Returns
-        -------
-        predictions : numpy ndarray
-            Predicted values.
-        
-        """
-
-        predictions = np.full(shape=steps, fill_value=np.nan)
-
-        for i in range(steps):
-            X = last_window[-self.lags].reshape(1, -1)
-            if exog is not None:
-                X = np.column_stack((X, exog[i, ].reshape(1, -1)))
-            with warnings.catch_warnings():
-                # Suppress scikit-learn warning: "X does not have valid feature names,
-                # but NoOpTransformer was fitted with feature names".
-                warnings.simplefilter("ignore")
-                prediction = self.regressor.predict(X)
-                predictions[i] = prediction.ravel()[0]
-
-            # Update `last_window` values. The first position is discarded and 
-            # the new prediction is added at the end.
-            last_window = np.append(last_window[1:], prediction)
-
-        return predictions
 
             
     def predict(
