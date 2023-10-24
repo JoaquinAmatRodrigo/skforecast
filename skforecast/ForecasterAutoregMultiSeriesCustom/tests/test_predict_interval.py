@@ -321,8 +321,8 @@ def test_predict_interval_output_when_regressor_is_LinearRegression_with_transfo
     as transformer_series and transformer_exog as transformer_exog.
     """
     transformer_exog = ColumnTransformer(
-                            [('scale', StandardScaler(), ['col_1']),
-                             ('onehot', OneHotEncoder(), ['col_2'])],
+                            [('scale', StandardScaler(), ['exog_1']),
+                             ('onehot', OneHotEncoder(), ['exog_2'])],
                             remainder = 'passthrough',
                             verbose_feature_names_out = False
                        )

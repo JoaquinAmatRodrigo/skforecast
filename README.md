@@ -48,7 +48,7 @@ pip install skforecast
 Specific version:
 
 ```bash
-pip install skforecast==0.10.1
+pip install skforecast==0.11.0
 ```
 
 Latest (unstable):
@@ -93,14 +93,14 @@ pip install skforecast[plotting]
 + statsmodels>=0.12, <0.15
 + pmdarima>=2.0, <2.1
 
-# What is new in skforecast 0.10?
+# What is new in skforecast 0.11?
 
 Visit the [release notes](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/changelog.md) to view all notable changes.
 
-- [x] New `Sarimax.Sarimax` model. A wrapper of `statsmodels.SARIMAX` that follows the scikit-learn API and can be used with the `ForecasterSarimax`.
-- [x] Added `skforecast.preprocessing.TimeSeriesDifferentiator` to preprocess time series by differentiating or integrating them (reverse differentiation).
-- [x] Added `differentiation` argument to `ForecasterAutoreg` and `ForecasterAutoregCustom` to model the n-order differentiated time series using the new skforecast preprocessor `TimeSeriesDifferentiator`.
-- [x] Bug fixes and performance improvements.
+- [x] New `predict_quantiles` method in all Autoreg Forecasters to calculate the specified quantiles for each step.
+- [x] Added `skforecast.datasets` module. It contains functions to load data for our examples and user guides.
+- [ ] Added `differentiation` argument to all Autoreg Forecasters to model the n-order differentiated time series using the new skforecast preprocessor `TimeSeriesDifferentiator`.
+- [ ] Bug fixes and performance improvements.
 
 
 # Forecasters

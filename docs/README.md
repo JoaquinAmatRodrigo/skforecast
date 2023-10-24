@@ -49,7 +49,7 @@ pip install skforecast
 Specific version:
 
 ```bash
-pip install skforecast==0.10.1
+pip install skforecast==0.11.0
 ```
 
 Latest (unstable):

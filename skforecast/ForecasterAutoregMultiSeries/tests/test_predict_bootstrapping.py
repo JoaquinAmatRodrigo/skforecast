@@ -17,8 +17,8 @@ from .fixtures_ForecasterAutoregMultiSeries import exog
 from .fixtures_ForecasterAutoregMultiSeries import exog_predict
 
 transformer_exog = ColumnTransformer(
-                       [('scale', StandardScaler(), ['col_1']),
-                        ('onehot', OneHotEncoder(), ['col_2'])],
+                       [('scale', StandardScaler(), ['exog_1']),
+                        ('onehot', OneHotEncoder(), ['exog_2'])],
                        remainder = 'passthrough',
                        verbose_feature_names_out = False
                    )
@@ -121,8 +121,8 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_exog_s
     1 step ahead is predicted with exog using in-sample residuals.
     """
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
-    forecaster.fit(series=series, exog=exog['col_1'])
-    results = forecaster.predict_bootstrapping(steps=1, n_boot=4, exog=exog_predict['col_1'], in_sample_residuals=True)
+    forecaster.fit(series=series, exog=exog['exog_1'])
+    results = forecaster.predict_bootstrapping(steps=1, n_boot=4, exog=exog_predict['exog_1'], in_sample_residuals=True)
 
     expected_1 = pd.DataFrame(
                      data    = np.array([[0.16386591, 0.56398143, 0.38576231, 0.37782729]]),
@@ -147,8 +147,8 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_exog_s
     2 steps ahead are predicted with exog using in-sample residuals.
     """
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
-    forecaster.fit(series=series, exog=exog['col_1'])
-    results = forecaster.predict_bootstrapping(steps=2, n_boot=4, exog=exog_predict['col_1'], in_sample_residuals=True)
+    forecaster.fit(series=series, exog=exog['exog_1'])
+    results = forecaster.predict_bootstrapping(steps=2, n_boot=4, exog=exog_predict['exog_1'], in_sample_residuals=True)
 
     expected_1 = pd.DataFrame(
                      data    = np.array([[0.16386591, 0.56398143, 0.38576231, 0.37782729],
@@ -175,9 +175,9 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_exog_s
     1 step ahead is predicted with exog using out-sample residuals.
     """
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
-    forecaster.fit(series=series, exog=exog['col_1'])
+    forecaster.fit(series=series, exog=exog['exog_1'])
     forecaster.out_sample_residuals = forecaster.in_sample_residuals
-    results = forecaster.predict_bootstrapping(steps=1, n_boot=4, exog=exog_predict['col_1'], in_sample_residuals=False)
+    results = forecaster.predict_bootstrapping(steps=1, n_boot=4, exog=exog_predict['exog_1'], in_sample_residuals=False)
 
     expected_1 = pd.DataFrame(
                      data    = np.array([[0.16386591, 0.56398143, 0.38576231, 0.37782729]]),
@@ -202,9 +202,9 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_exog_s
     2 steps ahead are predicted with exog using out-sample residuals.
     """
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
-    forecaster.fit(series=series, exog=exog['col_1'])
+    forecaster.fit(series=series, exog=exog['exog_1'])
     forecaster.out_sample_residuals = forecaster.in_sample_residuals
-    results = forecaster.predict_bootstrapping(steps=2, n_boot=4, exog=exog_predict['col_1'], in_sample_residuals=False)
+    results = forecaster.predict_bootstrapping(steps=2, n_boot=4, exog=exog_predict['exog_1'], in_sample_residuals=False)
 
     expected_1 = pd.DataFrame(
                      data    = np.array([[0.16386591, 0.56398143, 0.38576231, 0.37782729],
