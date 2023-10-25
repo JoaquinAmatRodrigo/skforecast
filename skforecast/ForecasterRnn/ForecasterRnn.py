@@ -277,7 +277,7 @@ class ForecasterRnn(ForecasterBase):
 
         self.weight_func, self.source_code_weight_func, _ = initialize_weights(
             forecaster_name=type(self).__name__,
-            regressor=regressor,
+            regressor=self.regressor,
             weight_func=weight_func,
             series_weights=None,
         )
@@ -289,7 +289,7 @@ class ForecasterRnn(ForecasterBase):
             fit_kwargs.pop("series_val")
 
         self.fit_kwargs = check_select_fit_kwargs(
-            regressor=regressor, fit_kwargs=fit_kwargs
+            regressor=self.regressor, fit_kwargs=fit_kwargs
         )
 
     def __repr__(self) -> str:
@@ -551,7 +551,6 @@ class ForecasterRnn(ForecasterBase):
                 x=X_train, y=y_train, validation_data=(X_val, y_val), **self.fit_kwargs
             )
         else:
-            # TODO: save history in self.train_history?
             history = self.regressor.fit(x=X_train, y=y_train, **self.fit_kwargs)
 
         self.history = history.history
@@ -664,7 +663,7 @@ class ForecasterRnn(ForecasterBase):
             last_window.loc[:, serie_name] = last_window_values
 
         X = np.reshape(last_window.to_numpy(), (1, self.max_lag, last_window.shape[1]))
-        predictions = self.regressor.predict(X)
+        predictions = self.regressor.predict(X, verbose=0)
         predictions_reshaped = np.reshape(
             predictions, (predictions.shape[1], predictions.shape[2])
         )

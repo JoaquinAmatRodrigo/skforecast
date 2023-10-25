@@ -247,7 +247,7 @@ def _backtesting_forecaster_multiseries(
         if fold[4] is False:
             # When the model is not fitted, last_window must be updated to include 
             # the data needed to make predictions.
-            last_window_series = series.iloc[last_window_start:last_window_end, ]
+            last_window_series = series.iloc[last_window_start:last_window_end, ].copy()
         else:
             # The model is fitted before making predictions. If `fixed_train_size`  
             # the train size doesn't increase but moves by `steps` in each iteration. 
