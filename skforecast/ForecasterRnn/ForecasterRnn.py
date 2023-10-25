@@ -661,7 +661,7 @@ class ForecasterRnn(ForecasterBase):
             last_window_values, last_window_index = preprocess_last_window(
                 last_window=last_window_serie
             )
-            last_window[serie_name] = last_window_values
+            last_window.loc[:, serie_name] = last_window_values
 
         X = np.reshape(last_window.to_numpy(), (1, self.max_lag, last_window.shape[1]))
         predictions = self.regressor.predict(X)
@@ -685,7 +685,7 @@ class ForecasterRnn(ForecasterBase):
                 fit=False,
                 inverse_transform=True,
             )
-            predictions[serie] = x
+            predictions.loc[:, serie] = x
 
         return predictions
 
