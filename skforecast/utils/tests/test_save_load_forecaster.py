@@ -1,12 +1,17 @@
 # Unit test save_forecaster and load_forecaster
 # ==============================================================================
 import os
+import re
 import joblib
+import pytest
 import numpy as np
 import pandas as pd
+import warnings
+import skforecast
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
 from skforecast.utils import save_forecaster
 from skforecast.utils import load_forecaster
+from skforecast.exceptions import SkforecastVersionWarning
 from sklearn.linear_model import LinearRegression
 
 
@@ -32,3 +37,31 @@ def test_save_and_load_forecaster_persistence():
             assert (attribute_forecaster == attribute_forecaster_loaded).all()
         else:
             assert attribute_forecaster == attribute_forecaster_loaded
+
+
+@pytest.mark.skip(reason="no way of currently testing this")
+def test_save_and_load_forecaster_SkforecastVersionWarning():
+    """ 
+    Test warning used to notify that the skforecast version installed in the 
+    environment differs from the version used to initialize the forecaster.
+
+    **This test does not work because forecaster.skforecast_version is 
+    overwritten when the forecaster is loaded.
+    """
+    forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3)
+    rng = np.random.default_rng(12345)
+    y = pd.Series(rng.normal(size=100))
+    forecaster.fit(y=y)
+    forecaster.skforecast_version = '0.0.0'
+    save_forecaster(forecaster=forecaster, file_name='forecaster.py', verbose=False)
+
+    warn_msg = re.escape(
+        (f"The skforecast version installed in the environment differs "
+         f"from the version used to initialize the forecaster.\n"
+         f"    Installed Version  : {skforecast.__version__}\n"
+         f"    Forecaster Version : 0.0.0\n"
+         f"This may create incompatibilities when using the library.")
+    )
+    with pytest.warns(SkforecastVersionWarning, match = warn_msg):
+        load_forecaster(file_name='forecaster.py', verbose=False)
+        os.remove('forecaster.py')

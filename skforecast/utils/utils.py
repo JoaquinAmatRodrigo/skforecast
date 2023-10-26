@@ -20,9 +20,11 @@ from sklearn.base import TransformerMixin
 import inspect
 from copy import deepcopy
 
+import skforecast
 from ..exceptions import MissingValuesExogWarning
 from ..exceptions import DataTypeWarning
 from ..exceptions import IgnoredArgumentWarning
+from ..exceptions import SkforecastVersionWarning
 
 optional_dependencies = {
     "sarimax": [
@@ -1336,6 +1338,19 @@ def load_forecaster(
     """
 
     forecaster = joblib.load(filename=file_name)
+
+    skforecast_v = skforecast.__version__
+    forecaster_v = forecaster.skforcast_version
+
+    if forecaster_v != skforecast_v:
+        warnings.warn(
+            (f"The skforecast version installed in the environment differs "
+             f"from the version used to initialize the forecaster.\n"
+             f"    Installed Version  : {skforecast_v}\n"
+             f"    Forecaster Version : {forecaster_v}\n"
+             f"This may create incompatibilities when using the library."),
+             SkforecastVersionWarning
+        )
 
     if verbose:
         forecaster.summary()
