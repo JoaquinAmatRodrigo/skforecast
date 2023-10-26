@@ -14,6 +14,8 @@ The main changes in this release are:
 
 + Added `predict_quantiles` method to all Autoreg Forecasters.
 
++ Added `SkforecastVersionWarning` to the `exception` module. This warning notify that the skforecast version installed in the environment differs from the version used to initialize the forecaster when using `load_forecaster`.
+
 **Changed**
 
 
