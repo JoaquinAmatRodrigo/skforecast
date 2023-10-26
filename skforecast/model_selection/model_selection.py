@@ -759,14 +759,17 @@ def backtesting_forecaster(
             - column upper_bound: upper bound of the interval.
     
     """
-    
-    if type(forecaster).__name__ not in ['ForecasterAutoreg', 
-                                         'ForecasterAutoregCustom', 
-                                         'ForecasterAutoregDirect']:
+    forecaters_allowed = [
+        'ForecasterAutoreg', 
+        'ForecasterAutoregCustom', 
+        'ForecasterAutoregDirect',
+        'ForecasterLastEquivalentDate'
+    ]
+    if type(forecaster).__name__ not in forecaters_allowed:
         raise TypeError(
-            ("`forecaster` must be of type `ForecasterAutoreg`, `ForecasterAutoregCustom` "
-             "or `ForecasterAutoregDirect`, for all other types of forecasters "
-             "use the functions available in the other `model_selection` modules.")
+            (f"`forecaster` must be of type {forecaters_allowed}, for all other types of "
+             f" forecasters use the functions available in the other `model_selection` "
+             f"modules.")
         )
     
     check_backtesting_input(
