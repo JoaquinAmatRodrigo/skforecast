@@ -512,11 +512,12 @@ def check_predict_input(
         Maximum number of steps allowed (`ForecasterAutoregDirect` and 
         `ForecasterAutoregMultiVariate`).
     levels : str, list, default `None`
-        Time series to be predicted (`ForecasterAutoregMultiSeries` and
-        `ForecasterAutoregMultiSeriesCustom`).
+        Time series to be predicted (`ForecasterAutoregMultiSeries`,
+        `ForecasterAutoregMultiSeriesCustom` and `ForecasterRnn).
     series_col_names : list, default `None`
         Names of the columns used during fit (`ForecasterAutoregMultiSeries`, 
-        `ForecasterAutoregMultiSeriesCustom` and `ForecasterAutoregMultiVariate`).
+        `ForecasterAutoregMultiSeriesCustom`, `ForecasterAutoregMultiVariate`
+        and `ForecasterRnn`).
 
     Returns
     -------
@@ -553,7 +554,8 @@ def check_predict_input(
         check_interval(interval=interval, alpha=alpha)
     
     if forecaster_name in ['ForecasterAutoregMultiSeries', 
-                           'ForecasterAutoregMultiSeriesCustom']:
+                           'ForecasterAutoregMultiSeriesCustom',
+                           'ForecasterRnn']:
         if levels is not None and not isinstance(levels, (str, list)):
             raise TypeError(
                 ("`levels` must be a `list` of column names, a `str` of a "
@@ -561,7 +563,8 @@ def check_predict_input(
             )
         if len(set(levels) - set(series_col_names)) != 0:
             raise ValueError(
-                f"`levels` must be in `series_col_names` : {series_col_names}."
+                f"`levels` names must be included in the series used during fit "
+                f"({series_col_names}). Got {levels}."
             )
 
     if exog is None and included_exog:
@@ -588,7 +591,8 @@ def check_predict_input(
             )
         
         if forecaster_name in ['ForecasterAutoregMultiSeries', 
-                               'ForecasterAutoregMultiSeriesCustom'] and \
+                               'ForecasterAutoregMultiSeriesCustom',
+                               'ForecasterRnn'] and \
             len(set(levels) - set(last_window.columns)) != 0:
             raise ValueError(
                 (f"`last_window` must contain a column(s) named as the level(s) "
