@@ -1528,18 +1528,21 @@ def check_backtesting_input(
     """
     
     forecasters_uni = ['ForecasterAutoreg', 'ForecasterAutoregCustom', 
-                       'ForecasterAutoregDirect', 'ForecasterSarimax']
+                       'ForecasterAutoregDirect', 'ForecasterSarimax',
+                       'ForecasterLastEquivalentDate']
     forecasters_multi = ['ForecasterAutoregMultiSeries', 
                          'ForecasterAutoregMultiSeriesCustom', 
                          'ForecasterAutoregMultiVariate']
+    
+    forecaster_name = type(forecaster).__name__
 
-    if type(forecaster).__name__ in forecasters_uni:
+    if forecaster_name in forecasters_uni:
         if not isinstance(y, pd.Series):
             raise TypeError("`y` must be a pandas Series.")
         data_name = 'y'
         data_length = len(y)
         
-    if type(forecaster).__name__ in forecasters_multi:
+    if forecaster_name in forecasters_multi:
         if not isinstance(series, pd.DataFrame):
             raise TypeError("`series` must be a pandas DataFrame.")
         data_name = 'series'
@@ -1591,7 +1594,7 @@ def check_backtesting_input(
                          f"all series reach the first non-null value.")
                     )
     else:
-        if type(forecaster).__name__ == 'ForecasterSarimax':
+        if forecaster_name == 'ForecasterSarimax':
             raise ValueError(
                 (f"`initial_train_size` must be an integer smaller than the "
                  f"length of `{data_name}` ({data_length}).")
