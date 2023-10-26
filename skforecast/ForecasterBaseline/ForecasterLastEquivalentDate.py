@@ -49,6 +49,14 @@ class ForecasterLastEquivalentDate():
         7 days ago (offset = 7). If the frequency of the time series is hourly,
         the most recent equivalent data to predict the value of the next hour is
         the value observed 24 hours ago (offset = 24).
+    n_equivalent_dates : int
+        Number of equivalent dates (multiple of offset) used in the prediction.
+        For example, if the frequency of the time series is dayly, offset = 7 and
+        n_equivalent_dates = 2, the most recent equivalent data used to predict the
+        value of the next day is the value observed 7 days ago and 14 days ago.
+    agg_func : callable, default `np.mean`
+        Function used to aggregate the values of the equivalent dates when the
+        number of equivalent dates is greater than 1.
     window_size : int
         Size of the window of past values needed to include last equivalent date
         according to the offset.
@@ -89,11 +97,15 @@ class ForecasterLastEquivalentDate():
     
     def __init__(
         self,
-        offset: Union[int, np.ndarray, list],
+        offset: int,
+        n_equivalent_dates: int=1,
+        agg_func: Callable=np.mean,
         forecaster_id: Optional[Union[str, int]]=None
     ) -> None:
         
         self.offset                  = offset
+        self.n_equivalent_dates      = n_equivalent_dates
+        self.agg_func                = agg_func
         self.regressor               = None
         self.transformer_y           = None
         self.transformer_exog        = None
@@ -120,12 +132,14 @@ class ForecasterLastEquivalentDate():
         self.forecaster_id           = forecaster_id
        
         if isinstance(self.offset, int):
-            self.window_size = self.offset
-        else:
+            self.window_size = self.offset * self.n_equivalent_dates
+        elif isinstance(self.offset, pd.tseries.offsets.DateOffset):
             # if offset is a pandas.tseries.offsets calculated the number of steps
             # base on the frequency of the time series.
             self.offset = pd.tseries.frequencies.to_offset(self.offset)
             self.window_size = self.offset.n
+        else:
+            raise Exception("offset must be an integer or a pandas.tseries.offsets")
 
 
     def __repr__(
@@ -140,6 +154,8 @@ class ForecasterLastEquivalentDate():
             f"{type(self).__name__} \n"
             f"{'=' * len(type(self).__name__)} \n"
             f"Offset: {self.offset} \n"
+            f"Number of equivalent dates: {self.n_equivalent_dates} \n"
+            f"Aggregation function: {self.agg_func.__name__} \n"
             f"Window size: {self.window_size} \n"
             f"Training range: {self.training_range.to_list() if self.fitted else None} \n"
             f"Training index type: {str(self.index_type).split('.')[-1][:-2] if self.fitted else None} \n"
@@ -187,7 +203,6 @@ class ForecasterLastEquivalentDate():
 
         self.fitted = True
         self.fit_date = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
-
         _, y_index = preprocess_y(y=y, return_values=True)
         self.training_range = y_index[[0, -1]]
         self.index_type = type(y_index)
@@ -256,12 +271,27 @@ class ForecasterLastEquivalentDate():
         last_window_values, last_window_index = preprocess_last_window(
                                                     last_window = last_window
                                                 )
-        offset_indexes = np.tile(
-                            np.arange(-self.offset, 0),
-                            int(np.ceil(steps/self.offset))
-                         )
-        offset_indexes = offset_indexes[:steps]
-        predictions = last_window_values[offset_indexes]
+        equivalent_indexes = np.tile(
+                                np.arange(-self.offset, 0),
+                                int(np.ceil(steps/self.offset))
+                             )
+        equivalent_indexes = equivalent_indexes[:steps]
+        equivalent_indexes = [
+            equivalent_indexes * n 
+            for n
+            in np.arange(self.n_equivalent_dates, 0, -1)
+        ]
+        equivalent_indexes = np.vstack(equivalent_indexes)
+        equivalent_values = last_window_values[equivalent_indexes]
+
+        if self.n_equivalent_dates == 1:
+            predictions = equivalent_values
+        else:
+            predictions = np.apply_along_axis(
+                            self.agg_func,
+                            axis=0,
+                            arr=equivalent_values
+                        )      
         predictions = pd.Series(
                           data  = predictions,
                           index = expand_index(
