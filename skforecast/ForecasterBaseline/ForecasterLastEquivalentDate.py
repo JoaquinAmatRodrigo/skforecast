@@ -43,23 +43,19 @@ class ForecasterLastEquivalentDate():
     Attributes
     ----------
     offset : int
-        Number of steps to go back in time to find the most recent data similar
-        to the target period.
-    max_lag : int
-        Maximum value of lag included in `lags`.
+        Number of steps to go back in time to find the most recent euivalent data.
+        For example, if the frequency of the time series is 1 day, the most recent
+        equivalent data to predict the value of the next day is the value observed
+        7 days ago (offset = 7). If the frequency of the time series is hourly,
+        the most recent equivalent data to predict the value of the next hour is
+        the value observed 24 hours ago (offset = 24).
     window_size : int
-        Size of the window needed to create the predictors. It is equal to `max_lag`.
-        If `differentiation` is not `None`, the size of the window is `max_lag` +
-        `differentiation`.
+        Size of the window of past values needed to include last equivalent date
+        according to the offset.
     last_window : pandas Series
         This window represents the most recent data observed by the predictor
-        during its training phase. It contains the values needed to predict the
-        next step immediately after the training data. These values are stored
-        in the original scale of the time series before undergoing any transformations
-        or differentiation. When `differentiation` parameter is specified, the
-        dimensions of the `last_window` are expanded as many values as the order
-        of differentiation. For example, if `lags` = 7 and `differentiation` = 1,
-        `last_window` will have 8 values.
+        during its training phase. It contains the past values needed to include
+        the last equivalent date according to the offset.
     index_type : type
         Type of index of the input used in training.
     index_freq : str
@@ -209,7 +205,7 @@ class ForecasterLastEquivalentDate():
         self,
         steps: int,
         last_window: Optional[pd.Series]=None,
-        exog = None
+        exog=None
     ) -> pd.Series:
         """
         Predict n steps ahead.
@@ -241,15 +237,15 @@ class ForecasterLastEquivalentDate():
             forecaster_name  = None,
             steps            = steps,
             fitted           = self.fitted,
-            included_exog    = self.included_exog,
+            included_exog    = None,
             index_type       = self.index_type,
             index_freq       = self.index_freq,
             window_size      = self.window_size,
             last_window      = last_window,
             last_window_exog = None,
-            exog             = exog,
-            exog_type        = self.exog_type,
-            exog_col_names   = self.exog_col_names,
+            exog             = None,
+            exog_type        = None,
+            exog_col_names   = None,
             interval         = None,
             alpha            = None,
             max_steps        = None,
@@ -260,7 +256,12 @@ class ForecasterLastEquivalentDate():
         last_window_values, last_window_index = preprocess_last_window(
                                                     last_window = last_window
                                                 )
-
+        offset_indexes = np.tile(
+                            np.arange(-self.offset, 0),
+                            int(np.ceil(steps/self.offset))
+                         )
+        offset_indexes = offset_indexes[:steps]
+        predictions = last_window_values[offset_indexes]
         predictions = pd.Series(
                           data  = predictions,
                           index = expand_index(
