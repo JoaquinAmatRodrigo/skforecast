@@ -1177,6 +1177,7 @@ class ForecasterAutoregDirect(ForecasterBase):
                            )
 
         predictions = boot_predictions.quantile(q=quantiles, axis=1).transpose()
+        predictions.columns = [f'q_{q}' for q in quantiles]
 
         return predictions
     

@@ -1362,7 +1362,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
 
         for level in levels:
             preds_quantiles = boot_predictions[level].quantile(q=quantiles, axis=1).transpose()
-            preds_quantiles.columns = [f'{level}_{q}' for q in quantiles]
+            preds_quantiles.columns = [f'{level}_q_{q}' for q in quantiles]
             predictions.append(preds_quantiles)
         
         predictions = pd.concat(predictions, axis=1)
