@@ -240,8 +240,10 @@ class ForecasterLastEquivalentDate():
             self.index_freq = y_index.step
 
         if isinstance(self.offset, pd.tseries.offsets.DateOffset):
-            first_date_window = y_index[-1] - (self.offset * self.n_equivalent_dates)
-            self.window_size = len(y.loc[first_date_window:])
+            last_window_start = (
+                (y_index[-1] + y_index.freq) - (self.offset * self.n_equivalent_dates)
+            )
+            self.window_size = len(y.loc[last_window_start:])
         
         # The last time window of training data is stored so that lags needed as
         # predictors in the first iteration of `predict()` can be calculated.
@@ -318,53 +320,41 @@ class ForecasterLastEquivalentDate():
             equivalent_indexes = np.vstack(equivalent_indexes)
             equivalent_values = last_window_values[equivalent_indexes]
 
-            if self.n_equivalent_dates == 1:
-                predictions = equivalent_values.ravel()
-            else:
-                predictions = np.apply_along_axis(
-                                self.agg_func,
-                                axis=0,
-                                arr=equivalent_values
-                            )
-            predictions_index = expand_index(index=last_window_index,steps=steps)
 
         if isinstance(self.offset, pd.tseries.offsets.DateOffset):
-            predictions_index = expand_index(index=last_window_index,steps=steps)
-            print(predictions_index[0])
-            print(self.offset)
-            print(self.index_freq)
-            equivalent_dates = [
-                            predictions_index[0] - self.offset + n * last_window_index.freq
-                            for n
-                            in np.arange(steps)[:len(last_window)]
-                        ]
+            predictions_index_start = last_window_index[-1] + last_window_index.freq
+            equivalent_dates = pd.date_range(
+                                    start=predictions_index_start - self.offset,
+                                    periods=steps - len(last_window) / self.n_equivalent_dates,
+                                    freq=last_window_index.freq
+                               )
             equivalent_dates = np.tile(
                                     equivalent_dates,
-                                    int(np.ceil(steps/len(equivalent_dates)))
-                                )
-            equivalent_dates = equivalent_dates[:steps]
+                                    steps // len(equivalent_dates) + 1
+                                )[:steps]
+            equivalent_dates = pd.to_datetime(equivalent_dates)
             equivalent_dates = [
-                [
-                    date - self.offset * n
+                    equivalent_dates - (self.offset * n)
                     for n
                     in np.arange(self.n_equivalent_dates)
                 ]
-                for date
-                in equivalent_dates
-            ]
             equivalent_values = [
                 last_window.loc[dates].to_numpy()
                 for dates in equivalent_dates
             ]
-            predictions = np.apply_along_axis(
-                            func1d=np.mean,
-                            axis=1,
-                            arr=equivalent_values
-                          )
 
+        equivalent_values = np.vstack(equivalent_values)
+        if self.n_equivalent_dates == 1:
+            predictions = equivalent_values.ravel()
+        else:
+            predictions = np.apply_along_axis(
+                            self.agg_func,
+                            axis=0,
+                            arr=equivalent_values
+                        )
         predictions = pd.Series(
                           data  = predictions,
-                          index = predictions_index,
+                          index = expand_index(index=last_window_index,steps=steps),
                           name = 'pred'
                       )
         
