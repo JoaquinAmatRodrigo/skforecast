@@ -121,6 +121,7 @@ class ForecasterLastEquivalentDate():
         self,
         offset: Union[int, pd.tseries.offsets.DateOffset],
         n_equivalent_dates: int=1,
+        allow_incomplete_n_equivalent: bool=True,
         agg_func: Callable=np.mean,
         forecaster_id: Optional[Union[str, int]]=None
     ) -> None:
@@ -312,12 +313,14 @@ class ForecasterLastEquivalentDate():
                                     int(np.ceil(steps/self.offset))
                                 )
             equivalent_indexes = equivalent_indexes[:steps]
-            equivalent_indexes = [
-                equivalent_indexes - n * self.offset 
-                for n
-                in np.arange(self.n_equivalent_dates)
-            ]
-            equivalent_indexes = np.vstack(equivalent_indexes)
+
+            if self.n_equivalent_dates > 1:
+                equivalent_indexes = [
+                    equivalent_indexes - n * self.offset 
+                    for n
+                    in np.arange(self.n_equivalent_dates)
+                ]
+                equivalent_indexes = np.vstack(equivalent_indexes)
             equivalent_values = last_window_values[equivalent_indexes]
 
 
@@ -325,25 +328,26 @@ class ForecasterLastEquivalentDate():
             predictions_index_start = last_window_index[-1] + last_window_index.freq
             equivalent_dates = pd.date_range(
                                     start=predictions_index_start - self.offset,
-                                    periods=steps - len(last_window) / self.n_equivalent_dates,
+                                    end=last_window_index[-1],
                                     freq=last_window_index.freq
                                )
             equivalent_dates = np.tile(
                                     equivalent_dates,
                                     steps // len(equivalent_dates) + 1
                                 )[:steps]
-            equivalent_dates = pd.to_datetime(equivalent_dates)
-            equivalent_dates = [
-                    equivalent_dates - (self.offset * n)
-                    for n
-                    in np.arange(self.n_equivalent_dates)
-                ]
+            equivalent_dates = pd.DatetimeIndex(equivalent_dates)
+            if self.n_equivalent_dates > 1:
+                equivalent_dates = [
+                        equivalent_dates - (self.offset * n)
+                        for n
+                        in np.arange(1, self.n_equivalent_dates)
+                    ]
             equivalent_values = [
                 last_window.loc[dates].to_numpy()
                 for dates in equivalent_dates
             ]
+            equivalent_values = np.vstack(equivalent_values)
 
-        equivalent_values = np.vstack(equivalent_values)
         if self.n_equivalent_dates == 1:
             predictions = equivalent_values.ravel()
         else:
