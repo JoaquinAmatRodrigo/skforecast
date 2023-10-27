@@ -34,21 +34,43 @@ class ForecasterLastEquivalentDate():
     
     Parameters
     ----------
-    offset : int
+    offset : int, pandas.tseries.offsets.DateOffset
         Number of steps to go back in time to find the most recent data similar
         to the target period.
+        If `offset` is an integer, it represents the number of steps to go back
+        in time. For example, if the frequency of the time series is 1 day, the
+        most recent data similar to the target period is the value observed 7
+        days ago (offset = 7).
+        Pandas DateOffsets can also be used to define the offset to move dates
+        forward a given number of valid dates. For example, Bday(2) can be added
+        subtracted to a date to move it two business days backward. If the date
+        does not start on a valid date, first it is moved to a valid date. For
+        example, if the date is a Saturday, it is moved to the previous Friday.
+        Then, the offset is applied. If the result is a non valid date, it is
+        moved to the next valid date. For example, if the date is a Sunday, it
+        is moved to the next Monday. Find more information about offsets in
+        https://pandas.pydata.org/docs/reference/offset_frequency.html.
     forecaster_id : str, int, default `None`
         Name used as an identifier of the forecaster.
     
     Attributes
     ----------
-    offset : int
-        Number of steps to go back in time to find the most recent euivalent data.
-        For example, if the frequency of the time series is 1 day, the most recent
-        equivalent data to predict the value of the next day is the value observed
-        7 days ago (offset = 7). If the frequency of the time series is hourly,
-        the most recent equivalent data to predict the value of the next hour is
-        the value observed 24 hours ago (offset = 24).
+    offset : int, pandas.tseries.offsets.DateOffset
+        Number of steps to go back in time to find the most recent data similar
+        to the target period.
+        If `offset` is an integer, it represents the number of steps to go back
+        in time. For example, if the frequency of the time series is 1 day, the
+        most recent data similar to the target period is the value observed 7
+        days ago (offset = 7).
+        Pandas DateOffsets can also be used to define the offset to move dates
+        forward a given number of valid dates. For example, Bday(2) can be added
+        subtracted to a date to move it two business days backward. If the date
+        does not start on a valid date, first it is moved to a valid date. For
+        example, if the date is a Saturday, it is moved to the previous Friday.
+        Then, the offset is applied. If the result is a non valid date, it is
+        moved to the next valid date. For example, if the date is a Sunday, it
+        is moved to the next Monday. Find more information about offsets in
+        https://pandas.pydata.org/docs/reference/offset_frequency.html.
     n_equivalent_dates : int
         Number of equivalent dates (multiple of offset) used in the prediction.
         For example, if the frequency of the time series is dayly, offset = 7 and
@@ -97,7 +119,7 @@ class ForecasterLastEquivalentDate():
     
     def __init__(
         self,
-        offset: int,
+        offset: Union[int, pd.tseries.offsets.DateOffset],
         n_equivalent_dates: int=1,
         agg_func: Callable=np.mean,
         forecaster_id: Optional[Union[str, int]]=None
@@ -131,16 +153,14 @@ class ForecasterLastEquivalentDate():
         self.python_version          = sys.version.split(" ")[0]
         self.forecaster_id           = forecaster_id
        
-        if isinstance(self.offset, int):
-            self.window_size = self.offset * self.n_equivalent_dates
-        elif isinstance(self.offset, pd.tseries.offsets.DateOffset):
-            # if offset is a pandas.tseries.offsets calculated the number of steps
-            # base on the frequency of the time series.
-            self.offset = pd.tseries.frequencies.to_offset(self.offset)
-            self.window_size = self.offset.n
-        else:
-            raise Exception("offset must be an integer or a pandas.tseries.offsets")
-
+        if not isinstance(self.offset, (int, pd.tseries.offsets.DateOffset)):
+            raise Exception(
+                "`offset` must be an integer or a pandas.tseries.offsets. "
+                "Find more information about offsets in "
+                "https://pandas.pydata.org/docs/reference/offset_frequency.html"
+            )
+        self.window_size = self.offset * self.n_equivalent_dates
+        
 
     def __repr__(
         self
@@ -192,6 +212,14 @@ class ForecasterLastEquivalentDate():
         None
         
         """
+
+        if isinstance(self.offset, pd.tseries.offsets.DateOffset) and not isinstance(
+            y.index, pd.DatetimeIndex
+        ):
+            raise Exception(
+                "If `offset` is a pandas DateOffset, the index of `y` must be a "
+                "pandas DatetimeIndex with a frequency."
+            )
         
         # Reset values in case the forecaster has already been fitted.
         self.index_type     = None
@@ -210,6 +238,10 @@ class ForecasterLastEquivalentDate():
             self.index_freq = y_index.freqstr
         else: 
             self.index_freq = y_index.step
+
+        if isinstance(self.offset, pd.tseries.offsets.DateOffset):
+            first_date_window = y_index[-1] - (self.offset * self.n_equivalent_dates)
+            self.window_size = len(y.loc[first_date_window:])
         
         # The last time window of training data is stored so that lags needed as
         # predictors in the first iteration of `predict()` can be calculated.
@@ -271,33 +303,68 @@ class ForecasterLastEquivalentDate():
         last_window_values, last_window_index = preprocess_last_window(
                                                     last_window = last_window
                                                 )
-        equivalent_indexes = np.tile(
-                                np.arange(-self.offset, 0),
-                                int(np.ceil(steps/self.offset))
-                             )
-        equivalent_indexes = equivalent_indexes[:steps]
-        equivalent_indexes = [
-            equivalent_indexes * n 
-            for n
-            in np.arange(self.n_equivalent_dates, 0, -1)
-        ]
-        equivalent_indexes = np.vstack(equivalent_indexes)
-        equivalent_values = last_window_values[equivalent_indexes]
+        
+        if isinstance(self.offset, int):
+            equivalent_indexes = np.tile(
+                                    np.arange(-self.offset, 0),
+                                    int(np.ceil(steps/self.offset))
+                                )
+            equivalent_indexes = equivalent_indexes[:steps]
+            equivalent_indexes = [
+                equivalent_indexes - n * self.offset 
+                for n
+                in np.arange(self.n_equivalent_dates)
+            ]
+            equivalent_indexes = np.vstack(equivalent_indexes)
+            equivalent_values = last_window_values[equivalent_indexes]
 
-        if self.n_equivalent_dates == 1:
-            predictions = equivalent_values
-        else:
+            if self.n_equivalent_dates == 1:
+                predictions = equivalent_values.ravel()
+            else:
+                predictions = np.apply_along_axis(
+                                self.agg_func,
+                                axis=0,
+                                arr=equivalent_values
+                            )
+            predictions_index = expand_index(index=last_window_index,steps=steps)
+
+        if isinstance(self.offset, pd.tseries.offsets.DateOffset):
+            predictions_index = expand_index(index=last_window_index,steps=steps)
+            print(predictions_index[0])
+            print(self.offset)
+            print(self.index_freq)
+            equivalent_dates = [
+                            predictions_index[0] - self.offset + n * last_window_index.freq
+                            for n
+                            in np.arange(steps)[:len(last_window)]
+                        ]
+            equivalent_dates = np.tile(
+                                    equivalent_dates,
+                                    int(np.ceil(steps/len(equivalent_dates)))
+                                )
+            equivalent_dates = equivalent_dates[:steps]
+            equivalent_dates = [
+                [
+                    date - self.offset * n
+                    for n
+                    in np.arange(self.n_equivalent_dates)
+                ]
+                for date
+                in equivalent_dates
+            ]
+            equivalent_values = [
+                last_window.loc[dates].to_numpy()
+                for dates in equivalent_dates
+            ]
             predictions = np.apply_along_axis(
-                            self.agg_func,
-                            axis=0,
+                            func1d=np.mean,
+                            axis=1,
                             arr=equivalent_values
-                        )      
+                          )
+
         predictions = pd.Series(
                           data  = predictions,
-                          index = expand_index(
-                                      index = last_window_index,
-                                      steps = steps
-                                  ),
+                          index = predictions_index,
                           name = 'pred'
                       )
         
