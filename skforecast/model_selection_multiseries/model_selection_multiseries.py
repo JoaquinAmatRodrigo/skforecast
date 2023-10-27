@@ -480,7 +480,6 @@ def backtesting_forecaster_multiseries(
         show_progress         = show_progress
     )
 
-    # TODO: why this is not checked in check_backtesting_input?
     if forecaster_name in multi_series_forecasters_with_levels \
     and levels is not None and not isinstance(levels, (str, list)):
         raise TypeError((

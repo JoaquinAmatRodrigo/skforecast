@@ -16,31 +16,21 @@ import sklearn
 import sklearn.pipeline
 from sklearn.base import clone
 import inspect
-from copy import copy, deepcopy
-from itertools import chain
-from joblib import Parallel, delayed, cpu_count
+from copy import deepcopy
 
 import skforecast
 from ..ForecasterBase import ForecasterBase
 from ..exceptions import IgnoredArgumentWarning
-from ..utils import initialize_lags
 from ..utils import initialize_weights
 from ..utils import check_select_fit_kwargs
 from ..utils import check_y
-from ..utils import check_exog
-from ..utils import get_exog_dtypes
-from ..utils import check_exog_dtypes
 from ..utils import check_predict_input
 from ..utils import check_interval
 from ..utils import preprocess_y
 from ..utils import preprocess_last_window
-from ..utils import preprocess_exog
-from ..utils import exog_to_direct
-from ..utils import exog_to_direct_numpy
 from ..utils import expand_index
 from ..utils import transform_series
 from ..utils import transform_dataframe
-from ..utils import select_n_jobs_fit_forecaster
 
 logging.basicConfig(
     format="%(name)-10s %(levelname)-5s %(message)s",
@@ -63,41 +53,29 @@ class ForecasterRnn(ForecasterBase):
         the forecaster will be handling. If `None`, all series used during training
         will be available for prediction.
     steps : Ignored
-        Not used, present here for API consistency by convention. This value is
-        infered from the arquiquitecture of the regressor. It is the maximum number of
-        future steps the forecaster will predict when using method `predict()`.
+        Not used, present here for API consistency by convention.
     lags  : Ignored
-        Not used, present here for API consistency by convention. This value is
-        infered from the arquiquitecture of the regressor. Lags used as predictors.
-        Index starts at 1, so lag 1 is equal to t-1. In this forecaster, all series
-        share the same number of lags.
-
+        Not used, present here for API consistency by convention. 
     transformer_series : object, dict, default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API with methods: fit, transform, fit_transform and
         inverse_transform. Transformation is applied to each `series` before training
         the forecaster. ColumnTransformers are not allowed since they do not have
         inverse_transform method.
-
+        
             - If single transformer: it is cloned and applied to all series.
             - If `dict` of transformers: a different transformer can be used for each
             series.
     transformer_exog : Ignored
-        Not used, present here for API consistency by convention. This type of
-        forecaster does not allow exogenous variables.
-    weight_func : Callable, default `None`
-        Function that defines the individual weights for each sample based on the
-        index. For example, a function that assigns a lower weight to certain dates.
-        Ignored if `regressor` does not have the argument `sample_weight` in its `fit`
-        method. The resulting `sample_weight` cannot have negative values.
+        Not used, present here for API consistency by convention. 
+    weight_func : Ignored
+        Not used, present here for API consistency by convention. 
     fit_kwargs : dict, default `None`
         Additional arguments to be passed to the `fit` method of the regressor.
-        **New in version 0.8.0**
     n_jobs : Ignored
         Not used, present here for API consistency by convention.
     forecaster_id : str, int, default `None`
         Name used as an identifier of the forecaster.
-        **New in version 0.7.0**
 
     Attributes
     ----------
@@ -109,15 +87,12 @@ class ForecasterRnn(ForecasterBase):
         Name of one or more time series to be predicted. This determine the series
         the forecaster will be handling. If `None`, all series used during training
         will be available for prediction.
-    steps : Ignored
-        Not used, present here for API consistency by convention. This value is
-        infered from the arquiquitecture of the regressor. It is the maximum number of
-        future steps the forecaster will predict when using method `predict()`.
-    lags  : Ignored
-        Not used, present here for API consistency by convention. This value is
-        infered from the arquiquitecture of the regressor. Lags used as predictors.
-        Index starts at 1, so lag 1 is equal to t-1. In this forecaster, all series
-        share the same number of lags.
+    steps : int
+        Number of future steps the forecaster will predict when using method
+        `predict()`. Since a different model is created for each step, this value
+        should be defined before training.
+    lags : numpy ndarray
+        Lags used as predictors.
     transformer_series : object, dict, default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API with methods: fit, transform, fit_transform and
@@ -132,20 +107,11 @@ class ForecasterRnn(ForecasterBase):
         Dictionary with the transformer for each series. It is created cloning the
         objects in `transformer_series` and is used internally to avoid overwriting.
     transformer_exog : Ignored
-        Not used, present here for API consistency by convention. This type of
-        forecaster does not allow exogenous variables.
-    weight_func : Callable
-        Function that defines the individual weights for each sample based on the
-        index. For example, a function that assigns a lower weight to certain dates.
-        Ignored if `regressor` does not have the argument `sample_weight` in its
-        `fit` method. The resulting `sample_weight` cannot have negative values.
-    source_code_weight_func : str
-        Source code of the custom function used to create weights.
+        Not used, present here for API consistency by convention.
     max_lag : int
         Maximum value of lag included in `lags`.
     window_size : int
-        Size of the window needed to create the predictors. It is equal to
-        `max_lag`.
+        Size of the window needed to create the predictors.
     last_window : pandas Series
         Last window seen by the forecaster during training. It stores the values
         needed to predict the next `step` immediately after the training data.
@@ -190,8 +156,6 @@ class ForecasterRnn(ForecasterBase):
         Version of skforecast library used to create the forecaster.
     python_version : str
         Version of python used to create the forecaster.
-    n_jobs : None
-        Ignored. Present here for API consistency by convention.
     forecaster_id : str, int
         Name used as an identifier of the forecaster.
     history : dict
@@ -208,19 +172,19 @@ class ForecasterRnn(ForecasterBase):
         self,
         regressor: object,
         levels: Union[str, list],
-        step=None,
-        lags=None,
         transformer_series: Optional[Union[object, dict]] = None,
-        transformer_exog=None,
         weight_func: Optional[Callable] = None,
         fit_kwargs: Optional[dict] = None,
-        n_jobs=None,
         forecaster_id: Optional[Union[str, int]] = None,
+        n_jobs=None,
+        step=None,
+        lags=None,
+        transformer_exog=None,
     ) -> None:
         self.levels = levels
         self.transformer_series = transformer_series
         self.transformer_series_ = None
-        self.transformer_exog = None  # TODO: remove if no needed
+        self.transformer_exog = None
         self.weight_func = weight_func
         self.source_code_weight_func = None
         self.max_lag = None
@@ -230,9 +194,9 @@ class ForecasterRnn(ForecasterBase):
         self.index_freq = None
         self.training_range = None
         self.included_exog = False
-        self.exog_type = None  # TODO: remove if no needed
-        self.exog_dtypes = None  # TODO: remove if no needed
-        self.exog_col_names = None  # TODO: remove if no needed
+        self.exog_type = None
+        self.exog_dtypes = None
+        self.exog_col_names = None
         self.series_col_names = None
         self.X_train_dim_names = None
         self.fitted = False
@@ -262,27 +226,7 @@ class ForecasterRnn(ForecasterBase):
         if isinstance(levels, str):
             self.levels = [levels]
 
-        if not isinstance(self.steps, int):
-            raise TypeError(
-                (
-                    f"`steps` argument must be an int greater than or equal to 1. "
-                    f"Got {type(self.steps)}."
-                )
-            )
-
-        if self.steps < 1:
-            raise ValueError(
-                f"`steps` argument must be greater than or equal to 1. Got {self.steps}."
-            )
-
-        self.weight_func, self.source_code_weight_func, _ = initialize_weights(
-            forecaster_name=type(self).__name__,
-            regressor=self.regressor,
-            weight_func=weight_func,
-            series_weights=None,
-        )
-
-        # TODO: This is a temporary solution. Move as an argument in fit.
+        # TODO: Move as an argument in fit? Evaluate pros and cons.
         self.series_val = None
         if "series_val" in fit_kwargs:
             self.series_val = fit_kwargs["series_val"]
@@ -291,6 +235,7 @@ class ForecasterRnn(ForecasterBase):
         self.fit_kwargs = check_select_fit_kwargs(
             regressor=self.regressor, fit_kwargs=fit_kwargs
         )
+
 
     def __repr__(self) -> str:
         """
@@ -316,7 +261,6 @@ class ForecasterRnn(ForecasterBase):
             f"Regressor: {self.regressor} \n"
             f"Lags: {self.lags} \n"
             f"Transformer for series: {self.transformer_series} \n"
-            f"Weight function included: {True if self.weight_func is not None else False} \n"
             f"Window size: {self.window_size} \n"
             f"Target series, levels: {self.levels} \n"
             f"Multivariate series (names): {self.series_col_names} \n"
@@ -400,7 +344,7 @@ class ForecasterRnn(ForecasterBase):
         exog : Ignored
             Not used, present here for API consistency by convention. This type of
             forecaster does not allow exogenous variables.
-
+            
         Returns
         -------
         X_train : np.ndarray
@@ -409,7 +353,6 @@ class ForecasterRnn(ForecasterBase):
         y_train : np.ndarray
             Values (target) of the time series related to each row of `X_train`.
             The resulting array has 3 dimensions: (time_points, n_steps, n_levels)
-
         dimension_names : dict
             Labels for the multi-dimensional arrays created internally for training.
 
@@ -496,7 +439,7 @@ class ForecasterRnn(ForecasterBase):
         X_train = np.stack(X_train, axis=2)
         y_train = np.stack(y_train, axis=2)
 
-        # TODO: create a dict with the names of each dimension
+        # TODO: create a dict with the names of each dimension {"X_train": {0:datime_index, 1:list_lags, 2:list_series}, "y_train": {0:list_steps, 1:list_levels}}
         dimension_names = None
 
         return X_train, y_train, dimension_names
@@ -515,8 +458,7 @@ class ForecasterRnn(ForecasterBase):
         series : pandas DataFrame
             Training time series.
         exog : Ignored
-            Not used, present here for API consistency by convention. This type of
-            forecaster does not allow exogenous variables.
+            Not used, present here for API consistency by convention. 
         store_in_sample_residuals : bool, default `True`
             If `True`, in-sample residuals will be stored in the forecaster object
             after fitting.
@@ -531,18 +473,17 @@ class ForecasterRnn(ForecasterBase):
         self.index_type = None
         self.index_freq = None
         self.last_window = None
-        self.included_exog = None  # TODO: remove if not used
-        self.exog_type = None  # TODO: remove if not used
-        self.exog_dtypes = None  # TODO: remove if not used
-        self.exog_col_names = None  # TODO: remove if not used
+        self.included_exog = None
+        self.exog_type = None
+        self.exog_dtypes = None
+        self.exog_col_names = None
         self.series_col_names = None
         self.X_train_dim_names = None
-        self.in_sample_residuals = {step: None for step in range(1, self.steps + 1)}
+        self.in_sample_residuals = None
         self.fitted = False
         self.training_range = None
-
+        
         self.series_col_names = list(series.columns)
-
         X_train, y_train, X_train_dim_names = self.create_train_X_y(series=series)
         self.X_train_dim_names = X_train_dim_names
         if self.series_val is not None:
@@ -554,7 +495,6 @@ class ForecasterRnn(ForecasterBase):
             history = self.regressor.fit(x=X_train, y=y_train, **self.fit_kwargs)
 
         self.history = history.history
-
         self.fitted = True
         self.fit_date = pd.Timestamp.today().strftime("%Y-%m-%d %H:%M:%S")
         _, y_index = preprocess_y(y=series[self.levels], return_values=False)
@@ -628,7 +568,10 @@ class ForecasterRnn(ForecasterBase):
                 )
 
         if last_window is None:
-            last_window = deepcopy(self.last_window)
+            last_window = self.last_window.copy()
+        else:
+            last_window = last_window.iloc[-self.window_size:].copy()
+            
 
         check_predict_input(
             forecaster_name=type(self).__name__,
@@ -688,326 +631,326 @@ class ForecasterRnn(ForecasterBase):
 
         return predictions
 
-    def predict_bootstrapping(
-        self,
-        steps: Optional[Union[int, list]] = None,
-        last_window: Optional[pd.DataFrame] = None,
-        exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
-        n_boot: int = 500,
-        random_state: int = 123,
-        in_sample_residuals: bool = True,
-        levels: Any = None,
-    ) -> pd.DataFrame:
-        """
-        Generate multiple forecasting predictions using a bootstrapping process.
-        By sampling from a collection of past observed errors (the residuals),
-        each iteration of bootstrapping generates a different set of predictions.
-        See the Notes section for more information.
+    # def predict_bootstrapping(
+    #     self,
+    #     steps: Optional[Union[int, list]] = None,
+    #     last_window: Optional[pd.DataFrame] = None,
+    #     exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
+    #     n_boot: int = 500,
+    #     random_state: int = 123,
+    #     in_sample_residuals: bool = True,
+    #     levels: Any = None,
+    # ) -> pd.DataFrame:
+    #     """
+    #     Generate multiple forecasting predictions using a bootstrapping process.
+    #     By sampling from a collection of past observed errors (the residuals),
+    #     each iteration of bootstrapping generates a different set of predictions.
+    #     See the Notes section for more information.
 
-        Parameters
-        ----------
-        steps : int, list, None, default `None`
-            Predict n steps. The value of `steps` must be less than or equal to the
-            value of steps defined when initializing the forecaster. Starts at 1.
+    #     Parameters
+    #     ----------
+    #     steps : int, list, None, default `None`
+    #         Predict n steps. The value of `steps` must be less than or equal to the
+    #         value of steps defined when initializing the forecaster. Starts at 1.
 
-                - If `int`: Only steps within the range of 1 to int are predicted.
-                - If `list`: List of ints. Only the steps contained in the list
-                are predicted.
-                - If `None`: As many steps are predicted as were defined at
-                initialization.
-        last_window : pandas DataFrame, default `None`
-            Series values used to create the predictors (lags) needed in the
-            first iteration of the prediction (t + 1).
-            If `last_window = None`, the values stored in` self.last_window` are
-            used to calculate the initial predictors, and the predictions start
-            right after training data.
-        exog : pandas Series, pandas DataFrame, default `None`
-            Exogenous variable/s included as predictor/s.
-        n_boot : int, default `500`
-            Number of bootstrapping iterations used to estimate prediction
-            intervals.
-        random_state : int, default `123`
-            Sets a seed to the random generator, so that boot intervals are always
-            deterministic.
-        in_sample_residuals : bool, default `True`
-            If `True`, residuals from the training data are used as proxy of
-            prediction error to create prediction intervals. If `False`, out of
-            sample residuals are used. In the latter case, the user should have
-            calculated and stored the residuals within the forecaster (see
-            `set_out_sample_residuals()`).
-        levelss : Ignored
-            Not used, present here for API consistency by convention.
+    #             - If `int`: Only steps within the range of 1 to int are predicted.
+    #             - If `list`: List of ints. Only the steps contained in the list
+    #             are predicted.
+    #             - If `None`: As many steps are predicted as were defined at
+    #             initialization.
+    #     last_window : pandas DataFrame, default `None`
+    #         Series values used to create the predictors (lags) needed in the
+    #         first iteration of the prediction (t + 1).
+    #         If `last_window = None`, the values stored in` self.last_window` are
+    #         used to calculate the initial predictors, and the predictions start
+    #         right after training data.
+    #     exog : pandas Series, pandas DataFrame, default `None`
+    #         Exogenous variable/s included as predictor/s.
+    #     n_boot : int, default `500`
+    #         Number of bootstrapping iterations used to estimate prediction
+    #         intervals.
+    #     random_state : int, default `123`
+    #         Sets a seed to the random generator, so that boot intervals are always
+    #         deterministic.
+    #     in_sample_residuals : bool, default `True`
+    #         If `True`, residuals from the training data are used as proxy of
+    #         prediction error to create prediction intervals. If `False`, out of
+    #         sample residuals are used. In the latter case, the user should have
+    #         calculated and stored the residuals within the forecaster (see
+    #         `set_out_sample_residuals()`).
+    #     levelss : Ignored
+    #         Not used, present here for API consistency by convention.
 
-        Returns
-        -------
-        boot_predictions : pandas DataFrame
-            Predictions generated by bootstrapping.
-            Shape: (steps, n_boot)
+    #     Returns
+    #     -------
+    #     boot_predictions : pandas DataFrame
+    #         Predictions generated by bootstrapping.
+    #         Shape: (steps, n_boot)
 
-        Notes
-        -----
-        More information about prediction intervals in forecasting:
-        https://otexts.com/fpp3/prediction-intervals.html#prediction-intervals-from-bootstrapped-residuals
-        Forecasting: Principles and Practice (3nd ed) Rob J Hyndman and George Athanasopoulos.
+    #     Notes
+    #     -----
+    #     More information about prediction intervals in forecasting:
+    #     https://otexts.com/fpp3/prediction-intervals.html#prediction-intervals-from-bootstrapped-residuals
+    #     Forecasting: Principles and Practice (3nd ed) Rob J Hyndman and George Athanasopoulos.
 
-        """
+    #     """
 
-        if isinstance(steps, int):
-            steps = list(np.arange(steps) + 1)
-        elif steps is None:
-            steps = list(np.arange(self.steps) + 1)
-        elif isinstance(steps, list):
-            steps = list(np.array(steps))
+    #     if isinstance(steps, int):
+    #         steps = list(np.arange(steps) + 1)
+    #     elif steps is None:
+    #         steps = list(np.arange(self.steps) + 1)
+    #     elif isinstance(steps, list):
+    #         steps = list(np.array(steps))
 
-        if in_sample_residuals:
-            if not set(steps).issubset(set(self.in_sample_residuals.keys())):
-                raise ValueError(
-                    (
-                        f"Not `forecaster.in_sample_residuals` for steps: "
-                        f"{set(steps) - set(self.in_sample_residuals.keys())}."
-                    )
-                )
-            residuals = self.in_sample_residuals
-        else:
-            if self.out_sample_residuals is None:
-                raise ValueError(
-                    (
-                        "`forecaster.out_sample_residuals` is `None`. Use "
-                        "`in_sample_residuals=True` or method `set_out_sample_residuals()` "
-                        "before `predict_interval()`, `predict_bootstrapping()` or "
-                        "`predict_dist()`."
-                    )
-                )
-            else:
-                if not set(steps).issubset(set(self.out_sample_residuals.keys())):
-                    raise ValueError(
-                        (
-                            f"Not `forecaster.out_sample_residuals` for steps: "
-                            f"{set(steps) - set(self.out_sample_residuals.keys())}. "
-                            f"Use method `set_out_sample_residuals()`."
-                        )
-                    )
-            residuals = self.out_sample_residuals
+    #     if in_sample_residuals:
+    #         if not set(steps).issubset(set(self.in_sample_residuals.keys())):
+    #             raise ValueError(
+    #                 (
+    #                     f"Not `forecaster.in_sample_residuals` for steps: "
+    #                     f"{set(steps) - set(self.in_sample_residuals.keys())}."
+    #                 )
+    #             )
+    #         residuals = self.in_sample_residuals
+    #     else:
+    #         if self.out_sample_residuals is None:
+    #             raise ValueError(
+    #                 (
+    #                     "`forecaster.out_sample_residuals` is `None`. Use "
+    #                     "`in_sample_residuals=True` or method `set_out_sample_residuals()` "
+    #                     "before `predict_interval()`, `predict_bootstrapping()` or "
+    #                     "`predict_dist()`."
+    #                 )
+    #             )
+    #         else:
+    #             if not set(steps).issubset(set(self.out_sample_residuals.keys())):
+    #                 raise ValueError(
+    #                     (
+    #                         f"Not `forecaster.out_sample_residuals` for steps: "
+    #                         f"{set(steps) - set(self.out_sample_residuals.keys())}. "
+    #                         f"Use method `set_out_sample_residuals()`."
+    #                     )
+    #                 )
+    #         residuals = self.out_sample_residuals
 
-        check_residuals = (
-            "forecaster.in_sample_residuals"
-            if in_sample_residuals
-            else "forecaster.out_sample_residuals"
-        )
-        for step in steps:
-            if residuals[step] is None:
-                raise ValueError(
-                    (
-                        f"forecaster residuals for step {step} are `None`. "
-                        f"Check {check_residuals}."
-                    )
-                )
-            elif (residuals[step] == None).any():
-                raise ValueError(
-                    (
-                        f"forecaster residuals for step {step} contains `None` values. "
-                        f"Check {check_residuals}."
-                    )
-                )
+    #     check_residuals = (
+    #         "forecaster.in_sample_residuals"
+    #         if in_sample_residuals
+    #         else "forecaster.out_sample_residuals"
+    #     )
+    #     for step in steps:
+    #         if residuals[step] is None:
+    #             raise ValueError(
+    #                 (
+    #                     f"forecaster residuals for step {step} are `None`. "
+    #                     f"Check {check_residuals}."
+    #                 )
+    #             )
+    #         elif (residuals[step] == None).any():
+    #             raise ValueError(
+    #                 (
+    #                     f"forecaster residuals for step {step} contains `None` values. "
+    #                     f"Check {check_residuals}."
+    #                 )
+    #             )
 
-        predictions = self.predict(steps=steps, last_window=last_window, exog=exog)
+    #     predictions = self.predict(steps=steps, last_window=last_window, exog=exog)
 
-        # Predictions must be in the transformed scale before adding residuals
-        predictions = transform_dataframe(
-            df=predictions,
-            transformer=self.transformer_series_[self.levels],
-            fit=False,
-            inverse_transform=False,
-        )
-        boot_predictions = pd.concat([predictions] * n_boot, axis=1)
-        boot_predictions.columns = [f"pred_boot_{i}" for i in range(n_boot)]
+    #     # Predictions must be in the transformed scale before adding residuals
+    #     predictions = transform_dataframe(
+    #         df=predictions,
+    #         transformer=self.transformer_series_[self.levels],
+    #         fit=False,
+    #         inverse_transform=False,
+    #     )
+    #     boot_predictions = pd.concat([predictions] * n_boot, axis=1)
+    #     boot_predictions.columns = [f"pred_boot_{i}" for i in range(n_boot)]
 
-        for i, step in enumerate(steps):
-            rng = np.random.default_rng(seed=random_state)
-            sample_residuals = rng.choice(a=residuals[step], size=n_boot, replace=True)
-            boot_predictions.iloc[i, :] = boot_predictions.iloc[i, :] + sample_residuals
+    #     for i, step in enumerate(steps):
+    #         rng = np.random.default_rng(seed=random_state)
+    #         sample_residuals = rng.choice(a=residuals[step], size=n_boot, replace=True)
+    #         boot_predictions.iloc[i, :] = boot_predictions.iloc[i, :] + sample_residuals
 
-        if self.transformer_series_[self.levels]:
-            for col in boot_predictions.columns:
-                boot_predictions[col] = transform_series(
-                    series=boot_predictions[col],
-                    transformer=self.transformer_series_[self.levels],
-                    fit=False,
-                    inverse_transform=True,
-                )
+    #     if self.transformer_series_[self.levels]:
+    #         for col in boot_predictions.columns:
+    #             boot_predictions[col] = transform_series(
+    #                 series=boot_predictions[col],
+    #                 transformer=self.transformer_series_[self.levels],
+    #                 fit=False,
+    #                 inverse_transform=True,
+    #             )
 
-        return boot_predictions
+    #     return boot_predictions
 
-    def predict_interval(
-        self,
-        steps: Optional[Union[int, list]] = None,
-        last_window: Optional[pd.DataFrame] = None,
-        exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
-        interval: list = [5, 95],
-        n_boot: int = 500,
-        random_state: int = 123,
-        in_sample_residuals: bool = True,
-        levelss: Any = None,
-    ) -> pd.DataFrame:
-        """
-        Bootstrapping based prediction intervals.
-        Both predictions and intervals are returned.
+    # def predict_interval(
+    #     self,
+    #     steps: Optional[Union[int, list]] = None,
+    #     last_window: Optional[pd.DataFrame] = None,
+    #     exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
+    #     interval: list = [5, 95],
+    #     n_boot: int = 500,
+    #     random_state: int = 123,
+    #     in_sample_residuals: bool = True,
+    #     levelss: Any = None,
+    # ) -> pd.DataFrame:
+    #     """
+    #     Bootstrapping based prediction intervals.
+    #     Both predictions and intervals are returned.
 
-        Parameters
-        ----------
-        steps : int, list, None, default `None`
-            Predict n steps. The value of `steps` must be less than or equal to the
-            value of steps defined when initializing the forecaster. Starts at 1.
+    #     Parameters
+    #     ----------
+    #     steps : int, list, None, default `None`
+    #         Predict n steps. The value of `steps` must be less than or equal to the
+    #         value of steps defined when initializing the forecaster. Starts at 1.
 
-                - If `int`: Only steps within the range of 1 to int are predicted.
-                - If `list`: List of ints. Only the steps contained in the list
-                are predicted.
-                - If `None`: As many steps are predicted as were defined at
-                initialization.
-        last_window : pandas DataFrame, default `None`
-            Series values used to create the predictors (lags) needed in the
-            first iteration of the prediction (t + 1).
-            If `last_window = None`, the values stored in` self.last_window` are
-            used to calculate the initial predictors, and the predictions start
-            right after training data.
-        exog : pandas Series, pandas DataFrame, default `None`
-            Exogenous variable/s included as predictor/s.
-        interval : list, default `[5, 95]`
-            Confidence of the prediction interval estimated. Sequence of
-            percentiles to compute, which must be between 0 and 100 inclusive.
-            For example, interval of 95% should be as `interval = [2.5, 97.5]`.
-        n_boot : int, default `500`
-            Number of bootstrapping iterations used to estimate prediction
-            intervals.
-        random_state : int, default `123`
-            Sets a seed to the random generator, so that boot intervals are always
-            deterministic.
-        in_sample_residuals : bool, default `True`
-            If `True`, residuals from the training data are used as proxy of
-            prediction error to create prediction intervals. If `False`, out of
-            sample residuals are used. In the latter case, the user should have
-            calculated and stored the residuals within the forecaster (see
-            `set_out_sample_residuals()`).
-        levelss : Ignored
-            Not used, present here for API consistency by convention.
+    #             - If `int`: Only steps within the range of 1 to int are predicted.
+    #             - If `list`: List of ints. Only the steps contained in the list
+    #             are predicted.
+    #             - If `None`: As many steps are predicted as were defined at
+    #             initialization.
+    #     last_window : pandas DataFrame, default `None`
+    #         Series values used to create the predictors (lags) needed in the
+    #         first iteration of the prediction (t + 1).
+    #         If `last_window = None`, the values stored in` self.last_window` are
+    #         used to calculate the initial predictors, and the predictions start
+    #         right after training data.
+    #     exog : pandas Series, pandas DataFrame, default `None`
+    #         Exogenous variable/s included as predictor/s.
+    #     interval : list, default `[5, 95]`
+    #         Confidence of the prediction interval estimated. Sequence of
+    #         percentiles to compute, which must be between 0 and 100 inclusive.
+    #         For example, interval of 95% should be as `interval = [2.5, 97.5]`.
+    #     n_boot : int, default `500`
+    #         Number of bootstrapping iterations used to estimate prediction
+    #         intervals.
+    #     random_state : int, default `123`
+    #         Sets a seed to the random generator, so that boot intervals are always
+    #         deterministic.
+    #     in_sample_residuals : bool, default `True`
+    #         If `True`, residuals from the training data are used as proxy of
+    #         prediction error to create prediction intervals. If `False`, out of
+    #         sample residuals are used. In the latter case, the user should have
+    #         calculated and stored the residuals within the forecaster (see
+    #         `set_out_sample_residuals()`).
+    #     levelss : Ignored
+    #         Not used, present here for API consistency by convention.
 
-        Returns
-        -------
-        predictions : pandas DataFrame
-            Values predicted by the forecaster and their estimated interval.
+    #     Returns
+    #     -------
+    #     predictions : pandas DataFrame
+    #         Values predicted by the forecaster and their estimated interval.
 
-                - pred: predictions.
-                - lower_bound: lower bound of the interval.
-                - upper_bound: upper bound of the interval.
+    #             - pred: predictions.
+    #             - lower_bound: lower bound of the interval.
+    #             - upper_bound: upper bound of the interval.
 
-        Notes
-        -----
-        More information about prediction intervals in forecasting:
-        https://otexts.com/fpp2/prediction-intervals.html
-        Forecasting: Principles and Practice (2nd ed) Rob J Hyndman and
-        George Athanasopoulos.
+    #     Notes
+    #     -----
+    #     More information about prediction intervals in forecasting:
+    #     https://otexts.com/fpp2/prediction-intervals.html
+    #     Forecasting: Principles and Practice (2nd ed) Rob J Hyndman and
+    #     George Athanasopoulos.
 
-        """
+    #     """
 
-        check_interval(interval=interval)
+    #     check_interval(interval=interval)
 
-        predictions = self.predict(steps=steps, last_window=last_window, exog=exog)
+    #     predictions = self.predict(steps=steps, last_window=last_window, exog=exog)
 
-        boot_predictions = self.predict_bootstrapping(
-            steps=steps,
-            last_window=last_window,
-            exog=exog,
-            n_boot=n_boot,
-            random_state=random_state,
-            in_sample_residuals=in_sample_residuals,
-        )
+    #     boot_predictions = self.predict_bootstrapping(
+    #         steps=steps,
+    #         last_window=last_window,
+    #         exog=exog,
+    #         n_boot=n_boot,
+    #         random_state=random_state,
+    #         in_sample_residuals=in_sample_residuals,
+    #     )
 
-        interval = np.array(interval) / 100
-        predictions_interval = boot_predictions.quantile(q=interval, axis=1).transpose()
-        predictions_interval.columns = ["lower_bound", "upper_bound"]
-        predictions = pd.concat((predictions, predictions_interval), axis=1)
+    #     interval = np.array(interval) / 100
+    #     predictions_interval = boot_predictions.quantile(q=interval, axis=1).transpose()
+    #     predictions_interval.columns = ["lower_bound", "upper_bound"]
+    #     predictions = pd.concat((predictions, predictions_interval), axis=1)
 
-        return predictions
+    #     return predictions
 
-    def predict_dist(
-        self,
-        distribution: object,
-        steps: Optional[Union[int, list]] = None,
-        last_window: Optional[pd.DataFrame] = None,
-        exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
-        n_boot: int = 500,
-        random_state: int = 123,
-        in_sample_residuals: bool = True,
-        levelss: Any = None,
-    ) -> pd.DataFrame:
-        """
-        Fit a given probability distribution for each step. After generating
-        multiple forecasting predictions through a bootstrapping process, each
-        step is fitted to the given distribution.
+    # def predict_dist(
+    #     self,
+    #     distribution: object,
+    #     steps: Optional[Union[int, list]] = None,
+    #     last_window: Optional[pd.DataFrame] = None,
+    #     exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
+    #     n_boot: int = 500,
+    #     random_state: int = 123,
+    #     in_sample_residuals: bool = True,
+    #     levelss: Any = None,
+    # ) -> pd.DataFrame:
+    #     """
+    #     Fit a given probability distribution for each step. After generating
+    #     multiple forecasting predictions through a bootstrapping process, each
+    #     step is fitted to the given distribution.
 
-        Parameters
-        ----------
-        distribution : Object
-            A distribution object from scipy.stats.
-        steps : int, list, None, default `None`
-            Predict n steps. The value of `steps` must be less than or equal to the
-            value of steps defined when initializing the forecaster. Starts at 1.
+    #     Parameters
+    #     ----------
+    #     distribution : Object
+    #         A distribution object from scipy.stats.
+    #     steps : int, list, None, default `None`
+    #         Predict n steps. The value of `steps` must be less than or equal to the
+    #         value of steps defined when initializing the forecaster. Starts at 1.
 
-                - If `int`: Only steps within the range of 1 to int are predicted.
-                - If `list`: List of ints. Only the steps contained in the list
-                are predicted.
-                - If `None`: As many steps are predicted as were defined at
-                initialization.
-        last_window : pandas DataFrame, default `None`
-            Series values used to create the predictors (lags) needed in the
-            first iteration of the prediction (t + 1).
-            If `last_window = None`, the values stored in` self.last_window` are
-            used to calculate the initial predictors, and the predictions start
-            right after training data.
-        exog : pandas Series, pandas DataFrame, default `None`
-            Exogenous variable/s included as predictor/s.
-        n_boot : int, default `500`
-            Number of bootstrapping iterations used to estimate prediction
-            intervals.
-        random_state : int, default `123`
-            Sets a seed to the random generator, so that boot intervals are always
-            deterministic.
-        in_sample_residuals : bool, default `True`
-            If `True`, residuals from the training data are used as proxy of
-            prediction error to create prediction intervals. If `False`, out of
-            sample residuals are used. In the latter case, the user should have
-            calculated and stored the residuals within the forecaster (see
-            `set_out_sample_residuals()`).
-        levelss : Ignored
-            Not used, present here for API consistency by convention.
+    #             - If `int`: Only steps within the range of 1 to int are predicted.
+    #             - If `list`: List of ints. Only the steps contained in the list
+    #             are predicted.
+    #             - If `None`: As many steps are predicted as were defined at
+    #             initialization.
+    #     last_window : pandas DataFrame, default `None`
+    #         Series values used to create the predictors (lags) needed in the
+    #         first iteration of the prediction (t + 1).
+    #         If `last_window = None`, the values stored in` self.last_window` are
+    #         used to calculate the initial predictors, and the predictions start
+    #         right after training data.
+    #     exog : pandas Series, pandas DataFrame, default `None`
+    #         Exogenous variable/s included as predictor/s.
+    #     n_boot : int, default `500`
+    #         Number of bootstrapping iterations used to estimate prediction
+    #         intervals.
+    #     random_state : int, default `123`
+    #         Sets a seed to the random generator, so that boot intervals are always
+    #         deterministic.
+    #     in_sample_residuals : bool, default `True`
+    #         If `True`, residuals from the training data are used as proxy of
+    #         prediction error to create prediction intervals. If `False`, out of
+    #         sample residuals are used. In the latter case, the user should have
+    #         calculated and stored the residuals within the forecaster (see
+    #         `set_out_sample_residuals()`).
+    #     levelss : Ignored
+    #         Not used, present here for API consistency by convention.
 
-        Returns
-        -------
-        predictions : pandas DataFrame
-            Distribution parameters estimated for each step.
+    #     Returns
+    #     -------
+    #     predictions : pandas DataFrame
+    #         Distribution parameters estimated for each step.
 
-        """
+    #     """
 
-        boot_samples = self.predict_bootstrapping(
-            steps=steps,
-            last_window=last_window,
-            exog=exog,
-            n_boot=n_boot,
-            random_state=random_state,
-            in_sample_residuals=in_sample_residuals,
-        )
+    #     boot_samples = self.predict_bootstrapping(
+    #         steps=steps,
+    #         last_window=last_window,
+    #         exog=exog,
+    #         n_boot=n_boot,
+    #         random_state=random_state,
+    #         in_sample_residuals=in_sample_residuals,
+    #     )
 
-        param_names = [
-            p for p in inspect.signature(distribution._pdf).parameters if not p == "x"
-        ] + ["loc", "scale"]
-        param_values = np.apply_along_axis(
-            lambda x: distribution.fit(x), axis=1, arr=boot_samples
-        )
-        predictions = pd.DataFrame(
-            data=param_values, columns=param_names, index=boot_samples.index
-        )
+    #     param_names = [
+    #         p for p in inspect.signature(distribution._pdf).parameters if not p == "x"
+    #     ] + ["loc", "scale"]
+    #     param_values = np.apply_along_axis(
+    #         lambda x: distribution.fit(x), axis=1, arr=boot_samples
+    #     )
+    #     predictions = pd.DataFrame(
+    #         data=param_values, columns=param_names, index=boot_samples.index
+    #     )
 
-        return predictions
+    #     return predictions
 
     def set_params(
         self, params: dict
@@ -1063,25 +1006,25 @@ class ForecasterRnn(ForecasterBase):
         """
 
         pass
-
+    
+    
     def set_out_sample_residuals(
-        self,
-        residuals: dict,
-        append: bool = True,
-        transform: bool = True,
-        random_state: int = 123,
-    ) -> None:
+        self, 
+        residuals: np.ndarray, 
+        append: bool=True,
+        transform: bool=True,
+        random_state: int=123
+    )-> None:
         """
         Set new values to the attribute `out_sample_residuals`. Out of sample
         residuals are meant to be calculated using observations that did not
         participate in the training process.
-
+        
         Parameters
         ----------
-        residuals : dict
-            Dictionary of numpy ndarrays with the residuals of each model in the
-            form {step: residuals}. If len(residuals) > 1000, only a random
-            sample of 1000 values are stored.
+        residuals : numpy ndarray
+            Values of residuals. If len(residuals) > 1000, only a random sample
+            of 1000 values are stored.
         append : bool, default `True`
             If `True`, new residuals are added to the once already stored in the
             attribute `out_sample_residuals`. Once the limit of 1000 values is
@@ -1098,85 +1041,49 @@ class ForecasterRnn(ForecasterBase):
 
         """
 
-        if not isinstance(residuals, dict) or not all(
-            isinstance(x, np.ndarray) for x in residuals.values()
-        ):
+        if not isinstance(residuals, np.ndarray):
             raise TypeError(
-                (
-                    f"`residuals` argument must be a dict of numpy ndarrays in the form "
-                    "`{step: residuals}`. "
-                    f"Got {type(residuals)}."
-                )
+                f"`residuals` argument must be `numpy ndarray`. Got {type(residuals)}."
             )
 
-        if not self.fitted:
-            raise sklearn.exceptions.NotFittedError(
-                (
-                    "This forecaster is not fitted yet. Call `fit` with appropriate "
-                    "arguments before using `set_out_sample_residuals()`."
-                )
-            )
-
-        if self.out_sample_residuals is None:
-            self.out_sample_residuals = {
-                step: None for step in range(1, self.steps + 1)
-            }
-
-        if not set(self.out_sample_residuals.keys()).issubset(set(residuals.keys())):
+        if not transform and self.transformer_y is not None:
             warnings.warn(
-                (
-                    f"""
-                Only residuals of models (steps) 
-                {set(self.out_sample_residuals.keys()).intersection(set(residuals.keys()))} 
-                are updated.
-                """
-                ),
-                IgnoredArgumentWarning,
+                (f"Argument `transform` is set to `False` but forecaster was trained "
+                 f"using a transformer {self.transformer_y}. Ensure that the new residuals "
+                 f"are already transformed or set `transform=True`.")
             )
 
-        residuals = {
-            key: value
-            for key, value in residuals.items()
-            if key in self.out_sample_residuals.keys()
-        }
-
-        if not transform and self.transformer_series_[self.levels] is not None:
+        if transform and self.transformer_y is not None:
             warnings.warn(
-                (
-                    f"Argument `transform` is set to `False` but forecaster was trained "
-                    f"using a transformer {self.transformer_series_[self.levels]}. Ensure "
-                    f"that the new residuals are already transformed or set `transform=True`."
-                )
+                (f"Residuals will be transformed using the same transformer used "
+                 f"when training the forecaster ({self.transformer_y}). Ensure that the "
+                 f"new residuals are on the same scale as the original time series.")
             )
 
-        if transform and self.transformer_series_[self.levels] is not None:
-            warnings.warn(
-                (
-                    f"Residuals will be transformed using the same transformer used when "
-                    f"training the forecaster ({self.transformer_series_[self.levels]}). Ensure "
-                    f"the new residuals are on the same scale as the original time series."
-                )
-            )
-            for key, value in residuals.items():
-                residuals[key] = transform_series(
-                    series=pd.Series(value, name="residuals"),
-                    transformer=self.transformer_series_[self.levels],
-                    fit=False,
-                    inverse_transform=False,
-                ).to_numpy()
+            residuals = transform_series(
+                            series            = pd.Series(residuals, name='residuals'),
+                            transformer       = self.transformer_y,
+                            fit               = False,
+                            inverse_transform = False
+                        ).to_numpy()
+            
+        if len(residuals) > 1000:
+            rng = np.random.default_rng(seed=random_state)
+            residuals = rng.choice(a=residuals, size=1000, replace=False)
+    
+        if append and self.out_sample_residuals is not None:
+            free_space = max(0, 1000 - len(self.out_sample_residuals))
+            if len(residuals) < free_space:
+                residuals = np.hstack((
+                                self.out_sample_residuals,
+                                residuals
+                            ))
+            else:
+                residuals = np.hstack((
+                                self.out_sample_residuals,
+                                residuals[:free_space]
+                            ))
 
-        for key, value in residuals.items():
-            if len(value) > 1000:
-                rng = np.random.default_rng(seed=random_state)
-                value = rng.choice(a=value, size=1000, replace=False)
+        self.out_sample_residuals = residuals
 
-            if append and self.out_sample_residuals[key] is not None:
-                free_space = max(0, 1000 - len(self.out_sample_residuals[key]))
-                if len(value) < free_space:
-                    value = np.hstack((self.out_sample_residuals[key], value))
-                else:
-                    value = np.hstack(
-                        (self.out_sample_residuals[key], value[:free_space])
-                    )
-
-            self.out_sample_residuals[key] = value
+    
