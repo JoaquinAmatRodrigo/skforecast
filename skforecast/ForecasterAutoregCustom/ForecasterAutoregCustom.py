@@ -664,7 +664,9 @@ class ForecasterAutoregCustom(ForecasterBase):
         """
 
         if last_window is None:
-            last_window = copy(self.last_window)
+            last_window = self.last_window.copy()
+        else:
+            last_window = last_window.copy()
 
         last_window = last_window.iloc[-self.window_size:]
 
@@ -810,7 +812,9 @@ class ForecasterAutoregCustom(ForecasterBase):
             )
 
         if last_window is None:
-            last_window = copy(self.last_window)
+            last_window = self.last_window.copy()
+        else:
+            last_window = last_window.copy()
 
         check_predict_input(
             forecaster_name  = type(self).__name__,
