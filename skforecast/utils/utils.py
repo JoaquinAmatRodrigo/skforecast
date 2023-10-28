@@ -1561,8 +1561,12 @@ def check_backtesting_input(
             (f"`metric` must be a string, a callable function, or a list containing "
              f"multiple strings and/or callables. Got {type(metric)}.")
         )
-
-    if initial_train_size is not None:
+    
+    if forecaster_name == "ForecasterLastEquivalentDate" and isinstance(
+        forecaster.offset, pd.tseries.offsets.DateOffset
+    ):
+        pass
+    elif initial_train_size is not None:
         if not isinstance(initial_train_size, (int, np.integer)):
             raise TypeError(
                 (f"If used, `initial_train_size` must be an integer greater than the "
@@ -1598,7 +1602,7 @@ def check_backtesting_input(
             raise ValueError(
                 (f"`initial_train_size` must be an integer smaller than the "
                  f"length of `{data_name}` ({data_length}).")
-            )    
+            )
         else:
             if not forecaster.fitted:
                 raise NotFittedError(

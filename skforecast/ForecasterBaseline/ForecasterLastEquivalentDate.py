@@ -71,10 +71,10 @@ class ForecasterLastEquivalentDate():
         moved to the next valid date. For example, if the date is a Sunday, it
         is moved to the next Monday. Find more information about offsets in
         https://pandas.pydata.org/docs/reference/offset_frequency.html.
-    n_equivalent_dates : int
+    n_offsets : int
         Number of equivalent dates (multiple of offset) used in the prediction.
         For example, if the frequency of the time series is dayly, offset = 7 and
-        n_equivalent_dates = 2, the most recent equivalent data used to predict the
+        n_offsets = 2, the most recent equivalent data used to predict the
         value of the next day is the value observed 7 days ago and 14 days ago.
     agg_func : callable, default `np.mean`
         Function used to aggregate the values of the equivalent dates when the
@@ -120,14 +120,13 @@ class ForecasterLastEquivalentDate():
     def __init__(
         self,
         offset: Union[int, pd.tseries.offsets.DateOffset],
-        n_equivalent_dates: int=1,
-        allow_incomplete_n_equivalent: bool=True,
+        n_offsets: int=1,
         agg_func: Callable=np.mean,
         forecaster_id: Optional[Union[str, int]]=None
     ) -> None:
         
         self.offset                  = offset
-        self.n_equivalent_dates      = n_equivalent_dates
+        self.n_offsets               = n_offsets
         self.agg_func                = agg_func
         self.regressor               = None
         self.transformer_y           = None
@@ -160,7 +159,7 @@ class ForecasterLastEquivalentDate():
                 "Find more information about offsets in "
                 "https://pandas.pydata.org/docs/reference/offset_frequency.html"
             )
-        self.window_size = self.offset * self.n_equivalent_dates
+        self.window_size = self.offset * self.n_offsets
         
 
     def __repr__(
@@ -175,7 +174,7 @@ class ForecasterLastEquivalentDate():
             f"{type(self).__name__} \n"
             f"{'=' * len(type(self).__name__)} \n"
             f"Offset: {self.offset} \n"
-            f"Number of equivalent dates: {self.n_equivalent_dates} \n"
+            f"Number of offsets: {self.n_offsets} \n"
             f"Aggregation function: {self.agg_func.__name__} \n"
             f"Window size: {self.window_size} \n"
             f"Training range: {self.training_range.to_list() if self.fitted else None} \n"
@@ -242,7 +241,7 @@ class ForecasterLastEquivalentDate():
 
         if isinstance(self.offset, pd.tseries.offsets.DateOffset):
             last_window_start = (
-                (y_index[-1] + y_index.freq) - (self.offset * self.n_equivalent_dates)
+                (y_index[-1] + y_index.freq) - (self.offset * self.n_offsets)
             )
             self.window_size = len(y.loc[last_window_start:])
         
@@ -314,52 +313,81 @@ class ForecasterLastEquivalentDate():
                                 )
             equivalent_indexes = equivalent_indexes[:steps]
 
-            if self.n_equivalent_dates > 1:
+            if self.n_offsets == 1:
+                equivalent_values = last_window_values[equivalent_indexes]
+                predictions = equivalent_values.ravel()
+
+
+            if self.n_offsets > 1:
                 equivalent_indexes = [
                     equivalent_indexes - n * self.offset 
                     for n
-                    in np.arange(self.n_equivalent_dates)
+                    in np.arange(self.n_offsets)
                 ]
                 equivalent_indexes = np.vstack(equivalent_indexes)
-            equivalent_values = last_window_values[equivalent_indexes]
-
+                equivalent_values = last_window_values[equivalent_indexes]
+                predictions = np.apply_along_axis(
+                                self.agg_func,
+                                axis=0,
+                                arr=equivalent_values
+                            )
+            predictions = pd.Series(
+                        data  = predictions,
+                        index = expand_index(index=last_window_index,steps=steps),
+                        name = 'pred'
+                    )
 
         if isinstance(self.offset, pd.tseries.offsets.DateOffset):
-            predictions_index_start = last_window_index[-1] + last_window_index.freq
-            equivalent_dates = pd.date_range(
-                                    start=predictions_index_start - self.offset,
-                                    end=last_window_index[-1],
-                                    freq=last_window_index.freq
-                               )
-            equivalent_dates = np.tile(
-                                    equivalent_dates,
-                                    steps // len(equivalent_dates) + 1
-                                )[:steps]
-            equivalent_dates = pd.DatetimeIndex(equivalent_dates)
-            if self.n_equivalent_dates > 1:
-                equivalent_dates = [
-                        equivalent_dates - (self.offset * n)
-                        for n
-                        in np.arange(1, self.n_equivalent_dates)
-                    ]
-            equivalent_values = [
-                last_window.loc[dates].to_numpy()
-                for dates in equivalent_dates
-            ]
-            equivalent_values = np.vstack(equivalent_values)
-
-        if self.n_equivalent_dates == 1:
-            predictions = equivalent_values.ravel()
-        else:
-            predictions = np.apply_along_axis(
-                            self.agg_func,
-                            axis=0,
-                            arr=equivalent_values
-                        )
-        predictions = pd.Series(
-                          data  = predictions,
-                          index = expand_index(index=last_window_index,steps=steps),
-                          name = 'pred'
-                      )
+            predictions_index = expand_index(index=last_window_index,steps=steps)
+            max_allowed_date = last_window_index[-1]
+            offset_dates = []
+            # For every date in predictions_index, calculate the n offsets
+            for date in predictions_index:
+                selected_obsets = []
+                while len(selected_obsets) < self.n_offsets:
+                    offset_date = date - self.offset
+                    if offset_date <= max_allowed_date:
+                        selected_obsets.append(offset_date)
+                    date = offset_date
+                offset_dates.append(selected_obsets)
+            offset_dates = np.array(offset_dates)
+    
+            # Select the values of the time series corresponding to the each
+            # offset date. If the offset date is not in the time series, the
+            # value is set to NaN.
+            equivalent_values = (
+                last_window.
+                reindex(offset_dates.ravel())
+                .to_numpy()
+                .reshape(-1,self.n_offsets)
+            )
+            equivalent_values = pd.DataFrame(
+                                    data    = equivalent_values,
+                                    index   = predictions_index,
+                                    columns = [f'offset_{i}' for i in range(self.n_offsets)]
+                                )
+            # Error if all values are missing
+            if equivalent_values.isnull().all().all():
+                raise Exception(
+                    f"All equivalent values are missing. This is caused by using an offset "
+                    f"({self.offset}) larger than the data available. Try decrease the "
+                    f"size of the offset ({self.offset}), the number of offsets "
+                    f"({self.n_offsets}) or increase the size of `last_window`. In "
+                    f"backtesing this error may be caused by using an too small "
+                    f"`initial_train_size`."
+                )
+            # Warning if equivalent values are missing
+            incomplete_offsets = equivalent_values.isnull().any(axis=1)
+            incomplete_offsets = incomplete_offsets[incomplete_offsets].index
+            if not incomplete_offsets.empty:
+                warnings.warn(
+                    f"Steps: {incomplete_offsets.strftime('%Y-%m-%d').to_list()} "
+                    f"are calculated with less than {self.n_offsets} offsets. To avoid "
+                    f"this increase `last_window` size or decrease the number "
+                    f"of offsets. The current configuration needs a total offset "
+                    f"of {self.offset * self.n_offsets}."
+                )
+            aggregate_values = equivalent_values.apply(self.agg_func, axis=1)
+            predictions = aggregate_values.rename('pred')
         
         return predictions
