@@ -1,5 +1,5 @@
 ################################################################################
-#                    ForecasterLastEquivalentDate                              #
+#                        ForecasterEquivalentDate                              #
 #                                                                              #
 # This work by skforecast team is licensed under the BSD 3-Clause License.     #
 ################################################################################
@@ -26,7 +26,7 @@ logging.basicConfig(
 )
 
 
-class ForecasterLastEquivalentDate():
+class ForecasterEquivalentDate():
     """
     This forecaster predicts future values based on the most recent observed data
     similar to the target period. This approach is useful as a baseline. However,

@@ -763,7 +763,7 @@ def backtesting_forecaster(
         'ForecasterAutoreg', 
         'ForecasterAutoregCustom', 
         'ForecasterAutoregDirect',
-        'ForecasterLastEquivalentDate'
+        'ForecasterEquivalentDate'
     ]
     if type(forecaster).__name__ not in forecaters_allowed:
         raise TypeError(

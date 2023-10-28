@@ -1,1 +1,1 @@
-from .ForecasterLastEquivalentDate import ForecasterLastEquivalentDate
+from .ForecasterEquivalentDate import ForecasterEquivalentDate

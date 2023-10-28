@@ -1529,7 +1529,7 @@ def check_backtesting_input(
     
     forecasters_uni = ['ForecasterAutoreg', 'ForecasterAutoregCustom', 
                        'ForecasterAutoregDirect', 'ForecasterSarimax',
-                       'ForecasterLastEquivalentDate']
+                       'ForecasterEquivalentDate']
     forecasters_multi = ['ForecasterAutoregMultiSeries', 
                          'ForecasterAutoregMultiSeriesCustom', 
                          'ForecasterAutoregMultiVariate']
@@ -1562,7 +1562,7 @@ def check_backtesting_input(
              f"multiple strings and/or callables. Got {type(metric)}.")
         )
     
-    if forecaster_name == "ForecasterLastEquivalentDate" and isinstance(
+    if forecaster_name == "ForecasterEquivalentDate" and isinstance(
         forecaster.offset, pd.tseries.offsets.DateOffset
     ):
         pass
