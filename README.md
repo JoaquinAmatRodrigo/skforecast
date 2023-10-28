@@ -2,14 +2,14 @@
 <img src="https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/images/banner-landing-page-skforecast.png?raw=true#only-light" style= margin-top: 0px;>
 </h1>
 
-![Python](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-blue)
-[![PyPI](https://img.shields.io/pypi/v/skforecast)](https://pypi.org/project/skforecast/)
-[![codecov](https://codecov.io/gh/JoaquinAmatRodrigo/skforecast/branch/master/graph/badge.svg)](https://codecov.io/gh/JoaquinAmatRodrigo/skforecast)
-[![Build status](https://github.com/JoaquinAmatRodrigo/skforecast/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/JoaquinAmatRodrigo/skforecast/actions/workflows/unit-tests.yml/badge.svg)
-[![Project Status: Active](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
-[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/JoaquinAmatRodrigo/skforecast/graphs/commit-activity)
-[![License](https://img.shields.io/github/license/JoaquinAmatRodrigo/skforecast)](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/LICENSE)
-[![Downloads](https://static.pepy.tech/personalized-badge/skforecast?period=total&units=international_system&left_color=grey&right_color=blue&left_text=Downloads)](https://pepy.tech/project/skforecast)
+
+| | |
+| --- | --- |
+| Package | ![Python](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-blue) [![PyPI](https://img.shields.io/pypi/v/skforecast)](https://pypi.org/project/skforecast/) [![Downloads](https://static.pepy.tech/personalized-badge/skforecast?period=total&units=international_system&left_color=grey&right_color=blue&left_text=Downloads)](https://pepy.tech/project/skforecast) [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/JoaquinAmatRodrigo/skforecast/graphs/commit-activity) [![Project Status: Active](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active) |
+| Meta | [![License](https://img.shields.io/github/license/JoaquinAmatRodrigo/skforecast)](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/LICENSE) [![DOI](https://zenodo.org/badge/337705968.svg)](https://zenodo.org/doi/10.5281/zenodo.8382787) |
+| Testing | [![Build status](https://github.com/JoaquinAmatRodrigo/skforecast/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/JoaquinAmatRodrigo/skforecast/actions/workflows/unit-tests.yml/badge.svg) [![codecov](https://codecov.io/gh/JoaquinAmatRodrigo/skforecast/branch/master/graph/badge.svg)](https://codecov.io/gh/JoaquinAmatRodrigo/skforecast) |
+|Donation | [![paypal](https://img.shields.io/static/v1?style=social&amp;label=Donate&amp;message=%E2%9D%A4&amp;logo=Paypal&amp;color&amp;link=%3curl%3e)](https://www.paypal.com/donate/?hosted_button_id=D2JZSWRLTZDL6) [![buymeacoffee](https://img.shields.io/badge/-Buy_me_a%C2%A0coffee-gray?logo=buy-me-a-coffee)](https://www.buymeacoffee.com/skforecast) ![GitHub Sponsors](https://img.shields.io/github/sponsors/joaquinamatrodrigo?logo=github&label=Github%20sponsors&link=https%3A%2F%2Fgithub.com%2Fsponsors%2FJoaquinAmatRodrigo)
+
 
 
 # About The Project
@@ -48,7 +48,7 @@ pip install skforecast
 Specific version:
 
 ```bash
-pip install skforecast==0.10.0
+pip install skforecast==0.11.0
 ```
 
 Latest (unstable):
@@ -93,14 +93,14 @@ pip install skforecast[plotting]
 + statsmodels>=0.12, <0.15
 + pmdarima>=2.0, <2.1
 
-# What is new in skforecast 0.10.0?
+# What is new in skforecast 0.11?
 
 Visit the [release notes](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/changelog.md) to view all notable changes.
 
-- [x] New `Sarimax.Sarimax` model. A wrapper of `statsmodels.SARIMAX` that follows the scikit-learn API and can be used with the `ForecasterSarimax`.
-- [x] Added `skforecast.preprocessing.TimeSeriesDifferentiator` to preprocess time series by differentiating or integrating them (reverse differentiation).
-- [x] Added `differentiation` argument to `ForecasterAutoreg` and `ForecasterAutoregCustom` to model the n-order differentiated time series using the new skforecast preprocessor `TimeSeriesDifferentiator`.
-- [x] Bug fixes and performance improvements.
+- [x] New `predict_quantiles` method in all Autoreg Forecasters to calculate the specified quantiles for each step.
+- [x] Added `skforecast.datasets` module. It contains functions to load data for our examples and user guides.
+- [ ] Added `differentiation` argument to all Autoreg Forecasters to model the n-order differentiated time series using the new skforecast preprocessor `TimeSeriesDifferentiator`.
+- [ ] Bug fixes and performance improvements.
 
 
 # Forecasters
@@ -170,11 +170,11 @@ The **skforecast** library offers a variety of forecaster types, each tailored t
 + [**Intermittent demand forecasting**](https://www.cienciadedatos.net/documentos/py48-intermittent-demand-forecasting.html)
 
 
-
-
 **Español**
 
 + [**Skforecast: forecasting series temporales con Python y Scikit-learn**](https://www.cienciadedatos.net/documentos/py27-forecasting-series-temporales-python-scikitlearn.html) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1mjmccrMA-XxOVXm-3wKSIQ9__oo9dJ5a)
+
++ [**Modelos ARIMA y SARIMAX**](https://cienciadedatos.net/documentos/py51-modelos-arima-sarimax-python.html)
 
 + [**Forecasting con gradient boosting: skforecast, XGBoost, LightGBM y CatBoost**](https://www.cienciadedatos.net/documentos/py39-forecasting-series-temporales-con-skforecast-xgboost-lightgbm-catboost.html) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1UAjX8vUKDoY0XJtq5WtHlJ4qwPvSgLrD)
 
@@ -200,7 +200,7 @@ The **skforecast** library offers a variety of forecaster types, each tailored t
 Primarily, skforecast development consists of adding and creating new *Forecasters*, new validation strategies, or improving the performance of the current code. However, there are many other ways to contribute:
 
 - Submit a bug report or feature request on [GitHub Issues](https://github.com/JoaquinAmatRodrigo/skforecast/issues).
-- Contribute a Jupyter notebook to our [examples](https://joaquinamatrodrigo.github.io/skforecast/latest/examples/examples.html).
+- Contribute a Jupyter notebook to our [examples](https://skforecast.org/latest/examples/examples).
 - Write [unit or integration tests](https://docs.pytest.org/en/latest/) for our project.
 - Answer questions on our issues, Stack Overflow, and elsewhere.
 - Translate our documentation into another language.
@@ -208,25 +208,35 @@ Primarily, skforecast development consists of adding and creating new *Forecaste
 
 For more information on how to contribute to skforecast, see our [Contribution Guide](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/CONTRIBUTING.md).
 
+Visit our [authors section](https://skforecast.org/latest/authors/authors) to meet all the contributors to skforecast.
+
 
 # Citation
 
-If you use this software, please cite it using the following metadata.
+If you use skforecast for a scientific publication, we would appreciate citations to the published software.
+
+**Zenodo**
+
+```
+Amat Rodrigo, Joaquin, & Escobar Ortiz, Javier. (2023). skforecast (v0.10.1). Zenodo. https://doi.org/10.5281/zenodo.8382788
+```
 
 **APA**:
 ```
-Amat Rodrigo, J., & Escobar Ortiz, J. skforecast (Version 0.10.0) [Computer software]
+Amat Rodrigo, J., & Escobar Ortiz, J. (2023). skforecast (Version 0.10.1) [Computer software]. https://doi.org/10.5281/zenodo.8382788
 ```
 
 **BibTeX**:
 ```
 @software{skforecast,
 author = {Amat Rodrigo, Joaquin and Escobar Ortiz, Javier},
-license = {BSD 3-Clause License},
+title = {skforecast},
+version = {0.10.1},
 month = {9},
-title = {{skforecast}},
-version = {0.10.0},
-year = {2023}
+year = {2023},
+license = {BSD-3-Clause},
+url = {https://skforecast.org/},
+doi = {10.5281/zenodo.8382788}
 }
 ```
 
@@ -246,4 +256,4 @@ If you found skforecast useful, you can support us with a donation. Your contrib
 
 # License
 
-[BSD 3-Clause License](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/LICENSE)
+[BSD-3-Clause License](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/LICENSE)

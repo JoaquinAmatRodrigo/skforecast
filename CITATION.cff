@@ -9,22 +9,22 @@ message: >-
 type: software
 authors:
   - given-names: Joaquin
-    name-particle:
     family-names: Amat Rodrigo
     email: j.amatrodrigo@gmail.com
   - given-names: Javier
-    name-particle:
     family-names: Escobar Ortiz
     email: javier.escobar.ortiz@gmail.com
+url: 'https://skforecast.org/'
 abstract: >-
   Skforecast is a Python library that eases using
-  scikit-learn regressors as multi-step forecasters.
-  It also works with any regressor compatible with
-  the scikit-learn API.
+  scikit-learn regressors as single and multi-step
+  forecasters. It also works with any regressor compatible
+  with the scikit-learn API.
 keywords:
   - forecasting
   - machine learning
   - python
-license: BSD 3-Clause License
-version: 0.10.0
-date-released: '2023-09'
+doi: 10.5281/zenodo.8382788
+license: bsd-3-clause
+version: 0.10.1
+date-released: '2023-09-26'

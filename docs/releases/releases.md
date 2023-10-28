@@ -2,6 +2,39 @@
 
 All significant changes to this project are documented in this release file.
 
+## [0.11.0] - [Under development]
+
+The main changes in this release are:
+
++ New `predict_quantiles` method in all Autoreg Forecasters to calculate the specified quantiles for each step.
+
+**Added**
+
++ Added `skforecast.datasets` module.
+
++ Added `predict_quantiles` method to all Autoreg Forecasters.
+
+**Changed**
+
+
+**Fixed**
+
+
+## [0.10.1] - [2023-09-26]
+
+This is a minor release to fix a bug when using `grid_search_forecaster`, `random_search_forecaster` or `bayesian_search_forecaster` with a Forecaster that includes differentiation.
+
+**Added**
+
+
+**Changed**
+
+
+**Fixed**
+
++ Bug fix `grid_search_forecaster`, `random_search_forecaster` or `bayesian_search_forecaster` with a Forecaster that includes differentiation.
+
+
 ## [0.10.0] - [2023-09-07]
 
 The main changes in this release are:

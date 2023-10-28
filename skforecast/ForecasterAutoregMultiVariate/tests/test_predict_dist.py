@@ -36,6 +36,7 @@ def test_predict_dist_output_when_forecaster_is_LinearRegression_steps_is_2_in_s
                      transformer_series = StandardScaler(),
                      transformer_exog   = transformer_exog
                  )
+    
     forecaster.fit(series=series, exog=exog)
     results = forecaster.predict_dist(
                   steps               = 2,
@@ -44,6 +45,7 @@ def test_predict_dist_output_when_forecaster_is_LinearRegression_steps_is_2_in_s
                   n_boot              = 4,
                   in_sample_residuals = True
               )
+    
     expected = pd.DataFrame(
                    data    = np.array([[0.53808076, 0.11721631],
                                        [0.48555937, 0.26296157]]),
@@ -68,6 +70,7 @@ def test_predict_dist_output_when_forecaster_is_LinearRegression_steps_is_2_in_s
                      transformer_series = StandardScaler(),
                      transformer_exog   = transformer_exog
                  )
+    
     forecaster.fit(series=series, exog=exog)
     forecaster.out_sample_residuals = forecaster.in_sample_residuals
     results = forecaster.predict_dist(
@@ -77,6 +80,7 @@ def test_predict_dist_output_when_forecaster_is_LinearRegression_steps_is_2_in_s
                   n_boot              = 4,
                   in_sample_residuals = False
               )
+    
     expected = pd.DataFrame(
                    data    = np.array([[0.53808076, 0.11721631],
                                        [0.48555937, 0.26296157]]),

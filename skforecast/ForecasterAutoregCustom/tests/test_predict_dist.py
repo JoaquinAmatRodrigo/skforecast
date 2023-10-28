@@ -12,7 +12,6 @@ from .fixtures_ForecasterAutoregCustom import y
 from .fixtures_ForecasterAutoregCustom import exog
 from .fixtures_ForecasterAutoregCustom import exog_predict
 
-
 def create_predictors(y): # pragma: no cover
     """
     Create first 3 lags of a time series.

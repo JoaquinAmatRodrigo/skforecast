@@ -16,8 +16,8 @@ from .fixtures_ForecasterAutoregMultiSeriesCustom import exog
 from .fixtures_ForecasterAutoregMultiSeriesCustom import exog_predict
 
 transformer_exog = ColumnTransformer(
-                       [('scale', StandardScaler(), ['col_1']),
-                        ('onehot', OneHotEncoder(), ['col_2'])],
+                       [('scale', StandardScaler(), ['exog_1']),
+                        ('onehot', OneHotEncoder(), ['exog_2'])],
                        remainder = 'passthrough',
                        verbose_feature_names_out = False
                    )
@@ -29,6 +29,7 @@ def create_predictors(y): # pragma: no cover
     lags = y[-1:-4:-1]
 
     return lags
+
 
 @pytest.mark.parametrize("level", 
                          ['1', ['1']], 
@@ -46,6 +47,7 @@ def test_predict_dist_output_when_forecaster_is_LinearRegression_steps_is_2_in_s
                      transformer_series = StandardScaler(),
                      transformer_exog   = transformer_exog,
                  )
+    
     forecaster.fit(series=series, exog=exog)
     results = forecaster.predict_dist(
                   steps               = 2,
@@ -82,6 +84,7 @@ def test_predict_dist_output_when_forecaster_is_LinearRegression_steps_is_2_in_s
                      transformer_series = StandardScaler(),
                      transformer_exog   = transformer_exog,
                  )
+    
     forecaster.fit(series=series, exog=exog)
     forecaster.out_sample_residuals = forecaster.in_sample_residuals
     results = forecaster.predict_dist(

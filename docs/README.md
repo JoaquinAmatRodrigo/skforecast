@@ -8,14 +8,19 @@
     margin-bottom: 30px;
     margin-top: 0px;">
 
+
 ![Python](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-blue)
 [![PyPI](https://img.shields.io/pypi/v/skforecast)](https://pypi.org/project/skforecast/)
 [![codecov](https://codecov.io/gh/JoaquinAmatRodrigo/skforecast/branch/master/graph/badge.svg)](https://codecov.io/gh/JoaquinAmatRodrigo/skforecast)
 [![Build status](https://github.com/JoaquinAmatRodrigo/skforecast/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/JoaquinAmatRodrigo/skforecast/actions/workflows/unit-tests.yml/badge.svg)
 [![Project Status: Active](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/JoaquinAmatRodrigo/skforecast/graphs/commit-activity)
-[![License](https://img.shields.io/github/license/JoaquinAmatRodrigo/skforecast)](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/LICENSE)
 [![Downloads](https://static.pepy.tech/personalized-badge/skforecast?period=total&units=international_system&left_color=grey&right_color=blue&left_text=Downloads)](https://pepy.tech/project/skforecast)
+[![License](https://img.shields.io/github/license/JoaquinAmatRodrigo/skforecast)](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/LICENSE)
+[![DOI](https://zenodo.org/badge/337705968.svg)](https://zenodo.org/doi/10.5281/zenodo.8382787)
+[![paypal](https://img.shields.io/static/v1?style=social&amp;label=Donate&amp;message=%E2%9D%A4&amp;logo=Paypal&amp;color&amp;link=%3curl%3e)](https://www.paypal.com/donate/?hosted_button_id=D2JZSWRLTZDL6)
+[![buymeacoffee](https://img.shields.io/badge/-Buy_me_a%C2%A0coffee-gray?logo=buy-me-a-coffee)](https://www.buymeacoffee.com/skforecast)
+![GitHub Sponsors](https://img.shields.io/github/sponsors/joaquinamatrodrigo?logo=github&label=Github%20sponsors&link=https%3A%2F%2Fgithub.com%2Fsponsors%2FJoaquinAmatRodrigo)
 
 
 ## About The Project
@@ -47,7 +52,7 @@ pip install skforecast
 Specific version:
 
 ```bash
-pip install skforecast==0.10.0
+pip install skforecast==0.11.0
 ```
 
 Latest (unstable):
@@ -155,6 +160,8 @@ The **skforecast** library offers a variety of forecaster types, each tailored t
 
 <i class="fa-duotone fa-chart-line fa" style="font-size: 25px; color:#1DA1F2;"></i> [**Skforecast: forecasting series temporales con Python y Scikit-learn**](https://www.cienciadedatos.net/documentos/py27-forecasting-series-temporales-python-scikitlearn.html) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1mjmccrMA-XxOVXm-3wKSIQ9__oo9dJ5a)
 
+<i class="fa-solid fa-arrow-trend-up" style="color: #E60023;"></i> [**Modelos ARIMA y SARIMAX**](https://cienciadedatos.net/documentos/py51-modelos-arima-sarimax-python.html)
+
 <i class="fa-solid fa-sitemap fa" style="font-size: 25px; color:#00cc99;"></i> [**Forecasting con gradient boosting: XGBoost, LightGBM y CatBoost**](https://www.cienciadedatos.net/documentos/py39-forecasting-series-temporales-con-skforecast-xgboost-lightgbm-catboost.html) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1UAjX8vUKDoY0XJtq5WtHlJ4qwPvSgLrD)
 
 <i class="fa-solid fa-arrow-trend-up" style="color: #fbbb09;"></i> [**Modelar series temporales con tendencia utilizando modelos de árboles**](https://cienciadedatos.net/documentos/py49-modelar-tendencia-en-series-temporales-modelos-de-arboles.html)
@@ -181,7 +188,7 @@ Universidad de Deusto / Deustuko Unibertsitatea**](https://youtu.be/MlktVhReO0E)
 Primarily, skforecast development consists of adding and creating new *Forecasters*, new validation strategies, or improving the performance of the current code. However, there are many other ways to contribute:
 
 - Submit a bug report or feature request on [GitHub Issues](https://github.com/JoaquinAmatRodrigo/skforecast/issues).
-- Contribute a Jupyter notebook to our [examples](https://joaquinamatrodrigo.github.io/skforecast/latest/examples/examples.html).
+- Contribute a Jupyter notebook to our [examples](https://skforecast.org/latest/examples/examples).
 - Write [unit or integration tests](https://docs.pytest.org/en/latest/) for our project.
 - Answer questions on our issues, Stack Overflow, and elsewhere.
 - Translate our documentation into another language.
@@ -189,29 +196,80 @@ Primarily, skforecast development consists of adding and creating new *Forecaste
 
 For more information on how to contribute to skforecast, see our [Contribution Guide](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/CONTRIBUTING.md).
 
+Visit our [authors section](https://skforecast.org/latest/authors/authors) to meet all the contributors to skforecast.
+
 
 ## Citation
 
-If you use this software, please cite it using the following metadata.
+If you use skforecast for a scientific publication, we would appreciate citations to the published software.
+
+**Zenodo**
+
+```
+Amat Rodrigo, Joaquin, & Escobar Ortiz, Javier. (2023). skforecast (v0.10.1). Zenodo. https://doi.org/10.5281/zenodo.8382788
+```
 
 **APA**:
 ```
-Amat Rodrigo, J., & Escobar Ortiz, J. skforecast (Version 0.10.0) [Computer software]
+Amat Rodrigo, J., & Escobar Ortiz, J. (2023). skforecast (Version 0.10.1) [Computer software]. https://doi.org/10.5281/zenodo.8382788
 ```
 
 **BibTeX**:
 ```
 @software{skforecast,
 author = {Amat Rodrigo, Joaquin and Escobar Ortiz, Javier},
-license = {BSD 3-Clause License},
+title = {skforecast},
+version = {0.10.1},
 month = {9},
-title = {{skforecast}},
-version = {0.10.0},
-year = {2023}
+year = {2023},
+license = {BSD-3-Clause},
+url = {https://skforecast.org/},
+doi = {10.5281/zenodo.8382788}
 }
 ```
 
-View the [citation file](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/CITATION.cff).
+### Publications citing skforecast
+
+<ul>
+<li><p style="color:#808080; font-size:0.95em;">Polo J, Martín-Chivelet N, Alonso-Abella M, Sanz-Saiz C, Cuenca J, de la Cruz M. Exploring the PV Power Forecasting at Building Façades Using Gradient Boosting Methods. Energies. 2023; 16(3):1495. <a href="https://doi.org/10.3390/en16031495">https://doi.org/10.3390/en16031495</a></p>
+</li>
+
+<li><p style="color:#808080; font-size:0.95em;">Popławski T, Dudzik S, Szeląg P. Forecasting of Energy Balance in Prosumer Micro-Installations Using Machine Learning Models. Energies. 2023; 16(18):6726. <a href="https://doi.org/10.3390/en16186726">https://doi.org/10.3390/en16186726</a></p>
+</li>
+<li><p style="color:#808080; font-size:0.95em;">Harrou F, Sun Y, Taghezouit B, Dairi A. Artificial Intelligence Techniques for Solar Irradiance and PV Modeling and Forecasting. Energies. 2023; 16(18):6731. <a href="https://doi.org/10.3390/en16186731">https://doi.org/10.3390/en16186731</a></p>
+</li>
+
+<li><p style="color:#808080; font-size:0.95em;">Amara-Ouali, Y., Goude, Y., Doumèche, N., Veyret, P., Thomas, A., Hebenstreit, D., ... &amp; Phe-Neau, T. (2023). Forecasting Electric Vehicle Charging Station Occupancy: Smarter Mobility Data Challenge. arXiv preprint arXiv:2306.06142.</p>
+</li>
+
+<li><p style="color:#808080; font-size:0.95em;">Emami, P., Sahu, A., &amp; Graf, P. (2023). BuildingsBench: A Large-Scale Dataset of 900K Buildings and Benchmark for Short-Term Load Forecasting. arXiv preprint arXiv:2307.00142.</p>
+</li>
+
+<li><p style="color:#808080; font-size:0.95em;">Dang, HA., Dao, VD. (2023). Building Power Demand Forecasting Using Machine Learning: Application for an Office Building in Danang. In: Nguyen, D.C., Vu, N.P., Long, B.T., Puta, H., Sattler, KU. (eds) Advances in Engineering Research and Application. ICERA 2022. Lecture Notes in Networks and Systems, vol 602. Springer, Cham. <a href="https://doi.org/10.1007/978-3-031-22200-9_32">https://doi.org/10.1007/978-3-031-22200-9_32</a></p>
+</li>
+
+<li><p style="color:#808080; font-size:0.95em;">Morate del Moral, Iván (2023). Predición de llamadas realizadas a un Call Center. Proyecto Fin de Carrera / Trabajo Fin de Grado, E.T.S.I. de Sistemas Informáticos (UPM), Madrid.</p>
+</li>
+
+<li><p style="color:#808080; font-size:0.95em;">Lopez Vega, A., &amp; Villanueva Vargas, R. A. (2022). Sistema para la automatización de procesos hospitalarios de control para pacientes para COVID-19 usando machine learning para el Centro de Salud San Fernando.</p>
+</li>
+
+<li><p style="color:#808080; font-size:0.95em;">García Álvarez, J. D. (2022). Modelo predictivo de rentabilidad de criptomonedas para un futuro cercano.</p>
+</li>
+
+<li><p style="color:#808080; font-size:0.95em;">Chilet Vera, Á. (2023). Elaboración de un algoritmo predictivo para la reposición de hipoclorito en los depósitos mediante técnicas de Machine Learning (Doctoral dissertation, Universitat Politècnica de València).</p>
+</li>
+
+<li><p style="color:#808080; font-size:0.95em;">Bustinza Barrial, A. A., Bautista Abanto, A. M., Alva Alfaro, D. A., Villena Sotomayor, G. M., &amp; Trujillo Sabrera, J. M. (2022). Predicción de los valores de la demanda máxima de energía eléctrica empleando técnicas de machine learning para la empresa Nexa Resources–Cajamarquilla.</p>
+</li>
+
+<li><p style="color:#808080; font-size:0.95em;">Morgado, K. Desarrollo de una técnica de gestión de activos para transformadores de distribución basada en sistema de monitoreo (Doctoral dissertation, Universidad Nacional de Colombia).</p>
+</li>
+
+<li><p style="color:#808080; font-size:0.95em;">Zafeiriou A., Chantzis G., Jonkaitis T., Fokaides P., Papadopoulos A., 2023, Smart Energy Strategy - A Comparative Study of Energy Consumption Forecasting Machine Learning Models, Chemical Engineering Transactions, 103, 691-696.</p>
+</li>
+
+</ul>
 
 
 ## Donating
@@ -226,4 +284,4 @@ If you found skforecast useful, you can support us with a donation. Your contrib
 
 ## License
 
-[BSD 3-Clause License](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/LICENSE)
+[BSD-3-Clause License](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/LICENSE)

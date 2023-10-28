@@ -108,13 +108,11 @@ forecaster = ForecasterAutoreg(
 ```
 
 
-### Inclusion of kwargs in the regressor fit method
+### Custom weights
 
-Some regressors include the possibility to add some additional configuration during the fitting method. The predictor parameter `fit_kwargs` allows these arguments to be set when the forecaster is declared.
+The `weight_func` parameter allows the user to define custom weights for each observation in the time series. These custom weights can be used to assign different levels of importance to different time periods. For example, assign higher weights to recent data points and lower weights to older data points to emphasize the importance of recent observations in the forecast model.
 
-!!! danger
-
-    To add weights to the forecaster, it must be done through the `weight_func` argument and not through a `fit_kwargs`.
+More information: [Weighted time series forecasting](https://skforecast.org/latest/user_guides/weighted-time-series-forecasting).
 
 ```python
 # Create a forecaster
@@ -243,7 +241,7 @@ The number of models to be trained is specified by the `steps` parameter.
 ```python
 # Create a forecaster
 # ==============================================================================
-from skforecast.ForecasterAutoreg import ForecasterAutoregDirect
+from skforecast.ForecasterAutoregDirect import ForecasterAutoregDirect
 from sklearn.ensemble import RandomForestRegressor
 
 forecaster = ForecasterAutoregDirect(
@@ -271,7 +269,7 @@ For a more detailed look at parallelization, visit [Parallelization in skforecas
 ```python
 # Create a forecaster
 # ==============================================================================
-from skforecast.ForecasterAutoreg import ForecasterAutoregDirect
+from skforecast.ForecasterAutoregDirect import ForecasterAutoregDirect
 from sklearn.ensemble import RandomForestRegressor
 
 forecaster = ForecasterAutoregDirect(

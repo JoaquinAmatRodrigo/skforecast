@@ -1,8 +1,7 @@
 ################################################################################
 #                             skforecast.utils                                 #
 #                                                                              #
-# This work by Joaquin Amat Rodrigo and Javier Escobar Ortiz is licensed       #
-# under the BSD 3-Clause License.                                              #
+# This work by skforecast team is licensed under the BSD 3-Clause License.     #
 ################################################################################
 # coding=utf-8
 
@@ -380,6 +379,7 @@ def check_exog_dtypes(
 
 def check_interval(
     interval: list=None,
+    quantiles: float=None,
     alpha: float=None
 ) -> None:
     """
@@ -391,6 +391,10 @@ def check_interval(
         Confidence of the prediction interval estimated. Sequence of percentiles
         to compute, which must be between 0 and 100 inclusive. For example, 
         interval of 95% should be as `interval = [2.5, 97.5]`.
+    quantiles : list, default `None`
+        Sequence of quantiles to compute, which must be between 0 and 1 
+        inclusive. For example, quantiles of 0.05, 0.5 and 0.95 should be as 
+        `quantiles = [0.05, 0.5, 0.95]`.
     alpha : float, default `None`
         The confidence intervals used in ForecasterSarimax are (1 - alpha) %.
 
@@ -429,6 +433,19 @@ def check_interval(
                 f"Lower interval bound ({interval[0]}) must be less than the "
                 f"upper interval bound ({interval[1]})."
             )
+        
+    if quantiles is not None:
+        if not isinstance(quantiles, list):
+            raise TypeError(
+                ("`quantiles` must be a `list`. For example, quantiles 0.05, "
+                 "0.5, and 0.95 should be as `quantiles = [0.05, 0.5, 0.95]`.")
+            )
+        
+        for q in quantiles:
+            if (q < 0.) or (q > 1.):
+                raise ValueError(
+                    ("All elements in `quantiles` must be >= 0 and <= 1.")
+                )
     
     if alpha is not None:
         if not isinstance(alpha, float):

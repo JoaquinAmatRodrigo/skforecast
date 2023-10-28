@@ -81,6 +81,8 @@ nav:
 
   - Releases: releases/releases.md
 
+  - Authors: authors/authors.md
+
 plugins:
   - mkdocstrings:
       handlers:

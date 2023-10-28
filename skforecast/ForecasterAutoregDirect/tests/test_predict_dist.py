@@ -26,6 +26,7 @@ def test_predict_dist_output_when_forecaster_is_LinearRegression_steps_is_2_in_s
                      transformer_y    = StandardScaler(),
                      transformer_exog = StandardScaler(),
                  )
+    
     forecaster.fit(y=y, exog=exog)
     results = forecaster.predict_dist(
                   steps               = 2,
@@ -57,6 +58,7 @@ def test_predict_dist_output_when_forecaster_is_LinearRegression_steps_is_2_in_s
                      transformer_y    = StandardScaler(),
                      transformer_exog = StandardScaler(),
                  )
+    
     forecaster.fit(y=y, exog=exog)
     forecaster.out_sample_residuals = forecaster.in_sample_residuals
     results = forecaster.predict_dist(
