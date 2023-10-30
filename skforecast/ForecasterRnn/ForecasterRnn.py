@@ -441,7 +441,6 @@ class ForecasterRnn(ForecasterBase):
         X_train = np.stack(X_train, axis=2)
         y_train = np.stack(y_train, axis=2)
 
-        # TODO: create a dict with the names of each dimension {"X_train": {0:datime_index, 1:list_lags, 2:list_series}, "y_train": {0:list_steps, 1:list_levels}}
         train_index = series.index.to_list()[self.max_lag:(len(series.index.to_list()) - self.steps+1)]
         dimension_names = {
             "X_train": {

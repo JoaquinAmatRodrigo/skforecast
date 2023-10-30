@@ -33,7 +33,7 @@ logging.basicConfig(
 def _backtesting_forecaster_multiseries(
     forecaster,
     series: pd.DataFrame,
-    steps: int, # TODO lo falsearemos, no necesario
+    steps: int, # TODO Temp, no necesary
     metric: Union[str, Callable, list],
     initial_train_size: Optional[int]=None,
     fixed_train_size: bool=True,
