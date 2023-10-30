@@ -135,6 +135,8 @@ class ForecasterRnn(ForecasterBase):
         Names of the series used during training.
     X_train_dim_names : dict
         Labels for the multi-dimensional arrays created internally for training.
+    y_train_dim_names : dict
+        Labels for the multi-dimensional arrays created internally for training.
     fit_kwargs : dict
         Additional arguments to be passed to the `fit` method of the regressor.
     in_sample_residuals : dict
@@ -199,6 +201,7 @@ class ForecasterRnn(ForecasterBase):
         self.exog_col_names = None
         self.series_col_names = None
         self.X_train_dim_names = None
+        self.y_train_dim_names = None
         self.fitted = False
         self.creation_date = pd.Timestamp.today().strftime("%Y-%m-%d %H:%M:%S")
         self.fit_date = None
@@ -226,7 +229,6 @@ class ForecasterRnn(ForecasterBase):
         if isinstance(levels, str):
             self.levels = [levels]
 
-        # TODO: Move as an argument in fit? Evaluate pros and cons.
         self.series_val = None
         if "series_val" in fit_kwargs:
             self.series_val = fit_kwargs["series_val"]
@@ -440,7 +442,19 @@ class ForecasterRnn(ForecasterBase):
         y_train = np.stack(y_train, axis=2)
 
         # TODO: create a dict with the names of each dimension {"X_train": {0:datime_index, 1:list_lags, 2:list_series}, "y_train": {0:list_steps, 1:list_levels}}
-        dimension_names = None
+        train_index = series.index.to_list()[self.max_lag:(len(series.index.to_list()) - self.steps+1)]
+        dimension_names = {
+            "X_train": {
+                0:train_index, 
+                1:["lag_" + str(l) for l in self.lags], 
+                2:series.columns.to_list()
+            }, 
+            "y_train": {
+                0:train_index, 
+                1:["step_" + str(l) for l in np.array(range(self.steps))+1], 
+                2:self.levels
+            }
+        }
 
         return X_train, y_train, dimension_names
 
@@ -479,13 +493,15 @@ class ForecasterRnn(ForecasterBase):
         self.exog_col_names = None
         self.series_col_names = None
         self.X_train_dim_names = None
+        self.y_train_dim_names = None
         self.in_sample_residuals = None
         self.fitted = False
         self.training_range = None
         
         self.series_col_names = list(series.columns)
         X_train, y_train, X_train_dim_names = self.create_train_X_y(series=series)
-        self.X_train_dim_names = X_train_dim_names
+        self.X_train_dim_names = X_train_dim_names["X_train"]
+        self.y_train_dim_names = X_train_dim_names["y_train"]
         if self.series_val is not None:
             X_val, y_val, _ = self.create_train_X_y(series=self.series_val)
             history = self.regressor.fit(
@@ -954,7 +970,7 @@ class ForecasterRnn(ForecasterBase):
 
     def set_params(
         self, params: dict
-    ) -> None:  # TODO llamar al compile actualizando argumentos
+    ) -> None:  # TODO testear
         """
         Set new values to the parameters of the scikit learn model stored in the
         forecaster. It is important to note that all models share the same
@@ -972,10 +988,8 @@ class ForecasterRnn(ForecasterBase):
         """
 
         self.regressor = clone(self.regressor)
-        self.regressor.set_params(**params)
-        self.regressors_ = {
-            step: clone(self.regressor) for step in range(1, self.steps + 1)
-        }
+        self.regressor.reset_states()
+        self.regressor.compile(**params)
 
     def set_fit_kwargs(self, fit_kwargs: dict) -> None:
         """
