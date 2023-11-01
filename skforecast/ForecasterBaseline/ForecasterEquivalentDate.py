@@ -28,54 +28,77 @@ logging.basicConfig(
 
 class ForecasterEquivalentDate():
     """
-    This forecaster predicts future values based on the most recent observed data
-    similar to the target period. This approach is useful as a baseline. However,
-    it is a simplistic method and may not capture complex underlying patterns.
+    This forecaster predicts future values based on the most recent equivalent
+    date. It also allows to aggregate multiple past values of the equivalent
+    date using a function (e.g. mean, median, max, min, etc.). The equivalent
+    date is calculated by moving back in time a given number of steps (offset).
+    The offset can be defined as an integer or as a pandas DateOffset. If the
+    offset is an integer, it represents the number of steps to go back in time.
+    For example, if the frequency of the time series is daily, and the offset is
+    7, the most recent data similar to the target period is the value observed 7
+    days ago. If the offset is a pandas DateOffset, for example Bday(2), moves
+    the date two business days backward. If the date does not start on a valid
+    date, first it is moved to a valid date. For example, if the date is a
+    Saturday, it is moved to the previous Friday. Then, the offset is applied.
+    If the result is a non valid date, it is moved to the next valid date. For
+    example, if the date is a Sunday, it is moved to the next Monday.
+    This approach is useful as a baseline. However, it is a simplistic method 
+    and may not capture complex underlying patterns.
     
     Parameters
     ----------
     offset : int, pandas.tseries.offsets.DateOffset
-        Number of steps to go back in time to find the most recent data similar
-        to the target period.
+        Number of steps to go back in time to find the most recent equivalent
+        date to the target period.
         If `offset` is an integer, it represents the number of steps to go back
-        in time. For example, if the frequency of the time series is 1 day, the
-        most recent data similar to the target period is the value observed 7
-        days ago (offset = 7).
-        Pandas DateOffsets can also be used to define the offset to move dates
-        forward a given number of valid dates. For example, Bday(2) can be added
-        subtracted to a date to move it two business days backward. If the date
-        does not start on a valid date, first it is moved to a valid date. For
-        example, if the date is a Saturday, it is moved to the previous Friday.
-        Then, the offset is applied. If the result is a non valid date, it is
-        moved to the next valid date. For example, if the date is a Sunday, it
-        is moved to the next Monday. Find more information about offsets in
-        https://pandas.pydata.org/docs/reference/offset_frequency.html.
+        in time. For example, if the frequency of the time series is daily, 
+        `offset = 7` means that the most recent data similar to the target
+        period is the value observed 7 days ago.
+        Pandas DateOffsets can also be used to move forward a given number of 
+        valid dates. For example, Bday(2) can be used to move two business days
+        backward. If the date does not start on a valid date, first it is moved 
+        to a valid date. For example, if the date is a Saturday, it is moved to
+        the previous Friday. Then, the offset is applied. If the result is a non
+        valid date, it is moved to the next valid date. For example, if the date
+        is a Sunday, it is moved to the next Monday. Find more information about
+        offsets in https://pandas.pydata.org/docs/reference/offset_frequency.html.
+    n_offsets : int, default 1
+        Number of equivalent dates (multiple of offset) used in the prediction.
+        If `offset` is greater than 1 integer, the value at the equivalent dates
+        is aggregated using the function `agg_func`. For example, if the frequency
+        of the time series is daily, offset = 7, n_offsets = 2 and agg_func = np.mean,
+        the predicted value is the mean of the values observed 7 days ago and 14
+        days ago.
+    agg_func : callable, default `np.mean`
+        Function used to aggregate the values of the equivalent dates when the
+        number of equivalent dates is greater than 1.
     forecaster_id : str, int, default `None`
         Name used as an identifier of the forecaster.
     
     Attributes
     ----------
     offset : int, pandas.tseries.offsets.DateOffset
-        Number of steps to go back in time to find the most recent data similar
-        to the target period.
+        Number of steps to go back in time to find the most recent equivalent
+        date to the target period.
         If `offset` is an integer, it represents the number of steps to go back
-        in time. For example, if the frequency of the time series is 1 day, the
-        most recent data similar to the target period is the value observed 7
-        days ago (offset = 7).
-        Pandas DateOffsets can also be used to define the offset to move dates
-        forward a given number of valid dates. For example, Bday(2) can be added
-        subtracted to a date to move it two business days backward. If the date
-        does not start on a valid date, first it is moved to a valid date. For
-        example, if the date is a Saturday, it is moved to the previous Friday.
-        Then, the offset is applied. If the result is a non valid date, it is
-        moved to the next valid date. For example, if the date is a Sunday, it
-        is moved to the next Monday. Find more information about offsets in
-        https://pandas.pydata.org/docs/reference/offset_frequency.html.
-    n_offsets : int
+        in time. For example, if the frequency of the time series is daily, 
+        `offset = 7` means that the most recent data similar to the target
+        period is the value observed 7 days ago.
+        Pandas DateOffsets can also be used to move forward a given number of 
+        valid dates. For example, Bday(2) can be used to move two business days
+        backward. If the date does not start on a valid date, first it is moved 
+        to a valid date. For example, if the date is a Saturday, it is moved to
+        the previous Friday. Then, the offset is applied. If the result is a non
+        valid date, it is moved to the next valid date. For example, if the date
+        is a Sunday, it is moved to the next Monday. Find more information about
+        offsets in https://pandas.pydata.org/docs/reference/offset_frequency.html.
+    n_offsets : int, default 1
         Number of equivalent dates (multiple of offset) used in the prediction.
-        For example, if the frequency of the time series is dayly, offset = 7 and
-        n_offsets = 2, the most recent equivalent data used to predict the
-        value of the next day is the value observed 7 days ago and 14 days ago.
+        If `offset` is greater than 1 integer, the value at the equivalent dates
+        is aggregated using the function `agg_func`. For example, if the frequency
+        of the time series is daily, offset = 7, n_offsets = 2 and agg_func = np.mean,
+        the predicted value is the mean of the values observed 7 days ago and 14
+        days ago.
     agg_func : callable, default `np.mean`
         Function used to aggregate the values of the equivalent dates when the
         number of equivalent dates is greater than 1.
@@ -245,8 +268,8 @@ class ForecasterEquivalentDate():
             )
             self.window_size = len(y.loc[last_window_start:])
         
-        # The last time window of training data is stored so that lags needed as
-        # predictors in the first iteration of `predict()` can be calculated.
+        # The last time window of training data is stored so that equivalent
+        # dates are available when calling the `predict` method.
         self.last_window = y.iloc[-self.window_size:].copy()
 
             
@@ -264,11 +287,10 @@ class ForecasterEquivalentDate():
         steps : int
             Number of future steps predicted.
         last_window : pandas Series, default `None`
-            Series values used to create the predictors (lags) needed in the 
-            first iteration of the prediction (t + 1).
-            If `last_window = None`, the values stored in `self.last_window` are
-            used to calculate the initial predictors, and the predictions start
-            right after training data.
+            Past values needed to select the last equivalent dates according to 
+            the offset. If `last_window = None`, the values stored in 
+            `self.last_window` areused and the predictions start right after
+            the training data.
         exog : Ignored
             Not used, present here for API consistency by convention.
 
@@ -316,7 +338,6 @@ class ForecasterEquivalentDate():
             if self.n_offsets == 1:
                 equivalent_values = last_window_values[equivalent_indexes]
                 predictions = equivalent_values.ravel()
-
 
             if self.n_offsets > 1:
                 equivalent_indexes = [
