@@ -3,7 +3,7 @@
 from skforecast import __version__
 import tomli
 
-version="0.10.1"
+version="0.11.0"
 
 
 def test_version_in_init_and_pyproject_toml():

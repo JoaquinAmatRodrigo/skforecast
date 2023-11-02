@@ -720,13 +720,13 @@ def test_create_train_X_y_output_when_transformer_series_and_transformer_exog(tr
                            '2': np.arange(10, dtype=float)},
                            index = pd.date_range("1990-01-01", periods=10, freq='D'))
     exog = pd.DataFrame({
-               'col_1': [7.5, 24.4, 60.3, 57.3, 50.7, 41.4, 24.4, 87.2, 47.4, 23.8],
-               'col_2': ['a', 'a', 'a', 'a', 'a', 'b', 'b', 'b', 'b', 'b']},
+               'exog_1': [7.5, 24.4, 60.3, 57.3, 50.7, 41.4, 24.4, 87.2, 47.4, 23.8],
+               'exog_2': ['a', 'a', 'a', 'a', 'a', 'b', 'b', 'b', 'b', 'b']},
                 index = pd.date_range("1990-01-01", periods=10, freq='D'))
 
     transformer_exog = ColumnTransformer(
-                            [('scale', StandardScaler(), ['col_1']),
-                             ('onehot', OneHotEncoder(), ['col_2'])],
+                            [('scale', StandardScaler(), ['exog_1']),
+                             ('onehot', OneHotEncoder(), ['exog_2'])],
                             remainder = 'passthrough',
                             verbose_feature_names_out = False
                         )
@@ -757,8 +757,8 @@ def test_create_train_X_y_output_when_transformer_series_and_transformer_exog(tr
                        [ 0.87038828,  0.52223297,  0.17407766,  0.22507577, 0., 1., 0., 1.],
                        [ 1.21854359,  0.87038828,  0.52223297, -0.84584926, 0., 1., 0., 1.]]),
             index   = pd.RangeIndex(start=0, stop=14, step=1),
-            columns = ['lag_1', 'lag_2', 'lag_3', 'col_1',
-                       'col_2_a', 'col_2_b', '1', '2']
+            columns = ['lag_1', 'lag_2', 'lag_3', 'exog_1',
+                       'exog_2_a', 'exog_2_b', '1', '2']
         ),
         pd.Series(
             data  = np.array([-0.52223297, -0.17407766,  0.17407766,  0.52223297,  0.87038828,
@@ -859,13 +859,13 @@ def test_create_train_X_y_output_when_transformer_series_and_transformer_exog_wi
                                             4., 5., 6., 7., 8., 9.])})
     series.index = pd.date_range("1990-01-01", periods=10, freq='D')
     exog = pd.DataFrame({
-               'col_1': [7.5, 24.4, 60.3, 57.3, 50.7, 41.4, 24.4, 87.2, 47.4, 23.8],
-               'col_2': ['a', 'b', 'a', 'b', 'a', 'b', 'a', 'b', 'a', 'b']},
+               'exog_1': [7.5, 24.4, 60.3, 57.3, 50.7, 41.4, 24.4, 87.2, 47.4, 23.8],
+               'exog_2': ['a', 'b', 'a', 'b', 'a', 'b', 'a', 'b', 'a', 'b']},
                 index = pd.date_range("1990-01-01", periods=10, freq='D'))
 
     transformer_exog = ColumnTransformer(
-                            [('scale', StandardScaler(), ['col_1']),
-                             ('onehot', OneHotEncoder(), ['col_2'])],
+                            [('scale', StandardScaler(), ['exog_1']),
+                             ('onehot', OneHotEncoder(), ['exog_2'])],
                             remainder = 'passthrough',
                             verbose_feature_names_out = False
                         )
@@ -897,8 +897,8 @@ def test_create_train_X_y_output_when_transformer_series_and_transformer_exog_wi
                        [ 0.29277002188455997, -0.29277002188455997, -0.8783100656536799,   0.2250757696112534,  1.0, 0.0, 0.0, 0.0, 1.0],
                        [ 0.8783100656536799,   0.29277002188455997, -0.29277002188455997, -0.8458492632164842,  0.0, 1.0, 0.0, 0.0, 1.0]]),
             index   = pd.RangeIndex(start=0, stop=15, step=1),
-            columns = ['lag_1', 'lag_2', 'lag_3', 'col_1',
-                       'col_2_a', 'col_2_b', 'l1', 'l2', 'l3']
+            columns = ['lag_1', 'lag_2', 'lag_3', 'exog_1',
+                       'exog_2_a', 'exog_2_b', 'l1', 'l2', 'l3']
         ),
         pd.Series(
             data  = np.array([-0.5222329678670935, -0.17407765595569785, 0.17407765595569785, 0.5222329678670935, 0.8703882797784892, 1.2185435916898848, 1.5666989036012806, 
