@@ -32,18 +32,9 @@ class ForecasterEquivalentDate():
     date. It also allows to aggregate multiple past values of the equivalent
     date using a function (e.g. mean, median, max, min, etc.). The equivalent
     date is calculated by moving back in time a given number of steps (offset).
-    The offset can be defined as an integer or as a pandas DateOffset. If the
-    offset is an integer, it represents the number of steps to go back in time.
-    For example, if the frequency of the time series is daily, and the offset is
-    7, the most recent data similar to the target period is the value observed 7
-    days ago. If the offset is a pandas DateOffset, for example Bday(2), moves
-    the date two business days backward. If the date does not start on a valid
-    date, first it is moved to a valid date. For example, if the date is a
-    Saturday, it is moved to the previous Friday. Then, the offset is applied.
-    If the result is a non valid date, it is moved to the next valid date. For
-    example, if the date is a Sunday, it is moved to the next Monday.
-    This approach is useful as a baseline. However, it is a simplistic method 
-    and may not capture complex underlying patterns.
+    The offset can be defined as an integer or as a pandas DateOffset. This
+    approach is useful as a baseline, however, it is a simplistic method and may
+    not capture complex underlying patterns.
     
     Parameters
     ----------
@@ -64,14 +55,14 @@ class ForecasterEquivalentDate():
         offsets in https://pandas.pydata.org/docs/reference/offset_frequency.html.
     n_offsets : int, default 1
         Number of equivalent dates (multiple of offset) used in the prediction.
-        If `offset` is greater than 1 integer, the value at the equivalent dates
-        is aggregated using the function `agg_func`. For example, if the frequency
-        of the time series is daily, offset = 7, n_offsets = 2 and agg_func = np.mean,
-        the predicted value is the mean of the values observed 7 days ago and 14
-        days ago.
+        If `offset` is greater than 1, the value at the equivalent dates is
+        aggregated using the function `agg_func`. For example, if the frequency
+        of the time series is daily, `offset = 7`, `n_offsets = 2` and
+        `agg_func = np.mean`, the predicted value is the mean of the values
+        observed 7 and 14 days ago.
     agg_func : callable, default `np.mean`
         Function used to aggregate the values of the equivalent dates when the
-        number of equivalent dates is greater than 1.
+        number of equivalent dates (`n_offsets`) is greater than 1.
     forecaster_id : str, int, default `None`
         Name used as an identifier of the forecaster.
     
@@ -94,21 +85,21 @@ class ForecasterEquivalentDate():
         offsets in https://pandas.pydata.org/docs/reference/offset_frequency.html.
     n_offsets : int, default 1
         Number of equivalent dates (multiple of offset) used in the prediction.
-        If `offset` is greater than 1 integer, the value at the equivalent dates
-        is aggregated using the function `agg_func`. For example, if the frequency
-        of the time series is daily, offset = 7, n_offsets = 2 and agg_func = np.mean,
-        the predicted value is the mean of the values observed 7 days ago and 14
-        days ago.
+        If `offset` is greater than 1, the value at the equivalent dates is
+        aggregated using the function `agg_func`. For example, if the frequency
+        of the time series is daily, `offset = 7`, `n_offsets = 2` and
+        `agg_func = np.mean`, the predicted value is the mean of the values
+        observed 7 and 14 days ago.
     agg_func : callable, default `np.mean`
         Function used to aggregate the values of the equivalent dates when the
-        number of equivalent dates is greater than 1.
+        number of equivalent dates (`n_offsets`) is greater than 1.
     window_size : int
-        Size of the window of past values needed to include last equivalent date
-        according to the offset.
+        Number of past values needed to include the last equivalent dates according
+        to the `offset` and `n_offsets`.
     last_window : pandas Series
         This window represents the most recent data observed by the predictor
         during its training phase. It contains the past values needed to include
-        the last equivalent date according to the offset.
+        the last equivalent date according the `offset` and `n_offsets`.
     index_type : type
         Type of index of the input used in training.
     index_freq : str
@@ -263,10 +254,10 @@ class ForecasterEquivalentDate():
             self.index_freq = y_index.step
 
         if isinstance(self.offset, pd.tseries.offsets.DateOffset):
-            last_window_start = (
-                (y_index[-1] + y_index.freq) - (self.offset * self.n_offsets)
-            )
-            self.window_size = len(y.loc[last_window_start:])
+            # Calculate the window_size in steps for compatibility with the
+            # check_predict_input function.
+            last_window_start = (y_index[-1] - self.offset * self.n_offsets)
+            self.window_size = int((y_index[-1] - last_window_start) / y_index.freq)
         
         # The last time window of training data is stored so that equivalent
         # dates are available when calling the `predict` method.
