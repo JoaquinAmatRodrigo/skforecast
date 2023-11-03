@@ -251,17 +251,14 @@ class ForecasterEquivalentDate():
         self.fitted         = False
         self.training_range = None
 
-
+        _, y_index = preprocess_y(y=y, return_values=True)
         self.fitted = True
         self.fit_date = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
-        _, y_index = preprocess_y(y=y, return_values=True)
         self.training_range = y_index[[0, -1]]
         self.index_type = type(y_index)
-        if isinstance(y_index, pd.DatetimeIndex):
-            self.index_freq = y_index.freqstr
-        else: 
-            self.index_freq = y_index.step
-
+        self.index_freq = (
+            y_index.freqstr if isinstance(y_index, pd.DatetimeIndex) else y_index.step
+        )
         if isinstance(self.offset, pd.tseries.offsets.DateOffset):
             last_window_start = (
                 (y_index[-1] + y_index.freq) - (self.offset * self.n_offsets)
@@ -346,6 +343,8 @@ class ForecasterEquivalentDate():
                     in np.arange(self.n_offsets)
                 ]
                 equivalent_indexes = np.vstack(equivalent_indexes)
+                # TODO: Check if equivalent_indexes are out of range
+                # and fill with NaNs
                 equivalent_values = last_window_values[equivalent_indexes]
                 predictions = np.apply_along_axis(
                                 self.agg_func,
