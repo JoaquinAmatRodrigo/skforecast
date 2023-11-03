@@ -334,8 +334,6 @@ class ForecasterEquivalentDate():
                     in np.arange(self.n_offsets)
                 ]
                 equivalent_indexes = np.vstack(equivalent_indexes)
-                # TODO: Check if equivalent_indexes are out of range
-                # and fill with NaNs
                 equivalent_values = last_window_values[equivalent_indexes]
                 predictions = np.apply_along_axis(
                                 self.agg_func,
