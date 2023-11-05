@@ -190,7 +190,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         Date of creation.
     fit_date : str
         Date of last fit.
-    skforcast_version : str
+    skforecast_version : str
         Version of skforecast library used to create the forecaster.
     python_version : str
         Version of python used to create the forecaster.
@@ -252,7 +252,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.fitted                  = False
         self.creation_date           = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
         self.fit_date                = None
-        self.skforcast_version       = skforecast.__version__
+        self.skforecast_version      = skforecast.__version__
         self.python_version          = sys.version.split(" ")[0]
         self.forecaster_id           = forecaster_id
         
@@ -309,7 +309,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             f"fit_kwargs: {self.fit_kwargs} \n"
             f"Creation date: {self.creation_date} \n"
             f"Last fit date: {self.fit_date} \n"
-            f"Skforecast version: {self.skforcast_version} \n"
+            f"Skforecast version: {self.skforecast_version} \n"
             f"Python version: {self.python_version} \n"
             f"Forecaster id: {self.forecaster_id} \n"
         )

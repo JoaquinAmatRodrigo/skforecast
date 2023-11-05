@@ -39,17 +39,13 @@ def test_save_and_load_forecaster_persistence():
             assert attribute_forecaster == attribute_forecaster_loaded
 
 
-@pytest.mark.skip(reason="no way of currently testing this")
 def test_save_and_load_forecaster_SkforecastVersionWarning():
     """ 
     Test warning used to notify that the skforecast version installed in the 
-    environment differs from the version used to initialize the forecaster.
-
-    **This test does not work because forecaster.skforecast_version is 
-    overwritten when the forecaster is loaded.
+    environment differs from the version used to create the forecaster.
     """
     forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3)
-    rng = np.random.default_rng(12345)
+    rng = np.random.default_rng(123)
     y = pd.Series(rng.normal(size=100))
     forecaster.fit(y=y)
     forecaster.skforecast_version = '0.0.0'
@@ -57,7 +53,7 @@ def test_save_and_load_forecaster_SkforecastVersionWarning():
 
     warn_msg = re.escape(
         (f"The skforecast version installed in the environment differs "
-         f"from the version used to initialize the forecaster.\n"
+         f"from the version used to create the forecaster.\n"
          f"    Installed Version  : {skforecast.__version__}\n"
          f"    Forecaster Version : 0.0.0\n"
          f"This may create incompatibilities when using the library.")
