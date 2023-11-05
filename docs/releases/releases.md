@@ -21,6 +21,8 @@ The main changes in this release are:
 
 **Fixed**
 
++ Rename `self.skforcast_version` attribute to `self.skforecast_version` in all Forecasters.
+
 
 ## [0.10.1] - [2023-09-26]
 
