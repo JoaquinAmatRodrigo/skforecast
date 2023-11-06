@@ -120,7 +120,17 @@ class ForecasterEquivalentDate():
         Version of python used to create the forecaster.
     forecaster_id : str, int
         Name used as an identifier of the forecaster.
-    
+    transformer_y : Ignored
+            Not used, present here for API consistency by convention.
+    transformer_exog : Ignored
+            Not used, present here for API consistency by convention.
+    weight_func : Ignored
+            Not used, present here for API consistency by convention.
+    differentiation : Ignored
+            Not used, present here for API consistency by convention.
+    fit_kwargs : Ignored
+            Not used, present here for API consistency by convention.
+
     """
     
     def __init__(
@@ -210,7 +220,7 @@ class ForecasterEquivalentDate():
         if isinstance(self.offset, pd.tseries.offsets.DateOffset) and not isinstance(
             y.index, pd.DatetimeIndex
         ):
-            raise Exception(
+            raise TypeError(
                 "If `offset` is a pandas DateOffset, the index of `y` must be a "
                 "pandas DatetimeIndex with a frequency."
             )
@@ -233,6 +243,8 @@ class ForecasterEquivalentDate():
         if isinstance(self.offset, pd.tseries.offsets.DateOffset):
             # Calculate the window_size in steps for compatibility with the
             # check_predict_input function.
+            #TODO: review if it is needed to pass the whole series to avoid
+            #      errors when the offset is larger than the data available.
             last_window_start = (y_index[-1] - self.offset * self.n_offsets)
             self.window_size = int((y_index[-1] - last_window_start) / y_index.freq)
         
