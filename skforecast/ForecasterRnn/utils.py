@@ -32,22 +32,35 @@ def create_and_compile_model(
     """
     Creates a neural network model for time series prediction with flexible recurrent layers.
 
-    Parameters:
-    series (pd.DataFrame): Input time series data represented as a pandas DataFrame.
-    lags (int or list): Number of lagged time steps to consider in the input, or a list of specific lag indices.
-    steps (int or list): Number of steps to predict into the future, or a list of specific step indices.
-    levels (str, int, or list, optional): Number of output levels (features) to predict, or a list of specific level indices.
+    Parameters
+    ----------
+    series : np.ndarray
+        Input time series data represented as a NumPy array.
+    lags : int or list
+        Number of lagged time steps to consider in the input, or a list of specific lag indices.
+    steps : int or list
+        Number of steps to predict into the future, or a list of specific step indices.
+    levels : str, int, or list, optional
+        Number of output levels (features) to predict, or a list of specific level indices.
         If None, defaults to the number of input series. Default is None.
-    recurrent_layer (str, optional): Type of recurrent layer to be used ('LSTM' or 'RNN'). Default is 'LSTM'.
-    recurrent_units (int or list, optional): Number of units in the recurrent layer(s). Can be an integer or a list of integers for multiple layers.
+    recurrent_layer : str, optional
+        Type of recurrent layer to be used ('LSTM' or 'RNN'). Default is 'LSTM'.
+    recurrent_units : int or list, optional
+        Number of units in the recurrent layer(s). Can be an integer or a list of integers for multiple layers.
         Default is 100.
-    dense_units (list, optional): List of integers representing the number of units in each dense layer. Default is [64].
-    activation (str, optional): Activation function for the recurrent and dense layers. Default is 'relu'.
-    optimizer (object, optional): Optimization algorithm and learning rate. Default is Adam(learning_rate=0.01).
-    loss (object, optional): Loss function for model training. Default is MeanSquaredError().
+    dense_units : list, optional
+        List of integers representing the number of units in each dense layer. Default is [64].
+    activation : str, optional
+        Activation function for the recurrent and dense layers. Default is 'relu'.
+    optimizer : object, optional
+        Optimization algorithm and learning rate. Default is Adam(learning_rate=0.01).
+    loss : object, optional
+        Loss function for model training. Default is MeanSquaredError().
 
-    Returns:
-    model (tf.keras.models.Model): Compiled neural network model.
+    Returns
+    -------
+    model : tf.keras.models.Model
+        Compiled neural network model.
     """
 
     n_series = series.shape[1]
