@@ -108,15 +108,7 @@ class ForecasterEquivalentDate():
         First and last values of index of the data used during training.
     fitted : bool
         Tag to identify if the regressor has been fitted (trained).
-    transformer_y : Ignored
-            Not used, present here for API consistency by convention.
-    transformer_exog : Ignored
-            Not used, present here for API consistency by convention.
-    weight_func : Ignored
-            Not used, present here for API consistency by convention.
     differentiation : Ignored
-            Not used, present here for API consistency by convention.
-    fit_kwargs : Ignored
             Not used, present here for API consistency by convention.
     creation_date : str
         Date of creation.
@@ -143,23 +135,11 @@ class ForecasterEquivalentDate():
         self.n_offsets               = n_offsets
         self.agg_func                = agg_func
         self.regressor               = None
-        self.transformer_y           = None
-        self.transformer_exog        = None
-        self.weight_func             = None
         self.differentiation         = None
-        self.differentiator          = None
-        self.source_code_weight_func = None
         self.last_window             = None
         self.index_type              = None
         self.index_freq              = None
         self.training_range          = None
-        self.included_exog           = False
-        self.exog_type               = None
-        self.exog_dtypes             = None
-        self.exog_col_names          = None
-        self.X_train_col_names       = None
-        self.in_sample_residuals     = None
-        self.out_sample_residuals    = None
         self.fitted                  = False
         self.creation_date           = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
         self.fit_date                = None
