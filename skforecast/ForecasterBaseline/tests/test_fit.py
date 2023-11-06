@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 from pandas.tseries.offsets import DateOffset
 import pytest
-from skforecast.ForecasterEquivalentDate import ForecasterEquivalentDate
+from skforecast.ForecasterBaseline import ForecasterEquivalentDate
 
 
 def test_fit_offset_DateOffset_y_index_not_DatetimeIndex():

@@ -1,9 +1,12 @@
 # Unit test __init__ ForecasterEquivalentDate
 # ==============================================================================
+import re
 import pytest
 import numpy as np
 import pandas as pd
-from skforecast.ForecasterEquivalentDate import ForecasterEquivalentDate
+from skforecast.ForecasterBaseline import ForecasterEquivalentDate
+import skforecast
+import sys
 
 
 def test_init_offset_not_int_or_DateOffset():

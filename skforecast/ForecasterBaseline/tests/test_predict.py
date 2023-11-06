@@ -1,15 +1,13 @@
 # Unit test predict ForecasterEquivalentDate
 # ==============================================================================
+import pytest
 from pytest import approx
 import numpy as np
 import pandas as pd
-from skforecast.baseline import ForecasterEquivalentDate
+from skforecast.ForecasterBaseline import ForecasterEquivalentDate
 
 # Fixtures
-from .fixtures_ForecasterAutoregCustom import y
-
-import pytest
-from skforecast.baseline import ForecasterEquivalentDate
+from .fixtures_ForecasterEquivalentDate import y
 
 
 def test_predict_exception_with_unfitted_forecaster():
