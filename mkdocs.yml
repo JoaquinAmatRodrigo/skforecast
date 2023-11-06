@@ -34,6 +34,7 @@ nav:
       - Independent multi-time series forecasting: user_guides/independent-multi-time-series-forecasting.ipynb
       - Dependent multivariate series forecasting: user_guides/dependent-multi-series-multivariate-forecasting.ipynb
       - ARIMA and SARIMAX forecasting: user_guides/forecasting-sarimax-arima.ipynb
+      - Foreasting baseline: user_guides/forecasting-baseline.ipynb
       - Exogenous variables: user_guides/exogenous-variables.ipynb
       - Custom predictors: user_guides/custom-predictors.ipynb
       - Weighted time series forecasting: user_guides/weighted-time-series-forecasting.ipynb
