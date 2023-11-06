@@ -24,7 +24,7 @@ def test_predict_exception_with_unfitted_forecaster():
         forecaster.predict(steps=3)
 
 
-def test_predict_with_int_offset_offset_1_n_offsets_1():
+def test_predict_5_steps_with_int_offset_offset_1_n_offsets_1():
     """
     Test predict method with int offset, offset=1 and n_offsets=1.
     """
@@ -42,7 +42,7 @@ def test_predict_with_int_offset_offset_1_n_offsets_1():
     pd.testing.assert_series_equal(predictions, expected_predictions)
 
 
-def test_predict_with_int_offset_offset_7_n_offsets_1():
+def test_predict_5_steps_with_int_offset_7_n_offsets_1():
     """
     Test predict method with int offset, offset=7 and n_offsets=1.
     """
@@ -60,9 +60,9 @@ def test_predict_with_int_offset_offset_7_n_offsets_1():
     pd.testing.assert_series_equal(predictions, expected_predictions)
 
 
-def test_predict_with_int_offset_offset_7_n_offsets_1():
+def test_predict_7_steps_with_int_offset_7_n_offsets_2():
     """
-    Test predict method with int offset, offset=7 and n_offsets=1.
+    Test predict method with int offset, offset=7 and n_offsets=2.
     """
     forecaster = ForecasterEquivalentDate(
         offset=7,
@@ -80,7 +80,7 @@ def test_predict_with_int_offset_offset_7_n_offsets_1():
     pd.testing.assert_series_equal(predictions, expected_predictions)
 
 
-def test_predict_with_int_offset_offset_7_n_offsets_1_using_last_window():
+def test_predict_7_steps_with_int_offset_5_n_offsets_1_using_last_window():
     """
     Test predict method with int offset, offset=1 and n_offsets=1, using last_window.
     """
@@ -104,7 +104,7 @@ def test_predict_with_int_offset_offset_7_n_offsets_1_using_last_window():
     pd.testing.assert_series_equal(predictions, expected_predictions)
 
 
-def test_predict_with_int_offset_offset_7_n_offsets_2_using_last_window():
+def test_predict_7_steps_with_int_offset_5_n_offsets_2_using_last_window():
     """
     Test predict method with int offset, offset=1 and n_offsets=1, using last_window.
     """
@@ -129,3 +129,51 @@ def test_predict_with_int_offset_offset_7_n_offsets_2_using_last_window():
     pd.testing.assert_series_equal(predictions, expected_predictions)
 
 
+def test_predict_7_steps_with_int_offset_Day_5__n_offsets_1_using_last_window():
+    """
+    Test predict method with int offset, offset=pd.offsets.Day() and n_offsets=1, using last_window.
+    """
+    last_window = pd.Series(
+        data = np.array([0.73799541, 0.18249173, 0.17545176, 0.53155137, 0.53182759]),
+        index = pd.date_range(start='2000-08-10', periods=5, freq='D'),
+        name = 'y'
+    )
+    forecaster = ForecasterEquivalentDate(
+                    offset    = pd.offsets.Day(5),
+                    n_offsets = 1
+                 )
+    forecaster.fit(y=y)
+    predictions = forecaster.predict(steps=7, last_window=last_window)
+    expected_predictions = pd.Series(
+        data = np.array([0.73799541, 0.18249173, 0.17545176, 0.53155137, 0.53182759,
+                         0.73799541, 0.18249173]),
+        index = pd.date_range(start='2000-08-15', periods=7, freq='D'),
+        name = 'pred'
+    )
+    pd.testing.assert_series_equal(predictions, expected_predictions)
+
+
+def test_predict_7_steps_with_int_offset_Day_5_n_offsets_2_using_last_window():
+    """
+    Test predict method with int offset, offset=pd.offsets.Day(5) and n_offsets=2,
+    using last_window.
+    """
+    last_window = pd.Series(
+        data = np.array([0.73799541, 0.18249173, 0.17545176, 0.53155137, 0.53182759,
+                         0.25045537, 0.48303426, 0.98555979, 0.51948512, 0.61289453]),
+        index = pd.date_range(start='2000-08-05', periods=10, freq='D'),
+        name = 'y'
+    )
+    forecaster = ForecasterEquivalentDate(
+                    offset    = pd.offsets.Day(5),
+                    n_offsets = 2
+                 )
+    forecaster.fit(y=y)
+    predictions = forecaster.predict(steps=7, last_window=last_window)
+    expected_predictions = pd.Series(
+        data = np.array([0.49422539, 0.332763, 0.58050578, 0.52551824, 0.57236106,
+                         0.49422539, 0.332763]),
+        index = pd.date_range(start='2000-08-15', periods=7, freq='D'),
+        name = 'pred'
+    )
+    pd.testing.assert_series_equal(predictions, expected_predictions)
