@@ -63,6 +63,7 @@ nav:
       - ForecasterMultiVariate: api/ForecasterMultiVariate.md
       - ForecasterSarimax: api/ForecasterSarimax.md
       - Sarimax: api/Sarimax.md
+      - ForecasterBaseline: api/ForecasterBaseline.md
       - model_selection: api/model_selection.md
       - model_selection_multiseries: api/model_selection_multiseries.md
       - model_selection_sarimax: api/model_selection_sarimax.md
