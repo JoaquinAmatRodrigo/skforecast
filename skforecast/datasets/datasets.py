@@ -17,7 +17,9 @@ def fetch_dataset(
     verbose: bool = True
 ) -> pd.DataFrame:
     """
-    Fetch a dataset from the skforecast repository.
+    Fetch a dataset from the skforecast-datasets repository. Available datasets
+    are: 'h2o', 'items_sales', 'air_pollution', 'fuel_consumption', 'web_visits',
+    'bike_sharing', 'store_item_demand'.
 
     Parameters
     ----------

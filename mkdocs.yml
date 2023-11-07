@@ -68,6 +68,7 @@ nav:
       - preprocessing: api/preprocessing.md
       - plot: api/plot.md
       - utils: api/utils.md
+      - datasets: api/datasets.md
       - exceptions: api/exceptions.md
 
   - FAQ and Tips:
