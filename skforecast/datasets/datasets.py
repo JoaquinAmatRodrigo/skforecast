@@ -57,8 +57,9 @@ def fetch_dataset(
             'freq': 'MS',
             'description': (
                 'Monthly expenditure ($AUD) on corticosteroid drugs that the Australian '
-                'health system had between 1991 and 2008.\nObtained from the book: '
-                'Forecasting: Principles and Practice by Rob J Hyndman and George Athanasopoulos.'
+                'health system had between 1991 and 2008. Hyndman, R.J., & Athanasopoulos, '
+                'G. (2021) Forecasting: principles and practice, 3rd edition, OTexts: '
+                'Melbourne, Australia. OTexts.com/fpp3. '
             )
         },
         'items_sales': {
