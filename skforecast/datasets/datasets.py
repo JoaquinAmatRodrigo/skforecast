@@ -80,7 +80,77 @@ def fetch_dataset(
             'date_format': '%Y-%m-%d',
             'freq': 'D',
             'description': ''
-        }
+        },
+        'fuel_consumption': {
+            'url' : (
+                'https://raw.githubusercontent.com/JoaquinAmatRodrigo/Estadistica-machine-learning-python/'
+                'master/data/consumos-combustibles-mensual.csv'
+            ),
+            'sep': ',',
+            'index_col': 'Fecha',
+            'date_format': '%Y-%m-%d',
+            'freq': 'MS',
+            'description': (
+                'Monthly fuel consumption in Spain from 1969-01-01 to 2022-08-01.'
+                '\nObtained from Corporación de Reservas Estratégicas de Productos '
+                'Petrolíferos and Corporación de Derecho Público tutelada por el '
+                'Ministerio para la Transición Ecológica y el Reto Demográfico. '
+                'https://www.cores.es/es/estadisticas'
+            )
+        },
+        'web_visits': {
+            'url' : (
+                'https://raw.githubusercontent.com/JoaquinAmatRodrigo/Estadistica-machine-learning-python/'
+                'master/data/visitas_por_dia_web_cienciadedatos.csv'
+            ),
+            'sep': ',',
+            'index_col': 'date',
+            'date_format': '%Y-%m-%d',
+            'freq': '1D',
+            'description': (
+                'Daily visits to the cienciadedatos.net website registered with the google '
+                'analytics service.'
+            )
+        },
+        'bike_sharing': {
+            'url' : (
+                'https://raw.githubusercontent.com/JoaquinAmatRodrigo/Estadistica-machine-'
+                'learning-python/master/data/bike_sharing_dataset_clean.csv'
+            ),
+            'sep': ',',
+            'index_col': 'date_time',
+            'date_format': '%Y-%m-%d %H:%M:%S',
+            'freq': 'H',
+            'description': (
+                """
+                Hourly usage of the bike share system in the city of Washington,
+                D.C. during the years 2011 and 2012. In addition to the number of
+                users per hour, information about weather conditions and holidays
+                is available. The original data was obtained from:
+                Fanaee-T,Hadi. (2013). Bike Sharing Dataset. UCI Machine Learning
+                Repository. https://doi.org/10.24432/C5W894.
+                """
+            )
+        },
+        'store_item_demand': {
+            'url' : (
+                'https://raw.githubusercontent.com/JoaquinAmatRodrigo/Estadistica-machine-'
+                'learning-python/master/data/bike_sharing_dataset_clean.csv'
+            ),
+            'sep': ',',
+            'index_col': 'date_time',
+            'date_format': '%Y-%m-%d %H:%M:%S',
+            'freq': 'H',
+            'description': (
+                """
+                This dataset contains 913,000 sales transactions from 2013-01-01
+                to 2017-12-31 for 50 products (SKU) in 10 stores. The original data
+                was obtained from:
+                inversion. (2018). Store Item Demand Forecasting Challenge. Kaggle.
+                https://kaggle.com/competitions/demand-forecasting-kernels-only
+                """
+            )
+        },
     }
     
     if name not in datasets.keys():
