@@ -31,6 +31,8 @@ from ..utils import expand_index
 from ..utils import transform_series
 from ..utils import transform_dataframe
 
+from sklearn.preprocessing import MinMaxScaler
+
 logging.basicConfig(
     format="%(name)-10s %(levelname)-5s %(message)s",
     level=logging.INFO,
@@ -177,7 +179,7 @@ class ForecasterRnn(ForecasterBase):
         self,
         regressor: object,
         levels: Union[str, list],
-        transformer_series: Optional[Union[object, dict]] = None, # TODO. add scaler by default
+        transformer_series: Optional[Union[object, dict]] = MinMaxScaler(),
         weight_func: Optional[Callable] = None,
         fit_kwargs: Optional[dict] = None,
         forecaster_id: Optional[Union[str, int]] = None,
@@ -223,7 +225,6 @@ class ForecasterRnn(ForecasterBase):
         layer_end = self.regressor.layers[-1]
         self.steps = layer_end.output_shape[1]
         self.outputs = layer_end.output_shape[-1]
-        #TODO. Check dimensions
         if not isinstance(levels, (list, str, type(None))):
             raise TypeError(
                 f"`levels` argument must be a string, list or. Got {type(levels)}."
