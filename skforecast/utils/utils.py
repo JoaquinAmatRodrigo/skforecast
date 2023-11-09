@@ -32,8 +32,8 @@ optional_dependencies = {
         'statsmodels>=0.12, <0.15'
     ],
     "plotting": [
-        'matplotlib>=3.3, <3.8', 
-        'seaborn>=0.11, <0.13', 
+        'matplotlib>=3.3, <3.9', 
+        'seaborn>=0.11, <0.14', 
         'statsmodels>=0.12, <0.15'
     ]
 }
