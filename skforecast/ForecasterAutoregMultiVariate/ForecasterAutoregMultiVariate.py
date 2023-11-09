@@ -527,7 +527,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             self.exog_dtypes = get_exog_dtypes(exog=exog)
 
             _, exog_index = preprocess_exog(exog=exog, return_values=False)
-            if not (exog_index[:len(series.index)] == series.index).all():
+            if not (exog.index[:len(series)] == series.index).all():
                 raise ValueError(
                     ("Different index for `series` and `exog`. They must be equal "
                      "to ensure the correct alignment of values.") 
@@ -573,6 +573,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                                 exog  = exog,
                                 steps = self.steps
                             ).iloc[-X_train.shape[0]:, :]
+            exog_to_train.index = exog_index[-X_train.shape[0]:]
             X_train = pd.concat((X_train, exog_to_train), axis=1)
         
         self.X_train_col_names = X_train.columns.to_list()

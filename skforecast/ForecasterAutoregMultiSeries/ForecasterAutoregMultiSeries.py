@@ -448,8 +448,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             check_exog_dtypes(exog)
             self.exog_dtypes = get_exog_dtypes(exog=exog)
 
-            _, exog_index = preprocess_exog(exog=exog, return_values=False)
-            if not (exog_index[:len(series.index)] == series.index).all():
+            _, _ = preprocess_exog(exog=exog, return_values=False)
+            if not (exog.index[:len(series)] == series.index).all():
                 raise ValueError(
                     ("Different index for `series` and `exog`. They must be equal "
                      "to ensure the correct alignment of values.")

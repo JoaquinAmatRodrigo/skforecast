@@ -122,7 +122,7 @@ def test_create_train_X_y_output_when_y_and_exog_no_pandas_index():
     that doesn't start at 0.
     """
     y = pd.Series(np.arange(10), index=np.arange(3, 13), dtype=float)
-    exog = pd.Series(np.arange(100, 110), index=np.arange(3, 13) , 
+    exog = pd.Series(np.arange(100, 110), index=np.arange(3, 13), 
                      name='exog', dtype=float)
     forecaster = ForecasterAutoreg(LinearRegression(), lags=5)
     results = forecaster.create_train_X_y(y=y, exog=exog)
