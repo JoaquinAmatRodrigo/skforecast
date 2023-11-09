@@ -190,7 +190,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         Date of creation.
     fit_date : str
         Date of last fit.
-    skforcast_version : str
+    skforecast_version : str
         Version of skforecast library used to create the forecaster.
     python_version : str
         Version of python used to create the forecaster.
@@ -252,7 +252,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.fitted                  = False
         self.creation_date           = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
         self.fit_date                = None
-        self.skforcast_version       = skforecast.__version__
+        self.skforecast_version      = skforecast.__version__
         self.python_version          = sys.version.split(" ")[0]
         self.forecaster_id           = forecaster_id
         
@@ -309,7 +309,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             f"fit_kwargs: {self.fit_kwargs} \n"
             f"Creation date: {self.creation_date} \n"
             f"Last fit date: {self.fit_date} \n"
-            f"Skforecast version: {self.skforcast_version} \n"
+            f"Skforecast version: {self.skforecast_version} \n"
             f"Python version: {self.python_version} \n"
             f"Forecaster id: {self.forecaster_id} \n"
         )
@@ -448,8 +448,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             check_exog_dtypes(exog)
             self.exog_dtypes = get_exog_dtypes(exog=exog)
 
-            _, exog_index = preprocess_exog(exog=exog, return_values=False)
-            if not (exog_index[:len(series.index)] == series.index).all():
+            _, _ = preprocess_exog(exog=exog, return_values=False)
+            if not (exog.index[:len(series)] == series.index).all():
                 raise ValueError(
                     ("Different index for `series` and `exog`. They must be equal "
                      "to ensure the correct alignment of values.")
@@ -1338,7 +1338,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         for level in levels:
             preds_quantiles = boot_predictions[level].quantile(q=quantiles, axis=1).transpose()
-            preds_quantiles.columns = [f'{level}_{q}' for q in quantiles]
+            preds_quantiles.columns = [f'{level}_q_{q}' for q in quantiles]
             predictions.append(preds_quantiles)
         
         predictions = pd.concat(predictions, axis=1)

@@ -178,7 +178,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         Date of creation.
     fit_date : str
         Date of last fit.
-    skforcast_version : str
+    skforecast_version : str
         Version of skforecast library used to create the forecaster.
     python_version : str
         Version of python used to create the forecaster.
@@ -226,7 +226,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         self.fitted                     = False
         self.creation_date              = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
         self.fit_date                   = None
-        self.skforcast_version          = skforecast.__version__
+        self.skforecast_version         = skforecast.__version__
         self.python_version             = sys.version.split(" ")[0]
         self.forecaster_id              = forecaster_id
         
@@ -300,7 +300,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             f"fit_kwargs: {self.fit_kwargs} \n"
             f"Creation date: {self.creation_date} \n"
             f"Last fit date: {self.fit_date} \n"
-            f"Skforecast version: {self.skforcast_version} \n"
+            f"Skforecast version: {self.skforecast_version} \n"
             f"Python version: {self.python_version} \n"
             f"Forecaster id: {self.forecaster_id} \n"
         )
@@ -363,17 +363,17 @@ class ForecasterAutoregCustom(ForecasterBase):
             check_exog(exog=exog, allow_nan=True)
             if isinstance(exog, pd.Series):
                 exog = transform_series(
-                            series            = exog,
-                            transformer       = self.transformer_exog,
-                            fit               = True,
-                            inverse_transform = False
+                           series            = exog,
+                           transformer       = self.transformer_exog,
+                           fit               = True,
+                           inverse_transform = False
                        )
             else:
                 exog = transform_dataframe(
-                            df                = exog,
-                            transformer       = self.transformer_exog,
-                            fit               = True,
-                            inverse_transform = False
+                           df                = exog,
+                           transformer       = self.transformer_exog,
+                           fit               = True,
+                           inverse_transform = False
                        )
             
             check_exog(exog=exog, allow_nan=False)
@@ -436,6 +436,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             # The first `self.window_size` positions have to be removed from exog
             # since they are not in X_train.
             exog_to_train = exog.iloc[self.window_size:, ]
+            exog_to_train.index = exog_index[self.window_size:]
             check_exog_dtypes(exog_to_train)
             X_train = pd.concat((X_train, exog_to_train), axis=1)
         
@@ -1090,6 +1091,7 @@ class ForecasterAutoregCustom(ForecasterBase):
                            )
 
         predictions = boot_predictions.quantile(q=quantiles, axis=1).transpose()
+        predictions.columns = [f'q_{q}' for q in quantiles]
 
         return predictions
 
