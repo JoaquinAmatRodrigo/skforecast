@@ -32,6 +32,8 @@ from ..utils import transform_series
 from ..utils import transform_dataframe
 
 from sklearn.preprocessing import MinMaxScaler
+import matplotlib.pyplot as plt
+
 
 logging.basicConfig(
     format="%(name)-10s %(levelname)-5s %(message)s",
@@ -650,7 +652,58 @@ class ForecasterRnn(ForecasterBase):
             predictions.loc[:, serie] = x
 
         return predictions
+    
 
+    def plot_history(self):
+        """
+        Plots the training and validation loss curves from the given history object stores
+        in the ForecasterRnn.
+
+        Parameters
+        ----------
+        None
+
+        Raises
+        ------
+        ValueError
+            If 'val_loss' key is not present in the history dictionary.
+
+        Returns
+        -------
+        None
+        """
+        # Setting up the plot style
+        
+        if self.history is None:
+            raise ValueError("ForecasterRnn has not been fitted yet.")
+        
+        plt.figure(figsize=(10, 4))
+
+        # Plotting training loss
+        plt.plot(range(1, len(self.history['loss']) + 1), self.history['loss'], color='b', label='Training Loss')
+        
+        # Plotting validation loss
+        if 'val_loss' in self.history:
+            plt.plot(range(1, len(self.history['val_loss']) + 1), self.history['val_loss'], color='r', label='Validation Loss')
+        
+        # Labeling the axes and adding a title
+        plt.xlabel('Epochs')
+        plt.ylabel('Loss')
+        plt.title('Training and Validation Loss')
+        
+        # Adding a legend
+        plt.legend()
+
+        # Displaying grid for better readability
+        plt.grid(True, linestyle='--', alpha=0.7)
+
+        # Setting x-axis ticks to integers only
+        plt.xticks(range(1, len(self.history['loss']) + 1))
+
+        # Showing the plot
+        plt.show()
+        
+        
     # def predict_bootstrapping(
     #     self,
     #     steps: Optional[Union[int, list]] = None,
