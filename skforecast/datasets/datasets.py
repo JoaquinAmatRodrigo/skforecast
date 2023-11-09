@@ -281,8 +281,6 @@ def fetch_dataset(
         )
     
     url = datasets[name]['url']
-    if version != 'latest':
-        url = url.replace('master', f'{version}')
 
     try:
         sep = datasets[name]['sep']
