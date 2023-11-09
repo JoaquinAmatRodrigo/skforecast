@@ -1,6 +1,10 @@
+# Unit test fetch_dataset
+# ==============================================================================
+import re
 import pytest
 import pandas as pd
 from skforecast.datasets import fetch_dataset
+
 
 def test_fetch_dataset():
     """
