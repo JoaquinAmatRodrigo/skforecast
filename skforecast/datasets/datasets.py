@@ -7,6 +7,7 @@
 # coding=utf-8
 
 import pandas as pd
+import textwrap
 
 
 def fetch_dataset(
@@ -51,37 +52,47 @@ def fetch_dataset(
     datasets = {
         'h2o': {
             'url': (
-                f'https://raw.githubusercontent.com/JoaquinAmatRodrigo/skforecast-datasets/{version}/data/h2o.csv'
+                f'https://raw.githubusercontent.com/JoaquinAmatRodrigo/'
+                f'skforecast-datasets/{version}/data/h2o.csv'
             ),
             'sep': ',',
             'index_col': 'fecha',
             'date_format': '%Y-%m-%d',
             'freq': 'MS',
             'description': (
-                'Monthly expenditure ($AUD) on corticosteroid drugs that the Australian health system had between 1991 and 2008.'
+                'Monthly expenditure ($AUD) on corticosteroid drugs that the '
+                'Australian health system had between 1991 and 2008. '
             ),
             'source': (
-                "Hyndman R (2023). fpp3: Data for Forecasting: Principles and Practice (3rd Edition). http://pkg.robjhyndman.com/fpp3package/, https://github.com/robjhyndman/fpp3package, http://OTexts.com/fpp3."
+                'Hyndman R (2023). fpp3: Data for Forecasting: Principles and Practice'
+                '(3rd Edition). http://pkg.robjhyndman.com/fpp3package/,'
+                'https://github.com/robjhyndman/fpp3package, http://OTexts.com/fpp3.'
             )
         },
         'h2o_exog': {
             'url': (
-                f"https://raw.githubusercontent.com/JoaquinAmatRodrigo/skforecast/{version}/data/h2o_exog.csv"
+                f"https://raw.githubusercontent.com/JoaquinAmatRodrigo/"
+                f"skforecast-datasets/{version}/data/h2o_exog.csv"
             ),
             'sep': ',',
             'index_col': 'fecha',
             'date_format': '%Y-%m-%d',
             'freq': 'MS',
             'description': (
-                'Monthly expenditure ($AUD) on corticosteroid drugs that the Australian health system had between 1991 and 2008. Two additional variables (exog_1, exog_2) are simulated.'
+                'Monthly expenditure ($AUD) on corticosteroid drugs that the '
+                'Australian health system had between 1991 and 2008. Two additional '
+                'variables (exog_1, exog_2) are simulated.'
             ),
             'source': (
-                "Hyndman R (2023). fpp3: Data for Forecasting: Principles and Practice (3rd Edition). http://pkg.robjhyndman.com/fpp3package/, https://github.com/robjhyndman/fpp3package, http://OTexts.com/fpp3."
+                "Hyndman R (2023). fpp3: Data for Forecasting: Principles and Practice "
+                "(3rd Edition). http://pkg.robjhyndman.com/fpp3package/, "
+                "https://github.com/robjhyndman/fpp3package, http://OTexts.com/fpp3."
             )
         },
         'fuel_consumption': {
             'url' : (
-                f'https://raw.githubusercontent.com/JoaquinAmatRodrigo/skforecast-datasets/{version}/data/data/consumos-combustibles-mensual.csv'
+                f'https://raw.githubusercontent.com/JoaquinAmatRodrigo/'
+                f'skforecast-datasets/{version}/data/consumos-combustibles-mensual.csv'
             ),
             'sep': ',',
             'index_col': 'Fecha',
@@ -91,12 +102,16 @@ def fetch_dataset(
                 'Monthly fuel consumption in Spain from 1969-01-01 to 2022-08-01.'
             ),
             'source': (
-                'Obtained from Corporación de Reservas Estratégicas de Productos Petrolíferos and Corporación de Derecho Público tutelada por el Ministerio para la Transición Ecológica y el Reto Demográfico. https://www.cores.es/es/estadisticas'
+                'Obtained from Corporación de Reservas Estratégicas de Productos '
+                'Petrolíferos and Corporación de Derecho Público tutelada por el '
+                'Ministerio para la Transición Ecológica y el Reto Demográfico. '
+                'https://www.cores.es/es/estadisticas'
             )
         },
         'items_sales': {
             'url': (
-                f'https://raw.githubusercontent.com/JoaquinAmatRodrigo/skforecast-datasets/{version}/data/simulated_items_sales.csv'
+                f'https://raw.githubusercontent.com/JoaquinAmatRodrigo/'
+                f'skforecast-datasets/{version}/data/simulated_items_sales.csv'
             ),
             'sep': ',',
             'index_col': 'date',
@@ -107,108 +122,156 @@ def fetch_dataset(
         },
         'air_quality_valencia': {
             'url': (
-                f"https://raw.githubusercontent.com/JoaquinAmatRodrigo/skforecast-datasets/{version}/data/air_quality_valencia.csv"
+                f"https://raw.githubusercontent.com/JoaquinAmatRodrigo/"
+                f"skforecast-datasets/{version}/data/air_quality_valencia.csv"
             ),
             'sep': ',',
             'index_col': 'datetime',
             'date_format': '%Y-%m-%d %H:%M:%S',
             'freq': 'H',
             'description': (
-                'Hourly measures of several air quimical pollutant (pm2.5, co, no, no2, pm10, nox, o3, so2) at Valencia city.'
+                'Hourly measures of several air quimical pollutant (pm2.5, co, no, '
+                'no2, pm10, nox, o3, so2) at Valencia city.'
             ),
             'source': (
-                " Red de Vigilancia y Control de la Contaminación Atmosférica, 46250054-València - Centre, https://mediambient.gva.es/es/web/calidad-ambiental/datos-historicos."
+                " Red de Vigilancia y Control de la Contaminación Atmosférica, "
+                "46250054-València - Centre, "
+                "https://mediambient.gva.es/es/web/calidad-ambiental/datos-historicos."
             )
         },
         'website_visits': {
             'url' : (
-                f'https://raw.githubusercontent.com/JoaquinAmatRodrigo/skforecast-datasets/{version}/data/visitas_por_dia_web_cienciadedatos.csv'
+                f'https://raw.githubusercontent.com/JoaquinAmatRodrigo/'
+                f'skforecast-datasets/{version}/data/visitas_por_dia_web_cienciadedatos.csv'
             ),
             'sep': ',',
             'index_col': 'date',
             'date_format': '%Y-%m-%d',
             'freq': '1D',
             'description': (
-                'Daily visits to the cienciadedatos.net website registered with the google analytics service.'
+                'Daily visits to the cienciadedatos.net website registered with the '
+                'google analytics service.'
             ),
-            'source': "Amat Rodrigo, J. (2021). cienciadedatos.net (1.0.0). Zenodo. https://doi.org/10.5281/zenodo.10006330"
+            'source': (
+                "Amat Rodrigo, J. (2021). cienciadedatos.net (1.0.0). Zenodo. "
+                "https://doi.org/10.5281/zenodo.10006330"
+            )
         },
         'bike_sharing': {
             'url' : (
-                f'https://raw.githubusercontent.com/JoaquinAmatRodrigo/skforecast-datasets/{version}/data/bike_sharing_dataset_clean.csv'
+                f'https://raw.githubusercontent.com/JoaquinAmatRodrigo/'
+                f'skforecast-datasets/{version}/data/bike_sharing_dataset_clean.csv'
             ),
             'sep': ',',
             'index_col': 'date_time',
             'date_format': '%Y-%m-%d %H:%M:%S',
             'freq': 'H',
             'description': (
-                """
-                Hourly usage of the bike share system in the city of Washington D.C. during the years 2011 and 2012. In addition to the number of users per hour, information about weather conditions and holidays is available.
-                """
+                'Hourly usage of the bike share system in the city of Washington D.C. '
+                'during the years 2011 and 2012. In addition to the number of users per '
+                'hour, information about weather conditions and holidays is available.'
             ),
             'source': (
-                "Fanaee-T,Hadi. (2013). Bike Sharing Dataset. UCI Machine Learning Repository. https://doi.org/10.24432/C5W894."
+                "Fanaee-T,Hadi. (2013). Bike Sharing Dataset. UCI Machine Learning "
+                "Repository. https://doi.org/10.24432/C5W894."
             )
         },
         'australia_tourism': {
             'url' : (
-                f'https://raw.githubusercontent.com/JoaquinAmatRodrigo/skforecast-datasets/{version}/data/australia_tourism.csv'
+                f'https://raw.githubusercontent.com/JoaquinAmatRodrigo/'
+                f'skforecast-datasets/{version}/data/australia_tourism.csv'
             ),
             'sep': ',',
             'index_col': 'date_time',
             'date_format': '%Y-%m-%d',
             'freq': 'Q',
             'description': (
-                "Quarterly overnight trips (in thousands) from 1998 Q1 to 2016 Q4 across Australia. The tourism regions are formed through the aggregation of Statistical Local Areas (SLAs) which are defined by the various State and Territory tourism authorities according to their research and marketing needs."
+                "Quarterly overnight trips (in thousands) from 1998 Q1 to 2016 Q4 "
+                "across Australia. The tourism regions are formed through the "
+                "aggregation of Statistical Local Areas (SLAs) which are defined by "
+                "the various State and Territory tourism authorities according to "
+                "their research and marketing needs."
             ),
             'source': (
-                "Wang, E, D Cook, and RJ Hyndman (2020). A new tidy data structure to support exploration and modeling of temporal data, Journal of Computational and Graphical Statistics, 29:3, 466-478, doi:10.1080/10618600.2019.1695624."
+                "Wang, E, D Cook, and RJ Hyndman (2020). A new tidy data structure to "
+                "support exploration and modeling of temporal data, Journal of "
+                "Computational and Graphical Statistics, 29:3, 466-478, "
+                "doi:10.1080/10618600.2019.1695624."
             )
         },
         'uk_daily_flights': {
-            'url' : (
-                f'https://raw.githubusercontent.com/JoaquinAmatRodrigo/skforecast-datasets/{version}/data/uk_daily_flights.csv'
+            'url': (
+                f'https://raw.githubusercontent.com/JoaquinAmatRodrigo/'
+                f'skforecast-datasets/{version}/data/uk_daily_flights.csv'
             ),
             'sep': ',',
             'index_col': 'Date',
             'date_format': '%Y-%m-%d',
             'freq': 'D',
             'description': 'Daily number of flights in UK from 02/01/2019 to 23/01/2022.',
-            'source': "Experimental statistics published as part of the Economic activity and social change in the UK, real-time indicators release, Published 27 January 2022. Daily flight numbers are available in the dashboard provided by the European Organisation for the Safety of Air Navigation (EUROCONTROL). https://www.ons.gov.uk/economy/economicoutputandproductivity/output/bulletins/economicactivityandsocialchangeintheukrealtimeindicators/latest"
+            'source': (
+                'Experimental statistics published as part of the Economic activity and '
+                'social change in the UK, real-time indicators release, Published 27 '
+                'January 2022. Daily flight numbers are available in the dashboard '
+                'provided by the European Organisation for the Safety of Air Navigation '
+                '(EUROCONTROL). '
+                'https://www.ons.gov.uk/economy/economicoutputandproductivity/output/'
+                'bulletins/economicactivityandsocialchangeintheukrealtimeindicators/latest'
+            )
         },
         'wikipedia_visits': {
-            'url' : (
-                f'https://raw.githubusercontent.com/JoaquinAmatRodrigo/skforecast-datasets/{version}/data/wikipedia_visits.csv'
+            'url': (
+                f'https://raw.githubusercontent.com/JoaquinAmatRodrigo/'
+                f'skforecast-datasets/{version}/data/wikipedia_visits.csv'
             ),
             'sep': ',',
             'index_col': 'date',
             'date_format': '%Y-%m-%d',
             'freq': 'D',
-            'description': "Log daily page views for the Wikipedia page for Peyton Manning. Scraped data using the Wikipediatrend package in R.",
-            'source': "https://github.com/facebook/prophet/blob/main/examples/example_wp_log_peyton_manning.csv"
+            'description': (
+                'Log daily page views for the Wikipedia page for Peyton Manning. '
+                'Scraped data using the Wikipediatrend package in R.'
+            ),
+            'source': (
+                'https://github.com/facebook/prophet/blob/main/examples/'
+                'example_wp_log_peyton_manning.csv'
+            )
         },
         'vic_electricity': {
-            'url' : (
-                f'https://raw.githubusercontent.com/JoaquinAmatRodrigo/skforecast-datasets/{version}/data/vic_electricity.csv'
+            'url': (
+                f'https://raw.githubusercontent.com/JoaquinAmatRodrigo/'
+                f'skforecast-datasets/{version}/data/vic_electricity.csv'
             ),
             'sep': ',',
             'index_col': 'Time',
             'date_format': '%Y-%m-%dT%H:%M:%SZ',
             'freq': '30min',
-            'description': "Half-hourly electricity demand for Victoria, Australia",
+            'description': 'Half-hourly electricity demand for Victoria, Australia',
             'source': (
-                "O'Hara-Wild M, Hyndman R, Wang E, Godahewa R (2022).tsibbledata: Diverse Datasets for 'tsibble'. https://tsibbledata.tidyverts.org/, https://github.com/tidyverts/tsibbledata/. https://tsibbledata.tidyverts.org/reference/vic_elec.html"
+                "O'Hara-Wild M, Hyndman R, Wang E, Godahewa R (2022).tsibbledata: Diverse "
+                "Datasets for 'tsibble'. https://tsibbledata.tidyverts.org/, "
+                "https://github.com/tidyverts/tsibbledata/. "
+                "https://tsibbledata.tidyverts.org/reference/vic_elec.html"
             )
         },
-        'store_item_demand': {
-            'url' : (
-                f'https://raw.githubusercontent.com/JoaquinAmatRodrigo/skforecast-datasets/{version}/data/bike_sharing_dataset_clean.csv'
+        'store_sales': {
+            'url': (
+                f'https://raw.githubusercontent.com/JoaquinAmatRodrigo/'
+                f'skforecast-datasets/{version}/data/store_sales.csv'
             ),
             'sep': ',',
-            'index_col': 'date_time',
-            'date_format': '%Y-%m-%d %H:%M:%S',
-            'freq': 'H',
-            'description': "This dataset contains 913,000 sales transactions from 2013-01-01 to 2017-12-31 for 50 products (SKU) in 10 stores. The original data was obtained from: inversion. (2018). Store Item Demand Forecasting Challenge. Kaggle. https://kaggle.com/competitions/demand-forecasting-kernels-only"
+            'index_col': 'date',
+            'date_format': '%Y-%m-%d',
+            'freq': '1D',
+            'description': (
+                'This dataset contains 913,000 sales transactions from 2013-01-01 to '
+                '2017-12-31 for 50 products (SKU) in 10 stores.'
+            ),
+            'source': (
+                'The original data was obtained from: inversion. (2018). Store Item '
+                'Demand Forecasting Challenge. Kaggle. '
+                'https://kaggle.com/competitions/demand-forecasting-kernels-only'
+            )
         }
     }
     
@@ -230,25 +293,30 @@ def fetch_dataset(
         )
 
     if not raw:
-        index_col = datasets[name]['index_col']
-        freq = datasets[name]['freq']
-        date_format = datasets[name]['date_format']
-        df = df.set_index(index_col)
-        df.index = pd.to_datetime(df.index, format=date_format)
-        df.index.freq = freq
-        df = df.sort_index()
+        try:
+            index_col = datasets[name]['index_col']
+            freq = datasets[name]['freq']
+            date_format = datasets[name]['date_format']
+            df = df.set_index(index_col)
+            df.index = pd.to_datetime(df.index, format=date_format)
+            df.index.freq = freq
+            df = df.sort_index()
+        except:
+            pass
     
     if verbose:
         print(name)
         print('-'*len(name))
-        print(datasets[name]['description'])
-        print(datasets[name]['source'])
+        description = textwrap.fill(datasets[name]['description'], width=80)
+        source = textwrap.fill(datasets[name]['source'], width=80)
+        print(description)
+        print(source)
         print(f"Shape of the dataset: {df.shape}")
 
     return df
 
 
-def load_demo_dataset() -> pd.Series:
+def load_demo_dataset(version: str = 'latest') -> pd.Series:
     """
     Load demo data set with monthly expenditure ($AUD) on corticosteroid drugs that
     the Australian health system had between 1991 and 2008. Obtained from the book:
@@ -257,7 +325,10 @@ def load_demo_dataset() -> pd.Series:
 
     Parameters
     ----------
-    None
+    version: str, default `'latest'`
+        Version of the dataset to fetch. If 'latest', the lastest version will be
+        fetched (the one in the main branch). For a list of available versions,
+        see the repository branches.
 
     Returns
     -------
@@ -265,6 +336,8 @@ def load_demo_dataset() -> pd.Series:
         Dataset.
     
     """
+
+    version = 'main' if version == 'latest' else f'{version}'
 
     url = (
         f'https://raw.githubusercontent.com/JoaquinAmatRodrigo/skforecast-datasets/{version}/'
