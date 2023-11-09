@@ -479,6 +479,7 @@ def check_predict_input(
     alpha: Optional[float]=None,
     max_steps: Optional[int]=None,
     levels: Optional[Union[str, list]]=None,
+    levels_forecaster: Optional[Union[str, list]]=None,
     series_col_names: Optional[list]=None
 ) -> None:
     """
@@ -531,6 +532,9 @@ def check_predict_input(
     levels : str, list, default `None`
         Time series to be predicted (`ForecasterAutoregMultiSeries`,
         `ForecasterAutoregMultiSeriesCustom` and `ForecasterRnn).
+    levels_forecaster : str, list, default `None`
+        Time series used as output data of a multiseries problem in a RNN problem
+        (`ForecasterRnn`).
     series_col_names : list, default `None`
         Names of the columns used during fit (`ForecasterAutoregMultiSeries`, 
         `ForecasterAutoregMultiSeriesCustom`, `ForecasterAutoregMultiVariate`
@@ -571,8 +575,7 @@ def check_predict_input(
         check_interval(interval=interval, alpha=alpha)
     
     if forecaster_name in ['ForecasterAutoregMultiSeries', 
-                           'ForecasterAutoregMultiSeriesCustom',
-                           'ForecasterRnn']:
+                           'ForecasterAutoregMultiSeriesCustom']:
         if levels is not None and not isinstance(levels, (str, list)):
             raise TypeError(
                 ("`levels` must be a `list` of column names, a `str` of a "
@@ -583,7 +586,18 @@ def check_predict_input(
                 f"`levels` names must be included in the series used during fit "
                 f"({series_col_names}). Got {levels}."
             )
-
+            
+    if forecaster_name in ['ForecasterRnn']:
+        if levels is not None and not isinstance(levels, (str, list)):
+            raise TypeError(
+                ("`levels` must be a `list` of column names, a `str` of a "
+                 "column name or `None`.")
+            )
+        if len(set(levels) - set(levels_forecaster)) != 0:
+            raise ValueError(
+                f"`levels` names must be included in the series used during fit "
+                f"({levels_forecaster}). Got {levels}."
+            )
     if exog is None and included_exog:
         raise ValueError(
             ("Forecaster trained with exogenous variable/s. "

@@ -36,6 +36,10 @@ logging.basicConfig(
     level=logging.INFO,
 )
 
+# TODO. Probar Interval
+# TODO. Grid search
+# TODO. Integrate plot history 
+# TODO. Add scaler by default
 
 class ForecasterRnn(ForecasterBase):
     """
@@ -173,7 +177,7 @@ class ForecasterRnn(ForecasterBase):
         self,
         regressor: object,
         levels: Union[str, list],
-        transformer_series: Optional[Union[object, dict]] = None,
+        transformer_series: Optional[Union[object, dict]] = None, # TODO. add scaler by default
         weight_func: Optional[Callable] = None,
         fit_kwargs: Optional[dict] = None,
         forecaster_id: Optional[Union[str, int]] = None,
@@ -219,7 +223,7 @@ class ForecasterRnn(ForecasterBase):
         layer_end = self.regressor.layers[-1]
         self.steps = layer_end.output_shape[1]
         self.outputs = layer_end.output_shape[-1]
-
+        #TODO. Check dimensions
         if not isinstance(levels, (list, str, type(None))):
             raise TypeError(
                 f"`levels` argument must be a string, list or. Got {type(levels)}."
@@ -604,6 +608,7 @@ class ForecasterRnn(ForecasterBase):
             alpha=None,
             max_steps=self.steps,
             levels=levels,
+            levels_forecaster=self.levels,
             series_col_names=self.series_col_names,
         )
 
