@@ -264,10 +264,12 @@ def test_create_train_X_y_output_when_y_and_exog_no_pandas_index():
                              [7., 6., 5., 4., 3., 108.],
                              [8., 7., 6., 5., 4., 109.]]),
             index   = pd.RangeIndex(start=5, stop=10, step=1),
-            columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 'exog']
+            columns = ['custom_predictor_0', 'custom_predictor_1',
+                       'custom_predictor_2', 'custom_predictor_3',
+                       'custom_predictor_4', 'exog']
         ).astype({'exog': float}),
         pd.Series(
-            data  = np.array([5, 6, 7, 8, 9]),
+            data  = np.array([5., 6., 7., 8., 9.]),
             index = pd.RangeIndex(start=5, stop=10, step=1),
             name  = 'y',
             dtype = float

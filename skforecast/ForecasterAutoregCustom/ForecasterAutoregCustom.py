@@ -436,7 +436,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             # The first `self.window_size` positions have to be removed from exog
             # since they are not in X_train.
             exog_to_train = exog.iloc[self.window_size:, ]
-            exog_to_train.index = exog_index[self.max_lag:]
+            exog_to_train.index = exog_index[self.window_size:]
             check_exog_dtypes(exog_to_train)
             X_train = pd.concat((X_train, exog_to_train), axis=1)
         
