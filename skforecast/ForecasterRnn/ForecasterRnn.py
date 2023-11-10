@@ -42,9 +42,6 @@ logging.basicConfig(
 
 # TODO. Probar Interval
 # TODO. Grid search
-# TODO. Integrate plot history 
-# TODO. Add scaler by default
-
 class ForecasterRnn(ForecasterBase):
     """
     This class turns any regressor compatible with the TensorFlow API into a
