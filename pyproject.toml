@@ -47,8 +47,8 @@ sarimax = [
     "statsmodels>=0.12, <0.15",
 ]
 
-rnn = [
-    "tensorflow>=2.13.0"
+deep_leerning = [
+    "tensorflow>=2.12, <2.14"
 ]
 
 plotting = [
