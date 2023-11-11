@@ -1,17 +1,16 @@
 ################################################################################
-#                        ForecasterEquivalentDate                              #
+#                           ForecasterEquivalentDate                           #
 #                                                                              #
 # This work by skforecast team is licensed under the BSD 3-Clause License.     #
 ################################################################################
 # coding=utf-8
 
-from typing import Union, Tuple, Optional, Callable
+from typing import Union, Tuple, Optional, Callable, Any
 import warnings
 import logging
 import sys
 import numpy as np
 import pandas as pd
-from sklearn.base import clone
 from copy import copy
 
 import skforecast
@@ -31,10 +30,10 @@ class ForecasterEquivalentDate():
     This forecaster predicts future values based on the most recent equivalent
     date. It also allows to aggregate multiple past values of the equivalent
     date using a function (e.g. mean, median, max, min, etc.). The equivalent
-    date is calculated by moving back in time a given number of steps (offset).
+    date is calculated by moving back in time a specified number of steps (offset).
     The offset can be defined as an integer or as a pandas DateOffset. This
-    approach is useful as a baseline, however, it is a simplistic method and may
-    not capture complex underlying patterns.
+    approach is useful as a baseline, but it is a simplistic method and may not
+    capture complex underlying patterns.
     
     Parameters
     ----------
@@ -46,21 +45,22 @@ class ForecasterEquivalentDate():
         `offset = 7` means that the most recent data similar to the target
         period is the value observed 7 days ago.
         Pandas DateOffsets can also be used to move forward a given number of 
-        valid dates. For example, Bday(2) can be used to move two business days
-        backward. If the date does not start on a valid date, first it is moved 
-        to a valid date. For example, if the date is a Saturday, it is moved to
-        the previous Friday. Then, the offset is applied. If the result is a non
-        valid date, it is moved to the next valid date. For example, if the date
-        is a Sunday, it is moved to the next Monday. Find more information about
-        offsets in https://pandas.pydata.org/docs/reference/offset_frequency.html.
-    n_offsets : int, default 1
+        valid dates. For example, Bday(2) can be used to move back two business 
+        days. If the date does not start on a valid date, it is first moved to a 
+        valid date. For example, if the date is a Saturday, it is moved to the 
+        previous Friday. Then, the offset is applied. If the result is a non-valid 
+        date, it is moved to the next valid date. For example, if the date
+        is a Sunday, it is moved to the next Monday. 
+        For more information about offsets, see
+        https://pandas.pydata.org/docs/reference/offset_frequency.html.
+    n_offsets : int, default `1`
         Number of equivalent dates (multiple of offset) used in the prediction.
         If `offset` is greater than 1, the value at the equivalent dates is
-        aggregated using the function `agg_func`. For example, if the frequency
+        aggregated using the `agg_func` function. For example, if the frequency
         of the time series is daily, `offset = 7`, `n_offsets = 2` and
-        `agg_func = np.mean`, the predicted value is the mean of the values
+        `agg_func = np.mean`, the predicted value will be the mean of the values
         observed 7 and 14 days ago.
-    agg_func : callable, default `np.mean`
+    agg_func : Callable, default `np.mean`
         Function used to aggregate the values of the equivalent dates when the
         number of equivalent dates (`n_offsets`) is greater than 1.
     forecaster_id : str, int, default `None`
@@ -76,21 +76,22 @@ class ForecasterEquivalentDate():
         `offset = 7` means that the most recent data similar to the target
         period is the value observed 7 days ago.
         Pandas DateOffsets can also be used to move forward a given number of 
-        valid dates. For example, Bday(2) can be used to move two business days
-        backward. If the date does not start on a valid date, first it is moved 
-        to a valid date. For example, if the date is a Saturday, it is moved to
-        the previous Friday. Then, the offset is applied. If the result is a non
-        valid date, it is moved to the next valid date. For example, if the date
-        is a Sunday, it is moved to the next Monday. Find more information about
-        offsets in https://pandas.pydata.org/docs/reference/offset_frequency.html.
-    n_offsets : int, default 1
+        valid dates. For example, Bday(2) can be used to move back two business 
+        days. If the date does not start on a valid date, it is first moved to a 
+        valid date. For example, if the date is a Saturday, it is moved to the 
+        previous Friday. Then, the offset is applied. If the result is a non-valid 
+        date, it is moved to the next valid date. For example, if the date
+        is a Sunday, it is moved to the next Monday. 
+        For more information about offsets, see
+        https://pandas.pydata.org/docs/reference/offset_frequency.html.
+    n_offsets : int
         Number of equivalent dates (multiple of offset) used in the prediction.
         If `offset` is greater than 1, the value at the equivalent dates is
-        aggregated using the function `agg_func`. For example, if the frequency
+        aggregated using the `agg_func` function. For example, if the frequency
         of the time series is daily, `offset = 7`, `n_offsets = 2` and
-        `agg_func = np.mean`, the predicted value is the mean of the values
+        `agg_func = np.mean`, the predicted value will be the mean of the values
         observed 7 and 14 days ago.
-    agg_func : callable, default `np.mean`
+    agg_func : Callable
         Function used to aggregate the values of the equivalent dates when the
         number of equivalent dates (`n_offsets`) is greater than 1.
     window_size : int
@@ -108,28 +109,20 @@ class ForecasterEquivalentDate():
         First and last values of index of the data used during training.
     fitted : bool
         Tag to identify if the regressor has been fitted (trained).
-    differentiation : Ignored
-            Not used, present here for API consistency by convention.
     creation_date : str
         Date of creation.
     fit_date : str
         Date of last fit.
-    skforcast_version : str
+    skforecast_version : str
         Version of skforecast library used to create the forecaster.
     python_version : str
         Version of python used to create the forecaster.
     forecaster_id : str, int
         Name used as an identifier of the forecaster.
-    transformer_y : Ignored
-            Not used, present here for API consistency by convention.
-    transformer_exog : Ignored
-            Not used, present here for API consistency by convention.
-    weight_func : Ignored
-            Not used, present here for API consistency by convention.
+    regressor : Ignored
+        Not used, present here for API consistency by convention.
     differentiation : Ignored
-            Not used, present here for API consistency by convention.
-    fit_kwargs : Ignored
-            Not used, present here for API consistency by convention.
+        Not used, present here for API consistency by convention.
 
     """
     
@@ -141,28 +134,29 @@ class ForecasterEquivalentDate():
         forecaster_id: Optional[Union[str, int]]=None
     ) -> None:
         
-        self.offset                  = offset
-        self.n_offsets               = n_offsets
-        self.agg_func                = agg_func
-        self.regressor               = None
-        self.differentiation         = None
-        self.last_window             = None
-        self.index_type              = None
-        self.index_freq              = None
-        self.training_range          = None
-        self.fitted                  = False
-        self.creation_date           = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
-        self.fit_date                = None
-        self.skforcast_version       = skforecast.__version__
-        self.python_version          = sys.version.split(" ")[0]
-        self.forecaster_id           = forecaster_id
+        self.offset             = offset
+        self.n_offsets          = n_offsets
+        self.agg_func           = agg_func
+        self.last_window        = None
+        self.index_type         = None
+        self.index_freq         = None
+        self.training_range     = None
+        self.fitted             = False
+        self.creation_date      = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
+        self.fit_date           = None
+        self.skforecast_version = skforecast.__version__
+        self.python_version     = sys.version.split(" ")[0]
+        self.forecaster_id      = forecaster_id
+        self.regressor          = None
+        self.differentiation    = None
        
         if not isinstance(self.offset, (int, pd.tseries.offsets.DateOffset)):
-            raise Exception(
-                "`offset` must be an integer or a pandas.tseries.offsets. "
-                "Find more information about offsets in "
-                "https://pandas.pydata.org/docs/reference/offset_frequency.html"
+            raise TypeError(
+                ("`offset` must be an integer or a pandas.tseries.offsets. "
+                 "Find more information about offsets in "
+                 "https://pandas.pydata.org/docs/reference/offset_frequency.html")
             )
+        
         self.window_size = self.offset * self.n_offsets
         
 
@@ -186,7 +180,7 @@ class ForecasterEquivalentDate():
             f"Training index frequency: {self.index_freq if self.fitted else None} \n"
             f"Creation date: {self.creation_date} \n"
             f"Last fit date: {self.fit_date} \n"
-            f"Skforecast version: {self.skforcast_version} \n"
+            f"Skforecast version: {self.skforecast_version} \n"
             f"Python version: {self.python_version} \n"
             f"Forecaster id: {self.forecaster_id} \n"
         )
@@ -197,8 +191,8 @@ class ForecasterEquivalentDate():
     def fit(
         self,
         y: pd.Series,
-        exog=None,
-        store_in_sample_residuals=None
+        exog: Any=None,
+        store_in_sample_residuals: Any=None
     ) -> None:
         """
         Training Forecaster.
@@ -211,6 +205,7 @@ class ForecasterEquivalentDate():
             Not used, present here for API consistency by convention.
         store_in_sample_residuals : Ignored
             Not used, present here for API consistency by convention.
+        
         Returns
         -------
         None
@@ -218,11 +213,10 @@ class ForecasterEquivalentDate():
         """
 
         if isinstance(self.offset, pd.tseries.offsets.DateOffset) and not isinstance(
-            y.index, pd.DatetimeIndex
-        ):
+            y.index, pd.DatetimeIndex):
             raise TypeError(
-                "If `offset` is a pandas DateOffset, the index of `y` must be a "
-                "pandas DatetimeIndex with a frequency."
+                ("If `offset` is a pandas DateOffset, the index of `y` must be a "
+                 "pandas DatetimeIndex.")
             )
         
         # Reset values in case the forecaster has already been fitted.
@@ -232,7 +226,7 @@ class ForecasterEquivalentDate():
         self.fitted         = False
         self.training_range = None
 
-        _, y_index = preprocess_y(y=y, return_values=True)
+        _, y_index = preprocess_y(y=y, return_values=False)
         self.fitted = True
         self.fit_date = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
         self.training_range = y_index[[0, -1]]
@@ -257,7 +251,7 @@ class ForecasterEquivalentDate():
         self,
         steps: int,
         last_window: Optional[pd.Series]=None,
-        exog=None
+        exog: Any=None,
     ) -> pd.Series:
         """
         Predict n steps ahead.
@@ -269,8 +263,8 @@ class ForecasterEquivalentDate():
         last_window : pandas Series, default `None`
             Past values needed to select the last equivalent dates according to 
             the offset. If `last_window = None`, the values stored in 
-            `self.last_window` areused and the predictions start right after
-            the training data.
+            `self.last_window` are used and the predictions start immediately 
+            after the training data.
         exog : Ignored
             Not used, present here for API consistency by convention.
 
@@ -282,10 +276,15 @@ class ForecasterEquivalentDate():
         """
 
         if last_window is None:
-            last_window = copy(self.last_window)
+            if self.fitted:
+                last_window = self.last_window.copy()
+            else:
+                last_window = copy(self.last_window)
+        else:
+            last_window = last_window.copy()
 
         check_predict_input(
-            forecaster_name  = None,
+            forecaster_name  = type(self).__name__,
             steps            = steps,
             fitted           = self.fitted,
             included_exog    = None,

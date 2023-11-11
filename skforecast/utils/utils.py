@@ -1672,7 +1672,10 @@ def select_n_jobs_backtesting(
     and refit=`True`, then n_jobs=cpu_count().
     - If forecaster_name is 'ForecasterAutoregDirect' or 'ForecasterAutoregMultiVariate'
     and refit=`False`, then n_jobs=1.
-    - If forecaster_name is 'ForecasterAutoregMultiseries', then n_jobs=cpu_count().
+    - If forecaster_name is 'ForecasterAutoregMultiseries' or 
+    'ForecasterAutoregMultiseriesCustom', then n_jobs=cpu_count().
+    - If forecaster_name is 'ForecasterSarimax' or 'ForecasterEquivalentDate', 
+    then n_jobs=1.
 
     Parameters
     ----------
@@ -1709,7 +1712,7 @@ def select_n_jobs_backtesting(
             n_jobs = 1
         elif forecaster_name in ['ForecasterAutoregMultiseries', 'ForecasterAutoregMultiSeriesCustom']:
             n_jobs = joblib.cpu_count()
-        elif forecaster_name in ['ForecasterSarimax']:
+        elif forecaster_name in ['ForecasterSarimax', 'ForecasterEquivalentDate']:
             n_jobs = 1
         else:
             n_jobs = 1

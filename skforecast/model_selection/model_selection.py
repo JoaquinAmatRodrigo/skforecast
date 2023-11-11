@@ -488,7 +488,7 @@ def _backtesting_forecaster(
             regressor_name = type(forecaster.regressor[-1]).__name__
         else:
             regressor_name = type(forecaster.regressor).__name__
-        
+
         n_jobs = select_n_jobs_backtesting(
                      forecaster_name = type(forecaster).__name__,
                      regressor_name  = regressor_name,

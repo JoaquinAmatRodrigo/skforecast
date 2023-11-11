@@ -95,10 +95,8 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
             - If `None`, all levels have the same weight.
     fit_kwargs : dict, default `None`
         Additional arguments to be passed to the `fit` method of the regressor.
-        **New in version 0.8.0**
     forecaster_id : str, int, default `None`
         Name used as an identifier of the forecaster.
-        **New in version 0.7.0**
     
     Attributes
     ----------
@@ -188,7 +186,6 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         Names of columns of the matrix created internally for training.
     fit_kwargs : dict
         Additional arguments to be passed to the `fit` method of the regressor.
-        **New in version 0.8.0**
     in_sample_residuals : dict
         Residuals of the model when predicting training data. Only stored up to
         1000 values in the form `{level: residuals}`. If `transformer_series` 

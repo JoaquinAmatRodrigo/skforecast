@@ -1,26 +1,29 @@
 # Unit test __init__ ForecasterEquivalentDate
 # ==============================================================================
+import sys
 import re
 import pytest
 import numpy as np
-import pandas as pd
-from skforecast.ForecasterBaseline import ForecasterEquivalentDate
 import skforecast
-import sys
+from skforecast.ForecasterBaseline import ForecasterEquivalentDate
 
 
-def test_init_offset_not_int_or_DateOffset():
+def test_init_TypeError_offset_not_int_or_DateOffset():
     """
-    Test Exception is raised when offset is not an int or DateOffset.
+    Test TypeError is raised when offset is not an int or DateOffset.
     """
-    with pytest.raises(
-        Exception, match="`offset` must be an integer or a pandas.tseries.offsets."
-    ):
+
+    err_msg = re.escape(
+        ("`offset` must be an integer or a pandas.tseries.offsets. "
+         "Find more information about offsets in "
+         "https://pandas.pydata.org/docs/reference/offset_frequency.html")
+    )
+    with pytest.raises(TypeError, match=err_msg):
         ForecasterEquivalentDate(
-            offset="not_int_or_DateOffset",
-            n_offsets=1,
-            agg_func=np.mean,
-            forecaster_id=None,
+            offset        = "not_int_or_DateOffset",
+            n_offsets     = 1,
+            agg_func      = np.mean,
+            forecaster_id = None,
         )
 
 
@@ -31,7 +34,7 @@ def test_init_window_size_calculation():
     forecaster = ForecasterEquivalentDate(
         offset=5, n_offsets=2, agg_func=np.mean, forecaster_id=None
     )
-    assert forecaster.window_size == forecaster.offset * forecaster.n_offsets
+    assert forecaster.window_size == 5 * 2
 
 
 def test_init_creation_date_format():
@@ -54,7 +57,7 @@ def test_init_skforecast_version():
     forecaster = ForecasterEquivalentDate(
         offset=5, n_offsets=2, agg_func=np.mean, forecaster_id=None
     )
-    assert forecaster.skforcast_version == skforecast.__version__
+    assert forecaster.skforecast_version == skforecast.__version__
 
 
 def test_init_python_version():
