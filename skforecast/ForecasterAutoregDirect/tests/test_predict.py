@@ -4,6 +4,7 @@ import re
 import pytest
 import numpy as np
 import pandas as pd
+from sklearn.exceptions import NotFittedError
 from skforecast.ForecasterAutoregDirect import ForecasterAutoregDirect
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler
@@ -37,6 +38,20 @@ def test_predict_exception_when_steps_list_contain_floats(steps):
                 )
     with pytest.raises(TypeError, match = err_msg):
         forecaster.predict(steps=steps)
+
+
+def test_predict_NotFittedError_when_fitted_is_False():
+    """
+    Test NotFittedError is raised when fitted is False.
+    """
+    forecaster = ForecasterAutoregDirect(LinearRegression(), lags=3, steps=5)
+
+    err_msg = re.escape(
+                ('This Forecaster instance is not fitted yet. Call `fit` with '
+                 'appropriate arguments before using predict.')
+              )
+    with pytest.raises(NotFittedError, match = err_msg):
+        forecaster.predict(steps=5)
 
 
 @pytest.mark.parametrize("steps", [3, [1, 2, 3], None], 

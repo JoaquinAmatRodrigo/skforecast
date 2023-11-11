@@ -9,6 +9,7 @@ from typing import Union, Dict, List, Tuple, Any, Optional
 import warnings
 import logging
 import sys
+from copy import copy
 import numpy as np
 import pandas as pd
 import pmdarima
@@ -357,7 +358,10 @@ class ForecasterSarimax():
         """
 
         # Needs to be a new variable to avoid arima_res_.append if not needed
-        last_window_check = last_window.copy() if last_window is not None else self.last_window.copy()
+        if self.fitted:
+            last_window_check = last_window.copy() if last_window is not None else self.last_window.copy()
+        else:
+            last_window_check = last_window.copy() if last_window is not None else copy(self.last_window)
 
         check_predict_input(
             forecaster_name  = type(self).__name__,

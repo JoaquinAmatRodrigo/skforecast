@@ -1,8 +1,10 @@
 # Unit test predict ForecasterAutoregMultiSeries
 # ==============================================================================
+import re
 import pytest
 import numpy as np
 import pandas as pd
+from sklearn.exceptions import NotFittedError
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler
@@ -24,6 +26,20 @@ from .fixtures_ForecasterAutoregMultiSeries import exog_predict
 
 series_2 = pd.DataFrame({'1': pd.Series(np.arange(start=0, stop=50)), 
                          '2': pd.Series(np.arange(start=50, stop=100))})
+
+
+def test_predict_NotFittedError_when_fitted_is_False():
+    """
+    Test NotFittedError is raised when fitted is False.
+    """
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5)
+
+    err_msg = re.escape(
+                ('This Forecaster instance is not fitted yet. Call `fit` with '
+                 'appropriate arguments before using predict.')
+              )
+    with pytest.raises(NotFittedError, match = err_msg):
+        forecaster.predict(steps=5)
 
 
 @pytest.fixture(params=[('1'  , [50., 51., 52., 53., 54.]), 
