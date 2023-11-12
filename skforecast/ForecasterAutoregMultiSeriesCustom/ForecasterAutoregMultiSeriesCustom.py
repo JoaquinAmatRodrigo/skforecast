@@ -871,11 +871,15 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
             levels = [levels]
 
         if last_window is None:
-            last_window = self.last_window.copy()
+            if self.fitted:
+                last_window = self.last_window.copy()
+            else:
+                last_window = copy(self.last_window)
         else:
             last_window = last_window.copy()
 
-        last_window = last_window.iloc[-self.window_size:, ]
+        # if last_window is not None:
+        #     last_window = last_window.iloc[-self.window_size:, ]
         
         check_predict_input(
             forecaster_name  = type(self).__name__,
@@ -1033,7 +1037,8 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
                     ("`forecaster.out_sample_residuals` is `None`. Use "
                      "`in_sample_residuals=True` or method "
                      "`set_out_sample_residuals()` before `predict_interval()`, "
-                     "`predict_bootstrapping()` or `predict_dist()`.")
+                     "`predict_bootstrapping()`,`predict_quantiles()` or "
+                     "`predict_dist()`.")
                 )
             else:
                 if not set(levels).issubset(set(self.out_sample_residuals.keys())):
@@ -1061,7 +1066,10 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
                 )
 
         if last_window is None:
-            last_window = self.last_window.copy()
+            if self.fitted:
+                last_window = self.last_window.copy()
+            else:
+                last_window = copy(self.last_window)
         else:
             last_window = last_window.copy()
 

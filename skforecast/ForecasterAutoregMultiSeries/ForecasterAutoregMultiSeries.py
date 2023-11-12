@@ -1007,7 +1007,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                     ("`forecaster.out_sample_residuals` is `None`. Use "
                      "`in_sample_residuals=True` or method "
                      "`set_out_sample_residuals()` before `predict_interval()`, "
-                     "`predict_bootstrapping()` or `predict_dist()`.")
+                     "`predict_bootstrapping()`,`predict_quantiles()` or "
+                     "`predict_dist()`.")
                 )
             else:
                 if not set(levels).issubset(set(self.out_sample_residuals.keys())):

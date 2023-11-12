@@ -913,7 +913,10 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                 )
 
         if last_window is None:
-            last_window = self.last_window.copy()
+            if self.fitted:
+                last_window = self.last_window.copy()
+            else:
+                last_window = copy(self.last_window)
         else:
             last_window = last_window.copy()
         
@@ -1100,8 +1103,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                 raise ValueError(
                     ("`forecaster.out_sample_residuals` is `None`. Use "
                      "`in_sample_residuals=True` or method `set_out_sample_residuals()` "
-                     "before `predict_interval()`, `predict_bootstrapping()` or "
-                     "`predict_dist()`.")
+                     "before `predict_interval()`, `predict_bootstrapping()`, "
+                     "`predict_quantiles()` or `predict_dist()`.")
                 )
             else:
                 if not set(steps).issubset(set(self.out_sample_residuals.keys())):
