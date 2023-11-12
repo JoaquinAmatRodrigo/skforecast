@@ -55,7 +55,7 @@ class ForecasterEquivalentDate():
         https://pandas.pydata.org/docs/reference/offset_frequency.html.
     n_offsets : int, default `1`
         Number of equivalent dates (multiple of offset) used in the prediction.
-        If `offset` is greater than 1, the value at the equivalent dates is
+        If `n_offsets` is greater than 1, the values at the equivalent dates are
         aggregated using the `agg_func` function. For example, if the frequency
         of the time series is daily, `offset = 7`, `n_offsets = 2` and
         `agg_func = np.mean`, the predicted value will be the mean of the values
