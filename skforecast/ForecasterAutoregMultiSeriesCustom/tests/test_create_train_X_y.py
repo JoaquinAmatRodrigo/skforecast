@@ -373,6 +373,59 @@ def test_create_train_X_y_output_when_series_and_exog_is_None():
             np.testing.assert_array_equal(results[i], expected[i])
 
 
+def test_create_train_X_y_output_when_series_and_exog_no_pandas_index():
+    """
+    Test the output of create_train_X_y when series and exog have no pandas index 
+    that doesn't start at 0.
+    """
+    series = pd.DataFrame({'l1': pd.Series(np.arange(10, dtype=float)), 
+                           'l2': pd.Series(np.arange(10, dtype=float))})
+    series.index = np.arange(6, 16)
+    exog = pd.Series(np.arange(100, 110), index=np.arange(6, 16), 
+                     name='exog', dtype=float)
+
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                     regressor      = LinearRegression(),
+                     fun_predictors = create_predictors_5,
+                     window_size    = 5
+                 )
+    results = forecaster.create_train_X_y(series=series, exog=exog)
+
+    expected = (
+        pd.DataFrame(
+            data = np.array([[4., 3., 2., 1., 0., 105., 1., 0.],
+                             [5., 4., 3., 2., 1., 106., 1., 0.],
+                             [6., 5., 4., 3., 2., 107., 1., 0.],
+                             [7., 6., 5., 4., 3., 108., 1., 0.],
+                             [8., 7., 6., 5., 4., 109., 1., 0.],
+                             [4., 3., 2., 1., 0., 105., 0., 1.],
+                             [5., 4., 3., 2., 1., 106., 0., 1.],
+                             [6., 5., 4., 3., 2., 107., 0., 1.],
+                             [7., 6., 5., 4., 3., 108., 0., 1.],
+                             [8., 7., 6., 5., 4., 109., 0., 1.]]),
+            index   = pd.RangeIndex(start=0, stop=10, step=1),
+            columns = ['custom_predictor_0', 'custom_predictor_1', 'custom_predictor_2', 
+                       'custom_predictor_3', 'custom_predictor_4', 'exog', 'l1', 'l2']
+        ),
+        pd.Series(
+            data  = np.array([5, 6, 7, 8, 9, 5, 6, 7, 8, 9]),
+            index = pd.RangeIndex(start=0, stop=10, step=1),
+            name  = 'y',
+            dtype = float
+        ),
+        pd.RangeIndex(start=0, stop=len(series), step=1),
+        pd.Index(np.array([5, 6, 7, 8, 9, 5, 6, 7, 8, 9]))
+    )
+
+    for i in range(len(expected)):
+        if isinstance(expected[i], pd.DataFrame):
+            pd.testing.assert_frame_equal(results[i], expected[i])
+        elif isinstance(expected[i], pd.Series):
+            pd.testing.assert_series_equal(results[i], expected[i])
+        else:
+            np.testing.assert_array_equal(results[i], expected[i])
+
+
 @pytest.mark.parametrize("dtype", 
                          [float, int], 
                          ids = lambda dt : f'dtype: {dt}')
@@ -936,13 +989,13 @@ def test_create_train_X_y_output_when_transformer_series_and_transformer_exog(tr
                            '2': np.arange(10, dtype=float)},
                            index = pd.date_range("1990-01-01", periods=10, freq='D'))
     exog = pd.DataFrame({
-               'col_1': [7.5, 24.4, 60.3, 57.3, 50.7, 41.4, 24.4, 87.2, 47.4, 23.8],
-               'col_2': ['a', 'a', 'a', 'a', 'a', 'b', 'b', 'b', 'b', 'b']},
+               'exog_1': [7.5, 24.4, 60.3, 57.3, 50.7, 41.4, 24.4, 87.2, 47.4, 23.8],
+               'exog_2': ['a', 'a', 'a', 'a', 'a', 'b', 'b', 'b', 'b', 'b']},
                 index = pd.date_range("1990-01-01", periods=10, freq='D'))
 
     transformer_exog = ColumnTransformer(
-                            [('scale', StandardScaler(), ['col_1']),
-                             ('onehot', OneHotEncoder(), ['col_2'])],
+                            [('scale', StandardScaler(), ['exog_1']),
+                             ('onehot', OneHotEncoder(), ['exog_2'])],
                             remainder = 'passthrough',
                             verbose_feature_names_out = False
                         )
@@ -975,8 +1028,8 @@ def test_create_train_X_y_output_when_transformer_series_and_transformer_exog(tr
                        [ 0.87038828,  0.52223297,  0.17407766,  0.22507577, 0., 1., 0., 1.],
                        [ 1.21854359,  0.87038828,  0.52223297, -0.84584926, 0., 1., 0., 1.]]),
             index   = pd.RangeIndex(start=0, stop=14, step=1),
-            columns = ['lag_1', 'lag_2', 'lag_3', 'col_1',
-                       'col_2_a', 'col_2_b', '1', '2']
+            columns = ['lag_1', 'lag_2', 'lag_3', 'exog_1',
+                       'exog_2_a', 'exog_2_b', '1', '2']
         ),
         pd.Series(
             data  = np.array([-0.52223297, -0.17407766,  0.17407766,  0.52223297,  0.87038828,
@@ -1082,13 +1135,13 @@ def test_create_train_X_y_output_when_transformer_series_and_transformer_exog_wi
                                             4., 5., 6., 7., 8., 9.])})
     series.index = pd.date_range("1990-01-01", periods=10, freq='D')
     exog = pd.DataFrame({
-               'col_1': [7.5, 24.4, 60.3, 57.3, 50.7, 41.4, 24.4, 87.2, 47.4, 23.8],
-               'col_2': ['a', 'b', 'a', 'b', 'a', 'b', 'a', 'b', 'a', 'b']},
+               'exog_1': [7.5, 24.4, 60.3, 57.3, 50.7, 41.4, 24.4, 87.2, 47.4, 23.8],
+               'exog_2': ['a', 'b', 'a', 'b', 'a', 'b', 'a', 'b', 'a', 'b']},
                 index = pd.date_range("1990-01-01", periods=10, freq='D'))
 
     transformer_exog = ColumnTransformer(
-                            [('scale', StandardScaler(), ['col_1']),
-                             ('onehot', OneHotEncoder(), ['col_2'])],
+                            [('scale', StandardScaler(), ['exog_1']),
+                             ('onehot', OneHotEncoder(), ['exog_2'])],
                             remainder = 'passthrough',
                             verbose_feature_names_out = False
                         )
@@ -1123,7 +1176,7 @@ def test_create_train_X_y_output_when_transformer_series_and_transformer_exog_wi
                        [ 0.8783100656536799,   0.29277002188455997, -0.29277002188455997, -0.8458492632164842,  0.0, 1.0, 0.0, 0.0, 1.0]]),
             index   = pd.RangeIndex(start=0, stop=15, step=1),
             columns = ['custom_predictor_0', 'custom_predictor_1', 'custom_predictor_2',
-                       'col_1', 'col_2_a', 'col_2_b', 'l1', 'l2', 'l3']
+                       'exog_1', 'exog_2_a', 'exog_2_b', 'l1', 'l2', 'l3']
         ),
         pd.Series(
             data  = np.array([-0.5222329678670935, -0.17407765595569785, 0.17407765595569785, 0.5222329678670935, 0.8703882797784892, 1.2185435916898848, 1.5666989036012806, 

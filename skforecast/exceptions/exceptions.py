@@ -75,3 +75,19 @@ class IgnoredArgumentWarning(UserWarning):
             "warnings.simplefilter('ignore', category=IgnoredArgumentWarning)"
         )
         return self.message + " " + extra_message
+
+
+class SkforecastVersionWarning(UserWarning):
+    """
+    Warning used to notify that the skforecast version installed in the 
+    environment differs from the version used to initialize the forecaster.
+    """
+    def __init__(self, message):
+        self.message = message
+
+    def __str__(self):
+        extra_message = (
+            "\n You can suppress this warning using: "
+            "warnings.simplefilter('ignore', category=SkforecastVersionWarning)"
+        )
+        return self.message + " " + extra_message

@@ -162,7 +162,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         Date of creation.
     fit_date : str
         Date of last fit.
-    skforcast_version : str
+    skforecast_version : str
         Version of skforecast library used to create the forecaster.
     python_version : str
         Version of python used to create the forecaster.
@@ -212,7 +212,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         self.fitted                  = False
         self.creation_date           = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
         self.fit_date                = None
-        self.skforcast_version       = skforecast.__version__
+        self.skforecast_version      = skforecast.__version__
         self.python_version          = sys.version.split(" ")[0]
         self.forecaster_id           = forecaster_id
 
@@ -296,7 +296,7 @@ class ForecasterAutoregDirect(ForecasterBase):
             f"fit_kwargs: {self.fit_kwargs} \n"
             f"Creation date: {self.creation_date} \n"
             f"Last fit date: {self.fit_date} \n"
-            f"Skforecast version: {self.skforcast_version} \n"
+            f"Skforecast version: {self.skforecast_version} \n"
             f"Python version: {self.python_version} \n"
             f"Forecaster id: {self.forecaster_id} \n"
         )
@@ -451,6 +451,7 @@ class ForecasterAutoregDirect(ForecasterBase):
                                 exog  = exog,
                                 steps = self.steps
                             ).iloc[-X_train.shape[0]:, :]
+            exog_to_train.index = exog_index[-X_train.shape[0]:]
             X_train = pd.concat((X_train, exog_to_train), axis=1)
 
         self.X_train_col_names = X_train.columns.to_list()
@@ -772,7 +773,9 @@ class ForecasterAutoregDirect(ForecasterBase):
                 )
 
         if last_window is None:
-            last_window = copy(self.last_window)
+            last_window = self.last_window.copy()
+        else:
+            last_window = last_window.copy()
 
         check_predict_input(
             forecaster_name  = type(self).__name__,
@@ -899,15 +902,14 @@ class ForecasterAutoregDirect(ForecasterBase):
         exog : pandas Series, pandas DataFrame, default `None`
             Exogenous variable/s included as predictor/s.
         n_boot : int, default `500`
-            Number of bootstrapping iterations used to estimate prediction
-            intervals.
+            Number of bootstrapping iterations used to estimate predictions.
         random_state : int, default `123`
-            Sets a seed to the random generator, so that boot intervals are always 
+            Sets a seed to the random generator, so that boot predictions are always 
             deterministic.
         in_sample_residuals : bool, default `True`
             If `True`, residuals from the training data are used as proxy of
-            prediction error to create prediction intervals. If `False`, out of
-            sample residuals are used. In the latter case, the user should have
+            prediction error to create predictions. If `False`, out of sample 
+            residuals are used. In the latter case, the user should have
             calculated and stored the residuals within the forecaster (see
             `set_out_sample_residuals()`).
 
@@ -1020,7 +1022,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         in_sample_residuals: bool=True
     ) -> pd.DataFrame:
         """
-        Bootstrapping based prediction intervals.
+        Bootstrapping based predicted intervals.
         Both predictions and intervals are returned.
         
         Parameters
@@ -1047,15 +1049,14 @@ class ForecasterAutoregDirect(ForecasterBase):
             percentiles to compute, which must be between 0 and 100 inclusive. 
             For example, interval of 95% should be as `interval = [2.5, 97.5]`.
         n_boot : int, default `500`
-            Number of bootstrapping iterations used to estimate prediction
-            intervals.
+            Number of bootstrapping iterations used to estimate predictions.
         random_state : int, default `123`
-            Sets a seed to the random generator, so that boot intervals are always 
+            Sets a seed to the random generator, so that boot predictions are always 
             deterministic.
         in_sample_residuals : bool, default `True`
             If `True`, residuals from the training data are used as proxy of
-            prediction error to create prediction intervals. If `False`, out of
-            sample residuals are used. In the latter case, the user should have
+            prediction error to create predictions. If `False`, out of sample 
+            residuals are used. In the latter case, the user should have
             calculated and stored the residuals within the forecaster (see
             `set_out_sample_residuals()`).
 
@@ -1100,6 +1101,85 @@ class ForecasterAutoregDirect(ForecasterBase):
         predictions = pd.concat((predictions, predictions_interval), axis=1)
 
         return predictions
+
+
+    def predict_quantiles(
+        self,
+        steps: Optional[Union[int, list]]=None,
+        last_window: Optional[pd.Series]=None,
+        exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+        quantiles: list=[0.05, 0.5, 0.95],
+        n_boot: int=500,
+        random_state: int=123,
+        in_sample_residuals: bool=True
+    ) -> pd.DataFrame:
+        """
+        Bootstrapping based predicted quantiles.
+        
+        Parameters
+        ----------
+        steps : int, list, None, default `None`
+            Predict n steps. The value of `steps` must be less than or equal to the 
+            value of steps defined when initializing the forecaster. Starts at 1.
+        
+                - If `int`: Only steps within the range of 1 to int are predicted.
+                - If `list`: List of ints. Only the steps contained in the list 
+                are predicted.
+                - If `None`: As many steps are predicted as were defined at 
+                initialization.
+        last_window : pandas Series, default `None`
+            Series values used to create the predictors (lags) needed in the 
+            first iteration of the prediction (t + 1).
+            If `last_window = None`, the values stored in` self.last_window` are
+            used to calculate the initial predictors, and the predictions start
+            right after training data.
+        exog : pandas Series, pandas DataFrame, default `None`
+            Exogenous variable/s included as predictor/s.
+        quantiles : list, default `[0.05, 0.5, 0.95]`
+            Sequence of quantiles to compute, which must be between 0 and 1 
+            inclusive. For example, quantiles of 0.05, 0.5 and 0.95 should be as 
+            `quantiles = [0.05, 0.5, 0.95]`.
+        n_boot : int, default `500`
+            Number of bootstrapping iterations used to estimate quantiles.
+        random_state : int, default `123`
+            Sets a seed to the random generator, so that boot quantiles are always 
+            deterministic.
+        in_sample_residuals : bool, default `True`
+            If `True`, residuals from the training data are used as proxy of
+            prediction error to create prediction quantiles. If `False`, out of
+            sample residuals are used. In the latter case, the user should have
+            calculated and stored the residuals within the forecaster (see
+            `set_out_sample_residuals()`).
+
+        Returns
+        -------
+        predictions : pandas DataFrame
+            Quantiles predicted by the forecaster.
+
+        Notes
+        -----
+        More information about prediction intervals in forecasting:
+        https://otexts.com/fpp2/prediction-intervals.html
+        Forecasting: Principles and Practice (2nd ed) Rob J Hyndman and
+        George Athanasopoulos.
+        
+        """
+        
+        check_interval(quantiles=quantiles)
+
+        boot_predictions = self.predict_bootstrapping(
+                               steps               = steps,
+                               last_window         = last_window,
+                               exog                = exog,
+                               n_boot              = n_boot,
+                               random_state        = random_state,
+                               in_sample_residuals = in_sample_residuals
+                           )
+
+        predictions = boot_predictions.quantile(q=quantiles, axis=1).transpose()
+        predictions.columns = [f'q_{q}' for q in quantiles]
+
+        return predictions
     
 
     def predict_dist(
@@ -1139,15 +1219,14 @@ class ForecasterAutoregDirect(ForecasterBase):
         exog : pandas Series, pandas DataFrame, default `None`
             Exogenous variable/s included as predictor/s.
         n_boot : int, default `500`
-            Number of bootstrapping iterations used to estimate prediction
-            intervals.
+            Number of bootstrapping iterations used to estimate predictions.
         random_state : int, default `123`
-            Sets a seed to the random generator, so that boot intervals are always 
+            Sets a seed to the random generator, so that boot predictions are always 
             deterministic.
         in_sample_residuals : bool, default `True`
             If `True`, residuals from the training data are used as proxy of
-            prediction error to create prediction intervals. If `False`, out of
-            sample residuals are used. In the latter case, the user should have
+            prediction error to create predictions. If `False`, out of sample 
+            residuals are used. In the latter case, the user should have
             calculated and stored the residuals within the forecaster (see
             `set_out_sample_residuals()`).
 

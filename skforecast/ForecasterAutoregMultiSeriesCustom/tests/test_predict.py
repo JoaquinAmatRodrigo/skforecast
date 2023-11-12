@@ -245,8 +245,8 @@ def test_predict_output_when_regressor_is_LinearRegression_with_transform_series
     as transformer_series and transformer_exog as transformer_exog.
     """
     transformer_exog = ColumnTransformer(
-                           [('scale', StandardScaler(), ['col_1']),
-                            ('onehot', OneHotEncoder(), ['col_2'])],
+                           [('scale', StandardScaler(), ['exog_1']),
+                            ('onehot', OneHotEncoder(), ['exog_2'])],
                            remainder = 'passthrough',
                            verbose_feature_names_out = False
                        )
@@ -283,8 +283,8 @@ def test_predict_output_when_regressor_is_LinearRegression_with_transform_series
     new_series['2'].iloc[:10] = np.nan
 
     transformer_exog = ColumnTransformer(
-                           [('scale', StandardScaler(), ['col_1']),
-                            ('onehot', OneHotEncoder(), ['col_2'])],
+                           [('scale', StandardScaler(), ['exog_1']),
+                            ('onehot', OneHotEncoder(), ['exog_2'])],
                            remainder = 'passthrough',
                            verbose_feature_names_out = False
                        )
@@ -315,7 +315,7 @@ def test_predict_output_when_categorical_features_native_implementation_HistGrad
     """
     Test predict output when using HistGradientBoostingRegressor and categorical variables.
     """
-    df_exog = pd.DataFrame({'exog_1': exog['col_1'],
+    df_exog = pd.DataFrame({'exog_1': exog['exog_1'],
                             'exog_2': ['a', 'b', 'c', 'd', 'e']*10,
                             'exog_3': pd.Categorical(['F', 'G', 'H', 'I', 'J']*10)})
     
@@ -372,7 +372,7 @@ def test_predict_output_when_categorical_features_native_implementation_LGBMRegr
     """
     Test predict output when using LGBMRegressor and categorical variables.
     """
-    df_exog = pd.DataFrame({'exog_1': exog['col_1'],
+    df_exog = pd.DataFrame({'exog_1': exog['exog_1'],
                             'exog_2': ['a', 'b', 'c', 'd', 'e']*10,
                             'exog_3': pd.Categorical(['F', 'G', 'H', 'I', 'J']*10)})
     
@@ -428,7 +428,7 @@ def test_predict_output_when_categorical_features_native_implementation_LGBMRegr
     Test predict output when using LGBMRegressor and categorical variables with 
     categorical_features='auto'.
     """
-    df_exog = pd.DataFrame({'exog_1': exog['col_1'],
+    df_exog = pd.DataFrame({'exog_1': exog['exog_1'],
                             'exog_2': ['a', 'b', 'c', 'd', 'e']*10,
                             'exog_3': pd.Categorical(['F', 'G', 'H', 'I', 'J']*10)})
     
