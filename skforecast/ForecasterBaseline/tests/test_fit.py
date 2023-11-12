@@ -8,7 +8,11 @@ from pandas.tseries.offsets import DateOffset
 from skforecast.ForecasterBaseline import ForecasterEquivalentDate
 
 
-def test_fit_TypeError_offset_DateOffset_y_index_not_DatetimeIndex():
+@pytest.mark.parametrize("y", 
+                         [pd.Series(np.arange(10)), 
+                          pd.Series(np.arange(10), 
+                                    index=pd.date_range(start='1/1/2021', periods=10))])
+def test_fit_TypeError_offset_DateOffset_y_index_not_DatetimeIndex(y):
     """
     Test TypeError is raised when offset is a DateOffset and y index is 
     not a DatetimeIndex or has no freq.
@@ -17,12 +21,33 @@ def test_fit_TypeError_offset_DateOffset_y_index_not_DatetimeIndex():
         offset=DateOffset(days=1), n_offsets=2, agg_func=np.mean
     )
 
+    if isinstance(y.index, pd.DatetimeIndex):
+        y.index.freq = None
+
     err_msg = re.escape(
         ("If `offset` is a pandas DateOffset, the index of `y` must be a "
-         "pandas DatetimeIndex.")
+         "pandas DatetimeIndex with frequency.")
     )
     with pytest.raises(TypeError, match=err_msg):
-        forecaster.fit(y = pd.Series(np.arange(10)))
+        forecaster.fit(y=y)
+
+
+def test_fit_ValueError_length_y_less_than_window_size():
+    """
+    Test ValueError is raised when length of y is less than window_size.
+    """
+    forecaster = ForecasterEquivalentDate(
+        offset=6, n_offsets=2, agg_func=np.mean
+    )
+    y = pd.Series(np.arange(10))
+
+    err_msg = re.escape(
+        (f"The length of `y` (10), must be greater than or equal to "
+         f"the window size (12). Try decreasing the offset "
+         f"or the number of offsets.")
+    )
+    with pytest.raises(ValueError, match=err_msg):
+        forecaster.fit(y=y)
 
 
 def test_fit_y_index_DatetimeIndex():
@@ -71,7 +96,7 @@ def test_fit_offset_int():
     forecaster.fit(y)
 
     assert forecaster.window_size == 4.0
-    assert forecaster.last_window.equals(y.iloc[-4:])
+    assert forecaster.last_window.equals(y)
 
 
 def test_fit_offset_DateOffset():
@@ -88,4 +113,4 @@ def test_fit_offset_DateOffset():
     forecaster.fit(y)
 
     assert forecaster.window_size == 4.0
-    assert forecaster.last_window.equals(y.iloc[-4:])
+    assert forecaster.last_window.equals(y)

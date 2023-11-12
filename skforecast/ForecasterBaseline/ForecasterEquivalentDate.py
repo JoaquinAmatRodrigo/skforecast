@@ -158,7 +158,7 @@ class ForecasterEquivalentDate():
             )
         
         self.window_size = self.offset * self.n_offsets
-        
+
 
     def __repr__(
         self
@@ -187,7 +187,7 @@ class ForecasterEquivalentDate():
 
         return info
 
-        
+
     def fit(
         self,
         y: pd.Series,
@@ -212,12 +212,17 @@ class ForecasterEquivalentDate():
         
         """
 
-        if isinstance(self.offset, pd.tseries.offsets.DateOffset) and not isinstance(
-            y.index, pd.DatetimeIndex):
-            raise TypeError(
-                ("If `offset` is a pandas DateOffset, the index of `y` must be a "
-                 "pandas DatetimeIndex.")
-            )
+        if isinstance(self.offset, pd.tseries.offsets.DateOffset):
+            if not isinstance(y.index, pd.DatetimeIndex):
+                raise TypeError(
+                    ("If `offset` is a pandas DateOffset, the index of `y` must be a "
+                     "pandas DatetimeIndex with frequency.")
+                )
+            elif y.index.freq is None:
+                raise TypeError(
+                    ("If `offset` is a pandas DateOffset, the index of `y` must be a "
+                     "pandas DatetimeIndex with frequency.")
+                )
         
         # Reset values in case the forecaster has already been fitted.
         self.index_type     = None
@@ -227,6 +232,20 @@ class ForecasterEquivalentDate():
         self.training_range = None
 
         _, y_index = preprocess_y(y=y, return_values=False)
+
+        if isinstance(self.offset, pd.tseries.offsets.DateOffset):
+            # Calculate the window_size in steps for compatibility with the
+            # check_predict_input function.
+            first_valid_index = (y_index[-1] - self.offset * self.n_offsets)
+            self.window_size = int((y_index[-1] - first_valid_index) / y_index.freq)
+
+        if len(y) < self.window_size:
+            raise ValueError(
+                (f"The length of `y` ({len(y)}), must be greater than or equal to "
+                 f"the window size ({self.window_size}). Try decreasing the offset "
+                 f"or the number of offsets.")
+            )
+        
         self.fitted = True
         self.fit_date = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
         self.training_range = y_index[[0, -1]]
@@ -234,19 +253,14 @@ class ForecasterEquivalentDate():
         self.index_freq = (
             y_index.freqstr if isinstance(y_index, pd.DatetimeIndex) else y_index.step
         )
-        if isinstance(self.offset, pd.tseries.offsets.DateOffset):
-            # Calculate the window_size in steps for compatibility with the
-            # check_predict_input function.
-            #TODO: review if it is needed to pass the whole series to avoid
-            #      errors when the offset is larger than the data available.
-            last_window_start = (y_index[-1] - self.offset * self.n_offsets)
-            self.window_size = int((y_index[-1] - last_window_start) / y_index.freq)
         
         # The last time window of training data is stored so that equivalent
         # dates are available when calling the `predict` method.
-        self.last_window = y.iloc[-self.window_size:].copy()
+        # Store the whole series to avoid errors when the offset is larger 
+        # than the data available.
+        self.last_window = y.copy()
 
-            
+
     def predict(
         self,
         steps: int,
@@ -373,12 +387,12 @@ class ForecasterEquivalentDate():
             # Error if all values are missing
             if equivalent_values.isnull().all().all():
                 raise ValueError(
-                    (f"All equivalent values are missing. This is caused by using an offset "
-                     f"({self.offset}) larger than the data available. Try decrease the "
-                     f"size of the offset ({self.offset}), the number of offsets "
-                     f"({self.n_offsets}) or increase the size of `last_window`. In "
-                     f"backtesing this error may be caused by using an too small "
-                     f"`initial_train_size`.")
+                    (f"All equivalent values are missing. This is caused by using "
+                     f"an offset ({self.offset}) larger than the available data. "
+                     f"Try to decrease the size of the offset ({self.offset.n}), "
+                     f"the number of n_offsets ({self.n_offsets}) or increase the "
+                     f"size of `last_window`. In backtesting, this error may be "
+                     f"caused by using an `initial_train_size` too small.")
                 )
             
             # Warning if equivalent values are missing
@@ -387,10 +401,10 @@ class ForecasterEquivalentDate():
             if not incomplete_offsets.empty:
                 warnings.warn(
                     (f"Steps: {incomplete_offsets.strftime('%Y-%m-%d').to_list()} "
-                     f"are calculated with less than {self.n_offsets} offsets. To avoid "
-                     f"this increase `last_window` size or decrease the number "
-                     f"of offsets. The current configuration needs a total offset "
-                     f"of {self.offset * self.n_offsets}.")
+                     f"are calculated with less than {self.n_offsets} n_offsets. "
+                     f"To avoid this, increase the `last_window` size or decrease "
+                     f"the number of n_offsets. The current configuration requires " 
+                     f"a total offset of {self.offset * self.n_offsets}.")
                 )
             
             aggregate_values = equivalent_values.apply(self.agg_func, axis=1)
