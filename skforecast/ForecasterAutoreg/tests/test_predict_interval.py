@@ -143,6 +143,7 @@ def test_predict_interval_output_when_regressor_is_LinearRegression_with_transfo
                      transformer_y    = transformer_y,
                      transformer_exog = transformer_exog,
                  )
+    
     forecaster.fit(y=y, exog=exog)
     predictions = forecaster.predict_interval(steps=5, exog=exog_predict)
     expected = pd.DataFrame(

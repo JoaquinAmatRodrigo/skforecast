@@ -303,7 +303,6 @@ def _create_backtesting_folds(
             validation_end    = data.index[fold[3][-1]]
             validation_length = len(fold[3])
 
-
             print(f"Fold: {i}")
             if not externally_fitted:
                 print(

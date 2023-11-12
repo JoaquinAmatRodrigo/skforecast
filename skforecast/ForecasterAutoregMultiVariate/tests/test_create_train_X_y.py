@@ -333,6 +333,50 @@ def test_create_train_X_y_output_when_different_lags_steps_2_and_exog_is_None(le
         pd.testing.assert_series_equal(results[1][key], expected[1][key]) 
 
 
+def test_create_train_X_y_output_when_y_and_exog_no_pandas_index():
+    """
+    Test the output of create_train_X_y when y and exog have no pandas index 
+    that doesn't start at 0.
+    """
+    series = pd.DataFrame({'l1': pd.Series(np.arange(10), dtype=float), 
+                           'l2': pd.Series(np.arange(50, 60), dtype=float)})
+    series.index = np.arange(6, 16)
+    exog = pd.Series(np.arange(100, 110), name='exog', 
+                     index=np.arange(6, 16), dtype=float)
+
+    forecaster = ForecasterAutoregMultiVariate(LinearRegression(), level='l1',
+                                               lags=5, steps=1)
+    results = forecaster.create_train_X_y(series=series, exog=exog)
+
+    expected = (
+        pd.DataFrame(
+            data = np.array([[4., 3., 2., 1., 0., 54., 53., 52., 51., 50., 105.],
+                             [5., 4., 3., 2., 1., 55., 54., 53., 52., 51., 106.],
+                             [6., 5., 4., 3., 2., 56., 55., 54., 53., 52., 107.],
+                             [7., 6., 5., 4., 3., 57., 56., 55., 54., 53., 108.],
+                             [8., 7., 6., 5., 4., 58., 57., 56., 55., 54., 109.]], 
+                             dtype=float),
+            index = pd.RangeIndex(start=5, stop=10, step=1),
+            columns = ['l1_lag_1', 'l1_lag_2', 'l1_lag_3', 'l1_lag_4', 'l1_lag_5', 
+                       'l2_lag_1', 'l2_lag_2', 'l2_lag_3', 'l2_lag_4', 'l2_lag_5',
+                       'exog_step_1']
+        ),
+        {1: pd.Series(
+                data  = np.array([5., 6., 7., 8., 9.], dtype=float), 
+                index = pd.RangeIndex(start=5, stop=10, step=1),
+                name  = "l1_step_1"
+            )
+        }
+    )
+
+    pd.testing.assert_frame_equal(results[0], expected[0])
+    assert isinstance(results[1], dict)
+    assert all(isinstance(x, pd.Series) for x in results[1].values())
+    assert results[1].keys() == expected[1].keys()
+    for key in expected[1]: 
+        pd.testing.assert_series_equal(results[1][key], expected[1][key]) 
+
+
 @pytest.mark.parametrize("dtype", 
                          [float, int], 
                          ids = lambda dt : f'dtype: {dt}')
