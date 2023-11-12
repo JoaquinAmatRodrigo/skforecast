@@ -14,8 +14,8 @@ def test_init_TypeError_offset_not_int_or_DateOffset():
     """
 
     err_msg = re.escape(
-        ("`offset` must be an integer or a pandas.tseries.offsets. "
-         "Find more information about offsets in "
+        ("`offset` must be an integer greater than 0 or a "
+         "pandas.tseries.offsets. Find more information about offsets in "
          "https://pandas.pydata.org/docs/reference/offset_frequency.html")
     )
     with pytest.raises(TypeError, match=err_msg):
