@@ -67,10 +67,11 @@ def test_predict_bootstrapping_ValueError_when_out_sample_residuals_is_None():
     forecaster.fit(series=series)
 
     err_msg = re.escape(
-                ('`forecaster.out_sample_residuals` is `None`. Use '
-                 '`in_sample_residuals=True` or method `set_out_sample_residuals()` '
-                 'before `predict_interval()`, `predict_bootstrapping()` or '
-                 '`predict_dist()`.')
+                ("`forecaster.out_sample_residuals` is `None`. Use "
+                 "`in_sample_residuals=True` or method "
+                 "`set_out_sample_residuals()` before `predict_interval()`, "
+                 "`predict_bootstrapping()`,`predict_quantiles()` or "
+                 "`predict_dist()`.")
               )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.predict_bootstrapping(steps=1, levels='1', in_sample_residuals=False)
