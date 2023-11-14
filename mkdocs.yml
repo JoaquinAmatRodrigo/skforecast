@@ -50,6 +50,7 @@ nav:
       - Shap-values: user_guides/shap-values-skforecast.ipynb
       - Skforecast in GPU: user_guides/skforecast-in-GPU.ipynb
       - Plot forecaster residuals: user_guides/plot-forecaster-residuals.ipynb
+      - Datasets: user_guides/datasets.ipynb
 
   - Examples and tutorials:
       - Examples and tutorials: examples/examples.md
