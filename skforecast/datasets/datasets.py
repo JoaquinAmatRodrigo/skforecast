@@ -206,7 +206,7 @@ def fetch_dataset(
             ),
             'sep': ',',
             'index_col': 'Date',
-            'date_format': '%Y-%m-%d',
+            'date_format': '%d/%m/%Y',
             'freq': 'D',
             'description': 'Daily number of flights in UK from 02/01/2019 to 23/01/2022.',
             'source': (
