@@ -235,9 +235,11 @@ class ForecasterEquivalentDate():
 
         if isinstance(self.offset, pd.tseries.offsets.DateOffset):
             # Calculate the window_size in steps for compatibility with the
-            # check_predict_input function.
+            # check_predict_input function. This is not a exact calculation
+            # because the offset follows the calendar rules and the distance
+            # between two dates may not be constant.
             first_valid_index = (y_index[-1] - self.offset * self.n_offsets)
-            self.window_size = int((y_index[-1] - first_valid_index) / y_index.freq)
+            self.window_size = len((y_index[-1] - first_valid_index))
 
         if len(y) < self.window_size:
             raise ValueError(
