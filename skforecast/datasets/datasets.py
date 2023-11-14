@@ -297,7 +297,7 @@ def fetch_dataset(
             date_format = datasets[name]['date_format']
             df = df.set_index(index_col)
             df.index = pd.to_datetime(df.index, format=date_format)
-            df.index.freq = freq
+            df = df.asfreq(freq)
             df = df.sort_index()
         except:
             pass
