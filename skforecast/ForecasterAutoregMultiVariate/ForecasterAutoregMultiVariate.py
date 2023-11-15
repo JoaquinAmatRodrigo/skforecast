@@ -825,11 +825,11 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             Parallel(n_jobs=self.n_jobs)
             (delayed(fit_forecaster)
             (
-                regressor=copy(self.regressor),
-                X_train=X_train,
-                y_train=y_train,
-                step=step,
-                store_in_sample_residuals=store_in_sample_residuals
+                regressor                 = copy(self.regressor),
+                X_train                   = X_train,
+                y_train                   = y_train,
+                step                      = step,
+                store_in_sample_residuals = store_in_sample_residuals
             )
             for step in range(1, self.steps + 1))
         )
@@ -910,12 +910,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                 )
 
         if last_window is None:
-            if self.fitted:
-                last_window = self.last_window.copy()
-            else:
-                last_window = copy(self.last_window)
-        else:
-            last_window = last_window.copy()
+            last_window = self.last_window
         
         check_predict_input(
             forecaster_name  = type(self).__name__,
@@ -937,8 +932,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             series_col_names = self.series_col_names
         )
 
-        if last_window is not None:
-            last_window = last_window.iloc[-self.window_size:, ]
+        last_window = last_window.iloc[-self.window_size:, ].copy()
         
         if exog is not None:
             if isinstance(exog, pd.DataFrame):
@@ -1084,52 +1078,53 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
 
         """
 
-        if isinstance(steps, int):
-            steps = list(np.arange(steps) + 1)
-        elif steps is None:
-            steps = list(np.arange(self.steps) + 1)
-        elif isinstance(steps, list):
-            steps = list(np.array(steps))
+        if self.fitted:
+            if isinstance(steps, int):
+                steps = list(np.arange(steps) + 1)
+            elif steps is None:
+                steps = list(np.arange(self.steps) + 1)
+            elif isinstance(steps, list):
+                steps = list(np.array(steps))
 
-        if in_sample_residuals:
-            if not set(steps).issubset(set(self.in_sample_residuals.keys())):
-                raise ValueError(
-                    (f"Not `forecaster.in_sample_residuals` for steps: "
-                     f"{set(steps) - set(self.in_sample_residuals.keys())}.")
-                )
-            residuals = self.in_sample_residuals
-        else:
-            if self.out_sample_residuals is None:
-                raise ValueError(
-                    ("`forecaster.out_sample_residuals` is `None`. Use "
-                     "`in_sample_residuals=True` or method `set_out_sample_residuals()` "
-                     "before `predict_interval()`, `predict_bootstrapping()`, "
-                     "`predict_quantiles()` or `predict_dist()`.")
-                )
-            else:
-                if not set(steps).issubset(set(self.out_sample_residuals.keys())):
+            if in_sample_residuals:
+                if not set(steps).issubset(set(self.in_sample_residuals.keys())):
                     raise ValueError(
-                        (f"Not `forecaster.out_sample_residuals` for steps: "
-                         f"{set(steps) - set(self.out_sample_residuals.keys())}. "
-                         f"Use method `set_out_sample_residuals()`.")
+                        (f"Not `forecaster.in_sample_residuals` for steps: "
+                         f"{set(steps) - set(self.in_sample_residuals.keys())}.")
                     )
-            residuals = self.out_sample_residuals
-        
-        check_residuals = (
-            'forecaster.in_sample_residuals' if in_sample_residuals
-            else 'forecaster.out_sample_residuals'
-        )
-        for step in steps:
-            if residuals[step] is None:
-                raise ValueError(
-                    (f"forecaster residuals for step {step} are `None`. "
-                     f"Check {check_residuals}.")
-                )
-            elif (residuals[step] == None).any():
-                raise ValueError(
-                    (f"forecaster residuals for step {step} contains `None` values. "
-                     f"Check {check_residuals}.")
-                )
+                residuals = self.in_sample_residuals
+            else:
+                if self.out_sample_residuals is None:
+                    raise ValueError(
+                        ("`forecaster.out_sample_residuals` is `None`. Use "
+                         "`in_sample_residuals=True` or method `set_out_sample_residuals()` "
+                         "before `predict_interval()`, `predict_bootstrapping()`, "
+                         "`predict_quantiles()` or `predict_dist()`.")
+                    )
+                else:
+                    if not set(steps).issubset(set(self.out_sample_residuals.keys())):
+                        raise ValueError(
+                            (f"Not `forecaster.out_sample_residuals` for steps: "
+                             f"{set(steps) - set(self.out_sample_residuals.keys())}. "
+                             f"Use method `set_out_sample_residuals()`.")
+                        )
+                residuals = self.out_sample_residuals
+            
+            check_residuals = (
+                'forecaster.in_sample_residuals' if in_sample_residuals
+                else 'forecaster.out_sample_residuals'
+            )
+            for step in steps:
+                if residuals[step] is None:
+                    raise ValueError(
+                        (f"forecaster residuals for step {step} are `None`. "
+                         f"Check {check_residuals}.")
+                    )
+                elif (residuals[step] == None).any():
+                    raise ValueError(
+                        (f"forecaster residuals for step {step} contains `None` values. "
+                         f"Check {check_residuals}.")
+                    )
 
         predictions = self.predict(
                           steps       = steps,

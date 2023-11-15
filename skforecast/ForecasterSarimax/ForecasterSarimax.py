@@ -9,7 +9,6 @@ from typing import Union, Dict, List, Tuple, Any, Optional
 import warnings
 import logging
 import sys
-from copy import copy
 import numpy as np
 import pandas as pd
 import pmdarima
@@ -357,11 +356,9 @@ class ForecasterSarimax():
         
         """
 
-        # Needs to be a new variable to avoid arima_res_.append if not needed
-        if self.fitted:
-            last_window_check = last_window.copy() if last_window is not None else self.last_window.copy()
-        else:
-            last_window_check = last_window.copy() if last_window is not None else copy(self.last_window)
+        # Needs to be a new variable to avoid arima_res_.append when using 
+        # self.last_window. It already has it stored.
+        last_window_check = last_window if last_window is not None else self.last_window
 
         check_predict_input(
             forecaster_name  = type(self).__name__,
@@ -382,8 +379,12 @@ class ForecasterSarimax():
             levels           = None,
             series_col_names = None
         )
+        
+        # If not last_window is provided, last_window needs to be None
+        if last_window is not None:
+            last_window = last_window.copy()
 
-        # If last_window_exog is provided but no last_window
+        # When last_window_exog is provided but no last_window
         if last_window is None and last_window_exog is not None:
             raise ValueError(
                 ("To make predictions unrelated to the original data, both "
@@ -416,7 +417,7 @@ class ForecasterSarimax():
                 )
             
             last_window = transform_series(
-                              series            = last_window.copy(),
+                              series            = last_window,
                               transformer       = self.transformer_y,
                               fit               = False,
                               inverse_transform = False
@@ -565,8 +566,9 @@ class ForecasterSarimax():
 
         """
 
-        # Needs to be a new variable to avoid arima_res_.append if not needed
-        last_window_check = last_window.copy() if last_window is not None else self.last_window.copy()
+        # Needs to be a new variable to avoid arima_res_.append when using 
+        # self.last_window. It already has it stored.
+        last_window_check = last_window if last_window is not None else self.last_window
 
         check_predict_input(
             forecaster_name  = type(self).__name__,
@@ -587,6 +589,10 @@ class ForecasterSarimax():
             levels           = None,
             series_col_names = None
         )
+        
+        # If not last_window is provided, last_window needs to be None
+        if last_window is not None:
+            last_window = last_window.copy()
 
         # If last_window_exog is provided but no last_window
         if last_window is None and last_window_exog is not None:

@@ -2,7 +2,6 @@
 # ==============================================================================
 import re
 import pytest
-from pytest import approx
 import numpy as np
 import pandas as pd
 from sklearn.exceptions import NotFittedError
@@ -59,8 +58,8 @@ def test_predict_NotFittedError_when_fitted_is_False():
                                                lags=3, steps=3)
 
     err_msg = re.escape(
-                ('This Forecaster instance is not fitted yet. Call `fit` with '
-                 'appropriate arguments before using predict.')
+                ("This Forecaster instance is not fitted yet. Call `fit` with "
+                 "appropriate arguments before using predict.")
               )
     with pytest.raises(NotFittedError, match = err_msg):
         forecaster.predict(steps=5)
