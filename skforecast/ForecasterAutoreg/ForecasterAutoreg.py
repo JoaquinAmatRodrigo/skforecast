@@ -669,6 +669,9 @@ class ForecasterAutoreg(ForecasterBase):
             series_col_names = None
         )
 
+        if last_window is not None:
+            last_window = last_window.iloc[-self.window_size:]
+
         if exog is not None:
             if isinstance(exog, pd.DataFrame):
                 exog = transform_dataframe(
@@ -817,6 +820,9 @@ class ForecasterAutoreg(ForecasterBase):
             levels           = None,
             series_col_names = None
         )
+
+        if last_window is not None:
+            last_window = last_window.iloc[-self.window_size:]
 
         if exog is not None:
             if isinstance(exog, pd.DataFrame):

@@ -638,7 +638,7 @@ def check_predict_input(
             ("`last_window` has missing values.")
         )
     _, last_window_index = preprocess_last_window(
-                               last_window  = last_window.iloc[:0],
+                               last_window   = last_window.iloc[:0],
                                return_values = False
                            ) 
     if not isinstance(last_window_index, index_type):

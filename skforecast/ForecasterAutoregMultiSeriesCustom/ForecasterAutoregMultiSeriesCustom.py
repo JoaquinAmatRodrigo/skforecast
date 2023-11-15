@@ -22,16 +22,15 @@ from ..ForecasterBase import ForecasterBase
 from ..exceptions import IgnoredArgumentWarning
 from ..utils import initialize_weights
 from ..utils import check_select_fit_kwargs
-from ..utils import check_y
 from ..utils import check_exog
 from ..utils import get_exog_dtypes
 from ..utils import check_exog_dtypes
 from ..utils import check_interval
+from ..utils import check_predict_input
 from ..utils import preprocess_y
 from ..utils import preprocess_last_window
 from ..utils import preprocess_exog
 from ..utils import expand_index
-from ..utils import check_predict_input
 from ..utils import transform_series
 from ..utils import transform_dataframe
 
@@ -877,9 +876,6 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
                 last_window = copy(self.last_window)
         else:
             last_window = last_window.copy()
-
-        # if last_window is not None:
-        #     last_window = last_window.iloc[-self.window_size:, ]
         
         check_predict_input(
             forecaster_name  = type(self).__name__,
@@ -898,6 +894,9 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
             levels           = levels,
             series_col_names = self.series_col_names
         )
+
+        if last_window is not None:
+            last_window = last_window.iloc[-self.window_size:, ]
         
         if exog is not None:
             if isinstance(exog, pd.DataFrame):
@@ -1073,8 +1072,6 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         else:
             last_window = last_window.copy()
 
-        last_window = last_window.iloc[-self.window_size:, ]
-
         check_predict_input(
             forecaster_name  = type(self).__name__,
             steps            = steps,
@@ -1094,6 +1091,9 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
             levels           = levels,
             series_col_names = self.series_col_names
         )
+
+        if last_window is not None:
+            last_window = last_window.iloc[-self.window_size:, ]
 
         if exog is not None:
             if isinstance(exog, pd.DataFrame):

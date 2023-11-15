@@ -845,7 +845,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             levels = [levels]
 
         if last_window is None:
-            last_window = self.last_window.copy()
+            if self.fitted:
+                last_window = self.last_window.copy()
+            else:
+                last_window = copy(self.last_window)
         else:
             last_window = last_window.copy()
         
@@ -868,6 +871,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             levels           = levels,
             series_col_names = self.series_col_names
         )
+
+        if last_window is not None:
+            last_window = last_window.iloc[-self.window_size:, ]
         
         if exog is not None:
             if isinstance(exog, pd.DataFrame):
@@ -1036,7 +1042,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 )
 
         if last_window is None:
-            last_window = self.last_window.copy()
+            if self.fitted:
+                last_window = self.last_window.copy()
+            else:
+                last_window = copy(self.last_window)
         else:
             last_window = last_window.copy()
 
@@ -1059,6 +1068,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             levels           = levels,
             series_col_names = self.series_col_names
         )
+
+        if last_window is not None:
+            last_window = last_window.iloc[-self.window_size:, ]
 
         if exog is not None:
             if isinstance(exog, pd.DataFrame):
