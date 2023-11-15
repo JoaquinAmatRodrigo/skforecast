@@ -19,6 +19,7 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "License :: OSI Approved :: BSD License"
 ]
 keywords = [
@@ -32,11 +33,11 @@ keywords = [
     "time-series-regression",
 ]
 dependencies = [
-    "numpy>=1.20, <1.26",
-    "pandas>=1.2, <2.1",
-    "tqdm>=4.57.0, <4.66",
+    "numpy>=1.20, <1.27",
+    "pandas>=1.2, <2.2",
+    "tqdm>=4.57.0, <4.67",
     "scikit-learn>=1.0, <1.4",
-    "optuna>=2.10.0, <3.3",
+    "optuna>=2.10.0, <3.5",
     "joblib>=1.1.0, <1.4",
 ]
 requires-python = ">=3.8"
@@ -48,22 +49,22 @@ sarimax = [
 ]
 
 plotting = [
-    "matplotlib>=3.3, <3.8",
-    "seaborn>=0.11, <0.13",
+    "matplotlib>=3.3, <3.9",
+    "seaborn>=0.11, <0.14",
     "statsmodels>=0.12, <0.15",
 ]
 
 all = [
     "pmdarima>=2.0, <2.1",
-    "matplotlib>=3.3, <3.8",
-    "seaborn>=0.11, <0.13",
+    "matplotlib>=3.3, <3.9",
+    "seaborn>=0.11, <0.14",
     "statsmodels>=0.12, <0.15",
 ]
 
 full = [
     "pmdarima>=2.0, <2.1",
-    "matplotlib>=3.3, <3.8",
-    "seaborn>=0.11, <0.13",
+    "matplotlib>=3.3, <3.9",
+    "seaborn>=0.11, <0.14",
     "statsmodels>=0.12, <0.15",
 ]
 

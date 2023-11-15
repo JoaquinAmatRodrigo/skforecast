@@ -1,6 +1,10 @@
+# Unit test fetch_dataset
+# ==============================================================================
+import re
 import pytest
 import pandas as pd
 from skforecast.datasets import fetch_dataset
+
 
 def test_fetch_dataset():
     """
@@ -16,7 +20,7 @@ def test_fetch_dataset():
     assert df.index[-1].strftime('%Y-%m-%d') == '2008-06-01'
 
     # Test fetching the 'items_sales' dataset
-    df = fetch_dataset('items_sales', version='latest', raw=False, verbose=False)
+    df = fetch_dataset('items_sales', version='latest', raw=False, verbose=True)
     assert isinstance(df, pd.DataFrame)
     assert df.shape == (1097, 3)
     assert df.index.freq == 'D'

@@ -303,7 +303,6 @@ def _create_backtesting_folds(
             validation_end    = data.index[fold[3][-1]]
             validation_length = len(fold[3])
 
-
             print(f"Fold: {i}")
             if not externally_fitted:
                 print(
@@ -488,7 +487,7 @@ def _backtesting_forecaster(
             regressor_name = type(forecaster.regressor[-1]).__name__
         else:
             regressor_name = type(forecaster.regressor).__name__
-        
+
         n_jobs = select_n_jobs_backtesting(
                      forecaster_name = type(forecaster).__name__,
                      regressor_name  = regressor_name,
@@ -759,14 +758,17 @@ def backtesting_forecaster(
             - column upper_bound: upper bound of the interval.
     
     """
-    
-    if type(forecaster).__name__ not in ['ForecasterAutoreg', 
-                                         'ForecasterAutoregCustom', 
-                                         'ForecasterAutoregDirect']:
+    forecaters_allowed = [
+        'ForecasterAutoreg', 
+        'ForecasterAutoregCustom', 
+        'ForecasterAutoregDirect',
+        'ForecasterEquivalentDate'
+    ]
+    if type(forecaster).__name__ not in forecaters_allowed:
         raise TypeError(
-            ("`forecaster` must be of type `ForecasterAutoreg`, `ForecasterAutoregCustom` "
-             "or `ForecasterAutoregDirect`, for all other types of forecasters "
-             "use the functions available in the other `model_selection` modules.")
+            (f"`forecaster` must be of type {forecaters_allowed}, for all other types of "
+             f" forecasters use the functions available in the other `model_selection` "
+             f"modules.")
         )
     
     check_backtesting_input(

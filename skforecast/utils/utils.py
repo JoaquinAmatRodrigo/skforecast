@@ -1,5 +1,5 @@
 ################################################################################
-#                             skforecast.utils                                 #
+#                               skforecast.utils                               #
 #                                                                              #
 # This work by skforecast team is licensed under the BSD 3-Clause License.     #
 ################################################################################
@@ -15,14 +15,14 @@ import sklearn
 import sklearn.linear_model
 from sklearn.compose import ColumnTransformer
 from sklearn.exceptions import NotFittedError
-from sklearn.base import BaseEstimator
-from sklearn.base import TransformerMixin
 import inspect
 from copy import deepcopy
 
+import skforecast
 from ..exceptions import MissingValuesExogWarning
 from ..exceptions import DataTypeWarning
 from ..exceptions import IgnoredArgumentWarning
+from ..exceptions import SkforecastVersionWarning
 
 optional_dependencies = {
     "sarimax": [
@@ -30,8 +30,8 @@ optional_dependencies = {
         'statsmodels>=0.12, <0.15'
     ],
     "plotting": [
-        'matplotlib>=3.3, <3.8', 
-        'seaborn>=0.11, <0.13', 
+        'matplotlib>=3.3, <3.9', 
+        'seaborn>=0.11, <0.14', 
         'statsmodels>=0.12, <0.15'
     ]
 }
@@ -636,7 +636,7 @@ def check_predict_input(
             ("`last_window` has missing values.")
         )
     _, last_window_index = preprocess_last_window(
-                               last_window  = last_window.iloc[:0],
+                               last_window   = last_window.iloc[:0],
                                return_values = False
                            ) 
     if not isinstance(last_window_index, index_type):
@@ -822,7 +822,7 @@ def preprocess_y(
                       step  = 1
                   )
 
-    y_values = y.to_numpy() if return_values else None
+    y_values = y.to_numpy(copy=True) if return_values else None
 
     return y_values, y_index
 
@@ -884,7 +884,7 @@ def preprocess_last_window(
                                 step  = 1
                             )
 
-    last_window_values = last_window.to_numpy() if return_values else None
+    last_window_values = last_window.to_numpy(copy=True) if return_values else None
 
     return last_window_values, last_window_index
 
@@ -947,7 +947,7 @@ def preprocess_exog(
                          step  = 1
                      )
 
-    exog_values = exog.to_numpy() if return_values else None
+    exog_values = exog.to_numpy(copy=True) if return_values else None
 
     return exog_values, exog_index
     
@@ -1084,7 +1084,7 @@ def exog_to_direct_numpy(
     if len(exog_transformed) > 1:
         exog_transformed = np.concatenate(exog_transformed, axis=1)
     else:
-        exog_transformed = exog_column_transformed
+        exog_transformed = exog_column_transformed.copy()
     
     return exog_transformed
 
@@ -1337,6 +1337,19 @@ def load_forecaster(
 
     forecaster = joblib.load(filename=file_name)
 
+    skforecast_v = skforecast.__version__
+    forecaster_v = forecaster.skforecast_version
+
+    if forecaster_v != skforecast_v:
+        warnings.warn(
+            (f"The skforecast version installed in the environment differs "
+             f"from the version used to create the forecaster.\n"
+             f"    Installed Version  : {skforecast_v}\n"
+             f"    Forecaster Version : {forecaster_v}\n"
+             f"This may create incompatibilities when using the library."),
+             SkforecastVersionWarning
+        )
+
     if verbose:
         forecaster.summary()
 
@@ -1546,18 +1559,21 @@ def check_backtesting_input(
     """
     
     forecasters_uni = ['ForecasterAutoreg', 'ForecasterAutoregCustom', 
-                       'ForecasterAutoregDirect', 'ForecasterSarimax']
+                       'ForecasterAutoregDirect', 'ForecasterSarimax',
+                       'ForecasterEquivalentDate']
     forecasters_multi = ['ForecasterAutoregMultiSeries', 
                          'ForecasterAutoregMultiSeriesCustom', 
                          'ForecasterAutoregMultiVariate']
+    
+    forecaster_name = type(forecaster).__name__
 
-    if type(forecaster).__name__ in forecasters_uni:
+    if forecaster_name in forecasters_uni:
         if not isinstance(y, pd.Series):
             raise TypeError("`y` must be a pandas Series.")
         data_name = 'y'
         data_length = len(y)
         
-    if type(forecaster).__name__ in forecasters_multi:
+    if forecaster_name in forecasters_multi:
         if not isinstance(series, pd.DataFrame):
             raise TypeError("`series` must be a pandas DataFrame.")
         data_name = 'series'
@@ -1576,8 +1592,12 @@ def check_backtesting_input(
             (f"`metric` must be a string, a callable function, or a list containing "
              f"multiple strings and/or callables. Got {type(metric)}.")
         )
-
-    if initial_train_size is not None:
+    
+    if forecaster_name == "ForecasterEquivalentDate" and isinstance(
+        forecaster.offset, pd.tseries.offsets.DateOffset
+    ):
+        pass
+    elif initial_train_size is not None:
         if not isinstance(initial_train_size, (int, np.integer)):
             raise TypeError(
                 (f"If used, `initial_train_size` must be an integer greater than the "
@@ -1609,11 +1629,11 @@ def check_backtesting_input(
                          f"all series reach the first non-null value.")
                     )
     else:
-        if type(forecaster).__name__ == 'ForecasterSarimax':
+        if forecaster_name == 'ForecasterSarimax':
             raise ValueError(
                 (f"`initial_train_size` must be an integer smaller than the "
                  f"length of `{data_name}` ({data_length}).")
-            )    
+            )
         else:
             if not forecaster.fitted:
                 raise NotFittedError(
@@ -1683,7 +1703,10 @@ def select_n_jobs_backtesting(
     and refit=`True`, then n_jobs=cpu_count().
     - If forecaster_name is 'ForecasterAutoregDirect' or 'ForecasterAutoregMultiVariate'
     and refit=`False`, then n_jobs=1.
-    - If forecaster_name is 'ForecasterAutoregMultiseries', then n_jobs=cpu_count().
+    - If forecaster_name is 'ForecasterAutoregMultiseries' or 
+    'ForecasterAutoregMultiseriesCustom', then n_jobs=cpu_count().
+    - If forecaster_name is 'ForecasterSarimax' or 'ForecasterEquivalentDate', 
+    then n_jobs=1.
 
     Parameters
     ----------
@@ -1720,7 +1743,7 @@ def select_n_jobs_backtesting(
             n_jobs = 1
         elif forecaster_name in ['ForecasterAutoregMultiseries', 'ForecasterAutoregMultiSeriesCustom']:
             n_jobs = joblib.cpu_count()
-        elif forecaster_name in ['ForecasterSarimax']:
+        elif forecaster_name in ['ForecasterSarimax', 'ForecasterEquivalentDate']:
             n_jobs = 1
         else:
             n_jobs = 1

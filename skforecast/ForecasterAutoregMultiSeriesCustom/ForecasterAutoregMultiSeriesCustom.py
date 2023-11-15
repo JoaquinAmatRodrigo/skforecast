@@ -22,16 +22,15 @@ from ..ForecasterBase import ForecasterBase
 from ..exceptions import IgnoredArgumentWarning
 from ..utils import initialize_weights
 from ..utils import check_select_fit_kwargs
-from ..utils import check_y
 from ..utils import check_exog
 from ..utils import get_exog_dtypes
 from ..utils import check_exog_dtypes
 from ..utils import check_interval
+from ..utils import check_predict_input
 from ..utils import preprocess_y
 from ..utils import preprocess_last_window
 from ..utils import preprocess_exog
 from ..utils import expand_index
-from ..utils import check_predict_input
 from ..utils import transform_series
 from ..utils import transform_dataframe
 
@@ -95,10 +94,8 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
             - If `None`, all levels have the same weight.
     fit_kwargs : dict, default `None`
         Additional arguments to be passed to the `fit` method of the regressor.
-        **New in version 0.8.0**
     forecaster_id : str, int, default `None`
         Name used as an identifier of the forecaster.
-        **New in version 0.7.0**
     
     Attributes
     ----------
@@ -188,7 +185,6 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         Names of columns of the matrix created internally for training.
     fit_kwargs : dict
         Additional arguments to be passed to the `fit` method of the regressor.
-        **New in version 0.8.0**
     in_sample_residuals : dict
         Residuals of the model when predicting training data. Only stored up to
         1000 values in the form `{level: residuals}`. If `transformer_series` 
@@ -204,7 +200,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         Date of creation.
     fit_date : str
         Date of last fit.
-    skforcast_version : str
+    skforecast_version : str
         Version of skforecast library used to create the forecaster.
     python_version : str
         Version of python used to create the forecaster.
@@ -272,7 +268,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         self.fitted                     = False
         self.creation_date              = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
         self.fit_date                   = None
-        self.skforcast_version          = skforecast.__version__
+        self.skforecast_version         = skforecast.__version__
         self.python_version             = sys.version.split(" ")[0]
         self.forecaster_id              = forecaster_id
 
@@ -337,7 +333,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
             f"fit_kwargs: {self.fit_kwargs} \n"
             f"Creation date: {self.creation_date} \n"
             f"Last fit date: {self.fit_date} \n"
-            f"Skforecast version: {self.skforcast_version} \n"
+            f"Skforecast version: {self.skforecast_version} \n"
             f"Python version: {self.python_version} \n"
             f"Forecaster id: {self.forecaster_id} \n"
         )
@@ -434,8 +430,8 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
             check_exog_dtypes(exog)
             self.exog_dtypes = get_exog_dtypes(exog=exog)
 
-            _, exog_index = preprocess_exog(exog=exog, return_values=False)
-            if not (exog_index[:len(series.index)] == series.index).all():
+            _, _ = preprocess_exog(exog=exog, return_values=False)
+            if not (exog.index[:len(series)] == series.index).all():
                 raise ValueError(
                     ("Different index for `series` and `exog`. They must be equal "
                      "to ensure the correct alignment of values.")
@@ -871,11 +867,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
             levels = [levels]
 
         if last_window is None:
-            last_window = self.last_window.copy()
-        else:
-            last_window = last_window.copy()
-
-        last_window = last_window.iloc[-self.window_size:, ]
+            last_window = self.last_window
         
         check_predict_input(
             forecaster_name  = type(self).__name__,
@@ -894,6 +886,8 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
             levels           = levels,
             series_col_names = self.series_col_names
         )
+
+        last_window = last_window.iloc[-self.window_size:, ].copy()
         
         if exog is not None:
             if isinstance(exog, pd.DataFrame):
@@ -932,8 +926,8 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
             preds_level = self._recursive_predict(
                               steps       = steps,
                               level       = level,
-                              last_window = copy(last_window_values),
-                              exog        = copy(exog_values)
+                              last_window = last_window_values,
+                              exog        = exog_values
                           )
 
             preds_level = pd.Series(
@@ -1015,57 +1009,55 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
 
         """
         
-        if levels is None:
-            levels = self.series_col_names
-        elif isinstance(levels, str):
-            levels = [levels]
+        if self.fitted:
+            if levels is None:
+                levels = self.series_col_names
+            elif isinstance(levels, str):
+                levels = [levels]
 
-        if in_sample_residuals:
-            if not set(levels).issubset(set(self.in_sample_residuals.keys())):
-                raise ValueError(
-                    (f"Not `forecaster.in_sample_residuals` for levels: "
-                     f"{set(levels) - set(self.in_sample_residuals.keys())}.")
-                )
-            residuals_levels = self.in_sample_residuals
-        else:
-            if self.out_sample_residuals is None:
-                raise ValueError(
-                    ("`forecaster.out_sample_residuals` is `None`. Use "
-                     "`in_sample_residuals=True` or method "
-                     "`set_out_sample_residuals()` before `predict_interval()`, "
-                     "`predict_bootstrapping()` or `predict_dist()`.")
-                )
-            else:
-                if not set(levels).issubset(set(self.out_sample_residuals.keys())):
+            if in_sample_residuals:
+                if not set(levels).issubset(set(self.in_sample_residuals.keys())):
                     raise ValueError(
-                        (f"Not `forecaster.out_sample_residuals` for levels: "
-                         f"{set(levels) - set(self.out_sample_residuals.keys())}. "
-                         f"Use method `set_out_sample_residuals()`.")
+                        (f"Not `forecaster.in_sample_residuals` for levels: "
+                         f"{set(levels) - set(self.in_sample_residuals.keys())}.")
                     )
-            residuals_levels = self.out_sample_residuals
-                
-        check_residuals = (
-            "forecaster.in_sample_residuals" if in_sample_residuals
-             else "forecaster.out_sample_residuals"
-        )
-        for level in levels:
-            if residuals_levels[level] is None:
-                raise ValueError(
-                    (f"forecaster residuals for level '{level}' are `None`. "
-                     f"Check `{check_residuals}`.")
-                )
-            elif (residuals_levels[level] == None).any():
-                raise ValueError(
-                    (f"forecaster residuals for level '{level}' contains `None` "
-                     f"values. Check `{check_residuals}`.")
-                )
+                residuals_levels = self.in_sample_residuals
+            else:
+                if self.out_sample_residuals is None:
+                    raise ValueError(
+                        ("`forecaster.out_sample_residuals` is `None`. Use "
+                         "`in_sample_residuals=True` or method "
+                         "`set_out_sample_residuals()` before `predict_interval()`, "
+                         "`predict_bootstrapping()`,`predict_quantiles()` or "
+                         "`predict_dist()`.")
+                    )
+                else:
+                    if not set(levels).issubset(set(self.out_sample_residuals.keys())):
+                        raise ValueError(
+                            (f"Not `forecaster.out_sample_residuals` for levels: "
+                             f"{set(levels) - set(self.out_sample_residuals.keys())}. "
+                             f"Use method `set_out_sample_residuals()`.")
+                        )
+                residuals_levels = self.out_sample_residuals
+                    
+            check_residuals = (
+                "forecaster.in_sample_residuals" if in_sample_residuals
+                else "forecaster.out_sample_residuals"
+            )
+            for level in levels:
+                if residuals_levels[level] is None:
+                    raise ValueError(
+                        (f"forecaster residuals for level '{level}' are `None`. "
+                         f"Check `{check_residuals}`.")
+                    )
+                elif (residuals_levels[level] == None).any():
+                    raise ValueError(
+                        (f"forecaster residuals for level '{level}' contains `None` "
+                         f"values. Check `{check_residuals}`.")
+                    )
 
         if last_window is None:
-            last_window = self.last_window.copy()
-        else:
-            last_window = last_window.copy()
-
-        last_window = last_window.iloc[-self.window_size:, ]
+            last_window = self.last_window
 
         check_predict_input(
             forecaster_name  = type(self).__name__,
@@ -1086,6 +1078,8 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
             levels           = levels,
             series_col_names = self.series_col_names
         )
+
+        last_window = last_window.iloc[-self.window_size:, ].copy()
 
         if exog is not None:
             if isinstance(exog, pd.DataFrame):
@@ -1366,7 +1360,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
 
         for level in levels:
             preds_quantiles = boot_predictions[level].quantile(q=quantiles, axis=1).transpose()
-            preds_quantiles.columns = [f'{level}_{q}' for q in quantiles]
+            preds_quantiles.columns = [f'{level}_q_{q}' for q in quantiles]
             predictions.append(preds_quantiles)
         
         predictions = pd.concat(predictions, axis=1)

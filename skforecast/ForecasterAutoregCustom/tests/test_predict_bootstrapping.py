@@ -4,6 +4,7 @@ import re
 import pytest
 import numpy as np
 import pandas as pd
+from sklearn.exceptions import NotFittedError
 from skforecast.ForecasterAutoregCustom import ForecasterAutoregCustom
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
@@ -21,7 +22,25 @@ def create_predictors(y): # pragma: no cover
     
     lags = y[-1:-4:-1]
     
-    return lags 
+    return lags
+
+
+def test_predict_bootstrapping_NotFittedError_when_fitted_is_False():
+    """
+    Test NotFittedError is raised when fitted is False.
+    """
+    forecaster = ForecasterAutoregCustom(
+                     regressor      = LinearRegression(),
+                     fun_predictors = create_predictors,
+                     window_size    = 5
+                 )
+
+    err_msg = re.escape(
+                ("This Forecaster instance is not fitted yet. Call `fit` with "
+                 "appropriate arguments before using predict.")
+              )
+    with pytest.raises(NotFittedError, match = err_msg):
+        forecaster.predict_bootstrapping(steps=1)
  
 
 def test_predict_interval_exception_when_out_sample_residuals_is_None():
@@ -37,10 +56,10 @@ def test_predict_interval_exception_when_out_sample_residuals_is_None():
     forecaster.fit(y=pd.Series(np.arange(10)))
 
     err_msg = re.escape(
-                ('`forecaster.out_sample_residuals` is `None`. Use '
-                 '`in_sample_residuals=True` or method `set_out_sample_residuals()` '
-                 'before `predict_interval()`, `predict_bootstrapping()` or '
-                 '`predict_dist()`.')
+                ("`forecaster.out_sample_residuals` is `None`. Use "
+                 "`in_sample_residuals=True` or method `set_out_sample_residuals()` "
+                 "before `predict_interval()`, `predict_bootstrapping()`, "
+                 "`predict_quantiles()` or `predict_dist()`.")
             )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.predict_bootstrapping(steps=1, in_sample_residuals=False)

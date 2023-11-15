@@ -14,7 +14,6 @@ import pandas as pd
 import sklearn
 import sklearn.pipeline
 from sklearn.base import clone
-from copy import copy
 import inspect
 
 import skforecast
@@ -82,10 +81,8 @@ class ForecasterAutoreg(ForecasterBase):
         **New in version 0.10.0**
     fit_kwargs : dict, default `None`
         Additional arguments to be passed to the `fit` method of the regressor.
-        **New in version 0.8.0**
     forecaster_id : str, int, default `None`
         Name used as an identifier of the forecaster.
-        **New in version 0.7.0**
     
     Attributes
     ----------
@@ -153,7 +150,6 @@ class ForecasterAutoreg(ForecasterBase):
         Names of columns of the matrix created internally for training.
     fit_kwargs : dict
         Additional arguments to be passed to the `fit` method of the regressor.
-        **New in version 0.8.0**
     in_sample_residuals : numpy ndarray
         Residuals of the model when predicting training data. Only stored up to
         1000 values. If `transformer_y` is not `None`, residuals are stored in the
@@ -169,7 +165,7 @@ class ForecasterAutoreg(ForecasterBase):
         Date of creation.
     fit_date : str
         Date of last fit.
-    skforcast_version : str
+    skforecast_version : str
         Version of skforecast library used to create the forecaster.
     python_version : str
         Version of python used to create the forecaster.
@@ -211,7 +207,7 @@ class ForecasterAutoreg(ForecasterBase):
         self.fitted                  = False
         self.creation_date           = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
         self.fit_date                = None
-        self.skforcast_version       = skforecast.__version__
+        self.skforecast_version      = skforecast.__version__
         self.python_version          = sys.version.split(" ")[0]
         self.forecaster_id           = forecaster_id
        
@@ -276,7 +272,7 @@ class ForecasterAutoreg(ForecasterBase):
             f"fit_kwargs: {self.fit_kwargs} \n"
             f"Creation date: {self.creation_date} \n"
             f"Last fit date: {self.fit_date} \n"
-            f"Skforecast version: {self.skforcast_version} \n"
+            f"Skforecast version: {self.skforecast_version} \n"
             f"Python version: {self.python_version} \n"
             f"Forecaster id: {self.forecaster_id} \n"
         )
@@ -415,6 +411,7 @@ class ForecasterAutoreg(ForecasterBase):
             # The first `self.max_lag` positions have to be removed from exog
             # since they are not in X_train.
             exog_to_train = exog.iloc[self.max_lag:, ]
+            exog_to_train.index = exog_index[self.max_lag:]
             X_train = pd.concat((X_train, exog_to_train), axis=1)
 
         self.X_train_col_names = X_train.columns.to_list()
@@ -641,9 +638,7 @@ class ForecasterAutoreg(ForecasterBase):
         """
 
         if last_window is None:
-            last_window = self.last_window.copy()
-        else:
-            last_window = last_window.copy()
+            last_window = self.last_window
 
         check_predict_input(
             forecaster_name  = type(self).__name__,
@@ -664,6 +659,8 @@ class ForecasterAutoreg(ForecasterBase):
             levels           = None,
             series_col_names = None
         )
+
+        last_window = last_window.iloc[-self.window_size:].copy()
 
         if exog is not None:
             if isinstance(exog, pd.DataFrame):
@@ -699,8 +696,8 @@ class ForecasterAutoreg(ForecasterBase):
             
         predictions = self._recursive_predict(
                           steps       = steps,
-                          last_window = copy(last_window_values),
-                          exog        = copy(exog_values)
+                          last_window = last_window_values,
+                          exog        = exog_values
                       )
         
         if self.differentiation is not None:
@@ -782,14 +779,12 @@ class ForecasterAutoreg(ForecasterBase):
             raise ValueError(
                 ("`forecaster.out_sample_residuals` is `None`. Use "
                  "`in_sample_residuals=True` or method `set_out_sample_residuals()` "
-                 "before `predict_interval()`, `predict_bootstrapping()` or "
-                 "`predict_dist()`.")
+                 "before `predict_interval()`, `predict_bootstrapping()`, "
+                 "`predict_quantiles()` or `predict_dist()`.")
             )
-
+        
         if last_window is None:
-            last_window = self.last_window.copy()
-        else:
-            last_window = last_window.copy()
+            last_window = self.last_window
 
         check_predict_input(
             forecaster_name  = type(self).__name__,
@@ -810,6 +805,8 @@ class ForecasterAutoreg(ForecasterBase):
             levels           = None,
             series_col_names = None
         )
+
+        last_window = last_window.iloc[-self.window_size:]
 
         if exog is not None:
             if isinstance(exog, pd.DataFrame):
@@ -1065,6 +1062,7 @@ class ForecasterAutoreg(ForecasterBase):
                            )
 
         predictions = boot_predictions.quantile(q=quantiles, axis=1).transpose()
+        predictions.columns = [f'q_{q}' for q in quantiles]
 
         return predictions
 

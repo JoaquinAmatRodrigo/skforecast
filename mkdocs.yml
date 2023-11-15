@@ -34,6 +34,7 @@ nav:
       - Independent multi-time series forecasting: user_guides/independent-multi-time-series-forecasting.ipynb
       - Dependent multivariate series forecasting: user_guides/dependent-multi-series-multivariate-forecasting.ipynb
       - ARIMA and SARIMAX forecasting: user_guides/forecasting-sarimax-arima.ipynb
+      - Foreasting baseline: user_guides/forecasting-baseline.ipynb
       - Exogenous variables: user_guides/exogenous-variables.ipynb
       - Custom predictors: user_guides/custom-predictors.ipynb
       - Weighted time series forecasting: user_guides/weighted-time-series-forecasting.ipynb
@@ -49,6 +50,7 @@ nav:
       - Shap-values: user_guides/shap-values-skforecast.ipynb
       - Skforecast in GPU: user_guides/skforecast-in-GPU.ipynb
       - Plot forecaster residuals: user_guides/plot-forecaster-residuals.ipynb
+      - Datasets: user_guides/datasets.ipynb
 
   - Examples and tutorials:
       - Examples and tutorials: examples/examples.md
@@ -62,12 +64,14 @@ nav:
       - ForecasterMultiVariate: api/ForecasterMultiVariate.md
       - ForecasterSarimax: api/ForecasterSarimax.md
       - Sarimax: api/Sarimax.md
+      - ForecasterBaseline: api/ForecasterBaseline.md
       - model_selection: api/model_selection.md
       - model_selection_multiseries: api/model_selection_multiseries.md
       - model_selection_sarimax: api/model_selection_sarimax.md
       - preprocessing: api/preprocessing.md
       - plot: api/plot.md
       - utils: api/utils.md
+      - datasets: api/datasets.md
       - exceptions: api/exceptions.md
 
   - FAQ and Tips:

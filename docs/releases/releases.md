@@ -2,22 +2,33 @@
 
 All significant changes to this project are documented in this release file.
 
-## [0.11.0] - [Under development]
+## [0.11.0] - [2023-11-16]
 
 The main changes in this release are:
 
 + New `predict_quantiles` method in all Autoreg Forecasters to calculate the specified quantiles for each step.
 
++ Create `ForecasterBaseline.ForecasterEquivalentDate`, a Forecaster to create simple model that serves as a basic reference for evaluating the performance of more complex models.
+
 **Added**
 
-+ Added `skforecast.datasets` module.
++ Added `skforecast.datasets` module. It contains functions to load data for our examples and user guides.
 
 + Added `predict_quantiles` method to all Autoreg Forecasters.
 
++ Added `SkforecastVersionWarning` to the `exception` module. This warning notify that the skforecast version installed in the environment differs from the version used to initialize the forecaster when using `load_forecaster`.
+
++ Create `ForecasterBaseline.ForecasterEquivalentDate`, a Forecaster to create simple model that serves as a basic reference for evaluating the performance of more complex models.
+
 **Changed**
 
++ Enhance the management of internal copying in skforecast to minimize the number of copies, thereby accelerating data processing.
 
 **Fixed**
+
++ Rename `self.skforcast_version` attribute to `self.skforecast_version` in all Forecasters.
+
++ Fixed a bug where the `create_train_X_y` method did not correctly align lags and exogenous variables when the index was not a Pandas index in all Forecasters.
 
 
 ## [0.10.1] - [2023-09-26]

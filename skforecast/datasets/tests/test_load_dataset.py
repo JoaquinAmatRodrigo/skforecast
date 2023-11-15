@@ -1,11 +1,15 @@
+# Unit test load_demo_dataset
+# ==============================================================================
 import pandas as pd
 from skforecast.datasets import load_demo_dataset
+
 
 def test_load_demo_dataset():
     """
     Test load_demo_dataset function.
     """
     df = load_demo_dataset()
+    
     assert isinstance(df, pd.Series)
     assert df.index.freq == 'MS'
     assert df.index.is_monotonic_increasing

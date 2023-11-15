@@ -9,7 +9,7 @@
     margin-top: 0px;">
 
 
-![Python](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-blue)
+![Python](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-blue)
 [![PyPI](https://img.shields.io/pypi/v/skforecast)](https://pypi.org/project/skforecast/)
 [![codecov](https://codecov.io/gh/JoaquinAmatRodrigo/skforecast/branch/master/graph/badge.svg)](https://codecov.io/gh/JoaquinAmatRodrigo/skforecast)
 [![Build status](https://github.com/JoaquinAmatRodrigo/skforecast/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/JoaquinAmatRodrigo/skforecast/actions/workflows/unit-tests.yml/badge.svg)
@@ -84,17 +84,17 @@ pip install skforecast[plotting]
 
 ### Hard dependencies
 
-+ numpy>=1.20, <1.26
-+ pandas>=1.2, <2.1
-+ tqdm>=4.57.0, <4.66
++ numpy>=1.20, <1.27
++ pandas>=1.2, <2.2
++ tqdm>=4.57.0, <4.67
 + scikit-learn>=1.0, <1.4
-+ optuna>=2.10.0, <3.3
++ optuna>=2.10.0, <3.5
 + joblib>=1.1.0, <1.4
 
 ### Optional dependencies
 
-+ matplotlib>=3.3, <3.8
-+ seaborn>=0.11, <0.13
++ matplotlib>=3.3, <3.9
++ seaborn>=0.11, <0.14
 + statsmodels>=0.12, <0.15
 + pmdarima>=2.0, <2.1
 
@@ -206,12 +206,12 @@ If you use skforecast for a scientific publication, we would appreciate citation
 **Zenodo**
 
 ```
-Amat Rodrigo, Joaquin, & Escobar Ortiz, Javier. (2023). skforecast (v0.10.1). Zenodo. https://doi.org/10.5281/zenodo.8382788
+Amat Rodrigo, Joaquin, & Escobar Ortiz, Javier. (2023). skforecast (v0.11.0). Zenodo. https://doi.org/10.5281/zenodo.8382788
 ```
 
 **APA**:
 ```
-Amat Rodrigo, J., & Escobar Ortiz, J. (2023). skforecast (Version 0.10.1) [Computer software]. https://doi.org/10.5281/zenodo.8382788
+Amat Rodrigo, J., & Escobar Ortiz, J. (2023). skforecast (Version 0.11.0) [Computer software]. https://doi.org/10.5281/zenodo.8382788
 ```
 
 **BibTeX**:
@@ -219,8 +219,8 @@ Amat Rodrigo, J., & Escobar Ortiz, J. (2023). skforecast (Version 0.10.1) [Compu
 @software{skforecast,
 author = {Amat Rodrigo, Joaquin and Escobar Ortiz, Javier},
 title = {skforecast},
-version = {0.10.1},
-month = {9},
+version = {0.11.0},
+month = {11},
 year = {2023},
 license = {BSD-3-Clause},
 url = {https://skforecast.org/},
