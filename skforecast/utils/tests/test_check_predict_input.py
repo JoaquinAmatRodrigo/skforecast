@@ -17,8 +17,8 @@ def test_check_predict_input_NotFittedError_when_fitted_is_False():
     Test NotFittedError is raised when fitted is False.
     """
     err_msg = re.escape(
-                ('This Forecaster instance is not fitted yet. Call `fit` with '
-                 'appropriate arguments before using predict.')
+                ("This Forecaster instance is not fitted yet. Call `fit` with "
+                 "appropriate arguments before using predict.")
               )
     with pytest.raises(NotFittedError, match = err_msg):
         check_predict_input(

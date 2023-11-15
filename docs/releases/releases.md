@@ -2,7 +2,7 @@
 
 All significant changes to this project are documented in this release file.
 
-## [0.11.0] - [2023-11-15]
+## [0.11.0] - [2023-11-16]
 
 The main changes in this release are:
 
@@ -22,6 +22,7 @@ The main changes in this release are:
 
 **Changed**
 
++ Enhance the management of internal copying in skforecast to minimize the number of copies, thereby accelerating data processing.
 
 **Fixed**
 

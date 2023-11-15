@@ -14,7 +14,6 @@ import pandas as pd
 import sklearn
 import sklearn.pipeline
 from sklearn.base import clone
-from copy import copy
 import inspect
 
 import skforecast
@@ -662,12 +661,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         """
 
         if last_window is None:
-            if self.fitted:
-                last_window = self.last_window.copy()
-            else:
-                last_window = copy(self.last_window)
-        else:
-            last_window = last_window.copy()
+            last_window = self.last_window
 
         check_predict_input(
             forecaster_name  = type(self).__name__,
@@ -689,8 +683,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             series_col_names = None
         )
 
-        if last_window is not None:
-            last_window = last_window.iloc[-self.window_size:]
+        last_window = last_window.iloc[-self.window_size:].copy()
 
         if exog is not None:
             if isinstance(exog, pd.DataFrame):
@@ -726,8 +719,8 @@ class ForecasterAutoregCustom(ForecasterBase):
             
         predictions = self._recursive_predict(
                           steps       = steps,
-                          last_window = copy(last_window_values),
-                          exog        = copy(exog_values)
+                          last_window = last_window_values,
+                          exog        = exog_values
                       )
         
         if self.differentiation is not None:
@@ -812,14 +805,9 @@ class ForecasterAutoregCustom(ForecasterBase):
                  "before `predict_interval()`, `predict_bootstrapping()`, "
                  "`predict_quantiles()` or `predict_dist()`.")
             )
-
+        
         if last_window is None:
-            if self.fitted:
-                last_window = self.last_window.copy()
-            else:
-                last_window = copy(self.last_window)
-        else:
-            last_window = last_window.copy()
+            last_window = self.last_window
 
         check_predict_input(
             forecaster_name  = type(self).__name__,
@@ -841,8 +829,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             series_col_names = None
         )
 
-        if last_window is not None:
-            last_window = last_window.iloc[-self.window_size:]
+        last_window = last_window.iloc[-self.window_size:].copy()
 
         if exog is not None:
             if isinstance(exog, pd.DataFrame):

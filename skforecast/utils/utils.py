@@ -822,7 +822,7 @@ def preprocess_y(
                       step  = 1
                   )
 
-    y_values = y.to_numpy() if return_values else None
+    y_values = y.to_numpy(copy=True) if return_values else None
 
     return y_values, y_index
 
@@ -884,7 +884,7 @@ def preprocess_last_window(
                                 step  = 1
                             )
 
-    last_window_values = last_window.to_numpy() if return_values else None
+    last_window_values = last_window.to_numpy(copy=True) if return_values else None
 
     return last_window_values, last_window_index
 
@@ -947,7 +947,7 @@ def preprocess_exog(
                          step  = 1
                      )
 
-    exog_values = exog.to_numpy() if return_values else None
+    exog_values = exog.to_numpy(copy=True) if return_values else None
 
     return exog_values, exog_index
     
@@ -1084,7 +1084,7 @@ def exog_to_direct_numpy(
     if len(exog_transformed) > 1:
         exog_transformed = np.concatenate(exog_transformed, axis=1)
     else:
-        exog_transformed = exog_column_transformed
+        exog_transformed = exog_column_transformed.copy()
     
     return exog_transformed
 

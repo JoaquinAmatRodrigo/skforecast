@@ -11,7 +11,6 @@ import logging
 import sys
 import numpy as np
 import pandas as pd
-from copy import copy
 
 import skforecast
 from ..utils import check_predict_input
@@ -308,12 +307,7 @@ class ForecasterEquivalentDate():
         """
 
         if last_window is None:
-            if self.fitted:
-                last_window = self.last_window.copy()
-            else:
-                last_window = copy(self.last_window)
-        else:
-            last_window = last_window.copy()
+            last_window = self.last_window
 
         check_predict_input(
             forecaster_name  = type(self).__name__,
@@ -334,6 +328,8 @@ class ForecasterEquivalentDate():
             levels           = None,
             series_col_names = None
         )
+
+        last_window = last_window.copy()
 
         last_window_values, last_window_index = preprocess_last_window(
                                                     last_window = last_window

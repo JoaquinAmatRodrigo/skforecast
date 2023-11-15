@@ -842,12 +842,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             levels = [levels]
 
         if last_window is None:
-            if self.fitted:
-                last_window = self.last_window.copy()
-            else:
-                last_window = copy(self.last_window)
-        else:
-            last_window = last_window.copy()
+            last_window = self.last_window
         
         check_predict_input(
             forecaster_name  = type(self).__name__,
@@ -869,8 +864,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             series_col_names = self.series_col_names
         )
 
-        if last_window is not None:
-            last_window = last_window.iloc[-self.window_size:, ]
+        last_window = last_window.iloc[-self.window_size:, ].copy()
         
         if exog is not None:
             if isinstance(exog, pd.DataFrame):
@@ -909,8 +903,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             preds_level = self._recursive_predict(
                               steps       = steps,
                               level       = level,
-                              last_window = copy(last_window_values),
-                              exog        = copy(exog_values)
+                              last_window = last_window_values,
+                              exog        = exog_values
                           )
 
             preds_level = pd.Series(
@@ -935,7 +929,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         return predictions
 
-    
+
     def predict_bootstrapping(
         self,
         steps: int,
@@ -992,59 +986,55 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         """
         
-        if levels is None:
-            levels = self.series_col_names
-        elif isinstance(levels, str):
-            levels = [levels]
+        if self.fitted:
+            if levels is None:
+                levels = self.series_col_names
+            elif isinstance(levels, str):
+                levels = [levels]
 
-        if in_sample_residuals:
-            if not set(levels).issubset(set(self.in_sample_residuals.keys())):
-                raise ValueError(
-                    (f"Not `forecaster.in_sample_residuals` for levels: "
-                     f"{set(levels) - set(self.in_sample_residuals.keys())}.")
-                )
-            residuals_levels = self.in_sample_residuals
-        else:
-            if self.out_sample_residuals is None:
-                raise ValueError(
-                    ("`forecaster.out_sample_residuals` is `None`. Use "
-                     "`in_sample_residuals=True` or method "
-                     "`set_out_sample_residuals()` before `predict_interval()`, "
-                     "`predict_bootstrapping()`,`predict_quantiles()` or "
-                     "`predict_dist()`.")
-                )
-            else:
-                if not set(levels).issubset(set(self.out_sample_residuals.keys())):
+            if in_sample_residuals:
+                if not set(levels).issubset(set(self.in_sample_residuals.keys())):
                     raise ValueError(
-                        (f"Not `forecaster.out_sample_residuals` for levels: "
-                         f"{set(levels) - set(self.out_sample_residuals.keys())}. "
-                         f"Use method `set_out_sample_residuals()`.")
+                        (f"Not `forecaster.in_sample_residuals` for levels: "
+                         f"{set(levels) - set(self.in_sample_residuals.keys())}.")
                     )
-            residuals_levels = self.out_sample_residuals
-                
-        check_residuals = (
-            "forecaster.in_sample_residuals" if in_sample_residuals
-             else "forecaster.out_sample_residuals"
-        )
-        for level in levels:
-            if residuals_levels[level] is None:
-                raise ValueError(
-                    (f"forecaster residuals for level '{level}' are `None`. "
-                     f"Check `{check_residuals}`.")
-                )
-            elif (residuals_levels[level] == None).any():
-                raise ValueError(
-                    (f"forecaster residuals for level '{level}' contains `None` "
-                     f"values. Check `{check_residuals}`.")
-                )
+                residuals_levels = self.in_sample_residuals
+            else:
+                if self.out_sample_residuals is None:
+                    raise ValueError(
+                        ("`forecaster.out_sample_residuals` is `None`. Use "
+                         "`in_sample_residuals=True` or method "
+                         "`set_out_sample_residuals()` before `predict_interval()`, "
+                         "`predict_bootstrapping()`,`predict_quantiles()` or "
+                         "`predict_dist()`.")
+                    )
+                else:
+                    if not set(levels).issubset(set(self.out_sample_residuals.keys())):
+                        raise ValueError(
+                            (f"Not `forecaster.out_sample_residuals` for levels: "
+                             f"{set(levels) - set(self.out_sample_residuals.keys())}. "
+                             f"Use method `set_out_sample_residuals()`.")
+                        )
+                residuals_levels = self.out_sample_residuals
+                    
+            check_residuals = (
+                "forecaster.in_sample_residuals" if in_sample_residuals
+                else "forecaster.out_sample_residuals"
+            )
+            for level in levels:
+                if residuals_levels[level] is None:
+                    raise ValueError(
+                        (f"forecaster residuals for level '{level}' are `None`. "
+                         f"Check `{check_residuals}`.")
+                    )
+                elif (residuals_levels[level] == None).any():
+                    raise ValueError(
+                        (f"forecaster residuals for level '{level}' contains `None` "
+                         f"values. Check `{check_residuals}`.")
+                    )
 
         if last_window is None:
-            if self.fitted:
-                last_window = self.last_window.copy()
-            else:
-                last_window = copy(self.last_window)
-        else:
-            last_window = last_window.copy()
+            last_window = self.last_window
 
         check_predict_input(
             forecaster_name  = type(self).__name__,
@@ -1066,8 +1056,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             series_col_names = self.series_col_names
         )
 
-        if last_window is not None:
-            last_window = last_window.iloc[-self.window_size:, ]
+        last_window = last_window.iloc[-self.window_size:, ].copy()
 
         if exog is not None:
             if isinstance(exog, pd.DataFrame):

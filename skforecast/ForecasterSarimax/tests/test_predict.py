@@ -3,13 +3,11 @@
 import re
 import pytest
 import platform
-import numpy as np
 import pandas as pd
 from sklearn.exceptions import NotFittedError
 from pmdarima.arima import ARIMA
 from skforecast.Sarimax import Sarimax
 from skforecast.ForecasterSarimax import ForecasterSarimax
-from skforecast.utils import expand_index
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import OneHotEncoder
@@ -41,11 +39,11 @@ def test_predict_NotFittedError_when_fitted_is_False():
     """
     Test NotFittedError is raised when fitted is False.
     """
-    forecaster = ForecasterSarimax(regressor=Sarimax(order=(1,1,1)))
+    forecaster = ForecasterSarimax(regressor=Sarimax(order=(1, 1, 1)))
 
     err_msg = re.escape(
-                ('This Forecaster instance is not fitted yet. Call `fit` with '
-                 'appropriate arguments before using predict.')
+                ("This Forecaster instance is not fitted yet. Call `fit` with "
+                 "appropriate arguments before using predict.")
               )
     with pytest.raises(NotFittedError, match = err_msg):
         forecaster.predict(steps=5)
@@ -56,7 +54,7 @@ def test_predict_ValueError_when_ForecasterSarimax_last_window_exog_is_not_None_
     Check ValueError is raised when last_window_exog is not None, but 
     last_window is not provided.
     """
-    forecaster = ForecasterSarimax(regressor=Sarimax(order=(1,1,1)))
+    forecaster = ForecasterSarimax(regressor=Sarimax(order=(1, 1, 1)))
     forecaster.fit(y=y, exog=exog)
     
     err_msg = re.escape(
@@ -77,7 +75,7 @@ def test_predict_ValueError_when_ForecasterSarimax_last_window_exog_is_None_and_
     Check ValueError is raised when last_window_exog is None, but included_exog
     is True and last_window is provided.
     """
-    forecaster = ForecasterSarimax(regressor=Sarimax(order=(1,1,1)))
+    forecaster = ForecasterSarimax(regressor=Sarimax(order=(1, 1, 1)))
     forecaster.fit(y=y, exog=exog)
     
     err_msg = re.escape(

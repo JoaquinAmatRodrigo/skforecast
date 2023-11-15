@@ -4,6 +4,7 @@ import re
 import pytest
 import numpy as np
 import pandas as pd
+from sklearn.exceptions import NotFittedError
 from skforecast.ForecasterAutoregMultiVariate import ForecasterAutoregMultiVariate
 from sklearn.linear_model import LinearRegression
 from sklearn.compose import ColumnTransformer
@@ -21,6 +22,21 @@ transformer_exog = ColumnTransformer(
                        remainder = 'passthrough',
                        verbose_feature_names_out = False
                    )
+
+
+def test_predict_NotFittedError_when_fitted_is_False():
+    """
+    Test NotFittedError is raised when fitted is False.
+    """
+    forecaster = ForecasterAutoregMultiVariate(LinearRegression(), level='l1',
+                                               lags=3, steps=3)
+
+    err_msg = re.escape(
+                ("This Forecaster instance is not fitted yet. Call `fit` with "
+                 "appropriate arguments before using predict.")
+              )
+    with pytest.raises(NotFittedError, match = err_msg):
+        forecaster.predict_bootstrapping(steps=5)
 
 
 def test_predict_bootstrapping_ValueError_when_not_in_sample_residuals_for_some_step():
