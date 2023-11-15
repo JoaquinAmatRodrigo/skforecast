@@ -1,5 +1,5 @@
 ################################################################################
-#                             skforecast.utils                                 #
+#                               skforecast.utils                               #
 #                                                                              #
 # This work by skforecast team is licensed under the BSD 3-Clause License.     #
 ################################################################################
@@ -15,8 +15,6 @@ import sklearn
 import sklearn.linear_model
 from sklearn.compose import ColumnTransformer
 from sklearn.exceptions import NotFittedError
-from sklearn.base import BaseEstimator
-from sklearn.base import TransformerMixin
 import inspect
 from copy import deepcopy
 
