@@ -239,14 +239,33 @@ class ForecasterEquivalentDate():
             # because the offset follows the calendar rules and the distance
             # between two dates may not be constant.
             first_valid_index = (y_index[-1] - self.offset * self.n_offsets)
-            self.window_size = len((y_index[-1] - first_valid_index))
 
-        if len(y) < self.window_size:
-            raise ValueError(
-                (f"The length of `y` ({len(y)}), must be greater than or equal to "
-                 f"the window size ({self.window_size}). Try decreasing the offset "
-                 f"or the number of offsets.")
-            )
+            try:
+                window_size_idx_start = y_index.get_loc(first_valid_index)
+                window_size_idx_end = y_index.get_loc(y_index[-1])
+
+                print(window_size_idx_start, window_size_idx_end)
+
+                self.window_size = window_size_idx_end - window_size_idx_start
+            except KeyError:
+                raise ValueError(
+                    (f"The length of `y` ({len(y)}), must be greater than or equal "
+                     f"to the window size ({self.window_size}). This is because  "
+                     f"the offset ({self.offset}) is larger than the available "
+                     f"data. Try to decrease the size of the offset ({self.offset}), "
+                     f"the number of n_offsets ({self.n_offsets}) or increase the "
+                     f"size of `y`.")
+                )
+        else:
+            if len(y) < self.window_size:
+                raise ValueError(
+                    (f"The length of `y` ({len(y)}), must be greater than or equal "
+                     f"to the window size ({self.window_size}). This is because  "
+                     f"the offset ({self.offset}) is larger than the available "
+                     f"data. Try to decrease the size of the offset ({self.offset}), "
+                     f"the number of n_offsets ({self.n_offsets}) or increase the "
+                     f"size of `y`.")
+                )
         
         self.fitted = True
         self.fit_date = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
@@ -391,7 +410,7 @@ class ForecasterEquivalentDate():
                 raise ValueError(
                     (f"All equivalent values are missing. This is caused by using "
                      f"an offset ({self.offset}) larger than the available data. "
-                     f"Try to decrease the size of the offset ({self.offset.n}), "
+                     f"Try to decrease the size of the offset ({self.offset}), "
                      f"the number of n_offsets ({self.n_offsets}) or increase the "
                      f"size of `last_window`. In backtesting, this error may be "
                      f"caused by using an `initial_train_size` too small.")

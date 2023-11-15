@@ -125,8 +125,9 @@ def test_predict_7_steps_with_int_offset_5_n_offsets_2_using_last_window():
         name = 'y'
     )
     forecaster = ForecasterEquivalentDate(
-                    offset    = 5,
-                    n_offsets = 2
+                     offset    = 5,
+                     n_offsets = 2,
+                     agg_func  = np.mean
                  )
     forecaster.fit(y=y)
     predictions = forecaster.predict(steps=7, last_window=last_window)
@@ -161,7 +162,7 @@ def test_predict_ValueError_when_all_equivalent_values_are_missing():
     err_msg = re.escape(
                 (f"All equivalent values are missing. This is caused by using "
                  f"an offset (<MonthEnd>) larger than the available data. "
-                 f"Try to decrease the size of the offset (1), "
+                 f"Try to decrease the size of the offset (<MonthEnd>), "
                  f"the number of n_offsets (1) or increase the "
                  f"size of `last_window`. In backtesting, this error may be "
                  f"caused by using an `initial_train_size` too small.")
@@ -180,7 +181,8 @@ def test_predict_ValueError_when_any_equivalent_values_are_missing():
     
     forecaster = ForecasterEquivalentDate(
                      offset    = pd.offsets.MonthEnd(1),
-                     n_offsets = 2
+                     n_offsets = 2,
+                     agg_func  = np.mean
                  )
     forecaster.fit(y=y)
 
@@ -231,23 +233,27 @@ def test_predict_7_steps_with_offset_Day_5_n_offsets_2_using_last_window():
     Test predict method with offset pd.offsets.Day(5) and n_offsets=2,
     using last_window.
     """
+    y_monthly = y.copy()
+    y_monthly.index = pd.date_range(start='1990-01-01', periods=50, freq='MS')
     last_window = pd.Series(
         data = np.array([0.73799541, 0.18249173, 0.17545176, 0.53155137, 0.53182759,
                          0.25045537, 0.48303426, 0.98555979, 0.51948512, 0.61289453]),
-        index = pd.date_range(start='2000-08-05', periods=10, freq='D'),
+        index = pd.date_range(start='2000-08-05', periods=10, freq='MS'),
         name = 'y'
     )
+
     forecaster = ForecasterEquivalentDate(
-                    offset    = pd.offsets.Day(5),
-                    n_offsets = 2
+                     offset    = pd.DateOffset(months=2),
+                     n_offsets = 2,
+                     agg_func  = np.mean
                  )
-    forecaster.fit(y=y)
+    forecaster.fit(y=y_monthly)
     predictions = forecaster.predict(steps=7, last_window=last_window)
 
     expected = pd.Series(
-        data  = np.array([0.49422539, 0.332763, 0.58050578, 0.52551824, 0.57236106,
-                          0.49422539, 0.332763]),
-        index = pd.date_range(start='2000-08-15', periods=7, freq='D'),
+        data  = np.array([0.50125969, 0.79922716, 0.50125969, 0.79922716,
+                          0.50125969, 0.79922716, 0.50125969]),
+        index = pd.date_range(start='2001-07-01', periods=7, freq='MS'),
         name  = 'pred'
     )
 
