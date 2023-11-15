@@ -100,6 +100,7 @@ Visit the [release notes](https://github.com/JoaquinAmatRodrigo/skforecast/blob/
 - [x] Create `ForecasterBaseline.ForecasterEquivalentDate`, a Forecaster to create simple model that serves as a basic reference for evaluating the performance of more complex models.
 - [x] New `predict_quantiles` method in all Autoreg Forecasters to calculate the specified quantiles for each step.
 - [x] Added `skforecast.datasets` module. It contains functions to load data for our examples and user guides.
+- [x] Enhance the management of internal copying in skforecast to minimize the number of copies, thereby accelerating data processing.
 - [x] Bug fixes and performance improvements.
 
 
