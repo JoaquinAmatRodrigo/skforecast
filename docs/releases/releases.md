@@ -2,7 +2,7 @@
 
 All significant changes to this project are documented in this release file.
 
-## [0.11.0] - [2023-11-12]
+## [0.11.0] - [2023-11-15]
 
 The main changes in this release are:
 
@@ -12,7 +12,7 @@ The main changes in this release are:
 
 **Added**
 
-+ Added `skforecast.datasets` module.
++ Added `skforecast.datasets` module. It contains functions to load data for our examples and user guides.
 
 + Added `predict_quantiles` method to all Autoreg Forecasters.
 

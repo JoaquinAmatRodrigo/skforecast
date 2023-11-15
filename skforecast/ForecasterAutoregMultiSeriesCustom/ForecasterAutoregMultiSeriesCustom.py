@@ -22,16 +22,15 @@ from ..ForecasterBase import ForecasterBase
 from ..exceptions import IgnoredArgumentWarning
 from ..utils import initialize_weights
 from ..utils import check_select_fit_kwargs
-from ..utils import check_y
 from ..utils import check_exog
 from ..utils import get_exog_dtypes
 from ..utils import check_exog_dtypes
 from ..utils import check_interval
+from ..utils import check_predict_input
 from ..utils import preprocess_y
 from ..utils import preprocess_last_window
 from ..utils import preprocess_exog
 from ..utils import expand_index
-from ..utils import check_predict_input
 from ..utils import transform_series
 from ..utils import transform_dataframe
 
@@ -868,12 +867,12 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
             levels = [levels]
 
         if last_window is None:
-            last_window = self.last_window.copy()
+            if self.fitted:
+                last_window = self.last_window.copy()
+            else:
+                last_window = copy(self.last_window)
         else:
             last_window = last_window.copy()
-
-        if last_window is not None:
-            last_window = last_window.iloc[-self.window_size:, ]
         
         check_predict_input(
             forecaster_name  = type(self).__name__,
@@ -892,6 +891,9 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
             levels           = levels,
             series_col_names = self.series_col_names
         )
+
+        if last_window is not None:
+            last_window = last_window.iloc[-self.window_size:, ]
         
         if exog is not None:
             if isinstance(exog, pd.DataFrame):
@@ -1031,7 +1033,8 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
                     ("`forecaster.out_sample_residuals` is `None`. Use "
                      "`in_sample_residuals=True` or method "
                      "`set_out_sample_residuals()` before `predict_interval()`, "
-                     "`predict_bootstrapping()` or `predict_dist()`.")
+                     "`predict_bootstrapping()`,`predict_quantiles()` or "
+                     "`predict_dist()`.")
                 )
             else:
                 if not set(levels).issubset(set(self.out_sample_residuals.keys())):
@@ -1059,11 +1062,12 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
                 )
 
         if last_window is None:
-            last_window = self.last_window.copy()
+            if self.fitted:
+                last_window = self.last_window.copy()
+            else:
+                last_window = copy(self.last_window)
         else:
             last_window = last_window.copy()
-
-        last_window = last_window.iloc[-self.window_size:, ]
 
         check_predict_input(
             forecaster_name  = type(self).__name__,
@@ -1084,6 +1088,9 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
             levels           = levels,
             series_col_names = self.series_col_names
         )
+
+        if last_window is not None:
+            last_window = last_window.iloc[-self.window_size:, ]
 
         if exog is not None:
             if isinstance(exog, pd.DataFrame):
