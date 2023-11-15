@@ -243,9 +243,6 @@ class ForecasterEquivalentDate():
             try:
                 window_size_idx_start = y_index.get_loc(first_valid_index)
                 window_size_idx_end = y_index.get_loc(y_index[-1])
-
-                print(window_size_idx_start, window_size_idx_end)
-
                 self.window_size = window_size_idx_end - window_size_idx_start
             except KeyError:
                 raise ValueError(
