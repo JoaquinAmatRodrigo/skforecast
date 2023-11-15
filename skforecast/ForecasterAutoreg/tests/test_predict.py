@@ -1,7 +1,10 @@
 # Unit test predict ForecasterAutoreg
 # ==============================================================================
+import re
+import pytest
 import numpy as np
 import pandas as pd
+from sklearn.exceptions import NotFittedError
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
 from skforecast.preprocessing import TimeSeriesDifferentiator
 from sklearn.compose import ColumnTransformer
@@ -20,6 +23,20 @@ from lightgbm import LGBMRegressor
 from .fixtures_ForecasterAutoreg import y as y_categorical
 from .fixtures_ForecasterAutoreg import exog as exog_categorical
 from .fixtures_ForecasterAutoreg import data # to test results when using differentiation
+
+
+def test_predict_NotFittedError_when_fitted_is_False():
+    """
+    Test NotFittedError is raised when fitted is False.
+    """
+    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
+
+    err_msg = re.escape(
+                ('This Forecaster instance is not fitted yet. Call `fit` with '
+                 'appropriate arguments before using predict.')
+              )
+    with pytest.raises(NotFittedError, match = err_msg):
+        forecaster.predict(steps=5)
 
 
 def test_predict_output_when_regressor_is_LinearRegression():

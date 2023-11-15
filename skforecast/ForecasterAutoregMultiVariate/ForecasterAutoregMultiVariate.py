@@ -91,7 +91,6 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         method. The resulting `sample_weight` cannot have negative values.
     fit_kwargs : dict, default `None`
         Additional arguments to be passed to the `fit` method of the regressor.
-        **New in version 0.8.0**
     n_jobs : int, 'auto', default `'auto'`
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
         set to the number of cores. If 'auto', `n_jobs` is set using the function
@@ -99,7 +98,6 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         **New in version 0.9.0**
     forecaster_id : str, int, default `None`
         Name used as an identifier of the forecaster.
-        **New in version 0.7.0**
 
     Attributes
     ----------
@@ -173,7 +171,6 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         Names of columns of the matrix created internally for training.
     fit_kwargs : dict
         Additional arguments to be passed to the `fit` method of the regressor.
-        **New in version 0.8.0**
     in_sample_residuals : dict
         Residuals of the models when predicting training data. Only stored up to
         1000 values per model in the form `{step: residuals}`. If `transformer_series` 

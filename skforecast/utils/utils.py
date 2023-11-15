@@ -1559,18 +1559,21 @@ def check_backtesting_input(
     """
     
     forecasters_uni = ['ForecasterAutoreg', 'ForecasterAutoregCustom', 
-                       'ForecasterAutoregDirect', 'ForecasterSarimax']
+                       'ForecasterAutoregDirect', 'ForecasterSarimax',
+                       'ForecasterEquivalentDate']
     forecasters_multi = ['ForecasterAutoregMultiSeries', 
                          'ForecasterAutoregMultiSeriesCustom', 
                          'ForecasterAutoregMultiVariate']
+    
+    forecaster_name = type(forecaster).__name__
 
-    if type(forecaster).__name__ in forecasters_uni:
+    if forecaster_name in forecasters_uni:
         if not isinstance(y, pd.Series):
             raise TypeError("`y` must be a pandas Series.")
         data_name = 'y'
         data_length = len(y)
         
-    if type(forecaster).__name__ in forecasters_multi:
+    if forecaster_name in forecasters_multi:
         if not isinstance(series, pd.DataFrame):
             raise TypeError("`series` must be a pandas DataFrame.")
         data_name = 'series'
@@ -1589,8 +1592,12 @@ def check_backtesting_input(
             (f"`metric` must be a string, a callable function, or a list containing "
              f"multiple strings and/or callables. Got {type(metric)}.")
         )
-
-    if initial_train_size is not None:
+    
+    if forecaster_name == "ForecasterEquivalentDate" and isinstance(
+        forecaster.offset, pd.tseries.offsets.DateOffset
+    ):
+        pass
+    elif initial_train_size is not None:
         if not isinstance(initial_train_size, (int, np.integer)):
             raise TypeError(
                 (f"If used, `initial_train_size` must be an integer greater than the "
@@ -1622,11 +1629,11 @@ def check_backtesting_input(
                          f"all series reach the first non-null value.")
                     )
     else:
-        if type(forecaster).__name__ == 'ForecasterSarimax':
+        if forecaster_name == 'ForecasterSarimax':
             raise ValueError(
                 (f"`initial_train_size` must be an integer smaller than the "
                  f"length of `{data_name}` ({data_length}).")
-            )    
+            )
         else:
             if not forecaster.fitted:
                 raise NotFittedError(
@@ -1696,7 +1703,10 @@ def select_n_jobs_backtesting(
     and refit=`True`, then n_jobs=cpu_count().
     - If forecaster_name is 'ForecasterAutoregDirect' or 'ForecasterAutoregMultiVariate'
     and refit=`False`, then n_jobs=1.
-    - If forecaster_name is 'ForecasterAutoregMultiseries', then n_jobs=cpu_count().
+    - If forecaster_name is 'ForecasterAutoregMultiseries' or 
+    'ForecasterAutoregMultiseriesCustom', then n_jobs=cpu_count().
+    - If forecaster_name is 'ForecasterSarimax' or 'ForecasterEquivalentDate', 
+    then n_jobs=1.
 
     Parameters
     ----------
@@ -1733,7 +1743,7 @@ def select_n_jobs_backtesting(
             n_jobs = 1
         elif forecaster_name in ['ForecasterAutoregMultiseries', 'ForecasterAutoregMultiSeriesCustom']:
             n_jobs = joblib.cpu_count()
-        elif forecaster_name in ['ForecasterSarimax']:
+        elif forecaster_name in ['ForecasterSarimax', 'ForecasterEquivalentDate']:
             n_jobs = 1
         else:
             n_jobs = 1

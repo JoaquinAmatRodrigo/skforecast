@@ -5,6 +5,7 @@ import pytest
 import platform
 import numpy as np
 import pandas as pd
+from sklearn.exceptions import NotFittedError
 from pmdarima.arima import ARIMA
 from skforecast.Sarimax import Sarimax
 from skforecast.ForecasterSarimax import ForecasterSarimax
@@ -34,6 +35,20 @@ from .fixtures_ForecasterSarimax import df_exog_datetime
 from .fixtures_ForecasterSarimax import df_exog_lw_datetime
 from .fixtures_ForecasterSarimax import df_exog_predict_datetime
 from .fixtures_ForecasterSarimax import df_exog_lw_predict_datetime
+
+
+def test_predict_NotFittedError_when_fitted_is_False():
+    """
+    Test NotFittedError is raised when fitted is False.
+    """
+    forecaster = ForecasterSarimax(regressor=Sarimax(order=(1,1,1)))
+
+    err_msg = re.escape(
+                ('This Forecaster instance is not fitted yet. Call `fit` with '
+                 'appropriate arguments before using predict.')
+              )
+    with pytest.raises(NotFittedError, match = err_msg):
+        forecaster.predict(steps=5)
 
 
 def test_predict_ValueError_when_ForecasterSarimax_last_window_exog_is_not_None_and_last_window_is_not_provided():

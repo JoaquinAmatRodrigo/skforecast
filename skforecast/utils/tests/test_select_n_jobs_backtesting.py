@@ -27,6 +27,9 @@ from skforecast.utils.utils import select_n_jobs_backtesting
                           ('ForecasterSarimax', 'ARIMA', True, 1),
                           ('ForecasterSarimax', 'ARIMA', 2, 1),
                           ('ForecasterSarimax', 'ARIMA', False, 1),
+                          ('ForecasterEquivalentDate', None, True, 1),
+                          ('ForecasterEquivalentDate', None, 2, 1),
+                          ('ForecasterEquivalentDate', None, False, 1),
                           ('Forecaster', 'regressor', False, 1)
                           ], 
                          ids=lambda info: f'info: {info}')
