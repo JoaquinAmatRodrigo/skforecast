@@ -32,7 +32,7 @@ def create_predictors(y): # pragma: no cover
     
     lags = y[-1:-6:-1]
     
-    return lags 
+    return lags
 
 
 def test_predict_NotFittedError_when_fitted_is_False():
@@ -46,8 +46,8 @@ def test_predict_NotFittedError_when_fitted_is_False():
                  )
 
     err_msg = re.escape(
-                ('This Forecaster instance is not fitted yet. Call `fit` with '
-                 'appropriate arguments before using predict.')
+                ("This Forecaster instance is not fitted yet. Call `fit` with "
+                 "appropriate arguments before using predict.")
               )
     with pytest.raises(NotFittedError, match = err_msg):
         forecaster.predict(steps=5)

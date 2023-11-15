@@ -2,9 +2,9 @@
 # ==============================================================================
 import re
 import pytest
-from pytest import approx
 import numpy as np
 import pandas as pd
+from sklearn.exceptions import NotFittedError
 from skforecast.ForecasterAutoregMultiSeriesCustom import ForecasterAutoregMultiSeriesCustom
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler
@@ -30,6 +30,24 @@ def create_predictors(y): # pragma: no cover
     lags = y[-1:-4:-1]
 
     return lags
+
+
+def test_predict_bootstrapping_NotFittedError_when_fitted_is_False():
+    """
+    Test NotFittedError is raised when fitted is False.
+    """
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                     regressor      = LinearRegression(),
+                     fun_predictors = create_predictors,
+                     window_size    = 5
+                 )
+
+    err_msg = re.escape(
+                ("This Forecaster instance is not fitted yet. Call `fit` with "
+                 "appropriate arguments before using predict.")
+              )
+    with pytest.raises(NotFittedError, match = err_msg):
+        forecaster.predict(steps=5)
 
 
 def test_predict_bootstrapping_ValueError_when_not_in_sample_residuals_for_any_level():
