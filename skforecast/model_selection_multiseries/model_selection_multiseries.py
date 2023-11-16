@@ -246,7 +246,7 @@ def _backtesting_forecaster_multiseries(
         if fold[4] is False:
             # When the model is not fitted, last_window must be updated to include 
             # the data needed to make predictions.
-            last_window_series = series.iloc[last_window_start:last_window_end, ]
+            last_window_series = series.iloc[last_window_start:last_window_end, ].copy()
         else:
             # The model is fitted before making predictions. If `fixed_train_size`  
             # the train size doesn't increase but moves by `steps` in each iteration. 
@@ -438,13 +438,25 @@ def backtesting_forecaster_multiseries(
     
     """
 
-    if type(forecaster).__name__ not in ['ForecasterAutoregMultiSeries', 
-                                         'ForecasterAutoregMultiSeriesCustom', 
-                                         'ForecasterAutoregMultiVariate']:
+    multi_series_forecasters = [
+        'ForecasterAutoregMultiSeries', 
+        'ForecasterAutoregMultiSeriesCustom', 
+        'ForecasterAutoregMultiVariate',
+        'ForecasterRnn'
+    ]
+
+    multi_series_forecasters_with_levels = [
+        'ForecasterAutoregMultiSeries', 
+        'ForecasterAutoregMultiSeriesCustom', 
+        'ForecasterRnn'
+    ]
+
+    forecaster_name = type(forecaster).__name__
+
+    if forecaster_name not in multi_series_forecasters:
         raise TypeError(
-            ("`forecaster` must be of type `ForecasterAutoregMultiSeries`, "
-             "`ForecasterAutoregMultiSeriesCustom` or `ForecasterAutoregMultiVariate`, "
-             "for all other types of forecasters use the functions available in "
+            (f"`forecaster` must be of type {multi_series_forecasters}, "
+             f"for all other types of forecasters use the functions available in "
              f"the `model_selection` module. Got {type(forecaster).__name__}")
         )
     
@@ -467,17 +479,16 @@ def backtesting_forecaster_multiseries(
         show_progress         = show_progress
     )
 
-    if type(forecaster).__name__ in ['ForecasterAutoregMultiSeries', 
-                                     'ForecasterAutoregMultiSeriesCustom'] \
-        and levels is not None and not isinstance(levels, (str, list)):
-        raise TypeError(
-            ("`levels` must be a `list` of column names, a `str` of a column name "
-             "or `None` when using a `ForecasterAutoregMultiSeries` or "
-             "`ForecasterAutoregMultiSeriesCustom`. If the forecaster is of type "
-             "`ForecasterAutoregMultiVariate`, this argument is ignored.")
-        )
+    if forecaster_name in multi_series_forecasters_with_levels \
+    and levels is not None and not isinstance(levels, (str, list)):
+        raise TypeError((
+            f"`levels` must be a `list` of column names, a `str` of a column name or "
+            f"`None` when using a forecaster of type {multi_series_forecasters_with_levels}. "
+            f"If the forecaster is of type `ForecasterAutoregMultiVariate`, this argument "
+            f"is ignored."
+        ))
 
-    if type(forecaster).__name__ == 'ForecasterAutoregMultiVariate' \
+    if forecaster_name == 'ForecasterAutoregMultiVariate' \
         and levels and levels != forecaster.level and levels != [forecaster.level]:
         warnings.warn(
             (f"`levels` argument have no use when the forecaster is of type "

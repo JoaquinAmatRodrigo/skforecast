@@ -479,6 +479,7 @@ def check_predict_input(
     alpha: Optional[float]=None,
     max_steps: Optional[int]=None,
     levels: Optional[Union[str, list]]=None,
+    levels_forecaster: Optional[Union[str, list]]=None,
     series_col_names: Optional[list]=None
 ) -> None:
     """
@@ -491,7 +492,8 @@ def check_predict_input(
     forecaster_name : str
         Forecaster name. ForecasterAutoreg, ForecasterAutoregCustom, 
         ForecasterAutoregDirect, ForecasterAutoregMultiSeries, 
-        ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate.
+        ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate,
+        ForecasterRnn
     steps : int, list
         Number of future steps predicted.
     fitted: bool
@@ -528,11 +530,15 @@ def check_predict_input(
         Maximum number of steps allowed (`ForecasterAutoregDirect` and 
         `ForecasterAutoregMultiVariate`).
     levels : str, list, default `None`
-        Time series to be predicted (`ForecasterAutoregMultiSeries` and
-        `ForecasterAutoregMultiSeriesCustom`).
+        Time series to be predicted (`ForecasterAutoregMultiSeries`,
+        `ForecasterAutoregMultiSeriesCustom` and `ForecasterRnn).
+    levels_forecaster : str, list, default `None`
+        Time series used as output data of a multiseries problem in a RNN problem
+        (`ForecasterRnn`).
     series_col_names : list, default `None`
         Names of the columns used during fit (`ForecasterAutoregMultiSeries`, 
-        `ForecasterAutoregMultiSeriesCustom` and `ForecasterAutoregMultiVariate`).
+        `ForecasterAutoregMultiSeriesCustom`, `ForecasterAutoregMultiVariate`
+        and `ForecasterRnn`).
 
     Returns
     -------
@@ -577,9 +583,21 @@ def check_predict_input(
             )
         if len(set(levels) - set(series_col_names)) != 0:
             raise ValueError(
-                f"`levels` must be in `series_col_names` : {series_col_names}."
+                f"`levels` names must be included in the series used during fit "
+                f"({series_col_names}). Got {levels}."
             )
-
+            
+    if forecaster_name in ['ForecasterRnn']:
+        if levels is not None and not isinstance(levels, (str, list)):
+            raise TypeError(
+                ("`levels` must be a `list` of column names, a `str` of a "
+                 "column name or `None`.")
+            )
+        if len(set(levels) - set(levels_forecaster)) != 0:
+            raise ValueError(
+                f"`levels` names must be included in the series used during fit "
+                f"({levels_forecaster}). Got {levels}."
+            )
     if exog is None and included_exog:
         raise ValueError(
             ("Forecaster trained with exogenous variable/s. "
@@ -596,14 +614,16 @@ def check_predict_input(
     # Check last_window type (pd.Series or pd.DataFrame according to forecaster)
     if forecaster_name in ['ForecasterAutoregMultiSeries', 
                            'ForecasterAutoregMultiSeriesCustom',
-                           'ForecasterAutoregMultiVariate']:
+                           'ForecasterAutoregMultiVariate',
+                           'ForecasterRnn']:
         if not isinstance(last_window, pd.DataFrame):
             raise TypeError(
                 f"`last_window` must be a pandas DataFrame. Got {type(last_window)}."
             )
         
         if forecaster_name in ['ForecasterAutoregMultiSeries', 
-                               'ForecasterAutoregMultiSeriesCustom'] and \
+                               'ForecasterAutoregMultiSeriesCustom',
+                               'ForecasterRnn'] and \
             len(set(levels) - set(last_window.columns)) != 0:
             raise ValueError(
                 (f"`last_window` must contain a column(s) named as the level(s) "
@@ -1549,7 +1569,8 @@ def check_backtesting_input(
                        'ForecasterAutoregDirect', 'ForecasterSarimax']
     forecasters_multi = ['ForecasterAutoregMultiSeries', 
                          'ForecasterAutoregMultiSeriesCustom', 
-                         'ForecasterAutoregMultiVariate']
+                         'ForecasterAutoregMultiVariate',
+                         'ForecasterRnn']
 
     if type(forecaster).__name__ in forecasters_uni:
         if not isinstance(y, pd.Series):

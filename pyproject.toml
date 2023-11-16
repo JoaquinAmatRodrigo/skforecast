@@ -47,6 +47,10 @@ sarimax = [
     "statsmodels>=0.12, <0.15",
 ]
 
+deep_leerning = [
+    "tensorflow>=2.12, <2.13"
+]
+
 plotting = [
     "matplotlib>=3.3, <3.8",
     "seaborn>=0.11, <0.13",
