@@ -4,6 +4,10 @@
     font-size: medium;
 }
 
+.jupyter-wrapper .highlight-ipynb pre {
+  font-size: 0.9em;
+}
+
 .jupyter-wrapper .jp-OutputArea-output pre {
     border: none;
     margin: 0px;
