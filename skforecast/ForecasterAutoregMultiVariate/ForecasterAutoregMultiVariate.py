@@ -65,11 +65,10 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
     lags : int, list, numpy ndarray, range, dict
         Lags used as predictors. Index starts at 1, so lag 1 is equal to t-1.
 
-            - `int`: include lags from 1 to `lags` (included).
-            - `list`, `1d numpy ndarray` or `range`: include only lags present in 
-            `lags`, all elements must be int.
-            - `dict`: create different lags for each series. 
-            {'series_column_name': lags}.
+        - `int`: include lags from 1 to `lags` (included).
+        - `list`, `1d numpy ndarray` or `range`: include only lags present in 
+        `lags`, all elements must be int.
+        - `dict`: create different lags for each series. {'series_column_name': lags}.
     transformer_series : transformer (preprocessor), dict, default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API with methods: fit, transform, fit_transform and 
@@ -77,9 +76,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         the forecaster. ColumnTransformers are not allowed since they do not have 
         inverse_transform method.
 
-            - If single transformer: it is cloned and applied to all series. 
-            - If `dict` of transformers: a different transformer can be used for each 
-            series.
+        - If single transformer: it is cloned and applied to all series. 
+        - If `dict` of transformers: a different transformer can be used for each series.
     transformer_exog : transformer, default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API. The transformation is applied to `exog` before training the
@@ -124,9 +122,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         the forecaster. ColumnTransformers are not allowed since they do not have 
         inverse_transform method.
 
-            - If single transformer: it is cloned and applied to all series. 
-            - If `dict` of transformers: a different transformer can be used for each 
-            series.
+        - If single transformer: it is cloned and applied to all series. 
+        - If `dict` of transformers: a different transformer can be used for each  series.
     transformer_series_ : dict
         Dictionary with the transformer for each series. It is created cloning the 
         objects in `transformer_series` and is used internally to avoid overwriting.
