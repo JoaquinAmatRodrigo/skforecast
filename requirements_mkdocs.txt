@@ -1,0 +1,8 @@
+mike==2.0.0
+mkdocs==1.5.3
+mkdocs-jupyter==0.24.6
+mkdocs-material==9.4.9
+mkdocstrings==0.24.0
+mkdocstrings-python==1.7.4
+notebook==6.4.12
+# jupyter-contrib-nbextensions==0.7.0 install from github pip install https://github.com/ipython-contrib/jupyter_contrib_nbextensions/tarball/master
