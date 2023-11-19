@@ -595,9 +595,10 @@ def check_predict_input(
             )
         if len(set(levels) - set(levels_forecaster)) != 0:
             raise ValueError(
-                f"`levels` names must be included in the series used during fit "
-                f"({levels_forecaster}). Got {levels}."
+                (f"`levels` names must be included in the series used during fit "
+                 f"({levels_forecaster}). Got {levels}.")
             )
+    
     if exog is None and included_exog:
         raise ValueError(
             ("Forecaster trained with exogenous variable/s. "
