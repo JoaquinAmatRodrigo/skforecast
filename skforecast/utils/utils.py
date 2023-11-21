@@ -1542,10 +1542,10 @@ def check_backtesting_input(
         error to create prediction intervals.  If `False`, out_sample_residuals 
         are used if they are already stored inside the forecaster.
     n_jobs : int, 'auto', default `'auto'`
-            The number of jobs to run in parallel. If `-1`, then the number of jobs is 
-            set to the number of cores. If 'auto', `n_jobs` is set using the fuction
-            skforecast.utils.select_n_jobs_fit_forecaster.
-            **New in version 0.9.0**
+        The number of jobs to run in parallel. If `-1`, then the number of jobs is 
+        set to the number of cores. If 'auto', `n_jobs` is set using the fuction
+        skforecast.utils.select_n_jobs_fit_forecaster.
+        **New in version 0.9.0**
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
         for backtesting.

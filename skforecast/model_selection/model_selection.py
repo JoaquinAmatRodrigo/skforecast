@@ -14,10 +14,12 @@ from copy import deepcopy
 from joblib import Parallel, delayed, cpu_count
 from tqdm.auto import tqdm
 import sklearn.pipeline
-from sklearn.metrics import mean_squared_error 
-from sklearn.metrics import mean_absolute_error
-from sklearn.metrics import mean_absolute_percentage_error
-from sklearn.metrics import mean_squared_log_error
+from sklearn.metrics import (
+    mean_squared_error,
+    mean_absolute_error,
+    mean_absolute_percentage_error,
+    mean_squared_log_error,
+)
 from sklearn.model_selection import ParameterGrid
 from sklearn.model_selection import ParameterSampler
 import optuna
@@ -413,11 +415,11 @@ def _backtesting_forecaster(
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-            - If `string`: {'mean_squared_error', 'mean_absolute_error',
-             'mean_absolute_percentage_error', 'mean_squared_log_error'}
-            - If `Callable`: Function with arguments y_true, y_pred that returns 
-            a float.
-            - If `list`: List containing multiple strings and/or Callables.
+        - If `string`: {'mean_squared_error', 'mean_absolute_error',
+        'mean_absolute_percentage_error', 'mean_squared_log_error'}
+        - If `Callable`: Function with arguments y_true, y_pred that returns 
+        a float.
+        - If `list`: List containing multiple strings and/or Callables.
     initial_train_size : int, default `None`
         Number of samples in the initial train split. If `None` and `forecaster` is 
         already trained, no initial train is done and all data is used to evaluate the 
@@ -474,9 +476,9 @@ def _backtesting_forecaster(
     backtest_predictions : pandas DataFrame
         Value of predictions and their estimated interval if `interval` is not `None`.
 
-            - column pred: predictions.
-            - column lower_bound: lower bound of the interval.
-            - column upper_bound: upper bound of the interval.
+        - column pred: predictions.
+        - column lower_bound: lower bound of the interval.
+        - column upper_bound: upper bound of the interval.
     
     """
 
@@ -692,11 +694,11 @@ def backtesting_forecaster(
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-            - If `string`: {'mean_squared_error', 'mean_absolute_error',
-             'mean_absolute_percentage_error', 'mean_squared_log_error'}
-            - If `Callable`: Function with arguments y_true, y_pred that returns 
-            a float.
-            - If `list`: List containing multiple strings and/or Callables.
+        - If `string`: {'mean_squared_error', 'mean_absolute_error',
+        'mean_absolute_percentage_error', 'mean_squared_log_error'}
+        - If `Callable`: Function with arguments y_true, y_pred that returns 
+        a float.
+        - If `list`: List containing multiple strings and/or Callables.
     initial_train_size : int, default `None`
         Number of samples in the initial train split. If `None` and `forecaster` is 
         already trained, no initial train is done and all data is used to evaluate the 
@@ -753,9 +755,9 @@ def backtesting_forecaster(
     backtest_predictions : pandas DataFrame
         Value of predictions and their estimated interval if `interval` is not `None`.
 
-            - column pred: predictions.
-            - column lower_bound: lower bound of the interval.
-            - column upper_bound: upper bound of the interval.
+        - column pred: predictions.
+        - column lower_bound: lower bound of the interval.
+        - column upper_bound: upper bound of the interval.
     
     """
     forecaters_allowed = [
@@ -857,11 +859,11 @@ def grid_search_forecaster(
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-            - If `string`: {'mean_squared_error', 'mean_absolute_error',
-             'mean_absolute_percentage_error', 'mean_squared_log_error'}
-            - If `Callable`: Function with arguments y_true, y_pred that returns 
-            a float.
-            - If `list`: List containing multiple strings and/or Callables.
+        - If `string`: {'mean_squared_error', 'mean_absolute_error',
+        'mean_absolute_percentage_error', 'mean_squared_log_error'}
+        - If `Callable`: Function with arguments y_true, y_pred that returns 
+        a float.
+        - If `list`: List containing multiple strings and/or Callables.
     initial_train_size : int 
         Number of samples in the initial train split.
     fixed_train_size : bool, default `True`
@@ -899,10 +901,10 @@ def grid_search_forecaster(
     results : pandas DataFrame
         Results for each combination of parameters.
 
-            - column lags: lags configuration for each iteration.
-            - column params: parameters configuration for each iteration.
-            - column metric: metric value estimated for each iteration.
-            - additional n columns with param = value.
+        - column lags: lags configuration for each iteration.
+        - column params: parameters configuration for each iteration.
+        - column metric: metric value estimated for each iteration.
+        - additional n columns with param = value.
     
     """
 
@@ -968,11 +970,11 @@ def random_search_forecaster(
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-            - If `string`: {'mean_squared_error', 'mean_absolute_error',
-             'mean_absolute_percentage_error', 'mean_squared_log_error'}
-            - If `Callable`: Function with arguments y_true, y_pred that returns 
-            a float.
-            - If `list`: List containing multiple strings and/or Callables.
+        - If `string`: {'mean_squared_error', 'mean_absolute_error',
+        'mean_absolute_percentage_error', 'mean_squared_log_error'}
+        - If `Callable`: Function with arguments y_true, y_pred that returns 
+        a float.
+        - If `list`: List containing multiple strings and/or Callables.
     initial_train_size : int 
         Number of samples in the initial train split.
     fixed_train_size : bool, default `True`
@@ -1015,10 +1017,10 @@ def random_search_forecaster(
     results : pandas DataFrame
         Results for each combination of parameters.
 
-            - column lags: lags configuration for each iteration.
-            - column params: parameters configuration for each iteration.
-            - column metric: metric value estimated for each iteration.
-            - additional n columns with param = value.
+        - column lags: lags configuration for each iteration.
+        - column params: parameters configuration for each iteration.
+        - column metric: metric value estimated for each iteration.
+        - additional n columns with param = value.
     
     """
 
@@ -1081,11 +1083,11 @@ def _evaluate_grid_hyperparameters(
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-            - If `string`: {'mean_squared_error', 'mean_absolute_error',
-             'mean_absolute_percentage_error', 'mean_squared_log_error'}
-            - If `Callable`: Function with arguments y_true, y_pred that returns 
-            a float.
-            - If `list`: List containing multiple strings and/or Callables.
+        - If `string`: {'mean_squared_error', 'mean_absolute_error',
+        'mean_absolute_percentage_error', 'mean_squared_log_error'}
+        - If `Callable`: Function with arguments y_true, y_pred that returns 
+        a float.
+        - If `list`: List containing multiple strings and/or Callables.
     initial_train_size : int 
         Number of samples in the initial train split.
     fixed_train_size : bool, default `True`
@@ -1123,10 +1125,10 @@ def _evaluate_grid_hyperparameters(
     results : pandas DataFrame
         Results for each combination of parameters.
 
-            - column lags: lags configuration for each iteration.
-            - column params: parameters configuration for each iteration.
-            - column metric: metric value estimated for each iteration.
-            - additional n columns with param = value.
+        - column lags: lags configuration for each iteration.
+        - column params: parameters configuration for each iteration.
+        - column metric: metric value estimated for each iteration.
+        - additional n columns with param = value.
 
     """
 
@@ -1268,11 +1270,11 @@ def bayesian_search_forecaster(
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-            - If `string`: {'mean_squared_error', 'mean_absolute_error',
-             'mean_absolute_percentage_error', 'mean_squared_log_error'}
-            - If `Callable`: Function with arguments y_true, y_pred that returns 
-            a float.
-            - If `list`: List containing multiple strings and/or Callables.
+        - If `string`: {'mean_squared_error', 'mean_absolute_error',
+        'mean_absolute_percentage_error', 'mean_squared_log_error'}
+        - If `Callable`: Function with arguments y_true, y_pred that returns 
+        a float.
+        - If `list`: List containing multiple strings and/or Callables.
     initial_train_size : int 
         Number of samples in the initial train split.
     fixed_train_size : bool, default `True`
@@ -1322,10 +1324,10 @@ def bayesian_search_forecaster(
     results : pandas DataFrame
         Results for each combination of parameters.
 
-            - column lags: lags configuration for each iteration.
-            - column params: parameters configuration for each iteration.
-            - column metric: metric value estimated for each iteration.
-            - additional n columns with param = value.
+        - column lags: lags configuration for each iteration.
+        - column params: parameters configuration for each iteration.
+        - column metric: metric value estimated for each iteration.
+        - additional n columns with param = value.
     results_opt_best : optuna object (optuna)  
         The best optimization result returned as a FrozenTrial optuna object.
     
@@ -1417,11 +1419,11 @@ def _bayesian_search_optuna(
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-            - If `string`: {'mean_squared_error', 'mean_absolute_error',
-             'mean_absolute_percentage_error', 'mean_squared_log_error'}
-            - If `Callable`: Function with arguments y_true, y_pred that returns 
-            a float.
-            - If `list`: List containing multiple strings and/or Callables.
+        - If `string`: {'mean_squared_error', 'mean_absolute_error',
+        'mean_absolute_percentage_error', 'mean_squared_log_error'}
+        - If `Callable`: Function with arguments y_true, y_pred that returns 
+        a float.
+        - If `list`: List containing multiple strings and/or Callables.
     initial_train_size : int 
         Number of samples in the initial train split.
     fixed_train_size : bool, default `True`
@@ -1467,10 +1469,10 @@ def _bayesian_search_optuna(
     results : pandas DataFrame
         Results for each combination of parameters.
 
-            - column lags: lags configuration for each iteration.
-            - column params: parameters configuration for each iteration.
-            - column metric: metric value estimated for each iteration.
-            - additional n columns with param = value.
+        - column lags: lags configuration for each iteration.
+        - column params: parameters configuration for each iteration.
+        - column metric: metric value estimated for each iteration.
+        - additional n columns with param = value.
     results_opt_best : optuna object
         The best optimization result returned as a FrozenTrial optuna object.
 

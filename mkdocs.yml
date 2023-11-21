@@ -44,6 +44,7 @@ nav:
       - Probabilistic forecasting: user_guides/probabilistic-forecasting.ipynb
       - Feature importances: user_guides/feature-importances.ipynb
       - Categorical features: user_guides/categorical-features.ipynb
+      - Calendars features: user_guides/calendar-features.ipynb
       - Forecasting with XGBoost and LightGBM: user_guides/forecasting-xgboost-lightgbm.ipynb
       - Forecaster in production: user_guides/forecaster-in-production.ipynb
       - Save and load forecaster: user_guides/save-load-forecaster.ipynb
@@ -106,6 +107,7 @@ plugins:
       include_source: True
       execute: False
       allow_errors: False
+      include_requirejs: True
   - search
 
 theme:
@@ -160,8 +162,8 @@ markdown_extensions:
   - pymdownx.superfences
   - pymdownx.magiclink
   - pymdownx.emoji:
-      emoji_index: !!python/name:materialx.emoji.twemoji
-      emoji_generator: !!python/name:materialx.emoji.to_svg
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
   - toc:
       permalink: true
 extra:

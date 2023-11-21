@@ -231,6 +231,9 @@ doi = {10.5281/zenodo.8382788}
 ### Publications citing skforecast
 
 <ul>
+
+<li><p style="color:#808080; font-size:0.95em;">OUKHOUYA, H., KADIRI, H., EL HIMDI, K., & GUERBAZ, R. (2023). Forecasting International Stock Market Trends: XGBoost, LSTM, LSTM-XGBoost, and Backtesting XGBoost Models. Statistics, Optimization & Information Computing, 12(1), 200-209. <a href="https://doi.org/10.19139/soic-2310-5070-1822">https://doi.org/10.19139/soic-2310-5070-1822</a></p>
+
 <li><p style="color:#808080; font-size:0.95em;">Polo J, Martín-Chivelet N, Alonso-Abella M, Sanz-Saiz C, Cuenca J, de la Cruz M. Exploring the PV Power Forecasting at Building Façades Using Gradient Boosting Methods. Energies. 2023; 16(3):1495. <a href="https://doi.org/10.3390/en16031495">https://doi.org/10.3390/en16031495</a></p>
 </li>
 
