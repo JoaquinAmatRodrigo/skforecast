@@ -69,11 +69,11 @@ def _backtesting_sarimax(
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-            - If `string`: {'mean_squared_error', 'mean_absolute_error',
-             'mean_absolute_percentage_error', 'mean_squared_log_error'}
-            - If `Callable`: Function with arguments y_true, y_pred that returns 
-            a float.
-            - If `list`: List containing multiple strings and/or Callables.
+        - If `string`: {'mean_squared_error', 'mean_absolute_error',
+        'mean_absolute_percentage_error', 'mean_squared_log_error'}
+        - If `Callable`: Function with arguments y_true, y_pred that returns 
+        a float.
+        - If `list`: List containing multiple strings and/or Callables.
     initial_train_size : int
         Number of samples in the initial train split. The backtest forecaster is
         trained using the first `initial_train_size` observations.
@@ -122,9 +122,9 @@ def _backtesting_sarimax(
     backtest_predictions : pandas DataFrame
         Value of predictions and their estimated interval if `interval` is not `None`.
 
-            - column pred: predictions.
-            - column lower_bound: lower bound of the interval.
-            - column upper_bound: upper bound of the interval.
+        - column pred: predictions.
+        - column lower_bound: lower bound of the interval.
+        - column upper_bound: upper bound of the interval.
     
     """
 
@@ -325,11 +325,11 @@ def backtesting_sarimax(
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-            - If `string`: {'mean_squared_error', 'mean_absolute_error',
-             'mean_absolute_percentage_error', 'mean_squared_log_error'}
-            - If `Callable`: Function with arguments y_true, y_pred that returns 
-            a float.
-            - If `list`: List containing multiple strings and/or Callables.
+        - If `string`: {'mean_squared_error', 'mean_absolute_error',
+        'mean_absolute_percentage_error', 'mean_squared_log_error'}
+        - If `Callable`: Function with arguments y_true, y_pred that returns 
+        a float.
+        - If `list`: List containing multiple strings and/or Callables.
     initial_train_size : int
         Number of samples in the initial train split. The backtest forecaster is
         trained using the first `initial_train_size` observations.
@@ -378,9 +378,9 @@ def backtesting_sarimax(
     backtest_predictions : pandas DataFrame
         Value of predictions and their estimated interval if `interval` is not `None`.
 
-            - column pred: predictions.
-            - column lower_bound: lower bound of the interval.
-            - column upper_bound: upper bound of the interval.
+        - column pred: predictions.
+        - column lower_bound: lower bound of the interval.
+        - column upper_bound: upper bound of the interval.
     
     """
     
@@ -466,11 +466,11 @@ def grid_search_sarimax(
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-            - If `string`: {'mean_squared_error', 'mean_absolute_error',
-             'mean_absolute_percentage_error', 'mean_squared_log_error'}
-            - If `Callable`: Function with arguments y_true, y_pred that returns 
-            a float.
-            - If `list`: List containing multiple strings and/or Callables.
+        - If `string`: {'mean_squared_error', 'mean_absolute_error',
+        'mean_absolute_percentage_error', 'mean_squared_log_error'}
+        - If `Callable`: Function with arguments y_true, y_pred that returns 
+        a float.
+        - If `list`: List containing multiple strings and/or Callables.
     initial_train_size : int 
         Number of samples in the initial train split. The backtest forecaster is
         trained using the first `initial_train_size` observations.
@@ -509,9 +509,9 @@ def grid_search_sarimax(
     results : pandas DataFrame
         Results for each combination of parameters.
 
-            - column params: parameters configuration for each iteration.
-            - column metric: metric value estimated for each iteration.
-            - additional n columns with param = value.
+        - column params: parameters configuration for each iteration.
+        - column metric: metric value estimated for each iteration.
+        - additional n columns with param = value.
     
     """
 
@@ -577,11 +577,11 @@ def random_search_sarimax(
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-            - If `string`: {'mean_squared_error', 'mean_absolute_error',
-             'mean_absolute_percentage_error', 'mean_squared_log_error'}
-            - If `Callable`: Function with arguments y_true, y_pred that returns 
-            a float.
-            - If `list`: List containing multiple strings and/or Callables.
+        - If `string`: {'mean_squared_error', 'mean_absolute_error',
+        'mean_absolute_percentage_error', 'mean_squared_log_error'}
+        - If `Callable`: Function with arguments y_true, y_pred that returns 
+        a float.
+        - If `list`: List containing multiple strings and/or Callables.
     initial_train_size : int 
         Number of samples in the initial train split. The backtest forecaster is
         trained using the first `initial_train_size` observations.
@@ -625,9 +625,9 @@ def random_search_sarimax(
     results : pandas DataFrame
         Results for each combination of parameters.
 
-            - column params: parameters configuration for each iteration.
-            - column metric: metric value estimated for each iteration.
-            - additional n columns with param = value.
+        - column params: parameters configuration for each iteration.
+        - column metric: metric value estimated for each iteration.
+        - additional n columns with param = value.
     
     """
 
@@ -690,11 +690,11 @@ def _evaluate_grid_hyperparameters_sarimax(
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-            - If `string`: {'mean_squared_error', 'mean_absolute_error',
-             'mean_absolute_percentage_error', 'mean_squared_log_error'}
-            - If `Callable`: Function with arguments y_true, y_pred that returns 
-            a float.
-            - If `list`: List containing multiple strings and/or Callables.
+        - If `string`: {'mean_squared_error', 'mean_absolute_error',
+        'mean_absolute_percentage_error', 'mean_squared_log_error'}
+        - If `Callable`: Function with arguments y_true, y_pred that returns 
+        a float.
+        - If `list`: List containing multiple strings and/or Callables.
     initial_train_size : int 
         Number of samples in the initial train split. The backtest forecaster is
         trained using the first `initial_train_size` observations.
@@ -732,9 +732,9 @@ def _evaluate_grid_hyperparameters_sarimax(
     results : pandas DataFrame
         Results for each combination of parameters.
 
-            - column params: lower bound of the interval.
-            - column metric: metric value estimated for the combination of parameters.
-            - additional n columns with param = value.
+        - column params: parameters configuration for each iteration.
+        - column metric: metric value estimated for each iteration.
+        - additional n columns with param = value.
 
     """
 

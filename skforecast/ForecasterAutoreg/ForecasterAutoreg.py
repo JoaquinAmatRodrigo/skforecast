@@ -955,9 +955,9 @@ class ForecasterAutoreg(ForecasterBase):
         predictions : pandas DataFrame
             Values predicted by the forecaster and their estimated interval.
 
-                - pred: predictions.
-                - lower_bound: lower bound of the interval.
-                - upper_bound: upper bound of the interval.
+            - pred: predictions.
+            - lower_bound: lower bound of the interval.
+            - upper_bound: upper bound of the interval.
 
         Notes
         -----

@@ -71,30 +71,30 @@ class Sarimax(BaseEstimator, RegressorMixin):
         The (p,d,q) order of the model for the number of AR parameters, differences, 
         and MA parameters. 
         
-            - `d` must be an integer indicating the integration order of the process.
-            - `p` and `q` may either be an integers indicating the AR and MA orders 
-            (so that all lags up to those orders are included) or else iterables 
-            giving specific AR and / or MA lags to include.
+        - `d` must be an integer indicating the integration order of the process.
+        - `p` and `q` may either be an integers indicating the AR and MA orders 
+        (so that all lags up to those orders are included) or else iterables 
+        giving specific AR and / or MA lags to include.
     seasonal_order : tuple, default `(0, 0, 0, 0)`
         The (P,D,Q,s) order of the seasonal component of the model for the AR 
         parameters, differences, MA parameters, and periodicity. 
         
-            - `D` must be an integer indicating the integration order of the process.
-            - `P` and `Q` may either be an integers indicating the AR and MA orders 
-            (so that all lags up to those orders are included) or else iterables 
-            giving specific AR and / or MA lags to include. 
-            - `s` is an integer giving the periodicity (number of periods in season),
-            often it is 4 for quarterly data or 12 for monthly data.
+        - `D` must be an integer indicating the integration order of the process.
+        - `P` and `Q` may either be an integers indicating the AR and MA orders 
+        (so that all lags up to those orders are included) or else iterables 
+        giving specific AR and / or MA lags to include. 
+        - `s` is an integer giving the periodicity (number of periods in season),
+        often it is 4 for quarterly data or 12 for monthly data.
     trend : str, default `None`
         Parameter controlling the deterministic trend polynomial `A(t)`.
             
-            - `'c'` indicates a constant (i.e. a degree zero component of the 
-            trend polynomial).
-            - `'t'` indicates a linear trend with time.
-            - `'ct'` indicates both, `'c'` and `'t'`. 
-            - Can also be specified as an iterable defining the non-zero polynomial 
-            exponents to include, in increasing order. For example, `[1,1,0,1]` 
-            denotes `a + b*t + ct^3`.
+        - `'c'` indicates a constant (i.e. a degree zero component of the 
+        trend polynomial).
+        - `'t'` indicates a linear trend with time.
+        - `'ct'` indicates both, `'c'` and `'t'`. 
+        - Can also be specified as an iterable defining the non-zero polynomial 
+        exponents to include, in increasing order. For example, `[1,1,0,1]` 
+        denotes `a + b*t + ct^3`.
     measurement_error : bool, default `False`
         Whether or not to assume the endogenous observations `y` were measured 
         with error.
@@ -110,11 +110,11 @@ class Sarimax(BaseEstimator, RegressorMixin):
         Whether or not to use partially conditional maximum likelihood
         estimation. 
         
-            - If `True`, differencing is performed prior to estimation, which 
-            discards the first `s*D + d` initial rows but results in a smaller 
-            state-space formulation. 
-            - If `False`, the full SARIMAX model is put in state-space form so 
-            that all datapoints can be used in estimation.
+        - If `True`, differencing is performed prior to estimation, which 
+        discards the first `s*D + d` initial rows but results in a smaller 
+        state-space formulation. 
+        - If `False`, the full SARIMAX model is put in state-space form so 
+        that all datapoints can be used in estimation.
     enforce_stationarity : bool, default `True`
         Whether or not to transform the AR parameters to enforce stationarity
         in the autoregressive component of the model.
@@ -141,14 +141,14 @@ class Sarimax(BaseEstimator, RegressorMixin):
         The method determines which solver from scipy.optimize is used, and it 
         can be chosen from among the following strings:
 
-            - `'newton'` for Newton-Raphson
-            - `'nm'` for Nelder-Mead
-            - `'bfgs'` for Broyden-Fletcher-Goldfarb-Shanno (BFGS)
-            - `'lbfgs'` for limited-memory BFGS with optional box constraints
-            - `'powell'` for modified Powell`s method
-            - `'cg'` for conjugate gradient
-            - `'ncg'` for Newton-conjugate gradient
-            - `'basinhopping'` for global basin-hopping solver
+        - `'newton'` for Newton-Raphson
+        - `'nm'` for Nelder-Mead
+        - `'bfgs'` for Broyden-Fletcher-Goldfarb-Shanno (BFGS)
+        - `'lbfgs'` for limited-memory BFGS with optional box constraints
+        - `'powell'` for modified Powell`s method
+        - `'cg'` for conjugate gradient
+        - `'ncg'` for Newton-conjugate gradient
+        - `'basinhopping'` for global basin-hopping solver
     maxiter : int, default `50`
         The maximum number of iterations to perform.
     start_params : numpy ndarray, default `None`
@@ -497,9 +497,9 @@ class Sarimax(BaseEstimator, RegressorMixin):
             Values predicted by the forecaster and their estimated interval. The 
             output type is the same as the type of `y` used in the fit method.
 
-                - pred: predictions.
-                - lower_bound: lower bound of the interval. (if `return_conf_int`)
-                - upper_bound: upper bound of the interval. (if `return_conf_int`)
+            - pred: predictions.
+            - lower_bound: lower bound of the interval. (if `return_conf_int`)
+            - upper_bound: upper bound of the interval. (if `return_conf_int`)
 
         """
 

@@ -869,11 +869,11 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             Predict n steps. The value of `steps` must be less than or equal to the 
             value of steps defined when initializing the forecaster. Starts at 1.
         
-                - If `int`: Only steps within the range of 1 to int are predicted.
-                - If `list`: List of ints. Only the steps contained in the list 
-                are predicted.
-                - If `None`: As many steps are predicted as were defined at 
-                initialization.
+            - If `int`: Only steps within the range of 1 to int are predicted.
+            - If `list`: List of ints. Only the steps contained in the list 
+            are predicted.
+            - If `None`: As many steps are predicted as were defined at 
+            initialization.
         last_window : pandas DataFrame, default `None`
             Series values used to create the predictors (lags) needed in the 
             first iteration of the prediction (t + 1).
@@ -1034,11 +1034,11 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             Predict n steps. The value of `steps` must be less than or equal to the 
             value of steps defined when initializing the forecaster. Starts at 1.
         
-                - If `int`: Only steps within the range of 1 to int are predicted.
-                - If `list`: List of ints. Only the steps contained in the list 
-                are predicted.
-                - If `None`: As many steps are predicted as were defined at 
-                initialization.
+            - If `int`: Only steps within the range of 1 to int are predicted.
+            - If `list`: List of ints. Only the steps contained in the list 
+            are predicted.
+            - If `None`: As many steps are predicted as were defined at 
+            initialization.
         last_window : pandas DataFrame, default `None`
             Series values used to create the predictors (lags) needed in the 
             first iteration of the prediction (t + 1).
@@ -1181,11 +1181,11 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             Predict n steps. The value of `steps` must be less than or equal to the 
             value of steps defined when initializing the forecaster. Starts at 1.
         
-                - If `int`: Only steps within the range of 1 to int are predicted.
-                - If `list`: List of ints. Only the steps contained in the list 
-                are predicted.
-                - If `None`: As many steps are predicted as were defined at 
-                initialization.
+            - If `int`: Only steps within the range of 1 to int are predicted.
+            - If `list`: List of ints. Only the steps contained in the list 
+            are predicted.
+            - If `None`: As many steps are predicted as were defined at 
+            initialization.
         last_window : pandas DataFrame, default `None`
             Series values used to create the predictors (lags) needed in the 
             first iteration of the prediction (t + 1).
@@ -1217,9 +1217,9 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         predictions : pandas DataFrame
             Values predicted by the forecaster and their estimated interval.
 
-                - pred: predictions.
-                - lower_bound: lower bound of the interval.
-                - upper_bound: upper bound of the interval.
+            - pred: predictions.
+            - lower_bound: lower bound of the interval.
+            - upper_bound: upper bound of the interval.
 
         Notes
         -----
@@ -1275,11 +1275,11 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             Predict n steps. The value of `steps` must be less than or equal to the 
             value of steps defined when initializing the forecaster. Starts at 1.
         
-                - If `int`: Only steps within the range of 1 to int are predicted.
-                - If `list`: List of ints. Only the steps contained in the list 
-                are predicted.
-                - If `None`: As many steps are predicted as were defined at 
-                initialization.
+            - If `int`: Only steps within the range of 1 to int are predicted.
+            - If `list`: List of ints. Only the steps contained in the list 
+            are predicted.
+            - If `None`: As many steps are predicted as were defined at 
+            initialization.
         last_window : pandas DataFrame, default `None`
             Series values used to create the predictors (lags) needed in the 
             first iteration of the prediction (t + 1).
@@ -1361,11 +1361,11 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             Predict n steps. The value of `steps` must be less than or equal to the 
             value of steps defined when initializing the forecaster. Starts at 1.
         
-                - If `int`: Only steps within the range of 1 to int are predicted.
-                - If `list`: List of ints. Only the steps contained in the list 
-                are predicted.
-                - If `None`: As many steps are predicted as were defined at 
-                initialization.
+            - If `int`: Only steps within the range of 1 to int are predicted.
+            - If `list`: List of ints. Only the steps contained in the list 
+            are predicted.
+            - If `None`: As many steps are predicted as were defined at 
+            initialization.
         last_window : pandas DataFrame, default `None`
             Series values used to create the predictors (lags) needed in the 
             first iteration of the prediction (t + 1).
@@ -1481,11 +1481,11 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         lags : int, list, numpy ndarray, range, dict
             Lags used as predictors. Index starts at 1, so lag 1 is equal to t-1.
 
-                - `int`: include lags from 1 to `lags` (included).
-                - `list`, `1d numpy ndarray` or `range`: include only lags present in 
-                `lags`, all elements must be int.
-                - `dict`: create different lags for each series. 
-                {'series_column_name': lags}.
+            - `int`: include lags from 1 to `lags` (included).
+            - `list`, `1d numpy ndarray` or `range`: include only lags present in 
+            `lags`, all elements must be int.
+            - `dict`: create different lags for each series. 
+            {'series_column_name': lags}.
 
         Returns
         -------

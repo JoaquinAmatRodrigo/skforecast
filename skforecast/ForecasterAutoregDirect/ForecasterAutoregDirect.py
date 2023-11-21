@@ -1,5 +1,5 @@
 ################################################################################
-#                         ForecasterAutoregDirect                              #
+#                           ForecasterAutoregDirect                            #
 #                                                                              #
 # This work by skforecast team is licensed under the BSD 3-Clause License.     #
 ################################################################################
@@ -737,11 +737,11 @@ class ForecasterAutoregDirect(ForecasterBase):
             Predict n steps. The value of `steps` must be less than or equal to the 
             value of steps defined when initializing the forecaster. Starts at 1.
         
-                - If `int`: Only steps within the range of 1 to int are predicted.
-                - If `list`: List of ints. Only the steps contained in the list 
-                are predicted.
-                - If `None`: As many steps are predicted as were defined at 
-                initialization.
+            - If `int`: Only steps within the range of 1 to int are predicted.
+            - If `list`: List of ints. Only the steps contained in the list 
+            are predicted.
+            - If `None`: As many steps are predicted as were defined at 
+            initialization.
         last_window : pandas Series, default `None`
             Series values used to create the predictors (lags) needed in the 
             first iteration of the prediction (t + 1).
@@ -888,11 +888,11 @@ class ForecasterAutoregDirect(ForecasterBase):
             Predict n steps. The value of `steps` must be less than or equal to the 
             value of steps defined when initializing the forecaster. Starts at 1.
         
-                - If `int`: Only steps within the range of 1 to int are predicted.
-                - If `list`: List of ints. Only the steps contained in the list 
-                are predicted.
-                - If `None`: As many steps are predicted as were defined at 
-                initialization.
+            - If `int`: Only steps within the range of 1 to int are predicted.
+            - If `list`: List of ints. Only the steps contained in the list 
+            are predicted.
+            - If `None`: As many steps are predicted as were defined at 
+            initialization.
         last_window : pandas Series, default `None`
             Series values used to create the predictors (lags) needed in the 
             first iteration of the prediction (t + 1).
@@ -1032,11 +1032,11 @@ class ForecasterAutoregDirect(ForecasterBase):
             Predict n steps. The value of `steps` must be less than or equal to the 
             value of steps defined when initializing the forecaster. Starts at 1.
         
-                - If `int`: Only steps within the range of 1 to int are predicted.
-                - If `list`: List of ints. Only the steps contained in the list 
-                are predicted.
-                - If `None`: As many steps are predicted as were defined at 
-                initialization.
+            - If `int`: Only steps within the range of 1 to int are predicted.
+            - If `list`: List of ints. Only the steps contained in the list 
+            are predicted.
+            - If `None`: As many steps are predicted as were defined at 
+            initialization.
         last_window : pandas Series, default `None`
             Series values used to create the predictors (lags) needed in the 
             first iteration of the prediction (t + 1).
@@ -1066,9 +1066,9 @@ class ForecasterAutoregDirect(ForecasterBase):
         predictions : pandas DataFrame
             Values predicted by the forecaster and their estimated interval.
 
-                - pred: predictions.
-                - lower_bound: lower bound of the interval.
-                - upper_bound: upper bound of the interval.
+            - pred: predictions.
+            - lower_bound: lower bound of the interval.
+            - upper_bound: upper bound of the interval.
 
         Notes
         -----
@@ -1123,11 +1123,11 @@ class ForecasterAutoregDirect(ForecasterBase):
             Predict n steps. The value of `steps` must be less than or equal to the 
             value of steps defined when initializing the forecaster. Starts at 1.
         
-                - If `int`: Only steps within the range of 1 to int are predicted.
-                - If `list`: List of ints. Only the steps contained in the list 
-                are predicted.
-                - If `None`: As many steps are predicted as were defined at 
-                initialization.
+            - If `int`: Only steps within the range of 1 to int are predicted.
+            - If `list`: List of ints. Only the steps contained in the list 
+            are predicted.
+            - If `None`: As many steps are predicted as were defined at 
+            initialization.
         last_window : pandas Series, default `None`
             Series values used to create the predictors (lags) needed in the 
             first iteration of the prediction (t + 1).
@@ -1206,11 +1206,11 @@ class ForecasterAutoregDirect(ForecasterBase):
             Predict n steps. The value of `steps` must be less than or equal to the 
             value of steps defined when initializing the forecaster. Starts at 1.
         
-                - If `int`: Only steps within the range of 1 to int are predicted.
-                - If `list`: List of ints. Only the steps contained in the list 
-                are predicted.
-                - If `None`: As many steps are predicted as were defined at 
-                initialization.
+            - If `int`: Only steps within the range of 1 to int are predicted.
+            - If `list`: List of ints. Only the steps contained in the list 
+            are predicted.
+            - If `None`: As many steps are predicted as were defined at 
+            initialization.
         last_window : pandas Series, default `None`
             Series values used to create the predictors (lags) needed in the 
             first iteration of the prediction (t + 1).
