@@ -107,7 +107,7 @@ plugins:
       include_source: True
       execute: False
       allow_errors: False
-      include_requirejs: true
+      include_requirejs: True
   - search
 
 theme:
