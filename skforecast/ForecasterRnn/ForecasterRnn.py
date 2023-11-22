@@ -598,9 +598,7 @@ class ForecasterRnn(ForecasterBase):
                 )
 
         if last_window is None:
-            last_window = self.last_window.copy()
-        else:
-            last_window = last_window.iloc[-self.window_size:].copy()
+            last_window = self.last_window
 
         check_predict_input(
             forecaster_name   = type(self).__name__,
@@ -622,7 +620,8 @@ class ForecasterRnn(ForecasterBase):
             levels_forecaster = self.levels,
             series_col_names  = self.series_col_names
         )
-
+        
+        last_window = last_window.iloc[-self.window_size:, :].copy()
         for serie_name in self.series_col_names:
             last_window_serie = transform_series(
                                     series            = last_window[serie_name],
@@ -644,13 +643,13 @@ class ForecasterRnn(ForecasterBase):
 
         predictions = pd.DataFrame(
                           data    = predictions_reshaped[np.array(steps) - 1],
-                          columns = [self.levels],
+                          columns = self.levels,
                           index   = idx[np.array(steps) - 1],
                       )
         predictions = predictions[levels]
 
         for serie in levels:
-            x = predictions[serie].squeeze()  # TODO check
+            x = predictions[serie]
             check_y(y=x)
             x = transform_series(
                     series            = x,
