@@ -27,7 +27,7 @@ def create_and_compile_model(
     activation: str = "relu",
     optimizer: object = Adam(learning_rate=0.01),
     loss: object = MeanSquaredError(), 
-    # compile_kwars: dict = {} # TODO. menor prioridad
+    compile_kwars: dict = {} # TODO. menor prioridad
 ) -> tf.keras.models.Model:
     """
     Creates a neural network model for time series prediction with flexible recurrent layers.
@@ -118,10 +118,16 @@ def create_and_compile_model(
 
     model = Model(inputs=input_layer, outputs=output_layer)
 
-    # Compile the model
-    if loss is not None:
-        model.compile(optimizer=optimizer, loss=loss)
-        # TODO. normalize compile_kwargs
-        # model.compile(optimizer=optimizer, loss=loss, **compile_kwargs)
+    # Compile the model if optimizer, loss or compile_kwargs are passed
+    if optimizer is not None or loss is not None or compile_kwars:
+        # give more priority to the parameters passed in the function check if the parameters passes in compile_kwars include optimizer and loss if so, delete them from compile_kwargs and raise a warning
+        if "optimizer" in compile_kwars.keys():
+            compile_kwars.pop("optimizer")
+            print("Warning: optimizer passed in compile_kwars. Ignoring it.")
+        if "loss" in compile_kwars.keys():
+            compile_kwars.pop("loss")
+            print("Warning: loss passed in compile_kwars. Ignoring it.")
+        
+        model.compile(optimizer=optimizer, loss=loss, **compile_kwars)    
 
     return model
