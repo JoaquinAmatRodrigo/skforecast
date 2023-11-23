@@ -10,6 +10,8 @@ Thank you for choosing skforecast and visiting our Frequently Asked Questions (F
 
 + [**Cyclical features in time series**](https://skforecast.org/latest/faq/cyclical-features-time-series.html)
 
++ [**Stacking (ensemble) machine learning models to improve forecasting**](https://skforecast.org/latest/faq/stacking-ensemble-models-forecasting.html)
+
 + [**Parallelization in skforecast**](https://skforecast.org/latest/faq/parallelization-skforecast.html)
 
 + [**Profiling skforecast**](https://skforecast.org/latest/faq/profiling-skforecast.html)
