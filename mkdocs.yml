@@ -81,7 +81,7 @@ nav:
       - Avoid negative predictions when forecasting: faq/non-negative-predictions.ipynb
       - Forecasting time series with missing values: faq/forecasting-time-series-with-missing-values.ipynb
       - Cyclical features in time series: faq/cyclical-features-time-series.ipynb
-      - Stacking (ensemble) machine learning models: faq/ensemble-stacking-models.ipynb
+      - Stacking (ensemble) machine learning models: faq/stacking-ensemble-models-forecasting.ipynb
       - Parallelization in skforecast: faq/parallelization-skforecast.ipynb
       - Profiling skforecast: faq/profiling-skforecast.ipynb
 

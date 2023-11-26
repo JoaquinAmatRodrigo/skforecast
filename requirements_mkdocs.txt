@@ -1,4 +1,4 @@
-mike==2.0.0
+mike==1.1.2 #2.0.0 not working when publishing online
 mkdocs==1.5.3
 mkdocs-jupyter==0.24.6
 mkdocs-material==9.4.9
