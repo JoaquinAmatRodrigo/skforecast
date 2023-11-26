@@ -3269,18 +3269,18 @@ forecaster.fit(
             <div class="highlight-ipynb hl-python "><pre><span></span><span class="c1"># Training matrices used by the forecaster to fit the internal regressor</span>
 <span class="c1"># ==============================================================================</span>
 <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span> <span class="o">=</span> <span class="n">forecaster</span><span class="o">.</span><span class="n">create_train_X_y</span><span class="p">(</span>
-                        <span class="n">y</span>    <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Demand&#39;</span><span class="p">],</span>
-                        <span class="n">exog</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Temperature&#39;</span><span class="p">]</span>
-                    <span class="p">)</span>
+                       <span class="n">y</span>    <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Demand&#39;</span><span class="p">],</span>
+                       <span class="n">exog</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Temperature&#39;</span><span class="p">]</span>
+                   <span class="p">)</span>
 <span class="n">display</span><span class="p">(</span><span class="n">X_train</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
 <span class="n">display</span><span class="p">(</span><span class="n">y_train</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
 </pre></div>
 <div id="cell-6" class="clipboard-copy-txt"># Training matrices used by the forecaster to fit the internal regressor
 # ==============================================================================
 X_train, y_train = forecaster.create_train_X_y(
-                        y    = data['Demand'],
-                        exog = data['Temperature']
-                    )
+                       y    = data['Demand'],
+                       exog = data['Temperature']
+                   )
 display(X_train.head(3))
 display(y_train.head(3))</div>
         

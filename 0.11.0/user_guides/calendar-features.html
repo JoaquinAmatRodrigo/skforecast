@@ -2828,7 +2828,7 @@ Shape of the dataset: (17544, 12)
 </div>
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
-<div id="cell-id=674c4d14" class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div id="cell-id=225ce388" class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2954,7 +2954,7 @@ data.head()</div>
 </div>
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
-<div id="cell-id=54e40b36" class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div id="cell-id=1f788453" class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -3096,7 +3096,7 @@ data.head()</div>
 
 </div>
 </div>
-<div id="cell-id=343abe9a" class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div id="cell-id=cb076720" class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -3116,7 +3116,7 @@ border-left: 8px solid #00bfa5; border-color: #00bfa5; padding-left: 10px;">
 </div>
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
-<div id="cell-id=e3dbe2e1" class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div id="cell-id=0cd1f8bb" class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -3377,7 +3377,7 @@ calendar_features.head()</div>
 
 </div>
 </div>
-<div id="cell-id=92a6050b" class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div id="cell-id=5775862b" class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -3389,7 +3389,7 @@ calendar_features.head()</div>
 </div>
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
-<div id="cell-id=e1e2ebb5" class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div id="cell-id=ab580d26" class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -3535,7 +3535,7 @@ sun_light_features.head()</div>
 
 </div>
 </div>
-<div id="cell-id=22356790" class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div id="cell-id=8f006ba2" class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -3546,13 +3546,13 @@ sun_light_features.head()</div>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
-<div id="cell-id=87764a2e" class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=155a758b" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[15]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
         
         
         <div class="CodeMirror cm-s-jupyter">
@@ -3567,7 +3567,7 @@ sun_light_features.head()</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="c1"># Ciclical encoding of month, day of week and hour</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="c1"># Ciclical encoding</span>
 <span class="c1"># ==============================================================================</span>
 <span class="k">def</span> <span class="nf">cyclical_encoding</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">cycle_length</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -3598,14 +3598,8 @@ sun_light_features.head()</div>
               <span class="p">})</span>
 
     <span class="k">return</span> <span class="n">result</span>
-
-<span class="n">month_encoded</span> <span class="o">=</span> <span class="n">cyclical_encoding</span><span class="p">(</span><span class="n">calendar_features</span><span class="p">[</span><span class="s1">&#39;month&#39;</span><span class="p">],</span> <span class="n">cycle_length</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
-<span class="n">day_of_week_encoded</span> <span class="o">=</span> <span class="n">cyclical_encoding</span><span class="p">(</span><span class="n">calendar_features</span><span class="p">[</span><span class="s1">&#39;day_of_week&#39;</span><span class="p">],</span> <span class="n">cycle_length</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
-<span class="n">hour_encoded</span> <span class="o">=</span> <span class="n">cyclical_encoding</span><span class="p">(</span><span class="n">calendar_features</span><span class="p">[</span><span class="s1">&#39;hour&#39;</span><span class="p">],</span> <span class="n">cycle_length</span><span class="o">=</span><span class="mi">24</span><span class="p">)</span>
-<span class="n">cyclical_features</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">month_encoded</span><span class="p">,</span> <span class="n">day_of_week_encoded</span><span class="p">,</span> <span class="n">hour_encoded</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">cyclical_features</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
-<div id="cell-7" class="clipboard-copy-txt"># Ciclical encoding of month, day of week and hour
+<div id="cell-7" class="clipboard-copy-txt"># Ciclical encoding
 # ==============================================================================
 def cyclical_encoding(data: pd.Series, cycle_length: int) -> pd.DataFrame:
     """
@@ -3635,11 +3629,51 @@ def cyclical_encoding(data: pd.Series, cycle_length: int) -> pd.DataFrame:
                   f"{data.name}_cos": cos
               })
 
-    return result
+    return result</div>
+        
+        </div>
+    </div>
 
+</div>
+</div>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div id="cell-id=6cc14da6" class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[15]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+        
+        
+        <div class="CodeMirror cm-s-jupyter">
+            <div class="zeroclipboard-container">
+                <clipboard-copy for="cell-8">
+                <div>
+                    <span class="notice" hidden>Copied!</span>
+                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 16 16" version="1.1"  data-view-component="true" class="clipboard-copy-icon">
+                        <path fill="currentColor" fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path>
+                        <path fill="currentColor" fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path>
+                    </svg>
+                    </div>
+                </clipboard-copy>
+            </div>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="c1"># Ciclical encoding of month, day of week and hour</span>
+<span class="c1"># ==============================================================================</span>
+<span class="n">month_encoded</span> <span class="o">=</span> <span class="n">cyclical_encoding</span><span class="p">(</span><span class="n">calendar_features</span><span class="p">[</span><span class="s1">&#39;month&#39;</span><span class="p">],</span> <span class="n">cycle_length</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+<span class="n">day_of_week_encoded</span> <span class="o">=</span> <span class="n">cyclical_encoding</span><span class="p">(</span><span class="n">calendar_features</span><span class="p">[</span><span class="s1">&#39;day_of_week&#39;</span><span class="p">],</span> <span class="n">cycle_length</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+<span class="n">hour_encoded</span> <span class="o">=</span> <span class="n">cyclical_encoding</span><span class="p">(</span><span class="n">calendar_features</span><span class="p">[</span><span class="s1">&#39;hour&#39;</span><span class="p">],</span> <span class="n">cycle_length</span><span class="o">=</span><span class="mi">24</span><span class="p">)</span>
+
+<span class="n">cyclical_features</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">month_encoded</span><span class="p">,</span> <span class="n">day_of_week_encoded</span><span class="p">,</span> <span class="n">hour_encoded</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">cyclical_features</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+<div id="cell-8" class="clipboard-copy-txt"># Ciclical encoding of month, day of week and hour
+# ==============================================================================
 month_encoded = cyclical_encoding(calendar_features['month'], cycle_length=12)
 day_of_week_encoded = cyclical_encoding(calendar_features['day_of_week'], cycle_length=7)
 hour_encoded = cyclical_encoding(calendar_features['hour'], cycle_length=24)
+
 cyclical_features = pd.concat([month_encoded, day_of_week_encoded, hour_encoded], axis=1)
 cyclical_features.head()</div>
         
@@ -3756,7 +3790,7 @@ cyclical_features.head()</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
-<div id="cell-id=2a556618" class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div id="cell-id=7047f787" class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -3766,7 +3800,7 @@ cyclical_features.head()</div>
         
         <div class="CodeMirror cm-s-jupyter">
             <div class="zeroclipboard-container">
-                <clipboard-copy for="cell-8">
+                <clipboard-copy for="cell-9">
                 <div>
                     <span class="notice" hidden>Copied!</span>
                     <svg aria-hidden="true" width="20" height="20" viewBox="0 0 16 16" version="1.1"  data-view-component="true" class="clipboard-copy-icon">
@@ -3792,7 +3826,7 @@ cyclical_features.head()</div>
 <span class="n">_</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">sp</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">();</span>
 </pre></div>
-<div id="cell-8" class="clipboard-copy-txt"># Plot value of sin and cos for each hour
+<div id="cell-9" class="clipboard-copy-txt"># Plot value of sin and cos for each hour
 # ==============================================================================
 fig, ax = plt.subplots(figsize=(3.5, 3))
 sp = ax.scatter(
@@ -3842,13 +3876,13 @@ class="
 
 </div>
 </div>
-<div id="cell-id=897d8d11" class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div id="cell-id=178b31a1" class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<div class="admonition note" name="html-admonition" style="background: rgba(0,184,212,.1); padding-top: 0px; padding-bottom: 6px; border-radius: 8px; border-left: 8px solid #00b8d4; padding-left: 10px;">
+<div class="admonition note" name="html-admonition" style="background: rgba(0,184,212,.1); padding-top: 0px; padding-bottom: 6px; border-radius: 8px; border-left: 8px solid #00b8d4; border-color: #00b8d4; padding-left: 10px;">
 <p class="title">
     <i style="font-size: 18px; color:#00b8d4;"></i>
     <b style="color: #00b8d4;">&#9998 Note</b>
