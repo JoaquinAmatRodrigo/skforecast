@@ -48,7 +48,7 @@ nav:
       - Forecasting with XGBoost and LightGBM: user_guides/forecasting-xgboost-lightgbm.ipynb
       - Forecaster in production: user_guides/forecaster-in-production.ipynb
       - Save and load forecaster: user_guides/save-load-forecaster.ipynb
-      - Shap-values: user_guides/shap-values-skforecast.ipynb
+      - Explainability: user_guides/explainability.ipynb
       - Skforecast in GPU: user_guides/skforecast-in-GPU.ipynb
       - Plot forecaster residuals: user_guides/plot-forecaster-residuals.ipynb
       - Datasets: user_guides/datasets.ipynb
