@@ -27,7 +27,7 @@ def create_and_compile_model(
     activation: str = "relu",
     optimizer: object = Adam(learning_rate=0.01),
     loss: object = MeanSquaredError(), 
-    compile_kwars: dict = {} # TODO. menor prioridad
+    compile_kwars: dict = {}
 ) -> tf.keras.models.Model:
     """
     Creates a neural network model for time series prediction with flexible recurrent layers.

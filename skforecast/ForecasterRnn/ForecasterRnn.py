@@ -39,8 +39,8 @@ logging.basicConfig(
 )
 
 
-# TODO. Probar Interval
-# TODO. Grid search
+# TODO. Test Interval
+# TODO. Test Grid search
 class ForecasterRnn(ForecasterBase):
     """
     This class turns any regressor compatible with the TensorFlow API into a
@@ -179,7 +179,7 @@ class ForecasterRnn(ForecasterBase):
         levels: Union[str, list],
         transformer_series: Optional[Union[object, dict]]=MinMaxScaler(),
         weight_func: Optional[Callable]=None,
-        fit_kwargs: Optional[dict]=None,
+        fit_kwargs: Optional[dict]={},
         forecaster_id: Optional[Union[str, int]]=None,
         n_jobs: Any=None,
         step: Any=None,
@@ -258,7 +258,8 @@ class ForecasterRnn(ForecasterBase):
                 if key.startswith(name_pipe_steps)
             }
         else:
-            params = self.regressor.get_params()
+            params = self.regressor.get_config()
+            compile_config = self.regressor.get_compile_config()
 
         info = (
             f"{'=' * len(type(self).__name__)} \n"
@@ -274,7 +275,8 @@ class ForecasterRnn(ForecasterBase):
             f"Training range: {self.training_range.to_list() if self.fitted else None} \n"
             f"Training index type: {str(self.index_type).split('.')[-1][:-2] if self.fitted else None} \n"
             f"Training index frequency: {self.index_freq if self.fitted else None} \n"
-            f"Regressor parameters: {params} \n"
+            f"Model parameters: {params} \n"
+            f"Compile parameters: {compile_config} \n"
             f"fit_kwargs: {self.fit_kwargs} \n"
             f"Creation date: {self.creation_date} \n"
             f"Last fit date: {self.fit_date} \n"

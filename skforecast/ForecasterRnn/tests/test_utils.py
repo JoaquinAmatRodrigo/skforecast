@@ -17,7 +17,7 @@ from skforecast.ForecasterRnn.utils import create_and_compile_model
     ([64, 32], [100]),
     ([64, 32], [100, 50])
 ])
-def test_dense_units(dense_units, recurrent_units):
+def test_units(dense_units, recurrent_units):
     print(f"dense_units: {dense_units}")
     print(f"recurrent_units: {recurrent_units}")
     # Generate dummy data for testing
