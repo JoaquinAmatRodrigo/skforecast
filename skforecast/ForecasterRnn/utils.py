@@ -23,7 +23,7 @@ def create_and_compile_model(
     levels: Union[str, int, list] = None,
     recurrent_layer: str = "LSTM",
     recurrent_units: Union[int, list] = 100,
-    dense_units: list = [64],
+    dense_units: Union[list, int] = [64],
     activation: str = "relu",
     optimizer: object = Adam(learning_rate=0.01),
     loss: object = MeanSquaredError(), 
@@ -64,7 +64,38 @@ def create_and_compile_model(
     """
 
     n_series = series.shape[1]
-
+    
+    # Dense units must be a list or int
+    if not isinstance(dense_units, (list, int)):
+        raise TypeError(
+            f"`dense_units` argument must be a list or int. Got {type(dense_units)}."
+        )
+    if isinstance(dense_units, int):
+        dense_units = [dense_units]
+        
+    # Recurrent units must be a list or int
+    if not isinstance(recurrent_units, (list, int)):
+        raise TypeError(
+            f"`recurrent_units` argument must be a list or int. Got {type(recurrent_units)}."
+        )
+    if isinstance(recurrent_units, int):
+        recurrent_units = [recurrent_units]
+        
+    # Lags, steps and levels must be int or list
+    if not isinstance(lags, (int, list)):
+        raise TypeError(
+            f"`lags` argument must be a list or int. Got {type(lags)}."
+        )
+    if not isinstance(steps, (int, list)):
+        raise TypeError(
+            f"`steps` argument must be a list or int. Got {type(steps)}."
+        )
+    if not isinstance(levels, (str, int, list, type(None))):
+        raise TypeError(
+            f"`levels` argument must be a string, list or int. Got {type(levels)}."
+        )
+    
+        
     if isinstance(lags, list):
         lags = len(lags)
     if isinstance(steps, list):
@@ -75,6 +106,8 @@ def create_and_compile_model(
         levels = 1
     elif isinstance(levels, type(None)):
         levels = series.shape[1]
+    elif isinstance(levels, int):
+        pass
     else:
         raise TypeError(
             f"`levels` argument must be a string, list or int. Got {type(levels)}."
