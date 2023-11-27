@@ -7,12 +7,16 @@ from tensorflow import keras
 from keras.losses import MeanSquaredError
 import pytest
 
+
 # test levels
-@pytest.mark.parametrize("levels", [
-    "t+1",
-    ["t+1"],
-    ["t+1", "t+2"],
-])
+@pytest.mark.parametrize(
+    "levels",
+    [
+        "t+1",
+        ["t+1"],
+        ["t+1", "t+2"],
+    ],
+)
 def test_init(levels):
     print(f"levels: {levels}")
     # Generate dummy data for testing
@@ -36,17 +40,17 @@ def test_init(levels):
         dense_units=dense_units,
         activation=activation,
         optimizer=optimizer,
-        loss=loss
+        loss=loss,
     )
-    
+
     forecaster = ForecasterRnn(
         regressor=model,
         levels=levels,
-        )
-    
+    )
+
     # Assert that the forecaster is an instance of ForecasterAutoreg
     assert isinstance(forecaster, ForecasterRnn)
-    
+
     # Assert that the forecaster is not fitted
     assert forecaster.fitted == False
 
@@ -61,8 +65,11 @@ def test_init(levels):
         recurrent_units = [recurrent_units]
     if isinstance(levels, str):
         levels = [levels]
-        
-    assert len(forecaster.regressor.layers) == 5 + len(dense_units) - 1 + len(recurrent_units) - 1
+
+    assert (
+        len(forecaster.regressor.layers)
+        == 5 + len(dense_units) - 1 + len(recurrent_units) - 1
+    )
 
     # Assert that the forecaster has the correct number of levels
     assert forecaster.levels == levels

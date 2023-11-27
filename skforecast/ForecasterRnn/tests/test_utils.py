@@ -6,17 +6,21 @@ from skforecast.ForecasterRnn.utils import create_and_compile_model
 
 # test with several parameters for dense_units and recurrent_units
 
-@pytest.mark.parametrize("dense_units, recurrent_units", [
-    (64, 100),
-    ([64], 100),
-    ([64, 32], 100),
-    (64, [100]),
-    (64, [100, 50]),
-    ([64], [100]),
-    ([64], [100, 50]),
-    ([64, 32], [100]),
-    ([64, 32], [100, 50])
-])
+
+@pytest.mark.parametrize(
+    "dense_units, recurrent_units",
+    [
+        (64, 100),
+        ([64], 100),
+        ([64, 32], 100),
+        (64, [100]),
+        (64, [100, 50]),
+        ([64], [100]),
+        ([64], [100, 50]),
+        ([64, 32], [100]),
+        ([64, 32], [100, 50]),
+    ],
+)
 def test_units(dense_units, recurrent_units):
     print(f"dense_units: {dense_units}")
     print(f"recurrent_units: {recurrent_units}")
@@ -39,13 +43,13 @@ def test_units(dense_units, recurrent_units):
         dense_units=dense_units,
         activation=activation,
         optimizer=optimizer,
-        loss=loss
+        loss=loss,
     )
     if isinstance(dense_units, int):
         dense_units = [dense_units]
     if isinstance(recurrent_units, int):
         recurrent_units = [recurrent_units]
-        
+
     # Assert that the model is an instance of tf.keras.models.Model
     assert isinstance(model, tf.keras.models.Model)
 

@@ -24,7 +24,6 @@ recurrent_units = 100
 dense_units = [128, 64]
 
 
-
 def test_create_train_X_y_TypeError_when_series_not_dataframe():
     """
     Test TypeError is raised when series is not a pandas DataFrame.
@@ -32,9 +31,8 @@ def test_create_train_X_y_TypeError_when_series_not_dataframe():
     series = pd.Series(np.arange(7))
     # Call the function to create and compile the model
 
-
     err_msg = f"`series` must be a pandas DataFrame. Got {type(series)}."
-    with pytest.raises(TypeError, match = err_msg):
+    with pytest.raises(TypeError, match=err_msg):
         model = create_and_compile_model(
             series=series,
             lags=lags,
@@ -44,20 +42,19 @@ def test_create_train_X_y_TypeError_when_series_not_dataframe():
             dense_units=dense_units,
             activation=activation,
             optimizer=optimizer,
-            loss=loss
+            loss=loss,
         )
         forecaster = ForecasterRnn(model)
+
 
 def test_create_train_X_y_UserWarning_when_levels_of_transformer_series_not_equal_to_series_col_names():
     """
     Test UserWarning is raised when `transformer_series` is a dict and its keys are
     not the same as forecaster.series_col_names.
     """
-    series = pd.DataFrame({'1': pd.Series(np.arange(5)),  
-                           '2': pd.Series(np.arange(5))})
-    dict_transformers = {'1': StandardScaler(), 
-                         '3': StandardScaler()}
-    
+    series = pd.DataFrame({"1": pd.Series(np.arange(5)), "2": pd.Series(np.arange(5))})
+    dict_transformers = {"1": StandardScaler(), "3": StandardScaler()}
+
     model = create_and_compile_model(
         series=series,
         lags=1,
@@ -67,31 +64,35 @@ def test_create_train_X_y_UserWarning_when_levels_of_transformer_series_not_equa
         dense_units=dense_units,
         activation=activation,
         optimizer=optimizer,
-        loss=loss
+        loss=loss,
     )
-    forecaster = ForecasterRnn(model, levels=levels, transformer_series=dict_transformers)
+    forecaster = ForecasterRnn(
+        model, levels=levels, transformer_series=dict_transformers
+    )
 
-    series_not_in_transformer_series = set(series.columns) - set(forecaster.transformer_series.keys())
-    
+    series_not_in_transformer_series = set(series.columns) - set(
+        forecaster.transformer_series.keys()
+    )
+
     warn_msg = re.escape(
-                    (f"{series_not_in_transformer_series} not present in `transformer_series`."
-                     f" No transformation is applied to these series.")
-                )
-    with pytest.warns(UserWarning, match = warn_msg):
+        (
+            f"{series_not_in_transformer_series} not present in `transformer_series`."
+            f" No transformation is applied to these series."
+        )
+    )
+    with pytest.warns(UserWarning, match=warn_msg):
         forecaster.create_train_X_y(series=series)
-
 
 
 def test_create_train_X_y_ValueError_when_all_series_values_are_missing():
     """
     Test ValueError is raised when all series values are missing.
     """
-    series = pd.DataFrame({'1': pd.Series(np.arange(7)), 
-                           '2': pd.Series([np.nan]*7)})
-    series.index = pd.date_range(start='2022-01-01', periods=7, freq='1D')
-    
+    series = pd.DataFrame({"1": pd.Series(np.arange(7)), "2": pd.Series([np.nan] * 7)})
+    series.index = pd.date_range(start="2022-01-01", periods=7, freq="1D")
+
     err_msg = re.escape("`y` has missing values.")
-    with pytest.raises(ValueError, match = err_msg):
+    with pytest.raises(ValueError, match=err_msg):
         model = create_and_compile_model(
             series=series,
             lags=1,
@@ -101,24 +102,24 @@ def test_create_train_X_y_ValueError_when_all_series_values_are_missing():
             dense_units=dense_units,
             activation=activation,
             optimizer=optimizer,
-            loss=loss
+            loss=loss,
         )
         forecaster = ForecasterRnn(model, levels=levels)
         # forecaster.create_train_X_y(series=series)
 
 
-# @pytest.mark.parametrize("values", 
-#                          [[0, 1, 2, 3, 4, 5, np.nan], 
-#                           [0, 1]+[np.nan]*5, 
+# @pytest.mark.parametrize("values",
+#                          [[0, 1, 2, 3, 4, 5, np.nan],
+#                           [0, 1]+[np.nan]*5,
 #                           [np.nan, 1, 2, 3, 4, 5, np.nan],
-#                           [0, 1, np.nan, 3, np.nan, 5, 6], 
+#                           [0, 1, np.nan, 3, np.nan, 5, 6],
 #                           [np.nan, np.nan, np.nan, 3, np.nan, 5, 6]])
 # def test_create_train_X_y_ValueError_when_series_values_are_missing(values):
 #     """
 #     Test ValueError is raised when series values are missing in different
 #     locations.
 #     """
-#     series = pd.DataFrame({'1': pd.Series(values), 
+#     series = pd.DataFrame({'1': pd.Series(values),
 #                            '2': pd.Series(np.arange(7))})
 #     series.index = pd.date_range(start='2022-01-01', periods=7, freq='1D')
 #     forecaster = ForecasterRnn(LinearRegression(), lags=5)
@@ -135,10 +136,10 @@ def test_create_train_X_y_ValueError_when_all_series_values_are_missing():
 
 # def test_create_train_X_y_output_when_series_and_exog_is_None():
 #     """
-#     Test the output of create_train_X_y when series has 2 columns and 
+#     Test the output of create_train_X_y when series has 2 columns and
 #     exog is None.
 #     """
-#     series = pd.DataFrame({'1': pd.Series(np.arange(7, dtype=float)), 
+#     series = pd.DataFrame({'1': pd.Series(np.arange(7, dtype=float)),
 #                            '2': pd.Series(np.arange(7, dtype=float))})
 #     forecaster = ForecasterRnn(LinearRegression(), lags=3)
 
@@ -175,15 +176,15 @@ def test_create_train_X_y_ValueError_when_all_series_values_are_missing():
 #             np.testing.assert_array_equal(results[i], expected[i])
 
 
-# @pytest.mark.parametrize("dtype", 
-#                          [float, int], 
+# @pytest.mark.parametrize("dtype",
+#                          [float, int],
 #                          ids = lambda dt : f'dtype: {dt}')
 # def test_create_train_X_y_output_when_series_10_and_exog_is_series_of_float_int(dtype):
 #     """
-#     Test the output of create_train_X_y when series has 2 columns and 
+#     Test the output of create_train_X_y when series has 2 columns and
 #     exog is a pandas series of floats or ints.
 #     """
-#     series = pd.DataFrame({'1': pd.Series(np.arange(10, dtype=float)), 
+#     series = pd.DataFrame({'1': pd.Series(np.arange(10, dtype=float)),
 #                            '2': pd.Series(np.arange(10, dtype=float))})
 #     exog = pd.Series(np.arange(100, 110), name='exog', dtype=dtype)
 
@@ -203,7 +204,7 @@ def test_create_train_X_y_ValueError_when_all_series_values_are_missing():
 #                              [7., 6., 5., 4., 3., 108., 0., 1.],
 #                              [8., 7., 6., 5., 4., 109., 0., 1.]]),
 #             index   = pd.RangeIndex(start=0, stop=10, step=1),
-#             columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 
+#             columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5',
 #                        'exog', '1', '2']
 #         ).astype({'exog': dtype}),
 #         pd.Series(
@@ -225,21 +226,21 @@ def test_create_train_X_y_ValueError_when_all_series_values_are_missing():
 #             np.testing.assert_array_equal(results[i], expected[i])
 
 
-# @pytest.mark.parametrize("dtype", 
-#                          [float, int], 
+# @pytest.mark.parametrize("dtype",
+#                          [float, int],
 #                          ids = lambda dt : f'dtype: {dt}')
 # def test_create_train_X_y_output_when_series_10_and_exog_is_dataframe_of_float_int(dtype):
 #     """
-#     Test the output of create_train_X_y when series has 2 columns and 
+#     Test the output of create_train_X_y when series has 2 columns and
 #     exog is a pandas dataframe with two columns of floats or ints.
 #     """
-#     series = pd.DataFrame({'1': pd.Series(np.arange(10, dtype=float)), 
+#     series = pd.DataFrame({'1': pd.Series(np.arange(10, dtype=float)),
 #                            '2': pd.Series(np.arange(10, dtype=float))})
 #     exog = pd.DataFrame({'exog_1': np.arange(100, 110, dtype=dtype),
 #                          'exog_2': np.arange(1000, 1010, dtype=dtype)})
 
 #     forecaster = ForecasterRnn(LinearRegression(), lags=5)
-#     results = forecaster.create_train_X_y(series=series, exog=exog)    
+#     results = forecaster.create_train_X_y(series=series, exog=exog)
 
 #     expected = (
 #         pd.DataFrame(
@@ -254,7 +255,7 @@ def test_create_train_X_y_ValueError_when_all_series_values_are_missing():
 #                              [7., 6., 5., 4., 3., 108., 1008., 0., 1.],
 #                              [8., 7., 6., 5., 4., 109., 1009., 0., 1.]]),
 #             index   = pd.RangeIndex(start=0, stop=10, step=1),
-#             columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 
+#             columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5',
 #                        'exog_1', 'exog_2', '1', '2']
 #         ).astype({'exog_1': dtype, 'exog_2': dtype}),
 #         pd.Series(
@@ -276,16 +277,16 @@ def test_create_train_X_y_ValueError_when_all_series_values_are_missing():
 #             np.testing.assert_array_equal(results[i], expected[i])
 
 
-# @pytest.mark.parametrize("exog_values, dtype", 
-#                          [([True]    , bool), 
-#                           (['string'], str)], 
+# @pytest.mark.parametrize("exog_values, dtype",
+#                          [([True]    , bool),
+#                           (['string'], str)],
 #                          ids = lambda dt : f'values, dtype: {dt}')
 # def test_create_train_X_y_output_when_series_10_and_exog_is_series_of_bool_str(exog_values, dtype):
 #     """
-#     Test the output of create_train_X_y when series has 2 columns and 
+#     Test the output of create_train_X_y when series has 2 columns and
 #     exog is a pandas series of bool or str.
 #     """
-#     series = pd.DataFrame({'l1': pd.Series(np.arange(10, dtype=float)), 
+#     series = pd.DataFrame({'l1': pd.Series(np.arange(10, dtype=float)),
 #                            'l2': pd.Series(np.arange(10, dtype=float))})
 #     exog = pd.Series(exog_values*10, name='exog', dtype=dtype)
 
@@ -306,8 +307,8 @@ def test_create_train_X_y_ValueError_when_all_series_values_are_missing():
 #                              [8., 7., 6., 5., 4.]]),
 #             index   = pd.RangeIndex(start=0, stop=10, step=1),
 #             columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5']
-#         ).assign(exog = exog_values*5 + exog_values*5, 
-#                  l1   = [1.]*5 + [0.]*5, 
+#         ).assign(exog = exog_values*5 + exog_values*5,
+#                  l1   = [1.]*5 + [0.]*5,
 #                  l2   = [0.]*5 + [1.]*5).astype({'exog': dtype}),
 #         pd.Series(
 #             data  = np.array([5, 6, 7, 8, 9, 5, 6, 7, 8, 9]),
@@ -328,22 +329,22 @@ def test_create_train_X_y_ValueError_when_all_series_values_are_missing():
 #             np.testing.assert_array_equal(results[i], expected[i])
 
 
-# @pytest.mark.parametrize("v_exog_1   , v_exog_2  , dtype", 
-#                          [([True]    , [False]   , bool), 
-#                           (['string'], ['string'], str)], 
+# @pytest.mark.parametrize("v_exog_1   , v_exog_2  , dtype",
+#                          [([True]    , [False]   , bool),
+#                           (['string'], ['string'], str)],
 #                          ids = lambda dt : f'values, dtype: {dt}')
 # def test_create_train_X_y_output_when_series_10_and_exog_is_dataframe_of_bool_str(v_exog_1, v_exog_2, dtype):
 #     """
-#     Test the output of create_train_X_y when series has 2 columns and 
+#     Test the output of create_train_X_y when series has 2 columns and
 #     exog is a pandas dataframe with two columns of bool or str.
 #     """
-#     series = pd.DataFrame({'l1': pd.Series(np.arange(10, dtype=float)), 
+#     series = pd.DataFrame({'l1': pd.Series(np.arange(10, dtype=float)),
 #                            'l2': pd.Series(np.arange(10, dtype=float))})
 #     exog = pd.DataFrame({'exog_1': v_exog_1*10,
 #                          'exog_2': v_exog_2*10})
 
 #     forecaster = ForecasterRnn(LinearRegression(), lags=5)
-#     results = forecaster.create_train_X_y(series=series, exog=exog)    
+#     results = forecaster.create_train_X_y(series=series, exog=exog)
 
 #     expected = (
 #         pd.DataFrame(
@@ -359,10 +360,10 @@ def test_create_train_X_y_ValueError_when_all_series_values_are_missing():
 #                              [8., 7., 6., 5., 4.]]),
 #             index   = pd.RangeIndex(start=0, stop=10, step=1),
 #             columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5']
-#         ).assign(exog_1 = v_exog_1*5 + v_exog_1*5, 
-#                  exog_2 = v_exog_2*5 + v_exog_2*5, 
-#                  l1     = [1.]*5 + [0.]*5, 
-#                  l2     = [0.]*5 + [1.]*5).astype({'exog_1': dtype, 
+#         ).assign(exog_1 = v_exog_1*5 + v_exog_1*5,
+#                  exog_2 = v_exog_2*5 + v_exog_2*5,
+#                  l1     = [1.]*5 + [0.]*5,
+#                  l2     = [0.]*5 + [1.]*5).astype({'exog_1': dtype,
 #                                                    'exog_2': dtype}),
 #         pd.Series(
 #             data  = np.array([5, 6, 7, 8, 9, 5, 6, 7, 8, 9]),
@@ -385,15 +386,15 @@ def test_create_train_X_y_ValueError_when_all_series_values_are_missing():
 
 # def test_create_train_X_y_output_when_series_10_and_exog_is_series_of_category():
 #     """
-#     Test the output of create_train_X_y when series has 2 columns and 
+#     Test the output of create_train_X_y when series has 2 columns and
 #     exog is a pandas series of category.
 #     """
-#     series = pd.DataFrame({'l1': pd.Series(np.arange(10, dtype=float)), 
+#     series = pd.DataFrame({'l1': pd.Series(np.arange(10, dtype=float)),
 #                            'l2': pd.Series(np.arange(10, dtype=float))})
 #     exog = pd.Series(range(10), name='exog', dtype='category')
 
 #     forecaster = ForecasterRnn(LinearRegression(), lags=5)
-#     results = forecaster.create_train_X_y(series=series, exog=exog)   
+#     results = forecaster.create_train_X_y(series=series, exog=exog)
 
 #     expected = (
 #         pd.DataFrame(
@@ -409,8 +410,8 @@ def test_create_train_X_y_ValueError_when_all_series_values_are_missing():
 #                              [8., 7., 6., 5., 4.]]),
 #             index   = pd.RangeIndex(start=0, stop=10, step=1),
 #             columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5']
-#         ).assign(exog = pd.Categorical([5, 6, 7, 8, 9]*2, categories=range(10)), 
-#                  l1   = [1.]*5 + [0.]*5, 
+#         ).assign(exog = pd.Categorical([5, 6, 7, 8, 9]*2, categories=range(10)),
+#                  l1   = [1.]*5 + [0.]*5,
 #                  l2   = [0.]*5 + [1.]*5),
 #         pd.Series(
 #             data  = np.array([5, 6, 7, 8, 9, 5, 6, 7, 8, 9]),
@@ -433,16 +434,16 @@ def test_create_train_X_y_ValueError_when_all_series_values_are_missing():
 
 # def test_create_train_X_y_output_when_series_10_and_exog_is_dataframe_of_category():
 #     """
-#     Test the output of create_train_X_y when series has 2 columns and 
+#     Test the output of create_train_X_y when series has 2 columns and
 #     exog is a pandas dataframe with two columns of category.
 #     """
-#     series = pd.DataFrame({'l1': pd.Series(np.arange(10, dtype=float)), 
+#     series = pd.DataFrame({'l1': pd.Series(np.arange(10, dtype=float)),
 #                            'l2': pd.Series(np.arange(10, dtype=float))})
 #     exog = pd.DataFrame({'exog_1': pd.Categorical(range(10)),
 #                          'exog_2': pd.Categorical(range(100, 110))})
 
 #     forecaster = ForecasterRnn(LinearRegression(), lags=5)
-#     results = forecaster.create_train_X_y(series=series, exog=exog)   
+#     results = forecaster.create_train_X_y(series=series, exog=exog)
 
 #     expected = (
 #         pd.DataFrame(
@@ -459,8 +460,8 @@ def test_create_train_X_y_ValueError_when_all_series_values_are_missing():
 #             index   = pd.RangeIndex(start=0, stop=10, step=1),
 #             columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5']
 #         ).assign(exog_1 = pd.Categorical([5, 6, 7, 8, 9]*2, categories=range(10)),
-#                  exog_2 = pd.Categorical([105, 106, 107, 108, 109]*2, categories=range(100, 110)), 
-#                  l1     = [1.]*5 + [0.]*5, 
+#                  exog_2 = pd.Categorical([105, 106, 107, 108, 109]*2, categories=range(100, 110)),
+#                  l1     = [1.]*5 + [0.]*5,
 #                  l2     = [0.]*5 + [1.]*5),
 #         pd.Series(
 #             data  = np.array([5, 6, 7, 8, 9, 5, 6, 7, 8, 9]),
@@ -483,17 +484,17 @@ def test_create_train_X_y_ValueError_when_all_series_values_are_missing():
 
 # def test_create_train_X_y_output_when_series_10_and_exog_is_dataframe_of_float_int_category():
 #     """
-#     Test the output of create_train_X_y when series has 2 columns and 
+#     Test the output of create_train_X_y when series has 2 columns and
 #     exog is a pandas dataframe with two columns of float, int, category.
 #     """
-#     series = pd.DataFrame({'l1': pd.Series(np.arange(10, dtype=float)), 
+#     series = pd.DataFrame({'l1': pd.Series(np.arange(10, dtype=float)),
 #                            'l2': pd.Series(np.arange(10, dtype=float))})
 #     exog = pd.DataFrame({'exog_1': pd.Series(np.arange(100, 110), dtype=float),
 #                          'exog_2': pd.Series(np.arange(1000, 1010), dtype=int),
 #                          'exog_3': pd.Categorical(range(100, 110))})
 
 #     forecaster = ForecasterRnn(LinearRegression(), lags=5)
-#     results = forecaster.create_train_X_y(series=series, exog=exog)   
+#     results = forecaster.create_train_X_y(series=series, exog=exog)
 
 #     expected = (
 #         pd.DataFrame(
@@ -509,11 +510,11 @@ def test_create_train_X_y_ValueError_when_all_series_values_are_missing():
 #                              [8., 7., 6., 5., 4., 109., 1009.]],
 #                              dtype=float),
 #             index   = pd.RangeIndex(start=0, stop=10, step=1),
-#             columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 
+#             columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5',
 #                        'exog_1', 'exog_2']
-#         ).assign(exog_3 = pd.Categorical([105, 106, 107, 108, 109]*2, categories=range(100, 110)), 
-#                  l1     = [1.]*5 + [0.]*5, 
-#                  l2     = [0.]*5 + [1.]*5).astype({'exog_1': float, 
+#         ).assign(exog_3 = pd.Categorical([105, 106, 107, 108, 109]*2, categories=range(100, 110)),
+#                  l1     = [1.]*5 + [0.]*5,
+#                  l2     = [0.]*5 + [1.]*5).astype({'exog_1': float,
 #                                                    'exog_2': int}),
 #         pd.Series(
 #             data  = np.array([5, 6, 7, 8, 9, 5, 6, 7, 8, 9]),
@@ -536,16 +537,16 @@ def test_create_train_X_y_ValueError_when_all_series_values_are_missing():
 
 # def test_create_train_X_y_output_when_series_and_exog_is_dataframe_datetime_index():
 #     """
-#     Test the output of create_train_X_y when series has 2 columns and 
+#     Test the output of create_train_X_y when series has 2 columns and
 #     exog is a pandas dataframe with two columns and datetime index.
 #     """
-#     series = pd.DataFrame({'1': np.arange(7, dtype=float), 
+#     series = pd.DataFrame({'1': np.arange(7, dtype=float),
 #                            '2': np.arange(7, dtype=float)},
 #                            index = pd.date_range("1990-01-01", periods=7, freq='D'))
 #     exog = pd.DataFrame({'exog_1' : np.arange(100, 107, dtype=float),
 #                          'exog_2' : np.arange(1000, 1007, dtype=float)},
 #                         index = pd.date_range("1990-01-01", periods=7, freq='D'))
-                         
+
 #     forecaster = ForecasterRnn(LinearRegression(), lags=3)
 #     results = forecaster.create_train_X_y(series=series, exog=exog)
 
@@ -569,7 +570,7 @@ def test_create_train_X_y_ValueError_when_all_series_values_are_missing():
 #             dtype = float
 #         ),
 #         pd.date_range("1990-01-01", periods=7, freq='D'),
-#         pd.Index(pd.DatetimeIndex(['1990-01-04', '1990-01-05', '1990-01-06', '1990-01-07', 
+#         pd.Index(pd.DatetimeIndex(['1990-01-04', '1990-01-05', '1990-01-06', '1990-01-07',
 #                                    '1990-01-04', '1990-01-05', '1990-01-06', '1990-01-07']))
 #     )
 
@@ -587,7 +588,7 @@ def test_create_train_X_y_ValueError_when_all_series_values_are_missing():
 #     Test the output of create_train_X_y when exog is None and transformer_series
 #     is StandardScaler.
 #     """
-#     series = pd.DataFrame({'l1': pd.Series(np.arange(10, dtype=float)), 
+#     series = pd.DataFrame({'l1': pd.Series(np.arange(10, dtype=float)),
 #                            'l2': pd.Series(np.arange(10, dtype=float))})
 #     forecaster = ForecasterRnn(
 #                     regressor          = LinearRegression(),
@@ -636,7 +637,7 @@ def test_create_train_X_y_ValueError_when_all_series_values_are_missing():
 #     Test the output of create_train_X_y when exog is None and transformer_exog
 #     is not None.
 #     """
-#     series = pd.DataFrame({'1': pd.Series(np.arange(7, dtype=float)), 
+#     series = pd.DataFrame({'1': pd.Series(np.arange(7, dtype=float)),
 #                            '2': pd.Series(np.arange(7, dtype=float))})
 #     forecaster = ForecasterRnn(
 #                      regressor        = LinearRegression(),
@@ -677,16 +678,16 @@ def test_create_train_X_y_ValueError_when_all_series_values_are_missing():
 #             np.testing.assert_array_equal(results[i], expected[i])
 
 
-# @pytest.mark.parametrize("transformer_series", 
+# @pytest.mark.parametrize("transformer_series",
 #                          [StandardScaler(),
-#                           {'1': StandardScaler(), '2': StandardScaler()}], 
+#                           {'1': StandardScaler(), '2': StandardScaler()}],
 #                          ids = lambda tr : f'transformer_series type: {type(tr)}')
 # def test_create_train_X_y_output_when_transformer_series_and_transformer_exog(transformer_series):
 #     """
-#     Test the output of create_train_X_y when using transformer_series and 
+#     Test the output of create_train_X_y when using transformer_series and
 #     transformer_exog.
 #     """
-#     series = pd.DataFrame({'1': np.arange(10, dtype=float), 
+#     series = pd.DataFrame({'1': np.arange(10, dtype=float),
 #                            '2': np.arange(10, dtype=float)},
 #                            index = pd.date_range("1990-01-01", periods=10, freq='D'))
 #     exog = pd.DataFrame({
@@ -739,7 +740,7 @@ def test_create_train_X_y_ValueError_when_all_series_values_are_missing():
 #             dtype = float
 #         ),
 #         pd.date_range("1990-01-01", periods=10, freq='D'),
-#         pd.Index(pd.DatetimeIndex(['1990-01-04', '1990-01-05', '1990-01-06', '1990-01-07', 
+#         pd.Index(pd.DatetimeIndex(['1990-01-04', '1990-01-05', '1990-01-06', '1990-01-07',
 #                                    '1990-01-08', '1990-01-09', '1990-01-10', '1990-01-04',
 #                                    '1990-01-05', '1990-01-06', '1990-01-07', '1990-01-08',
 #                                    '1990-01-09', '1990-01-10']))
@@ -756,10 +757,10 @@ def test_create_train_X_y_ValueError_when_all_series_values_are_missing():
 
 # def test_create_train_X_y_output_when_series_different_length_and_exog_is_dataframe_of_float_int_category():
 #     """
-#     Test the output of create_train_X_y when series has 2 columns with different 
+#     Test the output of create_train_X_y when series has 2 columns with different
 #     lengths and exog is a pandas dataframe with two columns of float, int, category.
 #     """
-#     series = pd.DataFrame({'l1': pd.Series(np.arange(10, dtype=float)), 
+#     series = pd.DataFrame({'l1': pd.Series(np.arange(10, dtype=float)),
 #                            'l2': pd.Series([np.nan, np.nan, 2., 3., 4., 5., 6., 7., 8., 9.])})
 #     series.index = pd.date_range("1990-01-01", periods=10, freq='D')
 #     exog = pd.DataFrame({'exog_1': pd.Series(np.arange(100, 110), dtype=float),
@@ -768,7 +769,7 @@ def test_create_train_X_y_ValueError_when_all_series_values_are_missing():
 #     exog.index = pd.date_range("1990-01-01", periods=10, freq='D')
 
 #     forecaster = ForecasterRnn(LinearRegression(), lags=5)
-#     results = forecaster.create_train_X_y(series=series, exog=exog)   
+#     results = forecaster.create_train_X_y(series=series, exog=exog)
 
 #     expected = (
 #         pd.DataFrame(
@@ -782,13 +783,13 @@ def test_create_train_X_y_ValueError_when_all_series_values_are_missing():
 #                              [8., 7., 6., 5., 4., 109., 1009.]],
 #                              dtype=float),
 #             index   = pd.RangeIndex(start=0, stop=8, step=1),
-#             columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 
+#             columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5',
 #                        'exog_1', 'exog_2']
-#         ).assign(exog_3 = pd.Categorical([105, 106, 107, 108, 109, 
-#                                           107, 108, 109], categories=range(100, 110)), 
-#                  l1     = [1.]*5 + [0.]*3, 
+#         ).assign(exog_3 = pd.Categorical([105, 106, 107, 108, 109,
+#                                           107, 108, 109], categories=range(100, 110)),
+#                  l1     = [1.]*5 + [0.]*3,
 #                  l2     = [0.]*5 + [1.]*3
-#         ).astype({'exog_1': float, 
+#         ).astype({'exog_1': float,
 #                   'exog_2': int}
 #         ),
 #         pd.Series(
@@ -813,19 +814,19 @@ def test_create_train_X_y_ValueError_when_all_series_values_are_missing():
 #             np.testing.assert_array_equal(results[i], expected[i])
 
 
-# @pytest.mark.parametrize("transformer_series", 
+# @pytest.mark.parametrize("transformer_series",
 #                          [StandardScaler(),
-#                           {'l1': StandardScaler(), 'l2': StandardScaler(), 'l3': StandardScaler()}], 
+#                           {'l1': StandardScaler(), 'l2': StandardScaler(), 'l3': StandardScaler()}],
 #                          ids = lambda tr : f'transformer_series type: {type(tr)}')
 # def test_create_train_X_y_output_when_transformer_series_and_transformer_exog_with_different_series_lengths(transformer_series):
 #     """
-#     Test the output of create_train_X_y when using transformer_series and 
+#     Test the output of create_train_X_y when using transformer_series and
 #     transformer_exog with series with different lengths.
 #     """
-#     series = pd.DataFrame({'l1': np.arange(10, dtype=float), 
-#                            'l2': pd.Series([np.nan, np.nan, 
-#                                             2., 3., 4., 5., 6., 7., 8., 9.]), 
-#                            'l3': pd.Series([np.nan, np.nan, np.nan, np.nan, 
+#     series = pd.DataFrame({'l1': np.arange(10, dtype=float),
+#                            'l2': pd.Series([np.nan, np.nan,
+#                                             2., 3., 4., 5., 6., 7., 8., 9.]),
+#                            'l3': pd.Series([np.nan, np.nan, np.nan, np.nan,
 #                                             4., 5., 6., 7., 8., 9.])})
 #     series.index = pd.date_range("1990-01-01", periods=10, freq='D')
 #     exog = pd.DataFrame({
@@ -871,8 +872,8 @@ def test_create_train_X_y_ValueError_when_all_series_values_are_missing():
 #                        'exog_2_a', 'exog_2_b', 'l1', 'l2', 'l3']
 #         ),
 #         pd.Series(
-#             data  = np.array([-0.5222329678670935, -0.17407765595569785, 0.17407765595569785, 0.5222329678670935, 0.8703882797784892, 1.2185435916898848, 1.5666989036012806, 
-#                               -0.2182178902359924, 0.2182178902359924, 0.6546536707079772, 1.091089451179962, 1.5275252316519468, 
+#             data  = np.array([-0.5222329678670935, -0.17407765595569785, 0.17407765595569785, 0.5222329678670935, 0.8703882797784892, 1.2185435916898848, 1.5666989036012806,
+#                               -0.2182178902359924, 0.2182178902359924, 0.6546536707079772, 1.091089451179962, 1.5275252316519468,
 #                               0.29277002188455997, 0.8783100656536799, 1.4638501094227998]),
 #             index = pd.RangeIndex(start=0, stop=15, step=1),
 #             name  = 'y',

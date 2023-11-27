@@ -9,7 +9,7 @@ from typing import Union, Any, Optional, Tuple, Callable
 import pandas as pd
 import re
 from ..utils import check_optional_dependency
- 
+
 try:
     import tensorflow as tf
     from tensorflow import keras
@@ -21,6 +21,7 @@ except Exception as e:
     package_name = str(e).split(" ")[-1].replace("'", "")
     check_optional_dependency(package_name=package_name)
 
+
 def create_and_compile_model(
     series: pd.DataFrame,
     lags: Union[int, list],
@@ -31,8 +32,8 @@ def create_and_compile_model(
     dense_units: Union[list, int] = 64,
     activation: str = "relu",
     optimizer: object = Adam(learning_rate=0.01),
-    loss: object = MeanSquaredError(), 
-    compile_kwars: dict = {}
+    loss: object = MeanSquaredError(),
+    compile_kwars: dict = {},
 ) -> tf.keras.models.Model:
     """
     Creates a neural network model for time series prediction with flexible recurrent layers.
@@ -67,14 +68,14 @@ def create_and_compile_model(
     model : tf.keras.models.Model
         Compiled neural network model.
     """
-    
+
     err_msg = f"`series` must be a pandas DataFrame. Got {type(series)}."
-    
+
     if not isinstance(series, pd.DataFrame):
         raise TypeError(err_msg)
-        
+
     n_series = series.shape[1]
-    
+
     # Dense units must be a list or int
     if not isinstance(dense_units, (list, int)):
         raise TypeError(
@@ -82,7 +83,7 @@ def create_and_compile_model(
         )
     if isinstance(dense_units, int):
         dense_units = [dense_units]
-        
+
     # Recurrent units must be a list or int
     if not isinstance(recurrent_units, (list, int)):
         raise TypeError(
@@ -90,22 +91,17 @@ def create_and_compile_model(
         )
     if isinstance(recurrent_units, int):
         recurrent_units = [recurrent_units]
-        
+
     # Lags, steps and levels must be int or list
     if not isinstance(lags, (int, list)):
-        raise TypeError(
-            f"`lags` argument must be a list or int. Got {type(lags)}."
-        )
+        raise TypeError(f"`lags` argument must be a list or int. Got {type(lags)}.")
     if not isinstance(steps, (int, list)):
-        raise TypeError(
-            f"`steps` argument must be a list or int. Got {type(steps)}."
-        )
+        raise TypeError(f"`steps` argument must be a list or int. Got {type(steps)}.")
     if not isinstance(levels, (str, int, list, type(None))):
         raise TypeError(
             f"`levels` argument must be a string, list or int. Got {type(levels)}."
         )
-    
-        
+
     if isinstance(lags, list):
         lags = len(lags)
     if isinstance(steps, list):
@@ -170,7 +166,7 @@ def create_and_compile_model(
         if "loss" in compile_kwars.keys():
             compile_kwars.pop("loss")
             print("Warning: loss passed in compile_kwars. Ignoring it.")
-        
-        model.compile(optimizer=optimizer, loss=loss, **compile_kwars)    
+
+        model.compile(optimizer=optimizer, loss=loss, **compile_kwars)
 
     return model
