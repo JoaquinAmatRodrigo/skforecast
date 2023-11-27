@@ -7,14 +7,19 @@
 
 from typing import Union, Any, Optional, Tuple, Callable
 import pandas as pd
-
-import tensorflow as tf
-from tensorflow import keras
-from keras.models import Model
-from keras.layers import Dense, Input, Reshape, LSTM, SimpleRNN
-from keras.optimizers import Adam
-from keras.losses import MeanSquaredError
-
+import re
+from ..utils import check_optional_dependency
+ 
+try:
+    import tensorflow as tf
+    from tensorflow import keras
+    from keras.models import Model
+    from keras.layers import Dense, Input, Reshape, LSTM, SimpleRNN
+    from keras.optimizers import Adam
+    from keras.losses import MeanSquaredError
+except Exception as e:
+    package_name = str(e).split(" ")[-1].replace("'", "")
+    check_optional_dependency(package_name=package_name)
 
 def create_and_compile_model(
     series: pd.DataFrame,
@@ -23,7 +28,7 @@ def create_and_compile_model(
     levels: Union[str, int, list] = None,
     recurrent_layer: str = "LSTM",
     recurrent_units: Union[int, list] = 100,
-    dense_units: Union[list, int] = [64],
+    dense_units: Union[list, int] = 64,
     activation: str = "relu",
     optimizer: object = Adam(learning_rate=0.01),
     loss: object = MeanSquaredError(), 
@@ -62,7 +67,12 @@ def create_and_compile_model(
     model : tf.keras.models.Model
         Compiled neural network model.
     """
-
+    
+    err_msg = f"`series` must be a pandas DataFrame. Got {type(series)}."
+    
+    if not isinstance(series, pd.DataFrame):
+        raise TypeError(err_msg)
+        
     n_series = series.shape[1]
     
     # Dense units must be a list or int
