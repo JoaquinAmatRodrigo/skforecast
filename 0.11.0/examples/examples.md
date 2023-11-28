@@ -26,6 +26,8 @@
 
 <i class="fa-solid fa-wave-square" style="color: #fbbb09;"></i> [**Intermittent demand forecasting**](https://www.cienciadedatos.net/documentos/py48-intermittent-demand-forecasting.html)
 
+<i class="fa-solid fa-layer-group" style="color: #001633;"></i> [**Stacking ensemble of machine learning models to improve forecasting**](https://cienciadedatos.net/documentos/py52-stacking-ensemble-models-forecasting.html)
+
 
 <br>
 

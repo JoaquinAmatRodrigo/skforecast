@@ -211,11 +211,6 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://joaquinamatrodrigo.github.io/skforecast/0.11.0/user_guides/feature-importances.html</loc>
-         <lastmod>2023-11-28</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
          <loc>https://joaquinamatrodrigo.github.io/skforecast/0.11.0/user_guides/forecaster-in-production.html</loc>
          <lastmod>2023-11-28</lastmod>
          <changefreq>daily</changefreq>
