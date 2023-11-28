@@ -5,6 +5,7 @@ import numpy as np
 import tensorflow as tf
 from tensorflow import keras
 from keras.losses import MeanSquaredError
+from keras.optimizers import Adam
 import pytest
 
 
@@ -27,8 +28,8 @@ def test_init(levels):
     recurrent_units = 100
     dense_units = [64]
     activation = "relu"
-    optimizer = tf.keras.optimizers.Adam(learning_rate=0.01)
-    loss = tf.keras.losses.MeanSquaredError()
+    optimizer = Adam(learning_rate=0.01)
+    loss = MeanSquaredError()
 
     # Call the function to create and compile the model
     model = create_and_compile_model(
