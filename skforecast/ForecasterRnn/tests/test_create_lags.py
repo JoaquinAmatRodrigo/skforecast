@@ -17,8 +17,6 @@ loss = tf.keras.losses.MeanSquaredError()
 recurrent_units = 100
 dense_units = [128, 64]
 
-
-
 def test_check_create_lags_exception_when_n_splits_less_than_0():
     """
     Check exception is raised when n_splits in _create_lags is less than 0.
@@ -89,10 +87,9 @@ def test_check_create_lags_exception_when_n_splits_less_than_0():
                 )),
     ]
 )    
-def test_create_lags_when_lags_is_3_steps_1_and_y_is_numpy_arange_10(lags, steps, expected):
+def test_create_lags_several_configurations(lags, steps, expected):
     """
-    Test matrix of lags created properly when lags is 3, steps is 1 and y is
-    np.arange(10).
+    Test matrix of lags created with different configurations.
     """
     series = pd.DataFrame(np.arange(10), columns=['l1'])
     model = create_and_compile_model(
