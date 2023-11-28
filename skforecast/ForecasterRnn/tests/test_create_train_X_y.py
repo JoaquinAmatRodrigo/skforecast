@@ -14,7 +14,7 @@ from sklearn.preprocessing import OneHotEncoder
 
 
 series = pd.DataFrame(np.random.randn(100, 3))
-lags = 10
+lags = 3
 steps = 1
 levels = "1"
 activation = "relu"
