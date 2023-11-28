@@ -42,7 +42,6 @@ nav:
       - Hyperparameter tuning and lags selection: user_guides/hyperparameter-tuning-and-lags-selection.ipynb
       - Scikit-learn Transformers and Pipelines: user_guides/sklearn-transformers-and-pipeline.ipynb
       - Probabilistic forecasting: user_guides/probabilistic-forecasting.ipynb
-      - Feature importances: user_guides/feature-importances.ipynb
       - Categorical features: user_guides/categorical-features.ipynb
       - Calendars features: user_guides/calendar-features.ipynb
       - Forecasting with XGBoost and LightGBM: user_guides/forecasting-xgboost-lightgbm.ipynb
