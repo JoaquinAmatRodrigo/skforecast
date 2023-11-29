@@ -1287,7 +1287,8 @@ def transform_dataframe(
 
 def save_forecaster(
     forecaster, 
-    file_name: str, 
+    file_name: str,
+    save_custom_functions: bool=True, 
     verbose: bool=True
 ) -> None:
     """
@@ -1299,6 +1300,10 @@ def save_forecaster(
         Forecaster created with skforecast library.
     file_name: str
         File name given to the object.
+    save_custom_functions: bool, default `True`
+        If True, save custom functions used in the forecaster (fun_predictors and
+        weight_func) as .py files. Custom functions need to be defined in the
+        environment where the forecaster is going to be loaded.
     verbose: bool, default `True`
         Print summary about the forecaster saved.
 
@@ -1309,6 +1314,15 @@ def save_forecaster(
     """
 
     joblib.dump(forecaster, filename=file_name)
+
+    if hasattr(forecaster, 'fun_predictors') and forecaster.fun_predictors is not None:
+        file_name = forecaster.fun_predictors.__name__ + '.py'
+        with open(file_name, 'w') as file:
+            file.write(inspect.getsource(forecaster.fun_predictors))
+    if hasattr(forecaster, 'weight_func') and forecaster.weight_func is not None:
+        file_name = forecaster.weight_func.__name__ + '.py'
+        with open(file_name, 'w') as file:
+            file.write(inspect.getsource(forecaster.weight_func))
 
     if verbose:
         forecaster.summary()
