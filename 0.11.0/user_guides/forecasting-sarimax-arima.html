@@ -1135,6 +1135,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#prediction-on-training-data-in-sample-predictions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Prediction on training data (In-sample Predictions)
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2327,6 +2336,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#prediction-on-training-data-in-sample-predictions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Prediction on training data (In-sample Predictions)
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -3076,10 +3094,10 @@ arima_res.summary()</div>
 <th>Model:</th> <td>SARIMAX(1, 1, 1)</td> <th>  Log Likelihood     </th> <td>89.934</td>
 </tr>
 <tr>
-<th>Date:</th> <td>Sat, 09 Sep 2023</td> <th>  AIC                </th> <td>-173.869</td>
+<th>Date:</th> <td>Wed, 29 Nov 2023</td> <th>  AIC                </th> <td>-173.869</td>
 </tr>
 <tr>
-<th>Time:</th> <td>16:56:02</td> <th>  BIC                </th> <td>-164.681</td>
+<th>Time:</th> <td>08:45:59</td> <th>  BIC                </th> <td>-164.681</td>
 </tr>
 <tr>
 <th>Sample:</th> <td>04-01-1992</td> <th>  HQIC               </th> <td>-170.137</td>
@@ -3234,10 +3252,10 @@ arima.summary()</div>
 <th>Model:</th> <td>SARIMAX(1, 1, 1)</td> <th>  Log Likelihood     </th> <td>93.643</td>
 </tr>
 <tr>
-<th>Date:</th> <td>Sat, 09 Sep 2023</td> <th>  AIC                </th> <td>-179.287</td>
+<th>Date:</th> <td>Wed, 29 Nov 2023</td> <th>  AIC                </th> <td>-179.287</td>
 </tr>
 <tr>
-<th>Time:</th> <td>16:56:02</td> <th>  BIC                </th> <td>-167.036</td>
+<th>Time:</th> <td>08:45:59</td> <th>  BIC                </th> <td>-167.036</td>
 </tr>
 <tr>
 <th>Sample:</th> <td>04-01-1992</td> <th>  HQIC               </th> <td>-174.312</td>
@@ -3395,10 +3413,10 @@ arima.summary()</div>
 <th>Model:</th> <td>SARIMAX(1, 1, 1)</td> <th>  Log Likelihood     </th> <td>89.934</td>
 </tr>
 <tr>
-<th>Date:</th> <td>Sat, 09 Sep 2023</td> <th>  AIC                </th> <td>-173.869</td>
+<th>Date:</th> <td>Wed, 29 Nov 2023</td> <th>  AIC                </th> <td>-173.869</td>
 </tr>
 <tr>
-<th>Time:</th> <td>16:56:02</td> <th>  BIC                </th> <td>-164.681</td>
+<th>Time:</th> <td>08:45:59</td> <th>  BIC                </th> <td>-164.681</td>
 </tr>
 <tr>
 <th>Sample:</th> <td>04-01-1992</td> <th>  HQIC               </th> <td>-170.137</td>
@@ -3624,8 +3642,8 @@ Exogenous variables names: None
 Training range: [Timestamp('1992-04-01 00:00:00'), Timestamp('2005-06-01 00:00:00')] 
 Training index type: DatetimeIndex 
 Training index frequency: MS 
-Creation date: 2023-09-09 16:56:02 
-Last fit date: 2023-09-09 16:56:04 
+Creation date: 2023-11-29 08:45:59 
+Last fit date: 2023-11-29 08:46:02 
 Index seen by the forecaster: DatetimeIndex(['1992-04-01', '1992-05-01', '1992-06-01', '1992-07-01',
                '1992-08-01', '1992-09-01', '1992-10-01', '1992-11-01',
                '1992-12-01', '1993-01-01',
@@ -3634,7 +3652,7 @@ Index seen by the forecaster: DatetimeIndex(['1992-04-01', '1992-05-01', '1992-0
                '2005-01-01', '2005-02-01', '2005-03-01', '2005-04-01',
                '2005-05-01', '2005-06-01'],
               dtype='datetime64[ns]', name='datetime', length=159, freq='MS') 
-Skforecast version: 0.10.0 
+Skforecast version: 0.11.0 
 Python version: 3.10.11 
 Forecaster id: None </pre>
 </div>
@@ -4985,8 +5003,8 @@ Exogenous variables names: None
 Training range: [Timestamp('1992-04-01 00:00:00'), Timestamp('2006-01-01 00:00:00')] 
 Training index type: DatetimeIndex 
 Training index frequency: MS 
-Creation date: 2023-09-09 16:56:27 
-Last fit date: 2023-09-09 16:56:49 
+Creation date: 2023-11-29 08:46:23 
+Last fit date: 2023-11-29 08:46:45 
 Index seen by the forecaster: DatetimeIndex(['1992-04-01', '1992-05-01', '1992-06-01', '1992-07-01',
                '1992-08-01', '1992-09-01', '1992-10-01', '1992-11-01',
                '1992-12-01', '1993-01-01',
@@ -4995,9 +5013,170 @@ Index seen by the forecaster: DatetimeIndex(['1992-04-01', '1992-05-01', '1992-0
                '2005-08-01', '2005-09-01', '2005-10-01', '2005-11-01',
                '2005-12-01', '2006-01-01'],
               dtype='datetime64[ns]', name='datetime', length=166, freq='MS') 
-Skforecast version: 0.10.0 
+Skforecast version: 0.11.0 
 Python version: 3.10.11 
 Forecaster id: None </pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=7c69da6d">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h2 id="prediction-on-training-data-in-sample-predictions">Prediction on training data (In-sample Predictions)<a class="anchor-link" href="#prediction-on-training-data-in-sample-predictions">¶</a></h2><p>Predictions on the training data are crucial for evaluating the accuracy and effectiveness of the model. By comparing the predicted values wtih the actual observed values in the training dataset, you can assess how well the model has learned the underlying patterns and trends in the data. This comparison helps in understanding the model's performance and identify areas where it may need improvement or adjustment. In essence, they act as a mirror, reflecting how the model interprets and reconstructs the historical data on which it was trained.</p>
+<p>The <a href="https://www.statsmodels.org/dev/generated/statsmodels.tsa.statespace.sarimax.SARIMAXResults.fittedvalues.html#statsmodels.tsa.statespace.sarimax.SARIMAXResults.fittedvalues">predictions of the fitted values</a> are stored in the <code>fittedvalues</code> attribute of the <code>SARIMAXResults</code> object. This object is stored within the <code>sarimax_res</code> attribute of the <a href="https://skforecast.org/latest/api/sarimax"><code>skforecast.Sarimax</code> model</a>:</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=8faf4107">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [24]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="CodeMirror cm-s-jupyter">
+<div class="zeroclipboard-container">
+<clipboard-copy for="cell-24">
+<div>
+<span class="notice" hidden="">Copied!</span>
+<svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
+<path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z" fill="currentColor" fill-rule="evenodd"></path>
+<path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+</div>
+</clipboard-copy>
+</div>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Create and fit ForecasterSarimax (skforecast)</span>
+<span class="c1"># ==============================================================================</span>
+<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterSarimax</span><span class="p">(</span>
+                 <span class="n">regressor</span><span class="o">=</span><span class="n">Sarimax</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">maxiter</span><span class="o">=</span><span class="mi">200</span><span class="p">),</span>
+             <span class="p">)</span>
+<span class="n">forecaster</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">data_train</span><span class="p">[</span><span class="s1">'y'</span><span class="p">],</span> <span class="n">suppress_warnings</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># In-sample Predictions</span>
+<span class="c1"># ==============================================================================</span>
+<span class="n">forecaster</span><span class="o">.</span><span class="n">regressor</span><span class="o">.</span><span class="n">sarimax_res</span><span class="o">.</span><span class="n">fittedvalues</span>
+</pre></div>
+<div class="clipboard-copy-txt" id="cell-24"># Create and fit ForecasterSarimax (skforecast)
+# ==============================================================================
+forecaster = ForecasterSarimax(
+                 regressor=Sarimax(order=(12, 1, 1), maxiter=200),
+             )
+forecaster.fit(y=data_train['y'], suppress_warnings=True)
+
+# In-sample Predictions
+# ==============================================================================
+forecaster.regressor.sarimax_res.fittedvalues</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child jp-OutputArea-executeResult">
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[24]:</div>
+<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain" tabindex="0">
+<pre>datetime
+1992-04-01    0.000000
+1992-05-01    0.379808
+1992-06-01    0.361370
+1992-07-01    0.413246
+1992-08-01    0.481038
+                ...   
+2005-02-01    0.739297
+2005-03-01    0.751038
+2005-04-01    0.716078
+2005-05-01    0.749854
+2005-06-01    0.817569
+Freq: MS, Length: 159, dtype: float64</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=4adad03d">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p>When using the <code>pmdarima.ARIMA</code> model, the statsmodels <code>SARIMAXResults</code> object is stored inside the <code>arima_res_</code> attribute:</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=eb62549c">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [25]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="CodeMirror cm-s-jupyter">
+<div class="zeroclipboard-container">
+<clipboard-copy for="cell-25">
+<div>
+<span class="notice" hidden="">Copied!</span>
+<svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
+<path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z" fill="currentColor" fill-rule="evenodd"></path>
+<path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+</div>
+</clipboard-copy>
+</div>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Create and fit ForecasterSarimax (pmdarima)</span>
+<span class="c1"># ==============================================================================</span>
+<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterSarimax</span><span class="p">(</span>
+                 <span class="n">regressor</span><span class="o">=</span><span class="n">ARIMA</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">maxiter</span><span class="o">=</span><span class="mi">200</span><span class="p">),</span>
+             <span class="p">)</span>
+<span class="n">forecaster</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">data_train</span><span class="p">[</span><span class="s1">'y'</span><span class="p">],</span> <span class="n">suppress_warnings</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># In-sample Predictions</span>
+<span class="c1"># ==============================================================================</span>
+<span class="n">forecaster</span><span class="o">.</span><span class="n">regressor</span><span class="o">.</span><span class="n">arima_res_</span><span class="o">.</span><span class="n">fittedvalues</span>
+</pre></div>
+<div class="clipboard-copy-txt" id="cell-25"># Create and fit ForecasterSarimax (pmdarima)
+# ==============================================================================
+forecaster = ForecasterSarimax(
+                 regressor=ARIMA(order=(12, 1, 1), maxiter=200),
+             )
+forecaster.fit(y=data_train['y'], suppress_warnings=True)
+
+# In-sample Predictions
+# ==============================================================================
+forecaster.regressor.arima_res_.fittedvalues</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child jp-OutputArea-executeResult">
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[25]:</div>
+<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain" tabindex="0">
+<pre>datetime
+1992-04-01    0.002797
+1992-05-01    0.382605
+1992-06-01    0.363857
+1992-07-01    0.416587
+1992-08-01    0.485223
+                ...   
+2005-02-01    0.740753
+2005-03-01    0.755807
+2005-04-01    0.725037
+2005-05-01    0.762426
+2005-06-01    0.832514
+Freq: MS, Length: 159, dtype: float64</pre>
 </div>
 </div>
 </div>
