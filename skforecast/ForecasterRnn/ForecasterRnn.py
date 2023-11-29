@@ -598,9 +598,7 @@ class ForecasterRnn(ForecasterBase):
                 )
 
         if last_window is None:
-            last_window = self.last_window.copy()
-        else:
-            last_window = last_window.iloc[-self.window_size:].copy()
+            last_window = self.last_window
 
         check_predict_input(
             forecaster_name   = type(self).__name__,
@@ -622,6 +620,8 @@ class ForecasterRnn(ForecasterBase):
             levels_forecaster = self.levels,
             series_col_names  = self.series_col_names
         )
+
+        last_window = last_window.iloc[-self.window_size:, ].copy()
 
         for serie_name in self.series_col_names:
             last_window_serie = transform_series(
@@ -712,8 +712,8 @@ class ForecasterRnn(ForecasterBase):
 
         # Showing the plot
         plt.show()
-        
-        
+
+
     # def predict_bootstrapping(
     #     self,
     #     steps: Optional[Union[int, list]] = None,
@@ -863,6 +863,7 @@ class ForecasterRnn(ForecasterBase):
     #             )
 
     #     return boot_predictions
+
 
     # def predict_interval(
     #     self,
