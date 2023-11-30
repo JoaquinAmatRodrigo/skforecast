@@ -47,7 +47,7 @@ sarimax = [
     "statsmodels>=0.12, <0.15",
 ]
 
-deep_leerning = [
+deep_learning = [
     "tensorflow>=2.12, <2.13"
 ]
 
