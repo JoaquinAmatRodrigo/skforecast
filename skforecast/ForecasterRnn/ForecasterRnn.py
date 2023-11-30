@@ -620,7 +620,8 @@ class ForecasterRnn(ForecasterBase):
             series_col_names=self.series_col_names,
         )
 
-        last_window = last_window.iloc[-self.window_size :, :].copy()
+        last_window = last_window.iloc[-self.window_size:, ].copy()
+
         for serie_name in self.series_col_names:
             last_window_serie = transform_series(
                 series=last_window[serie_name],
@@ -869,6 +870,7 @@ class ForecasterRnn(ForecasterBase):
     #             )
 
     #     return boot_predictions
+
 
     # def predict_interval(
     #     self,
