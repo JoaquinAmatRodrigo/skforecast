@@ -7,13 +7,19 @@
 
 from typing import Union, Any, Optional, Tuple, Callable
 import pandas as pd
+import re
+from ..utils import check_optional_dependency
 
-import tensorflow as tf
-from tensorflow import keras
-from keras.models import Model
-from keras.layers import Dense, Input, Reshape, LSTM, SimpleRNN
-from keras.optimizers import Adam
-from keras.losses import MeanSquaredError
+try:
+    import tensorflow as tf
+    from tensorflow import keras
+    from keras.models import Model
+    from keras.layers import Dense, Input, Reshape, LSTM, SimpleRNN
+    from keras.optimizers import Adam
+    from keras.losses import MeanSquaredError
+except Exception as e:
+    package_name = str(e).split(" ")[-1].replace("'", "")
+    check_optional_dependency(package_name=package_name)
 
 
 def create_and_compile_model(
@@ -23,11 +29,11 @@ def create_and_compile_model(
     levels: Union[str, int, list] = None,
     recurrent_layer: str = "LSTM",
     recurrent_units: Union[int, list] = 100,
-    dense_units: list = [64],
+    dense_units: Union[list, int] = 64,
     activation: str = "relu",
     optimizer: object = Adam(learning_rate=0.01),
-    loss: object = MeanSquaredError(), 
-    # compile_kwars: dict = {} # TODO. menor prioridad
+    loss: object = MeanSquaredError(),
+    compile_kwars: dict = {},
 ) -> tf.keras.models.Model:
     """
     Creates a neural network model for time series prediction with flexible recurrent layers.
@@ -63,7 +69,38 @@ def create_and_compile_model(
         Compiled neural network model.
     """
 
+    err_msg = f"`series` must be a pandas DataFrame. Got {type(series)}."
+
+    if not isinstance(series, pd.DataFrame):
+        raise TypeError(err_msg)
+
     n_series = series.shape[1]
+
+    # Dense units must be a list or int
+    if not isinstance(dense_units, (list, int)):
+        raise TypeError(
+            f"`dense_units` argument must be a list or int. Got {type(dense_units)}."
+        )
+    if isinstance(dense_units, int):
+        dense_units = [dense_units]
+
+    # Recurrent units must be a list or int
+    if not isinstance(recurrent_units, (list, int)):
+        raise TypeError(
+            f"`recurrent_units` argument must be a list or int. Got {type(recurrent_units)}."
+        )
+    if isinstance(recurrent_units, int):
+        recurrent_units = [recurrent_units]
+
+    # Lags, steps and levels must be int or list
+    if not isinstance(lags, (int, list)):
+        raise TypeError(f"`lags` argument must be a list or int. Got {type(lags)}.")
+    if not isinstance(steps, (int, list)):
+        raise TypeError(f"`steps` argument must be a list or int. Got {type(steps)}.")
+    if not isinstance(levels, (str, int, list, type(None))):
+        raise TypeError(
+            f"`levels` argument must be a string, list or int. Got {type(levels)}."
+        )
 
     if isinstance(lags, list):
         lags = len(lags)
@@ -75,6 +112,8 @@ def create_and_compile_model(
         levels = 1
     elif isinstance(levels, type(None)):
         levels = series.shape[1]
+    elif isinstance(levels, int):
+        pass
     else:
         raise TypeError(
             f"`levels` argument must be a string, list or int. Got {type(levels)}."
@@ -118,10 +157,16 @@ def create_and_compile_model(
 
     model = Model(inputs=input_layer, outputs=output_layer)
 
-    # Compile the model
-    if loss is not None:
-        model.compile(optimizer=optimizer, loss=loss)
-        # TODO. normalize compile_kwargs
-        # model.compile(optimizer=optimizer, loss=loss, **compile_kwargs)
+    # Compile the model if optimizer, loss or compile_kwargs are passed
+    if optimizer is not None or loss is not None or compile_kwars:
+        # give more priority to the parameters passed in the function check if the parameters passes in compile_kwars include optimizer and loss if so, delete them from compile_kwargs and raise a warning
+        if "optimizer" in compile_kwars.keys():
+            compile_kwars.pop("optimizer")
+            print("Warning: optimizer passed in compile_kwars. Ignoring it.")
+        if "loss" in compile_kwars.keys():
+            compile_kwars.pop("loss")
+            print("Warning: loss passed in compile_kwars. Ignoring it.")
+
+        model.compile(optimizer=optimizer, loss=loss, **compile_kwars)
 
     return model
