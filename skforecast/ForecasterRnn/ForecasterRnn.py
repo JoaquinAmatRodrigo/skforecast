@@ -51,10 +51,12 @@ class ForecasterRnn(ForecasterBase):
     ----------
     regressor : regressor or pipeline compatible with the TensorFlow API
         An instance of a regressor or pipeline compatible with the TensorFlow API.
-    levels : str, list, default `None`
+    levels : str, list
         Name of one or more time series to be predicted. This determine the series
         the forecaster will be handling. If `None`, all series used during training
         will be available for prediction.
+    lags : int, list
+        Lags used as predictors.
     transformer_series : object, dict, default `sklearn.preprocessing.MinMaxScaler`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API with methods: fit, transform, fit_transform and
@@ -86,7 +88,7 @@ class ForecasterRnn(ForecasterBase):
         An instance of a regressor or pipeline compatible with the TensorFlow API.
         An instance of this regressor is trained for each step. All of them
         are stored in `self.regressors_`.
-    levels : str, list
+    levels : str, list, default `None`
         Name of one or more time series to be predicted. This determine the series
         the forecaster will be handling. If `None`, all series used during training
         will be available for prediction.
@@ -177,13 +179,13 @@ class ForecasterRnn(ForecasterBase):
         self,
         regressor: object,
         levels: Union[str, list],
+        lags: Optional[Union[int, list]] = None,
         transformer_series: Optional[Union[object, dict]] = MinMaxScaler(),
         weight_func: Optional[Callable] = None,
         fit_kwargs: Optional[dict] = {},
         forecaster_id: Optional[Union[str, int]] = None,
         n_jobs: Any = None,
-        step: Any = None,
-        lags: Any = None,
+        steps: Any = None,
         transformer_exog: Any = None,
     ) -> None:
         self.levels = levels
@@ -216,7 +218,18 @@ class ForecasterRnn(ForecasterBase):
         # Infer parameters from the model
         self.regressor = regressor
         layer_init = self.regressor.layers[0]
-        self.lags = np.arange(layer_init.input_shape[0][1]) + 1
+        
+        if lags is None:
+            self.lags = np.arange(layer_init.input_shape[0][1]) + 1
+        elif isinstance(lags, int):
+            self.lags = np.arange(lags) + 1
+        elif isinstance(lags, list):
+            self.lags = np.array(lags)
+        else:
+            raise TypeError(
+                f"`lags` argument must be an int or a list. Got {type(lags)}."
+            )
+            
         self.max_lag = np.max(self.lags)
         self.window_size = self.max_lag
         self.series = layer_init.input_shape[0][2]
