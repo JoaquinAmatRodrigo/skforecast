@@ -224,7 +224,7 @@ class ForecasterRnn(ForecasterBase):
         
         if lags == "auto":
             self.lags = np.arange(layer_init.input_shape[0][1]) + 1
-            warnings.warn(f"`lags` default value = 'auto'. `lags` inferred from regressor architecture: {self.lags}")
+            warnings.warn(f"Setting `lags` = 'auto'. `lags` are inferred from the regressor architecture: {self.lags}\nAvoid the warning with lags=lags.")
         elif isinstance(lags, int):
             self.lags = np.arange(lags) + 1
         elif isinstance(lags, list):
@@ -241,7 +241,7 @@ class ForecasterRnn(ForecasterBase):
         
         if steps == "auto":
             self.steps = np.arange(layer_end.output_shape[1]) + 1
-            warnings.warn(f"`steps` default value = 'auto'. `steps` inferred from regressor architecture: {self.steps}")
+            warnings.warn(f"`steps` default value = 'auto'. `steps` inferred from regressor architecture: {self.steps}\nAvoid the warning with steps=steps.")
         elif isinstance(steps, int):
             self.steps = np.arange(steps) + 1
         elif isinstance(steps, list):
