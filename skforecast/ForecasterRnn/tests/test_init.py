@@ -9,24 +9,22 @@ from keras.optimizers import Adam
 import pytest
 
 
-# test levels
+# test levels, steps, lags
 @pytest.mark.parametrize(
-    "levels",
+    "levels, steps, lags",
     [
-        "t+1",
-        ["t+1"],
-        ["t+1", "t+2"],
+        ("t+1", 5, 10),
+        (["t+1"], [24, 48], 10),
+        (["t+1", "t+2"], 5, [2,4,6]),
     ],
 )
-def test_init(levels):
+def test_init(levels, steps, lags):
     print(f"levels: {levels}")
     # Generate dummy data for testing
     series = pd.DataFrame(np.random.randn(100, 3))
     series.columns = [f"t+{step}" for step in range(1, series.shape[1] + 1)]
-    lags = 10
-    steps = 5
     recurrent_units = 100
-    dense_units = [64]
+    dense_units = 64
     activation = "relu"
     optimizer = Adam(learning_rate=0.01)
     loss = MeanSquaredError()
@@ -47,6 +45,8 @@ def test_init(levels):
     forecaster = ForecasterRnn(
         regressor=model,
         levels=levels,
+        steps=steps,
+        lags=lags,
     )
 
     # Assert that the forecaster is an instance of ForecasterAutoreg
@@ -74,9 +74,15 @@ def test_init(levels):
 
     # Assert that the forecaster has the correct number of levels
     assert forecaster.levels == levels
-
-    # Assert that the forecaster has the correct number of lags
-    assert len(forecaster.lags) == lags
-
-    # Assert that the forecaster has the correct number of steps
-    assert forecaster.steps == steps
+    
+    # Assert that the forecaster has the correct lags
+    if isinstance(lags, int):
+        np.testing.assert_equal(forecaster.lags, np.array(range(lags))+1)
+    else:
+        np.testing.assert_equal(forecaster.lags, np.array(lags))
+        
+    # Assert that the forecaster has the correct steps
+    if isinstance(steps, int):
+        np.testing.assert_equal(forecaster.steps, np.array(range(steps))+1)
+    else:
+        np.testing.assert_equal(forecaster.steps, np.array(steps))

@@ -34,6 +34,7 @@ def create_and_compile_model(
     optimizer: object = Adam(learning_rate=0.01),
     loss: object = MeanSquaredError(),
     compile_kwars: dict = {},
+    backend: str = "tensorflow",
 ) -> tf.keras.models.Model:
     """
     Creates a neural network model for time series prediction with flexible recurrent layers.
@@ -49,6 +50,8 @@ def create_and_compile_model(
     levels : str, int, or list, optional
         Number of output levels (features) to predict, or a list of specific level indices.
         If None, defaults to the number of input series. Default is None.
+    backend : str, default 'tensorflow'
+        Deep learning backend to use: tensorflow, pytorch, or jax are supported.
     recurrent_layer : str, optional
         Type of recurrent layer to be used ('LSTM' or 'RNN'). Default is 'LSTM'.
     recurrent_units : int or list, optional

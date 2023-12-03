@@ -9,6 +9,7 @@ from typing import Union, Dict, List, Tuple, Any, Optional, Callable
 import warnings
 import logging
 import sys
+from click import pass_context
 import numpy as np
 import pandas as pd
 import sklearn
@@ -55,8 +56,9 @@ class ForecasterRnn(ForecasterBase):
         Name of one or more time series to be predicted. This determine the series
         the forecaster will be handling. If `None`, all series used during training
         will be available for prediction.
-    lags : int, list
-        Lags used as predictors.
+    lags : int, list, str, default 'auto'
+        Lags used as predictors. If 'auto', lags used are from 1 to N, where N is
+        extracted from the input layer `self.regressor.layers[0].input_shape[0][1]`.
     transformer_series : object, dict, default `sklearn.preprocessing.MinMaxScaler`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API with methods: fit, transform, fit_transform and
@@ -71,8 +73,9 @@ class ForecasterRnn(ForecasterBase):
         Additional arguments to be passed to the `fit` method of the regressor.
     forecaster_id : str, int, default `None`
         Name used as an identifier of the forecaster.
-    steps : Ignored
-        Not used, present here for API consistency by convention.
+    steps : int, list, str, default 'auto'
+        Steps to be predicted. If 'auto', steps used are from 1 to N, where N is
+        extracted from the output layer `self.regressor.layers[-1].output_shape[1]`.
     lags  : Ignored
         Not used, present here for API consistency by convention.
     transformer_exog : Ignored
@@ -92,7 +95,7 @@ class ForecasterRnn(ForecasterBase):
         Name of one or more time series to be predicted. This determine the series
         the forecaster will be handling. If `None`, all series used during training
         will be available for prediction.
-    steps : int
+    steps : numpy ndarray
         Number of future steps the forecaster will predict when using method
         `predict()`. Since a different model is created for each step, this value
         should be defined before training.
@@ -179,16 +182,16 @@ class ForecasterRnn(ForecasterBase):
         self,
         regressor: object,
         levels: Union[str, list],
-        lags: Optional[Union[int, list]] = None,
+        lags: Optional[Union[int, list, str]] = "auto",
+        steps: Optional[Union[int, list, str]] = "auto",
         transformer_series: Optional[Union[object, dict]] = MinMaxScaler(),
         weight_func: Optional[Callable] = None,
         fit_kwargs: Optional[dict] = {},
         forecaster_id: Optional[Union[str, int]] = None,
         n_jobs: Any = None,
-        steps: Any = None,
         transformer_exog: Any = None,
     ) -> None:
-        self.levels = levels
+        self.levels = None
         self.transformer_series = transformer_series
         self.transformer_series_ = None
         self.transformer_exog = None
@@ -219,22 +222,36 @@ class ForecasterRnn(ForecasterBase):
         self.regressor = regressor
         layer_init = self.regressor.layers[0]
         
-        if lags is None:
+        if lags == "auto":
             self.lags = np.arange(layer_init.input_shape[0][1]) + 1
+            warnings.warn(f"`lags` default value = 'auto'. `lags` inferred from regressor architecture: {self.lags}")
         elif isinstance(lags, int):
             self.lags = np.arange(lags) + 1
         elif isinstance(lags, list):
             self.lags = np.array(lags)
         else:
             raise TypeError(
-                f"`lags` argument must be an int or a list. Got {type(lags)}."
+                f"`lags` argument must be an int, list or 'auto'. Got {type(lags)}."
             )
             
         self.max_lag = np.max(self.lags)
         self.window_size = self.max_lag
         self.series = layer_init.input_shape[0][2]
         layer_end = self.regressor.layers[-1]
-        self.steps = layer_end.output_shape[1]
+        
+        if steps == "auto":
+            self.steps = np.arange(layer_end.output_shape[1]) + 1
+            warnings.warn(f"`steps` default value = 'auto'. `steps` inferred from regressor architecture: {self.steps}")
+        elif isinstance(steps, int):
+            self.steps = np.arange(steps) + 1
+        elif isinstance(steps, list):
+            self.steps = np.array(steps)
+        else:
+            raise TypeError(
+                f"`steps` argument must be an int, list or 'auto'. Got {type(steps)}."
+            )
+            
+        self.max_step = np.max(self.steps)
         self.outputs = layer_end.output_shape[-1]
 
         if not isinstance(levels, (list, str, type(None))):
@@ -244,6 +261,12 @@ class ForecasterRnn(ForecasterBase):
 
         if isinstance(levels, str):
             self.levels = [levels]
+        elif isinstance(levels, list):
+            self.levels = levels
+        else:
+            raise TypeError(
+                f"`levels` argument must be a string or a list. Got {type(levels)}."
+            )
 
         self.series_val = None
         if "series_val" in fit_kwargs:
@@ -297,12 +320,10 @@ class ForecasterRnn(ForecasterBase):
         )
 
         return info
-
     def _create_lags(
         self,
-        y: np.ndarray,
-        lags: np.ndarray,
-    ) -> Tuple[np.ndarray, np.ndarray]:
+        y: np.ndarray
+    ):
         """
         Transforms a 1d array into a 3d array (X) and a 3d array (y). Each row
         in X is associated with a value of y and it represents the lags that
@@ -315,39 +336,43 @@ class ForecasterRnn(ForecasterBase):
         ----------
         y : numpy ndarray
             1d numpy ndarray Training time series.
-        lags : numpy ndarray
-            lags to create.
 
         Returns
         -------
         X_data : numpy ndarray
             3d numpy ndarray with the lagged values (predictors).
-            Shape: (samples - max(self.lags), len(self.lags))
+            Shape: (samples - max(lags), len(lags))
         y_data : numpy ndarray
             3d numpy ndarray with the values of the time series related to each
             row of `X_data` for each step.
-            Shape: (len(self.steps), samples - max(self.lags))
+            Shape: (len(max_step), samples - max(lags))
 
         """
 
-        n_splits = len(y) - self.max_lag - (self.steps - 1)  # rows of y_data
+        n_splits = len(y) - self.max_lag - self.max_step + 1  # rows of y_data
         if n_splits <= 0:
-            raise ValueError(
+                raise ValueError(
                 (
                     f"The maximum lag ({self.max_lag}) must be less than the length "
-                    f"of the series minus the number of steps ({len(y)-(self.steps-1)})."
+                    f"of the series minus the maximum of steps ({len(y)-self.max_step})."
                 )
             )
 
-        X_data = np.full(shape=(n_splits, len(lags)), fill_value=np.nan, dtype=float)
-        for i, lag in enumerate(lags):
-            X_data[:, i] = y[self.max_lag - lag : -(lag + self.steps - 1)]
+        X_data = np.full(shape=(n_splits, (self.max_lag)), fill_value=np.nan, dtype=float)
+        for i, lag in enumerate(range(self.max_lag)):
+            X_data[:, i] = y[self.max_lag - lag -1 : -(lag + self.max_step)]
 
-        y_data = np.full(shape=(n_splits, self.steps), fill_value=np.nan, dtype=float)
-        for step in range(self.steps):
+        y_data = np.full(shape=(n_splits, self.max_step), fill_value=np.nan, dtype=float)
+        for step in range(self.max_step):
             y_data[:, step] = y[self.max_lag + step : self.max_lag + step + n_splits]
-
+            
+        # Get lags index
+        X_data = X_data[:, self.lags-1]
+        
+        # Get steps index
+        y_data = y_data[:, self.steps-1]
         return X_data, y_data
+
 
     def create_train_X_y(
         self, series: pd.DataFrame, exog: Any = None
@@ -391,12 +416,12 @@ class ForecasterRnn(ForecasterBase):
                 )
             )
 
-        if len(series) < self.max_lag + self.steps:
+        if len(series) < self.max_lag + self.max_step:
             raise ValueError(
                 (
                     f"Minimum length of `series` for training this forecaster is "
-                    f"{self.max_lag + self.steps}. Got {len(series)}. Reduce the "
-                    f"number of predicted steps, {self.steps}, or the maximum "
+                    f"{self.max_lag + self.max_step}. Got {len(series)}. Reduce the "
+                    f"number of predicted steps, {self.max_step}, or the maximum "
                     f"lag, {self.max_lag}, if no more data is available."
                 )
             )
@@ -440,7 +465,7 @@ class ForecasterRnn(ForecasterBase):
                 fit=True,
                 inverse_transform=False,
             )
-            X, _ = self._create_lags(x, self.lags)
+            X, _ = self._create_lags(x)
             X_train.append(X)
 
         for i, serie in enumerate(self.levels):
@@ -453,14 +478,14 @@ class ForecasterRnn(ForecasterBase):
                 inverse_transform=False,
             )
 
-            _, y = self._create_lags(y, self.lags)
+            _, y = self._create_lags(y)
             y_train.append(y)
 
         X_train = np.stack(X_train, axis=2)
         y_train = np.stack(y_train, axis=2)
 
         train_index = series.index.to_list()[
-            self.max_lag : (len(series.index.to_list()) - self.steps + 1)
+            self.max_lag : (len(series.index.to_list()) - self.max_step + 1)
         ]
         dimension_names = {
             "X_train": {
@@ -470,7 +495,7 @@ class ForecasterRnn(ForecasterBase):
             },
             "y_train": {
                 0: train_index,
-                1: ["step_" + str(l) for l in np.array(range(self.steps)) + 1],
+                1: ["step_" + str(l) for l in self.steps],
                 2: self.levels,
             },
         }
@@ -627,7 +652,7 @@ class ForecasterRnn(ForecasterBase):
             exog_col_names=None,
             interval=None,
             alpha=None,
-            max_steps=self.steps,
+            max_step=self.steps,
             levels=levels,
             levels_forecaster=self.levels,
             series_col_names=self.series_col_names,
