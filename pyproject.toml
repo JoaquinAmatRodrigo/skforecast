@@ -48,7 +48,7 @@ sarimax = [
 ]
 
 deep_learning = [
-    "tensorflow>=2.12, <2.13"
+    "tensorflow>=2.15, <2.16",
 ]
 
 plotting = [
