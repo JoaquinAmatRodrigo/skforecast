@@ -2,7 +2,7 @@
 
 All significant changes to this project are documented in this release file.
 
-## [0.11.0] - [In progress]
+## [0.12.0] - [In progress]
 
 The main changes in this release are:
 
