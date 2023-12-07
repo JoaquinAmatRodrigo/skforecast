@@ -1344,7 +1344,9 @@ def load_forecaster(
     verbose: bool=True
 ) -> object:
     """
-    Load forecaster model using joblib.
+    Load forecaster model using joblib. If the forecaster was saved with custom
+    functions to create predictors or weights, these functions must be available
+    in the environment where the forecaster is going to be loaded.
 
     Parameters
     ----------
