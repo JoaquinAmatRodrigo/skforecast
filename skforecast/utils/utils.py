@@ -1292,7 +1292,8 @@ def save_forecaster(
     verbose: bool=True
 ) -> None:
     """
-    Save forecaster model using joblib.
+    Save forecaster model using joblib. If custom functions are used to create
+    predictors or weights, they are saved as .py files.
 
     Parameters
     ----------
@@ -1302,7 +1303,7 @@ def save_forecaster(
         File name given to the object.
     save_custom_functions: bool, default `True`
         If True, save custom functions used in the forecaster (fun_predictors and
-        weight_func) as .py files. Custom functions need to be defined in the
+        weight_func) as .py files. Custom functions need to be available in the
         environment where the forecaster is going to be loaded.
     verbose: bool, default `True`
         Print summary about the forecaster saved.
@@ -1313,16 +1314,26 @@ def save_forecaster(
 
     """
 
+    # Save forecaster
     joblib.dump(forecaster, filename=file_name)
 
+    # Save custom functions to create predictors
     if hasattr(forecaster, 'fun_predictors') and forecaster.fun_predictors is not None:
         file_name = forecaster.fun_predictors.__name__ + '.py'
         with open(file_name, 'w') as file:
             file.write(inspect.getsource(forecaster.fun_predictors))
+
+    # Save custom functions to create weights
     if hasattr(forecaster, 'weight_func') and forecaster.weight_func is not None:
-        file_name = forecaster.weight_func.__name__ + '.py'
-        with open(file_name, 'w') as file:
-            file.write(inspect.getsource(forecaster.weight_func))
+        if isinstance(forecaster.weight_func, dict):
+            for fun in set(forecaster.weight_func.values()):
+                file_name = fun.__name__ + '.py'
+                with open(file_name, 'w') as file:
+                    file.write(inspect.getsource(fun))
+        else:
+            file_name = forecaster.weight_func.__name__ + '.py'
+            with open(file_name, 'w') as file:
+                file.write(inspect.getsource(forecaster.weight_func))
 
     if verbose:
         forecaster.summary()
