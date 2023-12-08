@@ -10,13 +10,15 @@ The main changes in this release are:
 
 **Added**
 
-+ Added argument `save_custom_functions` to `save_forecaster` function in `utils` module. If `True`, save custom functions used in the forecaster (fun_predictors and weight_func) as .py files. Custom functions need to be available in the environment where the forecaster is going to be loaded.
++ Added `save_custom_functions` argument to the `save_forecaster` function in the `utils` module. If `True`, save custom functions used in the forecaster (`fun_predictors` and `weight_func`) as .py files. Custom functions must be available in the environment where the forecaster is loaded.
 
 **Changed**
 
 + 
 
 **Fixed**
+
++ 
 
 
 ## [0.11.0] - [2023-11-16]
