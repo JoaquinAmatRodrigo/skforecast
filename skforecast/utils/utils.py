@@ -1287,19 +1287,25 @@ def transform_dataframe(
 
 def save_forecaster(
     forecaster, 
-    file_name: str, 
+    file_name: str,
+    save_custom_functions: bool=True, 
     verbose: bool=True
 ) -> None:
     """
-    Save forecaster model using joblib.
+    Save forecaster model using joblib. If custom functions are used to create
+    predictors or weights, they are saved as .py files.
 
     Parameters
     ----------
-    forecaster: forecaster
+    forecaster : forecaster
         Forecaster created with skforecast library.
-    file_name: str
+    file_name : str
         File name given to the object.
-    verbose: bool, default `True`
+    save_custom_functions : bool, default `True`
+        If True, save custom functions used in the forecaster (fun_predictors and
+        weight_func) as .py files. Custom functions need to be available in the
+        environment where the forecaster is going to be loaded.
+    verbose : bool, default `True`
         Print summary about the forecaster saved.
 
     Returns
@@ -1308,7 +1314,34 @@ def save_forecaster(
 
     """
 
+    # Save forecaster
     joblib.dump(forecaster, filename=file_name)
+
+    if save_custom_functions:
+        # Save custom functions to create predictors
+        if hasattr(forecaster, 'fun_predictors') and forecaster.fun_predictors is not None:
+            file_name = forecaster.fun_predictors.__name__ + '.py'
+            with open(file_name, 'w') as file:
+                file.write(inspect.getsource(forecaster.fun_predictors))
+
+        # Save custom functions to create weights
+        if hasattr(forecaster, 'weight_func') and forecaster.weight_func is not None:
+            if isinstance(forecaster.weight_func, dict):
+                for fun in set(forecaster.weight_func.values()):
+                    file_name = fun.__name__ + '.py'
+                    with open(file_name, 'w') as file:
+                        file.write(inspect.getsource(fun))
+            else:
+                file_name = forecaster.weight_func.__name__ + '.py'
+                with open(file_name, 'w') as file:
+                    file.write(inspect.getsource(forecaster.weight_func))
+    else:
+        if ((hasattr(forecaster, 'fun_predictors') and forecaster.fun_predictors is not None)
+          or (hasattr(forecaster, 'weight_func') and forecaster.weight_func is not None)):
+            warnings.warn(
+                ("Custom functions used to create predictors or weights are not saved. "
+                 "To save them, set `save_custom_functions` to `True`.")
+            )
 
     if verbose:
         forecaster.summary()
@@ -1319,7 +1352,9 @@ def load_forecaster(
     verbose: bool=True
 ) -> object:
     """
-    Load forecaster model using joblib.
+    Load forecaster model using joblib. If the forecaster was saved with custom
+    functions to create predictors or weights, these functions must be available
+    in the environment where the forecaster is going to be loaded.
 
     Parameters
     ----------
