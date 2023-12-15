@@ -236,6 +236,10 @@ doi = {10.5281/zenodo.8382788}
 
 <ul>
 
+<li><p style="color:#808080; font-size:0.95em;">
+V. Negri, A. Mingotti, R. Tinarelli and L. Peretto, "Comparison Between the Machine Learning and the Statistical Approach to the Forecasting of Voltage, Current, and Frequency," 2023 IEEE 13th International Workshop on Applied Measurements for Power Systems (AMPS), Bern, Switzerland, 2023, pp. 01-06, doi: 10.1109/AMPS59207.2023.10297192. <a href="https://doi.org/10.1109/AMPS59207.2023.10297192">https://doi.org/10.1109/AMPS59207.2023.10297192</a>
+</p></li>
+
 <li><p style="color:#808080; font-size:0.95em;">OUKHOUYA, H., KADIRI, H., EL HIMDI, K., & GUERBAZ, R. (2023). Forecasting International Stock Market Trends: XGBoost, LSTM, LSTM-XGBoost, and Backtesting XGBoost Models. Statistics, Optimization & Information Computing, 12(1), 200-209. <a href="https://doi.org/10.19139/soic-2310-5070-1822">https://doi.org/10.19139/soic-2310-5070-1822</a></p>
 </li>
 
