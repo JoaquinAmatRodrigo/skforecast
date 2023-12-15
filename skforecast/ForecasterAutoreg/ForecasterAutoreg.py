@@ -13,6 +13,7 @@ import numpy as np
 import pandas as pd
 import sklearn
 import sklearn.pipeline
+from sklearn.preprocessing import KBinsDiscretizer
 from sklearn.base import clone
 import inspect
 
@@ -214,6 +215,13 @@ class ForecasterAutoreg(ForecasterBase):
         self.lags = initialize_lags(type(self).__name__, lags)
         self.max_lag = max(self.lags)
         self.window_size = self.max_lag
+
+        self.binner = KBinsDiscretizer(
+                        n_bins=10,
+                        encode='ordinal',
+                        strategy='uniform',
+                        subsample=10000
+                    )
 
         if self.differentiation is not None:
             if not isinstance(differentiation, int) or differentiation < 1:
@@ -553,6 +561,11 @@ class ForecasterAutoreg(ForecasterBase):
                             )
                                                     
             self.in_sample_residuals = residuals
+            self.binner.fit(residuals.reshape(-1, 1))
+            bins = self.binner.transform(residuals.reshape(-1, 1)).ravel().
+            self.in_sample_residuals_by_bin = {
+                i : residuals[bins == i] for i in range(self.binner.n_bins_[0])
+            }
         
         # The last time window of training data is stored so that lags needed as
         # predictors in the first iteration of `predict()` can be calculated. It
@@ -1292,6 +1305,10 @@ class ForecasterAutoreg(ForecasterBase):
                             ))
 
         self.out_sample_residuals = residuals
+        bins = self.binner.transform(residuals.reshape(-1, 1)).ravel()
+        self.out_sample_residuals_by_bin = {
+            i : residuals[bins == i] for i in range(self.binner.n_bins_[0])
+        }
 
     
     def get_feature_importances(
