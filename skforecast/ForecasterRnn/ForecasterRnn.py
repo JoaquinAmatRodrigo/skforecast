@@ -5,11 +5,11 @@
 ################################################################################
 # coding=utf-8
 
+from math import e
 from typing import Union, Dict, List, Tuple, Any, Optional, Callable
 import warnings
 import logging
 import sys
-from click import pass_context
 import numpy as np
 import pandas as pd
 import sklearn
@@ -224,7 +224,7 @@ class ForecasterRnn(ForecasterBase):
         
         if lags == "auto":
             self.lags = np.arange(layer_init.input_shape[0][1]) + 1
-            warnings.warn(f"Setting `lags` = 'auto'. `lags` are inferred from the regressor architecture: {self.lags}\nAvoid the warning with lags=lags.")
+            warnings.warn(f"Setting `lags` = 'auto'. `lags` are inferred from the regressor architecture. Avoid the warning with lags=lags.")
         elif isinstance(lags, int):
             self.lags = np.arange(lags) + 1
         elif isinstance(lags, list):
@@ -236,12 +236,20 @@ class ForecasterRnn(ForecasterBase):
             
         self.max_lag = np.max(self.lags)
         self.window_size = self.max_lag
-        self.series = layer_init.input_shape[0][2]
+            
         layer_end = self.regressor.layers[-1]
+        
+        try:
+            self.series = layer_end.output_shape[-1]
+        # if does not work, break the and rise an error the input shape should be shape=(lags, n_series))
+        except:
+            raise TypeError(
+                f"Input shape of the regressor should be Input(shape=(lags, n_series))."
+            )
         
         if steps == "auto":
             self.steps = np.arange(layer_end.output_shape[1]) + 1
-            warnings.warn(f"`steps` default value = 'auto'. `steps` inferred from regressor architecture: {self.steps}\nAvoid the warning with steps=steps.")
+            warnings.warn(f"`steps` default value = 'auto'. `steps` inferred from regressor architecture. Avoid the warning with steps=steps.")
         elif isinstance(steps, int):
             self.steps = np.arange(steps) + 1
         elif isinstance(steps, list):
@@ -617,11 +625,13 @@ class ForecasterRnn(ForecasterBase):
             levels = self.levels
         elif isinstance(levels, str):
             levels = [levels]
-
         if isinstance(steps, int):
             steps = list(np.arange(steps) + 1)
         elif steps is None:
-            steps = list(np.arange(self.steps) + 1)
+            if isinstance(self.steps, int):
+                steps = list(np.arange(self.steps) + 1)
+            elif isinstance(self.steps, (list, np.ndarray)):
+                steps = list(np.array(self.steps))
         elif isinstance(steps, list):
             steps = list(np.array(steps))
 
@@ -652,7 +662,7 @@ class ForecasterRnn(ForecasterBase):
             exog_col_names=None,
             interval=None,
             alpha=None,
-            max_step=self.steps,
+            max_steps=self.max_step,
             levels=levels,
             levels_forecaster=self.levels,
             series_col_names=self.series_col_names,
