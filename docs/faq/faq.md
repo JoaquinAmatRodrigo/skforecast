@@ -14,6 +14,8 @@ Thank you for choosing skforecast and visiting our Frequently Asked Questions (F
 
 + [**Forecasting with delayed historical data**](https://skforecast.org/latest/faq/forecasting-with-delayed-historical-data.html)
 
++ [**Time series aggregation**](https://skforecast.org/latest/faq/time-series-aggregation.html)
+
 + [**Parallelization in skforecast**](https://skforecast.org/latest/faq/parallelization-skforecast.html)
 
 + [**Profiling skforecast**](https://skforecast.org/latest/faq/profiling-skforecast.html)

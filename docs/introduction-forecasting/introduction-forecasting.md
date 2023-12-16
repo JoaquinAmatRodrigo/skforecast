@@ -81,9 +81,9 @@ Direct multi-step forecasting consists of training a different model for each st
 
 Some machine learning models, such as long short-term memory (LSTM) neural network, can predict simultaneously several values of a sequence (*one-shot*). This strategy is not currently implemented in skforecast library.
 
-## Multi-time series forecasting
+## Global forecasting models
 
-In univariate time series forecasting, a single time series is modeled as a linear or nonlinear combination of its lags, where past values of the series are used to forecast its future. In multi-series forecasting, two or more time series are modeled together using a single model. There are two distinct strategies for multi-series forecasting.
+In univariate time series forecasting, a single time series is modeled as a linear or nonlinear combination of its lags, where past values of the series are used to forecast its future. Global forecasting, involves building a single predictive model that considers all time series simultaneously. It attempts to capture the core patterns that govern the series, thereby mitigating the potential noise that each series might introduce. This approach is computationally efficient, easy to maintain, and can yield more robust generalizations across time series. There are two distinct strategies for global forecasting.
 
 ### Independent Multi-Series Forecasting
 
