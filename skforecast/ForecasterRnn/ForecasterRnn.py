@@ -59,7 +59,7 @@ class ForecasterRnn(ForecasterBase):
     lags : int, list, str, default 'auto'
         Lags used as predictors. If 'auto', lags used are from 1 to N, where N is
         extracted from the input layer `self.regressor.layers[0].input_shape[0][1]`.
-    transformer_series : object, dict, default `sklearn.preprocessing.MinMaxScaler`
+    transformer_series : object, dict, default `sklearn.preprocessing.MinMaxScaler(feature_range=(0, 1))`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API with methods: fit, transform, fit_transform and
         inverse_transform. Transformation is applied to each `series` before training
@@ -184,7 +184,7 @@ class ForecasterRnn(ForecasterBase):
         levels: Union[str, list],
         lags: Optional[Union[int, list, str]] = "auto",
         steps: Optional[Union[int, list, str]] = "auto",
-        transformer_series: Optional[Union[object, dict]] = MinMaxScaler(),
+        transformer_series: Optional[Union[object, dict]] = MinMaxScaler(feature_range=(0, 1)),
         weight_func: Optional[Callable] = None,
         fit_kwargs: Optional[dict] = {},
         forecaster_id: Optional[Union[str, int]] = None,
@@ -367,7 +367,7 @@ class ForecasterRnn(ForecasterBase):
             )
 
         X_data = np.full(shape=(n_splits, (self.max_lag)), fill_value=np.nan, dtype=float)
-        for i, lag in enumerate(range(self.max_lag)):
+        for i, lag in enumerate(range(self.max_lag - 1, -1, -1)):
             X_data[:, i] = y[self.max_lag - lag -1 : -(lag + self.max_step)]
 
         y_data = np.full(shape=(n_splits, self.max_step), fill_value=np.nan, dtype=float)
@@ -687,6 +687,13 @@ class ForecasterRnn(ForecasterBase):
         predictions_reshaped = np.reshape(
             predictions, (predictions.shape[1], predictions.shape[2])
         )
+    
+        # if len(self.levels) == 1:
+        #     predictions_reshaped = np.reshape(predictions, (predictions.shape[1], 1))
+        # else:
+        #     predictions_reshaped = np.reshape(
+        #         predictions, (predictions.shape[1], predictions.shape[2])
+        #     )
         idx = expand_index(index=last_window_index, steps=max(steps))
 
         predictions = pd.DataFrame(

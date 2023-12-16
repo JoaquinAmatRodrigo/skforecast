@@ -79,8 +79,8 @@ def create_and_compile_model(
 
     n_series = series.shape[1]
 
-    # Dense units must be a list or int
-    if not isinstance(dense_units, (list, int)):
+    # Dense units must be a list, None or int
+    if not isinstance(dense_units, (list, int, type(None))):
         raise TypeError(
             f"`dense_units` argument must be a list or int. Got {type(dense_units)}."
         )
@@ -151,13 +151,14 @@ def create_and_compile_model(
             raise ValueError(f"Invalid recurrent layer: {recurrent_layer}")
 
     # Dense layers
-    for nn in dense_units:
-        x = Dense(nn, activation=activation)(x)
+    if dense_units is not None:
+        for nn in dense_units:
+            x = Dense(nn, activation=activation)(x)
 
     # Output layer
     x = Dense(levels * steps, activation="linear")(x)
+    # model = Model(inputs=input_layer, outputs=x)
     output_layer = tf.keras.layers.Reshape((steps, levels))(x)
-
     model = Model(inputs=input_layer, outputs=output_layer)
 
     # Compile the model if optimizer, loss or compile_kwargs are passed

@@ -48,6 +48,7 @@ sarimax = [
 ]
 
 deep_learning = [
+    "matplotlib>=3.3, <3.8",
     "tensorflow>=2.15, <2.16",
 ]
 
