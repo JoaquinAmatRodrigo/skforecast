@@ -110,13 +110,15 @@ def test_set_out_sample_residuals_when_residuals_length_is_less_than_1000_and_no
     """
     Test residuals stored when new residuals length is less than 1000 and append is False.
     """
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3,
+                                              transformer_series=None)
     forecaster.fit(series=series)
     residuals = {'l1': np.arange(10), 'l2': np.arange(10)}
     new_residuals = {'l1': np.arange(20), 'l2': np.arange(20)}
 
     forecaster.set_out_sample_residuals(residuals=residuals)
     forecaster.set_out_sample_residuals(residuals=new_residuals, append=False)
+
     expected = {'l1': np.arange(20), 'l2': np.arange(20)}
     results = forecaster.out_sample_residuals
 
@@ -128,12 +130,14 @@ def test_set_out_sample_residuals_when_residuals_length_is_less_than_1000_and_ap
     """
     Test residuals stored when new residuals length is less than 1000 and append is True.
     """
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3,
+                                              transformer_series=None)
     forecaster.fit(series=series)
     residuals = {'l1': np.arange(10), 'l2': np.arange(10)}
     
     forecaster.set_out_sample_residuals(residuals=residuals)
     forecaster.set_out_sample_residuals(residuals=residuals, append=True)
+
     expected = {'l1': np.append(np.arange(10), np.arange(10)),
                 'l2': np.append(np.arange(10), np.arange(10))}
     results = forecaster.out_sample_residuals
@@ -146,7 +150,8 @@ def test_set_out_sample_residuals_when_residuals_length_is_greater_than_1000():
     """
     Test len residuals stored when its length is greater than 1000.
     """
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3,
+                                              transformer_series=None)
     forecaster.fit(series=series)
 
     residuals = {'l1': np.arange(2000), 'l2': np.arange(2000)}
@@ -157,11 +162,12 @@ def test_set_out_sample_residuals_when_residuals_length_is_greater_than_1000():
     assert all(len(value)==1000 for value in results.values())
 
 
-def test_set_out_sample_residuals_when_residuals_length_is_more_than_1000_and_append():
+def test_set_out_sample_residuals_when_residuals_length_is_greater_than_1000_and_append():
     """
-    Test residuals stored when new residuals length is more than 1000 and append is True.
+    Test residuals stored when new residuals length is greater than 1000 and append is True.
     """
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3,
+                                              transformer_series=None)
     forecaster.fit(series=series)
     residuals = {'l1': np.arange(10), 'l2': np.arange(10)}
     residuals_2 = {'l1': np.arange(1200), 'l2': np.arange(1200)}

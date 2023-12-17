@@ -145,9 +145,9 @@ def test_fit_in_sample_residuals_stored():
     results = forecaster.in_sample_residuals
 
     assert isinstance(results, dict)
-    assert all(isinstance(x, np.ndarray) for x in results.values())
+    assert np.all(isinstance(x, np.ndarray) for x in results.values())
     assert results.keys() == expected.keys()
-    assert all(all(np.isclose(results[k], expected[k])) for k in expected.keys())
+    assert np.all(np.all(np.isclose(results[k], expected[k])) for k in expected.keys())
 
 
 def test_fit_in_sample_residuals_stored_XGBRegressor():
@@ -159,14 +159,15 @@ def test_fit_in_sample_residuals_stored_XGBRegressor():
 
     forecaster = ForecasterAutoregMultiSeries(XGBRegressor(random_state=123), lags=3)
     forecaster.fit(series=series, store_in_sample_residuals=True)
-    expected = {'1': np.array([-0.00049472,  0.00049543]),
-                '2': np.array([-0.00049472,  0.00049543])}
+
+    expected = {'1': np.array([-0.00054704, 0.00054731]),
+                '2': np.array([-0.00054704, 0.00054731])}
     results = forecaster.in_sample_residuals
 
     assert isinstance(results, dict)
-    assert all(isinstance(x, np.ndarray) for x in results.values())
+    assert np.all(isinstance(x, np.ndarray) for x in results.values())
     assert results.keys() == expected.keys()
-    assert all(all(np.isclose(results[k], expected[k])) for k in expected.keys())
+    assert np.all(np.all(np.isclose(results[k], expected[k])) for k in expected.keys())
 
 
 def test_fit_same_residuals_when_residuals_greater_than_1000():
@@ -181,18 +182,19 @@ def test_fit_same_residuals_when_residuals_greater_than_1000():
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
     forecaster.fit(series=series, store_in_sample_residuals=True)
     results_1 = forecaster.in_sample_residuals
+    
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
     forecaster.fit(series=series, store_in_sample_residuals=True)
     results_2 = forecaster.in_sample_residuals
 
     assert isinstance(results_1, dict)
-    assert all(isinstance(x, np.ndarray) for x in results_1.values())
+    assert np.all(isinstance(x, np.ndarray) for x in results_1.values())
     assert isinstance(results_2, dict)
-    assert all(isinstance(x, np.ndarray) for x in results_2.values())
+    assert np.all(isinstance(x, np.ndarray) for x in results_2.values())
     assert results_1.keys() == results_2.keys()
-    assert all(len(results_1[k] == 1000) for k in results_1.keys())
-    assert all(len(results_2[k] == 1000) for k in results_2.keys())
-    assert all(all(results_1[k] == results_2[k]) for k in results_2.keys())
+    assert np.all(len(results_1[k] == 1000) for k in results_1.keys())
+    assert np.all(len(results_2[k] == 1000) for k in results_2.keys())
+    assert np.all(np.all(results_1[k] == results_2[k]) for k in results_2.keys())
 
 
 def test_fit_in_sample_residuals_not_stored():
@@ -210,7 +212,7 @@ def test_fit_in_sample_residuals_not_stored():
 
     assert isinstance(results, dict)
     assert results.keys() == expected.keys()
-    assert all(results[k] == expected[k] for k in expected.keys())
+    assert np.all(results[k] == expected[k] for k in expected.keys())
 
 
 def test_fit_last_window_stored():

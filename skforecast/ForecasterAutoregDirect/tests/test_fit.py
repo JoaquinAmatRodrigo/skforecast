@@ -63,9 +63,9 @@ def test_fit_in_sample_residuals_stored_XGBRegressor(n_jobs):
     Test that values of in_sample_residuals are stored after fitting with XGBRegressor.
     """
     forecaster = ForecasterAutoregDirect(XGBRegressor(random_state=123), lags=3, steps=2, n_jobs=n_jobs)
-    forecaster.fit(y=pd.Series(np.arange(5)))
-    expected = {1: np.array([7.15255737e-07]),
-                2: np.array([7.15255737e-07])}
+    forecaster.fit(y=pd.Series(np.arange(7)))
+    expected = {1: np.array([-1.07049942e-03, -6.19888306e-06,  1.07812881e-03]),
+                2: np.array([-1.07812881e-03,  6.19888306e-06,  1.06954575e-03])}
     results = forecaster.in_sample_residuals
 
     assert isinstance(results, dict)

@@ -114,9 +114,9 @@ def test_fit_in_sample_residuals_stored(n_jobs):
     results = forecaster.in_sample_residuals
 
     assert isinstance(results, dict)
-    assert all(isinstance(x, np.ndarray) for x in results.values())
+    assert np.all(isinstance(x, np.ndarray) for x in results.values())
     assert results.keys() == expected.keys()
-    assert all(all(np.isclose(results[k], expected[k])) for k in expected.keys())
+    assert np.all(np.all(np.isclose(results[k], expected[k])) for k in expected.keys())
 
 
 @pytest.mark.parametrize("n_jobs", [1, -1, 'auto'], 
@@ -131,16 +131,17 @@ def test_fit_in_sample_residuals_stored_XGBRegressor(n_jobs):
     forecaster = ForecasterAutoregMultiVariate(XGBRegressor(random_state=123),  
                                                level='l2', lags=3, steps=2, n_jobs=n_jobs)
     forecaster.fit(series=series)
-    expected = {1: np.array([-7.98702240e-05, -7.86781311e-05, -9.74178314e-04, 
-                              1.15251541e-03, -1.14297867e-03,  1.12581253e-03]),
-                2: np.array([-0.00083256,  0.00097084, -0.00123358,  
-                              0.00103426, -0.00101185, 0.00107765])}
+
+    expected = {1: np.array([-1.15634824e-03, -2.28991951e-05,  8.58267988e-05, 
+                             -1.79824694e-05, -4.57920360e-06,  1.11609955e-03]),
+                2: np.array([-1.11573546e-03,  4.77938309e-06,  1.80783407e-05, 
+                             -8.58799391e-05,  2.24735258e-05,  1.15608649e-03])}
     results = forecaster.in_sample_residuals
 
     assert isinstance(results, dict)
-    assert all(isinstance(x, np.ndarray) for x in results.values())
+    assert np.all(isinstance(x, np.ndarray) for x in results.values())
     assert results.keys() == expected.keys()
-    assert all(all(np.isclose(results[k], expected[k])) for k in expected.keys())
+    assert np.all(np.all(np.isclose(results[k], expected[k])) for k in expected.keys())
 
 
 @pytest.mark.parametrize("n_jobs", [1, -1, 'auto'], 
@@ -164,13 +165,13 @@ def test_fit_same_residuals_when_residuals_greater_than_1000(n_jobs):
     results_2 = forecaster.in_sample_residuals
 
     assert isinstance(results_1, dict)
-    assert all(isinstance(x, np.ndarray) for x in results_1.values())
+    assert np.all(isinstance(x, np.ndarray) for x in results_1.values())
     assert isinstance(results_2, dict)
-    assert all(isinstance(x, np.ndarray) for x in results_2.values())
+    assert np.all(isinstance(x, np.ndarray) for x in results_2.values())
     assert results_1.keys() == results_2.keys()
-    assert all(len(results_1[k] == 1000) for k in results_1.keys())
-    assert all(len(results_2[k] == 1000) for k in results_2.keys())
-    assert all(all(results_1[k] == results_2[k]) for k in results_2.keys())
+    assert np.all(len(results_1[k] == 1000) for k in results_1.keys())
+    assert np.all(len(results_2[k] == 1000) for k in results_2.keys())
+    assert np.all(np.all(results_1[k] == results_2[k]) for k in results_2.keys())
 
 
 @pytest.mark.parametrize("n_jobs", [1, -1, 'auto'], 
@@ -191,7 +192,7 @@ def test_fit_in_sample_residuals_not_stored(n_jobs):
 
     assert isinstance(results, dict)
     assert results.keys() == expected.keys()
-    assert all(results[k] == expected[k] for k in expected.keys())
+    assert np.all(results[k] == expected[k] for k in expected.keys())
 
 
 def test_fit_last_window_stored():

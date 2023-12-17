@@ -41,8 +41,8 @@ def test_ValueError_evaluate_grid_hyperparameters_multiseries_when_return_best_a
     exog = series.iloc[:30, 0]
 
     err_msg = re.escape(
-            f'`exog` must have same number of samples as `series`. '
-            f'length `exog`: ({len(exog)}), length `series`: ({len(series)})'
+            (f"`exog` must have same number of samples as `series`. "
+             f"length `exog`: ({len(exog)}), length `series`: ({len(series)})")
         )
     with pytest.raises(ValueError, match = err_msg):
         _evaluate_grid_hyperparameters_multiseries(
@@ -75,8 +75,8 @@ def test_TypeError_grid_hyperparameters_multiseries_exception_when_levels_not_li
     levels = 1
     
     err_msg = re.escape(
-                (f'`levels` must be a `list` of column names, a `str` '
-                 f'of a column name or `None`.')
+                (f"`levels` must be a `list` of column names, a `str` "
+                 f"of a column name or `None`.")
               )
     with pytest.raises(TypeError, match = err_msg):
         _evaluate_grid_hyperparameters_multiseries(
@@ -140,7 +140,7 @@ def test_evaluate_grid_hyperparameters_multiseries_exception_when_metric_list_du
                     lags      = 3
                  )
     
-    err_msg = re.escape('When `metric` is a `list`, each metric name must be unique.')
+    err_msg = re.escape("When `metric` is a `list`, each metric name must be unique.")
     with pytest.raises(ValueError, match = err_msg):
         _evaluate_grid_hyperparameters_multiseries(
             forecaster          = forecaster,
@@ -166,8 +166,9 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
     with mocked (mocked done in Skforecast v0.5.0).
     """
     forecaster = ForecasterAutoregMultiSeries(
-                    regressor = Ridge(random_state=123),
-                    lags      = 2 # Placeholder, the value will be overwritten
+                     regressor          = Ridge(random_state=123),
+                     lags               = 2, 
+                     transformer_series = None
                  )
 
     steps = 3
@@ -212,8 +213,9 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregMultiSeries_lags_
     should use forecaster.lags as lags_grid.
     """
     forecaster = ForecasterAutoregMultiSeries(
-                    regressor = Ridge(random_state=123),
-                    lags      = 2
+                     regressor          = Ridge(random_state=123),
+                     lags               = 2, 
+                     transformer_series = None
                  )
 
     lags_grid = None
@@ -259,8 +261,9 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
     with mocked when `levels` is a `str` or a `list` (mocked done in Skforecast v0.5.0).
     """
     forecaster = ForecasterAutoregMultiSeries(
-                    regressor = Ridge(random_state=123),
-                    lags      = 2 # Placeholder, the value will be overwritten
+                     regressor          = Ridge(random_state=123),
+                     lags               = 2, 
+                     transformer_series = None
                  )
 
     steps = 3
@@ -304,8 +307,9 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
     with mocked when multiple metrics (mocked done in Skforecast v0.6.0).
     """
     forecaster = ForecasterAutoregMultiSeries(
-                    regressor = Ridge(random_state=123),
-                    lags      = 2 # Placeholder, the value will be overwritten
+                     regressor          = Ridge(random_state=123),
+                     lags               = 2, 
+                     transformer_series = None
                  )
 
     steps = 3
@@ -351,8 +355,9 @@ def test_evaluate_grid_hyperparameters_multiseries_when_return_best_ForecasterAu
     _evaluate_grid_hyperparameters_multiseries.
     """
     forecaster = ForecasterAutoregMultiSeries(
-                    regressor = Ridge(random_state=123),
-                    lags      = 2 # Placeholder, the value will be overwritten
+                     regressor          = Ridge(random_state=123),
+                     lags               = 2, 
+                     transformer_series = None
                  )
 
     steps = 3
@@ -393,9 +398,10 @@ def test_IgnoredArgumentWarning_evaluate_grid_hyperparameters_multiseries_Foreca
     when `lags_grid` is not `None`.
     """
     forecaster = ForecasterAutoregMultiSeriesCustom(
-                     regressor      = Ridge(random_state=123),
-                     fun_predictors = create_predictors,
-                     window_size    = 4 
+                     regressor          = Ridge(random_state=123),
+                     fun_predictors     = create_predictors,
+                     window_size        = 4,
+                     transformer_series = None
                  )
 
     lags_grid = [2 , 4]
@@ -404,7 +410,7 @@ def test_IgnoredArgumentWarning_evaluate_grid_hyperparameters_multiseries_Foreca
     param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
 
     warn_msg = re.escape(
-                '`lags_grid` ignored if forecaster is an instance of `ForecasterAutoregMultiSeriesCustom`.'
+                "`lags_grid` ignored if forecaster is an instance of `ForecasterAutoregMultiSeriesCustom`."
             )
     with pytest.warns(IgnoredArgumentWarning, match = warn_msg):
         _evaluate_grid_hyperparameters_multiseries(
@@ -430,9 +436,10 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
     with mocked (mocked done in Skforecast v0.5.0).
     """
     forecaster = ForecasterAutoregMultiSeriesCustom(
-                     regressor      = Ridge(random_state=123),
-                     fun_predictors = create_predictors,
-                     window_size    = 4 
+                     regressor          = Ridge(random_state=123),
+                     fun_predictors     = create_predictors,
+                     window_size        = 4,
+                     transformer_series = None
                  )
 
     steps = 3
@@ -477,9 +484,10 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
     with mocked when `levels` is a `str` or a `list` (mocked done in Skforecast v0.5.0).
     """
     forecaster = ForecasterAutoregMultiSeriesCustom(
-                     regressor      = Ridge(random_state=123),
-                     fun_predictors = create_predictors,
-                     window_size    = 4 
+                     regressor          = Ridge(random_state=123),
+                     fun_predictors     = create_predictors,
+                     window_size        = 4,
+                     transformer_series = None
                  )
 
     steps = 3
@@ -521,9 +529,10 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
     with mocked when multiple metrics (mocked done in Skforecast v0.6.0).
     """
     forecaster = ForecasterAutoregMultiSeriesCustom(
-                     regressor      = Ridge(random_state=123),
-                     fun_predictors = create_predictors,
-                     window_size    = 4 
+                     regressor          = Ridge(random_state=123),
+                     fun_predictors     = create_predictors,
+                     window_size        = 4,
+                     transformer_series = None
                  )
 
     steps = 3
@@ -566,9 +575,10 @@ def test_evaluate_grid_hyperparameters_multiseries_when_return_best_ForecasterAu
     _evaluate_grid_hyperparameters_multiseries.
     """
     forecaster = ForecasterAutoregMultiSeriesCustom(
-                     regressor      = Ridge(random_state=123),
-                     fun_predictors = create_predictors,
-                     window_size    = 4 
+                     regressor          = Ridge(random_state=123),
+                     fun_predictors     = create_predictors,
+                     window_size        = 4,
+                     transformer_series = None
                  )
 
     steps = 3
@@ -606,10 +616,11 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
     with mocked (mocked done in Skforecast v0.6.0).
     """
     forecaster = ForecasterAutoregMultiVariate(
-                     regressor = Ridge(random_state=123),
-                     level     = 'l1',
-                     lags      = 2,
-                     steps     = 3
+                     regressor          = Ridge(random_state=123),
+                     level              = 'l1',
+                     lags               = 2,
+                     steps              = 3,
+                     transformer_series = None
                  )
 
     steps = 3
@@ -653,10 +664,11 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregMultiVariate_lags
     should use forecaster.lags as lags_grid.
     """
     forecaster = ForecasterAutoregMultiVariate(
-                     regressor = Ridge(random_state=123),
-                     level     = 'l1',
-                     lags      = 2,
-                     steps     = 3
+                     regressor          = Ridge(random_state=123),
+                     level              = 'l1',
+                     lags               = 2,
+                     steps              = 3,
+                     transformer_series = None
                  )
 
     lags_grid = None
@@ -699,10 +711,11 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregMultiVariate_lags
     when `lags_grid` is a dict with mocked (mocked done in Skforecast v0.6.0).
     """
     forecaster = ForecasterAutoregMultiVariate(
-                     regressor = Ridge(random_state=123),
-                     level     = 'l1',
-                     lags      = 2,
-                     steps     = 3
+                     regressor          = Ridge(random_state=123),
+                     level              = 'l1',
+                     lags               = 2,
+                     steps              = 3,
+                     transformer_series = None
                  )
 
     lags_grid = [{'l1': 2, 'l2': 3}, {'l1': [1, 3], 'l2': 3}, {'l1': 2, 'l2': [1, 4]}]
@@ -757,10 +770,11 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
     with mocked when multiple metrics (mocked done in Skforecast v0.6.0).
     """
     forecaster = ForecasterAutoregMultiVariate(
-                     regressor = Ridge(random_state=123),
-                     level     = 'l1',
-                     lags      = 2,
-                     steps     = 3
+                     regressor          = Ridge(random_state=123),
+                     level              = 'l1',
+                     lags               = 2,
+                     steps              = 3,
+                     transformer_series = None
                  )
 
     steps = 3
@@ -804,10 +818,11 @@ def test_evaluate_grid_hyperparameters_multiseries_when_return_best_ForecasterAu
     _evaluate_grid_hyperparameters_multiseries.
     """
     forecaster = ForecasterAutoregMultiVariate(
-                     regressor = Ridge(random_state=123),
-                     level     = 'l1',
-                     lags      = 2,
-                     steps     = 3
+                     regressor          = Ridge(random_state=123),
+                     level              = 'l1',
+                     lags               = 2,
+                     steps              = 3,
+                     transformer_series = None
                  )
 
     steps = 3

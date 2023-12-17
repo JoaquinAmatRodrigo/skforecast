@@ -130,8 +130,8 @@ def test_output_get_feature_importances_when_regressor_is_LinearRegression_with_
     results = forecaster.get_feature_importances()
     expected = pd.DataFrame({
                    'feature': ['custom_predictor_0', 'custom_predictor_1', 'custom_predictor_2', 'exog', '1', '2'],
-                   'importance': np.array([2.50000000e-01, 2.50000000e-01, 2.50000000e-01, 
-                                           2.50000000e-01, -8.32667268e-17, 8.32667268e-17])
+                   'importance': np.array([2.00000000e-01,  2.00000000e-01, 2.00000000e-01,  
+                                           2.82842712e-01, -8.32667268e-17, 8.32667268e-17])
                })
 
     pd.testing.assert_frame_equal(results, expected)
@@ -146,9 +146,9 @@ def test_output_and_UserWarning_get_feature_importances_when_regressor_no_attrib
     series_2 = pd.DataFrame({'1': pd.Series(np.arange(5)), 
                              '2': pd.Series(np.arange(5))})
     forecaster = ForecasterAutoregMultiSeriesCustom(
-                     regressor       = MLPRegressor(solver = 'lbfgs', max_iter= 50, random_state=123),
-                     fun_predictors  = create_predictors,
-                     window_size     = 3
+                     regressor      = MLPRegressor(solver = 'lbfgs', max_iter= 50, random_state=123),
+                     fun_predictors = create_predictors,
+                     window_size    = 3
                  )
     forecaster.fit(series=series_2)
 
@@ -173,9 +173,10 @@ def test_output_get_feature_importances_when_pipeline_LinearRegression():
     it is trained with series pandas DataFrame.
     """  
     forecaster = ForecasterAutoregMultiSeriesCustom(
-                     regressor       = make_pipeline(StandardScaler(), LinearRegression()),
-                     fun_predictors  = create_predictors,
-                     window_size     = 3
+                     regressor          = make_pipeline(StandardScaler(), LinearRegression()),
+                     fun_predictors     = create_predictors,
+                     window_size        = 3,
+                     transformer_series = None
                  )
     forecaster.fit(series=series)
 
@@ -198,8 +199,9 @@ def test_output_get_feature_importances_when_pipeline_RandomForestRegressor():
     forecaster = ForecasterAutoregMultiSeriesCustom(
                      regressor = make_pipeline(StandardScaler(), 
                                                RandomForestRegressor(n_estimators=1, max_depth=2, random_state=123)),
-                     fun_predictors  = create_predictors,
-                     window_size     = 3
+                     fun_predictors     = create_predictors,
+                     window_size        = 3,
+                     transformer_series = None
                  )
     forecaster.fit(series=series)
 

@@ -71,7 +71,7 @@ def test_fit_in_sample_residuals_stored_XGBRegressor():
     forecaster = ForecasterAutoreg(XGBRegressor(random_state=123), lags=3)
     forecaster.fit(y=pd.Series(np.arange(5)))
     results = forecaster.in_sample_residuals
-    expected = np.array([-0.0008831, 0.00088406])
+    expected = np.array([-0.00088382, 0.00088382])
 
     assert isinstance(results, np.ndarray)
     assert all(np.isclose(results, expected))

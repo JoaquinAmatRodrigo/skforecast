@@ -104,8 +104,8 @@ def test_output_get_feature_importances_when_regressor_is_LinearRegression_with_
     results = forecaster.get_feature_importances()
     expected = pd.DataFrame({
                     'feature': ['lag_1', 'lag_2', 'lag_3', 'exog', '1', '2'],
-                    'importance': np.array([2.50000000e-01, 2.50000000e-01, 2.50000000e-01, 
-                                            2.50000000e-01, -8.32667268e-17, 8.32667268e-17])
+                    'importance': np.array([2.00000000e-01,  2.00000000e-01, 2.00000000e-01,  
+                                            2.82842712e-01, -8.32667268e-17, 8.32667268e-17])
                })
 
     pd.testing.assert_frame_equal(results, expected)
@@ -143,8 +143,9 @@ def test_output_get_feature_importances_when_pipeline_LinearRegression():
     it is trained with series pandas DataFrame.
     """
     forecaster = ForecasterAutoregMultiSeries(
-                     regressor = make_pipeline(StandardScaler(), LinearRegression()),
-                     lags      = 3
+                     regressor          = make_pipeline(StandardScaler(), LinearRegression()),
+                     lags               = 3,
+                     transformer_series = None
                  )
     forecaster.fit(series=series)
 
@@ -167,7 +168,8 @@ def test_output_get_feature_importances_when_pipeline_RandomForestRegressor():
     forecaster = ForecasterAutoregMultiSeries(
                      regressor = make_pipeline(StandardScaler(), 
                                                RandomForestRegressor(n_estimators=1, max_depth=2, random_state=123)),
-                     lags      = 3
+                     lags               = 3,
+                     transformer_series = None
                  )
     forecaster.fit(series=series)
 

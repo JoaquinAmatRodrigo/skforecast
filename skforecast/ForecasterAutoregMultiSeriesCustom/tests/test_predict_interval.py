@@ -66,10 +66,11 @@ def test_predict_output_when_regressor_is_LinearRegression_steps_is_1_in_sample_
     using in sample residuals. This test is equivalent to the next one.
     """
     forecaster = ForecasterAutoregMultiSeriesCustom(
-                    regressor       = LinearRegression(),
-                     fun_predictors = create_predictors,
-                     window_size    = 3,
-                )
+                     regressor           = LinearRegression(),
+                     fun_predictors     = create_predictors,
+                     window_size        = 3,
+                     transformer_series = None
+                 )
     forecaster.fit(series=series_2, store_in_sample_residuals=True)
     forecaster.in_sample_residuals['1'] = np.full_like(forecaster.in_sample_residuals['1'], fill_value=10)
     forecaster.in_sample_residuals['2'] = np.full_like(forecaster.in_sample_residuals['2'], fill_value=20)
@@ -86,10 +87,11 @@ def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_1_
     using in sample residuals.
     """
     forecaster = ForecasterAutoregMultiSeriesCustom(
-                    regressor       = LinearRegression(),
-                     fun_predictors = create_predictors,
-                     window_size    = 3,
-                )
+                     regressor           = LinearRegression(),
+                     fun_predictors     = create_predictors,
+                     window_size        = 3,
+                     transformer_series = None
+                 )
     forecaster.fit(series=series_2, store_in_sample_residuals=True)
 
     forecaster.in_sample_residuals['1'] = np.full_like(forecaster.in_sample_residuals['1'], fill_value=10)
@@ -161,10 +163,11 @@ def test_predict_output_when_regressor_is_LinearRegression_steps_is_2_in_sample_
     using in sample residuals. This test is equivalent to the next one.
     """
     forecaster = ForecasterAutoregMultiSeriesCustom(
-                    regressor      = LinearRegression(),
-                    fun_predictors = create_predictors,
-                    window_size    = 3,
-                )
+                     regressor           = LinearRegression(),
+                     fun_predictors     = create_predictors,
+                     window_size        = 3,
+                     transformer_series = None
+                 )
     forecaster.fit(series=series_2, store_in_sample_residuals=True)
     forecaster.in_sample_residuals['1'] = np.full_like(forecaster.in_sample_residuals['1'], fill_value=10)
     forecaster.in_sample_residuals['2'] = np.full_like(forecaster.in_sample_residuals['2'], fill_value=20)
@@ -181,10 +184,11 @@ def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_2_
     using in sample residuals.
     """
     forecaster = ForecasterAutoregMultiSeriesCustom(
-                    regressor      = LinearRegression(),
-                    fun_predictors = create_predictors,
-                    window_size    = 3,
-                )
+                     regressor           = LinearRegression(),
+                     fun_predictors     = create_predictors,
+                     window_size        = 3,
+                     transformer_series = None
+                 )
     forecaster.fit(series=series_2, store_in_sample_residuals=True)
 
     forecaster.in_sample_residuals['1'] = np.full_like(forecaster.in_sample_residuals['1'], fill_value=10)
@@ -226,10 +230,11 @@ def test_predict_output_when_regressor_is_LinearRegression_steps_is_1_in_sample_
     using out sample residuals.
     """
     forecaster = ForecasterAutoregMultiSeriesCustom(
-                    regressor      = LinearRegression(),
-                    fun_predictors = create_predictors,
-                    window_size    = 3,
-                )
+                     regressor           = LinearRegression(),
+                     fun_predictors     = create_predictors,
+                     window_size        = 3,
+                     transformer_series = None
+                 )
     forecaster.fit(series=series_2, store_in_sample_residuals=True)
 
     residuals = {'1': np.full_like(forecaster.in_sample_residuals['1'], fill_value=10), 
@@ -248,10 +253,11 @@ def test_predict_output_when_regressor_is_LinearRegression_steps_is_2_in_sample_
     using in sample residuals. This test is equivalent to the next one.
     """
     forecaster = ForecasterAutoregMultiSeriesCustom(
-                    regressor      = LinearRegression(),
-                    fun_predictors = create_predictors,
-                    window_size    = 3,
-                )
+                     regressor           = LinearRegression(),
+                     fun_predictors     = create_predictors,
+                     window_size        = 3,
+                     transformer_series = None
+                 )
     forecaster.fit(series=series_2, store_in_sample_residuals=True)
 
     residuals = {'1': np.full_like(forecaster.in_sample_residuals['1'], fill_value=10), 
@@ -332,7 +338,7 @@ def test_predict_interval_output_when_regressor_is_LinearRegression_with_transfo
                      window_size        = 3,
                      transformer_series = StandardScaler(),
                      transformer_exog   = transformer_exog,
-                )
+                 )
     forecaster.fit(series=series, exog=exog)
     predictions = forecaster.predict_interval(steps=5, levels=['1', '2'], exog=exog_predict)
     expected = pd.DataFrame(
