@@ -18,7 +18,7 @@
 
 <i class="fa-light fa-chart-line fa" style="font-size: 25px; color:#f26e1d;"></i>  [**Prediction intervals in forecasting models**](https://www.cienciadedatos.net/documentos/py42-forecasting-prediction-intervals-machine-learning.html)
 
-<i class="fa-duotone fa-water fa" style="font-size: 25px; color:teal;"></i> [**Multi-series forecasting**](https://www.cienciadedatos.net/documentos/py44-multi-series-forecasting-skforecast.html)
+<i class="fa-duotone fa-water fa" style="font-size: 25px; color:teal;"></i> [**Global Forecasting Models: Multi-series forecasting**](https://www.cienciadedatos.net/documentos/py44-multi-series-forecasting-skforecast.html)
 
 <i class="fa-solid fa-globe" style="font-size: 25px; color:#6b8e23;"></i> [**Global Forecasting Models: Comparative Analysis of Single and Multi-Series Forecasting Modeling**](https://www.cienciadedatos.net/documentos/py53-global-forecasting-models.html)
 
@@ -54,6 +54,6 @@ Universidad de Deusto / Deustuko Unibertsitatea**](https://youtu.be/MlktVhReO0E)
 
 <i class="fa-light fa-chart-line fa" style="font-size: 25px; color:#f26e1d;"></i>  [**Intervalos de predicción en modelos de forecasting**](https://www.cienciadedatos.net/documentos/py42-intervalos-prediccion-modelos-forecasting-machine-learning.html)
 
-<i class="fa-duotone fa-water fa" style="font-size: 25px; color:teal;"></i> [**Multi-series forecasting**](https://www.cienciadedatos.net/documentos/py44-multi-series-forecasting-skforecast-español.html)
+<i class="fa-duotone fa-water fa" style="font-size: 25px; color:teal;"></i> [**Global Forecasting Models: Multi-series forecasting**](https://www.cienciadedatos.net/documentos/py44-multi-series-forecasting-skforecast-español.html)
 
 <i class="fa-solid fa-wave-square" style="color: #fbbb09;"></i> [**Predicción demanda intermitente**](https://www.cienciadedatos.net/documentos/py48-forecasting-demanda-intermitente.html)
