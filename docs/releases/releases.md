@@ -6,6 +6,8 @@ All significant changes to this project are documented in this release file.
 
 The main changes in this release are:
 
++ Changed the default value of the `transformer_series` argument to use a `StandardScaler()` in the Global Forecasters (`ForecasterAutoregMultiSeries`, `ForecasterAutoregMultiSeriesCustom` and `ForecasterAutoregMultiVariate`).
+
 + 
 
 **Added**
@@ -15,6 +17,10 @@ The main changes in this release are:
 **Changed**
 
 + 
+
++ Changed the default value of the `transformer_series` argument to use a `StandardScaler()` in the Global Forecasters (`ForecasterAutoregMultiSeries`, `ForecasterAutoregMultiSeriesCustom` and `ForecasterAutoregMultiVariate`).
+
++ Remove `_backtesting_forecaster_verbose` in model_selection in favor of `_create_backtesting_folds`, (deprecated since 0.8.0).
 
 **Fixed**
 
