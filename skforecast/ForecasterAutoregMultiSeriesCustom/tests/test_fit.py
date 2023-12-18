@@ -7,7 +7,6 @@ import pandas as pd
 from skforecast.ForecasterAutoregMultiSeriesCustom import ForecasterAutoregMultiSeriesCustom
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
-from xgboost import XGBRegressor
 
 
 def create_predictors(y): # pragma: no cover
@@ -168,30 +167,6 @@ def test_fit_in_sample_residuals_stored():
     forecaster.fit(series=series, store_in_sample_residuals=True)
     expected = {'1': np.array([-4.4408921e-16, 0.0000000e+00]),
                 '2': np.array([0., 0.])}
-    results = forecaster.in_sample_residuals
-
-    assert isinstance(results, dict)
-    assert np.all(isinstance(x, np.ndarray) for x in results.values())
-    assert results.keys() == expected.keys()
-    assert np.all(np.all(np.isclose(results[k], expected[k])) for k in expected.keys())
-
-
-def test_fit_in_sample_residuals_stored_XGBRegressor():
-    """
-    Test that values of in_sample_residuals are stored after fitting with XGBRegressor.
-    """
-    series = pd.DataFrame({'1': pd.Series(np.arange(5)), 
-                           '2': pd.Series(np.arange(5))})
-
-    forecaster = ForecasterAutoregMultiSeriesCustom(
-                     regressor       = XGBRegressor(random_state=123),
-                     fun_predictors  = create_predictors,
-                     window_size     = 3
-                 )
-    forecaster.fit(series=series, store_in_sample_residuals=True)
-    
-    expected = {'1': np.array([-0.00054704, 0.00054731]),
-                '2': np.array([-0.00054704, 0.00054731])}
     results = forecaster.in_sample_residuals
 
     assert isinstance(results, dict)

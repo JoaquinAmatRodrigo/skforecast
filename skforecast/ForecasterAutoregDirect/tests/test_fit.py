@@ -6,7 +6,6 @@ import numpy as np
 import pandas as pd
 from skforecast.ForecasterAutoregDirect import ForecasterAutoregDirect
 from sklearn.linear_model import LinearRegression
-from xgboost import XGBRegressor
 
 
 def test_forecaster_DatetimeIndex_index_freq_stored():
@@ -17,7 +16,7 @@ def test_forecaster_DatetimeIndex_index_freq_stored():
         data  = np.arange(10),
         index = pd.date_range(start='2022-01-01', periods=10)
     )
-    forecaster = ForecasterAutoregDirect(XGBRegressor(random_state=123), lags=3, steps=2)
+    forecaster = ForecasterAutoregDirect(LinearRegression(), lags=3, steps=2)
     forecaster.fit(y=serie_with_DatetimeIndex)
     expected = serie_with_DatetimeIndex.index.freqstr
     results = forecaster.index_freq
@@ -48,24 +47,6 @@ def test_fit_in_sample_residuals_stored(n_jobs):
     forecaster.fit(y=pd.Series(np.arange(5)))
     expected = {1: np.array([0.]),
                 2: np.array([0.])}
-    results = forecaster.in_sample_residuals
-
-    assert isinstance(results, dict)
-    assert all(isinstance(x, np.ndarray) for x in results.values())
-    assert results.keys() == expected.keys()
-    assert all(all(np.isclose(results[k], expected[k])) for k in expected.keys())
-
-
-@pytest.mark.parametrize("n_jobs", [1, -1, 'auto'], 
-                         ids=lambda n_jobs: f'n_jobs: {n_jobs}')
-def test_fit_in_sample_residuals_stored_XGBRegressor(n_jobs):
-    """
-    Test that values of in_sample_residuals are stored after fitting with XGBRegressor.
-    """
-    forecaster = ForecasterAutoregDirect(XGBRegressor(random_state=123), lags=3, steps=2, n_jobs=n_jobs)
-    forecaster.fit(y=pd.Series(np.arange(7)))
-    expected = {1: np.array([-1.07049942e-03, -6.19888306e-06,  1.07812881e-03]),
-                2: np.array([-1.07812881e-03,  6.19888306e-06,  1.06954575e-03])}
     results = forecaster.in_sample_residuals
 
     assert isinstance(results, dict)

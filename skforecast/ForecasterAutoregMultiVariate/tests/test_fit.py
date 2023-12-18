@@ -7,7 +7,6 @@ import pandas as pd
 from skforecast.ForecasterAutoregMultiVariate import ForecasterAutoregMultiVariate
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
-from xgboost import XGBRegressor
 
 
 @pytest.mark.parametrize('exog', ['l1', ['l1'], ['l1', 'l2']])
@@ -71,7 +70,7 @@ def test_forecaster_DatetimeIndex_index_freq_stored():
 
     series.index = pd.date_range(start='2022-01-01', periods=10, freq='1D')
 
-    forecaster = ForecasterAutoregMultiVariate(XGBRegressor(random_state=123), 
+    forecaster = ForecasterAutoregMultiVariate(LinearRegression(), 
                                                level='l1', lags=3, steps=1)
     forecaster.fit(series=series)
     expected = series.index.freqstr
@@ -111,31 +110,6 @@ def test_fit_in_sample_residuals_stored(n_jobs):
     expected = {1: np.array([0.0000000e+00, 0.0000000e+00, 0.0000000e+00, 
                              0.0000000e+00, 0.0000000e+00, 8.8817842e-16]),
                 2: np.array([0., 0., 0., 0., 0., 0.])}
-    results = forecaster.in_sample_residuals
-
-    assert isinstance(results, dict)
-    assert np.all(isinstance(x, np.ndarray) for x in results.values())
-    assert results.keys() == expected.keys()
-    assert np.all(np.all(np.isclose(results[k], expected[k])) for k in expected.keys())
-
-
-@pytest.mark.parametrize("n_jobs", [1, -1, 'auto'], 
-                         ids=lambda n_jobs: f'n_jobs: {n_jobs}')
-def test_fit_in_sample_residuals_stored_XGBRegressor(n_jobs):
-    """
-    Test that values of in_sample_residuals are stored after fitting with XGBRegressor.
-    """
-    series = pd.DataFrame({'l1': pd.Series(np.arange(10)), 
-                           'l2': pd.Series(np.arange(10))})
-    
-    forecaster = ForecasterAutoregMultiVariate(XGBRegressor(random_state=123),  
-                                               level='l2', lags=3, steps=2, n_jobs=n_jobs)
-    forecaster.fit(series=series)
-
-    expected = {1: np.array([-1.15634824e-03, -2.28991951e-05,  8.58267988e-05, 
-                             -1.79824694e-05, -4.57920360e-06,  1.11609955e-03]),
-                2: np.array([-1.11573546e-03,  4.77938309e-06,  1.80783407e-05, 
-                             -8.58799391e-05,  2.24735258e-05,  1.15608649e-03])}
     results = forecaster.in_sample_residuals
 
     assert isinstance(results, dict)

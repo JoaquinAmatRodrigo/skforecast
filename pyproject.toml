@@ -79,12 +79,12 @@ docs = [
 ]
 
 test = [
-    "pytest>=7.1.2, <7.5",
+    "pytest>=7.1, <7.5",
     "pytest-cov>=3.0.0, <4.2",
-    "xgboost>=1.6.1, <1.8",
-    "lightgbm <3.4",
-    "pytest-xdist <3.4",
-    "tomli >=2.0.0"
+    "xgboost>=2.0.0, <2.1",
+    "lightgbm>=4.0.0, <4.2",
+    "pytest-xdist>=3.3, <3.6",
+    "tomli>=2.0, <2.1"
 ]
 
 
