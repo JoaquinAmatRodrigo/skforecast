@@ -45,7 +45,6 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
     This class turns any regressor compatible with the scikit-learn API into a
     recursive autoregressive (multi-step) forecaster for multiple series with a custom
     function to create predictors.
-    **New in version 0.7.0**
     
     Parameters
     ----------

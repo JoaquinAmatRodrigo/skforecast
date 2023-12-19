@@ -93,10 +93,8 @@ class ForecasterAutoregCustom(ForecasterBase):
     fun_predictors : Callable
         Function that receives a time series as input (numpy ndarray) and returns
         another numpy ndarray with the predictors.
-        **New in version 0.7.0**
     source_code_fun_predictors : str
         Source code of the custom function used to create the predictors.
-        **New in version 0.7.0**
     window_size : int
         Size of the window needed by `fun_predictors` to create the predictors.
         If `differentiation` is not `None`, `window_size` is increased by the
