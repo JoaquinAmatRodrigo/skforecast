@@ -1058,9 +1058,14 @@ def _evaluate_grid_hyperparameters(
                 IgnoredArgumentWarning
             )
         lags_grid = ['custom predictors']
-        
+
+    lags_label = 'values'
+    if isinstance(lags_grid, list):
+        lags_grid = {f'{lags}': lags for lags in lags_grid}
     elif lags_grid is None:
-        lags_grid = [forecaster.lags]
+        lags_grid = {f'{list(forecaster.lags)}': list(forecaster.lags)}
+    else:
+        lags_label = 'keys'
    
     lags_list = []
     params_list = []
@@ -1076,14 +1081,16 @@ def _evaluate_grid_hyperparameters(
     print(f"Number of models compared: {len(param_grid)*len(lags_grid)}.")
 
     if show_progress:
-        lags_grid = tqdm(lags_grid, desc='lags grid', position=0) #ncols=90
+        lags_grid_tqdm = tqdm(lags_grid.items(), desc='lags grid', position=0) #ncols=90
         param_grid = tqdm(param_grid, desc='params grid', position=1, leave=False)
+    else:
+        lags_grid_tqdm = lags_grid.items()
 
-    for lags in lags_grid:
+    for lags_k, lags_v in lags_grid_tqdm:
         
         if type(forecaster).__name__ in ['ForecasterAutoreg', 'ForecasterAutoregDirect']:
-            forecaster.set_lags(lags)
-            lags = forecaster.lags.copy()
+            forecaster.set_lags(lags_v)
+            lags_v = lags_k if lags_label == 'keys' else forecaster.lags.copy()
         
         for params in param_grid:
 
@@ -1104,17 +1111,18 @@ def _evaluate_grid_hyperparameters(
                                  verbose               = verbose,
                                  show_progress         = False
                              )[0]
-            warnings.filterwarnings('ignore', category=RuntimeWarning, message= "The forecaster will be fit.*")
-            lags_list.append(lags)
+            warnings.filterwarnings('ignore', category=RuntimeWarning, 
+                                    message= "The forecaster will be fit.*")
+            lags_list.append(lags_v)
             params_list.append(params)
             for m, m_value in zip(metric, metrics_values):
                 m_name = m if isinstance(m, str) else m.__name__
                 metric_dict[m_name].append(m_value)
 
     results = pd.DataFrame({
-                 'lags'  : lags_list,
-                 'params': params_list,
-                 **metric_dict
+                  'lags'  : lags_list,
+                  'params': params_list,
+                  **metric_dict
               })
     
     results = results.sort_values(by=list(metric_dict.keys())[0], ascending=True)
@@ -1125,15 +1133,19 @@ def _evaluate_grid_hyperparameters(
         best_lags = results['lags'].iloc[0]
         best_params = results['params'].iloc[0]
         best_metric = results[list(metric_dict.keys())[0]].iloc[0]
+
+        if lags_label == 'keys':
+            best_lags = lags_grid[best_lags]
         
         if type(forecaster).__name__ in ['ForecasterAutoreg', 'ForecasterAutoregDirect']:
             forecaster.set_lags(best_lags)
+        
         forecaster.set_params(best_params)
         forecaster.fit(y=y, exog=exog)
         
         print(
             f"`Forecaster` refitted using the best-found lags and parameters, and the whole data set: \n"
-            f"  Lags: {best_lags} \n"
+            f"  Lags: {forecaster.lags} \n"
             f"  Parameters: {best_params}\n"
             f"  Backtesting metric: {best_metric}\n"
         )
