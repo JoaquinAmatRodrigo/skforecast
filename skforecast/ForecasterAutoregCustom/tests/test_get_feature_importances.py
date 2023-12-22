@@ -54,7 +54,7 @@ def test_output_get_feature_importances_when_regressor_is_RandomForest():
                  )
     forecaster.fit(y=pd.Series(np.arange(10)))
 
-    results = forecaster.get_feature_importances()
+    results = forecaster.get_feature_importances(sort_importance=False)
     expected = pd.DataFrame({
                    'feature': ['custom_predictor_0', 'custom_predictor_1',
                                'custom_predictor_2', 'custom_predictor_3',
@@ -84,7 +84,7 @@ def test_output_get_feature_importances_when_regressor_is_RandomForest_with_exog
                                'custom_predictor_2', 'custom_predictor_3',
                                'custom_predictor_4', 'exog'],
                    'importance': np.array([0.76190476, 0., 0.05952381, 0.17857143, 0., 0.])
-               })
+               }).sort_values(by='importance', ascending=False)
 
     pd.testing.assert_frame_equal(results, expected)
 
@@ -101,7 +101,7 @@ def test_output_get_feature_importances_when_regressor_is_LinearRegression():
                  )
     forecaster.fit(y=pd.Series(np.arange(7)))
 
-    results = forecaster.get_feature_importances()
+    results = forecaster.get_feature_importances(sort_importance=False)
     expected = pd.DataFrame({
                    'feature': ['custom_predictor_0', 'custom_predictor_1',
                                'custom_predictor_2', 'custom_predictor_3',
@@ -125,7 +125,7 @@ def test_output_get_feature_importances_when_regressor_is_LinearRegression_with_
                  )
     forecaster.fit(y=pd.Series(np.arange(7)), exog=pd.Series(np.arange(10, 17), name='exog'))
     
-    results = forecaster.get_feature_importances()
+    results = forecaster.get_feature_importances(sort_importance=False)
     expected = pd.DataFrame({
                    'feature': ['custom_predictor_0', 'custom_predictor_1',
                                'custom_predictor_2', 'custom_predictor_3',
@@ -176,7 +176,7 @@ def test_output_get_feature_importances_when_pipeline_LinearRegression():
                  )
     forecaster.fit(y=pd.Series(np.arange(7)))
 
-    results = forecaster.get_feature_importances()
+    results = forecaster.get_feature_importances(sort_importance=False)
     expected = pd.DataFrame({
                    'feature': ['custom_predictor_0', 'custom_predictor_1',
                                'custom_predictor_2', 'custom_predictor_3',
@@ -201,7 +201,7 @@ def test_output_get_feature_importances_when_pipeline_RandomForestRegressor():
                  )
     forecaster.fit(y=pd.Series(np.arange(10)))
     
-    results = forecaster.get_feature_importances()
+    results = forecaster.get_feature_importances(sort_importance=False)
     expected = pd.DataFrame({
                    'feature': ['custom_predictor_0', 'custom_predictor_1',
                                'custom_predictor_2', 'custom_predictor_3',

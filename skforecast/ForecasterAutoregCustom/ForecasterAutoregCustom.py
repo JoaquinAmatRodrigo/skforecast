@@ -1286,7 +1286,8 @@ class ForecasterAutoregCustom(ForecasterBase):
 
     
     def get_feature_importances(
-        self
+        self,
+        sort_importance: bool=True
     ) -> pd.DataFrame:
         """
         Return feature importances of the regressor stored in the forecaster.
@@ -1295,7 +1296,8 @@ class ForecasterAutoregCustom(ForecasterBase):
 
         Parameters
         ----------
-        self
+        sort_importance: bool, default `True`
+            If `True`, sorts the feature importances in descending order.
 
         Returns
         -------
@@ -1333,5 +1335,9 @@ class ForecasterAutoregCustom(ForecasterBase):
                                       'feature': self.X_train_col_names,
                                       'importance': feature_importances
                                   })
+            if sort_importance:
+                feature_importances = feature_importances.sort_values(
+                                          by='importance', ascending=False
+                                      )
 
         return feature_importances

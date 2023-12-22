@@ -14,6 +14,8 @@ The main changes in this release are:
 
 + Added `save_custom_functions` argument to the `save_forecaster` function in the `utils` module. If `True`, save custom functions used in the forecaster (`fun_predictors` and `weight_func`) as .py files. Custom functions must be available in the environment where the forecaster is loaded.
 
++ Added `sort_importance` argument to `get_feature_importances` method in all Forecasters. If `True`, sort the feature importances in descending order.
+
 **Changed**
 
 + 
