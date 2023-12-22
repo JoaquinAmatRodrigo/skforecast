@@ -12,6 +12,8 @@ The main changes in this release are:
 
 + Added `save_custom_functions` argument to the `save_forecaster` function in the `utils` module. If `True`, save custom functions used in the forecaster (`fun_predictors` and `weight_func`) as .py files. Custom functions must be available in the environment where the forecaster is loaded.
 
++ Added `feature_selection_rfecv` function to the `model_selection` module to perform feature selection using recursive feature elimination with cross-validation.
+
 **Changed**
 
 + 
