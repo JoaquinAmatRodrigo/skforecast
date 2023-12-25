@@ -414,7 +414,8 @@ def _backtesting_forecaster(
     if not isinstance(metric, list):
         metrics = [_get_metric(metric=metric) if isinstance(metric, str) else metric]
     else:
-        metrics = [_get_metric(metric=m) if isinstance(m, str) else m for m in metric]
+        metrics = [_get_metric(metric=m) if isinstance(m, str) else m 
+                   for m in metric]
 
     store_in_sample_residuals = False if interval is None else True
 
@@ -673,12 +674,14 @@ def backtesting_forecaster(
         - column upper_bound: upper bound of the interval.
     
     """
+
     forecaters_allowed = [
         'ForecasterAutoreg', 
         'ForecasterAutoregCustom', 
         'ForecasterAutoregDirect',
         'ForecasterEquivalentDate'
     ]
+    
     if type(forecaster).__name__ not in forecaters_allowed:
         raise TypeError(
             (f"`forecaster` must be of type {forecaters_allowed}, for all other types of "
@@ -1050,22 +1053,52 @@ def _evaluate_grid_hyperparameters(
             (f"`exog` must have same number of samples as `y`. "
              f"length `exog`: ({len(exog)}), length `y`: ({len(y)})")
         )
+    
+    # TODO: move to utils and use in model_selection_multiseries
+    def _initialize_lags_grid(forecaster, lags_grid):
+        """
+        Initialize lags grid and lags label for model selection. 
 
-    if type(forecaster).__name__ == 'ForecasterAutoregCustom':
-        if lags_grid is not None:
-            warnings.warn(
-                "`lags_grid` ignored if forecaster is an instance of `ForecasterAutoregCustom`.",
-                IgnoredArgumentWarning
-            )
-        lags_grid = ['custom predictors']
+        Parameters
+        ----------
+        forecaster : Forecaster
+            Forecaster model. ForecasterAutoreg, ForecasterAutoregCustom, 
+            ForecasterAutoregDirect, ForecasterAutoregMultiSeries, 
+            ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate.
+        lags_grid : list of int, lists, numpy ndarray or range, default `None`
+            Lists of `lags` to try. Ignored if forecaster is an instance of 
+            `ForecasterAutoregCustom` or `ForecasterAutoregMultiSeriesCustom`.
 
-    lags_label = 'values'
-    if isinstance(lags_grid, list):
-        lags_grid = {f'{lags}': lags for lags in lags_grid}
-    elif lags_grid is None:
-        lags_grid = {f'{list(forecaster.lags)}': list(forecaster.lags)}
-    else:
-        lags_label = 'keys'
+        Returns
+        -------
+        lags_grid : dict
+            Dictionary with lags configuration for each iteration.
+        lags_label : str
+            Label for lags representation in the results object.
+
+        """
+
+        if type(forecaster).__name__ in ['ForecasterAutoregCustom', 
+                                         'ForecasterAutoregMultiSeriesCustom']:
+            if lags_grid is not None:
+                warnings.warn(
+                    ("`lags_grid` ignored if forecaster is an instance of "
+                     "`ForecasterAutoregCustom` or `ForecasterAutoregMultiSeriesCustom`."),
+                    IgnoredArgumentWarning
+                )
+            lags_grid = ['custom predictors']
+
+        lags_label = 'values'
+        if isinstance(lags_grid, list):
+            lags_grid = {f'{lags}': lags for lags in lags_grid}
+        elif lags_grid is None:
+            lags_grid = {f'{list(forecaster.lags)}': list(forecaster.lags)}
+        else:
+            lags_label = 'keys'
+
+        return lags_grid, lags_label
+    
+    lags_grid, lags_label = _initialize_lags_grid(forecaster, lags_grid)
    
     lags_list = []
     params_list = []
@@ -1238,7 +1271,7 @@ def bayesian_search_forecaster(
         Whether to show a progress bar.
     engine : str, default `'optuna'`
         Bayesian optimization runs through the optuna library.
-    kwargs_create_study : dict, default `{'direction':'minimize', 'sampler':TPESampler(seed=123)}`
+    kwargs_create_study : dict, default `{'direction': 'minimize', 'sampler': TPESampler(seed=123)}`
         Only applies to engine='optuna'. Keyword arguments (key, value mappings) 
         to pass to optuna.create_study.
     kwargs_study_optimize : dict, default `{}`
@@ -1254,15 +1287,15 @@ def bayesian_search_forecaster(
         - column params: parameters configuration for each iteration.
         - column metric: metric value estimated for each iteration.
         - additional n columns with param = value.
-    results_opt_best : optuna object (optuna)  
+    results_opt_best : optuna object
         The best optimization result returned as a FrozenTrial optuna object.
     
     """
 
     if return_best and exog is not None and (len(exog) != len(y)):
         raise ValueError(
-            f'`exog` must have same number of samples as `y`. '
-            f'length `exog`: ({len(exog)}), length `y`: ({len(y)})'
+            (f'`exog` must have same number of samples as `y`. '
+             f'length `exog`: ({len(exog)}), length `y`: ({len(y)})')
         )
     
     if engine == 'skopt':
@@ -1275,7 +1308,7 @@ def bayesian_search_forecaster(
 
     if engine not in ['optuna']:
         raise ValueError(
-            f"""`engine` only allows 'optuna', got {engine}."""
+            f"`engine` only allows 'optuna', got {engine}."
         )
 
     results, results_opt_best = _bayesian_search_optuna(
@@ -1385,7 +1418,7 @@ def _bayesian_search_optuna(
         Print number of folds used for cv or backtesting.
     show_progress: bool, default `True`
         Whether to show a progress bar.
-    kwargs_create_study : dict, default `{'direction':'minimize', 'sampler':TPESampler(seed=123)}`
+    kwargs_create_study : dict, default `{'direction': 'minimize', 'sampler': TPESampler(seed=123)}`
         Keyword arguments (key, value mappings) to pass to optuna.create_study.
     kwargs_study_optimize : dict, default `{}`
         Other keyword arguments (key, value mappings) to pass to study.optimize().

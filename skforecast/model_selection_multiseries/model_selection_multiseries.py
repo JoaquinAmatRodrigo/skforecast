@@ -165,7 +165,7 @@ def _backtesting_forecaster_multiseries(
         levels = [forecaster.level]
     else:
         if levels is None:
-            # Forecaster can be not fitted, so cannot use self.series_col_names
+            # Forecaster could be untrained, so self.series_col_names cannot be used.
             levels = list(series.columns) 
         elif isinstance(levels, str):
             levels = [levels]
@@ -173,7 +173,8 @@ def _backtesting_forecaster_multiseries(
     if not isinstance(metric, list):
         metrics = [_get_metric(metric=metric) if isinstance(metric, str) else metric]
     else:
-        metrics = [_get_metric(metric=m) if isinstance(m, str) else m for m in metric]
+        metrics = [_get_metric(metric=m) if isinstance(m, str) else m 
+                   for m in metric]
 
     store_in_sample_residuals = False if interval is None else True
 
@@ -570,7 +571,7 @@ def grid_search_forecaster_multiseries(
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
-    lags_grid : list of int, lists, np.narray or range, default `None`
+    lags_grid : list of int, lists, numpy ndarray or range, default `None`
         Lists of `lags` to try. Only used if forecaster is an instance of 
         `ForecasterAutoregMultiSeries` or `ForecasterAutoregMultiVariate`.
     refit : bool, int, default `False`
@@ -689,7 +690,7 @@ def random_search_forecaster_multiseries(
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
-    lags_grid : list of int, lists, np.narray or range, default `None`
+    lags_grid : list of int, lists, numpy ndarray or range, default `None`
         Lists of `lags` to try. Only used if forecaster is an instance of 
         `ForecasterAutoregMultiSeries` or `ForecasterAutoregMultiVariate`.
     refit : bool, int, default `False`
@@ -811,7 +812,7 @@ def _evaluate_grid_hyperparameters_multiseries(
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
-    lags_grid : list of int, lists, np.narray or range, default `None`
+    lags_grid : list of int, lists, numpy ndarray or range, default `None`
         Lists of `lags` to try. Only used if forecaster is an instance of 
         `ForecasterAutoregMultiSeries` or `ForecasterAutoregMultiVariate`.
     refit : bool, int, default `False`
@@ -862,7 +863,7 @@ def _evaluate_grid_hyperparameters_multiseries(
         levels = [forecaster.level]
     else:
         if levels is None:
-            # Forecaster can be not fitted, so cannot use self.series_col_names
+            # Forecaster could be untrained, so self.series_col_names cannot be used.
             levels = list(series.columns) 
         elif isinstance(levels, str):
             levels = [levels]
@@ -1166,7 +1167,7 @@ def grid_search_forecaster_multivariate(
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
-    lags_grid : list of int, lists, np.narray or range, default `None`
+    lags_grid : list of int, lists, numpy ndarray or range, default `None`
         Lists of `lags` to try. Only used if forecaster is an instance of 
         `ForecasterAutoregMultiSeries` or `ForecasterAutoregMultiVariate`.
     refit : bool, int, default `False`
@@ -1285,7 +1286,7 @@ def random_search_forecaster_multivariate(
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
-    lags_grid : list of int, lists, np.narray or range, default `None`
+    lags_grid : list of int, lists, numpy ndarray or range, default `None`
         Lists of `lags` to try. Only used if forecaster is an instance of 
         `ForecasterAutoregMultiSeries` or `ForecasterAutoregMultiVariate`.
     refit : bool, int, default `False`
