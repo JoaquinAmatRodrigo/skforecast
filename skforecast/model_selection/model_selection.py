@@ -1088,7 +1088,7 @@ def _evaluate_grid_hyperparameters(
 
     for lags_k, lags_v in lags_grid_tqdm:
         
-        if type(forecaster).__name__ in ['ForecasterAutoreg', 'ForecasterAutoregDirect']:
+        if type(forecaster).__name__ != 'ForecasterAutoregCustom':
             forecaster.set_lags(lags_v)
             lags_v = lags_k if lags_label == 'keys' else forecaster.lags.copy()
         
@@ -1137,14 +1137,15 @@ def _evaluate_grid_hyperparameters(
         if lags_label == 'keys':
             best_lags = lags_grid[best_lags]
         
-        if type(forecaster).__name__ in ['ForecasterAutoreg', 'ForecasterAutoregDirect']:
+        if type(forecaster).__name__ != 'ForecasterAutoregCustom':
             forecaster.set_lags(best_lags)
         
         forecaster.set_params(best_params)
         forecaster.fit(y=y, exog=exog)
         
         print(
-            f"`Forecaster` refitted using the best-found lags and parameters, and the whole data set: \n"
+            f"`Forecaster` refitted using the best-found lags and parameters, "
+            f"and the whole data set: \n"
             f"  Lags: {forecaster.lags} \n"
             f"  Parameters: {best_params}\n"
             f"  Backtesting metric: {best_metric}\n"
@@ -1419,7 +1420,8 @@ def _bayesian_search_optuna(
     results_opt_best = None
     if not isinstance(metric, list):
         metric = [metric] 
-    metric_dict = {(m if isinstance(m, str) else m.__name__): [] for m in metric}
+    metric_dict = {(m if isinstance(m, str) else m.__name__): [] 
+                   for m in metric}
     
     if len(metric_dict) != len(metric):
         raise ValueError(
@@ -1429,19 +1431,19 @@ def _bayesian_search_optuna(
     # Objective function using backtesting_forecaster
     def _objective(
         trial,
+        search_space          = search_space,
         forecaster            = forecaster,
         y                     = y,
         exog                  = exog,
+        steps                 = steps,
+        metric                = metric,
         initial_train_size    = initial_train_size,
         fixed_train_size      = fixed_train_size,
         gap                   = gap,
         allow_incomplete_fold = allow_incomplete_fold,
-        steps                 = steps,
-        metric                = metric,
         refit                 = refit,
         n_jobs                = n_jobs,
         verbose               = verbose,
-        search_space          = search_space,
     ) -> float:
         
         forecaster.set_params(search_space(trial))
@@ -1480,7 +1482,7 @@ def _bayesian_search_optuna(
         # It is a trick to extract multiple values from _objective function since
         # only the optimized value can be returned.
 
-        if type(forecaster).__name__ in ['ForecasterAutoreg', 'ForecasterAutoregDirect']:
+        if type(forecaster).__name__ != 'ForecasterAutoregCustom':
             forecaster.set_lags(lags)
             lags = forecaster.lags.copy()
         
@@ -1518,11 +1520,11 @@ def _bayesian_search_optuna(
             if best_trial.value < results_opt_best.value:
                 results_opt_best = best_trial
         
-    results = pd.DataFrame(
-                  {'lags'  : lags_list,
-                   'params': params_list,
-                   **metric_dict}
-              )
+    results = pd.DataFrame({
+                  'lags'  : lags_list,
+                  'params': params_list,
+                  **metric_dict
+              })
 
     results = results.sort_values(by=list(metric_dict.keys())[0], ascending=True)
     results = pd.concat([results, results['params'].apply(pd.Series)], axis=1)
@@ -1533,7 +1535,7 @@ def _bayesian_search_optuna(
         best_params = results['params'].iloc[0]
         best_metric = results[list(metric_dict.keys())[0]].iloc[0]
         
-        if type(forecaster).__name__ in ['ForecasterAutoreg', 'ForecasterAutoregDirect']:
+        if type(forecaster).__name__ != 'ForecasterAutoregCustom':
             forecaster.set_lags(best_lags)
         forecaster.set_params(best_params)
         forecaster.fit(y=y, exog=exog)

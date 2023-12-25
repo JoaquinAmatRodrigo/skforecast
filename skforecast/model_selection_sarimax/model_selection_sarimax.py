@@ -803,7 +803,8 @@ def _evaluate_grid_hyperparameters_sarimax(
         forecaster.fit(y=y, exog=exog, suppress_warnings=suppress_warnings_fit)
         
         print(
-            f"`Forecaster` refitted using the best-found parameters, and the whole data set: \n"
+            f"`Forecaster` refitted using the best-found parameters, "
+            f"and the whole data set: \n"
             f"  Parameters: {best_params}\n"
             f"  Backtesting metric: {best_metric}\n"
         )

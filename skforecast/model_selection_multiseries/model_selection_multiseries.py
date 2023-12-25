@@ -882,7 +882,8 @@ def _evaluate_grid_hyperparameters_multiseries(
     params_list = []
     if not isinstance(metric, list):
         metric = [metric] 
-    metric_dict = {(m if isinstance(m, str) else m.__name__): [] for m in metric}
+    metric_dict = {(m if isinstance(m, str) else m.__name__): [] 
+                   for m in metric}
     
     if len(metric_dict) != len(metric):
         raise ValueError(
@@ -900,8 +901,7 @@ def _evaluate_grid_hyperparameters_multiseries(
 
     for lags in lags_grid:
 
-        if type(forecaster).__name__ in ['ForecasterAutoregMultiSeries', 
-                                         'ForecasterAutoregMultiVariate']:
+        if type(forecaster).__name__ != 'ForecasterAutoregMultiSeriesCustom':
             forecaster.set_lags(lags)
             lags = forecaster.lags.copy()
         
@@ -911,6 +911,7 @@ def _evaluate_grid_hyperparameters_multiseries(
             metrics_levels = backtesting_forecaster_multiseries(
                                  forecaster            = forecaster,
                                  series                = series,
+                                 exog                  = exog,
                                  steps                 = steps,
                                  levels                = levels,
                                  metric                = metric,
@@ -918,7 +919,6 @@ def _evaluate_grid_hyperparameters_multiseries(
                                  fixed_train_size      = fixed_train_size,
                                  gap                   = gap,
                                  allow_incomplete_fold = allow_incomplete_fold,
-                                 exog                  = exog,
                                  refit                 = refit,
                                  interval              = None,
                                  verbose               = verbose,
@@ -956,7 +956,8 @@ def _evaluate_grid_hyperparameters_multiseries(
         forecaster.fit(series=series, exog=exog, store_in_sample_residuals=True)
         
         print(
-            f"`Forecaster` refitted using the best-found lags and parameters, and the whole data set: \n"
+            f"`Forecaster` refitted using the best-found lags and parameters, "
+            f"and the whole data set: \n"
             f"  Lags: {best_lags}\n"
             f"  Parameters: {best_params}\n"
             f"  Backtesting metric: {best_metric}\n"
