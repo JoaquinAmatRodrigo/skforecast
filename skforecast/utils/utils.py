@@ -1714,8 +1714,7 @@ def check_backtesting_input(
 
 
 def select_n_jobs_backtesting(
-    forecaster_name: str,
-    regressor_name: str,
+    forecaster,
     refit: Union[bool, int]
 ) -> int:
     """
@@ -1726,29 +1725,29 @@ def select_n_jobs_backtesting(
 
     - If `refit` is an integer, then n_jobs=1. This is because parallelization doesn't 
     work with intermittent refit.
-    - If forecaster_name is 'ForecasterAutoreg' or 'ForecasterAutoregCustom' and
-    regressor_name is a linear regressor, then n_jobs=1.
-    - If forecaster_name is 'ForecasterAutoreg' or 'ForecasterAutoregCustom',
-    regressor_name is not a linear regressor and refit=`True`, then
+    - If forecaster is 'ForecasterAutoreg' or 'ForecasterAutoregCustom' and
+    regressor is a linear regressor, then n_jobs=1.
+    - If forecaster is 'ForecasterAutoreg' or 'ForecasterAutoregCustom',
+    regressor is not a linear regressor and refit=`True`, then
     n_jobs=cpu_count().
-    - If forecaster_name is 'ForecasterAutoreg' or 'ForecasterAutoregCustom',
-    regressor_name is not a linear regressor and refit=`False`, then
+    - If forecaster is 'ForecasterAutoreg' or 'ForecasterAutoregCustom',
+    regressor is not a linear regressor and refit=`False`, then
     n_jobs=1.
-    - If forecaster_name is 'ForecasterAutoregDirect' or 'ForecasterAutoregMultiVariate'
+    - If forecaster is 'ForecasterAutoregDirect' or 'ForecasterAutoregMultiVariate'
     and refit=`True`, then n_jobs=cpu_count().
-    - If forecaster_name is 'ForecasterAutoregDirect' or 'ForecasterAutoregMultiVariate'
+    - If forecaster is 'ForecasterAutoregDirect' or 'ForecasterAutoregMultiVariate'
     and refit=`False`, then n_jobs=1.
-    - If forecaster_name is 'ForecasterAutoregMultiseries' or 
-    'ForecasterAutoregMultiseriesCustom', then n_jobs=cpu_count().
-    - If forecaster_name is 'ForecasterSarimax' or 'ForecasterEquivalentDate', 
+    - If forecaster is 'ForecasterAutoregMultiSeries' or 
+    'ForecasterAutoregMultiSeriesCustom', then n_jobs=cpu_count().
+    - If forecaster is 'ForecasterSarimax' or 'ForecasterEquivalentDate', 
     then n_jobs=1.
 
     Parameters
     ----------
-    forecaster_name : str
-        The type of Forecaster.
-    regressor_name : str
-        The type of regressor.
+    forecaster : Forecaster
+        Forecaster model. ForecasterAutoreg, ForecasterAutoregCustom, 
+        ForecasterAutoregDirect, ForecasterAutoregMultiSeries, 
+        ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate.
     refit : bool, int
         If the forecaster is refitted during the backtesting process.
 
@@ -1758,6 +1757,13 @@ def select_n_jobs_backtesting(
         The number of jobs to run in parallel.
     
     """
+
+    forecaster_name = type(forecaster).__name__
+
+    if isinstance(forecaster.regressor, sklearn.pipeline.Pipeline):
+        regressor_name = type(forecaster.regressor[-1]).__name__
+    else:
+        regressor_name = type(forecaster.regressor).__name__
 
     linear_regressors = [
         regressor_name
@@ -1776,7 +1782,7 @@ def select_n_jobs_backtesting(
                 n_jobs = joblib.cpu_count() if refit else 1
         elif forecaster_name in ['ForecasterAutoregDirect', 'ForecasterAutoregMultiVariate']:
             n_jobs = 1
-        elif forecaster_name in ['ForecasterAutoregMultiseries', 'ForecasterAutoregMultiSeriesCustom']:
+        elif forecaster_name in ['ForecasterAutoregMultiSeries', 'ForecasterAutoregMultiSeriesCustom']:
             n_jobs = joblib.cpu_count()
         elif forecaster_name in ['ForecasterSarimax', 'ForecasterEquivalentDate']:
             n_jobs = 1
@@ -1819,7 +1825,8 @@ def select_n_jobs_fit_forecaster(
         if not regressor_name.startswith('_')
     ]
 
-    if forecaster_name in ['ForecasterAutoregDirect', 'ForecasterAutoregMultiVariate']:
+    if forecaster_name in ['ForecasterAutoregDirect', 
+                           'ForecasterAutoregMultiVariate']:
         if regressor_name in linear_regressors:
             n_jobs = 1
         else:

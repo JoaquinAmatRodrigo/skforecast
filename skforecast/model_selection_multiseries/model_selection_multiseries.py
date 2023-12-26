@@ -147,16 +147,11 @@ def _backtesting_forecaster_multiseries(
     """
 
     forecaster = deepcopy(forecaster)
-    if n_jobs == 'auto':
-        if isinstance(forecaster.regressor, sklearn.pipeline.Pipeline):
-            regressor_name = type(forecaster.regressor[-1]).__name__
-        else:
-            regressor_name = type(forecaster.regressor).__name__
-        
+    
+    if n_jobs == 'auto':        
         n_jobs = select_n_jobs_backtesting(
-                     forecaster_name = type(forecaster).__name__,
-                     regressor_name  = regressor_name,
-                     refit           = refit
+                     forecaste = forecaster,
+                     refit     = refit
                  )
     else:
         n_jobs = n_jobs if n_jobs > 0 else cpu_count()

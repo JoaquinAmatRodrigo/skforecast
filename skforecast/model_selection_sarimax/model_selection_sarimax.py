@@ -135,9 +135,8 @@ def _backtesting_sarimax(
     else:
         if n_jobs == 'auto':        
             n_jobs = select_n_jobs_backtesting(
-                         forecaster_name = type(forecaster).__name__,
-                         regressor_name  = type(forecaster.regressor).__name__,
-                         refit           = refit
+                         forecaster = forecaster,
+                         refit      = refit
                      )
         else:
             n_jobs = n_jobs if n_jobs > 0 else cpu_count()
@@ -145,7 +144,8 @@ def _backtesting_sarimax(
     if not isinstance(metric, list):
         metrics = [_get_metric(metric=metric) if isinstance(metric, str) else metric]
     else:
-        metrics = [_get_metric(metric=m) if isinstance(m, str) else m for m in metric]
+        metrics = [_get_metric(metric=m) if isinstance(m, str) else m 
+                   for m in metric]
 
     # initial_train_size cannot be None because of append method in Sarimax
     # First model training, this is done to allow parallelization when `refit` 
