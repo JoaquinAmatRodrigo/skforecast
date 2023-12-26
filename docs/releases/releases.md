@@ -16,17 +16,23 @@ The main changes in this release are:
 
 + Added `sort_importance` argument to `get_feature_importances` method in all Forecasters. If `True`, sort the feature importances in descending order.
 
++ Added `_initialize_lags_grid` function to `model_selection` module. This function initializes the lags to be used in the hyperparameter search functions in `model_selection` and `model_selection_multiseries`.
+
++ Added `_initialize_levels_model_selection_multiseries` function to `model_selection_multiseries` module. This function initializes the levels of the series to be used in the model selection functions.
+
 **Changed**
 
 + 
 
 + Changed the default value of the `transformer_series` argument to use a `StandardScaler()` in the Global Forecasters (`ForecasterAutoregMultiSeries`, `ForecasterAutoregMultiSeriesCustom` and `ForecasterAutoregMultiVariate`).
 
++ Refactor `utils.select_n_jobs_backtesting` to use the forecaster directly instead of `forecaster_name` and `regressor_name`.
+
 + Remove `_backtesting_forecaster_verbose` in model_selection in favor of `_create_backtesting_folds`, (deprecated since 0.8.0).
 
 **Fixed**
 
-+ 
++ Small bug in `utils.select_n_jobs_backtesting`, rename `ForecasterAutoregMultiseries` to `ForecasterAutoregMultiSeries`.
 
 
 ## [0.11.0] - [2023-11-16]
