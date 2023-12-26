@@ -2,7 +2,6 @@
 # ==============================================================================
 import re
 import pytest
-import warnings
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import Ridge
@@ -39,10 +38,10 @@ def test_IgnoredArgumentWarning_initialize_lags_grid_when_forecaster_has_custom_
     """
     lags_grid = [1, 2, 3]
 
-    err_msg = re.escape(
+    warn_msg = re.escape(
         f"`lags_grid` ignored if forecaster is an instance of {type(forecaster).__name__}."
     )
-    with pytest.warns(IgnoredArgumentWarning, match = err_msg):
+    with pytest.warns(IgnoredArgumentWarning, match = warn_msg):
         _initialize_lags_grid(forecaster, lags_grid)
 
 
