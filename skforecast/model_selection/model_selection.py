@@ -958,7 +958,7 @@ def random_search_forecaster(
     return results
 
 
-# TODO: move to utils and use in model_selection_multiseries
+# TODO: move to utils or keep in model_selection? Use in model_selection_multiseries
 # and bayesian search
 def _initialize_lags_grid(
     forecaster, 
