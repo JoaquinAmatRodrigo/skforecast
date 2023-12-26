@@ -398,15 +398,9 @@ def _backtesting_forecaster(
     forecaster = deepcopy(forecaster)
     
     if n_jobs == 'auto':
-        if isinstance(forecaster.regressor, sklearn.pipeline.Pipeline):
-            regressor_name = type(forecaster.regressor[-1]).__name__
-        else:
-            regressor_name = type(forecaster.regressor).__name__
-
         n_jobs = select_n_jobs_backtesting(
-                     forecaster_name = type(forecaster).__name__,
-                     regressor_name  = regressor_name,
-                     refit           = refit
+                     forecaster = forecaster,
+                     refit      = refit
                  )
     else:
         n_jobs = n_jobs if n_jobs > 0 else cpu_count()
@@ -964,6 +958,55 @@ def random_search_forecaster(
     return results
 
 
+# TODO: move to utils and use in model_selection_multiseries
+# and bayesian search
+def _initialize_lags_grid(
+    forecaster, 
+    lags_grid: Optional[list]=None
+) -> Tuple[dict, str]:
+    """
+    Initialize lags grid and lags label for model selection. 
+
+    Parameters
+    ----------
+    forecaster : Forecaster
+        Forecaster model. ForecasterAutoreg, ForecasterAutoregCustom, 
+        ForecasterAutoregDirect, ForecasterAutoregMultiSeries, 
+        ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate.
+    lags_grid : list of int, lists, numpy ndarray or range, default `None`
+        Lists of `lags` to try. Ignored if forecaster is an instance of 
+        `ForecasterAutoregCustom` or `ForecasterAutoregMultiSeriesCustom`.
+
+    Returns
+    -------
+    lags_grid : dict
+        Dictionary with lags configuration for each iteration.
+    lags_label : str
+        Label for lags representation in the results object.
+
+    """
+
+    if type(forecaster).__name__ in ['ForecasterAutoregCustom', 
+                                     'ForecasterAutoregMultiSeriesCustom']:
+        if lags_grid is not None:
+            warnings.warn(
+                ("`lags_grid` ignored if forecaster is an instance of "
+                 f"{type(forecaster).__name__}."),
+                IgnoredArgumentWarning
+            )
+        lags_grid = ['custom predictors']
+
+    lags_label = 'values'
+    if isinstance(lags_grid, list):
+        lags_grid = {f'{lags}': lags for lags in lags_grid}
+    elif lags_grid is None:
+        lags_grid = {f'{list(forecaster.lags)}': list(forecaster.lags)}
+    else:
+        lags_label = 'keys'
+
+    return lags_grid, lags_label
+
+
 def _evaluate_grid_hyperparameters(
     forecaster,
     y: pd.Series,
@@ -1054,57 +1097,14 @@ def _evaluate_grid_hyperparameters(
              f"length `exog`: ({len(exog)}), length `y`: ({len(y)})")
         )
     
-    # TODO: move to utils and use in model_selection_multiseries
-    def _initialize_lags_grid(forecaster, lags_grid):
-        """
-        Initialize lags grid and lags label for model selection. 
-
-        Parameters
-        ----------
-        forecaster : Forecaster
-            Forecaster model. ForecasterAutoreg, ForecasterAutoregCustom, 
-            ForecasterAutoregDirect, ForecasterAutoregMultiSeries, 
-            ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate.
-        lags_grid : list of int, lists, numpy ndarray or range, default `None`
-            Lists of `lags` to try. Ignored if forecaster is an instance of 
-            `ForecasterAutoregCustom` or `ForecasterAutoregMultiSeriesCustom`.
-
-        Returns
-        -------
-        lags_grid : dict
-            Dictionary with lags configuration for each iteration.
-        lags_label : str
-            Label for lags representation in the results object.
-
-        """
-
-        if type(forecaster).__name__ in ['ForecasterAutoregCustom', 
-                                         'ForecasterAutoregMultiSeriesCustom']:
-            if lags_grid is not None:
-                warnings.warn(
-                    ("`lags_grid` ignored if forecaster is an instance of "
-                     "`ForecasterAutoregCustom` or `ForecasterAutoregMultiSeriesCustom`."),
-                    IgnoredArgumentWarning
-                )
-            lags_grid = ['custom predictors']
-
-        lags_label = 'values'
-        if isinstance(lags_grid, list):
-            lags_grid = {f'{lags}': lags for lags in lags_grid}
-        elif lags_grid is None:
-            lags_grid = {f'{list(forecaster.lags)}': list(forecaster.lags)}
-        else:
-            lags_label = 'keys'
-
-        return lags_grid, lags_label
-    
     lags_grid, lags_label = _initialize_lags_grid(forecaster, lags_grid)
    
     lags_list = []
     params_list = []
     if not isinstance(metric, list):
         metric = [metric] 
-    metric_dict = {(m if isinstance(m, str) else m.__name__): [] for m in metric}
+    metric_dict = {(m if isinstance(m, str) else m.__name__): [] 
+                   for m in metric}
     
     if len(metric_dict) != len(metric):
         raise ValueError(

@@ -40,8 +40,8 @@ def test_ValueError_evaluate_grid_hyperparameters_when_return_best_and_len_y_exo
     exog = y[:30]
 
     err_msg = re.escape(
-            f'`exog` must have same number of samples as `y`. '
-            f'length `exog`: ({len(exog)}), length `y`: ({len(y)})'
+            (f"`exog` must have same number of samples as `y`. "
+             f"length `exog`: ({len(exog)}), length `y`: ({len(y)})")
         )
     with pytest.raises(ValueError, match = err_msg):
         _evaluate_grid_hyperparameters(
