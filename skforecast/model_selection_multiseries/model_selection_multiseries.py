@@ -30,6 +30,62 @@ logging.basicConfig(
 )
 
 
+def _initialize_levels_model_selection_multiseries(
+    forecaster, 
+    series: pd.DataFrame,
+    levels: Optional[Union[str, list]]=None
+) -> list:
+    """
+    Initialize levels for model_selection_multiseries functions.
+
+    Parameters
+    ----------
+    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate
+        Forecaster model.
+    series : pandas DataFrame
+        Training time series.
+    levels : str, list, default `None`
+        level (`str`) or levels (`list`) at which the forecaster is optimized. 
+        If `None`, all levels are taken into account. The resulting metric will be
+        the average of the optimization of all levels.
+
+    Returns
+    -------
+    levels : list
+        List of levels to be used in model_selection_multiseries functions.
+    
+    """
+
+    if type(forecaster).__name__ in ['ForecasterAutoregMultiSeries', 
+                                     'ForecasterAutoregMultiSeriesCustom']  \
+        and levels is not None and not isinstance(levels, (str, list)):
+        raise TypeError(
+            ("`levels` must be a `list` of column names, a `str` of a column name "
+             "or `None` when using a `ForecasterAutoregMultiSeries` or "
+             "`ForecasterAutoregMultiSeriesCustom`. If the forecaster is of type "
+             "`ForecasterAutoregMultiVariate`, this argument is ignored.")
+        )
+
+    if type(forecaster).__name__ == 'ForecasterAutoregMultiVariate':
+        if levels and levels != forecaster.level and levels != [forecaster.level]:
+            warnings.warn(
+                (f"`levels` argument have no use when the forecaster is of type "
+                 f"`ForecasterAutoregMultiVariate`. The level of this forecaster "
+                 f"is '{forecaster.level}', to predict another level, change "
+                 f"the `level` argument when initializing the forecaster. \n"),
+                 IgnoredArgumentWarning
+            )
+        levels = [forecaster.level]
+    else:
+        if levels is None:
+            # Forecaster could be untrained, so self.series_col_names cannot be used.
+            levels = list(series.columns) 
+        elif isinstance(levels, str):
+            levels = [levels]
+
+    return levels
+
+
 def _backtesting_forecaster_multiseries(
     forecaster,
     series: pd.DataFrame,
@@ -150,20 +206,17 @@ def _backtesting_forecaster_multiseries(
     
     if n_jobs == 'auto':        
         n_jobs = select_n_jobs_backtesting(
-                     forecaste = forecaster,
-                     refit     = refit
+                     forecaster = forecaster,
+                     refit      = refit
                  )
     else:
         n_jobs = n_jobs if n_jobs > 0 else cpu_count()
-
-    if type(forecaster).__name__ == 'ForecasterAutoregMultiVariate':
-        levels = [forecaster.level]
-    else:
-        if levels is None:
-            # Forecaster could be untrained, so self.series_col_names cannot be used.
-            levels = list(series.columns) 
-        elif isinstance(levels, str):
-            levels = [levels]
+    
+    levels = _initialize_levels_model_selection_multiseries(
+                 forecaster = forecaster,
+                 series     = series,
+                 levels     = levels
+             )
 
     if not isinstance(metric, list):
         metrics = [_get_metric(metric=metric) if isinstance(metric, str) else metric]
@@ -461,26 +514,6 @@ def backtesting_forecaster_multiseries(
         verbose               = verbose,
         show_progress         = show_progress
     )
-
-    if type(forecaster).__name__ in ['ForecasterAutoregMultiSeries', 
-                                     'ForecasterAutoregMultiSeriesCustom'] \
-        and levels is not None and not isinstance(levels, (str, list)):
-        raise TypeError(
-            ("`levels` must be a `list` of column names, a `str` of a column name "
-             "or `None` when using a `ForecasterAutoregMultiSeries` or "
-             "`ForecasterAutoregMultiSeriesCustom`. If the forecaster is of type "
-             "`ForecasterAutoregMultiVariate`, this argument is ignored.")
-        )
-
-    if type(forecaster).__name__ == 'ForecasterAutoregMultiVariate' \
-        and levels and levels != forecaster.level and levels != [forecaster.level]:
-        warnings.warn(
-            (f"`levels` argument have no use when the forecaster is of type "
-             f"`ForecasterAutoregMultiVariate`. The level of this forecaster is "
-             f"'{forecaster.level}', to predict another level, change the `level` "
-             f"argument when initializing the forecaster."),
-             IgnoredArgumentWarning
-        )
 
     metrics_levels, backtest_predictions = _backtesting_forecaster_multiseries(
         forecaster            = forecaster,
@@ -837,31 +870,12 @@ def _evaluate_grid_hyperparameters_multiseries(
             (f"`exog` must have same number of samples as `series`. "
              f"length `exog`: ({len(exog)}), length `series`: ({len(series)})")
         )
-
-    if type(forecaster).__name__ in ['ForecasterAutoregMultiSeries', 
-                                     'ForecasterAutoregMultiSeriesCustom']  \
-        and levels is not None and not isinstance(levels, (str, list)):
-        raise TypeError(
-            ("`levels` must be a `list` of column names, a `str` of a column "
-             "name or `None`.")
-        )
-
-    if type(forecaster).__name__ == 'ForecasterAutoregMultiVariate':
-        if levels and levels != forecaster.level and levels != [forecaster.level]:
-            warnings.warn(
-                (f"`levels` argument have no use when the forecaster is of type "
-                 f"ForecasterAutoregMultiVariate. The level of this forecaster "
-                 f"is {forecaster.level}, to predict another level, change "
-                 f"the `level` argument when initializing the forecaster. \n"),
-                 IgnoredArgumentWarning
-            )
-        levels = [forecaster.level]
-    else:
-        if levels is None:
-            # Forecaster could be untrained, so self.series_col_names cannot be used.
-            levels = list(series.columns) 
-        elif isinstance(levels, str):
-            levels = [levels]
+    
+    levels = _initialize_levels_model_selection_multiseries(
+                 forecaster = forecaster,
+                 series     = series,
+                 levels     = levels
+             )
 
     if type(forecaster).__name__ == 'ForecasterAutoregMultiSeriesCustom':
         if lags_grid is not None:
