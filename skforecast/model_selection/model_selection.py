@@ -1132,6 +1132,9 @@ def _evaluate_grid_hyperparameters(
         
         if type(forecaster).__name__ != 'ForecasterAutoregCustom':
             forecaster.set_lags(best_lags)
+            best_lags = forecaster.lags
+        else:
+            best_lags = 'custom_predictors'
         forecaster.set_params(best_params)
 
         forecaster.fit(y=y, exog=exog, store_in_sample_residuals=True)
@@ -1139,7 +1142,7 @@ def _evaluate_grid_hyperparameters(
         print(
             f"`Forecaster` refitted using the best-found lags and parameters, "
             f"and the whole data set: \n"
-            f"  Lags: {forecaster.lags} \n"
+            f"  Lags: {best_lags} \n"
             f"  Parameters: {best_params}\n"
             f"  Backtesting metric: {best_metric}\n"
         )
@@ -1534,6 +1537,9 @@ def _bayesian_search_optuna(
         
         if type(forecaster).__name__ != 'ForecasterAutoregCustom':
             forecaster.set_lags(best_lags)
+            best_lags = forecaster.lags
+        else:
+            best_lags = 'custom_predictors'
         forecaster.set_params(best_params)
 
         forecaster.fit(y=y, exog=exog, store_in_sample_residuals=True)
@@ -1541,7 +1547,7 @@ def _bayesian_search_optuna(
         print(
             f"`Forecaster` refitted using the best-found lags and parameters, "
             f"and the whole data set: \n"
-            f"  Lags: {forecaster.lags} \n"
+            f"  Lags: {best_lags} \n"
             f"  Parameters: {best_params}\n"
             f"  Backtesting metric: {best_metric}\n"
         )
