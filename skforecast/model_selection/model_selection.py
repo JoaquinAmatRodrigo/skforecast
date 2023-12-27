@@ -1625,69 +1625,56 @@ def _bayesian_search_optuna(
     return results, results_opt_best
 
 
-def feature_selection_rfecv(
-    forecaster: object, 
+def select_features(
+    selector: object,
+    forecaster: object,
     y: Union[pd.Series, pd.DataFrame],
     exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
-    min_features_to_select: int = 1,
-    cv: Union[int, object, None] = None,
-    select_lags: bool = True,
+    force_lags_selection: bool = False,
     subsample: Union[int, float] = 0.5,
     verbose: bool = True,
-    **kwargs
-) -> list:
+) -> Union[list, list]:
     """
-    Recursive feature elimination with cross-validation to select features based
-    on sklearn.feature_selection.RFECV.
+    Feature selection using any of the classes from sklearn.feature_selection 
+    module (such as RFECV, SelectFromModel, etc).
 
-    Given a regressor that assigns weights to features (such as coef_, 
-    feature_importances_), the goal of recursive feature elimination (RFE) is to
-    select features by recursively considering smaller and smaller sets of features.
-    First, the regressor is trained with all the available features and the importance
-    of each feature is obtained. Then, the least important features are pruned
-    from the current set of features and the performance of the regressor is
-    evaluated using cross-validation, if the performance of the model has not
-    decreased, then the pruned features are discarded. The process is repeated
-    until the desired number of features to select is reached or there are no
-    more features to discard. 
-    
     Parameters
     ----------
+    selector : object
+        A feature selector from sklearn.feature_selection.
     forecaster : object
         A forecaster from skforecast.
-    y : pd.Series or pd.DataFrame
+    y : pd.Series or pd.DataFrame   
         Target time series to which feature selection will be applied.
-    exog : pd.Series or pd.DataFrame, optional (default=None)
+    exog : pd.Series or pd.DataFrame, optional (default=None)   
         Exogenous variables.
-    min_features_to_select : int, optional (default=1)
-        The minimum number of features to be selected.
-    include_lags: bool, optional (default=True)
-        Whether to include lagged variables in feature selection. If `False`, exogenous
-        variables are evaluated without the presence of lagged variables.
+    force_lags_selection : bool, optional (default=True)
+        Whether to include all lagged variables as part of the selected features.
+        If `False` (default), lagged variables are also evaluated by the selector
+        and only those that are selected are included in the final list of selected
+        features. If `True`, exogenous variables are evaluated without the presence
+        of lagged variables and then all lagged variables are added to the selected
+        exogenous variables.
     subsample : int or float, optional (default=0.5)
         Number of records to use for feature selection. If int, number of records
         to use. If float, proportion of records to use.
-    cv : int, cross-validation generator or an iterable, default=None
-        Determines the cross-validation splitting strategy. Possible inputs for cv are:
-        - None, to use the default 5-fold cross-validation
-        - integer, to specify the number of folds
-        - CV splitter
-        - An iterable yielding (train, test) splits as arrays of indices    
-    **kwargs : optional
-        Aditional arguments of sklearn.feature_selection.RFECV.
+    verbose : bool, optional (default=True)
+        Print information about feature selection process.
 
     Returns
     -------
-    selected_features : list
-        List of selected features.
+    selected_lags : list
+        List of selected lags.
+    selected_exog : list
+        List of selected exogenous variables.
     """
 
     X_train, y_train = forecaster.create_train_X_y(
-                        y    = y,
-                        exog = exog,
-                    )
+                            y    = y,
+                            exog = exog,
+                        )
 
-    if not select_lags:
+    if force_lags_selection:
         lags_cols = [col for col in X_train.columns if col.startswith("lag_")]
         X_train = X_train.drop(columns=lags_cols)
 
@@ -1698,20 +1685,19 @@ def feature_selection_rfecv(
     sample = rng.choice(X_train.index, size=subsample, replace=False)
     X_train_sample = X_train.loc[sample, :]
     y_train_sample = y_train.loc[sample]
-
-    selector = RFECV(
-        estimator              = forecaster.regressor,
-        min_features_to_select = min_features_to_select,
-        cv                     = cv,
-        **kwargs
-    )
+    
     selector.fit(X_train_sample, y_train_sample)
     selected_features = selector.get_feature_names_out()
-    selected_lags = [
-        int(feature.replace("lag_", ""))
-        for feature in selected_features
-        if feature.startswith("lag_")
-    ]
+
+    if force_lags_selection:
+        selected_lags = lags_cols
+    else:
+        selected_lags = [
+            int(feature.replace("lag_", ""))
+            for feature in selected_features
+            if feature.startswith("lag_")
+        ]
+        
     selected_exog = [
         feature
         for feature in selected_features
