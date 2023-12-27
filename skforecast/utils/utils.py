@@ -216,8 +216,8 @@ def initialize_lags_grid(
                                      'ForecasterAutoregMultiSeriesCustom']:
         if lags_grid is not None:
             warnings.warn(
-                ("`lags_grid` ignored if forecaster is an instance of "
-                 f"{type(forecaster).__name__}."),
+                (f"`lags_grid` ignored if forecaster is an instance of "
+                 f"`{type(forecaster).__name__}`."),
                 IgnoredArgumentWarning
             )
         lags_grid = ['custom predictors']

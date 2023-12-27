@@ -54,7 +54,8 @@ def test_IgnoredArgumentWarning_initialize_lags_grid_when_forecaster_has_custom_
     lags_grid = [1, 2, 3]
 
     warn_msg = re.escape(
-        f"`lags_grid` ignored if forecaster is an instance of {type(forecaster).__name__}."
+            (f"`lags_grid` ignored if forecaster is an instance of "
+             f"`{type(forecaster).__name__}`."),
     )
     with pytest.warns(IgnoredArgumentWarning, match = warn_msg):
         initialize_lags_grid(forecaster, lags_grid)

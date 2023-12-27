@@ -324,44 +324,6 @@ def test_evaluate_grid_hyperparameters_multiseries_when_return_best_ForecasterAu
 
 # ForecasterAutoregMultiSeriesCustom
 # ======================================================================================================================
-def test_IgnoredArgumentWarning_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMultiSeriesCustom_lags_grid():
-    """
-    Test IgnoredArgumentWarning _evaluate_grid_hyperparameters_multiseries in ForecasterAutoregMultiSeriesCustom 
-    when `lags_grid` is not `None`.
-    """
-    forecaster = ForecasterAutoregMultiSeriesCustom(
-                     regressor          = Ridge(random_state=123),
-                     fun_predictors     = create_predictors,
-                     window_size        = 4,
-                     transformer_series = None
-                 )
-
-    lags_grid = [2 , 4]
-    steps = 3
-    n_validation = 12
-    param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
-
-    warn_msg = re.escape(
-                "`lags_grid` ignored if forecaster is an instance of `ForecasterAutoregMultiSeriesCustom`."
-            )
-    with pytest.warns(IgnoredArgumentWarning, match = warn_msg):
-        _evaluate_grid_hyperparameters_multiseries(
-            forecaster          = forecaster,
-            series              = series,
-            param_grid          = param_grid,
-            steps               = steps,
-            metric              = 'mean_absolute_error',
-            initial_train_size  = len(series) - n_validation,
-            fixed_train_size    = False,
-            levels              = None,
-            exog                = None,
-            lags_grid           = lags_grid,
-            refit               = False,
-            return_best         = False,
-            verbose             = False
-        )
-
-
 def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMultiSeriesCustom_with_mocked():
     """
     Test output of _evaluate_grid_hyperparameters_multiseries in ForecasterAutoregMultiSeriesCustom 
