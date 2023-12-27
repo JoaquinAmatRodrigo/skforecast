@@ -12,6 +12,7 @@ import joblib
 import numpy as np
 import pandas as pd
 import sklearn
+import sklearn.pipeline
 import sklearn.linear_model
 from sklearn.compose import ColumnTransformer
 from sklearn.exceptions import NotFittedError
@@ -131,7 +132,8 @@ def initialize_weights(
 
     if weight_func is not None:
 
-        if forecaster_name in ['ForecasterAutoregMultiSeries', 'ForecasterAutoregMultiSeriesCustom']:
+        if forecaster_name in ['ForecasterAutoregMultiSeries', 
+                               'ForecasterAutoregMultiSeriesCustom']:
             if not isinstance(weight_func, (Callable, dict)):
                 raise TypeError(
                     (f"Argument `weight_func` must be a Callable or a dict of "
@@ -173,6 +175,62 @@ def initialize_weights(
             series_weights = None
 
     return weight_func, source_code_weight_func, series_weights
+
+
+def initialize_lags_grid(
+    forecaster, 
+    lags_grid: Optional[Union[list, dict]]=None
+) -> Tuple[dict, str]:
+    """
+    Initialize lags grid and lags label for model selection. 
+
+    Parameters
+    ----------
+    forecaster : Forecaster
+        Forecaster model. ForecasterAutoreg, ForecasterAutoregCustom, 
+        ForecasterAutoregDirect, ForecasterAutoregMultiSeries, 
+        ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate.
+    lags_grid : list, dict, default `None`
+        Lists of lags to try, containing int, lists, numpy ndarray, or range 
+        objects. If `dict`, the keys are used as labels in the `results` 
+        DataFrame, and the values are used as the lists of lags to try. Ignored 
+        if the forecaster is an instance of `ForecasterAutoregCustom` or 
+        `ForecasterAutoregMultiSeriesCustom`.
+
+    Returns
+    -------
+    lags_grid : dict
+        Dictionary with lags configuration for each iteration.
+    lags_label : str
+        Label for lags representation in the results object.
+
+    """
+
+    if not isinstance(lags_grid, (list, dict, type(None))):
+        raise TypeError(
+            (f"`lags_grid` argument must be a list, dict or None. "
+             f"Got {type(lags_grid)}.")
+        )
+
+    if type(forecaster).__name__ in ['ForecasterAutoregCustom', 
+                                     'ForecasterAutoregMultiSeriesCustom']:
+        if lags_grid is not None:
+            warnings.warn(
+                ("`lags_grid` ignored if forecaster is an instance of "
+                 f"{type(forecaster).__name__}."),
+                IgnoredArgumentWarning
+            )
+        lags_grid = ['custom predictors']
+
+    lags_label = 'values'
+    if isinstance(lags_grid, list):
+        lags_grid = {f'{lags}': lags for lags in lags_grid}
+    elif lags_grid is None:
+        lags_grid = {f'{list(forecaster.lags)}': list(forecaster.lags)}
+    else:
+        lags_label = 'keys'
+
+    return lags_grid, lags_label
 
 
 def check_select_fit_kwargs(
