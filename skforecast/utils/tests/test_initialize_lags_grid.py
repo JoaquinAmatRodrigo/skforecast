@@ -1,4 +1,4 @@
-# Unit test _initialize_lags_grid
+# Unit test initialize_lags_grid
 # ==============================================================================
 import re
 import pytest
@@ -8,7 +8,7 @@ from sklearn.linear_model import Ridge
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
 from skforecast.ForecasterAutoregCustom import ForecasterAutoregCustom
 from skforecast.ForecasterAutoregMultiSeriesCustom import ForecasterAutoregMultiSeriesCustom
-from skforecast.model_selection.model_selection import _initialize_lags_grid
+from skforecast.utils import initialize_lags_grid
 from skforecast.exceptions import IgnoredArgumentWarning
 
 def create_predictors(y): # pragma: no cover
@@ -19,6 +19,21 @@ def create_predictors(y): # pragma: no cover
     lags = y[-1:-5:-1]
 
     return lags
+
+
+def test_TypeError_initialize_lags__rid_when_not_list_dict_or_None():
+    """
+    Test TypeError is raised when lags_grid is not a list, dict or None.
+    """
+    forecaster = ForecasterAutoreg(regressor=Ridge(random_state=123), lags=2)
+    lags_grid = 'not_valid_type'
+
+    err_msg = re.escape(
+            (f"`lags_grid` argument must be a list, dict or None. "
+             f"Got {type(lags_grid)}.")
+        )
+    with pytest.raises(TypeError, match = err_msg):
+        initialize_lags_grid(forecaster, lags_grid)
 
 
 @pytest.mark.parametrize("forecaster", 
@@ -42,7 +57,7 @@ def test_IgnoredArgumentWarning_initialize_lags_grid_when_forecaster_has_custom_
         f"`lags_grid` ignored if forecaster is an instance of {type(forecaster).__name__}."
     )
     with pytest.warns(IgnoredArgumentWarning, match = warn_msg):
-        _initialize_lags_grid(forecaster, lags_grid)
+        initialize_lags_grid(forecaster, lags_grid)
 
 
 def test_initialize_lags_grid_when_lags_grid_is_a_list():
@@ -51,7 +66,7 @@ def test_initialize_lags_grid_when_lags_grid_is_a_list():
     """
     forecaster = ForecasterAutoreg(regressor=Ridge(random_state=123), lags=2)
     lags_grid = [1, [2, 4], range(3, 5), np.array([3, 7])]
-    lags_grid, lags_label = _initialize_lags_grid(forecaster, lags_grid)
+    lags_grid, lags_label = initialize_lags_grid(forecaster, lags_grid)
 
     lags_grid_expected = {
         '1': 1, 
@@ -83,7 +98,7 @@ def test_initialize_lags_grid_when_lags_grid_is_None(lags, lags_grid_expected):
     """
     forecaster = ForecasterAutoreg(regressor=Ridge(random_state=123), lags=lags)
     lags_grid = None
-    lags_grid, lags_label = _initialize_lags_grid(forecaster, lags_grid)
+    lags_grid, lags_label = initialize_lags_grid(forecaster, lags_grid)
 
     assert lags_label == 'values'
     assert lags_grid.keys() == lags_grid_expected.keys()
@@ -102,7 +117,7 @@ def test_initialize_lags_grid_when_lags_grid_is_a_dict():
     """
     forecaster = ForecasterAutoreg(regressor=Ridge(random_state=123), lags=2)
     lags_grid = {'1': 1, '[2, 4]': [2, 4], 'range(3, 5)': range(3, 5), '[3 7]': np.array([3, 7])}
-    lags_grid, lags_label = _initialize_lags_grid(forecaster, lags_grid)
+    lags_grid, lags_label = initialize_lags_grid(forecaster, lags_grid)
 
     lags_grid_expected = {
         '1': 1, 

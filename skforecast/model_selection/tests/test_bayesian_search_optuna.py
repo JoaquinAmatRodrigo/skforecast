@@ -33,9 +33,9 @@ optuna.logging.set_verbosity(optuna.logging.WARNING)
 tqdm.__init__ = partialmethod(tqdm.__init__, disable=True) # hide progress bar
 
 
-def test_exception_bayesian_search_optuna_metric_list_duplicate_names():
+def test_ValueError_bayesian_search_optuna_metric_list_duplicate_names():
     """
-    Test exception is raised in _bayesian_search_optuna when a `list` of 
+    Test ValueError is raised in _bayesian_search_optuna when a `list` of 
     metrics is used with duplicate names.
     """
     forecaster = ForecasterAutoreg(
@@ -48,8 +48,8 @@ def test_exception_bayesian_search_optuna_metric_list_duplicate_names():
     y_train = y[:-n_validation]
     lags_grid = [2, 4]
     def search_space(trial): # pragma: no cover
-        search_space  = {'alpha' : trial.suggest_float('not_alpha', 1e-2, 1.0)
-                        }
+        search_space  = {'alpha': trial.suggest_float('not_alpha', 1e-2, 1.0)}
+
         return search_space
 
     err_msg = re.escape("When `metric` is a `list`, each metric name must be unique.")
@@ -71,9 +71,9 @@ def test_exception_bayesian_search_optuna_metric_list_duplicate_names():
         )
 
 
-def test_bayesian_search_optuna_exception_when_search_space_names_do_not_match():
+def test_ValueError_bayesian_search_optuna_when_search_space_names_do_not_match():
     """
-    Test Exception is raised when search_space key name do not match the trial 
+    Test ValueError is raised when search_space key name do not match the trial 
     object name from optuna.
     """
     forecaster = ForecasterAutoreg(
@@ -86,8 +86,8 @@ def test_bayesian_search_optuna_exception_when_search_space_names_do_not_match()
     y_train = y[:-n_validation]
     lags_grid = [2, 4]
     def search_space(trial):
-        search_space  = {'alpha' : trial.suggest_float('not_alpha', 1e-2, 1.0)
-                        }
+        search_space  = {'alpha': trial.suggest_float('not_alpha', 1e-2, 1.0)}
+
         return search_space
     
     err_msg = re.escape(
@@ -134,10 +134,10 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_mocked():
     lags_grid = [2, 4]
 
     def search_space(trial):
-        search_space  = {'n_estimators'     : trial.suggest_int('n_estimators', 10, 20),
-                         'min_samples_leaf' : trial.suggest_float('min_samples_leaf', 0.1, 1., log=True),
-                         'max_features'     : trial.suggest_categorical('max_features', ['log2', 'sqrt'])
-                        } 
+        search_space  = {'n_estimators'    : trial.suggest_int('n_estimators', 10, 20),
+                         'min_samples_leaf': trial.suggest_float('min_samples_leaf', 0.1, 1., log=True),
+                         'max_features'    : trial.suggest_categorical('max_features', ['log2', 'sqrt'])} 
+        
         return search_space
 
     results = _bayesian_search_optuna(
@@ -219,8 +219,8 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_mocked_whe
     lags_grid = [4, 2]
 
     def search_space(trial):
-        search_space  = {'alpha' : trial.suggest_float('alpha', 1e-2, 1.0)
-                        }
+        search_space  = {'alpha': trial.suggest_float('alpha', 1e-2, 1.0)}
+        
         return search_space
 
     # kwargs_create_study
@@ -288,10 +288,10 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_mocked_whe
     lags_grid = [2, 4]
 
     def search_space(trial):
-        search_space  = {'n_estimators' : trial.suggest_int('n_estimators', 100, 200),
-                         'max_depth'    : trial.suggest_int('max_depth', 20, 35, log=True),
-                         'max_features' : trial.suggest_categorical('max_features', ['log2', 'sqrt'])
-                        } 
+        search_space  = {'n_estimators': trial.suggest_int('n_estimators', 100, 200),
+                         'max_depth'   : trial.suggest_int('max_depth', 20, 35, log=True),
+                         'max_features': trial.suggest_categorical('max_features', ['log2', 'sqrt'])} 
+        
         return search_space
 
     # kwargs_study_optimize
@@ -352,8 +352,8 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_mocked_whe
     lags_grid = None
     
     def search_space(trial):
-        search_space  = {'alpha' : trial.suggest_float('alpha', 1e-2, 1.0)
-                        }
+        search_space  = {'alpha': trial.suggest_float('alpha', 1e-2, 1.0)}
+
         return search_space
 
     results = _bayesian_search_optuna(
@@ -407,8 +407,8 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoregCustom_with_mock
     y_train = y[:-n_validation]
     
     def search_space(trial):
-        search_space  = {'alpha' : trial.suggest_float('alpha', 1e-2, 1.0)
-                        }
+        search_space  = {'alpha': trial.suggest_float('alpha', 1e-2, 1.0)}
+
         return search_space
 
     results = _bayesian_search_optuna(
@@ -462,8 +462,8 @@ def test_evaluate_bayesian_search_optuna_when_return_best():
     lags_grid = [2, 4]
     
     def search_space(trial):
-        search_space  = {'alpha' : trial.suggest_float('alpha', 1e-2, 1.0)
-                        }
+        search_space  = {'alpha': trial.suggest_float('alpha', 1e-2, 1.0)}
+        
         return search_space
 
     _bayesian_search_optuna(
