@@ -10,6 +10,7 @@ import numpy as np
 import pandas as pd
 import warnings
 import logging
+import re
 from copy import deepcopy
 from joblib import Parallel, delayed, cpu_count
 from tqdm.auto import tqdm
@@ -22,7 +23,6 @@ from sklearn.metrics import (
 )
 from sklearn.model_selection import ParameterGrid
 from sklearn.model_selection import ParameterSampler
-from sklearn.feature_selection import RFECV
 import optuna
 from optuna.samplers import TPESampler, RandomSampler
 
@@ -1630,13 +1630,22 @@ def select_features(
     forecaster: object,
     y: Union[pd.Series, pd.DataFrame],
     exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
-    force_lags_selection: bool = False,
+    select_only_exog: bool = False,
     subsample: Union[int, float] = 0.5,
+    force_inclusion: Optional[Union[list, str]] = None,
     verbose: bool = True,
 ) -> Union[list, list]:
     """
     Feature selection using any of the classes from sklearn.feature_selection 
-    module (such as RFECV, SelectFromModel, etc).
+    module (such as RFECV, SelectFromModel, etc). Two groups of features are
+    evaluated: lagged variables and exogenous variables. By default, the selection
+    process is performed using both groups of features at the same time so only
+    the most relevant lags and exogenous variables are selected. However, if
+    `select_only_exog=True`, the selection process is performed only using
+    exogenous variables. In this case, lagged variables are not evaluated by the
+    selector and are all included in the final list of selected features. It is 
+    also possible to force the inclusion of certain features in the final list of
+    selected features using the parameter `force_inclusion`.
 
     Parameters
     ----------
@@ -1648,9 +1657,9 @@ def select_features(
         Target time series to which feature selection will be applied.
     exog : pd.Series or pd.DataFrame, optional (default=None)   
         Exogenous variables.
-    force_lags_selection : bool, optional (default=True)
-        Whether to include all lagged variables as part of the selected features.
-        If `False` (default), lagged variables are also evaluated by the selector
+    select_only_exog : bool, optional (default=False)
+        Whether to only use exogenous variables in the selection process. If 
+        `False` (default), lagged variables are also evaluated by the selector
         and only those that are selected are included in the final list of selected
         features. If `True`, exogenous variables are evaluated without the presence
         of lagged variables and then all lagged variables are added to the selected
@@ -1658,6 +1667,12 @@ def select_features(
     subsample : int or float, optional (default=0.5)
         Number of records to use for feature selection. If int, number of records
         to use. If float, proportion of records to use.
+    force_inclusion : list or str, optional (default=None)
+        Features to force include in the final list of selected features. If list,
+        list of features names to force include. If str, regular expression to 
+        identify features to force include. For example, if `force_inclusion="^sun_"`,
+        all features that start with "sun_" will be included in the final list of
+        selected features.
     verbose : bool, optional (default=True)
         Print information about feature selection process.
 
@@ -1669,13 +1684,29 @@ def select_features(
         List of selected exogenous variables.
     """
 
-    X_train, y_train = forecaster.create_train_X_y(
-                            y    = y,
-                            exog = exog,
-                        )
+    X_train, y_train = forecaster.create_train_X_y(y=y, exog=exog)
+    features_forced = []
+    
+    if force_inclusion is not None:
+        if isinstance(force_inclusion, list):
+            features_forced = [col for col in force_inclusion if col in X_train.columns]
+        elif isinstance(force_inclusion, str):
+            features_forced = X_train.filter(regex=force_inclusion).columns.tolist()
+        X_train = X_train.drop(columns=features_forced)
 
-    if force_lags_selection:
-        lags_cols = [col for col in X_train.columns if col.startswith("lag_")]
+    if hasattr(forecaster, 'lags'):
+        lags_cols = [f"lag_{lag}" for lag in forecaster.lags]
+    elif hasattr(forecaster, 'name_predictors'):
+        if forecaster.name_predictors is not None:
+            lags_cols = forecaster.name_predictors
+        else:
+            lags_cols = [
+                col
+                for col in X_train.columns
+                if re.match(r'^custom_predictor_\d+', col)
+            ]
+
+    if select_only_exog:
         X_train = X_train.drop(columns=lags_cols)
 
     if isinstance(subsample, float):
@@ -1689,21 +1720,20 @@ def select_features(
     selector.fit(X_train_sample, y_train_sample)
     selected_features = selector.get_feature_names_out()
 
-    if force_lags_selection:
-        selected_lags = lags_cols
+    if hasattr(forecaster, 'lags'):
+        selected_lags = forecaster.lags
     else:
-        selected_lags = [
-            int(feature.replace("lag_", ""))
-            for feature in selected_features
-            if feature.startswith("lag_")
-        ]
-        
+        selected_lags = lags_cols
+    
     selected_exog = [
         feature
         for feature in selected_features
-        if not feature.startswith("lag_")
+        if feature not in lags_cols
     ]
 
+    if force_inclusion is not None:
+        selected_exog.extend(features_forced)
+        
     if verbose:
         print("Recursive feature elimination")
         print("-----------------------------")
@@ -1714,4 +1744,4 @@ def select_features(
         print(f"Selected lags: {selected_lags}")
         print(f"Selected exog : \n {selected_exog}")
 
-    return selected_lags, selected_exog
+    return selected_lags, selected_exog   
