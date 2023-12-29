@@ -24,6 +24,8 @@ The main changes in this release are:
 
 + Added `_initialize_levels_model_selection_multiseries` function to `model_selection_multiseries` module. This function initializes the levels of the series to be used in the model selection functions.
 
++ Added `set_dark_theme` function to the `plot` module to set a dark theme for matplotlib plots.
+
 **Changed**
 
 + 
