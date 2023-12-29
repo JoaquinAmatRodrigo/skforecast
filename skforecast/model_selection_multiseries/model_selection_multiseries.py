@@ -1017,6 +1017,7 @@ def bayesian_search_forecaster_multiseries(
     """
     Bayesian optimization for a Forecaster object using multi-series backtesting 
     and optuna library.
+    **New in version 0.12.0**
     
     Parameters
     ----------
@@ -1075,7 +1076,6 @@ def bayesian_search_forecaster_multiseries(
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
         set to the number of cores. If 'auto', `n_jobs` is set using the function
         skforecast.utils.select_n_jobs_backtesting.
-        **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
     show_progress: bool, default `True`
@@ -1224,7 +1224,6 @@ def _bayesian_search_optuna_multiseries(
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
         set to the number of cores. If 'auto', `n_jobs` is set using the function
         skforecast.utils.select_n_jobs_backtesting.
-        **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
     show_progress: bool, default `True`
@@ -1270,7 +1269,7 @@ def _bayesian_search_optuna_multiseries(
             "When `metric` is a `list`, each metric name must be unique."
         )
 
-    # Objective function using backtesting_forecaster
+    # Objective function using backtesting_forecaster_multiseries
     def _objective(
         trial,
         search_space          = search_space,
@@ -1820,8 +1819,11 @@ def bayesian_search_forecaster_multivariate(
     kwargs_study_optimize: dict={}
 ) -> Tuple[pd.DataFrame, object]:
     """
+    This function is an alias of bayesian_search_forecaster_multiseries.
+
     Bayesian optimization for a Forecaster object using multi-series backtesting 
     and optuna library.
+    **New in version 0.12.0**
     
     Parameters
     ----------

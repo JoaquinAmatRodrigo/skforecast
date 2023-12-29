@@ -215,12 +215,56 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregCustom_with_difer
     )
 
     pd.testing.assert_frame_equal(results, expected_results)
+
+
+def test_output_evaluate_grid_hyperparameters_ForecasterAutoreg_lags_grid_dict_with_mocked():
+    """
+    Test output of _evaluate_grid_hyperparameters in ForecasterAutoreg when 
+    `lags_grid` is a dict with mocked (mocked done in Skforecast v0.4.3).
+    """
+    forecaster = ForecasterAutoreg(
+                     regressor = Ridge(random_state=123),
+                     lags      = 2
+                 )
+
+    steps = 3
+    n_validation = 12
+    y_train = y[:-n_validation]
+    lags_grid = {'lags_1': 2, 'lags_2': 4}
+    param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
+    idx = len(lags_grid)*len(param_grid)
+
+    results = _evaluate_grid_hyperparameters(
+                  forecaster         = forecaster,
+                  y                  = y,
+                  lags_grid          = lags_grid,
+                  param_grid         = param_grid,
+                  steps              = steps,
+                  refit              = False,
+                  metric             = 'mean_squared_error',
+                  initial_train_size = len(y_train),
+                  fixed_train_size   = False,
+                  return_best        = False,
+                  verbose            = False
+              )
     
+    expected_results = pd.DataFrame({
+        'lags'  : ['lags_1', 'lags_1', 'lags_1', 'lags_2', 'lags_2', 'lags_2'],
+        'params': [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}, {'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}],
+        'mean_squared_error': np.array([0.06464646, 0.06502362, 0.06745534, 0.06779272, 0.06802481, 0.06948609]),                                                               
+        'alpha' : np.array([0.01, 0.1 , 1.  , 0.01, 0.1 , 1.  ])
+        },
+        index=pd.RangeIndex(start=0, stop=idx, step=1)
+    )
+
+    pd.testing.assert_frame_equal(results, expected_results)
+
 
 def test_output_evaluate_grid_hyperparameters_ForecasterAutoreg_lags_grid_is_None_with_mocked():
     """
-    Test output of _evaluate_grid_hyperparameters in ForecasterAutoreg when lags_grid is None with mocked
-    (mocked done in Skforecast v0.4.3), should use forecaster.lags as lags_grid.
+    Test output of _evaluate_grid_hyperparameters in ForecasterAutoreg when 
+    `lags_grid` is None with mocked (mocked done in Skforecast v0.4.3), 
+    should use forecaster.lags as lags_grid.
     """
     forecaster = ForecasterAutoreg(
                      regressor = Ridge(random_state=123),
@@ -347,21 +391,24 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregCustom_with_mocke
      )
     
     pd.testing.assert_frame_equal(results, expected_results)
-    
 
-def test_evaluate_grid_hyperparameters_when_return_best():
+
+@pytest.mark.parametrize("lags_grid", 
+                         [[2, 4], {'lags_1': 2, 'lags_2': 4}], 
+                         ids=lambda lg: f'lags_grid: {lg}')
+def test_evaluate_grid_hyperparameters_when_return_best_ForecasterAutoreg(lags_grid):
     """
-    Test forecaster is refitted when return_best=True in _evaluate_grid_hyperparameters.
+    Test forecaster is refitted when return_best=True in 
+    _evaluate_grid_hyperparameters with ForecasterAutoreg.
     """
     forecaster = ForecasterAutoreg(
-                    regressor = Ridge(random_state=123),
-                    lags      = 2 # Placeholder, the value will be overwritten
+                     regressor = Ridge(random_state=123),
+                     lags      = 2
                  )
 
     steps = 3
     n_validation = 12
     y_train = y[:-n_validation]
-    lags_grid = [2, 4]
     param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
 
     _evaluate_grid_hyperparameters(
@@ -385,20 +432,58 @@ def test_evaluate_grid_hyperparameters_when_return_best():
     assert expected_alpha == forecaster.regressor.alpha
 
 
-def test_evaluate_grid_hyperparameters_when_return_best_and_list_metrics():
+def test_evaluate_grid_hyperparameters_when_return_best_ForecasterAutoregCustom():
+    """
+    Test forecaster is refitted when return_best=True in 
+    _evaluate_grid_hyperparameters with ForecasterAutoregCustom.
+    """
+    forecaster = ForecasterAutoregCustom(
+                     regressor      = Ridge(random_state=123),
+                     fun_predictors = create_predictors,
+                     window_size    = 4
+                 )
+
+    steps = 3
+    n_validation = 12
+    y_train = y[:-n_validation]
+    param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
+    lags_grid = None # Ignored
+
+    _evaluate_grid_hyperparameters(
+        forecaster         = forecaster,
+        y                  = y,
+        lags_grid          = lags_grid,
+        param_grid         = param_grid,
+        steps              = steps,
+        refit              = False,
+        metric             = 'mean_squared_error',
+        initial_train_size = len(y_train),
+        fixed_train_size   = False,
+        return_best        = True,
+        verbose            = False
+    )
+    
+    expected_alpha = 0.01
+    
+    assert expected_alpha == forecaster.regressor.alpha
+
+
+@pytest.mark.parametrize("lags_grid", 
+                         [[2, 4], {'lags_1': 2, 'lags_2': 4}], 
+                         ids=lambda lg: f'lags_grid: {lg}')
+def test_evaluate_grid_hyperparameters_when_return_best_and_list_metrics(lags_grid):
     """
     Test forecaster is refitted when return_best=True in _evaluate_grid_hyperparameters
     and multiple metrics.
     """
     forecaster = ForecasterAutoreg(
                      regressor = Ridge(random_state=123),
-                     lags      = 2 # Placeholder, the value will be overwritten
+                     lags      = 2
                  )
 
     steps = 3
     n_validation = 12
     y_train = y[:-n_validation]
-    lags_grid = [2, 4]
     param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
 
     _evaluate_grid_hyperparameters(
