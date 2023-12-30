@@ -12,6 +12,7 @@ import joblib
 import numpy as np
 import pandas as pd
 import sklearn
+import sklearn.pipeline
 import sklearn.linear_model
 from sklearn.compose import ColumnTransformer
 from sklearn.exceptions import NotFittedError
@@ -131,7 +132,8 @@ def initialize_weights(
 
     if weight_func is not None:
 
-        if forecaster_name in ['ForecasterAutoregMultiSeries', 'ForecasterAutoregMultiSeriesCustom']:
+        if forecaster_name in ['ForecasterAutoregMultiSeries', 
+                               'ForecasterAutoregMultiSeriesCustom']:
             if not isinstance(weight_func, (Callable, dict)):
                 raise TypeError(
                     (f"Argument `weight_func` must be a Callable or a dict of "
@@ -173,6 +175,62 @@ def initialize_weights(
             series_weights = None
 
     return weight_func, source_code_weight_func, series_weights
+
+
+def initialize_lags_grid(
+    forecaster, 
+    lags_grid: Optional[Union[list, dict]]=None
+) -> Tuple[dict, str]:
+    """
+    Initialize lags grid and lags label for model selection. 
+
+    Parameters
+    ----------
+    forecaster : Forecaster
+        Forecaster model. ForecasterAutoreg, ForecasterAutoregCustom, 
+        ForecasterAutoregDirect, ForecasterAutoregMultiSeries, 
+        ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate.
+    lags_grid : list, dict, default `None`
+        Lists of lags to try, containing int, lists, numpy ndarray, or range 
+        objects. If `dict`, the keys are used as labels in the `results` 
+        DataFrame, and the values are used as the lists of lags to try. Ignored 
+        if the forecaster is an instance of `ForecasterAutoregCustom` or 
+        `ForecasterAutoregMultiSeriesCustom`.
+
+    Returns
+    -------
+    lags_grid : dict
+        Dictionary with lags configuration for each iteration.
+    lags_label : str
+        Label for lags representation in the results object.
+
+    """
+
+    if not isinstance(lags_grid, (list, dict, type(None))):
+        raise TypeError(
+            (f"`lags_grid` argument must be a list, dict or None. "
+             f"Got {type(lags_grid)}.")
+        )
+
+    if type(forecaster).__name__ in ['ForecasterAutoregCustom', 
+                                     'ForecasterAutoregMultiSeriesCustom']:
+        if lags_grid is not None:
+            warnings.warn(
+                (f"`lags_grid` ignored if forecaster is an instance of "
+                 f"`{type(forecaster).__name__}`."),
+                IgnoredArgumentWarning
+            )
+        lags_grid = ['custom predictors']
+
+    lags_label = 'values'
+    if isinstance(lags_grid, list):
+        lags_grid = {f'{lags}': lags for lags in lags_grid}
+    elif lags_grid is None:
+        lags_grid = {f'{list(forecaster.lags)}': list(forecaster.lags)}
+    else:
+        lags_label = 'keys'
+
+    return lags_grid, lags_label
 
 
 def check_select_fit_kwargs(
@@ -1714,8 +1772,7 @@ def check_backtesting_input(
 
 
 def select_n_jobs_backtesting(
-    forecaster_name: str,
-    regressor_name: str,
+    forecaster,
     refit: Union[bool, int]
 ) -> int:
     """
@@ -1726,29 +1783,29 @@ def select_n_jobs_backtesting(
 
     - If `refit` is an integer, then n_jobs=1. This is because parallelization doesn't 
     work with intermittent refit.
-    - If forecaster_name is 'ForecasterAutoreg' or 'ForecasterAutoregCustom' and
-    regressor_name is a linear regressor, then n_jobs=1.
-    - If forecaster_name is 'ForecasterAutoreg' or 'ForecasterAutoregCustom',
-    regressor_name is not a linear regressor and refit=`True`, then
+    - If forecaster is 'ForecasterAutoreg' or 'ForecasterAutoregCustom' and
+    regressor is a linear regressor, then n_jobs=1.
+    - If forecaster is 'ForecasterAutoreg' or 'ForecasterAutoregCustom',
+    regressor is not a linear regressor and refit=`True`, then
     n_jobs=cpu_count().
-    - If forecaster_name is 'ForecasterAutoreg' or 'ForecasterAutoregCustom',
-    regressor_name is not a linear regressor and refit=`False`, then
+    - If forecaster is 'ForecasterAutoreg' or 'ForecasterAutoregCustom',
+    regressor is not a linear regressor and refit=`False`, then
     n_jobs=1.
-    - If forecaster_name is 'ForecasterAutoregDirect' or 'ForecasterAutoregMultiVariate'
+    - If forecaster is 'ForecasterAutoregDirect' or 'ForecasterAutoregMultiVariate'
     and refit=`True`, then n_jobs=cpu_count().
-    - If forecaster_name is 'ForecasterAutoregDirect' or 'ForecasterAutoregMultiVariate'
+    - If forecaster is 'ForecasterAutoregDirect' or 'ForecasterAutoregMultiVariate'
     and refit=`False`, then n_jobs=1.
-    - If forecaster_name is 'ForecasterAutoregMultiseries' or 
-    'ForecasterAutoregMultiseriesCustom', then n_jobs=cpu_count().
-    - If forecaster_name is 'ForecasterSarimax' or 'ForecasterEquivalentDate', 
+    - If forecaster is 'ForecasterAutoregMultiSeries' or 
+    'ForecasterAutoregMultiSeriesCustom', then n_jobs=cpu_count().
+    - If forecaster is 'ForecasterSarimax' or 'ForecasterEquivalentDate', 
     then n_jobs=1.
 
     Parameters
     ----------
-    forecaster_name : str
-        The type of Forecaster.
-    regressor_name : str
-        The type of regressor.
+    forecaster : Forecaster
+        Forecaster model. ForecasterAutoreg, ForecasterAutoregCustom, 
+        ForecasterAutoregDirect, ForecasterAutoregMultiSeries, 
+        ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate.
     refit : bool, int
         If the forecaster is refitted during the backtesting process.
 
@@ -1758,6 +1815,13 @@ def select_n_jobs_backtesting(
         The number of jobs to run in parallel.
     
     """
+
+    forecaster_name = type(forecaster).__name__
+
+    if isinstance(forecaster.regressor, sklearn.pipeline.Pipeline):
+        regressor_name = type(forecaster.regressor[-1]).__name__
+    else:
+        regressor_name = type(forecaster.regressor).__name__
 
     linear_regressors = [
         regressor_name
@@ -1776,7 +1840,7 @@ def select_n_jobs_backtesting(
                 n_jobs = joblib.cpu_count() if refit else 1
         elif forecaster_name in ['ForecasterAutoregDirect', 'ForecasterAutoregMultiVariate']:
             n_jobs = 1
-        elif forecaster_name in ['ForecasterAutoregMultiseries', 'ForecasterAutoregMultiSeriesCustom']:
+        elif forecaster_name in ['ForecasterAutoregMultiSeries', 'ForecasterAutoregMultiSeriesCustom']:
             n_jobs = joblib.cpu_count()
         elif forecaster_name in ['ForecasterSarimax', 'ForecasterEquivalentDate']:
             n_jobs = 1
@@ -1819,7 +1883,8 @@ def select_n_jobs_fit_forecaster(
         if not regressor_name.startswith('_')
     ]
 
-    if forecaster_name in ['ForecasterAutoregDirect', 'ForecasterAutoregMultiVariate']:
+    if forecaster_name in ['ForecasterAutoregDirect', 
+                           'ForecasterAutoregMultiVariate']:
         if regressor_name in linear_regressors:
             n_jobs = 1
         else:

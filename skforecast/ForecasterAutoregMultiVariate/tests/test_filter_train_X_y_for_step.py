@@ -37,7 +37,7 @@ def test_filter_train_X_y_for_step_output_when_lags_3_steps_2_exog_is_None_for_s
                            'l2': pd.Series(np.arange(100, 110), dtype=float)})
     
     forecaster = ForecasterAutoregMultiVariate(LinearRegression(), level='l1',
-                                               lags=3, steps=2)
+                                               lags=3, steps=2, transformer_series=None)
     X_train, y_train = forecaster.create_train_X_y(series=series)
     results = forecaster.filter_train_X_y_for_step(step=1, X_train=X_train, y_train=y_train)
 
@@ -74,7 +74,7 @@ def test_filter_train_X_y_for_step_output_when_lags_3_steps_2_and_exog_for_step_
     exog = pd.Series(np.arange(100, 110), name='exog', dtype=int)
 
     forecaster = ForecasterAutoregMultiVariate(LinearRegression(), level='l2',
-                                               lags=[1, 2, 3], steps=2)
+                                               lags=[1, 2, 3], steps=2, transformer_series=None)
     X_train, y_train = forecaster.create_train_X_y(series=series, exog=exog)
     results = forecaster.filter_train_X_y_for_step(step=2, X_train=X_train, y_train=y_train)
 
@@ -113,7 +113,7 @@ def test_filter_train_X_y_for_step_output_when_lags_3_steps_2_and_exog_for_step_
     exog = pd.Series(np.arange(100, 110), name='exog', dtype=int)
 
     forecaster = ForecasterAutoregMultiVariate(LinearRegression(), level='l2',
-                                               lags=[1, 2, 3], steps=2)
+                                               lags=[1, 2, 3], steps=2, transformer_series=None)
     X_train, y_train = forecaster.create_train_X_y(series=series, exog=exog)
     results = forecaster.filter_train_X_y_for_step(
                   step          = 2, 

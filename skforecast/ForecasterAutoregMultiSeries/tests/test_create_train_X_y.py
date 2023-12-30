@@ -175,19 +175,19 @@ def test_create_train_X_y_output_when_series_and_exog_is_None():
     results = forecaster.create_train_X_y(series=series)
     expected = (
         pd.DataFrame(
-            data = np.array([[2.0, 1.0, 0.0, 1., 0.],
-                             [3.0, 2.0, 1.0, 1., 0.],
-                             [4.0, 3.0, 2.0, 1., 0.],
-                             [5.0, 4.0, 3.0, 1., 0.],
-                             [2.0, 1.0, 0.0, 0., 1.],
-                             [3.0, 2.0, 1.0, 0., 1.],
-                             [4.0, 3.0, 2.0, 0., 1.],
-                             [5.0, 4.0, 3.0, 0., 1.]]),
+            data = np.array([[-0.5, -1. , -1.5, 1., 0.],
+                             [ 0. , -0.5, -1. , 1., 0.],
+                             [ 0.5,  0. , -0.5, 1., 0.],
+                             [ 1. ,  0.5,  0. , 1., 0.],
+                             [-0.5, -1. , -1.5, 0., 1.],
+                             [ 0. , -0.5, -1. , 0., 1.],
+                             [ 0.5,  0. , -0.5, 0., 1.],
+                             [ 1. ,  0.5,  0. , 0., 1.]]),
             index   = pd.RangeIndex(start=0, stop=8, step=1),
             columns = ['lag_1', 'lag_2', 'lag_3', '1', '2']
         ),
         pd.Series(
-            data  = np.array([3., 4., 5., 6., 3., 4., 5., 6.]),
+            data  = np.array([0., 0.5, 1., 1.5, 0., 0.5, 1., 1.5]),
             index = pd.RangeIndex(start=0, stop=8, step=1),
             name  = 'y',
             dtype = float
@@ -216,7 +216,8 @@ def test_create_train_X_y_output_when_series_and_exog_no_pandas_index():
     exog = pd.Series(np.arange(100, 110), index=np.arange(6, 16), 
                      name='exog', dtype=float)
     
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5)
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5,
+                                              transformer_series=None)
     results = forecaster.create_train_X_y(series=series, exog=exog)
 
     expected = (
@@ -266,7 +267,8 @@ def test_create_train_X_y_output_when_series_10_and_exog_is_series_of_float_int(
                            '2': pd.Series(np.arange(10, dtype=float))})
     exog = pd.Series(np.arange(100, 110), name='exog', dtype=dtype)
 
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5)
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5,
+                                              transformer_series=None)
     results = forecaster.create_train_X_y(series=series, exog=exog)
 
     expected = (
@@ -317,7 +319,8 @@ def test_create_train_X_y_output_when_series_10_and_exog_is_dataframe_of_float_i
     exog = pd.DataFrame({'exog_1': np.arange(100, 110, dtype=dtype),
                          'exog_2': np.arange(1000, 1010, dtype=dtype)})
 
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5)
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5,
+                                              transformer_series=None)
     results = forecaster.create_train_X_y(series=series, exog=exog)    
 
     expected = (
@@ -368,7 +371,8 @@ def test_create_train_X_y_output_when_series_10_and_exog_is_series_of_bool_str(e
                            'l2': pd.Series(np.arange(10, dtype=float))})
     exog = pd.Series(exog_values*10, name='exog', dtype=dtype)
 
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5)
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5,
+                                              transformer_series=None)
     results = forecaster.create_train_X_y(series=series, exog=exog)
 
     expected = (
@@ -421,7 +425,8 @@ def test_create_train_X_y_output_when_series_10_and_exog_is_dataframe_of_bool_st
     exog = pd.DataFrame({'exog_1': v_exog_1*10,
                          'exog_2': v_exog_2*10})
 
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5)
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5,
+                                              transformer_series=None)
     results = forecaster.create_train_X_y(series=series, exog=exog)    
 
     expected = (
@@ -471,7 +476,8 @@ def test_create_train_X_y_output_when_series_10_and_exog_is_series_of_category()
                            'l2': pd.Series(np.arange(10, dtype=float))})
     exog = pd.Series(range(10), name='exog', dtype='category')
 
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5)
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5,
+                                              transformer_series=None)
     results = forecaster.create_train_X_y(series=series, exog=exog)   
 
     expected = (
@@ -520,7 +526,8 @@ def test_create_train_X_y_output_when_series_10_and_exog_is_dataframe_of_categor
     exog = pd.DataFrame({'exog_1': pd.Categorical(range(10)),
                          'exog_2': pd.Categorical(range(100, 110))})
 
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5)
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5,
+                                              transformer_series=None)
     results = forecaster.create_train_X_y(series=series, exog=exog)   
 
     expected = (
@@ -571,7 +578,8 @@ def test_create_train_X_y_output_when_series_10_and_exog_is_dataframe_of_float_i
                          'exog_2': pd.Series(np.arange(1000, 1010), dtype=int),
                          'exog_3': pd.Categorical(range(100, 110))})
 
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5)
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5,
+                                              transformer_series=None)
     results = forecaster.create_train_X_y(series=series, exog=exog)   
 
     expected = (
@@ -625,7 +633,8 @@ def test_create_train_X_y_output_when_series_and_exog_is_dataframe_datetime_inde
                          'exog_2' : np.arange(1000, 1007, dtype=float)},
                         index = pd.date_range("1990-01-01", periods=7, freq='D'))
                          
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3,
+                                              transformer_series=None)
     results = forecaster.create_train_X_y(series=series, exog=exog)
 
     expected = (
@@ -718,9 +727,10 @@ def test_create_train_X_y_output_when_exog_is_None_and_transformer_exog_is_not_N
     series = pd.DataFrame({'1': pd.Series(np.arange(7, dtype=float)), 
                            '2': pd.Series(np.arange(7, dtype=float))})
     forecaster = ForecasterAutoregMultiSeries(
-                     regressor        = LinearRegression(),
-                     lags             = 3,
-                     transformer_exog = StandardScaler()
+                     regressor          = LinearRegression(),
+                     lags               = 3,
+                     transformer_series = None,
+                     transformer_exog   = StandardScaler()
                  )
 
     results = forecaster.create_train_X_y(series=series)
@@ -846,7 +856,8 @@ def test_create_train_X_y_output_when_series_different_length_and_exog_is_datafr
                          'exog_3': pd.Categorical(range(100, 110))})
     exog.index = pd.date_range("1990-01-01", periods=10, freq='D')
 
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5)
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5,
+                                              transformer_series=None)
     results = forecaster.create_train_X_y(series=series, exog=exog)   
 
     expected = (
@@ -913,11 +924,11 @@ def test_create_train_X_y_output_when_transformer_series_and_transformer_exog_wi
                 index = pd.date_range("1990-01-01", periods=10, freq='D'))
 
     transformer_exog = ColumnTransformer(
-                            [('scale', StandardScaler(), ['exog_1']),
-                             ('onehot', OneHotEncoder(), ['exog_2'])],
-                            remainder = 'passthrough',
-                            verbose_feature_names_out = False
-                        )
+                           [('scale', StandardScaler(), ['exog_1']),
+                            ('onehot', OneHotEncoder(), ['exog_2'])],
+                           remainder = 'passthrough',
+                           verbose_feature_names_out = False
+                       )
 
     forecaster = ForecasterAutoregMultiSeries(
                      regressor          = LinearRegression(),

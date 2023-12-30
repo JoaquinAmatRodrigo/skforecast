@@ -44,7 +44,7 @@ def test_output_get_feature_importances_when_regressor_is_RandomForest():
     forecaster = ForecasterAutoregMultiSeries(RandomForestRegressor(n_estimators=1, max_depth=2, random_state=123), lags=3)
     forecaster.fit(series=series)
 
-    results = forecaster.get_feature_importances()
+    results = forecaster.get_feature_importances(sort_importance=False)
     expected = pd.DataFrame({
                    'feature': ['lag_1', 'lag_2', 'lag_3', '1', '2'],
                    'importance': np.array([0.9446366782006932, 0.0, 0.05536332179930687, 0.0, 0.0])
@@ -66,7 +66,7 @@ def test_output_get_feature_importances_when_regressor_is_RandomForest_with_exog
     expected = pd.DataFrame({
                    'feature': ['lag_1', 'lag_2', 'lag_3', 'exog', '1', '2'],
                    'importance': np.array([0.73269896, 0., 0.21193772, 0.05536332, 0., 0.])
-               })
+               }).sort_values(by='importance', ascending=False)
 
     pd.testing.assert_frame_equal(results, expected)
 
@@ -79,7 +79,7 @@ def test_output_get_feature_importances_when_regressor_is_LinearRegression():
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
     forecaster.fit(series=series)
 
-    results = forecaster.get_feature_importances()
+    results = forecaster.get_feature_importances(sort_importance=False)
     expected = pd.DataFrame({
                    'feature': ['lag_1', 'lag_2', 'lag_3', '1', '2'],
                    'importance': np.array([3.33333333e-01, 3.33333333e-01, 3.33333333e-01, 
@@ -101,11 +101,11 @@ def test_output_get_feature_importances_when_regressor_is_LinearRegression_with_
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
     forecaster.fit(series=series_2, exog=pd.Series(np.arange(10, 15), name='exog'))
 
-    results = forecaster.get_feature_importances()
+    results = forecaster.get_feature_importances(sort_importance=False)
     expected = pd.DataFrame({
                     'feature': ['lag_1', 'lag_2', 'lag_3', 'exog', '1', '2'],
-                    'importance': np.array([2.50000000e-01, 2.50000000e-01, 2.50000000e-01, 
-                                            2.50000000e-01, -8.32667268e-17, 8.32667268e-17])
+                    'importance': np.array([2.00000000e-01,  2.00000000e-01, 2.00000000e-01,  
+                                            2.82842712e-01, -8.32667268e-17, 8.32667268e-17])
                })
 
     pd.testing.assert_frame_equal(results, expected)
@@ -143,12 +143,13 @@ def test_output_get_feature_importances_when_pipeline_LinearRegression():
     it is trained with series pandas DataFrame.
     """
     forecaster = ForecasterAutoregMultiSeries(
-                     regressor = make_pipeline(StandardScaler(), LinearRegression()),
-                     lags      = 3
+                     regressor          = make_pipeline(StandardScaler(), LinearRegression()),
+                     lags               = 3,
+                     transformer_series = None
                  )
     forecaster.fit(series=series)
 
-    results = forecaster.get_feature_importances()
+    results = forecaster.get_feature_importances(sort_importance=False)
     expected = pd.DataFrame({
                    'feature': ['lag_1', 'lag_2', 'lag_3', '1', '2'],
                    'importance': np.array([6.66666667e-01, 6.66666667e-01, 6.66666667e-01, 
@@ -167,11 +168,12 @@ def test_output_get_feature_importances_when_pipeline_RandomForestRegressor():
     forecaster = ForecasterAutoregMultiSeries(
                      regressor = make_pipeline(StandardScaler(), 
                                                RandomForestRegressor(n_estimators=1, max_depth=2, random_state=123)),
-                     lags      = 3
+                     lags               = 3,
+                     transformer_series = None
                  )
     forecaster.fit(series=series)
 
-    results = forecaster.get_feature_importances()
+    results = forecaster.get_feature_importances(sort_importance=False)
     expected = pd.DataFrame({
                    'feature': ['lag_1', 'lag_2', 'lag_3', '1', '2'],
                    'importance': np.array([0.9446366782006932, 0.0, 0.05536332179930687, 0.0, 0.0])

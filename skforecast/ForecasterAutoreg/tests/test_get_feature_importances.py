@@ -44,7 +44,7 @@ def test_output_get_feature_importances_when_regressor_is_RandomForest():
     expected = pd.DataFrame({
                    'feature': ['lag_1', 'lag_2', 'lag_3'],
                    'importance': np.array([0.94766355, 0., 0.05233645])
-               })
+               }).sort_values(by='importance', ascending=False)
 
     pd.testing.assert_frame_equal(results, expected)
 
@@ -75,7 +75,7 @@ def test_output_get_feature_importances_when_regressor_is_LinearRegression():
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
     forecaster.fit(y=pd.Series(np.arange(5)))
 
-    results = forecaster.get_feature_importances()
+    results = forecaster.get_feature_importances(sort_importance=False)
     expected = pd.DataFrame({
                    'feature': ['lag_1', 'lag_2', 'lag_3'],
                    'importance': np.array([0.33333333, 0.33333333, 0.33333333])
@@ -93,7 +93,7 @@ def test_output_get_feature_importances_when_regressor_is_LinearRegression_with_
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
     forecaster.fit(y=pd.Series(np.arange(5)), exog=pd.Series(np.arange(10, 15), name='exog'))
     
-    results = forecaster.get_feature_importances()
+    results = forecaster.get_feature_importances(sort_importance=False)
     expected = pd.DataFrame({
                    'feature': ['lag_1', 'lag_2', 'lag_3', 'exog'],
                    'importance': np.array([0.25, 0.25, 0.25, 0.25])
@@ -137,7 +137,7 @@ def test_output_get_feature_importances_when_pipeline_LinearRegression():
                  )
     forecaster.fit(y=pd.Series(np.arange(5)))
 
-    results = forecaster.get_feature_importances()
+    results = forecaster.get_feature_importances(sort_importance=False)
     expected = pd.DataFrame({
                    'feature': ['lag_1', 'lag_2', 'lag_3'],
                    'importance': np.array([0.166667, 0.166667, 0.166667])
@@ -159,7 +159,7 @@ def test_output_get_feature_importances_when_pipeline_RandomForestRegressor():
                  )
     forecaster.fit(y=pd.Series(np.arange(10)))
 
-    results = forecaster.get_feature_importances()
+    results = forecaster.get_feature_importances(sort_importance=False)
     expected = pd.DataFrame({
                    'feature': ['lag_1', 'lag_2', 'lag_3'],
                    'importance': np.array([0.94766355, 0., 0.05233645])

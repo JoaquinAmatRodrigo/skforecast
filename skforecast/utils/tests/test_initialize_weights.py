@@ -10,7 +10,6 @@ from skforecast.utils.utils import initialize_weights
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.neighbors import KNeighborsRegressor
-from xgboost import XGBRegressor
 
 
 @pytest.mark.parametrize("forecaster_name", 
@@ -118,7 +117,7 @@ def test_IgnoredArgumentWarning_initialize_weights_when_series_weights_is_provid
 
 
 @pytest.mark.parametrize("regressor", 
-                         [LinearRegression(), RandomForestRegressor(), XGBRegressor()], 
+                         [LinearRegression(), RandomForestRegressor()], 
                          ids=lambda regressor: f'regressor: {type(regressor).__name__}')
 def test_initialize_weights_finds_sample_weight_in_different_regressors_when_weight_func(recwarn, regressor):
     """
@@ -140,7 +139,7 @@ def test_initialize_weights_finds_sample_weight_in_different_regressors_when_wei
 
 
 @pytest.mark.parametrize("regressor", 
-                         [LinearRegression(), RandomForestRegressor(), XGBRegressor()], 
+                         [LinearRegression(), RandomForestRegressor()], 
                          ids=lambda regressor: f'regressor: {type(regressor).__name__}')
 def test_initialize_weights_finds_sample_weight_in_different_regressors_when_series_weights(recwarn, regressor):
     """

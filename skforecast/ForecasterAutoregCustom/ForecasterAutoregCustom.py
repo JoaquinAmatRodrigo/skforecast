@@ -93,10 +93,8 @@ class ForecasterAutoregCustom(ForecasterBase):
     fun_predictors : Callable
         Function that receives a time series as input (numpy ndarray) and returns
         another numpy ndarray with the predictors.
-        **New in version 0.7.0**
     source_code_fun_predictors : str
         Source code of the custom function used to create the predictors.
-        **New in version 0.7.0**
     window_size : int
         Size of the window needed by `fun_predictors` to create the predictors.
         If `differentiation` is not `None`, `window_size` is increased by the
@@ -1288,7 +1286,8 @@ class ForecasterAutoregCustom(ForecasterBase):
 
     
     def get_feature_importances(
-        self
+        self,
+        sort_importance: bool=True
     ) -> pd.DataFrame:
         """
         Return feature importances of the regressor stored in the forecaster.
@@ -1297,7 +1296,8 @@ class ForecasterAutoregCustom(ForecasterBase):
 
         Parameters
         ----------
-        self
+        sort_importance: bool, default `True`
+            If `True`, sorts the feature importances in descending order.
 
         Returns
         -------
@@ -1335,5 +1335,9 @@ class ForecasterAutoregCustom(ForecasterBase):
                                       'feature': self.X_train_col_names,
                                       'importance': feature_importances
                                   })
+            if sort_importance:
+                feature_importances = feature_importances.sort_values(
+                                          by='importance', ascending=False
+                                      )
 
         return feature_importances
