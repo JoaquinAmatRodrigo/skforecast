@@ -3,8 +3,9 @@
 from pytest import approx
 import numpy as np
 import pandas as pd
-from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
+from sklearn.linear_model import Ridge
 from sklearn.linear_model import LinearRegression
+from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 
 
 def test_recursive_predict_output_when_regressor_is_LinearRegression():
@@ -49,7 +50,7 @@ def test_recursive_predict_output_when_regressor_is_LinearRegression_StandardSca
                            '2': pd.Series(np.arange(start=50, stop=100))
                           })
 
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5)
+    forecaster = ForecasterAutoregMultiSeries(Ridge(random_state=123), lags=5)
     forecaster.fit(series=series)
     level = '1'
     predictions_1 = forecaster._recursive_predict(
@@ -58,7 +59,7 @@ def test_recursive_predict_output_when_regressor_is_LinearRegression_StandardSca
                         last_window = forecaster.last_window[level].to_numpy(),
                         exog        = None
                     )
-    expected_1 = np.array([47.42080743, 47.6709354 , 47.99768315, 48.20560339, 48.26631367])
+    expected_1 = np.array([47.07918986, 47.49389001, 47.79185048, 47.94978724, 47.93977217])
 
     level = '2'
     predictions_2 = forecaster._recursive_predict(
@@ -67,7 +68,7 @@ def test_recursive_predict_output_when_regressor_is_LinearRegression_StandardSca
                         last_window = forecaster.last_window[level].to_numpy(),
                         exog        = None
                     )
-    expected_2 = np.array([97.42080743, 97.6709354 , 97.99768315, 98.20560339, 98.26631367])
+    expected_2 = np.array([96.94237815, 97.32979082, 97.59502126, 97.71369989, 97.65659655])
 
     assert predictions_1 == approx(expected_1)
     assert predictions_2 == approx(expected_2)

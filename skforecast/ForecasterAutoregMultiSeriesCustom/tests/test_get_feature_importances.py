@@ -118,20 +118,21 @@ def test_output_get_feature_importances_when_regressor_is_LinearRegression_with_
     and it is trained with series pandas DataFrame and a exogenous variable
     exog=pd.Series(np.arange(10, 15), name='exog').
     """
-    series_2 = pd.DataFrame({'1': pd.Series(np.arange(5)), 
-                             '2': pd.Series(np.arange(5))})
+    series_2 = pd.DataFrame({'1': pd.Series(np.arange(10)), 
+                             '2': pd.Series(np.arange(10))})
     forecaster = ForecasterAutoregMultiSeriesCustom(
-                     regressor       = LinearRegression(),
-                     fun_predictors  = create_predictors,
-                     window_size     = 3
+                     regressor          = LinearRegression(),
+                     fun_predictors     = create_predictors,
+                     window_size        = 3,
+                     transformer_series = None
                  )
-    forecaster.fit(series=series_2, exog=pd.Series(np.arange(10, 15), name='exog'))
+    forecaster.fit(series=series_2, exog=pd.Series(np.arange(10, 20), name='exog'))
 
     results = forecaster.get_feature_importances(sort_importance=False)
     expected = pd.DataFrame({
                    'feature': ['custom_predictor_0', 'custom_predictor_1', 'custom_predictor_2', 'exog', '1', '2'],
-                   'importance': np.array([2.00000000e-01,  2.00000000e-01, 2.00000000e-01,  
-                                           2.82842712e-01, -8.32667268e-17, 8.32667268e-17])
+                   'importance': np.array([2.50000000e-01,  2.50000000e-01,  2.50000000e-01,  
+                                           2.50000000e-01, -2.97120907e-17,  2.97120907e-17])
                })
 
     pd.testing.assert_frame_equal(results, expected)

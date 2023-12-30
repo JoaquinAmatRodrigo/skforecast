@@ -2,7 +2,6 @@
 # ==============================================================================
 import re
 import pytest
-from pytest import approx
 import numpy as np
 import pandas as pd
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
@@ -95,17 +94,18 @@ def test_output_get_feature_importances_when_regressor_is_LinearRegression_with_
     and it is trained with series pandas DataFrame and a exogenous variable
     exog=pd.Series(np.arange(10, 15), name='exog').
     """
-    series_2 = pd.DataFrame({'1': pd.Series(np.arange(5)), 
-                             '2': pd.Series(np.arange(5))})
+    series_2 = pd.DataFrame({'1': pd.Series(np.arange(10)), 
+                             '2': pd.Series(np.arange(10))})
 
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
-    forecaster.fit(series=series_2, exog=pd.Series(np.arange(10, 15), name='exog'))
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3,
+                                              transformer_series=None)
+    forecaster.fit(series=series_2, exog=pd.Series(np.arange(10, 20), name='exog'))
 
     results = forecaster.get_feature_importances(sort_importance=False)
     expected = pd.DataFrame({
-                    'feature': ['lag_1', 'lag_2', 'lag_3', 'exog', '1', '2'],
-                    'importance': np.array([2.00000000e-01,  2.00000000e-01, 2.00000000e-01,  
-                                            2.82842712e-01, -8.32667268e-17, 8.32667268e-17])
+                   'feature': ['lag_1', 'lag_2', 'lag_3', 'exog', '1', '2'],
+                   'importance': np.array([2.50000000e-01,  2.50000000e-01,  2.50000000e-01,  
+                                           2.50000000e-01, -2.97120907e-17,  2.97120907e-17])
                })
 
     pd.testing.assert_frame_equal(results, expected)
