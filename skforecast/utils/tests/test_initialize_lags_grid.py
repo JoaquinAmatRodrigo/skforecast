@@ -104,12 +104,7 @@ def test_initialize_lags_grid_when_lags_grid_is_None(lags, lags_grid_expected):
     assert lags_label == 'values'
     assert lags_grid.keys() == lags_grid_expected.keys()
     for v, v_expected in zip(lags_grid.values(), lags_grid_expected.values()):
-        if isinstance(v, np.ndarray):
-            assert np.array_equal(v, v_expected)
-        elif isinstance(v, range):
-            assert list(v) == list(v_expected)
-        else:
-            assert v == v_expected
+        assert v == v_expected
 
 
 def test_initialize_lags_grid_when_lags_grid_is_a_dict():
