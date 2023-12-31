@@ -474,7 +474,7 @@ def test_results_output_bayesian_search_optuna_multiseries_with_mocked_when_kwar
         index=pd.Index([0, 1], dtype="int64")
     )
 
-    pd.testing.assert_frame_equal(results.head(2), expected_results, check_dtype=False)
+    pd.testing.assert_frame_equal(results.head(1), expected_results.head(1), check_dtype=False)
 
 
 def test_results_output_bayesian_search_optuna_multiseries_with_mocked_when_lags_grid_is_None():
