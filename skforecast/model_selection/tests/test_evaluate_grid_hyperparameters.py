@@ -497,7 +497,8 @@ def test_evaluate_grid_hyperparameters_when_return_best_and_list_metrics(lags_gr
         initial_train_size = len(y_train),
         fixed_train_size   = False,
         return_best        = True,
-        verbose            = False
+        verbose            = False,
+        show_progress      = False
     )
     
     expected_lags = np.array([1, 2])

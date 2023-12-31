@@ -45,19 +45,19 @@ def test_ValueError_evaluate_grid_hyperparameters_multiseries_when_return_best_a
         )
     with pytest.raises(ValueError, match = err_msg):
         _evaluate_grid_hyperparameters_multiseries(
-            forecaster          = forecaster,
-            series              = series,
-            exog                = exog,
-            param_grid          = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}],
-            steps               = 4,
-            metric              = 'mean_absolute_error',
-            initial_train_size  = 12,
-            fixed_train_size    = False,
-            levels              = None,
-            lags_grid           = [2, 4],
-            refit               = False,
-            return_best         = True,
-            verbose             = False
+            forecaster         = forecaster,
+            series             = series,
+            exog               = exog,
+            param_grid         = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}],
+            steps              = 4,
+            metric             = 'mean_absolute_error',
+            initial_train_size = 12,
+            fixed_train_size   = False,
+            levels             = None,
+            lags_grid          = [2, 4],
+            refit              = False,
+            return_best        = True,
+            verbose            = False
         )
 
 
@@ -74,19 +74,19 @@ def test_evaluate_grid_hyperparameters_multiseries_exception_when_metric_list_du
     err_msg = re.escape("When `metric` is a `list`, each metric name must be unique.")
     with pytest.raises(ValueError, match = err_msg):
         _evaluate_grid_hyperparameters_multiseries(
-            forecaster          = forecaster,
-            series              = series,
-            param_grid          = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}],
-            steps               = 4,
-            metric              = ['mean_absolute_error', mean_absolute_error],
-            initial_train_size  = 12,
-            fixed_train_size    = False,
-            levels              = ['l1'],
-            exog                = None,
-            lags_grid           = [2, 4],
-            refit               = False,
-            return_best         = False,
-            verbose             = False
+            forecaster         = forecaster,
+            series             = series,
+            param_grid         = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}],
+            steps              = 4,
+            metric             = ['mean_absolute_error', mean_absolute_error],
+            initial_train_size = 12,
+            fixed_train_size   = False,
+            levels             = ['l1'],
+            exog               = None,
+            lags_grid          = [2, 4],
+            refit              = False,
+            return_best        = False,
+            verbose            = False
         )
 
 # ForecasterAutoregMultiSeries
@@ -108,19 +108,19 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
     param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
 
     results = _evaluate_grid_hyperparameters_multiseries(
-                  forecaster          = forecaster,
-                  series              = series,
-                  param_grid          = param_grid,
-                  steps               = steps,
-                  metric              = 'mean_absolute_error',
-                  initial_train_size  = len(series) - n_validation,
-                  fixed_train_size    = False,
-                  levels              = None,
-                  exog                = None,
-                  lags_grid           = lags_grid,
-                  refit               = False,
-                  return_best         = False,
-                  verbose             = False
+                  forecaster         = forecaster,
+                  series             = series,
+                  param_grid         = param_grid,
+                  steps              = steps,
+                  metric             = 'mean_absolute_error',
+                  initial_train_size = len(series) - n_validation,
+                  fixed_train_size   = False,
+                  levels             = None,
+                  exog               = None,
+                  lags_grid          = lags_grid,
+                  refit              = False,
+                  return_best        = False,
+                  verbose            = False
               )
     
     expected_results = pd.DataFrame({
@@ -156,19 +156,19 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregMultiSeries_lags_
     param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
 
     results = _evaluate_grid_hyperparameters_multiseries(
-                  forecaster          = forecaster,
-                  series              = series,
-                  param_grid          = param_grid,
-                  steps               = steps,
-                  metric              = 'mean_absolute_error',
-                  initial_train_size  = len(series) - n_validation,
-                  fixed_train_size    = False,
-                  levels              = None,
-                  exog                = None,
-                  lags_grid           = lags_grid,
-                  refit               = False,
-                  return_best         = False,
-                  verbose             = False
+                  forecaster         = forecaster,
+                  series             = series,
+                  param_grid         = param_grid,
+                  steps              = steps,
+                  metric             = 'mean_absolute_error',
+                  initial_train_size = len(series) - n_validation,
+                  fixed_train_size   = False,
+                  levels             = None,
+                  exog               = None,
+                  lags_grid          = lags_grid,
+                  refit              = False,
+                  return_best        = False,
+                  verbose            = False
               )
     
     expected_results = pd.DataFrame({
@@ -205,19 +205,19 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregMultiSeries_lags_
     param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
 
     results = _evaluate_grid_hyperparameters_multiseries(
-                  forecaster          = forecaster,
-                  series              = series,
-                  param_grid          = param_grid,
-                  steps               = steps,
-                  metric              = mean_absolute_error,
-                  initial_train_size  = len(series) - n_validation,
-                  fixed_train_size    = False,
-                  levels              = ['l1', 'l2'],
-                  exog                = None,
-                  lags_grid           = lags_grid,
-                  refit               = False,
-                  return_best         = False,
-                  verbose             = False
+                  forecaster         = forecaster,
+                  series             = series,
+                  param_grid         = param_grid,
+                  steps              = steps,
+                  metric             = mean_absolute_error,
+                  initial_train_size = len(series) - n_validation,
+                  fixed_train_size   = False,
+                  levels             = ['l1', 'l2'],
+                  exog               = None,
+                  lags_grid          = lags_grid,
+                  refit              = False,
+                  return_best        = False,
+                  verbose            = False
               )
     
     expected_results = pd.DataFrame({
@@ -253,19 +253,19 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
     param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
 
     results = _evaluate_grid_hyperparameters_multiseries(
-                  forecaster          = forecaster,
-                  series              = series,
-                  param_grid          = param_grid,
-                  steps               = steps,
-                  metric              = 'mean_absolute_error',
-                  initial_train_size  = len(series) - n_validation,
-                  fixed_train_size    = False,
-                  levels              = levels,
-                  exog                = None,
-                  lags_grid           = lags_grid,
-                  refit               = False,
-                  return_best         = False,
-                  verbose             = False
+                  forecaster         = forecaster,
+                  series             = series,
+                  param_grid         = param_grid,
+                  steps              = steps,
+                  metric             = 'mean_absolute_error',
+                  initial_train_size = len(series) - n_validation,
+                  fixed_train_size   = False,
+                  levels             = levels,
+                  exog               = None,
+                  lags_grid          = lags_grid,
+                  refit              = False,
+                  return_best        = False,
+                  verbose            = False
               )
     
     expected_results = pd.DataFrame({
@@ -300,19 +300,19 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
     param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
 
     results = _evaluate_grid_hyperparameters_multiseries(
-                  forecaster          = forecaster,
-                  series              = series,
-                  param_grid          = param_grid,
-                  steps               = steps,
-                  metric              = [mean_squared_error, 'mean_absolute_error'],
-                  initial_train_size  = len(series) - n_validation,
-                  fixed_train_size    = False,
-                  levels              = None,
-                  exog                = None,
-                  lags_grid           = lags_grid,
-                  refit               = False,
-                  return_best         = False,
-                  verbose             = False
+                  forecaster         = forecaster,
+                  series             = series,
+                  param_grid         = param_grid,
+                  steps              = steps,
+                  metric             = [mean_squared_error, 'mean_absolute_error'],
+                  initial_train_size = len(series) - n_validation,
+                  fixed_train_size   = False,
+                  levels             = None,
+                  exog               = None,
+                  lags_grid          = lags_grid,
+                  refit              = False,
+                  return_best        = False,
+                  verbose            = False
               )
     
     expected_results = pd.DataFrame({
@@ -351,19 +351,19 @@ def test_evaluate_grid_hyperparameters_multiseries_when_return_best_ForecasterAu
     param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
 
     _evaluate_grid_hyperparameters_multiseries(
-        forecaster          = forecaster,
-        series              = series,
-        param_grid          = param_grid,
-        steps               = steps,
-        metric              = 'mean_absolute_error',
-        initial_train_size  = len(series) - n_validation,
-        fixed_train_size    = False,
-        levels              = None,
-        exog                = None,
-        lags_grid           = lags_grid,
-        refit               = False,
-        return_best         = True,
-        verbose             = False
+        forecaster         = forecaster,
+        series             = series,
+        param_grid         = param_grid,
+        steps              = steps,
+        metric             = 'mean_absolute_error',
+        initial_train_size = len(series) - n_validation,
+        fixed_train_size   = False,
+        levels             = None,
+        exog               = None,
+        lags_grid          = lags_grid,
+        refit              = False,
+        return_best        = True,
+        verbose            = False
     )
 
     expected_lags = np.array([1, 2, 3, 4])
@@ -394,19 +394,19 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
     param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
 
     results = _evaluate_grid_hyperparameters_multiseries(
-                  forecaster          = forecaster,
-                  series              = series,
-                  param_grid          = param_grid,
-                  steps               = steps,
-                  metric              = 'mean_absolute_error',
-                  initial_train_size  = len(series) - n_validation,
-                  fixed_train_size    = False,
-                  levels              = None,
-                  exog                = None,
-                  lags_grid           = None,
-                  refit               = False,
-                  return_best         = False,
-                  verbose             = False
+                  forecaster         = forecaster,
+                  series             = series,
+                  param_grid         = param_grid,
+                  steps              = steps,
+                  metric             = 'mean_absolute_error',
+                  initial_train_size = len(series) - n_validation,
+                  fixed_train_size   = False,
+                  levels             = None,
+                  exog               = None,
+                  lags_grid          = None,
+                  refit              = False,
+                  return_best        = False,
+                  verbose            = False
               )
     
     expected_results = pd.DataFrame({
@@ -442,19 +442,19 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
     param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
 
     results = _evaluate_grid_hyperparameters_multiseries(
-                  forecaster          = forecaster,
-                  series              = series,
-                  param_grid          = param_grid,
-                  steps               = steps,
-                  metric              = 'mean_absolute_error',
-                  initial_train_size  = len(series) - n_validation,
-                  fixed_train_size    = False,
-                  levels              = levels,
-                  exog                = None,
-                  lags_grid           = None,
-                  refit               = False,
-                  return_best         = False,
-                  verbose             = False
+                  forecaster         = forecaster,
+                  series             = series,
+                  param_grid         = param_grid,
+                  steps              = steps,
+                  metric             = 'mean_absolute_error',
+                  initial_train_size = len(series) - n_validation,
+                  fixed_train_size   = False,
+                  levels             = levels,
+                  exog               = None,
+                  lags_grid          = None,
+                  refit              = False,
+                  return_best        = False,
+                  verbose            = False
               )
     
     expected_results = pd.DataFrame({
@@ -487,19 +487,19 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
     param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
 
     results = _evaluate_grid_hyperparameters_multiseries(
-                  forecaster          = forecaster,
-                  series              = series,
-                  param_grid          = param_grid,
-                  steps               = steps,
-                  metric              = [mean_squared_error, 'mean_absolute_error'],
-                  initial_train_size  = len(series) - n_validation,
-                  fixed_train_size    = False,
-                  levels              = None,
-                  exog                = None,
-                  lags_grid           = None,
-                  refit               = False,
-                  return_best         = False,
-                  verbose             = False
+                  forecaster         = forecaster,
+                  series             = series,
+                  param_grid         = param_grid,
+                  steps              = steps,
+                  metric             = [mean_squared_error, 'mean_absolute_error'],
+                  initial_train_size = len(series) - n_validation,
+                  fixed_train_size   = False,
+                  levels             = None,
+                  exog               = None,
+                  lags_grid          = None,
+                  refit              = False,
+                  return_best        = False,
+                  verbose            = False
               )
     
     expected_results = pd.DataFrame({
@@ -533,19 +533,19 @@ def test_evaluate_grid_hyperparameters_multiseries_when_return_best_ForecasterAu
     param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
 
     _evaluate_grid_hyperparameters_multiseries(
-        forecaster          = forecaster,
-        series              = series,
-        param_grid          = param_grid,
-        steps               = steps,
-        metric              = 'mean_absolute_error',
-        initial_train_size  = len(series) - n_validation,
-        fixed_train_size    = False,
-        levels              = None,
-        exog                = None,
-        lags_grid           = None,
-        refit               = False,
-        return_best         = True,
-        verbose             = False
+        forecaster         = forecaster,
+        series             = series,
+        param_grid         = param_grid,
+        steps              = steps,
+        metric             = 'mean_absolute_error',
+        initial_train_size = len(series) - n_validation,
+        fixed_train_size   = False,
+        levels             = None,
+        exog               = None,
+        lags_grid          = None,
+        refit              = False,
+        return_best        = True,
+        verbose            = False
     )
 
     expected_alpha = 0.01
@@ -576,19 +576,19 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
     param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
 
     results = _evaluate_grid_hyperparameters_multiseries(
-                  forecaster          = forecaster,
-                  series              = series,
-                  param_grid          = param_grid,
-                  steps               = steps,
-                  metric              = 'mean_absolute_error',
-                  initial_train_size  = len(series) - n_validation,
-                  fixed_train_size    = False,
-                  levels              = None,
-                  exog                = None,
-                  lags_grid           = lags_grid,
-                  refit               = False,
-                  return_best         = False,
-                  verbose             = True
+                  forecaster         = forecaster,
+                  series             = series,
+                  param_grid         = param_grid,
+                  steps              = steps,
+                  metric             = 'mean_absolute_error',
+                  initial_train_size = len(series) - n_validation,
+                  fixed_train_size   = False,
+                  levels             = None,
+                  exog               = None,
+                  lags_grid          = lags_grid,
+                  refit              = False,
+                  return_best        = False,
+                  verbose            = True
               )
     
     expected_results = pd.DataFrame({
@@ -625,19 +625,19 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregMultiVariate_lags
     param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
 
     results = _evaluate_grid_hyperparameters_multiseries(
-                  forecaster          = forecaster,
-                  series              = series,
-                  param_grid          = param_grid,
-                  steps               = steps,
-                  metric              = 'mean_absolute_error',
-                  initial_train_size  = len(series) - n_validation,
-                  fixed_train_size    = False,
-                  levels              = None,
-                  exog                = None,
-                  lags_grid           = lags_grid,
-                  refit               = False,
-                  return_best         = False,
-                  verbose             = True
+                  forecaster         = forecaster,
+                  series             = series,
+                  param_grid         = param_grid,
+                  steps              = steps,
+                  metric             = 'mean_absolute_error',
+                  initial_train_size = len(series) - n_validation,
+                  fixed_train_size   = False,
+                  levels             = None,
+                  exog               = None,
+                  lags_grid          = lags_grid,
+                  refit              = False,
+                  return_best        = False,
+                  verbose            = True
               )
     
     expected_results = pd.DataFrame({
@@ -675,19 +675,19 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregMultiVariate_lags
     param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
 
     results = _evaluate_grid_hyperparameters_multiseries(
-                  forecaster          = forecaster,
-                  series              = series,
-                  param_grid          = param_grid,
-                  steps               = steps,
-                  metric              = mean_absolute_error,
-                  initial_train_size  = len(series) - n_validation,
-                  fixed_train_size    = False,
-                  levels              = None,
-                  exog                = None,
-                  lags_grid           = lags_grid,
-                  refit               = False,
-                  return_best         = False,
-                  verbose             = False
+                  forecaster         = forecaster,
+                  series             = series,
+                  param_grid         = param_grid,
+                  steps              = steps,
+                  metric             = mean_absolute_error,
+                  initial_train_size = len(series) - n_validation,
+                  fixed_train_size   = False,
+                  levels             = None,
+                  exog               = None,
+                  lags_grid          = lags_grid,
+                  refit              = False,
+                  return_best        = False,
+                  verbose            = False
               )
     
     expected_results = pd.DataFrame({
@@ -722,19 +722,19 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregMultiVariate_lags
     param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
 
     results = _evaluate_grid_hyperparameters_multiseries(
-                  forecaster          = forecaster,
-                  series              = series,
-                  param_grid          = param_grid,
-                  steps               = steps,
-                  metric              = mean_absolute_error,
-                  initial_train_size  = len(series) - n_validation,
-                  fixed_train_size    = False,
-                  levels              = None,
-                  exog                = None,
-                  lags_grid           = lags_grid,
-                  refit               = False,
-                  return_best         = False,
-                  verbose             = False
+                  forecaster         = forecaster,
+                  series             = series,
+                  param_grid         = param_grid,
+                  steps              = steps,
+                  metric             = mean_absolute_error,
+                  initial_train_size = len(series) - n_validation,
+                  fixed_train_size   = False,
+                  levels             = None,
+                  exog               = None,
+                  lags_grid          = lags_grid,
+                  refit              = False,
+                  return_best        = False,
+                  verbose            = False
               )
     
     expected_results = pd.DataFrame({
@@ -786,19 +786,19 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregMultiVariate_lags
     param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
 
     results = _evaluate_grid_hyperparameters_multiseries(
-                  forecaster          = forecaster,
-                  series              = series,
-                  param_grid          = param_grid,
-                  steps               = steps,
-                  metric              = mean_absolute_error,
-                  initial_train_size  = len(series) - n_validation,
-                  fixed_train_size    = False,
-                  levels              = None,
-                  exog                = None,
-                  lags_grid           = lags_grid,
-                  refit               = False,
-                  return_best         = False,
-                  verbose             = False
+                  forecaster         = forecaster,
+                  series             = series,
+                  param_grid         = param_grid,
+                  steps              = steps,
+                  metric             = mean_absolute_error,
+                  initial_train_size = len(series) - n_validation,
+                  fixed_train_size   = False,
+                  levels             = None,
+                  exog               = None,
+                  lags_grid          = lags_grid,
+                  refit              = False,
+                  return_best        = False,
+                  verbose            = False
               )
     
     expected_results = pd.DataFrame({
@@ -839,19 +839,19 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
     param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
 
     results = _evaluate_grid_hyperparameters_multiseries(
-                  forecaster          = forecaster,
-                  series              = series,
-                  param_grid          = param_grid,
-                  steps               = steps,
-                  metric              = [mean_squared_error, 'mean_absolute_error'],
-                  initial_train_size  = len(series) - n_validation,
-                  fixed_train_size    = False,
-                  levels              = None,
-                  exog                = None,
-                  lags_grid           = lags_grid,
-                  refit               = False,
-                  return_best         = False,
-                  verbose             = False
+                  forecaster         = forecaster,
+                  series             = series,
+                  param_grid         = param_grid,
+                  steps              = steps,
+                  metric             = [mean_squared_error, 'mean_absolute_error'],
+                  initial_train_size = len(series) - n_validation,
+                  fixed_train_size   = False,
+                  levels             = None,
+                  exog               = None,
+                  lags_grid          = lags_grid,
+                  refit              = False,
+                  return_best        = False,
+                  verbose            = False
               )
     
     expected_results = pd.DataFrame({
@@ -892,19 +892,20 @@ def test_evaluate_grid_hyperparameters_multiseries_when_return_best_ForecasterAu
     param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
 
     _evaluate_grid_hyperparameters_multiseries(
-        forecaster          = forecaster,
-        series              = series,
-        param_grid          = param_grid,
-        steps               = steps,
-        metric              = 'mean_absolute_error',
-        initial_train_size  = len(series) - n_validation,
-        fixed_train_size    = False,
-        levels              = None,
-        exog                = None,
-        lags_grid           = lags_grid,
-        refit               = False,
-        return_best         = True,
-        verbose             = False
+        forecaster         = forecaster,
+        series             = series,
+        param_grid         = param_grid,
+        steps              = steps,
+        metric             = 'mean_absolute_error',
+        initial_train_size = len(series) - n_validation,
+        fixed_train_size   = False,
+        levels             = None,
+        exog               = None,
+        lags_grid          = lags_grid,
+        refit              = False,
+        return_best        = True,
+        verbose            = False,
+        show_progress      = False
     )
 
     expected_lags = np.array([1, 2])

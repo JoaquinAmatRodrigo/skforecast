@@ -182,7 +182,9 @@ def plot_prediction_distribution(
     return fig
 
 
-def set_dark_theme(custom_style: dict = None) -> None:
+def set_dark_theme(
+    custom_style: dict = None
+) -> None:
     """
     Set aspects of the visual theme for all matplotlib plots.
     This function changes the global defaults for all plots using the matplotlib
@@ -196,7 +198,13 @@ def set_dark_theme(custom_style: dict = None) -> None:
         Optional dictionary containing custom styles to be added or override the
         default dark theme. It is applied after the default theme is set by
         using the `plt.rcParams.update()` method.
+
+    Returns
+    -------
+    None
+    
     """
+
     plt.style.use('fivethirtyeight')
     dark_style = {
         'figure.facecolor': '#212946',
