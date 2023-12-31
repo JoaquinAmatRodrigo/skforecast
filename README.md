@@ -94,15 +94,15 @@ pip install skforecast[plotting]
 + pmdarima>=2.0, <2.1
 
 
-# What is new in skforecast 0.11?
+# What is new in skforecast 0.12?
 
 Visit the [release notes](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/changelog.md) to view all notable changes.
 
-- [x] Create `ForecasterBaseline.ForecasterEquivalentDate`, a Forecaster to create simple model that serves as a basic reference for evaluating the performance of more complex models.
-- [x] New `predict_quantiles` method in all Autoreg Forecasters to calculate the specified quantiles for each step.
-- [x] Added `skforecast.datasets` module. It contains functions to load data for our examples and user guides.
-- [x] Enhance the management of internal copying in skforecast to minimize the number of copies, thereby accelerating data processing.
-- [x] Bug fixes and performance improvements.
+- [x] Bayesian hyperparameter search for the `ForecasterAutoregMultiSeries`, `ForecasterAutoregMultiSeriesCustom`, and `ForecasterAutoregMultiVariate` using `optuna` as the search engine.
+- [ ] Feature Selection functions.
+- [ ] Allow different exogenous variables per series in the `ForecasterAutoregMultiSeries` and `ForecasterAutoregMultiSeriesCustom`.
+- [ ] New encoding for the `ForecasterAutoregMultiSeries` and `ForecasterAutoregMultiSeriesCustom`.
+- [ ] Bug fixes and performance improvements.
 
 
 # Forecasters
@@ -155,7 +155,7 @@ The **skforecast** library offers a variety of forecaster types, each tailored t
 
 + [**Modelling time series trend with tree based models**](https://www.cienciadedatos.net/documentos/py49-modelling-time-series-trend-with-tree-based-models.html)
 
-+ [**Forecasting electricity demand with Python**](https://www.cienciadedatos.net/documentos/py29-forecasting-electricity-power-demand-python.html) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1efCKQtuHOlw7MLojIwqi2zrU2NZbG-FP)
++ [**Forecasting energy demand with machine learning**](https://www.cienciadedatos.net/documentos/py29-forecasting-electricity-power-demand-python.html) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1efCKQtuHOlw7MLojIwqi2zrU2NZbG-FP)
 
 + [**Forecasting web traffic with machine learning and Python**](https://www.cienciadedatos.net/documentos/py37-forecasting-web-traffic-machine-learning.html) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1QhLkJAAEfvgYoVkQXy58-T_sloNFCV1o)
 
@@ -163,7 +163,9 @@ The **skforecast** library offers a variety of forecaster types, each tailored t
 
 + [**Prediction intervals in forecasting models**](https://www.cienciadedatos.net/documentos/py42-forecasting-prediction-intervals-machine-learning.html)
 
-+ [**Multi-series forecasting**](https://www.cienciadedatos.net/documentos/py44-multi-series-forecasting-skforecast.html)
++ [**Global Forecasting Models: Multi-series forecasting**](https://www.cienciadedatos.net/documentos/py44-multi-series-forecasting-skforecast.html)
+
++ [**Global Forecasting Models: Comparative Analysis of Single and Multi-Series Forecasting Modeling**](https://www.cienciadedatos.net/documentos/py53-global-forecasting-models.html)
 
 + [**Reducing the influence of Covid-19 on time series forecasting models**](https://www.cienciadedatos.net/documentos/py45-weighted-time-series-forecasting.html)
 
@@ -194,7 +196,7 @@ The **skforecast** library offers a variety of forecaster types, each tailored t
 
 + [**Intervalos de predicción en modelos de forecasting**](https://www.cienciadedatos.net/documentos/py42-intervalos-prediccion-modelos-forecasting-machine-learning.html)
 
-+ [**Multi-series forecasting**](https://www.cienciadedatos.net/documentos/py44-multi-series-forecasting-skforecast-español.html)
++ [**Global Forecasting Models: Multi-series forecasting**](https://www.cienciadedatos.net/documentos/py44-multi-series-forecasting-skforecast-español.html)
 
 + [**Predicción de demanda intermitente**](https://www.cienciadedatos.net/documentos/py48-forecasting-demanda-intermitente.html)
 

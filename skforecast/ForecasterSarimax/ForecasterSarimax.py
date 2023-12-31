@@ -790,14 +790,16 @@ class ForecasterSarimax():
 
 
     def get_feature_importances(
-        self
+        self,
+        sort_importance: bool=True
     ) -> pd.DataFrame:
         """
         Return feature importances of the regressor stored in the forecaster.
 
         Parameters
         ----------
-        self
+        sort_importance: bool, default `True`
+            If `True`, sorts the feature importances in descending order.
 
         Returns
         -------
@@ -814,6 +816,11 @@ class ForecasterSarimax():
 
         feature_importances = self.regressor.params().to_frame().reset_index()
         feature_importances.columns = ['feature', 'importance']
+
+        if sort_importance:
+            feature_importances = feature_importances.sort_values(
+                                      by='importance', ascending=False
+                                  )
 
         return feature_importances
 

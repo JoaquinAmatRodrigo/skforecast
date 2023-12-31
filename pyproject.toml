@@ -1,6 +1,6 @@
 [project]
 name = "skforecast"
-version = "0.11.0"
+version = "0.12.0"
 description="Forecasting time series with scikit-learn regressors. It also works with any regressor compatible with the scikit-learn API (pipelines, CatBoost, LightGBM, XGBoost, Ranger...)."
 readme = "README.md"
 authors = [
@@ -79,12 +79,11 @@ docs = [
 ]
 
 test = [
-    "pytest>=7.1.2, <7.5",
+    "pytest>=7.1, <7.5",
     "pytest-cov>=3.0.0, <4.2",
-    "xgboost>=1.6.1, <1.8",
-    "lightgbm <3.4",
-    "pytest-xdist <3.4",
-    "tomli >=2.0.0"
+    "lightgbm>=4.0.0, <4.2",
+    "pytest-xdist>=3.3, <3.6",
+    "tomli>=2.0, <2.1"
 ]
 
 

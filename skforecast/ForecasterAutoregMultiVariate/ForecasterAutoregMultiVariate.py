@@ -14,6 +14,7 @@ import pandas as pd
 import sklearn
 import sklearn.pipeline
 from sklearn.base import clone
+from sklearn.preprocessing import StandardScaler
 import inspect
 from copy import copy, deepcopy
 from itertools import chain
@@ -69,7 +70,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         - `list`, `1d numpy ndarray` or `range`: include only lags present in 
         `lags`, all elements must be int.
         - `dict`: create different lags for each series. {'series_column_name': lags}.
-    transformer_series : transformer (preprocessor), dict, default `None`
+    transformer_series : transformer (preprocessor), dict, default `sklearn.preprocessing.StandardScaler`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API with methods: fit, transform, fit_transform and 
         inverse_transform. Transformation is applied to each `series` before training 
@@ -123,7 +124,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         inverse_transform method.
 
         - If single transformer: it is cloned and applied to all series. 
-        - If `dict` of transformers: a different transformer can be used for each  series.
+        - If `dict` of transformers: a different transformer can be used for each series.
     transformer_series_ : dict
         Dictionary with the transformer for each series. It is created cloning the 
         objects in `transformer_series` and is used internally to avoid overwriting.
@@ -208,7 +209,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         level: str,
         steps: int,
         lags: Union[int, np.ndarray, list, dict],
-        transformer_series: Optional[Union[object, dict]]=None,
+        transformer_series: Optional[Union[object, dict]]=StandardScaler(),
         transformer_exog: Optional[object]=None,
         weight_func: Optional[Callable]=None,
         fit_kwargs: Optional[dict]=None,
@@ -1117,10 +1118,11 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                         (f"forecaster residuals for step {step} are `None`. "
                          f"Check {check_residuals}.")
                     )
-                elif (residuals[step] == None).any():
+                elif (any(element is None for element in residuals[step]) or
+                      np.any(np.isnan(residuals[step]))):
                     raise ValueError(
-                        (f"forecaster residuals for step {step} contains `None` values. "
-                         f"Check {check_residuals}.")
+                        (f"forecaster residuals for step {step} contains `None` "
+                         f"or `NaNs` values. Check {check_residuals}.")
                     )
 
         predictions = self.predict(
@@ -1621,7 +1623,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
     
     def get_feature_importances(
         self,
-        step: int
+        step: int,
+        sort_importance: bool=True
     ) -> pd.DataFrame:
         """
         Return feature importance of the model stored in the forecaster for a
@@ -1636,6 +1639,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         step : int
             Model from which retrieve information (a separate model is created 
             for each forecast time step). First step is 1.
+        sort_importance: bool, default `True`
+            If `True`, sorts the feature importances in descending order.
 
         Returns
         -------
@@ -1646,7 +1651,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
 
         if not isinstance(step, int):
             raise TypeError(
-                f'`step` must be an integer. Got {type(step)}.'
+                f"`step` must be an integer. Got {type(step)}."
             )
 
         if not self.fitted:
@@ -1670,8 +1675,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         idx_columns_lags = np.arange(len_columns_lags)
         if self.included_exog:
             idx_columns_exog = np.flatnonzero(
-                                [name.endswith(f"step_{step}")
-                                 for name in self.X_train_col_names]
+                                   [name.endswith(f"step_{step}")
+                                    for name in self.X_train_col_names]
                                )
         else:
             idx_columns_exog = np.array([], dtype=int)
@@ -1698,5 +1703,9 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                                       'feature': feature_names,
                                       'importance': feature_importances
                                   })
+            if sort_importance:
+                feature_importances = feature_importances.sort_values(
+                                          by='importance', ascending=False
+                                      )
 
         return feature_importances

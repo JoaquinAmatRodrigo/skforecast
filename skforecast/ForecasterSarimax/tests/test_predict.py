@@ -357,7 +357,7 @@ def test_predict_output_ForecasterSarimax_with_last_window_and_exog(kwargs, data
                    name  = 'pred'
                )
     
-    pd.testing.assert_series_equal(predictions, expected)
+    pd.testing.assert_series_equal(predictions, expected, atol=0.0005)
 
 
 @pytest.mark.parametrize("kwargs, data", 

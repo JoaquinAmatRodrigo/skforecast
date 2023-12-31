@@ -4,7 +4,6 @@ import numpy as np
 import pandas as pd
 from skforecast.ForecasterAutoregCustom import ForecasterAutoregCustom
 from sklearn.linear_model import LinearRegression
-from xgboost import XGBRegressor
 
 # Fixtures
 from .fixtures_ForecasterAutoregCustom import y
@@ -83,23 +82,6 @@ def test_fit_in_sample_residuals_stored():
 
     assert isinstance(results, np.ndarray)
     np.testing.assert_array_equal(results, expected)
-
-
-def test_fit_in_sample_residuals_stored_XGBRegressor():
-    """
-    Test that values of in_sample_residuals are stored after fitting with XGBRegressor.
-    """
-    forecaster = ForecasterAutoregCustom(
-                     regressor      = XGBRegressor(random_state=123),
-                     fun_predictors = create_predictors,
-                     window_size    = 5
-                 )
-    forecaster.fit(y=pd.Series(np.arange(7)))
-    results = forecaster.in_sample_residuals
-    expected = np.array([-0.0008831, 0.00088501])
-
-    assert isinstance(results, np.ndarray)
-    assert all(np.isclose(results, expected))
 
 
 def test_fit_same_residuals_when_residuals_greater_than_1000():
