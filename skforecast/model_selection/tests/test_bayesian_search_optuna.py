@@ -612,7 +612,8 @@ def test_evaluate_bayesian_search_optuna_when_return_best_ForecasterAutoregCusto
         n_trials           = 10,
         random_state       = 123,
         return_best        = True,
-        verbose            = False
+        verbose            = False,
+        show_progress      = False
     )
     
     expected_alpha = 0.9809565564007693
