@@ -754,41 +754,39 @@ class ForecasterRnn(ForecasterBase):
         if self.history is None:
             raise ValueError("ForecasterRnn has not been fitted yet.")
 
-        plt.figure(figsize=(10, 4))
-
-        # Plotting training loss
-        plt.plot(
+          # Plotting training loss
+        ax.plot(
             range(1, len(self.history["loss"]) + 1),
             self.history["loss"],
             color="b",
             label="Training Loss",
+            axes=ax,
         )
 
         # Plotting validation loss
         if "val_loss" in self.history:
-            plt.plot(
+            ax.plot(
                 range(1, len(self.history["val_loss"]) + 1),
                 self.history["val_loss"],
                 color="r",
                 label="Validation Loss",
+                axes=ax,
             )
 
         # Labeling the axes and adding a title
-        plt.xlabel("Epochs")
-        plt.ylabel("Loss")
-        plt.title("Training and Validation Loss")
+        ax.set_xlabel("Epochs")
+        ax.set_ylabel("Loss")
+        ax.set_title("Training and Validation Loss")
 
         # Adding a legend
-        plt.legend()
+        ax.legend()
 
         # Displaying grid for better readability
-        plt.grid(True, linestyle="--", alpha=0.7)
+        ax.grid(True, linestyle="--", alpha=0.7)
 
         # Setting x-axis ticks to integers only
-        plt.xticks(range(1, len(self.history["loss"]) + 1))
+        ax.set_xticks(range(1, len(self.history["loss"]) + 1))
 
-        # Showing the plot
-        plt.show()
 
     # def predict_bootstrapping(
     #     self,
