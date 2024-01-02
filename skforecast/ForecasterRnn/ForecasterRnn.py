@@ -33,6 +33,7 @@ from ..utils import transform_dataframe
 
 from sklearn.preprocessing import MinMaxScaler
 import matplotlib.pyplot as plt
+import matplotlib
 
 logging.basicConfig(
     format="%(name)-10s %(levelname)-5s %(message)s",
@@ -716,14 +717,22 @@ class ForecasterRnn(ForecasterBase):
 
         return predictions
 
-    def plot_history(self):
+    def plot_history(
+        self,
+        ax: matplotlib.axes.Axes=None,
+        **fig_kw
+    ) -> matplotlib.figure.Figure:
         """
         Plots the training and validation loss curves from the given history object stores
         in the ForecasterRnn.
 
         Parameters
         ----------
-        None
+        ax : matplotlib.axes.Axes, default `None`. 
+            Pre-existing ax for the plot. Otherwise, call matplotlib.pyplot.subplots() 
+            internally.
+        fig_kw : dict
+            Other keyword arguments are passed to matplotlib.pyplot.subplots()
 
         Raises
         ------
@@ -732,8 +741,13 @@ class ForecasterRnn(ForecasterBase):
 
         Returns
         -------
-        None
+        fig: matplotlib.figure.Figure
+            Matplotlib Figure.
+
         """
+
+        if ax is None:
+            fig, ax = plt.subplots(1, 1, **fig_kw)
 
         # Setting up the plot style
 
