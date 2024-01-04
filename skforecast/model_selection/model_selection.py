@@ -1684,6 +1684,18 @@ def select_features(
         List of selected exogenous variables.
     """
 
+    valid_forecasters = [
+        'ForecasterAutoreg',
+        'ForecasterAutoregCustom',
+        'ForecasterAutoregMultiSeries',
+        'ForecasterAutoregMultiSeriesCustom'
+    ]
+
+    if type(forecaster).__name__ not in valid_forecasters:
+        raise ValueError(
+            f"`forecaster` must be one of the following classes: {valid_forecasters}."
+        )
+
     X_train, y_train = forecaster.create_train_X_y(y=y, exog=exog)
     features_forced = []
     
@@ -1692,7 +1704,6 @@ def select_features(
             features_forced = [col for col in force_inclusion if col in X_train.columns]
         elif isinstance(force_inclusion, str):
             features_forced = X_train.filter(regex=force_inclusion).columns.tolist()
-        X_train = X_train.drop(columns=features_forced)
 
     if hasattr(forecaster, 'lags'):
         lags_cols = [f"lag_{lag}" for lag in forecaster.lags]
@@ -1716,14 +1727,20 @@ def select_features(
     sample = rng.choice(X_train.index, size=subsample, replace=False)
     X_train_sample = X_train.loc[sample, :]
     y_train_sample = y_train.loc[sample]
-    
     selector.fit(X_train_sample, y_train_sample)
     selected_features = selector.get_feature_names_out()
 
-    if hasattr(forecaster, 'lags'):
-        selected_lags = forecaster.lags
-    else:
+    if select_only_exog:
         selected_lags = lags_cols
+    else:
+        selected_lags = [
+            feature
+            for feature in selected_features
+            if feature in lags_cols
+    ]
+
+    if hasattr(forecaster, 'lags'):
+        selected_lags = [int(feature.replace('lag_', '')) for feature in selected_lags]
     
     selected_exog = [
         feature
@@ -1732,8 +1749,9 @@ def select_features(
     ]
 
     if force_inclusion is not None:
-        selected_exog.extend(features_forced)
-        
+        features_forced_not_selected = set(features_forced) - set(selected_exog)
+        selected_exog.extend(features_forced_not_selected)
+
     if verbose:
         print("Recursive feature elimination")
         print("-----------------------------")
