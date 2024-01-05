@@ -1651,8 +1651,8 @@ def select_features(
     ----------
     selector : object
         A feature selector from sklearn.feature_selection.
-    forecaster : object
-        A forecaster from skforecast.
+    forecaster : ForecasterAutoreg, ForecasterAutoregCustom
+        Forecaster model.
     y : pd.Series or pd.DataFrame   
         Target time series to which feature selection will be applied.
     exog : pd.Series or pd.DataFrame, optional (default=None)   
@@ -1668,11 +1668,12 @@ def select_features(
         Number of records to use for feature selection. If int, number of records
         to use. If float, proportion of records to use.
     force_inclusion : list or str, optional (default=None)
-        Features to force include in the final list of selected features. If list,
-        list of features names to force include. If str, regular expression to 
-        identify features to force include. For example, if `force_inclusion="^sun_"`,
-        all features that start with "sun_" will be included in the final list of
-        selected features.
+        Features to force include in the final list of selected features.
+        
+        - If list, list of features names to force include.
+        - If str, regular expression to identify features to force include. For example,
+        if `force_inclusion="^sun_"`, all features that start with "sun_" will be
+        included in the final list of selected features.
     verbose : bool, optional (default=True)
         Print information about feature selection process.
 
@@ -1682,14 +1683,18 @@ def select_features(
         List of selected lags.
     selected_exog : list
         List of selected exogenous variables.
+
     """
 
     valid_forecasters = [
         'ForecasterAutoreg',
-        'ForecasterAutoregCustom',
-        'ForecasterAutoregMultiSeries',
-        'ForecasterAutoregMultiSeriesCustom'
+        'ForecasterAutoregCustom'
     ]
+
+    if subsample < 0 or subsample > 1:
+        raise ValueError(
+            "`subsample` must be a number between 0 and 1."
+        )
 
     if type(forecaster).__name__ not in valid_forecasters:
         raise ValueError(
@@ -1697,17 +1702,10 @@ def select_features(
         )
 
     X_train, y_train = forecaster.create_train_X_y(y=y, exog=exog)
-    features_forced = []
-    
-    if force_inclusion is not None:
-        if isinstance(force_inclusion, list):
-            features_forced = [col for col in force_inclusion if col in X_train.columns]
-        elif isinstance(force_inclusion, str):
-            features_forced = X_train.filter(regex=force_inclusion).columns.tolist()
 
     if hasattr(forecaster, 'lags'):
         lags_cols = [f"lag_{lag}" for lag in forecaster.lags]
-    elif hasattr(forecaster, 'name_predictors'):
+    else:
         if forecaster.name_predictors is not None:
             lags_cols = forecaster.name_predictors
         else:
@@ -1716,6 +1714,17 @@ def select_features(
                 for col in X_train.columns
                 if re.match(r'^custom_predictor_\d+', col)
             ]
+    exog_cols = [col for col in X_train.columns if col not in lags_cols]
+
+    forced_lags = []
+    forced_exog = []
+    if force_inclusion is not None:
+        if isinstance(force_inclusion, list):
+            forced_lags = [col for col in force_inclusion if col in lags_cols]
+            forced_exog = [col for col in force_inclusion if col in exog_cols]
+        elif isinstance(force_inclusion, str):
+            forced_lags = [col for col in lags_cols if re.match(force_inclusion, col)]
+            forced_exog = [col for col in exog_cols if re.match(force_inclusion, col)]
 
     if select_only_exog:
         X_train = X_train.drop(columns=lags_cols)
@@ -1739,18 +1748,23 @@ def select_features(
             if feature in lags_cols
     ]
 
-    if hasattr(forecaster, 'lags'):
-        selected_lags = [int(feature.replace('lag_', '')) for feature in selected_lags]
-    
     selected_exog = [
         feature
         for feature in selected_features
-        if feature not in lags_cols
+        if feature in exog_cols
     ]
 
-    if force_inclusion is not None:
-        features_forced_not_selected = set(features_forced) - set(selected_exog)
-        selected_exog.extend(features_forced_not_selected)
+    if force_inclusion is not None: 
+        forced_exog_not_selected = set(forced_exog) - set(selected_features)
+        selected_exog.extend(forced_exog_not_selected)
+        selected_exog.sort(key=exog_cols.index)
+        if not select_only_exog:
+            forced_lags_not_selected = set(forced_lags) - set(selected_features)
+            selected_lags.extend(forced_lags_not_selected)
+            selected_lags.sort(key=lags_cols.index)
+
+    if hasattr(forecaster, 'lags'):
+        selected_lags = [int(feature.replace('lag_', '')) for feature in selected_lags]
 
     if verbose:
         print("Recursive feature elimination")
@@ -1759,7 +1773,9 @@ def select_features(
         print(f"Total number of records available: {X_train.shape[0]}")
         print(f"Total number of records used for feature selection: {X_train_sample.shape[0]}")
         print(f"Number of features selected: {len(selected_features)}")
-        print(f"Selected lags: {selected_lags}")
-        print(f"Selected exog : \n {selected_exog}")
+        print(f"    Selected lags: {selected_lags}")
+        print(f"    Selected exog : \n {selected_exog}")
 
-    return selected_lags, selected_exog   
+    return selected_lags, selected_exog
+
+    # TODO: añadir test en el que al selector se le pasa directamente un regresor.
