@@ -1774,8 +1774,6 @@ def select_features(
         print(f"Total number of records used for feature selection: {X_train_sample.shape[0]}")
         print(f"Number of features selected: {len(selected_features)}")
         print(f"    Selected lags: {selected_lags}")
-        print(f"    Selected exog : \n {selected_exog}")
+        print(f"    Selected exog : {selected_exog}")
 
     return selected_lags, selected_exog
-
-    # TODO: añadir test en el que al selector se le pasa directamente un regresor.
