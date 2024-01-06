@@ -1665,8 +1665,7 @@ def select_features(
         of lagged variables and then all lagged variables are added to the selected
         exogenous variables.
     subsample : int or float, optional (default=0.5)
-        Number of records to use for feature selection. If int, number of records
-        to use. If float, proportion of records to use.
+        Proportion of records to use for feature selection.
     force_inclusion : list or str, optional (default=None)
         Features to force include in the final list of selected features.
         
@@ -1767,13 +1766,13 @@ def select_features(
         selected_lags = [int(feature.replace('lag_', '')) for feature in selected_lags]
 
     if verbose:
-        print("Recursive feature elimination")
-        print("-----------------------------")
+        print(f"Recursive feature elimination ({selector.__class__.__name__})")
+        print("--------------------------------" + "-"*len(selector.__class__.__name__))
         print(f"Total number of features available: {X_train.shape[1]}") 
         print(f"Total number of records available: {X_train.shape[0]}")
         print(f"Total number of records used for feature selection: {X_train_sample.shape[0]}")
         print(f"Number of features selected: {len(selected_features)}")
-        print(f"    Selected lags: {selected_lags}")
-        print(f"    Selected exog : {selected_exog}")
+        print(f"    Selected lags (n={len(selected_lags)}): {selected_lags}")
+        print(f"    Selected exog (n={len(selected_exog)}): {selected_exog}")
 
     return selected_lags, selected_exog
