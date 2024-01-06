@@ -4,5 +4,4 @@
 ::: skforecast.model_selection.model_selection.grid_search_forecaster
 ::: skforecast.model_selection.model_selection.random_search_forecaster
 ::: skforecast.model_selection.model_selection.bayesian_search_forecaster
-::: skforecast.model_selection.model_selection.feature_selection_rfecv
-
+::: skforecast.model_selection.model_selection.select_features
