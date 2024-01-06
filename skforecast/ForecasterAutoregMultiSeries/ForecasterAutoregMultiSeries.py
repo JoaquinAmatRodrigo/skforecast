@@ -14,6 +14,7 @@ import pandas as pd
 import sklearn
 import sklearn.pipeline
 from sklearn.base import clone
+from sklearn.preprocessing import StandardScaler
 from copy import copy, deepcopy
 import inspect
 
@@ -55,7 +56,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         - `int`: include lags from 1 to `lags` (included).
         - `list`, `1d numpy ndarray` or `range`: include only lags present in 
         `lags`, all elements must be int.
-    transformer_series : transformer (preprocessor), dict, default `None`
+    transformer_series : transformer (preprocessor), dict, default `sklearn.preprocessing.StandardScaler`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API with methods: fit, transform, fit_transform and 
         inverse_transform. Transformation is applied to each `series` before training 
@@ -63,8 +64,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         inverse_transform method.
 
         - If single transformer: it is cloned and applied to all series. 
-        - If `dict` of transformers: a different transformer can be used for each 
-        series.
+        - If `dict` of transformers: a different transformer can be used for each series.
     transformer_exog : transformer, default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API. The transformation is applied to `exog` before training the
@@ -215,7 +215,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self,
         regressor: object,
         lags: Union[int, np.ndarray, list],
-        transformer_series: Optional[Union[object, dict]]=None,
+        transformer_series: Optional[Union[object, dict]]=StandardScaler(),
         transformer_exog: Optional[object]=None,
         weight_func: Optional[Union[Callable, dict]]=None,
         series_weights: Optional[dict]=None,
@@ -1026,10 +1026,11 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                         (f"forecaster residuals for level '{level}' are `None`. "
                          f"Check `{check_residuals}`.")
                     )
-                elif (residuals_levels[level] == None).any():
+                elif (any(element is None for element in residuals_levels[level]) or
+                      np.any(np.isnan(residuals_levels[level]))):
                     raise ValueError(
                         (f"forecaster residuals for level '{level}' contains `None` "
-                         f"values. Check `{check_residuals}`.")
+                         f"or `NaNs` values. Check `{check_residuals}`.")
                     )
 
         if last_window is None:
@@ -1613,7 +1614,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
     
     def get_feature_importances(
-        self
+        self,
+        sort_importance: bool=True
     ) -> pd.DataFrame:
         """
         Return feature importances of the regressor stored in the
@@ -1622,7 +1624,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         Parameters
         ----------
-        self
+        sort_importance: bool, default `True`
+            If `True`, sorts the feature importances in descending order.
 
         Returns
         -------
@@ -1660,5 +1663,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                                       'feature': self.X_train_col_names,
                                       'importance': feature_importances
                                   })
+            if sort_importance:
+                feature_importances = feature_importances.sort_values(
+                                          by='importance', ascending=False
+                                      )
 
         return feature_importances

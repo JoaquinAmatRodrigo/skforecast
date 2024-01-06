@@ -39,12 +39,13 @@ def test_output_get_feature_importances_ForecasterSarimax_pmdarima():
     """
     forecaster = ForecasterSarimax(regressor=ARIMA(order=(1, 1, 1)))
     forecaster.fit(y=pd.Series(np.arange(10)))
+    results = forecaster.get_feature_importances()
+
     expected = pd.DataFrame({
                    'feature': ['intercept', 'ar.L1', 'ma.L1', 'sigma2'],
                    'importance': np.array([0.49998574676910396, 0.5000130662306124, 
                                            7.479723906909597e-11, 2.658043128694438e-12])
-               })
-    results = forecaster.get_feature_importances()
+               }).sort_values(by='importance', ascending=False)
 
     pd.testing.assert_frame_equal(expected, results)
 
@@ -57,11 +58,12 @@ def test_output_get_feature_importances_ForecasterSarimax_skforecast():
                      regressor = Sarimax(order= (1, 1, 1), maxiter=1000, method='cg', disp=False)
                  )
     forecaster.fit(y=y, exog=exog)
+    results = forecaster.get_feature_importances(sort_importance=False)
+
     expected = pd.DataFrame({
                    'feature': ['exog', 'ar.L1', 'ma.L1', 'sigma2'],
                    'importance': np.array([0.9690539855149568, 0.4666537980992382, 
                                            -0.5263430267037418, 0.7862622654382363])
                })
-    results = forecaster.get_feature_importances()
 
     pd.testing.assert_frame_equal(expected, results)

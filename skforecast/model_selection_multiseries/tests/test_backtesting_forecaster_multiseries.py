@@ -64,101 +64,24 @@ def test_backtesting_forecaster_multiseries_TypeError_when_forecaster_not_a_fore
         )
 
 
-@pytest.mark.parametrize("levels, refit", 
-                         [(1    , True), 
-                          (1    , False)],
-                         ids=lambda d: f'levels: {d}')
-def test_backtesting_forecaster_multiseries_TypeError_when_levels_not_list_str_None(levels, refit):
-    """
-    Test TypeError is raised in backtesting_forecaster_multiseries when 
-    `levels` is not a `list`, `str` or `None`.
-    """
-    forecaster = ForecasterAutoregMultiSeries(
-                     regressor = Ridge(random_state=123),
-                     lags      = 2
-                 )
-    
-    err_msg = re.escape(
-            ("`levels` must be a `list` of column names, a `str` of a column name "
-             "or `None` when using a `ForecasterAutoregMultiSeries` or "
-             "`ForecasterAutoregMultiSeriesCustom`. If the forecaster is of type "
-             "`ForecasterAutoregMultiVariate`, this argument is ignored.")
-        )
-    with pytest.raises(TypeError, match = err_msg):
-        backtesting_forecaster_multiseries(
-            forecaster          = forecaster,
-            series              = series,
-            steps               = 4,
-            levels              = levels,
-            metric              = 'mean_absolute_error',
-            initial_train_size  = 12,
-            refit               = refit,
-            fixed_train_size    = False,
-            exog                = None,
-            interval            = None,
-            n_boot              = 500,
-            random_state        = 123,
-            in_sample_residuals = True,
-            verbose             = False
-        )
-
-
-def test_backtesting_forecaster_multiseries_IgnoredArgumentWarning_forecaster_multivariate_and_levels():
-    """
-    Test IgnoredArgumentWarning is raised when levels is not forecaster.level or 
-    None in ForecasterAutoregMultiVariate.
-    """
-    forecaster = ForecasterAutoregMultiVariate(
-                     regressor = Ridge(random_state=123),
-                     level     = 'l1',
-                     lags      = 2,
-                     steps     = 3
-                 )
-    
-    warn_msg = re.escape(
-                ("`levels` argument have no use when the forecaster is of type "
-                 "`ForecasterAutoregMultiVariate`. The level of this forecaster is "
-                 "'l1', to predict another level, change the `level` "
-                 "argument when initializing the forecaster.")
-            )
-    with pytest.warns(IgnoredArgumentWarning, match = warn_msg):
-        backtesting_forecaster_multiseries(
-            forecaster          = forecaster,
-            series              = series,
-            steps               = 3,
-            levels              = 'not_forecaster.level',
-            metric              = 'mean_absolute_error',
-            initial_train_size  = 12,
-            refit               = True,
-            fixed_train_size    = False,
-            exog                = None,
-            interval            = None,
-            n_boot              = 500,
-            random_state        = 123,
-            in_sample_residuals = True,
-            verbose             = False,
-            n_jobs              = 1
-        )
-
-
 # ForecasterAutoregMultiSeries and ForecasterAutoregMultiSeriesCustom
 # ======================================================================================================================
 @pytest.mark.parametrize("forecaster, n_jobs", 
                          [(ForecasterAutoregMultiSeries(regressor=Ridge(random_state=123), 
-                                                        lags=2), -1),
+                                                        lags=2, transformer_series=None), -1),
                           (ForecasterAutoregMultiSeries(regressor=Ridge(random_state=123), 
-                                                        lags=2), 1),
+                                                        lags=2, transformer_series=None), 1),
                           (ForecasterAutoregMultiSeries(regressor=Ridge(random_state=123), 
-                                                        lags=2), 'auto'),
+                                                        lags=2, transformer_series=None), 'auto'),
                           (ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                               fun_predictors=create_predictors, 
-                                                              window_size=2), -1),
+                                                              window_size=2, transformer_series=None), -1),
                           (ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                               fun_predictors=create_predictors, 
-                                                              window_size=2), 1),
+                                                              window_size=2, transformer_series=None), 1),
                           (ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                               fun_predictors=create_predictors, 
-                                                              window_size=2), 'auto')], 
+                                                              window_size=2, transformer_series=None), 'auto')], 
                          ids=lambda fc: f'forecaster, n_jobs: {fc}')
 def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_not_refit_with_mocked(forecaster, n_jobs):
     """
@@ -203,10 +126,10 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
 
 @pytest.mark.parametrize("forecaster", 
                          [ForecasterAutoregMultiSeries(regressor=Ridge(random_state=123), 
-                                                       lags=2), 
+                                                       lags=2, transformer_series=None), 
                           ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                              fun_predictors=create_predictors, 
-                                                             window_size=2)], 
+                                                             window_size=2, transformer_series=None)], 
                          ids=lambda forecaster: f'forecaster: {type(forecaster).__name__}')
 def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_not_refit_not_initial_train_size_with_mocked(forecaster):
     """
@@ -259,20 +182,20 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
 
 @pytest.mark.parametrize("forecaster, n_jobs", 
                          [(ForecasterAutoregMultiSeries(regressor=Ridge(random_state=123), 
-                                                        lags=2), -1),
+                                                        lags=2, transformer_series=None), -1),
                           (ForecasterAutoregMultiSeries(regressor=Ridge(random_state=123), 
-                                                        lags=2), 1),
+                                                        lags=2, transformer_series=None), 1),
                           (ForecasterAutoregMultiSeries(regressor=Ridge(random_state=123), 
-                                                        lags=2), 'auto'),
+                                                        lags=2, transformer_series=None), 'auto'),
                           (ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                               fun_predictors=create_predictors, 
-                                                              window_size=2), -1),
+                                                              window_size=2, transformer_series=None), -1),
                           (ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                               fun_predictors=create_predictors, 
-                                                              window_size=2), 1),
+                                                              window_size=2, transformer_series=None), 1),
                           (ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                               fun_predictors=create_predictors, 
-                                                              window_size=2), 'auto')], 
+                                                              window_size=2, transformer_series=None), 'auto')], 
                          ids=lambda fc: f'forecaster, n_jobs: {fc}')
 def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_refit_fixed_train_size_with_mocked(forecaster, n_jobs):
     """
@@ -325,20 +248,20 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
 
 @pytest.mark.parametrize("forecaster, n_jobs", 
                          [(ForecasterAutoregMultiSeries(regressor=Ridge(random_state=123), 
-                                                        lags=2), -1),
+                                                        lags=2, transformer_series=None), -1),
                           (ForecasterAutoregMultiSeries(regressor=Ridge(random_state=123), 
-                                                        lags=2), 1),
+                                                        lags=2, transformer_series=None), 1),
                           (ForecasterAutoregMultiSeries(regressor=Ridge(random_state=123), 
-                                                        lags=2), 'auto'),
+                                                        lags=2, transformer_series=None), 'auto'),
                           (ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                               fun_predictors=create_predictors, 
-                                                              window_size=2), -1),
+                                                              window_size=2, transformer_series=None), -1),
                           (ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                               fun_predictors=create_predictors, 
-                                                              window_size=2), 1),
+                                                              window_size=2, transformer_series=None), 1),
                           (ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                               fun_predictors=create_predictors, 
-                                                              window_size=2), 'auto')], 
+                                                              window_size=2, transformer_series=None), 'auto')], 
                          ids=lambda fc: f'forecaster, n_jobs: {fc}')
 def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_refit_with_mocked(forecaster, n_jobs):
     """
@@ -384,10 +307,10 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
 
 @pytest.mark.parametrize("forecaster", 
                          [ForecasterAutoregMultiSeries(regressor=Ridge(random_state=123), 
-                                                       lags=2), 
+                                                       lags=2, transformer_series=None), 
                           ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                              fun_predictors=create_predictors, 
-                                                             window_size=2)], 
+                                                             window_size=2, transformer_series=None)], 
                          ids=lambda forecaster: f'forecaster: {type(forecaster).__name__}')
 def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_refit_list_metrics_with_mocked_metrics(forecaster):
     """
@@ -434,10 +357,10 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
 
 @pytest.mark.parametrize("forecaster", 
                          [ForecasterAutoregMultiSeries(regressor=Ridge(random_state=123), 
-                                                       lags=2), 
+                                                       lags=2, transformer_series=None), 
                           ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                              fun_predictors=create_predictors, 
-                                                             window_size=2)], 
+                                                             window_size=2, transformer_series=None)], 
                          ids=lambda forecaster: f'forecaster: {type(forecaster).__name__}')
 def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_no_refit_levels_metrics_remainder_with_mocked(forecaster):
     """
@@ -487,10 +410,10 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
 
 @pytest.mark.parametrize("forecaster", 
                          [ForecasterAutoregMultiSeries(regressor=Ridge(random_state=123), 
-                                                       lags=2), 
+                                                       lags=2, transformer_series=None), 
                           ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                              fun_predictors=create_predictors, 
-                                                             window_size=2)], 
+                                                             window_size=2, transformer_series=None)], 
                          ids=lambda forecaster: f'forecaster: {type(forecaster).__name__}')
 def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_refit_levels_metrics_remainder_with_mocked(forecaster):
     """
@@ -540,10 +463,10 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
 
 @pytest.mark.parametrize("forecaster", 
                          [ForecasterAutoregMultiSeries(regressor=Ridge(random_state=123), 
-                                                       lags=2), 
+                                                       lags=2, transformer_series=None), 
                           ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                              fun_predictors=create_predictors, 
-                                                             window_size=2)], 
+                                                             window_size=2, transformer_series=None)], 
                          ids=lambda forecaster: f'forecaster: {type(forecaster).__name__}')
 def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_not_refit_exog_interval_with_mocked(forecaster):
     """
@@ -597,10 +520,10 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
 
 @pytest.mark.parametrize("forecaster", 
                          [ForecasterAutoregMultiSeries(regressor=Ridge(random_state=123), 
-                                                       lags=2), 
+                                                       lags=2, transformer_series=None), 
                           ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                              fun_predictors=create_predictors, 
-                                                             window_size=2)], 
+                                                             window_size=2, transformer_series=None)], 
                          ids=lambda forecaster: f'forecaster: {type(forecaster).__name__}')
 def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_refit_fixed_train_size_exog_interval_with_mocked(forecaster):
     """
@@ -654,10 +577,10 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
 
 @pytest.mark.parametrize("forecaster", 
                          [ForecasterAutoregMultiSeries(regressor=Ridge(random_state=123), 
-                                                       lags=2), 
+                                                       lags=2, transformer_series=None), 
                           ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                              fun_predictors=create_predictors, 
-                                                             window_size=2)], 
+                                                             window_size=2, transformer_series=None)], 
                          ids=lambda forecaster: f'forecaster: {type(forecaster).__name__}')
 def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_no_refit_exog_interval_gap_with_mocked(forecaster):
     """
@@ -718,10 +641,10 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
 
 @pytest.mark.parametrize("forecaster", 
                          [ForecasterAutoregMultiSeries(regressor=Ridge(random_state=123), 
-                                                       lags=2), 
+                                                       lags=2, transformer_series=None), 
                           ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                              fun_predictors=create_predictors, 
-                                                             window_size=2)], 
+                                                             window_size=2, transformer_series=None)], 
                          ids=lambda forecaster: f'forecaster: {type(forecaster).__name__}')
 def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_refit_exog_interval_gap_with_mocked(forecaster):
     """
@@ -780,10 +703,10 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
 
 @pytest.mark.parametrize("forecaster", 
                          [ForecasterAutoregMultiSeries(regressor=Ridge(random_state=123), 
-                                                       lags=2), 
+                                                       lags=2, transformer_series=None), 
                           ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                              fun_predictors=create_predictors, 
-                                                             window_size=2)], 
+                                                             window_size=2, transformer_series=None)], 
                          ids=lambda forecaster: f'forecaster: {type(forecaster).__name__}')
 def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_refit_exog_fixed_train_size_interval_gap_with_mocked(forecaster):
     """
@@ -845,10 +768,10 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
 
 @pytest.mark.parametrize("forecaster", 
                          [ForecasterAutoregMultiSeries(regressor=Ridge(random_state=123), 
-                                                       lags=2), 
+                                                       lags=2, transformer_series=None), 
                           ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                              fun_predictors=create_predictors, 
-                                                             window_size=2)], 
+                                                             window_size=2, transformer_series=None)], 
                          ids=lambda forecaster: f'forecaster: {type(forecaster).__name__}')
 def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_no_refit_different_lengths_with_mocked(forecaster):
     """
@@ -910,10 +833,10 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
 
 @pytest.mark.parametrize("forecaster", 
                          [ForecasterAutoregMultiSeries(regressor=Ridge(random_state=123), 
-                                                       lags=2), 
+                                                       lags=2, transformer_series=None), 
                           ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                              fun_predictors=create_predictors, 
-                                                             window_size=2)], 
+                                                             window_size=2, transformer_series=None)], 
                          ids=lambda forecaster: f'forecaster: {type(forecaster).__name__}')
 def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_refit_different_lengths_with_mocked(forecaster):
     """
@@ -972,10 +895,10 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
 
 @pytest.mark.parametrize("forecaster", 
                          [ForecasterAutoregMultiSeries(regressor=Ridge(random_state=123), 
-                                                       lags=2), 
+                                                       lags=2, transformer_series=None), 
                           ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                              fun_predictors=create_predictors, 
-                                                             window_size=2)], 
+                                                             window_size=2, transformer_series=None)], 
                          ids=lambda forecaster: f'forecaster: {type(forecaster).__name__}')
 def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_refit_fixed_train_size_different_lengths_with_mocked(forecaster):
     """
@@ -1037,10 +960,10 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
 
 @pytest.mark.parametrize("forecaster", 
                          [ForecasterAutoregMultiSeries(regressor=Ridge(random_state=123), 
-                                                       lags=2), 
+                                                       lags=2, transformer_series=None), 
                           ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                              fun_predictors=create_predictors, 
-                                                             window_size=2)], 
+                                                             window_size=2, transformer_series=None)], 
                          ids=lambda forecaster: f'forecaster: {type(forecaster).__name__}')
 def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_refit_int_interval_yes_exog_yes_remainder_with_mocked(forecaster):
     """
@@ -1126,10 +1049,10 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
 
 @pytest.mark.parametrize("forecaster", 
                          [ForecasterAutoregMultiSeries(regressor=Ridge(random_state=123), 
-                                                       lags=2), 
+                                                       lags=2, transformer_series=None), 
                           ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                              fun_predictors=create_predictors, 
-                                                             window_size=2)], 
+                                                             window_size=2, transformer_series=None)], 
                          ids=lambda forecaster: f'forecaster: {type(forecaster).__name__}')
 def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_refit_int_interval_yes_exog_not_allow_remainder_gap_with_mocked(forecaster):
     """
@@ -1206,10 +1129,11 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
     """
 
     forecaster = ForecasterAutoregMultiVariate(
-                     regressor = Ridge(random_state=123),
-                     level     = 'l1',
-                     lags      = 2,
-                     steps     = 3
+                     regressor          = Ridge(random_state=123),
+                     level              = 'l1',
+                     lags               = 2,
+                     steps              = 3,
+                     transformer_series = None
                  )
 
     steps = 3
@@ -1255,10 +1179,11 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
     """
 
     forecaster = ForecasterAutoregMultiVariate(
-                     regressor = Ridge(random_state=123),
-                     level     = 'l1',
-                     lags      = 2,
-                     steps     = 3
+                     regressor          = Ridge(random_state=123),
+                     level              = 'l1',
+                     lags               = 2,
+                     steps              = 3,
+                     transformer_series = None
                  )
     forecaster.fit(series=series)
 
@@ -1311,10 +1236,11 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
     """
 
     forecaster = ForecasterAutoregMultiVariate(
-                     regressor = Ridge(random_state=123),
-                     level     = 'l2',
-                     lags      = 2,
-                     steps     = 3
+                     regressor          = Ridge(random_state=123),
+                     level              = 'l2',
+                     lags               = 2,
+                     steps              = 3,
+                     transformer_series = None
                  )
 
     steps = 3
@@ -1368,10 +1294,11 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
     """
 
     forecaster = ForecasterAutoregMultiVariate(
-                     regressor = Ridge(random_state=123),
-                     level     = 'l1',
-                     lags      = 2,
-                     steps     = 3
+                     regressor          = Ridge(random_state=123),
+                     level              = 'l1',
+                     lags               = 2,
+                     steps              = 3,
+                     transformer_series = None
                  )
 
     steps = 3
@@ -1417,10 +1344,11 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
     """
 
     forecaster = ForecasterAutoregMultiVariate(
-                     regressor = Ridge(random_state=123),
-                     level     = 'l1',
-                     lags      = 2,
-                     steps     = 3
+                     regressor          = Ridge(random_state=123),
+                     level              = 'l1',
+                     lags               = 2,
+                     steps              = 3,
+                     transformer_series = None
                  )
 
     steps = 3
@@ -1467,10 +1395,11 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
     """
 
     forecaster = ForecasterAutoregMultiVariate(
-                     regressor = Ridge(random_state=123),
-                     level     = 'l1',
-                     lags      = 2,
-                     steps     = 3
+                     regressor          = Ridge(random_state=123),
+                     level              = 'l1',
+                     lags               = 2,
+                     steps              = 3,
+                     transformer_series = None
                  )
 
     steps = 3
@@ -1524,10 +1453,11 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
     """
 
     forecaster = ForecasterAutoregMultiVariate(
-                     regressor = Ridge(random_state=123),
-                     level     = 'l1',
-                     lags      = 2,
-                     steps     = 3
+                     regressor          = Ridge(random_state=123),
+                     level              = 'l1',
+                     lags               = 2,
+                     steps              = 3,
+                     transformer_series = None
                  )
 
     steps = 3
@@ -1580,10 +1510,11 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
     (mocked done in Skforecast v0.5.0).
     """
     forecaster = ForecasterAutoregMultiVariate(
-                     regressor = Ridge(random_state=123),
-                     level     = 'l1',
-                     lags      = 2,
-                     steps     = 8
+                     regressor          = Ridge(random_state=123),
+                     level              = 'l1',
+                     lags               = 2,
+                     steps              = 8,
+                     transformer_series = None
                  )
     
     n_validation = 20
@@ -1644,10 +1575,11 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
     intervals (mocked done in Skforecast v0.5.0).
     """
     forecaster = ForecasterAutoregMultiVariate(
-                     regressor = Ridge(random_state=123),
-                     level     = 'l1',
-                     lags      = 2,
-                     steps     = 8
+                     regressor          = Ridge(random_state=123),
+                     level              = 'l1',
+                     lags               = 2,
+                     steps              = 8,
+                     transformer_series = None
                  )
     
     n_validation = 20
@@ -1709,10 +1641,11 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
     series_datetime.index = pd.date_range(start='2022-01-01', periods=50, freq='D')
 
     forecaster = ForecasterAutoregMultiVariate(
-                     regressor = Ridge(random_state=123),
-                     level     = 'l1',
-                     lags      = 2,
-                     steps     = 10
+                     regressor          = Ridge(random_state=123),
+                     level              = 'l1',
+                     lags               = 2,
+                     steps              = 10,
+                     transformer_series = None
                  )
 
     n_validation = 20
@@ -1772,10 +1705,11 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
     (mocked done in Skforecast v0.9.0).
     """
     forecaster = ForecasterAutoregMultiVariate(
-                     regressor = Ridge(random_state=123),
-                     level     = 'l1',
-                     lags      = 2,
-                     steps     = 2
+                     regressor          = Ridge(random_state=123),
+                     level              = 'l1',
+                     lags               = 2,
+                     steps              = 2,
+                     transformer_series = None
                  )
     
     refit = 2
@@ -1846,10 +1780,11 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
     exog_with_index.index = pd.date_range(start='2022-01-01', periods=50, freq='D')
 
     forecaster = ForecasterAutoregMultiVariate(
-                     regressor = Ridge(random_state=123),
-                     level     = 'l1',
-                     lags      = 2,
-                     steps     = 7
+                     regressor          = Ridge(random_state=123),
+                     level              = 'l1',
+                     lags               = 2,
+                     steps              = 7,
+                     transformer_series = None
                  )
 
     refit = 3

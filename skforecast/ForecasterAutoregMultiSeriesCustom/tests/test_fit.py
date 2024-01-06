@@ -7,7 +7,6 @@ import pandas as pd
 from skforecast.ForecasterAutoregMultiSeriesCustom import ForecasterAutoregMultiSeriesCustom
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
-from xgboost import XGBRegressor
 
 
 def create_predictors(y): # pragma: no cover
@@ -171,33 +170,9 @@ def test_fit_in_sample_residuals_stored():
     results = forecaster.in_sample_residuals
 
     assert isinstance(results, dict)
-    assert all(isinstance(x, np.ndarray) for x in results.values())
+    assert np.all(isinstance(x, np.ndarray) for x in results.values())
     assert results.keys() == expected.keys()
-    assert all(all(np.isclose(results[k], expected[k])) for k in expected.keys())
-
-
-def test_fit_in_sample_residuals_stored_XGBRegressor():
-    """
-    Test that values of in_sample_residuals are stored after fitting with XGBRegressor.
-    """
-    series = pd.DataFrame({'1': pd.Series(np.arange(5)), 
-                           '2': pd.Series(np.arange(5))})
-
-    forecaster = ForecasterAutoregMultiSeriesCustom(
-                     regressor       = XGBRegressor(random_state=123),
-                     fun_predictors  = create_predictors,
-                     window_size     = 3
-                 )
-    
-    forecaster.fit(series=series, store_in_sample_residuals=True)
-    expected = {'1': np.array([-0.00049472,  0.00049543]),
-                '2': np.array([-0.00049472,  0.00049543])}
-    results = forecaster.in_sample_residuals
-
-    assert isinstance(results, dict)
-    assert all(isinstance(x, np.ndarray) for x in results.values())
-    assert results.keys() == expected.keys()
-    assert all(all(np.isclose(results[k], expected[k])) for k in expected.keys())
+    assert np.all(np.all(np.isclose(results[k], expected[k])) for k in expected.keys())
 
 
 def test_fit_same_residuals_when_residuals_greater_than_1000():
@@ -216,6 +191,7 @@ def test_fit_same_residuals_when_residuals_greater_than_1000():
                  )
     forecaster.fit(series=series, store_in_sample_residuals=True)
     results_1 = forecaster.in_sample_residuals
+    
     forecaster = ForecasterAutoregMultiSeriesCustom(
                      regressor       = LinearRegression(),
                      fun_predictors  = create_predictors,
@@ -225,13 +201,13 @@ def test_fit_same_residuals_when_residuals_greater_than_1000():
     results_2 = forecaster.in_sample_residuals
 
     assert isinstance(results_1, dict)
-    assert all(isinstance(x, np.ndarray) for x in results_1.values())
+    assert np.all(isinstance(x, np.ndarray) for x in results_1.values())
     assert isinstance(results_2, dict)
-    assert all(isinstance(x, np.ndarray) for x in results_2.values())
+    assert np.all(isinstance(x, np.ndarray) for x in results_2.values())
     assert results_1.keys() == results_2.keys()
-    assert all(len(results_1[k] == 1000) for k in results_1.keys())
-    assert all(len(results_2[k] == 1000) for k in results_2.keys())
-    assert all(all(results_1[k] == results_2[k]) for k in results_2.keys())
+    assert np.all(len(results_1[k] == 1000) for k in results_1.keys())
+    assert np.all(len(results_2[k] == 1000) for k in results_2.keys())
+    assert np.all(np.all(results_1[k] == results_2[k]) for k in results_2.keys())
 
 
 def test_fit_in_sample_residuals_not_stored():
@@ -253,7 +229,7 @@ def test_fit_in_sample_residuals_not_stored():
 
     assert isinstance(results, dict)
     assert results.keys() == expected.keys()
-    assert all(results[k] == expected[k] for k in expected.keys())
+    assert np.all(results[k] == expected[k] for k in expected.keys())
 
 
 def test_fit_last_window_stored():

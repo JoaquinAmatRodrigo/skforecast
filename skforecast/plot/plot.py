@@ -180,3 +180,53 @@ def plot_prediction_distribution(
     fig.suptitle('Forecasting distribution per step')
 
     return fig
+
+
+def set_dark_theme(
+    custom_style: dict = None
+) -> None:
+    """
+    Set aspects of the visual theme for all matplotlib plots.
+    This function changes the global defaults for all plots using the matplotlib
+    rcParams system. The theme includes specific colors for figure and axes
+    backgrounds, gridlines, text, labels, and ticks. It also sets the font size
+    and line width.
+
+    Parameters
+    ----------
+    custom_style : dict, default None
+        Optional dictionary containing custom styles to be added or override the
+        default dark theme. It is applied after the default theme is set by
+        using the `plt.rcParams.update()` method.
+
+    Returns
+    -------
+    None
+    
+    """
+
+    plt.style.use('fivethirtyeight')
+    dark_style = {
+        'figure.facecolor': '#212946',
+        'axes.facecolor': '#212946',
+        'savefig.facecolor':'#212946',
+        'axes.grid': True,
+        'axes.grid.which': 'both',
+        'axes.spines.left': False,
+        'axes.spines.right': False,
+        'axes.spines.top': False,
+        'axes.spines.bottom': False,
+        'grid.color': '#2A3459',
+        'grid.linewidth': '1',
+        'text.color': '0.9',
+        'axes.labelcolor': '0.9',
+        'xtick.color': '0.9',
+        'ytick.color': '0.9',
+        'font.size': 10,
+        'lines.linewidth': 1.5
+    }
+
+    if custom_style is not None:
+        dark_style.update(custom_style)
+        
+    plt.rcParams.update(dark_style)

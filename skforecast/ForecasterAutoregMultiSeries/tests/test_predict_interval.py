@@ -57,7 +57,8 @@ def test_predict_output_when_regressor_is_LinearRegression_steps_is_1_in_sample_
     Test output when regressor is LinearRegression and one step ahead is predicted
     using in sample residuals. This test is equivalent to the next one.
     """
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3,
+                                              transformer_series=None)
     forecaster.fit(series=series_2, store_in_sample_residuals=True)
     forecaster.in_sample_residuals['1'] = np.full_like(forecaster.in_sample_residuals['1'], fill_value=10)
     forecaster.in_sample_residuals['2'] = np.full_like(forecaster.in_sample_residuals['2'], fill_value=20)
@@ -73,7 +74,8 @@ def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_1_
     Test output when regressor is LinearRegression and one step ahead is predicted
     using in sample residuals.
     """
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3,
+                                              transformer_series=None)
     forecaster.fit(series=series_2, store_in_sample_residuals=True)
 
     forecaster.in_sample_residuals['1'] = np.full_like(forecaster.in_sample_residuals['1'], fill_value=10)
@@ -144,7 +146,8 @@ def test_predict_output_when_regressor_is_LinearRegression_steps_is_2_in_sample_
     Test output when regressor is LinearRegression and one step ahead is predicted
     using in sample residuals. This test is equivalent to the next one.
     """
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3,
+                                              transformer_series=None)
     forecaster.fit(series=series_2, store_in_sample_residuals=True)
     forecaster.in_sample_residuals['1'] = np.full_like(forecaster.in_sample_residuals['1'], fill_value=10)
     forecaster.in_sample_residuals['2'] = np.full_like(forecaster.in_sample_residuals['2'], fill_value=20)
@@ -160,7 +163,8 @@ def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_2_
     Test output when regressor is LinearRegression and two step ahead is predicted
     using in sample residuals.
     """
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3,
+                                              transformer_series=None)
     forecaster.fit(series=series_2, store_in_sample_residuals=True)
 
     forecaster.in_sample_residuals['1'] = np.full_like(forecaster.in_sample_residuals['1'], fill_value=10)
@@ -201,7 +205,8 @@ def test_predict_output_when_regressor_is_LinearRegression_steps_is_1_in_sample_
     Test output when regressor is LinearRegression and one step ahead is predicted
     using out sample residuals.
     """
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3,
+                                              transformer_series=None)
     forecaster.fit(series=series_2, store_in_sample_residuals=True)
 
     residuals = {'1': np.full_like(forecaster.in_sample_residuals['1'], fill_value=10), 
@@ -219,7 +224,8 @@ def test_predict_output_when_regressor_is_LinearRegression_steps_is_2_in_sample_
     Test output when regressor is LinearRegression and one step ahead is predicted
     using in sample residuals. This test is equivalent to the next one.
     """
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3,
+                                              transformer_series=None)
     forecaster.fit(series=series_2, store_in_sample_residuals=True)
 
     residuals = {'1': np.full_like(forecaster.in_sample_residuals['1'], fill_value=10), 

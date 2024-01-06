@@ -94,15 +94,15 @@ pip install skforecast[plotting]
 + pmdarima>=2.0, <2.1
 
 
-# What is new in skforecast 0.11?
+# What is new in skforecast 0.12?
 
 Visit the [release notes](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/changelog.md) to view all notable changes.
 
-- [x] Create `ForecasterBaseline.ForecasterEquivalentDate`, a Forecaster to create simple model that serves as a basic reference for evaluating the performance of more complex models.
-- [x] New `predict_quantiles` method in all Autoreg Forecasters to calculate the specified quantiles for each step.
-- [x] Added `skforecast.datasets` module. It contains functions to load data for our examples and user guides.
-- [x] Enhance the management of internal copying in skforecast to minimize the number of copies, thereby accelerating data processing.
-- [x] Bug fixes and performance improvements.
+- [x] Bayesian hyperparameter search for the `ForecasterAutoregMultiSeries`, `ForecasterAutoregMultiSeriesCustom`, and `ForecasterAutoregMultiVariate` using `optuna` as the search engine.
+- [ ] Feature Selection functions.
+- [ ] Allow different exogenous variables per series in the `ForecasterAutoregMultiSeries` and `ForecasterAutoregMultiSeriesCustom`.
+- [ ] New encoding for the `ForecasterAutoregMultiSeries` and `ForecasterAutoregMultiSeriesCustom`.
+- [ ] Bug fixes and performance improvements.
 
 
 # Forecasters
