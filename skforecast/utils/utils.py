@@ -178,7 +178,7 @@ def initialize_weights(
 
 
 def initialize_lags_grid(
-    forecaster, 
+    forecaster: object, 
     lags_grid: Optional[Union[list, dict]]=None
 ) -> Tuple[dict, str]:
     """
@@ -1344,7 +1344,7 @@ def transform_dataframe(
 
 
 def save_forecaster(
-    forecaster, 
+    forecaster: object, 
     file_name: str,
     save_custom_functions: bool=True, 
     verbose: bool=True
@@ -1355,7 +1355,7 @@ def save_forecaster(
 
     Parameters
     ----------
-    forecaster : forecaster
+    forecaster : Forecaster
         Forecaster created with skforecast library.
     file_name : str
         File name given to the object.
@@ -1423,7 +1423,7 @@ def load_forecaster(
 
     Returns
     -------
-    forecaster: forecaster
+    forecaster: Forecaster
         Forecaster created with skforecast library.
     
     """
@@ -1594,7 +1594,7 @@ def check_backtesting_input(
 
     Parameters
     ----------
-    forecaster : object
+    forecaster : Forecaster
         Forecaster model.
     steps : int, list
         Number of future steps predicted.
@@ -1772,7 +1772,7 @@ def check_backtesting_input(
 
 
 def select_n_jobs_backtesting(
-    forecaster,
+    forecaster: object,
     refit: Union[bool, int]
 ) -> int:
     """

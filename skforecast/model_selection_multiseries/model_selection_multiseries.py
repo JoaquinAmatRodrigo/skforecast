@@ -35,7 +35,7 @@ logging.basicConfig(
 
 
 def _initialize_levels_model_selection_multiseries(
-    forecaster, 
+    forecaster: object, 
     series: pd.DataFrame,
     levels: Optional[Union[str, list]]=None
 ) -> list:
@@ -91,7 +91,7 @@ def _initialize_levels_model_selection_multiseries(
 
 
 def _backtesting_forecaster_multiseries(
-    forecaster,
+    forecaster: object,
     series: pd.DataFrame,
     steps: int,
     metric: Union[str, Callable, list],
@@ -374,7 +374,7 @@ def _backtesting_forecaster_multiseries(
 
 
 def backtesting_forecaster_multiseries(
-    forecaster,
+    forecaster: object,
     series: pd.DataFrame,
     steps: int,
     metric: Union[str, Callable, list],
@@ -544,7 +544,7 @@ def backtesting_forecaster_multiseries(
 
 
 def grid_search_forecaster_multiseries(
-    forecaster,
+    forecaster: object,
     series: pd.DataFrame,
     param_grid: dict,
     steps: int,
@@ -664,7 +664,7 @@ def grid_search_forecaster_multiseries(
 
 
 def random_search_forecaster_multiseries(
-    forecaster,
+    forecaster: object,
     series: pd.DataFrame,
     param_distributions: dict,
     steps: int,
@@ -792,7 +792,7 @@ def random_search_forecaster_multiseries(
 
 
 def _evaluate_grid_hyperparameters_multiseries(
-    forecaster,
+    forecaster: object,
     series: pd.DataFrame,
     param_grid: dict,
     steps: int,
@@ -991,7 +991,7 @@ def _evaluate_grid_hyperparameters_multiseries(
 
 
 def bayesian_search_forecaster_multiseries(
-    forecaster,
+    forecaster: object,
     series: pd.DataFrame,
     search_space: Callable,
     steps: int,
@@ -1141,7 +1141,7 @@ def bayesian_search_forecaster_multiseries(
 
 
 def _bayesian_search_optuna_multiseries(
-    forecaster,
+    forecaster: object,
     series: pd.DataFrame,
     search_space: Callable,
     steps: int,
@@ -1411,7 +1411,7 @@ def _bayesian_search_optuna_multiseries(
 # Alias MultiVariate
 # ==============================================================================
 def backtesting_forecaster_multivariate(
-    forecaster,
+    forecaster: object,
     series: pd.DataFrame,
     steps: int,
     metric: Union[str, Callable, list],
@@ -1546,7 +1546,7 @@ def backtesting_forecaster_multivariate(
 
 
 def grid_search_forecaster_multivariate(
-    forecaster,
+    forecaster: object,
     series: pd.DataFrame,
     param_grid: dict,
     steps: int,
@@ -1666,7 +1666,7 @@ def grid_search_forecaster_multivariate(
 
 
 def random_search_forecaster_multivariate(
-    forecaster,
+    forecaster: object,
     series: pd.DataFrame,
     param_distributions: dict,
     steps: int,
@@ -1795,7 +1795,7 @@ def random_search_forecaster_multivariate(
 
 
 def bayesian_search_forecaster_multivariate(
-    forecaster,
+    forecaster: object,
     series: pd.DataFrame,
     search_space: Callable,
     steps: int,
