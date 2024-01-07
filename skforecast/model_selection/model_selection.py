@@ -5,15 +5,17 @@
 ################################################################################
 # coding=utf-8
 
-from typing import Union, Tuple, Optional, Callable
-import numpy as np
-import pandas as pd
-import warnings
-import logging
 import re
 from copy import deepcopy
+import logging
+from typing import Union, Tuple, Optional, Callable
+import warnings
+import numpy as np
+import pandas as pd
 from joblib import Parallel, delayed, cpu_count
 from tqdm.auto import tqdm
+import optuna
+from optuna.samplers import TPESampler, RandomSampler
 from sklearn.metrics import (
     mean_squared_error,
     mean_absolute_error,
@@ -22,8 +24,6 @@ from sklearn.metrics import (
 )
 from sklearn.model_selection import ParameterGrid
 from sklearn.model_selection import ParameterSampler
-import optuna
-from optuna.samplers import TPESampler, RandomSampler
 
 from ..exceptions import LongTrainingWarning
 from ..utils import check_backtesting_input
@@ -282,7 +282,7 @@ def _get_metric(
 
 
 def _backtesting_forecaster(
-    forecaster,
+    forecaster: object,
     y: pd.Series,
     steps: int,
     metric: Union[str, Callable, list],
@@ -556,7 +556,7 @@ def _backtesting_forecaster(
 
 
 def backtesting_forecaster(
-    forecaster,
+    forecaster: object,
     y: pd.Series,
     steps: int,
     metric: Union[str, Callable, list],
@@ -734,7 +734,7 @@ def backtesting_forecaster(
 
 
 def grid_search_forecaster(
-    forecaster,
+    forecaster: object,
     y: pd.Series,
     param_grid: dict,
     steps: int,
@@ -846,7 +846,7 @@ def grid_search_forecaster(
 
 
 def random_search_forecaster(
-    forecaster,
+    forecaster: object,
     y: pd.Series,
     param_distributions: dict,
     steps: int,
@@ -965,7 +965,7 @@ def random_search_forecaster(
 
 
 def _evaluate_grid_hyperparameters(
-    forecaster,
+    forecaster: object,
     y: pd.Series,
     param_grid: dict,
     steps: int,
@@ -1152,7 +1152,7 @@ def _evaluate_grid_hyperparameters(
 
 
 def bayesian_search_forecaster(
-    forecaster,
+    forecaster: object,
     y: pd.Series,
     search_space: Callable,
     steps: int,
@@ -1305,7 +1305,7 @@ def bayesian_search_forecaster(
 
 
 def _bayesian_search_optuna(
-    forecaster,
+    forecaster: object,
     y: pd.Series,
     search_space: Callable,
     steps: int,
@@ -1557,54 +1557,61 @@ def _bayesian_search_optuna(
 
 
 def select_features(
-    selector: object,
     forecaster: object,
+    selector: object,
     y: Union[pd.Series, pd.DataFrame],
-    exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
-    select_only_exog: bool = False,
-    subsample: Union[int, float] = 0.5,
-    force_inclusion: Optional[Union[list, str]] = None,
-    verbose: bool = True,
+    exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+    select_only_exog: bool=False,
+    force_inclusion: Optional[Union[list, str]]=None,
+    subsample: Union[int, float]=0.5,
+    random_state: int=123,
+    verbose: bool=True
 ) -> Union[list, list]:
     """
-    Feature selection using any of the classes from sklearn.feature_selection 
-    module (such as RFECV, SelectFromModel, etc). Two groups of features are
+    Feature selection using any of the sklearn.feature_selection module classes 
+    (such as `RFECV`, `SelectFromModel`, etc.). Two groups of features are
     evaluated: lagged variables and exogenous variables. By default, the selection
-    process is performed using both groups of features at the same time so only
+    process is performed on both sets of features at the same time, so that only
     the most relevant lags and exogenous variables are selected. However, if
-    `select_only_exog=True`, the selection process is performed only using
-    exogenous variables. In this case, lagged variables are not evaluated by the
-    selector and are all included in the final list of selected features. It is 
-    also possible to force the inclusion of certain features in the final list of
-    selected features using the parameter `force_inclusion`.
+    `select_only_exog=True`, the selection process is performed on exogenous 
+    variables only. In this case, the lags are not evaluated by the selector 
+    and are all included in the final list of selected features. It is also 
+    possible to force the inclusion of certain features in the final list of 
+    selected features using the `force_inclusion` parameter.
 
     Parameters
     ----------
-    selector : object
-        A feature selector from sklearn.feature_selection.
     forecaster : ForecasterAutoreg, ForecasterAutoregCustom
         Forecaster model.
-    y : pd.Series or pd.DataFrame   
-        Target time series to which feature selection will be applied.
-    exog : pd.Series or pd.DataFrame, optional (default=None)   
-        Exogenous variables.
-    select_only_exog : bool, optional (default=False)
-        Whether to only use exogenous variables in the selection process. If 
-        `False` (default), lagged variables are also evaluated by the selector
-        and only those that are selected are included in the final list of selected
-        features. If `True`, exogenous variables are evaluated without the presence
-        of lagged variables and then all lagged variables are added to the selected
-        exogenous variables.
-    subsample : int or float, optional (default=0.5)
-        Proportion of records to use for feature selection.
-    force_inclusion : list or str, optional (default=None)
+    selector : object
+        A feature selector from sklearn.feature_selection.
+    y : pandas Series, pandas DataFrame
+        Target time series to which the feature selection will be applied.
+    exog : pandas Series, pandas DataFrame, default `None`
+        Exogenous variable/s included as predictor/s. Must have the same
+        number of observations as `y` and should be aligned so that y[i] is
+        regressed on exog[i].
+    select_only_exog : bool, default `False`
+        Whether to use only exogenous variables in the selection process. 
+        
+        - If `False` (default), lags are also evaluated by the selector and 
+        only those that are selected are included in the final list of 
+        selected features. 
+        - If `True`, exogenous variables are evaluated without the presence
+        of lags. Therefore, all lags are selected.
+    force_inclusion : list, str, default `None`
         Features to force include in the final list of selected features.
         
-        - If list, list of features names to force include.
-        - If str, regular expression to identify features to force include. For example,
-        if `force_inclusion="^sun_"`, all features that start with "sun_" will be
-        included in the final list of selected features.
-    verbose : bool, optional (default=True)
+        - If `list`, list of feature names to force include.
+        - If `str`, regular expression to identify features to force include. 
+        For example, if `force_inclusion="^sun_"`, all features that begin 
+        with "sun_" will be included in the final list of selected features.
+    subsample : int, float, default `0.5`
+        Proportion of records to use for feature selection.
+    random_state : int, default `123`
+        Sets a seed for the random subsample so that the subsampling process 
+        is always deterministic.
+    verbose : bool, default `True`
         Print information about feature selection process.
 
     Returns
@@ -1621,14 +1628,14 @@ def select_features(
         'ForecasterAutoregCustom'
     ]
 
-    if subsample < 0 or subsample > 1:
-        raise ValueError(
-            "`subsample` must be a number between 0 and 1."
+    if type(forecaster).__name__ not in valid_forecasters:
+        raise TypeError(
+            f"`forecaster` must be one of the following classes: {valid_forecasters}."
         )
 
-    if type(forecaster).__name__ not in valid_forecasters:
+    if subsample <= 0 or subsample > 1:
         raise ValueError(
-            f"`forecaster` must be one of the following classes: {valid_forecasters}."
+            "`subsample` must be a number greater than 0 and less than or equal to 1."
         )
 
     X_train, y_train = forecaster.create_train_X_y(y=y, exog=exog)
@@ -1662,7 +1669,7 @@ def select_features(
     if isinstance(subsample, float):
         subsample = int(len(X_train)*subsample)
 
-    rng = np.random.default_rng(seed=785412)
+    rng = np.random.default_rng(seed=random_state)
     sample = rng.choice(X_train.index, size=subsample, replace=False)
     X_train_sample = X_train.loc[sample, :]
     y_train_sample = y_train.loc[sample]
@@ -1676,7 +1683,7 @@ def select_features(
             feature
             for feature in selected_features
             if feature in lags_cols
-    ]
+        ]
 
     selected_exog = [
         feature
@@ -1692,6 +1699,13 @@ def select_features(
             forced_lags_not_selected = set(forced_lags) - set(selected_features)
             selected_lags.extend(forced_lags_not_selected)
             selected_lags.sort(key=lags_cols.index)
+
+    if len(selected_lags) == 0:
+        warnings.warn(
+            ("No lags has been selected by the feature selector. Since a Forecaster "
+             "cannot be created without lags, be sure to include at least one to "
+             "ensure the autoregressive component of the forecast model.")
+        )
 
     if hasattr(forecaster, 'lags'):
         selected_lags = [int(feature.replace('lag_', '')) for feature in selected_lags]
