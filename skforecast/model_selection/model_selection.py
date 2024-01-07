@@ -1561,23 +1561,23 @@ def select_features(
     selector: object,
     y: Union[pd.Series, pd.DataFrame],
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-    select_only_exog: bool=False,
+    select_only: Optional[str]=None,
     force_inclusion: Optional[Union[list, str]]=None,
     subsample: Union[int, float]=0.5,
     random_state: int=123,
     verbose: bool=True
 ) -> Union[list, list]:
     """
-    Feature selection using any of the sklearn.feature_selection module classes 
+    Feature selection using any of the sklearn.feature_selection module selectors 
     (such as `RFECV`, `SelectFromModel`, etc.). Two groups of features are
-    evaluated: lagged variables and exogenous variables. By default, the selection
-    process is performed on both sets of features at the same time, so that only
-    the most relevant lags and exogenous variables are selected. However, if
-    `select_only_exog=True`, the selection process is performed on exogenous 
-    variables only. In this case, the lags are not evaluated by the selector 
-    and are all included in the final list of selected features. It is also 
-    possible to force the inclusion of certain features in the final list of 
-    selected features using the `force_inclusion` parameter.
+    evaluated: autoregressive features and exogenous features. By default, the 
+    selection process is performed on both sets of features at the same time, 
+    so that the most relevant autoregressive and exogenous features are selected. 
+    However, using the `select_only` argument, the selection process can focus 
+    only on the autoregressive or exogenous features without taking into account 
+    the other features. Therefore, all other features will remain in the model. 
+    It is also possible to force the inclusion of certain features in the final 
+    list of selected features using the `force_inclusion` parameter.
 
     Parameters
     ----------
@@ -1591,14 +1591,16 @@ def select_features(
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
-    select_only_exog : bool, default `False`
-        Whether to use only exogenous variables in the selection process. 
+    select_only : str, default `None`
+        Decide what type of features to include in the selection process. 
         
-        - If `False` (default), lags are also evaluated by the selector and 
-        only those that are selected are included in the final list of 
-        selected features. 
-        - If `True`, exogenous variables are evaluated without the presence
-        of lags. Therefore, all lags are selected.
+        - If `'autoreg'`, only autoregressive features (lags or custom 
+        predictors) are evaluated by the selector. All exogenous features are 
+        included in the output (`selected_exog`).
+        - If `'exog'`, only exogenous features are evaluated without the presence
+        of autoregressive features. All autoregressive features are included 
+        in the output (`selected_autoreg`).
+        - If `None`, all features are evaluated by the selector.
     force_inclusion : list, str, default `None`
         Features to force include in the final list of selected features.
         
@@ -1616,10 +1618,10 @@ def select_features(
 
     Returns
     -------
-    selected_lags : list
-        List of selected lags.
+    selected_autoreg : list
+        List of selected autoregressive features.
     selected_exog : list
-        List of selected exogenous variables.
+        List of selected exogenous features.
 
     """
 
@@ -1632,39 +1634,46 @@ def select_features(
         raise TypeError(
             f"`forecaster` must be one of the following classes: {valid_forecasters}."
         )
+    
+    if not select_only in ['autoreg', 'exog', None]:
+        raise ValueError(
+            "`select_only` must be one of the following values: 'autoreg', 'exog', None."
+        )
 
     if subsample <= 0 or subsample > 1:
         raise ValueError(
             "`subsample` must be a number greater than 0 and less than or equal to 1."
         )
-
+    
     X_train, y_train = forecaster.create_train_X_y(y=y, exog=exog)
 
     if hasattr(forecaster, 'lags'):
-        lags_cols = [f"lag_{lag}" for lag in forecaster.lags]
+        autoreg_cols = [f"lag_{lag}" for lag in forecaster.lags]
     else:
         if forecaster.name_predictors is not None:
-            lags_cols = forecaster.name_predictors
+            autoreg_cols = forecaster.name_predictors
         else:
-            lags_cols = [
+            autoreg_cols = [
                 col
                 for col in X_train.columns
                 if re.match(r'^custom_predictor_\d+', col)
             ]
-    exog_cols = [col for col in X_train.columns if col not in lags_cols]
+    exog_cols = [col for col in X_train.columns if col not in autoreg_cols]
 
-    forced_lags = []
+    forced_autoreg = []
     forced_exog = []
     if force_inclusion is not None:
         if isinstance(force_inclusion, list):
-            forced_lags = [col for col in force_inclusion if col in lags_cols]
+            forced_autoreg = [col for col in force_inclusion if col in autoreg_cols]
             forced_exog = [col for col in force_inclusion if col in exog_cols]
         elif isinstance(force_inclusion, str):
-            forced_lags = [col for col in lags_cols if re.match(force_inclusion, col)]
+            forced_autoreg = [col for col in autoreg_cols if re.match(force_inclusion, col)]
             forced_exog = [col for col in exog_cols if re.match(force_inclusion, col)]
 
-    if select_only_exog:
-        X_train = X_train.drop(columns=lags_cols)
+    if select_only == 'autoreg':
+        X_train = X_train.drop(columns=exog_cols)
+    elif select_only == 'exog':
+        X_train = X_train.drop(columns=autoreg_cols)
 
     if isinstance(subsample, float):
         subsample = int(len(X_train)*subsample)
@@ -1676,48 +1685,56 @@ def select_features(
     selector.fit(X_train_sample, y_train_sample)
     selected_features = selector.get_feature_names_out()
 
-    if select_only_exog:
-        selected_lags = lags_cols
+    if select_only == 'exog':
+        selected_autoreg = autoreg_cols
     else:
-        selected_lags = [
+        selected_autoreg = [
             feature
             for feature in selected_features
-            if feature in lags_cols
+            if feature in autoreg_cols
         ]
 
-    selected_exog = [
-        feature
-        for feature in selected_features
-        if feature in exog_cols
-    ]
+    if select_only == 'autoreg':
+        selected_exog = exog_cols
+    else:
+        selected_exog = [
+            feature
+            for feature in selected_features
+            if feature in exog_cols
+        ]
 
     if force_inclusion is not None: 
-        forced_exog_not_selected = set(forced_exog) - set(selected_features)
-        selected_exog.extend(forced_exog_not_selected)
-        selected_exog.sort(key=exog_cols.index)
-        if not select_only_exog:
-            forced_lags_not_selected = set(forced_lags) - set(selected_features)
-            selected_lags.extend(forced_lags_not_selected)
-            selected_lags.sort(key=lags_cols.index)
+        if select_only != 'autoreg':
+            forced_exog_not_selected = set(forced_exog) - set(selected_features)
+            selected_exog.extend(forced_exog_not_selected)
+            selected_exog.sort(key=exog_cols.index)
+        if select_only != 'exog':
+            forced_autoreg_not_selected = set(forced_autoreg) - set(selected_features)
+            selected_autoreg.extend(forced_autoreg_not_selected)
+            selected_autoreg.sort(key=autoreg_cols.index)
 
-    if len(selected_lags) == 0:
+    if len(selected_autoreg) == 0:
         warnings.warn(
-            ("No lags has been selected by the feature selector. Since a Forecaster "
-             "cannot be created without lags, be sure to include at least one to "
-             "ensure the autoregressive component of the forecast model.")
+            ("No autoregressive features has been selected. Since a Forecaster "
+             "cannot be created without them, be sure to include at least one "
+             "to ensure the autoregressive component of the forecast model "
+             "using the `force_inclusion` parameter.")
         )
-
-    if hasattr(forecaster, 'lags'):
-        selected_lags = [int(feature.replace('lag_', '')) for feature in selected_lags]
+    else:
+        if hasattr(forecaster, 'lags'):
+            selected_autoreg = [int(feature.replace('lag_', '')) 
+                                for feature in selected_autoreg]
 
     if verbose:
         print(f"Recursive feature elimination ({selector.__class__.__name__})")
         print("--------------------------------" + "-"*len(selector.__class__.__name__))
-        print(f"Total number of features available: {X_train.shape[1]}") 
         print(f"Total number of records available: {X_train.shape[0]}")
         print(f"Total number of records used for feature selection: {X_train_sample.shape[0]}")
+        print(f"Number of features available: {X_train.shape[1]}") 
+        print(f"    Autoreg (n={len(autoreg_cols)})")
+        print(f"    Exog    (n={len(exog_cols)})")
         print(f"Number of features selected: {len(selected_features)}")
-        print(f"    Selected lags (n={len(selected_lags)}): {selected_lags}")
-        print(f"    Selected exog (n={len(selected_exog)}): {selected_exog}")
+        print(f"    Autoreg (n={len(selected_autoreg)}) : {selected_autoreg}")
+        print(f"    Exog    (n={len(selected_exog)}) : {selected_exog}")
 
-    return selected_lags, selected_exog
+    return selected_autoreg, selected_exog
