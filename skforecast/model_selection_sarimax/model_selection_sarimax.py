@@ -28,7 +28,7 @@ logging.basicConfig(
 
 
 def _backtesting_sarimax(
-    forecaster,
+    forecaster: object,
     y: pd.Series,
     steps: int,
     metric: Union[str, Callable, list],
@@ -284,7 +284,7 @@ def _backtesting_sarimax(
 
 
 def backtesting_sarimax(
-    forecaster,
+    forecaster: object,
     y: pd.Series,
     steps: int,
     metric: Union[str, Callable, list],
@@ -431,7 +431,7 @@ def backtesting_sarimax(
 
 
 def grid_search_sarimax(
-    forecaster,
+    forecaster: object,
     y: pd.Series,
     param_grid: dict,
     steps: int,
@@ -540,7 +540,7 @@ def grid_search_sarimax(
 
 
 def random_search_sarimax(
-    forecaster,
+    forecaster: object,
     y: pd.Series,
     param_distributions: dict,
     steps: int,
@@ -656,7 +656,7 @@ def random_search_sarimax(
 
 
 def _evaluate_grid_hyperparameters_sarimax(
-    forecaster,
+    forecaster: object,
     y: pd.Series,
     param_grid: dict,
     steps: int,
