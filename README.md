@@ -99,7 +99,7 @@ pip install skforecast[plotting]
 Visit the [release notes](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/changelog.md) to view all notable changes.
 
 - [x] Bayesian hyperparameter search for the `ForecasterAutoregMultiSeries`, `ForecasterAutoregMultiSeriesCustom`, and `ForecasterAutoregMultiVariate` using `optuna` as the search engine.
-- [ ] Feature Selection functions.
+- [x] Added `select_features` function to the `model_selection` module to perform feature selection using scikit-learn selectors.
 - [ ] Allow different exogenous variables per series in the `ForecasterAutoregMultiSeries` and `ForecasterAutoregMultiSeriesCustom`.
 - [ ] New encoding for the `ForecasterAutoregMultiSeries` and `ForecasterAutoregMultiSeriesCustom`.
 - [ ] Bug fixes and performance improvements.

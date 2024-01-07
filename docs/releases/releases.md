@@ -8,6 +8,8 @@ The main changes in this release are:
 
 + Added `bayesian_search_forecaster_multiseries` function to `model_selection_multiseries` module. This function performs a Bayesian hyperparameter search for the `ForecasterAutoregMultiSeries`, `ForecasterAutoregMultiSeriesCustom`, and `ForecasterAutoregMultiVariate` using `optuna` as the search engine.
 
++ Added `select_features` function to the `model_selection` module to perform feature selection using scikit-learn selectors.
+
 + Changed the default value of the `transformer_series` argument to use a `StandardScaler()` in the Global Forecasters (`ForecasterAutoregMultiSeries`, `ForecasterAutoregMultiSeriesCustom` and `ForecasterAutoregMultiVariate`).
 
 + 
@@ -18,7 +20,8 @@ The main changes in this release are:
 
 + Added `save_custom_functions` argument to the `save_forecaster` function in the `utils` module. If `True`, save custom functions used in the forecaster (`fun_predictors` and `weight_func`) as .py files. Custom functions must be available in the environment where the forecaster is loaded.
 
-+ Added `select_features` function to the `model_selection` module to perform feature selection using scikit-learn methods.
++ Added `select_features` function to the `model_selection` module to perform feature selection using scikit-learn selectors.
+
 + Added `sort_importance` argument to `get_feature_importances` method in all Forecasters. If `True`, sort the feature importances in descending order.
 
 + Added `initialize_lags_grid` function to `model_selection` module. This function initializes the lags to be used in the hyperparameter search functions in `model_selection` and `model_selection_multiseries`.
