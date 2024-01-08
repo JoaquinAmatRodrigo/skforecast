@@ -1193,6 +1193,7 @@ def bayesian_search_forecaster(
     n_jobs: Optional[Union[int, str]]='auto',
     verbose: bool=True,
     show_progress: bool=True,
+    results_output_path: Optional[str]=None,
     engine: str='optuna',
     kwargs_create_study: dict={},
     kwargs_study_optimize: dict={}
@@ -1257,8 +1258,10 @@ def bayesian_search_forecaster(
         **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
+    results_output_path : str, default `None`
+        Path to save the results of the grid search as .txt file.
     engine : str, default `'optuna'`
         Bayesian optimization runs through the optuna library.
     kwargs_create_study : dict, default `{'direction': 'minimize', 'sampler': TPESampler(seed=123)}`
@@ -1321,7 +1324,8 @@ def bayesian_search_forecaster(
                                     verbose               = verbose,
                                     show_progress         = show_progress,
                                     kwargs_create_study   = kwargs_create_study,
-                                    kwargs_study_optimize = kwargs_study_optimize
+                                    kwargs_study_optimize = kwargs_study_optimize,
+                                    results_output_path   = results_output_path
                                 )
 
     return results, results_opt_best
@@ -1346,6 +1350,7 @@ def _bayesian_search_optuna(
     n_jobs: Optional[Union[int, str]]='auto',
     verbose: bool=True,
     show_progress: bool=True,
+    results_output_path: Optional[str]=None,
     kwargs_create_study: dict={},
     kwargs_study_optimize: dict={}
 ) -> Tuple[pd.DataFrame, object]:
@@ -1409,8 +1414,10 @@ def _bayesian_search_optuna(
         **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
+    results_output_path : str, default `None`
+        Path to save the results of the grid search as .txt file.
     kwargs_create_study : dict, default `{'direction': 'minimize', 'sampler': TPESampler(seed=123)}`
         Keyword arguments (key, value mappings) to pass to optuna.create_study.
     kwargs_study_optimize : dict, default `{}`
@@ -1429,7 +1436,15 @@ def _bayesian_search_optuna(
         The best optimization result returned as a FrozenTrial optuna object.
 
     """
-    
+
+    if results_output_path is not None:
+        logger = logging.getLogger()
+        logger.setLevel(logging.INFO)  # Setup the root logger.
+        logger.addHandler(logging.FileHandler("results_output_path", mode="w"))
+        optuna.logging.enable_propagation()  # Propagate logs to the root logger.
+        optuna.logging.disable_default_handler()  # Stop showing logs in sys.stderr.
+        
+
     lags_grid, lags_label = initialize_lags_grid(forecaster, lags_grid)
    
     lags_list = []
