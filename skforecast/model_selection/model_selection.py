@@ -6,6 +6,7 @@
 # coding=utf-8
 
 import re
+import os
 from copy import deepcopy
 import logging
 from typing import Union, Tuple, Optional, Callable
@@ -749,7 +750,8 @@ def grid_search_forecaster(
     return_best: bool=True,
     n_jobs: Optional[Union[int, str]]='auto',
     verbose: bool=True,
-    show_progress: bool=True
+    show_progress: bool=True,
+    results_output_path: Optional[str]=None
 ) -> pd.DataFrame:
     """
     Exhaustive search over specified parameter values for a Forecaster object.
@@ -806,8 +808,10 @@ def grid_search_forecaster(
         **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
+    results_output_path : str, default `None`
+        Path to save the results of the grid search as .txt file.
 
     Returns
     -------
@@ -839,7 +843,8 @@ def grid_search_forecaster(
         return_best           = return_best,
         n_jobs                = n_jobs,
         verbose               = verbose,
-        show_progress         = show_progress
+        show_progress         = show_progress,
+        results_output_path   = results_output_path
     )
 
     return results
@@ -863,7 +868,8 @@ def random_search_forecaster(
     return_best: bool=True,
     n_jobs: Optional[Union[int, str]]='auto',
     verbose: bool=True,
-    show_progress: bool=True
+    show_progress: bool=True,
+    results_output_path: Optional[str]=None
 ) -> pd.DataFrame:
     """
     Random search over specified parameter values or distributions for a Forecaster 
@@ -925,8 +931,10 @@ def random_search_forecaster(
         **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
+    results_output_path : str, default `None`
+        Path to save the results of the grid search as .txt file.
 
     Returns
     -------
@@ -958,7 +966,8 @@ def random_search_forecaster(
         return_best           = return_best,
         n_jobs                = n_jobs,
         verbose               = verbose,
-        show_progress         = show_progress
+        show_progress         = show_progress,
+        results_output_path   = results_output_path
     )
 
     return results
@@ -980,7 +989,8 @@ def _evaluate_grid_hyperparameters(
     return_best: bool=True,
     n_jobs: Optional[Union[int, str]]='auto',
     verbose: bool=True,
-    show_progress: bool=True
+    show_progress: bool=True,
+    results_output_path: Optional[str]=None
 ) -> pd.DataFrame:
     """
     Evaluate parameter values for a Forecaster object using time series backtesting.
@@ -1036,8 +1046,10 @@ def _evaluate_grid_hyperparameters(
         **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
+    results_output_path : str, default `None`
+        Path to save the results of the grid search as txt file.
 
     Returns
     -------
@@ -1112,7 +1124,18 @@ def _evaluate_grid_hyperparameters(
             for m, m_value in zip(metric, metrics_values):
                 m_name = m if isinstance(m, str) else m.__name__
                 metric_dict[m_name].append(m_value)
-
+        
+            if results_output_path is not None:
+                header = ['lags', 'paramns', *list(metric_dict.keys()), *params.keys()]
+                row = [lags_v, params, *metrics_values, *params.values()]
+                if not os.path.isfile(results_output_path):
+                    with open(results_output_path, 'w', newline='') as f:
+                        f.write(','.join(header) + '\n')
+                        f.write(','.join([str(r) for r in row]) + '\n')
+                else:
+                    with open(results_output_path, 'a', newline='') as f:
+                        f.write(','.join([str(r) for r in row]) + '\n')
+    
     results = pd.DataFrame({
                   'lags'  : lags_list,
                   'params': params_list,
