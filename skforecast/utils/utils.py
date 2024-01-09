@@ -1656,7 +1656,8 @@ def check_backtesting_input(
                        'ForecasterEquivalentDate']
     forecasters_multi = ['ForecasterAutoregMultiSeries', 
                          'ForecasterAutoregMultiSeriesCustom', 
-                         'ForecasterAutoregMultiVariate']
+                         'ForecasterAutoregMultiVariate',
+                         'ForecasterRnn']
     
     forecaster_name = type(forecaster).__name__
 
