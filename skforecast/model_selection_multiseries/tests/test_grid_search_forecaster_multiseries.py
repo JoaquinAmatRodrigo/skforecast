@@ -32,8 +32,9 @@ def test_output_grid_search_forecaster_multiseries_ForecasterAutoregMultiSeries_
     with mocked (mocked done in Skforecast v0.5.0)
     """
     forecaster = ForecasterAutoregMultiSeries(
-                     regressor = Ridge(random_state=123),
-                     lags      = 2 # Placeholder, the value will be overwritten
+                     regressor          = Ridge(random_state=123),
+                     lags               = 2, 
+                     transformer_series = None
                  )
 
     steps = 3
@@ -77,9 +78,10 @@ def test_output_grid_search_forecaster_multiseries_ForecasterAutoregMultiSeriesC
     with mocked (mocked done in Skforecast v0.5.0)
     """
     forecaster = ForecasterAutoregMultiSeriesCustom(
-                     regressor      = Ridge(random_state=123),
-                     fun_predictors = create_predictors,
-                     window_size    = 2
+                     regressor          = Ridge(random_state=123),
+                     fun_predictors     = create_predictors,
+                     window_size        = 2, 
+                     transformer_series = None
                  )
 
     steps = 3
@@ -121,10 +123,11 @@ def test_output_grid_search_forecaster_multiseries_ForecasterAutoregMultiVariate
     with mocked (mocked done in Skforecast v0.6.0)
     """
     forecaster = ForecasterAutoregMultiVariate(
-                     regressor = Ridge(random_state=123),
-                     level     = 'l1',
-                     lags      = 2,
-                     steps     = 3
+                     regressor          = Ridge(random_state=123),
+                     level              = 'l1',
+                     lags               = 2,
+                     steps              = 3, 
+                     transformer_series = None
                  )
 
     steps = 3

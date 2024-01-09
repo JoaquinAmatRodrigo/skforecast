@@ -25,11 +25,17 @@ def test_backtesting_forecaster_TypeError_when_forecaster_not_supported_types():
                     lags      = 2
                  )
 
+    forecaters_allowed = [
+        'ForecasterAutoreg', 
+        'ForecasterAutoregCustom', 
+        'ForecasterAutoregDirect',
+        'ForecasterEquivalentDate'
+    ]
+
     err_msg = re.escape(
-        ("`forecaster` must be of type `ForecasterAutoreg`, `ForecasterAutoregCustom` "
-         "or `ForecasterAutoregDirect`, for all other types of forecasters "
-         "use the functions available in the other `model_selection` modules.")
-        )
+        f"`forecaster` must be of type {forecaters_allowed}, for all other types of "
+        f" forecasters use the functions available in the other `model_selection` "
+        f"modules.")
     with pytest.raises(TypeError, match = err_msg):
         backtesting_forecaster(
             forecaster            = forecaster,

@@ -2,22 +2,76 @@
 
 All significant changes to this project are documented in this release file.
 
-## [0.11.0] - [Under development]
+## [0.12.0] - [In progress]
+
+The main changes in this release are:
+
++ Added `bayesian_search_forecaster_multiseries` function to `model_selection_multiseries` module. This function performs a Bayesian hyperparameter search for the `ForecasterAutoregMultiSeries`, `ForecasterAutoregMultiSeriesCustom`, and `ForecasterAutoregMultiVariate` using `optuna` as the search engine.
+
++ Added `select_features` function to the `model_selection` module to perform feature selection using scikit-learn selectors.
+
++ Changed the default value of the `transformer_series` argument to use a `StandardScaler()` in the Global Forecasters (`ForecasterAutoregMultiSeries`, `ForecasterAutoregMultiSeriesCustom` and `ForecasterAutoregMultiVariate`).
+
++ 
+
+**Added**
+
++ Added `bayesian_search_forecaster_multiseries` function to `model_selection_multiseries` module. This function performs a Bayesian hyperparameter search for the `ForecasterAutoregMultiSeries`, `ForecasterAutoregMultiSeriesCustom`, and `ForecasterAutoregMultiVariate` using `optuna` as the search engine.
+
++ Added `save_custom_functions` argument to the `save_forecaster` function in the `utils` module. If `True`, save custom functions used in the forecaster (`fun_predictors` and `weight_func`) as .py files. Custom functions must be available in the environment where the forecaster is loaded.
+
++ Added `select_features` function to the `model_selection` module to perform feature selection using scikit-learn selectors.
+
++ Added `sort_importance` argument to `get_feature_importances` method in all Forecasters. If `True`, sort the feature importances in descending order.
+
++ Added `initialize_lags_grid` function to `model_selection` module. This function initializes the lags to be used in the hyperparameter search functions in `model_selection` and `model_selection_multiseries`.
+
++ Added `_initialize_levels_model_selection_multiseries` function to `model_selection_multiseries` module. This function initializes the levels of the series to be used in the model selection functions.
+
++ Added `set_dark_theme` function to the `plot` module to set a dark theme for matplotlib plots.
+
+**Changed**
+
++ 
+
++ Changed the default value of the `transformer_series` argument to use a `StandardScaler()` in the Global Forecasters (`ForecasterAutoregMultiSeries`, `ForecasterAutoregMultiSeriesCustom` and `ForecasterAutoregMultiVariate`).
+
++ Refactor `utils.select_n_jobs_backtesting` to use the forecaster directly instead of `forecaster_name` and `regressor_name`.
+
++ Remove `_backtesting_forecaster_verbose` in model_selection in favor of `_create_backtesting_folds`, (deprecated since 0.8.0).
+
+**Fixed**
+
++ Small bug in `utils.select_n_jobs_backtesting`, rename `ForecasterAutoregMultiseries` to `ForecasterAutoregMultiSeries`.
+
+
+## [0.11.0] - [2023-11-16]
 
 The main changes in this release are:
 
 + New `predict_quantiles` method in all Autoreg Forecasters to calculate the specified quantiles for each step.
 
++ Create `ForecasterBaseline.ForecasterEquivalentDate`, a Forecaster to create simple model that serves as a basic reference for evaluating the performance of more complex models.
+
 **Added**
 
-+ Added `skforecast.datasets` module.
++ Added `skforecast.datasets` module. It contains functions to load data for our examples and user guides.
 
 + Added `predict_quantiles` method to all Autoreg Forecasters.
 
++ Added `SkforecastVersionWarning` to the `exception` module. This warning notify that the skforecast version installed in the environment differs from the version used to initialize the forecaster when using `load_forecaster`.
+
++ Create `ForecasterBaseline.ForecasterEquivalentDate`, a Forecaster to create simple model that serves as a basic reference for evaluating the performance of more complex models.
+
 **Changed**
 
++ Enhance the management of internal copying in skforecast to minimize the number of copies, thereby accelerating data processing.
 
 **Fixed**
+
++ Rename `self.skforcast_version` attribute to `self.skforecast_version` in all Forecasters.
+
++ Fixed a bug where the `create_train_X_y` method did not correctly align lags and exogenous variables when the index was not a Pandas index in all Forecasters.
 
 
 ## [0.10.1] - [2023-09-26]

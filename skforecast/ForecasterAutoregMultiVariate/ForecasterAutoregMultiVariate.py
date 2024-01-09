@@ -14,6 +14,7 @@ import pandas as pd
 import sklearn
 import sklearn.pipeline
 from sklearn.base import clone
+from sklearn.preprocessing import StandardScaler
 import inspect
 from copy import copy, deepcopy
 from itertools import chain
@@ -65,21 +66,19 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
     lags : int, list, numpy ndarray, range, dict
         Lags used as predictors. Index starts at 1, so lag 1 is equal to t-1.
 
-            - `int`: include lags from 1 to `lags` (included).
-            - `list`, `1d numpy ndarray` or `range`: include only lags present in 
-            `lags`, all elements must be int.
-            - `dict`: create different lags for each series. 
-            {'series_column_name': lags}.
-    transformer_series : transformer (preprocessor), dict, default `None`
+        - `int`: include lags from 1 to `lags` (included).
+        - `list`, `1d numpy ndarray` or `range`: include only lags present in 
+        `lags`, all elements must be int.
+        - `dict`: create different lags for each series. {'series_column_name': lags}.
+    transformer_series : transformer (preprocessor), dict, default `sklearn.preprocessing.StandardScaler`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API with methods: fit, transform, fit_transform and 
         inverse_transform. Transformation is applied to each `series` before training 
         the forecaster. ColumnTransformers are not allowed since they do not have 
         inverse_transform method.
 
-            - If single transformer: it is cloned and applied to all series. 
-            - If `dict` of transformers: a different transformer can be used for each 
-            series.
+        - If single transformer: it is cloned and applied to all series. 
+        - If `dict` of transformers: a different transformer can be used for each series.
     transformer_exog : transformer, default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API. The transformation is applied to `exog` before training the
@@ -91,7 +90,6 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         method. The resulting `sample_weight` cannot have negative values.
     fit_kwargs : dict, default `None`
         Additional arguments to be passed to the `fit` method of the regressor.
-        **New in version 0.8.0**
     n_jobs : int, 'auto', default `'auto'`
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
         set to the number of cores. If 'auto', `n_jobs` is set using the function
@@ -99,7 +97,6 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         **New in version 0.9.0**
     forecaster_id : str, int, default `None`
         Name used as an identifier of the forecaster.
-        **New in version 0.7.0**
 
     Attributes
     ----------
@@ -126,9 +123,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         the forecaster. ColumnTransformers are not allowed since they do not have 
         inverse_transform method.
 
-            - If single transformer: it is cloned and applied to all series. 
-            - If `dict` of transformers: a different transformer can be used for each 
-            series.
+        - If single transformer: it is cloned and applied to all series. 
+        - If `dict` of transformers: a different transformer can be used for each series.
     transformer_series_ : dict
         Dictionary with the transformer for each series. It is created cloning the 
         objects in `transformer_series` and is used internally to avoid overwriting.
@@ -173,7 +169,6 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         Names of columns of the matrix created internally for training.
     fit_kwargs : dict
         Additional arguments to be passed to the `fit` method of the regressor.
-        **New in version 0.8.0**
     in_sample_residuals : dict
         Residuals of the models when predicting training data. Only stored up to
         1000 values per model in the form `{step: residuals}`. If `transformer_series` 
@@ -189,7 +184,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         Date of creation.
     fit_date : str
         Date of last fit.
-    skforcast_version : str
+    skforecast_version : str
         Version of skforecast library used to create the forecaster.
     python_version : str
         Version of python used to create the forecaster.
@@ -214,7 +209,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         level: str,
         steps: int,
         lags: Union[int, np.ndarray, list, dict],
-        transformer_series: Optional[Union[object, dict]]=None,
+        transformer_series: Optional[Union[object, dict]]=StandardScaler(),
         transformer_exog: Optional[object]=None,
         weight_func: Optional[Callable]=None,
         fit_kwargs: Optional[dict]=None,
@@ -245,7 +240,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         self.fitted                  = False
         self.creation_date           = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
         self.fit_date                = None
-        self.skforcast_version       = skforecast.__version__
+        self.skforecast_version      = skforecast.__version__
         self.python_version          = sys.version.split(" ")[0]
         self.forecaster_id           = forecaster_id
 
@@ -354,7 +349,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             f"fit_kwargs: {self.fit_kwargs} \n"
             f"Creation date: {self.creation_date} \n"
             f"Last fit date: {self.fit_date} \n"
-            f"Skforecast version: {self.skforcast_version} \n"
+            f"Skforecast version: {self.skforecast_version} \n"
             f"Python version: {self.python_version} \n"
             f"Forecaster id: {self.forecaster_id} \n"
         )
@@ -527,7 +522,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             self.exog_dtypes = get_exog_dtypes(exog=exog)
 
             _, exog_index = preprocess_exog(exog=exog, return_values=False)
-            if not (exog_index[:len(series.index)] == series.index).all():
+            if not (exog.index[:len(series)] == series.index).all():
                 raise ValueError(
                     ("Different index for `series` and `exog`. They must be equal "
                      "to ensure the correct alignment of values.") 
@@ -573,6 +568,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                                 exog  = exog,
                                 steps = self.steps
                             ).iloc[-X_train.shape[0]:, :]
+            exog_to_train.index = exog_index[-X_train.shape[0]:]
             X_train = pd.concat((X_train, exog_to_train), axis=1)
         
         self.X_train_col_names = X_train.columns.to_list()
@@ -827,11 +823,11 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             Parallel(n_jobs=self.n_jobs)
             (delayed(fit_forecaster)
             (
-                regressor=copy(self.regressor),
-                X_train=X_train,
-                y_train=y_train,
-                step=step,
-                store_in_sample_residuals=store_in_sample_residuals
+                regressor                 = copy(self.regressor),
+                X_train                   = X_train,
+                y_train                   = y_train,
+                step                      = step,
+                store_in_sample_residuals = store_in_sample_residuals
             )
             for step in range(1, self.steps + 1))
         )
@@ -874,11 +870,11 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             Predict n steps. The value of `steps` must be less than or equal to the 
             value of steps defined when initializing the forecaster. Starts at 1.
         
-                - If `int`: Only steps within the range of 1 to int are predicted.
-                - If `list`: List of ints. Only the steps contained in the list 
-                are predicted.
-                - If `None`: As many steps are predicted as were defined at 
-                initialization.
+            - If `int`: Only steps within the range of 1 to int are predicted.
+            - If `list`: List of ints. Only the steps contained in the list 
+            are predicted.
+            - If `None`: As many steps are predicted as were defined at 
+            initialization.
         last_window : pandas DataFrame, default `None`
             Series values used to create the predictors (lags) needed in the 
             first iteration of the prediction (t + 1).
@@ -912,9 +908,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                 )
 
         if last_window is None:
-            last_window = self.last_window.copy()
-        else:
-            last_window = last_window.copy()
+            last_window = self.last_window
         
         check_predict_input(
             forecaster_name  = type(self).__name__,
@@ -935,6 +929,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             levels           = None,
             series_col_names = self.series_col_names
         )
+
+        last_window = last_window.iloc[-self.window_size:, ].copy()
         
         if exog is not None:
             if isinstance(exog, pd.DataFrame):
@@ -1039,11 +1035,11 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             Predict n steps. The value of `steps` must be less than or equal to the 
             value of steps defined when initializing the forecaster. Starts at 1.
         
-                - If `int`: Only steps within the range of 1 to int are predicted.
-                - If `list`: List of ints. Only the steps contained in the list 
-                are predicted.
-                - If `None`: As many steps are predicted as were defined at 
-                initialization.
+            - If `int`: Only steps within the range of 1 to int are predicted.
+            - If `list`: List of ints. Only the steps contained in the list 
+            are predicted.
+            - If `None`: As many steps are predicted as were defined at 
+            initialization.
         last_window : pandas DataFrame, default `None`
             Series values used to create the predictors (lags) needed in the 
             first iteration of the prediction (t + 1).
@@ -1080,52 +1076,54 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
 
         """
 
-        if isinstance(steps, int):
-            steps = list(np.arange(steps) + 1)
-        elif steps is None:
-            steps = list(np.arange(self.steps) + 1)
-        elif isinstance(steps, list):
-            steps = list(np.array(steps))
+        if self.fitted:
+            if isinstance(steps, int):
+                steps = list(np.arange(steps) + 1)
+            elif steps is None:
+                steps = list(np.arange(self.steps) + 1)
+            elif isinstance(steps, list):
+                steps = list(np.array(steps))
 
-        if in_sample_residuals:
-            if not set(steps).issubset(set(self.in_sample_residuals.keys())):
-                raise ValueError(
-                    (f"Not `forecaster.in_sample_residuals` for steps: "
-                     f"{set(steps) - set(self.in_sample_residuals.keys())}.")
-                )
-            residuals = self.in_sample_residuals
-        else:
-            if self.out_sample_residuals is None:
-                raise ValueError(
-                    ("`forecaster.out_sample_residuals` is `None`. Use "
-                     "`in_sample_residuals=True` or method `set_out_sample_residuals()` "
-                     "before `predict_interval()`, `predict_bootstrapping()` or "
-                     "`predict_dist()`.")
-                )
-            else:
-                if not set(steps).issubset(set(self.out_sample_residuals.keys())):
+            if in_sample_residuals:
+                if not set(steps).issubset(set(self.in_sample_residuals.keys())):
                     raise ValueError(
-                        (f"Not `forecaster.out_sample_residuals` for steps: "
-                         f"{set(steps) - set(self.out_sample_residuals.keys())}. "
-                         f"Use method `set_out_sample_residuals()`.")
+                        (f"Not `forecaster.in_sample_residuals` for steps: "
+                         f"{set(steps) - set(self.in_sample_residuals.keys())}.")
                     )
-            residuals = self.out_sample_residuals
-        
-        check_residuals = (
-            'forecaster.in_sample_residuals' if in_sample_residuals
-            else 'forecaster.out_sample_residuals'
-        )
-        for step in steps:
-            if residuals[step] is None:
-                raise ValueError(
-                    (f"forecaster residuals for step {step} are `None`. "
-                     f"Check {check_residuals}.")
-                )
-            elif (residuals[step] == None).any():
-                raise ValueError(
-                    (f"forecaster residuals for step {step} contains `None` values. "
-                     f"Check {check_residuals}.")
-                )
+                residuals = self.in_sample_residuals
+            else:
+                if self.out_sample_residuals is None:
+                    raise ValueError(
+                        ("`forecaster.out_sample_residuals` is `None`. Use "
+                         "`in_sample_residuals=True` or method `set_out_sample_residuals()` "
+                         "before `predict_interval()`, `predict_bootstrapping()`, "
+                         "`predict_quantiles()` or `predict_dist()`.")
+                    )
+                else:
+                    if not set(steps).issubset(set(self.out_sample_residuals.keys())):
+                        raise ValueError(
+                            (f"Not `forecaster.out_sample_residuals` for steps: "
+                             f"{set(steps) - set(self.out_sample_residuals.keys())}. "
+                             f"Use method `set_out_sample_residuals()`.")
+                        )
+                residuals = self.out_sample_residuals
+            
+            check_residuals = (
+                'forecaster.in_sample_residuals' if in_sample_residuals
+                else 'forecaster.out_sample_residuals'
+            )
+            for step in steps:
+                if residuals[step] is None:
+                    raise ValueError(
+                        (f"forecaster residuals for step {step} are `None`. "
+                         f"Check {check_residuals}.")
+                    )
+                elif (any(element is None for element in residuals[step]) or
+                      np.any(np.isnan(residuals[step]))):
+                    raise ValueError(
+                        (f"forecaster residuals for step {step} contains `None` "
+                         f"or `NaNs` values. Check {check_residuals}.")
+                    )
 
         predictions = self.predict(
                           steps       = steps,
@@ -1185,11 +1183,11 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             Predict n steps. The value of `steps` must be less than or equal to the 
             value of steps defined when initializing the forecaster. Starts at 1.
         
-                - If `int`: Only steps within the range of 1 to int are predicted.
-                - If `list`: List of ints. Only the steps contained in the list 
-                are predicted.
-                - If `None`: As many steps are predicted as were defined at 
-                initialization.
+            - If `int`: Only steps within the range of 1 to int are predicted.
+            - If `list`: List of ints. Only the steps contained in the list 
+            are predicted.
+            - If `None`: As many steps are predicted as were defined at 
+            initialization.
         last_window : pandas DataFrame, default `None`
             Series values used to create the predictors (lags) needed in the 
             first iteration of the prediction (t + 1).
@@ -1221,9 +1219,9 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         predictions : pandas DataFrame
             Values predicted by the forecaster and their estimated interval.
 
-                - pred: predictions.
-                - lower_bound: lower bound of the interval.
-                - upper_bound: upper bound of the interval.
+            - pred: predictions.
+            - lower_bound: lower bound of the interval.
+            - upper_bound: upper bound of the interval.
 
         Notes
         -----
@@ -1279,11 +1277,11 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             Predict n steps. The value of `steps` must be less than or equal to the 
             value of steps defined when initializing the forecaster. Starts at 1.
         
-                - If `int`: Only steps within the range of 1 to int are predicted.
-                - If `list`: List of ints. Only the steps contained in the list 
-                are predicted.
-                - If `None`: As many steps are predicted as were defined at 
-                initialization.
+            - If `int`: Only steps within the range of 1 to int are predicted.
+            - If `list`: List of ints. Only the steps contained in the list 
+            are predicted.
+            - If `None`: As many steps are predicted as were defined at 
+            initialization.
         last_window : pandas DataFrame, default `None`
             Series values used to create the predictors (lags) needed in the 
             first iteration of the prediction (t + 1).
@@ -1336,6 +1334,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                            )
 
         predictions = boot_predictions.quantile(q=quantiles, axis=1).transpose()
+        predictions.columns = [f'q_{q}' for q in quantiles]
 
         return predictions
     
@@ -1364,11 +1363,11 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             Predict n steps. The value of `steps` must be less than or equal to the 
             value of steps defined when initializing the forecaster. Starts at 1.
         
-                - If `int`: Only steps within the range of 1 to int are predicted.
-                - If `list`: List of ints. Only the steps contained in the list 
-                are predicted.
-                - If `None`: As many steps are predicted as were defined at 
-                initialization.
+            - If `int`: Only steps within the range of 1 to int are predicted.
+            - If `list`: List of ints. Only the steps contained in the list 
+            are predicted.
+            - If `None`: As many steps are predicted as were defined at 
+            initialization.
         last_window : pandas DataFrame, default `None`
             Series values used to create the predictors (lags) needed in the 
             first iteration of the prediction (t + 1).
@@ -1484,11 +1483,11 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         lags : int, list, numpy ndarray, range, dict
             Lags used as predictors. Index starts at 1, so lag 1 is equal to t-1.
 
-                - `int`: include lags from 1 to `lags` (included).
-                - `list`, `1d numpy ndarray` or `range`: include only lags present in 
-                `lags`, all elements must be int.
-                - `dict`: create different lags for each series. 
-                {'series_column_name': lags}.
+            - `int`: include lags from 1 to `lags` (included).
+            - `list`, `1d numpy ndarray` or `range`: include only lags present in 
+            `lags`, all elements must be int.
+            - `dict`: create different lags for each series. 
+            {'series_column_name': lags}.
 
         Returns
         -------
@@ -1624,7 +1623,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
     
     def get_feature_importances(
         self,
-        step: int
+        step: int,
+        sort_importance: bool=True
     ) -> pd.DataFrame:
         """
         Return feature importance of the model stored in the forecaster for a
@@ -1639,6 +1639,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         step : int
             Model from which retrieve information (a separate model is created 
             for each forecast time step). First step is 1.
+        sort_importance: bool, default `True`
+            If `True`, sorts the feature importances in descending order.
 
         Returns
         -------
@@ -1649,7 +1651,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
 
         if not isinstance(step, int):
             raise TypeError(
-                f'`step` must be an integer. Got {type(step)}.'
+                f"`step` must be an integer. Got {type(step)}."
             )
 
         if not self.fitted:
@@ -1673,8 +1675,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         idx_columns_lags = np.arange(len_columns_lags)
         if self.included_exog:
             idx_columns_exog = np.flatnonzero(
-                                [name.endswith(f"step_{step}")
-                                 for name in self.X_train_col_names]
+                                   [name.endswith(f"step_{step}")
+                                    for name in self.X_train_col_names]
                                )
         else:
             idx_columns_exog = np.array([], dtype=int)
@@ -1701,5 +1703,9 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                                       'feature': feature_names,
                                       'importance': feature_importances
                                   })
+            if sort_importance:
+                feature_importances = feature_importances.sort_values(
+                                          by='importance', ascending=False
+                                      )
 
         return feature_importances

@@ -1,5 +1,5 @@
 ################################################################################
-#                             skforecast.utils                                 #
+#                               skforecast.utils                               #
 #                                                                              #
 # This work by skforecast team is licensed under the BSD 3-Clause License.     #
 ################################################################################
@@ -12,17 +12,18 @@ import joblib
 import numpy as np
 import pandas as pd
 import sklearn
+import sklearn.pipeline
 import sklearn.linear_model
 from sklearn.compose import ColumnTransformer
 from sklearn.exceptions import NotFittedError
-from sklearn.base import BaseEstimator
-from sklearn.base import TransformerMixin
 import inspect
 from copy import deepcopy
 
+import skforecast
 from ..exceptions import MissingValuesExogWarning
 from ..exceptions import DataTypeWarning
 from ..exceptions import IgnoredArgumentWarning
+from ..exceptions import SkforecastVersionWarning
 
 optional_dependencies = {
     "sarimax": [
@@ -30,8 +31,8 @@ optional_dependencies = {
         'statsmodels>=0.12, <0.15'
     ],
     "plotting": [
-        'matplotlib>=3.3, <3.8', 
-        'seaborn>=0.11, <0.13', 
+        'matplotlib>=3.3, <3.9', 
+        'seaborn>=0.11, <0.14', 
         'statsmodels>=0.12, <0.15'
     ]
 }
@@ -131,7 +132,8 @@ def initialize_weights(
 
     if weight_func is not None:
 
-        if forecaster_name in ['ForecasterAutoregMultiSeries', 'ForecasterAutoregMultiSeriesCustom']:
+        if forecaster_name in ['ForecasterAutoregMultiSeries', 
+                               'ForecasterAutoregMultiSeriesCustom']:
             if not isinstance(weight_func, (Callable, dict)):
                 raise TypeError(
                     (f"Argument `weight_func` must be a Callable or a dict of "
@@ -173,6 +175,62 @@ def initialize_weights(
             series_weights = None
 
     return weight_func, source_code_weight_func, series_weights
+
+
+def initialize_lags_grid(
+    forecaster: object, 
+    lags_grid: Optional[Union[list, dict]]=None
+) -> Tuple[dict, str]:
+    """
+    Initialize lags grid and lags label for model selection. 
+
+    Parameters
+    ----------
+    forecaster : Forecaster
+        Forecaster model. ForecasterAutoreg, ForecasterAutoregCustom, 
+        ForecasterAutoregDirect, ForecasterAutoregMultiSeries, 
+        ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate.
+    lags_grid : list, dict, default `None`
+        Lists of lags to try, containing int, lists, numpy ndarray, or range 
+        objects. If `dict`, the keys are used as labels in the `results` 
+        DataFrame, and the values are used as the lists of lags to try. Ignored 
+        if the forecaster is an instance of `ForecasterAutoregCustom` or 
+        `ForecasterAutoregMultiSeriesCustom`.
+
+    Returns
+    -------
+    lags_grid : dict
+        Dictionary with lags configuration for each iteration.
+    lags_label : str
+        Label for lags representation in the results object.
+
+    """
+
+    if not isinstance(lags_grid, (list, dict, type(None))):
+        raise TypeError(
+            (f"`lags_grid` argument must be a list, dict or None. "
+             f"Got {type(lags_grid)}.")
+        )
+
+    if type(forecaster).__name__ in ['ForecasterAutoregCustom', 
+                                     'ForecasterAutoregMultiSeriesCustom']:
+        if lags_grid is not None:
+            warnings.warn(
+                (f"`lags_grid` ignored if forecaster is an instance of "
+                 f"`{type(forecaster).__name__}`."),
+                IgnoredArgumentWarning
+            )
+        lags_grid = ['custom predictors']
+
+    lags_label = 'values'
+    if isinstance(lags_grid, list):
+        lags_grid = {f'{lags}': lags for lags in lags_grid}
+    elif lags_grid is None:
+        lags_grid = {f'{list(forecaster.lags)}': list(forecaster.lags)}
+    else:
+        lags_label = 'keys'
+
+    return lags_grid, lags_label
 
 
 def check_select_fit_kwargs(
@@ -648,7 +706,7 @@ def check_predict_input(
             ("`last_window` has missing values.")
         )
     _, last_window_index = preprocess_last_window(
-                               last_window  = last_window.iloc[:0],
+                               last_window   = last_window.iloc[:0],
                                return_values = False
                            ) 
     if not isinstance(last_window_index, index_type):
@@ -834,7 +892,7 @@ def preprocess_y(
                       step  = 1
                   )
 
-    y_values = y.to_numpy() if return_values else None
+    y_values = y.to_numpy(copy=True) if return_values else None
 
     return y_values, y_index
 
@@ -896,7 +954,7 @@ def preprocess_last_window(
                                 step  = 1
                             )
 
-    last_window_values = last_window.to_numpy() if return_values else None
+    last_window_values = last_window.to_numpy(copy=True) if return_values else None
 
     return last_window_values, last_window_index
 
@@ -959,7 +1017,7 @@ def preprocess_exog(
                          step  = 1
                      )
 
-    exog_values = exog.to_numpy() if return_values else None
+    exog_values = exog.to_numpy(copy=True) if return_values else None
 
     return exog_values, exog_index
     
@@ -1096,7 +1154,7 @@ def exog_to_direct_numpy(
     if len(exog_transformed) > 1:
         exog_transformed = np.concatenate(exog_transformed, axis=1)
     else:
-        exog_transformed = exog_column_transformed
+        exog_transformed = exog_column_transformed.copy()
     
     return exog_transformed
 
@@ -1298,20 +1356,26 @@ def transform_dataframe(
 
 
 def save_forecaster(
-    forecaster, 
-    file_name: str, 
+    forecaster: object, 
+    file_name: str,
+    save_custom_functions: bool=True, 
     verbose: bool=True
 ) -> None:
     """
-    Save forecaster model using joblib.
+    Save forecaster model using joblib. If custom functions are used to create
+    predictors or weights, they are saved as .py files.
 
     Parameters
     ----------
-    forecaster: forecaster
+    forecaster : Forecaster
         Forecaster created with skforecast library.
-    file_name: str
+    file_name : str
         File name given to the object.
-    verbose: bool, default `True`
+    save_custom_functions : bool, default `True`
+        If True, save custom functions used in the forecaster (fun_predictors and
+        weight_func) as .py files. Custom functions need to be available in the
+        environment where the forecaster is going to be loaded.
+    verbose : bool, default `True`
         Print summary about the forecaster saved.
 
     Returns
@@ -1320,7 +1384,34 @@ def save_forecaster(
 
     """
 
+    # Save forecaster
     joblib.dump(forecaster, filename=file_name)
+
+    if save_custom_functions:
+        # Save custom functions to create predictors
+        if hasattr(forecaster, 'fun_predictors') and forecaster.fun_predictors is not None:
+            file_name = forecaster.fun_predictors.__name__ + '.py'
+            with open(file_name, 'w') as file:
+                file.write(inspect.getsource(forecaster.fun_predictors))
+
+        # Save custom functions to create weights
+        if hasattr(forecaster, 'weight_func') and forecaster.weight_func is not None:
+            if isinstance(forecaster.weight_func, dict):
+                for fun in set(forecaster.weight_func.values()):
+                    file_name = fun.__name__ + '.py'
+                    with open(file_name, 'w') as file:
+                        file.write(inspect.getsource(fun))
+            else:
+                file_name = forecaster.weight_func.__name__ + '.py'
+                with open(file_name, 'w') as file:
+                    file.write(inspect.getsource(forecaster.weight_func))
+    else:
+        if ((hasattr(forecaster, 'fun_predictors') and forecaster.fun_predictors is not None)
+          or (hasattr(forecaster, 'weight_func') and forecaster.weight_func is not None)):
+            warnings.warn(
+                ("Custom functions used to create predictors or weights are not saved. "
+                 "To save them, set `save_custom_functions` to `True`.")
+            )
 
     if verbose:
         forecaster.summary()
@@ -1331,7 +1422,9 @@ def load_forecaster(
     verbose: bool=True
 ) -> object:
     """
-    Load forecaster model using joblib.
+    Load forecaster model using joblib. If the forecaster was saved with custom
+    functions to create predictors or weights, these functions must be available
+    in the environment where the forecaster is going to be loaded.
 
     Parameters
     ----------
@@ -1342,12 +1435,25 @@ def load_forecaster(
 
     Returns
     -------
-    forecaster: forecaster
+    forecaster: Forecaster
         Forecaster created with skforecast library.
     
     """
 
     forecaster = joblib.load(filename=file_name)
+
+    skforecast_v = skforecast.__version__
+    forecaster_v = forecaster.skforecast_version
+
+    if forecaster_v != skforecast_v:
+        warnings.warn(
+            (f"The skforecast version installed in the environment differs "
+             f"from the version used to create the forecaster.\n"
+             f"    Installed Version  : {skforecast_v}\n"
+             f"    Forecaster Version : {forecaster_v}\n"
+             f"This may create incompatibilities when using the library."),
+             SkforecastVersionWarning
+        )
 
     if verbose:
         forecaster.summary()
@@ -1500,7 +1606,7 @@ def check_backtesting_input(
 
     Parameters
     ----------
-    forecaster : object
+    forecaster : Forecaster
         Forecaster model.
     steps : int, list
         Number of future steps predicted.
@@ -1541,10 +1647,10 @@ def check_backtesting_input(
         error to create prediction intervals.  If `False`, out_sample_residuals 
         are used if they are already stored inside the forecaster.
     n_jobs : int, 'auto', default `'auto'`
-            The number of jobs to run in parallel. If `-1`, then the number of jobs is 
-            set to the number of cores. If 'auto', `n_jobs` is set using the fuction
-            skforecast.utils.select_n_jobs_fit_forecaster.
-            **New in version 0.9.0**
+        The number of jobs to run in parallel. If `-1`, then the number of jobs is 
+        set to the number of cores. If 'auto', `n_jobs` is set using the fuction
+        skforecast.utils.select_n_jobs_fit_forecaster.
+        **New in version 0.9.0**
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
         for backtesting.
@@ -1558,19 +1664,22 @@ def check_backtesting_input(
     """
     
     forecasters_uni = ['ForecasterAutoreg', 'ForecasterAutoregCustom', 
-                       'ForecasterAutoregDirect', 'ForecasterSarimax']
+                       'ForecasterAutoregDirect', 'ForecasterSarimax',
+                       'ForecasterEquivalentDate']
     forecasters_multi = ['ForecasterAutoregMultiSeries', 
                          'ForecasterAutoregMultiSeriesCustom', 
                          'ForecasterAutoregMultiVariate',
                          'ForecasterRnn']
+    
+    forecaster_name = type(forecaster).__name__
 
-    if type(forecaster).__name__ in forecasters_uni:
+    if forecaster_name in forecasters_uni:
         if not isinstance(y, pd.Series):
             raise TypeError("`y` must be a pandas Series.")
         data_name = 'y'
         data_length = len(y)
         
-    if type(forecaster).__name__ in forecasters_multi:
+    if forecaster_name in forecasters_multi:
         if not isinstance(series, pd.DataFrame):
             raise TypeError("`series` must be a pandas DataFrame.")
         data_name = 'series'
@@ -1589,8 +1698,12 @@ def check_backtesting_input(
             (f"`metric` must be a string, a callable function, or a list containing "
              f"multiple strings and/or callables. Got {type(metric)}.")
         )
-
-    if initial_train_size is not None:
+    
+    if forecaster_name == "ForecasterEquivalentDate" and isinstance(
+        forecaster.offset, pd.tseries.offsets.DateOffset
+    ):
+        pass
+    elif initial_train_size is not None:
         if not isinstance(initial_train_size, (int, np.integer)):
             raise TypeError(
                 (f"If used, `initial_train_size` must be an integer greater than the "
@@ -1622,11 +1735,11 @@ def check_backtesting_input(
                          f"all series reach the first non-null value.")
                     )
     else:
-        if type(forecaster).__name__ == 'ForecasterSarimax':
+        if forecaster_name == 'ForecasterSarimax':
             raise ValueError(
                 (f"`initial_train_size` must be an integer smaller than the "
                  f"length of `{data_name}` ({data_length}).")
-            )    
+            )
         else:
             if not forecaster.fitted:
                 raise NotFittedError(
@@ -1672,8 +1785,7 @@ def check_backtesting_input(
 
 
 def select_n_jobs_backtesting(
-    forecaster_name: str,
-    regressor_name: str,
+    forecaster: object,
     refit: Union[bool, int]
 ) -> int:
     """
@@ -1684,26 +1796,29 @@ def select_n_jobs_backtesting(
 
     - If `refit` is an integer, then n_jobs=1. This is because parallelization doesn't 
     work with intermittent refit.
-    - If forecaster_name is 'ForecasterAutoreg' or 'ForecasterAutoregCustom' and
-    regressor_name is a linear regressor, then n_jobs=1.
-    - If forecaster_name is 'ForecasterAutoreg' or 'ForecasterAutoregCustom',
-    regressor_name is not a linear regressor and refit=`True`, then
+    - If forecaster is 'ForecasterAutoreg' or 'ForecasterAutoregCustom' and
+    regressor is a linear regressor, then n_jobs=1.
+    - If forecaster is 'ForecasterAutoreg' or 'ForecasterAutoregCustom',
+    regressor is not a linear regressor and refit=`True`, then
     n_jobs=cpu_count().
-    - If forecaster_name is 'ForecasterAutoreg' or 'ForecasterAutoregCustom',
-    regressor_name is not a linear regressor and refit=`False`, then
+    - If forecaster is 'ForecasterAutoreg' or 'ForecasterAutoregCustom',
+    regressor is not a linear regressor and refit=`False`, then
     n_jobs=1.
-    - If forecaster_name is 'ForecasterAutoregDirect' or 'ForecasterAutoregMultiVariate'
+    - If forecaster is 'ForecasterAutoregDirect' or 'ForecasterAutoregMultiVariate'
     and refit=`True`, then n_jobs=cpu_count().
-    - If forecaster_name is 'ForecasterAutoregDirect' or 'ForecasterAutoregMultiVariate'
+    - If forecaster is 'ForecasterAutoregDirect' or 'ForecasterAutoregMultiVariate'
     and refit=`False`, then n_jobs=1.
-    - If forecaster_name is 'ForecasterAutoregMultiseries', then n_jobs=cpu_count().
+    - If forecaster is 'ForecasterAutoregMultiSeries' or 
+    'ForecasterAutoregMultiSeriesCustom', then n_jobs=cpu_count().
+    - If forecaster is 'ForecasterSarimax' or 'ForecasterEquivalentDate', 
+    then n_jobs=1.
 
     Parameters
     ----------
-    forecaster_name : str
-        The type of Forecaster.
-    regressor_name : str
-        The type of regressor.
+    forecaster : Forecaster
+        Forecaster model. ForecasterAutoreg, ForecasterAutoregCustom, 
+        ForecasterAutoregDirect, ForecasterAutoregMultiSeries, 
+        ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate.
     refit : bool, int
         If the forecaster is refitted during the backtesting process.
 
@@ -1713,6 +1828,13 @@ def select_n_jobs_backtesting(
         The number of jobs to run in parallel.
     
     """
+
+    forecaster_name = type(forecaster).__name__
+
+    if isinstance(forecaster.regressor, sklearn.pipeline.Pipeline):
+        regressor_name = type(forecaster.regressor[-1]).__name__
+    else:
+        regressor_name = type(forecaster.regressor).__name__
 
     linear_regressors = [
         regressor_name
@@ -1731,9 +1853,9 @@ def select_n_jobs_backtesting(
                 n_jobs = joblib.cpu_count() if refit else 1
         elif forecaster_name in ['ForecasterAutoregDirect', 'ForecasterAutoregMultiVariate']:
             n_jobs = 1
-        elif forecaster_name in ['ForecasterAutoregMultiseries', 'ForecasterAutoregMultiSeriesCustom']:
+        elif forecaster_name in ['ForecasterAutoregMultiSeries', 'ForecasterAutoregMultiSeriesCustom']:
             n_jobs = joblib.cpu_count()
-        elif forecaster_name in ['ForecasterSarimax']:
+        elif forecaster_name in ['ForecasterSarimax', 'ForecasterEquivalentDate']:
             n_jobs = 1
         else:
             n_jobs = 1
@@ -1774,7 +1896,8 @@ def select_n_jobs_fit_forecaster(
         if not regressor_name.startswith('_')
     ]
 
-    if forecaster_name in ['ForecasterAutoregDirect', 'ForecasterAutoregMultiVariate']:
+    if forecaster_name in ['ForecasterAutoregDirect', 
+                           'ForecasterAutoregMultiVariate']:
         if regressor_name in linear_regressors:
             n_jobs = 1
         else:

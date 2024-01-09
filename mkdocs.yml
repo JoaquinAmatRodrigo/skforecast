@@ -34,6 +34,7 @@ nav:
       - Independent multi-time series forecasting: user_guides/independent-multi-time-series-forecasting.ipynb
       - Dependent multivariate series forecasting: user_guides/dependent-multi-series-multivariate-forecasting.ipynb
       - ARIMA and SARIMAX forecasting: user_guides/forecasting-sarimax-arima.ipynb
+      - Foreasting baseline: user_guides/forecasting-baseline.ipynb
       - Exogenous variables: user_guides/exogenous-variables.ipynb
       - Custom predictors: user_guides/custom-predictors.ipynb
       - Weighted time series forecasting: user_guides/weighted-time-series-forecasting.ipynb
@@ -41,14 +42,16 @@ nav:
       - Hyperparameter tuning and lags selection: user_guides/hyperparameter-tuning-and-lags-selection.ipynb
       - Scikit-learn Transformers and Pipelines: user_guides/sklearn-transformers-and-pipeline.ipynb
       - Probabilistic forecasting: user_guides/probabilistic-forecasting.ipynb
-      - Feature importances: user_guides/feature-importances.ipynb
       - Categorical features: user_guides/categorical-features.ipynb
+      - Calendars features: user_guides/calendar-features.ipynb
+      - Feature selection: user_guides/feature-selection.ipynb
       - Forecasting with XGBoost and LightGBM: user_guides/forecasting-xgboost-lightgbm.ipynb
       - Forecaster in production: user_guides/forecaster-in-production.ipynb
       - Save and load forecaster: user_guides/save-load-forecaster.ipynb
-      - Shap-values: user_guides/shap-values-skforecast.ipynb
+      - Explainability: user_guides/explainability.ipynb
       - Skforecast in GPU: user_guides/skforecast-in-GPU.ipynb
       - Plot forecaster residuals: user_guides/plot-forecaster-residuals.ipynb
+      - Datasets: user_guides/datasets.ipynb
 
   - Examples and tutorials:
       - Examples and tutorials: examples/examples.md
@@ -62,12 +65,14 @@ nav:
       - ForecasterMultiVariate: api/ForecasterMultiVariate.md
       - ForecasterSarimax: api/ForecasterSarimax.md
       - Sarimax: api/Sarimax.md
+      - ForecasterBaseline: api/ForecasterBaseline.md
       - model_selection: api/model_selection.md
       - model_selection_multiseries: api/model_selection_multiseries.md
       - model_selection_sarimax: api/model_selection_sarimax.md
       - preprocessing: api/preprocessing.md
       - plot: api/plot.md
       - utils: api/utils.md
+      - datasets: api/datasets.md
       - exceptions: api/exceptions.md
 
   - FAQ and Tips:
@@ -76,6 +81,9 @@ nav:
       - Avoid negative predictions when forecasting: faq/non-negative-predictions.ipynb
       - Forecasting time series with missing values: faq/forecasting-time-series-with-missing-values.ipynb
       - Cyclical features in time series: faq/cyclical-features-time-series.ipynb
+      - Stacking (ensemble) machine learning models: faq/stacking-ensemble-models-forecasting.ipynb
+      - Forecasting with delayed historical data: faq/forecasting-with-delayed-historical-data.ipynb
+      - Time series aggregation: faq/time-series-aggregation.ipynb
       - Parallelization in skforecast: faq/parallelization-skforecast.ipynb
       - Profiling skforecast: faq/profiling-skforecast.ipynb
 
@@ -102,6 +110,7 @@ plugins:
       include_source: True
       execute: False
       allow_errors: False
+      include_requirejs: True
   - search
 
 theme:
@@ -156,8 +165,8 @@ markdown_extensions:
   - pymdownx.superfences
   - pymdownx.magiclink
   - pymdownx.emoji:
-      emoji_index: !!python/name:materialx.emoji.twemoji
-      emoji_generator: !!python/name:materialx.emoji.to_svg
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
   - toc:
       permalink: true
 extra:

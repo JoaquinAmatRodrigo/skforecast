@@ -2,9 +2,9 @@
 # ==============================================================================
 import re
 import pytest
-from pytest import approx
 import numpy as np
 import pandas as pd
+from sklearn.exceptions import NotFittedError
 from skforecast.ForecasterAutoregMultiVariate import ForecasterAutoregMultiVariate
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler
@@ -34,9 +34,9 @@ transformer_exog = ColumnTransformer(
 
 @pytest.mark.parametrize("steps", [[1, 2.0, 3], [1, 4.]], 
                          ids=lambda steps: f'steps: {steps}')
-def test_predict_exception_when_steps_list_contain_floats(steps):
+def test_predict_TypeError_when_steps_list_contain_floats(steps):
     """
-    Test predict exception when steps is a list with floats.
+    Test predict TypeError when steps is a list with floats.
     """
     forecaster = ForecasterAutoregMultiVariate(LinearRegression(), level='l1',
                                                lags=3, steps=3)
@@ -48,6 +48,21 @@ def test_predict_exception_when_steps_list_contain_floats(steps):
                 )
     with pytest.raises(TypeError, match = err_msg):
         forecaster.predict(steps=steps)
+
+
+def test_predict_NotFittedError_when_fitted_is_False():
+    """
+    Test NotFittedError is raised when fitted is False.
+    """
+    forecaster = ForecasterAutoregMultiVariate(LinearRegression(), level='l1',
+                                               lags=3, steps=3)
+
+    err_msg = re.escape(
+                ("This Forecaster instance is not fitted yet. Call `fit` with "
+                 "appropriate arguments before using predict.")
+              )
+    with pytest.raises(NotFittedError, match = err_msg):
+        forecaster.predict(steps=5)
 
 
 @pytest.mark.parametrize("steps", [3, [1, 2, 3], None], 

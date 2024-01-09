@@ -100,20 +100,70 @@ def test_bayesian_search_forecaster_ValueError_when_engine_not_optuna():
         )
 
 
+def test_results_output_bayesian_search_forecaster_optuna_engine_ForecasterAutoreg_with_mocked():
+    """
+    Test output of bayesian_search_forecaster in ForecasterAutoreg with 
+    mocked using optuna engine (mocked done in Skforecast v0.4.3).
+    """    
+    forecaster = ForecasterAutoreg(
+                     regressor = Ridge(random_state=123),
+                     lags      = 4
+                 )
+
+    def search_space(trial): # pragma: no cover
+        search_space  = {'alpha' : trial.suggest_float('alpha', 1e-2, 1.0)}
+        
+        return search_space
+
+    results = bayesian_search_forecaster(
+                  forecaster         = forecaster,
+                  y                  = y,
+                  search_space       = search_space,
+                  lags_grid          = None,
+                  steps              = 3,
+                  metric             = 'mean_absolute_error',
+                  refit              = True,
+                  initial_train_size = len(y[:-12]),
+                  fixed_train_size   = True,
+                  n_trials           = 10,
+                  random_state       = 123,
+                  return_best        = False,
+                  verbose            = False,
+                  engine             = 'optuna'
+              )[0]
+    
+    expected_results = pd.DataFrame({
+        'lags'  :[[1, 2, 3, 4]]*10,
+        'params':[{'alpha': 0.6995044937418831}, {'alpha': 0.29327794160087567},
+                  {'alpha': 0.2345829390285611}, {'alpha': 0.5558016213920624},
+                  {'alpha': 0.7222742800877074}, {'alpha': 0.42887539552321635},
+                  {'alpha': 0.9809565564007693}, {'alpha': 0.6879814411990146},
+                  {'alpha': 0.48612258246951734}, {'alpha': 0.398196343012209}],
+        'mean_absolute_error':np.array([0.2157946 , 0.21639339, 0.21647289, 0.21600778, 0.21576132,
+                                        0.21619734, 0.21539791, 0.21581151, 0.21611205, 0.216242651]),
+        'alpha' :np.array([0.69950449, 0.29327794, 0.23458294, 0.55580162, 0.72227428,
+                           0.4288754 , 0.98095656, 0.68798144, 0.48612258, 0.39819634])
+        },
+        index=pd.RangeIndex(start=0, stop=10, step=1)
+    ).sort_values(by='mean_absolute_error', ascending=True)
+
+    pd.testing.assert_frame_equal(results, expected_results)
+
+
 def test_results_output_bayesian_search_forecaster_optuna_engine_ForecasterAutoregCustom_with_mocked():
     """
     Test output of bayesian_search_forecaster in ForecasterAutoregCustom with 
     mocked using optuna engine (mocked done in Skforecast v0.4.3).
     """    
     forecaster = ForecasterAutoregCustom(
-                        regressor      = Ridge(random_state=123),
-                        fun_predictors = create_predictors,
-                        window_size    = 4
+                     regressor      = Ridge(random_state=123),
+                     fun_predictors = create_predictors,
+                     window_size    = 4
                  )
 
     def search_space(trial): # pragma: no cover
-        search_space  = {'alpha' : trial.suggest_float('alpha', 1e-2, 1.0)
-                        }
+        search_space  = {'alpha' : trial.suggest_float('alpha', 1e-2, 1.0)}
+
         return search_space
 
     results = bayesian_search_forecaster(
