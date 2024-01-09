@@ -60,14 +60,19 @@ def _initialize_levels_model_selection_multiseries(
     
     """
 
-    if type(forecaster).__name__ in ['ForecasterAutoregMultiSeries', 
-                                     'ForecasterAutoregMultiSeriesCustom']  \
-        and levels is not None and not isinstance(levels, (str, list)):
+    multi_series_forecasters_with_levels = [
+        'ForecasterAutoregMultiSeries', 
+        'ForecasterAutoregMultiSeriesCustom', 
+        'ForecasterRnn'
+    ]
+
+    if type(forecaster).__name__ in multi_series_forecasters_with_levels  \
+        and not isinstance(levels, (str, list, type(None))):
         raise TypeError(
-            ("`levels` must be a `list` of column names, a `str` of a column name "
-             "or `None` when using a `ForecasterAutoregMultiSeries` or "
-             "`ForecasterAutoregMultiSeriesCustom`. If the forecaster is of type "
-             "`ForecasterAutoregMultiVariate`, this argument is ignored.")
+            (f"`levels` must be a `list` of column names, a `str` of a column "
+             f"name or `None` when using a forecaster of type "
+             f"{multi_series_forecasters_with_levels}. If the forecaster is of "
+             f"type `ForecasterAutoregMultiVariate`, this argument is ignored.")
         )
 
     if type(forecaster).__name__ == 'ForecasterAutoregMultiVariate':
