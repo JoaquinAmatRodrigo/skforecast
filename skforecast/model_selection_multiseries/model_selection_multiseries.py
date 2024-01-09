@@ -10,6 +10,7 @@ import numpy as np
 import pandas as pd
 import warnings
 import logging
+import os
 from copy import deepcopy
 from joblib import Parallel, delayed, cpu_count
 from tqdm.auto import tqdm
@@ -25,8 +26,6 @@ from ..model_selection.model_selection import _create_backtesting_folds
 from ..utils import check_backtesting_input
 from ..utils import initialize_lags_grid
 from ..utils import select_n_jobs_backtesting
-
-optuna.logging.set_verbosity(optuna.logging.WARNING) # disable optuna logs
 
 logging.basicConfig(
     format = '%(name)-10s %(levelname)-5s %(message)s', 
@@ -189,7 +188,7 @@ def _backtesting_forecaster_multiseries(
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
         for backtesting.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
 
     Returns
@@ -560,7 +559,8 @@ def grid_search_forecaster_multiseries(
     return_best: bool=True,
     n_jobs: Optional[Union[int, str]]='auto',
     verbose: bool=True,
-    show_progress: bool=True
+    show_progress: bool=True,
+    results_output_path: Optional[str]=None
 ) -> pd.DataFrame:
     """
     Exhaustive search over specified parameter values for a Forecaster object.
@@ -621,8 +621,10 @@ def grid_search_forecaster_multiseries(
         **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
+    results_output_path : str, default `None`
+        Path to save the results of the grid search as .txt file.
 
     Returns
     -------
@@ -657,7 +659,8 @@ def grid_search_forecaster_multiseries(
                   n_jobs                = n_jobs,
                   return_best           = return_best,
                   verbose               = verbose,
-                  show_progress         = show_progress
+                  show_progress         = show_progress,
+                  results_output_path   = results_output_path
               )
 
     return results
@@ -682,7 +685,8 @@ def random_search_forecaster_multiseries(
     return_best: bool=True,
     n_jobs: Optional[Union[int, str]]='auto',
     verbose: bool=True,
-    show_progress: bool=True
+    show_progress: bool=True,
+    results_output_path: Optional[str]=None
 ) -> pd.DataFrame:
     """
     Random search over specified parameter values or distributions for a Forecaster 
@@ -748,8 +752,10 @@ def random_search_forecaster_multiseries(
         **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
+    results_output_path : str, default `None`
+        Path to save the results of the grid search as .txt file.
 
     Returns
     -------
@@ -785,7 +791,8 @@ def random_search_forecaster_multiseries(
                   return_best           = return_best,
                   n_jobs                = n_jobs,
                   verbose               = verbose,
-                  show_progress         = show_progress
+                  show_progress         = show_progress,
+                 results_output_path   = results_output_path
               )
 
     return results
@@ -808,7 +815,8 @@ def _evaluate_grid_hyperparameters_multiseries(
     return_best: bool=True,
     n_jobs: Optional[Union[int, str]]='auto',
     verbose: bool=True,
-    show_progress: bool=True
+    show_progress: bool=True,
+    results_output_path: Optional[str]=None
 ) -> pd.DataFrame:
     """
     Evaluate parameter values for a Forecaster object using multi-series backtesting.
@@ -863,6 +871,10 @@ def _evaluate_grid_hyperparameters_multiseries(
         Refit the `forecaster` using the best found parameters on the whole data.
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
+    show_progress : bool, default `True`
+        Whether to show a progress bar.
+    results_output_path : str, default `None`
+        Path to save the results of the grid search as .txt file.
 
     Returns
     -------
@@ -950,6 +962,17 @@ def _evaluate_grid_hyperparameters_multiseries(
                 m_name = m if isinstance(m, str) else m.__name__
                 metric_dict[m_name].append(metrics_levels[m_name].mean())
 
+            if results_output_path is not None:
+                header = ['levels', 'lags', 'paramns', *list(metric_dict.keys()), *params.keys()]
+                row = [levels, lags_v, params, *metrics_levels, *params.values()]
+                if not os.path.isfile(results_output_path):
+                    with open(results_output_path, 'w', newline='') as f:
+                        f.write(','.join(header) + '\n')
+                        f.write(','.join([str(r) for r in row]) + '\n')
+                else:
+                    with open(results_output_path, 'a', newline='') as f:
+                        f.write(','.join([str(r) for r in row]) + '\n')
+
     results = pd.DataFrame({
                   'levels': [levels]*len(lags_list),
                   'lags'  : lags_list,
@@ -1010,6 +1033,7 @@ def bayesian_search_forecaster_multiseries(
     n_jobs: Optional[Union[int, str]]='auto',
     verbose: bool=True,
     show_progress: bool=True,
+    results_output_path: Optional[str]=None,
     engine: str='optuna',
     kwargs_create_study: dict={},
     kwargs_study_optimize: dict={}
@@ -1078,8 +1102,10 @@ def bayesian_search_forecaster_multiseries(
         skforecast.utils.select_n_jobs_backtesting.
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
+    results_output_path : str, default `None`
+        Path to save the results of the grid search as .txt file.
     engine : str, default `'optuna'`
         Bayesian optimization runs through the optuna library.
     kwargs_create_study : dict, default `{'direction': 'minimize', 'sampler': TPESampler(seed=123)}`
@@ -1133,6 +1159,7 @@ def bayesian_search_forecaster_multiseries(
                                     n_jobs                = n_jobs,
                                     verbose               = verbose,
                                     show_progress         = show_progress,
+                                    results_output_path   = results_output_path,
                                     kwargs_create_study   = kwargs_create_study,
                                     kwargs_study_optimize = kwargs_study_optimize
                                 )
@@ -1160,6 +1187,7 @@ def _bayesian_search_optuna_multiseries(
     n_jobs: Optional[Union[int, str]]='auto',
     verbose: bool=True,
     show_progress: bool=True,
+    results_output_path: Optional[str]=None,
     kwargs_create_study: dict={},
     kwargs_study_optimize: dict={}
 ) -> Tuple[pd.DataFrame, object]:
@@ -1226,8 +1254,10 @@ def _bayesian_search_optuna_multiseries(
         skforecast.utils.select_n_jobs_backtesting.
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
+    results_output_path : str, default `None`
+        Path to save the results of the grid search as .txt file.
     kwargs_create_study : dict, default `{'direction': 'minimize', 'sampler': TPESampler(seed=123)}`
         Keyword arguments (key, value mappings) to pass to optuna.create_study.
     kwargs_study_optimize : dict, default `{}`
@@ -1248,6 +1278,19 @@ def _bayesian_search_optuna_multiseries(
 
     """
     
+    if results_output_path is not None:
+        # Redirect optuna logging to file
+        optuna.logging.disable_default_handler()
+        logger = logging.getLogger('optuna')
+        logger.setLevel(logging.INFO)
+        for handler in logger.handlers.copy():
+            if isinstance(handler, logging.StreamHandler):
+                logger.removeHandler(handler)
+        logger.addHandler(logging.FileHandler(results_output_path, mode="w"))
+
+    else:
+        optuna.logging.disable_default_handler()
+
     levels = _initialize_levels_model_selection_multiseries(
                  forecaster = forecaster,
                  series     = series,
@@ -1428,7 +1471,8 @@ def backtesting_forecaster_multivariate(
     in_sample_residuals: bool=True,
     n_jobs: Optional[Union[int, str]]='auto',
     verbose: bool=False,
-    show_progress: bool=True
+    show_progress: bool=True,
+    results_output_path: Optional[str]=None
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
     This function is an alias of backtesting_forecaster_multiseries.
@@ -1503,8 +1547,10 @@ def backtesting_forecaster_multivariate(
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
         for backtesting.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
+    results_output_path : str, default `None`
+        Path to save the results of the backtesting as .txt file.
 
     Returns
     -------
@@ -1538,7 +1584,8 @@ def backtesting_forecaster_multivariate(
         in_sample_residuals   = in_sample_residuals,
         n_jobs                = n_jobs,
         verbose               = verbose,
-        show_progress         = show_progress
+        show_progress         = show_progress,
+        results_output_path   = results_output_path
         
     )
 
@@ -1562,7 +1609,8 @@ def grid_search_forecaster_multivariate(
     return_best: bool=True,
     n_jobs: Optional[Union[int, str]]='auto',
     verbose: bool=True,
-    show_progress: bool=True
+    show_progress: bool=True,
+    results_output_path: Optional[str]=None
 ) -> pd.DataFrame:
     """
     This function is an alias of grid_search_forecaster_multiseries.
@@ -1625,8 +1673,10 @@ def grid_search_forecaster_multivariate(
         **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
+    results_output_path : str, default `None`
+        Path to save the results of the grid search as .txt file.
 
     Returns
     -------
@@ -1659,7 +1709,8 @@ def grid_search_forecaster_multivariate(
         return_best           = return_best,
         n_jobs                = n_jobs,
         verbose               = verbose,
-        show_progress         = show_progress
+        show_progress         = show_progress,
+        results_output_path   = results_output_path
     )
 
     return results
@@ -1684,7 +1735,8 @@ def random_search_forecaster_multivariate(
     return_best: bool=True,
     n_jobs: Optional[Union[int, str]]='auto',
     verbose: bool=True,
-    show_progress: bool=True
+    show_progress: bool=True,
+    results_output_path: Optional[str]=None
 ) -> pd.DataFrame:
     """
     This function is an alias of random_search_forecaster_multiseries.
@@ -1752,8 +1804,10 @@ def random_search_forecaster_multivariate(
         **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
+    results_output_path : str, default `None`
+        Path to save the results of the grid search as .txt file.
 
     Returns
     -------
@@ -1788,7 +1842,8 @@ def random_search_forecaster_multivariate(
         return_best           = return_best,
         n_jobs                = n_jobs,
         verbose               = verbose,
-        show_progress         = show_progress
+        show_progress         = show_progress,
+        results_output_path   = results_output_path
     ) 
 
     return results
@@ -1814,6 +1869,7 @@ def bayesian_search_forecaster_multivariate(
     n_jobs: Optional[Union[int, str]]='auto',
     verbose: bool=True,
     show_progress: bool=True,
+    results_output_path: Optional[str]=None,
     engine: str='optuna',
     kwargs_create_study: dict={},
     kwargs_study_optimize: dict={}
@@ -1885,8 +1941,10 @@ def bayesian_search_forecaster_multivariate(
         **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
+    results_output_path : str, default `None`
+        Path to save the results of the grid search as .txt file.
     engine : str, default `'optuna'`
         Bayesian optimization runs through the optuna library.
     kwargs_create_study : dict, default `{'direction': 'minimize', 'sampler': TPESampler(seed=123)}`
@@ -1929,6 +1987,7 @@ def bayesian_search_forecaster_multivariate(
                                     n_jobs                = n_jobs,
                                     verbose               = verbose,
                                     show_progress         = show_progress,
+                                    results_output_path   = results_output_path,
                                     engine                = engine,
                                     kwargs_create_study   = kwargs_create_study,
                                     kwargs_study_optimize = kwargs_study_optimize

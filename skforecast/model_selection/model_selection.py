@@ -31,8 +31,6 @@ from ..utils import check_backtesting_input
 from ..utils import initialize_lags_grid
 from ..utils import select_n_jobs_backtesting
 
-optuna.logging.set_verbosity(optuna.logging.WARNING) # disable optuna logs
-
 logging.basicConfig(
     format = '%(name)-10s %(levelname)-5s %(message)s', 
     level  = logging.INFO,
@@ -654,7 +652,7 @@ def backtesting_forecaster(
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
         for backtesting.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
 
     Returns
@@ -1436,13 +1434,19 @@ def _bayesian_search_optuna(
         The best optimization result returned as a FrozenTrial optuna object.
 
     """
-
+    
     if results_output_path is not None:
-        logger = logging.getLogger()
-        logger.setLevel(logging.INFO)  # Setup the root logger.
-        logger.addHandler(logging.FileHandler("results_output_path", mode="w"))
-        optuna.logging.enable_propagation()  # Propagate logs to the root logger.
-        optuna.logging.disable_default_handler()  # Stop showing logs in sys.stderr.
+        # Redirect optuna logging to file
+        optuna.logging.disable_default_handler()
+        logger = logging.getLogger('optuna')
+        logger.setLevel(logging.INFO)
+        for handler in logger.handlers.copy():
+            if isinstance(handler, logging.StreamHandler):
+                logger.removeHandler(handler)
+        logger.addHandler(logging.FileHandler(results_output_path, mode="w"))
+
+    else:
+        optuna.logging.disable_default_handler()
         
 
     lags_grid, lags_label = initialize_lags_grid(forecaster, lags_grid)
