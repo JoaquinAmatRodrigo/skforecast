@@ -26,50 +26,53 @@ def create_and_compile_model(
     series: pd.DataFrame,
     lags: Union[int, list],
     steps: Union[int, list],
-    levels: Union[str, int, list] = None,
-    recurrent_layer: str = "LSTM",
-    recurrent_units: Union[int, list] = 100,
-    dense_units: Union[list, int] = 64,
-    activation: str = "relu",
-    optimizer: object = Adam(learning_rate=0.01),
-    loss: object = MeanSquaredError(),
-    compile_kwars: dict = {},
-    backend: str = "tensorflow",
+    levels: Optional[Union[str, int, list]]=None,
+    recurrent_layer: str="LSTM",
+    recurrent_units: Union[int, list]=100,
+    dense_units: Union[int, list]=64,
+    activation: str="relu",
+    optimizer: object=Adam(learning_rate=0.01),
+    loss: object=MeanSquaredError(),
+    compile_kwars: dict={},
+    backend: str="tensorflow",
 ) -> tf.keras.models.Model:
     """
     Creates a neural network model for time series prediction with flexible recurrent layers.
 
     Parameters
     ----------
-    series : np.ndarray
+    series : numpy ndarray
         Input time series data represented as a NumPy array.
-    lags : int or list
-        Number of lagged time steps to consider in the input, or a list of specific lag indices.
-    steps : int or list
-        Number of steps to predict into the future, or a list of specific step indices.
-    levels : str, int, or list, optional
-        Number of output levels (features) to predict, or a list of specific level indices.
-        If None, defaults to the number of input series. Default is None.
-    backend : str, default 'tensorflow'
+    lags : int, list
+        Number of lagged time steps to consider in the input, or a list of 
+        specific lag indices.
+    steps : int, list
+        Number of steps to predict into the future, or a list of specific step 
+        indices.
+    levels : str, int, list, default `None`
+        Number of output levels (features) to predict, or a list of specific 
+        level indices. If None, defaults to the number of input series.
+    recurrent_layer : str, default `'LSTM'`
+        Type of recurrent layer to be used ('LSTM' or 'RNN').
+    recurrent_units : int, list, default `100`
+        Number of units in the recurrent layer(s). Can be an integer or a 
+        list of integers for multiple layers.
+    dense_units : int, list, default `64`
+        List of integers representing the number of units in each dense layer.
+    activation : str, default `'relu'`
+        Activation function for the recurrent and dense layers.
+    optimizer : object, default `Adam(learning_rate=0.01)`
+        Optimization algorithm and learning rate.
+    loss : object, default `MeanSquaredError()`
+        Loss function for model training.
+    backend : str, default `'tensorflow'`
         Deep learning backend to use: tensorflow, pytorch, or jax are supported.
-    recurrent_layer : str, optional
-        Type of recurrent layer to be used ('LSTM' or 'RNN'). Default is 'LSTM'.
-    recurrent_units : int or list, optional
-        Number of units in the recurrent layer(s). Can be an integer or a list of integers for multiple layers.
-        Default is 100.
-    dense_units : list, optional
-        List of integers representing the number of units in each dense layer. Default is [64].
-    activation : str, optional
-        Activation function for the recurrent and dense layers. Default is 'relu'.
-    optimizer : object, optional
-        Optimization algorithm and learning rate. Default is Adam(learning_rate=0.01).
-    loss : object, optional
-        Loss function for model training. Default is MeanSquaredError().
 
     Returns
     -------
     model : tf.keras.models.Model
         Compiled neural network model.
+    
     """
 
     err_msg = f"`series` must be a pandas DataFrame. Got {type(series)}."

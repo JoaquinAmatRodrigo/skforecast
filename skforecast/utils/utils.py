@@ -575,28 +575,19 @@ def check_predict_input(
         check_interval(interval=interval, alpha=alpha)
     
     if forecaster_name in ['ForecasterAutoregMultiSeries', 
-                           'ForecasterAutoregMultiSeriesCustom']:
-        if levels is not None and not isinstance(levels, (str, list)):
+                           'ForecasterAutoregMultiSeriesCustom',
+                           'ForecasterRnn']:
+        if not isinstance(levels, (type(None), str, list)):
             raise TypeError(
                 ("`levels` must be a `list` of column names, a `str` of a "
                  "column name or `None`.")
             )
-        if len(set(levels) - set(series_col_names)) != 0:
-            raise ValueError(
-                f"`levels` names must be included in the series used during fit "
-                f"({series_col_names}). Got {levels}."
-            )
-            
-    if forecaster_name in ['ForecasterRnn']:
-        if levels is not None and not isinstance(levels, (str, list)):
-            raise TypeError(
-                ("`levels` must be a `list` of column names, a `str` of a "
-                 "column name or `None`.")
-            )
-        if len(set(levels) - set(levels_forecaster)) != 0:
+        
+        levels_to_check = levels_forecaster if forecaster_name == 'ForecasterRnn' else series_col_names
+        if len(set(levels) - set(levels_to_check)) != 0:
             raise ValueError(
                 (f"`levels` names must be included in the series used during fit "
-                 f"({levels_forecaster}). Got {levels}.")
+                 f"({levels_to_check}). Got {levels}.")
             )
     
     if exog is None and included_exog:

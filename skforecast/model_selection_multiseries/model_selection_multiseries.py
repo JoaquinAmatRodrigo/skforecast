@@ -41,12 +41,12 @@ def _backtesting_forecaster_multiseries(
     allow_incomplete_fold: bool=True,
     levels: Optional[Union[str, list]]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-    refit: Optional[Union[bool, int]]=False,
+    refit: Union[bool, int]=False,
     interval: Optional[list]=None,
     n_boot: int=500,
     random_state: int=123,
     in_sample_residuals: bool=True,
-    n_jobs: Optional[Union[int, str]]='auto',
+    n_jobs: Union[int, str]='auto',
     verbose: bool=False,
     show_progress: bool=True
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
@@ -360,7 +360,7 @@ def backtesting_forecaster_multiseries(
 
     Parameters
     ----------
-    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate
+    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate, ForecasterRnn
         Forecaster model.
     series : pandas DataFrame
         Training time series.
@@ -457,7 +457,7 @@ def backtesting_forecaster_multiseries(
         raise TypeError(
             (f"`forecaster` must be of type {multi_series_forecasters}, "
              f"for all other types of forecasters use the functions available in "
-             f"the `model_selection` module. Got {type(forecaster).__name__}")
+             f"the `model_selection` module. Got {forecaster_name}")
         )
     
     check_backtesting_input(
@@ -480,13 +480,13 @@ def backtesting_forecaster_multiseries(
     )
 
     if forecaster_name in multi_series_forecasters_with_levels \
-    and levels is not None and not isinstance(levels, (str, list)):
-        raise TypeError((
-            f"`levels` must be a `list` of column names, a `str` of a column name or "
-            f"`None` when using a forecaster of type {multi_series_forecasters_with_levels}. "
-            f"If the forecaster is of type `ForecasterAutoregMultiVariate`, this argument "
-            f"is ignored."
-        ))
+    and not isinstance(levels, (str, list, type(None))):
+        raise TypeError(
+            (f"`levels` must be a `list` of column names, a `str` of a column name or "
+             f"`None` when using a forecaster of type {multi_series_forecasters_with_levels}. "
+             f"If the forecaster is of type `ForecasterAutoregMultiVariate`, this argument "
+             f"is ignored.")
+        )
 
     if forecaster_name == 'ForecasterAutoregMultiVariate' \
         and levels and levels != forecaster.level and levels != [forecaster.level]:
