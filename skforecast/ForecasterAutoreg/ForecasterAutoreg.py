@@ -187,41 +187,44 @@ class ForecasterAutoreg(ForecasterBase):
         forecaster_id: Optional[Union[str, int]]=None
     ) -> None:
         
-        self.regressor               = regressor
-        self.transformer_y           = transformer_y
-        self.transformer_exog        = transformer_exog
-        self.weight_func             = weight_func
-        self.differentiation         = differentiation
-        self.differentiator          = None
-        self.source_code_weight_func = None
-        self.last_window             = None
-        self.index_type              = None
-        self.index_freq              = None
-        self.training_range          = None
-        self.included_exog           = False
-        self.exog_type               = None
-        self.exog_dtypes             = None
-        self.exog_col_names          = None
-        self.X_train_col_names       = None
-        self.in_sample_residuals     = None
-        self.out_sample_residuals    = None
-        self.fitted                  = False
-        self.creation_date           = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
-        self.fit_date                = None
-        self.skforecast_version      = skforecast.__version__
-        self.python_version          = sys.version.split(" ")[0]
-        self.forecaster_id           = forecaster_id
+        self.regressor                    = regressor
+        self.transformer_y                = transformer_y
+        self.transformer_exog             = transformer_exog
+        self.weight_func                  = weight_func
+        self.differentiation              = differentiation
+        self.differentiator               = None
+        self.source_code_weight_func      = None
+        self.last_window                  = None
+        self.index_type                   = None
+        self.index_freq                   = None
+        self.training_range               = None
+        self.included_exog                = False
+        self.exog_type                    = None
+        self.exog_dtypes                  = None
+        self.exog_col_names               = None
+        self.X_train_col_names            = None
+        self.in_sample_residuals          = None
+        self.out_sample_residuals         = None
+        self.in_sample_residuals_by_bin   = None
+        self.out_sample_residuals_by_bin  = None
+        self.fitted                       = False
+        self.creation_date                = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
+        self.fit_date                     = None
+        self.skforecast_version           = skforecast.__version__
+        self.python_version               = sys.version.split(" ")[0]
+        self.forecaster_id                = forecaster_id
        
         self.lags = initialize_lags(type(self).__name__, lags)
         self.max_lag = max(self.lags)
         self.window_size = self.max_lag
 
         self.binner = KBinsDiscretizer(
-                        n_bins=10,
-                        encode='ordinal',
-                        strategy='uniform',
-                        subsample=10000
-                    )
+                            n_bins=10,
+                            encode='ordinal',
+                            strategy='uniform',
+                            subsample=10000
+                       )
+        self.binner_intervals = None
 
         if self.differentiation is not None:
             if not isinstance(differentiation, int) or differentiation < 1:
@@ -549,23 +552,51 @@ class ForecasterAutoreg(ForecasterBase):
         # This is done to save time during fit in functions such as backtesting()
         if store_in_sample_residuals:
 
-            residuals = (y_train - self.regressor.predict(X_train)).to_numpy()
+            in_sample_predictions = self.regressor.predict(X_train)
+            in_sample_predictions = pd.DataFrame(
+                                        data    = in_sample_predictions,
+                                        index   = X_train.index,
+                                        columns = ['pred']
+                                    )
+            residuals = (y_train - in_sample_predictions['pred']).to_frame('residuals')
+            residuals = pd.merge(
+                            residuals,
+                            in_sample_predictions,
+                            left_index=True,
+                            right_index=True
+                        )
 
-            if len(residuals) > 1000:
-                # Only up to 1000 residuals are stored
+            self.binner.fit(residuals[['pred']].to_numpy())
+            residuals['bin'] = self.binner.transform(
+                                    residuals[['pred']].to_numpy()
+                                ).astype(int)
+            self.in_sample_residuals_by_bin = (
+                residuals.groupby('bin')['residuals'].apply(np.array).to_dict()
+            )
+
+            for k, v in self.in_sample_residuals_by_bin.items():
                 rng = np.random.default_rng(seed=123)
-                residuals = rng.choice(
-                                a       = residuals, 
-                                size    = 1000, 
-                                replace = False
-                            )
-                                                    
-            self.in_sample_residuals = residuals
-            self.binner.fit(residuals.reshape(-1, 1))
-            bins = self.binner.transform(residuals.reshape(-1, 1)).ravel().
-            self.in_sample_residuals_by_bin = {
-                i : residuals[bins == i] for i in range(self.binner.n_bins_[0])
+                if len(v) > 1000:
+                    # Only up to 1000 residuals are stored per bin
+                    sample = rng.choice(a=v, size=1000, replace=False)
+                    self.in_sample_residuals_by_bin[k] = sample
+            
+            self.in_sample_residuals = np.concatenate(list(
+                                          self.in_sample_residuals_by_bin.values()
+                                       ))
+
+            self.binner_intervals = {
+                i: (
+                    self.binner.bin_edges_[0][i],
+                    (
+                        self.binner.bin_edges_[0][i + 1]
+                        if i + 1 < len(self.binner.bin_edges_[0])
+                        else None
+                    ),
+                )
+                for i in range(len(self.binner.bin_edges_[0]) - 1)
             }
+
         
         # The last time window of training data is stored so that lags needed as
         # predictors in the first iteration of `predict()` can be calculated. It
@@ -1287,28 +1318,42 @@ class ForecasterAutoreg(ForecasterBase):
                             inverse_transform = False
                         ).to_numpy()
             
-        if len(residuals) > 1000:
-            rng = np.random.default_rng(seed=random_state)
-            residuals = rng.choice(a=residuals, size=1000, replace=False)
-    
-        if append and self.out_sample_residuals is not None:
-            free_space = max(0, 1000 - len(self.out_sample_residuals))
-            if len(residuals) < free_space:
-                residuals = np.hstack((
-                                self.out_sample_residuals,
-                                residuals
-                            ))
-            else:
-                residuals = np.hstack((
-                                self.out_sample_residuals,
-                                residuals[:free_space]
-                            ))
+        bins = self.binner.transform(residuals.reshape(-1, 1)).ravel().astype(int)
+        residuals = pd.DataFrame({
+                            'residuals': residuals,
+                            'bin': bins
+                        })
+        residuals_by_bin = residuals.groupby('bin')['residuals'].apply(np.array).to_dict()
 
-        self.out_sample_residuals = residuals
-        bins = self.binner.transform(residuals.reshape(-1, 1)).ravel()
-        self.out_sample_residuals_by_bin = {
-            i : residuals[bins == i] for i in range(self.binner.n_bins_[0])
-        }
+        if append and self.out_sample_residuals_by_bin is not None:
+            for k, v in residuals_by_bin.items():
+                if k in self.out_sample_residuals_by_bin:
+                    free_space = max(0, 1000 - len(self.out_sample_residuals_by_bin[k]))
+                    if len(v) < free_space:
+                        self.out_sample_residuals_by_bin[k] = np.hstack((
+                            self.out_sample_residuals_by_bin[k],
+                            v
+                        ))
+                    else:
+                        self.out_sample_residuals_by_bin[k] = np.hstack((
+                            self.out_sample_residuals_by_bin[k],
+                            v[:free_space]
+                        ))
+                else:
+                    self.out_sample_residuals_by_bin[k] = v
+        else:
+            self.out_sample_residuals_by_bin = residuals_by_bin
+
+        for k, v in self.out_sample_residuals_by_bin.items():
+                rng = np.random.default_rng(seed=123)
+                if len(v) > 1000:
+                    # Only up to 1000 residuals are stored per bin
+                    sample = rng.choice(a=v, size=1000, replace=False)
+                    self.out_sample_residuals_by_bin[k] = sample
+            
+        self.out_sample_residuals = np.concatenate(list(
+                                        self.out_sample_residuals_by_bin.values()
+                                    ))
 
     
     def get_feature_importances(
