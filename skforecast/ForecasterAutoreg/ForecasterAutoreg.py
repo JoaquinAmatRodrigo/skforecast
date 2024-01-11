@@ -552,12 +552,17 @@ class ForecasterAutoreg(ForecasterBase):
         # This is done to save time during fit in functions such as backtesting()
         if store_in_sample_residuals:
 
+            #TODO: move to auxiliar function
+
+            # def _get_residuals(y_true, y_pred, binning=True, method='quantile', n_bins=10):
+
             in_sample_predictions = self.regressor.predict(X_train)
-            in_sample_predictions = pd.DataFrame(
-                                        data    = in_sample_predictions,
-                                        index   = X_train.index,
-                                        columns = ['pred']
+            in_sample_predictions = pd.Series(
+                                        data  = in_sample_predictions,
+                                        index = X_train.index,
+                                        name  = 'pred'
                                     )
+            
             residuals = (y_train - in_sample_predictions['pred']).to_frame('residuals')
             residuals = pd.merge(
                             residuals,
@@ -602,7 +607,61 @@ class ForecasterAutoreg(ForecasterBase):
         # predictors in the first iteration of `predict()` can be calculated. It
         # also includes the values need to calculate the diferenctiation.
         self.last_window = y.iloc[-self.window_size:].copy()
-    
+
+    def _binnarize_residuals(
+            forecaster: object,
+            y_true: pd.Series,
+            y_pred: pd.Series,
+            binning: bool=True,
+            method: str='quantile',
+            n_bins: int=10
+    ):
+        """
+        Bin residuals according to the predicted values. Bins are created using
+        the sklearn.preprocessing.KBinsDiscretizer stored in the forecaster.
+        
+        
+        """
+
+        residuals = (y_true - y_pred['pred']).rename('residuals')
+        residuals = pd.merge(
+                        residuals,
+                        y_true,
+                        left_index=True,
+                        right_index=True
+                    )
+
+        self.binner.fit(residuals[['pred']].to_numpy())
+        residuals['bin'] = self.binner.transform(
+                                residuals[['pred']].to_numpy()
+                            ).astype(int)
+        self.in_sample_residuals_by_bin = (
+            residuals.groupby('bin')['residuals'].apply(np.array).to_dict()
+        )
+
+        for k, v in self.in_sample_residuals_by_bin.items():
+            rng = np.random.default_rng(seed=123)
+            if len(v) > 1000:
+                # Only up to 1000 residuals are stored per bin
+                sample = rng.choice(a=v, size=1000, replace=False)
+                self.in_sample_residuals_by_bin[k] = sample
+        
+        self.in_sample_residuals = np.concatenate(list(
+                                        self.in_sample_residuals_by_bin.values()
+                                    ))
+
+        self.binner_intervals = {
+            i: (
+                self.binner.bin_edges_[0][i],
+                (
+                    self.binner.bin_edges_[0][i + 1]
+                    if i + 1 < len(self.binner.bin_edges_[0])
+                    else None
+                ),
+            )
+            for i in range(len(self.binner.bin_edges_[0]) - 1)
+        }
+
 
     def _recursive_predict(
         self,
