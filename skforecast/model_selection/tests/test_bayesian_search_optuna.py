@@ -2,6 +2,7 @@
 # ==============================================================================
 import re
 import pytest
+import os
 import numpy as np
 import pandas as pd
 import sys
@@ -707,3 +708,45 @@ def test_results_opt_best_output_bayesian_search_optuna_with_output_study_best_t
     assert best_trial.number == results_opt_best.number
     assert best_trial.values == results_opt_best.values
     assert best_trial.params == results_opt_best.params
+
+
+def test_bayesian_search_optuna_output_file():
+    """ 
+    Test output file of _bayesian_search_optuna.
+    """
+
+    output_fie = 'test_evaluate_grid_hyperparameters_output_file.txt'
+    forecaster = ForecasterAutoreg(
+                    regressor = RandomForestRegressor(random_state=123),
+                    lags      = 2 # Placeholder, the value will be overwritten
+                 )
+
+    steps = 3
+    n_validation = 12
+    y_train = y[:-n_validation]
+    lags_grid = [2, 4]
+
+    def search_space(trial):
+        search_space  = {'n_estimators'    : trial.suggest_int('n_estimators', 10, 20),
+                         'min_samples_leaf': trial.suggest_float('min_samples_leaf', 0.1, 1., log=True),
+                         'max_features'    : trial.suggest_categorical('max_features', ['log2', 'sqrt'])} 
+        
+        return search_space
+
+    results = _bayesian_search_optuna(
+                  forecaster         = forecaster,
+                  y                  = y,
+                  lags_grid          = lags_grid,
+                  search_space       = search_space,
+                  steps              = steps,
+                  metric             = 'mean_absolute_error',
+                  refit              = True,
+                  initial_train_size = len(y_train),
+                  fixed_train_size   = True,
+                  n_trials           = 10,
+                  random_state       = 123,
+                  return_best        = False,
+                  verbose            = False
+              )[0]
+
+    assert os.path.isfile(output_fie)

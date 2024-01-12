@@ -100,12 +100,12 @@ def _backtesting_forecaster_multiseries(
     allow_incomplete_fold: bool=True,
     levels: Optional[Union[str, list]]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-    refit: Optional[Union[bool, int]]=False,
+    refit: Union[bool, int]=False,
     interval: Optional[list]=None,
     n_boot: int=500,
     random_state: int=123,
     in_sample_residuals: bool=True,
-    n_jobs: Optional[Union[int, str]]='auto',
+    n_jobs: Union[int, str]='auto',
     verbose: bool=False,
     show_progress: bool=True
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
@@ -383,12 +383,12 @@ def backtesting_forecaster_multiseries(
     allow_incomplete_fold: bool=True,
     levels: Optional[Union[str, list]]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-    refit: Optional[Union[bool, int]]=False,
+    refit: Union[bool, int]=False,
     interval: Optional[list]=None,
     n_boot: int=500,
     random_state: int=123,
     in_sample_residuals: bool=True,
-    n_jobs: Optional[Union[int, str]]='auto',
+    n_jobs: Union[int, str]='auto',
     verbose: bool=False,
     show_progress: bool=True
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
@@ -555,12 +555,12 @@ def grid_search_forecaster_multiseries(
     levels: Optional[Union[str, list]]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Optional[Union[list, dict]]=None,
-    refit: Optional[Union[bool, int]]=False,
+    refit: Union[bool, int]=False,
     return_best: bool=True,
-    n_jobs: Optional[Union[int, str]]='auto',
+    n_jobs: Union[int, str]='auto',
     verbose: bool=True,
     show_progress: bool=True,
-    results_output_path: Optional[str]=None
+    output_file: Optional[str]=None
 ) -> pd.DataFrame:
     """
     Exhaustive search over specified parameter values for a Forecaster object.
@@ -623,8 +623,10 @@ def grid_search_forecaster_multiseries(
         Print number of folds used for cv or backtesting.
     show_progress : bool, default `True`
         Whether to show a progress bar.
-    results_output_path : str, default `None`
-        Path to save the results of the hyperparameter search as .txt file.
+    output_file : str, default `None`
+        File name or full path to save the results. Results are saved .txt file
+        with tab separated columns. If `None`, the results are not saved.
+        **New in version 0.12.0**
 
     Returns
     -------
@@ -660,7 +662,7 @@ def grid_search_forecaster_multiseries(
                   return_best           = return_best,
                   verbose               = verbose,
                   show_progress         = show_progress,
-                  results_output_path   = results_output_path
+                  output_file           = output_file
               )
 
     return results
@@ -679,14 +681,14 @@ def random_search_forecaster_multiseries(
     levels: Optional[Union[str, list]]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Optional[Union[list, dict]]=None,
-    refit: Optional[Union[bool, int]]=False,
+    refit: Union[bool, int]=False,
     n_iter: int=10,
     random_state: int=123,
     return_best: bool=True,
-    n_jobs: Optional[Union[int, str]]='auto',
+    n_jobs: Union[int, str]='auto',
     verbose: bool=True,
     show_progress: bool=True,
-    results_output_path: Optional[str]=None
+    output_file: Optional[str]=None
 ) -> pd.DataFrame:
     """
     Random search over specified parameter values or distributions for a Forecaster 
@@ -754,8 +756,10 @@ def random_search_forecaster_multiseries(
         Print number of folds used for cv or backtesting.
     show_progress : bool, default `True`
         Whether to show a progress bar.
-    results_output_path : str, default `None`
-        Path to save the results of the hyperparameter search as .txt file.
+    output_file : str, default `None`
+        File name or full path to save the results. Results are saved .txt file
+        with tab separated columns. If `None`, the results are not saved.
+        **New in version 0.12.0**
 
     Returns
     -------
@@ -792,7 +796,7 @@ def random_search_forecaster_multiseries(
                   n_jobs                = n_jobs,
                   verbose               = verbose,
                   show_progress         = show_progress,
-                 results_output_path   = results_output_path
+                 output_file            = output_file
               )
 
     return results
@@ -811,12 +815,12 @@ def _evaluate_grid_hyperparameters_multiseries(
     levels: Optional[Union[str, list]]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Optional[Union[list, dict]]=None,
-    refit: Optional[Union[bool, int]]=False,
+    refit: Union[bool, int]=False,
     return_best: bool=True,
-    n_jobs: Optional[Union[int, str]]='auto',
+    n_jobs: Union[int, str]='auto',
     verbose: bool=True,
     show_progress: bool=True,
-    results_output_path: Optional[str]=None
+    output_file: Optional[str]=None
 ) -> pd.DataFrame:
     """
     Evaluate parameter values for a Forecaster object using multi-series backtesting.
@@ -873,8 +877,10 @@ def _evaluate_grid_hyperparameters_multiseries(
         Print number of folds used for cv or backtesting.
     show_progress : bool, default `True`
         Whether to show a progress bar.
-    results_output_path : str, default `None`
-        Path to save the results of the hyperparameter search as .txt file.
+    output_file : str, default `None`
+        File name or full path to save the results. Results are saved .txt file
+        with tab separated columns. If `None`, the results are not saved.
+        **New in version 0.12.0**
 
     Returns
     -------
@@ -895,6 +901,9 @@ def _evaluate_grid_hyperparameters_multiseries(
             (f"`exog` must have same number of samples as `series`. "
              f"length `exog`: ({len(exog)}), length `series`: ({len(series)})")
         )
+    
+    if output_file is not None and os.path.isfile(output_file):
+        os.remove(output_file)
     
     levels = _initialize_levels_model_selection_multiseries(
                  forecaster = forecaster,
@@ -962,20 +971,20 @@ def _evaluate_grid_hyperparameters_multiseries(
                 m_name = m if isinstance(m, str) else m.__name__
                 metric_dict[m_name].append(metrics_levels[m_name].mean())
 
-            if results_output_path is not None:
+            if output_file is not None:
                 header = ['levels', 'lags', 'paramns', *metric_dict.keys(), *params.keys()]
                 row = [
                     levels, lags_v, params,
                     *[metric[-1] for metric in metric_dict.values()],
                     *params.values()
                 ]
-                if not os.path.isfile(results_output_path):
-                    with open(results_output_path, 'w', newline='') as f:
-                        f.write(';'.join(header) + '\n')
-                        f.write(';'.join([str(r) for r in row]) + '\n')
+                if not os.path.isfile(output_file):
+                    with open(output_file, 'w', newline='') as f:
+                        f.write('\t'.join(header) + '\n')
+                        f.write('\t'.join([str(r) for r in row]) + '\n')
                 else:
-                    with open(results_output_path, 'a', newline='') as f:
-                        f.write(';'.join([str(r) for r in row]) + '\n')
+                    with open(output_file, 'a', newline='') as f:
+                        f.write('\t'.join([str(r) for r in row]) + '\n')
 
     results = pd.DataFrame({
                   'levels': [levels]*len(lags_list),
@@ -1030,14 +1039,14 @@ def bayesian_search_forecaster_multiseries(
     levels: Optional[Union[str, list]]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Optional[Union[list, dict]]=None,
-    refit: Optional[Union[bool, int]]=False,
+    refit: Union[bool, int]=False,
     n_trials: int=10,
     random_state: int=123,
     return_best: bool=True,
-    n_jobs: Optional[Union[int, str]]='auto',
+    n_jobs: Union[int, str]='auto',
     verbose: bool=True,
     show_progress: bool=True,
-    results_output_path: Optional[str]=None,
+    output_file: Optional[str]=None,
     engine: str='optuna',
     kwargs_create_study: dict={},
     kwargs_study_optimize: dict={}
@@ -1108,8 +1117,10 @@ def bayesian_search_forecaster_multiseries(
         Print number of folds used for cv or backtesting.
     show_progress : bool, default `True`
         Whether to show a progress bar.
-    results_output_path : str, default `None`
-        Path to save the results of the hyperparameter search as .txt file.
+    output_file : str, default `None`
+        File name or full path to save the results. Results are saved .txt file
+        with tab separated columns. If `None`, the results are not saved.
+        **New in version 0.12.0**
     engine : str, default `'optuna'`
         Bayesian optimization runs through the optuna library.
     kwargs_create_study : dict, default `{'direction': 'minimize', 'sampler': TPESampler(seed=123)}`
@@ -1163,7 +1174,7 @@ def bayesian_search_forecaster_multiseries(
                                     n_jobs                = n_jobs,
                                     verbose               = verbose,
                                     show_progress         = show_progress,
-                                    results_output_path   = results_output_path,
+                                    output_file           = output_file,
                                     kwargs_create_study   = kwargs_create_study,
                                     kwargs_study_optimize = kwargs_study_optimize
                                 )
@@ -1184,14 +1195,14 @@ def _bayesian_search_optuna_multiseries(
     levels: Optional[Union[str, list]]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Optional[Union[list, dict]]=None,
-    refit: Optional[Union[bool, int]]=False,
+    refit: Union[bool, int]=False,
     n_trials: int=10,
     random_state: int=123,
     return_best: bool=True,
-    n_jobs: Optional[Union[int, str]]='auto',
+    n_jobs: Union[int, str]='auto',
     verbose: bool=True,
     show_progress: bool=True,
-    results_output_path: Optional[str]=None,
+    output_file: Optional[str]=None,
     kwargs_create_study: dict={},
     kwargs_study_optimize: dict={}
 ) -> Tuple[pd.DataFrame, object]:
@@ -1260,8 +1271,10 @@ def _bayesian_search_optuna_multiseries(
         Print number of folds used for cv or backtesting.
     show_progress : bool, default `True`
         Whether to show a progress bar.
-    results_output_path : str, default `None`
-        Path to save the results of the hyperparameter search as .txt file.
+    output_file : str, default `None`
+        File name or full path to save the results. Results are saved .txt file
+        with tab separated columns. If `None`, the results are not saved.
+        **New in version 0.12.0**
     kwargs_create_study : dict, default `{'direction': 'minimize', 'sampler': TPESampler(seed=123)}`
         Keyword arguments (key, value mappings) to pass to optuna.create_study.
     kwargs_study_optimize : dict, default `{}`
@@ -1282,7 +1295,7 @@ def _bayesian_search_optuna_multiseries(
 
     """
     
-    if results_output_path is not None:
+    if output_file is not None:
         # Redirect optuna logging to file
         optuna.logging.disable_default_handler()
         logger = logging.getLogger('optuna')
@@ -1290,7 +1303,7 @@ def _bayesian_search_optuna_multiseries(
         for handler in logger.handlers.copy():
             if isinstance(handler, logging.StreamHandler):
                 logger.removeHandler(handler)
-        logger.addHandler(logging.FileHandler(results_output_path, mode="w"))
+        logger.addHandler(logging.FileHandler(output_file, mode="w"))
 
     else:
         optuna.logging.disable_default_handler()
@@ -1469,15 +1482,15 @@ def backtesting_forecaster_multivariate(
     allow_incomplete_fold: bool=True,
     levels: Optional[Union[str, list]]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-    refit: Optional[Union[bool, int]]=False,
+    refit: Union[bool, int]=False,
     interval: Optional[list]=None,
     n_boot: int=500,
     random_state: int=123,
     in_sample_residuals: bool=True,
-    n_jobs: Optional[Union[int, str]]='auto',
+    n_jobs: Union[int, str]='auto',
     verbose: bool=False,
     show_progress: bool=True,
-    results_output_path: Optional[str]=None
+    output_file: Optional[str]=None
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
     This function is an alias of backtesting_forecaster_multiseries.
@@ -1554,7 +1567,7 @@ def backtesting_forecaster_multivariate(
         for backtesting.
     show_progress : bool, default `True`
         Whether to show a progress bar.
-    results_output_path : str, default `None`
+    output_file : str, default `None`
         Path to save the results of the backtesting as .txt file.
 
     Returns
@@ -1590,7 +1603,7 @@ def backtesting_forecaster_multivariate(
         n_jobs                = n_jobs,
         verbose               = verbose,
         show_progress         = show_progress,
-        results_output_path   = results_output_path
+        output_file           = output_file
         
     )
 
@@ -1610,12 +1623,12 @@ def grid_search_forecaster_multivariate(
     levels: Optional[Union[str, list]]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Optional[Union[list, dict]]=None,
-    refit: Optional[Union[bool, int]]=False,
+    refit: Union[bool, int]=False,
     return_best: bool=True,
-    n_jobs: Optional[Union[int, str]]='auto',
+    n_jobs: Union[int, str]='auto',
     verbose: bool=True,
     show_progress: bool=True,
-    results_output_path: Optional[str]=None
+    output_file: Optional[str]=None
 ) -> pd.DataFrame:
     """
     This function is an alias of grid_search_forecaster_multiseries.
@@ -1680,8 +1693,10 @@ def grid_search_forecaster_multivariate(
         Print number of folds used for cv or backtesting.
     show_progress : bool, default `True`
         Whether to show a progress bar.
-    results_output_path : str, default `None`
-        Path to save the results of the hyperparameter search as .txt file.
+    output_file : str, default `None`
+        File name or full path to save the results. Results are saved .txt file
+        with tab separated columns. If `None`, the results are not saved.
+        **New in version 0.12.0**
 
     Returns
     -------
@@ -1715,7 +1730,7 @@ def grid_search_forecaster_multivariate(
         n_jobs                = n_jobs,
         verbose               = verbose,
         show_progress         = show_progress,
-        results_output_path   = results_output_path
+        output_file           = output_file
     )
 
     return results
@@ -1734,14 +1749,14 @@ def random_search_forecaster_multivariate(
     levels: Optional[Union[str, list]]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Optional[Union[list, dict]]=None,
-    refit: Optional[Union[bool, int]]=False,
+    refit: Union[bool, int]=False,
     n_iter: int=10,
     random_state: int=123,
     return_best: bool=True,
-    n_jobs: Optional[Union[int, str]]='auto',
+    n_jobs: Union[int, str]='auto',
     verbose: bool=True,
     show_progress: bool=True,
-    results_output_path: Optional[str]=None
+    output_file: Optional[str]=None
 ) -> pd.DataFrame:
     """
     This function is an alias of random_search_forecaster_multiseries.
@@ -1811,8 +1826,10 @@ def random_search_forecaster_multivariate(
         Print number of folds used for cv or backtesting.
     show_progress : bool, default `True`
         Whether to show a progress bar.
-    results_output_path : str, default `None`
-        Path to save the results of the hyperparameter search as .txt file.
+    output_file : str, default `None`
+        File name or full path to save the results. Results are saved .txt file
+        with tab separated columns. If `None`, the results are not saved.
+        **New in version 0.12.0**
 
     Returns
     -------
@@ -1848,7 +1865,7 @@ def random_search_forecaster_multivariate(
         n_jobs                = n_jobs,
         verbose               = verbose,
         show_progress         = show_progress,
-        results_output_path   = results_output_path
+        output_file           = output_file
     ) 
 
     return results
@@ -1867,14 +1884,14 @@ def bayesian_search_forecaster_multivariate(
     levels: Optional[Union[str, list]]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Optional[Union[list, dict]]=None,
-    refit: Optional[Union[bool, int]]=False,
+    refit: Union[bool, int]=False,
     n_trials: int=10,
     random_state: int=123,
     return_best: bool=True,
-    n_jobs: Optional[Union[int, str]]='auto',
+    n_jobs: Union[int, str]='auto',
     verbose: bool=True,
     show_progress: bool=True,
-    results_output_path: Optional[str]=None,
+    output_file: Optional[str]=None,
     engine: str='optuna',
     kwargs_create_study: dict={},
     kwargs_study_optimize: dict={}
@@ -1948,8 +1965,10 @@ def bayesian_search_forecaster_multivariate(
         Print number of folds used for cv or backtesting.
     show_progress : bool, default `True`
         Whether to show a progress bar.
-    results_output_path : str, default `None`
-        Path to save the results of the hyperparameter search as .txt file.
+    output_file : str, default `None`
+        File name or full path to save the results. Results are saved .txt file
+        with tab separated columns. If `None`, the results are not saved.
+        **New in version 0.12.0**
     engine : str, default `'optuna'`
         Bayesian optimization runs through the optuna library.
     kwargs_create_study : dict, default `{'direction': 'minimize', 'sampler': TPESampler(seed=123)}`
@@ -1992,7 +2011,7 @@ def bayesian_search_forecaster_multivariate(
                                     n_jobs                = n_jobs,
                                     verbose               = verbose,
                                     show_progress         = show_progress,
-                                    results_output_path   = results_output_path,
+                                    output_file           = output_file,
                                     engine                = engine,
                                     kwargs_create_study   = kwargs_create_study,
                                     kwargs_study_optimize = kwargs_study_optimize
