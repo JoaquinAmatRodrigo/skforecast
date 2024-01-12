@@ -976,7 +976,8 @@ class ForecasterAutoreg(ForecasterBase):
                                  last_window = last_window_boot,
                                  exog        = exog_boot 
                              )
-                
+                # Bin de la prediccion
+                # Extraer 1 residuo aleatorio del bin
                 prediction_with_residual  = prediction + sample_residuals[step]
                 boot_predictions[step, i] = prediction_with_residual[0]
 
@@ -1442,11 +1443,11 @@ class ForecasterAutoreg(ForecasterBase):
             self.out_sample_residuals_by_bin = residuals_by_bin
 
         for k, v in self.out_sample_residuals_by_bin.items():
-                rng = np.random.default_rng(seed=123)
-                if len(v) > 200:
-                    # Only up to 200 residuals are stored per bin
-                    sample = rng.choice(a=v, size=1000, replace=False)
-                    self.out_sample_residuals_by_bin[k] = sample
+            rng = np.random.default_rng(seed=123)
+            if len(v) > 200:
+                # Only up to 200 residuals are stored per bin
+                sample = rng.choice(a=v, size=200, replace=False)
+                self.out_sample_residuals_by_bin[k] = sample
             
         self.out_sample_residuals = np.concatenate(list(
                                         self.out_sample_residuals_by_bin.values()
