@@ -1,0 +1,23 @@
+A new study created in memory with name: lags 24: [ 1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24]
+Trial 0 finished with value: 2.3007820769068177 and parameters: {'alpha': 0.6995044937418831}. Best is trial 0 with value: 2.3007820769068177.
+Trial 1 finished with value: 2.3008127452232894 and parameters: {'alpha': 0.29327794160087567}. Best is trial 0 with value: 2.3007820769068177.
+Trial 2 finished with value: 2.300817249453555 and parameters: {'alpha': 0.2345829390285611}. Best is trial 0 with value: 2.3007820769068177.
+Trial 3 finished with value: 2.300792610452959 and parameters: {'alpha': 0.5558016213920624}. Best is trial 0 with value: 2.3007820769068177.
+Trial 4 finished with value: 2.3007804102824063 and parameters: {'alpha': 0.7222742800877074}. Best is trial 4 with value: 2.3007804102824063.
+Trial 5 finished with value: 2.3008023430269557 and parameters: {'alpha': 0.42887539552321635}. Best is trial 4 with value: 2.3007804102824063.
+Trial 6 finished with value: 2.3007614853339393 and parameters: {'alpha': 0.9809565564007693}. Best is trial 6 with value: 2.3007614853339393.
+Trial 7 finished with value: 2.3007829203814216 and parameters: {'alpha': 0.6879814411990146}. Best is trial 6 with value: 2.3007614853339393.
+Trial 8 finished with value: 2.3007979528419664 and parameters: {'alpha': 0.48612258246951734}. Best is trial 6 with value: 2.3007614853339393.
+Trial 9 finished with value: 2.3008046961067 and parameters: {'alpha': 0.398196343012209}. Best is trial 6 with value: 2.3007614853339393.
+A new study created in memory with name: lags 48: [ 1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24
+ 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48]
+Trial 0 finished with value: 2.224628886427516 and parameters: {'alpha': 0.6995044937418831}. Best is trial 0 with value: 2.224628886427516.
+Trial 1 finished with value: 2.2246675588822504 and parameters: {'alpha': 0.29327794160087567}. Best is trial 0 with value: 2.224628886427516.
+Trial 2 finished with value: 2.224673151557054 and parameters: {'alpha': 0.2345829390285611}. Best is trial 0 with value: 2.224628886427516.
+Trial 3 finished with value: 2.224642559983369 and parameters: {'alpha': 0.5558016213920624}. Best is trial 0 with value: 2.224628886427516.
+Trial 4 finished with value: 2.2246267205336636 and parameters: {'alpha': 0.7222742800877074}. Best is trial 4 with value: 2.2246267205336636.
+Trial 5 finished with value: 2.2246546434473182 and parameters: {'alpha': 0.42887539552321635}. Best is trial 4 with value: 2.2246267205336636.
+Trial 6 finished with value: 2.224602127506204 and parameters: {'alpha': 0.9809565564007693}. Best is trial 6 with value: 2.224602127506204.
+Trial 7 finished with value: 2.224629982587994 and parameters: {'alpha': 0.6879814411990146}. Best is trial 6 with value: 2.224602127506204.
+Trial 8 finished with value: 2.2246491927517016 and parameters: {'alpha': 0.48612258246951734}. Best is trial 6 with value: 2.224602127506204.
+Trial 9 finished with value: 2.2246575649920395 and parameters: {'alpha': 0.398196343012209}. Best is trial 6 with value: 2.224602127506204.

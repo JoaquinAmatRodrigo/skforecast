@@ -809,7 +809,7 @@ def grid_search_forecaster(
     show_progress : bool, default `True`
         Whether to show a progress bar.
     results_output_path : str, default `None`
-        Path to save the results of the grid search as .txt file.
+        Path to save the results of the hyperparameter search as .txt file.
 
     Returns
     -------
@@ -932,7 +932,7 @@ def random_search_forecaster(
     show_progress : bool, default `True`
         Whether to show a progress bar.
     results_output_path : str, default `None`
-        Path to save the results of the grid search as .txt file.
+        Path to save the results of the hyperparameter search as .txt file.
 
     Returns
     -------
@@ -1124,15 +1124,15 @@ def _evaluate_grid_hyperparameters(
                 metric_dict[m_name].append(m_value)
         
             if results_output_path is not None:
-                header = ['lags', 'paramns', *list(metric_dict.keys()), *params.keys()]
+                header = ['lags', 'paramns', *metric_dict.keys(), *params.keys()]
                 row = [lags_v, params, *metrics_values, *params.values()]
                 if not os.path.isfile(results_output_path):
                     with open(results_output_path, 'w', newline='') as f:
-                        f.write(','.join(header) + '\n')
-                        f.write(','.join([str(r) for r in row]) + '\n')
+                        f.write(';'.join(header) + '\n')
+                        f.write(';'.join([str(r) for r in row]) + '\n')
                 else:
                     with open(results_output_path, 'a', newline='') as f:
-                        f.write(','.join([str(r) for r in row]) + '\n')
+                        f.write(';'.join([str(r) for r in row]) + '\n')
     
     results = pd.DataFrame({
                   'lags'  : lags_list,
@@ -1259,7 +1259,7 @@ def bayesian_search_forecaster(
     show_progress : bool, default `True`
         Whether to show a progress bar.
     results_output_path : str, default `None`
-        Path to save the results of the grid search as .txt file.
+        Path to save the results of the hyperparameter search as .txt file.
     engine : str, default `'optuna'`
         Bayesian optimization runs through the optuna library.
     kwargs_create_study : dict, default `{'direction': 'minimize', 'sampler': TPESampler(seed=123)}`
@@ -1415,7 +1415,7 @@ def _bayesian_search_optuna(
     show_progress : bool, default `True`
         Whether to show a progress bar.
     results_output_path : str, default `None`
-        Path to save the results of the grid search as .txt file.
+        Path to save the results of the hyperparameter search as .txt file.
     kwargs_create_study : dict, default `{'direction': 'minimize', 'sampler': TPESampler(seed=123)}`
         Keyword arguments (key, value mappings) to pass to optuna.create_study.
     kwargs_study_optimize : dict, default `{}`
@@ -1531,7 +1531,8 @@ def _bayesian_search_optuna(
             kwargs_create_study['sampler']._rng = np.random.RandomState(random_state)
             kwargs_create_study['sampler']._random_sampler = RandomSampler(seed=random_state)
 
-        study = optuna.create_study(**kwargs_create_study)
+        study_name = f"lags {lags_k}: {lags_v}"
+        study = optuna.create_study(study_name=study_name, **kwargs_create_study)
 
         if 'sampler' not in kwargs_create_study.keys():
             study.sampler = TPESampler(seed=random_state)
