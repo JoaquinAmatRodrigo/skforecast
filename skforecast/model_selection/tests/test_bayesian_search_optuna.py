@@ -733,6 +733,7 @@ def test_bayesian_search_optuna_output_file():
         
         return search_space
 
+    output_fie = 'test_bayesian_search_optuna_output_file.txt'
     results = _bayesian_search_optuna(
                   forecaster         = forecaster,
                   y                  = y,
@@ -746,7 +747,8 @@ def test_bayesian_search_optuna_output_file():
                   n_trials           = 10,
                   random_state       = 123,
                   return_best        = False,
-                  verbose            = False
+                  verbose            = False,
+                  output_file        = output_fie
               )[0]
 
     assert os.path.isfile(output_fie)
