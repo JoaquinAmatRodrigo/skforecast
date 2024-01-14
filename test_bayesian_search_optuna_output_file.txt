@@ -1,0 +1,22 @@
+A new study created in memory with name: lags 2: [1 2]
+Trial 0 finished with value: 0.2235827591941962 and parameters: {'n_estimators': 17, 'min_samples_leaf': 0.19325882509735576, 'max_features': 'sqrt'}. Best is trial 0 with value: 0.2235827591941962.
+Trial 1 finished with value: 0.22545562575758119 and parameters: {'n_estimators': 17, 'min_samples_leaf': 0.2649149454284987, 'max_features': 'log2'}. Best is trial 0 with value: 0.2235827591941962.
+Trial 2 finished with value: 0.22474295833338784 and parameters: {'n_estimators': 15, 'min_samples_leaf': 0.2466706727024324, 'max_features': 'sqrt'}. Best is trial 0 with value: 0.2235827591941962.
+Trial 3 finished with value: 0.22764885273610677 and parameters: {'n_estimators': 14, 'min_samples_leaf': 0.1147302385573586, 'max_features': 'sqrt'}. Best is trial 0 with value: 0.2235827591941962.
+Trial 4 finished with value: 0.21733380794605772 and parameters: {'n_estimators': 12, 'min_samples_leaf': 0.14977928606210794, 'max_features': 'sqrt'}. Best is trial 4 with value: 0.21733380794605772.
+Trial 5 finished with value: 0.2152253922034143 and parameters: {'n_estimators': 16, 'min_samples_leaf': 0.707020154488976, 'max_features': 'log2'}. Best is trial 5 with value: 0.2152253922034143.
+Trial 6 finished with value: 0.22289167220237815 and parameters: {'n_estimators': 17, 'min_samples_leaf': 0.21035794225904136, 'max_features': 'log2'}. Best is trial 5 with value: 0.2152253922034143.
+Trial 7 finished with value: 0.21739975926994304 and parameters: {'n_estimators': 13, 'min_samples_leaf': 0.42753938073418213, 'max_features': 'sqrt'}. Best is trial 5 with value: 0.2152253922034143.
+Trial 8 finished with value: 0.2212038455891643 and parameters: {'n_estimators': 14, 'min_samples_leaf': 0.3116628929828935, 'max_features': 'log2'}. Best is trial 5 with value: 0.2152253922034143.
+Trial 9 finished with value: 0.21661388810185186 and parameters: {'n_estimators': 14, 'min_samples_leaf': 0.782328520465639, 'max_features': 'log2'}. Best is trial 5 with value: 0.2152253922034143.
+A new study created in memory with name: lags 4: [1 2 3 4]
+Trial 0 finished with value: 0.2323304395600637 and parameters: {'n_estimators': 17, 'min_samples_leaf': 0.19325882509735576, 'max_features': 'sqrt'}. Best is trial 0 with value: 0.2323304395600637.
+Trial 1 finished with value: 0.22883716667984197 and parameters: {'n_estimators': 17, 'min_samples_leaf': 0.2649149454284987, 'max_features': 'log2'}. Best is trial 1 with value: 0.22883716667984197.
+Trial 2 finished with value: 0.22633805911136198 and parameters: {'n_estimators': 15, 'min_samples_leaf': 0.2466706727024324, 'max_features': 'sqrt'}. Best is trial 2 with value: 0.22633805911136198.
+Trial 3 finished with value: 0.23739747548460785 and parameters: {'n_estimators': 14, 'min_samples_leaf': 0.1147302385573586, 'max_features': 'sqrt'}. Best is trial 2 with value: 0.22633805911136198.
+Trial 4 finished with value: 0.24077370656897412 and parameters: {'n_estimators': 12, 'min_samples_leaf': 0.14977928606210794, 'max_features': 'sqrt'}. Best is trial 2 with value: 0.22633805911136198.
+Trial 5 finished with value: 0.21045872919117656 and parameters: {'n_estimators': 16, 'min_samples_leaf': 0.707020154488976, 'max_features': 'log2'}. Best is trial 5 with value: 0.21045872919117656.
+Trial 6 finished with value: 0.2229839747692736 and parameters: {'n_estimators': 17, 'min_samples_leaf': 0.21035794225904136, 'max_features': 'log2'}. Best is trial 5 with value: 0.21045872919117656.
+Trial 7 finished with value: 0.20775872275075422 and parameters: {'n_estimators': 13, 'min_samples_leaf': 0.42753938073418213, 'max_features': 'sqrt'}. Best is trial 7 with value: 0.20775872275075422.
+Trial 8 finished with value: 0.22132441940953074 and parameters: {'n_estimators': 14, 'min_samples_leaf': 0.3116628929828935, 'max_features': 'log2'}. Best is trial 7 with value: 0.20775872275075422.
+Trial 9 finished with value: 0.20952958306022407 and parameters: {'n_estimators': 14, 'min_samples_leaf': 0.782328520465639, 'max_features': 'log2'}. Best is trial 7 with value: 0.20775872275075422.

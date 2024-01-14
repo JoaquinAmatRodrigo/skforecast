@@ -629,3 +629,4 @@ def test_evaluate_grid_hyperparameters_output_file_when_2_metrics():
     output_fie_content = output_fie_content.sort_values(by='mean_squared_error')
     output_fie_content = output_fie_content.astype({'params': str, 'lags': str})
     pd.testing.assert_frame_equal(results, output_fie_content)
+    os.remove(output_fie)

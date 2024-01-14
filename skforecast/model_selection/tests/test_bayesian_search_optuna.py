@@ -752,3 +752,4 @@ def test_bayesian_search_optuna_output_file():
               )[0]
 
     assert os.path.isfile(output_fie)
+    os.remove(output_fie)
