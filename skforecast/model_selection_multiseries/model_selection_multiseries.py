@@ -1602,8 +1602,7 @@ def backtesting_forecaster_multivariate(
         in_sample_residuals   = in_sample_residuals,
         n_jobs                = n_jobs,
         verbose               = verbose,
-        show_progress         = show_progress,
-        output_file           = output_file
+        show_progress         = show_progress
         
     )
 
