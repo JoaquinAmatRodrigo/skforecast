@@ -213,7 +213,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         transformer_exog: Optional[object]=None,
         weight_func: Optional[Callable]=None,
         fit_kwargs: Optional[dict]=None,
-        n_jobs: Optional[Union[int, str]]='auto',
+        n_jobs: Union[int, str]='auto',
         forecaster_id: Optional[Union[str, int]]=None
     ) -> None:
         
