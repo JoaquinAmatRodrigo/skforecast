@@ -976,6 +976,7 @@ class ForecasterAutoreg(ForecasterBase):
                                  last_window = last_window_boot,
                                  exog        = exog_boot 
                              )
+                # TODO
                 # Bin de la prediccion
                 # Extraer 1 residuo aleatorio del bin
                 prediction_with_residual  = prediction + sample_residuals[step]
