@@ -1398,8 +1398,8 @@ def _bayesian_search_optuna_multiseries(
             kwargs_create_study['sampler']._rng = np.random.RandomState(random_state)
             kwargs_create_study['sampler']._random_sampler = RandomSampler(seed=random_state)
 
-        study_name = f"lags {lags_k}: {lags_v}"
-        study = optuna.create_study(study_name=study_name, **kwargs_create_study)
+        logger.info(f"lags {lags_k}: {lags_v}")
+        study = optuna.create_study(**kwargs_create_study)
 
         if 'sampler' not in kwargs_create_study.keys():
             study.sampler = TPESampler(seed=random_state)
