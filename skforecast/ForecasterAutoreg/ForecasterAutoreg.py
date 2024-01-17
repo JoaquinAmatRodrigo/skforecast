@@ -82,6 +82,10 @@ class ForecasterAutoreg(ForecasterBase):
         **New in version 0.10.0**
     fit_kwargs : dict, default `None`
         Additional arguments to be passed to the `fit` method of the regressor.
+    binner_kwargs : dict, default `None`
+        Additional arguments to be passed to the `KBinsDiscretizer` used to bin
+        residuals according to the predicted values.
+        **New in version 0.12.0**
     forecaster_id : str, int, default `None`
         Name used as an identifier of the forecaster.
     
@@ -116,7 +120,11 @@ class ForecasterAutoreg(ForecasterBase):
         **New in version 0.12.0**
     biner : sklearn.preprocessing.KBinsDiscretizer
         Biner used to bin residuals according to the predicted values.
-        **New in version 0.10.0**
+        **New in version 0.12.0**
+    binner_kwargs : dict, default `None`
+        Additional arguments to be passed to the `KBinsDiscretizer` used to bin
+        residuals according to the predicted values.
+        **New in version 0.12.0**
     source_code_weight_func : str
         Source code of the custom function used to create weights.
     max_lag : int
@@ -197,6 +205,7 @@ class ForecasterAutoreg(ForecasterBase):
         weight_func: Optional[Callable]=None,
         differentiation: Optional[int]=None,
         fit_kwargs: Optional[dict]=None,
+        binner_kwargs: Optional[dict]=None,
         forecaster_id: Optional[Union[str, int]]=None
     ) -> None:
         
@@ -230,13 +239,14 @@ class ForecasterAutoreg(ForecasterBase):
         self.lags = initialize_lags(type(self).__name__, lags)
         self.max_lag = max(self.lags)
         self.window_size = self.max_lag
-
-        self.binner = KBinsDiscretizer(
-                            n_bins=10,
-                            encode='ordinal',
-                            strategy='uniform',
-                            subsample=10000
-                       )
+        self.binner_kwargs = binner_kwargs
+        if binner_kwargs is None:
+            self.binner_kwargs = {
+                'n_bins': 20, 'encode': 'ordinal', 'strategy': 'quantile', 'subsample': 10000
+            }
+        else:
+            self.binner_kwargs = binner_kwargs
+        self.binner = KBinsDiscretizer(**self.binner_kwargs)
         self.binner_intervals = None
 
         if self.differentiation is not None:
@@ -953,21 +963,17 @@ class ForecasterAutoreg(ForecasterBase):
 
         if in_sample_residuals:
             residuals = self.in_sample_residuals
+            residuals_by_bin = self.in_sample_residuals_by_bin
         else:
             residuals = self.out_sample_residuals
+            residuals_by_bin = self.out_sample_residuals_by_bin
 
         for i in range(n_boot):
             # In each bootstraping iteration the initial last_window and exog 
             # need to be restored.
             last_window_boot = last_window_values.copy()
             exog_boot = exog_values.copy() if exog is not None else None
-
             rng = np.random.default_rng(seed=seeds[i])
-            sample_residuals = rng.choice(
-                                   a       = residuals,
-                                   size    = steps,
-                                   replace = True
-                               )
 
             for step in range(steps):
 
@@ -976,12 +982,14 @@ class ForecasterAutoreg(ForecasterBase):
                                  last_window = last_window_boot,
                                  exog        = exog_boot 
                              )
-                # TODO
-                # Bin de la prediccion
-                # Extraer 1 residuo aleatorio del bin
-                prediction_with_residual  = prediction + sample_residuals[step]
+                predicted_bin = self.binner.transform(prediction.reshape(1, -1)).astype(int)[0][0]
+                sampled_residual = rng.choice(
+                                        a       = residuals_by_bin[predicted_bin],
+                                        size    = 1,
+                                        replace = True
+                                    )
+                prediction_with_residual  = prediction + sampled_residual
                 boot_predictions[step, i] = prediction_with_residual[0]
-
                 last_window_boot = np.append(
                                        last_window_boot[1:],
                                        prediction_with_residual
@@ -1453,6 +1461,18 @@ class ForecasterAutoreg(ForecasterBase):
         self.out_sample_residuals = np.concatenate(list(
                                         self.out_sample_residuals_by_bin.values()
                                     ))
+
+        for k in self.in_sample_residuals_by_bin.keys():
+            if k not in self.out_sample_residuals_by_bin:
+                self.out_sample_residuals_by_bin[k] = np.array([])
+        
+        empty_bins = [k for k, v in self.out_sample_residuals_by_bin.items() if len(v) == 0]
+        if empty_bins:
+            warnings.warn(
+                f"The following bins have no out of sample residuals: {empty_bins}. "
+                f"This may be due to the fact that no predicted values fall in the "
+                f"interval {[self.binner_intervals[bin] for bin in empty_bins]}."
+            )
 
     
     def get_feature_importances(
