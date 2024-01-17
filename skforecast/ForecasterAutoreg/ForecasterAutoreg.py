@@ -873,7 +873,7 @@ class ForecasterAutoreg(ForecasterBase):
         binned_residuals : bool, default `True`
             If `True`, residuals used in each bootstrapping iteration are selected
             conditioning on the predicted values. If `False`, residuals are selected
-            without conditioning on the predicted values. 
+            randomly without conditioning on the predicted values.
 
         Returns
         -------
@@ -889,13 +889,21 @@ class ForecasterAutoreg(ForecasterBase):
 
         """
 
-        if not in_sample_residuals and self.out_sample_residuals is None:
-            raise ValueError(
-                ("`forecaster.out_sample_residuals` is `None`. Use "
-                 "`in_sample_residuals=True` or method `set_out_sample_residuals()` "
-                 "before `predict_interval()`, `predict_bootstrapping()`, "
-                 "`predict_quantiles()` or `predict_dist()`.")
-            )
+        if not in_sample_residuals:
+            if not binned_residuals and self.out_sample_residuals is None:
+                raise ValueError(
+                    ("`forecaster.out_sample_residuals` is `None`. Use "
+                    "`in_sample_residuals=True` or method `set_out_sample_residuals()` "
+                    "before `predict_interval()`, `predict_bootstrapping()`, "
+                    "`predict_quantiles()` or `predict_dist()`.")
+                )
+            if binned_residuals and self.out_sample_residuals_by_bin is None:
+                raise ValueError(
+                    ("`forecaster.out_sample_residuals_by_bin` is `None`. Use "
+                    "`in_sample_residuals=True` or method `set_out_sample_residuals()` "
+                    "before `predict_interval()`, `predict_bootstrapping()`, "
+                    "`predict_quantiles()` or `predict_dist()`.")
+                )
         
         if last_window is None:
             last_window = self.last_window
@@ -982,12 +990,13 @@ class ForecasterAutoreg(ForecasterBase):
                                  last_window = last_window_boot,
                                  exog        = exog_boot 
                              )
-                predicted_bin = self.binner.transform(prediction.reshape(1, -1)).astype(int)[0][0]
-                sampled_residual = rng.choice(
-                                        a       = residuals_by_bin[predicted_bin],
-                                        size    = 1,
-                                        replace = True
-                                    )
+                if binned_residuals:
+                    predicted_bin = self.binner.transform(prediction.reshape(1, -1)).astype(int)[0][0]
+                    residuals = residuals_by_bin[predicted_bin]
+                    sampled_residual = rng.choice(a=residuals, size=1)
+                else:
+                    sampled_residual = rng.choice(a=residuals, size=1)
+
                 prediction_with_residual  = prediction + sampled_residual
                 boot_predictions[step, i] = prediction_with_residual[0]
                 last_window_boot = np.append(
@@ -1029,7 +1038,8 @@ class ForecasterAutoreg(ForecasterBase):
         interval: list=[5, 95],
         n_boot: int=500,
         random_state: int=123,
-        in_sample_residuals: bool=True
+        in_sample_residuals: bool=True,
+        binned_residuals: bool=False
     ) -> pd.DataFrame:
         """
         Iterative process in which each prediction is used as a predictor
@@ -1063,6 +1073,10 @@ class ForecasterAutoreg(ForecasterBase):
             residuals are used. In the latter case, the user should have
             calculated and stored the residuals within the forecaster (see
             `set_out_sample_residuals()`).
+        binned_residuals : bool, default `False`
+            If `True`, residuals used in each bootstrapping iteration are selected
+            conditioning on the predicted values. If `False`, residuals are selected
+            randomly without conditioning on the predicted values.
 
         Returns
         -------
@@ -1332,7 +1346,7 @@ class ForecasterAutoreg(ForecasterBase):
     def set_out_sample_residuals(
         self, 
         residuals: Union[pd.Series, np.ndarray],
-        y_pred: Union[pd.Series, np.ndarray],
+        y_pred: Optional[Union[pd.Series, np.ndarray]]=None,
         append: bool=True,
         transform: bool=True,
         random_state: int=123
@@ -1347,9 +1361,10 @@ class ForecasterAutoreg(ForecasterBase):
         residuals : pandas Series, numpy ndarray
             Values of residuals. If len(residuals) > 1000, only a random sample
             of 1000 values are stored.
-        y_pred : pandas Series, numpy ndarray
+        y_pred : pandas Series, numpy ndarray, default `None`
             Predicted values of the time series from which the residuals have been
-            calculated.
+            calculated. This argument is used to bin residuals according to the
+            predicted values. If `y_pred` is `None`, residuals are not binned.
         append : bool, default `True`
             If `True`, new residuals are added to the once already stored in the
             attribute `out_sample_residuals`. Once the limit of 200 values per bin is
@@ -1372,13 +1387,13 @@ class ForecasterAutoreg(ForecasterBase):
                 f"but found {type(residuals)}."
             )
 
-        if not isinstance(y_pred, (np.ndarray, pd.Series)):
+        if not isinstance(y_pred, (np.ndarray, pd.Series, type(None))):
             raise TypeError(
-                f"`y_pred` argument must be `numpy ndarray` or `pandas Series`, "
+                f"`y_pred` argument must be `numpy ndarray`, `pandas Series` or `None`, "
                 f"but found {type(y_pred)}."
             )
 
-        if len(residuals) != len(y_pred):
+        if y_pred is not None and len(residuals) != len(y_pred):
             raise ValueError(
                 ("`residuals` and `y_pred` must have the same length, but found "
                  f"{len(residuals)} and {len(y_pred)}.")
@@ -1398,7 +1413,7 @@ class ForecasterAutoreg(ForecasterBase):
 
         if isinstance(y_pred, np.ndarray):
             y_pred = pd.Series(y_pred, name='prediction')
-        else:
+        elif isinstance(y_pred, pd.Series):
             y_pred = y_pred.rename('prediction').reset_index(drop=True)
 
         if not transform and self.transformer_y is not None:
@@ -1421,58 +1436,78 @@ class ForecasterAutoreg(ForecasterBase):
                             fit               = False,
                             inverse_transform = False
                         ).to_numpy()
-            
-        data = pd.merge(
-                    residuals,
-                    y_pred,
-                    left_index=True,
-                    right_index=True
-                )
-
-        data['bin'] = self.binner.transform(data[['prediction']].to_numpy()).astype(int)
-        residuals_by_bin = data.groupby('bin')['residuals'].apply(np.array).to_dict()
-
-        if append and self.out_sample_residuals_by_bin is not None:
-            for k, v in residuals_by_bin.items():
-                if k in self.out_sample_residuals_by_bin:
-                    free_space = max(0, 200 - len(self.out_sample_residuals_by_bin[k]))
-                    if len(v) < free_space:
-                        self.out_sample_residuals_by_bin[k] = np.hstack((
-                            self.out_sample_residuals_by_bin[k],
-                            v
-                        ))
-                    else:
-                        self.out_sample_residuals_by_bin[k] = np.hstack((
-                            self.out_sample_residuals_by_bin[k],
-                            v[:free_space]
-                        ))
-                else:
-                    self.out_sample_residuals_by_bin[k] = v
-        else:
-            self.out_sample_residuals_by_bin = residuals_by_bin
-
-        for k, v in self.out_sample_residuals_by_bin.items():
-            rng = np.random.default_rng(seed=123)
-            if len(v) > 200:
-                # Only up to 200 residuals are stored per bin
-                sample = rng.choice(a=v, size=200, replace=False)
-                self.out_sample_residuals_by_bin[k] = sample
-            
-        self.out_sample_residuals = np.concatenate(list(
-                                        self.out_sample_residuals_by_bin.values()
-                                    ))
-
-        for k in self.in_sample_residuals_by_bin.keys():
-            if k not in self.out_sample_residuals_by_bin:
-                self.out_sample_residuals_by_bin[k] = np.array([])
         
-        empty_bins = [k for k, v in self.out_sample_residuals_by_bin.items() if len(v) == 0]
-        if empty_bins:
-            warnings.warn(
-                f"The following bins have no out of sample residuals: {empty_bins}. "
-                f"This may be due to the fact that no predicted values fall in the "
-                f"interval {[self.binner_intervals[bin] for bin in empty_bins]}."
-            )
+        if y_pred is None:
+            # If y_pred is None, residuals are not binned.
+            if len(residuals) > 1000:
+                rng = np.random.default_rng(seed=random_state)
+                residuals = rng.choice(a=residuals, size=1000, replace=False)
+            if append and self.out_sample_residuals is not None:
+                free_space = max(0, 1000 - len(self.out_sample_residuals))
+                if len(residuals) < free_space:
+                    residuals = np.hstack((
+                                    self.out_sample_residuals,
+                                    residuals
+                                ))
+                else:
+                    residuals = np.hstack((
+                                    self.out_sample_residuals,
+                                    residuals[:free_space]
+                                ))
+            self.out_sample_residuals = residuals
+        else:
+            # If y_pred is not None, residuals are binned according to the predicted
+            # values.
+            data = pd.merge(
+                        residuals,
+                        y_pred,
+                        left_index=True,
+                        right_index=True
+                   )
+            data['bin'] = self.binner.transform(data[['prediction']].to_numpy()).astype(int)
+            residuals_by_bin = data.groupby('bin')['residuals'].apply(np.array).to_dict()
+
+            if append and self.out_sample_residuals_by_bin is not None:
+                for k, v in residuals_by_bin.items():
+                    if k in self.out_sample_residuals_by_bin:
+                        free_space = max(0, 200 - len(self.out_sample_residuals_by_bin[k]))
+                        if len(v) < free_space:
+                            self.out_sample_residuals_by_bin[k] = np.hstack((
+                                self.out_sample_residuals_by_bin[k],
+                                v
+                            ))
+                        else:
+                            self.out_sample_residuals_by_bin[k] = np.hstack((
+                                self.out_sample_residuals_by_bin[k],
+                                v[:free_space]
+                            ))
+                    else:
+                        self.out_sample_residuals_by_bin[k] = v
+            else:
+                self.out_sample_residuals_by_bin = residuals_by_bin
+
+            for k, v in self.out_sample_residuals_by_bin.items():
+                rng = np.random.default_rng(seed=123)
+                if len(v) > 200:
+                    # Only up to 200 residuals are stored per bin
+                    sample = rng.choice(a=v, size=200, replace=False)
+                    self.out_sample_residuals_by_bin[k] = sample
+                
+            self.out_sample_residuals = np.concatenate(list(
+                                            self.out_sample_residuals_by_bin.values()
+                                        ))
+
+            for k in self.in_sample_residuals_by_bin.keys():
+                if k not in self.out_sample_residuals_by_bin:
+                    self.out_sample_residuals_by_bin[k] = np.array([])
+            
+            empty_bins = [k for k, v in self.out_sample_residuals_by_bin.items() if len(v) == 0]
+            if empty_bins:
+                warnings.warn(
+                    f"The following bins have no out of sample residuals: {empty_bins}. "
+                    f"This may be due to the fact that no predicted values fall in the "
+                    f"interval {[self.binner_intervals[bin] for bin in empty_bins]}."
+                )
 
     
     def get_feature_importances(
