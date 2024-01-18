@@ -83,8 +83,9 @@ class ForecasterAutoreg(ForecasterBase):
     fit_kwargs : dict, default `None`
         Additional arguments to be passed to the `fit` method of the regressor.
     binner_kwargs : dict, default `None`
-        Additional arguments to be passed to the `KBinsDiscretizer` used to bin
-        residuals according to the predicted values.
+        Additional arguments to be passed to the `KBinsDiscretizer` used to 
+        discretize residuals into k bins according to the predicted values each
+        residual is associated with.
         **New in version 0.12.0**
     forecaster_id : str, int, default `None`
         Name used as an identifier of the forecaster.
@@ -118,12 +119,14 @@ class ForecasterAutoreg(ForecasterBase):
         **WARNING: This argument is newly introduced and requires special attention. It
         is still experimental and may undergo changes.**
         **New in version 0.12.0**
-    biner : sklearn.preprocessing.KBinsDiscretizer
-        Biner used to bin residuals according to the predicted values.
+    binner : sklearn.preprocessing.KBinsDiscretizer
+        KBinsDiscretizer used to discretize residuals into k bins according to the
+        predicted values each residual is associated with.
         **New in version 0.12.0**
     binner_kwargs : dict, default `None`
-        Additional arguments to be passed to the `KBinsDiscretizer` used to bin
-        residuals according to the predicted values.
+        Additional arguments to be passed to the `KBinsDiscretizer` used to 
+        discretize residuals into k bins according to the predicted values each
+        residual is associated with.
         **New in version 0.12.0**
     source_code_weight_func : str
         Source code of the custom function used to create weights.
@@ -167,8 +170,8 @@ class ForecasterAutoreg(ForecasterBase):
         1000 values. If `transformer_y` is not `None`, residuals are stored in the
         transformed scale.
     in_sample_residuals_by_bin : dict
-        Residuals of the model when predicting training data binned according to
-        the predicted values. Only stored up to 200 values per bin. If `transformer_y`
+        In sample residuals binned according to the predicted value each residual
+        is associated with. Only stored up to 200 values per bin. If `transformer_y`
         is not `None`, residuals are stored in the transformed scale.
         **New in version 0.12.0**
     out_sample_residuals : numpy ndarray
@@ -177,8 +180,8 @@ class ForecasterAutoreg(ForecasterBase):
         are assumed to be in the transformed scale. Use `set_out_sample_residuals` 
         method to set values.
     out_sample_residuals_by_bin : dict
-        Residuals of the model when predicting non training data binned according
-        to the predicted values. Only stored up to 200 values per bin. If `transformer_y`
+        Out of sample residuals binned according to the predicted value each residual
+        is associated with. Only stored up to 200 values per bin. If `transformer_y`
         is not `None`, residuals are assumed to be in the transformed scale.
         **New in version 0.12.0**
     fitted : bool
@@ -580,12 +583,10 @@ class ForecasterAutoreg(ForecasterBase):
                                         index = X_train.index
                                     )
             
-            self._binnarize_residuals(
-                y_true     = y_train,
-                y_pred     = in_sample_predictions,
-                binning    = True,
-                method     = 'quantile',
-                n_bins     = 10
+            self._binning_in_sample_residuals(
+                y_true = y_train,
+                y_pred = in_sample_predictions,
+
             )
         
         # The last time window of training data is stored so that lags needed as
@@ -594,39 +595,29 @@ class ForecasterAutoreg(ForecasterBase):
         self.last_window = y.iloc[-self.window_size:].copy()
 
 
-    def _binnarize_residuals(
+    def _binning_in_sample_residuals(
             self,
             y_true: pd.Series,
             y_pred: pd.Series,
-            binning: bool=True,
-            method: str='quantile',
-            n_bins: int=10
     ) -> None:
         """
-        Bin residuals according to the predicted values. Bins are created training
-        a sklearn.preprocessing.KBinsDiscretizer stored in the forecaster.
-        Residuals are stored in the forecaster object as `in_sample_residuals` and
-        `in_sample_residuals_by_bin`.
+        Binning residuals according to the predicted value each residual is
+        associated with. First a sklearn.preprocessing.KBinsDiscretizer
+        is fitted to the predicted values. Then, residuals are binned according
+        to the predicted value each residual is associated with. Residuals are
+        stored in the forecaster object as `in_sample_residuals` and
+        `in_sample_residuals_by_bin`. Only up to 200 residuals are stored per bin.
 
         Parameters
         ----------
         y_true : pandas Series
             True values of the time series.
         y_pred : pandas Series
-            Predicted values of the time series.
-        binning : bool, default `True`
-            If `True`, residuals are binned according to the predicted values.
-        method : str, default `quantile`
-            Method used to bin residuals. Available methods are: `quantile` and
-            `uniform`. See sklearn.preprocessing.KBinsDiscretizer for more
-            information.
-        n_bins : int, default `10`
-            Number of bins used to bin residuals.
-        
+            Predicted values of the time series.     
+
         Returns
         -------
         None
-        
         
         """
 
@@ -638,7 +629,6 @@ class ForecasterAutoreg(ForecasterBase):
                     left_index=True,
                     right_index=True
                 )
-
         self.binner.fit(data[['prediction']].to_numpy())
         data['bin'] = self.binner.transform(data[['prediction']].to_numpy()).astype(int)
         self.in_sample_residuals_by_bin = (
@@ -1367,22 +1357,27 @@ class ForecasterAutoreg(ForecasterBase):
         """
         Set new values to the attribute `out_sample_residuals`. Out of sample
         residuals are meant to be calculated using observations that did not
-        participate in the training process.
+        participate in the training process. If `y_pred` is provided, residuals
+        are binned according to the predicted value they are associated with. If
+        `y_pred` is `None`, residuals are stored without binning. Only up to 200
+        residuals are stored per bin.
         
         Parameters
         ----------
         residuals : pandas Series, numpy ndarray
-            Values of residuals. If len(residuals) > 1000, only a random sample
-            of 1000 values are stored.
+            Values of residuals. If `y_pred` is `None`, at most 1000 values are
+            stored. If `y_pred` is not `None`, at most 200 * n_bins values are
+            stored, where `n_bins` is the number of bins used by `self.binner`.
         y_pred : pandas Series, numpy ndarray, default `None`
             Predicted values of the time series from which the residuals have been
             calculated. This argument is used to bin residuals according to the
             predicted values. If `y_pred` is `None`, residuals are not binned.
+            **New in version 0.12.0**
         append : bool, default `True`
             If `True`, new residuals are added to the once already stored in the
-            attribute `out_sample_residuals`. Once the limit of 200 values per bin is
-            reached, no more values are appended. If False, `out_sample_residuals`
-            is overwritten with the new residuals.
+            forecaster. Once the limit of 200 values per bin is reached, no more values
+            are appended. If False, stored residuals are overwritten with the new
+            residuals.
         transform : bool, default `True`
             If `True`, new residuals are transformed using self.transformer_y.
         random_state : int, default `123`
@@ -1517,9 +1512,18 @@ class ForecasterAutoreg(ForecasterBase):
             if empty_bins:
                 warnings.warn(
                     f"The following bins have no out of sample residuals: {empty_bins}. "
-                    f"This may be due to the fact that no predicted values fall in the "
-                    f"interval {[self.binner_intervals[bin] for bin in empty_bins]}."
+                    f"No predicted values fall in the interval "
+                    f"{[self.binner_intervals[bin] for bin in empty_bins]}. "
+                    f"Empty bins will be filled with a random sample of residuals from "
+                    f"the other bins."
                 )
+                for k in empty_bins:
+                    rng = np.random.default_rng(seed=123)
+                    self.out_sample_residuals_by_bin[k] = rng.choice(
+                                                              a=self.out_sample_residuals,
+                                                              size=100,
+                                                              replace=True
+                                                          )
 
     
     def get_feature_importances(
