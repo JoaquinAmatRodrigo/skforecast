@@ -85,7 +85,7 @@ class ForecasterAutoreg(ForecasterBase):
     binner_kwargs : dict, default `None`
         Additional arguments to be passed to the `KBinsDiscretizer` used to 
         discretize residuals into k bins according to the predicted values each
-        residual is associated with.
+        residual is associated with. Argument `encode` is always set to `ordinal`.
         **New in version 0.12.0**
     forecaster_id : str, int, default `None`
         Name used as an identifier of the forecaster.
@@ -126,7 +126,7 @@ class ForecasterAutoreg(ForecasterBase):
     binner_kwargs : dict, default `None`
         Additional arguments to be passed to the `KBinsDiscretizer` used to 
         discretize residuals into k bins according to the predicted values each
-        residual is associated with.
+        residual is associated with. Argument `encode` is always set to `ordinal`.
         **New in version 0.12.0**
     source_code_weight_func : str
         Source code of the custom function used to create weights.
@@ -249,6 +249,7 @@ class ForecasterAutoreg(ForecasterBase):
             }
         else:
             self.binner_kwargs = binner_kwargs
+            self.binner_kwargs['encode'] = 'ordinal'
         self.binner = KBinsDiscretizer(**self.binner_kwargs)
         self.binner_intervals = None
 
@@ -585,7 +586,7 @@ class ForecasterAutoreg(ForecasterBase):
             
             self._binning_in_sample_residuals(
                 y_true = y_train,
-                y_pred = in_sample_predictions,
+                y_pred = in_sample_predictions
 
             )
         
