@@ -21,9 +21,11 @@ import inspect
 import skforecast
 from ..ForecasterBase import ForecasterBase
 from ..exceptions import IgnoredArgumentWarning
+from ..exceptions import MissingValuesExogWarning
 from ..utils import initialize_lags
 from ..utils import initialize_weights
 from ..utils import check_select_fit_kwargs
+from ..utils import check_y
 from ..utils import check_exog
 from ..utils import get_exog_dtypes
 from ..utils import check_exog_dtypes
@@ -35,6 +37,7 @@ from ..utils import preprocess_exog
 from ..utils import expand_index
 from ..utils import transform_series
 from ..utils import transform_dataframe
+from ..preprocessing import TimeSeriesDifferentiator
 
 logging.basicConfig(
     format = '%(name)-10s %(levelname)-5s %(message)s', 
@@ -87,6 +90,15 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         - If a `dict` is provided, a weight of 1 is given to all series not present
         in `series_weights`.
         - If `None`, all levels have the same weight.
+    differentiation : int, default `None`
+        Order of differencing applied to the time series before training the forecaster.
+        If `None`, no differencing is applied. The order of differentiation is the number
+        of times the differencing operation is applied to a time series. Differencing
+        involves computing the differences between consecutive data points in the series.
+        Differentiation is reversed in the output of `predict()` and `predict_interval()`.
+        **WARNING: This argument is newly introduced and requires special attention. It
+        is still experimental and may undergo changes.**
+        **New in version 0.12.0**
     fit_kwargs : dict, default `None`
         Additional arguments to be passed to the `fit` method of the regressor.
     forecaster_id : str, int, default `None`
@@ -137,6 +149,14 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         - If a `dict` is provided, a weight of 1 is given to all series not present
         in `series_weights`.
         - If `None`, all levels have the same weight.
+    differentiation : int
+        Order of differencing applied to the time series before training the 
+        forecaster.
+    differentiator : TimeSeriesDifferentiator
+        Skforecast object used to differentiate the time series.
+    differentiator_ : dict
+        Dictionary with the `differentiator` for each series. It is created cloning the
+        objects in `differentiator` and is used internally to avoid overwriting.
     series_weights_ : dict
         Weights associated with each series.It is created as a clone of `series_weights`
         and is used internally to avoid overwriting.
@@ -219,6 +239,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         transformer_exog: Optional[object]=None,
         weight_func: Optional[Union[Callable, dict]]=None,
         series_weights: Optional[dict]=None,
+        differentiation: Optional[int]=None,
         fit_kwargs: Optional[dict]=None,
         forecaster_id: Optional[Union[str, int]]=None
     ) -> None:
@@ -232,6 +253,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.source_code_weight_func = None
         self.series_weights          = series_weights
         self.series_weights_         = None
+        self.differentiation         = differentiation
+        self.differentiator          = None
+        self.differentiator_         = None
         self.index_type              = None
         self.index_freq              = None
         self.index_values            = None
@@ -262,6 +286,15 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             weight_func     = weight_func, 
             series_weights  = series_weights
         )
+
+        if self.differentiation is not None:
+            if not isinstance(differentiation, int) or differentiation < 1:
+                raise ValueError(
+                    (f"Argument `differentiation` must be an integer equal to or "
+                     f"greater than 1. Got {differentiation}.")
+                )
+            self.window_size += self.differentiation
+            self.differentiator = TimeSeriesDifferentiator(order=self.differentiation)
 
         self.fit_kwargs = check_select_fit_kwargs(
                               regressor  = regressor,
@@ -295,6 +328,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             f"Series levels (names): {self.series_col_names} \n"
             f"Series weights: {self.series_weights} \n"
             f"Weight function included: {True if self.weight_func is not None else False} \n"
+            f"Differentiation order: {self.differentiation} \n"
             f"Exogenous included: {self.included_exog} \n"
             f"Type of exogenous variable: {self.exog_type} \n"
             f"Exogenous variables names: {self.exog_col_names} \n"
@@ -362,6 +396,91 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         return X_data, y_data
 
 
+    def _create_train_X_y_single_series(
+        self,
+        y: pd.Series,
+        exog: Optional[Union[pd.Series, pd.DataFrame]]=None
+    ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.Series]:
+        """
+        Create training matrices from univariate time series and exogenous
+        variables. This method does not transform the exog variables.
+        
+        Parameters
+        ----------
+        y : pandas Series
+            Training time series.
+        exog : pandas Series, pandas DataFrame, default `None`
+            Exogenous variable/s included as predictor/s. Must have the same
+            number of observations as `y` and their indexes must be aligned.
+
+        Returns
+        -------
+        X_train_lags : pandas DataFrame
+            Training values of lags
+            Shape: (len(y) - self.max_lag, len(self.lags))
+        X_train_exog : pandas DataFrame
+            Training values of exogenous variables.
+            Shape: (len(y) - self.max_lag, len(exog.columns))
+        y_train : pandas Series
+            Values (target) of the time series related to each row of `X_train`.
+            Shape: (len(y) - self.max_lag, )
+        
+        """
+
+        series_name = y.name
+        check_y(y=y)
+        y = transform_series(
+                series            = y,
+                transformer       = self.transformer_series_[series_name],
+                fit               = True,
+                inverse_transform = False
+            )
+        
+        # TODO: check if this is necessary
+        y_values, y_index = preprocess_y(y=y)
+
+        if self.differentiation is not None:
+            y_values = self.differentiator_[series_name].fit_transform(y_values)
+        
+        X_train, y_train = self._create_lags(y=y_values, series_name=series_name)
+        X_train_lags = pd.DataFrame(
+                           data    = X_train,
+                           columns = self.X_train_col_names,
+                           index   = y_index[self.max_lag: ]
+                       )
+
+        if self.included_exog:
+            if exog is not None:
+                # The first `self.max_lag` positions have to be removed from exog
+                # since they are not in X_train.
+                X_train_exog = exog.iloc[self.max_lag:, ]
+            else:
+                X_train_exog = pd.DataFrame(
+                                   data    = np.nan,
+                                   columns = ['_dummy_exog_col_to_keep_shape'],
+                                   index   = y_index[self.max_lag: ]
+                               )
+        else:
+            X_train_exog = None
+
+        y_train = pd.Series(
+                      data  = y_train,
+                      index = y_index[self.max_lag: ],
+                      name  = 'y'
+                  )
+
+        if self.differentiation is not None:
+            X_train_lags = X_train_lags.iloc[self.differentiation: ]
+            y_train = y_train.iloc[self.differentiation: ]
+            if X_train_exog is not None:
+                X_train_exog = X_train_exog.iloc[self.differentiation: ]
+
+        # assert X_train_lags.index.equals(y_train.index)
+        # assert X_train_exog.index.equals(y_train.index)
+                        
+        return X_train_lags, X_train_exog, y_train
+
+
     def create_train_X_y(
         self,
         series: pd.DataFrame,
@@ -393,141 +512,261 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         
         """
 
-        if not isinstance(series, pd.DataFrame):
-            raise TypeError(f"`series` must be a pandas DataFrame. Got {type(series)}.")
+        if isinstance(series, pd.DataFrame):
+            # _, series_index = preprocess_y(series=series, return_values=False)
+            # series_dict = series.copy()
+            # series_dict.index = series_index
+            series_dict = series.to_dict("series")
+        elif isinstance(series, dict):
+            series_dict = series
 
-        series_col_names = list(series.columns)
-
-        if self.transformer_series is None:
-            self.transformer_series_ = {serie: None for serie in series_col_names}
-        elif not isinstance(self.transformer_series, dict):
-            self.transformer_series_ = {serie: clone(self.transformer_series) 
-                                        for serie in series_col_names}
-        else:
-            self.transformer_series_ = {serie: None for serie in series_col_names}
-            # Only elements already present in transformer_series_ are updated
-            self.transformer_series_.update(
-                (k, v) for k, v in deepcopy(self.transformer_series).items() 
-                if k in self.transformer_series_
-            )
-            series_not_in_transformer_series = set(series.columns) - set(self.transformer_series.keys())
-            if series_not_in_transformer_series:
-                warnings.warn(
-                    (f"{series_not_in_transformer_series} not present in `transformer_series`."
-                     f" No transformation is applied to these series."),
-                     IgnoredArgumentWarning
+            not_valid_series = [k
+                                for k, v in series_dict.items()
+                                if not isinstance(v, (pd.Series, pd.DataFrame))]
+            if not_valid_series:
+                raise TypeError(
+                    (f"All series must be a named pandas Series or a pandas Dataframe. "
+                     f"with a single column. Review series: {not_valid_series}")
                 )
-        
-        if exog is not None:
-            if len(exog) != len(series):
-                raise ValueError(
-                    (f"`exog` must have same number of samples as `series`. "
-                     f"length `exog`: ({len(exog)}), length `series`: ({len(series)})")
-                )
-            check_exog(exog=exog, allow_nan=True)
-            if isinstance(exog, pd.Series):
-                exog = transform_series(
-                           series            = exog,
-                           transformer       = self.transformer_exog,
-                           fit               = True,
-                           inverse_transform = False
-                       )
-            else:
-                exog = transform_dataframe(
-                           df                = exog,
-                           transformer       = self.transformer_exog,
-                           fit               = True,
-                           inverse_transform = False
-                       )
             
-            check_exog(exog=exog, allow_nan=False)
-            check_exog_dtypes(exog)
-            self.exog_dtypes = get_exog_dtypes(exog=exog)
+            for k, v in series_dict.items():
+                if isinstance(v, pd.DataFrame):
+                    if v.shape[1] != 1:
+                        raise ValueError(
+                            (f"All series must be a named pandas Series or a pandas Dataframe "
+                             f"with a single column. Review series: {k}")
+                        )
+                    series_dict[k] = v.iloc[:, 0]
 
-            _, _ = preprocess_exog(exog=exog, return_values=False)
-            if not (exog.index[:len(series)] == series.index).all():
+                series_dict[k].name = k
+
+            not_valid_index = [k
+                               for k, v in series_dict.items()
+                               if not isinstance(v.index, pd.DatetimeIndex)]
+            if not_valid_index:
+                raise TypeError(
+                    (f"All series must have a DatetimeIndex index with the same frequency. "
+                     f"Review series: {not_valid_index}")
+                )
+
+            indexes_freq = [series.index.freq
+                            for series in series_dict.values()]
+            if not len(set(indexes_freq)) == 1:
                 raise ValueError(
-                    ("Different index for `series` and `exog`. They must be equal "
+                    (f"All series must have a DatetimeIndex index with the same frequency. "
+                     f"Found frequencies: {set(indexes_freq)}")
+                )
+        else:
+            raise TypeError(
+                (f"`series` must be a pandas DataFrame or a dict of DataFrames or Series. "
+                 f"Got {type(series)}.")
+            )
+        
+        # TODO: hacerlo return 
+        series_col_names = list(series.keys())
+        
+        exog_dict = {serie: None for serie in series_col_names}
+        if exog is not None:
+            
+            if not isinstance(exog, (pd.Series, pd.DataFrame, dict)):
+                raise TypeError(
+                    (f"`exog` must be a pandas Series, DataFrame or dict. "
+                     f"Got {type(exog)}.")
+                )
+            
+            if isinstance(exog, (pd.Series, pd.DataFrame)): 
+
+                if isinstance(series, dict):
+                    raise TypeError(
+                        (f"`exog` must be a dict of DataFrames or Series if "
+                         f"`series` is a dict. Got {type(exog)}.")
+                    )
+                
+                # TODO: check_exog para ver si poner warnings de NaNs
+
+                # TODO: check if this is necessary (if preprocess series need preprocess exog)
+                # _, _ = preprocess_exog(exog=exog, return_values=False)
+                if not (exog.index == series.index).all():
+                    raise ValueError(
+                        ("Different index for `series` and `exog`. They must be equal "
+                         "to ensure the correct alignment of values.")
+                    )
+
+                exog_dict = {serie: exog for serie in series_col_names}
+            else:       
+                # Only elements already present in exog_dict are updated
+                exog_dict.update(
+                    (k, v) for k, v in exog.items() 
+                    if k in exog_dict
+                )
+                series_not_in_exog = set(series_col_names) - set(exog.keys())
+                if series_not_in_exog:
+                    warnings.warn(
+                        (f"{series_not_in_exog} not present in `exog`. All values "
+                         f"of the exogenous variables for these series will be NaN."),
+                         MissingValuesExogWarning
+                    )
+
+                if isinstance(series, pd.DataFrame):
+                    for k, v in exog_dict.items():
+                        if v and not (v.index == series.index).all():
+                            raise ValueError(
+                                (f"Different index for `series` {k} and its `exog`. "
+                                 f"When `series` is a pandas DataFrame, they must "
+                                 f"be equal to ensure the correct alignment of values.")
+                            )
+            
+            # Convert exog to dataframe if it is a series
+            for k, v in exog_dict.items():
+                check_exog(exog=v, allow_nan=True)
+                if isinstance(v, pd.Series):
+                    v = v.to_frame()
+                exog_dict[k] = v
+
+            exog_col_names = list(set(column for df in exog_dict.values() 
+                                      for column in df.columns.to_list()))
+
+            # Check that all exog have the same dtypes for common columns
+            exog_dtype_dict = {col_name: set() for col_name in exog_col_names}
+            for v in exog_dict.values():
+                if v is not None:
+                    for col_name in v.columns:
+                        exog_dtype_dict[col_name].add(v[col_name].dtype.name)
+            
+            for col_name, dtypes in exog_dtype_dict.items():
+                if len(dtypes) > 1:
+                    raise TypeError(
+                        (f"Column {col_name} has different dtypes in different exog "
+                         f"DataFrames or Series.")
+                    )
+
+            if len(set(exog_col_names) - set(series_col_names)) != len(exog_col_names):
+                raise ValueError(
+                    (f"`exog` cannot contain a column named the same as one of the "
+                     f"series (column names of series).\n"
+                     f"    `series` columns : {series_col_names}.\n"
+                     f"    `exog`   columns : {exog_col_names}.")
+                )
+
+        if not self.fitted:
+            if self.transformer_series is None:
+                self.transformer_series_ = {serie: None for serie in self.series_col_names}
+            elif not isinstance(self.transformer_series, dict):
+                self.transformer_series_ = {serie: clone(self.transformer_series) 
+                                            for serie in self.series_col_names}
+            else:
+                self.transformer_series_ = {serie: None for serie in self.series_col_names}
+                # Only elements already present in transformer_series_ are updated
+                self.transformer_series_.update(
+                    (k, v) for k, v in deepcopy(self.transformer_series).items() 
+                    if k in self.transformer_series_
+                )
+                series_not_in_transformer_series = set(self.series_col_names) - set(self.transformer_series.keys())
+                if series_not_in_transformer_series:
+                    warnings.warn(
+                        (f"{series_not_in_transformer_series} not present in `transformer_series`."
+                        f" No transformation is applied to these series."),
+                        IgnoredArgumentWarning
+                    )
+        
+        if self.differentiation is None:
+            self.differentiator_ = {serie: None for serie in self.series_col_names}
+        else:
+            if not self.fitted:
+                self.differentiator_ = {serie: clone(self.self.differentiator) 
+                                        for serie in self.series_col_names}
+            
+        # Remove leading and trailing nans from each series.
+        for k, v in series_dict.items():
+            series_dict[k] = v.loc[v.first_valid_index() : v.last_valid_index()]
+                    
+        X_train_lags_buffer = []
+        X_train_exog_buffer = []
+        y_train_buffer = []
+        
+        # TODO: review X_train_col_names
+        X_train_col_names = [f"lag_{i}" for i in self.lags]
+        for key in series_dict.keys():
+
+            y = series_dict[key]
+            exog_level = exog_dict[key]
+
+            if self.included_exog:
+
+                if y.index.dtype.name != exog_level.index.dtype.name:
+                    raise TypeError(
+                        (f"Series '{key}' and its `exog` must have the same index type.")
+                    )
+                
+                y_freq = y.index.freq if isinstance(y.index, pd.DatetimeIndex) else y.index.step
+                exog_freq = exog_level.index.freq if isinstance(exog_level.index, pd.DatetimeIndex) else exog_level.index.step
+                if y_freq != exog_freq:
+                    raise TypeError(
+                        (f"Series '{key}' and its `exog` must have the same frequency/step.")
+                    )
+
+                index_intersection = y.index.intersection(exog_level.index)
+                if len(index_intersection) == 0:
+                    warnings.warn(
+                        (f"Series '{key}' and its `exog` do not have the same index. "
+                         f"All exog values will be NaN for the period of the series."),
+                        MissingValuesExogWarning
+                    )
+                elif len(index_intersection) != len(y):
+                    warnings.warn(
+                        (f"Series '{key}' and its `exog` do not have the same length. "
+                         f"Exog values will be NaN for the not matched period of the series."),
+                        MissingValuesExogWarning
+                    )
+                
+                exog_level = exog_level.loc[index_intersection]
+                if len(index_intersection) != len(y):
+                    exog_level = exog_level.reindex(y.index, fill_value=np.nan)
+
+            X_train_lags, X_train_exog, y_train = (
+                self._create_train_X_y_single_series(y=y, exog=exog_level)
+            )
+            X_train_lags['_level_skforecast'] = key
+            
+            X_train_lags_buffer.append(X_train_lags)
+            X_train_exog_buffer.append(X_train_exog)
+            y_train_buffer.append(y_train)
+
+        X_train = pd.concat(X_train_lags_buffer, axis=0)
+        y_train = pd.concat(y_train_buffer, axis=0)
+
+        X_train = pd.get_dummies(X_train, columns=['_level_skforecast'], dtype=float)
+        X_train.columns = X_train.columns.str.replace('_level_skforecast', '')
+
+        if self.included_exog:
+            X_train_exog = pd.concat(X_train_exog_buffer, axis=0)
+            if '_dummy_exog_col_to_keep_shape' in X_train_exog.columns:
+                X_train_exog = X_train_exog.drop(columns=['_dummy_exog_col_to_keep_shape'])
+            X_train_exog = transform_dataframe(
+                               df                = X_train_exog,
+                               transformer       = self.transformer_exog,
+                               fit               = True,
+                               inverse_transform = False
+                           )
+            
+            check_exog_dtypes(X_train_exog)
+            self.exog_dtypes = get_exog_dtypes(exog=X_train_exog)
+
+            # TODO: check if this is necessary
+            if not (X_train_exog.index == X_train.index).all():
+                raise ValueError(
+                    ("Different index for `y` and `exog`. They must be equal "
                      "to ensure the correct alignment of values.")
                 )
-        
-        X_levels = []
-        len_series = []
-        X_train_col_names = [f"lag_{lag}" for lag in self.lags]
+            X_train = pd.concat([X_train, X_train_exog], axis=1)
 
-        for i, serie in enumerate(series.columns):
-
-            y = series[serie]
-            y_values = y.to_numpy()
-
-            if np.isnan(y_values).all():
-                raise ValueError(f"All values of series '{serie}' are NaN.")
-            
-            first_no_nan_idx = np.argmax(~np.isnan(y_values))
-            y_values = y_values[first_no_nan_idx:]
-
-            if np.isnan(y_values).any():
-                raise ValueError(
-                    (f"'{serie}' Time series has missing values in between or "
-                     f"at the end of the time series. When working with series "
-                     f"of different lengths, all series must be complete after "
-                     f"the first non-null value.")
-                )
-            
-            y = transform_series(
-                    series            = y.iloc[first_no_nan_idx:],
-                    transformer       = self.transformer_series_[serie],
-                    fit               = True,
-                    inverse_transform = False
-                )
-
-            y_values = y.to_numpy()
-            X_train_values, y_train_values = self._create_lags(y=y_values, series_name=serie)
-
-            if i == 0:
-                X_train = X_train_values
-                y_train = y_train_values
-            else:
-                X_train = np.concatenate((X_train, X_train_values), axis=0)
-                y_train = np.concatenate((y_train, y_train_values), axis=0)
-
-            X_level = [serie]*len(X_train_values)
-            X_levels.extend(X_level)
-            len_series.append(len(y_train_values))
-        
-        X_levels = pd.Series(X_levels)
-        X_levels = pd.get_dummies(X_levels, dtype=float)
-
-        X_train = pd.DataFrame(
-                      data    = X_train,
-                      columns = X_train_col_names
-                  )
-
-        if exog is not None:
-            # The first `self.max_lag` positions have to be removed from exog
-            # since they are not in X_train. Then Exog is cloned as many times 
-            # as there are series, taking into account the length of the series.
-            exog_to_train = [exog.iloc[-length:, ] for length in len_series]
-            exog_to_train = pd.concat(exog_to_train).reset_index(drop=True)
-        else:
-            exog_to_train = None
-        
-        X_train = pd.concat([X_train, exog_to_train, X_levels], axis=1)
         self.X_train_col_names = X_train.columns.to_list()
+        y_train_index = y_train.index.to_numpy()
 
-        y_train = pd.Series(
-                      data = y_train,
-                      name = 'y'
-                  )
+        # TODO: what we do with the NaNs?
 
-        _, y_index = preprocess_y(y=series, return_values=False)
-
-        y_index_numpy = y_index.to_numpy()
-        y_train_index = pd.Index(
-                            np.concatenate(
-                                [y_index_numpy[-length:, ] for length in len_series]
-                            )
-                        )
+        # TODO: check if this is necessary
+        y_index = None
 
         return X_train, y_train, y_index, y_train_index
 
@@ -574,8 +813,11 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                      IgnoredArgumentWarning
                 )
             self.series_weights_ = {col: 1. for col in series.columns}
-            self.series_weights_.update((k, v) for k, v in self.series_weights.items() 
-                                        if k in self.series_weights_)
+            self.series_weights_.update(
+                (k, v) 
+                for k, v in self.series_weights.items() 
+                if k in self.series_weights_
+            )
             weights_series = [np.repeat(self.series_weights_[serie], sum(X_train[serie])) 
                               for serie in series.columns]
             weights_series = np.concatenate(weights_series)
@@ -595,8 +837,11 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                     )
                 self.weight_func_ = {col: lambda x: np.ones_like(x, dtype=float) 
                                      for col in series.columns}
-                self.weight_func_.update((k, v) for k, v in self.weight_func.items() 
-                                         if k in self.weight_func_)
+                self.weight_func_.update(
+                    (k, v) 
+                    for k, v in self.weight_func.items() 
+                    if k in self.weight_func_
+                )
                 
             weights_samples = []
             for key in self.weight_func_.keys():
@@ -661,6 +906,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         """
         
         # Reset values in case the forecaster has already been fitted.
+        self.series_col_names    = None
         self.index_type          = None
         self.index_freq          = None
         self.index_values        = None
@@ -674,22 +920,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.in_sample_residuals = None
         self.fitted              = False
         self.training_range      = None
-        
-        self.series_col_names = list(series.columns)        
-
-        if exog is not None:
-            self.included_exog = True
-            self.exog_type = type(exog)
-            self.exog_col_names = \
-                 exog.columns.to_list() if isinstance(exog, pd.DataFrame) else [exog.name]
-
-            if len(set(self.exog_col_names) - set(self.series_col_names)) != len(self.exog_col_names):
-                raise ValueError(
-                    (f"`exog` cannot contain a column named the same as one of the "
-                     f"series (column names of series).\n"
-                     f"    `series` columns : {self.series_col_names}.\n"
-                     f"    `exog`   columns : {self.exog_col_names}.")
-                )
 
         X_train, y_train, y_index, y_train_index = self.create_train_X_y(series=series, exog=exog)
         sample_weight = self.create_sample_weights(
@@ -707,7 +937,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             )
         else:
             self.regressor.fit(X=X_train, y=y_train, **self.fit_kwargs)
-            
+
+        self.series_col_names = series_col_names
         self.fitted = True
         self.fit_date = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
         self.training_range = y_index[[0, -1]]
@@ -717,6 +948,11 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         else: 
             self.index_freq = y_index.step
         self.index_values = y_index
+
+        if exog is not None:
+            self.included_exog = True
+            self.exog_type = type(exog)
+            self.exog_col_names = exog_col_names
 
         in_sample_residuals = {}
         

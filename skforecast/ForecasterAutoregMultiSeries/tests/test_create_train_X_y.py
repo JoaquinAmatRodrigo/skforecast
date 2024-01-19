@@ -22,11 +22,11 @@ def test_create_train_X_y_TypeError_when_exog_is_categorical_of_no_int():
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=2)
 
     err_msg = re.escape(
-                ("If exog is of type category, it must contain only integer values. "
-                 "See skforecast docs for more info about how to include categorical "
-                 "features https://skforecast.org/"
-                 "latest/user_guides/categorical-features.html")
-              )
+        ("Categorical columns in exog must contain only integer values. "
+         "See skforecast docs for more info about how to include "
+         "categorical features https://skforecast.org/"
+         "latest/user_guides/categorical-features.html")
+    )
     with pytest.raises(TypeError, match = err_msg):
         forecaster.create_train_X_y(series=series, exog=exog)
 
@@ -55,7 +55,7 @@ def test_create_train_X_y_TypeError_when_series_not_dataframe():
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
     series = pd.Series(np.arange(7))
 
-    err_msg = re.escape(f"`series` must be a pandas DataFrame. Got {type(series)}.")
+    err_msg = re.escape(f"`series` must be a pandas DataFrame or dict. Got {type(series)}.")
     with pytest.raises(TypeError, match = err_msg):
         forecaster.create_train_X_y(series=series)
 
@@ -78,9 +78,9 @@ def test_create_train_X_y_UserWarning_when_levels_of_transformer_series_not_equa
     series_not_in_transformer_series = set(series.columns) - set(forecaster.transformer_series.keys())
     
     warn_msg = re.escape(
-                    (f"{series_not_in_transformer_series} not present in `transformer_series`."
-                     f" No transformation is applied to these series.")
-                )
+        (f"{series_not_in_transformer_series} not present in `transformer_series`."
+         f" No transformation is applied to these series.")
+    )
     with pytest.warns(UserWarning, match = warn_msg):
         forecaster.create_train_X_y(series=series)
 

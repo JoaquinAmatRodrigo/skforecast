@@ -104,17 +104,13 @@ class ForecasterAutoreg(ForecasterBase):
         index. For example, a function that assigns a lower weight to certain dates.
         Ignored if `regressor` does not have the argument `sample_weight` in its `fit`
         method. The resulting `sample_weight` cannot have negative values.
-    differentiation : int, default `None`
-        Order of differencing applied to the time series before training the forecaster.
-        If `None`, no differencing is applied. The order of differentiation is the number
-        of times the differencing operation is applied to a time series. Differencing
-        involves computing the differences between consecutive data points in the series.
-        Differentiation is reversed in the output of `predict()` and `predict_interval()`.
-        **WARNING: This argument is newly introduced and requires special attention. It
-        is still experimental and may undergo changes.**
-        **New in version 0.10.0**
     source_code_weight_func : str
         Source code of the custom function used to create weights.
+    differentiation : int
+        Order of differencing applied to the time series before training the 
+        forecaster.
+    differentiator : TimeSeriesDifferentiator
+        Skforecast object used to differentiate the time series.
     max_lag : int
         Maximum value of lag included in `lags`.
     window_size : int
@@ -190,9 +186,9 @@ class ForecasterAutoreg(ForecasterBase):
         self.transformer_y           = transformer_y
         self.transformer_exog        = transformer_exog
         self.weight_func             = weight_func
+        self.source_code_weight_func = None
         self.differentiation         = differentiation
         self.differentiator          = None
-        self.source_code_weight_func = None
         self.last_window             = None
         self.index_type              = None
         self.index_freq              = None
@@ -355,16 +351,21 @@ class ForecasterAutoreg(ForecasterBase):
         """
         
         check_y(y=y)
+        fit_transformer = False if self.fitted else True
         y = transform_series(
                 series            = y,
                 transformer       = self.transformer_y,
-                fit               = True,
+                fit               = fit_transformer,
                 inverse_transform = False
             )
         y_values, y_index = preprocess_y(y=y)
 
         if self.differentiation is not None:
-            y_values = self.differentiator.fit_transform(y_values)
+            if not self.fitted:
+                y_values = self.differentiator.fit_transform(y_values)
+            else:
+                differentiator = clone(self.differentiator)
+                y_values = differentiator.fit_transform(y_values)
         
         if exog is not None:
             if len(exog) != len(y):
@@ -377,20 +378,21 @@ class ForecasterAutoreg(ForecasterBase):
                 exog = transform_series(
                            series            = exog,
                            transformer       = self.transformer_exog,
-                           fit               = True,
+                           fit               = fit_transformer,
                            inverse_transform = False
                        )
             else:
                 exog = transform_dataframe(
                            df                = exog,
                            transformer       = self.transformer_exog,
-                           fit               = True,
+                           fit               = fit_transformer,
                            inverse_transform = False
                        )
             
             check_exog(exog=exog, allow_nan=False)
             check_exog_dtypes(exog)
-            self.exog_dtypes = get_exog_dtypes(exog=exog)
+            if not self.fitted:
+                self.exog_dtypes = get_exog_dtypes(exog=exog)
 
             _, exog_index = preprocess_exog(exog=exog, return_values=False)
             if not (exog_index[:len(y_index)] == y_index).all():
@@ -414,7 +416,9 @@ class ForecasterAutoreg(ForecasterBase):
             exog_to_train.index = exog_index[self.max_lag:]
             X_train = pd.concat((X_train, exog_to_train), axis=1)
 
-        self.X_train_col_names = X_train.columns.to_list()
+        if not self.fitted:
+            self.X_train_col_names = X_train.columns.to_list()
+        
         y_train = pd.Series(
                       data  = y_train,
                       index = y_index[self.max_lag: ],
@@ -422,8 +426,8 @@ class ForecasterAutoreg(ForecasterBase):
                   )
 
         if self.differentiation is not None:
-            y_train = y_train.iloc[self.differentiation: ]
             X_train = X_train.iloc[self.differentiation: ]
+            y_train = y_train.iloc[self.differentiation: ]
                         
         return X_train, y_train
 

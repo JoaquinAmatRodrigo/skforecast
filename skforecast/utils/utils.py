@@ -488,8 +488,8 @@ def check_interval(
 
         if interval[0] >= interval[1]:
             raise ValueError(
-                f"Lower interval bound ({interval[0]}) must be less than the "
-                f"upper interval bound ({interval[1]})."
+                (f"Lower interval bound ({interval[0]}) must be less than the "
+                 f"upper interval bound ({interval[1]}).")
             )
         
     if quantiles is not None:

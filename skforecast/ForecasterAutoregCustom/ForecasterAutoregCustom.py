@@ -77,7 +77,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         If `None`, no differencing is applied. The order of differentiation is the number
         of times the differencing operation is applied to a time series. Differencing
         involves computing the differences between consecutive data points in the series.
-        Diferentiarion is reversed in the output of `predict()` and `predict_interval()`.
+        Differentiation is reversed in the output of `predict()` and `predict_interval()`.
         **WARNING: This argument is newly introduced and requires special attention. It
         is still experimental and may undergo changes.**
         **New in version 0.10.0**
@@ -117,17 +117,13 @@ class ForecasterAutoregCustom(ForecasterBase):
         index. For example, a function that assigns a lower weight to certain dates.
         Ignored if `regressor` does not have the argument `sample_weight` in its `fit`
         method. The resulting `sample_weight` cannot have negative values.
-    differentiation : int, default `None`
-        Order of differencing applied to the time series before training the forecaster.
-        If `None`, no differencing is applied. The order of differentiation is the number
-        of times the differencing operation is applied to a time series. Differencing
-        involves computing the differences between consecutive data points in the series.
-        Differentiation is reversed in the output of `predict()` and `predict_interval()`.
-        **WARNING: This argument is newly introduced and requires special attention. It
-        is still experimental and may undergo changes.**
-        **New in version 0.10.0**
     source_code_weight_func : str
         Source code of the custom function used to create weights.
+    differentiation : int
+        Order of differencing applied to the time series before training the 
+        forecaster.
+    differentiator : TimeSeriesDifferentiator
+        Skforecast object used to differentiate the time series.
     last_window : pandas Series
         This window represents the most recent data observed by the predictor
         during its training phase. It contains the values needed to predict the
@@ -203,9 +199,9 @@ class ForecasterAutoregCustom(ForecasterBase):
         self.transformer_y              = transformer_y
         self.transformer_exog           = transformer_exog
         self.weight_func                = weight_func
+        self.source_code_weight_func    = None
         self.differentiation            = differentiation
         self.differentiator             = None
-        self.source_code_weight_func    = None
         self.last_window                = None
         self.index_type                 = None
         self.index_freq                 = None
@@ -351,8 +347,8 @@ class ForecasterAutoregCustom(ForecasterBase):
         if exog is not None:
             if len(exog) != len(y):
                 raise ValueError(
-                    f'`exog` must have same number of samples as `y`. '
-                    f'length `exog`: ({len(exog)}), length `y`: ({len(y)})'
+                    (f"`exog` must have same number of samples as `y`. "
+                     f"length `exog`: ({len(exog)}), length `y`: ({len(y)})")
                 )
             check_exog(exog=exog, allow_nan=True)
             if isinstance(exog, pd.Series):
