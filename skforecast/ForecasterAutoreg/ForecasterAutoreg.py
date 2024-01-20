@@ -827,7 +827,7 @@ class ForecasterAutoreg(ForecasterBase):
         steps: int,
         last_window: Optional[pd.Series]=None,
         exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-        n_boot: int=500,
+        n_boot: int=250,
         random_state: int=123,
         in_sample_residuals: bool=True,
         binned_residuals: bool=False,
@@ -880,6 +880,7 @@ class ForecasterAutoreg(ForecasterBase):
 
         """
 
+        # TODO: Move to check_predict_input(), validate why it was not there.
         if not in_sample_residuals:
             if not binned_residuals and self.out_sample_residuals is None:
                 raise ValueError(
@@ -972,8 +973,15 @@ class ForecasterAutoreg(ForecasterBase):
             # need to be restored.
             last_window_boot = last_window_values.copy()
             exog_boot = exog_values.copy() if exog is not None else None
-            rng = np.random.default_rng(seed=seeds[i])
 
+            rng = np.random.default_rng(seed=seeds[i])
+            if not binned_residuals:
+                sampled_residuals = rng.choice(
+                                        a       = residuals,
+                                        size    = steps,
+                                        replace = True
+                                    )
+            
             for step in range(steps):
 
                 prediction = self._recursive_predict(
@@ -982,11 +990,12 @@ class ForecasterAutoreg(ForecasterBase):
                                  exog        = exog_boot 
                              )
                 if binned_residuals:
-                    predicted_bin = self.binner.transform(prediction.reshape(1, -1)).astype(int)[0][0]
-                    residuals = residuals_by_bin[predicted_bin]
-                    sampled_residual = rng.choice(a=residuals, size=1)
+                    predicted_bin = (
+                        self.binner.transform(prediction.reshape(1, -1)).astype(int)[0][0]
+                    )
+                    sampled_residual = rng.choice(a=residuals_by_bin[predicted_bin], size=1)
                 else:
-                    sampled_residual = rng.choice(a=residuals, size=1)
+                    sampled_residual = sampled_residuals[step]
 
                 prediction_with_residual  = prediction + sampled_residual
                 boot_predictions[step, i] = prediction_with_residual[0]
@@ -994,7 +1003,6 @@ class ForecasterAutoreg(ForecasterBase):
                                        last_window_boot[1:],
                                        prediction_with_residual
                                    )
-                
                 if exog is not None:
                     exog_boot = exog_boot[1:]
 
@@ -1027,7 +1035,7 @@ class ForecasterAutoreg(ForecasterBase):
         last_window: Optional[pd.Series]=None,
         exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
         interval: list=[5, 95],
-        n_boot: int=500,
+        n_boot: int=250,
         random_state: int=123,
         in_sample_residuals: bool=True,
         binned_residuals: bool=False
@@ -1119,7 +1127,7 @@ class ForecasterAutoreg(ForecasterBase):
         last_window: Optional[pd.Series]=None,
         exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
         quantiles: list=[0.05, 0.5, 0.95],
-        n_boot: int=500,
+        n_boot: int=250,
         random_state: int=123,
         in_sample_residuals: bool=True,
         binned_residuals: bool=False
@@ -1199,7 +1207,7 @@ class ForecasterAutoreg(ForecasterBase):
         distribution: object,
         last_window: Optional[pd.Series]=None,
         exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-        n_boot: int=500,
+        n_boot: int=250,
         random_state: int=123,
         in_sample_residuals: bool=True,
         binned_residuals: bool=False
