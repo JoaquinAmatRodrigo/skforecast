@@ -13,13 +13,14 @@ from skforecast.utils import save_forecaster
 from skforecast.utils import load_forecaster
 from skforecast.exceptions import SkforecastVersionWarning
 from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import StandardScaler
 
 
 def test_save_and_load_forecaster_persistence():
     """ 
     Test if a loaded forecaster is exactly the same as the original one.
     """
-    forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3)
+    forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3, transformer_y=StandardScaler())
     rng = np.random.default_rng(12345)
     y = pd.Series(rng.normal(size=100))
     forecaster.fit(y=y)
@@ -31,10 +32,17 @@ def test_save_and_load_forecaster_persistence():
         attribute_forecaster = forecaster.__getattribute__(key)
         attribute_forecaster_loaded = forecaster_loaded.__getattribute__(key)
 
-        if key == 'regressor':
+        if key in ['regressor', 'binner', 'transformer_y', 'transformer_exog']:
             assert joblib.hash(attribute_forecaster) == joblib.hash(attribute_forecaster_loaded)
         elif isinstance(attribute_forecaster, (np.ndarray, pd.Series, pd.DataFrame, pd.Index)):
             assert (attribute_forecaster == attribute_forecaster_loaded).all()
+        elif isinstance(attribute_forecaster, dict):
+            assert attribute_forecaster.keys() == attribute_forecaster_loaded.keys()
+            for k in attribute_forecaster.keys():
+                if isinstance(attribute_forecaster[k], (np.ndarray, pd.Series, pd.DataFrame, pd.Index)):
+                    assert (attribute_forecaster[k] == attribute_forecaster_loaded[k]).all()
+                else:
+                    assert attribute_forecaster[k] == attribute_forecaster_loaded[k]
         else:
             assert attribute_forecaster == attribute_forecaster_loaded
 

@@ -1376,7 +1376,7 @@ class ForecasterAutoreg(ForecasterBase):
         residuals : pandas Series, numpy ndarray
             Values of residuals. If `y_pred` is `None`, at most 1000 values are
             stored. If `y_pred` is not `None`, at most 200 * n_bins values are
-            stored, where `n_bins` is the number of bins used by `self.binner`.
+            stored, where `n_bins` is the number of bins used in `self.binner`.
         y_pred : pandas Series, numpy ndarray, default `None`
             Predicted values of the time series from which the residuals have been
             calculated. This argument is used to bin residuals according to the
@@ -1412,15 +1412,15 @@ class ForecasterAutoreg(ForecasterBase):
 
         if y_pred is not None and len(residuals) != len(y_pred):
             raise ValueError(
-                ("`residuals` and `y_pred` must have the same length, but found "
-                 f"{len(residuals)} and {len(y_pred)}.")
+                f"`residuals` and `y_pred` must have the same length, but found "
+                f"{len(residuals)} and {len(y_pred)}."
             )
 
         if isinstance(residuals, pd.Series) and isinstance(y_pred, pd.Series):
             if not residuals.index.equals(y_pred.index):
                 raise ValueError(
-                    ("`residuals` and `y_pred` must have the same index, but found "
-                     f"{residuals.index} and {y_pred.index}.")
+                    f"`residuals` and `y_pred` must have the same index, but found "
+                    f"{residuals.index} and {y_pred.index}."
                 )
 
         if isinstance(residuals, np.ndarray):

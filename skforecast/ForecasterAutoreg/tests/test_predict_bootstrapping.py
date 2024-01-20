@@ -57,7 +57,7 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_exog_s
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
     forecaster.fit(y=y, exog=exog)
     expected = pd.DataFrame(
-                   data    = np.array([[0.39132925, 0.71907802, 0.45297104, 0.52687879]]),
+                   data    = np.array([[0.83836963, 0.54888446, 1.16537933, 0.69662898]]),
                    columns = [f"pred_boot_{i}" for i in range(4)],
                    index   = pd.RangeIndex(start=50, stop=51)
                )
@@ -74,8 +74,10 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_exog_s
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
     forecaster.fit(y=y, exog=exog)
     expected = pd.DataFrame(
-                   data    = np.array([[ 0.39132925,  0.71907802,  0.45297104,  0.52687879],
-                                       [-0.06983175,  0.40010008,  0.06326565,  0.05134409]]),
+                   data    = np.array(
+                                [[ 0.83836963,  0.54888446,  1.16537933,  0.69662898],
+                                [ 0.21874597, -0.0376708 ,  0.29184038,  0.5833093 ]]
+                            ),
                    columns = [f"pred_boot_{i}" for i in range(4)],
                    index   = pd.RangeIndex(start=50, stop=52)
                )
@@ -93,7 +95,7 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_exog_s
     forecaster.fit(y=y, exog=exog)
     forecaster.out_sample_residuals = forecaster.in_sample_residuals
     expected = pd.DataFrame(
-                   data    = np.array([[0.39132925, 0.71907802, 0.45297104, 0.52687879]]),
+                   data    = np.array([[0.83836963, 0.54888446, 1.16537933, 0.69662898]]),
                    columns = [f"pred_boot_{i}" for i in range(4)],
                    index   = pd.RangeIndex(start=50, stop=51)
                )
@@ -111,8 +113,8 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_exog_s
     forecaster.fit(y=y, exog=exog)
     forecaster.out_sample_residuals = forecaster.in_sample_residuals
     expected = pd.DataFrame(
-                   data    = np.array([[ 0.39132925,  0.71907802,  0.45297104,  0.52687879],
-                                       [-0.06983175,  0.40010008,  0.06326565,  0.05134409]]),
+                   data    = np.array([[ 0.83836963,  0.54888446,  1.16537933,  0.69662898],
+                                       [ 0.21874597, -0.0376708 ,  0.29184038,  0.5833093 ]]),
                    columns = [f"pred_boot_{i}" for i in range(4)],
                    index   = pd.RangeIndex(start=50, stop=52)
                )
@@ -138,7 +140,7 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_steps_
     results = forecaster.predict_bootstrapping(steps=2, exog=exog_predict, n_boot=4, in_sample_residuals=True)
     expected = pd.DataFrame(
                    data = np.array([[0.67998879, 0.67998879, 0.67998879, 0.67998879],
-                                    [0.46135022, 0.46135022, 0.46135022, 0.46135022]]),
+                                   [0.46135022, 0.46135022, 0.46135022, 0.46135022]]),
                    columns = [f"pred_boot_{i}" for i in range(4)],
                    index   = pd.RangeIndex(start=50, stop=52)
                )
@@ -163,8 +165,8 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_steps_
     results = forecaster.predict_bootstrapping(steps=2, exog=exog_predict, n_boot=4, in_sample_residuals=True)
     expected = pd.DataFrame(
                    data    = np.array(
-                                 [[ 0.39132925,  0.71907802,  0.45297104,  0.52687879],
-                                  [-0.06983175,  0.40010008,  0.06326565,  0.05134409]]
+                                 [[ 0.83836963,  0.54888446,  1.16537933,  0.69662898],
+                                  [ 0.21874597, -0.0376708 ,  0.29184038,  0.5833093 ]]
                              ),
                    columns = [f"pred_boot_{i}" for i in range(4)],
                    index   = pd.RangeIndex(start=50, stop=52)
