@@ -874,7 +874,8 @@ class ForecasterAutoregDirect(ForecasterBase):
         exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
         n_boot: int=500,
         random_state: int=123,
-        in_sample_residuals: bool=True
+        in_sample_residuals: bool=True,
+        binned_residuals: bool=False
     ) -> pd.DataFrame:
         """
         Generate multiple forecasting predictions using a bootstrapping process. 
@@ -912,6 +913,10 @@ class ForecasterAutoregDirect(ForecasterBase):
             residuals are used. In the latter case, the user should have
             calculated and stored the residuals within the forecaster (see
             `set_out_sample_residuals()`).
+        binned_residuals : bool, default `False`
+            If `True`, residuals used in each bootstrapping iteration are selected
+            conditioning on the predicted values. If `False`, residuals are selected
+            randomly without conditioning on the predicted values.
 
         Returns
         -------
@@ -1020,7 +1025,8 @@ class ForecasterAutoregDirect(ForecasterBase):
         interval: list=[5, 95],
         n_boot: int=500,
         random_state: int=123,
-        in_sample_residuals: bool=True
+        in_sample_residuals: bool=True,
+        binned_residuals: bool=False
     ) -> pd.DataFrame:
         """
         Bootstrapping based predicted intervals.
@@ -1060,6 +1066,10 @@ class ForecasterAutoregDirect(ForecasterBase):
             residuals are used. In the latter case, the user should have
             calculated and stored the residuals within the forecaster (see
             `set_out_sample_residuals()`).
+        binned_residuals : bool, default `False`
+            If `True`, residuals used in each bootstrapping iteration are selected
+            conditioning on the predicted values. If `False`, residuals are selected
+            randomly without conditioning on the predicted values.
 
         Returns
         -------
@@ -1112,7 +1122,8 @@ class ForecasterAutoregDirect(ForecasterBase):
         quantiles: list=[0.05, 0.5, 0.95],
         n_boot: int=500,
         random_state: int=123,
-        in_sample_residuals: bool=True
+        in_sample_residuals: bool=True,
+        binned_residuals: bool=False
     ) -> pd.DataFrame:
         """
         Bootstrapping based predicted quantiles.
@@ -1151,6 +1162,10 @@ class ForecasterAutoregDirect(ForecasterBase):
             sample residuals are used. In the latter case, the user should have
             calculated and stored the residuals within the forecaster (see
             `set_out_sample_residuals()`).
+        binned_residuals : bool, default `False`
+            If `True`, residuals used in each bootstrapping iteration are selected
+            conditioning on the predicted values. If `False`, residuals are selected
+            randomly without conditioning on the predicted values.
 
         Returns
         -------
@@ -1191,7 +1206,8 @@ class ForecasterAutoregDirect(ForecasterBase):
         exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
         n_boot: int=500,
         random_state: int=123,
-        in_sample_residuals: bool=True
+        in_sample_residuals: bool=True,
+        binned_residuals: bool=False
     ) -> pd.DataFrame:
         """
         Fit a given probability distribution for each step. After generating 
@@ -1230,6 +1246,10 @@ class ForecasterAutoregDirect(ForecasterBase):
             residuals are used. In the latter case, the user should have
             calculated and stored the residuals within the forecaster (see
             `set_out_sample_residuals()`).
+        binned_residuals : bool, default `False`
+            If `True`, residuals used in each bootstrapping iteration are selected
+            conditioning on the predicted values. If `False`, residuals are selected
+            randomly without conditioning on the predicted values.
 
         Returns
         -------
