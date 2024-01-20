@@ -861,7 +861,7 @@ def preprocess_y(
         y_index = y.index
     elif isinstance(y.index, pd.DatetimeIndex) and y.index.freq is None:
         warnings.warn(
-            ("`y` has DatetimeIndex index but no frequency. "
+            ("Series has DatetimeIndex index but no frequency. "
              "Index is overwritten with a RangeIndex of step 1.")
         )
         y_index = pd.RangeIndex(
@@ -871,7 +871,7 @@ def preprocess_y(
                   )
     else:
         warnings.warn(
-            ("`y` has no DatetimeIndex nor RangeIndex index. "
+            ("Series has no DatetimeIndex nor RangeIndex index. "
              "Index is overwritten with a RangeIndex.")
         )
         y_index = pd.RangeIndex(
