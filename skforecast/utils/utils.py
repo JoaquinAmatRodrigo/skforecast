@@ -379,7 +379,8 @@ def get_exog_dtypes(
 
 
 def check_exog_dtypes(
-    exog: Union[pd.DataFrame, pd.Series]
+    exog: Union[pd.DataFrame, pd.Series],
+    call_check_exog: bool=True
 ) -> None:
     """
     Raise Exception if `exog` has categorical columns with non integer values.
@@ -391,6 +392,8 @@ def check_exog_dtypes(
     ----------
     exog : pandas DataFrame, pandas Series
         Exogenous variable/s included as predictor/s.
+    call_check_exog : bool, default `True`
+        If `True`, call `check_exog` function.
 
     Returns
     -------
@@ -398,7 +401,8 @@ def check_exog_dtypes(
 
     """
 
-    check_exog(exog=exog, allow_nan=False)
+    if call_check_exog:
+        check_exog(exog=exog, allow_nan=False)
 
     if isinstance(exog, pd.DataFrame):
         if not exog.select_dtypes(exclude=[np.number, 'category']).columns.empty:

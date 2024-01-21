@@ -368,12 +368,14 @@ class ForecasterAutoreg(ForecasterBase):
                 y_values = differentiator.fit_transform(y_values)
         
         if exog is not None:
+            
+            check_exog(exog=exog, allow_nan=True)
             if len(exog) != len(y):
                 raise ValueError(
                     (f"`exog` must have same number of samples as `y`. "
                      f"length `exog`: ({len(exog)}), length `y`: ({len(y)})")
                 )
-            check_exog(exog=exog, allow_nan=True)
+            
             if isinstance(exog, pd.Series):
                 exog = transform_series(
                            series            = exog,
@@ -389,10 +391,7 @@ class ForecasterAutoreg(ForecasterBase):
                            inverse_transform = False
                        )
             
-            check_exog(exog=exog, allow_nan=False)
-            check_exog_dtypes(exog)
-            if not self.fitted:
-                self.exog_dtypes = get_exog_dtypes(exog=exog)
+            check_exog_dtypes(exog, call_check_exog=True)
 
             _, exog_index = preprocess_exog(exog=exog, return_values=False)
             if not (exog_index[:len(y_index)] == y_index).all():
@@ -517,12 +516,6 @@ class ForecasterAutoreg(ForecasterBase):
         self.in_sample_residuals = None
         self.fitted              = False
         self.training_range      = None
-        
-        if exog is not None:
-            self.included_exog = True
-            self.exog_type = type(exog)
-            self.exog_col_names = \
-                 exog.columns.to_list() if isinstance(exog, pd.DataFrame) else exog.name
 
         X_train, y_train = self.create_train_X_y(y=y, exog=exog)
         sample_weight = self.create_sample_weights(X_train=X_train)
@@ -541,6 +534,13 @@ class ForecasterAutoreg(ForecasterBase):
             self.index_freq = X_train.index.freqstr
         else: 
             self.index_freq = X_train.index.step
+
+        if exog is not None:
+            self.included_exog = True
+            self.exog_type = type(exog)
+            self.exog_dtypes = get_exog_dtypes(exog=exog)
+            self.exog_col_names = \
+                 exog.columns.to_list() if isinstance(exog, pd.DataFrame) else exog.name
         
         # This is done to save time during fit in functions such as backtesting()
         if store_in_sample_residuals:
