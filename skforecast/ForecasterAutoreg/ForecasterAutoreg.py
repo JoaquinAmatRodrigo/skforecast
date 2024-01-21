@@ -370,8 +370,8 @@ class ForecasterAutoreg(ForecasterBase):
         if exog is not None:
             if len(exog) != len(y):
                 raise ValueError(
-                    (f'`exog` must have same number of samples as `y`. '
-                     f'length `exog`: ({len(exog)}), length `y`: ({len(y)})')
+                    (f"`exog` must have same number of samples as `y`. "
+                     f"length `exog`: ({len(exog)}), length `y`: ({len(y)})")
                 )
             check_exog(exog=exog, allow_nan=True)
             if isinstance(exog, pd.Series):
