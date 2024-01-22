@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 from skforecast.exceptions import MissingValuesExogWarning
+from skforecast.exceptions import IgnoredArgumentWarning
 from sklearn.linear_model import LinearRegression
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler
@@ -60,9 +61,9 @@ def test_create_train_X_y_TypeError_when_series_not_dataframe():
         forecaster.create_train_X_y(series=series)
 
 
-def test_create_train_X_y_UserWarning_when_levels_of_transformer_series_not_equal_to_series_col_names():
+def test_create_train_X_y_IgnoredArgumentWarning_when_levels_of_transformer_series_not_equal_to_series_col_names():
     """
-    Test UserWarning is raised when `transformer_series` is a dict and its keys are
+    Test IgnoredArgumentWarning is raised when `transformer_series` is a dict and its keys are
     not the same as forecaster.series_col_names.
     """
     series = pd.DataFrame({'1': pd.Series(np.arange(5)),  
@@ -81,7 +82,7 @@ def test_create_train_X_y_UserWarning_when_levels_of_transformer_series_not_equa
         (f"{series_not_in_transformer_series} not present in `transformer_series`."
          f" No transformation is applied to these series.")
     )
-    with pytest.warns(UserWarning, match = warn_msg):
+    with pytest.warns(IgnoredArgumentWarning, match = warn_msg):
         forecaster.create_train_X_y(series=series)
 
 

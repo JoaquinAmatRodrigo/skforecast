@@ -12,6 +12,7 @@ import joblib
 import numpy as np
 import pandas as pd
 import sklearn
+from sklearn.base import clone
 import sklearn.pipeline
 import sklearn.linear_model
 from sklearn.compose import ColumnTransformer
@@ -175,6 +176,102 @@ def initialize_weights(
             series_weights = None
 
     return weight_func, source_code_weight_func, series_weights
+
+
+def initialize_transformer_series(
+    series_col_names: list,
+    transformer_series: Optional[Union[object, dict]]=None
+) -> dict:
+    """
+    Initialize `transformer_series_` attribute for the Forecasters Multiseries.
+
+    - If `transformer_series` is `None`, no transformation is applied.
+    - If `transformer_series` is a scikit-learn transformer (object), the same 
+    transformer is applied to all series (`series_col_names`).
+    - If `transformer_series` is a `dict`, a different transformer can be
+    applied to each series. The keys of the dictionary must be the same as the
+    names of the series in `series_col_names`.
+
+    Parameters
+    ----------
+    series_col_names : list
+        Names of the series (levels) used during training.
+    transformer_series : object, dict, default `None`
+        An instance of a transformer (preprocessor) compatible with the scikit-learn
+        preprocessing API with methods: fit, transform, fit_transform and 
+        inverse_transform. 
+
+    Returns
+    -------
+    transformer_series_ : dict
+        Dictionary with the transformer for each series. It is created cloning the 
+        objects in `transformer_series` and is used internally to avoid overwriting.
+    
+    """
+
+    if transformer_series is None:
+        transformer_series_ = {serie: None for serie in series_col_names}
+    elif not isinstance(transformer_series, dict):
+        transformer_series_ = {serie: clone(transformer_series) 
+                               for serie in series_col_names}
+    else:
+        transformer_series_ = {serie: None for serie in series_col_names}
+        # Only elements already present in transformer_series_ are updated
+        transformer_series_.update(
+            (k, v) for k, v in deepcopy(transformer_series).items() 
+            if k in transformer_series_
+        )
+        series_not_in_transformer_series = (
+            set(series_col_names) - set(transformer_series.keys())
+        )
+        if series_not_in_transformer_series:
+            warnings.warn(
+                (f"{series_not_in_transformer_series} not present in `transformer_series`."
+                 f" No transformation is applied to these series."),
+                 IgnoredArgumentWarning
+            )
+
+    return transformer_series_
+
+
+# TODO: Include tests for this function
+def initialize_differentiator_multiseries(
+    series_col_names: list,
+    fitted: bool,
+    differentiator: Optional[object]=None
+) -> dict:
+    """
+    Initialize `differentiator_` attribute for the Forecasters Multiseries.
+
+    Parameters
+    ----------
+    series_col_names : list
+        Names of the series (levels) used during training.
+    fitted : bool
+        Tag to identify if the regressor has been fitted (trained).
+    differentiator : TimeSeriesDifferentiator, default `None`
+        Skforecast object used to differentiate the time series.
+
+    Returns
+    -------
+    differentiator_ : dict
+        Dictionary with the differentiator for each series. It is created cloning  
+        the object `differentiator` and is used internally to avoid overwriting.
+    
+    """
+    
+    if differentiator is None:
+        differentiator_ = {serie: None for serie in series_col_names}
+    else:
+        if not fitted:
+            differentiator_ = {serie: clone(differentiator) 
+                               for serie in series_col_names}
+        else:
+            pass
+            # TODO: Need something like differentiator_ = differentiator_
+            # Maybe not worth to have the function
+            
+    return differentiator_
 
 
 def initialize_lags_grid(
@@ -350,6 +447,80 @@ def check_exog(
             )
     
     return
+
+
+# TODO: Include tests for this function
+def series_exog_alignment_multiseries(
+    series_dict: dict,
+    series_arg_is_dict: bool,
+    exog_dict: dict=None
+) -> Tuple[Union[pd.Series, pd.DataFrame], Union[pd.Series, pd.DataFrame]]:
+    """
+    Align series and exog according to their index.
+
+    - If original series is a pandas DataFrame (series_arg_is_dict = False) and 
+    original exog is a pandas Series or DataFrame. Both must have the same index, 
+    same length and same frequency. No alignment is needed.
+    - If original series is a pandas DataFrame (series_arg_is_dict = False) and
+    original exog is a dict. Both must have the same index, same length and 
+    same frequency. No alignment is needed.
+    - If original series is a dict (series_arg_is_dict = True) and original exog 
+    is a dict. Both must have a pandas DatetimeIndex but can have different
+    lengths. Alignment is needed.
+
+    Parameters
+    ----------
+    series_dict : dict
+        Dictionary with the series used during training.
+    series_arg_is_dict : bool
+        Indicates if original series argument is a dict.
+    exog_dict : dict, default `None`
+        Dictionary with the exogenous variable/s used during training.
+
+    Returns
+    -------
+    series_dict : dict
+        Dictionary with the series used during training.
+    exog_dict : dict
+        Dictionary with the exogenous variable/s used during training.
+    
+    """
+
+    for k in series_dict.keys():
+
+        series_dict[k] = series_dict[k].loc[
+            series_dict[k].first_valid_index() : series_dict[k].last_valid_index()
+        ]
+
+        if exog_dict[k] is not None:
+            if series_arg_is_dict:
+                index_intersection = (
+                    series_dict[k].index.intersection(exog_dict[k].index)
+                )
+                if len(index_intersection) == 0:
+                    warnings.warn(
+                        (f"Series '{k}' and its `exog` do not have the same index. "
+                            f"All exog values will be NaN for the period of the series."),
+                            MissingValuesExogWarning
+                    )
+                elif len(index_intersection) != len(series_dict[k]):
+                    warnings.warn(
+                        (f"Series '{k}' and its `exog` do not have the same length. "
+                            f"Exog values will be NaN for the not matched period of the series."),
+                            MissingValuesExogWarning
+                    )  
+                exog_dict[k] = exog_dict[k].loc[index_intersection]
+                if len(index_intersection) != len(series_dict[k]):
+                    exog_dict[k] = exog_dict[k].reindex(
+                                        series_dict[k].index, 
+                                        fill_value = np.nan
+                                    )
+            else:
+                exog_dict[k] = exog_dict[k].loc[
+                    exog_dict[k].first_valid_index() : exog_dict[k].last_valid_index()
+                ]
+
+    return series_dict, exog_dict
 
 
 def get_exog_dtypes(

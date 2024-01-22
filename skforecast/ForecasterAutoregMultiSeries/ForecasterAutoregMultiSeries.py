@@ -24,9 +24,11 @@ from ..exceptions import IgnoredArgumentWarning
 from ..exceptions import MissingValuesExogWarning
 from ..utils import initialize_lags
 from ..utils import initialize_weights
+from ..utils import initialize_transformer_series
 from ..utils import check_select_fit_kwargs
 from ..utils import check_y
 from ..utils import check_exog
+from ..utils import series_exog_alignment_multiseries
 from ..utils import get_exog_dtypes
 from ..utils import check_exog_dtypes
 from ..utils import check_interval
@@ -716,31 +718,16 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                                             exog_dict        = exog_dict
                                         )
 
-        # TODO: move to utils
+        # TODO: move to utils (done)
         # ======================================================================
         if not self.fitted:
-            if self.transformer_series is None:
-                self.transformer_series_ = {serie: None for serie in series_col_names}
-            elif not isinstance(self.transformer_series, dict):
-                self.transformer_series_ = {serie: clone(self.transformer_series) 
-                                            for serie in series_col_names}
-            else:
-                self.transformer_series_ = {serie: None for serie in series_col_names}
-                # Only elements already present in transformer_series_ are updated
-                self.transformer_series_.update(
-                    (k, v) for k, v in deepcopy(self.transformer_series).items() 
-                    if k in self.transformer_series_
-                )
-                series_not_in_transformer_series = set(series_col_names) - set(self.transformer_series.keys())
-                if series_not_in_transformer_series:
-                    warnings.warn(
-                        (f"{series_not_in_transformer_series} not present in `transformer_series`."
-                        f" No transformation is applied to these series."),
-                        IgnoredArgumentWarning
-                    )
+            self.transformer_series_ = initialize_transformer_series(
+                                           series_col_names = series_col_names,
+                                           transformer_series = self.transformer_series
+                                       )
         # ======================================================================
         
-        # TODO: move to utils
+        # TODO: move to utils (created initialize_differentiator_multiseries but have questions)
         # ======================================================================
         if self.differentiation is None:
             self.differentiator_ = {serie: None for serie in series_col_names}
@@ -750,8 +737,14 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                                         for serie in series_col_names}
         # ======================================================================
 
-        # TODO: create function _alignments_series_exog
+        # TODO: utils function series_exog_alignment_multiseries (discuss name series_arg_is_dict)
         # ======================================================================
+        series_dict, exog_dict = series_exog_alignment_multiseries(
+                                     series_dict        = series_dict,
+                                     series_arg_is_dict = isinstance(series, dict),
+                                     exog_dict          = exog_dict
+                                 )
+
         for k in series_dict.keys():
 
             '''
