@@ -234,46 +234,6 @@ def initialize_transformer_series(
     return transformer_series_
 
 
-# TODO: Include tests for this function
-def initialize_differentiator_multiseries(
-    series_col_names: list,
-    fitted: bool,
-    differentiator: Optional[object]=None
-) -> dict:
-    """
-    Initialize `differentiator_` attribute for the Forecasters Multiseries.
-
-    Parameters
-    ----------
-    series_col_names : list
-        Names of the series (levels) used during training.
-    fitted : bool
-        Tag to identify if the regressor has been fitted (trained).
-    differentiator : TimeSeriesDifferentiator, default `None`
-        Skforecast object used to differentiate the time series.
-
-    Returns
-    -------
-    differentiator_ : dict
-        Dictionary with the differentiator for each series. It is created cloning  
-        the object `differentiator` and is used internally to avoid overwriting.
-    
-    """
-    
-    if differentiator is None:
-        differentiator_ = {serie: None for serie in series_col_names}
-    else:
-        if not fitted:
-            differentiator_ = {serie: clone(differentiator) 
-                               for serie in series_col_names}
-        else:
-            pass
-            # TODO: Need something like differentiator_ = differentiator_
-            # Maybe not worth to have the function
-            
-    return differentiator_
-
-
 def initialize_lags_grid(
     forecaster, 
     lags_grid: Optional[Union[list, dict]]=None
@@ -452,28 +412,26 @@ def check_exog(
 # TODO: Include tests for this function
 def series_exog_alignment_multiseries(
     series_dict: dict,
-    series_arg_is_dict: bool,
+    input_series_is_dict: bool,
     exog_dict: dict=None
 ) -> Tuple[Union[pd.Series, pd.DataFrame], Union[pd.Series, pd.DataFrame]]:
     """
-    Align series and exog according to their index.
+    Align series and exog according to their index. If needed, reindexing is
+    applied.
 
-    - If original series is a pandas DataFrame (series_arg_is_dict = False) and 
-    original exog is a pandas Series or DataFrame. Both must have the same index, 
-    same length and same frequency. No alignment is needed.
-    - If original series is a pandas DataFrame (series_arg_is_dict = False) and
-    original exog is a dict. Both must have the same index, same length and 
-    same frequency. No alignment is needed.
-    - If original series is a dict (series_arg_is_dict = True) and original exog 
-    is a dict. Both must have a pandas DatetimeIndex but can have different
-    lengths. Alignment is needed.
+    - If input series is a pandas DataFrame (input_series_is_dict = False),  
+    input exog (pandas Series, DataFrame or dict) must have the same index 
+    (type, length and frequency). Reindexing is not applied.
+    - If input series is a dict (input_series_is_dict = True), then input 
+    exog must be a dict. Both must have a pandas DatetimeIndex, but can have 
+    different lengths. Reindexing is applied.
 
     Parameters
     ----------
     series_dict : dict
         Dictionary with the series used during training.
-    series_arg_is_dict : bool
-        Indicates if original series argument is a dict.
+    input_series_is_dict : bool
+        Indicates if input series argument is a dict.
     exog_dict : dict, default `None`
         Dictionary with the exogenous variable/s used during training.
 
@@ -488,12 +446,13 @@ def series_exog_alignment_multiseries(
 
     for k in series_dict.keys():
 
-        series_dict[k] = series_dict[k].loc[
-            series_dict[k].first_valid_index() : series_dict[k].last_valid_index()
-        ]
+        first_valid_index = series_dict[k].first_valid_index()
+        last_valid_index = series_dict[k].last_valid_index()
+
+        series_dict[k] = series_dict[k].loc[first_valid_index : last_valid_index]
 
         if exog_dict[k] is not None:
-            if series_arg_is_dict:
+            if input_series_is_dict:
                 index_intersection = (
                     series_dict[k].index.intersection(exog_dict[k].index)
                 )
@@ -516,9 +475,7 @@ def series_exog_alignment_multiseries(
                                         fill_value = np.nan
                                     )
             else:
-                exog_dict[k] = exog_dict[k].loc[
-                    exog_dict[k].first_valid_index() : exog_dict[k].last_valid_index()
-                ]
+                exog_dict[k] = exog_dict[k].loc[first_valid_index : last_valid_index]
 
     return series_dict, exog_dict
 

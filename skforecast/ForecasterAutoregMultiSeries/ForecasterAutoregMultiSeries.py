@@ -466,7 +466,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
     def _check_preprocess_exog(
         self,
-        series: Union[pd.DataFrame, dict],
+        input_series_is_dict: bool,
         series_index: pd.Index,
         series_col_names: list,
         exog: Union[pd.Series, pd.DataFrame, dict],
@@ -483,7 +483,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             
         if isinstance(exog, (pd.Series, pd.DataFrame)): 
 
-            if isinstance(series, dict):
+            if input_series_is_dict:
                 raise TypeError(
                     (f"`exog` must be a dict of DataFrames or Series if "
                      f"`series` is a dict. Got {type(exog)}.")
@@ -522,7 +522,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                     v = v.to_frame()
                 exog_dict[k] = v
 
-            if isinstance(series, pd.DataFrame):
+            if not input_series_is_dict:
                 for k, v in exog_dict.items():
                     if v is not None:
                         _, v_index = preprocess_exog(exog=v, return_values=False)
@@ -705,86 +705,56 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         """
 
         series_dict, series_index = self._check_preprocess_series(series=series)
+        input_series_is_dict = isinstance(series, dict)
         series_col_names = list(series_dict.keys())
+
+        if self.fitted and not (series_col_names == self.series_col_names):
+            raise ValueError(
+                ("Once the Forecaster has been trained, `series` must have the "
+                 "same columns as the series used during training.")
+            )
         
         exog_dict = {serie: None for serie in series_col_names}
         exog_col_names = None
         if exog is not None:
             exog_dict, exog_col_names = self._check_preprocess_exog(
-                                            series           = series, # TODO: ver si puede ser series_type
-                                            series_index     = series_index,
-                                            series_col_names = series_col_names,
-                                            exog             = exog,
-                                            exog_dict        = exog_dict
+                                            input_series_is_dict = input_series_is_dict,
+                                            series_index         = series_index,
+                                            series_col_names     = series_col_names,
+                                            exog                 = exog,
+                                            exog_dict            = exog_dict
                                         )
+            
+        if self.fitted and not (exog_col_names == self.exog_col_names):
+            if self.exog_col_names is None:
+                raise ValueError(
+                    ("Once the Forecaster has been trained, `exog` must be `None` "
+                     "because no exogenous variables were added during training.")
+                )
+            else:
+                raise ValueError(
+                    ("Once the Forecaster has been trained, `exog` must have the "
+                     "same columns as the series used during training.")
+                )
 
-        # TODO: move to utils (done)
-        # ======================================================================
         if not self.fitted:
             self.transformer_series_ = initialize_transformer_series(
                                            series_col_names = series_col_names,
                                            transformer_series = self.transformer_series
                                        )
-        # ======================================================================
         
-        # TODO: move to utils (created initialize_differentiator_multiseries but have questions)
-        # ======================================================================
         if self.differentiation is None:
             self.differentiator_ = {serie: None for serie in series_col_names}
         else:
             if not self.fitted:
                 self.differentiator_ = {serie: clone(self.differentiator) 
                                         for serie in series_col_names}
-        # ======================================================================
 
-        # TODO: utils function series_exog_alignment_multiseries (discuss name series_arg_is_dict)
-        # ======================================================================
         series_dict, exog_dict = series_exog_alignment_multiseries(
-                                     series_dict        = series_dict,
-                                     series_arg_is_dict = isinstance(series, dict),
-                                     exog_dict          = exog_dict
+                                     series_dict          = series_dict,
+                                     input_series_is_dict = input_series_is_dict,
+                                     exog_dict            = exog_dict
                                  )
-
-        for k in series_dict.keys():
-
-            '''
-            - series df, exog df: same index, same length, same freq
-            - series df, exog dict: same index, same length, same freq
-            - series dict, exog dict: same index (not same length, need reindex)
-            '''
-
-            series_dict[k] = series_dict[k].loc[
-                series_dict[k].first_valid_index() : series_dict[k].last_valid_index()
-            ]
-
-            if exog_dict[k] is not None:
-                if isinstance(series, dict):
-                    index_intersection = (
-                        series_dict[k].index.intersection(exog_dict[k].index)
-                    )
-                    if len(index_intersection) == 0:
-                        warnings.warn(
-                            (f"Series '{k}' and its `exog` do not have the same index. "
-                             f"All exog values will be NaN for the period of the series."),
-                             MissingValuesExogWarning
-                        )
-                    elif len(index_intersection) != len(series_dict[k]):
-                        warnings.warn(
-                            (f"Series '{k}' and its `exog` do not have the same length. "
-                             f"Exog values will be NaN for the not matched period of the series."),
-                             MissingValuesExogWarning
-                        )  
-                    exog_dict[k] = exog_dict[k].loc[index_intersection]
-                    if len(index_intersection) != len(series_dict[k]):
-                        exog_dict[k] = exog_dict[k].reindex(
-                                           series_dict[k].index, 
-                                           fill_value = np.nan
-                                       )
-                else:
-                    exog_dict[k] = exog_dict[k].loc[
-                        exog_dict[k].first_valid_index() : exog_dict[k].last_valid_index()
-                    ]
-        # ======================================================================
 
         # TODO: parallelize
         # ======================================================================
