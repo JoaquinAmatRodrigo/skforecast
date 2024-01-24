@@ -28,7 +28,7 @@ from ..utils import initialize_transformer_series
 from ..utils import check_select_fit_kwargs
 from ..utils import check_y
 from ..utils import check_exog
-from ..utils import series_exog_alignment_multiseries
+from ..utils import align_series_and_exog_multiseries
 from ..utils import get_exog_dtypes
 from ..utils import check_exog_dtypes
 from ..utils import check_interval
@@ -420,7 +420,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                                 if not isinstance(v, (pd.Series, pd.DataFrame))]
             if not_valid_series:
                 raise TypeError(
-                    (f"All series must be a named pandas Series or a pandas Dataframe. "
+                    (f"All series must be a named pandas Series or a pandas Dataframe "
                      f"with a single column. Review series: {not_valid_series}")
                 )
             
@@ -750,7 +750,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 self.differentiator_ = {serie: clone(self.differentiator) 
                                         for serie in series_col_names}
 
-        series_dict, exog_dict = series_exog_alignment_multiseries(
+        series_dict, exog_dict = align_series_and_exog_multiseries(
                                      series_dict          = series_dict,
                                      input_series_is_dict = input_series_is_dict,
                                      exog_dict            = exog_dict

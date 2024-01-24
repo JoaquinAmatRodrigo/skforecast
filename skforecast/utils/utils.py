@@ -410,7 +410,7 @@ def check_exog(
 
 
 # TODO: Include tests for this function
-def series_exog_alignment_multiseries(
+def align_series_and_exog_multiseries(
     series_dict: dict,
     input_series_is_dict: bool,
     exog_dict: dict=None
