@@ -406,7 +406,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         """
 
         if isinstance(series, pd.DataFrame):
-
+            # TODO: preprocess_y expect argument y, not series
             _, series_index = preprocess_y(series=series, return_values=False)
             series_dict = series.copy()
             series_dict.index = series_index
@@ -495,7 +495,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             exog_dict = exog.copy().to_frame() if isinstance(exog, pd.Series) else exog.copy()
             exog_dict.index = exog_index
 
-            if not (exog_index == series_index).all():
+            if not exog_index.equals(series_index):
                 raise ValueError(
                     ("Different index for `series` and `exog`. They must be equal "
                      "to ensure the correct alignment of values.")
@@ -758,17 +758,23 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         # TODO: parallelize
         # ======================================================================
+        ignore_exog = True if exog else False
+        input_matrices = [
+            [series_dict[k], exog_dict[k], ignore_exog]
+            for k
+            in series_dict.keys() & exog_dict.keys()
+        ]
         X_train_lags_buffer = []
         X_train_exog_buffer = []
         y_train_buffer = []
-        ignore_exog = True if exog else False
-        for k in series_dict.keys():
+        
+        for matrices in input_matrices:
 
             X_train_lags, X_train_exog, y_train = (
                 self._create_train_X_y_single_series(
-                    y           = series_dict[k], 
-                    ignore_exog = ignore_exog,
-                    exog        = exog_dict[k]
+                    y           = matrices[0],
+                    exog        = matrices[1],
+                    ignore_exog = matrices[2],
                 )
             )
             
@@ -786,6 +792,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         X_train.columns = X_train.columns.str.replace('_level_skforecast', '')
         # ======================================================================
 
+        exog_dtypes = None
         if exog is not None:
 
             X_train_exog = pd.concat(X_train_exog_buffer, axis=0)
