@@ -397,7 +397,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             
         return X_data, y_data
 
-
+    # TODO: MOVE TO utils.py WITH THE NAME _check_preprocess_series_multiseries
     def _check_preprocess_series(
         self,
         series: Union[pd.DataFrame, dict],
@@ -464,6 +464,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         return series_dict, series_index
     
 
+    # TODO: MOVE TO utils.py WITH THE NAME _check_preprocess_exog_multiseries
     def _check_preprocess_exog(
         self,
         input_series_is_dict: bool,
