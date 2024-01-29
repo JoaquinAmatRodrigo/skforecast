@@ -21,21 +21,18 @@ import inspect
 import skforecast
 from ..ForecasterBase import ForecasterBase
 from ..exceptions import IgnoredArgumentWarning
-from ..exceptions import MissingValuesExogWarning
 from ..utils import initialize_lags
 from ..utils import initialize_weights
 from ..utils import initialize_transformer_series
 from ..utils import check_select_fit_kwargs
-from ..utils import check_y
-from ..utils import check_exog
+from ..utils import check_preprocess_series
+from ..utils import check_preprocess_exog_multiseries
 from ..utils import series_exog_alignment_multiseries
 from ..utils import get_exog_dtypes
 from ..utils import check_exog_dtypes
 from ..utils import check_interval
 from ..utils import check_predict_input
-from ..utils import preprocess_y
 from ..utils import preprocess_last_window
-from ..utils import preprocess_exog
 from ..utils import expand_index
 from ..utils import transform_series
 from ..utils import transform_dataframe
@@ -185,8 +182,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         Type of each exogenous variable/s used in training. If `transformer_exog` 
         is used, the dtypes are calculated after the transformation.
     exog_col_names : list
-        Names of columns of `exog` if `exog` used in training was a pandas
-        DataFrame.
+        Names of the exogenous variables used during training.
     series_col_names : list
         Names of the series (levels) used during training.
     X_train_col_names : list
@@ -398,180 +394,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         return X_data, y_data
 
 
-    def _check_preprocess_series(
-        self,
-        series: Union[pd.DataFrame, dict],
-    ) -> Tuple[dict, pd.Index]:
-        """        
-        """
-
-        if isinstance(series, pd.DataFrame):
-
-            _, series_index = preprocess_y(series=series, return_values=False)
-            series_dict = series.copy()
-            series_dict.index = series_index
-            series_dict = series.to_dict("series")
-        
-        elif isinstance(series, dict):
-            series_dict = series
-
-            not_valid_series = [k
-                                for k, v in series_dict.items()
-                                if not isinstance(v, (pd.Series, pd.DataFrame))]
-            if not_valid_series:
-                raise TypeError(
-                    (f"All series must be a named pandas Series or a pandas Dataframe. "
-                     f"with a single column. Review series: {not_valid_series}")
-                )
-            
-            for k, v in series_dict.items():
-                if isinstance(v, pd.DataFrame):
-                    if v.shape[1] != 1:
-                        raise ValueError(
-                            (f"All series must be a named pandas Series or a pandas Dataframe "
-                             f"with a single column. Review series: {k}")
-                        )
-                    series_dict[k] = v.iloc[:, 0]
-
-                series_dict[k].name = k
-
-            not_valid_index = [k
-                               for k, v in series_dict.items()
-                               if not isinstance(v.index, pd.DatetimeIndex)]
-            if not_valid_index:
-                raise TypeError(
-                    (f"All series must have a DatetimeIndex index with the same frequency. "
-                     f"Review series: {not_valid_index}")
-                )
-
-            indexes_freq = [v.index.freq
-                            for v in series_dict.values()]
-            if not len(set(indexes_freq)) == 1:
-                raise ValueError(
-                    (f"All series must have a DatetimeIndex index with the same frequency. "
-                     f"Found frequencies: {set(indexes_freq)}")
-                )
-            
-            # TODO: review
-            series_index = None
-
-        else:
-            raise TypeError(
-                (f"`series` must be a pandas DataFrame or a dict of DataFrames or Series. "
-                 f"Got {type(series)}.")
-            )
-        
-        return series_dict, series_index
-    
-
-    def _check_preprocess_exog(
-        self,
-        input_series_is_dict: bool,
-        series_index: pd.Index,
-        series_col_names: list,
-        exog: Union[pd.Series, pd.DataFrame, dict],
-        exog_dict: dict,
-    ) -> Tuple[dict, list]:
-        """
-        """
-        
-        if not isinstance(exog, (pd.Series, pd.DataFrame, dict)):
-                raise TypeError(
-                    (f"`exog` must be a pandas Series, DataFrame or dict. "
-                     f"Got {type(exog)}.")
-                )
-            
-        if isinstance(exog, (pd.Series, pd.DataFrame)): 
-
-            if input_series_is_dict:
-                raise TypeError(
-                    (f"`exog` must be a dict of DataFrames or Series if "
-                     f"`series` is a dict. Got {type(exog)}.")
-                )
-            
-            # TODO: check_exog para ver si poner warnings de NaNs
-
-            _, exog_index = preprocess_exog(exog=exog, return_values=False)
-            exog_dict = exog.copy().to_frame() if isinstance(exog, pd.Series) else exog.copy()
-            exog_dict.index = exog_index
-
-            if not (exog_index == series_index).all():
-                raise ValueError(
-                    ("Different index for `series` and `exog`. They must be equal "
-                     "to ensure the correct alignment of values.")
-                )
-
-            exog_dict = {serie: exog for serie in series_col_names}
-        else:       
-            # Only elements already present in exog_dict are updated
-            exog_dict.update(
-                (k, v) for k, v in exog.items() 
-                if k in exog_dict
-            )
-            series_not_in_exog = set(series_col_names) - set(exog.keys())
-            if series_not_in_exog:
-                warnings.warn(
-                    (f"{series_not_in_exog} not present in `exog`. All values "
-                     f"of the exogenous variables for these series will be NaN."),
-                     MissingValuesExogWarning
-                )
-
-            for k, v in exog_dict.items():
-                check_exog(exog=v, allow_nan=True)
-                if isinstance(v, pd.Series):
-                    v = v.to_frame()
-                exog_dict[k] = v
-
-            if not input_series_is_dict:
-                for k, v in exog_dict.items():
-                    if v is not None:
-                        _, v_index = preprocess_exog(exog=v, return_values=False)
-                        exog_dict[k].index = v_index
-                        if (v.index == series_index).all():
-                            raise ValueError(
-                                (f"Different index for `series` {k} and its `exog`. "
-                                 f"When `series` is a pandas DataFrame, they must "
-                                 f"be equal to ensure the correct alignment of values.")
-                            )
-            else:
-
-                not_valid_index = [k
-                                   for k, v in exog_dict.items()
-                                   if v is not None and not isinstance(v.index, pd.DatetimeIndex)]
-                if not_valid_index:
-                    raise TypeError(
-                        (f"All exog must have a DatetimeIndex index with the same frequency. "
-                         f"Review exog for series: {not_valid_index}")
-                    )
-        
-        exog_col_names = list(set(column for df in exog_dict.values() 
-                                  for column in df.columns.to_list()))
-
-        # Check that all exog have the same dtypes for common columns
-        exog_dtype_dict = {col_name: set() for col_name in exog_col_names}
-        for v in exog_dict.values():
-            if v is not None:
-                for col_name in v.columns:
-                    exog_dtype_dict[col_name].add(v[col_name].dtype.name)
-        
-        for col_name, dtypes in exog_dtype_dict.items():
-            if len(dtypes) > 1:
-                raise TypeError(
-                    (f"Column {col_name} has different dtypes in different exog "
-                        f"DataFrames or Series.")
-                )
-
-        if len(set(exog_col_names) - set(series_col_names)) != len(exog_col_names):
-            raise ValueError(
-                (f"`exog` cannot contain a column named the same as one of the "
-                 f"series (column names of series).\n"
-                 f"    `series` columns : {series_col_names}.\n"
-                 f"    `exog`   columns : {exog_col_names}.")
-            )
-
-        return exog_dict, exog_col_names
-
-
     def _create_train_X_y_single_series(
         self,
         y: pd.Series,
@@ -704,7 +526,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         
         """
 
-        series_dict, series_index = self._check_preprocess_series(series=series)
+        series_dict, series_index = check_preprocess_series(series=series)
         input_series_is_dict = isinstance(series, dict)
         series_col_names = list(series_dict.keys())
 
@@ -717,7 +539,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         exog_dict = {serie: None for serie in series_col_names}
         exog_col_names = None
         if exog is not None:
-            exog_dict, exog_col_names = self._check_preprocess_exog(
+            exog_dict, exog_col_names = check_preprocess_exog_multiseries(
                                             input_series_is_dict = input_series_is_dict,
                                             series_index         = series_index,
                                             series_col_names     = series_col_names,

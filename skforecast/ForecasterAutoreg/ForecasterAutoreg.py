@@ -140,8 +140,7 @@ class ForecasterAutoreg(ForecasterBase):
         Type of each exogenous variable/s used in training. If `transformer_exog` 
         is used, the dtypes are calculated after the transformation.
     exog_col_names : list
-        Names of columns of `exog` if `exog` used in training was a pandas
-        DataFrame.
+        Names of the exogenous variables used during training.
     X_train_col_names : list
         Names of columns of the matrix created internally for training.
     fit_kwargs : dict

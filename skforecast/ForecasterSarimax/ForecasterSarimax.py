@@ -98,8 +98,7 @@ class ForecasterSarimax():
     exog_type : type
         Type of exogenous variable/s used in training.
     exog_col_names : list
-        Names of columns of `exog` if `exog` used in training was a pandas
-        DataFrame.
+        Names of the exogenous variables used during training.
     fit_kwargs : dict
         Additional arguments to be passed to the `fit` method of the regressor.
     creation_date : str
