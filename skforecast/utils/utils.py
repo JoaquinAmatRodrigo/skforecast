@@ -2191,7 +2191,7 @@ def check_preprocess_exog_multiseries(
 
 
 # TODO: Include tests for this function
-def series_exog_alignment_multiseries(
+def align_series_and_exog_multiseries(
     series_dict: dict,
     input_series_is_dict: bool,
     exog_dict: dict=None
@@ -2240,21 +2240,21 @@ def series_exog_alignment_multiseries(
                 if len(index_intersection) == 0:
                     warnings.warn(
                         (f"Series '{k}' and its `exog` do not have the same index. "
-                            f"All exog values will be NaN for the period of the series."),
-                            MissingValuesExogWarning
+                         f"All exog values will be NaN for the period of the series."),
+                         MissingValuesExogWarning
                     )
                 elif len(index_intersection) != len(series_dict[k]):
                     warnings.warn(
                         (f"Series '{k}' and its `exog` do not have the same length. "
-                            f"Exog values will be NaN for the not matched period of the series."),
-                            MissingValuesExogWarning
+                         f"Exog values will be NaN for the not matched period of the series."),
+                         MissingValuesExogWarning
                     )  
                 exog_dict[k] = exog_dict[k].loc[index_intersection]
                 if len(index_intersection) != len(series_dict[k]):
                     exog_dict[k] = exog_dict[k].reindex(
-                                        series_dict[k].index, 
-                                        fill_value = np.nan
-                                    )
+                                       series_dict[k].index, 
+                                       fill_value = np.nan
+                                   )
             else:
                 exog_dict[k] = exog_dict[k].loc[first_valid_index : last_valid_index]
 

@@ -27,7 +27,7 @@ from ..utils import initialize_transformer_series
 from ..utils import check_select_fit_kwargs
 from ..utils import check_preprocess_series
 from ..utils import check_preprocess_exog_multiseries
-from ..utils import series_exog_alignment_multiseries
+from ..utils import align_series_and_exog_multiseries
 from ..utils import get_exog_dtypes
 from ..utils import check_exog_dtypes
 from ..utils import check_interval
@@ -572,7 +572,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 self.differentiator_ = {serie: clone(self.differentiator) 
                                         for serie in series_col_names}
 
-        series_dict, exog_dict = series_exog_alignment_multiseries(
+        series_dict, exog_dict = align_series_and_exog_multiseries(
                                      series_dict          = series_dict,
                                      input_series_is_dict = input_series_is_dict,
                                      exog_dict            = exog_dict
@@ -580,17 +580,23 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         # TODO: parallelize
         # ======================================================================
+        ignore_exog = True if exog else False
+        input_matrices = [
+            [series_dict[k], exog_dict[k], ignore_exog]
+            for k
+            in series_dict.keys() & exog_dict.keys()
+        ]
         X_train_lags_buffer = []
         X_train_exog_buffer = []
         y_train_buffer = []
-        ignore_exog = True if exog else False
-        for k in series_dict.keys():
+        
+        for matrices in input_matrices:
 
             X_train_lags, X_train_exog, y_train = (
                 self._create_train_X_y_single_series(
-                    y           = series_dict[k], 
-                    ignore_exog = ignore_exog,
-                    exog        = exog_dict[k]
+                    y           = matrices[0],
+                    exog        = matrices[1],
+                    ignore_exog = matrices[2],
                 )
             )
             
@@ -608,6 +614,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         X_train.columns = X_train.columns.str.replace('_level_skforecast', '')
         # ======================================================================
 
+        exog_dtypes = None
         if exog is not None:
 
             X_train_exog = pd.concat(X_train_exog_buffer, axis=0)
