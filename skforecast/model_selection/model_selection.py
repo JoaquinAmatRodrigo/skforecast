@@ -28,6 +28,7 @@ from sklearn.model_selection import ParameterSampler
 from ..exceptions import LongTrainingWarning
 from ..utils import check_backtesting_input
 from ..utils import initialize_lags_grid
+from ..utils import initialize_lags
 from ..utils import select_n_jobs_backtesting
 
 optuna.logging.set_verbosity(optuna.logging.WARNING) # disable optuna logs
@@ -1440,7 +1441,12 @@ def _bayesian_search_optuna(
         verbose               = verbose,
     ) -> float:
         
-        forecaster.set_params(search_space(trial))
+        sample = search_space(trial)
+        sample_params = {k: v for k, v in sample.items() if k != 'lags'}
+        sample_lags = sample.get('lags', None)
+        forecaster.set_params(sample_params)
+        if type(forecaster).__name__ != 'ForecasterAutoregCustom':
+            forecaster.set_lags(sample_lags)
         
         metrics, _ = backtesting_forecaster(
                          forecaster            = forecaster,
@@ -1469,55 +1475,51 @@ def _bayesian_search_optuna(
          {n_trials} bayesian search in each lag configuration."""
     )
 
-    if show_progress:
-        lags_grid_tqdm = tqdm(lags_grid.items(), desc='lags grid', position=0)
+    # `metric_values` will be modified inside _objective function. 
+    # It is a trick to extract multiple values from _objective since
+    # only the optimized value can be returned.
+    metric_values = []
+    
+    if 'sampler' in kwargs_create_study.keys():
+        kwargs_create_study['sampler']._rng = np.random.RandomState(random_state)
+        kwargs_create_study['sampler']._random_sampler = RandomSampler(seed=random_state)
+
+    study = optuna.create_study(**kwargs_create_study)
+
+    if 'sampler' not in kwargs_create_study.keys():
+        study.sampler = TPESampler(seed=random_state)
+
+    study.optimize(_objective, n_trials=n_trials, **kwargs_study_optimize)
+
+    best_trial = study.best_trial
+
+    if search_space(best_trial).keys() != best_trial.params.keys():
+        raise ValueError(
+            f"""Some of the key values do not match the search_space key names.
+            Dict keys     : {list(search_space(best_trial).keys())}
+            Trial objects : {list(best_trial.params.keys())}."""
+        )
+    
+    for i, trial in enumerate(study.get_trials()):
+        regressor_params = {k: v for k, v in trial.params.items() if k != 'lags'}
+        lags = trial.params.get('lags', None)
+        params_list.append(regressor_params)
+        lags_list.append(lags)
+        for m, m_values in zip(metric, metric_values[i]):
+            m_name = m if isinstance(m, str) else m.__name__
+            metric_dict[m_name].append(m_values)
+    
+    if results_opt_best is None:
+        results_opt_best = best_trial
     else:
-        lags_grid_tqdm = lags_grid.items()
-
-    for lags_k, lags_v in lags_grid_tqdm:
-
-        # `metric_values` will be modified inside _objective function. 
-        # It is a trick to extract multiple values from _objective since
-        # only the optimized value can be returned.
-        metric_values = []
-
-        if type(forecaster).__name__ != 'ForecasterAutoregCustom':
-            forecaster.set_lags(lags_v)
-            lags_v = lags_k if lags_label == 'keys' else forecaster.lags.copy()
-        
-        if 'sampler' in kwargs_create_study.keys():
-            kwargs_create_study['sampler']._rng = np.random.RandomState(random_state)
-            kwargs_create_study['sampler']._random_sampler = RandomSampler(seed=random_state)
-
-        study = optuna.create_study(**kwargs_create_study)
-
-        if 'sampler' not in kwargs_create_study.keys():
-            study.sampler = TPESampler(seed=random_state)
-
-        study.optimize(_objective, n_trials=n_trials, **kwargs_study_optimize)
-
-        best_trial = study.best_trial
-
-        if search_space(best_trial).keys() != best_trial.params.keys():
-            raise ValueError(
-                f"""Some of the key values do not match the search_space key names.
-                Dict keys     : {list(search_space(best_trial).keys())}
-                Trial objects : {list(best_trial.params.keys())}."""
-            )
-        
-        for i, trial in enumerate(study.get_trials()):
-            params_list.append(trial.params)
-            lags_list.append(lags_v)
-            for m, m_values in zip(metric, metric_values[i]):
-                m_name = m if isinstance(m, str) else m.__name__
-                metric_dict[m_name].append(m_values)
-        
-        if results_opt_best is None:
+        if best_trial.value < results_opt_best.value:
             results_opt_best = best_trial
-        else:
-            if best_trial.value < results_opt_best.value:
-                results_opt_best = best_trial
-        
+    
+    lags_list = [
+        initialize_lags(forecaster_name=type(forecaster).__name__, lags = lag)
+        for lag
+        in lags_list
+    ]
     results = pd.DataFrame({
                   'lags'  : lags_list,
                   'params': params_list,
@@ -1528,13 +1530,9 @@ def _bayesian_search_optuna(
     results = pd.concat([results, results['params'].apply(pd.Series)], axis=1)
     
     if return_best:
-        
         best_lags = results['lags'].iloc[0]
         best_params = results['params'].iloc[0]
         best_metric = results[list(metric_dict.keys())[0]].iloc[0]
-
-        if lags_label == 'keys':
-            best_lags = lags_grid[best_lags]
         
         if type(forecaster).__name__ != 'ForecasterAutoregCustom':
             forecaster.set_lags(best_lags)
@@ -1635,7 +1633,7 @@ def select_features(
             f"`forecaster` must be one of the following classes: {valid_forecasters}."
         )
     
-    if not select_only in ['autoreg', 'exog', None]:
+    if select_only not in ['autoreg', 'exog', None]:
         raise ValueError(
             "`select_only` must be one of the following values: 'autoreg', 'exog', None."
         )
