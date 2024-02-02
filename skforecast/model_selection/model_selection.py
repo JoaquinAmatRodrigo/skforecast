@@ -1461,7 +1461,6 @@ def _bayesian_search_optuna(
     else:
         optuna.logging.disable_default_handler()
         
-
     lags_grid, lags_label = initialize_lags_grid(forecaster, lags_grid)
    
     lags_list = []
@@ -1691,7 +1690,7 @@ def select_features(
             f"`forecaster` must be one of the following classes: {valid_forecasters}."
         )
     
-    if not select_only in ['autoreg', 'exog', None]:
+    if select_only not in ['autoreg', 'exog', None]:
         raise ValueError(
             "`select_only` must be one of the following values: 'autoreg', 'exog', None."
         )
