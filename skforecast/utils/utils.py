@@ -1617,8 +1617,8 @@ def check_backtesting_input(
         Last fold is allowed to have a smaller number of samples than the 
         `test_size`. If `False`, the last fold is excluded.
     refit : bool, int, default `False`
-        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
-        the Forecaster will be trained every that number of iterations.
+        Whether to re-fit the forecaster in each iteration. If `refit` is an 
+        integer, the Forecaster will be trained every that number of iterations.
     interval : list, default `None`
         Confidence of the prediction interval estimated. Sequence of percentiles
         to compute, which must be between 0 and 100 inclusive.
@@ -1642,7 +1642,7 @@ def check_backtesting_input(
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
         for backtesting.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
 
     Returns
