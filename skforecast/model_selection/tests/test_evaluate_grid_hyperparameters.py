@@ -1,8 +1,8 @@
 # Unit test _evaluate_grid_hyperparameters
 # ==============================================================================
 import re
-import pytest
 import os
+import pytest
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import Ridge
@@ -511,13 +511,13 @@ def test_evaluate_grid_hyperparameters_when_return_best_and_list_metrics(lags_gr
 
 def test_evaluate_grid_hyperparameters_output_file_when_single_metric():
     """
-    Test output file is created when output_file is passed to _evaluate_grid_hyperparameters
-    and single metric.
+    Test output file is created when output_file is passed to
+    _evaluate_grid_hyperparameters and single metric.
     """
 
     forecaster = ForecasterAutoreg(
                      regressor = Ridge(random_state=123),
-                     lags      = 2 # Placeholder, the value will be overwritten
+                     lags      = 2 
                  )
 
     steps = 3
@@ -525,7 +525,8 @@ def test_evaluate_grid_hyperparameters_output_file_when_single_metric():
     y_train = y[:-n_validation]
     lags_grid = [2, 4]
     param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
-    output_fie = 'test_evaluate_grid_hyperparameters_output_file.txt'
+    output_file = 'test_evaluate_grid_hyperparameters_output_file.txt'
+
     results = _evaluate_grid_hyperparameters(
                   forecaster         = forecaster,
                   y                  = y,
@@ -539,26 +540,27 @@ def test_evaluate_grid_hyperparameters_output_file_when_single_metric():
                   return_best        = False,
                   verbose            = False,
                   show_progress      = False,
-                  output_file        = output_fie
+                  output_file        = output_file
               )
     results  = results.astype({'params': str, 'lags': str})
 
-    assert os.path.isfile(output_fie)
-    output_fie_content = pd.read_csv(output_fie, sep='\t', low_memory=False)
-    output_fie_content = output_fie_content.sort_values(by='mean_squared_error')
-    output_fie_content = output_fie_content.astype({'params': str, 'lags': str})
-    pd.testing.assert_frame_equal(results, output_fie_content)
-    
+    assert os.path.isfile(output_file)
+    output_file_content = pd.read_csv(output_file, sep='\t', low_memory=False)
+    output_file_content = output_file_content.sort_values(by='mean_squared_error')
+    output_file_content = output_file_content.astype({'params': str, 'lags': str})
+    pd.testing.assert_frame_equal(results, output_file_content)
+    os.remove(output_file)
+
 
 def test_evaluate_grid_hyperparameters_output_file_when_single_metric_as_list():
     """ 
-    Test output file is created when output_file is passed to _evaluate_grid_hyperparameters
-    and single metric as list.
+    Test output file is created when output_file is passed to 
+    _evaluate_grid_hyperparameters and single metric as list.
     """
 
     forecaster = ForecasterAutoreg(
                      regressor = Ridge(random_state=123),
-                     lags      = 2 # Placeholder, the value will be overwritten
+                     lags      = 2 
                  )
 
     steps = 3
@@ -566,7 +568,8 @@ def test_evaluate_grid_hyperparameters_output_file_when_single_metric_as_list():
     y_train = y[:-n_validation]
     lags_grid = [2, 4]
     param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
-    output_fie = 'test_evaluate_grid_hyperparameters_output_file.txt'
+    output_file = 'test_evaluate_grid_hyperparameters_output_file.txt'
+
     results = _evaluate_grid_hyperparameters(
                   forecaster         = forecaster,
                   y                  = y,
@@ -580,25 +583,26 @@ def test_evaluate_grid_hyperparameters_output_file_when_single_metric_as_list():
                   return_best        = False,
                   verbose            = False,
                   show_progress      = False,
-                  output_file        = output_fie
+                  output_file        = output_file
               )
     results  = results.astype({'params': str, 'lags': str})
 
-    assert os.path.isfile(output_fie)
-    output_fie_content = pd.read_csv(output_fie, sep='\t', low_memory=False)
-    output_fie_content = output_fie_content.sort_values(by='mean_squared_error')
-    output_fie_content = output_fie_content.astype({'params': str, 'lags': str})
-    pd.testing.assert_frame_equal(results, output_fie_content)
+    assert os.path.isfile(output_file)
+    output_file_content = pd.read_csv(output_file, sep='\t', low_memory=False)
+    output_file_content = output_file_content.sort_values(by='mean_squared_error')
+    output_file_content = output_file_content.astype({'params': str, 'lags': str})
+    pd.testing.assert_frame_equal(results, output_file_content)
+    os.remove(output_file)
 
 
-def test_evaluate_grid_hyperparameters_output_file_when_2_metrics():
+def test_evaluate_grid_hyperparameters_output_file_when_2_metrics_as_list():
     """
-    Test output file is created when output_file is passed to _evaluate_grid_hyperparameters
-    and 2 metrics.
+    Test output file is created when output_file is passed to 
+    _evaluate_grid_hyperparameters and 2 metrics as list.
     """
     forecaster = ForecasterAutoreg(
                      regressor = Ridge(random_state=123),
-                     lags      = 2 # Placeholder, the value will be overwritten
+                     lags      = 2 
                  )
 
     steps = 3
@@ -606,7 +610,8 @@ def test_evaluate_grid_hyperparameters_output_file_when_2_metrics():
     y_train = y[:-n_validation]
     lags_grid = [2, 4]
     param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
-    output_fie = 'test_evaluate_grid_hyperparameters_output_file.txt'
+    output_file = 'test_evaluate_grid_hyperparameters_output_file.txt'
+
     results = _evaluate_grid_hyperparameters(
                   forecaster         = forecaster,
                   y                  = y,
@@ -620,13 +625,13 @@ def test_evaluate_grid_hyperparameters_output_file_when_2_metrics():
                   return_best        = False,
                   verbose            = False,
                   show_progress      = False,
-                  output_file        = output_fie
+                  output_file        = output_file
               )
     results  = results.astype({'params': str, 'lags': str})
 
-    assert os.path.isfile(output_fie)
-    output_fie_content = pd.read_csv(output_fie, sep='\t', low_memory=False)
-    output_fie_content = output_fie_content.sort_values(by='mean_squared_error')
-    output_fie_content = output_fie_content.astype({'params': str, 'lags': str})
-    pd.testing.assert_frame_equal(results, output_fie_content)
-    os.remove(output_fie)
+    assert os.path.isfile(output_file)
+    output_file_content = pd.read_csv(output_file, sep='\t', low_memory=False)
+    output_file_content = output_file_content.sort_values(by='mean_squared_error')
+    output_file_content = output_file_content.astype({'params': str, 'lags': str})
+    pd.testing.assert_frame_equal(results, output_file_content)
+    os.remove(output_file)

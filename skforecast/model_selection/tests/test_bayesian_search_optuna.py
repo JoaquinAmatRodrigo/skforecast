@@ -3,9 +3,9 @@
 import re
 import pytest
 import os
+import sys
 import numpy as np
 import pandas as pd
-import sys
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import Ridge
 from sklearn.metrics import mean_absolute_error
@@ -715,10 +715,9 @@ def test_bayesian_search_optuna_output_file():
     Test output file of _bayesian_search_optuna.
     """
 
-    output_fie = 'test_evaluate_grid_hyperparameters_output_file.txt'
     forecaster = ForecasterAutoreg(
-                    regressor = RandomForestRegressor(random_state=123),
-                    lags      = 2 # Placeholder, the value will be overwritten
+                     regressor = RandomForestRegressor(random_state=123),
+                     lags      = 2 
                  )
 
     steps = 3
@@ -727,13 +726,15 @@ def test_bayesian_search_optuna_output_file():
     lags_grid = [2, 4]
 
     def search_space(trial):
-        search_space  = {'n_estimators'    : trial.suggest_int('n_estimators', 10, 20),
-                         'min_samples_leaf': trial.suggest_float('min_samples_leaf', 0.1, 1., log=True),
-                         'max_features'    : trial.suggest_categorical('max_features', ['log2', 'sqrt'])} 
+        search_space  = {
+            'n_estimators'    : trial.suggest_int('n_estimators', 10, 20),
+            'min_samples_leaf': trial.suggest_float('min_samples_leaf', 0.1, 1., log=True),
+            'max_features'    : trial.suggest_categorical('max_features', ['log2', 'sqrt'])
+        } 
         
         return search_space
 
-    output_fie = 'test_bayesian_search_optuna_output_file.txt'
+    output_file = 'test_bayesian_search_optuna_output_file.txt'
     results = _bayesian_search_optuna(
                   forecaster         = forecaster,
                   y                  = y,
@@ -748,8 +749,8 @@ def test_bayesian_search_optuna_output_file():
                   random_state       = 123,
                   return_best        = False,
                   verbose            = False,
-                  output_file        = output_fie
+                  output_file        = output_file
               )[0]
 
-    assert os.path.isfile(output_fie)
-    os.remove(output_fie)
+    assert os.path.isfile(output_file)
+    os.remove(output_file)

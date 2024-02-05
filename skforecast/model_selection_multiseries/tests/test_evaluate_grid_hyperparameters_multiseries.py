@@ -1,6 +1,7 @@
 # Unit test _evaluate_grid_hyperparameters_multiseries
 # ==============================================================================
 import re
+import os
 import pytest
 import numpy as np
 import pandas as pd
