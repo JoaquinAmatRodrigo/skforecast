@@ -90,8 +90,8 @@ def _backtesting_sarimax(
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
     refit : bool, int, default `False`
-        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
-        the Forecaster will be trained every that number of iterations.
+        Whether to re-fit the forecaster in each iteration. If `refit` is an 
+        integer, the Forecaster will be trained every that number of iterations.
     alpha : float, default `0.05`
         The confidence intervals for the forecasts are (1 - alpha) %.
         If both, `alpha` and `interval` are provided, `alpha` will be used.
@@ -112,7 +112,7 @@ def _backtesting_sarimax(
     suppress_warnings_fit : bool, default `False`
         If `True`, warnings generated during fitting will be ignored.
         **New in version 0.10.0**
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
 
     Returns
@@ -346,8 +346,8 @@ def backtesting_sarimax(
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
     refit : bool, int, default `False`
-        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
-        the Forecaster will be trained every that number of iterations.
+        Whether to re-fit the forecaster in each iteration. If `refit` is an 
+        integer, the Forecaster will be trained every that number of iterations.
     alpha : float, default `0.05`
         The confidence intervals for the forecasts are (1 - alpha) %.
         If both, `alpha` and `interval` are provided, `alpha` will be used.
@@ -368,7 +368,7 @@ def backtesting_sarimax(
     suppress_warnings_fit : bool, default `False`
         If `True`, warnings generated during fitting will be ignored.
         **New in version 0.10.0**
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
 
     Returns
@@ -487,8 +487,8 @@ def grid_search_sarimax(
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
     refit : bool, int, default `False`
-        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
-        the Forecaster will be trained every that number of iterations.
+        Whether to re-fit the forecaster in each iteration. If `refit` is an 
+        integer, the Forecaster will be trained every that number of iterations.
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
     n_jobs : int, 'auto', default `'auto'`
@@ -501,7 +501,7 @@ def grid_search_sarimax(
     suppress_warnings_fit : bool, default `False`
         If `True`, warnings generated during fitting will be ignored.
         **New in version 0.10.0**
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
 
     Returns
@@ -598,8 +598,8 @@ def random_search_sarimax(
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
     refit : bool, int, default `False`
-        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
-        the Forecaster will be trained every that number of iterations.
+        Whether to re-fit the forecaster in each iteration. If `refit` is an 
+        integer, the Forecaster will be trained every that number of iterations.
     n_iter : int, default `10`
         Number of parameter settings that are sampled. 
         n_iter trades off runtime vs quality of the solution.
@@ -617,7 +617,7 @@ def random_search_sarimax(
     suppress_warnings_fit : bool, default `False`
         If `True`, warnings generated during fitting will be ignored.
         **New in version 0.10.0**
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
 
     Returns
@@ -711,8 +711,8 @@ def _evaluate_grid_hyperparameters_sarimax(
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
     refit : bool, int, default `False`
-        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
-        the Forecaster will be trained every that number of iterations.
+        Whether to re-fit the forecaster in each iteration. If `refit` is an 
+        integer, the Forecaster will be trained every that number of iterations.
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
     n_jobs : int, 'auto', default `'auto'`
@@ -724,7 +724,7 @@ def _evaluate_grid_hyperparameters_sarimax(
         Print number of folds used for cv or backtesting.
     suppress_warnings_fit : bool, default `False`
         If `True`, warnings generated during fitting will be ignored.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
 
     Returns

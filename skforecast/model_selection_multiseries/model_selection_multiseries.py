@@ -164,8 +164,8 @@ def _backtesting_forecaster_multiseries(
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
     refit : bool, int, default `False`
-        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
-        the Forecaster will be trained every that number of iterations.
+        Whether to re-fit the forecaster in each iteration. If `refit` is an 
+        integer, the Forecaster will be trained every that number of iterations.
     interval : list, default `None`
         Confidence of the prediction interval estimated. Sequence of percentiles
         to compute, which must be between 0 and 100 inclusive. If `None`, no
@@ -448,8 +448,8 @@ def backtesting_forecaster_multiseries(
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
     refit : bool, int, default `False`
-        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
-        the Forecaster will be trained every that number of iterations.
+        Whether to re-fit the forecaster in each iteration. If `refit` is an 
+        integer, the Forecaster will be trained every that number of iterations.
     interval : list, default `None`
         Confidence of the prediction interval estimated. Sequence of percentiles
         to compute, which must be between 0 and 100 inclusive. If `None`, no
@@ -472,7 +472,7 @@ def backtesting_forecaster_multiseries(
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
         for backtesting.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
 
     Returns
@@ -610,8 +610,8 @@ def grid_search_forecaster_multiseries(
         if the forecaster is an instance of `ForecasterAutoregCustom` or 
         `ForecasterAutoregMultiSeriesCustom`.
     refit : bool, int, default `False`
-        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
-        the Forecaster will be trained every that number of iterations.
+        Whether to re-fit the forecaster in each iteration. If `refit` is an 
+        integer, the Forecaster will be trained every that number of iterations.
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
     n_jobs : int, 'auto', default `'auto'`
@@ -624,8 +624,8 @@ def grid_search_forecaster_multiseries(
     show_progress : bool, default `True`
         Whether to show a progress bar.
     output_file : str, default `None`
-        File name or full path to save the results. Results are saved .txt file
-        with tab separated columns. If `None`, the results are not saved.
+        File name or full path to save the results. Results are saved as a .txt 
+        file with tab-separated columns. If `None`, the results will not be saved.
         **New in version 0.12.0**
 
     Returns
@@ -738,8 +738,8 @@ def random_search_forecaster_multiseries(
         if the forecaster is an instance of `ForecasterAutoregCustom` or 
         `ForecasterAutoregMultiSeriesCustom`.
     refit : bool, int, default `False`
-        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
-        the Forecaster will be trained every that number of iterations.
+        Whether to re-fit the forecaster in each iteration. If `refit` is an 
+        integer, the Forecaster will be trained every that number of iterations.
     n_iter : int, default `10`
         Number of parameter settings that are sampled per lags configuration. 
         n_iter trades off runtime vs quality of the solution.
@@ -757,8 +757,8 @@ def random_search_forecaster_multiseries(
     show_progress : bool, default `True`
         Whether to show a progress bar.
     output_file : str, default `None`
-        File name or full path to save the results. Results are saved .txt file
-        with tab separated columns. If `None`, the results are not saved.
+        File name or full path to save the results. Results are saved as a .txt 
+        file with tab-separated columns. If `None`, the results will not be saved.
         **New in version 0.12.0**
 
     Returns
@@ -869,8 +869,8 @@ def _evaluate_grid_hyperparameters_multiseries(
         if the forecaster is an instance of `ForecasterAutoregCustom` or 
         `ForecasterAutoregMultiSeriesCustom`.
     refit : bool, int, default `False`
-        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
-        the Forecaster will be trained every that number of iterations.
+        Whether to re-fit the forecaster in each iteration. If `refit` is an 
+        integer, the Forecaster will be trained every that number of iterations.
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
     verbose : bool, default `True`
@@ -878,8 +878,8 @@ def _evaluate_grid_hyperparameters_multiseries(
     show_progress : bool, default `True`
         Whether to show a progress bar.
     output_file : str, default `None`
-        File name or full path to save the results. Results are saved .txt file
-        with tab separated columns. If `None`, the results are not saved.
+        File name or full path to save the results. Results are saved as a .txt 
+        file with tab-separated columns. If `None`, the results will not be saved.
         **New in version 0.12.0**
 
     Returns
@@ -901,9 +901,6 @@ def _evaluate_grid_hyperparameters_multiseries(
             (f"`exog` must have same number of samples as `series`. "
              f"length `exog`: ({len(exog)}), length `series`: ({len(series)})")
         )
-    
-    if output_file is not None and os.path.isfile(output_file):
-        os.remove(output_file)
     
     levels = _initialize_levels_model_selection_multiseries(
                  forecaster = forecaster,
@@ -935,6 +932,9 @@ def _evaluate_grid_hyperparameters_multiseries(
         param_grid = tqdm(param_grid, desc='params grid', position=1, leave=False)
     else:
         lags_grid_tqdm = lags_grid.items()
+    
+    if output_file is not None and os.path.isfile(output_file):
+        os.remove(output_file)
 
     for lags_k, lags_v in lags_grid_tqdm:
 
@@ -972,7 +972,7 @@ def _evaluate_grid_hyperparameters_multiseries(
                 metric_dict[m_name].append(metrics_levels[m_name].mean())
 
             if output_file is not None:
-                header = ['levels', 'lags', 'paramns', *metric_dict.keys(), *params.keys()]
+                header = ['levels', 'lags', 'params', *metric_dict.keys(), *params.keys()]
                 row = [
                     levels, lags_v, params,
                     *[metric[-1] for metric in metric_dict.values()],
@@ -1101,8 +1101,8 @@ def bayesian_search_forecaster_multiseries(
         if the forecaster is an instance of `ForecasterAutoregCustom` or 
         `ForecasterAutoregMultiSeriesCustom`.
     refit : bool, int, default `False`
-        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
-        the Forecaster will be trained every that number of iterations.
+        Whether to re-fit the forecaster in each iteration. If `refit` is an 
+        integer, the Forecaster will be trained every that number of iterations.
     n_trials : int, default `10`
         Number of parameter settings that are sampled in each lag configuration.
     random_state : int, default `123`
@@ -1118,13 +1118,15 @@ def bayesian_search_forecaster_multiseries(
     show_progress : bool, default `True`
         Whether to show a progress bar.
     output_file : str, default `None`
-        File name or full path to save the results. Results are saved .txt file
-        with tab separated columns. If `None`, the results are not saved.
+        File name or full path to save the results. Results are saved as a .txt 
+        file with tab-separated columns. If `None`, the results will not be saved.
         **New in version 0.12.0**
     engine : str, default `'optuna'`
         Bayesian optimization runs through the optuna library.
-    kwargs_create_study : dict, default `{'direction': 'minimize', 'sampler': TPESampler(seed=123)}`
-        Keyword arguments (key, value mappings) to pass to optuna.create_study.
+    kwargs_create_study : dict, default `{}`
+        Keyword arguments (key, value mappings) to pass to optuna.create_study().
+        If default, the direction is set to 'minimize' and a TPESampler(seed=123) 
+        sampler is used during optimization.
     kwargs_study_optimize : dict, default `{}`
         Other keyword arguments (key, value mappings) to pass to study.optimize().
 
@@ -1255,8 +1257,8 @@ def _bayesian_search_optuna_multiseries(
         if the forecaster is an instance of `ForecasterAutoregCustom` or 
         `ForecasterAutoregMultiSeriesCustom`.
     refit : bool, int, default `False`
-        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
-        the Forecaster will be trained every that number of iterations.
+        Whether to re-fit the forecaster in each iteration. If `refit` is an 
+        integer, the Forecaster will be trained every that number of iterations.
     n_trials : int, default `10`
         Number of parameter settings that are sampled in each lag configuration.
     random_state : int, default `123`
@@ -1272,11 +1274,13 @@ def _bayesian_search_optuna_multiseries(
     show_progress : bool, default `True`
         Whether to show a progress bar.
     output_file : str, default `None`
-        File name or full path to save the results. Results are saved .txt file
-        with tab separated columns. If `None`, the results are not saved.
+        File name or full path to save the results. Results are saved as a .txt 
+        file with tab-separated columns. If `None`, the results will not be saved.
         **New in version 0.12.0**
-    kwargs_create_study : dict, default `{'direction': 'minimize', 'sampler': TPESampler(seed=123)}`
-        Keyword arguments (key, value mappings) to pass to optuna.create_study.
+    kwargs_create_study : dict, default `{}`
+        Keyword arguments (key, value mappings) to pass to optuna.create_study().
+        If default, the direction is set to 'minimize' and a TPESampler(seed=123) 
+        sampler is used during optimization.
     kwargs_study_optimize : dict, default `{}`
         Other keyword arguments (key, value mappings) to pass to study.optimize().
 
@@ -1294,19 +1298,6 @@ def _bayesian_search_optuna_multiseries(
         The best optimization result returned as a FrozenTrial optuna object.
 
     """
-    
-    if output_file is not None:
-        # Redirect optuna logging to file
-        optuna.logging.disable_default_handler()
-        logger = logging.getLogger('optuna')
-        logger.setLevel(logging.INFO)
-        for handler in logger.handlers.copy():
-            if isinstance(handler, logging.StreamHandler):
-                logger.removeHandler(handler)
-        logger.addHandler(logging.FileHandler(output_file, mode="w"))
-
-    else:
-        optuna.logging.disable_default_handler()
 
     levels = _initialize_levels_model_selection_multiseries(
                  forecaster = forecaster,
@@ -1382,6 +1373,19 @@ def _bayesian_search_optuna_multiseries(
         lags_grid_tqdm = tqdm(lags_grid.items(), desc='lags grid', position=0)
     else:
         lags_grid_tqdm = lags_grid.items()
+    
+    if output_file is not None:
+        # Redirect optuna logging to file
+        optuna.logging.disable_default_handler()
+        logger = logging.getLogger('optuna')
+        logger.setLevel(logging.INFO)
+        for handler in logger.handlers.copy():
+            if isinstance(handler, logging.StreamHandler):
+                logger.removeHandler(handler)
+        handler = logging.FileHandler(output_file, mode="w")
+        logger.addHandler(handler)
+    else:
+        optuna.logging.disable_default_handler()
 
     for lags_k, lags_v in lags_grid_tqdm:
 
@@ -1398,7 +1402,9 @@ def _bayesian_search_optuna_multiseries(
             kwargs_create_study['sampler']._rng = np.random.RandomState(random_state)
             kwargs_create_study['sampler']._random_sampler = RandomSampler(seed=random_state)
 
-        logger.info(f"lags {lags_k}: {lags_v}")
+        if output_file is not None:
+            logger.info(f"lags {lags_k}: {lags_v}")
+        
         study = optuna.create_study(**kwargs_create_study)
 
         if 'sampler' not in kwargs_create_study.keys():
@@ -1428,6 +1434,9 @@ def _bayesian_search_optuna_multiseries(
         else:
             if best_trial.value < results_opt_best.value:
                 results_opt_best = best_trial
+
+    if output_file is not None:
+        handler.close()
 
     results = pd.DataFrame({
                   'levels': [levels]*len(lags_list),
@@ -1541,8 +1550,8 @@ def backtesting_forecaster_multivariate(
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
     refit : bool, int, default `False`
-        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
-        the Forecaster will be trained every that number of iterations.
+        Whether to re-fit the forecaster in each iteration. If `refit` is an 
+        integer, the Forecaster will be trained every that number of iterations.
     interval : list, default `None`
         Confidence of the prediction interval estimated. Sequence of percentiles
         to compute, which must be between 0 and 100 inclusive. If `None`, no
@@ -1568,7 +1577,9 @@ def backtesting_forecaster_multivariate(
     show_progress : bool, default `True`
         Whether to show a progress bar.
     output_file : str, default `None`
-        Path to save the results of the backtesting as .txt file.
+        File name or full path to save the results. Results are saved as a .txt 
+        file with tab-separated columns. If `None`, the results will not be saved.
+        **New in version 0.12.0**
 
     Returns
     -------
@@ -1679,8 +1690,8 @@ def grid_search_forecaster_multivariate(
         if the forecaster is an instance of `ForecasterAutoregCustom` or 
         `ForecasterAutoregMultiSeriesCustom`.
     refit : bool, int, default `False`
-        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
-        the Forecaster will be trained every that number of iterations.
+        Whether to re-fit the forecaster in each iteration. If `refit` is an 
+        integer, the Forecaster will be trained every that number of iterations.
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
     n_jobs : int, 'auto', default `'auto'`
@@ -1693,8 +1704,8 @@ def grid_search_forecaster_multivariate(
     show_progress : bool, default `True`
         Whether to show a progress bar.
     output_file : str, default `None`
-        File name or full path to save the results. Results are saved .txt file
-        with tab separated columns. If `None`, the results are not saved.
+        File name or full path to save the results. Results are saved as a .txt 
+        file with tab-separated columns. If `None`, the results will not be saved.
         **New in version 0.12.0**
 
     Returns
@@ -1807,8 +1818,8 @@ def random_search_forecaster_multivariate(
         if the forecaster is an instance of `ForecasterAutoregCustom` or 
         `ForecasterAutoregMultiSeriesCustom`.
     refit : bool, int, default `False`
-        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
-        the Forecaster will be trained every that number of iterations.
+        Whether to re-fit the forecaster in each iteration. If `refit` is an 
+        integer, the Forecaster will be trained every that number of iterations.
     n_iter : int, default `10`
         Number of parameter settings that are sampled per lags configuration. 
         n_iter trades off runtime vs quality of the solution.
@@ -1826,8 +1837,8 @@ def random_search_forecaster_multivariate(
     show_progress : bool, default `True`
         Whether to show a progress bar.
     output_file : str, default `None`
-        File name or full path to save the results. Results are saved .txt file
-        with tab separated columns. If `None`, the results are not saved.
+        File name or full path to save the results. Results are saved as a .txt 
+        file with tab-separated columns. If `None`, the results will not be saved.
         **New in version 0.12.0**
 
     Returns
@@ -1947,8 +1958,8 @@ def bayesian_search_forecaster_multivariate(
         if the forecaster is an instance of `ForecasterAutoregCustom` or 
         `ForecasterAutoregMultiSeriesCustom`.
     refit : bool, int, default `False`
-        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
-        the Forecaster will be trained every that number of iterations.
+        Whether to re-fit the forecaster in each iteration. If `refit` is an 
+        integer, the Forecaster will be trained every that number of iterations.
     n_trials : int, default `10`
         Number of parameter settings that are sampled in each lag configuration.
     random_state : int, default `123`
@@ -1965,13 +1976,15 @@ def bayesian_search_forecaster_multivariate(
     show_progress : bool, default `True`
         Whether to show a progress bar.
     output_file : str, default `None`
-        File name or full path to save the results. Results are saved .txt file
-        with tab separated columns. If `None`, the results are not saved.
+        File name or full path to save the results. Results are saved as a .txt 
+        file with tab-separated columns. If `None`, the results will not be saved.
         **New in version 0.12.0**
     engine : str, default `'optuna'`
         Bayesian optimization runs through the optuna library.
-    kwargs_create_study : dict, default `{'direction': 'minimize', 'sampler': TPESampler(seed=123)}`
-        Keyword arguments (key, value mappings) to pass to optuna.create_study.
+    kwargs_create_study : dict, default `{}`
+        Keyword arguments (key, value mappings) to pass to optuna.create_study().
+        If default, the direction is set to 'minimize' and a TPESampler(seed=123) 
+        sampler is used during optimization.
     kwargs_study_optimize : dict, default `{}`
         Other keyword arguments (key, value mappings) to pass to study.optimize().
 
