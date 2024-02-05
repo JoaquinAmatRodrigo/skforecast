@@ -588,6 +588,76 @@ def test_results_output_bayesian_search_optuna_multiseries_ForecasterAutoregMult
     )
 
     pd.testing.assert_frame_equal(results, expected_results)
+
+
+def test_results_output_bayesian_search_optuna_multiseries_ForecasterAutoregMultiVariate_with_mocked():
+    """
+    Test output of _bayesian_search_optuna_multiseries in 
+    ForecasterAutoregMultiVariate with mocked (mocked done in skforecast v0.12.0).
+    """
+    forecaster = ForecasterAutoregMultiVariate(
+                     regressor          = Ridge(random_state=123),
+                     level              = 'l1',
+                     lags               = 2,
+                     steps              = 3,
+                     transformer_series = None
+                 )
+
+    steps = 3
+    n_validation = 12
+    lags_grid = [2, 4]
+
+    def search_space(trial):
+        search_space  = {'alpha': trial.suggest_float('alpha', 1e-2, 1.0)}
+        
+        return search_space
+
+    results = _bayesian_search_optuna_multiseries(
+                  forecaster         = forecaster,
+                  series             = series,
+                  steps              = steps,
+                  lags_grid          = lags_grid,
+                  search_space       = search_space,
+                  metric             = 'mean_absolute_error',
+                  refit              = True,
+                  initial_train_size = len(series) - n_validation,
+                  fixed_train_size   = True,
+                  n_trials           = 10,
+                  random_state       = 123,
+                  return_best        = False,
+                  verbose            = False
+              )[0]
+    
+    expected_results = pd.DataFrame({
+        'levels': [['l1']]*20,
+        'lags'  : [[1, 2], [1, 2], [1, 2], [1, 2], [1, 2],
+                   [1, 2], [1, 2], [1, 2], [1, 2], [1, 2],
+                   [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4],
+                   [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]],
+        'params': [{'alpha': 0.2345829390285611}, {'alpha': 0.29327794160087567},
+                   {'alpha': 0.398196343012209}, {'alpha': 0.42887539552321635},
+                   {'alpha': 0.48612258246951734}, {'alpha': 0.5558016213920624},
+                   {'alpha': 0.6879814411990146}, {'alpha': 0.6995044937418831},
+                   {'alpha': 0.7222742800877074}, {'alpha': 0.9809565564007693},
+                   {'alpha': 0.9809565564007693}, {'alpha': 0.7222742800877074},
+                   {'alpha': 0.6995044937418831}, {'alpha': 0.6879814411990146},
+                   {'alpha': 0.5558016213920624}, {'alpha': 0.48612258246951734},
+                   {'alpha': 0.42887539552321635}, {'alpha': 0.398196343012209},
+                   {'alpha': 0.29327794160087567}, {'alpha': 0.2345829390285611}],
+        'mean_absolute_error': np.array([0.20359805, 0.20387838, 0.20433819, 0.2044636 , 0.2046877 ,
+                                         0.20494431, 0.20538793, 0.20542418, 0.20549473, 0.20620855,
+                                         0.21635469, 0.21703337, 0.21710019, 0.21713449, 0.21755249,
+                                         0.21779247, 0.21800075, 0.21811675, 0.21853829, 0.21913975]),
+        'alpha': np.array([0.23458294, 0.29327794, 0.39819634, 0.4288754 , 0.48612258,
+                           0.55580162, 0.68798144, 0.69950449, 0.72227428, 0.98095656,
+                           0.98095656, 0.72227428, 0.69950449, 0.68798144, 0.55580162,
+                           0.48612258, 0.4288754 , 0.39819634, 0.29327794, 0.23458294])
+        },
+        index=pd.Index([2, 1, 9, 5, 8, 3, 7, 0, 4, 6, 16, 
+                        14, 10, 17, 13, 18, 15, 19, 11, 12], dtype="int64")
+    )
+
+    pd.testing.assert_frame_equal(results, expected_results)
     
 
 @pytest.mark.parametrize("lags_grid", 
