@@ -1,21 +1,26 @@
 # Unit test _bayesian_search_optuna_multiseries
 # ==============================================================================
+import os
 import re
+import sys
 import pytest
 import numpy as np
 import pandas as pd
-import sys
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import Ridge
 from sklearn.metrics import mean_absolute_error
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 from skforecast.ForecasterAutoregMultiSeriesCustom import ForecasterAutoregMultiSeriesCustom
+from skforecast.ForecasterAutoregMultiVariate import ForecasterAutoregMultiVariate
 from skforecast.model_selection_multiseries import backtesting_forecaster_multiseries
 from skforecast.model_selection_multiseries.model_selection_multiseries import _bayesian_search_optuna_multiseries
 import optuna
 from optuna.samplers import TPESampler
 from tqdm import tqdm
 from functools import partialmethod
+
+optuna.logging.set_verbosity(optuna.logging.WARNING)
+tqdm.__init__ = partialmethod(tqdm.__init__, disable=True) # hide progress bar
 
 # Fixtures
 from .fixtures_model_selection_multiseries import series
@@ -28,9 +33,6 @@ def create_predictors(y): # pragma: no cover
     lags = y[-1:-5:-1]
 
     return lags
-
-optuna.logging.set_verbosity(optuna.logging.WARNING)
-tqdm.__init__ = partialmethod(tqdm.__init__, disable=True) # hide progress bar
 
 
 def test_ValueError_bayesian_search_optuna_multiseries_metric_list_duplicate_names():
@@ -767,3 +769,141 @@ def test_results_opt_best_output__bayesian_search_optuna_multiseries_with_output
     assert best_trial.number == results_opt_best.number
     assert best_trial.values == results_opt_best.values
     assert best_trial.params == results_opt_best.params
+
+
+def test_bayesian_search_optuna_multiseries_ForecasterAutoregMultiSeries_output_file():
+    """
+    Test output file of _bayesian_search_optuna_multiseries in 
+    ForecasterAutoregMultiSeries.
+    """
+    forecaster = ForecasterAutoregMultiSeries(
+                     regressor = RandomForestRegressor(random_state=123),
+                     lags      = 2 
+                 )
+
+    steps = 3
+    n_validation = 12
+    lags_grid = [2, 4]
+
+    def search_space(trial):
+        search_space  = {
+            'n_estimators'    : trial.suggest_int('n_estimators', 10, 20),
+            'min_samples_leaf': trial.suggest_float('min_samples_leaf', 0.1, 1., log=True),
+            'max_features'    : trial.suggest_categorical('max_features', ['log2', 'sqrt'])
+        }
+        
+        return search_space
+
+    output_file = 'test_bayesian_search_optuna_multiseries_output_file.txt'
+    results = _bayesian_search_optuna_multiseries(
+                  forecaster         = forecaster,
+                  series             = series,
+                  steps              = steps,
+                  lags_grid          = lags_grid,
+                  search_space       = search_space,
+                  metric             = 'mean_absolute_error',
+                  refit              = False,
+                  initial_train_size = len(series) - n_validation,
+                  fixed_train_size   = False,
+                  n_trials           = 10,
+                  random_state       = 123,
+                  return_best        = False,
+                  verbose            = False,
+                  output_file        = output_file
+              )[0]
+
+    assert os.path.isfile(output_file)
+    os.remove(output_file)
+
+
+def test_bayesian_search_optuna_multiseries_ForecasterAutoregMultiSeriesCustom_output_file():
+    """
+    Test output file of _bayesian_search_optuna_multiseries in 
+    ForecasterAutoregMultiSeriesCustom.
+    """
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                     regressor      = RandomForestRegressor(random_state=123),
+                     fun_predictors = create_predictors,
+                     window_size    = 4
+                 )
+
+    steps = 3
+    n_validation = 12
+    lags_grid = [2, 4]
+
+    def search_space(trial):
+        search_space  = {
+            'n_estimators'    : trial.suggest_int('n_estimators', 10, 20),
+            'min_samples_leaf': trial.suggest_float('min_samples_leaf', 0.1, 1., log=True),
+            'max_features'    : trial.suggest_categorical('max_features', ['log2', 'sqrt'])
+        }
+        
+        return search_space
+
+    output_file = 'test_bayesian_search_optuna_multiseries_output_file.txt'
+    results = _bayesian_search_optuna_multiseries(
+                  forecaster         = forecaster,
+                  series             = series,
+                  steps              = steps,
+                  lags_grid          = lags_grid,
+                  search_space       = search_space,
+                  metric             = 'mean_absolute_error',
+                  refit              = False,
+                  initial_train_size = len(series) - n_validation,
+                  fixed_train_size   = False,
+                  n_trials           = 10,
+                  random_state       = 123,
+                  return_best        = False,
+                  verbose            = False,
+                  output_file        = output_file
+              )[0]
+
+    assert os.path.isfile(output_file)
+    os.remove(output_file)
+
+
+def test_bayesian_search_optuna_multiseries_ForecasterAutoregMultiVariate_output_file():
+    """
+    Test output file of _bayesian_search_optuna_multiseries in 
+    ForecasterAutoregMultiVariate.
+    """
+    forecaster = ForecasterAutoregMultiVariate(
+                     regressor = RandomForestRegressor(random_state=123),
+                     level     = 'l1',
+                     lags      = 2,
+                     steps     = 3
+                 )
+
+    steps = 3
+    n_validation = 12
+    lags_grid = [2, 4]
+
+    def search_space(trial):
+        search_space  = {
+            'n_estimators'    : trial.suggest_int('n_estimators', 10, 20),
+            'min_samples_leaf': trial.suggest_float('min_samples_leaf', 0.1, 1., log=True),
+            'max_features'    : trial.suggest_categorical('max_features', ['log2', 'sqrt'])
+        }
+        
+        return search_space
+
+    output_file = 'test_bayesian_search_optuna_multiseries_output_file.txt'
+    results = _bayesian_search_optuna_multiseries(
+                  forecaster         = forecaster,
+                  series             = series,
+                  steps              = steps,
+                  lags_grid          = lags_grid,
+                  search_space       = search_space,
+                  metric             = 'mean_absolute_error',
+                  refit              = False,
+                  initial_train_size = len(series) - n_validation,
+                  fixed_train_size   = False,
+                  n_trials           = 10,
+                  random_state       = 123,
+                  return_best        = False,
+                  verbose            = False,
+                  output_file        = output_file
+              )[0]
+
+    assert os.path.isfile(output_file)
+    os.remove(output_file)

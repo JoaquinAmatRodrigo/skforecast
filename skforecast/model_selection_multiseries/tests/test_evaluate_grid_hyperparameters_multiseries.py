@@ -376,6 +376,92 @@ def test_evaluate_grid_hyperparameters_multiseries_when_return_best_ForecasterAu
     assert expected_series_col_names ==  forecaster.series_col_names
 
 
+def test_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMultiSeries_output_file_single_level():
+    """
+    Test output file is created when output_file is passed to 
+    _evaluate_grid_hyperparameters_multiseries and single level.
+    """
+    forecaster = ForecasterAutoregMultiSeries(
+                     regressor = Ridge(random_state=123),
+                     lags      = 2
+                 )
+
+    steps = 3
+    n_validation = 12
+    lags_grid = {'lags_1': 2, 'lags_2': 4}
+    param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
+    output_file = 'test_evaluate_grid_hyperparameters_multiseries_output_file.txt'
+
+    results = _evaluate_grid_hyperparameters_multiseries(
+                  forecaster         = forecaster,
+                  series             = series,
+                  param_grid         = param_grid,
+                  steps              = steps,
+                  metric             = 'mean_absolute_error',
+                  initial_train_size = len(series) - n_validation,
+                  fixed_train_size   = False,
+                  levels             = 'l1',
+                  exog               = None,
+                  lags_grid          = lags_grid,
+                  refit              = False,
+                  return_best        = False,
+                  verbose            = False,
+                  show_progress      = False,
+                  output_file        = output_file
+              )
+    results  = results.astype({'levels': str, 'lags': str, 'params': str})
+
+    assert os.path.isfile(output_file)
+    output_file_content = pd.read_csv(output_file, sep='\t', low_memory=False)
+    output_file_content = output_file_content.sort_values(by='mean_absolute_error')
+    output_file_content = output_file_content.astype({'levels': str, 'lags': str, 'params': str})
+    pd.testing.assert_frame_equal(results, output_file_content)
+    os.remove(output_file)
+
+
+def test_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMultiSeries_output_file_multiple_metrics():
+    """
+    Test output file is created when output_file is passed to 
+    _evaluate_grid_hyperparameters_multiseries and list of metrics.
+    """
+    forecaster = ForecasterAutoregMultiSeries(
+                     regressor = Ridge(random_state=123),
+                     lags      = 2
+                 )
+
+    steps = 3
+    n_validation = 12
+    lags_grid = [2, 4]
+    param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
+    output_file = 'test_evaluate_grid_hyperparameters_multiseries_output_file.txt'
+
+    results = _evaluate_grid_hyperparameters_multiseries(
+                  forecaster         = forecaster,
+                  series             = series,
+                  param_grid         = param_grid,
+                  steps              = steps,
+                  metric             = [mean_squared_error, 'mean_absolute_error'],
+                  initial_train_size = len(series) - n_validation,
+                  fixed_train_size   = False,
+                  levels             = None,
+                  exog               = None,
+                  lags_grid          = lags_grid,
+                  refit              = False,
+                  return_best        = False,
+                  verbose            = False,
+                  show_progress      = False,
+                  output_file        = output_file
+              )
+    results  = results.astype({'levels': str, 'lags': str, 'params': str})
+
+    assert os.path.isfile(output_file)
+    output_file_content = pd.read_csv(output_file, sep='\t', low_memory=False)
+    output_file_content = output_file_content.sort_values(by='mean_squared_error')
+    output_file_content = output_file_content.astype({'levels': str, 'lags': str, 'params': str})
+    pd.testing.assert_frame_equal(results, output_file_content)
+    os.remove(output_file)
+
+
 # ForecasterAutoregMultiSeriesCustom
 # ======================================================================================================================
 def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMultiSeriesCustom_with_mocked():
@@ -525,8 +611,7 @@ def test_evaluate_grid_hyperparameters_multiseries_when_return_best_ForecasterAu
     forecaster = ForecasterAutoregMultiSeriesCustom(
                      regressor          = Ridge(random_state=123),
                      fun_predictors     = create_predictors,
-                     window_size        = 4,
-                     transformer_series = None
+                     window_size        = 4
                  )
 
     steps = 3
@@ -554,6 +639,92 @@ def test_evaluate_grid_hyperparameters_multiseries_when_return_best_ForecasterAu
     
     assert expected_alpha == forecaster.regressor.alpha
     assert expected_series_col_names ==  forecaster.series_col_names
+
+
+def test_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMultiSeriesCustom_output_file_single_level():
+    """
+    Test output file is created when output_file is passed to 
+    _evaluate_grid_hyperparameters_multiseries and single level.
+    """
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                     regressor      = Ridge(random_state=123),
+                     fun_predictors = create_predictors,
+                     window_size    = 4
+                 )
+
+    steps = 3
+    n_validation = 12
+    param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
+    output_file = 'test_evaluate_grid_hyperparameters_multiseries_output_file.txt'
+
+    results = _evaluate_grid_hyperparameters_multiseries(
+                  forecaster         = forecaster,
+                  series             = series,
+                  param_grid         = param_grid,
+                  steps              = steps,
+                  metric             = 'mean_absolute_error',
+                  initial_train_size = len(series) - n_validation,
+                  fixed_train_size   = False,
+                  levels             = 'l1',
+                  exog               = None,
+                  lags_grid          = None,
+                  refit              = False,
+                  return_best        = False,
+                  verbose            = False,
+                  show_progress      = False,
+                  output_file        = output_file
+              )
+    results  = results.astype({'levels': str, 'lags': str, 'params': str})
+
+    assert os.path.isfile(output_file)
+    output_file_content = pd.read_csv(output_file, sep='\t', low_memory=False)
+    output_file_content = output_file_content.sort_values(by='mean_absolute_error')
+    output_file_content = output_file_content.astype({'levels': str, 'lags': str, 'params': str})
+    pd.testing.assert_frame_equal(results, output_file_content)
+    os.remove(output_file)
+
+
+def test_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMultiSeriesCustom_output_file_multiple_metrics():
+    """
+    Test output file is created when output_file is passed to 
+    _evaluate_grid_hyperparameters_multiseries and list of metrics.
+    """
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                     regressor      = Ridge(random_state=123),
+                     fun_predictors = create_predictors,
+                     window_size    = 4
+                 )
+
+    steps = 3
+    n_validation = 12
+    param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
+    output_file = 'test_evaluate_grid_hyperparameters_multiseries_output_file.txt'
+
+    results = _evaluate_grid_hyperparameters_multiseries(
+                  forecaster         = forecaster,
+                  series             = series,
+                  param_grid         = param_grid,
+                  steps              = steps,
+                  metric             = [mean_squared_error, 'mean_absolute_error'],
+                  initial_train_size = len(series) - n_validation,
+                  fixed_train_size   = False,
+                  levels             = None,
+                  exog               = None,
+                  lags_grid          = None,
+                  refit              = False,
+                  return_best        = False,
+                  verbose            = False,
+                  show_progress      = False,
+                  output_file        = output_file
+              )
+    results  = results.astype({'levels': str, 'lags': str, 'params': str})
+
+    assert os.path.isfile(output_file)
+    output_file_content = pd.read_csv(output_file, sep='\t', low_memory=False)
+    output_file_content = output_file_content.sort_values(by='mean_squared_error')
+    output_file_content = output_file_content.astype({'levels': str, 'lags': str, 'params': str})
+    pd.testing.assert_frame_equal(results, output_file_content)
+    os.remove(output_file)
 
 
 # ForecasterAutoregMultiVariate
@@ -917,3 +1088,93 @@ def test_evaluate_grid_hyperparameters_multiseries_when_return_best_ForecasterAu
     for i in range(1, forecaster.steps + 1):
         assert expected_alpha == forecaster.regressors_[i].alpha
     assert expected_series_col_names ==  forecaster.series_col_names
+
+
+def test_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMultiVariate_output_file_single_level():
+    """
+    Test output file is created when output_file is passed to 
+    _evaluate_grid_hyperparameters_multiseries and single level.
+    """
+    forecaster = ForecasterAutoregMultiVariate(
+                     regressor = Ridge(random_state=123),
+                     level     = 'l1',
+                     lags      = 2,
+                     steps     = 3
+                 )
+
+    steps = 3
+    n_validation = 12
+    lags_grid = {'lags_1': 2, 'lags_2': 4}
+    param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
+    output_file = 'test_evaluate_grid_hyperparameters_multiseries_output_file.txt'
+
+    results = _evaluate_grid_hyperparameters_multiseries(
+                  forecaster         = forecaster,
+                  series             = series,
+                  param_grid         = param_grid,
+                  steps              = steps,
+                  metric             = 'mean_absolute_error',
+                  initial_train_size = len(series) - n_validation,
+                  fixed_train_size   = False,
+                  levels             = 'l1',
+                  exog               = None,
+                  lags_grid          = lags_grid,
+                  refit              = False,
+                  return_best        = False,
+                  verbose            = False,
+                  show_progress      = False,
+                  output_file        = output_file
+              )
+    results  = results.astype({'levels': str, 'lags': str, 'params': str})
+
+    assert os.path.isfile(output_file)
+    output_file_content = pd.read_csv(output_file, sep='\t', low_memory=False)
+    output_file_content = output_file_content.sort_values(by='mean_absolute_error')
+    output_file_content = output_file_content.astype({'levels': str, 'lags': str, 'params': str})
+    pd.testing.assert_frame_equal(results, output_file_content)
+    os.remove(output_file)
+
+
+def test_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMultiVariate_output_file_multiple_metrics():
+    """
+    Test output file is created when output_file is passed to 
+    _evaluate_grid_hyperparameters_multiseries and list of metrics.
+    """
+    forecaster = ForecasterAutoregMultiVariate(
+                     regressor = Ridge(random_state=123),
+                     level     = 'l2',
+                     lags      = 2,
+                     steps     = 3
+                 )
+
+    steps = 3
+    n_validation = 12
+    lags_grid = [2, 4]
+    param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
+    output_file = 'test_evaluate_grid_hyperparameters_multiseries_output_file.txt'
+
+    results = _evaluate_grid_hyperparameters_multiseries(
+                  forecaster         = forecaster,
+                  series             = series,
+                  param_grid         = param_grid,
+                  steps              = steps,
+                  metric             = [mean_squared_error, 'mean_absolute_error'],
+                  initial_train_size = len(series) - n_validation,
+                  fixed_train_size   = False,
+                  levels             = None,
+                  exog               = None,
+                  lags_grid          = lags_grid,
+                  refit              = False,
+                  return_best        = False,
+                  verbose            = False,
+                  show_progress      = False,
+                  output_file        = output_file
+              )
+    results  = results.astype({'levels': str, 'lags': str, 'params': str})
+
+    assert os.path.isfile(output_file)
+    output_file_content = pd.read_csv(output_file, sep='\t', low_memory=False)
+    output_file_content = output_file_content.sort_values(by='mean_squared_error')
+    output_file_content = output_file_content.astype({'levels': str, 'lags': str, 'params': str})
+    pd.testing.assert_frame_equal(results, output_file_content)
+    os.remove(output_file)
