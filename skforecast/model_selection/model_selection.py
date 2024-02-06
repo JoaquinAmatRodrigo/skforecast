@@ -819,6 +819,7 @@ def grid_search_forecaster(
         Results for each combination of parameters.
 
         - column lags: lags configuration for each iteration.
+        - column lags_labels: Descriptive labels or aliases for the lags.
         - column params: parameters configuration for each iteration.
         - column metric: metric value estimated for each iteration.
         - additional n columns with param = value.
@@ -944,6 +945,7 @@ def random_search_forecaster(
         Results for each combination of parameters.
 
         - column lags: lags configuration for each iteration.
+        - column lags_labels: Descriptive labels or aliases for the lags.
         - column params: parameters configuration for each iteration.
         - column metric: metric value estimated for each iteration.
         - additional n columns with param = value.
@@ -1061,6 +1063,7 @@ def _evaluate_grid_hyperparameters(
         Results for each combination of parameters.
 
         - column lags: lags configuration for each iteration.
+        - column lags_labels: Descriptive labels or aliases for the lags.
         - column params: parameters configuration for each iteration.
         - column metric: metric value estimated for each iteration.
         - additional n columns with param = value.
@@ -1075,8 +1078,6 @@ def _evaluate_grid_hyperparameters(
 
     lags_grid, lags_label = initialize_lags_grid(forecaster, lags_grid)
    
-    lags_list = []
-    params_list = []
     if not isinstance(metric, list):
         metric = [metric] 
     metric_dict = {(m if isinstance(m, str) else m.__name__): [] 
@@ -1098,11 +1099,16 @@ def _evaluate_grid_hyperparameters(
     if output_file is not None and os.path.isfile(output_file):
         os.remove(output_file)
 
+    lags_list = []
+    lags_labels_list = []
+    params_list = []
     for lags_k, lags_v in lags_grid_tqdm:
         
         if type(forecaster).__name__ != 'ForecasterAutoregCustom':
             forecaster.set_lags(lags_v)
-            lags_v = lags_k if lags_label == 'keys' else forecaster.lags.copy()
+            lags_v = forecaster.lags.copy()
+            if lags_label == 'values':
+                lags_k = lags_v
         
         for params in param_grid:
 
@@ -1127,14 +1133,17 @@ def _evaluate_grid_hyperparameters(
                                     message= "The forecaster will be fit.*")
             
             lags_list.append(lags_v)
+            lags_labels_list.append(lags_k)
             params_list.append(params)
             for m, m_value in zip(metric, metrics_values):
                 m_name = m if isinstance(m, str) else m.__name__
                 metric_dict[m_name].append(m_value)
         
             if output_file is not None:
-                header = ['lags', 'params', *metric_dict.keys(), *params.keys()]
-                row = [lags_v, params, *metrics_values, *params.values()]
+                header = ['lags', 'lags_labels', 'params', 
+                          *metric_dict.keys(), *params.keys()]
+                row = [lags_v, lags_k, params, 
+                       *metrics_values, *params.values()]
                 if not os.path.isfile(output_file):
                     with open(output_file, 'w', newline='') as f:
                         f.write('\t'.join(header) + '\n')
@@ -1144,8 +1153,9 @@ def _evaluate_grid_hyperparameters(
                         f.write('\t'.join([str(r) for r in row]) + '\n')
     
     results = pd.DataFrame({
-                  'lags'  : lags_list,
-                  'params': params_list,
+                  'lags'       : lags_list,
+                  'lags_labels': lags_labels_list,
+                  'params'     : params_list,
                   **metric_dict
               })
     
@@ -1157,15 +1167,9 @@ def _evaluate_grid_hyperparameters(
         best_lags = results['lags'].iloc[0]
         best_params = results['params'].iloc[0]
         best_metric = results[list(metric_dict.keys())[0]].iloc[0]
-
-        if lags_label == 'keys':
-            best_lags = lags_grid[best_lags]
         
         if type(forecaster).__name__ != 'ForecasterAutoregCustom':
             forecaster.set_lags(best_lags)
-            best_lags = forecaster.lags
-        else:
-            best_lags = 'custom_predictors'
         forecaster.set_params(best_params)
 
         forecaster.fit(y=y, exog=exog, store_in_sample_residuals=True)
@@ -1287,6 +1291,7 @@ def bayesian_search_forecaster(
         Results for each combination of parameters.
 
         - column lags: lags configuration for each iteration.
+        - column lags_labels: Descriptive labels or aliases for the lags.
         - column params: parameters configuration for each iteration.
         - column metric: metric value estimated for each iteration.
         - additional n columns with param = value.
@@ -1443,6 +1448,7 @@ def _bayesian_search_optuna(
         Results for each combination of parameters.
 
         - column lags: lags configuration for each iteration.
+        - column lags_labels: Descriptive labels or aliases for the lags.
         - column params: parameters configuration for each iteration.
         - column metric: metric value estimated for each iteration.
         - additional n columns with param = value.
@@ -1453,9 +1459,6 @@ def _bayesian_search_optuna(
         
     lags_grid, lags_label = initialize_lags_grid(forecaster, lags_grid)
    
-    lags_list = []
-    params_list = []
-    results_opt_best = None
     if not isinstance(metric, list):
         metric = [metric] 
     metric_dict = {(m if isinstance(m, str) else m.__name__): [] 
@@ -1531,6 +1534,10 @@ def _bayesian_search_optuna(
     else:
         optuna.logging.disable_default_handler()
 
+    lags_list = []
+    lags_labels_list = []
+    params_list = []
+    results_opt_best = None
     for lags_k, lags_v in lags_grid_tqdm:
 
         # `metric_values` will be modified inside _objective function. 
@@ -1540,7 +1547,9 @@ def _bayesian_search_optuna(
 
         if type(forecaster).__name__ != 'ForecasterAutoregCustom':
             forecaster.set_lags(lags_v)
-            lags_v = lags_k if lags_label == 'keys' else forecaster.lags.copy()
+            lags_v = forecaster.lags.copy()
+            if lags_label == 'values':
+                lags_k = lags_v
         
         if 'sampler' in kwargs_create_study.keys():
             kwargs_create_study['sampler']._rng = np.random.RandomState(random_state)
@@ -1566,8 +1575,9 @@ def _bayesian_search_optuna(
             )
         
         for i, trial in enumerate(study.get_trials()):
-            params_list.append(trial.params)
             lags_list.append(lags_v)
+            lags_labels_list.append(lags_k)
+            params_list.append(trial.params)
             for m, m_values in zip(metric, metric_values[i]):
                 m_name = m if isinstance(m, str) else m.__name__
                 metric_dict[m_name].append(m_values)
@@ -1582,8 +1592,9 @@ def _bayesian_search_optuna(
         handler.close()
     
     results = pd.DataFrame({
-                  'lags'  : lags_list,
-                  'params': params_list,
+                  'lags'       : lags_list,
+                  'lags_labels': lags_labels_list,
+                  'params'     : params_list,
                   **metric_dict
               })
 
@@ -1595,15 +1606,9 @@ def _bayesian_search_optuna(
         best_lags = results['lags'].iloc[0]
         best_params = results['params'].iloc[0]
         best_metric = results[list(metric_dict.keys())[0]].iloc[0]
-
-        if lags_label == 'keys':
-            best_lags = lags_grid[best_lags]
         
         if type(forecaster).__name__ != 'ForecasterAutoregCustom':
             forecaster.set_lags(best_lags)
-            best_lags = forecaster.lags
-        else:
-            best_lags = 'custom_predictors'
         forecaster.set_params(best_params)
 
         forecaster.fit(y=y, exog=exog, store_in_sample_residuals=True)
