@@ -12,13 +12,8 @@ from skforecast.ForecasterAutoregDirect import ForecasterAutoregDirect
 from skforecast.model_selection import select_features
 
 # Fixtures
-exog, y = make_regression(n_samples=500, n_features=5, n_informative=2, random_state=123)
-exog = pd.DataFrame(
-           data    = exog,
-           index   = pd.date_range(start='2020-01-01', periods=len(exog), freq='H'),
-           columns = [f"exog_{i}" for i in range(exog.shape[1])]
-       )
-y = pd.Series(y, index=exog.index, name="y")
+from .fixtures_model_selection import y_feature_selection as y
+from .fixtures_model_selection import exog_feature_selection as exog
 
 
 def test_TypeError_select_features_raise_when_forecaster_is_not_supported():
@@ -119,7 +114,7 @@ def test_select_features_when_selector_is_RFE_and_select_only_is_exog():
     )
 
     assert selected_autoreg == [1, 2, 3, 4, 5]
-    assert selected_exog == ['exog_0', 'exog_1', 'exog_2']
+    assert selected_exog == ['exog_1', 'exog_2', 'exog_4']
 
 
 def test_select_features_when_selector_is_RFE_and_select_only_is_exog_regressor():
@@ -144,7 +139,7 @@ def test_select_features_when_selector_is_RFE_and_select_only_is_exog_regressor(
     )
 
     assert selected_autoreg == [1, 2, 3, 4, 5]
-    assert selected_exog == ['exog_0', 'exog_1', 'exog_2']
+    assert selected_exog == ['exog_1', 'exog_2', 'exog_4']
 
 
 def test_select_features_when_selector_is_RFE_and_select_only_is_exog_ForecasterAutoregCustom():
@@ -170,7 +165,7 @@ def test_select_features_when_selector_is_RFE_and_select_only_is_exog_Forecaster
 
     assert selected_autoreg == ['custom_predictor_0', 'custom_predictor_1', 'custom_predictor_2',
                                 'custom_predictor_3', 'custom_predictor_4']
-    assert selected_exog == ['exog_0', 'exog_1', 'exog_2']
+    assert selected_exog == ['exog_1', 'exog_2', 'exog_4']
 
 
 def test_select_features_when_selector_is_RFE_and_select_only_is_autoreg():
@@ -302,12 +297,12 @@ def test_select_features_when_selector_is_RFE_select_only_exog_is_True_and_force
         y               = y,
         exog            = exog,
         select_only     = 'exog',
-        force_inclusion = "^exog_4",
+        force_inclusion = "^exog_3",
         verbose         = False,
     )
 
     assert selected_autoreg == [1, 2, 3, 4, 5]
-    assert selected_exog == ['exog_0', 'exog_1', 'exog_2', 'exog_4']
+    assert selected_exog == ['exog_1', 'exog_2', 'exog_3', 'exog_4']
 
 
 def test_select_features_when_selector_is_RFE_select_only_exog_is_False_and_force_inclusion_is_regex_ForecasterAutoregCustom():
@@ -335,7 +330,7 @@ def test_select_features_when_selector_is_RFE_select_only_exog_is_False_and_forc
 
     assert selected_autoreg == ['custom_predictor_0', 'custom_predictor_1', 'custom_predictor_2',
                                 'custom_predictor_3', 'custom_predictor_4']
-    assert selected_exog == ['exog_0', 'exog_1', 'exog_2']
+    assert selected_exog == ['exog_1', 'exog_2', 'exog_4']
 
 
 def test_select_features_when_selector_is_RFE_select_only_exog_is_False_and_force_inclusion_is_list():
@@ -360,7 +355,7 @@ def test_select_features_when_selector_is_RFE_select_only_exog_is_False_and_forc
     )
 
     assert selected_autoreg == [1]
-    assert selected_exog == ['exog_0', 'exog_1', 'exog_2']
+    assert selected_exog == ['exog_1', 'exog_2', 'exog_4']
 
 
 def test_select_features_when_selector_is_RFE_select_only_exog_is_True_and_force_inclusion_is_list_ForecasterAutoregCustom():

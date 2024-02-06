@@ -1,0 +1,7 @@
+lags	params	mean_absolute_error	max_depth	n_estimators
+[1 2 3]	{'max_depth': 5, 'n_estimators': 50}	0.10810517419360707	5	50
+[1 2 3]	{'max_depth': 10, 'n_estimators': 50}	0.12297242717462376	10	50
+[ 1  2  3  4  5  6  7  8  9 10]	{'max_depth': 5, 'n_estimators': 50}	0.1356266514033854	5	50
+[ 1  2  3  4  5  6  7  8  9 10]	{'max_depth': 10, 'n_estimators': 50}	0.12654982496200146	10	50
+[ 1  2  3 20]	{'max_depth': 5, 'n_estimators': 50}	0.14725255083244257	5	50
+[ 1  2  3 20]	{'max_depth': 10, 'n_estimators': 50}	0.14770442230599348	10	50
