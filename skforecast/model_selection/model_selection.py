@@ -1365,7 +1365,7 @@ def _bayesian_search_optuna(
     gap: int=0,
     allow_incomplete_fold: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-    lags_grid: Any= 'deprecated',
+    lags_grid: Any='deprecated',
     refit: Optional[Union[bool, int]]=False,
     n_trials: int=10,
     random_state: int=123,
