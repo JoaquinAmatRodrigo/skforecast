@@ -1181,7 +1181,9 @@ def expand_index(
                             start = index[-1] + 1,
                             stop  = index[-1] + 1 + steps
                         )
-    else: 
+        else:
+            raise TypeError("Index must be of type 'RangeIndex' or 'DateIndex'")
+    else:
         new_index = pd.RangeIndex(
                         start = 0,
                         stop  = steps
