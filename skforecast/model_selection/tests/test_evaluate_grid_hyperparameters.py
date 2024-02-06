@@ -95,7 +95,7 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoreg_with_mocked():
     """
     forecaster = ForecasterAutoreg(
                      regressor = Ridge(random_state=123),
-                     lags      = 2 # Placeholder, the value will be overwritten
+                     lags      = 2 
                  )
 
     steps = 3
@@ -120,12 +120,15 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoreg_with_mocked():
               )
     
     expected_results = pd.DataFrame({
-            'lags'  :[[1, 2], [1, 2], [1, 2], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]],
-            'params':[{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}, {'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}],
-            'mean_squared_error':np.array([0.06464646, 0.06502362, 0.06745534, 0.06779272, 0.06802481, 0.06948609]),                                                               
-            'alpha' :np.array([0.01, 0.1 , 1.  , 0.01, 0.1 , 1.  ])
+            'lags'       : [[1, 2], [1, 2], [1, 2], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]],
+            'lags_labels': [[1, 2], [1, 2], [1, 2], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]],
+            'params'     : [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}, 
+                            {'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}],
+            'mean_squared_error':np.array([0.06464646, 0.06502362, 0.06745534, 
+                                           0.06779272, 0.06802481, 0.06948609]),                                                               
+            'alpha'      : np.array([0.01, 0.1 , 1.  , 0.01, 0.1 , 1.  ])
                                      },
-            index=pd.RangeIndex(start=0, stop=idx, step=1)
+            index = pd.RangeIndex(start=0, stop=idx, step=1)
     )
 
     pd.testing.assert_frame_equal(results, expected_results)
@@ -164,12 +167,15 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoreg_with_diferentiat
               ).reset_index(drop=True)
     
     expected_results = pd.DataFrame({
-        'lags'  : [[1, 2, 3, 4], [1, 2], [1, 2, 3, 4], [1, 2], [1, 2], [1, 2, 3, 4]],
-        'params': [{'alpha': 1}, {'alpha': 1}, {'alpha': 0.1}, {'alpha': 0.1}, {'alpha': 0.01}, {'alpha': 0.01}],
-        'mean_squared_error': np.array([0.09168123, 0.09300068, 0.09930084, 0.09960109, 0.10102995, 0.1012931]),                                                               
-        'alpha' : np.array([1., 1., 0.1, 0.1, 0.01 , 0.01])
+        'lags'       : [[1, 2, 3, 4], [1, 2], [1, 2, 3, 4], [1, 2], [1, 2], [1, 2, 3, 4]],
+        'lags_labels': [[1, 2, 3, 4], [1, 2], [1, 2, 3, 4], [1, 2], [1, 2], [1, 2, 3, 4]],
+        'params'     : [{'alpha': 1}, {'alpha': 1}, {'alpha': 0.1}, 
+                        {'alpha': 0.1}, {'alpha': 0.01}, {'alpha': 0.01}],
+        'mean_squared_error': np.array([0.09168123, 0.09300068, 0.09930084, 
+                                        0.09960109, 0.10102995, 0.1012931]),                                                               
+        'alpha'      : np.array([1., 1., 0.1, 0.1, 0.01 , 0.01])
         },
-        index=pd.RangeIndex(start=0, stop=idx, step=1)
+        index = pd.RangeIndex(start=0, stop=idx, step=1)
     )
 
     pd.testing.assert_frame_equal(results, expected_results)
@@ -207,12 +213,13 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregCustom_with_difer
               ).reset_index(drop=True)
     
     expected_results = pd.DataFrame({
-        'lags'  : ['custom predictors', 'custom predictors', 'custom predictors'],
-        'params': [{'alpha': 1}, {'alpha': 0.1}, {'alpha': 0.01}],
+        'lags'       : ['custom predictors', 'custom predictors', 'custom predictors'],
+        'lags_labels': ['custom predictors', 'custom predictors', 'custom predictors'],
+        'params'     : [{'alpha': 1}, {'alpha': 0.1}, {'alpha': 0.01}],
         'mean_squared_error': np.array([0.09168123, 0.09930084, 0.1012931]),                                                               
-        'alpha' : np.array([1., 0.1, 0.01])
+        'alpha'      : np.array([1., 0.1, 0.01])
         },
-        index=pd.RangeIndex(start=0, stop=idx, step=1)
+        index = pd.RangeIndex(start=0, stop=idx, step=1)
     )
 
     pd.testing.assert_frame_equal(results, expected_results)
@@ -250,12 +257,13 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoreg_lags_grid_dict_w
               )
     
     expected_results = pd.DataFrame({
-        'lags'  : ['lags_1', 'lags_1', 'lags_1', 'lags_2', 'lags_2', 'lags_2'],
-        'params': [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}, {'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}],
+        'lags'       : [[1, 2], [1, 2], [1, 2], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]],
+        'lags_labels': ['lags_1', 'lags_1', 'lags_1', 'lags_2', 'lags_2', 'lags_2'],
+        'params'     : [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}, {'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}],
         'mean_squared_error': np.array([0.06464646, 0.06502362, 0.06745534, 0.06779272, 0.06802481, 0.06948609]),                                                               
-        'alpha' : np.array([0.01, 0.1 , 1.  , 0.01, 0.1 , 1.  ])
+        'alpha'      : np.array([0.01, 0.1 , 1.  , 0.01, 0.1 , 1.  ])
         },
-        index=pd.RangeIndex(start=0, stop=idx, step=1)
+        index = pd.RangeIndex(start=0, stop=idx, step=1)
     )
 
     pd.testing.assert_frame_equal(results, expected_results)
@@ -293,12 +301,13 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoreg_lags_grid_is_Non
               )
     
     expected_results = pd.DataFrame({
-        'lags'  : [[1, 2], [1, 2], [1, 2]],
-        'params': [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}],
+        'lags'       : [[1, 2], [1, 2], [1, 2]],
+        'lags_labels': [[1, 2], [1, 2], [1, 2]],
+        'params'     : [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}],
         'mean_squared_error': np.array([0.06464646, 0.06502362, 0.06745534]),                                                               
-        'alpha' : np.array([0.01, 0.1 , 1.])
+        'alpha'      : np.array([0.01, 0.1 , 1.])
         },
-        index=pd.RangeIndex(start=0, stop=3, step=1)
+        index = pd.RangeIndex(start=0, stop=3, step=1)
     )
 
     pd.testing.assert_frame_equal(results, expected_results)
@@ -336,17 +345,19 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoreg_metric_list_with
               )
     
     expected_results = pd.DataFrame({
-                            'lags'  : [[1, 2], [1, 2], [1, 2], [1, 2, 3, 4], 
-                                       [1, 2, 3, 4], [1, 2, 3, 4]],
-                            'params': [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}, 
-                                       {'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}],
-                            'mean_squared_error': np.array([0.06464646, 0.06502362, 0.06745534, 
-                                                            0.06779272, 0.06802481, 0.06948609]),   
-                            'mean_absolute_error': np.array([0.20278812, 0.20314819, 0.20519952, 
-                                                             0.20601567, 0.206323, 0.20747017]),                                                          
-                            'alpha': np.array([0.01, 0.1 , 1.  , 0.01, 0.1 , 1.  ])},
-                            index = pd.RangeIndex(start=0, stop=idx, step=1)
-                       )
+        'lags'       : [[1, 2], [1, 2], [1, 2], [1, 2, 3, 4], 
+                        [1, 2, 3, 4], [1, 2, 3, 4]],
+        'lags_labels': [[1, 2], [1, 2], [1, 2], [1, 2, 3, 4], 
+                        [1, 2, 3, 4], [1, 2, 3, 4]],
+        'params'     : [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}, 
+                        {'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}],
+        'mean_squared_error': np.array([0.06464646, 0.06502362, 0.06745534, 
+                                        0.06779272, 0.06802481, 0.06948609]),   
+        'mean_absolute_error': np.array([0.20278812, 0.20314819, 0.20519952, 
+                                         0.20601567, 0.206323, 0.20747017]),                                                          
+        'alpha'      : np.array([0.01, 0.1 , 1.  , 0.01, 0.1 , 1.  ])},
+        index = pd.RangeIndex(start=0, stop=idx, step=1)
+    )
 
     pd.testing.assert_frame_equal(results, expected_results)
 
@@ -381,14 +392,14 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregCustom_with_mocke
                   verbose            = False
               )
     
-    expected_results = pd.DataFrame(
-        {
-        'lags'  : ['custom predictors', 'custom predictors', 'custom predictors'],
-        'params': [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}],
+    expected_results = pd.DataFrame({
+        'lags'       : ['custom predictors', 'custom predictors', 'custom predictors'],
+        'lags_labels': ['custom predictors', 'custom predictors', 'custom predictors'],
+        'params'     : [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}],
         'mean_squared_error': np.array([0.06779272, 0.06802481, 0.06948609]),                                                               
-        'alpha' : np.array([0.01, 0.1 , 1.])
+        'alpha'      : np.array([0.01, 0.1 , 1.])
         },
-        index=pd.RangeIndex(start=0, stop=idx, step=1)
+        index = pd.RangeIndex(start=0, stop=idx, step=1)
      )
     
     pd.testing.assert_frame_equal(results, expected_results)
@@ -514,7 +525,6 @@ def test_evaluate_grid_hyperparameters_output_file_when_single_metric():
     Test output file is created when output_file is passed to
     _evaluate_grid_hyperparameters and single metric.
     """
-
     forecaster = ForecasterAutoreg(
                      regressor = Ridge(random_state=123),
                      lags      = 2 
@@ -542,12 +552,12 @@ def test_evaluate_grid_hyperparameters_output_file_when_single_metric():
                   show_progress      = False,
                   output_file        = output_file
               )
-    results  = results.astype({'params': str, 'lags': str})
+    results  = results.astype({'lags': str, 'lags_labels': str, 'params': str})
 
     assert os.path.isfile(output_file)
     output_file_content = pd.read_csv(output_file, sep='\t', low_memory=False)
     output_file_content = output_file_content.sort_values(by='mean_squared_error')
-    output_file_content = output_file_content.astype({'params': str, 'lags': str})
+    output_file_content = output_file_content.astype({'lags': str, 'lags_labels': str, 'params': str})
     pd.testing.assert_frame_equal(results, output_file_content)
     os.remove(output_file)
 
@@ -557,7 +567,6 @@ def test_evaluate_grid_hyperparameters_output_file_when_single_metric_as_list():
     Test output file is created when output_file is passed to 
     _evaluate_grid_hyperparameters and single metric as list.
     """
-
     forecaster = ForecasterAutoreg(
                      regressor = Ridge(random_state=123),
                      lags      = 2 
@@ -585,12 +594,12 @@ def test_evaluate_grid_hyperparameters_output_file_when_single_metric_as_list():
                   show_progress      = False,
                   output_file        = output_file
               )
-    results  = results.astype({'params': str, 'lags': str})
+    results  = results.astype({'lags': str, 'lags_labels': str, 'params': str})
 
     assert os.path.isfile(output_file)
     output_file_content = pd.read_csv(output_file, sep='\t', low_memory=False)
     output_file_content = output_file_content.sort_values(by='mean_squared_error')
-    output_file_content = output_file_content.astype({'params': str, 'lags': str})
+    output_file_content = output_file_content.astype({'lags': str, 'lags_labels': str, 'params': str})
     pd.testing.assert_frame_equal(results, output_file_content)
     os.remove(output_file)
 
@@ -627,11 +636,11 @@ def test_evaluate_grid_hyperparameters_output_file_when_2_metrics_as_list():
                   show_progress      = False,
                   output_file        = output_file
               )
-    results  = results.astype({'params': str, 'lags': str})
+    results  = results.astype({'lags': str, 'lags_labels': str, 'params': str})
 
     assert os.path.isfile(output_file)
     output_file_content = pd.read_csv(output_file, sep='\t', low_memory=False)
     output_file_content = output_file_content.sort_values(by='mean_squared_error')
-    output_file_content = output_file_content.astype({'params': str, 'lags': str})
+    output_file_content = output_file_content.astype({'lags': str, 'lags_labels': str, 'params': str})
     pd.testing.assert_frame_equal(results, output_file_content)
     os.remove(output_file)

@@ -133,9 +133,11 @@ def test_results_output_bayesian_search_optuna_multiseries_ForecasterAutoregMult
     lags_grid = [2, 4]
 
     def search_space(trial):
-        search_space  = {'n_estimators'    : trial.suggest_int('n_estimators', 10, 20),
-                         'min_samples_leaf': trial.suggest_float('min_samples_leaf', 0.1, 1., log=True),
-                         'max_features'    : trial.suggest_categorical('max_features', ['log2', 'sqrt'])}
+        search_space  = {
+            'n_estimators'    : trial.suggest_int('n_estimators', 10, 20),
+            'min_samples_leaf': trial.suggest_float('min_samples_leaf', 0.1, 1., log=True),
+            'max_features'    : trial.suggest_categorical('max_features', ['log2', 'sqrt'])
+        }
         
         return search_space
 
@@ -161,6 +163,10 @@ def test_results_output_bayesian_search_optuna_multiseries_ForecasterAutoregMult
                    [1, 2], [1, 2], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4],
                    [1, 2, 3, 4], [1, 2], [1, 2], [1, 2], [1, 2, 3, 4],
                    [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]],
+        'lags_labels': [[1, 2], [1, 2], [1, 2], [1, 2], [1, 2],
+                        [1, 2], [1, 2], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4],
+                        [1, 2, 3, 4], [1, 2], [1, 2], [1, 2], [1, 2, 3, 4],
+                        [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]],
         'params':[{'n_estimators': 12, 'min_samples_leaf': 0.14977928606210794, 'max_features': 'sqrt'},
                   {'n_estimators': 15, 'min_samples_leaf': 0.2466706727024324, 'max_features': 'sqrt'},
                   {'n_estimators': 17, 'min_samples_leaf': 0.21035794225904136, 'max_features': 'log2'},
@@ -194,7 +200,8 @@ def test_results_output_bayesian_search_optuna_multiseries_ForecasterAutoregMult
                          'log2', 'sqrt', 'log2', 'log2', 'log2', 'sqrt', 'log2', 'sqrt',
                          'log2', 'log2', 'sqrt', 'sqrt']
         },
-        index=pd.Index([4, 2, 6, 0, 8, 3, 1, 12, 19, 17, 15, 5, 9, 7, 11, 10, 16, 18, 14, 13], dtype="int64")
+        index=pd.Index([4, 2, 6, 0, 8, 3, 1, 12, 19, 17, 15, 
+                        5, 9, 7, 11, 10, 16, 18, 14, 13], dtype="int64")
     )
 
     pd.testing.assert_frame_equal(results, expected_results, check_dtype=False)
@@ -217,9 +224,11 @@ def test_results_output_bayesian_search_optuna_multiseries_with_mocked_when_lags
     lags_grid = {'lags_1': 2, 'lags_2': 4}
 
     def search_space(trial):
-        search_space  = {'n_estimators'    : trial.suggest_int('n_estimators', 10, 20),
-                         'min_samples_leaf': trial.suggest_float('min_samples_leaf', 0.1, 1., log=True),
-                         'max_features'    : trial.suggest_categorical('max_features', ['log2', 'sqrt'])}
+        search_space  = {
+            'n_estimators'    : trial.suggest_int('n_estimators', 10, 20),
+            'min_samples_leaf': trial.suggest_float('min_samples_leaf', 0.1, 1., log=True),
+            'max_features'    : trial.suggest_categorical('max_features', ['log2', 'sqrt'])
+        }
         
         return search_space
 
@@ -241,10 +250,14 @@ def test_results_output_bayesian_search_optuna_multiseries_with_mocked_when_lags
     
     expected_results = pd.DataFrame({
         'levels': [['l1', 'l2']]*2*10,
-        'lags'  : ['lags_1', 'lags_1', 'lags_1', 'lags_1', 'lags_1',
-                   'lags_1', 'lags_1', 'lags_2', 'lags_2', 'lags_2',
-                   'lags_2', 'lags_1', 'lags_1', 'lags_1', 'lags_2',
-                   'lags_2', 'lags_2', 'lags_2', 'lags_2', 'lags_2'],
+        'lags'  : [[1, 2], [1, 2], [1, 2], [1, 2], [1, 2],
+                   [1, 2], [1, 2], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4],
+                   [1, 2, 3, 4], [1, 2], [1, 2], [1, 2], [1, 2, 3, 4],
+                   [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]],
+        'lags_labels': ['lags_1', 'lags_1', 'lags_1', 'lags_1', 'lags_1',
+                        'lags_1', 'lags_1', 'lags_2', 'lags_2', 'lags_2',
+                        'lags_2', 'lags_1', 'lags_1', 'lags_1', 'lags_2',
+                        'lags_2', 'lags_2', 'lags_2', 'lags_2', 'lags_2'],
         'params':[{'n_estimators': 12, 'min_samples_leaf': 0.14977928606210794, 'max_features': 'sqrt'},
                   {'n_estimators': 15, 'min_samples_leaf': 0.2466706727024324, 'max_features': 'sqrt'},
                   {'n_estimators': 17, 'min_samples_leaf': 0.21035794225904136, 'max_features': 'log2'},
@@ -328,6 +341,10 @@ def test_results_output_bayesian_search_optuna_multiseries_ForecasterAutoregMult
                    [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4],
                    [1, 2], [1, 2], [1, 2], [1, 2], [1, 2],
                    [1, 2], [1, 2], [1, 2], [1, 2], [1, 2]],
+        'lags_labels': [[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4],
+                        [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4],
+                        [1, 2], [1, 2], [1, 2], [1, 2], [1, 2],
+                        [1, 2], [1, 2], [1, 2], [1, 2], [1, 2]],
         'params': [{'alpha': 0.2345829390285611}, {'alpha': 0.29327794160087567},
                    {'alpha': 0.398196343012209}, {'alpha': 0.42887539552321635},
                    {'alpha': 0.48612258246951734}, {'alpha': 0.5558016213920624},
@@ -397,6 +414,10 @@ def test_results_output_bayesian_search_optuna_multiseries_with_mocked_when_kwar
                    [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4],
                    [1, 2], [1, 2], [1, 2], [1, 2], [1, 2],
                    [1, 2], [1, 2], [1, 2], [1, 2], [1, 2]],
+        'lags_labels': [[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4],
+                        [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4],
+                        [1, 2], [1, 2], [1, 2], [1, 2], [1, 2],
+                        [1, 2], [1, 2], [1, 2], [1, 2], [1, 2]],
         'params': [{'alpha': 0.4691658780571222}, {'alpha': 0.5865558832017513},
                    {'alpha': 0.796392686024418}, {'alpha': 0.8577507910464327},
                    {'alpha': 0.9722451649390347}, {'alpha': 1.1116032427841247},
@@ -437,9 +458,11 @@ def test_results_output_bayesian_search_optuna_multiseries_with_mocked_when_kwar
     lags_grid = [2, 4]
 
     def search_space(trial):
-        search_space  = {'n_estimators': trial.suggest_int('n_estimators', 100, 200),
-                         'max_depth'   : trial.suggest_int('max_depth', 20, 35, log=True),
-                         'max_features': trial.suggest_categorical('max_features', ['log2', 'sqrt'])}
+        search_space  = {
+            'n_estimators': trial.suggest_int('n_estimators', 100, 200),
+            'max_depth'   : trial.suggest_int('max_depth', 20, 35, log=True),
+            'max_features': trial.suggest_categorical('max_features', ['log2', 'sqrt'])
+        }
          
         return search_space
 
@@ -466,6 +489,7 @@ def test_results_output_bayesian_search_optuna_multiseries_with_mocked_when_kwar
     expected_results = pd.DataFrame({
         'levels': [['l1', 'l2']]*2,
         'lags'  : [[1, 2], [1, 2]],
+        'lags_labels': [[1, 2], [1, 2]],
         'params':[{'n_estimators': 144, 'max_depth': 20, 'max_features': 'sqrt'},
                   {'n_estimators': 143, 'max_depth': 33, 'max_features': 'log2'}],
         'mean_absolute_error': np.array([0.18642719, 0.18984788]),                                                               
@@ -473,7 +497,7 @@ def test_results_output_bayesian_search_optuna_multiseries_with_mocked_when_kwar
         'max_depth': np.array([20, 33]),
         'max_features': ['sqrt', 'log2']
         },
-        index=pd.Index([0, 1], dtype="int64")
+        index = pd.Index([0, 1], dtype="int64")
     )
 
     pd.testing.assert_frame_equal(results.head(1), expected_results.head(1), check_dtype=False)
@@ -519,6 +543,8 @@ def test_results_output_bayesian_search_optuna_multiseries_with_mocked_when_lags
         'levels': [['l1', 'l2']]*10,
         'lags'  : [[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4],
                    [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]],
+        'lags_labels': [[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4],
+                        [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]],
         'params': [{'alpha': 0.2345829390285611}, {'alpha': 0.29327794160087567},
                    {'alpha': 0.398196343012209}, {'alpha': 0.42887539552321635},
                    {'alpha': 0.48612258246951734}, {'alpha': 0.5558016213920624},
@@ -574,6 +600,7 @@ def test_results_output_bayesian_search_optuna_multiseries_ForecasterAutoregMult
     expected_results = pd.DataFrame({
         'levels': [['l1', 'l2']]*10,
         'lags'  : ['custom predictors']*10,
+        'lags_labels': ['custom predictors']*10,
         'params': [{'alpha': 0.2345829390285611}, {'alpha': 0.29327794160087567},
                    {'alpha': 0.398196343012209}, {'alpha': 0.42887539552321635},
                    {'alpha': 0.48612258246951734}, {'alpha': 0.5558016213920624},
@@ -634,6 +661,10 @@ def test_results_output_bayesian_search_optuna_multiseries_ForecasterAutoregMult
                    [1, 2], [1, 2], [1, 2], [1, 2], [1, 2],
                    [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4],
                    [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]],
+        'lags_labels': [[1, 2], [1, 2], [1, 2], [1, 2], [1, 2],
+                        [1, 2], [1, 2], [1, 2], [1, 2], [1, 2],
+                        [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4],
+                        [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]],
         'params': [{'alpha': 0.2345829390285611}, {'alpha': 0.29327794160087567},
                    {'alpha': 0.398196343012209}, {'alpha': 0.42887539552321635},
                    {'alpha': 0.48612258246951734}, {'alpha': 0.5558016213920624},
