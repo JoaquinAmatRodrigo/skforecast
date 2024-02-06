@@ -140,7 +140,7 @@ def test_results_output_bayesian_search_forecaster_multiseries_optuna_engine_For
     expected_results = pd.DataFrame({
         'levels'     : [['l1', 'l2']]*10*2,
         'lags'       : [[1, 2, 3, 4]]*10 + [[1, 2]]*10,
-        'lags_labels': ['lags_2']*10 + ['lags_1']*10,
+        'lags_label': ['lags_2']*10 + ['lags_1']*10,
         'params': [{'alpha': 0.2345829390285611}, {'alpha': 0.29327794160087567},
                    {'alpha': 0.398196343012209}, {'alpha': 0.42887539552321635},
                    {'alpha': 0.48612258246951734}, {'alpha': 0.5558016213920624},
@@ -208,7 +208,7 @@ def test_results_output_bayesian_search_forecaster_multiseries_optuna_engine_For
     expected_results = pd.DataFrame({
         'levels'     : [['l1', 'l2']]*10,
         'lags'       : ['custom predictors']*10,
-        'lags_labels': ['custom predictors']*10,
+        'lags_label': ['custom predictors']*10,
         'params'     : [{'alpha': 0.2345829390285611}, {'alpha': 0.29327794160087567},
                         {'alpha': 0.398196343012209}, {'alpha': 0.42887539552321635},
                         {'alpha': 0.48612258246951734}, {'alpha': 0.5558016213920624},
@@ -266,7 +266,7 @@ def test_results_output_bayesian_search_forecaster_multivariate_optuna_engine_Fo
     expected_results = pd.DataFrame({
         'levels'     : [['l1']]*10*2,
         'lags'       : [{'l1': [1, 2, 3, 4], 'l2': [2, 3]}]*10 + [[1, 2]]*10,
-        'lags_labels': [{'l1': [1, 2, 3, 4], 'l2': [2, 3]}]*10 + [[1, 2]]*10,
+        'lags_label': [{'l1': [1, 2, 3, 4], 'l2': [2, 3]}]*10 + [[1, 2]]*10,
         'params'     : [{'alpha': 0.2345829390285611}, {'alpha': 0.29327794160087567},
                         {'alpha': 0.398196343012209}, {'alpha': 0.42887539552321635},
                         {'alpha': 0.48612258246951734}, {'alpha': 0.5558016213920624},

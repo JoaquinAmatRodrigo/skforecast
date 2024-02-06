@@ -819,7 +819,7 @@ def grid_search_forecaster(
         Results for each combination of parameters.
 
         - column lags: lags configuration for each iteration.
-        - column lags_labels: Descriptive labels or aliases for the lags.
+        - column lags_label: descriptive label or alias for the lags.
         - column params: parameters configuration for each iteration.
         - column metric: metric value estimated for each iteration.
         - additional n columns with param = value.
@@ -945,7 +945,7 @@ def random_search_forecaster(
         Results for each combination of parameters.
 
         - column lags: lags configuration for each iteration.
-        - column lags_labels: Descriptive labels or aliases for the lags.
+        - column lags_label: descriptive label or alias for the lags.
         - column params: parameters configuration for each iteration.
         - column metric: metric value estimated for each iteration.
         - additional n columns with param = value.
@@ -1063,7 +1063,7 @@ def _evaluate_grid_hyperparameters(
         Results for each combination of parameters.
 
         - column lags: lags configuration for each iteration.
-        - column lags_labels: Descriptive labels or aliases for the lags.
+        - column lags_label: descriptive label or alias for the lags.
         - column params: parameters configuration for each iteration.
         - column metric: metric value estimated for each iteration.
         - additional n columns with param = value.
@@ -1100,7 +1100,7 @@ def _evaluate_grid_hyperparameters(
         os.remove(output_file)
 
     lags_list = []
-    lags_labels_list = []
+    lags_label_list = []
     params_list = []
     for lags_k, lags_v in lags_grid_tqdm:
         
@@ -1133,14 +1133,14 @@ def _evaluate_grid_hyperparameters(
                                     message= "The forecaster will be fit.*")
             
             lags_list.append(lags_v)
-            lags_labels_list.append(lags_k)
+            lags_label_list.append(lags_k)
             params_list.append(params)
             for m, m_value in zip(metric, metrics_values):
                 m_name = m if isinstance(m, str) else m.__name__
                 metric_dict[m_name].append(m_value)
         
             if output_file is not None:
-                header = ['lags', 'lags_labels', 'params', 
+                header = ['lags', 'lags_label', 'params', 
                           *metric_dict.keys(), *params.keys()]
                 row = [lags_v, lags_k, params, 
                        *metrics_values, *params.values()]
@@ -1154,7 +1154,7 @@ def _evaluate_grid_hyperparameters(
     
     results = pd.DataFrame({
                   'lags'       : lags_list,
-                  'lags_labels': lags_labels_list,
+                  'lags_label' : lags_label_list,
                   'params'     : params_list,
                   **metric_dict
               })
@@ -1291,7 +1291,7 @@ def bayesian_search_forecaster(
         Results for each combination of parameters.
 
         - column lags: lags configuration for each iteration.
-        - column lags_labels: Descriptive labels or aliases for the lags.
+        - column lags_label: descriptive label or alias for the lags.
         - column params: parameters configuration for each iteration.
         - column metric: metric value estimated for each iteration.
         - additional n columns with param = value.
@@ -1448,7 +1448,7 @@ def _bayesian_search_optuna(
         Results for each combination of parameters.
 
         - column lags: lags configuration for each iteration.
-        - column lags_labels: Descriptive labels or aliases for the lags.
+        - column lags_label: descriptive label or alias for the lags.
         - column params: parameters configuration for each iteration.
         - column metric: metric value estimated for each iteration.
         - additional n columns with param = value.
@@ -1535,7 +1535,7 @@ def _bayesian_search_optuna(
         optuna.logging.disable_default_handler()
 
     lags_list = []
-    lags_labels_list = []
+    lags_label_list = []
     params_list = []
     results_opt_best = None
     for lags_k, lags_v in lags_grid_tqdm:
@@ -1576,7 +1576,7 @@ def _bayesian_search_optuna(
         
         for i, trial in enumerate(study.get_trials()):
             lags_list.append(lags_v)
-            lags_labels_list.append(lags_k)
+            lags_label_list.append(lags_k)
             params_list.append(trial.params)
             for m, m_values in zip(metric, metric_values[i]):
                 m_name = m if isinstance(m, str) else m.__name__
@@ -1593,7 +1593,7 @@ def _bayesian_search_optuna(
     
     results = pd.DataFrame({
                   'lags'       : lags_list,
-                  'lags_labels': lags_labels_list,
+                  'lags_label' : lags_label_list,
                   'params'     : params_list,
                   **metric_dict
               })

@@ -63,7 +63,7 @@ def test_output_random_search_forecaster_multiseries_ForecasterAutoregMultiSerie
     expected_results = pd.DataFrame({
         'levels': [['l1', 'l2'], ['l1', 'l2'], ['l1', 'l2'], ['l1', 'l2'], ['l1', 'l2'], ['l1', 'l2']],
         'lags'  : [[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2], [1, 2], [1, 2]],
-        'lags_labels': [[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2], [1, 2], [1, 2]],
+        'lags_label': [[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2], [1, 2], [1, 2]],
         'params': [{'alpha': 1e-05}, {'alpha': 0.03593813663804626}, {'alpha': 16.681005372000556}, 
                     {'alpha': 16.681005372000556}, {'alpha': 0.03593813663804626}, {'alpha': 1e-05}],
         'mean_absolute_error': np.array([0.20967967565103562, 0.20968441516920436, 0.20988932397621246,
@@ -114,7 +114,7 @@ def test_output_random_search_forecaster_multiseries_ForecasterAutoregMultiSerie
     expected_results = pd.DataFrame({
         'levels': [['l1', 'l2'], ['l1', 'l2'], ['l1', 'l2']],
         'lags'  : ['custom predictors', 'custom predictors', 'custom predictors'],
-        'lags_labels': ['custom predictors', 'custom predictors', 'custom predictors'],
+        'lags_label': ['custom predictors', 'custom predictors', 'custom predictors'],
         'params': [{'alpha': 1e-05}, {'alpha': 0.03593813663804626}, {'alpha': 16.681005372000556}],
         'mean_absolute_error': np.array([0.20967967565103562, 0.20968441516920436, 0.20988932397621246]),                                                               
         'alpha' : np.array([1e-05, 0.03593813663804626, 16.681005372000556])
@@ -164,7 +164,7 @@ def test_output_random_search_forecaster_multiseries_ForecasterAutoregMultiVaria
     expected_results = pd.DataFrame({
         'levels': [['l1'], ['l1'], ['l1'], ['l1'], ['l1'], ['l1']],
         'lags'  : [[1, 2], [1, 2], [1, 2], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]],
-        'lags_labels': [[1, 2], [1, 2], [1, 2], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]],
+        'lags_label': [[1, 2], [1, 2], [1, 2], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]],
         'params': [{'alpha': 1e-05}, {'alpha': 0.03593813663804626}, {'alpha': 16.681005372000556},
                    {'alpha': 16.681005372000556}, {'alpha': 0.03593813663804626}, {'alpha': 1e-05}],
         'mean_absolute_error': np.array([0.20107097, 0.20135665, 0.20991177, 0.21121154, 0.22640335, 0.22645387]),                                                               

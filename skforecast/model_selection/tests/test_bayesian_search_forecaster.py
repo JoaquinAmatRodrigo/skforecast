@@ -134,7 +134,7 @@ def test_results_output_bayesian_search_forecaster_optuna_engine_ForecasterAutor
     
     expected_results = pd.DataFrame({
         'lags'  :[[1, 2, 3, 4]]*10,
-        'lags_labels': [[1, 2, 3, 4]]*10,
+        'lags_label': [[1, 2, 3, 4]]*10,
         'params':[{'alpha': 0.6995044937418831}, {'alpha': 0.29327794160087567},
                   {'alpha': 0.2345829390285611}, {'alpha': 0.5558016213920624},
                   {'alpha': 0.7222742800877074}, {'alpha': 0.42887539552321635},
@@ -188,7 +188,7 @@ def test_results_output_bayesian_search_forecaster_optuna_engine_ForecasterAutor
                   'custom predictors', 'custom predictors', 'custom predictors',
                   'custom predictors', 'custom predictors', 'custom predictors',
                   'custom predictors'],
-        'lags_labels': ['custom predictors', 'custom predictors', 'custom predictors',
+        'lags_label': ['custom predictors', 'custom predictors', 'custom predictors',
                         'custom predictors', 'custom predictors', 'custom predictors',
                         'custom predictors', 'custom predictors', 'custom predictors',
                         'custom predictors'],

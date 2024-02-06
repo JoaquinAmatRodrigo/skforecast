@@ -635,7 +635,7 @@ def grid_search_forecaster_multiseries(
 
         - column levels: levels configuration for each iteration.
         - column lags: lags configuration for each iteration.
-        - column lags_labels: Descriptive labels or aliases for the lags.
+        - column lags_label: descriptive label or alias for the lags.
         - column params: parameters configuration for each iteration.
         - column metric: metric value estimated for each iteration. The resulting 
         metric will be the average of the optimization of all levels.
@@ -769,7 +769,7 @@ def random_search_forecaster_multiseries(
 
         - column levels: levels configuration for each iteration.
         - column lags: lags configuration for each iteration.
-        - column lags_labels: Descriptive labels or aliases for the lags.
+        - column lags_label: descriptive label or alias for the lags.
         - column params: parameters configuration for each iteration.
         - column metric: metric value estimated for each iteration. The resulting 
         metric will be the average of the optimization of all levels.
@@ -891,7 +891,7 @@ def _evaluate_grid_hyperparameters_multiseries(
 
         - column levels: levels configuration for each iteration.
         - column lags: lags configuration for each iteration.
-        - column lags_labels: Descriptive labels or aliases for the lags.
+        - column lags_label: descriptive label or alias for the lags.
         - column params: parameters configuration for each iteration.
         - column metric: metric value estimated for each iteration. The resulting 
         metric will be the average of the optimization of all levels.
@@ -938,7 +938,7 @@ def _evaluate_grid_hyperparameters_multiseries(
         os.remove(output_file)
 
     lags_list = []
-    lags_labels_list = []
+    lags_label_list = []
     params_list = []
     for lags_k, lags_v in lags_grid_tqdm:
 
@@ -972,14 +972,14 @@ def _evaluate_grid_hyperparameters_multiseries(
                                     message= "The forecaster will be fit.*")
 
             lags_list.append(lags_v)
-            lags_labels_list.append(lags_k)
+            lags_label_list.append(lags_k)
             params_list.append(params)
             for m in metric:
                 m_name = m if isinstance(m, str) else m.__name__
                 metric_dict[m_name].append(metrics_levels[m_name].mean())
 
             if output_file is not None:
-                header = ['levels', 'lags', 'lags_labels', 'params', 
+                header = ['levels', 'lags', 'lags_label', 'params', 
                           *metric_dict.keys(), *params.keys()]
                 row = [
                     levels, lags_v, lags_k, params,
@@ -997,7 +997,7 @@ def _evaluate_grid_hyperparameters_multiseries(
     results = pd.DataFrame({
                   'levels'     : [levels]*len(lags_list),
                   'lags'       : lags_list,
-                  'lags_labels': lags_labels_list,
+                  'lags_label' : lags_label_list,
                   'params'     : params_list,
                   **metric_dict
               })
@@ -1140,7 +1140,7 @@ def bayesian_search_forecaster_multiseries(
 
         - column levels: levels configuration for each iteration.
         - column lags: lags configuration for each iteration.
-        - column lags_labels: Descriptive labels or aliases for the lags.
+        - column lags_label: descriptive label or alias for the lags.
         - column params: parameters configuration for each iteration.
         - column metric: metric value estimated for each iteration. The resulting 
         metric will be the average of the optimization of all levels.
@@ -1296,7 +1296,7 @@ def _bayesian_search_optuna_multiseries(
 
         - column levels: levels configuration for each iteration.
         - column lags: lags configuration for each iteration.
-        - column lags_labels: Descriptive labels or aliases for the lags.
+        - column lags_label: descriptive label or alias for the lags.
         - column params: parameters configuration for each iteration.
         - column metric: metric value estimated for each iteration. The resulting 
         metric will be the average of the optimization of all levels.
@@ -1392,7 +1392,7 @@ def _bayesian_search_optuna_multiseries(
         optuna.logging.disable_default_handler()
 
     lags_list = []
-    lags_labels_list = []
+    lags_label_list = []
     params_list = []
     results_opt_best = None
     for lags_k, lags_v in lags_grid_tqdm:
@@ -1433,7 +1433,7 @@ def _bayesian_search_optuna_multiseries(
         
         for i, trial in enumerate(study.get_trials()):
             lags_list.append(lags_v)
-            lags_labels_list.append(lags_k)
+            lags_label_list.append(lags_k)
             params_list.append(trial.params)
             m_values = metric_values[i]
             for m in metric:
@@ -1452,7 +1452,7 @@ def _bayesian_search_optuna_multiseries(
     results = pd.DataFrame({
                   'levels'     : [levels]*len(lags_list),
                   'lags'       : lags_list,
-                  'lags_labels': lags_labels_list,
+                  'lags_label' : lags_label_list,
                   'params'     : params_list,
                   **metric_dict
               })
@@ -1721,7 +1721,7 @@ def grid_search_forecaster_multivariate(
 
         - column levels: levels configuration for each iteration.
         - column lags: lags configuration for each iteration.
-        - column lags_labels: Descriptive labels or aliases for the lags.
+        - column lags_label: descriptive label or alias for the lags.
         - column params: parameters configuration for each iteration.
         - column metric: metric value estimated for each iteration. The resulting 
         metric will be the average of the optimization of all levels.
@@ -1855,7 +1855,7 @@ def random_search_forecaster_multivariate(
 
         - column levels: levels configuration for each iteration.
         - column lags: lags configuration for each iteration.
-        - column lags_labels: Descriptive labels or aliases for the lags.
+        - column lags_label: descriptive label or alias for the lags.
         - column params: parameters configuration for each iteration.
         - column metric: metric value estimated for each iteration. The resulting 
         metric will be the average of the optimization of all levels.
@@ -2003,7 +2003,7 @@ def bayesian_search_forecaster_multivariate(
 
         - column levels: levels configuration for each iteration.
         - column lags: lags configuration for each iteration.
-        - column lags_labels: Descriptive labels or aliases for the lags.
+        - column lags_label: descriptive label or alias for the lags.
         - column params: parameters configuration for each iteration.
         - column metric: metric value estimated for each iteration. The resulting 
         metric will be the average of the optimization of all levels.

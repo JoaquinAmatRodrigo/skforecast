@@ -50,7 +50,7 @@ def test_output_random_search_forecaster_ForecasterAutoreg_with_mocked():
     
     expected_results = pd.DataFrame({
         'lags'       : [[1, 2], [1, 2], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2]],
-        'lags_labels': [[1, 2], [1, 2], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2]],
+        'lags_label' : [[1, 2], [1, 2], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2]],
         'params'     : [{'alpha': 1e-05}, {'alpha': 0.03593813663804626}, {'alpha': 1e-05},
                         {'alpha': 0.03593813663804626}, {'alpha': 16.681005372000556}, {'alpha': 16.681005372000556}],
         'mean_squared_error': np.array([0.06460234, 0.06475887, 0.06776596, 
