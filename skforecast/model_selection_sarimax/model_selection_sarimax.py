@@ -5,6 +5,7 @@
 ################################################################################
 # coding=utf-8
 
+import os
 from typing import Union, Tuple, Optional, Callable
 import pandas as pd
 import warnings
@@ -446,7 +447,8 @@ def grid_search_sarimax(
     n_jobs: Optional[Union[int, str]]='auto',
     verbose: bool=True,
     suppress_warnings_fit: bool=False,
-    show_progress: bool=True
+    show_progress: bool=True,
+    output_file: Optional[str]=None
 ) -> pd.DataFrame:
     """
     Exhaustive search over specified parameter values for a ForecasterSarimax object.
@@ -503,6 +505,10 @@ def grid_search_sarimax(
         **New in version 0.10.0**
     show_progress : bool, default `True`
         Whether to show a progress bar.
+    output_file : str, default `None`
+        File name or full path to save the results. Results are saved as a .txt 
+        file with tab-separated columns. If `None`, the results will not be saved.
+        **New in version 0.12.0**
 
     Returns
     -------
@@ -533,7 +539,8 @@ def grid_search_sarimax(
         n_jobs                = n_jobs,
         verbose               = verbose,
         suppress_warnings_fit = suppress_warnings_fit,
-        show_progress         = show_progress
+        show_progress         = show_progress,
+        output_file           = output_file
     )
 
     return results
@@ -557,7 +564,8 @@ def random_search_sarimax(
     n_jobs: Optional[Union[int, str]]='auto',
     verbose: bool=True,
     suppress_warnings_fit: bool=False,
-    show_progress: bool=True
+    show_progress: bool=True,
+    output_file: Optional[str]=None
 ) -> pd.DataFrame:
     """
     Random search over specified parameter values or distributions for a Forecaster 
@@ -619,6 +627,10 @@ def random_search_sarimax(
         **New in version 0.10.0**
     show_progress : bool, default `True`
         Whether to show a progress bar.
+    output_file : str, default `None`
+        File name or full path to save the results. Results are saved as a .txt 
+        file with tab-separated columns. If `None`, the results will not be saved.
+        **New in version 0.12.0**
 
     Returns
     -------
@@ -649,7 +661,8 @@ def random_search_sarimax(
         n_jobs                = n_jobs,
         verbose               = verbose,
         suppress_warnings_fit = suppress_warnings_fit,
-        show_progress         = show_progress
+        show_progress         = show_progress,
+        output_file           = output_file
     )
 
     return results
@@ -671,7 +684,8 @@ def _evaluate_grid_hyperparameters_sarimax(
     n_jobs: Optional[Union[int, str]]='auto',
     verbose: bool=True,
     suppress_warnings_fit: bool=False,
-    show_progress: bool=True
+    show_progress: bool=True,
+    output_file: Optional[str]=None
 ) -> pd.DataFrame:
     """
     Evaluate parameter values for a Forecaster object using time series backtesting.
@@ -726,6 +740,10 @@ def _evaluate_grid_hyperparameters_sarimax(
         If `True`, warnings generated during fitting will be ignored.
     show_progress : bool, default `True`
         Whether to show a progress bar.
+    output_file : str, default `None`
+        File name or full path to save the results. Results are saved as a .txt 
+        file with tab-separated columns. If `None`, the results will not be saved.
+        **New in version 0.12.0**
 
     Returns
     -------
@@ -740,25 +758,28 @@ def _evaluate_grid_hyperparameters_sarimax(
 
     if return_best and exog is not None and (len(exog) != len(y)):
         raise ValueError(
-            (f'`exog` must have same number of samples as `y`. '
-             f'length `exog`: ({len(exog)}), length `y`: ({len(y)})')
+            (f"`exog` must have same number of samples as `y`. "
+             f"length `exog`: ({len(exog)}), length `y`: ({len(y)})")
         )
 
-    params_list = []
     if not isinstance(metric, list):
         metric = [metric] 
     metric_dict = {(m if isinstance(m, str) else m.__name__): [] for m in metric}
     
     if len(metric_dict) != len(metric):
         raise ValueError(
-            'When `metric` is a `list`, each metric name must be unique.'
+            "When `metric` is a `list`, each metric name must be unique."
         )
 
     print(f"Number of models compared: {len(param_grid)}.")
 
     if show_progress:
         param_grid = tqdm(param_grid, desc='params grid', position=0)
-  
+    
+    if output_file is not None and os.path.isfile(output_file):
+        os.remove(output_file)
+    
+    params_list = []
     for params in param_grid:
 
         forecaster.set_params(params)
@@ -780,15 +801,28 @@ def _evaluate_grid_hyperparameters_sarimax(
                             suppress_warnings_fit = suppress_warnings_fit,
                             show_progress         = False
                          )[0]
-        warnings.filterwarnings('ignore', category=RuntimeWarning, message= "The forecaster will be fit.*")   
+        warnings.filterwarnings('ignore', category=RuntimeWarning, 
+                                message= "The forecaster will be fit.*")
+        
         params_list.append(params)
         for m, m_value in zip(metric, metrics_values):
             m_name = m if isinstance(m, str) else m.__name__
             metric_dict[m_name].append(m_value)
+        
+        if output_file is not None:
+            header = ['params', *metric_dict.keys(), *params.keys()]
+            row = [params, *metrics_values, *params.values()]
+            if not os.path.isfile(output_file):
+                with open(output_file, 'w', newline='') as f:
+                    f.write('\t'.join(header) + '\n')
+                    f.write('\t'.join([str(r) for r in row]) + '\n')
+            else:
+                with open(output_file, 'a', newline='') as f:
+                    f.write('\t'.join([str(r) for r in row]) + '\n')
 
     results = pd.DataFrame({
-                 'params': params_list,
-                 **metric_dict
+                  'params': params_list,
+                  **metric_dict
               })
     
     results = results.sort_values(by=list(metric_dict.keys())[0], ascending=True)
