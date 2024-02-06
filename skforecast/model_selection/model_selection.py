@@ -1197,7 +1197,7 @@ def bayesian_search_forecaster(
     gap: int=0,
     allow_incomplete_fold: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-    lags_grid= 'deprecated',
+    lags_grid:Any='deprecated',
     refit: Optional[Union[bool, int]]=False,
     n_trials: int=10,
     random_state: int=123,
