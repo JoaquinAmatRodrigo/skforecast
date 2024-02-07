@@ -70,7 +70,7 @@ def test_TypeError_initialize_lags_when_lags_is_not_valid_type_ForecasterAutoreg
     """
     lags = 'not_valid_type'
     err_msg = re.escape(
-                f"`lags` argument must be a dict, int, 1d numpy ndarray, range or list. "
+                f"`lags` argument must be an int, 1d numpy ndarray, range, tuple or list. "
                 f"Got {type(lags)}."
             )
     with pytest.raises(TypeError, match = err_msg):
@@ -82,7 +82,8 @@ def test_TypeError_initialize_lags_when_lags_is_not_valid_type_ForecasterAutoreg
 
 @pytest.mark.parametrize("lags             , expected", 
                          [(10              , np.arange(10) + 1), 
-                          ([1, 2, 3]       , np.array([1, 2, 3])), 
+                          ([1, 2, 3]       , np.array([1, 2, 3])),
+                          ((1, 2, 3)       , np.array((1, 2, 3))),  
                           (range(1, 4)     , np.array(range(1, 4))), 
                           (np.arange(1, 10), np.arange(1, 10))], 
                          ids = lambda values : f'values: {values}'
