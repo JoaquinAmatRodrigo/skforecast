@@ -93,8 +93,8 @@ def test_ValueError_bayesian_search_optuna_when_search_space_names_do_not_match(
     
     err_msg = re.escape(
                 """Some of the key values do not match the search_space key names.
-                Dict keys     : ['alpha']
-                Trial objects : ['not_alpha'].""")
+                Search Space keys  : ['alpha']
+                Trial objects keys : ['not_alpha'].""")
     with pytest.raises(ValueError, match = err_msg):
         _bayesian_search_optuna(
             forecaster         = forecaster,

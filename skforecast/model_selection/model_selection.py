@@ -1458,12 +1458,11 @@ def _bayesian_search_optuna(
         - column params: parameters configuration for each iteration.
         - column metric: metric value estimated for each iteration.
         - additional n columns with param = value.
-    results_opt_best : optuna object
-        The best optimization result returned as a FrozenTrial optuna object.
+    best_trial : optuna object
+        The best optimization result returned as an optuna FrozenTrial object.
 
     """
     
-    results_opt_best = None
     if not isinstance(metric, list):
         metric = [metric] 
     metric_dict = {(m if isinstance(m, str) else m.__name__): [] 
@@ -1473,9 +1472,6 @@ def _bayesian_search_optuna(
         raise ValueError(
             "When `metric` is a `list`, each metric name must be unique."
         )
-        
-    if show_progress:
-        kwargs_study_optimize['show_progress_bar'] = True
         
     # Objective function using backtesting_forecaster
     def _objective(
@@ -1524,10 +1520,14 @@ def _bayesian_search_optuna(
 
         return metrics[0]
 
-    print(
-        f"""Number of models compared: {n_trials*len(lags_grid)},
-         {n_trials} bayesian search in each lag configuration."""
-    )
+    # TODO: Este print ya no tiene sentido, ponemos algo?
+    # print(
+    #     f"""Number of models compared: {n_trials*len(lags_grid)},
+    #      {n_trials} bayesian search in each lag configuration."""
+    # )
+        
+    if show_progress:
+        kwargs_study_optimize['show_progress_bar'] = True
 
     if output_file is not None:
         # Redirect optuna logging to file
@@ -1543,11 +1543,6 @@ def _bayesian_search_optuna(
         # logging.getLogger("optuna").setLevel(logging.WARNING)
         optuna.logging.disable_default_handler()
 
-    # `metric_values` will be modified inside _objective function. 
-    # It is a trick to extract multiple values from _objective since
-    # only the optimized value can be returned.
-    metric_values = []
-
     if 'sampler' in kwargs_create_study.keys():
         kwargs_create_study['sampler']._rng = np.random.RandomState(random_state)
         kwargs_create_study['sampler']._random_sampler = RandomSampler(seed=random_state)
@@ -1556,15 +1551,22 @@ def _bayesian_search_optuna(
 
     if 'sampler' not in kwargs_create_study.keys():
         study.sampler = TPESampler(seed=random_state)
-        
+
+    # `metric_values` will be modified inside _objective function. 
+    # It is a trick to extract multiple values from _objective since
+    # only the optimized value can be returned.
+    metric_values = []
     study.optimize(_objective, n_trials=n_trials, **kwargs_study_optimize)
     best_trial = study.best_trial
+
+    if output_file is not None:
+        handler.close()
 
     if search_space(best_trial).keys() != best_trial.params.keys():
         raise ValueError(
             f"""Some of the key values do not match the search_space key names.
-            Dict keys     : {list(search_space(best_trial).keys())}
-            Trial objects : {list(best_trial.params.keys())}."""
+            Search Space keys  : {list(search_space(best_trial).keys())}
+            Trial objects keys : {list(best_trial.params.keys())}."""
         )
     
     lags_list = []
@@ -1577,15 +1579,6 @@ def _bayesian_search_optuna(
         for m, m_values in zip(metric, metric_values[i]):
             m_name = m if isinstance(m, str) else m.__name__
             metric_dict[m_name].append(m_values)
-    
-    if results_opt_best is None:
-        results_opt_best = best_trial
-    else:
-        if best_trial.value < results_opt_best.value:
-            results_opt_best = best_trial
-
-    if output_file is not None:
-        handler.close()
     
     if type(forecaster).__name__ != 'ForecasterAutoregCustom':
         lags_list = [
@@ -1623,7 +1616,7 @@ def _bayesian_search_optuna(
             f"  Backtesting metric: {best_metric}\n"
         )
             
-    return results, results_opt_best
+    return results, best_trial
 
 
 def select_features(
