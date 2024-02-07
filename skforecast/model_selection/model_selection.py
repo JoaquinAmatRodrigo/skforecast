@@ -1550,8 +1550,16 @@ def _bayesian_search_optuna(
     # It is a trick to extract multiple values from _objective since
     # only the optimized value can be returned.
     metric_values = []
+    warnings.filterwarnings(
+        "ignore",
+        message=(
+            "^Choices for a categorical distribution should be a tuple of None, bool, "
+            "int, float and str for persistent storage but contains "
+        )
+    )
     study.optimize(_objective, n_trials=n_trials, **kwargs_study_optimize)
     best_trial = study.best_trial
+    warnings.filterwarnings('default')
 
     if output_file is not None:
         handler.close()
