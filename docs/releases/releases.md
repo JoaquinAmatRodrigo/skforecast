@@ -30,6 +30,8 @@ The main changes in this release are:
 
 + Added `set_dark_theme` function to the `plot` module to set a dark theme for matplotlib plots.
 
++ Allow tuple type for `lags` argument.
+
 **Changed**
 
 + 
