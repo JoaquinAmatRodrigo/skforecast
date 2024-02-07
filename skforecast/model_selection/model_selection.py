@@ -1462,9 +1462,7 @@ def _bayesian_search_optuna(
         The best optimization result returned as a FrozenTrial optuna object.
 
     """
-       
-    lags_list = []
-    params_list = []
+    
     results_opt_best = None
     if not isinstance(metric, list):
         metric = [metric] 
@@ -1542,12 +1540,14 @@ def _bayesian_search_optuna(
         handler = logging.FileHandler(output_file, mode="w")
         logger.addHandler(handler)
     else:
+        # logging.getLogger("optuna").setLevel(logging.WARNING)
         optuna.logging.disable_default_handler()
 
     # `metric_values` will be modified inside _objective function. 
     # It is a trick to extract multiple values from _objective since
     # only the optimized value can be returned.
     metric_values = []
+
     if 'sampler' in kwargs_create_study.keys():
         kwargs_create_study['sampler']._rng = np.random.RandomState(random_state)
         kwargs_create_study['sampler']._random_sampler = RandomSampler(seed=random_state)
@@ -1567,6 +1567,8 @@ def _bayesian_search_optuna(
             Trial objects : {list(best_trial.params.keys())}."""
         )
     
+    lags_list = []
+    params_list = []
     for i, trial in enumerate(study.get_trials()):
         regressor_params = {k: v for k, v in trial.params.items() if k != 'lags'}
         lags = trial.params.get('lags', forecaster.lags)
@@ -1588,8 +1590,7 @@ def _bayesian_search_optuna(
     if type(forecaster).__name__ != 'ForecasterAutoregCustom':
         lags_list = [
             initialize_lags(forecaster_name=type(forecaster).__name__, lags = lag)
-            for lag
-            in lags_list
+            for lag in lags_list
         ]
     else:
         lags_list = ['custom_predictors' for _ in lags_list]
@@ -1599,6 +1600,7 @@ def _bayesian_search_optuna(
                   'params': params_list,
                   **metric_dict
               })
+    
     results = results.sort_values(by=list(metric_dict.keys())[0], ascending=True)
     results = pd.concat([results, results['params'].apply(pd.Series)], axis=1)
     
