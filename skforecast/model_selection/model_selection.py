@@ -1519,13 +1519,7 @@ def _bayesian_search_optuna(
         metric_values.append(metrics)
 
         return metrics[0]
-
-    # TODO: Este print ya no tiene sentido, ponemos algo?
-    # print(
-    #     f"""Number of models compared: {n_trials*len(lags_grid)},
-    #      {n_trials} bayesian search in each lag configuration."""
-    # )
-        
+       
     if show_progress:
         kwargs_study_optimize['show_progress_bar'] = True
 
@@ -1573,7 +1567,10 @@ def _bayesian_search_optuna(
     params_list = []
     for i, trial in enumerate(study.get_trials()):
         regressor_params = {k: v for k, v in trial.params.items() if k != 'lags'}
-        lags = trial.params.get('lags', forecaster.lags)
+        lags = trial.params.get(
+                    'lags',
+                    forecaster.lags if hasattr(forecaster, 'lags') else None
+                )
         params_list.append(regressor_params)
         lags_list.append(lags)
         for m, m_values in zip(metric, metric_values[i]):
@@ -1586,7 +1583,11 @@ def _bayesian_search_optuna(
             for lag in lags_list
         ]
     else:
-        lags_list = ['custom_predictors' for _ in lags_list]
+        lags_list = [
+            f"custom function: {forecaster.fun_predictors.__name__}"
+            for _
+            in lags_list
+        ]
 
     results = pd.DataFrame({
                   'lags'  : lags_list,
