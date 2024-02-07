@@ -64,17 +64,17 @@ def initialize_lags(
     if isinstance(lags, int) and lags < 1:
         raise ValueError("Minimum value of lags allowed is 1.")
 
-    if isinstance(lags, (list, np.ndarray)):
+    if isinstance(lags, (list, tuple, np.ndarray)):
         for lag in lags:
             if not isinstance(lag, (int, np.int64, np.int32)):
                 raise TypeError("All values in `lags` must be int.")
         
-    if isinstance(lags, (list, range, np.ndarray)) and min(lags) < 1:
+    if isinstance(lags, (list, tuple, range, np.ndarray)) and min(lags) < 1:
         raise ValueError("Minimum value of lags allowed is 1.")
 
     if isinstance(lags, int):
         lags = np.arange(lags) + 1
-    elif isinstance(lags, (list, range)):
+    elif isinstance(lags, (list, tuple, range)):
         lags = np.array(lags)
     elif isinstance(lags, np.ndarray):
         lags = lags
@@ -86,7 +86,7 @@ def initialize_lags(
             )
         else:
             raise TypeError(
-                ("`lags` argument must be a dict, int, 1d numpy ndarray, range or list. "
+                ("`lags` argument must be a dict, int, 1d numpy ndarray, range, tuple or list. "
                  f"Got {type(lags)}.")
             )
 
