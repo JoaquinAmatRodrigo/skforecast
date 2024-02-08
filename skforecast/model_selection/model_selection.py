@@ -1534,7 +1534,7 @@ def _bayesian_search_optuna(
         handler = logging.FileHandler(output_file, mode="w")
         logger.addHandler(handler)
     else:
-        # logging.getLogger("optuna").setLevel(logging.WARNING)
+        logging.getLogger("optuna").setLevel(logging.WARNING)
         optuna.logging.disable_default_handler()
 
     if 'sampler' in kwargs_create_study.keys():
