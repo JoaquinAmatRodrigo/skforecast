@@ -1,0 +1,46 @@
+lags 3: [1 2 3]
+A new study created in memory with name: no-name-45e0e2d5-4375-4876-b397-6296ccda1a2c
+Trial 0 finished with value: 0.15112382706554234 and parameters: {'n_estimators': 17, 'min_samples_leaf': 3, 'max_features': 'sqrt'}. Best is trial 0 with value: 0.15112382706554234.
+Trial 1 finished with value: 0.1632184510105523 and parameters: {'n_estimators': 17, 'min_samples_leaf': 5, 'max_features': 'log2'}. Best is trial 0 with value: 0.15112382706554234.
+Trial 2 finished with value: 0.18114265376881422 and parameters: {'n_estimators': 15, 'min_samples_leaf': 4, 'max_features': 'sqrt'}. Best is trial 0 with value: 0.15112382706554234.
+Trial 3 finished with value: 0.13263306663095237 and parameters: {'n_estimators': 14, 'min_samples_leaf': 1, 'max_features': 'sqrt'}. Best is trial 3 with value: 0.13263306663095237.
+Trial 4 finished with value: 0.16554026501537694 and parameters: {'n_estimators': 12, 'min_samples_leaf': 2, 'max_features': 'sqrt'}. Best is trial 3 with value: 0.13263306663095237.
+Trial 5 finished with value: 0.18783366743012142 and parameters: {'n_estimators': 16, 'min_samples_leaf': 9, 'max_features': 'log2'}. Best is trial 3 with value: 0.13263306663095237.
+Trial 6 finished with value: 0.1849637271096086 and parameters: {'n_estimators': 17, 'min_samples_leaf': 4, 'max_features': 'log2'}. Best is trial 3 with value: 0.13263306663095237.
+Trial 7 finished with value: 0.1942616498506665 and parameters: {'n_estimators': 13, 'min_samples_leaf': 7, 'max_features': 'sqrt'}. Best is trial 3 with value: 0.13263306663095237.
+Trial 8 finished with value: 0.16308699022233036 and parameters: {'n_estimators': 14, 'min_samples_leaf': 5, 'max_features': 'log2'}. Best is trial 3 with value: 0.13263306663095237.
+Trial 9 finished with value: 0.19157351643829618 and parameters: {'n_estimators': 14, 'min_samples_leaf': 9, 'max_features': 'log2'}. Best is trial 3 with value: 0.13263306663095237.
+lags 5: [1 2 3 4 5]
+A new study created in memory with name: no-name-ae4cbdea-a7bb-4335-9027-b25fde5cba0c
+Trial 0 finished with value: 0.19183432533756226 and parameters: {'n_estimators': 17, 'min_samples_leaf': 3, 'max_features': 'sqrt'}. Best is trial 0 with value: 0.19183432533756226.
+Trial 1 finished with value: 0.18738549585146577 and parameters: {'n_estimators': 17, 'min_samples_leaf': 5, 'max_features': 'log2'}. Best is trial 1 with value: 0.18738549585146577.
+Trial 2 finished with value: 0.2185153977762301 and parameters: {'n_estimators': 15, 'min_samples_leaf': 4, 'max_features': 'sqrt'}. Best is trial 1 with value: 0.18738549585146577.
+Trial 3 finished with value: 0.20036329421428567 and parameters: {'n_estimators': 14, 'min_samples_leaf': 1, 'max_features': 'sqrt'}. Best is trial 1 with value: 0.18738549585146577.
+Trial 4 finished with value: 0.1895701660671296 and parameters: {'n_estimators': 12, 'min_samples_leaf': 2, 'max_features': 'sqrt'}. Best is trial 1 with value: 0.18738549585146577.
+Trial 5 finished with value: 0.19362107203764486 and parameters: {'n_estimators': 16, 'min_samples_leaf': 9, 'max_features': 'log2'}. Best is trial 1 with value: 0.18738549585146577.
+Trial 6 finished with value: 0.21615838157459985 and parameters: {'n_estimators': 17, 'min_samples_leaf': 4, 'max_features': 'log2'}. Best is trial 1 with value: 0.18738549585146577.
+Trial 7 finished with value: 0.20115030685251636 and parameters: {'n_estimators': 13, 'min_samples_leaf': 7, 'max_features': 'sqrt'}. Best is trial 1 with value: 0.18738549585146577.
+Trial 8 finished with value: 0.18247237509953046 and parameters: {'n_estimators': 14, 'min_samples_leaf': 5, 'max_features': 'log2'}. Best is trial 8 with value: 0.18247237509953046.
+Trial 9 finished with value: 0.19379692448648994 and parameters: {'n_estimators': 14, 'min_samples_leaf': 9, 'max_features': 'log2'}. Best is trial 8 with value: 0.18247237509953046.
+A new study created in memory with name: no-name-2da706c9-b1a4-45c3-a4a9-1e1a97ebfc47
+Trial 0 finished with value: 0.15112382706554234 and parameters: {'n_estimators': 17, 'min_samples_leaf': 3, 'max_features': 'sqrt'}. Best is trial 0 with value: 0.15112382706554234.
+Trial 1 finished with value: 0.1632184510105523 and parameters: {'n_estimators': 17, 'min_samples_leaf': 5, 'max_features': 'log2'}. Best is trial 0 with value: 0.15112382706554234.
+Trial 2 finished with value: 0.18114265376881422 and parameters: {'n_estimators': 15, 'min_samples_leaf': 4, 'max_features': 'sqrt'}. Best is trial 0 with value: 0.15112382706554234.
+Trial 3 finished with value: 0.13263306663095237 and parameters: {'n_estimators': 14, 'min_samples_leaf': 1, 'max_features': 'sqrt'}. Best is trial 3 with value: 0.13263306663095237.
+Trial 4 finished with value: 0.16554026501537694 and parameters: {'n_estimators': 12, 'min_samples_leaf': 2, 'max_features': 'sqrt'}. Best is trial 3 with value: 0.13263306663095237.
+Trial 5 finished with value: 0.18783366743012142 and parameters: {'n_estimators': 16, 'min_samples_leaf': 9, 'max_features': 'log2'}. Best is trial 3 with value: 0.13263306663095237.
+Trial 6 finished with value: 0.1849637271096086 and parameters: {'n_estimators': 17, 'min_samples_leaf': 4, 'max_features': 'log2'}. Best is trial 3 with value: 0.13263306663095237.
+Trial 7 finished with value: 0.1942616498506665 and parameters: {'n_estimators': 13, 'min_samples_leaf': 7, 'max_features': 'sqrt'}. Best is trial 3 with value: 0.13263306663095237.
+Trial 8 finished with value: 0.16308699022233036 and parameters: {'n_estimators': 14, 'min_samples_leaf': 5, 'max_features': 'log2'}. Best is trial 3 with value: 0.13263306663095237.
+Trial 9 finished with value: 0.19157351643829618 and parameters: {'n_estimators': 14, 'min_samples_leaf': 9, 'max_features': 'log2'}. Best is trial 3 with value: 0.13263306663095237.
+A new study created in memory with name: no-name-bf943c8c-be07-46d6-8ab6-62656329d500
+Trial 0 finished with value: 0.19183432533756226 and parameters: {'n_estimators': 17, 'min_samples_leaf': 3, 'max_features': 'sqrt'}. Best is trial 0 with value: 0.19183432533756226.
+Trial 1 finished with value: 0.18738549585146577 and parameters: {'n_estimators': 17, 'min_samples_leaf': 5, 'max_features': 'log2'}. Best is trial 1 with value: 0.18738549585146577.
+Trial 2 finished with value: 0.2185153977762301 and parameters: {'n_estimators': 15, 'min_samples_leaf': 4, 'max_features': 'sqrt'}. Best is trial 1 with value: 0.18738549585146577.
+Trial 3 finished with value: 0.20036329421428567 and parameters: {'n_estimators': 14, 'min_samples_leaf': 1, 'max_features': 'sqrt'}. Best is trial 1 with value: 0.18738549585146577.
+Trial 4 finished with value: 0.1895701660671296 and parameters: {'n_estimators': 12, 'min_samples_leaf': 2, 'max_features': 'sqrt'}. Best is trial 1 with value: 0.18738549585146577.
+Trial 5 finished with value: 0.19362107203764486 and parameters: {'n_estimators': 16, 'min_samples_leaf': 9, 'max_features': 'log2'}. Best is trial 1 with value: 0.18738549585146577.
+Trial 6 finished with value: 0.21615838157459985 and parameters: {'n_estimators': 17, 'min_samples_leaf': 4, 'max_features': 'log2'}. Best is trial 1 with value: 0.18738549585146577.
+Trial 7 finished with value: 0.20115030685251636 and parameters: {'n_estimators': 13, 'min_samples_leaf': 7, 'max_features': 'sqrt'}. Best is trial 1 with value: 0.18738549585146577.
+Trial 8 finished with value: 0.18247237509953046 and parameters: {'n_estimators': 14, 'min_samples_leaf': 5, 'max_features': 'log2'}. Best is trial 8 with value: 0.18247237509953046.
+Trial 9 finished with value: 0.19379692448648994 and parameters: {'n_estimators': 14, 'min_samples_leaf': 9, 'max_features': 'log2'}. Best is trial 8 with value: 0.18247237509953046.

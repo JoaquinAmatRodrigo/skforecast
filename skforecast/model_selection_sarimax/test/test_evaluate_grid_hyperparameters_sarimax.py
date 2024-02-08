@@ -1,5 +1,6 @@
 # Unit test _evaluate_grid_hyperparameters_sarimax
 # ==============================================================================
+import os
 import re
 import pytest
 import platform
@@ -243,3 +244,75 @@ def test_evaluate_grid_hyperparameters_sarimax_when_return_best():
     }
     
     assert expected_params == forecaster.params
+
+
+def test_evaluate_grid_hyperparameters_sarimax_output_file_when_single_metric():
+    """
+    Test output file is created when output_file is passed to
+    _evaluate_grid_hyperparameters_sarimax and single metric.
+    """
+    forecaster = ForecasterSarimax(
+                     regressor = Sarimax(order=(3, 2, 0), maxiter=1000, method='cg', disp=False)
+                 )
+    
+    param_grid = [{'order': (3, 2 ,0), 'trend': None}, 
+                  {'order': (1, 1, 0), 'trend': 'c'}]
+    output_file = 'test_evaluate_grid_hyperparameters_sarimax_output_file.txt'
+
+    results = _evaluate_grid_hyperparameters_sarimax(
+                  forecaster         = forecaster,
+                  y                  = y_datetime,
+                  param_grid         = param_grid,
+                  steps              = 3,
+                  refit              = False,
+                  metric             = 'mean_squared_error',
+                  initial_train_size = len(y_datetime)-12,
+                  fixed_train_size   = False,
+                  return_best        = False,
+                  verbose            = False,
+                  output_file        = output_file
+              )
+    results  = results.astype({'params': str, 'order': str})
+
+    assert os.path.isfile(output_file)
+    output_file_content = pd.read_csv(output_file, sep='\t', low_memory=False)
+    output_file_content = output_file_content.sort_values(by='mean_squared_error')
+    output_file_content = output_file_content.astype({'params': str, 'order': str})
+    pd.testing.assert_frame_equal(results, output_file_content)
+    os.remove(output_file)
+
+
+def test_evaluate_grid_hyperparameters_sarimax_output_file_when_metric_list():
+    """
+    Test output file is created when output_file is passed to
+    _evaluate_grid_hyperparameters_sarimax and metric as list.
+    """
+    forecaster = ForecasterSarimax(
+                     regressor = Sarimax(order=(3, 2, 0), maxiter=1000, method='cg', disp=False)
+                 )
+    
+    param_grid = [{'order': (3, 2, 0), 'trend': None}, 
+                  {'order': (1, 1, 0), 'trend': 'c'}]
+    output_file = 'test_evaluate_grid_hyperparameters_sarimax_output_file.txt'
+
+    results = _evaluate_grid_hyperparameters_sarimax(
+                  forecaster         = forecaster,
+                  y                  = y_datetime,
+                  param_grid         = param_grid,
+                  steps              = 3,
+                  refit              = True,
+                  metric             = [mean_absolute_error, 'mean_squared_error'],
+                  initial_train_size = len(y_datetime)-12,
+                  fixed_train_size   = False,
+                  return_best        = False,
+                  verbose            = False,
+                  output_file        = output_file
+              )
+    results  = results.astype({'params': str, 'order': str})
+
+    assert os.path.isfile(output_file)
+    output_file_content = pd.read_csv(output_file, sep='\t', low_memory=False)
+    output_file_content = output_file_content.sort_values(by='mean_squared_error')
+    output_file_content = output_file_content.astype({'params': str, 'order': str})
+    pd.testing.assert_frame_equal(results, output_file_content)
+    os.remove(output_file)

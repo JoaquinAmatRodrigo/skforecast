@@ -64,29 +64,29 @@ def initialize_lags(
     if isinstance(lags, int) and lags < 1:
         raise ValueError("Minimum value of lags allowed is 1.")
 
-    if isinstance(lags, (list, np.ndarray)):
+    if isinstance(lags, (list, tuple, np.ndarray)):
         for lag in lags:
             if not isinstance(lag, (int, np.int64, np.int32)):
-                raise TypeError("All values in `lags` must be int.")
+                raise TypeError("All values in `lags` must be integers.")
         
-    if isinstance(lags, (list, range, np.ndarray)) and min(lags) < 1:
+    if isinstance(lags, (list, tuple, range, np.ndarray)) and min(lags) < 1:
         raise ValueError("Minimum value of lags allowed is 1.")
 
     if isinstance(lags, int):
         lags = np.arange(lags) + 1
-    elif isinstance(lags, (list, range)):
+    elif isinstance(lags, (list, tuple, range)):
         lags = np.array(lags)
     elif isinstance(lags, np.ndarray):
         lags = lags
     else:
-        if not forecaster_name == 'ForecasterAutoregMultiVariate':
+        if forecaster_name != 'ForecasterAutoregMultiVariate':
             raise TypeError(
-                ("`lags` argument must be an int, 1d numpy ndarray, range or list. "
+                (f"`lags` argument must be an int, 1d numpy ndarray, range, tuple or list. "
                  f"Got {type(lags)}.")
             )
         else:
             raise TypeError(
-                ("`lags` argument must be a dict, int, 1d numpy ndarray, range or list. "
+                ("`lags` argument must be a dict, int, 1d numpy ndarray, range, tuple or list. "
                  f"Got {type(lags)}.")
             )
 
@@ -178,7 +178,7 @@ def initialize_weights(
 
 
 def initialize_lags_grid(
-    forecaster, 
+    forecaster: object, 
     lags_grid: Optional[Union[list, dict]]=None
 ) -> Tuple[dict, str]:
     """
@@ -537,6 +537,7 @@ def check_predict_input(
     alpha: Optional[float]=None,
     max_steps: Optional[int]=None,
     levels: Optional[Union[str, list]]=None,
+    levels_forecaster: Optional[Union[str, list]]=None,
     series_col_names: Optional[list]=None
 ) -> None:
     """
@@ -549,7 +550,8 @@ def check_predict_input(
     forecaster_name : str
         Forecaster name. ForecasterAutoreg, ForecasterAutoregCustom, 
         ForecasterAutoregDirect, ForecasterAutoregMultiSeries, 
-        ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate.
+        ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate,
+        ForecasterRnn
     steps : int, list
         Number of future steps predicted.
     fitted: bool
@@ -586,11 +588,15 @@ def check_predict_input(
         Maximum number of steps allowed (`ForecasterAutoregDirect` and 
         `ForecasterAutoregMultiVariate`).
     levels : str, list, default `None`
-        Time series to be predicted (`ForecasterAutoregMultiSeries` and
-        `ForecasterAutoregMultiSeriesCustom`).
+        Time series to be predicted (`ForecasterAutoregMultiSeries`,
+        `ForecasterAutoregMultiSeriesCustom` and `ForecasterRnn).
+    levels_forecaster : str, list, default `None`
+        Time series used as output data of a multiseries problem in a RNN problem
+        (`ForecasterRnn`).
     series_col_names : list, default `None`
         Names of the columns used during fit (`ForecasterAutoregMultiSeries`, 
-        `ForecasterAutoregMultiSeriesCustom` and `ForecasterAutoregMultiVariate`).
+        `ForecasterAutoregMultiSeriesCustom`, `ForecasterAutoregMultiVariate`
+        and `ForecasterRnn`).
 
     Returns
     -------
@@ -627,17 +633,21 @@ def check_predict_input(
         check_interval(interval=interval, alpha=alpha)
     
     if forecaster_name in ['ForecasterAutoregMultiSeries', 
-                           'ForecasterAutoregMultiSeriesCustom']:
-        if levels is not None and not isinstance(levels, (str, list)):
+                           'ForecasterAutoregMultiSeriesCustom',
+                           'ForecasterRnn']:
+        if not isinstance(levels, (type(None), str, list)):
             raise TypeError(
                 ("`levels` must be a `list` of column names, a `str` of a "
                  "column name or `None`.")
             )
-        if len(set(levels) - set(series_col_names)) != 0:
+        
+        levels_to_check = levels_forecaster if forecaster_name == 'ForecasterRnn' else series_col_names
+        if len(set(levels) - set(levels_to_check)) != 0:
             raise ValueError(
-                f"`levels` must be in `series_col_names` : {series_col_names}."
+                (f"`levels` names must be included in the series used during fit "
+                 f"({levels_to_check}). Got {levels}.")
             )
-
+    
     if exog is None and included_exog:
         raise ValueError(
             ("Forecaster trained with exogenous variable/s. "
@@ -654,14 +664,16 @@ def check_predict_input(
     # Check last_window type (pd.Series or pd.DataFrame according to forecaster)
     if forecaster_name in ['ForecasterAutoregMultiSeries', 
                            'ForecasterAutoregMultiSeriesCustom',
-                           'ForecasterAutoregMultiVariate']:
+                           'ForecasterAutoregMultiVariate',
+                           'ForecasterRnn']:
         if not isinstance(last_window, pd.DataFrame):
             raise TypeError(
                 f"`last_window` must be a pandas DataFrame. Got {type(last_window)}."
             )
         
         if forecaster_name in ['ForecasterAutoregMultiSeries', 
-                               'ForecasterAutoregMultiSeriesCustom'] and \
+                               'ForecasterAutoregMultiSeriesCustom',
+                               'ForecasterRnn'] and \
             len(set(levels) - set(last_window.columns)) != 0:
             raise ValueError(
                 (f"`last_window` must contain a column(s) named as the level(s) "
@@ -1181,7 +1193,9 @@ def expand_index(
                             start = index[-1] + 1,
                             stop  = index[-1] + 1 + steps
                         )
-    else: 
+        else:
+            raise TypeError("Index must be of type 'RangeIndex' or 'DateIndex'")
+    else:
         new_index = pd.RangeIndex(
                         start = 0,
                         stop  = steps
@@ -1344,7 +1358,7 @@ def transform_dataframe(
 
 
 def save_forecaster(
-    forecaster, 
+    forecaster: object, 
     file_name: str,
     save_custom_functions: bool=True, 
     verbose: bool=True
@@ -1355,7 +1369,7 @@ def save_forecaster(
 
     Parameters
     ----------
-    forecaster : forecaster
+    forecaster : Forecaster
         Forecaster created with skforecast library.
     file_name : str
         File name given to the object.
@@ -1423,7 +1437,7 @@ def load_forecaster(
 
     Returns
     -------
-    forecaster: forecaster
+    forecaster: Forecaster
         Forecaster created with skforecast library.
     
     """
@@ -1594,7 +1608,7 @@ def check_backtesting_input(
 
     Parameters
     ----------
-    forecaster : object
+    forecaster : Forecaster
         Forecaster model.
     steps : int, list
         Number of future steps predicted.
@@ -1617,8 +1631,8 @@ def check_backtesting_input(
         Last fold is allowed to have a smaller number of samples than the 
         `test_size`. If `False`, the last fold is excluded.
     refit : bool, int, default `False`
-        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
-        the Forecaster will be trained every that number of iterations.
+        Whether to re-fit the forecaster in each iteration. If `refit` is an 
+        integer, the Forecaster will be trained every that number of iterations.
     interval : list, default `None`
         Confidence of the prediction interval estimated. Sequence of percentiles
         to compute, which must be between 0 and 100 inclusive.
@@ -1642,7 +1656,7 @@ def check_backtesting_input(
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
         for backtesting.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
 
     Returns
@@ -1656,7 +1670,8 @@ def check_backtesting_input(
                        'ForecasterEquivalentDate']
     forecasters_multi = ['ForecasterAutoregMultiSeries', 
                          'ForecasterAutoregMultiSeriesCustom', 
-                         'ForecasterAutoregMultiVariate']
+                         'ForecasterAutoregMultiVariate',
+                         'ForecasterRnn']
     
     forecaster_name = type(forecaster).__name__
 
@@ -1772,7 +1787,7 @@ def check_backtesting_input(
 
 
 def select_n_jobs_backtesting(
-    forecaster,
+    forecaster: object,
     refit: Union[bool, int]
 ) -> int:
     """

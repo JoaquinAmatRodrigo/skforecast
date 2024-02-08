@@ -5,14 +5,18 @@
 ################################################################################
 # coding=utf-8
 
+import re
+import os
+from copy import deepcopy
+import logging
 from typing import Union, Tuple, Optional, Callable
+import warnings
 import numpy as np
 import pandas as pd
-import warnings
-import logging
-from copy import deepcopy
 from joblib import Parallel, delayed, cpu_count
 from tqdm.auto import tqdm
+import optuna
+from optuna.samplers import TPESampler, RandomSampler
 from sklearn.metrics import (
     mean_squared_error,
     mean_absolute_error,
@@ -21,15 +25,11 @@ from sklearn.metrics import (
 )
 from sklearn.model_selection import ParameterGrid
 from sklearn.model_selection import ParameterSampler
-import optuna
-from optuna.samplers import TPESampler, RandomSampler
 
 from ..exceptions import LongTrainingWarning
 from ..utils import check_backtesting_input
 from ..utils import initialize_lags_grid
 from ..utils import select_n_jobs_backtesting
-
-optuna.logging.set_verbosity(optuna.logging.WARNING) # disable optuna logs
 
 logging.basicConfig(
     format = '%(name)-10s %(levelname)-5s %(message)s', 
@@ -43,7 +43,7 @@ def _create_backtesting_folds(
     initial_train_size: Union[int, None],
     test_size: int,
     externally_fitted: bool=False,
-    refit: Optional[Union[bool, int]]=False,
+    refit: Union[bool, int]=False,
     fixed_train_size: bool=True,
     gap: int=0,
     allow_incomplete_fold: bool=True,
@@ -96,8 +96,8 @@ def _create_backtesting_folds(
         Flag indicating whether the forecaster is already trained. Only used when 
         `initial_train_size` is None and `refit` is False.
     refit : bool, int, default `False`
-        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
-        the Forecaster will be trained every that number of iterations.
+        Whether to re-fit the forecaster in each iteration. If `refit` is an 
+        integer, the Forecaster will be trained every that number of iterations.
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
     gap : int, default `0`
@@ -281,7 +281,7 @@ def _get_metric(
 
 
 def _backtesting_forecaster(
-    forecaster,
+    forecaster: object,
     y: pd.Series,
     steps: int,
     metric: Union[str, Callable, list],
@@ -290,12 +290,12 @@ def _backtesting_forecaster(
     gap: int=0,
     allow_incomplete_fold: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-    refit: Optional[Union[bool, int]]=False,
+    refit: Union[bool, int]=False,
     interval: Optional[list]=None,
     n_boot: int=500,
     random_state: int=123,
     in_sample_residuals: bool=True,
-    n_jobs: Optional[Union[int, str]]='auto',
+    n_jobs: Union[int, str]='auto',
     verbose: bool=False,
     show_progress: bool=True
 ) -> Tuple[Union[float, list], pd.DataFrame]:
@@ -353,8 +353,8 @@ def _backtesting_forecaster(
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
     refit : bool, int, default `False`
-        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
-        the Forecaster will be trained every that number of iterations.
+        Whether to re-fit the forecaster in each iteration. If `refit` is an 
+        integer, the Forecaster will be trained every that number of iterations.
     interval : list, default `None`
         Confidence of the prediction interval estimated. Sequence of percentiles
         to compute, which must be between 0 and 100 inclusive. For example, 
@@ -378,7 +378,7 @@ def _backtesting_forecaster(
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
         for backtesting.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
 
     Returns
@@ -555,7 +555,7 @@ def _backtesting_forecaster(
 
 
 def backtesting_forecaster(
-    forecaster,
+    forecaster: object,
     y: pd.Series,
     steps: int,
     metric: Union[str, Callable, list],
@@ -564,12 +564,12 @@ def backtesting_forecaster(
     gap: int=0,
     allow_incomplete_fold: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-    refit: Optional[Union[bool, int]]=False,
+    refit: Union[bool, int]=False,
     interval: Optional[list]=None,
     n_boot: int=500,
     random_state: int=123,
     in_sample_residuals: bool=True,
-    n_jobs: Optional[Union[int, str]]='auto',
+    n_jobs: Union[int, str]='auto',
     verbose: bool=False,
     show_progress: bool=True
 ) -> Tuple[Union[float, list], pd.DataFrame]:
@@ -627,8 +627,8 @@ def backtesting_forecaster(
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
     refit : bool, int, default `False`
-        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
-        the Forecaster will be trained every that number of iterations.
+        Whether to re-fit the forecaster in each iteration. If `refit` is an 
+        integer, the Forecaster will be trained every that number of iterations.
     interval : list, default `None`
         Confidence of the prediction interval estimated. Sequence of percentiles
         to compute, which must be between 0 and 100 inclusive. For example, 
@@ -652,7 +652,7 @@ def backtesting_forecaster(
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
         for backtesting.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
 
     Returns
@@ -733,7 +733,7 @@ def backtesting_forecaster(
 
 
 def grid_search_forecaster(
-    forecaster,
+    forecaster: object,
     y: pd.Series,
     param_grid: dict,
     steps: int,
@@ -744,11 +744,12 @@ def grid_search_forecaster(
     allow_incomplete_fold: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Optional[Union[list, dict]]=None,
-    refit: Optional[Union[bool, int]]=False,
+    refit: Union[bool, int]=False,
     return_best: bool=True,
-    n_jobs: Optional[Union[int, str]]='auto',
+    n_jobs: Union[int, str]='auto',
     verbose: bool=True,
-    show_progress: bool=True
+    show_progress: bool=True,
+    output_file: Optional[str]=None
 ) -> pd.DataFrame:
     """
     Exhaustive search over specified parameter values for a Forecaster object.
@@ -794,8 +795,8 @@ def grid_search_forecaster(
         if the forecaster is an instance of `ForecasterAutoregCustom` or 
         `ForecasterAutoregMultiSeriesCustom`.
     refit : bool, int, default `False`
-        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
-        the Forecaster will be trained every that number of iterations.
+        Whether to re-fit the forecaster in each iteration. If `refit` is an
+        integer,  the Forecaster will be trained every that number of iterations.
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
     n_jobs : int, 'auto', default `'auto'`
@@ -805,8 +806,12 @@ def grid_search_forecaster(
         **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
+    output_file : str, default `None`
+        File name or full path to save the results. Results are saved as a .txt 
+        file with tab-separated columns. If `None`, the results will not be saved.
+        **New in version 0.12.0**
 
     Returns
     -------
@@ -814,6 +819,7 @@ def grid_search_forecaster(
         Results for each combination of parameters.
 
         - column lags: lags configuration for each iteration.
+        - column lags_label: descriptive label or alias for the lags.
         - column params: parameters configuration for each iteration.
         - column metric: metric value estimated for each iteration.
         - additional n columns with param = value.
@@ -838,14 +844,15 @@ def grid_search_forecaster(
         return_best           = return_best,
         n_jobs                = n_jobs,
         verbose               = verbose,
-        show_progress         = show_progress
+        show_progress         = show_progress,
+        output_file           = output_file
     )
 
     return results
 
 
 def random_search_forecaster(
-    forecaster,
+    forecaster: object,
     y: pd.Series,
     param_distributions: dict,
     steps: int,
@@ -856,13 +863,14 @@ def random_search_forecaster(
     allow_incomplete_fold: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Optional[Union[list, dict]]=None,
-    refit: Optional[Union[bool, int]]=False,
+    refit: Union[bool, int]=False,
     n_iter: int=10,
     random_state: int=123,
     return_best: bool=True,
-    n_jobs: Optional[Union[int, str]]='auto',
+    n_jobs: Union[int, str]='auto',
     verbose: bool=True,
-    show_progress: bool=True
+    show_progress: bool=True,
+    output_file: Optional[str]=None
 ) -> pd.DataFrame:
     """
     Random search over specified parameter values or distributions for a Forecaster 
@@ -908,8 +916,8 @@ def random_search_forecaster(
         if the forecaster is an instance of `ForecasterAutoregCustom` or 
         `ForecasterAutoregMultiSeriesCustom`.
     refit : bool, int, default `False`
-        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
-        the Forecaster will be trained every that number of iterations.
+        Whether to re-fit the forecaster in each iteration. If `refit` is an 
+        integer, the Forecaster will be trained every that number of iterations.
     n_iter : int, default `10`
         Number of parameter settings that are sampled per lags configuration. 
         n_iter trades off runtime vs quality of the solution.
@@ -924,8 +932,12 @@ def random_search_forecaster(
         **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
+    output_file : str, default `None`
+        File name or full path to save the results. Results are saved as a .txt 
+        file with tab-separated columns. If `None`, the results will not be saved.
+        **New in version 0.12.0**
 
     Returns
     -------
@@ -933,6 +945,7 @@ def random_search_forecaster(
         Results for each combination of parameters.
 
         - column lags: lags configuration for each iteration.
+        - column lags_label: descriptive label or alias for the lags.
         - column params: parameters configuration for each iteration.
         - column metric: metric value estimated for each iteration.
         - additional n columns with param = value.
@@ -957,14 +970,15 @@ def random_search_forecaster(
         return_best           = return_best,
         n_jobs                = n_jobs,
         verbose               = verbose,
-        show_progress         = show_progress
+        show_progress         = show_progress,
+        output_file           = output_file
     )
 
     return results
 
 
 def _evaluate_grid_hyperparameters(
-    forecaster,
+    forecaster: object,
     y: pd.Series,
     param_grid: dict,
     steps: int,
@@ -975,11 +989,12 @@ def _evaluate_grid_hyperparameters(
     allow_incomplete_fold: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Optional[Union[list, dict]]=None,
-    refit: Optional[Union[bool, int]]=False,
+    refit: Union[bool, int]=False,
     return_best: bool=True,
-    n_jobs: Optional[Union[int, str]]='auto',
+    n_jobs: Union[int, str]='auto',
     verbose: bool=True,
-    show_progress: bool=True
+    show_progress: bool=True,
+    output_file: Optional[str]=None
 ) -> pd.DataFrame:
     """
     Evaluate parameter values for a Forecaster object using time series backtesting.
@@ -1024,8 +1039,8 @@ def _evaluate_grid_hyperparameters(
         if the forecaster is an instance of `ForecasterAutoregCustom` or 
         `ForecasterAutoregMultiSeriesCustom`.
     refit : bool, int, default `False`
-        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
-        the Forecaster will be trained every that number of iterations.
+        Whether to re-fit the forecaster in each iteration. If `refit` is an 
+        integer, the Forecaster will be trained every that number of iterations.
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
     n_jobs : int, 'auto', default `'auto'`
@@ -1035,8 +1050,12 @@ def _evaluate_grid_hyperparameters(
         **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
+    output_file : str, default `None`
+        File name or full path to save the results. Results are saved as a .txt 
+        file with tab-separated columns. If `None`, the results will not be saved.
+        **New in version 0.12.0**
 
     Returns
     -------
@@ -1044,6 +1063,7 @@ def _evaluate_grid_hyperparameters(
         Results for each combination of parameters.
 
         - column lags: lags configuration for each iteration.
+        - column lags_label: descriptive label or alias for the lags.
         - column params: parameters configuration for each iteration.
         - column metric: metric value estimated for each iteration.
         - additional n columns with param = value.
@@ -1055,11 +1075,9 @@ def _evaluate_grid_hyperparameters(
             (f"`exog` must have same number of samples as `y`. "
              f"length `exog`: ({len(exog)}), length `y`: ({len(y)})")
         )
-    
+
     lags_grid, lags_label = initialize_lags_grid(forecaster, lags_grid)
    
-    lags_list = []
-    params_list = []
     if not isinstance(metric, list):
         metric = [metric] 
     metric_dict = {(m if isinstance(m, str) else m.__name__): [] 
@@ -1077,12 +1095,20 @@ def _evaluate_grid_hyperparameters(
         param_grid = tqdm(param_grid, desc='params grid', position=1, leave=False)
     else:
         lags_grid_tqdm = lags_grid.items()
+    
+    if output_file is not None and os.path.isfile(output_file):
+        os.remove(output_file)
 
+    lags_list = []
+    lags_label_list = []
+    params_list = []
     for lags_k, lags_v in lags_grid_tqdm:
         
         if type(forecaster).__name__ != 'ForecasterAutoregCustom':
             forecaster.set_lags(lags_v)
-            lags_v = lags_k if lags_label == 'keys' else forecaster.lags.copy()
+            lags_v = forecaster.lags.copy()
+            if lags_label == 'values':
+                lags_k = lags_v
         
         for params in param_grid:
 
@@ -1107,14 +1133,29 @@ def _evaluate_grid_hyperparameters(
                                     message= "The forecaster will be fit.*")
             
             lags_list.append(lags_v)
+            lags_label_list.append(lags_k)
             params_list.append(params)
             for m, m_value in zip(metric, metrics_values):
                 m_name = m if isinstance(m, str) else m.__name__
                 metric_dict[m_name].append(m_value)
-
+        
+            if output_file is not None:
+                header = ['lags', 'lags_label', 'params', 
+                          *metric_dict.keys(), *params.keys()]
+                row = [lags_v, lags_k, params, 
+                       *metrics_values, *params.values()]
+                if not os.path.isfile(output_file):
+                    with open(output_file, 'w', newline='') as f:
+                        f.write('\t'.join(header) + '\n')
+                        f.write('\t'.join([str(r) for r in row]) + '\n')
+                else:
+                    with open(output_file, 'a', newline='') as f:
+                        f.write('\t'.join([str(r) for r in row]) + '\n')
+    
     results = pd.DataFrame({
-                  'lags'  : lags_list,
-                  'params': params_list,
+                  'lags'       : lags_list,
+                  'lags_label' : lags_label_list,
+                  'params'     : params_list,
                   **metric_dict
               })
     
@@ -1126,15 +1167,9 @@ def _evaluate_grid_hyperparameters(
         best_lags = results['lags'].iloc[0]
         best_params = results['params'].iloc[0]
         best_metric = results[list(metric_dict.keys())[0]].iloc[0]
-
-        if lags_label == 'keys':
-            best_lags = lags_grid[best_lags]
         
         if type(forecaster).__name__ != 'ForecasterAutoregCustom':
             forecaster.set_lags(best_lags)
-            best_lags = forecaster.lags
-        else:
-            best_lags = 'custom_predictors'
         forecaster.set_params(best_params)
 
         forecaster.fit(y=y, exog=exog, store_in_sample_residuals=True)
@@ -1151,7 +1186,7 @@ def _evaluate_grid_hyperparameters(
 
 
 def bayesian_search_forecaster(
-    forecaster,
+    forecaster: object,
     y: pd.Series,
     search_space: Callable,
     steps: int,
@@ -1162,13 +1197,14 @@ def bayesian_search_forecaster(
     allow_incomplete_fold: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Optional[Union[list, dict]]=None,
-    refit: Optional[Union[bool, int]]=False,
+    refit: Union[bool, int]=False,
     n_trials: int=10,
     random_state: int=123,
     return_best: bool=True,
-    n_jobs: Optional[Union[int, str]]='auto',
+    n_jobs: Union[int, str]='auto',
     verbose: bool=True,
     show_progress: bool=True,
+    output_file: Optional[str]=None,
     engine: str='optuna',
     kwargs_create_study: dict={},
     kwargs_study_optimize: dict={}
@@ -1218,8 +1254,8 @@ def bayesian_search_forecaster(
         if the forecaster is an instance of `ForecasterAutoregCustom` or 
         `ForecasterAutoregMultiSeriesCustom`.
     refit : bool, int, default `False`
-        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
-        the Forecaster will be trained every that number of iterations.
+        Whether to re-fit the forecaster in each iteration. If `refit` is an 
+        integer, the Forecaster will be trained every that number of iterations.
     n_trials : int, default `10`
         Number of parameter settings that are sampled in each lag configuration.
     random_state : int, default `123`
@@ -1233,13 +1269,18 @@ def bayesian_search_forecaster(
         **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
+    output_file : str, default `None`
+        File name or full path to save the results. Results are saved as a .txt 
+        file with tab-separated columns. If `None`, the results will not be saved.
+        **New in version 0.12.0**
     engine : str, default `'optuna'`
         Bayesian optimization runs through the optuna library.
-    kwargs_create_study : dict, default `{'direction': 'minimize', 'sampler': TPESampler(seed=123)}`
-        Only applies to engine='optuna'. Keyword arguments (key, value mappings) 
-        to pass to optuna.create_study.
+    kwargs_create_study : dict, default `{}`
+        Keyword arguments (key, value mappings) to pass to optuna.create_study().
+        If default, the direction is set to 'minimize' and a TPESampler(seed=123) 
+        sampler is used during optimization.
     kwargs_study_optimize : dict, default `{}`
         Only applies to engine='optuna'. Other keyword arguments (key, value mappings) 
         to pass to study.optimize().
@@ -1250,6 +1291,7 @@ def bayesian_search_forecaster(
         Results for each combination of parameters.
 
         - column lags: lags configuration for each iteration.
+        - column lags_label: descriptive label or alias for the lags.
         - column params: parameters configuration for each iteration.
         - column metric: metric value estimated for each iteration.
         - additional n columns with param = value.
@@ -1296,6 +1338,7 @@ def bayesian_search_forecaster(
                                     n_jobs                = n_jobs,
                                     verbose               = verbose,
                                     show_progress         = show_progress,
+                                    output_file           = output_file,
                                     kwargs_create_study   = kwargs_create_study,
                                     kwargs_study_optimize = kwargs_study_optimize
                                 )
@@ -1304,7 +1347,7 @@ def bayesian_search_forecaster(
 
 
 def _bayesian_search_optuna(
-    forecaster,
+    forecaster: object,
     y: pd.Series,
     search_space: Callable,
     steps: int,
@@ -1315,13 +1358,14 @@ def _bayesian_search_optuna(
     allow_incomplete_fold: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Optional[Union[list, dict]]=None,
-    refit: Optional[Union[bool, int]]=False,
+    refit: Union[bool, int]=False,
     n_trials: int=10,
     random_state: int=123,
     return_best: bool=True,
-    n_jobs: Optional[Union[int, str]]='auto',
+    n_jobs: Union[int, str]='auto',
     verbose: bool=True,
     show_progress: bool=True,
+    output_file: Optional[str]=None,
     kwargs_create_study: dict={},
     kwargs_study_optimize: dict={}
 ) -> Tuple[pd.DataFrame, object]:
@@ -1370,8 +1414,8 @@ def _bayesian_search_optuna(
         if the forecaster is an instance of `ForecasterAutoregCustom` or 
         `ForecasterAutoregMultiSeriesCustom`.
     refit : bool, int, default `False`
-        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
-        the Forecaster will be trained every that number of iterations.
+        Whether to re-fit the forecaster in each iteration. If `refit` is an 
+        integer, the Forecaster will be trained every that number of iterations.
     n_trials : int, default `10`
         Number of parameter settings that are sampled in each lag configuration.
     random_state : int, default `123`
@@ -1385,10 +1429,16 @@ def _bayesian_search_optuna(
         **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
-    kwargs_create_study : dict, default `{'direction': 'minimize', 'sampler': TPESampler(seed=123)}`
-        Keyword arguments (key, value mappings) to pass to optuna.create_study.
+    output_file : str, default `None`
+        File name or full path to save the results. Results are saved as a .txt 
+        file with tab-separated columns. If `None`, the results will not be saved.
+        **New in version 0.12.0**
+    kwargs_create_study : dict, default `{}`
+        Keyword arguments (key, value mappings) to pass to optuna.create_study().
+        If default, the direction is set to 'minimize' and a TPESampler(seed=123) 
+        sampler is used during optimization.
     kwargs_study_optimize : dict, default `{}`
         Other keyword arguments (key, value mappings) to pass to study.optimize().
 
@@ -1398,6 +1448,7 @@ def _bayesian_search_optuna(
         Results for each combination of parameters.
 
         - column lags: lags configuration for each iteration.
+        - column lags_label: descriptive label or alias for the lags.
         - column params: parameters configuration for each iteration.
         - column metric: metric value estimated for each iteration.
         - additional n columns with param = value.
@@ -1405,12 +1456,9 @@ def _bayesian_search_optuna(
         The best optimization result returned as a FrozenTrial optuna object.
 
     """
-    
+        
     lags_grid, lags_label = initialize_lags_grid(forecaster, lags_grid)
    
-    lags_list = []
-    params_list = []
-    results_opt_best = None
     if not isinstance(metric, list):
         metric = [metric] 
     metric_dict = {(m if isinstance(m, str) else m.__name__): [] 
@@ -1472,7 +1520,24 @@ def _bayesian_search_optuna(
         lags_grid_tqdm = tqdm(lags_grid.items(), desc='lags grid', position=0)
     else:
         lags_grid_tqdm = lags_grid.items()
+    
+    if output_file is not None:
+        # Redirect optuna logging to file
+        optuna.logging.disable_default_handler()
+        logger = logging.getLogger('optuna')
+        logger.setLevel(logging.INFO)
+        for handler in logger.handlers.copy():
+            if isinstance(handler, logging.StreamHandler):
+                logger.removeHandler(handler)
+        handler = logging.FileHandler(output_file, mode="w")
+        logger.addHandler(handler)
+    else:
+        optuna.logging.disable_default_handler()
 
+    lags_list = []
+    lags_label_list = []
+    params_list = []
+    results_opt_best = None
     for lags_k, lags_v in lags_grid_tqdm:
 
         # `metric_values` will be modified inside _objective function. 
@@ -1482,12 +1547,17 @@ def _bayesian_search_optuna(
 
         if type(forecaster).__name__ != 'ForecasterAutoregCustom':
             forecaster.set_lags(lags_v)
-            lags_v = lags_k if lags_label == 'keys' else forecaster.lags.copy()
+            lags_v = forecaster.lags.copy()
+            if lags_label == 'values':
+                lags_k = lags_v
         
         if 'sampler' in kwargs_create_study.keys():
             kwargs_create_study['sampler']._rng = np.random.RandomState(random_state)
             kwargs_create_study['sampler']._random_sampler = RandomSampler(seed=random_state)
 
+        if output_file is not None:
+            logger.info(f"lags {lags_k}: {lags_v}")
+        
         study = optuna.create_study(**kwargs_create_study)
 
         if 'sampler' not in kwargs_create_study.keys():
@@ -1505,8 +1575,9 @@ def _bayesian_search_optuna(
             )
         
         for i, trial in enumerate(study.get_trials()):
-            params_list.append(trial.params)
             lags_list.append(lags_v)
+            lags_label_list.append(lags_k)
+            params_list.append(trial.params)
             for m, m_values in zip(metric, metric_values[i]):
                 m_name = m if isinstance(m, str) else m.__name__
                 metric_dict[m_name].append(m_values)
@@ -1516,10 +1587,14 @@ def _bayesian_search_optuna(
         else:
             if best_trial.value < results_opt_best.value:
                 results_opt_best = best_trial
-        
+
+    if output_file is not None:
+        handler.close()
+    
     results = pd.DataFrame({
-                  'lags'  : lags_list,
-                  'params': params_list,
+                  'lags'       : lags_list,
+                  'lags_label' : lags_label_list,
+                  'params'     : params_list,
                   **metric_dict
               })
 
@@ -1531,15 +1606,9 @@ def _bayesian_search_optuna(
         best_lags = results['lags'].iloc[0]
         best_params = results['params'].iloc[0]
         best_metric = results[list(metric_dict.keys())[0]].iloc[0]
-
-        if lags_label == 'keys':
-            best_lags = lags_grid[best_lags]
         
         if type(forecaster).__name__ != 'ForecasterAutoregCustom':
             forecaster.set_lags(best_lags)
-            best_lags = forecaster.lags
-        else:
-            best_lags = 'custom_predictors'
         forecaster.set_params(best_params)
 
         forecaster.fit(y=y, exog=exog, store_in_sample_residuals=True)
@@ -1553,3 +1622,187 @@ def _bayesian_search_optuna(
         )
             
     return results, results_opt_best
+
+
+def select_features(
+    forecaster: object,
+    selector: object,
+    y: Union[pd.Series, pd.DataFrame],
+    exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+    select_only: Optional[str]=None,
+    force_inclusion: Optional[Union[list, str]]=None,
+    subsample: Union[int, float]=0.5,
+    random_state: int=123,
+    verbose: bool=True
+) -> Union[list, list]:
+    """
+    Feature selection using any of the sklearn.feature_selection module selectors 
+    (such as `RFECV`, `SelectFromModel`, etc.). Two groups of features are
+    evaluated: autoregressive features and exogenous features. By default, the 
+    selection process is performed on both sets of features at the same time, 
+    so that the most relevant autoregressive and exogenous features are selected. 
+    However, using the `select_only` argument, the selection process can focus 
+    only on the autoregressive or exogenous features without taking into account 
+    the other features. Therefore, all other features will remain in the model. 
+    It is also possible to force the inclusion of certain features in the final 
+    list of selected features using the `force_inclusion` parameter.
+
+    Parameters
+    ----------
+    forecaster : ForecasterAutoreg, ForecasterAutoregCustom
+        Forecaster model.
+    selector : object
+        A feature selector from sklearn.feature_selection.
+    y : pandas Series, pandas DataFrame
+        Target time series to which the feature selection will be applied.
+    exog : pandas Series, pandas DataFrame, default `None`
+        Exogenous variable/s included as predictor/s. Must have the same
+        number of observations as `y` and should be aligned so that y[i] is
+        regressed on exog[i].
+    select_only : str, default `None`
+        Decide what type of features to include in the selection process. 
+        
+        - If `'autoreg'`, only autoregressive features (lags or custom 
+        predictors) are evaluated by the selector. All exogenous features are 
+        included in the output (`selected_exog`).
+        - If `'exog'`, only exogenous features are evaluated without the presence
+        of autoregressive features. All autoregressive features are included 
+        in the output (`selected_autoreg`).
+        - If `None`, all features are evaluated by the selector.
+    force_inclusion : list, str, default `None`
+        Features to force include in the final list of selected features.
+        
+        - If `list`, list of feature names to force include.
+        - If `str`, regular expression to identify features to force include. 
+        For example, if `force_inclusion="^sun_"`, all features that begin 
+        with "sun_" will be included in the final list of selected features.
+    subsample : int, float, default `0.5`
+        Proportion of records to use for feature selection.
+    random_state : int, default `123`
+        Sets a seed for the random subsample so that the subsampling process 
+        is always deterministic.
+    verbose : bool, default `True`
+        Print information about feature selection process.
+
+    Returns
+    -------
+    selected_autoreg : list
+        List of selected autoregressive features.
+    selected_exog : list
+        List of selected exogenous features.
+
+    """
+
+    valid_forecasters = [
+        'ForecasterAutoreg',
+        'ForecasterAutoregCustom'
+    ]
+
+    if type(forecaster).__name__ not in valid_forecasters:
+        raise TypeError(
+            f"`forecaster` must be one of the following classes: {valid_forecasters}."
+        )
+    
+    if select_only not in ['autoreg', 'exog', None]:
+        raise ValueError(
+            "`select_only` must be one of the following values: 'autoreg', 'exog', None."
+        )
+
+    if subsample <= 0 or subsample > 1:
+        raise ValueError(
+            "`subsample` must be a number greater than 0 and less than or equal to 1."
+        )
+    
+    X_train, y_train = forecaster.create_train_X_y(y=y, exog=exog)
+
+    if hasattr(forecaster, 'lags'):
+        autoreg_cols = [f"lag_{lag}" for lag in forecaster.lags]
+    else:
+        if forecaster.name_predictors is not None:
+            autoreg_cols = forecaster.name_predictors
+        else:
+            autoreg_cols = [
+                col
+                for col in X_train.columns
+                if re.match(r'^custom_predictor_\d+', col)
+            ]
+    exog_cols = [col for col in X_train.columns if col not in autoreg_cols]
+
+    forced_autoreg = []
+    forced_exog = []
+    if force_inclusion is not None:
+        if isinstance(force_inclusion, list):
+            forced_autoreg = [col for col in force_inclusion if col in autoreg_cols]
+            forced_exog = [col for col in force_inclusion if col in exog_cols]
+        elif isinstance(force_inclusion, str):
+            forced_autoreg = [col for col in autoreg_cols if re.match(force_inclusion, col)]
+            forced_exog = [col for col in exog_cols if re.match(force_inclusion, col)]
+
+    if select_only == 'autoreg':
+        X_train = X_train.drop(columns=exog_cols)
+    elif select_only == 'exog':
+        X_train = X_train.drop(columns=autoreg_cols)
+
+    if isinstance(subsample, float):
+        subsample = int(len(X_train)*subsample)
+
+    rng = np.random.default_rng(seed=random_state)
+    sample = rng.choice(X_train.index, size=subsample, replace=False)
+    X_train_sample = X_train.loc[sample, :]
+    y_train_sample = y_train.loc[sample]
+    selector.fit(X_train_sample, y_train_sample)
+    selected_features = selector.get_feature_names_out()
+
+    if select_only == 'exog':
+        selected_autoreg = autoreg_cols
+    else:
+        selected_autoreg = [
+            feature
+            for feature in selected_features
+            if feature in autoreg_cols
+        ]
+
+    if select_only == 'autoreg':
+        selected_exog = exog_cols
+    else:
+        selected_exog = [
+            feature
+            for feature in selected_features
+            if feature in exog_cols
+        ]
+
+    if force_inclusion is not None: 
+        if select_only != 'autoreg':
+            forced_exog_not_selected = set(forced_exog) - set(selected_features)
+            selected_exog.extend(forced_exog_not_selected)
+            selected_exog.sort(key=exog_cols.index)
+        if select_only != 'exog':
+            forced_autoreg_not_selected = set(forced_autoreg) - set(selected_features)
+            selected_autoreg.extend(forced_autoreg_not_selected)
+            selected_autoreg.sort(key=autoreg_cols.index)
+
+    if len(selected_autoreg) == 0:
+        warnings.warn(
+            ("No autoregressive features has been selected. Since a Forecaster "
+             "cannot be created without them, be sure to include at least one "
+             "to ensure the autoregressive component of the forecast model "
+             "using the `force_inclusion` parameter.")
+        )
+    else:
+        if hasattr(forecaster, 'lags'):
+            selected_autoreg = [int(feature.replace('lag_', '')) 
+                                for feature in selected_autoreg]
+
+    if verbose:
+        print(f"Recursive feature elimination ({selector.__class__.__name__})")
+        print("--------------------------------" + "-"*len(selector.__class__.__name__))
+        print(f"Total number of records available: {X_train.shape[0]}")
+        print(f"Total number of records used for feature selection: {X_train_sample.shape[0]}")
+        print(f"Number of features available: {X_train.shape[1]}") 
+        print(f"    Autoreg (n={len(autoreg_cols)})")
+        print(f"    Exog    (n={len(exog_cols)})")
+        print(f"Number of features selected: {len(selected_features)}")
+        print(f"    Autoreg (n={len(selected_autoreg)}) : {selected_autoreg}")
+        print(f"    Exog    (n={len(selected_exog)}) : {selected_exog}")
+
+    return selected_autoreg, selected_exog

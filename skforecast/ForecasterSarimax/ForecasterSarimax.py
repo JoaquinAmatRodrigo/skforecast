@@ -872,6 +872,7 @@ class ForecasterSarimax():
         
         return metric
 
+
     def summary(self) -> None:
         """
         Show forecaster information.

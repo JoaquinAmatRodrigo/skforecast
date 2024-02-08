@@ -10,6 +10,7 @@ import numpy as np
 import pandas as pd
 import warnings
 import logging
+import os
 from copy import deepcopy
 from joblib import Parallel, delayed, cpu_count
 from tqdm.auto import tqdm
@@ -26,8 +27,6 @@ from ..utils import check_backtesting_input
 from ..utils import initialize_lags_grid
 from ..utils import select_n_jobs_backtesting
 
-optuna.logging.set_verbosity(optuna.logging.WARNING) # disable optuna logs
-
 logging.basicConfig(
     format = '%(name)-10s %(levelname)-5s %(message)s', 
     level  = logging.INFO,
@@ -35,7 +34,7 @@ logging.basicConfig(
 
 
 def _initialize_levels_model_selection_multiseries(
-    forecaster, 
+    forecaster: object, 
     series: pd.DataFrame,
     levels: Optional[Union[str, list]]=None
 ) -> list:
@@ -60,14 +59,19 @@ def _initialize_levels_model_selection_multiseries(
     
     """
 
-    if type(forecaster).__name__ in ['ForecasterAutoregMultiSeries', 
-                                     'ForecasterAutoregMultiSeriesCustom']  \
-        and levels is not None and not isinstance(levels, (str, list)):
+    multi_series_forecasters_with_levels = [
+        'ForecasterAutoregMultiSeries', 
+        'ForecasterAutoregMultiSeriesCustom', 
+        'ForecasterRnn'
+    ]
+
+    if type(forecaster).__name__ in multi_series_forecasters_with_levels  \
+        and not isinstance(levels, (str, list, type(None))):
         raise TypeError(
-            ("`levels` must be a `list` of column names, a `str` of a column name "
-             "or `None` when using a `ForecasterAutoregMultiSeries` or "
-             "`ForecasterAutoregMultiSeriesCustom`. If the forecaster is of type "
-             "`ForecasterAutoregMultiVariate`, this argument is ignored.")
+            (f"`levels` must be a `list` of column names, a `str` of a column "
+             f"name or `None` when using a forecaster of type "
+             f"{multi_series_forecasters_with_levels}. If the forecaster is of "
+             f"type `ForecasterAutoregMultiVariate`, this argument is ignored.")
         )
 
     if type(forecaster).__name__ == 'ForecasterAutoregMultiVariate':
@@ -91,7 +95,7 @@ def _initialize_levels_model_selection_multiseries(
 
 
 def _backtesting_forecaster_multiseries(
-    forecaster,
+    forecaster: object,
     series: pd.DataFrame,
     steps: int,
     metric: Union[str, Callable, list],
@@ -101,12 +105,12 @@ def _backtesting_forecaster_multiseries(
     allow_incomplete_fold: bool=True,
     levels: Optional[Union[str, list]]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-    refit: Optional[Union[bool, int]]=False,
+    refit: Union[bool, int]=False,
     interval: Optional[list]=None,
     n_boot: int=500,
     random_state: int=123,
     in_sample_residuals: bool=True,
-    n_jobs: Optional[Union[int, str]]='auto',
+    n_jobs: Union[int, str]='auto',
     verbose: bool=False,
     show_progress: bool=True
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
@@ -165,8 +169,8 @@ def _backtesting_forecaster_multiseries(
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
     refit : bool, int, default `False`
-        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
-        the Forecaster will be trained every that number of iterations.
+        Whether to re-fit the forecaster in each iteration. If `refit` is an 
+        integer, the Forecaster will be trained every that number of iterations.
     interval : list, default `None`
         Confidence of the prediction interval estimated. Sequence of percentiles
         to compute, which must be between 0 and 100 inclusive. If `None`, no
@@ -189,7 +193,7 @@ def _backtesting_forecaster_multiseries(
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
         for backtesting.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
 
     Returns
@@ -298,7 +302,7 @@ def _backtesting_forecaster_multiseries(
         if fold[4] is False:
             # When the model is not fitted, last_window must be updated to include 
             # the data needed to make predictions.
-            last_window_series = series.iloc[last_window_start:last_window_end, ]
+            last_window_series = series.iloc[last_window_start:last_window_end, ].copy()
         else:
             # The model is fitted before making predictions. If `fixed_train_size`  
             # the train size doesn't increase but moves by `steps` in each iteration. 
@@ -374,7 +378,7 @@ def _backtesting_forecaster_multiseries(
 
 
 def backtesting_forecaster_multiseries(
-    forecaster,
+    forecaster: object,
     series: pd.DataFrame,
     steps: int,
     metric: Union[str, Callable, list],
@@ -384,12 +388,12 @@ def backtesting_forecaster_multiseries(
     allow_incomplete_fold: bool=True,
     levels: Optional[Union[str, list]]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-    refit: Optional[Union[bool, int]]=False,
+    refit: Union[bool, int]=False,
     interval: Optional[list]=None,
     n_boot: int=500,
     random_state: int=123,
     in_sample_residuals: bool=True,
-    n_jobs: Optional[Union[int, str]]='auto',
+    n_jobs: Union[int, str]='auto',
     verbose: bool=False,
     show_progress: bool=True
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
@@ -412,7 +416,7 @@ def backtesting_forecaster_multiseries(
 
     Parameters
     ----------
-    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate
+    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate, ForecasterRnn
         Forecaster model.
     series : pandas DataFrame
         Training time series.
@@ -449,8 +453,8 @@ def backtesting_forecaster_multiseries(
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
     refit : bool, int, default `False`
-        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
-        the Forecaster will be trained every that number of iterations.
+        Whether to re-fit the forecaster in each iteration. If `refit` is an 
+        integer, the Forecaster will be trained every that number of iterations.
     interval : list, default `None`
         Confidence of the prediction interval estimated. Sequence of percentiles
         to compute, which must be between 0 and 100 inclusive. If `None`, no
@@ -473,7 +477,7 @@ def backtesting_forecaster_multiseries(
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
         for backtesting.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
 
     Returns
@@ -490,14 +494,26 @@ def backtesting_forecaster_multiseries(
     
     """
 
-    if type(forecaster).__name__ not in ['ForecasterAutoregMultiSeries', 
-                                         'ForecasterAutoregMultiSeriesCustom', 
-                                         'ForecasterAutoregMultiVariate']:
+    multi_series_forecasters = [
+        'ForecasterAutoregMultiSeries', 
+        'ForecasterAutoregMultiSeriesCustom', 
+        'ForecasterAutoregMultiVariate',
+        'ForecasterRnn'
+    ]
+
+    multi_series_forecasters_with_levels = [
+        'ForecasterAutoregMultiSeries', 
+        'ForecasterAutoregMultiSeriesCustom', 
+        'ForecasterRnn'
+    ]
+
+    forecaster_name = type(forecaster).__name__
+
+    if forecaster_name not in multi_series_forecasters:
         raise TypeError(
-            ("`forecaster` must be of type `ForecasterAutoregMultiSeries`, "
-             "`ForecasterAutoregMultiSeriesCustom` or `ForecasterAutoregMultiVariate`, "
-             "for all other types of forecasters use the functions available in "
-             f"the `model_selection` module. Got {type(forecaster).__name__}")
+            (f"`forecaster` must be of type {multi_series_forecasters}, "
+             f"for all other types of forecasters use the functions available in "
+             f"the `model_selection` module. Got {forecaster_name}")
         )
     
     check_backtesting_input(
@@ -544,7 +560,7 @@ def backtesting_forecaster_multiseries(
 
 
 def grid_search_forecaster_multiseries(
-    forecaster,
+    forecaster: object,
     series: pd.DataFrame,
     param_grid: dict,
     steps: int,
@@ -556,11 +572,12 @@ def grid_search_forecaster_multiseries(
     levels: Optional[Union[str, list]]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Optional[Union[list, dict]]=None,
-    refit: Optional[Union[bool, int]]=False,
+    refit: Union[bool, int]=False,
     return_best: bool=True,
-    n_jobs: Optional[Union[int, str]]='auto',
+    n_jobs: Union[int, str]='auto',
     verbose: bool=True,
-    show_progress: bool=True
+    show_progress: bool=True,
+    output_file: Optional[str]=None
 ) -> pd.DataFrame:
     """
     Exhaustive search over specified parameter values for a Forecaster object.
@@ -610,8 +627,8 @@ def grid_search_forecaster_multiseries(
         if the forecaster is an instance of `ForecasterAutoregCustom` or 
         `ForecasterAutoregMultiSeriesCustom`.
     refit : bool, int, default `False`
-        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
-        the Forecaster will be trained every that number of iterations.
+        Whether to re-fit the forecaster in each iteration. If `refit` is an 
+        integer, the Forecaster will be trained every that number of iterations.
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
     n_jobs : int, 'auto', default `'auto'`
@@ -621,8 +638,12 @@ def grid_search_forecaster_multiseries(
         **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
+    output_file : str, default `None`
+        File name or full path to save the results. Results are saved as a .txt 
+        file with tab-separated columns. If `None`, the results will not be saved.
+        **New in version 0.12.0**
 
     Returns
     -------
@@ -631,6 +652,7 @@ def grid_search_forecaster_multiseries(
 
         - column levels: levels configuration for each iteration.
         - column lags: lags configuration for each iteration.
+        - column lags_label: descriptive label or alias for the lags.
         - column params: parameters configuration for each iteration.
         - column metric: metric value estimated for each iteration. The resulting 
         metric will be the average of the optimization of all levels.
@@ -657,14 +679,15 @@ def grid_search_forecaster_multiseries(
                   n_jobs                = n_jobs,
                   return_best           = return_best,
                   verbose               = verbose,
-                  show_progress         = show_progress
+                  show_progress         = show_progress,
+                  output_file           = output_file
               )
 
     return results
 
 
 def random_search_forecaster_multiseries(
-    forecaster,
+    forecaster: object,
     series: pd.DataFrame,
     param_distributions: dict,
     steps: int,
@@ -676,13 +699,14 @@ def random_search_forecaster_multiseries(
     levels: Optional[Union[str, list]]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Optional[Union[list, dict]]=None,
-    refit: Optional[Union[bool, int]]=False,
+    refit: Union[bool, int]=False,
     n_iter: int=10,
     random_state: int=123,
     return_best: bool=True,
-    n_jobs: Optional[Union[int, str]]='auto',
+    n_jobs: Union[int, str]='auto',
     verbose: bool=True,
-    show_progress: bool=True
+    show_progress: bool=True,
+    output_file: Optional[str]=None
 ) -> pd.DataFrame:
     """
     Random search over specified parameter values or distributions for a Forecaster 
@@ -732,8 +756,8 @@ def random_search_forecaster_multiseries(
         if the forecaster is an instance of `ForecasterAutoregCustom` or 
         `ForecasterAutoregMultiSeriesCustom`.
     refit : bool, int, default `False`
-        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
-        the Forecaster will be trained every that number of iterations.
+        Whether to re-fit the forecaster in each iteration. If `refit` is an 
+        integer, the Forecaster will be trained every that number of iterations.
     n_iter : int, default `10`
         Number of parameter settings that are sampled per lags configuration. 
         n_iter trades off runtime vs quality of the solution.
@@ -748,8 +772,12 @@ def random_search_forecaster_multiseries(
         **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
+    output_file : str, default `None`
+        File name or full path to save the results. Results are saved as a .txt 
+        file with tab-separated columns. If `None`, the results will not be saved.
+        **New in version 0.12.0**
 
     Returns
     -------
@@ -758,6 +786,7 @@ def random_search_forecaster_multiseries(
 
         - column levels: levels configuration for each iteration.
         - column lags: lags configuration for each iteration.
+        - column lags_label: descriptive label or alias for the lags.
         - column params: parameters configuration for each iteration.
         - column metric: metric value estimated for each iteration. The resulting 
         metric will be the average of the optimization of all levels.
@@ -785,14 +814,15 @@ def random_search_forecaster_multiseries(
                   return_best           = return_best,
                   n_jobs                = n_jobs,
                   verbose               = verbose,
-                  show_progress         = show_progress
+                  show_progress         = show_progress,
+                 output_file            = output_file
               )
 
     return results
 
 
 def _evaluate_grid_hyperparameters_multiseries(
-    forecaster,
+    forecaster: object,
     series: pd.DataFrame,
     param_grid: dict,
     steps: int,
@@ -804,11 +834,12 @@ def _evaluate_grid_hyperparameters_multiseries(
     levels: Optional[Union[str, list]]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Optional[Union[list, dict]]=None,
-    refit: Optional[Union[bool, int]]=False,
+    refit: Union[bool, int]=False,
     return_best: bool=True,
-    n_jobs: Optional[Union[int, str]]='auto',
+    n_jobs: Union[int, str]='auto',
     verbose: bool=True,
-    show_progress: bool=True
+    show_progress: bool=True,
+    output_file: Optional[str]=None
 ) -> pd.DataFrame:
     """
     Evaluate parameter values for a Forecaster object using multi-series backtesting.
@@ -857,12 +888,18 @@ def _evaluate_grid_hyperparameters_multiseries(
         if the forecaster is an instance of `ForecasterAutoregCustom` or 
         `ForecasterAutoregMultiSeriesCustom`.
     refit : bool, int, default `False`
-        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
-        the Forecaster will be trained every that number of iterations.
+        Whether to re-fit the forecaster in each iteration. If `refit` is an 
+        integer, the Forecaster will be trained every that number of iterations.
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
+    show_progress : bool, default `True`
+        Whether to show a progress bar.
+    output_file : str, default `None`
+        File name or full path to save the results. Results are saved as a .txt 
+        file with tab-separated columns. If `None`, the results will not be saved.
+        **New in version 0.12.0**
 
     Returns
     -------
@@ -871,6 +908,7 @@ def _evaluate_grid_hyperparameters_multiseries(
 
         - column levels: levels configuration for each iteration.
         - column lags: lags configuration for each iteration.
+        - column lags_label: descriptive label or alias for the lags.
         - column params: parameters configuration for each iteration.
         - column metric: metric value estimated for each iteration. The resulting 
         metric will be the average of the optimization of all levels.
@@ -892,8 +930,6 @@ def _evaluate_grid_hyperparameters_multiseries(
 
     lags_grid, lags_label = initialize_lags_grid(forecaster, lags_grid)
    
-    lags_list = []
-    params_list = []
     if not isinstance(metric, list):
         metric = [metric] 
     metric_dict = {(m if isinstance(m, str) else m.__name__): [] 
@@ -914,12 +950,20 @@ def _evaluate_grid_hyperparameters_multiseries(
         param_grid = tqdm(param_grid, desc='params grid', position=1, leave=False)
     else:
         lags_grid_tqdm = lags_grid.items()
+    
+    if output_file is not None and os.path.isfile(output_file):
+        os.remove(output_file)
 
+    lags_list = []
+    lags_label_list = []
+    params_list = []
     for lags_k, lags_v in lags_grid_tqdm:
 
         if type(forecaster).__name__ != 'ForecasterAutoregMultiSeriesCustom':
             forecaster.set_lags(lags_v)
-            lags_v = lags_k if lags_label == 'keys' else forecaster.lags.copy()
+            lags_v = forecaster.lags.copy()
+            if lags_label == 'values':
+                lags_k = lags_v
         
         for params in param_grid:
 
@@ -945,15 +989,33 @@ def _evaluate_grid_hyperparameters_multiseries(
                                     message= "The forecaster will be fit.*")
 
             lags_list.append(lags_v)
+            lags_label_list.append(lags_k)
             params_list.append(params)
             for m in metric:
                 m_name = m if isinstance(m, str) else m.__name__
                 metric_dict[m_name].append(metrics_levels[m_name].mean())
 
+            if output_file is not None:
+                header = ['levels', 'lags', 'lags_label', 'params', 
+                          *metric_dict.keys(), *params.keys()]
+                row = [
+                    levels, lags_v, lags_k, params,
+                    *[metric[-1] for metric in metric_dict.values()],
+                    *params.values()
+                ]
+                if not os.path.isfile(output_file):
+                    with open(output_file, 'w', newline='') as f:
+                        f.write('\t'.join(header) + '\n')
+                        f.write('\t'.join([str(r) for r in row]) + '\n')
+                else:
+                    with open(output_file, 'a', newline='') as f:
+                        f.write('\t'.join([str(r) for r in row]) + '\n')
+
     results = pd.DataFrame({
-                  'levels': [levels]*len(lags_list),
-                  'lags'  : lags_list,
-                  'params': params_list,
+                  'levels'     : [levels]*len(lags_list),
+                  'lags'       : lags_list,
+                  'lags_label' : lags_label_list,
+                  'params'     : params_list,
                   **metric_dict
               })
     
@@ -965,15 +1027,9 @@ def _evaluate_grid_hyperparameters_multiseries(
         best_lags = results['lags'].iloc[0]
         best_params = results['params'].iloc[0]
         best_metric = results[list(metric_dict.keys())[0]].iloc[0]
-
-        if lags_label == 'keys':
-            best_lags = lags_grid[best_lags]
         
         if type(forecaster).__name__ != 'ForecasterAutoregMultiSeriesCustom':
             forecaster.set_lags(best_lags)
-            best_lags = forecaster.lags
-        else:
-            best_lags = 'custom_predictors'
         forecaster.set_params(best_params)
 
         forecaster.fit(series=series, exog=exog, store_in_sample_residuals=True)
@@ -991,7 +1047,7 @@ def _evaluate_grid_hyperparameters_multiseries(
 
 
 def bayesian_search_forecaster_multiseries(
-    forecaster,
+    forecaster: object,
     series: pd.DataFrame,
     search_space: Callable,
     steps: int,
@@ -1003,13 +1059,14 @@ def bayesian_search_forecaster_multiseries(
     levels: Optional[Union[str, list]]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Optional[Union[list, dict]]=None,
-    refit: Optional[Union[bool, int]]=False,
+    refit: Union[bool, int]=False,
     n_trials: int=10,
     random_state: int=123,
     return_best: bool=True,
-    n_jobs: Optional[Union[int, str]]='auto',
+    n_jobs: Union[int, str]='auto',
     verbose: bool=True,
     show_progress: bool=True,
+    output_file: Optional[str]=None,
     engine: str='optuna',
     kwargs_create_study: dict={},
     kwargs_study_optimize: dict={}
@@ -1064,8 +1121,8 @@ def bayesian_search_forecaster_multiseries(
         if the forecaster is an instance of `ForecasterAutoregCustom` or 
         `ForecasterAutoregMultiSeriesCustom`.
     refit : bool, int, default `False`
-        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
-        the Forecaster will be trained every that number of iterations.
+        Whether to re-fit the forecaster in each iteration. If `refit` is an 
+        integer, the Forecaster will be trained every that number of iterations.
     n_trials : int, default `10`
         Number of parameter settings that are sampled in each lag configuration.
     random_state : int, default `123`
@@ -1078,12 +1135,18 @@ def bayesian_search_forecaster_multiseries(
         skforecast.utils.select_n_jobs_backtesting.
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
+    output_file : str, default `None`
+        File name or full path to save the results. Results are saved as a .txt 
+        file with tab-separated columns. If `None`, the results will not be saved.
+        **New in version 0.12.0**
     engine : str, default `'optuna'`
         Bayesian optimization runs through the optuna library.
-    kwargs_create_study : dict, default `{'direction': 'minimize', 'sampler': TPESampler(seed=123)}`
-        Keyword arguments (key, value mappings) to pass to optuna.create_study.
+    kwargs_create_study : dict, default `{}`
+        Keyword arguments (key, value mappings) to pass to optuna.create_study().
+        If default, the direction is set to 'minimize' and a TPESampler(seed=123) 
+        sampler is used during optimization.
     kwargs_study_optimize : dict, default `{}`
         Other keyword arguments (key, value mappings) to pass to study.optimize().
 
@@ -1091,8 +1154,10 @@ def bayesian_search_forecaster_multiseries(
     -------
     results : pandas DataFrame
         Results for each combination of parameters.
+
         - column levels: levels configuration for each iteration.
         - column lags: lags configuration for each iteration.
+        - column lags_label: descriptive label or alias for the lags.
         - column params: parameters configuration for each iteration.
         - column metric: metric value estimated for each iteration. The resulting 
         metric will be the average of the optimization of all levels.
@@ -1133,6 +1198,7 @@ def bayesian_search_forecaster_multiseries(
                                     n_jobs                = n_jobs,
                                     verbose               = verbose,
                                     show_progress         = show_progress,
+                                    output_file           = output_file,
                                     kwargs_create_study   = kwargs_create_study,
                                     kwargs_study_optimize = kwargs_study_optimize
                                 )
@@ -1141,7 +1207,7 @@ def bayesian_search_forecaster_multiseries(
 
 
 def _bayesian_search_optuna_multiseries(
-    forecaster,
+    forecaster: object,
     series: pd.DataFrame,
     search_space: Callable,
     steps: int,
@@ -1153,13 +1219,14 @@ def _bayesian_search_optuna_multiseries(
     levels: Optional[Union[str, list]]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Optional[Union[list, dict]]=None,
-    refit: Optional[Union[bool, int]]=False,
+    refit: Union[bool, int]=False,
     n_trials: int=10,
     random_state: int=123,
     return_best: bool=True,
-    n_jobs: Optional[Union[int, str]]='auto',
+    n_jobs: Union[int, str]='auto',
     verbose: bool=True,
     show_progress: bool=True,
+    output_file: Optional[str]=None,
     kwargs_create_study: dict={},
     kwargs_study_optimize: dict={}
 ) -> Tuple[pd.DataFrame, object]:
@@ -1212,8 +1279,8 @@ def _bayesian_search_optuna_multiseries(
         if the forecaster is an instance of `ForecasterAutoregCustom` or 
         `ForecasterAutoregMultiSeriesCustom`.
     refit : bool, int, default `False`
-        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
-        the Forecaster will be trained every that number of iterations.
+        Whether to re-fit the forecaster in each iteration. If `refit` is an 
+        integer, the Forecaster will be trained every that number of iterations.
     n_trials : int, default `10`
         Number of parameter settings that are sampled in each lag configuration.
     random_state : int, default `123`
@@ -1226,10 +1293,16 @@ def _bayesian_search_optuna_multiseries(
         skforecast.utils.select_n_jobs_backtesting.
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
-    kwargs_create_study : dict, default `{'direction': 'minimize', 'sampler': TPESampler(seed=123)}`
-        Keyword arguments (key, value mappings) to pass to optuna.create_study.
+    output_file : str, default `None`
+        File name or full path to save the results. Results are saved as a .txt 
+        file with tab-separated columns. If `None`, the results will not be saved.
+        **New in version 0.12.0**
+    kwargs_create_study : dict, default `{}`
+        Keyword arguments (key, value mappings) to pass to optuna.create_study().
+        If default, the direction is set to 'minimize' and a TPESampler(seed=123) 
+        sampler is used during optimization.
     kwargs_study_optimize : dict, default `{}`
         Other keyword arguments (key, value mappings) to pass to study.optimize().
 
@@ -1237,8 +1310,10 @@ def _bayesian_search_optuna_multiseries(
     -------
     results : pandas DataFrame
         Results for each combination of parameters.
+
         - column levels: levels configuration for each iteration.
         - column lags: lags configuration for each iteration.
+        - column lags_label: descriptive label or alias for the lags.
         - column params: parameters configuration for each iteration.
         - column metric: metric value estimated for each iteration. The resulting 
         metric will be the average of the optimization of all levels.
@@ -1247,7 +1322,7 @@ def _bayesian_search_optuna_multiseries(
         The best optimization result returned as a FrozenTrial optuna object.
 
     """
-    
+
     levels = _initialize_levels_model_selection_multiseries(
                  forecaster = forecaster,
                  series     = series,
@@ -1256,9 +1331,6 @@ def _bayesian_search_optuna_multiseries(
 
     lags_grid, lags_label = initialize_lags_grid(forecaster, lags_grid)
    
-    lags_list = []
-    params_list = []
-    results_opt_best = None
     if not isinstance(metric, list):
         metric = [metric] 
     metric_dict = {(m if isinstance(m, str) else m.__name__): [] 
@@ -1322,7 +1394,24 @@ def _bayesian_search_optuna_multiseries(
         lags_grid_tqdm = tqdm(lags_grid.items(), desc='lags grid', position=0)
     else:
         lags_grid_tqdm = lags_grid.items()
+    
+    if output_file is not None:
+        # Redirect optuna logging to file
+        optuna.logging.disable_default_handler()
+        logger = logging.getLogger('optuna')
+        logger.setLevel(logging.INFO)
+        for handler in logger.handlers.copy():
+            if isinstance(handler, logging.StreamHandler):
+                logger.removeHandler(handler)
+        handler = logging.FileHandler(output_file, mode="w")
+        logger.addHandler(handler)
+    else:
+        optuna.logging.disable_default_handler()
 
+    lags_list = []
+    lags_label_list = []
+    params_list = []
+    results_opt_best = None
     for lags_k, lags_v in lags_grid_tqdm:
 
         # `metric_values` will be modified inside _objective function. 
@@ -1332,12 +1421,17 @@ def _bayesian_search_optuna_multiseries(
 
         if type(forecaster).__name__ != 'ForecasterAutoregMultiSeriesCustom':
             forecaster.set_lags(lags_v)
-            lags_v = lags_k if lags_label == 'keys' else forecaster.lags.copy()
+            lags_v = forecaster.lags.copy()
+            if lags_label == 'values':
+                lags_k = lags_v
         
         if 'sampler' in kwargs_create_study.keys():
             kwargs_create_study['sampler']._rng = np.random.RandomState(random_state)
             kwargs_create_study['sampler']._random_sampler = RandomSampler(seed=random_state)
 
+        if output_file is not None:
+            logger.info(f"lags {lags_k}: {lags_v}")
+        
         study = optuna.create_study(**kwargs_create_study)
 
         if 'sampler' not in kwargs_create_study.keys():
@@ -1355,8 +1449,9 @@ def _bayesian_search_optuna_multiseries(
             )
         
         for i, trial in enumerate(study.get_trials()):
-            params_list.append(trial.params)
             lags_list.append(lags_v)
+            lags_label_list.append(lags_k)
+            params_list.append(trial.params)
             m_values = metric_values[i]
             for m in metric:
                 m_name = m if isinstance(m, str) else m.__name__
@@ -1368,10 +1463,14 @@ def _bayesian_search_optuna_multiseries(
             if best_trial.value < results_opt_best.value:
                 results_opt_best = best_trial
 
+    if output_file is not None:
+        handler.close()
+
     results = pd.DataFrame({
-                  'levels': [levels]*len(lags_list),
-                  'lags'  : lags_list,
-                  'params': params_list,
+                  'levels'     : [levels]*len(lags_list),
+                  'lags'       : lags_list,
+                  'lags_label' : lags_label_list,
+                  'params'     : params_list,
                   **metric_dict
               })
 
@@ -1383,15 +1482,9 @@ def _bayesian_search_optuna_multiseries(
         best_lags = results['lags'].iloc[0]
         best_params = results['params'].iloc[0]
         best_metric = results[list(metric_dict.keys())[0]].iloc[0]
-
-        if lags_label == 'keys':
-            best_lags = lags_grid[best_lags]
         
         if type(forecaster).__name__ != 'ForecasterAutoregMultiSeriesCustom':
             forecaster.set_lags(best_lags)
-            best_lags = forecaster.lags
-        else:
-            best_lags = 'custom_predictors'
         forecaster.set_params(best_params)
 
         forecaster.fit(series=series, exog=exog, store_in_sample_residuals=True)
@@ -1411,7 +1504,7 @@ def _bayesian_search_optuna_multiseries(
 # Alias MultiVariate
 # ==============================================================================
 def backtesting_forecaster_multivariate(
-    forecaster,
+    forecaster: object,
     series: pd.DataFrame,
     steps: int,
     metric: Union[str, Callable, list],
@@ -1421,14 +1514,15 @@ def backtesting_forecaster_multivariate(
     allow_incomplete_fold: bool=True,
     levels: Optional[Union[str, list]]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-    refit: Optional[Union[bool, int]]=False,
+    refit: Union[bool, int]=False,
     interval: Optional[list]=None,
     n_boot: int=500,
     random_state: int=123,
     in_sample_residuals: bool=True,
-    n_jobs: Optional[Union[int, str]]='auto',
+    n_jobs: Union[int, str]='auto',
     verbose: bool=False,
-    show_progress: bool=True
+    show_progress: bool=True,
+    output_file: Optional[str]=None
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
     This function is an alias of backtesting_forecaster_multiseries.
@@ -1479,8 +1573,8 @@ def backtesting_forecaster_multivariate(
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
     refit : bool, int, default `False`
-        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
-        the Forecaster will be trained every that number of iterations.
+        Whether to re-fit the forecaster in each iteration. If `refit` is an 
+        integer, the Forecaster will be trained every that number of iterations.
     interval : list, default `None`
         Confidence of the prediction interval estimated. Sequence of percentiles
         to compute, which must be between 0 and 100 inclusive. If `None`, no
@@ -1503,8 +1597,12 @@ def backtesting_forecaster_multivariate(
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
         for backtesting.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
+    output_file : str, default `None`
+        File name or full path to save the results. Results are saved as a .txt 
+        file with tab-separated columns. If `None`, the results will not be saved.
+        **New in version 0.12.0**
 
     Returns
     -------
@@ -1546,7 +1644,7 @@ def backtesting_forecaster_multivariate(
 
 
 def grid_search_forecaster_multivariate(
-    forecaster,
+    forecaster: object,
     series: pd.DataFrame,
     param_grid: dict,
     steps: int,
@@ -1558,11 +1656,12 @@ def grid_search_forecaster_multivariate(
     levels: Optional[Union[str, list]]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Optional[Union[list, dict]]=None,
-    refit: Optional[Union[bool, int]]=False,
+    refit: Union[bool, int]=False,
     return_best: bool=True,
-    n_jobs: Optional[Union[int, str]]='auto',
+    n_jobs: Union[int, str]='auto',
     verbose: bool=True,
-    show_progress: bool=True
+    show_progress: bool=True,
+    output_file: Optional[str]=None
 ) -> pd.DataFrame:
     """
     This function is an alias of grid_search_forecaster_multiseries.
@@ -1614,8 +1713,8 @@ def grid_search_forecaster_multivariate(
         if the forecaster is an instance of `ForecasterAutoregCustom` or 
         `ForecasterAutoregMultiSeriesCustom`.
     refit : bool, int, default `False`
-        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
-        the Forecaster will be trained every that number of iterations.
+        Whether to re-fit the forecaster in each iteration. If `refit` is an 
+        integer, the Forecaster will be trained every that number of iterations.
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
     n_jobs : int, 'auto', default `'auto'`
@@ -1625,8 +1724,12 @@ def grid_search_forecaster_multivariate(
         **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
+    output_file : str, default `None`
+        File name or full path to save the results. Results are saved as a .txt 
+        file with tab-separated columns. If `None`, the results will not be saved.
+        **New in version 0.12.0**
 
     Returns
     -------
@@ -1635,6 +1738,7 @@ def grid_search_forecaster_multivariate(
 
         - column levels: levels configuration for each iteration.
         - column lags: lags configuration for each iteration.
+        - column lags_label: descriptive label or alias for the lags.
         - column params: parameters configuration for each iteration.
         - column metric: metric value estimated for each iteration. The resulting 
         metric will be the average of the optimization of all levels.
@@ -1659,14 +1763,15 @@ def grid_search_forecaster_multivariate(
         return_best           = return_best,
         n_jobs                = n_jobs,
         verbose               = verbose,
-        show_progress         = show_progress
+        show_progress         = show_progress,
+        output_file           = output_file
     )
 
     return results
 
 
 def random_search_forecaster_multivariate(
-    forecaster,
+    forecaster: object,
     series: pd.DataFrame,
     param_distributions: dict,
     steps: int,
@@ -1678,13 +1783,14 @@ def random_search_forecaster_multivariate(
     levels: Optional[Union[str, list]]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Optional[Union[list, dict]]=None,
-    refit: Optional[Union[bool, int]]=False,
+    refit: Union[bool, int]=False,
     n_iter: int=10,
     random_state: int=123,
     return_best: bool=True,
-    n_jobs: Optional[Union[int, str]]='auto',
+    n_jobs: Union[int, str]='auto',
     verbose: bool=True,
-    show_progress: bool=True
+    show_progress: bool=True,
+    output_file: Optional[str]=None
 ) -> pd.DataFrame:
     """
     This function is an alias of random_search_forecaster_multiseries.
@@ -1736,8 +1842,8 @@ def random_search_forecaster_multivariate(
         if the forecaster is an instance of `ForecasterAutoregCustom` or 
         `ForecasterAutoregMultiSeriesCustom`.
     refit : bool, int, default `False`
-        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
-        the Forecaster will be trained every that number of iterations.
+        Whether to re-fit the forecaster in each iteration. If `refit` is an 
+        integer, the Forecaster will be trained every that number of iterations.
     n_iter : int, default `10`
         Number of parameter settings that are sampled per lags configuration. 
         n_iter trades off runtime vs quality of the solution.
@@ -1752,8 +1858,12 @@ def random_search_forecaster_multivariate(
         **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
+    output_file : str, default `None`
+        File name or full path to save the results. Results are saved as a .txt 
+        file with tab-separated columns. If `None`, the results will not be saved.
+        **New in version 0.12.0**
 
     Returns
     -------
@@ -1762,6 +1872,7 @@ def random_search_forecaster_multivariate(
 
         - column levels: levels configuration for each iteration.
         - column lags: lags configuration for each iteration.
+        - column lags_label: descriptive label or alias for the lags.
         - column params: parameters configuration for each iteration.
         - column metric: metric value estimated for each iteration. The resulting 
         metric will be the average of the optimization of all levels.
@@ -1788,14 +1899,15 @@ def random_search_forecaster_multivariate(
         return_best           = return_best,
         n_jobs                = n_jobs,
         verbose               = verbose,
-        show_progress         = show_progress
+        show_progress         = show_progress,
+        output_file           = output_file
     ) 
 
     return results
 
 
 def bayesian_search_forecaster_multivariate(
-    forecaster,
+    forecaster: object,
     series: pd.DataFrame,
     search_space: Callable,
     steps: int,
@@ -1807,13 +1919,14 @@ def bayesian_search_forecaster_multivariate(
     levels: Optional[Union[str, list]]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Optional[Union[list, dict]]=None,
-    refit: Optional[Union[bool, int]]=False,
+    refit: Union[bool, int]=False,
     n_trials: int=10,
     random_state: int=123,
     return_best: bool=True,
-    n_jobs: Optional[Union[int, str]]='auto',
+    n_jobs: Union[int, str]='auto',
     verbose: bool=True,
     show_progress: bool=True,
+    output_file: Optional[str]=None,
     engine: str='optuna',
     kwargs_create_study: dict={},
     kwargs_study_optimize: dict={}
@@ -1870,8 +1983,8 @@ def bayesian_search_forecaster_multivariate(
         if the forecaster is an instance of `ForecasterAutoregCustom` or 
         `ForecasterAutoregMultiSeriesCustom`.
     refit : bool, int, default `False`
-        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
-        the Forecaster will be trained every that number of iterations.
+        Whether to re-fit the forecaster in each iteration. If `refit` is an 
+        integer, the Forecaster will be trained every that number of iterations.
     n_trials : int, default `10`
         Number of parameter settings that are sampled in each lag configuration.
     random_state : int, default `123`
@@ -1885,12 +1998,18 @@ def bayesian_search_forecaster_multivariate(
         **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
+    output_file : str, default `None`
+        File name or full path to save the results. Results are saved as a .txt 
+        file with tab-separated columns. If `None`, the results will not be saved.
+        **New in version 0.12.0**
     engine : str, default `'optuna'`
         Bayesian optimization runs through the optuna library.
-    kwargs_create_study : dict, default `{'direction': 'minimize', 'sampler': TPESampler(seed=123)}`
-        Keyword arguments (key, value mappings) to pass to optuna.create_study.
+    kwargs_create_study : dict, default `{}`
+        Keyword arguments (key, value mappings) to pass to optuna.create_study().
+        If default, the direction is set to 'minimize' and a TPESampler(seed=123) 
+        sampler is used during optimization.
     kwargs_study_optimize : dict, default `{}`
         Other keyword arguments (key, value mappings) to pass to study.optimize().
 
@@ -1898,8 +2017,10 @@ def bayesian_search_forecaster_multivariate(
     -------
     results : pandas DataFrame
         Results for each combination of parameters.
+
         - column levels: levels configuration for each iteration.
         - column lags: lags configuration for each iteration.
+        - column lags_label: descriptive label or alias for the lags.
         - column params: parameters configuration for each iteration.
         - column metric: metric value estimated for each iteration. The resulting 
         metric will be the average of the optimization of all levels.
@@ -1929,6 +2050,7 @@ def bayesian_search_forecaster_multivariate(
                                     n_jobs                = n_jobs,
                                     verbose               = verbose,
                                     show_progress         = show_progress,
+                                    output_file           = output_file,
                                     engine                = engine,
                                     kwargs_create_study   = kwargs_create_study,
                                     kwargs_study_optimize = kwargs_study_optimize

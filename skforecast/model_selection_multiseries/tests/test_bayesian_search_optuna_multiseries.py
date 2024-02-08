@@ -1,21 +1,26 @@
 # Unit test _bayesian_search_optuna_multiseries
 # ==============================================================================
+import os
 import re
+import sys
 import pytest
 import numpy as np
 import pandas as pd
-import sys
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import Ridge
 from sklearn.metrics import mean_absolute_error
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 from skforecast.ForecasterAutoregMultiSeriesCustom import ForecasterAutoregMultiSeriesCustom
+from skforecast.ForecasterAutoregMultiVariate import ForecasterAutoregMultiVariate
 from skforecast.model_selection_multiseries import backtesting_forecaster_multiseries
 from skforecast.model_selection_multiseries.model_selection_multiseries import _bayesian_search_optuna_multiseries
 import optuna
 from optuna.samplers import TPESampler
 from tqdm import tqdm
 from functools import partialmethod
+
+optuna.logging.set_verbosity(optuna.logging.WARNING)
+tqdm.__init__ = partialmethod(tqdm.__init__, disable=True) # hide progress bar
 
 # Fixtures
 from .fixtures_model_selection_multiseries import series
@@ -28,9 +33,6 @@ def create_predictors(y): # pragma: no cover
     lags = y[-1:-5:-1]
 
     return lags
-
-optuna.logging.set_verbosity(optuna.logging.WARNING)
-tqdm.__init__ = partialmethod(tqdm.__init__, disable=True) # hide progress bar
 
 
 def test_ValueError_bayesian_search_optuna_multiseries_metric_list_duplicate_names():
@@ -131,9 +133,11 @@ def test_results_output_bayesian_search_optuna_multiseries_ForecasterAutoregMult
     lags_grid = [2, 4]
 
     def search_space(trial):
-        search_space  = {'n_estimators'    : trial.suggest_int('n_estimators', 10, 20),
-                         'min_samples_leaf': trial.suggest_float('min_samples_leaf', 0.1, 1., log=True),
-                         'max_features'    : trial.suggest_categorical('max_features', ['log2', 'sqrt'])}
+        search_space  = {
+            'n_estimators'    : trial.suggest_int('n_estimators', 10, 20),
+            'min_samples_leaf': trial.suggest_float('min_samples_leaf', 0.1, 1., log=True),
+            'max_features'    : trial.suggest_categorical('max_features', ['log2', 'sqrt'])
+        }
         
         return search_space
 
@@ -159,6 +163,10 @@ def test_results_output_bayesian_search_optuna_multiseries_ForecasterAutoregMult
                    [1, 2], [1, 2], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4],
                    [1, 2, 3, 4], [1, 2], [1, 2], [1, 2], [1, 2, 3, 4],
                    [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]],
+        'lags_label': [[1, 2], [1, 2], [1, 2], [1, 2], [1, 2],
+                        [1, 2], [1, 2], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4],
+                        [1, 2, 3, 4], [1, 2], [1, 2], [1, 2], [1, 2, 3, 4],
+                        [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]],
         'params':[{'n_estimators': 12, 'min_samples_leaf': 0.14977928606210794, 'max_features': 'sqrt'},
                   {'n_estimators': 15, 'min_samples_leaf': 0.2466706727024324, 'max_features': 'sqrt'},
                   {'n_estimators': 17, 'min_samples_leaf': 0.21035794225904136, 'max_features': 'log2'},
@@ -192,7 +200,8 @@ def test_results_output_bayesian_search_optuna_multiseries_ForecasterAutoregMult
                          'log2', 'sqrt', 'log2', 'log2', 'log2', 'sqrt', 'log2', 'sqrt',
                          'log2', 'log2', 'sqrt', 'sqrt']
         },
-        index=pd.Index([4, 2, 6, 0, 8, 3, 1, 12, 19, 17, 15, 5, 9, 7, 11, 10, 16, 18, 14, 13], dtype="int64")
+        index=pd.Index([4, 2, 6, 0, 8, 3, 1, 12, 19, 17, 15, 
+                        5, 9, 7, 11, 10, 16, 18, 14, 13], dtype="int64")
     )
 
     pd.testing.assert_frame_equal(results, expected_results, check_dtype=False)
@@ -215,9 +224,11 @@ def test_results_output_bayesian_search_optuna_multiseries_with_mocked_when_lags
     lags_grid = {'lags_1': 2, 'lags_2': 4}
 
     def search_space(trial):
-        search_space  = {'n_estimators'    : trial.suggest_int('n_estimators', 10, 20),
-                         'min_samples_leaf': trial.suggest_float('min_samples_leaf', 0.1, 1., log=True),
-                         'max_features'    : trial.suggest_categorical('max_features', ['log2', 'sqrt'])}
+        search_space  = {
+            'n_estimators'    : trial.suggest_int('n_estimators', 10, 20),
+            'min_samples_leaf': trial.suggest_float('min_samples_leaf', 0.1, 1., log=True),
+            'max_features'    : trial.suggest_categorical('max_features', ['log2', 'sqrt'])
+        }
         
         return search_space
 
@@ -239,10 +250,14 @@ def test_results_output_bayesian_search_optuna_multiseries_with_mocked_when_lags
     
     expected_results = pd.DataFrame({
         'levels': [['l1', 'l2']]*2*10,
-        'lags'  : ['lags_1', 'lags_1', 'lags_1', 'lags_1', 'lags_1',
-                   'lags_1', 'lags_1', 'lags_2', 'lags_2', 'lags_2',
-                   'lags_2', 'lags_1', 'lags_1', 'lags_1', 'lags_2',
-                   'lags_2', 'lags_2', 'lags_2', 'lags_2', 'lags_2'],
+        'lags'  : [[1, 2], [1, 2], [1, 2], [1, 2], [1, 2],
+                   [1, 2], [1, 2], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4],
+                   [1, 2, 3, 4], [1, 2], [1, 2], [1, 2], [1, 2, 3, 4],
+                   [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]],
+        'lags_label': ['lags_1', 'lags_1', 'lags_1', 'lags_1', 'lags_1',
+                        'lags_1', 'lags_1', 'lags_2', 'lags_2', 'lags_2',
+                        'lags_2', 'lags_1', 'lags_1', 'lags_1', 'lags_2',
+                        'lags_2', 'lags_2', 'lags_2', 'lags_2', 'lags_2'],
         'params':[{'n_estimators': 12, 'min_samples_leaf': 0.14977928606210794, 'max_features': 'sqrt'},
                   {'n_estimators': 15, 'min_samples_leaf': 0.2466706727024324, 'max_features': 'sqrt'},
                   {'n_estimators': 17, 'min_samples_leaf': 0.21035794225904136, 'max_features': 'log2'},
@@ -326,6 +341,10 @@ def test_results_output_bayesian_search_optuna_multiseries_ForecasterAutoregMult
                    [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4],
                    [1, 2], [1, 2], [1, 2], [1, 2], [1, 2],
                    [1, 2], [1, 2], [1, 2], [1, 2], [1, 2]],
+        'lags_label': [[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4],
+                        [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4],
+                        [1, 2], [1, 2], [1, 2], [1, 2], [1, 2],
+                        [1, 2], [1, 2], [1, 2], [1, 2], [1, 2]],
         'params': [{'alpha': 0.2345829390285611}, {'alpha': 0.29327794160087567},
                    {'alpha': 0.398196343012209}, {'alpha': 0.42887539552321635},
                    {'alpha': 0.48612258246951734}, {'alpha': 0.5558016213920624},
@@ -395,6 +414,10 @@ def test_results_output_bayesian_search_optuna_multiseries_with_mocked_when_kwar
                    [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4],
                    [1, 2], [1, 2], [1, 2], [1, 2], [1, 2],
                    [1, 2], [1, 2], [1, 2], [1, 2], [1, 2]],
+        'lags_label': [[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4],
+                        [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4],
+                        [1, 2], [1, 2], [1, 2], [1, 2], [1, 2],
+                        [1, 2], [1, 2], [1, 2], [1, 2], [1, 2]],
         'params': [{'alpha': 0.4691658780571222}, {'alpha': 0.5865558832017513},
                    {'alpha': 0.796392686024418}, {'alpha': 0.8577507910464327},
                    {'alpha': 0.9722451649390347}, {'alpha': 1.1116032427841247},
@@ -435,9 +458,11 @@ def test_results_output_bayesian_search_optuna_multiseries_with_mocked_when_kwar
     lags_grid = [2, 4]
 
     def search_space(trial):
-        search_space  = {'n_estimators': trial.suggest_int('n_estimators', 100, 200),
-                         'max_depth'   : trial.suggest_int('max_depth', 20, 35, log=True),
-                         'max_features': trial.suggest_categorical('max_features', ['log2', 'sqrt'])}
+        search_space  = {
+            'n_estimators': trial.suggest_int('n_estimators', 100, 200),
+            'max_depth'   : trial.suggest_int('max_depth', 20, 35, log=True),
+            'max_features': trial.suggest_categorical('max_features', ['log2', 'sqrt'])
+        }
          
         return search_space
 
@@ -464,6 +489,7 @@ def test_results_output_bayesian_search_optuna_multiseries_with_mocked_when_kwar
     expected_results = pd.DataFrame({
         'levels': [['l1', 'l2']]*2,
         'lags'  : [[1, 2], [1, 2]],
+        'lags_label': [[1, 2], [1, 2]],
         'params':[{'n_estimators': 144, 'max_depth': 20, 'max_features': 'sqrt'},
                   {'n_estimators': 143, 'max_depth': 33, 'max_features': 'log2'}],
         'mean_absolute_error': np.array([0.18642719, 0.18984788]),                                                               
@@ -471,7 +497,7 @@ def test_results_output_bayesian_search_optuna_multiseries_with_mocked_when_kwar
         'max_depth': np.array([20, 33]),
         'max_features': ['sqrt', 'log2']
         },
-        index=pd.Index([0, 1], dtype="int64")
+        index = pd.Index([0, 1], dtype="int64")
     )
 
     pd.testing.assert_frame_equal(results.head(1), expected_results.head(1), check_dtype=False)
@@ -517,6 +543,8 @@ def test_results_output_bayesian_search_optuna_multiseries_with_mocked_when_lags
         'levels': [['l1', 'l2']]*10,
         'lags'  : [[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4],
                    [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]],
+        'lags_label': [[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4],
+                        [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]],
         'params': [{'alpha': 0.2345829390285611}, {'alpha': 0.29327794160087567},
                    {'alpha': 0.398196343012209}, {'alpha': 0.42887539552321635},
                    {'alpha': 0.48612258246951734}, {'alpha': 0.5558016213920624},
@@ -572,6 +600,7 @@ def test_results_output_bayesian_search_optuna_multiseries_ForecasterAutoregMult
     expected_results = pd.DataFrame({
         'levels': [['l1', 'l2']]*10,
         'lags'  : ['custom predictors']*10,
+        'lags_label': ['custom predictors']*10,
         'params': [{'alpha': 0.2345829390285611}, {'alpha': 0.29327794160087567},
                    {'alpha': 0.398196343012209}, {'alpha': 0.42887539552321635},
                    {'alpha': 0.48612258246951734}, {'alpha': 0.5558016213920624},
@@ -583,6 +612,80 @@ def test_results_output_bayesian_search_optuna_multiseries_ForecasterAutoregMult
                            0.55580162, 0.68798144, 0.69950449, 0.72227428, 0.98095656])
         },
         index=pd.Index([2, 1, 9, 5, 8, 3, 7, 0, 4, 6], dtype="int64")
+    )
+
+    pd.testing.assert_frame_equal(results, expected_results)
+
+
+def test_results_output_bayesian_search_optuna_multiseries_ForecasterAutoregMultiVariate_with_mocked():
+    """
+    Test output of _bayesian_search_optuna_multiseries in 
+    ForecasterAutoregMultiVariate with mocked (mocked done in skforecast v0.12.0).
+    """
+    forecaster = ForecasterAutoregMultiVariate(
+                     regressor          = Ridge(random_state=123),
+                     level              = 'l1',
+                     lags               = 2,
+                     steps              = 3,
+                     transformer_series = None
+                 )
+
+    steps = 3
+    n_validation = 12
+    lags_grid = [2, 4]
+
+    def search_space(trial):
+        search_space  = {'alpha': trial.suggest_float('alpha', 1e-2, 1.0)}
+        
+        return search_space
+
+    results = _bayesian_search_optuna_multiseries(
+                  forecaster         = forecaster,
+                  series             = series,
+                  steps              = steps,
+                  lags_grid          = lags_grid,
+                  search_space       = search_space,
+                  metric             = 'mean_absolute_error',
+                  refit              = True,
+                  initial_train_size = len(series) - n_validation,
+                  fixed_train_size   = True,
+                  n_trials           = 10,
+                  random_state       = 123,
+                  return_best        = False,
+                  verbose            = False
+              )[0]
+    
+    expected_results = pd.DataFrame({
+        'levels': [['l1']]*20,
+        'lags'  : [[1, 2], [1, 2], [1, 2], [1, 2], [1, 2],
+                   [1, 2], [1, 2], [1, 2], [1, 2], [1, 2],
+                   [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4],
+                   [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]],
+        'lags_label': [[1, 2], [1, 2], [1, 2], [1, 2], [1, 2],
+                        [1, 2], [1, 2], [1, 2], [1, 2], [1, 2],
+                        [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4],
+                        [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]],
+        'params': [{'alpha': 0.2345829390285611}, {'alpha': 0.29327794160087567},
+                   {'alpha': 0.398196343012209}, {'alpha': 0.42887539552321635},
+                   {'alpha': 0.48612258246951734}, {'alpha': 0.5558016213920624},
+                   {'alpha': 0.6879814411990146}, {'alpha': 0.6995044937418831},
+                   {'alpha': 0.7222742800877074}, {'alpha': 0.9809565564007693},
+                   {'alpha': 0.9809565564007693}, {'alpha': 0.7222742800877074},
+                   {'alpha': 0.6995044937418831}, {'alpha': 0.6879814411990146},
+                   {'alpha': 0.5558016213920624}, {'alpha': 0.48612258246951734},
+                   {'alpha': 0.42887539552321635}, {'alpha': 0.398196343012209},
+                   {'alpha': 0.29327794160087567}, {'alpha': 0.2345829390285611}],
+        'mean_absolute_error': np.array([0.20359805, 0.20387838, 0.20433819, 0.2044636 , 0.2046877 ,
+                                         0.20494431, 0.20538793, 0.20542418, 0.20549473, 0.20620855,
+                                         0.21635469, 0.21703337, 0.21710019, 0.21713449, 0.21755249,
+                                         0.21779247, 0.21800075, 0.21811675, 0.21853829, 0.21913975]),
+        'alpha': np.array([0.23458294, 0.29327794, 0.39819634, 0.4288754 , 0.48612258,
+                           0.55580162, 0.68798144, 0.69950449, 0.72227428, 0.98095656,
+                           0.98095656, 0.72227428, 0.69950449, 0.68798144, 0.55580162,
+                           0.48612258, 0.4288754 , 0.39819634, 0.29327794, 0.23458294])
+        },
+        index=pd.Index([2, 1, 9, 5, 8, 3, 7, 0, 4, 6, 16, 
+                        14, 10, 17, 13, 18, 15, 19, 11, 12], dtype="int64")
     )
 
     pd.testing.assert_frame_equal(results, expected_results)
@@ -767,3 +870,141 @@ def test_results_opt_best_output__bayesian_search_optuna_multiseries_with_output
     assert best_trial.number == results_opt_best.number
     assert best_trial.values == results_opt_best.values
     assert best_trial.params == results_opt_best.params
+
+
+def test_bayesian_search_optuna_multiseries_ForecasterAutoregMultiSeries_output_file():
+    """
+    Test output file of _bayesian_search_optuna_multiseries in 
+    ForecasterAutoregMultiSeries.
+    """
+    forecaster = ForecasterAutoregMultiSeries(
+                     regressor = RandomForestRegressor(random_state=123),
+                     lags      = 2 
+                 )
+
+    steps = 3
+    n_validation = 12
+    lags_grid = [2, 4]
+
+    def search_space(trial):
+        search_space  = {
+            'n_estimators'    : trial.suggest_int('n_estimators', 10, 20),
+            'min_samples_leaf': trial.suggest_float('min_samples_leaf', 0.1, 1., log=True),
+            'max_features'    : trial.suggest_categorical('max_features', ['log2', 'sqrt'])
+        }
+        
+        return search_space
+
+    output_file = 'test_bayesian_search_optuna_multiseries_output_file.txt'
+    results = _bayesian_search_optuna_multiseries(
+                  forecaster         = forecaster,
+                  series             = series,
+                  steps              = steps,
+                  lags_grid          = lags_grid,
+                  search_space       = search_space,
+                  metric             = 'mean_absolute_error',
+                  refit              = False,
+                  initial_train_size = len(series) - n_validation,
+                  fixed_train_size   = False,
+                  n_trials           = 10,
+                  random_state       = 123,
+                  return_best        = False,
+                  verbose            = False,
+                  output_file        = output_file
+              )[0]
+
+    assert os.path.isfile(output_file)
+    os.remove(output_file)
+
+
+def test_bayesian_search_optuna_multiseries_ForecasterAutoregMultiSeriesCustom_output_file():
+    """
+    Test output file of _bayesian_search_optuna_multiseries in 
+    ForecasterAutoregMultiSeriesCustom.
+    """
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                     regressor      = RandomForestRegressor(random_state=123),
+                     fun_predictors = create_predictors,
+                     window_size    = 4
+                 )
+
+    steps = 3
+    n_validation = 12
+    lags_grid = [2, 4]
+
+    def search_space(trial):
+        search_space  = {
+            'n_estimators'    : trial.suggest_int('n_estimators', 10, 20),
+            'min_samples_leaf': trial.suggest_float('min_samples_leaf', 0.1, 1., log=True),
+            'max_features'    : trial.suggest_categorical('max_features', ['log2', 'sqrt'])
+        }
+        
+        return search_space
+
+    output_file = 'test_bayesian_search_optuna_multiseries_output_file.txt'
+    results = _bayesian_search_optuna_multiseries(
+                  forecaster         = forecaster,
+                  series             = series,
+                  steps              = steps,
+                  lags_grid          = lags_grid,
+                  search_space       = search_space,
+                  metric             = 'mean_absolute_error',
+                  refit              = False,
+                  initial_train_size = len(series) - n_validation,
+                  fixed_train_size   = False,
+                  n_trials           = 10,
+                  random_state       = 123,
+                  return_best        = False,
+                  verbose            = False,
+                  output_file        = output_file
+              )[0]
+
+    assert os.path.isfile(output_file)
+    os.remove(output_file)
+
+
+def test_bayesian_search_optuna_multiseries_ForecasterAutoregMultiVariate_output_file():
+    """
+    Test output file of _bayesian_search_optuna_multiseries in 
+    ForecasterAutoregMultiVariate.
+    """
+    forecaster = ForecasterAutoregMultiVariate(
+                     regressor = RandomForestRegressor(random_state=123),
+                     level     = 'l1',
+                     lags      = 2,
+                     steps     = 3
+                 )
+
+    steps = 3
+    n_validation = 12
+    lags_grid = [2, 4]
+
+    def search_space(trial):
+        search_space  = {
+            'n_estimators'    : trial.suggest_int('n_estimators', 10, 20),
+            'min_samples_leaf': trial.suggest_float('min_samples_leaf', 0.1, 1., log=True),
+            'max_features'    : trial.suggest_categorical('max_features', ['log2', 'sqrt'])
+        }
+        
+        return search_space
+
+    output_file = 'test_bayesian_search_optuna_multiseries_output_file.txt'
+    results = _bayesian_search_optuna_multiseries(
+                  forecaster         = forecaster,
+                  series             = series,
+                  steps              = steps,
+                  lags_grid          = lags_grid,
+                  search_space       = search_space,
+                  metric             = 'mean_absolute_error',
+                  refit              = False,
+                  initial_train_size = len(series) - n_validation,
+                  fixed_train_size   = False,
+                  n_trials           = 10,
+                  random_state       = 123,
+                  return_best        = False,
+                  verbose            = False,
+                  output_file        = output_file
+              )[0]
+
+    assert os.path.isfile(output_file)
+    os.remove(output_file)
