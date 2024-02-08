@@ -1250,7 +1250,7 @@ def bayesian_search_forecaster(
         regressed on exog[i]. 
     lags_grid : deprecated
         **Deprecated since version 0.12.0 and will be removed in 0.13.0.** Use
-        `search_space` to define the candidate values for the lags. This way, the
+        `search_space` to define the candidate values for the lags. This way,
         lags can be optimized together with the other parameters of the regressor
         in the bayesian search.
     refit : bool, int, default `False`
@@ -1417,7 +1417,7 @@ def _bayesian_search_optuna(
         regressed on exog[i].
     lags_grid : deprecated
         **Deprecated since version 0.12.0 and will be removed in 0.13.0.** Use
-        `search_space` to define the candidate values for the lags. This way, the
+        `search_space` to define the candidate values for the lags. This way,
         lags can be optimized together with the other parameters of the regressor
         in the bayesian search.
     refit : bool, int, default `False`
