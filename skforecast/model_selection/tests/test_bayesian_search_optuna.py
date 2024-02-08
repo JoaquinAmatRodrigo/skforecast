@@ -282,13 +282,13 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_mocked_whe
     steps = 3
     n_validation = 12
     y_train = y[:-n_validation]
-    lags_grid = [2, 4]
 
     def search_space(trial):
         search_space  = {
             'n_estimators': trial.suggest_int('n_estimators', 100, 200),
             'max_depth'   : trial.suggest_int('max_depth', 20, 35, log=True),
-            'max_features': trial.suggest_categorical('max_features', ['log2', 'sqrt'])
+            'max_features': trial.suggest_categorical('max_features', ['log2', 'sqrt']),
+            'lags'        : trial.suggest_categorical('lags', [2, 4])
         } 
         
         return search_space
@@ -299,7 +299,6 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_mocked_whe
     results = _bayesian_search_optuna(
                   forecaster            = forecaster,
                   y                     = y,
-                  lags_grid             = lags_grid,
                   search_space          = search_space,
                   steps                 = steps,
                   metric                = 'mean_absolute_error',
@@ -337,11 +336,10 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_mocked_whe
     pd.testing.assert_frame_equal(results.head(2), expected_results.head(2), check_dtype=False)
 
 
-def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_mocked_when_lags_grid_is_None():
+def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_mocked_when_lags_not_in_search_space():
     """
-    Test output of _bayesian_search_optuna in ForecasterAutoreg when lags_grid 
-    is None with mocked (mocked done in Skforecast v0.4.3), should use 
-    forecaster.lags as lags_grid.
+    Test output of _bayesian_search_optuna in ForecasterAutoreg when lag is not 
+    in search_space with mocked (mocked done in Skforecast v0.4.3).
     """
     forecaster = ForecasterAutoreg(
                      regressor = Ridge(random_state=123),
@@ -351,7 +349,6 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_mocked_whe
     steps = 3
     n_validation = 12
     y_train = y[:-n_validation]
-    lags_grid = None
     
     def search_space(trial):
         search_space  = {'alpha': trial.suggest_float('alpha', 1e-2, 1.0)}
@@ -361,7 +358,6 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_mocked_whe
     results = _bayesian_search_optuna(
                   forecaster         = forecaster,
                   y                  = y,
-                  lags_grid          = lags_grid,
                   search_space       = search_space,
                   steps              = steps,
                   metric             = 'mean_absolute_error',
@@ -513,17 +509,18 @@ def test_evaluate_bayesian_search_optuna_when_return_best_ForecasterAutoregCusto
     steps = 3
     n_validation = 12
     y_train = y[:-n_validation]
-    lags_grid = None # Ignored
     
     def search_space(trial):
-        search_space  = {'alpha': trial.suggest_float('alpha', 1e-2, 1.0)}
+        search_space  = {
+            'alpha': trial.suggest_float('alpha', 1e-2, 1.0),
+            'lags' : trial.suggest_categorical('lags', [4, 2])
+        }
         
         return search_space
 
     _bayesian_search_optuna(
         forecaster         = forecaster,
         y                  = y,
-        lags_grid          = lags_grid,
         search_space       = search_space,
         steps              = steps,
         metric             = 'mean_absolute_error',
@@ -603,9 +600,10 @@ def test_results_opt_best_output_bayesian_search_optuna_with_output_study_best_t
 
     best_trial = study.best_trial
 
-    lags_grid = [4, 2]
     def search_space(trial):
-        search_space  = {'alpha' : trial.suggest_float('alpha', 1e-2, 1.0)
+        search_space  = {
+            'alpha' : trial.suggest_float('alpha', 1e-2, 1.0),
+            'lags'  : trial.suggest_categorical('lags', [4, 2])
                         }
         return search_space
     return_best  = False
@@ -613,7 +611,6 @@ def test_results_opt_best_output_bayesian_search_optuna_with_output_study_best_t
     results_opt_best = _bayesian_search_optuna(
                            forecaster         = forecaster,
                            y                  = y,
-                           lags_grid          = lags_grid,
                            search_space       = search_space,
                            steps              = steps,
                            metric             = metric,
@@ -643,13 +640,13 @@ def test_bayesian_search_optuna_output_file():
     steps = 3
     n_validation = 12
     y_train = y[:-n_validation]
-    lags_grid = [2, 4]
 
     def search_space(trial):
         search_space  = {
             'n_estimators'    : trial.suggest_int('n_estimators', 10, 20),
             'min_samples_leaf': trial.suggest_float('min_samples_leaf', 0.1, 1., log=True),
-            'max_features'    : trial.suggest_categorical('max_features', ['log2', 'sqrt'])
+            'max_features'    : trial.suggest_categorical('max_features', ['log2', 'sqrt']),
+            'lags'            : trial.suggest_categorical('lags', [2, 4])
         } 
         
         return search_space
@@ -658,7 +655,6 @@ def test_bayesian_search_optuna_output_file():
     results = _bayesian_search_optuna(
                   forecaster         = forecaster,
                   y                  = y,
-                  lags_grid          = lags_grid,
                   search_space       = search_space,
                   steps              = steps,
                   metric             = 'mean_absolute_error',
