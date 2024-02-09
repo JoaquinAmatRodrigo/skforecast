@@ -1979,8 +1979,8 @@ def check_preprocess_series(
     -------
     series_dict : dict
         Dictionary with the series used during training.
-    series_index : pandas Index
-        Index of `series`.
+    series_indexes : dict
+        Dictionary with the index of the series.
     
     """
 
@@ -2015,8 +2015,8 @@ def check_preprocess_series(
             series_dict[k].name = k
 
         not_valid_index = [k
-                            for k, v in series_dict.items()
-                            if not isinstance(v.index, pd.DatetimeIndex)]
+                           for k, v in series_dict.items()
+                           if not isinstance(v.index, pd.DatetimeIndex)]
         if not_valid_index:
             raise TypeError(
                 (f"All series must have a DatetimeIndex index with the same frequency. "
@@ -2031,23 +2031,25 @@ def check_preprocess_series(
                 (f"All series must have a DatetimeIndex index with the same frequency. "
                  f"Found frequencies: {indexes_freq}")
             )
-        
-        # TODO: review
-        series_index = None
-
+    
     else:
         raise TypeError(
             (f"`series` must be a pandas DataFrame or a dict of DataFrames or Series. "
              f"Got {type(series)}.")
         )
     
-    return series_dict, series_index
+    series_indexes = {
+        k: v.index
+        for k, v in series_dict.items()
+    }
+    
+    return series_dict, series_indexes
 
 
 # TODO: Include tests for this function
 def check_preprocess_exog_multiseries(
     input_series_is_dict: bool,
-    series_index: pd.Index,
+    series_indexes: dict,
     series_col_names: list,
     exog: Union[pd.Series, pd.DataFrame, dict],
     exog_dict: dict,
@@ -2068,8 +2070,8 @@ def check_preprocess_exog_multiseries(
     ----------
     input_series_is_dict : bool
         Indicates if input series argument is a dict.
-    series_index : pandas Index
-        Index of `series`.
+    series_indexes : dict
+        Dictionary with the index of the series.
     series_col_names : list
         Names of the series (levels) used during training.
     exog : pandas Series, pandas DataFrame, dict
@@ -2091,6 +2093,11 @@ def check_preprocess_exog_multiseries(
             (f"`exog` must be a pandas Series, DataFrame or dict. "
              f"Got {type(exog)}.")
         )
+    
+    if not input_series_is_dict:
+        # If input series is a pandas DataFrame, all index are the same. 
+        # Select the first index to check exog
+        series_index = series_indexes[series_col_names[0]]
         
     if isinstance(exog, (pd.Series, pd.DataFrame)): 
 
@@ -2099,14 +2106,11 @@ def check_preprocess_exog_multiseries(
                 (f"`exog` must be a dict of DataFrames or Series if "
                  f"`series` is a dict. Got {type(exog)}.")
             )
-        
-        # TODO: check_exog para ver si poner warnings de NaNs
 
         _, exog_index = preprocess_exog(exog=exog, return_values=False)
         exog = exog.copy().to_frame() if isinstance(exog, pd.Series) else exog.copy()
         exog.index = exog_index
 
-        # TODO: include check length becasue of error that cant compare different lengths
         if len(exog) != len(series_index):
             raise ValueError(
                 (f"`exog` must have same number of samples as `series`. "
@@ -2135,19 +2139,26 @@ def check_preprocess_exog_multiseries(
             )
 
         for k, v in exog_dict.items():
-            check_exog(exog=v, allow_nan=True)
-            if isinstance(v, pd.Series):
-                v = v.to_frame()
-            exog_dict[k] = v
+            if v is not None:
+                check_exog(exog=v, allow_nan=True)
+                if isinstance(v, pd.Series):
+                    v = v.to_frame()
+                exog_dict[k] = v
 
         if not input_series_is_dict:
             for k, v in exog_dict.items():
                 if v is not None:
+                    if len(v) != len(series_index):
+                        raise ValueError(
+                            (f"`exog` for series '{k}' must have same number of samples as `series`. "
+                             f"length `exog`: ({len(v)}), length `series`: ({len(series_index)})")
+                        )
+                    
                     _, v_index = preprocess_exog(exog=v, return_values=False)
                     exog_dict[k].index = v_index
-                    if (v.index == series_index).all():
+                    if not (exog_dict[k].index == series_index).all():
                         raise ValueError(
-                            (f"Different index for `series` {k} and its `exog`. "
+                            (f"Different index for series '{k}' and its exog. "
                              f"When `series` is a pandas DataFrame, they must "
                              f"be equal to ensure the correct alignment of values.")
                         )
@@ -2161,9 +2172,15 @@ def check_preprocess_exog_multiseries(
                     (f"All exog must have a DatetimeIndex index with the same frequency. "
                      f"Review exog for series: {not_valid_index}")
                 )
-    
-    exog_col_names = list(set(column for df in exog_dict.values() 
-                              for column in df.columns.to_list()))
+        
+    exog_col_names = list(
+        set(
+            column
+            for df in exog_dict.values()
+            if df is not None
+            for column in df.columns.to_list()
+        )
+    )
 
     # Check that all exog have the same dtypes for common columns
     exog_dtype_dict = {col_name: set() for col_name in exog_col_names}

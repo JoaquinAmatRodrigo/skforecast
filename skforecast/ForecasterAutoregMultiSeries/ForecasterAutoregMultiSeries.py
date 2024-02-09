@@ -170,8 +170,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         Type of index of the input used in training.
     index_freq : str
         Frequency of Index of the input used in training.
-    index_values : pandas Index
-        Values of Index of the input used in training.
     training_range: pandas Index
         First and last values of index of the data used during training.
     included_exog : bool
@@ -256,7 +254,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.differentiator_         = None
         self.index_type              = None
         self.index_freq              = None
-        self.index_values            = None
         self.training_range          = None
         self.last_window             = None
         self.included_exog           = False
@@ -488,7 +485,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
     def create_train_X_y(
         self,
         series: Union[pd.DataFrame, dict],
-        exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None
+        exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
+        drop_nan: bool=False
     ) -> Tuple[pd.DataFrame, pd.Series, pd.Index, pd.Index]:
         """
         Create training matrices from multiple time series and exogenous
@@ -501,6 +499,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         exog : pandas Series, pandas DataFrame, default `None`
             Exogenous variable/s included as predictor/s. Must have the same
             number of observations as `series` and their indexes must be aligned.
+        drop_nan : bool, default `False`
+            ...........
 
         Returns
         -------
@@ -511,8 +511,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             Shape: (len(series) - self.max_lag, )
         y_index : pandas Index
             Index of `series`.
-        y_train_index: pandas Index
-            Index of `y_train`.
 
         Notes
         -----
@@ -523,10 +521,14 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         - If `series` is a dict, `exog` must be a dict and all index in both
         arugments must be pandas DatetimeIndex with the same frequency. However,
         equal length is not required.
+
+        # First drop NaNs in y_train (100% sure) and same rows in X_train
+        # If allow_nan is False, drop NaNs in X_train and same rows in y_train and warn the user
+        # If allow_nan is True, leave NaNs in X_train and warn the user
         
         """
 
-        series_dict, series_index = check_preprocess_series(series=series)
+        series_dict, series_indexes = check_preprocess_series(series=series)
         input_series_is_dict = isinstance(series, dict)
         series_col_names = list(series_dict.keys())
 
@@ -541,7 +543,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         if exog is not None:
             exog_dict, exog_col_names = check_preprocess_exog_multiseries(
                                             input_series_is_dict = input_series_is_dict,
-                                            series_index         = series_index,
+                                            series_indexes       = series_indexes,
                                             series_col_names     = series_col_names,
                                             exog                 = exog,
                                             exog_dict            = exog_dict
@@ -583,13 +585,12 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         ignore_exog = True if exog else False
         input_matrices = [
             [series_dict[k], exog_dict[k], ignore_exog]
-            for k
-            in series_dict.keys() & exog_dict.keys()
+             for k in series_dict.keys()
         ]
+
         X_train_lags_buffer = []
         X_train_exog_buffer = []
         y_train_buffer = []
-        
         for matrices in input_matrices:
 
             X_train_lags, X_train_exog, y_train = (
@@ -640,21 +641,39 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             
             X_train = pd.concat([X_train, X_train_exog], axis=1)
 
-        y_train_index = y_train.index.to_numpy()
+        if y_train.isnull().any():
+            y_train = y_train.dropna()
+            X_train = X_train.loc[y_train.index, ]
+            warnings.warn(
+                ("NaNs detected in `y_train`. They have been dropped since the "
+                 "target cannot have NaN values. Same rows have been dropped from "
+                 "`X_train`.")
+            )
 
-        # TODO: what we do with the NaNs?
+        if drop_nan:
+            if X_train.isnull().any().any():
+                X_train = X_train.dropna()
+                y_train = y_train.loc[X_train.index]
+                warnings.warn(
+                    ("NaNs detected in `X_train`. They have been dropped. "
+                     "If you want to keep them, set `drop_nan` to `False`."
+                     "Same rows have been dropped from  `y_train`.")
+                )
+        else:
+            if X_train.isnull().any().any():
+                warnings.warn(
+                    ("NaNs detected in `X_train`. Some regressor does not "
+                     "allow NaNs values during training. If you want to drop "
+                     "them, set `drop_nan` to `True`.")
+                )
 
-        # TODO: check if this is necessary
-        y_index = None
-
-        return X_train, y_train, y_index, y_train_index, series_col_names, exog_col_names, exog_dtypes
+        return X_train, y_train, series_indexes, series_col_names, exog_col_names, exog_dtypes
 
     
     def create_sample_weights(
         self,
-        series: pd.DataFrame,
-        X_train: pd.DataFrame,
-        y_train_index: pd.Index,
+        series_col_names: list,
+        X_train: pd.DataFrame
     )-> np.ndarray:
         """
         Crate weights for each observation according to the forecaster's attributes
@@ -663,12 +682,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         Parameters
         ----------
-        series : pandas DataFrame
-            Time series used to create `X_train` with the method `create_train_X_y`.
+        series_col_names : list
+            Names of the series (levels) used during training.
         X_train : pandas DataFrame
             Dataframe created with the `create_train_X_y` method, first return.
-        y_train_index : pandas Index
-            Index created with the `create_train_X_y` method, fourth return.
 
         Returns
         -------
@@ -684,30 +701,30 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         if self.series_weights is not None:
             # Series not present in series_weights have a weight of 1 in all their samples.
             # Keys in series_weights not present in series are ignored.
-            series_not_in_series_weights = set(series.columns) - set(self.series_weights.keys())
+            series_not_in_series_weights = set(series_col_names) - set(self.series_weights.keys())
             if series_not_in_series_weights:
                 warnings.warn(
                     (f"{series_not_in_series_weights} not present in `series_weights`. "
                      f"A weight of 1 is given to all their samples."),
                      IgnoredArgumentWarning
                 )
-            self.series_weights_ = {col: 1. for col in series.columns}
+            self.series_weights_ = {col: 1. for col in series_col_names}
             self.series_weights_.update(
                 (k, v) 
                 for k, v in self.series_weights.items() 
                 if k in self.series_weights_
             )
             weights_series = [np.repeat(self.series_weights_[serie], sum(X_train[serie])) 
-                              for serie in series.columns]
+                              for serie in series_col_names]
             weights_series = np.concatenate(weights_series)
 
         if self.weight_func is not None:
             if isinstance(self.weight_func, Callable):
                 self.weight_func_ = {col: copy(self.weight_func) 
-                                     for col in series.columns}
+                                     for col in series_col_names}
             else:
                 # Series not present in weight_func have a weight of 1 in all their samples
-                series_not_in_weight_func = set(series.columns) - set(self.weight_func.keys())
+                series_not_in_weight_func = set(series_col_names) - set(self.weight_func.keys())
                 if series_not_in_weight_func:
                     warnings.warn(
                         (f"{series_not_in_weight_func} not present in `weight_func`. "
@@ -715,16 +732,18 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                          IgnoredArgumentWarning
                     )
                 self.weight_func_ = {col: lambda x: np.ones_like(x, dtype=float) 
-                                     for col in series.columns}
+                                     for col in series_col_names}
                 self.weight_func_.update(
                     (k, v) 
                     for k, v in self.weight_func.items() 
                     if k in self.weight_func_
                 )
+
+            # TODO: review when new encondings are added
                 
             weights_samples = []
             for key in self.weight_func_.keys():
-                idx = y_train_index[X_train[X_train[key] == 1.0].index]
+                idx = X_train[X_train[key] == 1.0].index
                 weights_samples.append(self.weight_func_[key](idx))
             weights_samples = np.concatenate(weights_samples)
 
@@ -758,6 +777,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self,
         series: pd.DataFrame,
         exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+        drop_nan: bool=False,
         store_in_sample_residuals: bool=True
     ) -> None:
         """
@@ -788,7 +808,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.series_col_names    = None
         self.index_type          = None
         self.index_freq          = None
-        self.index_values        = None
         self.last_window         = None
         self.included_exog       = False
         self.exog_type           = None
@@ -803,17 +822,16 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         (
             X_train,
             y_train,
-            y_index,
-            y_train_index,
+            series_indexes,
             series_col_names,
             exog_col_names,
             exog_dtypes,
         ) = self.create_train_X_y(series=series, exog=exog)
 
+        # TODO: review when new encondings are added
         sample_weight = self.create_sample_weights(
-                            series        = series,
-                            X_train       = X_train,
-                            y_train_index = y_train_index,
+                            series_col_names = series_col_names,
+                            X_train          = X_train
                         )
 
         if sample_weight is not None:
@@ -830,13 +848,14 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.X_train_col_names = X_train.columns.to_list()
         self.fitted = True
         self.fit_date = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
-        self.training_range = y_index[[0, -1]]
-        self.index_type = type(y_index)
-        if isinstance(y_index, pd.DatetimeIndex):
-            self.index_freq = y_index.freqstr
+
+        self.training_range = {k: v[[0, -1]] for k, v in series_indexes.items()}
+        unique_index = series_indexes[series_col_names[0]]
+        self.index_type = type(unique_index)
+        if isinstance(unique_index, pd.DatetimeIndex):
+            self.index_freq = unique_index.freqstr
         else: 
-            self.index_freq = y_index.step
-        self.index_values = y_index
+            self.index_freq = unique_index.step
 
         if exog is not None:
             self.included_exog = True

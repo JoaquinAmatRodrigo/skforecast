@@ -53,5 +53,10 @@ exog = pd.DataFrame({'exog_1': pd.Series(np.array(
                      'exog_2': ['a']*25 + ['b']*25}
        )
 
+exog_as_dict = {
+    '1': exog.copy(),
+    '2': exog['exog_1'].copy()
+}
+
 exog_predict = exog.copy()
 exog_predict.index = pd.RangeIndex(start=50, stop=100)
