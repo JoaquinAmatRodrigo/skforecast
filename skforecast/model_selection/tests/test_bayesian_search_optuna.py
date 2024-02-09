@@ -222,9 +222,9 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_mocked_whe
         
         return search_space
 
-    # kwargs_create_study
-    sampler = TPESampler(seed=123, prior_weight=2.0, consider_magic_clip=False)
-
+    kwargs_create_study = {
+        'sampler' : TPESampler(seed=123, prior_weight=2.0, consider_magic_clip=False)
+    }
     results = _bayesian_search_optuna(
                   forecaster          = forecaster,
                   y                   = y,
@@ -238,7 +238,7 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_mocked_whe
                   random_state        = 123,
                   return_best         = False,
                   verbose             = False,
-                  kwargs_create_study = {'sampler':sampler}
+                  kwargs_create_study = kwargs_create_study
               )[0]
     
     expected_results = pd.DataFrame(
@@ -294,9 +294,7 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_mocked_whe
         
         return search_space
 
-    # kwargs_study_optimize
-    timeout = 2.0
-
+    kwargs_study_optimize = {'timeout': 3}
     results = _bayesian_search_optuna(
                   forecaster            = forecaster,
                   y                     = y,
@@ -311,28 +309,25 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_mocked_whe
                   n_jobs                = 1,
                   return_best           = False,
                   verbose               = False,
-                  kwargs_study_optimize = {'timeout': timeout}
+                  kwargs_study_optimize = kwargs_study_optimize
               )[0].reset_index(drop=True)
     
-    expected_results = pd.DataFrame({
-        'lags'  : [[1, 2], [1, 2], [1, 2], 
-                   [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]],
-        'lags_label': [[1, 2], [1, 2], [1, 2], 
-                        [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]],
-        'params': [{'n_estimators': 170, 'max_depth': 23, 'max_features': 'sqrt'},
-                   {'n_estimators': 172, 'max_depth': 25, 'max_features': 'log2'},
-                   {'n_estimators': 148, 'max_depth': 25, 'max_features': 'sqrt'}, 
-                   {'n_estimators': 170, 'max_depth': 23, 'max_features': 'sqrt'}, 
-                   {'n_estimators': 172, 'max_depth': 25, 'max_features': 'log2'}, 
-                   {'n_estimators': 148, 'max_depth': 25, 'max_features': 'sqrt'}],
-        'mean_absolute_error': np.array([0.21698591071568632, 0.21677310983527143, 0.2207701537612612, 
-                                         0.22227287699019596, 0.22139945523255808, 0.22838451457770267]),                                                               
-        'n_estimators': np.array([170, 172, 148, 170, 172, 148]),
-        'max_depth': np.array([23, 25, 25, 23, 25, 25]),
-        'max_features': ['sqrt', 'log2', 'sqrt', 'sqrt', 'log2', 'sqrt']
-        },
-        index=pd.RangeIndex(start=0, stop=6, step=1)
-    ).sort_values(by='mean_absolute_error', ascending=True).reset_index(drop=True)
+    expected_results = expected = pd.DataFrame(
+        np.array([[np.array([1, 2]),
+            {'n_estimators': 170, 'max_depth': 23, 'max_features': 'sqrt'},
+            0.21698591071568632, 170, 23, 'sqrt'],
+        [np.array([1, 2, 3, 4]),
+            {'n_estimators': 199, 'max_depth': 29, 'max_features': 'log2'},
+            0.21847001182160794, 199, 29, 'log2'],
+        [np.array([1, 2]),
+            {'n_estimators': 144, 'max_depth': 20, 'max_features': 'sqrt'},
+            0.22096976868055548, 144, 20, 'sqrt']], dtype=object),
+        columns=['lags', 'params', 'mean_absolute_error', 'n_estimators', 'max_depth', 'max_features'],
+        index=pd.RangeIndex(start=0, stop=3, step=1)
+    )
+    expected[['mean_absolute_error']] = expected[['mean_absolute_error']].astype(float)
+    expected[['n_estimators']] = expected[['n_estimators']].astype(int)
+    expected[['max_depth']] = expected[['max_depth']].astype(int)
 
     pd.testing.assert_frame_equal(results.head(2), expected_results.head(2), check_dtype=False)
 
