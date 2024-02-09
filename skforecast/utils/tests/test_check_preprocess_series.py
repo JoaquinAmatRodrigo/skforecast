@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 from skforecast.utils import check_preprocess_series
 from skforecast.ForecasterAutoregMultiSeries.tests.fixtures_ForecasterAutoregMultiSeries import series
+from skforecast.ForecasterAutoregMultiSeries.tests.fixtures_ForecasterAutoregMultiSeries import series_as_dict
 
 
 def test_TypeError_check_preprocess_series_when_series_is_not_pandas_DataFrame_or_dict():
@@ -26,9 +27,12 @@ def test_check_preprocess_series_when_series_is_pandas_DataFrame():
     """
     Test check_preprocess_series when `series` is a pandas DataFrame.
     """
-    series_dict, series_index = check_preprocess_series(series=series)
+    series_dict, series_indexes = check_preprocess_series(series=series)
 
-    expected_index = pd.RangeIndex(start=0, stop=len(series), step=1)
+    expected_series_indexes = {
+        col: pd.RangeIndex(start=0, stop=len(series), step=1) 
+        for col in series.columns
+    }
 
     assert isinstance(series_dict, dict)
     assert list(series_dict.keys()) == ['1', '2']
@@ -36,8 +40,11 @@ def test_check_preprocess_series_when_series_is_pandas_DataFrame():
         assert isinstance(v, pd.Series)
         assert k == v.name
 
-    assert isinstance(series_index, pd.RangeIndex)
-    pd.testing.assert_index_equal(series_index, expected_index)
+    assert isinstance(series_indexes, dict)
+    assert list(series_indexes.keys()) == ['1', '2']
+    for k in series_indexes:
+        pd.testing.assert_index_equal(series_indexes[k], expected_series_indexes[k])
+        assert series_indexes[k].step == expected_series_indexes[k].step
 
 
 def test_check_preprocess_series_when_series_is_pandas_DataFrame_with_DatetimeIndex():
@@ -50,20 +57,24 @@ def test_check_preprocess_series_when_series_is_pandas_DataFrame_with_DatetimeIn
         start='2000-01-01', periods=len(series_datetime), freq='D'
     )
 
-    series_dict, series_index = check_preprocess_series(series=series_datetime)
+    series_dict, series_indexes = check_preprocess_series(series=series_datetime)
 
-    expected_index = pd.date_range(
+    expected_series_indexes = {series: pd.date_range(
         start='2000-01-01', periods=len(series_datetime), freq='D'
-    )
+    ) for series in series_datetime.columns}
 
     assert isinstance(series_dict, dict)
     assert list(series_dict.keys()) == ['1', '2']
     for k, v in series_dict.items():
         assert isinstance(v, pd.Series)
         assert k == v.name
+        pd.testing.assert_series_equal(v, series_datetime[k])
 
-    assert isinstance(series_index, pd.DatetimeIndex)
-    pd.testing.assert_index_equal(series_index, expected_index)
+    assert isinstance(series_indexes, dict)
+    assert list(series_indexes.keys()) == ['1', '2']
+    for k in series_indexes:
+        pd.testing.assert_index_equal(series_indexes[k], expected_series_indexes[k])
+        assert series_indexes[k].freq == expected_series_indexes[k].freq
 
 
 def test_TypeError_check_preprocess_series_when_series_is_dict_with_no_pandas_Series_or_DataFrame():
@@ -116,17 +127,16 @@ def test_TypeError_check_preprocess_series_when_series_is_dict_with_no_DatetimeI
 
 def test_ValueError_check_preprocess_series_when_series_is_dict_with_different_freqs():
     """
-    Test ValueError is raised when series is dict containing series with no
-    DatetimeIndex.
+    Test ValueError is raised when series is dict containing series with 
+    DatetimeIndex but different frequencies.
     """
-    series_1 = series['1'].copy()
-    series_1.index = pd.date_range(start='2000-01-01', periods=len(series_1), freq='D')
-
-    series_2 = series['2'].copy()
-    series_2.index = pd.date_range(start='2000-01-01', periods=len(series_2), freq='MS')
-
-    series_dict = {'l1': series_1,
-                   'l2': series_2}
+    series_dict = series_as_dict.copy()
+    series_dict['l1'].index = pd.date_range(
+        start='2000-01-01', periods=len(series_dict['l1']), freq='D'
+    )
+    series_dict['l2'].index = pd.date_range(
+        start='2000-01-01', periods=len(series_dict['l2']), freq='MS'
+    )
 
     err_msg = re.escape(
         ("All series must have a DatetimeIndex index with the same frequency. "
@@ -141,29 +151,30 @@ def test_check_preprocess_series_when_series_is_dict():
     Test check_preprocess_series when `series` is a pandas DataFrame with 
     a DatetimeIndex.
     """
-    series_1 = series['1'].copy()
-    series_1.index = pd.date_range(start='2000-01-01', periods=len(series_1), freq='D')
 
-    series_2 = series['2'].copy()
-    series_2 = series_2.to_frame()
-    series_2.index = pd.date_range(start='2000-01-01', periods=len(series_2), freq='D')
+    series_dict = series_as_dict.copy()
+    series_dict['l1'].index = pd.date_range(start='2000-01-01', periods=len(series_dict['l1']), freq='D')
+    series_dict['l2'] = series_dict['l2'].to_frame()
+    series_dict['l2'].index = pd.date_range(start='2000-01-01', periods=len(series_dict['l2']), freq='D')
 
-    series_dict = {'l1': series_1,
-                   'l2': series_2}
-
-    series_dict, series_index = check_preprocess_series(series=series_dict)
+    series_dict, series_indexes = check_preprocess_series(series=series_dict)
 
     expected_series_dict = {
         'l1': pd.Series(
-                  data  = series['1'].values,
+                  data  = series_dict['l1'].to_numpy(),
                   index = pd.date_range(start='2000-01-01', periods=len(series['1']), freq='D'),
                   name  ='l1'
               ),
         'l2': pd.Series(
-                  data  = series['2'].values,
+                  data  = series_dict['l2'].to_numpy(),
                   index = pd.date_range(start='2000-01-01', periods=len(series['2']), freq='D'),
                   name  ='l2'
               ),
+    }
+
+    expected_series_indexes = {
+        k: v.index
+        for k, v in expected_series_dict.items()
     }
     
     assert isinstance(series_dict, dict)
@@ -177,4 +188,8 @@ def test_check_preprocess_series_when_series_is_dict():
                     for v in series_dict.values()]
     assert len(set(indexes_freq)) == 1
 
-    assert series_index is None
+    assert isinstance(series_indexes, dict)
+    assert list(series_indexes.keys()) == ['l1', 'l2']
+    for k in series_indexes:
+        pd.testing.assert_index_equal(series_indexes[k], expected_series_indexes[k])
+        assert series_indexes[k].freq == expected_series_indexes[k].freq

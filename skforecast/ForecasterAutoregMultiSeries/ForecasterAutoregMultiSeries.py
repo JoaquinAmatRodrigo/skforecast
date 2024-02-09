@@ -500,7 +500,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             Exogenous variable/s included as predictor/s. Must have the same
             number of observations as `series` and their indexes must be aligned.
         drop_nan : bool, default `False`
-            ...........
+            Whether or not to remove missing values before returning `X_train`. 
+            Same rows will be removed from `y_train` to maintain alignment.
 
         Returns
         -------
@@ -646,8 +647,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             X_train = X_train.loc[y_train.index, ]
             warnings.warn(
                 ("NaNs detected in `y_train`. They have been dropped since the "
-                 "target cannot have NaN values. Same rows have been dropped from "
-                 "`X_train`.")
+                 "target variable cannot have NaN values. Same rows have been "
+                 "dropped from `X_train` to maintain alignment.")
             )
 
         if drop_nan:
@@ -655,16 +656,16 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 X_train = X_train.dropna()
                 y_train = y_train.loc[X_train.index]
                 warnings.warn(
-                    ("NaNs detected in `X_train`. They have been dropped. "
-                     "If you want to keep them, set `drop_nan` to `False`."
-                     "Same rows have been dropped from  `y_train`.")
+                    ("NaNs detected in `X_train`. They have been dropped. If "
+                     "you want to keep them, set `drop_nan = False`. Same rows"
+                     "have been removed from `y_train` to maintain alignment.")
                 )
         else:
             if X_train.isnull().any().any():
                 warnings.warn(
-                    ("NaNs detected in `X_train`. Some regressor does not "
-                     "allow NaNs values during training. If you want to drop "
-                     "them, set `drop_nan` to `True`.")
+                    ("NaNs detected in `X_train`. Some regressor do not allow "
+                     "NaN values during training. If you want to drop them, "
+                     "set `drop_nan = True`.")
                 )
 
         return X_train, y_train, series_indexes, series_col_names, exog_col_names, exog_dtypes
@@ -794,6 +795,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             Exogenous variable/s included as predictor/s. Must have the same
             number of observations as `series` and their indexes must be aligned so
             that series[i] is regressed on exog[i].
+        drop_nan : bool, default `False`
+            Whether or not to remove missing values before returning `X_train`. 
+            Same rows will be removed from `y_train` to maintain alignment.
         store_in_sample_residuals : bool, default `True`
             If `True`, in-sample residuals will be stored in the forecaster object
             after fitting.
@@ -826,7 +830,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             series_col_names,
             exog_col_names,
             exog_dtypes,
-        ) = self.create_train_X_y(series=series, exog=exog)
+        ) = self.create_train_X_y(series=series, exog=exog, drop_nan=drop_nan)
 
         # TODO: review when new encondings are added
         sample_weight = self.create_sample_weights(
@@ -865,30 +869,35 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         in_sample_residuals = {}
         
-        # This is done to save time during fit in functions such as backtesting()
+        # TODO: review when new encondings are added
+        # ======================================================================
         if store_in_sample_residuals:
 
             residuals = y_train - self.regressor.predict(X_train)
 
-            for serie in series.columns:
-                in_sample_residuals[serie] = residuals.loc[X_train[serie] == 1.].to_numpy()
-                if len(in_sample_residuals[serie]) > 1000:
+            for col in series_col_names:
+                in_sample_residuals[col] = residuals.loc[X_train[col] == 1.].to_numpy()
+                if len(in_sample_residuals[col]) > 1000:
                     # Only up to 1000 residuals are stored
                     rng = np.random.default_rng(seed=123)
-                    in_sample_residuals[serie] = rng.choice(
-                                                     a       = in_sample_residuals[serie], 
-                                                     size    = 1000, 
-                                                     replace = False
-                                                 )
+                    in_sample_residuals[col] = rng.choice(
+                                                   a       = in_sample_residuals[col], 
+                                                   size    = 1000, 
+                                                   replace = False
+                                               )
         else:
-            for serie in series.columns:
-                in_sample_residuals[serie] = None
+            for col in series_col_names:
+                in_sample_residuals[col] = None
 
         self.in_sample_residuals = in_sample_residuals
+        # ======================================================================
 
+        # TODO: review how to store last_window
+        # ======================================================================
         # The last time window of training data is stored so that lags needed as
         # predictors in the first iteration of `predict()` can be calculated.
         self.last_window = series.iloc[-self.max_lag:, ].copy()
+        # ======================================================================
 
 
     def _recursive_predict(

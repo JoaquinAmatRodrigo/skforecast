@@ -36,7 +36,15 @@ series = pd.DataFrame({'1': pd.Series(np.array(
                             )
                       }
          )
-    
+
+series_2 = series.copy()
+series_2.columns = ['l1', 'l2']
+
+series_as_dict = series_2.copy().to_dict(orient='series')
+series_as_dict['l1'].index = pd.date_range(start='2000-01-01', periods=len(series), freq='D')
+series_as_dict['l2'].index = pd.date_range(start='2000-01-01', periods=len(series), freq='D')
+
+
 exog = pd.DataFrame({'exog_1': pd.Series(np.array(
                                  [0.51312815, 0.66662455, 0.10590849, 0.13089495, 0.32198061,
                                   0.66156434, 0.84650623, 0.55325734, 0.85445249, 0.38483781,
@@ -54,8 +62,8 @@ exog = pd.DataFrame({'exog_1': pd.Series(np.array(
        )
 
 exog_as_dict = {
-    '1': exog.copy(),
-    '2': exog['exog_1'].copy()
+    'l1': exog.copy(),
+    'l2': exog['exog_1'].copy()
 }
 
 exog_predict = exog.copy()

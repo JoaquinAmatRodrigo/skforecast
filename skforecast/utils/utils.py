@@ -1980,7 +1980,7 @@ def check_preprocess_series(
     series_dict : dict
         Dictionary with the series used during training.
     series_indexes : dict
-        Dictionary with the index of the series.
+        Dictionary with the index of each series.
     
     """
 
@@ -2071,7 +2071,7 @@ def check_preprocess_exog_multiseries(
     input_series_is_dict : bool
         Indicates if input series argument is a dict.
     series_indexes : dict
-        Dictionary with the index of the series.
+        Dictionary with the index of each series.
     series_col_names : list
         Names of the series (levels) used during training.
     exog : pandas Series, pandas DataFrame, dict
