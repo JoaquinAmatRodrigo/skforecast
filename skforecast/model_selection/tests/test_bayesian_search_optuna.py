@@ -40,8 +40,8 @@ def test_ValueError_bayesian_search_optuna_metric_list_duplicate_names():
     metrics is used with duplicate names.
     """
     forecaster = ForecasterAutoreg(
-                    regressor = Ridge(random_state=123),
-                    lags      = 2 # Placeholder, the value will be overwritten
+                     regressor = Ridge(random_state=123),
+                     lags      = 2
                  )
 
     steps = 3
@@ -50,7 +50,7 @@ def test_ValueError_bayesian_search_optuna_metric_list_duplicate_names():
     def search_space(trial): # pragma: no cover
         search_space  = {
             'alpha': trial.suggest_float('not_alpha', 1e-2, 1.0),
-            'lags' : trial.suggest_int('lags', 2, 4)
+            'lags' : trial.suggest_categorical('lags', [2, 4])
         }
 
         return search_space
@@ -79,8 +79,8 @@ def test_ValueError_bayesian_search_optuna_when_search_space_names_do_not_match(
     object name from optuna.
     """
     forecaster = ForecasterAutoreg(
-                    regressor = Ridge(random_state=123),
-                    lags      = 2 # Placeholder, the value will be overwritten
+                     regressor = Ridge(random_state=123),
+                     lags      = 2 
                  )
 
     steps = 3
@@ -89,15 +89,16 @@ def test_ValueError_bayesian_search_optuna_when_search_space_names_do_not_match(
     def search_space(trial):
         search_space  = {
             'alpha': trial.suggest_float('not_alpha', 1e-2, 1.0),
-            'lags' : trial.suggest_int('lags', 2, 4)
+            'lags' : trial.suggest_categorical('lags', [2, 4])
         }
 
         return search_space
     
     err_msg = re.escape(
-                """Some of the key values do not match the search_space key names.
-                Search Space keys  : ['alpha', 'lags']
-                Trial objects keys : ['not_alpha', 'lags'].""")
+        (f"Some of the key values do not match the search_space key names.\n"
+         f"  Search Space keys  : ['alpha', 'lags']\n"
+         f"  Trial objects keys : ['not_alpha', 'lags'].")
+    )
     with pytest.raises(ValueError, match = err_msg):
         _bayesian_search_optuna(
             forecaster         = forecaster,
@@ -127,8 +128,8 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_mocked():
     (mocked done in Skforecast v0.4.3).
     """
     forecaster = ForecasterAutoreg(
-                    regressor = RandomForestRegressor(random_state=123),
-                    lags      = 2
+                     regressor = RandomForestRegressor(random_state=123),
+                     lags      = 2
                  )
 
     steps = 3
@@ -205,8 +206,8 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_mocked_whe
     kwargs_create_study with mocked (mocked done in Skforecast v0.4.3).
     """
     forecaster = ForecasterAutoreg(
-                    regressor = Ridge(random_state=123),
-                    lags      = 2
+                     regressor = Ridge(random_state=123),
+                     lags      = 2
                  )
 
     steps = 3
@@ -275,8 +276,8 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_mocked_whe
     kwargs_study_optimize with mocked (mocked done in Skforecast v0.4.3).
     """
     forecaster = ForecasterAutoreg(
-                    regressor = RandomForestRegressor(random_state=123),
-                    lags      = 2 
+                     regressor = RandomForestRegressor(random_state=123),
+                     lags      = 2 
                  )
 
     steps = 3
@@ -460,8 +461,8 @@ def test_evaluate_bayesian_search_optuna_when_return_best_ForecasterAutoreg(lags
     with a ForecasterAutoreg.
     """
     forecaster = ForecasterAutoreg(
-                    regressor = Ridge(random_state=123),
-                    lags      = 2
+                     regressor = Ridge(random_state=123),
+                     lags      = 2
                  )
 
     steps = 3
@@ -545,8 +546,8 @@ def test_results_opt_best_output_bayesian_search_optuna_with_output_study_best_t
     study.best_trial optuna.
     """
     forecaster = ForecasterAutoreg(
-                    regressor = Ridge(random_state=123),
-                    lags      = 2
+                     regressor = Ridge(random_state=123),
+                     lags      = 2
                  )
 
     steps = 3

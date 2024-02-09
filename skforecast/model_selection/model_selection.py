@@ -1259,7 +1259,9 @@ def bayesian_search_forecaster(
     n_trials : int, default `10`
         Number of parameter settings that are sampled in each lag configuration.
     random_state : int, default `123`
-        Sets a seed to the sampling for reproducible output.
+        Sets a seed to the sampling for reproducible output. When a new sampler 
+        is passed in `kwargs_create_study`, the seed must be set within the 
+        sampler. For example `{'sampler': TPESampler(seed=145)}`.
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
     n_jobs : int, 'auto', default `'auto'`
@@ -1295,7 +1297,7 @@ def bayesian_search_forecaster(
         - column params: parameters configuration for each iteration.
         - column metric: metric value estimated for each iteration.
         - additional n columns with param = value.
-    results_opt_best : optuna object
+    best_trial : optuna object
         The best optimization result returned as a FrozenTrial optuna object.
     
     """
@@ -1308,9 +1310,9 @@ def bayesian_search_forecaster(
 
     if lags_grid != 'deprecated':
         warnings.warn(
-            "The 'lags_grid' argument is deprecated and will be removed in a future version. "
-            "Use the 'search_space' argument to define the candidate values for the lags. "
-            "Example: {'lags' : trial.suggest_categorical('lags', [3, 5])}"
+            ("The 'lags_grid' argument is deprecated and will be removed in a future version. "
+             "Use the 'search_space' argument to define the candidate values for the lags. "
+             "Example: {'lags' : trial.suggest_categorical('lags', [3, 5])}")
         )
         lags_grid = 'deprecated'
     
@@ -1327,31 +1329,31 @@ def bayesian_search_forecaster(
             f"`engine` only allows 'optuna', got {engine}."
         )
 
-    results, results_opt_best = _bayesian_search_optuna(
-                                    forecaster            = forecaster,
-                                    y                     = y,
-                                    exog                  = exog,
-                                    lags_grid             = lags_grid,
-                                    search_space          = search_space,
-                                    steps                 = steps,
-                                    metric                = metric,
-                                    refit                 = refit,
-                                    initial_train_size    = initial_train_size,
-                                    fixed_train_size      = fixed_train_size,
-                                    gap                   = gap,
-                                    allow_incomplete_fold = allow_incomplete_fold,
-                                    n_trials              = n_trials,
-                                    random_state          = random_state,
-                                    return_best           = return_best,
-                                    n_jobs                = n_jobs,
-                                    verbose               = verbose,
-                                    show_progress         = show_progress,
-                                    output_file           = output_file,
-                                    kwargs_create_study   = kwargs_create_study,
-                                    kwargs_study_optimize = kwargs_study_optimize
-                                )
+    results, best_trial = _bayesian_search_optuna(
+                              forecaster            = forecaster,
+                              y                     = y,
+                              exog                  = exog,
+                              lags_grid             = lags_grid,
+                              search_space          = search_space,
+                              steps                 = steps,
+                              metric                = metric,
+                              refit                 = refit,
+                              initial_train_size    = initial_train_size,
+                              fixed_train_size      = fixed_train_size,
+                              gap                   = gap,
+                              allow_incomplete_fold = allow_incomplete_fold,
+                              n_trials              = n_trials,
+                              random_state          = random_state,
+                              return_best           = return_best,
+                              n_jobs                = n_jobs,
+                              verbose               = verbose,
+                              show_progress         = show_progress,
+                              output_file           = output_file,
+                              kwargs_create_study   = kwargs_create_study,
+                              kwargs_study_optimize = kwargs_study_optimize
+                          )
 
-    return results, results_opt_best
+    return results, best_trial
 
 
 def _bayesian_search_optuna(
@@ -1426,7 +1428,9 @@ def _bayesian_search_optuna(
     n_trials : int, default `10`
         Number of parameter settings that are sampled in each lag configuration.
     random_state : int, default `123`
-        Sets a seed to the sampling for reproducible output.
+        Sets a seed to the sampling for reproducible output. When a new sampler 
+        is passed in `kwargs_create_study`, the seed must be set within the 
+        sampler. For example `{'sampler': TPESampler(seed=145)}`.
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
     n_jobs : int, 'auto', default `'auto'`
@@ -1537,10 +1541,6 @@ def _bayesian_search_optuna(
         logging.getLogger("optuna").setLevel(logging.WARNING)
         optuna.logging.disable_default_handler()
 
-    if 'sampler' in kwargs_create_study.keys():
-        kwargs_create_study['sampler']._rng = np.random.RandomState(random_state)
-        kwargs_create_study['sampler']._random_sampler = RandomSampler(seed=random_state)
-
     study = optuna.create_study(**kwargs_create_study)
 
     if 'sampler' not in kwargs_create_study.keys():
@@ -1566,9 +1566,9 @@ def _bayesian_search_optuna(
 
     if search_space(best_trial).keys() != best_trial.params.keys():
         raise ValueError(
-            f"""Some of the key values do not match the search_space key names.
-            Search Space keys  : {list(search_space(best_trial).keys())}
-            Trial objects keys : {list(best_trial.params.keys())}."""
+            (f"Some of the key values do not match the search_space key names.\n"
+             f"  Search Space keys  : {list(search_space(best_trial).keys())}\n"
+             f"  Trial objects keys : {list(best_trial.params.keys())}.")
         )
     
     lags_list = []
