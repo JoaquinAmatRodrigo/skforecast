@@ -2019,8 +2019,8 @@ def check_preprocess_series(
                            if not isinstance(v.index, pd.DatetimeIndex)]
         if not_valid_index:
             raise TypeError(
-                (f"All series must have a DatetimeIndex index with the same frequency. "
-                 f"Review series: {not_valid_index}")
+                (f"All series must have a Pandas DatetimeIndex as index with the "
+                 f"same frequency. Review series: {not_valid_index}")
             )
 
         indexes_freq = [f'{v.index.freq}' 
@@ -2028,8 +2028,8 @@ def check_preprocess_series(
         indexes_freq = sorted(set(indexes_freq))
         if not len(indexes_freq) == 1:
             raise ValueError(
-                (f"All series must have a DatetimeIndex index with the same frequency. "
-                 f"Found frequencies: {indexes_freq}")
+                (f"All series must have a Pandas DatetimeIndex as index with the "
+                 f"same frequency. Found frequencies: {indexes_freq}")
             )
     
     else:
@@ -2046,7 +2046,6 @@ def check_preprocess_series(
     return series_dict, series_indexes
 
 
-# TODO: Include tests for this function
 def check_preprocess_exog_multiseries(
     input_series_is_dict: bool,
     series_indexes: dict,
@@ -2163,22 +2162,23 @@ def check_preprocess_exog_multiseries(
                              f"be equal to ensure the correct alignment of values.")
                         )
         else:
-
             not_valid_index = [k
                                for k, v in exog_dict.items()
                                if v is not None and not isinstance(v.index, pd.DatetimeIndex)]
             if not_valid_index:
                 raise TypeError(
-                    (f"All exog must have a DatetimeIndex index with the same frequency. "
-                     f"Review exog for series: {not_valid_index}")
+                    (f"All exog must have a Pandas DatetimeIndex as index with the "
+                     f"same frequency. Check exog for series: {not_valid_index}")
                 )
-        
+    
     exog_col_names = list(
-        set(
-            column
-            for df in exog_dict.values()
-            if df is not None
-            for column in df.columns.to_list()
+        sorted(
+            set(
+                column
+                for df in exog_dict.values()
+                if df is not None
+                for column in df.columns.to_list()
+            )
         )
     )
 
@@ -2192,7 +2192,7 @@ def check_preprocess_exog_multiseries(
     for col_name, dtypes in exog_dtype_dict.items():
         if len(dtypes) > 1:
             raise TypeError(
-                (f"Column {col_name} has different dtypes in different exog "
+                (f"Column '{col_name}' has different dtypes in different exog "
                  f"DataFrames or Series.")
             )
 

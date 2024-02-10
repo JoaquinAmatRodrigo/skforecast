@@ -12,7 +12,9 @@ from skforecast.ForecasterAutoregMultiSeries.tests.fixtures_ForecasterAutoregMul
 from skforecast.ForecasterAutoregMultiSeries.tests.fixtures_ForecasterAutoregMultiSeries import series_as_dict
 from skforecast.ForecasterAutoregMultiSeries.tests.fixtures_ForecasterAutoregMultiSeries import exog
 from skforecast.ForecasterAutoregMultiSeries.tests.fixtures_ForecasterAutoregMultiSeries import exog_as_dict
+from skforecast.ForecasterAutoregMultiSeries.tests.fixtures_ForecasterAutoregMultiSeries import exog_as_dict_datetime
 from skforecast.ForecasterAutoregMultiSeries.tests.fixtures_ForecasterAutoregMultiSeries import exog_predict
+
 
 def test_TypeError_check_preprocess_exog_multiseries_when_exog_is_not_valid_type():
     """
@@ -171,7 +173,7 @@ def test_check_preprocess_exog_multiseries_when_series_is_pandas_DataFrame_with_
     assert len(set(exog_col_names) - set(expected_exog_col_names)) == 0
     
 
-def test_check_preprocess_exog_multiseries_when_series_is_pandas_DataFrame_with_DatetimeIndex():
+def test_output_check_preprocess_exog_multiseries_when_series_is_pandas_DataFrame_with_DatetimeIndex():
     """
     Test check_preprocess_exog_multiseries when `series` is a pandas DataFrame with 
     a DatetimeIndex.
@@ -215,7 +217,7 @@ def test_MissingValuesExogWarning_check_preprocess_exog_multiseries_when_exog_is
     """
     _, series_indexes = check_preprocess_series(series=series_2)
 
-    incomplete_exog = exog_as_dict.copy()
+    incomplete_exog = exog_as_dict_datetime.copy()
     incomplete_exog.pop('l1')
 
     warn_msg = re.escape(
@@ -239,12 +241,12 @@ def test_ValueError_check_preprocess_exog_multiseries_when_exog_dict_with_differ
     """
     _, series_indexes = check_preprocess_series(series=series_2)
 
-    not_valid_exog = exog_as_dict.copy()
+    not_valid_exog = exog_as_dict_datetime.copy()
     not_valid_exog['l2'] = not_valid_exog['l2'].iloc[:30]
 
     err_msg = re.escape(
-        (f"`exog` for series 'l2' must have same number of samples as `series`. "
-         f"length `exog`: (30), length `series`: (50)")
+        ("`exog` for series 'l2' must have same number of samples as `series`. "
+         "length `exog`: (30), length `series`: (50)")
     )
     with pytest.raises(ValueError, match = err_msg):
         check_preprocess_exog_multiseries(
@@ -255,125 +257,308 @@ def test_ValueError_check_preprocess_exog_multiseries_when_exog_dict_with_differ
             exog_dict            = {'l1': None, 'l2': None}
         )
 
-# TODO: Next test is:
-# raise ValueError(
-#     (f"Different index for series '{k}' and its exog. "
-#     f"When `series` is a pandas DataFrame, they must "
-#     f"be equal to ensure the correct alignment of values.")
-# )
 
-
-
-
-def test_TypeError_check_preprocess_series_when_series_is_dict_with_no_pandas_Series_or_DataFrame():
+def test_ValueError_check_preprocess_exog_multiseries_when_exog_dict_with_different_index_from_series():
     """
-    Test TypeError is raised when series is dict not containing 
-    a pandas DataFrame or dict.
+    Test ValueError is raised when exog is a dict with different index from 
+    input series as pandas DataFrame (series_indexes).
     """
-    series_dict = {'l1': np.array([1, 2, 3]),
-                   'l2': series}
+    _, series_indexes = check_preprocess_series(series=series)
 
-    err_msg = re.escape(
-        ("All series must be a named pandas Series or a pandas Dataframe. "
-         "with a single column. Review series: ['l1']")
-    )
-    with pytest.raises(TypeError, match = err_msg):
-        check_preprocess_series(series = series_dict)
-
-
-def test_ValueError_check_preprocess_series_when_series_is_dict_with_a_DataFrame_with_2_columns():
-    """
-    Test ValueError is raised when series is dict containing a pandas DataFrame 
-    with 2 columns.
-    """
-    series_dict = {'l1': series['1'],
-                   'l2': series}
-
-    err_msg = re.escape(
-        ("All series must be a named pandas Series or a pandas Dataframe "
-         "with a single column. Review series: l2")
-    )
-    with pytest.raises(ValueError, match = err_msg):
-        check_preprocess_series(series = series_dict)
-
-
-def test_TypeError_check_preprocess_series_when_series_is_dict_with_no_DatetimeIndex():
-    """
-    Test TypeError is raised when series is dict containing series with no
-    DatetimeIndex.
-    """
-    series_dict = {'l1': series['1'],
-                   'l2': series['2']}
-
-    err_msg = re.escape(
-        ("All series must have a DatetimeIndex index with the same frequency. "
-         "Review series: ['l1', 'l2']")
-    )
-    with pytest.raises(TypeError, match = err_msg):
-        check_preprocess_series(series = series_dict)
-
-
-def test_ValueError_check_preprocess_series_when_series_is_dict_with_different_freqs():
-    """
-    Test ValueError is raised when series is dict containing series with no
-    DatetimeIndex.
-    """
-    series_1 = series['1'].copy()
-    series_1.index = pd.date_range(start='2000-01-01', periods=len(series_1), freq='D')
-
-    series_2 = series['2'].copy()
-    series_2.index = pd.date_range(start='2000-01-01', periods=len(series_2), freq='MS')
-
-    series_dict = {'l1': series_1,
-                   'l2': series_2}
-
-    err_msg = re.escape(
-        ("All series must have a DatetimeIndex index with the same frequency. "
-         "Found frequencies: ['<Day>', '<MonthBegin>']")
-    )
-    with pytest.raises(ValueError, match = err_msg):
-        check_preprocess_series(series = series_dict)
-
-
-def test_check_preprocess_series_when_series_is_dict():
-    """
-    Test check_preprocess_series when `series` is a pandas DataFrame with 
-    a DatetimeIndex.
-    """
-    series_1 = series['1'].copy()
-    series_1.index = pd.date_range(start='2000-01-01', periods=len(series_1), freq='D')
-
-    series_2 = series['2'].copy()
-    series_2 = series_2.to_frame()
-    series_2.index = pd.date_range(start='2000-01-01', periods=len(series_2), freq='D')
-
-    series_dict = {'l1': series_1,
-                   'l2': series_2}
-
-    series_dict, series_index = check_preprocess_series(series=series_dict)
-
-    expected_series_dict = {
-        'l1': pd.Series(
-                  data  = series['1'].values,
-                  index = pd.date_range(start='2000-01-01', periods=len(series['1']), freq='D'),
-                  name  ='l1'
-              ),
-        'l2': pd.Series(
-                  data  = series['2'].values,
-                  index = pd.date_range(start='2000-01-01', periods=len(series['2']), freq='D'),
-                  name  ='l2'
-              ),
+    not_valid_exog = {
+        '1': exog.copy(),
+        '2': exog_predict['exog_1'].copy()
     }
+
+    err_msg = re.escape(
+        ("Different index for series '2' and its exog. "
+         "When `series` is a pandas DataFrame, they must "
+         "be equal to ensure the correct alignment of values.")
+    )
+    with pytest.raises(ValueError, match = err_msg):
+        check_preprocess_exog_multiseries(
+            input_series_is_dict = False,
+            series_indexes       = series_indexes,
+            series_col_names     = ['1', '2'],
+            exog                 = not_valid_exog,
+            exog_dict            = {'1': None, '2': None}
+        )
+
+
+def test_TypeError_check_preprocess_exog_multiseries_when_exog_dict_with_different_index_from_series():
+    """
+    Test TypeError is raised when exog is a dict with not DatetimeIndex index 
+    when input series is a dict (input_series_is_dict=True).
+    """
+    _, series_indexes = check_preprocess_series(series=series_as_dict)
+
+    err_msg = re.escape(
+        ("All exog must have a Pandas DatetimeIndex as index with the "
+         "same frequency. Check exog for series: ['l1', 'l2']")
+    )
+    with pytest.raises(TypeError, match = err_msg):
+        check_preprocess_exog_multiseries(
+            input_series_is_dict = True,
+            series_indexes       = series_indexes,
+            series_col_names     = ['l1', 'l2'],
+            exog                 = exog_as_dict,
+            exog_dict            = {'l1': None, 'l2': None}
+        )
+
+
+def test_TypeError_check_preprocess_exog_multiseries_when_exog_dict_with_different_dtypes_same_column():
+    """
+    Test TypeError is raised when exog is a dict with different dtypes for the 
+    same column.
+    """
+    _, series_indexes = check_preprocess_series(series=series)
+
+    not_valid_exog = {
+        '1': exog.copy(),
+        '2': exog['exog_1'].astype(str).copy()
+    }
+
+    err_msg = re.escape(
+        ("Column 'exog_1' has different dtypes in different exog "
+         "DataFrames or Series.")
+    )
+    with pytest.raises(TypeError, match = err_msg):
+        check_preprocess_exog_multiseries(
+            input_series_is_dict = False,
+            series_indexes       = series_indexes,
+            series_col_names     = ['1', '2'],
+            exog                 = not_valid_exog,
+            exog_dict            = {'1': None, '2': None}
+        )
+
+
+def test_ValueError_check_preprocess_exog_multiseries_when_exog_has_columns_named_as_series():
+    """
+    Test ValueError is raised when exog has columns named as the series.
+    """
+    _, series_indexes = check_preprocess_series(series=series)
+
+    duplicate_exog = exog['exog_1'].copy()
+    duplicate_exog.name = '1'
+
+    not_valid_exog = {
+        '1': exog.copy(),
+        '2': duplicate_exog
+    }
+
+    err_msg = re.escape(
+        ("`exog` cannot contain a column named the same as one of the "
+         "series (column names of series).\n"
+         "    `series` columns : ['1', '2'].\n"
+         "    `exog`   columns : ['1', 'exog_1', 'exog_2'].")
+    )
+    with pytest.raises(ValueError, match = err_msg):
+        check_preprocess_exog_multiseries(
+            input_series_is_dict = False,
+            series_indexes       = series_indexes,
+            series_col_names     = ['1', '2'],
+            exog                 = not_valid_exog,
+            exog_dict            = {'1': None, '2': None}
+        )
+
+
+def test_output_check_preprocess_exog_multiseries_when_series_is_DataFrame_and_exog_pandas_Series():
+    """
+    Test check_preprocess_exog_multiseries when `series` is a pandas DataFrame 
+    and `exog` is a pandas Series.
+    """
+    series_dict, series_indexes = check_preprocess_series(series=series)
+
+    exog_dict, exog_col_names = check_preprocess_exog_multiseries(
+                                    input_series_is_dict = False,
+                                    series_indexes       = series_indexes,
+                                    series_col_names     = ['1', '2'],
+                                    exog                 = exog['exog_1'],
+                                    exog_dict            = {'1': None, '2': None}
+                                )
+
+    expected_exog_dict = {
+        '1': pd.DataFrame(
+                 data    = exog['exog_1'].to_numpy(),
+                 index   = pd.RangeIndex(start=0, stop=50),
+                 columns = ['exog_1']
+             ),
+        '2': pd.DataFrame(
+                 data    = exog['exog_1'].to_numpy(),
+                 index   = pd.RangeIndex(start=0, stop=50),
+                 columns = ['exog_1']
+             ),
+    }
+    expected_exog_col_names = ['exog_1']
     
-    assert isinstance(series_dict, dict)
-    assert list(series_dict.keys()) == ['l1', 'l2']
-    for k in series_dict:
-        assert isinstance(series_dict[k], pd.Series)
-        pd.testing.assert_series_equal(series_dict[k], expected_series_dict[k])
-        assert isinstance(series_dict[k].index, pd.DatetimeIndex)
+    assert isinstance(exog_dict, dict)
+    assert list(exog_dict.keys()) == ['1', '2']
+    for k in exog_dict:
+        assert isinstance(exog_dict[k], pd.DataFrame)
+        pd.testing.assert_frame_equal(exog_dict[k], expected_exog_dict[k])
+        pd.testing.assert_index_equal(exog_dict[k].index, series_dict[k].index)
 
-    indexes_freq = [f'{v.index.freq}' 
-                    for v in series_dict.values()]
-    assert len(set(indexes_freq)) == 1
+    assert exog_col_names == expected_exog_col_names
 
-    assert series_index is None
+
+def test_output_check_preprocess_exog_multiseries_when_series_is_DataFrame_and_exog_pandas_DataFrame():
+    """
+    Test check_preprocess_exog_multiseries when `series` is a pandas DataFrame 
+    and `exog` is a pandas DataFrame.
+    """
+    series_dict, series_indexes = check_preprocess_series(series=series)
+
+    exog_dict, exog_col_names = check_preprocess_exog_multiseries(
+                                    input_series_is_dict = False,
+                                    series_indexes       = series_indexes,
+                                    series_col_names     = ['1', '2'],
+                                    exog                 = exog,
+                                    exog_dict            = {'1': None, '2': None}
+                                )
+
+    expected_exog_dict = {
+        '1': pd.DataFrame(
+                 data    = exog.to_numpy(),
+                 index   = pd.RangeIndex(start=0, stop=50),
+                 columns = ['exog_1', 'exog_2']
+             ).astype({'exog_1': float}),
+        '2': pd.DataFrame(
+                 data    = exog.to_numpy(),
+                 index   = pd.RangeIndex(start=0, stop=50),
+                 columns = ['exog_1', 'exog_2']
+             ).astype({'exog_1': float}),
+    }
+    expected_exog_col_names = ['exog_1', 'exog_2']
+    
+    assert isinstance(exog_dict, dict)
+    assert list(exog_dict.keys()) == ['1', '2']
+    for k in exog_dict:
+        assert isinstance(exog_dict[k], pd.DataFrame)
+        pd.testing.assert_frame_equal(exog_dict[k], expected_exog_dict[k])
+        pd.testing.assert_index_equal(exog_dict[k].index, series_dict[k].index)
+
+    assert len(set(exog_col_names) - set(expected_exog_col_names)) == 0
+
+
+def test_output_check_preprocess_exog_multiseries_when_series_is_DataFrame_and_exog_dict():
+    """
+    Test check_preprocess_exog_multiseries when `series` is a pandas DataFrame 
+    and `exog` is a dict.
+    """
+    series_dict, series_indexes = check_preprocess_series(series=series_2)
+
+    exog_dict, exog_col_names = check_preprocess_exog_multiseries(
+                                    input_series_is_dict = False,
+                                    series_indexes       = series_indexes,
+                                    series_col_names     = ['l1', 'l2'],
+                                    exog                 = exog_as_dict_datetime,
+                                    exog_dict            = {'l1': None, 'l2': None}
+                                )
+
+    expected_exog_dict = {
+        'l1': pd.DataFrame(
+                  data    = exog_as_dict_datetime['l1'].to_numpy(),
+                  index   = pd.date_range(start='2000-01-01', periods=len(exog), freq='D'),
+                  columns = ['exog_1', 'exog_2']
+              ).astype({'exog_1': float}),
+        'l2': pd.DataFrame(
+                  data    = exog_as_dict_datetime['l2'].to_numpy(),
+                  index   = pd.date_range(start='2000-01-01', periods=len(exog), freq='D'),
+                  columns = ['exog_1']
+              ).astype({'exog_1': float}),
+    }
+    expected_exog_col_names = ['exog_1', 'exog_2']
+    
+    assert isinstance(exog_dict, dict)
+    assert list(exog_dict.keys()) == ['l1', 'l2']
+    for k in exog_dict:
+        assert isinstance(exog_dict[k], pd.DataFrame)
+        pd.testing.assert_frame_equal(exog_dict[k], expected_exog_dict[k])
+        pd.testing.assert_index_equal(exog_dict[k].index, series_dict[k].index)
+
+    assert len(set(exog_col_names) - set(expected_exog_col_names)) == 0
+
+
+def test_output_check_preprocess_exog_multiseries_when_series_is_dict_and_exog_dict():
+    """
+    Test check_preprocess_exog_multiseries when `series` is a dict (input_series_is_dict = True)
+    and `exog` is a dict.
+    """
+    series_dict, series_indexes = check_preprocess_series(series=series_as_dict)
+
+    exog_dict, exog_col_names = check_preprocess_exog_multiseries(
+                                    input_series_is_dict = True,
+                                    series_indexes       = series_indexes,
+                                    series_col_names     = ['l1', 'l2'],
+                                    exog                 = exog_as_dict_datetime,
+                                    exog_dict            = {'l1': None, 'l2': None}
+                                )
+
+    expected_exog_dict = {
+        'l1': pd.DataFrame(
+                  data    = exog_as_dict_datetime['l1'].to_numpy(),
+                  index   = pd.date_range(start='2000-01-01', periods=len(exog), freq='D'),
+                  columns = ['exog_1', 'exog_2']
+              ).astype({'exog_1': float}),
+        'l2': pd.DataFrame(
+                  data    = exog_as_dict_datetime['l2'].to_numpy(),
+                  index   = pd.date_range(start='2000-01-01', periods=len(exog), freq='D'),
+                  columns = ['exog_1']
+              ).astype({'exog_1': float}),
+    }
+    expected_exog_col_names = ['exog_1', 'exog_2']
+    
+    assert isinstance(exog_dict, dict)
+    assert list(exog_dict.keys()) == ['l1', 'l2']
+    for k in exog_dict:
+        assert isinstance(exog_dict[k], pd.DataFrame)
+        pd.testing.assert_frame_equal(exog_dict[k], expected_exog_dict[k])
+        pd.testing.assert_index_equal(exog_dict[k].index, series_dict[k].index)
+
+    assert len(set(exog_col_names) - set(expected_exog_col_names)) == 0
+
+
+def test_output_check_preprocess_exog_multiseries_when_series_is_dict_and_exog_dict_with_different_lengths():
+    """
+    Test check_preprocess_exog_multiseries when `series` is a dict (input_series_is_dict = True)
+    and `exog` is a dict with series of different lengths.
+    """
+    series_dict, series_indexes = check_preprocess_series(series=series_as_dict)
+
+    exog_test = exog_as_dict_datetime.copy()
+    exog_test['l1'] = exog_test['l1'].iloc[10:30]
+    exog_test['l2'] = exog_test['l2'].iloc[:40]
+
+    exog_dict, exog_col_names = check_preprocess_exog_multiseries(
+                                    input_series_is_dict = True,
+                                    series_indexes       = series_indexes,
+                                    series_col_names     = ['l1', 'l2'],
+                                    exog                 = exog_test,
+                                    exog_dict            = {'l1': None, 'l2': None}
+                                )
+
+    expected_exog_dict = {
+        'l1': pd.DataFrame(
+                  data    = exog_test['l1'].to_numpy(),
+                  index   = pd.date_range(start='2000-01-11', periods=len(exog_test['l1']), freq='D'),
+                  columns = ['exog_1', 'exog_2']
+              ).astype({'exog_1': float}),
+        'l2': pd.DataFrame(
+                  data    = exog_test['l2'].to_numpy(),
+                  index   = pd.date_range(start='2000-01-01', periods=len(exog_test['l2']), freq='D'),
+                  columns = ['exog_1']
+              ).astype({'exog_1': float}),
+    }
+    expected_exog_col_names = ['exog_1', 'exog_2']
+    
+    assert isinstance(exog_dict, dict)
+    assert list(exog_dict.keys()) == ['l1', 'l2']
+    for k in exog_dict:
+        assert isinstance(exog_dict[k], pd.DataFrame)
+        pd.testing.assert_frame_equal(exog_dict[k], expected_exog_dict[k])
+        index_intersection = (
+            series_dict[k].index.intersection(exog_dict[k].index)
+        )
+        assert len(index_intersection) == len(exog_dict[k])
+
+    assert len(set(exog_col_names) - set(expected_exog_col_names)) == 0

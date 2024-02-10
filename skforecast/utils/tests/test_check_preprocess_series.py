@@ -118,8 +118,8 @@ def test_TypeError_check_preprocess_series_when_series_is_dict_with_no_DatetimeI
                    'l2': series['2']}
 
     err_msg = re.escape(
-        ("All series must have a DatetimeIndex index with the same frequency. "
-         "Review series: ['l1', 'l2']")
+        ("All series must have a Pandas DatetimeIndex as index with the "
+         "same frequency. Review series: ['l1', 'l2']")
     )
     with pytest.raises(TypeError, match = err_msg):
         check_preprocess_series(series = series_dict)
@@ -139,8 +139,8 @@ def test_ValueError_check_preprocess_series_when_series_is_dict_with_different_f
     )
 
     err_msg = re.escape(
-        ("All series must have a DatetimeIndex index with the same frequency. "
-         "Found frequencies: ['<Day>', '<MonthBegin>']")
+        ("All series must have a Pandas DatetimeIndex as index with the "
+         "same frequency. Found frequencies: ['<Day>', '<MonthBegin>']")
     )
     with pytest.raises(ValueError, match = err_msg):
         check_preprocess_series(series = series_dict)
