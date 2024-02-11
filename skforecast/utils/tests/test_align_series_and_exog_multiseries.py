@@ -140,7 +140,10 @@ def test_output_align_series_and_exog_multiseries_when_series_is_dict_different_
     Test align_series_and_exog_multiseries when `series` is a dict 
     with series of different lengths and NaNs in between with `exog` is None.
     """
-    series_diff = series_as_dict.copy()
+    series_diff = {
+        'l1': series_as_dict['l1'].copy(),
+        'l2': series_as_dict['l2'].copy()
+    }
     n_nans = 10
     series_diff['l1'].iloc[:n_nans, ] = np.nan
     series_diff['l1'].iloc[20:23, ] = np.nan
@@ -381,6 +384,11 @@ def test_output_align_series_and_exog_multiseries_when_input_series_is_DataFrame
     Test align_series_and_exog_multiseries when `series` is a pandas DataFrame 
     and `exog` is a dict.
     """
+    exog_dict = {
+        '1': exog.copy(),
+        '2': exog['exog_1'].copy()
+    }
+
     input_series_is_dict = isinstance(series, dict)
     series_dict, series_indexes = check_preprocess_series(series=series)
 
@@ -388,7 +396,7 @@ def test_output_align_series_and_exog_multiseries_when_input_series_is_DataFrame
                        input_series_is_dict = input_series_is_dict,
                        series_indexes       = series_indexes,
                        series_col_names     = ['1', '2'],
-                       exog                 = exog_as_dict,
+                       exog                 = exog_dict,
                        exog_dict            = {'1': None, '2': None}
                    )
 
@@ -417,9 +425,9 @@ def test_output_align_series_and_exog_multiseries_when_input_series_is_DataFrame
                  columns = ['exog_1', 'exog_2']
              ).astype({'exog_1': float}),
         '2': pd.DataFrame(
-                 data    = exog.to_numpy(),
+                 data    = exog['exog_1'].to_numpy(),
                  index   = pd.RangeIndex(start=0, stop=50),
-                 columns = ['exog_1', 'exog_2']
+                 columns = ['exog_1']
              ).astype({'exog_1': float}),
     }
     
@@ -786,8 +794,7 @@ def test_output_align_series_and_exog_multiseries_when_series_is_dict_and_length
         pd.testing.assert_frame_equal(exog_dict[k], expected_exog_dict[k])
         pd.testing.assert_index_equal(exog_dict[k].index, series_dict[k].index)
 
-# TODO:
-# - Test when series is a dict and exog with intersection != len series
+
 def test_output_align_series_and_exog_multiseries_when_series_is_dict_and_different_length_intersection_with_exog():
     """
     Test align_series_and_exog_multiseries when `series` is a dict and the
@@ -805,21 +812,22 @@ def test_output_align_series_and_exog_multiseries_when_series_is_dict_and_differ
     input_series_is_dict = isinstance(series_diff, dict)
     series_dict, series_indexes = check_preprocess_series(series=series_diff)
 
-    exog_no_intersection = {
+    exog_half_intersection = {
         'l1': exog_as_dict_datetime['l1'].copy(),
         'l2': exog_as_dict_datetime['l2'].copy()
     }
-    exog_no_intersection['l1'].iloc[20:23, :] = np.nan
-    exog_no_intersection['l2'].iloc[33:49, :] = np.nan
-    exog_no_intersection['l1'].index = pd.date_range(
-        start='2000-01-15', periods=len(exog_no_intersection['l1']), freq='D'
+    exog_half_intersection['l1'].iloc[20:23, :] = np.nan
+    exog_half_intersection['l1'].index = pd.date_range(
+        start='2000-01-15', periods=len(exog_half_intersection['l1']), freq='D'
     )
+    exog_half_intersection['l2'].iloc[:10] = np.nan
+    exog_half_intersection['l2'].iloc[33:49] = np.nan
 
     exog_dict, _ = check_preprocess_exog_multiseries(
                        input_series_is_dict = input_series_is_dict,
                        series_indexes       = series_indexes,
                        series_col_names     = ['l1', 'l2'],
-                       exog                 = exog_no_intersection,
+                       exog                 = exog_half_intersection,
                        exog_dict            = {'l1': None, 'l2': None}
                    )
 
@@ -848,17 +856,19 @@ def test_output_align_series_and_exog_multiseries_when_series_is_dict_and_differ
     }
     expected_exog_dict = {
         'l1': pd.DataFrame(
-                  data    = exog_as_dict_datetime['l1'].to_numpy()[],
-                  index   = pd.date_range(start='2000-01-15', periods=len(series_2)-n_nans, freq='D'),
+                  data    = np.vstack((
+                                np.full((4, len(['exog_1', 'exog_2'])), np.nan), 
+                                exog_half_intersection['l1'].to_numpy()[:40-4]
+                            )),
+                  index   = pd.date_range(start='2000-01-11', periods=len(expected_series_dict['l1']), freq='D'),
                   columns = ['exog_1', 'exog_2']
-              ).astype({'exog_2': object}),
+              ).astype({'exog_1': float, 'exog_2': object}),
         'l2': pd.DataFrame(
-                  data    = exog_as_dict_datetime['l2'].to_numpy(),
-                  index   = pd.date_range(start='2000-01-01', periods=len(series_2), freq='D'),
+                  data    = exog_half_intersection['l2'].to_numpy(),
+                  index   = pd.date_range(start='2000-01-01', periods=len(exog_half_intersection['l2']), freq='D'),
                   columns = ['exog_1']
-              ),
+              ).astype({'exog_1': float}),
     }
-    expected_exog_dict['l1'].iloc[:n_nans, :] = np.nan
     
     assert isinstance(series_dict, dict)
     assert list(series_dict.keys()) == ['l1', 'l2']

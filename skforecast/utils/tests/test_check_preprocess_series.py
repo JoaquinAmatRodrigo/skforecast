@@ -4,6 +4,7 @@ import re
 import pytest
 import numpy as np
 import pandas as pd
+from copy import deepcopy
 from skforecast.utils import check_preprocess_series
 from skforecast.ForecasterAutoregMultiSeries.tests.fixtures_ForecasterAutoregMultiSeries import series
 from skforecast.ForecasterAutoregMultiSeries.tests.fixtures_ForecasterAutoregMultiSeries import series_as_dict
@@ -130,7 +131,7 @@ def test_ValueError_check_preprocess_series_when_series_is_dict_with_different_f
     Test ValueError is raised when series is dict containing series with 
     DatetimeIndex but different frequencies.
     """
-    series_dict = series_as_dict.copy()
+    series_dict = deepcopy(series_as_dict)
     series_dict['l1'].index = pd.date_range(
         start='2000-01-01', periods=len(series_dict['l1']), freq='D'
     )
@@ -151,8 +152,7 @@ def test_check_preprocess_series_when_series_is_dict():
     Test check_preprocess_series when `series` is a pandas DataFrame with 
     a DatetimeIndex.
     """
-
-    series_dict = series_as_dict.copy()
+    series_dict = deepcopy(series_as_dict)
     series_dict['l1'].index = pd.date_range(start='2000-01-01', periods=len(series_dict['l1']), freq='D')
     series_dict['l2'] = series_dict['l2'].to_frame()
     series_dict['l2'].index = pd.date_range(start='2000-01-01', periods=len(series_dict['l2']), freq='D')

@@ -4,6 +4,7 @@ import re
 import pytest
 import numpy as np
 import pandas as pd
+from copy import deepcopy
 from skforecast.exceptions import MissingValuesExogWarning
 from skforecast.utils import check_preprocess_series
 from skforecast.utils import check_preprocess_exog_multiseries
@@ -217,7 +218,7 @@ def test_MissingValuesExogWarning_check_preprocess_exog_multiseries_when_exog_is
     """
     _, series_indexes = check_preprocess_series(series=series_2)
 
-    incomplete_exog = exog_as_dict_datetime.copy()
+    incomplete_exog = deepcopy(exog_as_dict_datetime)
     incomplete_exog.pop('l1')
 
     warn_msg = re.escape(
@@ -241,7 +242,7 @@ def test_ValueError_check_preprocess_exog_multiseries_when_exog_dict_with_differ
     """
     _, series_indexes = check_preprocess_series(series=series_2)
 
-    not_valid_exog = exog_as_dict_datetime.copy()
+    not_valid_exog = deepcopy(exog_as_dict_datetime)
     not_valid_exog['l2'] = not_valid_exog['l2'].iloc[:30]
 
     err_msg = re.escape(
@@ -525,7 +526,7 @@ def test_output_check_preprocess_exog_multiseries_when_series_is_dict_and_exog_d
     """
     series_dict, series_indexes = check_preprocess_series(series=series_as_dict)
 
-    exog_test = exog_as_dict_datetime.copy()
+    exog_test = deepcopy(exog_as_dict_datetime)
     exog_test['l1'] = exog_test['l1'].iloc[10:30]
     exog_test['l2'] = exog_test['l2'].iloc[:40]
 

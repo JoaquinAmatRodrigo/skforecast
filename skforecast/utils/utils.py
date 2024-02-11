@@ -1957,7 +1957,6 @@ def select_n_jobs_fit_forecaster(
     return n_jobs
 
 
-# TODO: Review tests for this function
 def check_preprocess_series(
     series: Union[pd.DataFrame, dict],
 ) -> Tuple[dict, pd.Index]:
@@ -1992,7 +1991,7 @@ def check_preprocess_series(
         series_dict = series.to_dict("series")
     
     elif isinstance(series, dict):
-        series_dict = series
+        series_dict = deepcopy(series)
 
         not_valid_series = [k
                             for k, v in series_dict.items()
@@ -2129,6 +2128,8 @@ def check_preprocess_exog_multiseries(
             (k, v) for k, v in exog.items() 
             if k in exog_dict
         )
+        exog_dict = deepcopy(exog_dict) 
+        
         series_not_in_exog = set(series_col_names) - set(exog.keys())
         if series_not_in_exog:
             warnings.warn(
@@ -2207,7 +2208,6 @@ def check_preprocess_exog_multiseries(
     return exog_dict, exog_col_names
 
 
-# TODO: Include tests for this function
 def align_series_and_exog_multiseries(
     series_dict: dict,
     input_series_is_dict: bool,
