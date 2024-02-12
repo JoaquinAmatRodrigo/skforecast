@@ -23,7 +23,7 @@ def test_check_exog_dtypes_DataTypeWarning_when_exog_has_str_values(exog):
          "Fitting the forecaster may fail.")
     )
     with pytest.warns(DataTypeWarning, match = warn_msg):
-        check_exog_dtypes(exog)
+        check_exog_dtypes(exog, call_check_exog=False)
 
 
 @pytest.mark.parametrize("exog", 

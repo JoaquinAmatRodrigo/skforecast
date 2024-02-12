@@ -395,7 +395,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self,
         y: pd.Series,
         ignore_exog: bool,
-        exog: Optional[Union[pd.Series, pd.DataFrame]]=None
+        exog: Optional[pd.DataFrame]=None
     ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.Series]:
         """
         Create training matrices from univariate time series and exogenous
@@ -407,9 +407,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             Training time series.
         ignore_exog : bool
             If `True`, `exog` is ignored.
-        exog : pandas Series, pandas DataFrame, default `None`
-            Exogenous variable/s included as predictor/s. Must have the same
-            number of observations as `y` and their indexes must be aligned.
+        exog : pandas DataFrame, default `None`
+            Exogenous variable/s included as predictor/s.
 
         Returns
         -------
