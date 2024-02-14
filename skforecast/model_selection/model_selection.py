@@ -16,7 +16,7 @@ import pandas as pd
 from joblib import Parallel, delayed, cpu_count
 from tqdm.auto import tqdm
 import optuna
-from optuna.samplers import TPESampler, RandomSampler
+from optuna.samplers import TPESampler
 from sklearn.metrics import (
     mean_squared_error,
     mean_absolute_error,
