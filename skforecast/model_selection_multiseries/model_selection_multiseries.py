@@ -218,6 +218,13 @@ def _backtesting_forecaster_multiseries(
                      forecaster = forecaster,
                      refit      = refit
                  )
+    elif not isinstance(refit, bool) and refit != 1:
+        warnings.warn(
+            ("If `refit` is an integer other than 1 (intermittent refit). `n_jobs` "
+             "is set to 1 to avoid unexpected results during parallelization."),
+             IgnoredArgumentWarning
+        )
+        n_jobs = 1
     else:
         n_jobs = n_jobs if n_jobs > 0 else cpu_count()
     

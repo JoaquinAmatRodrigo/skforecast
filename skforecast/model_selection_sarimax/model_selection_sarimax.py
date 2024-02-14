@@ -16,6 +16,7 @@ from sklearn.model_selection import ParameterGrid
 from sklearn.model_selection import ParameterSampler
 
 from ..exceptions import LongTrainingWarning
+from ..exceptions import IgnoredArgumentWarning
 from ..model_selection.model_selection import _get_metric
 from ..model_selection.model_selection import _create_backtesting_folds
 from ..utils import check_backtesting_input
@@ -131,6 +132,11 @@ def _backtesting_sarimax(
     forecaster = deepcopy(forecaster)
     
     if refit == False:
+        warnings.warn(
+            ("If `refit = False`, `n_jobs` is set to 1 to avoid unexpected "
+             "results during parallelization."),
+             IgnoredArgumentWarning
+        )
         n_jobs = 1
     else:
         if n_jobs == 'auto':        
@@ -138,6 +144,13 @@ def _backtesting_sarimax(
                          forecaster = forecaster,
                          refit      = refit
                      )
+        elif not isinstance(refit, bool) and refit != 1:
+            warnings.warn(
+                ("If `refit` is an integer other than 1 (intermittent refit). `n_jobs` "
+                 "is set to 1 to avoid unexpected results during parallelization."),
+                 IgnoredArgumentWarning
+            )
+            n_jobs = 1
         else:
             n_jobs = n_jobs if n_jobs > 0 else cpu_count()
 

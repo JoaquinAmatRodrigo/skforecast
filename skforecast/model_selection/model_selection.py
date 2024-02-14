@@ -25,6 +25,7 @@ import optuna
 from optuna.samplers import TPESampler, RandomSampler
 
 from ..exceptions import LongTrainingWarning
+from ..exceptions import IgnoredArgumentWarning
 from ..utils import check_backtesting_input
 from ..utils import initialize_lags_grid
 from ..utils import select_n_jobs_backtesting
@@ -401,6 +402,13 @@ def _backtesting_forecaster(
                      forecaster = forecaster,
                      refit      = refit
                  )
+    elif not isinstance(refit, bool) and refit != 1:
+        warnings.warn(
+            ("If `refit` is an integer other than 1 (intermittent refit). `n_jobs` "
+             "is set to 1 to avoid unexpected results during parallelization."),
+             IgnoredArgumentWarning
+        )
+        n_jobs = 1
     else:
         n_jobs = n_jobs if n_jobs > 0 else cpu_count()
 
