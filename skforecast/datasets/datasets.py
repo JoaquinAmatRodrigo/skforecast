@@ -130,7 +130,7 @@ def fetch_dataset(
             'date_format': '%Y-%m-%d %H:%M:%S',
             'freq': 'H',
             'description': (
-                'Hourly measures of several air quimical pollutant (pm2.5, co, no, '
+                'Hourly measures of several air chemical pollutant (pm2.5, co, no, '
                 'no2, pm10, nox, o3, so2) at Valencia city.'
             ),
             'source': (
