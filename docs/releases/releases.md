@@ -34,7 +34,7 @@ The main changes in this release are:
 
 **Changed**
 
-+  Deprecated argument `lags_grid` in `bayesian_search_forecaster`. Use `search_space` to define the candidate values for the lags. This way, lags can be optimized together with the other parameters of the regressor in the bayesian search. 
++ Deprecated argument `lags_grid` in `bayesian_search_forecaster`. Use `search_space` to define the candidate values for the lags. This allows the lags to be optimized along with the other hyperparameters of the regressor in the bayesian search.
 
 + Changed the default value of the `transformer_series` argument to use a `StandardScaler()` in the Global Forecasters (`ForecasterAutoregMultiSeries`, `ForecasterAutoregMultiSeriesCustom` and `ForecasterAutoregMultiVariate`).
 

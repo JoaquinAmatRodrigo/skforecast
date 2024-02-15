@@ -67,7 +67,7 @@ def initialize_lags(
     if isinstance(lags, (list, tuple, np.ndarray)):
         for lag in lags:
             if not isinstance(lag, (int, np.int64, np.int32)):
-                raise TypeError("All values in `lags` must be int.")
+                raise TypeError("All values in `lags` must be integers.")
         
     if isinstance(lags, (list, tuple, range, np.ndarray)) and min(lags) < 1:
         raise ValueError("Minimum value of lags allowed is 1.")
@@ -79,9 +79,9 @@ def initialize_lags(
     elif isinstance(lags, np.ndarray):
         lags = lags
     else:
-        if not forecaster_name == 'ForecasterAutoregMultiVariate':
+        if forecaster_name != 'ForecasterAutoregMultiVariate':
             raise TypeError(
-                ("`lags` argument must be an int, 1d numpy ndarray, range or list. "
+                (f"`lags` argument must be an int, 1d numpy ndarray, range, tuple or list. "
                  f"Got {type(lags)}.")
             )
         else:
