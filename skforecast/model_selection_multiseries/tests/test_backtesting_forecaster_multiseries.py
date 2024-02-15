@@ -38,12 +38,13 @@ def test_backtesting_forecaster_multiseries_TypeError_when_forecaster_not_a_fore
                      regressor = Ridge(random_state=123),
                      lags      = 2
                  )
-    
+
     err_msg = re.escape(
-            ("`forecaster` must be of type `ForecasterAutoregMultiSeries`, "
-             "`ForecasterAutoregMultiSeriesCustom` or `ForecasterAutoregMultiVariate`, "
-             "for all other types of forecasters use the functions available in "
-             f"the `model_selection` module. Got {type(forecaster).__name__}")
+            ("`forecaster` must be of type ['ForecasterAutoregMultiSeries', "
+             "'ForecasterAutoregMultiSeriesCustom', 'ForecasterAutoregMultiVariate', "
+             "'ForecasterRnn'], for all other types of forecasters use the functions "
+             "available in the `model_selection` module. "
+             f"Got {type(forecaster).__name__}")
         )
     with pytest.raises(TypeError, match = err_msg):
         backtesting_forecaster_multiseries(
