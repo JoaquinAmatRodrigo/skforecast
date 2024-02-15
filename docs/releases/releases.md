@@ -12,7 +12,6 @@ The main changes in this release are:
 
 + Changed the default value of the `transformer_series` argument to use a `StandardScaler()` in the Global Forecasters (`ForecasterAutoregMultiSeries`, `ForecasterAutoregMultiSeriesCustom` and `ForecasterAutoregMultiVariate`).
 
-+ 
 
 **Added**
 
@@ -31,6 +30,8 @@ The main changes in this release are:
 + Added `_initialize_levels_model_selection_multiseries` function to `model_selection_multiseries` module. This function initializes the levels of the series to be used in the model selection functions.
 
 + Added `set_dark_theme` function to the `plot` module to set a dark theme for matplotlib plots.
+
++ Allow tuple type for `lags` argument in Forecasters.
 
 **Changed**
 

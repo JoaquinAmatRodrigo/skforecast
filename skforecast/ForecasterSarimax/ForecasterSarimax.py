@@ -871,8 +871,7 @@ class ForecasterSarimax():
             metric = self.regressor.get_info_criteria(criteria=criteria, method=method)
         
         return metric
-
-
+    
     def summary(self) -> None:
         """
         Show forecaster information.
@@ -886,5 +885,4 @@ class ForecasterSarimax():
         None
         
         """
-        
         print(self)
