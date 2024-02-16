@@ -2060,7 +2060,7 @@ def bayesian_search_forecaster_multivariate(
     return results, results_opt_best
 
 
-def select_features_multiseries(
+def select_features_multiseries( #TODO: EXCLUIR LAS COLUMNAS DEL ENCODING DE LAS SERIES, POSIBLEMENTE SACANDOLAS DEL ENCODER DEL FORECASTER
     forecaster: object,
     selector: object,
     series: pd.DataFrame,
