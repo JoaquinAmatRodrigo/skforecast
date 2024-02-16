@@ -1200,7 +1200,7 @@ def bayesian_search_forecaster(
     gap: int=0,
     allow_incomplete_fold: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-    lags_grid:Any='deprecated',
+    lags_grid: Any='deprecated',
     refit: Optional[Union[bool, int]]=False,
     n_trials: int=10,
     random_state: int=123,
@@ -1297,7 +1297,6 @@ def bayesian_search_forecaster(
         Results for each combination of parameters.
 
         - column lags: lags configuration for each iteration.
-        - column lags_label: descriptive label or alias for the lags.
         - column params: parameters configuration for each iteration.
         - column metric: metric value estimated for each iteration.
         - additional n columns with param = value.
