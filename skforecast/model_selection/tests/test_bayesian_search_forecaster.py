@@ -40,15 +40,14 @@ def test_ValueError_bayesian_search_forecaster_when_return_best_and_len_y_exog_d
         return search_space
 
     err_msg = re.escape(
-            (f"`exog` must have same number of samples as `y`. "
-             f"length `exog`: ({len(exog)}), length `y`: ({len(y)})")
-        )
+        (f"`exog` must have same number of samples as `y`. "
+         f"length `exog`: ({len(exog)}), length `y`: ({len(y)})")
+    )
     with pytest.raises(ValueError, match = err_msg):
         bayesian_search_forecaster(
             forecaster         = forecaster,
             y                  = y,
             exog               = exog,
-            lags_grid          = [2, 4],
             search_space       = search_space,
             steps              = 3,
             metric             = 'mean_absolute_error',
@@ -80,12 +79,11 @@ def test_bayesian_search_forecaster_ValueError_when_engine_not_optuna():
 
     engine = 'not_optuna'
     
-    err_msg = re.escape(f"""`engine` only allows 'optuna', got {engine}.""")
+    err_msg = re.escape(f"`engine` only allows 'optuna', got {engine}.")
     with pytest.raises(ValueError, match = err_msg):
         bayesian_search_forecaster(
             forecaster         = forecaster,
             y                  = y,
-            lags_grid          = [2, 4],
             search_space       = search_space,
             steps              = 3,
             metric             = 'mean_absolute_error',
@@ -154,8 +152,10 @@ def test_results_output_bayesian_search_forecaster_optuna_engine_ForecasterAutor
             0.21647289061896782, 0.2345829390285611]], dtype=object),
         columns=['lags', 'params', 'mean_absolute_error', 'alpha'],
         index=pd.Index([6, 4, 0, 7, 3, 8, 5, 9, 1, 2], dtype='int64'),
-    )
-    expected_results[['mean_absolute_error', 'alpha']] = expected_results[['mean_absolute_error', 'alpha']].astype(float)
+    ).astype({
+        'mean_absolute_error': float, 
+        'alpha': float
+    })
 
     pd.testing.assert_frame_equal(results, expected_results)
 
@@ -225,7 +225,9 @@ def test_results_output_bayesian_search_forecaster_optuna_engine_ForecasterAutor
         0.2345829390285611]], dtype=object),
         columns=['lags', 'params', 'mean_absolute_error', 'alpha'],
         index=pd.Index([6, 4, 0, 7, 3, 8, 5, 9, 1, 2], dtype='int64')
-    )
-    expected_results[['mean_absolute_error', 'alpha']] = expected_results[['mean_absolute_error', 'alpha']].astype(float)
+    ).astype({
+        'mean_absolute_error': float, 
+        'alpha': float
+    })
 
     pd.testing.assert_frame_equal(results, expected_results)
