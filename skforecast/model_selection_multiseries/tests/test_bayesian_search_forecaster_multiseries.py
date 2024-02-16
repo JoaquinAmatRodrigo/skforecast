@@ -41,15 +41,14 @@ def test_ValueError_bayesian_search_forecaster_multiseries_when_return_best_and_
         return search_space
 
     err_msg = re.escape(
-            (f"`exog` must have same number of samples as `series`. "
-             f"length `exog`: ({len(exog)}), length `series`: ({len(series)})")
-        )
+        (f"`exog` must have same number of samples as `series`. "
+         f"length `exog`: ({len(exog)}), length `series`: ({len(series)})")
+    )
     with pytest.raises(ValueError, match = err_msg):
         bayesian_search_forecaster_multiseries(
             forecaster         = forecaster,
             series             = series,
             exog               = exog,
-            lags_grid          = [2, 4],
             search_space       = search_space,
             steps              = 3,
             metric             = 'mean_absolute_error',
@@ -75,7 +74,7 @@ def test_bayesian_search_forecaster_multiseries_ValueError_when_engine_not_optun
                  )
 
     def search_space(trial): # pragma: no cover
-        search_space  = {'alpha' : trial.suggest_float('alpha', 1e-2, 1.0)}
+        search_space  = {'alpha': trial.suggest_float('alpha', 1e-2, 1.0)}
 
         return search_space
 
@@ -86,7 +85,6 @@ def test_bayesian_search_forecaster_multiseries_ValueError_when_engine_not_optun
         bayesian_search_forecaster_multiseries(
             forecaster         = forecaster,
             series             = series,
-            lags_grid          = [2, 4],
             search_space       = search_space,
             steps              = 3,
             metric             = 'mean_absolute_error',
@@ -116,8 +114,8 @@ def test_results_output_bayesian_search_forecaster_multiseries_optuna_engine_For
 
     def search_space(trial):
         search_space  = {
-            'alpha' : trial.suggest_float('alpha', 1e-2, 1.0),
-            'lags'  : trial.suggest_categorical('lags', [2, 4])
+            'alpha': trial.suggest_float('alpha', 1e-2, 1.0),
+            'lags' : trial.suggest_categorical('lags', [2, 4])
         }
 
         return search_space
@@ -165,10 +163,10 @@ def test_results_output_bayesian_search_forecaster_multiseries_optuna_engine_For
             0.20914638910039665, 0.9809565564007693]], dtype=object),
         columns=['levels', 'lags', 'params', 'mean_absolute_error', 'alpha'],
         index=pd.Index([9, 3, 4, 6, 8, 1, 0, 5, 7, 2], dtype='int64')
-    )
-
-    expected_results['mean_absolute_error'] = expected_results['mean_absolute_error'].astype(float)
-    expected_results['alpha'] = expected_results['alpha'].astype(float)
+    ).astype({
+        'mean_absolute_error': float, 
+        'alpha': float
+    })
 
     pd.testing.assert_frame_equal(results, expected_results)
 
@@ -241,10 +239,10 @@ def test_results_output_bayesian_search_forecaster_multiseries_optuna_engine_For
             0.9809565564007693]], dtype=object),
         columns=['levels', 'lags', 'params', 'mean_absolute_error', 'alpha'],
         index=pd.Index([2, 1, 9, 5, 8, 3, 7, 0, 4, 6], dtype='int64')
-    )
-
-    expected_results['mean_absolute_error'] = expected_results['mean_absolute_error'].astype(float)
-    expected_results['alpha'] = expected_results['alpha'].astype(float)
+    ).astype({
+        'mean_absolute_error': float,
+        'alpha': float
+    })
 
     pd.testing.assert_frame_equal(results, expected_results)
 
@@ -267,9 +265,9 @@ def test_results_output_bayesian_search_forecaster_multivariate_optuna_engine_Fo
 
     def search_space(trial):
         search_space  = {
-            'alpha' : trial.suggest_float('alpha', 1e-2, 1.0),
-            'lags'  : trial.suggest_categorical('lags', [2, {'l1': 4, 'l2': [2, 3]}])
-            }
+            'alpha': trial.suggest_float('alpha', 1e-2, 1.0),
+            'lags' : trial.suggest_categorical('lags', [2, {'l1': 4, 'l2': [2, 3]}])
+        }
 
         return search_space
 
@@ -316,9 +314,9 @@ def test_results_output_bayesian_search_forecaster_multivariate_optuna_engine_Fo
             0.20148678375852938, 0.9809565564007693]], dtype=object),
         columns=['levels', 'lags', 'params', 'mean_absolute_error', 'alpha'],
         index=pd.Index([9, 3, 4, 6, 8, 1, 0, 5, 7, 2], dtype='int64')
-    )
-
-    expected_results['mean_absolute_error'] = expected_results['mean_absolute_error'].astype(float)
-    expected_results['alpha'] = expected_results['alpha'].astype(float)
+    ).astype({
+        'mean_absolute_error': float,
+        'alpha': float
+    })
 
     pd.testing.assert_frame_equal(results, expected_results)

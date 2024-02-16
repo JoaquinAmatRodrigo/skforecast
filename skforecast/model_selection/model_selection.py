@@ -810,8 +810,9 @@ def grid_search_forecaster(
     show_progress: bool, default `True`
         Whether to show a progress bar.
     output_file : str, default `None`
-        File name or full path to save the results. Results are saved as a .txt 
-        file with tab-separated columns. If `None`, the results will not be saved.
+        Specifies the filename or full path where the results should be saved. 
+        The results will be saved in a tab-separated values (TSV) format. If 
+        `None`, the results will not be saved to a file.
         **New in version 0.12.0**
 
     Returns
@@ -936,8 +937,9 @@ def random_search_forecaster(
     show_progress: bool, default `True`
         Whether to show a progress bar.
     output_file : str, default `None`
-        File name or full path to save the results. Results are saved as a .txt 
-        file with tab-separated columns. If `None`, the results will not be saved.
+        Specifies the filename or full path where the results should be saved. 
+        The results will be saved in a tab-separated values (TSV) format. If 
+        `None`, the results will not be saved to a file.
         **New in version 0.12.0**
 
     Returns
@@ -1054,8 +1056,9 @@ def _evaluate_grid_hyperparameters(
     show_progress: bool, default `True`
         Whether to show a progress bar.
     output_file : str, default `None`
-        File name or full path to save the results. Results are saved as a .txt 
-        file with tab-separated columns. If `None`, the results will not be saved.
+        Specifies the filename or full path where the results should be saved. 
+        The results will be saved in a tab-separated values (TSV) format. If 
+        `None`, the results will not be saved to a file.
         **New in version 0.12.0**
 
     Returns
@@ -1274,8 +1277,9 @@ def bayesian_search_forecaster(
     show_progress : bool, default `True`
         Whether to show a progress bar.
     output_file : str, default `None`
-        File name or full path to save the results. Results are saved as a .txt 
-        file with tab-separated columns. If `None`, the results will not be saved.
+        Specifies the filename or full path where the results should be saved. 
+        The results will be saved in a tab-separated values (TSV) format. If 
+        `None`, the results will not be saved to a file.
         **New in version 0.12.0**
     engine : str, default `'optuna'`
         Bayesian optimization runs through the optuna library.
@@ -1443,8 +1447,9 @@ def _bayesian_search_optuna(
     show_progress : bool, default `True`
         Whether to show a progress bar.
     output_file : str, default `None`
-        File name or full path to save the results. Results are saved as a .txt 
-        file with tab-separated columns. If `None`, the results will not be saved.
+        Specifies the filename or full path where the results should be saved. 
+        The results will be saved in a tab-separated values (TSV) format. If 
+        `None`, the results will not be saved to a file.
         **New in version 0.12.0**
     kwargs_create_study : dict, default `{}`
         Keyword arguments (key, value mappings) to pass to optuna.create_study().

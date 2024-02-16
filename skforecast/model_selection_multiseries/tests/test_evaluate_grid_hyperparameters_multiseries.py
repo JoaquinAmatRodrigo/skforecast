@@ -35,8 +35,8 @@ def test_ValueError_evaluate_grid_hyperparameters_multiseries_when_return_best_a
     `return_best = True` and length of `series` and `exog` do not match.
     """
     forecaster = ForecasterAutoregMultiSeries(
-                    regressor = Ridge(random_state=123),
-                    lags      = 3
+                     regressor = Ridge(random_state=123),
+                     lags      = 3
                  )
     exog = series.iloc[:30, 0]
 
@@ -68,8 +68,8 @@ def test_evaluate_grid_hyperparameters_multiseries_exception_when_metric_list_du
     metrics is used with duplicate names.
     """
     forecaster = ForecasterAutoregMultiSeries(
-                    regressor = Ridge(random_state=123),
-                    lags      = 3
+                     regressor = Ridge(random_state=123),
+                     lags      = 3
                  )
     
     err_msg = re.escape("When `metric` is a `list`, each metric name must be unique.")

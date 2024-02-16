@@ -506,8 +506,9 @@ def grid_search_sarimax(
     show_progress : bool, default `True`
         Whether to show a progress bar.
     output_file : str, default `None`
-        File name or full path to save the results. Results are saved as a .txt 
-        file with tab-separated columns. If `None`, the results will not be saved.
+        Specifies the filename or full path where the results should be saved. 
+        The results will be saved in a tab-separated values (TSV) format. If 
+        `None`, the results will not be saved to a file.
         **New in version 0.12.0**
 
     Returns
@@ -628,8 +629,9 @@ def random_search_sarimax(
     show_progress : bool, default `True`
         Whether to show a progress bar.
     output_file : str, default `None`
-        File name or full path to save the results. Results are saved as a .txt 
-        file with tab-separated columns. If `None`, the results will not be saved.
+        Specifies the filename or full path where the results should be saved. 
+        The results will be saved in a tab-separated values (TSV) format. If 
+        `None`, the results will not be saved to a file.
         **New in version 0.12.0**
 
     Returns
@@ -741,8 +743,9 @@ def _evaluate_grid_hyperparameters_sarimax(
     show_progress : bool, default `True`
         Whether to show a progress bar.
     output_file : str, default `None`
-        File name or full path to save the results. Results are saved as a .txt 
-        file with tab-separated columns. If `None`, the results will not be saved.
+        Specifies the filename or full path where the results should be saved. 
+        The results will be saved in a tab-separated values (TSV) format. If 
+        `None`, the results will not be saved to a file.
         **New in version 0.12.0**
 
     Returns

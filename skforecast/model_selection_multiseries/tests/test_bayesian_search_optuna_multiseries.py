@@ -47,7 +47,7 @@ def test_ValueError_bayesian_search_optuna_multiseries_metric_list_duplicate_nam
 
     steps = 3
     n_validation = 12
-    lags_grid = [2, 4]
+    
     def search_space(trial): # pragma: no cover
         search_space  = {'alpha': trial.suggest_float('not_alpha', 1e-2, 1.0)}
 
@@ -59,7 +59,6 @@ def test_ValueError_bayesian_search_optuna_multiseries_metric_list_duplicate_nam
             forecaster         = forecaster,
             series             = series,
             steps              = steps,
-            lags_grid          = lags_grid,
             search_space       = search_space,
             metric             = ['mean_absolute_error', mean_absolute_error],
             refit              = True,
@@ -84,23 +83,22 @@ def test_ValueError_bayesian_search_optuna_multiseries_when_search_space_names_d
 
     steps = 3
     n_validation = 12
-    lags_grid = [2, 4]
+
     def search_space(trial):
         search_space  = {'alpha': trial.suggest_float('not_alpha', 1e-2, 1.0)}
 
         return search_space
     
     err_msg = re.escape(
-                ("Some of the key values do not match the search_space key names.\n"
-                "  Search Space keys  : ['alpha']\n"
-                "  Trial objects keys : ['not_alpha']")
+        ("Some of the key values do not match the search_space key names.\n"
+         "  Search Space keys  : ['alpha']\n"
+         "  Trial objects keys : ['not_alpha']")
     )
     with pytest.raises(ValueError, match = err_msg):
         _bayesian_search_optuna_multiseries(
             forecaster         = forecaster,
             series             = series,
             steps              = steps,
-            lags_grid          = lags_grid,
             search_space       = search_space,
             metric             = 'mean_absolute_error',
             refit              = True,
@@ -192,10 +190,11 @@ def test_results_output_bayesian_search_optuna_multiseries_ForecasterAutoregMult
         dtype=object),
         columns=['levels', 'lags', 'params', 'mean_absolute_error', 'n_estimators', 'min_samples_leaf', 'max_features'],
         index=pd.Index([9, 5, 0, 2, 7, 1, 8, 6, 3, 4], dtype='int64')
-    )
-    expected_results['mean_absolute_error'] = expected_results['mean_absolute_error'].astype(float)
-    expected_results['n_estimators'] = expected_results['n_estimators'].astype(int)
-    expected_results['min_samples_leaf'] = expected_results['min_samples_leaf'].astype(float)
+    ).astype({
+        'mean_absolute_error': float, 
+        'n_estimators': int, 
+        'min_samples_leaf': float
+    })
 
     pd.testing.assert_frame_equal(results, expected_results, check_dtype=False)
 
@@ -263,9 +262,10 @@ def test_results_output_bayesian_search_optuna_multiseries_ForecasterAutoregMult
             0.2163292127503296, 0.9809565564007693]], dtype=object),
         columns=['levels', 'lags', 'params', 'mean_absolute_error', 'alpha'],
         index=pd.Index([9, 3, 4, 6, 8, 1, 0, 5, 7, 2], dtype='int64')
-    )
-    expected_results['mean_absolute_error'] = expected_results['mean_absolute_error'].astype(float)
-    expected_results['alpha'] = expected_results['alpha'].astype(float)
+    ).astype({
+        'mean_absolute_error': float, 
+        'alpha': float
+    })
 
     pd.testing.assert_frame_equal(results, expected_results, check_dtype=False)
     
@@ -335,9 +335,10 @@ def test_results_output_bayesian_search_optuna_multiseries_with_kwargs_create_st
             0.2091714215090992, 1.9619131128015386]], dtype=object),
         columns=['levels', 'lags', 'params', 'mean_absolute_error', 'alpha'],
         index=pd.Index([9, 3, 4, 6, 8, 1, 0, 5, 7, 2], dtype='int64')
-    )
-    expected_results['mean_absolute_error'] = expected_results['mean_absolute_error'].astype(float)
-    expected_results['alpha'] = expected_results['alpha'].astype(float)
+    ).astype({
+        'mean_absolute_error': float,
+        'alpha': float
+    })
 
     pd.testing.assert_frame_equal(results, expected_results)
 
@@ -404,11 +405,11 @@ def test_results_output_bayesian_search_optuna_multiseries_with_kwargs_study_opt
             0.22300765864212552, 172, 24, 'log2']], dtype=object),
         columns=['levels', 'lags', 'params', 'mean_absolute_error', 'n_estimators', 'max_depth', 'max_features'],
         index=pd.RangeIndex(start=0, stop=7, step=1)
-    )
-
-    expected_results['mean_absolute_error'] = expected_results['mean_absolute_error'].astype(float)
-    expected_results['n_estimators'] = expected_results['n_estimators'].astype(int)
-    expected_results['max_depth'] = expected_results['max_depth'].astype(int)
+    ).astype({
+        'mean_absolute_error': float,
+        'n_estimators': int,
+        'max_depth': int
+    })
 
     pd.testing.assert_frame_equal(results.head(1), expected_results.head(1), check_dtype=False)
 
@@ -417,7 +418,7 @@ def test_results_output_bayesian_search_optuna_multiseries_when_lags_is_not_prov
     """
     Test output of _bayesian_search_optuna_multiseries in ForecasterAutoregMultiSeries 
     when `lags` is not provided (mocked done in skforecast v0.12.0), 
-    should use forecaster.lags as `lags_grid`.
+    should use forecaster.lags.
     """
     forecaster = ForecasterAutoregMultiSeries(
                      regressor = Ridge(random_state=123),
@@ -425,6 +426,7 @@ def test_results_output_bayesian_search_optuna_multiseries_when_lags_is_not_prov
                  )
     steps = 3
     n_validation = 12
+
     def search_space(trial):
         search_space  = {'alpha': trial.suggest_float('alpha', 1e-2, 1.0)}
         
@@ -478,10 +480,10 @@ def test_results_output_bayesian_search_optuna_multiseries_when_lags_is_not_prov
             0.9809565564007693]], dtype=object),
         columns=['levels', 'lags', 'params', 'mean_absolute_error', 'alpha'],
         index=pd.Index([2, 1, 9, 5, 8, 3, 7, 0, 4, 6], dtype='int64')
-    )
-
-    expected_results['mean_absolute_error'] = expected_results['mean_absolute_error'].astype(float)
-    expected_results['alpha'] = expected_results['alpha'].astype(float)
+    ).astype({
+        'mean_absolute_error': float,
+        'alpha': float
+    })
 
     pd.testing.assert_frame_equal(results, expected_results)
 
@@ -552,9 +554,10 @@ def test_results_output_bayesian_search_optuna_multiseries_ForecasterAutoregMult
             0.9809565564007693]], dtype=object),
         columns=['levels', 'lags', 'params', 'mean_absolute_error', 'alpha'],
         index=pd.Index([2, 1, 9, 5, 8, 3, 7, 0, 4, 6], dtype='int64')
-    )
-    expected_results['mean_absolute_error'] = expected_results['mean_absolute_error'].astype(float)
-    expected_results['alpha'] = expected_results['alpha'].astype(float)
+    ).astype({
+        'mean_absolute_error': float,
+        'alpha': float
+    })
 
     pd.testing.assert_frame_equal(results, expected_results)
 
@@ -578,7 +581,7 @@ def test_results_output_bayesian_search_optuna_multiseries_ForecasterAutoregMult
         search_space  = {
             'alpha': trial.suggest_float('alpha', 1e-2, 1.0),
             'lags' : trial.suggest_categorical('lags', [2, 4])
-            }
+        }
         
         return search_space
 
@@ -621,10 +624,10 @@ def test_results_output_bayesian_search_optuna_multiseries_ForecasterAutoregMult
             0.23598059857016607]], dtype=object),
         columns=['levels', 'lags', 'params', 'mean_absolute_error', 'alpha'],
         index=pd.Index([1, 0, 5, 7, 2, 8, 6, 4, 3, 9], dtype='int64')
-    )
-
-    expected_results['mean_absolute_error'] = expected_results['mean_absolute_error'].astype(float)
-    expected_results['alpha'] = expected_results['alpha'].astype(float)
+    ).astype({
+        'mean_absolute_error': float,
+        'alpha': float
+    })
 
     pd.testing.assert_frame_equal(results, expected_results)
     
@@ -724,8 +727,8 @@ def test_results_opt_best_output__bayesian_search_optuna_multiseries_with_output
     refit              = True
     verbose            = False
     show_progress      = False
-    n_trials = 10
-    random_state = 123
+    n_trials           = 10
+    random_state       = 123
 
     def objective(
         trial,
@@ -803,7 +806,6 @@ def test_bayesian_search_optuna_multiseries_ForecasterAutoregMultiSeries_output_
 
     steps = 3
     n_validation = 12
-    lags_grid = [2, 4]
 
     def search_space(trial):
         search_space  = {
@@ -819,7 +821,6 @@ def test_bayesian_search_optuna_multiseries_ForecasterAutoregMultiSeries_output_
                   forecaster         = forecaster,
                   series             = series,
                   steps              = steps,
-                  lags_grid          = lags_grid,
                   search_space       = search_space,
                   metric             = 'mean_absolute_error',
                   refit              = False,
@@ -849,7 +850,6 @@ def test_bayesian_search_optuna_multiseries_ForecasterAutoregMultiSeriesCustom_o
 
     steps = 3
     n_validation = 12
-    lags_grid = [2, 4]
 
     def search_space(trial):
         search_space  = {
@@ -865,7 +865,6 @@ def test_bayesian_search_optuna_multiseries_ForecasterAutoregMultiSeriesCustom_o
                   forecaster         = forecaster,
                   series             = series,
                   steps              = steps,
-                  lags_grid          = lags_grid,
                   search_space       = search_space,
                   metric             = 'mean_absolute_error',
                   refit              = False,
@@ -896,7 +895,6 @@ def test_bayesian_search_optuna_multiseries_ForecasterAutoregMultiVariate_output
 
     steps = 3
     n_validation = 12
-    lags_grid = [2, 4]
 
     def search_space(trial):
         search_space  = {
@@ -912,7 +910,6 @@ def test_bayesian_search_optuna_multiseries_ForecasterAutoregMultiVariate_output
                   forecaster         = forecaster,
                   series             = series,
                   steps              = steps,
-                  lags_grid          = lags_grid,
                   search_space       = search_space,
                   metric             = 'mean_absolute_error',
                   refit              = False,
