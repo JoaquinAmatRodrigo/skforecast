@@ -3,7 +3,6 @@
 import re
 import pytest
 import numpy as np
-import pandas as pd
 from skforecast.utils import initialize_lags
 
 
@@ -75,10 +74,11 @@ def test_TypeError_initialize_lags_when_lags_is_not_valid_type_ForecasterAutoreg
     Test TypeError is raised when lags is not a valid type in ForecasterAutoregMultiVariate.
     """
     lags = 'not_valid_type'
+    
     err_msg = re.escape(
-                ("`lags` argument must be a dict, int, 1d numpy ndarray, range, tuple or list. "
-                 f"Got {type(lags)}.")
-            )
+        (f"`lags` argument must be a dict, int, 1d numpy ndarray, range, tuple or list. "
+         f"Got {type(lags)}.")
+    )
     with pytest.raises(TypeError, match = err_msg):
         initialize_lags(
             forecaster_name = 'ForecasterAutoregMultiVariate',

@@ -5,7 +5,7 @@
 ################################################################################
 # coding=utf-8
 
-from typing import Union, Tuple, Optional, Callable
+from typing import Union, Tuple, Optional, Callable, Any
 import numpy as np
 import pandas as pd
 import warnings
@@ -17,15 +17,16 @@ from tqdm.auto import tqdm
 from sklearn.model_selection import ParameterGrid
 from sklearn.model_selection import ParameterSampler
 import optuna
-from optuna.samplers import TPESampler, RandomSampler
+from optuna.samplers import TPESampler
 
 from ..exceptions import LongTrainingWarning
 from ..exceptions import IgnoredArgumentWarning
 from ..model_selection.model_selection import _get_metric
 from ..model_selection.model_selection import _create_backtesting_folds
 from ..utils import check_backtesting_input
-from ..utils import initialize_lags_grid
 from ..utils import select_n_jobs_backtesting
+from ..utils import initialize_lags
+from ..utils import initialize_lags_grid
 
 logging.basicConfig(
     format = '%(name)-10s %(levelname)-5s %(message)s', 
@@ -641,8 +642,9 @@ def grid_search_forecaster_multiseries(
     show_progress : bool, default `True`
         Whether to show a progress bar.
     output_file : str, default `None`
-        File name or full path to save the results. Results are saved as a .txt 
-        file with tab-separated columns. If `None`, the results will not be saved.
+        Specifies the filename or full path where the results should be saved. 
+        The results will be saved in a tab-separated values (TSV) format. If 
+        `None`, the results will not be saved to a file.
         **New in version 0.12.0**
 
     Returns
@@ -775,8 +777,9 @@ def random_search_forecaster_multiseries(
     show_progress : bool, default `True`
         Whether to show a progress bar.
     output_file : str, default `None`
-        File name or full path to save the results. Results are saved as a .txt 
-        file with tab-separated columns. If `None`, the results will not be saved.
+        Specifies the filename or full path where the results should be saved. 
+        The results will be saved in a tab-separated values (TSV) format. If 
+        `None`, the results will not be saved to a file.
         **New in version 0.12.0**
 
     Returns
@@ -897,8 +900,9 @@ def _evaluate_grid_hyperparameters_multiseries(
     show_progress : bool, default `True`
         Whether to show a progress bar.
     output_file : str, default `None`
-        File name or full path to save the results. Results are saved as a .txt 
-        file with tab-separated columns. If `None`, the results will not be saved.
+        Specifies the filename or full path where the results should be saved. 
+        The results will be saved in a tab-separated values (TSV) format. If 
+        `None`, the results will not be saved to a file.
         **New in version 0.12.0**
 
     Returns
@@ -1058,12 +1062,12 @@ def bayesian_search_forecaster_multiseries(
     allow_incomplete_fold: bool=True,
     levels: Optional[Union[str, list]]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-    lags_grid: Optional[Union[list, dict]]=None,
-    refit: Union[bool, int]=False,
+    lags_grid: Any='deprecated',
+    refit: Optional[Union[bool, int]]=False,
     n_trials: int=10,
     random_state: int=123,
     return_best: bool=True,
-    n_jobs: Union[int, str]='auto',
+    n_jobs: Optional[Union[int, str]]='auto',
     verbose: bool=True,
     show_progress: bool=True,
     output_file: Optional[str]=None,
@@ -1114,12 +1118,11 @@ def bayesian_search_forecaster_multiseries(
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
-    lags_grid : list, dict, default `None`
-        Lists of lags to try, containing int, lists, numpy ndarray, or range 
-        objects. If `dict`, the keys are used as labels in the `results` 
-        DataFrame, and the values are used as the lists of lags to try. Ignored 
-        if the forecaster is an instance of `ForecasterAutoregCustom` or 
-        `ForecasterAutoregMultiSeriesCustom`.
+    lags_grid : deprecated
+        **Deprecated since version 0.12.0 and will be removed in 0.13.0.** Use
+        `search_space` to define the candidate values for the lags. This allows 
+        the lags to be optimized along with the other hyperparameters of the 
+        regressor in the bayesian search.
     refit : bool, int, default `False`
         Whether to re-fit the forecaster in each iteration. If `refit` is an 
         integer, the Forecaster will be trained every that number of iterations.
@@ -1138,8 +1141,9 @@ def bayesian_search_forecaster_multiseries(
     show_progress : bool, default `True`
         Whether to show a progress bar.
     output_file : str, default `None`
-        File name or full path to save the results. Results are saved as a .txt 
-        file with tab-separated columns. If `None`, the results will not be saved.
+        Specifies the filename or full path where the results should be saved. 
+        The results will be saved in a tab-separated values (TSV) format. If 
+        `None`, the results will not be saved to a file.
         **New in version 0.12.0**
     engine : str, default `'optuna'`
         Bayesian optimization runs through the optuna library.
@@ -1157,12 +1161,11 @@ def bayesian_search_forecaster_multiseries(
 
         - column levels: levels configuration for each iteration.
         - column lags: lags configuration for each iteration.
-        - column lags_label: descriptive label or alias for the lags.
         - column params: parameters configuration for each iteration.
         - column metric: metric value estimated for each iteration. The resulting 
         metric will be the average of the optimization of all levels.
         - additional n columns with param = value.
-    results_opt_best : optuna object
+    best_trial : optuna object
         The best optimization result returned as a FrozenTrial optuna object.
     
     """
@@ -1172,38 +1175,45 @@ def bayesian_search_forecaster_multiseries(
             (f"`exog` must have same number of samples as `series`. "
              f"length `exog`: ({len(exog)}), length `series`: ({len(series)})")
         )
+    
+    if lags_grid != 'deprecated':
+        warnings.warn(
+            ("The 'lags_grid' argument is deprecated and will be removed in a future version. "
+             "Use the 'search_space' argument to define the candidate values for the lags. "
+             "Example: {'lags' : trial.suggest_categorical('lags', [3, 5])}")
+        )
+        lags_grid = 'deprecated'
 
     if engine not in ['optuna']:
         raise ValueError(
             f"`engine` only allows 'optuna', got {engine}."
         )
 
-    results, results_opt_best = _bayesian_search_optuna_multiseries(
-                                    forecaster            = forecaster,
-                                    series                = series,
-                                    exog                  = exog,
-                                    levels                = levels, 
-                                    lags_grid             = lags_grid,
-                                    search_space          = search_space,
-                                    steps                 = steps,
-                                    metric                = metric,
-                                    refit                 = refit,
-                                    initial_train_size    = initial_train_size,
-                                    fixed_train_size      = fixed_train_size,
-                                    gap                   = gap,
-                                    allow_incomplete_fold = allow_incomplete_fold,
-                                    n_trials              = n_trials,
-                                    random_state          = random_state,
-                                    return_best           = return_best,
-                                    n_jobs                = n_jobs,
-                                    verbose               = verbose,
-                                    show_progress         = show_progress,
-                                    output_file           = output_file,
-                                    kwargs_create_study   = kwargs_create_study,
-                                    kwargs_study_optimize = kwargs_study_optimize
-                                )
+    results, best_trial = _bayesian_search_optuna_multiseries(
+                              forecaster            = forecaster,
+                              series                = series,
+                              exog                  = exog,
+                              levels                = levels, 
+                              search_space          = search_space,
+                              steps                 = steps,
+                              metric                = metric,
+                              refit                 = refit,
+                              initial_train_size    = initial_train_size,
+                              fixed_train_size      = fixed_train_size,
+                              gap                   = gap,
+                              allow_incomplete_fold = allow_incomplete_fold,
+                              n_trials              = n_trials,
+                              random_state          = random_state,
+                              return_best           = return_best,
+                              n_jobs                = n_jobs,
+                              verbose               = verbose,
+                              show_progress         = show_progress,
+                              output_file           = output_file,
+                              kwargs_create_study   = kwargs_create_study,
+                              kwargs_study_optimize = kwargs_study_optimize
+                          )
 
-    return results, results_opt_best
+    return results, best_trial
 
 
 def _bayesian_search_optuna_multiseries(
@@ -1218,12 +1228,12 @@ def _bayesian_search_optuna_multiseries(
     allow_incomplete_fold: bool=True,
     levels: Optional[Union[str, list]]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-    lags_grid: Optional[Union[list, dict]]=None,
+    lags_grid: Any='deprecated',
     refit: Union[bool, int]=False,
     n_trials: int=10,
     random_state: int=123,
     return_best: bool=True,
-    n_jobs: Union[int, str]='auto',
+    n_jobs: Optional[Union[int, str]]='auto',
     verbose: bool=True,
     show_progress: bool=True,
     output_file: Optional[str]=None,
@@ -1272,12 +1282,11 @@ def _bayesian_search_optuna_multiseries(
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
-    lags_grid : list, dict, default `None`
-        Lists of lags to try, containing int, lists, numpy ndarray, or range 
-        objects. If `dict`, the keys are used as labels in the `results` 
-        DataFrame, and the values are used as the lists of lags to try. Ignored 
-        if the forecaster is an instance of `ForecasterAutoregCustom` or 
-        `ForecasterAutoregMultiSeriesCustom`.
+    lags_grid : deprecated
+        **Deprecated since version 0.12.0 and will be removed in 0.13.0.** Use
+        `search_space` to define the candidate values for the lags. This allows 
+        the lags to be optimized along with the other hyperparameters of the 
+        regressor in the bayesian search.
     refit : bool, int, default `False`
         Whether to re-fit the forecaster in each iteration. If `refit` is an 
         integer, the Forecaster will be trained every that number of iterations.
@@ -1296,8 +1305,13 @@ def _bayesian_search_optuna_multiseries(
     show_progress : bool, default `True`
         Whether to show a progress bar.
     output_file : str, default `None`
-        File name or full path to save the results. Results are saved as a .txt 
-        file with tab-separated columns. If `None`, the results will not be saved.
+        File name or full path to save the results. Results are saved as a 
+        tab-separated file. If `None`, the results will not be saved.
+        **New in version 0.12.0**
+    output_file : str, default `None`
+        Specifies the filename or full path where the results should be saved. 
+        The results will be saved in a tab-separated values (TSV) format. If 
+        `None`, the results will not be saved to a file.
         **New in version 0.12.0**
     kwargs_create_study : dict, default `{}`
         Keyword arguments (key, value mappings) to pass to optuna.create_study().
@@ -1313,13 +1327,12 @@ def _bayesian_search_optuna_multiseries(
 
         - column levels: levels configuration for each iteration.
         - column lags: lags configuration for each iteration.
-        - column lags_label: descriptive label or alias for the lags.
         - column params: parameters configuration for each iteration.
         - column metric: metric value estimated for each iteration. The resulting 
         metric will be the average of the optimization of all levels.
         - additional n columns with param = value.
-    results_opt_best : optuna object
-        The best optimization result returned as a FrozenTrial optuna object.
+    best_trial : optuna object
+        The best optimization result returned as an optuna FrozenTrial object.
 
     """
 
@@ -1328,9 +1341,7 @@ def _bayesian_search_optuna_multiseries(
                  series     = series,
                  levels     = levels
              )
-
-    lags_grid, lags_label = initialize_lags_grid(forecaster, lags_grid)
-   
+  
     if not isinstance(metric, list):
         metric = [metric] 
     metric_dict = {(m if isinstance(m, str) else m.__name__): [] 
@@ -1360,7 +1371,12 @@ def _bayesian_search_optuna_multiseries(
         verbose               = verbose
     ) -> float:
         
-        forecaster.set_params(search_space(trial))
+        sample = search_space(trial)
+        sample_params = {k: v for k, v in sample.items() if k != 'lags'}
+        forecaster.set_params(sample_params)
+        if type(forecaster).__name__ != 'ForecasterAutoregMultiSeriesCustom':
+            if "lags" in sample:
+                forecaster.set_lags(sample['lags'])
         
         metrics_levels = backtesting_forecaster_multiseries(
                              forecaster            = forecaster,
@@ -1385,15 +1401,8 @@ def _bayesian_search_optuna_multiseries(
 
         return metrics_levels.iloc[:, 1].mean()
 
-    print(
-        f"""Number of models compared: {n_trials*len(lags_grid)},
-         {n_trials} bayesian search in each lag configuration."""
-    )
-
     if show_progress:
-        lags_grid_tqdm = tqdm(lags_grid.items(), desc='lags grid', position=0)
-    else:
-        lags_grid_tqdm = lags_grid.items()
+        kwargs_study_optimize['show_progress_bar'] = True
     
     if output_file is not None:
         # Redirect optuna logging to file
@@ -1406,70 +1415,87 @@ def _bayesian_search_optuna_multiseries(
         handler = logging.FileHandler(output_file, mode="w")
         logger.addHandler(handler)
     else:
+        logging.getLogger("optuna").setLevel(logging.WARNING)
         optuna.logging.disable_default_handler()
 
-    lags_list = []
-    lags_label_list = []
-    params_list = []
-    results_opt_best = None
-    for lags_k, lags_v in lags_grid_tqdm:
+    study = optuna.create_study(**kwargs_create_study)
 
-        # `metric_values` will be modified inside _objective function. 
-        # It is a trick to extract multiple values from _objective since
-        # only the optimized value can be returned.
-        metric_values = []
+    if 'sampler' not in kwargs_create_study.keys():
+        study.sampler = TPESampler(seed=random_state)
 
-        if type(forecaster).__name__ != 'ForecasterAutoregMultiSeriesCustom':
-            forecaster.set_lags(lags_v)
-            lags_v = forecaster.lags.copy()
-            if lags_label == 'values':
-                lags_k = lags_v
-        
-        if 'sampler' in kwargs_create_study.keys():
-            kwargs_create_study['sampler']._rng = np.random.RandomState(random_state)
-            kwargs_create_study['sampler']._random_sampler = RandomSampler(seed=random_state)
-
-        if output_file is not None:
-            logger.info(f"lags {lags_k}: {lags_v}")
-        
-        study = optuna.create_study(**kwargs_create_study)
-
-        if 'sampler' not in kwargs_create_study.keys():
-            study.sampler = TPESampler(seed=random_state)
-
-        study.optimize(_objective, n_trials=n_trials, **kwargs_study_optimize)
-
-        best_trial = study.best_trial
-
-        if search_space(best_trial).keys() != best_trial.params.keys():
-            raise ValueError(
-                f"""Some of the key values do not match the search_space key names.
-                Dict keys     : {list(search_space(best_trial).keys())}
-                Trial objects : {list(best_trial.params.keys())}."""
-            )
-        
-        for i, trial in enumerate(study.get_trials()):
-            lags_list.append(lags_v)
-            lags_label_list.append(lags_k)
-            params_list.append(trial.params)
-            m_values = metric_values[i]
-            for m in metric:
-                m_name = m if isinstance(m, str) else m.__name__
-                metric_dict[m_name].append(m_values[m_name].mean())
-        
-        if results_opt_best is None:
-            results_opt_best = best_trial
-        else:
-            if best_trial.value < results_opt_best.value:
-                results_opt_best = best_trial
+    # `metric_values` will be modified inside _objective function. 
+    # It is a trick to extract multiple values from _objective since
+    # only the optimized value can be returned.
+    metric_values = []
+    warnings.filterwarnings(
+        "ignore",
+        message=(
+            "^Choices for a categorical distribution should be a tuple of None, bool, "
+            "int, float and str for persistent storage but contains "
+        )
+    )
+    study.optimize(_objective, n_trials=n_trials, **kwargs_study_optimize)
+    best_trial = study.best_trial
+    warnings.filterwarnings('default')
 
     if output_file is not None:
         handler.close()
+       
+    if search_space(best_trial).keys() != best_trial.params.keys():
+        raise ValueError(
+            (f"Some of the key values do not match the search_space key names.\n"
+             f"  Search Space keys  : {list(search_space(best_trial).keys())}\n"
+             f"  Trial objects keys : {list(best_trial.params.keys())}")
+        )
+    
+    lags_list = []
+    params_list = []
+    for i, trial in enumerate(study.get_trials()):
+        regressor_params = {k: v for k, v in trial.params.items() if k != 'lags'}
+        lags = trial.params.get(
+                   'lags',
+                   forecaster.lags if hasattr(forecaster, 'lags') else None
+               )
+        params_list.append(regressor_params)
+        lags_list.append(lags)
+        m_values = metric_values[i]
+        for m in metric:
+            m_name = m if isinstance(m, str) else m.__name__
+            metric_dict[m_name].append(m_values[m_name].mean())
+    
+    if type(forecaster).__name__ not in ['ForecasterAutoregMultiSeriesCustom',
+    'ForecasterAutoregMultiVariate']:
+        lags_list = [
+            initialize_lags(forecaster_name=type(forecaster).__name__, lags = lag)
+            for lag in lags_list
+        ]
+    elif type(forecaster).__name__ == 'ForecasterAutoregMultiSeriesCustom':
+        lags_list = [
+            f"custom function: {forecaster.fun_predictors.__name__}"
+            for _
+            in lags_list
+        ]
+    else:
+        lags_list_initialized = []
+        for lags in lags_list:
+            if isinstance(lags, dict):
+                for key in lags:
+                    lags[key] = initialize_lags(
+                                    forecaster_name = type(forecaster).__name__,
+                                    lags            = lags[key]
+                                )
+            else:
+                lags = initialize_lags(
+                           forecaster_name = type(forecaster).__name__,
+                           lags            = lags
+                       )
+            lags_list_initialized.append(lags)
+        
+        lags_list = lags_list_initialized
 
     results = pd.DataFrame({
                   'levels'     : [levels]*len(lags_list),
                   'lags'       : lags_list,
-                  'lags_label' : lags_label_list,
                   'params'     : params_list,
                   **metric_dict
               })
@@ -1497,8 +1523,8 @@ def _bayesian_search_optuna_multiseries(
             f"  Backtesting metric: {best_metric}\n"
             f"  Levels: {results['levels'].iloc[0]}\n"
         )
-            
-    return results, results_opt_best
+    
+    return results, best_trial
 
 
 # Alias MultiVariate
@@ -1600,8 +1626,9 @@ def backtesting_forecaster_multivariate(
     show_progress : bool, default `True`
         Whether to show a progress bar.
     output_file : str, default `None`
-        File name or full path to save the results. Results are saved as a .txt 
-        file with tab-separated columns. If `None`, the results will not be saved.
+        Specifies the filename or full path where the results should be saved. 
+        The results will be saved in a tab-separated values (TSV) format. If 
+        `None`, the results will not be saved to a file.
         **New in version 0.12.0**
 
     Returns
@@ -1727,8 +1754,9 @@ def grid_search_forecaster_multivariate(
     show_progress : bool, default `True`
         Whether to show a progress bar.
     output_file : str, default `None`
-        File name or full path to save the results. Results are saved as a .txt 
-        file with tab-separated columns. If `None`, the results will not be saved.
+        Specifies the filename or full path where the results should be saved. 
+        The results will be saved in a tab-separated values (TSV) format. If 
+        `None`, the results will not be saved to a file.
         **New in version 0.12.0**
 
     Returns
@@ -1861,8 +1889,9 @@ def random_search_forecaster_multivariate(
     show_progress : bool, default `True`
         Whether to show a progress bar.
     output_file : str, default `None`
-        File name or full path to save the results. Results are saved as a .txt 
-        file with tab-separated columns. If `None`, the results will not be saved.
+        Specifies the filename or full path where the results should be saved. 
+        The results will be saved in a tab-separated values (TSV) format. If 
+        `None`, the results will not be saved to a file.
         **New in version 0.12.0**
 
     Returns
@@ -1918,7 +1947,7 @@ def bayesian_search_forecaster_multivariate(
     allow_incomplete_fold: bool=True,
     levels: Optional[Union[str, list]]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-    lags_grid: Optional[Union[list, dict]]=None,
+    lags_grid: Any='deprecated',
     refit: Union[bool, int]=False,
     n_trials: int=10,
     random_state: int=123,
@@ -1976,12 +2005,11 @@ def bayesian_search_forecaster_multivariate(
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
-    lags_grid : list, dict, default `None`
-        Lists of lags to try, containing int, lists, numpy ndarray, or range 
-        objects. If `dict`, the keys are used as labels in the `results` 
-        DataFrame, and the values are used as the lists of lags to try. Ignored 
-        if the forecaster is an instance of `ForecasterAutoregCustom` or 
-        `ForecasterAutoregMultiSeriesCustom`.
+    lags_grid : deprecated
+        **Deprecated since version 0.12.0 and will be removed in 0.13.0.** Use
+        `search_space` to define the candidate values for the lags. This allows 
+        the lags to be optimized along with the other hyperparameters of the 
+        regressor in the bayesian search.
     refit : bool, int, default `False`
         Whether to re-fit the forecaster in each iteration. If `refit` is an 
         integer, the Forecaster will be trained every that number of iterations.
@@ -2001,8 +2029,9 @@ def bayesian_search_forecaster_multivariate(
     show_progress : bool, default `True`
         Whether to show a progress bar.
     output_file : str, default `None`
-        File name or full path to save the results. Results are saved as a .txt 
-        file with tab-separated columns. If `None`, the results will not be saved.
+        Specifies the filename or full path where the results should be saved. 
+        The results will be saved in a tab-separated values (TSV) format. If 
+        `None`, the results will not be saved to a file.
         **New in version 0.12.0**
     engine : str, default `'optuna'`
         Bayesian optimization runs through the optuna library.
@@ -2020,7 +2049,6 @@ def bayesian_search_forecaster_multivariate(
 
         - column levels: levels configuration for each iteration.
         - column lags: lags configuration for each iteration.
-        - column lags_label: descriptive label or alias for the lags.
         - column params: parameters configuration for each iteration.
         - column metric: metric value estimated for each iteration. The resulting 
         metric will be the average of the optimization of all levels.
