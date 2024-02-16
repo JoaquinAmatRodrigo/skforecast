@@ -119,7 +119,6 @@ def test_results_output_bayesian_search_forecaster_optuna_engine_ForecasterAutor
                   forecaster         = forecaster,
                   y                  = y,
                   search_space       = search_space,
-                  lags_grid          = None,
                   steps              = 3,
                   metric             = 'mean_absolute_error',
                   refit              = True,
@@ -132,21 +131,31 @@ def test_results_output_bayesian_search_forecaster_optuna_engine_ForecasterAutor
                   engine             = 'optuna'
               )[0]
     
-    expected_results = pd.DataFrame({
-        'lags'  :[[1, 2, 3, 4]]*10,
-        'lags_label': [[1, 2, 3, 4]]*10,
-        'params':[{'alpha': 0.6995044937418831}, {'alpha': 0.29327794160087567},
-                  {'alpha': 0.2345829390285611}, {'alpha': 0.5558016213920624},
-                  {'alpha': 0.7222742800877074}, {'alpha': 0.42887539552321635},
-                  {'alpha': 0.9809565564007693}, {'alpha': 0.6879814411990146},
-                  {'alpha': 0.48612258246951734}, {'alpha': 0.398196343012209}],
-        'mean_absolute_error':np.array([0.2157946 , 0.21639339, 0.21647289, 0.21600778, 0.21576132,
-                                        0.21619734, 0.21539791, 0.21581151, 0.21611205, 0.216242651]),
-        'alpha' :np.array([0.69950449, 0.29327794, 0.23458294, 0.55580162, 0.72227428,
-                           0.4288754 , 0.98095656, 0.68798144, 0.48612258, 0.39819634])
-        },
-        index=pd.RangeIndex(start=0, stop=10, step=1)
-    ).sort_values(by='mean_absolute_error', ascending=True)
+    expected_results = pd.DataFrame(
+        np.array([[np.array([1, 2, 3, 4]), {'alpha': 0.9809565564007693},
+            0.21539791166603497, 0.9809565564007693],
+        [np.array([1, 2, 3, 4]), {'alpha': 0.7222742800877074},
+            0.21576131952657338, 0.7222742800877074],
+        [np.array([1, 2, 3, 4]), {'alpha': 0.6995044937418831},
+            0.21579460210585208, 0.6995044937418831],
+        [np.array([1, 2, 3, 4]), {'alpha': 0.6879814411990146},
+            0.21581150916013206, 0.6879814411990146],
+        [np.array([1, 2, 3, 4]), {'alpha': 0.5558016213920624},
+            0.21600778429729228, 0.5558016213920624],
+        [np.array([1, 2, 3, 4]), {'alpha': 0.48612258246951734},
+            0.21611205459571634, 0.48612258246951734],
+        [np.array([1, 2, 3, 4]), {'alpha': 0.42887539552321635},
+            0.2161973389956996, 0.42887539552321635],
+        [np.array([1, 2, 3, 4]), {'alpha': 0.398196343012209},
+            0.2162426532005299, 0.398196343012209],
+        [np.array([1, 2, 3, 4]), {'alpha': 0.29327794160087567},
+            0.2163933942116072, 0.29327794160087567],
+        [np.array([1, 2, 3, 4]), {'alpha': 0.2345829390285611},
+            0.21647289061896782, 0.2345829390285611]], dtype=object),
+        columns=['lags', 'params', 'mean_absolute_error', 'alpha'],
+        index=pd.Index([6, 4, 0, 7, 3, 8, 5, 9, 1, 2], dtype='int64'),
+    )
+    expected_results[['mean_absolute_error', 'alpha']] = expected_results[['mean_absolute_error', 'alpha']].astype(float)
 
     pd.testing.assert_frame_equal(results, expected_results)
 
@@ -183,81 +192,40 @@ def test_results_output_bayesian_search_forecaster_optuna_engine_ForecasterAutor
                   engine             = 'optuna'
               )[0]
     
-    expected_results = pd.DataFrame({
-        'lags'  :['custom predictors', 'custom predictors', 'custom predictors',
-                  'custom predictors', 'custom predictors', 'custom predictors',
-                  'custom predictors', 'custom predictors', 'custom predictors',
-                  'custom predictors'],
-        'lags_label': ['custom predictors', 'custom predictors', 'custom predictors',
-                        'custom predictors', 'custom predictors', 'custom predictors',
-                        'custom predictors', 'custom predictors', 'custom predictors',
-                        'custom predictors'],
-        'params':[{'alpha': 0.6995044937418831}, {'alpha': 0.29327794160087567},
-                  {'alpha': 0.2345829390285611}, {'alpha': 0.5558016213920624},
-                  {'alpha': 0.7222742800877074}, {'alpha': 0.42887539552321635},
-                  {'alpha': 0.9809565564007693}, {'alpha': 0.6879814411990146},
-                  {'alpha': 0.48612258246951734}, {'alpha': 0.398196343012209}],
-        'mean_absolute_error':np.array([0.2157946 , 0.21639339, 0.21647289, 0.21600778, 0.21576132,
-                                        0.21619734, 0.21539791, 0.21581151, 0.21611205, 0.216242651]),
-        'alpha' :np.array([0.69950449, 0.29327794, 0.23458294, 0.55580162, 0.72227428,
-                           0.4288754 , 0.98095656, 0.68798144, 0.48612258, 0.39819634])
-        },
-        index=pd.RangeIndex(start=0, stop=10, step=1)
-    ).sort_values(by='mean_absolute_error', ascending=True)
-
-    pd.testing.assert_frame_equal(results, expected_results)
-
-
-@pytest.mark.skip(reason="`_bayesian_search_skopt` is deprecated since skforecast 0.7.0")
-def test_results_output_bayesian_search_forecaster_skopt_engine_ForecasterAutoregCustom_with_mocked(): # pragma: no cover
-    """
-    Test output of bayesian_search_forecaster in ForecasterAutoregCustom with mocked
-    using skopt engine (mocked done in Skforecast v0.4.3).
-    """    
-    forecaster = ForecasterAutoregCustom(
-                        regressor      = Ridge(random_state=123),
-                        fun_predictors = create_predictors,
-                        window_size    = 4
-                 )
-
-    engine = 'skopt'
-
-    results = bayesian_search_forecaster(
-                  forecaster         = forecaster,
-                  y                  = y,
-                  search_space       = {'alpha': Real(0.01, 1.0, "log-uniform", name='alpha')},
-                  steps              = 3,
-                  metric             = 'mean_absolute_error',
-                  refit              = True,
-                  initial_train_size = len(y[:-12]),
-                  fixed_train_size   = True,
-                  n_trials           = 10,
-                  random_state       = 123,
-                  return_best        = False,
-                  verbose            = False,
-                  engine             = engine
-              )[0]
-    
-    expected_results = pd.DataFrame({
-            'lags'  :['custom predictors', 'custom predictors', 'custom predictors',
-                      'custom predictors', 'custom predictors', 'custom predictors',
-                      'custom predictors', 'custom predictors', 'custom predictors',
-                      'custom predictors'],
-            'params':[{'alpha': 0.26663099972129245}, {'alpha': 0.07193526575307788},
-                      {'alpha': 0.24086278856848584}, {'alpha': 0.27434725570656354},
-                      {'alpha': 0.0959926247515687}, {'alpha': 0.3631244766604131},
-                      {'alpha': 0.06635119445083354}, {'alpha': 0.14434062917737708},
-                      {'alpha': 0.019050287104581624}, {'alpha': 0.0633920962590419}],
-            'mean_absolute_error':np.array([0.21643005790510492, 0.21665565996188138, 0.2164646190462156,
-                               0.21641953058020516, 0.21663365234334242, 0.2162939165190013, 
-                               0.21666043214039407, 0.21658325961136823, 0.21669499028423744, 
-                               0.21666290650172168]),                                                               
-            'alpha' :np.array([0.26663099972129245, 0.07193526575307788, 0.24086278856848584, 
-                               0.27434725570656354, 0.0959926247515687, 0.3631244766604131,
-                               0.06635119445083354, 0.14434062917737708, 0.019050287104581624, 
-                               0.0633920962590419])
-                                     },
-            index=pd.RangeIndex(start=0, stop=10, step=1)
-                                   ).sort_values(by='mean_absolute_error', ascending=True)
+    expected_results = pd.DataFrame(
+        np.array([['custom function: create_predictors',
+        {'alpha': 0.9809565564007693}, 0.21539791166603497,
+        0.9809565564007693],
+        ['custom function: create_predictors',
+        {'alpha': 0.7222742800877074}, 0.21576131952657338,
+        0.7222742800877074],
+        ['custom function: create_predictors',
+        {'alpha': 0.6995044937418831}, 0.21579460210585208,
+        0.6995044937418831],
+        ['custom function: create_predictors',
+        {'alpha': 0.6879814411990146}, 0.21581150916013206,
+        0.6879814411990146],
+        ['custom function: create_predictors',
+        {'alpha': 0.5558016213920624}, 0.21600778429729228,
+        0.5558016213920624],
+        ['custom function: create_predictors',
+        {'alpha': 0.48612258246951734}, 0.21611205459571634,
+        0.48612258246951734],
+        ['custom function: create_predictors',
+        {'alpha': 0.42887539552321635}, 0.21619733899569962,
+        0.42887539552321635],
+        ['custom function: create_predictors',
+        {'alpha': 0.398196343012209}, 0.2162426532005299,
+        0.398196343012209],
+        ['custom function: create_predictors',
+        {'alpha': 0.29327794160087567}, 0.2163933942116072,
+        0.29327794160087567],
+        ['custom function: create_predictors',
+        {'alpha': 0.2345829390285611}, 0.21647289061896782,
+        0.2345829390285611]], dtype=object),
+        columns=['lags', 'params', 'mean_absolute_error', 'alpha'],
+        index=pd.Index([6, 4, 0, 7, 3, 8, 5, 9, 1, 2], dtype='int64')
+    )
+    expected_results[['mean_absolute_error', 'alpha']] = expected_results[['mean_absolute_error', 'alpha']].astype(float)
 
     pd.testing.assert_frame_equal(results, expected_results)
