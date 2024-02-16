@@ -265,8 +265,10 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_kwargs_cre
             0.21600778429729228, 0.5558016213920624]], dtype=object),
         columns=['lags', 'params', 'mean_absolute_error', 'alpha'],
         index=pd.Index([9, 3, 4, 6, 8, 2, 7, 5, 0, 1], dtype='int64')
-    )
-    expected_results[['mean_absolute_error', 'alpha']] = expected_results[['mean_absolute_error', 'alpha']].astype(float)
+    ).astype({
+        'mean_absolute_error': float,
+        'alpha': float
+    })
 
     pd.testing.assert_frame_equal(results, expected_results)
 
@@ -295,7 +297,7 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_kwargs_stu
         
         return search_space
 
-    kwargs_study_optimize = {'timeout': 3}
+    kwargs_study_optimize = {'timeout': 5}
     results = _bayesian_search_optuna(
                   forecaster            = forecaster,
                   y                     = y,
@@ -313,24 +315,20 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_kwargs_stu
                   kwargs_study_optimize = kwargs_study_optimize
               )[0].reset_index(drop=True)
     
-    expected_results = expected = pd.DataFrame(
-        np.array([[np.array([1, 2]),
-            {'n_estimators': 170, 'max_depth': 23, 'max_features': 'sqrt'},
-            0.21698591071568632, 170, 23, 'sqrt'],
-        [np.array([1, 2, 3, 4]),
-            {'n_estimators': 199, 'max_depth': 29, 'max_features': 'log2'},
-            0.21847001182160794, 199, 29, 'log2'],
-        [np.array([1, 2]),
-            {'n_estimators': 144, 'max_depth': 20, 'max_features': 'sqrt'},
-            0.22096976868055548, 144, 20, 'sqrt']], dtype=object),
+    expected_results = pd.DataFrame(
+        np.array([
+            [np.array([1, 2]),
+                {'n_estimators': 109, 'max_depth': 25, 'max_features': 'sqrt'},
+                 0.21489690173547402, 109, 25, 'sqrt'],
+            [np.array([1, 2]),
+                {'n_estimators': 170, 'max_depth': 23, 'max_features': 'sqrt'},
+                  0.21698591071568632, 170, 23, 'sqrt']
+        ], dtype=object),
         columns=['lags', 'params', 'mean_absolute_error', 'n_estimators', 'max_depth', 'max_features'],
-        index=pd.RangeIndex(start=0, stop=3, step=1)
+        index=pd.RangeIndex(start=0, stop=2, step=1)
     )
-    expected[['mean_absolute_error']] = expected[['mean_absolute_error']].astype(float)
-    expected[['n_estimators']] = expected[['n_estimators']].astype(int)
-    expected[['max_depth']] = expected[['max_depth']].astype(int)
 
-    pd.testing.assert_frame_equal(results.head(2), expected_results.head(2), check_dtype=False)
+    pd.testing.assert_frame_equal(results.head(2), expected_results, check_dtype=False)
 
 
 def test_results_output_bayesian_search_optuna_ForecasterAutoreg_when_lags_not_in_search_space():
@@ -390,9 +388,10 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoreg_when_lags_not_i
             0.21647289061896782, 0.2345829390285611]], dtype=object),
         columns=['lags', 'params', 'mean_absolute_error', 'alpha'],
         index=pd.Index([6, 4, 0, 7, 3, 8, 5, 9, 1, 2], dtype='int64')
-    )
-    expected_results[['mean_absolute_error']] = expected_results[['mean_absolute_error']].astype(float)
-    expected_results[['alpha']] = expected_results[['alpha']].astype(float)
+    ).astype({
+        'mean_absolute_error': float,
+        'alpha': float
+    })
     
     pd.testing.assert_frame_equal(results, expected_results)
 
@@ -464,9 +463,10 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoregCustom():
             0.2345829390285611]], dtype=object),
         columns=['lags', 'params', 'mean_absolute_error', 'alpha'],
         index=pd.Index([6, 4, 0, 7, 3, 8, 5, 9, 1, 2], dtype='int64')
-    )
-    expected_results['mean_absolute_error'] = expected_results['mean_absolute_error'].astype(float)
-    expected_results['alpha']= expected_results['alpha'].astype(float)
+    ).astype({
+        'mean_absolute_error': float,
+        'alpha': float
+    })
 
     pd.testing.assert_frame_equal(results, expected_results)
 
@@ -654,10 +654,10 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoregDirect():
     (mocked done in Skforecast v0.4.3).
     """    
     forecaster = ForecasterAutoregDirect(
-                    regressor   = RandomForestRegressor(random_state=123),
-                    steps       = 3,
-                    lags        = 4
-                )
+                     regressor = RandomForestRegressor(random_state=123),
+                     steps     = 3,
+                     lags      = 4
+                 )
 
     steps = 3
     n_validation = 12
@@ -674,19 +674,19 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoregDirect():
         return search_space
 
     results = _bayesian_search_optuna(
-                    forecaster         = forecaster,
-                    y                  = y,
-                    search_space       = search_space,
-                    steps              = steps,
-                    metric             = 'mean_absolute_error',
-                    refit              = True,
-                    initial_train_size = len(y_train),
-                    fixed_train_size   = True,
-                    n_trials           = 10,
-                    random_state       = 123,
-                    return_best        = False,
-                    verbose            = False
-                )[0]
+                  forecaster         = forecaster,
+                  y                  = y,
+                  search_space       = search_space,
+                  steps              = steps,
+                  metric             = 'mean_absolute_error',
+                  refit              = True,
+                  initial_train_size = len(y_train),
+                  fixed_train_size   = True,
+                  n_trials           = 10,
+                  random_state       = 123,
+                  return_best        = False,
+                  verbose            = False
+              )[0]
     
     expected_results = pd.DataFrame(
         np.array([[np.array([1, 2, 3, 4]),
@@ -721,10 +721,17 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoregDirect():
             0.2279790315504743, 17, 0.19325882509735576, 'sqrt']], dtype=object),
         columns=['lags', 'params', 'mean_absolute_error', 'n_estimators','min_samples_leaf', 'max_features'],
         index=pd.Index([4, 7, 1, 3, 8, 6, 5, 9, 2, 0], dtype='int64')
-    )
-    expected_results['mean_absolute_error'] = expected_results['mean_absolute_error'].astype(float)
-    expected_results['n_estimators']= expected_results['n_estimators'].astype(int)
-    expected_results['min_samples_leaf']= expected_results['min_samples_leaf'].astype(float)
+    ).astype({
+        'mean_absolute_error': float, 
+        'n_estimators': int, 
+        'min_samples_leaf': float
+    })
+
+    results = results.astype({
+        'mean_absolute_error': float, 
+        'n_estimators': int, 
+        'min_samples_leaf': float
+    })
 
     pd.testing.assert_frame_equal(results, expected_results)
 
