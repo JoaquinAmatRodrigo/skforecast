@@ -516,7 +516,8 @@ def test_create_train_X_y_output_when_transformer_y_and_transformer_exog():
 
 def test_create_train_X_y_output_when_y_is_series_exog_is_series_and_differentiation_is_1():
     """
-    Test the output of create_train_X_y when using differentiation=1.
+    Test the output of create_train_X_y when using differentiation=1. Comparing 
+    the matrix created with and without differentiating the series.
     """
     # Data differentiated
     diferenciator = TimeSeriesDifferentiator(order=1)
@@ -547,9 +548,10 @@ def test_create_train_X_y_output_when_y_is_series_exog_is_series_and_differentia
     pd.testing.assert_series_equal(y_train_1, y_train_2, check_names=True)
 
 
-def test_create_train_X_y_output_when_y_is_series_10_exog_is_series_and_differentiation_is_2():
+def test_create_train_X_y_output_when_y_is_series_exog_is_series_and_differentiation_is_2():
     """
-    Test the output of create_train_X_y when using differentiation=1.
+    Test the output of create_train_X_y when using differentiation=2. Comparing 
+    the matrix created with and without differentiating the series.
     """
 
     # Data differentiated

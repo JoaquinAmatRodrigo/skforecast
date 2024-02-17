@@ -698,12 +698,14 @@ def test_create_train_X_y_output_when_transformer_y_and_transformer_exog():
 
 def test_create_train_X_y_output_when_y_is_series_exog_is_series_and_differentiation_is_1():
     """
-    Test the output of create_train_X_y when using differentiation=1.
+    Test the output of create_train_X_y when using differentiation=1. Comparing 
+    the matrix created with and without differentiating the series.
     """
     # Data differentiated
     diferenciator = TimeSeriesDifferentiator(order=1)
     data_diff = diferenciator.fit_transform(data)
     data_diff = pd.Series(data_diff, index=data.index).dropna()
+
     # Simulated exogenous variable
     rng = np.random.default_rng(9876)
     exog = pd.Series(
@@ -723,27 +725,30 @@ def test_create_train_X_y_output_when_y_is_series_exog_is_series_and_differentia
                      window_size      = 5,
                      differentiation  = 1
                   )
+    
     X_train_1, y_train_1 = forecaster_1.create_train_X_y(
-                                    data_diff.loc[:end_train],
-                                    exog=exog_diff.loc[:end_train]
-                            )
+                               y    = data_diff.loc[:end_train],
+                               exog = exog_diff.loc[:end_train]
+                           )
     X_train_2, y_train_2 = forecaster_2.create_train_X_y(
-                            data.loc[:end_train],
-                            exog=exog.loc[:end_train]
-                        )
+                               y    = data.loc[:end_train],
+                               exog = exog.loc[:end_train]
+                           )
+    
     pd.testing.assert_frame_equal(X_train_1, X_train_2, check_names=True)
     pd.testing.assert_series_equal(y_train_1, y_train_2, check_names=True)
 
 
-def test_create_train_X_y_output_when_y_is_series_10_exog_is_series_and_differentiation_is_2():
+def test_create_train_X_y_output_when_y_is_series_exog_is_series_and_differentiation_is_2():
     """
-    Test the output of create_train_X_y when using differentiation=1.
+    Test the output of create_train_X_y when using differentiation=2. Comparing 
+    the matrix created with and without differentiating the series.
     """
-
     # Data differentiated
     diferenciator = TimeSeriesDifferentiator(order=2)
     data_diff_2 = diferenciator.fit_transform(data)
     data_diff_2 = pd.Series(data_diff_2, index=data.index).dropna()
+
     # Simulated exogenous variable
     rng = np.random.default_rng(9876)
     exog = pd.Series(
@@ -763,13 +768,15 @@ def test_create_train_X_y_output_when_y_is_series_10_exog_is_series_and_differen
                      window_size      = 5,
                      differentiation  = 2
                   )
+
     X_train_1, y_train_1 = forecaster_1.create_train_X_y(
-                                    data_diff_2.loc[:end_train],
-                                    exog=exog_diff_2.loc[:end_train]
-                            )
+                               y    = data_diff_2.loc[:end_train],
+                               exog = exog_diff_2.loc[:end_train]
+                           )
     X_train_2, y_train_2 = forecaster_2.create_train_X_y(
-                            data.loc[:end_train],
-                            exog=exog.loc[:end_train]
-                        )
+                               y    = data.loc[:end_train],
+                               exog = exog.loc[:end_train]
+                           )
+    
     pd.testing.assert_frame_equal(X_train_1, X_train_2, check_names=True)
     pd.testing.assert_series_equal(y_train_1, y_train_2, check_names=True)
