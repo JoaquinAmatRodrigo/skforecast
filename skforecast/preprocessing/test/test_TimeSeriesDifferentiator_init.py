@@ -12,7 +12,7 @@ def test_TypeError_when_order_is_not_int_when_initialization():
     order = 1.5
 
     err_msg = re.escape(
-                (f"Parameter 'order' must be an integer. "
+                (f"Parameter 'order' must be an integer greater than 0. "
                  f"Found {type(order)}.")
             ) 
     with pytest.raises(TypeError, match = err_msg):
