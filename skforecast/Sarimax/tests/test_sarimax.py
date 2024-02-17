@@ -33,15 +33,15 @@ exog_lw_predict_numpy = exog_lw_predict.to_numpy()
 
 def test_decorator_check_fitted():
     """
-    Test Sarimax fit with pandas `y` and `exog`.
+    Test Sarimax decorator check if regressor is fitted.
     """
 
     sarimax = Sarimax(order=(1, 1, 1))
 
     err_msg = re.escape(
-                ("Sarimax instance is not fitted yet. Call `fit` with "
-                 "appropriate arguments before using this method.")
-              )
+        ("Sarimax instance is not fitted yet. Call `fit` with "
+         "appropriate arguments before using this method.")
+    )
     with pytest.raises(NotFittedError, match = err_msg): 
         sarimax.predict(steps=5)
     with pytest.raises(NotFittedError, match = err_msg): 

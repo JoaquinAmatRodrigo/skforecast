@@ -300,7 +300,10 @@ def test_create_train_X_y_single_series_output_when_transformer_and_fitted():
     pd.testing.assert_series_equal(results[2], expected[2])
 
 
-def test_create_train_X_y_single_series_output_when_series_and_exog_and_differentitation():
+@pytest.mark.parametrize("fitted", 
+                         [True, False], 
+                         ids = lambda fitted : f'fitted: {fitted}')
+def test_create_train_X_y_single_series_output_when_series_and_exog_and_differentitation_1(fitted):
     """
     Test the output of _create_train_X_y_single_series when exog is a 
     pandas DataFrame with one column and differentiation=1.
@@ -312,10 +315,8 @@ def test_create_train_X_y_single_series_output_when_series_and_exog_and_differen
                                               transformer_series = None,
                                               differentiation    = 1)
     forecaster.transformer_series_ = {'l1': None}
-    forecaster.differentiator_ = {'l1': clone(forecaster.differentiator) }
-
-    # TODO: COntinue from here
-
+    forecaster.differentiator_ = {'l1': clone(forecaster.differentiator)}
+    forecaster.fitted = fitted
 
     results = forecaster._create_train_X_y_single_series(
                   y           = y,
@@ -325,24 +326,74 @@ def test_create_train_X_y_single_series_output_when_series_and_exog_and_differen
 
     expected = (
         pd.DataFrame(
-            data = np.array([[4., 3., 2., 1., 0., 'l1'],
-                             [5., 4., 3., 2., 1., 'l1'],
-                             [6., 5., 4., 3., 2., 'l1'],
-                             [7., 6., 5., 4., 3., 'l1'],
-                             [8., 7., 6., 5., 4., 'l1']]),
-            index   = pd.RangeIndex(start=5, stop=10, step=1),
+            data = np.array([[1., 1., 1., 1., 1., 'l1'],
+                             [1., 1., 1., 1., 1., 'l1'],
+                             [1., 1., 1., 1., 1., 'l1'],
+                             [1., 1., 1., 1., 1., 'l1']]),
+            index   = pd.RangeIndex(start=6, stop=10, step=1),
             columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 
                        '_level_skforecast']
         ).astype({'lag_1': float, 'lag_2': float, 'lag_3': float,
                   'lag_4': float, 'lag_5': float}),
         pd.DataFrame(
-            data  = np.array([105., 106., 107., 108., 109.], dtype=float),
-            index = pd.RangeIndex(start=5, stop=10, step=1),
+            data  = np.array([106., 107., 108., 109.], dtype=float),
+            index = pd.RangeIndex(start=6, stop=10, step=1),
             columns = ['exog']
         ),
         pd.Series(
-            data  = np.array([5., 6., 7., 8., 9.], dtype=float),
-            index = pd.RangeIndex(start=5, stop=10, step=1),
+            data  = np.array([1., 1., 1., 1.], dtype=float),
+            index = pd.RangeIndex(start=6, stop=10, step=1),
+            name  = 'y'
+        )
+    )
+
+    pd.testing.assert_frame_equal(results[0], expected[0])
+    pd.testing.assert_frame_equal(results[1], expected[1])
+    pd.testing.assert_series_equal(results[2], expected[2])
+
+
+@pytest.mark.parametrize("fitted", 
+                         [True, False], 
+                         ids = lambda fitted : f'fitted: {fitted}')
+def test_create_train_X_y_single_series_output_when_series_and_exog_and_differentitation_2(fitted):
+    """
+    Test the output of _create_train_X_y_single_series when exog is a 
+    pandas DataFrame with one column and differentiation=2.
+    """
+    y = pd.Series(np.arange(10, dtype=float), name='l1')
+    exog = pd.DataFrame(np.arange(100, 110, dtype=float), columns=['exog'])
+    
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5,
+                                              transformer_series = None,
+                                              differentiation    = 2)
+    forecaster.transformer_series_ = {'l1': None}
+    forecaster.differentiator_ = {'l1': clone(forecaster.differentiator)}
+    forecaster.fitted = fitted
+
+    results = forecaster._create_train_X_y_single_series(
+                  y           = y,
+                  ignore_exog = False,
+                  exog        = exog
+              )
+
+    expected = (
+        pd.DataFrame(
+            data = np.array([[0., 0., 0., 0., 0., 'l1'],
+                             [0., 0., 0., 0., 0., 'l1'],
+                             [0., 0., 0., 0., 0., 'l1']]),
+            index   = pd.RangeIndex(start=7, stop=10, step=1),
+            columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 
+                       '_level_skforecast']
+        ).astype({'lag_1': float, 'lag_2': float, 'lag_3': float,
+                  'lag_4': float, 'lag_5': float}),
+        pd.DataFrame(
+            data  = np.array([107., 108., 109.], dtype=float),
+            index = pd.RangeIndex(start=7, stop=10, step=1),
+            columns = ['exog']
+        ),
+        pd.Series(
+            data  = np.array([0., 0., 0.], dtype=float),
+            index = pd.RangeIndex(start=7, stop=10, step=1),
             name  = 'y'
         )
     )
