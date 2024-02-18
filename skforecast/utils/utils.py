@@ -21,7 +21,7 @@ import inspect
 from copy import deepcopy
 
 import skforecast
-from ..exceptions import MissingValuesExogWarning
+from ..exceptions import MissingValuesWarning
 from ..exceptions import DataTypeWarning
 from ..exceptions import IgnoredArgumentWarning
 from ..exceptions import SkforecastVersionWarning
@@ -403,7 +403,7 @@ def check_exog(
             warnings.warn(
                 ("`exog` has missing values. Most machine learning models do not allow "
                  "missing values. Fitting the forecaster may fail."), 
-                 MissingValuesExogWarning
+                 MissingValuesWarning
             )
     
     return
@@ -779,7 +779,7 @@ def check_predict_input(
             warnings.warn(
                 ("`exog` has missing values. Most of machine learning models do "
                  "not allow missing values. `predict` method may fail."), 
-                 MissingValuesExogWarning
+                 MissingValuesWarning
             )
         if not isinstance(exog, exog_type):
             raise TypeError(
@@ -854,7 +854,7 @@ def check_predict_input(
                 warnings.warn(
                 ("`last_window_exog` has missing values. Most of machine learning "
                  "models do not allow missing values. `predict` method may fail."),
-                MissingValuesExogWarning
+                MissingValuesWarning
             )
             _, last_window_exog_index = preprocess_last_window(
                                             last_window   = last_window_exog.iloc[:0],
@@ -2037,6 +2037,10 @@ def check_preprocess_series(
              f"Got {type(series)}.")
         )
     
+    for k, v in series_dict.items():
+        if np.isnan(v.to_numpy()).all():
+            raise ValueError(f"All values of series '{k}' are NaN.")
+    
     series_indexes = {
         k: v.index
         for k, v in series_dict.items()
@@ -2135,7 +2139,7 @@ def check_preprocess_exog_multiseries(
             warnings.warn(
                 (f"{series_not_in_exog} not present in `exog`. All values "
                  f"of the exogenous variables for these series will be NaN."),
-                 MissingValuesExogWarning
+                 MissingValuesWarning
             )
 
         for k, v in exog_dict.items():
@@ -2258,13 +2262,13 @@ def align_series_and_exog_multiseries(
                     warnings.warn(
                         (f"Series '{k}' and its `exog` do not have the same index. "
                          f"All exog values will be NaN for the period of the series."),
-                         MissingValuesExogWarning
+                         MissingValuesWarning
                     )
                 elif len(index_intersection) != len(series_dict[k]):
                     warnings.warn(
                         (f"Series '{k}' and its `exog` do not have the same length. "
                          f"Exog values will be NaN for the not matched period of the series."),
-                         MissingValuesExogWarning
+                         MissingValuesWarning
                     )  
                 exog_dict[k] = exog_dict[k].loc[index_intersection]
                 if len(index_intersection) != len(series_dict[k]):

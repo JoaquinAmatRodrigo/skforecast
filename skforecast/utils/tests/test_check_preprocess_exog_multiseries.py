@@ -5,7 +5,7 @@ import pytest
 import numpy as np
 import pandas as pd
 from copy import deepcopy
-from skforecast.exceptions import MissingValuesExogWarning
+from skforecast.exceptions import MissingValuesWarning
 from skforecast.utils import check_preprocess_series
 from skforecast.utils import check_preprocess_exog_multiseries
 from skforecast.ForecasterAutoregMultiSeries.tests.fixtures_ForecasterAutoregMultiSeries import series
@@ -211,9 +211,9 @@ def test_output_check_preprocess_exog_multiseries_when_series_is_pandas_DataFram
     assert len(set(exog_col_names) - set(expected_exog_col_names)) == 0
 
 
-def test_MissingValuesExogWarning_check_preprocess_exog_multiseries_when_exog_is_dict_without_all_series():
+def test_MissingValuesWarning_check_preprocess_exog_multiseries_when_exog_is_dict_without_all_series():
     """
-    Test MissingValuesExogWarning is issues when exog is a dict without all the 
+    Test MissingValuesWarning is issues when exog is a dict without all the 
     series as keys.
     """
     _, series_indexes = check_preprocess_series(series=series_2)
@@ -225,7 +225,7 @@ def test_MissingValuesExogWarning_check_preprocess_exog_multiseries_when_exog_is
         ("{'l1'} not present in `exog`. All values "
          "of the exogenous variables for these series will be NaN.")
     )
-    with pytest.warns(MissingValuesExogWarning, match = warn_msg):
+    with pytest.warns(MissingValuesWarning, match = warn_msg):
         check_preprocess_exog_multiseries(
             input_series_is_dict = False,
             series_indexes       = series_indexes,

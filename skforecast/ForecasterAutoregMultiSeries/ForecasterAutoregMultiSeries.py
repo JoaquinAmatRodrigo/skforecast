@@ -170,19 +170,20 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         Type of index of the input used in training.
     index_freq : str
         Frequency of Index of the input used in training.
-    training_range: pandas Index
-        First and last values of index of the data used during training.
+    training_range: dict
+        First and last values of index of the data used during training for each 
+        series.
+    series_col_names : list
+        Names of the series (levels) used during training.
     included_exog : bool
         If the forecaster has been trained using exogenous variable/s.
     exog_type : type
         Type of exogenous variable/s used in training.
     exog_dtypes : dict
         Type of each exogenous variable/s used in training. If `transformer_exog` 
-        is used, the dtypes are calculated after the transformation.
+        is used, the dtypes are calculated before the transformation.
     exog_col_names : list
         Names of the exogenous variables used during training.
-    series_col_names : list
-        Names of the series (levels) used during training.
     X_train_col_names : list
         Names of columns of the matrix created internally for training.
     fit_kwargs : dict
@@ -252,15 +253,15 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.differentiation         = differentiation
         self.differentiator          = None
         self.differentiator_         = None
+        self.last_window             = None
         self.index_type              = None
         self.index_freq              = None
         self.training_range          = None
-        self.last_window             = None
+        self.series_col_names        = None
         self.included_exog           = False
         self.exog_type               = None
         self.exog_dtypes             = None
         self.exog_col_names          = None
-        self.series_col_names        = None
         self.X_train_col_names       = None
         self.in_sample_residuals     = None
         self.out_sample_residuals    = None
@@ -486,7 +487,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         series: Union[pd.DataFrame, dict],
         exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
         drop_nan: bool=False
-    ) -> Tuple[pd.DataFrame, pd.Series, pd.Index, pd.Index]:
+    ) -> Tuple[pd.DataFrame, pd.Series, dict, list, list, dict]:
         """
         Create training matrices from multiple time series and exogenous
         variables.
@@ -508,9 +509,15 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             Training values (predictors).
         y_train : pandas Series
             Values (target) of the time series related to each row of `X_train`.
-            Shape: (len(series) - self.max_lag, )
-        y_index : pandas Index
-            Index of `series`.
+        series_indexes : dict
+            Dictionary with the index of each series.
+        series_col_names : list
+            Names of the series (levels) used during training.
+        exog_col_names : list
+            Names of the exogenous variables used during training.
+        exog_dtypes : dict
+            Type of each exogenous variable/s used in training. If `transformer_exog` 
+            is used, the dtypes are calculated before the transformation.
 
         Notes
         -----
@@ -534,8 +541,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         if self.fitted and not (series_col_names == self.series_col_names):
             raise ValueError(
-                ("Once the Forecaster has been trained, `series` must have the "
-                 "same columns as the series used during training.")
+                (f"Once the Forecaster has been trained, `series` must have the "
+                 f"same columns as the series used during training:\n" 
+                 f" Got      : {series_col_names}\n"
+                 f" Expected : {self.series_col_names}")
             )
         
         exog_dict = {serie: None for serie in series_col_names}
@@ -557,8 +566,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 )
             else:
                 raise ValueError(
-                    ("Once the Forecaster has been trained, `exog` must have the "
-                     "same columns as the series used during training.")
+                    (f"Once the Forecaster has been trained, `exog` must have the "
+                     f"same columns as the series used during training:\n" 
+                     f" Got      : {exog_col_names}\n"
+                     f" Expected : {self.exog_col_names}")
                 )
 
         if not self.fitted:
@@ -582,7 +593,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         # TODO: parallelize
         # ======================================================================
-        ignore_exog = True if exog else False
+        ignore_exog = False if exog is not None else True
         input_matrices = [
             [series_dict[k], exog_dict[k], ignore_exog]
              for k in series_dict.keys()
@@ -612,7 +623,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         # TODO: Explore other encodings
         # ======================================================================
         X_train = pd.get_dummies(X_train, columns=['_level_skforecast'], dtype=float)
-        X_train.columns = X_train.columns.str.replace('_level_skforecast', '')
+        X_train.columns = X_train.columns.str.replace('_level_skforecast_', '')
         # ======================================================================
 
         exog_dtypes = None

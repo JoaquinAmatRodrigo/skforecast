@@ -24,6 +24,20 @@ def test_TypeError_check_preprocess_series_when_series_is_not_pandas_DataFrame_o
         check_preprocess_series(series = series)
 
 
+def test_ValueError_check_preprocess_series_when_all_series_values_are_missing_DataFrame():
+    """
+    Test ValueError is raised when all series values are missing when series
+    is a pandas DataFrame.
+    """
+    series_nan = pd.DataFrame({'1': pd.Series(np.arange(7)), 
+                               '2': pd.Series([np.nan]*7)})
+    series_nan.index = pd.date_range(start='2022-01-01', periods=7, freq='1D')
+
+    err_msg = re.escape("All values of series '2' are NaN.")
+    with pytest.raises(ValueError, match = err_msg):
+        check_preprocess_series(series=series_nan)
+
+
 def test_check_preprocess_series_when_series_is_pandas_DataFrame():
     """
     Test check_preprocess_series when `series` is a pandas DataFrame.
@@ -145,6 +159,21 @@ def test_ValueError_check_preprocess_series_when_series_is_dict_with_different_f
     )
     with pytest.raises(ValueError, match = err_msg):
         check_preprocess_series(series = series_dict)
+
+
+def test_ValueError_check_preprocess_series_when_all_series_values_are_missing_dict():
+    """
+    Test ValueError is raised when all series values are missing when series
+    is a dict.
+    """
+    series_nan = pd.DataFrame({'l1': pd.Series(np.arange(7)), 
+                               'l2': pd.Series([np.nan]*7)})
+    series_nan.index = pd.date_range(start='2022-01-01', periods=7, freq='1D')
+    series_nan = series_nan.to_dict("series")
+
+    err_msg = re.escape("All values of series 'l2' are NaN.")
+    with pytest.raises(ValueError, match = err_msg):
+        check_preprocess_series(series=series_nan)
 
 
 def test_check_preprocess_series_when_series_is_dict():

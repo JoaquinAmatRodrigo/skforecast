@@ -4,7 +4,7 @@ import re
 import pytest
 import numpy as np
 import pandas as pd
-from skforecast.exceptions import MissingValuesExogWarning
+from skforecast.exceptions import MissingValuesWarning
 from skforecast.utils import check_preprocess_series
 from skforecast.utils import check_preprocess_exog_multiseries
 from skforecast.utils import align_series_and_exog_multiseries
@@ -750,7 +750,7 @@ def test_output_align_series_and_exog_multiseries_when_series_is_dict_and_length
         ("Series 'l1' and its `exog` do not have the same index. "
          "All exog values will be NaN for the period of the series.")
     )
-    with pytest.warns(MissingValuesExogWarning, match = warn_msg):
+    with pytest.warns(MissingValuesWarning, match = warn_msg):
         series_dict, exog_dict = align_series_and_exog_multiseries(
                                      series_dict          = series_dict,
                                      input_series_is_dict = input_series_is_dict,
@@ -835,7 +835,7 @@ def test_output_align_series_and_exog_multiseries_when_series_is_dict_and_differ
         ("Series 'l1' and its `exog` do not have the same length. "
          "Exog values will be NaN for the not matched period of the series.")
     )
-    with pytest.warns(MissingValuesExogWarning, match = warn_msg):
+    with pytest.warns(MissingValuesWarning, match = warn_msg):
         series_dict, exog_dict = align_series_and_exog_multiseries(
                                      series_dict          = series_dict,
                                      input_series_is_dict = input_series_is_dict,

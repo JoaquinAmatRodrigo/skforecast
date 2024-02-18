@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
 from skforecast.preprocessing import TimeSeriesDifferentiator
-from skforecast.exceptions import MissingValuesExogWarning
+from skforecast.exceptions import MissingValuesWarning
 from sklearn.linear_model import LinearRegression
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler
@@ -34,9 +34,9 @@ def test_create_train_X_y_TypeError_when_exog_is_categorical_of_no_int():
         forecaster.create_train_X_y(y=y, exog=exog)
 
 
-def test_create_train_X_y_MissingValuesExogWarning_when_exog_has_missing_values():
+def test_create_train_X_y_MissingValuesWarning_when_exog_has_missing_values():
     """
-    Test create_train_X_y is issues a MissingValuesExogWarning when exog has missing values.
+    Test create_train_X_y is issues a MissingValuesWarning when exog has missing values.
     """
     y = pd.Series(np.arange(4))
     exog = pd.Series([1, 2, 3, np.nan], name='exog')
@@ -46,7 +46,7 @@ def test_create_train_X_y_MissingValuesExogWarning_when_exog_has_missing_values(
                 ("`exog` has missing values. Most machine learning models do "
                  "not allow missing values. Fitting the forecaster may fail.")  
               )
-    with pytest.warns(MissingValuesExogWarning, match = warn_msg):
+    with pytest.warns(MissingValuesWarning, match = warn_msg):
         forecaster.create_train_X_y(y=y, exog=exog)
 
 

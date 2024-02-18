@@ -9,7 +9,7 @@ from skforecast.utils import check_predict_input
 from skforecast.utils import check_exog
 from skforecast.utils import preprocess_exog
 from skforecast.utils import preprocess_last_window
-from skforecast.exceptions import MissingValuesExogWarning
+from skforecast.exceptions import MissingValuesWarning
 
 
 def test_check_predict_input_NotFittedError_when_fitted_is_False():
@@ -541,14 +541,14 @@ def test_check_predict_input_TypeError_when_exog_is_not_pandas_series_or_datafra
         )
 
 
-def test_check_predict_input_MissingValuesExogWarning_when_exog_has_missing_values():
+def test_check_predict_input_MissingValuesWarning_when_exog_has_missing_values():
     """
     """
     warn_msg = re.escape(
                 ("`exog` has missing values. Most of machine learning models do "
                  "not allow missing values. `predict` method may fail.")
                )
-    with pytest.warns(MissingValuesExogWarning, match = warn_msg):
+    with pytest.warns(MissingValuesWarning, match = warn_msg):
         check_predict_input(
             forecaster_name  = 'ForecasterAutoreg',
             steps            = 3,
@@ -909,7 +909,7 @@ def test_check_predict_input_ValueError_when_ForecasterSarimax_last_window_exog_
                 ("`last_window_exog` has missing values. Most of machine learning models "
                  "do not allow missing values. `predict` method may fail.")
             )
-    with pytest.warns(MissingValuesExogWarning, match = warn_msg):
+    with pytest.warns(MissingValuesWarning, match = warn_msg):
         check_predict_input(
             forecaster_name  = 'ForecasterSarimax',
             steps            = 10,

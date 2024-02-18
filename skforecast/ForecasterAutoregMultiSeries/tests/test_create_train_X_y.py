@@ -5,7 +5,7 @@ import pytest
 import numpy as np
 import pandas as pd
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
-from skforecast.exceptions import MissingValuesExogWarning
+from skforecast.exceptions import MissingValuesWarning
 from skforecast.exceptions import IgnoredArgumentWarning
 from sklearn.linear_model import LinearRegression
 from sklearn.compose import ColumnTransformer
@@ -32,136 +32,78 @@ def test_create_train_X_y_TypeError_when_exog_is_categorical_of_no_int():
         forecaster.create_train_X_y(series=series, exog=exog)
 
 
-def test_create_train_X_y_MissingValuesExogWarning_when_exog_has_missing_values():
+def test_create_train_X_y_ValueError_when_Forecaster_fitted_and_different_columns_names():
     """
-    Test create_train_X_y is issues a MissingValuesExogWarning when exog has missing values.
-    """
-    series = pd.DataFrame({'1': pd.Series(np.arange(4)),  
-                           '2': pd.Series(np.arange(4))})
-    exog = pd.Series([1, 2, 3, np.nan], name='exog')
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=2)
-
-    warn_msg = re.escape(
-                ("`exog` has missing values. Most machine learning models do "
-                 "not allow missing values. Fitting the forecaster may fail.")  
-              )
-    with pytest.warns(MissingValuesExogWarning, match = warn_msg):
-        forecaster.create_train_X_y(series=series, exog=exog)
-
-
-def test_create_train_X_y_TypeError_when_series_not_dataframe():
-    """
-    Test TypeError is raised when series is not a pandas DataFrame.
+    Test ValueError is raised when the forecaster is fitted and the columns names
+    of the series are different from the columns names used to fit the forecaster.
     """
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
-    series = pd.Series(np.arange(7))
+    forecaster.fitted = True
+    forecaster.series_col_names = ['l1', 'l2']
 
-    err_msg = re.escape(f"`series` must be a pandas DataFrame or dict. Got {type(series)}.")
-    with pytest.raises(TypeError, match = err_msg):
-        forecaster.create_train_X_y(series=series)
+    new_series = pd.DataFrame({
+        'l1': pd.Series(np.arange(10)),
+        'l4': pd.Series(np.arange(10))
+    })
 
-
-def test_create_train_X_y_IgnoredArgumentWarning_when_levels_of_transformer_series_not_equal_to_series_col_names():
-    """
-    Test IgnoredArgumentWarning is raised when `transformer_series` is a dict and its keys are
-    not the same as forecaster.series_col_names.
-    """
-    series = pd.DataFrame({'1': pd.Series(np.arange(5)),  
-                           '2': pd.Series(np.arange(5))})
-    dict_transformers = {'1': StandardScaler(), 
-                         '3': StandardScaler()}
-    
-    forecaster = ForecasterAutoregMultiSeries(
-                     regressor          = LinearRegression(), 
-                     lags               = 3,
-                     transformer_series = dict_transformers
-                 )
-    series_not_in_transformer_series = set(series.columns) - set(forecaster.transformer_series.keys())
-    
-    warn_msg = re.escape(
-        (f"{series_not_in_transformer_series} not present in `transformer_series`."
-         f" No transformation is applied to these series.")
-    )
-    with pytest.warns(IgnoredArgumentWarning, match = warn_msg):
-        forecaster.create_train_X_y(series=series)
-
-
-@pytest.mark.parametrize("exog", 
-                         [pd.Series(np.arange(10)), 
-                          pd.DataFrame(np.arange(50).reshape(25, 2))])
-def test_create_train_X_y_ValueError_when_series_and_exog_have_different_length(exog):
-    """
-    Test ValueError is raised when length of series is not equal to length exog.
-    """
-    series = pd.DataFrame({'1': pd.Series(np.arange(7)), 
-                           '2': pd.Series(np.arange(7))})
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5)
-    
     err_msg = re.escape(
-                (f"`exog` must have same number of samples as `series`. "
-                 f"length `exog`: ({len(exog)}), length `series`: ({len(series)})")
-              )
+        (f"Once the Forecaster has been trained, `series` must have the "
+         f"same columns as the series used during training:\n" 
+         f" Got      : ['l1', 'l4']\n"
+         f" Expected : ['l1', 'l2']")
+    )
+    with pytest.raises(ValueError, match = err_msg):
+        forecaster.create_train_X_y(series=new_series)
+
+
+def test_create_train_X_y_ValueError_when_Forecaster_fitted_without_exog_and_exog_is_not_None():
+    """
+    Test ValueError is raised when the forecaster was fitted without exog and
+    exog is not None.
+    """
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
+    forecaster.fitted = True
+    forecaster.series_col_names = ['l1', 'l2']
+    forecaster.exog_col_names = None
+
+    series = pd.DataFrame({
+        'l1': pd.Series(np.arange(10)),
+        'l2': pd.Series(np.arange(10))
+    })
+    exog = pd.Series(np.arange(10), name='exog')
+
+    err_msg = re.escape(
+        ("Once the Forecaster has been trained, `exog` must be `None` "
+         "because no exogenous variables were added during training.")
+    )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.create_train_X_y(series=series, exog=exog)
 
 
-def test_create_train_X_y_ValueError_when_series_and_exog_have_different_index():
+def test_create_train_X_y_ValueError_when_Forecaster_fitted_and_different_exog_columns_names():
     """
-    Test ValueError is raised when series and exog have different index.
+    Test ValueError is raised when the forecaster is fitted and the columns names
+    of exog are different from the columns names used to fit the forecaster.
     """
-    series = pd.DataFrame({'1': pd.Series(np.arange(7)), 
-                           '2': pd.Series(np.arange(7))})
-    series.index = pd.date_range(start='2022-01-01', periods=7, freq='1D')
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5)
-    
-    exog = pd.Series(np.arange(7), index=pd.RangeIndex(start=0, stop=7, step=1))
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
+    forecaster.fitted = True
+    forecaster.series_col_names = ['l1', 'l2']
+    forecaster.exog_col_names = ['exog']
+
+    series = pd.DataFrame({
+        'l1': pd.Series(np.arange(10)),
+        'l2': pd.Series(np.arange(10))
+    })
+    new_exog = pd.Series(np.arange(10), name='exog2')
 
     err_msg = re.escape(
-                ("Different index for `series` and `exog`. They must be equal "
-                 "to ensure the correct alignment of values.")
-              )
+        (f"Once the Forecaster has been trained, `exog` must have the "
+         f"same columns as the series used during training:\n" 
+         f" Got      : ['exog2']\n"
+         f" Expected : ['exog']")
+    )
     with pytest.raises(ValueError, match = err_msg):
-        forecaster.fit(series=series, exog=exog)
-
-
-def test_create_train_X_y_ValueError_when_all_series_values_are_missing():
-    """
-    Test ValueError is raised when all series values are missing.
-    """
-    series = pd.DataFrame({'1': pd.Series(np.arange(7)), 
-                           '2': pd.Series([np.nan]*7)})
-    series.index = pd.date_range(start='2022-01-01', periods=7, freq='1D')
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5)
-
-    err_msg = re.escape("All values of series '2' are NaN.")
-    with pytest.raises(ValueError, match = err_msg):
-        forecaster.create_train_X_y(series=series)
-
-
-@pytest.mark.parametrize("values", 
-                         [[0, 1, 2, 3, 4, 5, np.nan], 
-                          [0, 1]+[np.nan]*5, 
-                          [np.nan, 1, 2, 3, 4, 5, np.nan],
-                          [0, 1, np.nan, 3, np.nan, 5, 6], 
-                          [np.nan, np.nan, np.nan, 3, np.nan, 5, 6]])
-def test_create_train_X_y_ValueError_when_series_values_are_missing(values):
-    """
-    Test ValueError is raised when series values are missing in different
-    locations.
-    """
-    series = pd.DataFrame({'1': pd.Series(values), 
-                           '2': pd.Series(np.arange(7))})
-    series.index = pd.date_range(start='2022-01-01', periods=7, freq='1D')
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5)
-
-    err_msg = re.escape(
-                ("'1' Time series has missing values in between or "
-                 "at the end of the time series. When working with series "
-                 "of different lengths, all series must be complete after "
-                 "the first non-null value.")
-              )
-    with pytest.raises(ValueError, match = err_msg):
-        forecaster.create_train_X_y(series=series)
+        forecaster.create_train_X_y(series=series, exog=new_exog)
 
 
 def test_create_train_X_y_output_when_series_and_exog_is_None():
@@ -184,26 +126,34 @@ def test_create_train_X_y_output_when_series_and_exog_is_None():
                              [ 0. , -0.5, -1. , 0., 1.],
                              [ 0.5,  0. , -0.5, 0., 1.],
                              [ 1. ,  0.5,  0. , 0., 1.]]),
-            index   = pd.RangeIndex(start=0, stop=8, step=1),
+            index   = pd.Index([3, 4, 5, 6, 3, 4, 5, 6]),
             columns = ['lag_1', 'lag_2', 'lag_3', '1', '2']
         ),
         pd.Series(
             data  = np.array([0., 0.5, 1., 1.5, 0., 0.5, 1., 1.5]),
-            index = pd.RangeIndex(start=0, stop=8, step=1),
+            index = pd.Index([3, 4, 5, 6, 3, 4, 5, 6]),
             name  = 'y',
             dtype = float
         ),
-        pd.RangeIndex(start=0, stop=len(series), step=1),
-        pd.Index(np.array([3., 4., 5., 6., 3., 4., 5., 6.]))
+        {'1': pd.RangeIndex(start=0, stop=7, step=1),
+         '2': pd.RangeIndex(start=0, stop=7, step=1)},
+        ['1', '2'],
+        None,
+        None
     )
 
-    for i in range(len(expected)):
-        if isinstance(expected[i], pd.DataFrame):
-            pd.testing.assert_frame_equal(results[i], expected[i])
-        elif isinstance(expected[i], pd.Series):
-            pd.testing.assert_series_equal(results[i], expected[i])
-        else:
-            np.testing.assert_array_equal(results[i], expected[i])
+    pd.testing.assert_frame_equal(results[0], expected[0])
+    pd.testing.assert_series_equal(results[1], expected[1])
+    for k in results[2].keys():
+        pd.testing.assert_index_equal(results[2][k], expected[2][k])
+    assert results[3] == expected[3]
+    assert isinstance(results[4], type(None))
+    assert isinstance(results[5], type(None))
+
+
+# TODO: CONTINUE FROM HERE
+# =============================================================================
+
 
 
 def test_create_train_X_y_output_when_series_and_exog_no_pandas_index():
@@ -984,3 +934,33 @@ def test_create_train_X_y_output_when_transformer_series_and_transformer_exog_wi
             pd.testing.assert_series_equal(results[i], expected[i])
         else:
             np.testing.assert_array_equal(results[i], expected[i])
+
+
+
+
+
+
+
+
+
+
+
+
+# TODO: Complete
+def test_create_train_X_y_MissingValuesWarning_when_exog_has_missing_values():
+    """
+    Test create_train_X_y is issues a MissingValuesWarning when X_train has 
+    missing values and drop_nan.
+    """
+    series = pd.DataFrame({'1': pd.Series(np.arange(4)),  
+                           '2': pd.Series(np.arange(4))})
+    exog = pd.Series([1, 2, 3, np.nan], name='exog')
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=2)
+
+    warn_msg = re.escape(
+        ("NaNs detected in `X_train`. Some regressor do not allow "
+         "NaN values during training. If you want to drop them, "
+         "set `drop_nan = True`.")
+    )
+    with pytest.warns(MissingValuesWarning, match = warn_msg):
+        forecaster.create_train_X_y(series=series, exog=exog, drop_nan=False)
