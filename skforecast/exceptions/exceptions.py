@@ -10,12 +10,14 @@ The skforecast.exceptions module contains all the custom warnings and error
 classes used across skforecast.
 """
 
-class MissingValuesExogWarning(UserWarning):
+
+class MissingValuesWarning(UserWarning):
     """
-    Warning used to notify there are missing values in the exogenous data.
-    This warning occurs when the input data passed to the `exog` arguments contains
-    missing values. Most machine learning models do not accept missing values, therefore
-    the forecaster `fit` and `predict` may fail.
+    Warning used to indicate that there are missing values in the data. This 
+    warning occurs when the input data passed to the `exog` arguments contains 
+    missing values, or the training matrix generates missing values. Most machine 
+    learning models do not accept missing values, so the Forecaster's `fit' and 
+    `predict' methods may fail.
     """
     def __init__(self, message):
         self.message = message
@@ -23,7 +25,7 @@ class MissingValuesExogWarning(UserWarning):
     def __str__(self):
         extra_message = (
             "\n You can suppress this warning using: "
-            "warnings.simplefilter('ignore', category=MissingValuesExogWarning)"
+            "warnings.simplefilter('ignore', category=MissingValuesWarning)"
         )
         return self.message + " " + extra_message
 
