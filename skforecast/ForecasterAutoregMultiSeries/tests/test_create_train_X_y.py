@@ -200,13 +200,9 @@ def test_create_train_X_y_output_when_series_and_exog_no_pandas_index():
     for k in results[2].keys():
         pd.testing.assert_index_equal(results[2][k], expected[2][k])
     assert results[3] == expected[3]
-    assert results[4] == expected[4]
+    assert set(results[4]) == set(expected[4])
     for k in results[5].keys():
         assert results[5] == expected[5]
-
-
-# TODO: CONTINUE FROM HERE
-# =============================================================================
 
 
 @pytest.mark.parametrize("dtype", 
@@ -227,37 +223,41 @@ def test_create_train_X_y_output_when_series_10_and_exog_is_series_of_float_int(
 
     expected = (
         pd.DataFrame(
-            data = np.array([[4., 3., 2., 1., 0., 105., 1., 0.],
-                             [5., 4., 3., 2., 1., 106., 1., 0.],
-                             [6., 5., 4., 3., 2., 107., 1., 0.],
-                             [7., 6., 5., 4., 3., 108., 1., 0.],
-                             [8., 7., 6., 5., 4., 109., 1., 0.],
-                             [4., 3., 2., 1., 0., 105., 0., 1.],
-                             [5., 4., 3., 2., 1., 106., 0., 1.],
-                             [6., 5., 4., 3., 2., 107., 0., 1.],
-                             [7., 6., 5., 4., 3., 108., 0., 1.],
-                             [8., 7., 6., 5., 4., 109., 0., 1.]]),
-            index   = pd.RangeIndex(start=0, stop=10, step=1),
+            data = np.array([[4., 3., 2., 1., 0., 1., 0., 105.],
+                             [5., 4., 3., 2., 1., 1., 0., 106.],
+                             [6., 5., 4., 3., 2., 1., 0., 107.],
+                             [7., 6., 5., 4., 3., 1., 0., 108.],
+                             [8., 7., 6., 5., 4., 1., 0., 109.],
+                             [4., 3., 2., 1., 0., 0., 1., 105.],
+                             [5., 4., 3., 2., 1., 0., 1., 106.],
+                             [6., 5., 4., 3., 2., 0., 1., 107.],
+                             [7., 6., 5., 4., 3., 0., 1., 108.],
+                             [8., 7., 6., 5., 4., 0., 1., 109.]]),
+            index   = pd.Index([5, 6, 7, 8, 9, 5, 6, 7, 8, 9]),
             columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 
-                       'exog', '1', '2']
+                       '1', '2', 'exog']
         ).astype({'exog': dtype}),
         pd.Series(
             data  = np.array([5, 6, 7, 8, 9, 5, 6, 7, 8, 9]),
-            index = pd.RangeIndex(start=0, stop=10, step=1),
+            index = pd.Index([5, 6, 7, 8, 9, 5, 6, 7, 8, 9]),
             name  = 'y',
             dtype = float
         ),
-        pd.RangeIndex(start=0, stop=len(series), step=1),
-        pd.Index(np.array([5, 6, 7, 8, 9, 5, 6, 7, 8, 9]))
+        {'1': pd.RangeIndex(start=0, stop=10, step=1),
+         '2': pd.RangeIndex(start=0, stop=10, step=1)},
+        ['1', '2'],
+        ['exog'],
+        {'exog': exog.dtypes}
     )
 
-    for i in range(len(expected)):
-        if isinstance(expected[i], pd.DataFrame):
-            pd.testing.assert_frame_equal(results[i], expected[i])
-        elif isinstance(expected[i], pd.Series):
-            pd.testing.assert_series_equal(results[i], expected[i])
-        else:
-            np.testing.assert_array_equal(results[i], expected[i])
+    pd.testing.assert_frame_equal(results[0], expected[0])
+    pd.testing.assert_series_equal(results[1], expected[1])
+    for k in results[2].keys():
+        pd.testing.assert_index_equal(results[2][k], expected[2][k])
+    assert results[3] == expected[3]
+    assert set(results[4]) == set(expected[4])
+    for k in results[5].keys():
+        assert results[5] == expected[5]
 
 
 @pytest.mark.parametrize("dtype", 
@@ -279,37 +279,41 @@ def test_create_train_X_y_output_when_series_10_and_exog_is_dataframe_of_float_i
 
     expected = (
         pd.DataFrame(
-            data = np.array([[4., 3., 2., 1., 0., 105., 1005., 1., 0.],
-                             [5., 4., 3., 2., 1., 106., 1006., 1., 0.],
-                             [6., 5., 4., 3., 2., 107., 1007., 1., 0.],
-                             [7., 6., 5., 4., 3., 108., 1008., 1., 0.],
-                             [8., 7., 6., 5., 4., 109., 1009., 1., 0.],
-                             [4., 3., 2., 1., 0., 105., 1005., 0., 1.],
-                             [5., 4., 3., 2., 1., 106., 1006., 0., 1.],
-                             [6., 5., 4., 3., 2., 107., 1007., 0., 1.],
-                             [7., 6., 5., 4., 3., 108., 1008., 0., 1.],
-                             [8., 7., 6., 5., 4., 109., 1009., 0., 1.]]),
-            index   = pd.RangeIndex(start=0, stop=10, step=1),
+            data = np.array([[4., 3., 2., 1., 0., 1., 0., 105., 1005.],
+                             [5., 4., 3., 2., 1., 1., 0., 106., 1006.],
+                             [6., 5., 4., 3., 2., 1., 0., 107., 1007.],
+                             [7., 6., 5., 4., 3., 1., 0., 108., 1008.],
+                             [8., 7., 6., 5., 4., 1., 0., 109., 1009.],
+                             [4., 3., 2., 1., 0., 0., 1., 105., 1005.],
+                             [5., 4., 3., 2., 1., 0., 1., 106., 1006.],
+                             [6., 5., 4., 3., 2., 0., 1., 107., 1007.],
+                             [7., 6., 5., 4., 3., 0., 1., 108., 1008.],
+                             [8., 7., 6., 5., 4., 0., 1., 109., 1009.]]),
+            index   = pd.Index([5, 6, 7, 8, 9, 5, 6, 7, 8, 9]),
             columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 
-                       'exog_1', 'exog_2', '1', '2']
+                       '1', '2', 'exog_1', 'exog_2']
         ).astype({'exog_1': dtype, 'exog_2': dtype}),
         pd.Series(
             data  = np.array([5, 6, 7, 8, 9, 5, 6, 7, 8, 9]),
-            index = pd.RangeIndex(start=0, stop=10, step=1),
+            index = pd.Index([5, 6, 7, 8, 9, 5, 6, 7, 8, 9]),
             name  = 'y',
             dtype = float
         ),
-        pd.RangeIndex(start=0, stop=len(series), step=1),
-        pd.Index(np.array([5, 6, 7, 8, 9, 5, 6, 7, 8, 9]))
+        {'1': pd.RangeIndex(start=0, stop=10, step=1),
+         '2': pd.RangeIndex(start=0, stop=10, step=1)},
+        ['1', '2'],
+        ['exog_1', 'exog_2'],
+        {'exog_1': exog['exog_1'].dtypes, 'exog_2': exog['exog_2'].dtypes}
     )
 
-    for i in range(len(expected)):
-        if isinstance(expected[i], pd.DataFrame):
-            pd.testing.assert_frame_equal(results[i], expected[i])
-        elif isinstance(expected[i], pd.Series):
-            pd.testing.assert_series_equal(results[i], expected[i])
-        else:
-            np.testing.assert_array_equal(results[i], expected[i])
+    pd.testing.assert_frame_equal(results[0], expected[0])
+    pd.testing.assert_series_equal(results[1], expected[1])
+    for k in results[2].keys():
+        pd.testing.assert_index_equal(results[2][k], expected[2][k])
+    assert results[3] == expected[3]
+    assert set(results[4]) == set(expected[4])
+    for k in results[5].keys():
+        assert results[5] == expected[5]
 
 
 @pytest.mark.parametrize("exog_values, dtype", 
@@ -341,28 +345,35 @@ def test_create_train_X_y_output_when_series_10_and_exog_is_series_of_bool_str(e
                              [6., 5., 4., 3., 2.],
                              [7., 6., 5., 4., 3.],
                              [8., 7., 6., 5., 4.]]),
-            index   = pd.RangeIndex(start=0, stop=10, step=1),
+            index   = pd.Index([5, 6, 7, 8, 9, 5, 6, 7, 8, 9]),
             columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5']
-        ).assign(exog = exog_values*5 + exog_values*5, 
-                 l1   = [1.]*5 + [0.]*5, 
-                 l2   = [0.]*5 + [1.]*5).astype({'exog': dtype}),
+        ).assign(
+            l1   = [1.]*5 + [0.]*5, 
+            l2   = [0.]*5 + [1.]*5,
+            exog = exog_values*5 + exog_values*5
+        ).astype({'exog': dtype}
+        ),
         pd.Series(
             data  = np.array([5, 6, 7, 8, 9, 5, 6, 7, 8, 9]),
-            index = pd.RangeIndex(start=0, stop=10, step=1),
+            index = pd.Index([5, 6, 7, 8, 9, 5, 6, 7, 8, 9]),
             name  = 'y',
             dtype = float
         ),
-        pd.RangeIndex(start=0, stop=len(series), step=1),
-        pd.Index(np.array([5, 6, 7, 8, 9, 5, 6, 7, 8, 9]))
+        {'l1': pd.RangeIndex(start=0, stop=10, step=1),
+         'l2': pd.RangeIndex(start=0, stop=10, step=1)},
+        ['l1', 'l2'],
+        ['exog'],
+        {'exog': exog.dtypes}
     )
 
-    for i in range(len(expected)):
-        if isinstance(expected[i], pd.DataFrame):
-            pd.testing.assert_frame_equal(results[i], expected[i])
-        elif isinstance(expected[i], pd.Series):
-            pd.testing.assert_series_equal(results[i], expected[i])
-        else:
-            np.testing.assert_array_equal(results[i], expected[i])
+    pd.testing.assert_frame_equal(results[0], expected[0])
+    pd.testing.assert_series_equal(results[1], expected[1])
+    for k in results[2].keys():
+        pd.testing.assert_index_equal(results[2][k], expected[2][k])
+    assert results[3] == expected[3]
+    assert set(results[4]) == set(expected[4])
+    for k in results[5].keys():
+        assert results[5] == expected[5]
 
 
 @pytest.mark.parametrize("v_exog_1   , v_exog_2  , dtype", 
@@ -395,30 +406,38 @@ def test_create_train_X_y_output_when_series_10_and_exog_is_dataframe_of_bool_st
                              [6., 5., 4., 3., 2.],
                              [7., 6., 5., 4., 3.],
                              [8., 7., 6., 5., 4.]]),
-            index   = pd.RangeIndex(start=0, stop=10, step=1),
+            index   = pd.Index([5, 6, 7, 8, 9, 5, 6, 7, 8, 9]),
             columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5']
-        ).assign(exog_1 = v_exog_1*5 + v_exog_1*5, 
-                 exog_2 = v_exog_2*5 + v_exog_2*5, 
-                 l1     = [1.]*5 + [0.]*5, 
-                 l2     = [0.]*5 + [1.]*5).astype({'exog_1': dtype, 
-                                                   'exog_2': dtype}),
+        ).assign(
+            l1     = [1.]*5 + [0.]*5, 
+            l2     = [0.]*5 + [1.]*5,
+            exog_1 = v_exog_1*5 + v_exog_1*5, 
+            exog_2 = v_exog_2*5 + v_exog_2*5
+        ).astype({
+            'exog_1': dtype, 
+            'exog_2': dtype}
+        ),
         pd.Series(
             data  = np.array([5, 6, 7, 8, 9, 5, 6, 7, 8, 9]),
-            index = pd.RangeIndex(start=0, stop=10, step=1),
+            index = pd.Index([5, 6, 7, 8, 9, 5, 6, 7, 8, 9]),
             name  = 'y',
             dtype = float
         ),
-        pd.RangeIndex(start=0, stop=len(series), step=1),
-        pd.Index(np.array([5, 6, 7, 8, 9, 5, 6, 7, 8, 9]))
+        {'l1': pd.RangeIndex(start=0, stop=10, step=1),
+         'l2': pd.RangeIndex(start=0, stop=10, step=1)},
+        ['l1', 'l2'],
+        ['exog_1', 'exog_2'],
+        {'exog_1': exog['exog_1'].dtypes, 'exog_2': exog['exog_2'].dtypes}
     )
 
-    for i in range(len(expected)):
-        if isinstance(expected[i], pd.DataFrame):
-            pd.testing.assert_frame_equal(results[i], expected[i])
-        elif isinstance(expected[i], pd.Series):
-            pd.testing.assert_series_equal(results[i], expected[i])
-        else:
-            np.testing.assert_array_equal(results[i], expected[i])
+    pd.testing.assert_frame_equal(results[0], expected[0])
+    pd.testing.assert_series_equal(results[1], expected[1])
+    for k in results[2].keys():
+        pd.testing.assert_index_equal(results[2][k], expected[2][k])
+    assert results[3] == expected[3]
+    assert set(results[4]) == set(expected[4])
+    for k in results[5].keys():
+        assert results[5] == expected[5]
 
 
 def test_create_train_X_y_output_when_series_10_and_exog_is_series_of_category():
@@ -446,28 +465,34 @@ def test_create_train_X_y_output_when_series_10_and_exog_is_series_of_category()
                              [6., 5., 4., 3., 2.],
                              [7., 6., 5., 4., 3.],
                              [8., 7., 6., 5., 4.]]),
-            index   = pd.RangeIndex(start=0, stop=10, step=1),
+            index   = pd.Index([5, 6, 7, 8, 9, 5, 6, 7, 8, 9]),
             columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5']
-        ).assign(exog = pd.Categorical([5, 6, 7, 8, 9]*2, categories=range(10)), 
-                 l1   = [1.]*5 + [0.]*5, 
-                 l2   = [0.]*5 + [1.]*5),
+        ).assign(
+            l1   = [1.]*5 + [0.]*5, 
+            l2   = [0.]*5 + [1.]*5,
+            exog = pd.Categorical([5, 6, 7, 8, 9]*2, categories=range(10))
+        ),
         pd.Series(
             data  = np.array([5, 6, 7, 8, 9, 5, 6, 7, 8, 9]),
-            index = pd.RangeIndex(start=0, stop=10, step=1),
+            index = pd.Index([5, 6, 7, 8, 9, 5, 6, 7, 8, 9]),
             name  = 'y',
             dtype = float
         ),
-        pd.RangeIndex(start=0, stop=len(series), step=1),
-        pd.Index(np.array([5, 6, 7, 8, 9, 5, 6, 7, 8, 9]))
+        {'l1': pd.RangeIndex(start=0, stop=10, step=1),
+         'l2': pd.RangeIndex(start=0, stop=10, step=1)},
+        ['l1', 'l2'],
+        ['exog'],
+        {'exog': exog.dtypes}
     )
 
-    for i in range(len(expected)):
-        if isinstance(expected[i], pd.DataFrame):
-            pd.testing.assert_frame_equal(results[i], expected[i])
-        elif isinstance(expected[i], pd.Series):
-            pd.testing.assert_series_equal(results[i], expected[i])
-        else:
-            np.testing.assert_array_equal(results[i], expected[i])
+    pd.testing.assert_frame_equal(results[0], expected[0])
+    pd.testing.assert_series_equal(results[1], expected[1])
+    for k in results[2].keys():
+        pd.testing.assert_index_equal(results[2][k], expected[2][k])
+    assert results[3] == expected[3]
+    assert set(results[4]) == set(expected[4])
+    for k in results[5].keys():
+        assert results[5] == expected[5]
 
 
 def test_create_train_X_y_output_when_series_10_and_exog_is_dataframe_of_category():
@@ -496,29 +521,35 @@ def test_create_train_X_y_output_when_series_10_and_exog_is_dataframe_of_categor
                              [6., 5., 4., 3., 2.],
                              [7., 6., 5., 4., 3.],
                              [8., 7., 6., 5., 4.]]),
-            index   = pd.RangeIndex(start=0, stop=10, step=1),
+            index   = pd.Index([5, 6, 7, 8, 9, 5, 6, 7, 8, 9]),
             columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5']
-        ).assign(exog_1 = pd.Categorical([5, 6, 7, 8, 9]*2, categories=range(10)),
-                 exog_2 = pd.Categorical([105, 106, 107, 108, 109]*2, categories=range(100, 110)), 
-                 l1     = [1.]*5 + [0.]*5, 
-                 l2     = [0.]*5 + [1.]*5),
+        ).assign(
+            l1     = [1.]*5 + [0.]*5, 
+            l2     = [0.]*5 + [1.]*5,
+            exog_1 = pd.Categorical([5, 6, 7, 8, 9]*2, categories=range(10)),
+            exog_2 = pd.Categorical([105, 106, 107, 108, 109]*2, categories=range(100, 110))
+        ),
         pd.Series(
             data  = np.array([5, 6, 7, 8, 9, 5, 6, 7, 8, 9]),
-            index = pd.RangeIndex(start=0, stop=10, step=1),
+            index = pd.Index([5, 6, 7, 8, 9, 5, 6, 7, 8, 9]),
             name  = 'y',
             dtype = float
         ),
-        pd.RangeIndex(start=0, stop=len(series), step=1),
-        pd.Index(np.array([5, 6, 7, 8, 9, 5, 6, 7, 8, 9]))
+        {'l1': pd.RangeIndex(start=0, stop=10, step=1),
+         'l2': pd.RangeIndex(start=0, stop=10, step=1)},
+        ['l1', 'l2'],
+        ['exog_1', 'exog_2'],
+        {'exog_1': exog['exog_1'].dtypes, 'exog_2': exog['exog_2'].dtypes}
     )
 
-    for i in range(len(expected)):
-        if isinstance(expected[i], pd.DataFrame):
-            pd.testing.assert_frame_equal(results[i], expected[i])
-        elif isinstance(expected[i], pd.Series):
-            pd.testing.assert_series_equal(results[i], expected[i])
-        else:
-            np.testing.assert_array_equal(results[i], expected[i])
+    pd.testing.assert_frame_equal(results[0], expected[0])
+    pd.testing.assert_series_equal(results[1], expected[1])
+    for k in results[2].keys():
+        pd.testing.assert_index_equal(results[2][k], expected[2][k])
+    assert results[3] == expected[3]
+    assert set(results[4]) == set(expected[4])
+    for k in results[5].keys():
+        assert results[5] == expected[5]
 
 
 def test_create_train_X_y_output_when_series_10_and_exog_is_dataframe_of_float_int_category():
@@ -538,41 +569,49 @@ def test_create_train_X_y_output_when_series_10_and_exog_is_dataframe_of_float_i
 
     expected = (
         pd.DataFrame(
-            data = np.array([[4., 3., 2., 1., 0., 105., 1005.],
-                             [5., 4., 3., 2., 1., 106., 1006.],
-                             [6., 5., 4., 3., 2., 107., 1007.],
-                             [7., 6., 5., 4., 3., 108., 1008.],
-                             [8., 7., 6., 5., 4., 109., 1009.],
-                             [4., 3., 2., 1., 0., 105., 1005.],
-                             [5., 4., 3., 2., 1., 106., 1006.],
-                             [6., 5., 4., 3., 2., 107., 1007.],
-                             [7., 6., 5., 4., 3., 108., 1008.],
-                             [8., 7., 6., 5., 4., 109., 1009.]],
+            data = np.array([[4., 3., 2., 1., 0., 1., 0., 105., 1005.],
+                             [5., 4., 3., 2., 1., 1., 0., 106., 1006.],
+                             [6., 5., 4., 3., 2., 1., 0., 107., 1007.],
+                             [7., 6., 5., 4., 3., 1., 0., 108., 1008.],
+                             [8., 7., 6., 5., 4., 1., 0., 109., 1009.],
+                             [4., 3., 2., 1., 0., 0., 1., 105., 1005.],
+                             [5., 4., 3., 2., 1., 0., 1., 106., 1006.],
+                             [6., 5., 4., 3., 2., 0., 1., 107., 1007.],
+                             [7., 6., 5., 4., 3., 0., 1., 108., 1008.],
+                             [8., 7., 6., 5., 4., 0., 1., 109., 1009.]],
                              dtype=float),
-            index   = pd.RangeIndex(start=0, stop=10, step=1),
+            index   = pd.Index([5, 6, 7, 8, 9, 5, 6, 7, 8, 9]),
             columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 
-                       'exog_1', 'exog_2']
-        ).assign(exog_3 = pd.Categorical([105, 106, 107, 108, 109]*2, categories=range(100, 110)), 
-                 l1     = [1.]*5 + [0.]*5, 
-                 l2     = [0.]*5 + [1.]*5).astype({'exog_1': float, 
-                                                   'exog_2': int}),
+                       'l1', 'l2', 'exog_1', 'exog_2']
+        ).assign(
+            exog_3 = pd.Categorical([105, 106, 107, 108, 109]*2, categories=range(100, 110)), 
+        ).astype(
+            {'exog_1': float, 
+             'exog_2': int}
+        ),
         pd.Series(
             data  = np.array([5, 6, 7, 8, 9, 5, 6, 7, 8, 9]),
-            index = pd.RangeIndex(start=0, stop=10, step=1),
+            index = pd.Index([5, 6, 7, 8, 9, 5, 6, 7, 8, 9]),
             name  = 'y',
             dtype = float
         ),
-        pd.RangeIndex(start=0, stop=len(series), step=1),
-        pd.Index(np.array([5, 6, 7, 8, 9, 5, 6, 7, 8, 9]))
+        {'l1': pd.RangeIndex(start=0, stop=10, step=1),
+         'l2': pd.RangeIndex(start=0, stop=10, step=1)},
+        ['l1', 'l2'],
+        ['exog_1', 'exog_2', 'exog_3'],
+        {'exog_1': exog['exog_1'].dtypes, 
+         'exog_2': exog['exog_2'].dtypes,
+         'exog_3': exog['exog_3'].dtypes}
     )
 
-    for i in range(len(expected)):
-        if isinstance(expected[i], pd.DataFrame):
-            pd.testing.assert_frame_equal(results[i], expected[i])
-        elif isinstance(expected[i], pd.Series):
-            pd.testing.assert_series_equal(results[i], expected[i])
-        else:
-            np.testing.assert_array_equal(results[i], expected[i])
+    pd.testing.assert_frame_equal(results[0], expected[0])
+    pd.testing.assert_series_equal(results[1], expected[1])
+    for k in results[2].keys():
+        pd.testing.assert_index_equal(results[2][k], expected[2][k])
+    assert results[3] == expected[3]
+    assert set(results[4]) == set(expected[4])
+    for k in results[5].keys():
+        assert results[5] == expected[5]
 
 
 def test_create_train_X_y_output_when_series_and_exog_is_dataframe_datetime_index():
@@ -593,35 +632,57 @@ def test_create_train_X_y_output_when_series_and_exog_is_dataframe_datetime_inde
 
     expected = (
         pd.DataFrame(
-            data = np.array([[2.0, 1.0, 0.0, 103., 1003., 1., 0.],
-                             [3.0, 2.0, 1.0, 104., 1004., 1., 0.],
-                             [4.0, 3.0, 2.0, 105., 1005., 1., 0.],
-                             [5.0, 4.0, 3.0, 106., 1006., 1., 0.],
-                             [2.0, 1.0, 0.0, 103., 1003., 0., 1.],
-                             [3.0, 2.0, 1.0, 104., 1004., 0., 1.],
-                             [4.0, 3.0, 2.0, 105., 1005., 0., 1.],
-                             [5.0, 4.0, 3.0, 106., 1006., 0., 1.]]),
-            index   = pd.RangeIndex(start=0, stop=8, step=1),
-            columns = ['lag_1', 'lag_2', 'lag_3', 'exog_1', 'exog_2', '1', '2']
+            data = np.array([[2.0, 1.0, 0.0, 1., 0., 103., 1003.],
+                             [3.0, 2.0, 1.0, 1., 0., 104., 1004.],
+                             [4.0, 3.0, 2.0, 1., 0., 105., 1005.],
+                             [5.0, 4.0, 3.0, 1., 0., 106., 1006.],
+                             [2.0, 1.0, 0.0, 0., 1., 103., 1003.],
+                             [3.0, 2.0, 1.0, 0., 1., 104., 1004.],
+                             [4.0, 3.0, 2.0, 0., 1., 105., 1005.],
+                             [5.0, 4.0, 3.0, 0., 1., 106., 1006.]]),
+            index   = pd.Index(
+                          pd.DatetimeIndex(
+                              ['1990-01-04', '1990-01-05', '1990-01-06', '1990-01-07', 
+                               '1990-01-04', '1990-01-05', '1990-01-06', '1990-01-07']
+                          )
+                      ),
+            columns = ['lag_1', 'lag_2', 'lag_3', 
+                       '1', '2', 'exog_1', 'exog_2']
         ),
         pd.Series(
             data  = np.array([3., 4., 5., 6., 3., 4., 5., 6.]),
-            index = pd.RangeIndex(start=0, stop=8, step=1),
+            index = pd.Index(
+                        pd.DatetimeIndex(
+                            ['1990-01-04', '1990-01-05', '1990-01-06', '1990-01-07', 
+                             '1990-01-04', '1990-01-05', '1990-01-06', '1990-01-07']
+                        )
+                    ),
             name  = 'y',
             dtype = float
         ),
-        pd.date_range("1990-01-01", periods=7, freq='D'),
-        pd.Index(pd.DatetimeIndex(['1990-01-04', '1990-01-05', '1990-01-06', '1990-01-07', 
-                                   '1990-01-04', '1990-01-05', '1990-01-06', '1990-01-07']))
+        {'1': pd.date_range("1990-01-01", periods=7, freq='D'),
+         '2': pd.date_range("1990-01-01", periods=7, freq='D')},
+        ['1', '2'],
+        ['exog_1', 'exog_2'],
+        {'exog_1': exog['exog_1'].dtypes, 
+         'exog_2': exog['exog_2'].dtypes}
     )
 
-    for i in range(len(expected)):
-        if isinstance(expected[i], pd.DataFrame):
-            pd.testing.assert_frame_equal(results[i], expected[i])
-        elif isinstance(expected[i], pd.Series):
-            pd.testing.assert_series_equal(results[i], expected[i])
-        else:
-            np.testing.assert_array_equal(results[i], expected[i])
+    pd.testing.assert_frame_equal(results[0], expected[0])
+    pd.testing.assert_series_equal(results[1], expected[1])
+    for k in results[2].keys():
+        pd.testing.assert_index_equal(results[2][k], expected[2][k])
+    assert results[3] == expected[3]
+    assert set(results[4]) == set(expected[4])
+    for k in results[5].keys():
+        assert results[5] == expected[5]
+
+
+
+# =============================================================================
+# TODO: Continue from here
+# =============================================================================
+
 
 
 def test_create_train_X_y_output_when_series_10_and_transformer_series_is_StandardScaler():
