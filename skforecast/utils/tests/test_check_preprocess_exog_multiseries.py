@@ -4,7 +4,6 @@ import re
 import pytest
 import numpy as np
 import pandas as pd
-from copy import deepcopy
 from skforecast.exceptions import MissingValuesWarning
 from skforecast.utils import check_preprocess_series
 from skforecast.utils import check_preprocess_exog_multiseries
@@ -211,6 +210,32 @@ def test_output_check_preprocess_exog_multiseries_when_series_is_pandas_DataFram
     assert len(set(exog_col_names) - set(expected_exog_col_names)) == 0
 
 
+def test_TypeError_check_preprocess_exog_multiseries_when_exog_is_dict_with_no_pandas_Series_or_DataFrame():
+    """
+    Test TypeError is raised when exog is dict not containing 
+    a pandas Series or DataFrame.
+    """
+    _, series_indexes = check_preprocess_series(series=series_2)
+
+    not_valid_exog = {
+        'l1': exog_as_dict_datetime['l1'].copy(),
+        'l2': np.array([1, 2, 3])
+    }
+
+    err_msg = re.escape(
+        ("All exog must be a named pandas Series or a pandas DataFrame. "
+         "Review exog: ['l2']")
+    )
+    with pytest.raises(TypeError, match = err_msg):
+        check_preprocess_exog_multiseries(
+            input_series_is_dict = False,
+            series_indexes       = series_indexes,
+            series_col_names     = ['l1', 'l2'],
+            exog                 = not_valid_exog,
+            exog_dict            = {'l1': None, 'l2': None}
+        )
+
+
 def test_MissingValuesWarning_check_preprocess_exog_multiseries_when_exog_is_dict_without_all_series():
     """
     Test MissingValuesWarning is issues when exog is a dict without all the 
@@ -218,7 +243,10 @@ def test_MissingValuesWarning_check_preprocess_exog_multiseries_when_exog_is_dic
     """
     _, series_indexes = check_preprocess_series(series=series_2)
 
-    incomplete_exog = deepcopy(exog_as_dict_datetime)
+    incomplete_exog = {
+        'l1': exog_as_dict_datetime['l1'].copy(),
+        'l2': exog_as_dict_datetime['l2'].copy()
+    }
     incomplete_exog.pop('l1')
 
     warn_msg = re.escape(
@@ -242,7 +270,10 @@ def test_ValueError_check_preprocess_exog_multiseries_when_exog_dict_with_differ
     """
     _, series_indexes = check_preprocess_series(series=series_2)
 
-    not_valid_exog = deepcopy(exog_as_dict_datetime)
+    not_valid_exog = {
+        'l1': exog_as_dict_datetime['l1'].copy(),
+        'l2': exog_as_dict_datetime['l2'].copy()
+    }
     not_valid_exog['l2'] = not_valid_exog['l2'].iloc[:30]
 
     err_msg = re.escape(
@@ -343,15 +374,14 @@ def test_ValueError_check_preprocess_exog_multiseries_when_exog_has_columns_name
     duplicate_exog.name = '1'
 
     not_valid_exog = {
-        '1': exog.copy(),
-        '2': duplicate_exog
+        '1': duplicate_exog
     }
 
     err_msg = re.escape(
         ("`exog` cannot contain a column named the same as one of the "
          "series (column names of series).\n"
          "    `series` columns : ['1', '2'].\n"
-         "    `exog`   columns : ['1', 'exog_1', 'exog_2'].")
+         "    `exog`   columns : ['1'].")
     )
     with pytest.raises(ValueError, match = err_msg):
         check_preprocess_exog_multiseries(
@@ -526,7 +556,10 @@ def test_output_check_preprocess_exog_multiseries_when_series_is_dict_and_exog_d
     """
     series_dict, series_indexes = check_preprocess_series(series=series_as_dict)
 
-    exog_test = deepcopy(exog_as_dict_datetime)
+    exog_test = {
+        'l1': exog_as_dict_datetime['l1'].copy(),
+        'l2': exog_as_dict_datetime['l2'].copy()
+    }
     exog_test['l1'] = exog_test['l1'].iloc[10:30]
     exog_test['l2'] = exog_test['l2'].iloc[:40]
 

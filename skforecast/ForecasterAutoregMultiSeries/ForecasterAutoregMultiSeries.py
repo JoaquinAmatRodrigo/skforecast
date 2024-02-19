@@ -20,6 +20,7 @@ import inspect
 
 import skforecast
 from ..ForecasterBase import ForecasterBase
+from ..exceptions import MissingValuesWarning
 from ..exceptions import IgnoredArgumentWarning
 from ..utils import initialize_lags
 from ..utils import initialize_weights
@@ -658,7 +659,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             warnings.warn(
                 ("NaNs detected in `y_train`. They have been dropped since the "
                  "target variable cannot have NaN values. Same rows have been "
-                 "dropped from `X_train` to maintain alignment.")
+                 "dropped from `X_train` to maintain alignment."),
+                 MissingValuesWarning
             )
 
         if drop_nan:
@@ -668,14 +670,16 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 warnings.warn(
                     ("NaNs detected in `X_train`. They have been dropped. If "
                      "you want to keep them, set `drop_nan = False`. Same rows"
-                     "have been removed from `y_train` to maintain alignment.")
+                     "have been removed from `y_train` to maintain alignment."),
+                     MissingValuesWarning
                 )
         else:
             if X_train.isnull().any().any():
                 warnings.warn(
                     ("NaNs detected in `X_train`. Some regressor do not allow "
                      "NaN values during training. If you want to drop them, "
-                     "set `drop_nan = True`.")
+                     "set `drop_nan = True`."),
+                     MissingValuesWarning
                 )
 
         return X_train, y_train, series_indexes, series_col_names, exog_col_names, exog_dtypes
