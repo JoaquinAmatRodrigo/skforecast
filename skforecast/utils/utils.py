@@ -1988,25 +1988,29 @@ def check_preprocess_series(
         _, series_index = preprocess_y(y=series, return_values=False)
         series_dict = series.copy()
         series_dict.index = series_index
-        series_dict = series.to_dict("series")
+        series_dict = series_dict.to_dict("series")
     
     elif isinstance(series, dict):
-        series_dict = deepcopy(series)
 
         not_valid_series = [k
-                            for k, v in series_dict.items()
+                            for k, v in series.items()
                             if not isinstance(v, (pd.Series, pd.DataFrame))]
         if not_valid_series:
             raise TypeError(
-                (f"All series must be a named pandas Series or a pandas Dataframe. "
+                (f"All series must be a named pandas Series or a pandas DataFrame. "
                  f"with a single column. Review series: {not_valid_series}")
             )
+        
+        series_dict = {
+            k: v.copy()
+            for k, v in series.items()
+        }
         
         for k, v in series_dict.items():
             if isinstance(v, pd.DataFrame):
                 if v.shape[1] != 1:
                     raise ValueError(
-                        (f"All series must be a named pandas Series or a pandas Dataframe "
+                        (f"All series must be a named pandas Series or a pandas DataFrame "
                          f"with a single column. Review series: {k}")
                     )
                 series_dict[k] = v.iloc[:, 0]
@@ -2038,7 +2042,7 @@ def check_preprocess_series(
         )
     
     for k, v in series_dict.items():
-        if np.isnan(v.to_numpy()).all():
+        if np.isnan(v).all():
             raise ValueError(f"All values of series '{k}' are NaN.")
     
     series_indexes = {
@@ -2126,13 +2130,24 @@ def check_preprocess_exog_multiseries(
             )
 
         exog_dict = {serie: exog for serie in series_col_names}
-    else:       
+    
+    else:
+
+        not_valid_exog = [k
+                          for k, v in exog.items()
+                          if not isinstance(v, (pd.Series, pd.DataFrame))]
+        if not_valid_exog:
+            raise TypeError(
+                (f"All exog must be a named pandas Series or a pandas DataFrame. "
+                 f"Review exog: {not_valid_exog}")
+            )
+        
         # Only elements already present in exog_dict are updated
         exog_dict.update(
-            (k, v) for k, v in exog.items() 
+            (k, v.copy())
+            for k, v in exog.items() 
             if k in exog_dict
         )
-        exog_dict = deepcopy(exog_dict) 
         
         series_not_in_exog = set(series_col_names) - set(exog.keys())
         if series_not_in_exog:
@@ -2177,13 +2192,11 @@ def check_preprocess_exog_multiseries(
                 )
     
     exog_col_names = list(
-        sorted(
-            set(
-                column
-                for df in exog_dict.values()
-                if df is not None
-                for column in df.columns.to_list()
-            )
+        set(
+            column
+            for df in exog_dict.values()
+            if df is not None
+            for column in df.columns.to_list()
         )
     )
 
