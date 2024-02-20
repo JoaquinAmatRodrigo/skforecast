@@ -39,6 +39,9 @@ model = create_and_compile_model(
 
 # Test case for predicting 3 steps ahead
 def test_predict_3_steps_ahead():
+    """
+    Test case for predicting 3 steps ahead
+    """
     # Create a ForecasterRnn object
     forecaster = ForecasterRnn(model, levels)
     forecaster.fit(series)
@@ -52,6 +55,9 @@ def test_predict_3_steps_ahead():
 
 # Test case for predicting 2 steps ahead with specific levels
 def test_predict_2_steps_ahead_specific_levels():
+    """
+    Test case for predicting 2 steps ahead with specific levels
+    """
     # Create a ForecasterRnn object
     forecaster = ForecasterRnn(model, levels)
     forecaster.fit(series)

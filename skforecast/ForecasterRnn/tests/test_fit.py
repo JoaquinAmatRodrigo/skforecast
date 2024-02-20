@@ -35,6 +35,9 @@ model = create_and_compile_model(
 
 # Test case for fitting the forecaster without validation data
 def test_fit_without_validation_data():
+    """
+    Test case for fitting the forecaster without validation data
+    """
     # Call the function to create and compile the model
 
     forecaster = ForecasterRnn(model, levels)
@@ -59,6 +62,9 @@ def test_fit_without_validation_data():
 
 # Test case for fitting the forecaster with validation data
 def test_fit_with_validation_data():
+    """
+    Test case for fitting the forecaster with validation data
+    """
 
     # Create a validation series
     series_val = pd.DataFrame(

@@ -41,6 +41,9 @@ forecaster.fit(series)
 
 
 def test_plot_history_with_val_loss():
+    """
+    Test case for the plot_history method
+    """
     # Call the plot_history method
     fig = forecaster.plot_history()
 
