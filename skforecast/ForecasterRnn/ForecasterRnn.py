@@ -181,7 +181,9 @@ class ForecasterRnn(ForecasterBase):
         levels: Union[str, list],
         lags: Optional[Union[int, list, str]] = "auto",
         steps: Optional[Union[int, list, str]] = "auto",
-        transformer_series: Optional[Union[object, dict]] = MinMaxScaler(feature_range=(0, 1)),
+        transformer_series: Optional[Union[object, dict]] = MinMaxScaler(
+            feature_range=(0, 1)
+        ),
         weight_func: Optional[Callable] = None,
         fit_kwargs: Optional[dict] = {},
         forecaster_id: Optional[Union[str, int]] = None,
@@ -218,10 +220,12 @@ class ForecasterRnn(ForecasterBase):
         # Infer parameters from the model
         self.regressor = regressor
         layer_init = self.regressor.layers[0]
-        
+
         if lags == "auto":
             self.lags = np.arange(layer_init.input_shape[0][1]) + 1
-            warnings.warn(f"Setting `lags` = 'auto'. `lags` are inferred from the regressor architecture. Avoid the warning with lags=lags.")
+            warnings.warn(
+                f"Setting `lags` = 'auto'. `lags` are inferred from the regressor architecture. Avoid the warning with lags=lags."
+            )
         elif isinstance(lags, int):
             self.lags = np.arange(lags) + 1
         elif isinstance(lags, list):
@@ -230,12 +234,12 @@ class ForecasterRnn(ForecasterBase):
             raise TypeError(
                 f"`lags` argument must be an int, list or 'auto'. Got {type(lags)}."
             )
-            
+
         self.max_lag = np.max(self.lags)
         self.window_size = self.max_lag
-            
+
         layer_end = self.regressor.layers[-1]
-        
+
         try:
             self.series = layer_end.output_shape[-1]
         # if does not work, break the and raise an error the input shape should be shape=(lags, n_series))
@@ -243,10 +247,12 @@ class ForecasterRnn(ForecasterBase):
             raise TypeError(
                 f"Input shape of the regressor should be Input(shape=(lags, n_series))."
             )
-        
+
         if steps == "auto":
             self.steps = np.arange(layer_end.output_shape[1]) + 1
-            warnings.warn(f"`steps` default value = 'auto'. `steps` inferred from regressor architecture. Avoid the warning with steps=steps.")
+            warnings.warn(
+                f"`steps` default value = 'auto'. `steps` inferred from regressor architecture. Avoid the warning with steps=steps."
+            )
         elif isinstance(steps, int):
             self.steps = np.arange(steps) + 1
         elif isinstance(steps, list):
@@ -255,7 +261,7 @@ class ForecasterRnn(ForecasterBase):
             raise TypeError(
                 f"`steps` argument must be an int, list or 'auto'. Got {type(steps)}."
             )
-            
+
         self.max_step = np.max(self.steps)
         self.outputs = layer_end.output_shape[-1]
 
@@ -359,29 +365,32 @@ class ForecasterRnn(ForecasterBase):
 
         n_splits = len(y) - self.max_lag - self.max_step + 1  # rows of y_data
         if n_splits <= 0:
-                raise ValueError(
+            raise ValueError(
                 (
                     f"The maximum lag ({self.max_lag}) must be less than the length "
                     f"of the series minus the maximum of steps ({len(y)-self.max_step})."
                 )
             )
 
-        X_data = np.full(shape=(n_splits, (self.max_lag)), fill_value=np.nan, dtype=float)
+        X_data = np.full(
+            shape=(n_splits, (self.max_lag)), fill_value=np.nan, dtype=float
+        )
         for i, lag in enumerate(range(self.max_lag - 1, -1, -1)):
-            X_data[:, i] = y[self.max_lag - lag -1 : -(lag + self.max_step)]
+            X_data[:, i] = y[self.max_lag - lag - 1 : -(lag + self.max_step)]
 
-        y_data = np.full(shape=(n_splits, self.max_step), fill_value=np.nan, dtype=float)
+        y_data = np.full(
+            shape=(n_splits, self.max_step), fill_value=np.nan, dtype=float
+        )
         for step in range(self.max_step):
             y_data[:, step] = y[self.max_lag + step : self.max_lag + step + n_splits]
-            
+
         # Get lags index
-        X_data = X_data[:, self.lags-1]
-        
+        X_data = X_data[:, self.lags - 1]
+
         # Get steps index
         y_data = y_data[:, self.steps-1]
 
         return X_data, y_data
-
 
     def create_train_X_y(
         self, series: pd.DataFrame, exog: Any = None
@@ -671,7 +680,7 @@ class ForecasterRnn(ForecasterBase):
             series_col_names=self.series_col_names,
         )
 
-        last_window = last_window.iloc[-self.window_size:, ].copy()
+        last_window = last_window.iloc[-self.window_size :,].copy()
 
         for serie_name in self.series_col_names:
             last_window_serie = transform_series(
@@ -690,7 +699,7 @@ class ForecasterRnn(ForecasterBase):
         predictions_reshaped = np.reshape(
             predictions, (predictions.shape[1], predictions.shape[2])
         )
-    
+
         # if len(self.levels) == 1:
         #     predictions_reshaped = np.reshape(predictions, (predictions.shape[1], 1))
         # else:
@@ -721,9 +730,7 @@ class ForecasterRnn(ForecasterBase):
 
 
     def plot_history(
-        self,
-        ax: matplotlib.axes.Axes=None,
-        **fig_kw
+        self, ax: matplotlib.axes.Axes = None, **fig_kw
     ) -> matplotlib.figure.Figure:
         """
         Plots the training and validation loss curves from the given history object stores
@@ -731,8 +738,8 @@ class ForecasterRnn(ForecasterBase):
 
         Parameters
         ----------
-        ax : matplotlib.axes.Axes, default `None`. 
-            Pre-existing ax for the plot. Otherwise, call matplotlib.pyplot.subplots() 
+        ax : matplotlib.axes.Axes, default `None`.
+            Pre-existing ax for the plot. Otherwise, call matplotlib.pyplot.subplots()
             internally.
         fig_kw : dict
             Other keyword arguments are passed to matplotlib.pyplot.subplots()
@@ -757,7 +764,7 @@ class ForecasterRnn(ForecasterBase):
         if self.history is None:
             raise ValueError("ForecasterRnn has not been fitted yet.")
 
-          # Plotting training loss
+        # Plotting training loss
         ax.plot(
             range(1, len(self.history["loss"]) + 1),
             self.history["loss"],
@@ -790,6 +797,7 @@ class ForecasterRnn(ForecasterBase):
         # Setting x-axis ticks to integers only
         ax.set_xticks(range(1, len(self.history["loss"]) + 1))
 
+        return fig
 
     # def predict_bootstrapping(
     #     self,
@@ -940,7 +948,6 @@ class ForecasterRnn(ForecasterBase):
     #             )
 
     #     return boot_predictions
-
 
     # def predict_interval(
     #     self,

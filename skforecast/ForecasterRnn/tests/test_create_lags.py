@@ -8,6 +8,7 @@ from skforecast.ForecasterRnn import ForecasterRnn
 from skforecast.ForecasterRnn.utils import create_and_compile_model
 import tensorflow as tf
 
+
 lags = 6
 steps = 3
 levels = "l1"

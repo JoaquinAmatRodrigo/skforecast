@@ -15,10 +15,13 @@ import pytest
     [
         ("t+1", 5, 10),
         (["t+1"], [24, 48], 10),
-        (["t+1", "t+2"], 5, [2,4,6]),
+        (["t+1", "t+2"], 5, [2, 4, 6]),
     ],
 )
 def test_init(levels, steps, lags):
+    """
+    Test case for the initialization of the ForecasterRnn class
+    """
     print(f"levels: {levels}")
     # Generate dummy data for testing
     series = pd.DataFrame(np.random.randn(100, 3))
@@ -74,15 +77,15 @@ def test_init(levels, steps, lags):
 
     # Assert that the forecaster has the correct number of levels
     assert forecaster.levels == levels
-    
+
     # Assert that the forecaster has the correct lags
     if isinstance(lags, int):
-        np.testing.assert_equal(forecaster.lags, np.array(range(lags))+1)
+        np.testing.assert_equal(forecaster.lags, np.array(range(lags)) + 1)
     else:
         np.testing.assert_equal(forecaster.lags, np.array(lags))
-        
+
     # Assert that the forecaster has the correct steps
     if isinstance(steps, int):
-        np.testing.assert_equal(forecaster.steps, np.array(range(steps))+1)
+        np.testing.assert_equal(forecaster.steps, np.array(range(steps)) + 1)
     else:
         np.testing.assert_equal(forecaster.steps, np.array(steps))

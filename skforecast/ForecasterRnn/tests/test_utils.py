@@ -10,7 +10,7 @@ from skforecast.ForecasterRnn.utils import create_and_compile_model
 @pytest.mark.parametrize(
     "dense_units, recurrent_layer, recurrent_units",
     [
-        (64, "LSTM",100),
+        (64, "LSTM", 100),
         ([64], "LSTM", 100),
         ([64, 32], "LSTM", 100),
         (64, "RNN", [100]),
@@ -23,6 +23,9 @@ from skforecast.ForecasterRnn.utils import create_and_compile_model
     ],
 )
 def test_units(dense_units, recurrent_layer, recurrent_units):
+    """
+    Test case for testing the create_and_compile_model function with different dense_units and recurrent_units
+    """
     print(f"dense_units: {dense_units}")
     print(f"recurrent_units: {recurrent_units}")
     # Generate dummy data for testing
@@ -67,42 +70,67 @@ def test_units(dense_units, recurrent_layer, recurrent_units):
 
 
 # Mock data for testing
-series_data = pd.DataFrame(np.random.randn(100, 2), columns=['feature1', 'feature2'])
+series_data = pd.DataFrame(np.random.randn(100, 2), columns=["feature1", "feature2"])
 lags_data = 5
 steps_data = 3
-levels_data = 'feature1'
+levels_data = "feature1"
+
 
 def test_correct_input_type():
     # Test if the function works with the correct input type
     model = create_and_compile_model(series_data, lags_data, steps_data, levels_data)
     assert isinstance(model, tf.keras.models.Model)
 
+
 def test_incorrect_series_type():
     # Test if the function raises an error for incorrect series type
     with pytest.raises(TypeError, match="`series` must be a pandas DataFrame. Got .*"):
-        create_and_compile_model(np.random.randn(100, 2), lags_data, steps_data, levels_data)
+        create_and_compile_model(
+            np.random.randn(100, 2), lags_data, steps_data, levels_data
+        )
+
 
 def test_incorrect_dense_units_type():
     # Test if the function raises an error for incorrect dense_units type
-    with pytest.raises(TypeError, match="`dense_units` argument must be a list or int. Got .*"):
-        create_and_compile_model(series_data, lags_data, steps_data, levels_data, dense_units="invalid")
+    with pytest.raises(
+        TypeError, match="`dense_units` argument must be a list or int. Got .*"
+    ):
+        create_and_compile_model(
+            series_data, lags_data, steps_data, levels_data, dense_units="invalid"
+        )
+
 
 def test_incorrect_recurrent_units_type():
     # Test if the function raises an error for incorrect recurrent_units type
-    with pytest.raises(TypeError, match="`recurrent_units` argument must be a list or int. Got .*"):
-        create_and_compile_model(series_data, lags_data, steps_data, levels_data, recurrent_units="invalid")
+    with pytest.raises(
+        TypeError, match="`recurrent_units` argument must be a list or int. Got .*"
+    ):
+        create_and_compile_model(
+            series_data, lags_data, steps_data, levels_data, recurrent_units="invalid"
+        )
+
 
 def test_incorrect_lags_type():
     # Test if the function raises an error for incorrect lags type
-    with pytest.raises(TypeError, match="`lags` argument must be a list or int. Got .*"):
+    with pytest.raises(
+        TypeError, match="`lags` argument must be a list or int. Got .*"
+    ):
         create_and_compile_model(series_data, "invalid", steps_data, levels_data)
+
 
 def test_incorrect_steps_type():
     # Test if the function raises an error for incorrect steps type
-    with pytest.raises(TypeError, match="`steps` argument must be a list or int. Got .*"):
+    with pytest.raises(
+        TypeError, match="`steps` argument must be a list or int. Got .*"
+    ):
         create_and_compile_model(series_data, lags_data, "invalid", levels_data)
+
 
 def test_incorrect_levels_type():
     # Test if the function raises an error for incorrect levels type
-    with pytest.raises(TypeError, match="`levels` argument must be a string, list or int. Got .*"):
-        create_and_compile_model(series_data, lags_data, steps_data, np.array([1, 2, 3]))
+    with pytest.raises(
+        TypeError, match="`levels` argument must be a string, list or int. Got .*"
+    ):
+        create_and_compile_model(
+            series_data, lags_data, steps_data, np.array([1, 2, 3])
+        )
