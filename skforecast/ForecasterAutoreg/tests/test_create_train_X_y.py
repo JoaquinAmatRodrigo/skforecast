@@ -116,6 +116,38 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_None():
     pd.testing.assert_series_equal(results[1], expected[1])
 
 
+def test_create_train_X_y_output_when_y_and_exog_no_pandas_index():
+    """
+    Test the output of create_train_X_y when y and exog have no pandas index 
+    that doesn't start at 0.
+    """
+    y = pd.Series(np.arange(10), index=np.arange(3, 13), dtype=float)
+    exog = pd.Series(np.arange(100, 110), index=np.arange(3, 13), 
+                     name='exog', dtype=float)
+    forecaster = ForecasterAutoreg(LinearRegression(), lags=5)
+    results = forecaster.create_train_X_y(y=y, exog=exog)
+    expected = (
+        pd.DataFrame(
+            data = np.array([[4., 3., 2., 1., 0., 105.],
+                             [5., 4., 3., 2., 1., 106.],
+                             [6., 5., 4., 3., 2., 107.],
+                             [7., 6., 5., 4., 3., 108.],
+                             [8., 7., 6., 5., 4., 109.]]),
+            index   = pd.RangeIndex(start=5, stop=10, step=1),
+            columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 'exog']
+        ).astype({'exog': float}),
+        pd.Series(
+            data  = np.array([5, 6, 7, 8, 9]),
+            index = pd.RangeIndex(start=5, stop=10, step=1),
+            name  = 'y',
+            dtype = float
+        )
+    )
+
+    pd.testing.assert_frame_equal(results[0], expected[0])
+    pd.testing.assert_series_equal(results[1], expected[1])
+
+
 @pytest.mark.parametrize("dtype", 
                          [float, int], 
                          ids = lambda dt : f'dtype: {dt}')
@@ -368,10 +400,11 @@ def test_create_train_X_y_output_when_y_is_series_10_and_transformer_y_is_Standa
     is StandardScaler.
     """
     forecaster = ForecasterAutoreg(
-                    regressor = LinearRegression(),
-                    lags = 5,
-                    transformer_y = StandardScaler()
-                )
+                     regressor = LinearRegression(),
+                     lags = 5,
+                     transformer_y = StandardScaler()
+                 )
+    
     results = forecaster.create_train_X_y(y=pd.Series(np.arange(10), dtype=float))
     expected = (
         pd.DataFrame(
@@ -405,6 +438,7 @@ def test_create_train_X_y_output_when_exog_is_None_and_transformer_exog_is_not_N
                      lags             = 5,
                      transformer_exog = StandardScaler()
                  )
+    
     results = forecaster.create_train_X_y(y=pd.Series(np.arange(10), dtype=float))
     expected = (
         pd.DataFrame(
@@ -488,6 +522,7 @@ def test_create_train_X_y_output_when_y_is_series_exog_is_series_and_differentia
     diferenciator = TimeSeriesDifferentiator(order=1)
     data_diff = diferenciator.fit_transform(data)
     data_diff = pd.Series(data_diff, index=data.index).dropna()
+
     # Simulated exogenous variable
     rng = np.random.default_rng(9876)
     exog = pd.Series(
@@ -498,14 +533,16 @@ def test_create_train_X_y_output_when_y_is_series_exog_is_series_and_differentia
 
     forecaster_1 = ForecasterAutoreg(LinearRegression(), lags=5)
     forecaster_2 = ForecasterAutoreg(LinearRegression(), lags=5, differentiation=1)
+
     X_train_1, y_train_1 = forecaster_1.create_train_X_y(
-                                    data_diff.loc[:end_train],
-                                    exog=exog_diff.loc[:end_train]
-                            )
+                               y    = data_diff.loc[:end_train],
+                               exog = exog_diff.loc[:end_train]
+                           )
     X_train_2, y_train_2 = forecaster_2.create_train_X_y(
-                            data.loc[:end_train],
-                            exog=exog.loc[:end_train]
-                        )
+                               y    = data.loc[:end_train],
+                               exog = exog.loc[:end_train]
+                           )
+    
     pd.testing.assert_frame_equal(X_train_1, X_train_2, check_names=True)
     pd.testing.assert_series_equal(y_train_1, y_train_2, check_names=True)
 
@@ -519,6 +556,7 @@ def test_create_train_X_y_output_when_y_is_series_10_exog_is_series_and_differen
     diferenciator = TimeSeriesDifferentiator(order=2)
     data_diff_2 = diferenciator.fit_transform(data)
     data_diff_2 = pd.Series(data_diff_2, index=data.index).dropna()
+
     # Simulated exogenous variable
     rng = np.random.default_rng(9876)
     exog = pd.Series(
@@ -529,13 +567,15 @@ def test_create_train_X_y_output_when_y_is_series_10_exog_is_series_and_differen
 
     forecaster_1 = ForecasterAutoreg(LinearRegression(), lags=5)
     forecaster_2 = ForecasterAutoreg(LinearRegression(), lags=5, differentiation=2)
+
     X_train_1, y_train_1 = forecaster_1.create_train_X_y(
-                                    data_diff_2.loc[:end_train],
-                                    exog=exog_diff_2.loc[:end_train]
-                            )
+                               y    = data_diff_2.loc[:end_train],
+                               exog = exog_diff_2.loc[:end_train]
+                           )
     X_train_2, y_train_2 = forecaster_2.create_train_X_y(
-                            data.loc[:end_train],
-                            exog=exog.loc[:end_train]
-                        )
+                               y    = data.loc[:end_train],
+                               exog = exog.loc[:end_train]
+                           )
+    
     pd.testing.assert_frame_equal(X_train_1, X_train_2, check_names=True)
     pd.testing.assert_series_equal(y_train_1, y_train_2, check_names=True)

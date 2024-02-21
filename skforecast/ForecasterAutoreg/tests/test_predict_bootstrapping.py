@@ -4,6 +4,7 @@ import re
 import pytest
 import numpy as np
 import pandas as pd
+from sklearn.exceptions import NotFittedError
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
 from skforecast.preprocessing import TimeSeriesDifferentiator
 from sklearn.linear_model import LinearRegression
@@ -16,6 +17,20 @@ from .fixtures_ForecasterAutoreg import exog_predict
 from .fixtures_ForecasterAutoreg import data # to test results when using differentiation
 
 
+def test_predict_bootstrapping_NotFittedError_when_fitted_is_False():
+    """
+    Test NotFittedError is raised when fitted is False.
+    """
+    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
+
+    err_msg = re.escape(
+                ("This Forecaster instance is not fitted yet. Call `fit` with "
+                 "appropriate arguments before using predict.")
+              )
+    with pytest.raises(NotFittedError, match = err_msg):
+        forecaster.predict_bootstrapping(steps=1)
+
+
 def test_predict_bootstrapping_ValueError_when_out_sample_residuals_is_None():
     """
     Test ValueError is raised when in_sample_residuals=False and
@@ -25,10 +40,10 @@ def test_predict_bootstrapping_ValueError_when_out_sample_residuals_is_None():
     forecaster.fit(y=pd.Series(np.arange(10)))
 
     err_msg = re.escape(
-                ('`forecaster.out_sample_residuals` is `None`. Use '
-                 '`in_sample_residuals=True` or method `set_out_sample_residuals()` '
-                 'before `predict_interval()`, `predict_bootstrapping()` or '
-                 '`predict_dist()`.')
+                ("`forecaster.out_sample_residuals` is `None`. Use "
+                 "`in_sample_residuals=True` or method `set_out_sample_residuals()` "
+                 "before `predict_interval()`, `predict_bootstrapping()`, "
+                 "`predict_quantiles()` or `predict_dist()`.")
               )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.predict_bootstrapping(steps=1, in_sample_residuals=False)

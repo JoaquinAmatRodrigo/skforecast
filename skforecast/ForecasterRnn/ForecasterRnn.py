@@ -92,7 +92,7 @@ class ForecasterRnn(ForecasterBase):
         An instance of a regressor or pipeline compatible with the TensorFlow API.
         An instance of this regressor is trained for each step. All of them
         are stored in `self.regressors_`.
-    levels : str, list, default `None`
+    levels : str, list
         Name of one or more time series to be predicted. This determine the series
         the forecaster will be handling. If `None`, all series used during training
         will be available for prediction.
@@ -173,10 +173,6 @@ class ForecasterRnn(ForecasterBase):
         Dictionary with the history of the training of each step. It is created
         internally to avoid overwriting.
 
-    Notes
-    -----
-
-
     """
 
     def __init__(
@@ -246,7 +242,7 @@ class ForecasterRnn(ForecasterBase):
 
         try:
             self.series = layer_end.output_shape[-1]
-        # if does not work, break the and rise an error the input shape should be shape=(lags, n_series))
+        # if does not work, break the and raise an error the input shape should be shape=(lags, n_series))
         except:
             raise TypeError(
                 f"Input shape of the regressor should be Input(shape=(lags, n_series))."
@@ -292,6 +288,7 @@ class ForecasterRnn(ForecasterBase):
             regressor=self.regressor, fit_kwargs=fit_kwargs
         )
 
+
     def __repr__(self) -> str:
         """
         Information displayed when a ForecasterRnn object is printed.
@@ -336,7 +333,11 @@ class ForecasterRnn(ForecasterBase):
 
         return info
 
-    def _create_lags(self, y: np.ndarray):
+
+    def _create_lags(
+        self,
+        y: np.ndarray
+    ) -> Tuple[np.ndarray, np.ndarray]:
         """
         Transforms a 1d array into a 3d array (X) and a 3d array (y). Each row
         in X is associated with a value of y and it represents the lags that
@@ -387,7 +388,8 @@ class ForecasterRnn(ForecasterBase):
         X_data = X_data[:, self.lags - 1]
 
         # Get steps index
-        y_data = y_data[:, self.steps - 1]
+        y_data = y_data[:, self.steps-1]
+
         return X_data, y_data
 
     def create_train_X_y(
@@ -518,6 +520,7 @@ class ForecasterRnn(ForecasterBase):
 
         return X_train, y_train, dimension_names
 
+
     def fit(
         self,
         series: pd.DataFrame,
@@ -588,6 +591,7 @@ class ForecasterRnn(ForecasterBase):
 
         self.last_window = series.iloc[-self.max_lag :].copy()
 
+
     def predict(
         self,
         steps: Optional[Union[int, list]] = None,
@@ -604,11 +608,11 @@ class ForecasterRnn(ForecasterBase):
             Predict n steps. The value of `steps` must be less than or equal to the
             value of steps defined when initializing the forecaster. Starts at 1.
 
-                - If `int`: Only steps within the range of 1 to int are predicted.
-                - If `list`: List of ints. Only the steps contained in the list
-                are predicted.
-                - If `None`: As many steps are predicted as were defined at
-                initialization.
+            - If `int`: Only steps within the range of 1 to int are predicted.
+            - If `list`: List of ints. Only the steps contained in the list
+            are predicted.
+            - If `None`: As many steps are predicted as were defined at
+            initialization.
         levels : str, list, default `None`
             Name of one or more time series to be predicted. It must be included
             in `levels` defined when initializing the forecaster. If `None`, all
@@ -723,6 +727,7 @@ class ForecasterRnn(ForecasterBase):
             predictions.loc[:, serie] = x
 
         return predictions
+
 
     def plot_history(
         self, ax: matplotlib.axes.Axes = None, **fig_kw
@@ -1115,7 +1120,11 @@ class ForecasterRnn(ForecasterBase):
 
     #     return predictions
 
-    def set_params(self, params: dict) -> None:  # TODO testear
+
+    def set_params(
+        self, 
+        params: dict
+    ) -> None:  # TODO testear
         """
         Set new values to the parameters of the scikit learn model stored in the
         forecaster. It is important to note that all models share the same
@@ -1136,7 +1145,11 @@ class ForecasterRnn(ForecasterBase):
         self.regressor.reset_states()
         self.regressor.compile(**params)
 
-    def set_fit_kwargs(self, fit_kwargs: dict) -> None:
+
+    def set_fit_kwargs(
+        self,
+        fit_kwargs: dict
+    ) -> None:
         """
         Set new values for the additional keyword arguments passed to the `fit`
         method of the regressor.
@@ -1154,7 +1167,11 @@ class ForecasterRnn(ForecasterBase):
 
         self.fit_kwargs = check_select_fit_kwargs(self.regressor, fit_kwargs=fit_kwargs)
 
-    def set_lags(self, lags: Union[int, np.ndarray, list, dict]) -> None:
+
+    def set_lags(
+        self, 
+        lags: Any
+    ) -> None:
         """
         Not used, present here for API consistency by convention.
 
@@ -1166,80 +1183,81 @@ class ForecasterRnn(ForecasterBase):
 
         pass
 
-    def set_out_sample_residuals(
-        self,
-        residuals: np.ndarray,
-        append: bool = True,
-        transform: bool = True,
-        random_state: int = 123,
-    ) -> None:
-        """
-        Set new values to the attribute `out_sample_residuals`. Out of sample
-        residuals are meant to be calculated using observations that did not
-        participate in the training process.
 
-        Parameters
-        ----------
-        residuals : numpy ndarray
-            Values of residuals. If len(residuals) > 1000, only a random sample
-            of 1000 values are stored.
-        append : bool, default `True`
-            If `True`, new residuals are added to the once already stored in the
-            attribute `out_sample_residuals`. Once the limit of 1000 values is
-            reached, no more values are appended. If False, `out_sample_residuals`
-            is overwritten with the new residuals.
-        transform : bool, default `True`
-            If `True`, new residuals are transformed using self.transformer_y.
-        random_state : int, default `123`
-            Sets a seed to the random sampling for reproducible output.
+    # def set_out_sample_residuals(
+    #     self,
+    #     residuals: np.ndarray,
+    #     append: bool=True,
+    #     transform: bool=True,
+    #     random_state: int=123,
+    # ) -> None:
+    #     """
+    #     Set new values to the attribute `out_sample_residuals`. Out of sample
+    #     residuals are meant to be calculated using observations that did not
+    #     participate in the training process.
 
-        Returns
-        -------
-        None
+    #     Parameters
+    #     ----------
+    #     residuals : numpy ndarray
+    #         Values of residuals. If len(residuals) > 1000, only a random sample
+    #         of 1000 values are stored.
+    #     append : bool, default `True`
+    #         If `True`, new residuals are added to the once already stored in the
+    #         attribute `out_sample_residuals`. Once the limit of 1000 values is
+    #         reached, no more values are appended. If False, `out_sample_residuals`
+    #         is overwritten with the new residuals.
+    #     transform : bool, default `True`
+    #         If `True`, new residuals are transformed using self.transformer_y.
+    #     random_state : int, default `123`
+    #         Sets a seed to the random sampling for reproducible output.
 
-        """
+    #     Returns
+    #     -------
+    #     None
 
-        if not isinstance(residuals, np.ndarray):
-            raise TypeError(
-                f"`residuals` argument must be `numpy ndarray`. Got {type(residuals)}."
-            )
+    #     """
 
-        if not transform and self.transformer_y is not None:
-            warnings.warn(
-                (
-                    f"Argument `transform` is set to `False` but forecaster was trained "
-                    f"using a transformer {self.transformer_y}. Ensure that the new residuals "
-                    f"are already transformed or set `transform=True`."
-                )
-            )
+    #     if not isinstance(residuals, np.ndarray):
+    #         raise TypeError(
+    #             f"`residuals` argument must be `numpy ndarray`. Got {type(residuals)}."
+    #         )
 
-        if transform and self.transformer_y is not None:
-            warnings.warn(
-                (
-                    f"Residuals will be transformed using the same transformer used "
-                    f"when training the forecaster ({self.transformer_y}). Ensure that the "
-                    f"new residuals are on the same scale as the original time series."
-                )
-            )
+    #     if not transform and self.transformer_y is not None:
+    #         warnings.warn(
+    #             (
+    #                 f"Argument `transform` is set to `False` but forecaster was trained "
+    #                 f"using a transformer {self.transformer_y}. Ensure that the new residuals "
+    #                 f"are already transformed or set `transform=True`."
+    #             )
+    #         )
 
-            residuals = transform_series(
-                series=pd.Series(residuals, name="residuals"),
-                transformer=self.transformer_y,
-                fit=False,
-                inverse_transform=False,
-            ).to_numpy()
+    #     if transform and self.transformer_y is not None:
+    #         warnings.warn(
+    #             (
+    #                 f"Residuals will be transformed using the same transformer used "
+    #                 f"when training the forecaster ({self.transformer_y}). Ensure that the "
+    #                 f"new residuals are on the same scale as the original time series."
+    #             )
+    #         )
 
-        if len(residuals) > 1000:
-            rng = np.random.default_rng(seed=random_state)
-            residuals = rng.choice(a=residuals, size=1000, replace=False)
+    #         residuals = transform_series(
+    #             series=pd.Series(residuals, name="residuals"),
+    #             transformer=self.transformer_y,
+    #             fit=False,
+    #             inverse_transform=False,
+    #         ).to_numpy()
 
-        if append and self.out_sample_residuals is not None:
-            free_space = max(0, 1000 - len(self.out_sample_residuals))
-            if len(residuals) < free_space:
-                residuals = np.hstack((self.out_sample_residuals, residuals))
-            else:
-                residuals = np.hstack(
-                    (self.out_sample_residuals, residuals[:free_space])
-                )
+    #     if len(residuals) > 1000:
+    #         rng = np.random.default_rng(seed=random_state)
+    #         residuals = rng.choice(a=residuals, size=1000, replace=False)
 
-        self.out_sample_residuals = residuals
+    #     if append and self.out_sample_residuals is not None:
+    #         free_space = max(0, 1000 - len(self.out_sample_residuals))
+    #         if len(residuals) < free_space:
+    #             residuals = np.hstack((self.out_sample_residuals, residuals))
+    #         else:
+    #             residuals = np.hstack(
+    #                 (self.out_sample_residuals, residuals[:free_space])
+    #             )
+
+    #     self.out_sample_residuals = residuals

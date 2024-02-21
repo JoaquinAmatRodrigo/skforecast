@@ -4,6 +4,10 @@
     font-size: medium;
 }
 
+/* .jupyter-wrapper .highlight-ipynb pre {
+  font-size: 0.9em;
+} */
+
 .jupyter-wrapper .jp-OutputArea-output pre {
     border: none;
     margin: 0px;
@@ -16,12 +20,20 @@
     font-size: medium;
 }
 
+.jupyter-wrapper table.dataframe {
+  display: inline;
+}
+
 .jupyter-wrapper .jp-OutputPrompt {
     display: none;
 }
 
 .jupyter-wrapper .jp-CodeCell .jp-Cell-inputWrapper .jp-InputPrompt {
     display: none;
+}
+
+.jupyter-wrapper .jp-Notebook .jp-Cell:not(.jp-mod-active) .jp-InputPrompt {
+  display: none;
 }
 
 .md-content__button {
@@ -31,6 +43,17 @@
 .md-typeset code {
     font-size: 1em;
 }
+
+.md-typeset h2 {
+  font-size: 1.3em;
+  line-height: 1.2;
+}
+
+.md-typeset h3 {
+  font-size: 1.1em;
+  line-height: 1.2;
+}
+
 
 p {
     text-align: justify;

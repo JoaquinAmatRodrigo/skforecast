@@ -4,6 +4,7 @@ import re
 import pytest
 import numpy as np
 import pandas as pd
+from sklearn.exceptions import NotFittedError
 from skforecast.ForecasterAutoregMultiVariate import ForecasterAutoregMultiVariate
 from sklearn.linear_model import LinearRegression
 from sklearn.compose import ColumnTransformer
@@ -21,6 +22,21 @@ transformer_exog = ColumnTransformer(
                        remainder = 'passthrough',
                        verbose_feature_names_out = False
                    )
+
+
+def test_predict_NotFittedError_when_fitted_is_False():
+    """
+    Test NotFittedError is raised when fitted is False.
+    """
+    forecaster = ForecasterAutoregMultiVariate(LinearRegression(), level='l1',
+                                               lags=3, steps=3)
+
+    err_msg = re.escape(
+                ("This Forecaster instance is not fitted yet. Call `fit` with "
+                 "appropriate arguments before using predict.")
+              )
+    with pytest.raises(NotFittedError, match = err_msg):
+        forecaster.predict_bootstrapping(steps=5)
 
 
 def test_predict_bootstrapping_ValueError_when_not_in_sample_residuals_for_some_step():
@@ -53,8 +69,8 @@ def test_predict_bootstrapping_ValueError_when_out_sample_residuals_is_None():
     err_msg = re.escape(
                 ("`forecaster.out_sample_residuals` is `None`. Use "
                  "`in_sample_residuals=True` or method `set_out_sample_residuals()` "
-                 "before `predict_interval()`, `predict_bootstrapping()` or "
-                 "`predict_dist()`.")
+                 "before `predict_interval()`, `predict_bootstrapping()`, "
+                 "`predict_quantiles()` or `predict_dist()`.")
               )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.predict_bootstrapping(steps=1, in_sample_residuals=False)
@@ -81,41 +97,51 @@ def test_predict_bootstrapping_ValueError_when_not_out_sample_residuals_for_all_
         forecaster.predict_bootstrapping(steps=[1, 2], in_sample_residuals=False)
 
 
-def test_predict_bootstrapping_ValueError_when_step_out_sample_residuals_value_is_None():
+@pytest.mark.parametrize("transformer_series", 
+                         [None, StandardScaler()],
+                         ids = lambda tr : f'transformer_series type: {type(tr)}')
+def test_predict_bootstrapping_ValueError_when_step_out_sample_residuals_value_is_None(transformer_series):
     """
     Test ValueError is raised when in_sample_residuals=False and
     forecaster.out_sample_residuals has a step with a None.
     """
     forecaster = ForecasterAutoregMultiVariate(LinearRegression(), level='l1',
-                                               lags=3, steps=3)
+                                               lags=3, steps=3, 
+                                               transformer_series=transformer_series)
     forecaster.fit(series=series)
     residuals = {1: np.array([1, 2, 3, 4, 5]),
                  2: np.array([1, 2, 3, 4, 5])}
     forecaster.set_out_sample_residuals(residuals = residuals)
 
     err_msg = re.escape(
-                    ("forecaster residuals for step 3 are `None`. Check forecaster.out_sample_residuals.")
-                )
+                  ("forecaster residuals for step 3 are `None`. "
+                   "Check forecaster.out_sample_residuals.")
+              )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.predict_bootstrapping(steps=3, in_sample_residuals=False)
 
 
-def test_predict_bootstrapping_ValueError_when_step_out_sample_residuals_value_contains_None():
+@pytest.mark.parametrize("transformer_series", 
+                         [None, StandardScaler()],
+                         ids = lambda tr : f'transformer_series type: {type(tr)}')
+def test_predict_bootstrapping_ValueError_when_step_out_sample_residuals_value_contains_None_or_NaNs(transformer_series):
     """
     Test ValueError is raised when in_sample_residuals=False and
-    forecaster.out_sample_residuals has a step with a None value.
+    forecaster.out_sample_residuals has a step with a None or NaN value.
     """
     forecaster = ForecasterAutoregMultiVariate(LinearRegression(), level='l1',
-                                               lags=3, steps=3)
+                                               lags=3, steps=3, 
+                                               transformer_series=transformer_series)
     forecaster.fit(series=series)
     residuals = {1: np.array([1, 2, 3, 4, 5]),
                  2: np.array([1, 2, 3, 4, 5]), 
-                 3: np.array([1, 2, 3, 4, None])}
+                 3: np.array([1, 2, 3, 4, None])} # StandardScaler() transforms None to NaN
     forecaster.set_out_sample_residuals(residuals = residuals)
 
     err_msg = re.escape(
-                    ("forecaster residuals for step 3 contains `None` values. Check forecaster.out_sample_residuals.")
-                )
+                  ("forecaster residuals for step 3 contains `None` "
+                   "or `NaNs` values. Check forecaster.out_sample_residuals.")
+              )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.predict_bootstrapping(steps=3, in_sample_residuals=False)
 
@@ -186,7 +212,8 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_steps_
                      regressor          = LinearRegression(),
                      steps              = 2,
                      level              = 'l1',
-                     lags               = 3
+                     lags               = 3,
+                     transformer_series = None
                  )
     forecaster.fit(series=series, exog=exog['exog_1'])
     forecaster.in_sample_residuals = {1: pd.Series([1, 1, 1, 1, 1, 1, 1]),
@@ -194,10 +221,10 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_steps_
     results = forecaster.predict_bootstrapping(steps=2, exog=exog_predict['exog_1'], 
                                                n_boot=4, in_sample_residuals=True)
     expected = pd.DataFrame(
-                    data = np.array([[1.57457831, 1.57457831, 1.57457831, 1.57457831],
-                                     [5.3777698 , 5.3777698 , 5.3777698 , 5.3777698 ]]),
-                    columns = [f"pred_boot_{i}" for i in range(4)],
-                    index   = pd.RangeIndex(start=50, stop=52)
-                )
+                   data = np.array([[1.57457831, 1.57457831, 1.57457831, 1.57457831],
+                                    [5.3777698 , 5.3777698 , 5.3777698 , 5.3777698 ]]),
+                   columns = [f"pred_boot_{i}" for i in range(4)],
+                   index   = pd.RangeIndex(start=50, stop=52)
+               )
     
     pd.testing.assert_frame_equal(expected, results)        

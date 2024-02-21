@@ -14,7 +14,6 @@ import pandas as pd
 import sklearn
 import sklearn.pipeline
 from sklearn.base import clone
-from copy import copy
 import inspect
 
 import skforecast
@@ -84,10 +83,8 @@ class ForecasterAutoregCustom(ForecasterBase):
         **New in version 0.10.0**
     fit_kwargs : dict, default `None`
         Additional arguments to be passed to the `fit` method of the regressor.
-        **New in version 0.8.0**
     forecaster_id : str, int, default `None`
         Name used as an identifier of the forecaster.
-        **New in version 0.7.0**
     
     Attributes
     ----------
@@ -96,10 +93,8 @@ class ForecasterAutoregCustom(ForecasterBase):
     fun_predictors : Callable
         Function that receives a time series as input (numpy ndarray) and returns
         another numpy ndarray with the predictors.
-        **New in version 0.7.0**
     source_code_fun_predictors : str
         Source code of the custom function used to create the predictors.
-        **New in version 0.7.0**
     window_size : int
         Size of the window needed by `fun_predictors` to create the predictors.
         If `differentiation` is not `None`, `window_size` is increased by the
@@ -162,7 +157,6 @@ class ForecasterAutoregCustom(ForecasterBase):
         Names of columns of the matrix created internally for training.
     fit_kwargs : dict
         Additional arguments to be passed to the `fit` method of the regressor.
-        **New in version 0.8.0**
     in_sample_residuals : numpy ndarray
         Residuals of the model when predicting training data. Only stored up to
         1000 values. If `transformer_y` is not `None`, residuals are stored in the
@@ -178,7 +172,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         Date of creation.
     fit_date : str
         Date of last fit.
-    skforcast_version : str
+    skforecast_version : str
         Version of skforecast library used to create the forecaster.
     python_version : str
         Version of python used to create the forecaster.
@@ -226,7 +220,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         self.fitted                     = False
         self.creation_date              = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
         self.fit_date                   = None
-        self.skforcast_version          = skforecast.__version__
+        self.skforecast_version         = skforecast.__version__
         self.python_version             = sys.version.split(" ")[0]
         self.forecaster_id              = forecaster_id
         
@@ -300,7 +294,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             f"fit_kwargs: {self.fit_kwargs} \n"
             f"Creation date: {self.creation_date} \n"
             f"Last fit date: {self.fit_date} \n"
-            f"Skforecast version: {self.skforcast_version} \n"
+            f"Skforecast version: {self.skforecast_version} \n"
             f"Python version: {self.python_version} \n"
             f"Forecaster id: {self.forecaster_id} \n"
         )
@@ -363,17 +357,17 @@ class ForecasterAutoregCustom(ForecasterBase):
             check_exog(exog=exog, allow_nan=True)
             if isinstance(exog, pd.Series):
                 exog = transform_series(
-                            series            = exog,
-                            transformer       = self.transformer_exog,
-                            fit               = True,
-                            inverse_transform = False
+                           series            = exog,
+                           transformer       = self.transformer_exog,
+                           fit               = True,
+                           inverse_transform = False
                        )
             else:
                 exog = transform_dataframe(
-                            df                = exog,
-                            transformer       = self.transformer_exog,
-                            fit               = True,
-                            inverse_transform = False
+                           df                = exog,
+                           transformer       = self.transformer_exog,
+                           fit               = True,
+                           inverse_transform = False
                        )
             
             check_exog(exog=exog, allow_nan=False)
@@ -436,6 +430,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             # The first `self.window_size` positions have to be removed from exog
             # since they are not in X_train.
             exog_to_train = exog.iloc[self.window_size:, ]
+            exog_to_train.index = exog_index[self.window_size:]
             check_exog_dtypes(exog_to_train)
             X_train = pd.concat((X_train, exog_to_train), axis=1)
         
@@ -664,11 +659,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         """
 
         if last_window is None:
-            last_window = self.last_window.copy()
-        else:
-            last_window = last_window.copy()
-
-        last_window = last_window.iloc[-self.window_size:]
+            last_window = self.last_window
 
         check_predict_input(
             forecaster_name  = type(self).__name__,
@@ -689,6 +680,8 @@ class ForecasterAutoregCustom(ForecasterBase):
             levels           = None,
             series_col_names = None
         )
+
+        last_window = last_window.iloc[-self.window_size:].copy()
 
         if exog is not None:
             if isinstance(exog, pd.DataFrame):
@@ -724,8 +717,8 @@ class ForecasterAutoregCustom(ForecasterBase):
             
         predictions = self._recursive_predict(
                           steps       = steps,
-                          last_window = copy(last_window_values),
-                          exog        = copy(exog_values)
+                          last_window = last_window_values,
+                          exog        = exog_values
                       )
         
         if self.differentiation is not None:
@@ -805,16 +798,14 @@ class ForecasterAutoregCustom(ForecasterBase):
         
         if not in_sample_residuals and self.out_sample_residuals is None:
             raise ValueError(
-                ('`forecaster.out_sample_residuals` is `None`. Use '
-                 '`in_sample_residuals=True` or method `set_out_sample_residuals()` '
-                 'before `predict_interval()`, `predict_bootstrapping()` or '
-                 '`predict_dist()`.')
+                ("`forecaster.out_sample_residuals` is `None`. Use "
+                 "`in_sample_residuals=True` or method `set_out_sample_residuals()` "
+                 "before `predict_interval()`, `predict_bootstrapping()`, "
+                 "`predict_quantiles()` or `predict_dist()`.")
             )
-
+        
         if last_window is None:
-            last_window = self.last_window.copy()
-        else:
-            last_window = last_window.copy()
+            last_window = self.last_window
 
         check_predict_input(
             forecaster_name  = type(self).__name__,
@@ -835,6 +826,8 @@ class ForecasterAutoregCustom(ForecasterBase):
             levels           = None,
             series_col_names = None
         )
+
+        last_window = last_window.iloc[-self.window_size:].copy()
 
         if exog is not None:
             if isinstance(exog, pd.DataFrame):
@@ -983,9 +976,9 @@ class ForecasterAutoregCustom(ForecasterBase):
         predictions : pandas DataFrame
             Values predicted by the forecaster and their estimated interval.
 
-                - pred: predictions.
-                - lower_bound: lower bound of the interval.
-                - upper_bound: upper bound of the interval.
+            - pred: predictions.
+            - lower_bound: lower bound of the interval.
+            - upper_bound: upper bound of the interval.
 
         Notes
         -----
@@ -1090,6 +1083,7 @@ class ForecasterAutoregCustom(ForecasterBase):
                            )
 
         predictions = boot_predictions.quantile(q=quantiles, axis=1).transpose()
+        predictions.columns = [f'q_{q}' for q in quantiles]
 
         return predictions
 
@@ -1292,7 +1286,8 @@ class ForecasterAutoregCustom(ForecasterBase):
 
     
     def get_feature_importances(
-        self
+        self,
+        sort_importance: bool=True
     ) -> pd.DataFrame:
         """
         Return feature importances of the regressor stored in the forecaster.
@@ -1301,7 +1296,8 @@ class ForecasterAutoregCustom(ForecasterBase):
 
         Parameters
         ----------
-        self
+        sort_importance: bool, default `True`
+            If `True`, sorts the feature importances in descending order.
 
         Returns
         -------
@@ -1339,5 +1335,9 @@ class ForecasterAutoregCustom(ForecasterBase):
                                       'feature': self.X_train_col_names,
                                       'importance': feature_importances
                                   })
+            if sort_importance:
+                feature_importances = feature_importances.sort_values(
+                                          by='importance', ascending=False
+                                      )
 
         return feature_importances

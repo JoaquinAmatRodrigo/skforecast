@@ -4,6 +4,7 @@ import re
 import pytest
 import numpy as np
 import pandas as pd
+from sklearn.exceptions import NotFittedError
 from skforecast.ForecasterAutoregDirect import ForecasterAutoregDirect
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
@@ -12,6 +13,20 @@ from sklearn.preprocessing import StandardScaler
 from .fixtures_ForecasterAutoregDirect import y
 from .fixtures_ForecasterAutoregDirect import exog
 from .fixtures_ForecasterAutoregDirect import exog_predict
+
+
+def test_predict_NotFittedError_when_fitted_is_False():
+    """
+    Test NotFittedError is raised when fitted is False.
+    """
+    forecaster = ForecasterAutoregDirect(LinearRegression(), lags=3, steps=5)
+
+    err_msg = re.escape(
+                ('This Forecaster instance is not fitted yet. Call `fit` with '
+                 'appropriate arguments before using predict.')
+              )
+    with pytest.raises(NotFittedError, match = err_msg):
+        forecaster.predict_bootstrapping(steps=5)
 
 
 def test_predict_bootstrapping_ValueError_when_not_in_sample_residuals_for_some_step():
@@ -42,8 +57,8 @@ def test_predict_bootstrapping_ValueError_when_out_sample_residuals_is_None():
     err_msg = re.escape(
                 ("`forecaster.out_sample_residuals` is `None`. Use "
                  "`in_sample_residuals=True` or method `set_out_sample_residuals()` "
-                 "before `predict_interval()`, `predict_bootstrapping()` or "
-                 "`predict_dist()`.")
+                 "before `predict_interval()`, `predict_bootstrapping()`, "
+                 "`predict_quantiles()` or `predict_dist()`.")
               )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.predict_bootstrapping(steps=1, in_sample_residuals=False)

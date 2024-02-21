@@ -12,7 +12,6 @@ from sklearn.linear_model import LinearRegression
 from sklearn.neural_network import MLPRegressor
 from sklearn.ensemble import RandomForestRegressor
 
-
 # Fixtures
 series = pd.DataFrame({'l1': pd.Series(np.arange(10, dtype=float)), 
                        'l2': pd.Series(np.arange(10, dtype=float))})
@@ -35,7 +34,7 @@ def test_TypeError_is_raised_when_step_is_not_int():
 
     step = 'not_an_int'
 
-    err_msg = re.escape(f'`step` must be an integer. Got {type(step)}.')
+    err_msg = re.escape(f"`step` must be an integer. Got {type(step)}.")
     with pytest.raises(TypeError, match = err_msg):         
         forecaster.get_feature_importances(step=step)
 
@@ -101,7 +100,7 @@ def test_output_get_feature_importances_when_regressor_is_RandomForestRegressor_
                                'l2_lag_1', 'l2_lag_2', 'l2_lag_3'],
                    'importance': np.array([0.17522374, 0.17408016, 0.17918514, 
                                            0.13738555, 0.17994996, 0.15417544])
-               })
+               }).sort_values(by='importance', ascending=False)
     
     pd.testing.assert_frame_equal(results, expected)
   
@@ -124,10 +123,10 @@ def test_output_get_feature_importances_when_regressor_is_RandomForestRegressor_
                    'feature': ['l1_lag_1', 'l1_lag_2', 'l1_lag_3', 
                                'l2_lag_1', 'l2_lag_2', 'l2_lag_3', 
                                'exog_1', 'exog_2'],
-                   'importance': np.array([0.08793948794586698, 0.11408643989844021, 0.16109783229869726, 
-                                           0.15234993377292386, 0.12713124418798266, 0.08677362246872701, 
-                                           0.1605029739403479, 0.11011846548701419])
-               })
+                   'importance': np.array([0.08793949, 0.11408644, 0.16284783, 
+                                           0.15234993, 0.12713124, 0.08502362, 
+                                           0.16050297, 0.11011847])
+               }).sort_values(by='importance', ascending=False)
     
     pd.testing.assert_frame_equal(results, expected)
     
@@ -145,7 +144,7 @@ def test_output_get_feature_importances_when_regressor_is_LinearRegression_lags_
                  )
     forecaster.fit(series=series)
 
-    results = forecaster.get_feature_importances(step=1)
+    results = forecaster.get_feature_importances(step=1, sort_importance=False)
     expected = pd.DataFrame({
                    'feature': ['l1_lag_1', 'l1_lag_2', 'l1_lag_3', 
                                'l2_lag_1', 'l2_lag_2', 'l2_lag_3'],
@@ -169,14 +168,14 @@ def test_output_get_feature_importances_when_regressor_is_LinearRegression_lags_
                  )
     forecaster.fit(series=series, exog=exog)
 
-    results = forecaster.get_feature_importances(step=2)
+    results = forecaster.get_feature_importances(step=2, sort_importance=False)
     expected = pd.DataFrame({
                    'feature': ['l1_lag_1', 'l1_lag_2', 'l1_lag_3', 
                                'l2_lag_1', 'l2_lag_2', 'l2_lag_3', 
                                'exog_1', 'exog_2'],
-                   'importance': np.array([0.125, 0.125, 0.125, 
-                                           0.125, 0.125, 0.125, 
-                                           0.125, 0.125])
+                   'importance': np.array([0.04444444, 0.04444444, 0.04444444,
+                                           0.04444444, 0.04444444, 0.04444444, 
+                                           0.12765695, 0.12765695])
                })
     
     pd.testing.assert_frame_equal(results, expected)
@@ -216,14 +215,15 @@ def test_output_get_feature_importances_when_pipeline_LinearRegression():
     (StandardScaler() + LinearRegression with lags=3).
     """
     forecaster = ForecasterAutoregMultiVariate(
-                     regressor = make_pipeline(StandardScaler(), 
-                                               LinearRegression()),
-                     level     = 'l1',
-                     lags      = 3,
-                     steps     = 1
+                     regressor          = make_pipeline(StandardScaler(), 
+                                                        LinearRegression()),
+                     level              = 'l1',
+                     lags               = 3,
+                     steps              = 1,
+                     transformer_series = None
                  )
     forecaster.fit(series=series)
-    results = forecaster.get_feature_importances(step=1)
+    results = forecaster.get_feature_importances(step=1, sort_importance=False)
     expected = pd.DataFrame({
                    'feature': ['l1_lag_1', 'l1_lag_2', 'l1_lag_3', 
                                'l2_lag_1', 'l2_lag_2', 'l2_lag_3'],
@@ -240,11 +240,12 @@ def test_output_get_feature_importances_when_pipeline_RandomForestRegressor():
     (StandardScaler() + RandomForestRegressor with lags=3).
     """
     forecaster = ForecasterAutoregMultiVariate(
-                     regressor = make_pipeline(StandardScaler(), 
-                                               RandomForestRegressor(random_state=123)),
-                     level     = 'l1',
-                     lags      = 3,
-                     steps     = 1
+                     regressor          = make_pipeline(StandardScaler(), 
+                                                        RandomForestRegressor(random_state=123)),
+                     level              = 'l1',
+                     lags               = 3,
+                     steps              = 1,
+                     transformer_series = None
                  )
     forecaster.fit(series=series)
     results = forecaster.get_feature_importances(step=1)
@@ -253,6 +254,6 @@ def test_output_get_feature_importances_when_pipeline_RandomForestRegressor():
                                'l2_lag_1', 'l2_lag_2', 'l2_lag_3'],
                    'importance': np.array([0.17522374, 0.17408016, 0.17918514, 
                                            0.13738555, 0.17994996, 0.15417544])
-               })
+               }).sort_values(by='importance', ascending=False)
     
     pd.testing.assert_frame_equal(results, expected)

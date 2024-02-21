@@ -106,7 +106,7 @@ class ForecasterSarimax():
         Date of creation.
     fit_date : str
         Date of last fit.
-    skforcast_version : str
+    skforecast_version : str
         Version of skforecast library used to create the forecaster.
     python_version : str
         Version of python used to create the forecaster.
@@ -139,7 +139,7 @@ class ForecasterSarimax():
         self.exog_col_names    = None
         self.creation_date     = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
         self.fit_date          = None
-        self.skforcast_version = skforecast.__version__
+        self.skforecast_version= skforecast.__version__
         self.python_version    = sys.version.split(" ")[0]
         self.forecaster_id     = forecaster_id
         
@@ -196,7 +196,7 @@ class ForecasterSarimax():
             f"Creation date: {self.creation_date} \n"
             f"Last fit date: {self.fit_date} \n"
             f"Index seen by the forecaster: {self.extended_index} \n"
-            f"Skforecast version: {self.skforcast_version} \n"
+            f"Skforecast version: {self.skforecast_version} \n"
             f"Python version: {self.python_version} \n"
             f"Forecaster id: {self.forecaster_id} \n"
         )
@@ -356,8 +356,9 @@ class ForecasterSarimax():
         
         """
 
-        # Needs to be a new variable to avoid arima_res_.append if not needed
-        last_window_check = last_window.copy() if last_window is not None else self.last_window.copy()
+        # Needs to be a new variable to avoid arima_res_.append when using 
+        # self.last_window. It already has it stored.
+        last_window_check = last_window if last_window is not None else self.last_window
 
         check_predict_input(
             forecaster_name  = type(self).__name__,
@@ -378,8 +379,12 @@ class ForecasterSarimax():
             levels           = None,
             series_col_names = None
         )
+        
+        # If not last_window is provided, last_window needs to be None
+        if last_window is not None:
+            last_window = last_window.copy()
 
-        # If last_window_exog is provided but no last_window
+        # When last_window_exog is provided but no last_window
         if last_window is None and last_window_exog is not None:
             raise ValueError(
                 ("To make predictions unrelated to the original data, both "
@@ -412,7 +417,7 @@ class ForecasterSarimax():
                 )
             
             last_window = transform_series(
-                              series            = last_window.copy(),
+                              series            = last_window,
                               transformer       = self.transformer_y,
                               fit               = False,
                               inverse_transform = False
@@ -555,14 +560,15 @@ class ForecasterSarimax():
         predictions : pandas DataFrame
             Values predicted by the forecaster and their estimated interval.
 
-                - pred: predictions.
-                - lower_bound: lower bound of the interval.
-                - upper_bound: upper bound of the interval.
+            - pred: predictions.
+            - lower_bound: lower bound of the interval.
+            - upper_bound: upper bound of the interval.
 
         """
 
-        # Needs to be a new variable to avoid arima_res_.append if not needed
-        last_window_check = last_window.copy() if last_window is not None else self.last_window.copy()
+        # Needs to be a new variable to avoid arima_res_.append when using 
+        # self.last_window. It already has it stored.
+        last_window_check = last_window if last_window is not None else self.last_window
 
         check_predict_input(
             forecaster_name  = type(self).__name__,
@@ -583,6 +589,10 @@ class ForecasterSarimax():
             levels           = None,
             series_col_names = None
         )
+        
+        # If not last_window is provided, last_window needs to be None
+        if last_window is not None:
+            last_window = last_window.copy()
 
         # If last_window_exog is provided but no last_window
         if last_window is None and last_window_exog is not None:
@@ -780,14 +790,16 @@ class ForecasterSarimax():
 
 
     def get_feature_importances(
-        self
+        self,
+        sort_importance: bool=True
     ) -> pd.DataFrame:
         """
         Return feature importances of the regressor stored in the forecaster.
 
         Parameters
         ----------
-        self
+        sort_importance: bool, default `True`
+            If `True`, sorts the feature importances in descending order.
 
         Returns
         -------
@@ -804,6 +816,11 @@ class ForecasterSarimax():
 
         feature_importances = self.regressor.params().to_frame().reset_index()
         feature_importances.columns = ['feature', 'importance']
+
+        if sort_importance:
+            feature_importances = feature_importances.sort_values(
+                                      by='importance', ascending=False
+                                  )
 
         return feature_importances
 
@@ -854,3 +871,18 @@ class ForecasterSarimax():
             metric = self.regressor.get_info_criteria(criteria=criteria, method=method)
         
         return metric
+    
+    def summary(self) -> None:
+        """
+        Show forecaster information.
+        
+        Parameters
+        ----------
+        self
+
+        Returns
+        -------
+        None
+        
+        """
+        print(self)

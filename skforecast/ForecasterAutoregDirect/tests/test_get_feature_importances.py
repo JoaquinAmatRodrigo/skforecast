@@ -29,7 +29,7 @@ def test_TypeError_is_raised_when_step_is_not_int():
 
     step = 'not_an_int'
 
-    err_msg = re.escape(f'`step` must be an integer. Got {type(step)}.')
+    err_msg = re.escape(f"`step` must be an integer. Got {type(step)}.")
     with pytest.raises(TypeError, match = err_msg):         
         forecaster.get_feature_importances(step=step)
 
@@ -90,7 +90,7 @@ def test_output_get_feature_importances_when_regressor_is_RandomForestRegressor_
     expected = pd.DataFrame({
                    'feature': ['lag_1', 'lag_2', 'lag_3'],
                    'importance': np.array([0.3902439024390244, 0.3170731707317073, 0.2926829268292683])
-               })
+               }).sort_values(by='importance', ascending=False)
     
     pd.testing.assert_frame_equal(results, expected)
   
@@ -116,7 +116,7 @@ def test_output_get_feature_importances_when_regressor_is_RandomForestRegressor_
     expected = pd.DataFrame({
                    'feature': ['lag_1', 'lag_2', 'lag_3', 'exog_1', 'exog_2'],
                    'importance': np.array([0.16428571, 0.2, 0.20446429, 0.23333333, 0.19791667])
-               })
+               }).sort_values(by='importance', ascending=False)
     
     pd.testing.assert_frame_equal(results, expected)
     
@@ -129,7 +129,7 @@ def test_output_get_feature_importances_when_regressor_is_LinearRegression_lags_
     forecaster = ForecasterAutoregDirect(LinearRegression(), lags=3, steps=1)
     forecaster.fit(y=pd.Series(np.arange(5)))
 
-    results = forecaster.get_feature_importances(step=1)
+    results = forecaster.get_feature_importances(step=1, sort_importance=False)
     expected = pd.DataFrame({
                    'feature': ['lag_1', 'lag_2', 'lag_3'],
                    'importance': np.array([0.33333333, 0.33333333, 0.33333333])
@@ -147,7 +147,7 @@ def test_output_get_feature_importances_when_regressor_is_LinearRegression_lags_
     forecaster = ForecasterAutoregDirect(regressor=LinearRegression(), lags=3, steps=1)
     forecaster.fit(y=pd.Series(np.arange(5)), exog=pd.Series(np.arange(5), name='exog'))
 
-    results = forecaster.get_feature_importances(step=1)
+    results = forecaster.get_feature_importances(step=1, sort_importance=False)
     expected = pd.DataFrame({
                    'feature': ['lag_1', 'lag_2', 'lag_3', 'exog'],
                    'importance': np.array([0.25, 0.25, 0.25, 0.25])
@@ -196,7 +196,7 @@ def test_output_get_feature_importances_when_pipeline_LinearRegression():
                  )
     forecaster.fit(y=pd.Series(np.arange(5)))
     
-    results = forecaster.get_feature_importances(step=1)
+    results = forecaster.get_feature_importances(step=1, sort_importance=False)
     expected = pd.DataFrame({
                    'feature': ['lag_1', 'lag_2', 'lag_3'],
                    'importance': np.array([0.166667, 0.166667, 0.166667])
@@ -218,7 +218,7 @@ def test_output_get_feature_importances_when_pipeline_RandomForestRegressor():
                  )
     forecaster.fit(y=pd.Series(np.arange(5)))
     
-    results = forecaster.get_feature_importances(step=1)
+    results = forecaster.get_feature_importances(step=1, sort_importance=False)
     expected = pd.DataFrame({
                    'feature': ['lag_1', 'lag_2', 'lag_3'],
                    'importance': np.array([0.5, 0.5, 0.0])

@@ -14,6 +14,7 @@ import pandas as pd
 import sklearn
 import sklearn.pipeline
 from sklearn.base import clone
+from sklearn.preprocessing import StandardScaler
 from copy import copy, deepcopy
 import inspect
 
@@ -52,19 +53,18 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
     lags : int, list, numpy ndarray, range
         Lags used as predictors. Index starts at 1, so lag 1 is equal to t-1. 
     
-            - `int`: include lags from 1 to `lags` (included).
-            - `list`, `1d numpy ndarray` or `range`: include only lags present in 
-            `lags`, all elements must be int.
-    transformer_series : transformer (preprocessor), dict, default `None`
+        - `int`: include lags from 1 to `lags` (included).
+        - `list`, `1d numpy ndarray` or `range`: include only lags present in 
+        `lags`, all elements must be int.
+    transformer_series : transformer (preprocessor), dict, default `sklearn.preprocessing.StandardScaler`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API with methods: fit, transform, fit_transform and 
         inverse_transform. Transformation is applied to each `series` before training 
         the forecaster. ColumnTransformers are not allowed since they do not have 
         inverse_transform method.
 
-            - If single transformer: it is cloned and applied to all series. 
-            - If `dict` of transformers: a different transformer can be used for each 
-            series.
+        - If single transformer: it is cloned and applied to all series. 
+        - If `dict` of transformers: a different transformer can be used for each series.
     transformer_exog : transformer, default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API. The transformation is applied to `exog` before training the
@@ -75,24 +75,22 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         Ignored if `regressor` does not have the argument `sample_weight` in its 
         `fit` method. See Notes section for more details on the use of the weights.
 
-            - If single function: it is applied to all series. 
-            - If `dict` {'series_column_name' : Callable}: a different function can be
-              used for each series, a weight of 1 is given to all series not present 
-              in `weight_func`.
+        - If single function: it is applied to all series. 
+        - If `dict` {'series_column_name' : Callable}: a different function can be
+        used for each series, a weight of 1 is given to all series not present in
+        `weight_func`.
     series_weights : dict, default `None`
         Weights associated with each series {'series_column_name' : float}. It is only
         applied if the `regressor` used accepts `sample_weight` in its `fit` method. 
         See Notes section for more details on the use of the weights.
 
-            - If a `dict` is provided, a weight of 1 is given to all series not present
-            in `series_weights`.
-            - If `None`, all levels have the same weight.
+        - If a `dict` is provided, a weight of 1 is given to all series not present
+        in `series_weights`.
+        - If `None`, all levels have the same weight.
     fit_kwargs : dict, default `None`
         Additional arguments to be passed to the `fit` method of the regressor.
-        **New in version 0.8.0**
     forecaster_id : str, int, default `None`
         Name used as an identifier of the forecaster.
-        **New in version 0.7.0**
 
     Attributes
     ----------
@@ -107,9 +105,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         the forecaster. ColumnTransformers are not allowed since they do not have 
         inverse_transform method.
 
-            - If single transformer: it is cloned and applied to all series. 
-            - If `dict` of transformers: a different transformer can be used for each 
-            series.
+        - If single transformer: it is cloned and applied to all series. 
+        - If `dict` of transformers: a different transformer can be used for each series.
     transformer_series_ : dict
         Dictionary with the transformer for each series. It is created cloning the 
         objects in `transformer_series` and is used internally to avoid overwriting.
@@ -123,10 +120,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         Ignored if `regressor` does not have the argument `sample_weight` in its 
         `fit` method. See Notes section for more details on the use of the weights.
 
-            - If single function: it is applied to all series. 
-            - If `dict` {'series_column_name' : Callable}: a different function can be
-              used for each series, a weight of 1 is given to all series not present 
-              in `weight_func`.
+        - If single function: it is applied to all series. 
+        - If `dict` {'series_column_name' : Callable}: a different function can be
+        used for each series, a weight of 1 is given to all series not present 
+        in `weight_func`.
     weight_func_ : dict
         Dictionary with the `weight_func` for each series. It is created cloning the 
         objects in `weight_func` and is used internally to avoid overwriting.
@@ -137,9 +134,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         applied if the `regressor` used accepts `sample_weight` in its `fit` method. 
         See Notes section for more details on the use of the weights.
 
-            - If a `dict` is provided, a weight of 1 is given to all series not present
-            in `series_weights`.
-            - If `None`, all levels have the same weight.
+        - If a `dict` is provided, a weight of 1 is given to all series not present
+        in `series_weights`.
+        - If `None`, all levels have the same weight.
     series_weights_ : dict
         Weights associated with each series.It is created as a clone of `series_weights`
         and is used internally to avoid overwriting.
@@ -174,7 +171,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         Names of columns of the matrix created internally for training.
     fit_kwargs : dict
         Additional arguments to be passed to the `fit` method of the regressor.
-        **New in version 0.8.0**
     in_sample_residuals : dict
         Residuals of the model when predicting training data. Only stored up to
         1000 values in the form `{level: residuals}`. If `transformer_series` 
@@ -190,7 +186,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         Date of creation.
     fit_date : str
         Date of last fit.
-    skforcast_version : str
+    skforecast_version : str
         Version of skforecast library used to create the forecaster.
     python_version : str
         Version of python used to create the forecaster.
@@ -219,7 +215,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self,
         regressor: object,
         lags: Union[int, np.ndarray, list],
-        transformer_series: Optional[Union[object, dict]]=None,
+        transformer_series: Optional[Union[object, dict]]=StandardScaler(),
         transformer_exog: Optional[object]=None,
         weight_func: Optional[Union[Callable, dict]]=None,
         series_weights: Optional[dict]=None,
@@ -252,7 +248,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.fitted                  = False
         self.creation_date           = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
         self.fit_date                = None
-        self.skforcast_version       = skforecast.__version__
+        self.skforecast_version      = skforecast.__version__
         self.python_version          = sys.version.split(" ")[0]
         self.forecaster_id           = forecaster_id
         
@@ -309,7 +305,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             f"fit_kwargs: {self.fit_kwargs} \n"
             f"Creation date: {self.creation_date} \n"
             f"Last fit date: {self.fit_date} \n"
-            f"Skforecast version: {self.skforcast_version} \n"
+            f"Skforecast version: {self.skforecast_version} \n"
             f"Python version: {self.python_version} \n"
             f"Forecaster id: {self.forecaster_id} \n"
         )
@@ -448,8 +444,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             check_exog_dtypes(exog)
             self.exog_dtypes = get_exog_dtypes(exog=exog)
 
-            _, exog_index = preprocess_exog(exog=exog, return_values=False)
-            if not (exog_index[:len(series.index)] == series.index).all():
+            _, _ = preprocess_exog(exog=exog, return_values=False)
+            if not (exog.index[:len(series)] == series.index).all():
                 raise ValueError(
                     ("Different index for `series` and `exog`. They must be equal "
                      "to ensure the correct alignment of values.")
@@ -845,9 +841,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             levels = [levels]
 
         if last_window is None:
-            last_window = self.last_window.copy()
-        else:
-            last_window = last_window.copy()
+            last_window = self.last_window
         
         check_predict_input(
             forecaster_name  = type(self).__name__,
@@ -868,6 +862,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             levels           = levels,
             series_col_names = self.series_col_names
         )
+
+        last_window = last_window.iloc[-self.window_size:, ].copy()
         
         if exog is not None:
             if isinstance(exog, pd.DataFrame):
@@ -906,8 +902,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             preds_level = self._recursive_predict(
                               steps       = steps,
                               level       = level,
-                              last_window = copy(last_window_values),
-                              exog        = copy(exog_values)
+                              last_window = last_window_values,
+                              exog        = exog_values
                           )
 
             preds_level = pd.Series(
@@ -932,7 +928,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         return predictions
 
-    
+
     def predict_bootstrapping(
         self,
         steps: int,
@@ -989,55 +985,56 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         """
         
-        if levels is None:
-            levels = self.series_col_names
-        elif isinstance(levels, str):
-            levels = [levels]
+        if self.fitted:
+            if levels is None:
+                levels = self.series_col_names
+            elif isinstance(levels, str):
+                levels = [levels]
 
-        if in_sample_residuals:
-            if not set(levels).issubset(set(self.in_sample_residuals.keys())):
-                raise ValueError(
-                    (f"Not `forecaster.in_sample_residuals` for levels: "
-                     f"{set(levels) - set(self.in_sample_residuals.keys())}.")
-                )
-            residuals_levels = self.in_sample_residuals
-        else:
-            if self.out_sample_residuals is None:
-                raise ValueError(
-                    ("`forecaster.out_sample_residuals` is `None`. Use "
-                     "`in_sample_residuals=True` or method "
-                     "`set_out_sample_residuals()` before `predict_interval()`, "
-                     "`predict_bootstrapping()` or `predict_dist()`.")
-                )
-            else:
-                if not set(levels).issubset(set(self.out_sample_residuals.keys())):
+            if in_sample_residuals:
+                if not set(levels).issubset(set(self.in_sample_residuals.keys())):
                     raise ValueError(
-                        (f"Not `forecaster.out_sample_residuals` for levels: "
-                         f"{set(levels) - set(self.out_sample_residuals.keys())}. "
-                         f"Use method `set_out_sample_residuals()`.")
+                        (f"Not `forecaster.in_sample_residuals` for levels: "
+                         f"{set(levels) - set(self.in_sample_residuals.keys())}.")
                     )
-            residuals_levels = self.out_sample_residuals
-                
-        check_residuals = (
-            "forecaster.in_sample_residuals" if in_sample_residuals
-             else "forecaster.out_sample_residuals"
-        )
-        for level in levels:
-            if residuals_levels[level] is None:
-                raise ValueError(
-                    (f"forecaster residuals for level '{level}' are `None`. "
-                     f"Check `{check_residuals}`.")
-                )
-            elif (residuals_levels[level] == None).any():
-                raise ValueError(
-                    (f"forecaster residuals for level '{level}' contains `None` "
-                     f"values. Check `{check_residuals}`.")
-                )
+                residuals_levels = self.in_sample_residuals
+            else:
+                if self.out_sample_residuals is None:
+                    raise ValueError(
+                        ("`forecaster.out_sample_residuals` is `None`. Use "
+                         "`in_sample_residuals=True` or method "
+                         "`set_out_sample_residuals()` before `predict_interval()`, "
+                         "`predict_bootstrapping()`,`predict_quantiles()` or "
+                         "`predict_dist()`.")
+                    )
+                else:
+                    if not set(levels).issubset(set(self.out_sample_residuals.keys())):
+                        raise ValueError(
+                            (f"Not `forecaster.out_sample_residuals` for levels: "
+                             f"{set(levels) - set(self.out_sample_residuals.keys())}. "
+                             f"Use method `set_out_sample_residuals()`.")
+                        )
+                residuals_levels = self.out_sample_residuals
+                    
+            check_residuals = (
+                "forecaster.in_sample_residuals" if in_sample_residuals
+                else "forecaster.out_sample_residuals"
+            )
+            for level in levels:
+                if residuals_levels[level] is None:
+                    raise ValueError(
+                        (f"forecaster residuals for level '{level}' are `None`. "
+                         f"Check `{check_residuals}`.")
+                    )
+                elif (any(element is None for element in residuals_levels[level]) or
+                      np.any(np.isnan(residuals_levels[level]))):
+                    raise ValueError(
+                        (f"forecaster residuals for level '{level}' contains `None` "
+                         f"or `NaNs` values. Check `{check_residuals}`.")
+                    )
 
         if last_window is None:
-            last_window = self.last_window.copy()
-        else:
-            last_window = last_window.copy()
+            last_window = self.last_window
 
         check_predict_input(
             forecaster_name  = type(self).__name__,
@@ -1058,6 +1055,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             levels           = levels,
             series_col_names = self.series_col_names
         )
+
+        last_window = last_window.iloc[-self.window_size:, ].copy()
 
         if exog is not None:
             if isinstance(exog, pd.DataFrame):
@@ -1206,9 +1205,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         predictions : pandas DataFrame
             Values predicted by the forecaster and their estimated interval.
 
-                - level: predictions.
-                - level_lower_bound: lower bound of the interval.
-                - level_upper_bound: upper bound of the interval.
+            - level: predictions.
+            - level_lower_bound: lower bound of the interval.
+            - level_upper_bound: upper bound of the interval.
 
         Notes
         -----
@@ -1338,7 +1337,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         for level in levels:
             preds_quantiles = boot_predictions[level].quantile(q=quantiles, axis=1).transpose()
-            preds_quantiles.columns = [f'{level}_{q}' for q in quantiles]
+            preds_quantiles.columns = [f'{level}_q_{q}' for q in quantiles]
             predictions.append(preds_quantiles)
         
         predictions = pd.concat(predictions, axis=1)
@@ -1615,7 +1614,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
     
     def get_feature_importances(
-        self
+        self,
+        sort_importance: bool=True
     ) -> pd.DataFrame:
         """
         Return feature importances of the regressor stored in the
@@ -1624,7 +1624,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         Parameters
         ----------
-        self
+        sort_importance: bool, default `True`
+            If `True`, sorts the feature importances in descending order.
 
         Returns
         -------
@@ -1662,5 +1663,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                                       'feature': self.X_train_col_names,
                                       'importance': feature_importances
                                   })
+            if sort_importance:
+                feature_importances = feature_importances.sort_values(
+                                          by='importance', ascending=False
+                                      )
 
         return feature_importances

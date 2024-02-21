@@ -5,6 +5,7 @@
 ################################################################################
 # coding=utf-8
 
+import os
 from typing import Union, Tuple, Optional, Callable
 import pandas as pd
 import warnings
@@ -28,7 +29,7 @@ logging.basicConfig(
 
 
 def _backtesting_sarimax(
-    forecaster,
+    forecaster: object,
     y: pd.Series,
     steps: int,
     metric: Union[str, Callable, list],
@@ -69,11 +70,11 @@ def _backtesting_sarimax(
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-            - If `string`: {'mean_squared_error', 'mean_absolute_error',
-             'mean_absolute_percentage_error', 'mean_squared_log_error'}
-            - If `Callable`: Function with arguments y_true, y_pred that returns 
-            a float.
-            - If `list`: List containing multiple strings and/or Callables.
+        - If `string`: {'mean_squared_error', 'mean_absolute_error',
+        'mean_absolute_percentage_error', 'mean_squared_log_error'}
+        - If `Callable`: Function with arguments y_true, y_pred that returns 
+        a float.
+        - If `list`: List containing multiple strings and/or Callables.
     initial_train_size : int
         Number of samples in the initial train split. The backtest forecaster is
         trained using the first `initial_train_size` observations.
@@ -90,8 +91,8 @@ def _backtesting_sarimax(
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
     refit : bool, int, default `False`
-        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
-        the Forecaster will be trained every that number of iterations.
+        Whether to re-fit the forecaster in each iteration. If `refit` is an 
+        integer, the Forecaster will be trained every that number of iterations.
     alpha : float, default `0.05`
         The confidence intervals for the forecasts are (1 - alpha) %.
         If both, `alpha` and `interval` are provided, `alpha` will be used.
@@ -112,7 +113,7 @@ def _backtesting_sarimax(
     suppress_warnings_fit : bool, default `False`
         If `True`, warnings generated during fitting will be ignored.
         **New in version 0.10.0**
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
 
     Returns
@@ -122,9 +123,9 @@ def _backtesting_sarimax(
     backtest_predictions : pandas DataFrame
         Value of predictions and their estimated interval if `interval` is not `None`.
 
-            - column pred: predictions.
-            - column lower_bound: lower bound of the interval.
-            - column upper_bound: upper bound of the interval.
+        - column pred: predictions.
+        - column lower_bound: lower bound of the interval.
+        - column upper_bound: upper bound of the interval.
     
     """
 
@@ -135,9 +136,8 @@ def _backtesting_sarimax(
     else:
         if n_jobs == 'auto':        
             n_jobs = select_n_jobs_backtesting(
-                         forecaster_name = type(forecaster).__name__,
-                         regressor_name  = type(forecaster.regressor).__name__,
-                         refit           = refit
+                         forecaster = forecaster,
+                         refit      = refit
                      )
         else:
             n_jobs = n_jobs if n_jobs > 0 else cpu_count()
@@ -145,7 +145,8 @@ def _backtesting_sarimax(
     if not isinstance(metric, list):
         metrics = [_get_metric(metric=metric) if isinstance(metric, str) else metric]
     else:
-        metrics = [_get_metric(metric=m) if isinstance(m, str) else m for m in metric]
+        metrics = [_get_metric(metric=m) if isinstance(m, str) else m 
+                   for m in metric]
 
     # initial_train_size cannot be None because of append method in Sarimax
     # First model training, this is done to allow parallelization when `refit` 
@@ -284,7 +285,7 @@ def _backtesting_sarimax(
 
 
 def backtesting_sarimax(
-    forecaster,
+    forecaster: object,
     y: pd.Series,
     steps: int,
     metric: Union[str, Callable, list],
@@ -325,11 +326,11 @@ def backtesting_sarimax(
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-            - If `string`: {'mean_squared_error', 'mean_absolute_error',
-             'mean_absolute_percentage_error', 'mean_squared_log_error'}
-            - If `Callable`: Function with arguments y_true, y_pred that returns 
-            a float.
-            - If `list`: List containing multiple strings and/or Callables.
+        - If `string`: {'mean_squared_error', 'mean_absolute_error',
+        'mean_absolute_percentage_error', 'mean_squared_log_error'}
+        - If `Callable`: Function with arguments y_true, y_pred that returns 
+        a float.
+        - If `list`: List containing multiple strings and/or Callables.
     initial_train_size : int
         Number of samples in the initial train split. The backtest forecaster is
         trained using the first `initial_train_size` observations.
@@ -346,8 +347,8 @@ def backtesting_sarimax(
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
     refit : bool, int, default `False`
-        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
-        the Forecaster will be trained every that number of iterations.
+        Whether to re-fit the forecaster in each iteration. If `refit` is an 
+        integer, the Forecaster will be trained every that number of iterations.
     alpha : float, default `0.05`
         The confidence intervals for the forecasts are (1 - alpha) %.
         If both, `alpha` and `interval` are provided, `alpha` will be used.
@@ -368,7 +369,7 @@ def backtesting_sarimax(
     suppress_warnings_fit : bool, default `False`
         If `True`, warnings generated during fitting will be ignored.
         **New in version 0.10.0**
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
 
     Returns
@@ -378,9 +379,9 @@ def backtesting_sarimax(
     backtest_predictions : pandas DataFrame
         Value of predictions and their estimated interval if `interval` is not `None`.
 
-            - column pred: predictions.
-            - column lower_bound: lower bound of the interval.
-            - column upper_bound: upper bound of the interval.
+        - column pred: predictions.
+        - column lower_bound: lower bound of the interval.
+        - column upper_bound: upper bound of the interval.
     
     """
     
@@ -431,7 +432,7 @@ def backtesting_sarimax(
 
 
 def grid_search_sarimax(
-    forecaster,
+    forecaster: object,
     y: pd.Series,
     param_grid: dict,
     steps: int,
@@ -446,7 +447,8 @@ def grid_search_sarimax(
     n_jobs: Optional[Union[int, str]]='auto',
     verbose: bool=True,
     suppress_warnings_fit: bool=False,
-    show_progress: bool=True
+    show_progress: bool=True,
+    output_file: Optional[str]=None
 ) -> pd.DataFrame:
     """
     Exhaustive search over specified parameter values for a ForecasterSarimax object.
@@ -466,11 +468,11 @@ def grid_search_sarimax(
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-            - If `string`: {'mean_squared_error', 'mean_absolute_error',
-             'mean_absolute_percentage_error', 'mean_squared_log_error'}
-            - If `Callable`: Function with arguments y_true, y_pred that returns 
-            a float.
-            - If `list`: List containing multiple strings and/or Callables.
+        - If `string`: {'mean_squared_error', 'mean_absolute_error',
+        'mean_absolute_percentage_error', 'mean_squared_log_error'}
+        - If `Callable`: Function with arguments y_true, y_pred that returns 
+        a float.
+        - If `list`: List containing multiple strings and/or Callables.
     initial_train_size : int 
         Number of samples in the initial train split. The backtest forecaster is
         trained using the first `initial_train_size` observations.
@@ -487,8 +489,8 @@ def grid_search_sarimax(
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
     refit : bool, int, default `False`
-        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
-        the Forecaster will be trained every that number of iterations.
+        Whether to re-fit the forecaster in each iteration. If `refit` is an 
+        integer, the Forecaster will be trained every that number of iterations.
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
     n_jobs : int, 'auto', default `'auto'`
@@ -501,17 +503,22 @@ def grid_search_sarimax(
     suppress_warnings_fit : bool, default `False`
         If `True`, warnings generated during fitting will be ignored.
         **New in version 0.10.0**
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
+    output_file : str, default `None`
+        Specifies the filename or full path where the results should be saved. 
+        The results will be saved in a tab-separated values (TSV) format. If 
+        `None`, the results will not be saved to a file.
+        **New in version 0.12.0**
 
     Returns
     -------
     results : pandas DataFrame
         Results for each combination of parameters.
 
-            - column params: parameters configuration for each iteration.
-            - column metric: metric value estimated for each iteration.
-            - additional n columns with param = value.
+        - column params: parameters configuration for each iteration.
+        - column metric: metric value estimated for each iteration.
+        - additional n columns with param = value.
     
     """
 
@@ -533,14 +540,15 @@ def grid_search_sarimax(
         n_jobs                = n_jobs,
         verbose               = verbose,
         suppress_warnings_fit = suppress_warnings_fit,
-        show_progress         = show_progress
+        show_progress         = show_progress,
+        output_file           = output_file
     )
 
     return results
 
 
 def random_search_sarimax(
-    forecaster,
+    forecaster: object,
     y: pd.Series,
     param_distributions: dict,
     steps: int,
@@ -557,7 +565,8 @@ def random_search_sarimax(
     n_jobs: Optional[Union[int, str]]='auto',
     verbose: bool=True,
     suppress_warnings_fit: bool=False,
-    show_progress: bool=True
+    show_progress: bool=True,
+    output_file: Optional[str]=None
 ) -> pd.DataFrame:
     """
     Random search over specified parameter values or distributions for a Forecaster 
@@ -577,11 +586,11 @@ def random_search_sarimax(
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-            - If `string`: {'mean_squared_error', 'mean_absolute_error',
-             'mean_absolute_percentage_error', 'mean_squared_log_error'}
-            - If `Callable`: Function with arguments y_true, y_pred that returns 
-            a float.
-            - If `list`: List containing multiple strings and/or Callables.
+        - If `string`: {'mean_squared_error', 'mean_absolute_error',
+        'mean_absolute_percentage_error', 'mean_squared_log_error'}
+        - If `Callable`: Function with arguments y_true, y_pred that returns 
+        a float.
+        - If `list`: List containing multiple strings and/or Callables.
     initial_train_size : int 
         Number of samples in the initial train split. The backtest forecaster is
         trained using the first `initial_train_size` observations.
@@ -598,8 +607,8 @@ def random_search_sarimax(
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
     refit : bool, int, default `False`
-        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
-        the Forecaster will be trained every that number of iterations.
+        Whether to re-fit the forecaster in each iteration. If `refit` is an 
+        integer, the Forecaster will be trained every that number of iterations.
     n_iter : int, default `10`
         Number of parameter settings that are sampled. 
         n_iter trades off runtime vs quality of the solution.
@@ -617,17 +626,22 @@ def random_search_sarimax(
     suppress_warnings_fit : bool, default `False`
         If `True`, warnings generated during fitting will be ignored.
         **New in version 0.10.0**
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
+    output_file : str, default `None`
+        Specifies the filename or full path where the results should be saved. 
+        The results will be saved in a tab-separated values (TSV) format. If 
+        `None`, the results will not be saved to a file.
+        **New in version 0.12.0**
 
     Returns
     -------
     results : pandas DataFrame
         Results for each combination of parameters.
 
-            - column params: parameters configuration for each iteration.
-            - column metric: metric value estimated for each iteration.
-            - additional n columns with param = value.
+        - column params: parameters configuration for each iteration.
+        - column metric: metric value estimated for each iteration.
+        - additional n columns with param = value.
     
     """
 
@@ -649,14 +663,15 @@ def random_search_sarimax(
         n_jobs                = n_jobs,
         verbose               = verbose,
         suppress_warnings_fit = suppress_warnings_fit,
-        show_progress         = show_progress
+        show_progress         = show_progress,
+        output_file           = output_file
     )
 
     return results
 
 
 def _evaluate_grid_hyperparameters_sarimax(
-    forecaster,
+    forecaster: object,
     y: pd.Series,
     param_grid: dict,
     steps: int,
@@ -671,7 +686,8 @@ def _evaluate_grid_hyperparameters_sarimax(
     n_jobs: Optional[Union[int, str]]='auto',
     verbose: bool=True,
     suppress_warnings_fit: bool=False,
-    show_progress: bool=True
+    show_progress: bool=True,
+    output_file: Optional[str]=None
 ) -> pd.DataFrame:
     """
     Evaluate parameter values for a Forecaster object using time series backtesting.
@@ -690,11 +706,11 @@ def _evaluate_grid_hyperparameters_sarimax(
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-            - If `string`: {'mean_squared_error', 'mean_absolute_error',
-             'mean_absolute_percentage_error', 'mean_squared_log_error'}
-            - If `Callable`: Function with arguments y_true, y_pred that returns 
-            a float.
-            - If `list`: List containing multiple strings and/or Callables.
+        - If `string`: {'mean_squared_error', 'mean_absolute_error',
+        'mean_absolute_percentage_error', 'mean_squared_log_error'}
+        - If `Callable`: Function with arguments y_true, y_pred that returns 
+        a float.
+        - If `list`: List containing multiple strings and/or Callables.
     initial_train_size : int 
         Number of samples in the initial train split. The backtest forecaster is
         trained using the first `initial_train_size` observations.
@@ -711,8 +727,8 @@ def _evaluate_grid_hyperparameters_sarimax(
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
     refit : bool, int, default `False`
-        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
-        the Forecaster will be trained every that number of iterations.
+        Whether to re-fit the forecaster in each iteration. If `refit` is an 
+        integer, the Forecaster will be trained every that number of iterations.
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
     n_jobs : int, 'auto', default `'auto'`
@@ -724,41 +740,49 @@ def _evaluate_grid_hyperparameters_sarimax(
         Print number of folds used for cv or backtesting.
     suppress_warnings_fit : bool, default `False`
         If `True`, warnings generated during fitting will be ignored.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
+    output_file : str, default `None`
+        Specifies the filename or full path where the results should be saved. 
+        The results will be saved in a tab-separated values (TSV) format. If 
+        `None`, the results will not be saved to a file.
+        **New in version 0.12.0**
 
     Returns
     -------
     results : pandas DataFrame
         Results for each combination of parameters.
 
-            - column params: lower bound of the interval.
-            - column metric: metric value estimated for the combination of parameters.
-            - additional n columns with param = value.
+        - column params: parameters configuration for each iteration.
+        - column metric: metric value estimated for each iteration.
+        - additional n columns with param = value.
 
     """
 
     if return_best and exog is not None and (len(exog) != len(y)):
         raise ValueError(
-            (f'`exog` must have same number of samples as `y`. '
-             f'length `exog`: ({len(exog)}), length `y`: ({len(y)})')
+            (f"`exog` must have same number of samples as `y`. "
+             f"length `exog`: ({len(exog)}), length `y`: ({len(y)})")
         )
 
-    params_list = []
     if not isinstance(metric, list):
         metric = [metric] 
     metric_dict = {(m if isinstance(m, str) else m.__name__): [] for m in metric}
     
     if len(metric_dict) != len(metric):
         raise ValueError(
-            'When `metric` is a `list`, each metric name must be unique.'
+            "When `metric` is a `list`, each metric name must be unique."
         )
 
     print(f"Number of models compared: {len(param_grid)}.")
 
     if show_progress:
         param_grid = tqdm(param_grid, desc='params grid', position=0)
-  
+    
+    if output_file is not None and os.path.isfile(output_file):
+        os.remove(output_file)
+    
+    params_list = []
     for params in param_grid:
 
         forecaster.set_params(params)
@@ -780,15 +804,28 @@ def _evaluate_grid_hyperparameters_sarimax(
                             suppress_warnings_fit = suppress_warnings_fit,
                             show_progress         = False
                          )[0]
-        warnings.filterwarnings('ignore', category=RuntimeWarning, message= "The forecaster will be fit.*")   
+        warnings.filterwarnings('ignore', category=RuntimeWarning, 
+                                message= "The forecaster will be fit.*")
+        
         params_list.append(params)
         for m, m_value in zip(metric, metrics_values):
             m_name = m if isinstance(m, str) else m.__name__
             metric_dict[m_name].append(m_value)
+        
+        if output_file is not None:
+            header = ['params', *metric_dict.keys(), *params.keys()]
+            row = [params, *metrics_values, *params.values()]
+            if not os.path.isfile(output_file):
+                with open(output_file, 'w', newline='') as f:
+                    f.write('\t'.join(header) + '\n')
+                    f.write('\t'.join([str(r) for r in row]) + '\n')
+            else:
+                with open(output_file, 'a', newline='') as f:
+                    f.write('\t'.join([str(r) for r in row]) + '\n')
 
     results = pd.DataFrame({
-                 'params': params_list,
-                 **metric_dict
+                  'params': params_list,
+                  **metric_dict
               })
     
     results = results.sort_values(by=list(metric_dict.keys())[0], ascending=True)
@@ -803,7 +840,8 @@ def _evaluate_grid_hyperparameters_sarimax(
         forecaster.fit(y=y, exog=exog, suppress_warnings=suppress_warnings_fit)
         
         print(
-            f"`Forecaster` refitted using the best-found parameters, and the whole data set: \n"
+            f"`Forecaster` refitted using the best-found parameters, "
+            f"and the whole data set: \n"
             f"  Parameters: {best_params}\n"
             f"  Backtesting metric: {best_metric}\n"
         )
