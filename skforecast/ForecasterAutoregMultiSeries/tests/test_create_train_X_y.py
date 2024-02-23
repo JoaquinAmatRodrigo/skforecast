@@ -1040,6 +1040,184 @@ def test_create_train_X_y_output_when_transformer_series_and_transformer_exog_wi
         assert results[5] == expected[5]
 
 
+def test_create_train_X_y_output_series_DataFrame_and_NaNs_in_y_train():
+    """
+    Test the output of create_train_X_y when series is a DataFrame and y_train
+    has NaNs. Also test the MissingValuesWarning message.
+    """
+    series = pd.DataFrame({'l1': pd.Series(np.arange(10, dtype=float)), 
+                           'l2': pd.Series(np.arange(10, dtype=float))})
+    series.loc[5, 'l1'] = np.nan
+    exog = pd.Series(np.arange(100, 110), name='exog', dtype=float)
+    
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5,
+                                              transformer_series=None)
+    
+    warn_msg = re.escape(
+        ("NaNs detected in `y_train`. They have been dropped since the "
+         "target variable cannot have NaN values. Same rows have been "
+         "dropped from `X_train` to maintain alignment.")
+    )
+    with pytest.warns(MissingValuesWarning, match = warn_msg):    
+        results = forecaster.create_train_X_y(series=series, exog=exog,
+                                              drop_nan=False)
+
+    expected = (
+        pd.DataFrame(
+            data = np.array([[np.nan, 4., 3., 2., 1., 1., 0., 106.],
+                             [6., np.nan, 4., 3., 2., 1., 0., 107.],
+                             [7., 6., np.nan, 4., 3., 1., 0., 108.],
+                             [8., 7., 6., np.nan, 4., 1., 0., 109.],
+                             [4., 3., 2., 1., 0., 0., 1., 105.],
+                             [5., 4., 3., 2., 1., 0., 1., 106.],
+                             [6., 5., 4., 3., 2., 0., 1., 107.],
+                             [7., 6., 5., 4., 3., 0., 1., 108.],
+                             [8., 7., 6., 5., 4., 0., 1., 109.]]),
+            index   = pd.Index([6, 7, 8, 9, 5, 6, 7, 8, 9]),
+            columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 
+                       'l1', 'l2', 'exog']
+        ),
+        pd.Series(
+            data  = np.array([6, 7, 8, 9, 5, 6, 7, 8, 9]),
+            index = pd.Index([6, 7, 8, 9, 5, 6, 7, 8, 9]),
+            name  = 'y',
+            dtype = float
+        ),
+        {'l1': pd.RangeIndex(start=0, stop=10, step=1),
+         'l2': pd.RangeIndex(start=0, stop=10, step=1)},
+        ['l1', 'l2'],
+        ['exog'],
+        {'exog': exog.dtypes}
+    )
+
+    pd.testing.assert_frame_equal(results[0], expected[0])
+    pd.testing.assert_series_equal(results[1], expected[1])
+    for k in results[2].keys():
+        pd.testing.assert_index_equal(results[2][k], expected[2][k])
+    assert results[3] == expected[3]
+    assert set(results[4]) == set(expected[4])
+    for k in results[5].keys():
+        assert results[5] == expected[5]
+
+
+def test_create_train_X_y_output_series_DataFrame_and_NaNs_in_X_train_drop_nan_True():
+    """
+    Test the output of create_train_X_y when series is a DataFrame and X_train
+    has NaNs and `drop_nan=True`. Also test the MissingValuesWarning message.
+    """
+    series = pd.DataFrame({'l1': pd.Series(np.arange(10, dtype=float)), 
+                           'l2': pd.Series(np.arange(10, dtype=float))})
+    series.loc[3, 'l1'] = np.nan
+    exog = pd.Series(np.arange(100, 110), name='exog', dtype=float)
+    
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5,
+                                              transformer_series=None)
+    
+    warn_msg = re.escape(
+        ("NaNs detected in `X_train`. They have been dropped. If "
+         "you want to keep them, set `drop_nan = False`. Same rows"
+         "have been removed from `y_train` to maintain alignment."),
+    )
+    with pytest.warns(MissingValuesWarning, match = warn_msg):    
+        results = forecaster.create_train_X_y(series=series, exog=exog,
+                                              drop_nan=True)
+
+    expected = (
+        pd.DataFrame(
+            data = np.array([[8., 7., 6., 5., 4., 1., 0., 109.],
+                             [4., 3., 2., 1., 0., 0., 1., 105.],
+                             [5., 4., 3., 2., 1., 0., 1., 106.],
+                             [6., 5., 4., 3., 2., 0., 1., 107.],
+                             [7., 6., 5., 4., 3., 0., 1., 108.],
+                             [8., 7., 6., 5., 4., 0., 1., 109.]]),
+            index   = pd.Index([9, 5, 6, 7, 8, 9]),
+            columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 
+                       'l1', 'l2', 'exog']
+        ),
+        pd.Series(
+            data  = np.array([9, 5, 6, 7, 8, 9]),
+            index = pd.Index([9, 5, 6, 7, 8, 9]),
+            name  = 'y',
+            dtype = float
+        ),
+        {'l1': pd.RangeIndex(start=0, stop=10, step=1),
+         'l2': pd.RangeIndex(start=0, stop=10, step=1)},
+        ['l1', 'l2'],
+        ['exog'],
+        {'exog': exog.dtypes}
+    )
+
+    pd.testing.assert_frame_equal(results[0], expected[0])
+    pd.testing.assert_series_equal(results[1], expected[1])
+    for k in results[2].keys():
+        pd.testing.assert_index_equal(results[2][k], expected[2][k])
+    assert results[3] == expected[3]
+    assert set(results[4]) == set(expected[4])
+    for k in results[5].keys():
+        assert results[5] == expected[5]
+
+
+def test_create_train_X_y_output_series_DataFrame_and_NaNs_in_X_train_drop_nan_False():
+    """
+    Test the output of create_train_X_y when series is a DataFrame and X_train
+    has NaNs and `drop_nan=False`. Also test the MissingValuesWarning message.
+    """
+    series = pd.DataFrame({'l1': pd.Series(np.arange(10, dtype=float)), 
+                           'l2': pd.Series(np.arange(10, dtype=float))})
+    series.loc[3, 'l1'] = np.nan
+    exog = pd.Series(np.arange(100, 110), name='exog', dtype=float)
+    
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5,
+                                              transformer_series=None)
+    
+    warn_msg = re.escape(
+        ("NaNs detected in `X_train`. Some regressor do not allow "
+         "NaN values during training. If you want to drop them, "
+         "set `drop_nan = True`.")
+    )
+    with pytest.warns(MissingValuesWarning, match = warn_msg):    
+        results = forecaster.create_train_X_y(series=series, exog=exog,
+                                              drop_nan=False)
+
+    expected = (
+        pd.DataFrame(
+            data = np.array([[4., np.nan, 2., 1., 0., 1., 0., 105.],
+                             [5., 4., np.nan, 2., 1., 1., 0., 106.],
+                             [6., 5., 4., np.nan, 2., 1., 0., 107.],
+                             [7., 6., 5., 4., np.nan, 1., 0., 108.],
+                             [8., 7., 6., 5., 4., 1., 0., 109.],
+                             [4., 3., 2., 1., 0., 0., 1., 105.],
+                             [5., 4., 3., 2., 1., 0., 1., 106.],
+                             [6., 5., 4., 3., 2., 0., 1., 107.],
+                             [7., 6., 5., 4., 3., 0., 1., 108.],
+                             [8., 7., 6., 5., 4., 0., 1., 109.]]),
+            index   = pd.Index([5, 6, 7, 8, 9, 5, 6, 7, 8, 9]),
+            columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 
+                       'l1', 'l2', 'exog']
+        ),
+        pd.Series(
+            data  = np.array([5, 6, 7, 8, 9, 5, 6, 7, 8, 9]),
+            index = pd.Index([5, 6, 7, 8, 9, 5, 6, 7, 8, 9]),
+            name  = 'y',
+            dtype = float
+        ),
+        {'l1': pd.RangeIndex(start=0, stop=10, step=1),
+         'l2': pd.RangeIndex(start=0, stop=10, step=1)},
+        ['l1', 'l2'],
+        ['exog'],
+        {'exog': exog.dtypes}
+    )
+
+    pd.testing.assert_frame_equal(results[0], expected[0])
+    pd.testing.assert_series_equal(results[1], expected[1])
+    for k in results[2].keys():
+        pd.testing.assert_index_equal(results[2][k], expected[2][k])
+    assert results[3] == expected[3]
+    assert set(results[4]) == set(expected[4])
+    for k in results[5].keys():
+        assert results[5] == expected[5]
+
+
 
 # =============================================================================
 # TODO: Continue from here
@@ -1047,25 +1225,3 @@ def test_create_train_X_y_output_when_transformer_series_and_transformer_exog_wi
 
 
 
-
-
-
-
-# TODO: Complete
-def test_create_train_X_y_MissingValuesWarning_when_exog_has_missing_values():
-    """
-    Test create_train_X_y is issues a MissingValuesWarning when X_train has 
-    missing values and drop_nan.
-    """
-    series = pd.DataFrame({'1': pd.Series(np.arange(4)),  
-                           '2': pd.Series(np.arange(4))})
-    exog = pd.Series([1, 2, 3, np.nan], name='exog')
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=2)
-
-    warn_msg = re.escape(
-        ("NaNs detected in `X_train`. Some regressor do not allow "
-         "NaN values during training. If you want to drop them, "
-         "set `drop_nan = True`.")
-    )
-    with pytest.warns(MissingValuesWarning, match = warn_msg):
-        forecaster.create_train_X_y(series=series, exog=exog, drop_nan=False)

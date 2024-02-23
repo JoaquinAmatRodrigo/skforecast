@@ -492,18 +492,22 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
     ) -> Tuple[pd.DataFrame, pd.Series, dict, list, list, dict, dict]:
         """
         Create training matrices from multiple time series and exogenous
-        variables.
+        variables. See Notes section for more details depending on the type of
+        `series` and `exog`.
         
         Parameters
         ----------
         series : pandas DataFrame, dict
             Training time series.
-        exog : pandas Series, pandas DataFrame, default `None`
-            Exogenous variable/s included as predictor/s. Must have the same
-            number of observations as `series` and their indexes must be aligned.
+        exog : pandas Series, pandas DataFrame, dict, default `None`
+            Exogenous variable/s included as predictor/s.
         drop_nan : bool, default `False`
-            Whether or not to remove missing values before returning `X_train`. 
-            Same rows will be removed from `y_train` to maintain alignment.
+            NaNs detected in `y_train` will be dropped since the target variable 
+            cannot have NaN values. Same rows are dropped from `X_train` to 
+            maintain alignment. Regarding `X_train`:
+
+            - If `True`, drop NaNs in X_train and same rows in y_train.
+            - If `False`, leave NaNs in X_train and warn the user.
         store_last_window : bool, list, default `True`
             Whether or not to store the last window of training data.
 
@@ -532,17 +536,17 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         Notes
         -----
-        - If `series` is a pandas DataFrame and `exog` is a pandas. They must have
-        the same index.
-        - If `series` is a pandas DataFrame and `exog` is a dict. All values in 
-        exog must have the same index as `series`.
-        - If `series` is a dict, `exog` must be a dict and all index in both
-        arugments must be pandas DatetimeIndex with the same frequency. However,
-        equal length is not required.
-
-        # First drop NaNs in y_train (100% sure) and same rows in X_train
-        # If allow_nan is False, drop NaNs in X_train and same rows in y_train and warn the user
-        # If allow_nan is True, leave NaNs in X_train and warn the user
+        - If `series` is a pandas DataFrame and `exog` is a pandas Series or 
+        DataFrame, each exog is duplicated for each series. Exog must have the
+        same index as `series` (type, length and frequency).
+        - If `series` is a pandas DataFrame and `exog` is a dict of pandas Series 
+        or DataFrames. Each key in `exog` must be a column in `series` and the 
+        values are the exog for each series. Exog must have the same index as 
+        `series` (type, length and frequency).
+        - If `series` is a dict of pandas Series, `exog`must be a dict of pandas
+        Series or DataFrames. The keys in `series` and `exog` must be the same.
+        All series and exog must have a pandas DatetimeIndex with the same 
+        frequency.
         
         """
 
@@ -664,8 +668,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             X_train = pd.concat([X_train, X_train_exog], axis=1)
 
         if y_train.isnull().any():
-            y_train = y_train.dropna()
-            X_train = X_train.loc[y_train.index, ]
+            mask = y_train.notna()
+            y_train = y_train.loc[mask]
+            X_train = X_train.iloc[mask.to_numpy(),]
             warnings.warn(
                 ("NaNs detected in `y_train`. They have been dropped since the "
                  "target variable cannot have NaN values. Same rows have been "
@@ -675,8 +680,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         if drop_nan:
             if X_train.isnull().any().any():
-                X_train = X_train.dropna()
-                y_train = y_train.loc[X_train.index]
+                mask = X_train.notna().all(axis=1)
+                X_train = X_train.loc[mask, ]
+                y_train = y_train.iloc[mask.to_numpy()]
                 warnings.warn(
                     ("NaNs detected in `X_train`. They have been dropped. If "
                      "you want to keep them, set `drop_nan = False`. Same rows"
@@ -709,6 +715,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 )
             
             # TODO: Qué hacer si hay NaNs en el last_window?
+            # Dejarlos ya que es la last_window real
+            # TODO: Sacar esto a una función auxiliar en utils?
             last_window = {
                 k: v.iloc[-self.max_lag:].copy()
                 for k, v in series_dict.items()
@@ -722,7 +730,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             series_col_names,
             exog_col_names,
             exog_dtypes,
-            last_window,
+            # last_window,
         )
     
 
@@ -838,22 +846,25 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         store_in_sample_residuals: bool=True
     ) -> None:
         """
-        Training Forecaster.
+        Training Forecaster. See Notes section for more details depending on 
+        the type of `series` and `exog`.
 
         Additional arguments to be passed to the `fit` method of the regressor 
         can be added with the `fit_kwargs` argument when initializing the forecaster.
         
         Parameters
         ----------
-        series : pandas DataFrame
+        series : pandas DataFrame, dict
             Training time series.
-        exog : pandas Series, pandas DataFrame, default `None`
-            Exogenous variable/s included as predictor/s. Must have the same
-            number of observations as `series` and their indexes must be aligned so
-            that series[i] is regressed on exog[i].
+        exog : pandas Series, pandas DataFrame, dict, default `None`
+            Exogenous variable/s included as predictor/s.
         drop_nan : bool, default `False`
-            Whether or not to remove missing values before returning `X_train`. 
-            Same rows will be removed from `y_train` to maintain alignment.
+            NaNs detected in `y_train` will be dropped since the target variable 
+            cannot have NaN values. Same rows are dropped from `X_train` to 
+            maintain alignment. Regarding `X_train`:
+
+            - If `True`, drop NaNs in X_train and same rows in y_train.
+            - If `False`, leave NaNs in X_train and warn the user.
         store_last_window : bool, list, default `True`
             Whether or not to store the last window of training data.
 
@@ -867,6 +878,20 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         Returns
         -------
         None
+
+        Notes
+        -----
+        - If `series` is a pandas DataFrame and `exog` is a pandas Series or 
+        DataFrame, each exog is duplicated for each series. Exog must have the
+        same index as `series` (type, length and frequency).
+        - If `series` is a pandas DataFrame and `exog` is a dict of pandas Series 
+        or DataFrames. Each key in `exog` must be a column in `series` and the 
+        values are the exog for each series. Exog must have the same index as 
+        `series` (type, length and frequency).
+        - If `series` is a dict of pandas Series, `exog`must be a dict of pandas
+        Series or DataFrames. The keys in `series` and `exog` must be the same.
+        All series and exog must have a pandas DatetimeIndex with the same 
+        frequency.
         
         """
         
