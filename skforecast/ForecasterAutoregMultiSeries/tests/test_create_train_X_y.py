@@ -678,13 +678,6 @@ def test_create_train_X_y_output_when_series_and_exog_is_dataframe_datetime_inde
         assert results[5] == expected[5]
 
 
-
-# =============================================================================
-# TODO: Continue from here
-# =============================================================================
-
-
-
 def test_create_train_X_y_output_when_series_10_and_transformer_series_is_StandardScaler():
     """
     Test the output of create_train_X_y when exog is None and transformer_series
@@ -711,27 +704,30 @@ def test_create_train_X_y_output_when_series_10_and_transformer_series_is_Standa
                        [ 0.52223297,  0.17407766, -0.17407766, -0.52223297, -0.87038828, 0.,  1.],
                        [ 0.87038828,  0.52223297,  0.17407766, -0.17407766, -0.52223297, 0.,  1.],
                        [ 1.21854359,  0.87038828,  0.52223297,  0.17407766, -0.17407766, 0.,  1.]]),
-            index   = pd.RangeIndex(start=0, stop=10, step=1),
+            index   = pd.Index([5, 6, 7, 8, 9, 5, 6, 7, 8, 9]),
             columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 'l1', 'l2']
         ),
         pd.Series(
             data  = np.array([0.17407766, 0.52223297, 0.87038828, 1.21854359, 1.5666989 ,
                               0.17407766, 0.52223297, 0.87038828, 1.21854359, 1.5666989 ]),
-            index = pd.RangeIndex(start=0, stop=10, step=1),
+            index = pd.Index([5, 6, 7, 8, 9, 5, 6, 7, 8, 9]),
             name  = 'y',
             dtype = float
         ),
-        pd.RangeIndex(start=0, stop=len(series), step=1),
-        pd.Index(np.array([5, 6, 7, 8, 9, 5, 6, 7, 8, 9]))
+        {'l1': pd.RangeIndex(start=0, stop=10, step=1),
+         'l2': pd.RangeIndex(start=0, stop=10, step=1)},
+        ['l1', 'l2'],
+        None,
+        None
     )
 
-    for i in range(len(expected)):
-        if isinstance(expected[i], pd.DataFrame):
-            pd.testing.assert_frame_equal(results[i], expected[i])
-        elif isinstance(expected[i], pd.Series):
-            pd.testing.assert_series_equal(results[i], expected[i])
-        else:
-            np.testing.assert_array_equal(results[i], expected[i])
+    pd.testing.assert_frame_equal(results[0], expected[0])
+    pd.testing.assert_series_equal(results[1], expected[1])
+    for k in results[2].keys():
+        pd.testing.assert_index_equal(results[2][k], expected[2][k])
+    assert results[3] == expected[3]
+    assert isinstance(results[4], type(None))
+    assert isinstance(results[5], type(None))
 
 
 def test_create_train_X_y_output_when_exog_is_None_and_transformer_exog_is_not_None():
@@ -759,26 +755,29 @@ def test_create_train_X_y_output_when_exog_is_None_and_transformer_exog_is_not_N
                              [3.0, 2.0, 1.0, 0., 1.],
                              [4.0, 3.0, 2.0, 0., 1.],
                              [5.0, 4.0, 3.0, 0., 1.]]),
-            index   = pd.RangeIndex(start=0, stop=8, step=1),
+            index   = pd.Index([3, 4, 5, 6, 3, 4, 5, 6]),
             columns = ['lag_1', 'lag_2', 'lag_3', '1', '2']
         ),
         pd.Series(
             data  = np.array([3., 4., 5., 6., 3., 4., 5., 6.]),
-            index = pd.RangeIndex(start=0, stop=8, step=1),
+            index = pd.Index([3, 4, 5, 6, 3, 4, 5, 6]),
             name  = 'y',
             dtype = float
         ),
-        pd.RangeIndex(start=0, stop=len(series), step=1),
-        pd.Index(np.array([3., 4., 5., 6., 3., 4., 5., 6.]))
+        {'1': pd.RangeIndex(start=0, stop=7, step=1),
+         '2': pd.RangeIndex(start=0, stop=7, step=1)},
+        ['1', '2'],
+        None,
+        None
     )
 
-    for i in range(len(expected)):
-        if isinstance(expected[i], pd.DataFrame):
-            pd.testing.assert_frame_equal(results[i], expected[i])
-        elif isinstance(expected[i], pd.Series):
-            pd.testing.assert_series_equal(results[i], expected[i])
-        else:
-            np.testing.assert_array_equal(results[i], expected[i])
+    pd.testing.assert_frame_equal(results[0], expected[0])
+    pd.testing.assert_series_equal(results[1], expected[1])
+    for k in results[2].keys():
+        pd.testing.assert_index_equal(results[2][k], expected[2][k])
+    assert results[3] == expected[3]
+    assert isinstance(results[4], type(None))
+    assert isinstance(results[5], type(None))
 
 
 @pytest.mark.parametrize("transformer_series", 
@@ -799,11 +798,11 @@ def test_create_train_X_y_output_when_transformer_series_and_transformer_exog(tr
                 index = pd.date_range("1990-01-01", periods=10, freq='D'))
 
     transformer_exog = ColumnTransformer(
-                            [('scale', StandardScaler(), ['exog_1']),
-                             ('onehot', OneHotEncoder(), ['exog_2'])],
-                            remainder = 'passthrough',
-                            verbose_feature_names_out = False
-                        )
+                           [('scale', StandardScaler(), ['exog_1']),
+                            ('onehot', OneHotEncoder(), ['exog_2'])],
+                           remainder = 'passthrough',
+                           verbose_feature_names_out = False
+                       )
 
     forecaster = ForecasterAutoregMultiSeries(
                      regressor          = LinearRegression(),
@@ -816,46 +815,62 @@ def test_create_train_X_y_output_when_transformer_series_and_transformer_exog(tr
     expected = (
         pd.DataFrame(
             data = np.array([
-                       [-0.87038828, -1.21854359, -1.5666989 ,  0.67431975, 1., 0., 1., 0.],
-                       [-0.52223297, -0.87038828, -1.21854359,  0.37482376, 1., 0., 1., 0.],
-                       [-0.17407766, -0.52223297, -0.87038828, -0.04719331, 0., 1., 1., 0.],
-                       [ 0.17407766, -0.17407766, -0.52223297, -0.81862236, 0., 1., 1., 0.],
-                       [ 0.52223297,  0.17407766, -0.17407766,  2.03112731, 0., 1., 1., 0.],
-                       [ 0.87038828,  0.52223297,  0.17407766,  0.22507577, 0., 1., 1., 0.],
-                       [ 1.21854359,  0.87038828,  0.52223297, -0.84584926, 0., 1., 1., 0.],
-                       [-0.87038828, -1.21854359, -1.5666989 ,  0.67431975, 1., 0., 0., 1.],
-                       [-0.52223297, -0.87038828, -1.21854359,  0.37482376, 1., 0., 0., 1.],
-                       [-0.17407766, -0.52223297, -0.87038828, -0.04719331, 0., 1., 0., 1.],
-                       [ 0.17407766, -0.17407766, -0.52223297, -0.81862236, 0., 1., 0., 1.],
-                       [ 0.52223297,  0.17407766, -0.17407766,  2.03112731, 0., 1., 0., 1.],
-                       [ 0.87038828,  0.52223297,  0.17407766,  0.22507577, 0., 1., 0., 1.],
-                       [ 1.21854359,  0.87038828,  0.52223297, -0.84584926, 0., 1., 0., 1.]]),
-            index   = pd.RangeIndex(start=0, stop=14, step=1),
-            columns = ['lag_1', 'lag_2', 'lag_3', 'exog_1',
-                       'exog_2_a', 'exog_2_b', '1', '2']
+                       [-0.87038828, -1.21854359, -1.5666989 , 1., 0.,  0.49084060, 1., 0.],
+                       [-0.52223297, -0.87038828, -1.21854359, 1., 0.,  0.16171381, 1., 0.],
+                       [-0.17407766, -0.52223297, -0.87038828, 1., 0., -0.30205575, 0., 1.],
+                       [ 0.17407766, -0.17407766, -0.52223297, 1., 0., -1.14980658, 0., 1.],
+                       [ 0.52223297,  0.17407766, -0.17407766, 1., 0.,  1.98188469, 0., 1.],
+                       [ 0.87038828,  0.52223297,  0.17407766, 1., 0., -0.00284958, 0., 1.],
+                       [ 1.21854359,  0.87038828,  0.52223297, 1., 0., -1.17972719, 0., 1.],
+                       [-0.87038828, -1.21854359, -1.5666989 , 0., 1.,  0.49084060, 1., 0.],
+                       [-0.52223297, -0.87038828, -1.21854359, 0., 1.,  0.16171381, 1., 0.],
+                       [-0.17407766, -0.52223297, -0.87038828, 0., 1., -0.30205575, 0., 1.],
+                       [ 0.17407766, -0.17407766, -0.52223297, 0., 1., -1.14980658, 0., 1.],
+                       [ 0.52223297,  0.17407766, -0.17407766, 0., 1.,  1.98188469, 0., 1.],
+                       [ 0.87038828,  0.52223297,  0.17407766, 0., 1., -0.00284958, 0., 1.],
+                       [ 1.21854359,  0.87038828,  0.52223297, 0., 1., -1.17972719, 0., 1.]]),
+            index   = pd.Index(
+                          pd.DatetimeIndex(
+                              ['1990-01-04', '1990-01-05', '1990-01-06', '1990-01-07', 
+                               '1990-01-08', '1990-01-09', '1990-01-10',
+                               '1990-01-04', '1990-01-05', '1990-01-06', '1990-01-07',
+                               '1990-01-08', '1990-01-09', '1990-01-10']
+                          )
+                      ),
+            columns = ['lag_1', 'lag_2', 'lag_3', '1', '2', 
+                       'exog_1', 'exog_2_a', 'exog_2_b']
         ),
         pd.Series(
             data  = np.array([-0.52223297, -0.17407766,  0.17407766,  0.52223297,  0.87038828,
                                1.21854359,  1.5666989 , -0.52223297, -0.17407766,  0.17407766,
                                0.52223297,  0.87038828,  1.21854359,  1.5666989 ]),
-            index = pd.RangeIndex(start=0, stop=14, step=1),
+            index   = pd.Index(
+                          pd.DatetimeIndex(
+                              ['1990-01-04', '1990-01-05', '1990-01-06', '1990-01-07', 
+                               '1990-01-08', '1990-01-09', '1990-01-10',
+                               '1990-01-04', '1990-01-05', '1990-01-06', '1990-01-07',
+                               '1990-01-08', '1990-01-09', '1990-01-10']
+                          )
+                      ),
             name  = 'y',
             dtype = float
         ),
-        pd.date_range("1990-01-01", periods=10, freq='D'),
-        pd.Index(pd.DatetimeIndex(['1990-01-04', '1990-01-05', '1990-01-06', '1990-01-07', 
-                                   '1990-01-08', '1990-01-09', '1990-01-10', '1990-01-04',
-                                   '1990-01-05', '1990-01-06', '1990-01-07', '1990-01-08',
-                                   '1990-01-09', '1990-01-10']))
+        {'1': pd.date_range("1990-01-01", periods=10, freq='D'),
+         '2': pd.date_range("1990-01-01", periods=10, freq='D')},
+        ['1', '2'],
+        ['exog_1', 'exog_2'],
+        {'exog_1': exog['exog_1'].dtypes, 
+         'exog_2': exog['exog_2'].dtypes}
     )
 
-    for i in range(len(expected)):
-        if isinstance(expected[i], pd.DataFrame):
-            pd.testing.assert_frame_equal(results[i], expected[i])
-        elif isinstance(expected[i], pd.Series):
-            pd.testing.assert_series_equal(results[i], expected[i])
-        else:
-            np.testing.assert_array_equal(results[i], expected[i])
+    pd.testing.assert_frame_equal(results[0], expected[0])
+    pd.testing.assert_series_equal(results[1], expected[1])
+    for k in results[2].keys():
+        pd.testing.assert_index_equal(results[2][k], expected[2][k])
+    assert results[3] == expected[3]
+    assert set(results[4]) == set(expected[4])
+    for k in results[5].keys():
+        assert results[5] == expected[5]
 
 
 def test_create_train_X_y_output_when_series_different_length_and_exog_is_dataframe_of_float_int_category():
@@ -877,45 +892,56 @@ def test_create_train_X_y_output_when_series_different_length_and_exog_is_datafr
 
     expected = (
         pd.DataFrame(
-            data = np.array([[4., 3., 2., 1., 0., 105., 1005.],
-                             [5., 4., 3., 2., 1., 106., 1006.],
-                             [6., 5., 4., 3., 2., 107., 1007.],
-                             [7., 6., 5., 4., 3., 108., 1008.],
-                             [8., 7., 6., 5., 4., 109., 1009.],
-                             [6., 5., 4., 3., 2., 107., 1007.],
-                             [7., 6., 5., 4., 3., 108., 1008.],
-                             [8., 7., 6., 5., 4., 109., 1009.]],
+            data = np.array([[4., 3., 2., 1., 0., 1., 0., 105., 1005.],
+                             [5., 4., 3., 2., 1., 1., 0., 106., 1006.],
+                             [6., 5., 4., 3., 2., 1., 0., 107., 1007.],
+                             [7., 6., 5., 4., 3., 1., 0., 108., 1008.],
+                             [8., 7., 6., 5., 4., 1., 0., 109., 1009.],
+                             [6., 5., 4., 3., 2., 0., 1., 107., 1007.],
+                             [7., 6., 5., 4., 3., 0., 1., 108., 1008.],
+                             [8., 7., 6., 5., 4., 0., 1., 109., 1009.]],
                              dtype=float),
-            index   = pd.RangeIndex(start=0, stop=8, step=1),
+            index   = pd.Index(
+                          pd.DatetimeIndex(
+                              ['1990-01-06', '1990-01-07', '1990-01-08', '1990-01-09', '1990-01-10', 
+                               '1990-01-08', '1990-01-09', '1990-01-10']
+                          )
+                      ),
             columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 
-                       'exog_1', 'exog_2']
+                       'l1', 'l2', 'exog_1', 'exog_2']
         ).assign(exog_3 = pd.Categorical([105, 106, 107, 108, 109, 
-                                          107, 108, 109], categories=range(100, 110)), 
-                 l1     = [1.]*5 + [0.]*3, 
-                 l2     = [0.]*5 + [1.]*3
+                                          107, 108, 109], categories=range(100, 110))
         ).astype({'exog_1': float, 
                   'exog_2': int}
         ),
         pd.Series(
             data  = np.array([5, 6, 7, 8, 9, 7, 8, 9]),
-            index = pd.RangeIndex(start=0, stop=8, step=1),
+            index   = pd.Index(
+                          pd.DatetimeIndex(
+                              ['1990-01-06', '1990-01-07', '1990-01-08', '1990-01-09', '1990-01-10', 
+                               '1990-01-08', '1990-01-09', '1990-01-10']
+                          )
+                      ),
             name  = 'y',
             dtype = float
         ),
-        pd.date_range("1990-01-01", periods=10, freq='D'),
-        pd.DatetimeIndex(['1990-01-06', '1990-01-07', '1990-01-08', '1990-01-09', '1990-01-10',
-                          '1990-01-08', '1990-01-09', '1990-01-10'],
-                         dtype='datetime64[ns]', freq=None
-        )
+        {'l1': pd.date_range("1990-01-01", periods=10, freq='D'),
+         'l2': pd.date_range("1990-01-01", periods=10, freq='D')},
+        ['l1', 'l2'],
+        ['exog_1', 'exog_2', 'exog_3'],
+        {'exog_1': exog['exog_1'].dtypes, 
+         'exog_2': exog['exog_2'].dtypes,
+         'exog_3': exog['exog_3'].dtypes}
     )
 
-    for i in range(len(expected)):
-        if isinstance(expected[i], pd.DataFrame):
-            pd.testing.assert_frame_equal(results[i], expected[i])
-        elif isinstance(expected[i], pd.Series):
-            pd.testing.assert_series_equal(results[i], expected[i])
-        else:
-            np.testing.assert_array_equal(results[i], expected[i])
+    pd.testing.assert_frame_equal(results[0], expected[0])
+    pd.testing.assert_series_equal(results[1], expected[1])
+    for k in results[2].keys():
+        pd.testing.assert_index_equal(results[2][k], expected[2][k])
+    assert results[3] == expected[3]
+    assert set(results[4]) == set(expected[4])
+    for k in results[5].keys():
+        assert results[5] == expected[5]
 
 
 @pytest.mark.parametrize("transformer_series", 
@@ -956,53 +982,68 @@ def test_create_train_X_y_output_when_transformer_series_and_transformer_exog_wi
     expected = (
         pd.DataFrame(
             data = np.array([
-                       [-0.8703882797784892,  -1.2185435916898848,  -1.5666989036012806,   0.6743197452466179,  0.0, 1.0, 1.0, 0.0, 0.0],
-                       [-0.5222329678670935,  -0.8703882797784892,  -1.2185435916898848,   0.3748237614897084,  1.0, 0.0, 1.0, 0.0, 0.0],
-                       [-0.17407765595569785, -0.5222329678670935,  -0.8703882797784892,  -0.04719330653139179, 0.0, 1.0, 1.0, 0.0, 0.0],
-                       [ 0.17407765595569785, -0.17407765595569785, -0.5222329678670935,  -0.8186223556022197,  1.0, 0.0, 1.0, 0.0, 0.0],
-                       [ 0.5222329678670935,   0.17407765595569785, -0.17407765595569785,  2.0311273080241334,  0.0, 1.0, 1.0, 0.0, 0.0],
-                       [ 0.8703882797784892,   0.5222329678670935,   0.17407765595569785,  0.2250757696112534,  1.0, 0.0, 1.0, 0.0, 0.0],
-                       [ 1.2185435916898848,   0.8703882797784892,   0.5222329678670935,  -0.8458492632164842,  0.0, 1.0, 1.0, 0.0, 0.0],
-                       [-0.6546536707079772,  -1.091089451179962,   -1.5275252316519468,  -0.04719330653139179, 0.0, 1.0, 0.0, 1.0, 0.0],
-                       [-0.2182178902359924,  -0.6546536707079772,  -1.091089451179962,   -0.8186223556022197,  1.0, 0.0, 0.0, 1.0, 0.0],
-                       [ 0.2182178902359924,  -0.2182178902359924,  -0.6546536707079772,   2.0311273080241334,  0.0, 1.0, 0.0, 1.0, 0.0],
-                       [ 0.6546536707079772,   0.2182178902359924,  -0.2182178902359924,   0.2250757696112534,  1.0, 0.0, 0.0, 1.0, 0.0],
-                       [ 1.091089451179962,    0.6546536707079772,   0.2182178902359924,  -0.8458492632164842,  0.0, 1.0, 0.0, 1.0, 0.0],
-                       [-0.29277002188455997, -0.8783100656536799,  -1.4638501094227998,   2.0311273080241334,  0.0, 1.0, 0.0, 0.0, 1.0],
-                       [ 0.29277002188455997, -0.29277002188455997, -0.8783100656536799,   0.2250757696112534,  1.0, 0.0, 0.0, 0.0, 1.0],
-                       [ 0.8783100656536799,   0.29277002188455997, -0.29277002188455997, -0.8458492632164842,  0.0, 1.0, 0.0, 0.0, 1.0]]),
-            index   = pd.RangeIndex(start=0, stop=15, step=1),
-            columns = ['lag_1', 'lag_2', 'lag_3', 'exog_1',
-                       'exog_2_a', 'exog_2_b', 'l1', 'l2', 'l3']
+                       [-0.8703882797784892,  -1.2185435916898848,  -1.5666989036012806,  1.0, 0.0, 0.0,  0.42685655,  0.0, 1.0],
+                       [-0.5222329678670935,  -0.8703882797784892,  -1.2185435916898848,  1.0, 0.0, 0.0,  0.13481233,  1.0, 0.0],
+                       [-0.17407765595569785, -0.5222329678670935,  -0.8703882797784892,  1.0, 0.0, 0.0, -0.27670452,  0.0, 1.0],
+                       [ 0.17407765595569785, -0.17407765595569785, -0.5222329678670935,  1.0, 0.0, 0.0, -1.02893962,  1.0, 0.0],
+                       [ 0.5222329678670935,   0.17407765595569785, -0.17407765595569785, 1.0, 0.0, 0.0,  1.74990535,  0.0, 1.0],
+                       [ 0.8703882797784892,   0.5222329678670935,   0.17407765595569785, 1.0, 0.0, 0.0, -0.01120978,  1.0, 0.0],
+                       [ 1.2185435916898848,   0.8703882797784892,   0.5222329678670935,  1.0, 0.0, 0.0, -1.05548910,  0.0, 1.0],
+                       [-0.6546536707079772,  -1.091089451179962,   -1.5275252316519468,  0.0, 1.0, 0.0, -0.27670452,  0.0, 1.0],
+                       [-0.2182178902359924,  -0.6546536707079772,  -1.091089451179962,   0.0, 1.0, 0.0, -1.02893962,  1.0, 0.0],
+                       [ 0.2182178902359924,  -0.2182178902359924,  -0.6546536707079772,  0.0, 1.0, 0.0,  1.74990535,  0.0, 1.0],
+                       [ 0.6546536707079772,   0.2182178902359924,  -0.2182178902359924,  0.0, 1.0, 0.0, -0.01120978,  1.0, 0.0],
+                       [ 1.091089451179962,    0.6546536707079772,   0.2182178902359924,  0.0, 1.0, 0.0, -1.05548910,  0.0, 1.0],
+                       [-0.29277002188455997, -0.8783100656536799,  -1.4638501094227998,  0.0, 0.0, 1.0,  1.74990535,  0.0, 1.0],
+                       [ 0.29277002188455997, -0.29277002188455997, -0.8783100656536799,  0.0, 0.0, 1.0, -0.01120978,  1.0, 0.0],
+                       [ 0.8783100656536799,   0.29277002188455997, -0.29277002188455997, 0.0, 0.0, 1.0, -1.05548910,  0.0, 1.0]]),
+            index   = pd.Index(
+                          pd.DatetimeIndex(
+                              ['1990-01-04', '1990-01-05', '1990-01-06', '1990-01-07', '1990-01-08', '1990-01-09', '1990-01-10',
+                               '1990-01-06', '1990-01-07', '1990-01-08', '1990-01-09', '1990-01-10',
+                               '1990-01-08', '1990-01-09', '1990-01-10',]
+                          )
+                      ),
+            columns = ['lag_1', 'lag_2', 'lag_3', 'l1', 'l2', 'l3',
+                       'exog_1','exog_2_a', 'exog_2_b']
         ),
         pd.Series(
             data  = np.array([-0.5222329678670935, -0.17407765595569785, 0.17407765595569785, 0.5222329678670935, 0.8703882797784892, 1.2185435916898848, 1.5666989036012806, 
                               -0.2182178902359924, 0.2182178902359924, 0.6546536707079772, 1.091089451179962, 1.5275252316519468, 
                               0.29277002188455997, 0.8783100656536799, 1.4638501094227998]),
-            index = pd.RangeIndex(start=0, stop=15, step=1),
+            index   = pd.Index(
+                          pd.DatetimeIndex(
+                              ['1990-01-04', '1990-01-05', '1990-01-06', '1990-01-07', '1990-01-08', '1990-01-09', '1990-01-10',
+                               '1990-01-06', '1990-01-07', '1990-01-08', '1990-01-09', '1990-01-10',
+                               '1990-01-08', '1990-01-09', '1990-01-10',]
+                          )
+                      ),
             name  = 'y',
             dtype = float
         ),
-        pd.date_range("1990-01-01", periods=10, freq='D'),
-        pd.DatetimeIndex(['1990-01-04', '1990-01-05', '1990-01-06', '1990-01-07', '1990-01-08', '1990-01-09', '1990-01-10',
-                          '1990-01-06', '1990-01-07', '1990-01-08', '1990-01-09', '1990-01-10',
-                          '1990-01-08', '1990-01-09', '1990-01-10'],
-                         dtype='datetime64[ns]', freq=None
-        )
+        {'l1': pd.date_range("1990-01-01", periods=10, freq='D'),
+         'l2': pd.date_range("1990-01-01", periods=10, freq='D'),
+         'l3': pd.date_range("1990-01-01", periods=10, freq='D')},
+        ['l1', 'l2', 'l3'],
+        ['exog_1', 'exog_2'],
+        {'exog_1': exog['exog_1'].dtypes, 
+         'exog_2': exog['exog_2'].dtypes}
     )
 
-    for i in range(len(expected)):
-        if isinstance(expected[i], pd.DataFrame):
-            pd.testing.assert_frame_equal(results[i], expected[i])
-        elif isinstance(expected[i], pd.Series):
-            pd.testing.assert_series_equal(results[i], expected[i])
-        else:
-            np.testing.assert_array_equal(results[i], expected[i])
+    pd.testing.assert_frame_equal(results[0], expected[0])
+    pd.testing.assert_series_equal(results[1], expected[1])
+    for k in results[2].keys():
+        pd.testing.assert_index_equal(results[2][k], expected[2][k])
+    assert results[3] == expected[3]
+    assert set(results[4]) == set(expected[4])
+    for k in results[5].keys():
+        assert results[5] == expected[5]
 
 
 
-
-
+# =============================================================================
+# TODO: Continue from here
+# =============================================================================
 
 
 

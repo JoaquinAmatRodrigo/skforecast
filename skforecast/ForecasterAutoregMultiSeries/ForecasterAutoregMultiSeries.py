@@ -487,8 +487,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self,
         series: Union[pd.DataFrame, dict],
         exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
-        drop_nan: bool=False
-    ) -> Tuple[pd.DataFrame, pd.Series, dict, list, list, dict]:
+        drop_nan: bool=False,
+        store_last_window: Union[bool, list]=True,
+    ) -> Tuple[pd.DataFrame, pd.Series, dict, list, list, dict, dict]:
         """
         Create training matrices from multiple time series and exogenous
         variables.
@@ -503,6 +504,12 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         drop_nan : bool, default `False`
             Whether or not to remove missing values before returning `X_train`. 
             Same rows will be removed from `y_train` to maintain alignment.
+        store_last_window : bool, list, default `True`
+            Whether or not to store the last window of training data.
+
+            - If `True`, last_window is stored for all series. 
+            - If `list`, last_window is stored for the series present in the list.
+            - If `False`, last_window is not stored.
 
         Returns
         -------
@@ -519,6 +526,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         exog_dtypes : dict
             Type of each exogenous variable/s used in training. If `transformer_exog` 
             is used, the dtypes are calculated before the transformation.
+        last_window : dict
+            Last window of training data for each series. It stores the values 
+            needed to predict the next `step` immediately after the training data.
 
         Notes
         -----
@@ -682,9 +692,40 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                      MissingValuesWarning
                 )
 
-        return X_train, y_train, series_indexes, series_col_names, exog_col_names, exog_dtypes
+        # The last time window of training data is stored so that lags needed as
+        # predictors in the first iteration of `predict()` can be calculated.
+        if store_last_window:
 
+            store_series = (
+                series_col_names if store_last_window is True else store_last_window
+            )
+        
+            series_not_in_series_dict = set(store_series) - set(series_col_names)
+            if series_not_in_series_dict:
+                warnings.warn(
+                    (f"{series_not_in_series_dict} not present in `series`. No "
+                     f"last window is stored for them."),
+                    IgnoredArgumentWarning
+                )
+            
+            # TODO: Qué hacer si hay NaNs en el last_window?
+            last_window = {
+                k: v.iloc[-self.max_lag:].copy()
+                for k, v in series_dict.items()
+                if k in store_series
+            }
+
+        return (
+            X_train,
+            y_train,
+            series_indexes,
+            series_col_names,
+            exog_col_names,
+            exog_dtypes,
+            last_window,
+        )
     
+
     def create_sample_weights(
         self,
         series_col_names: list,
@@ -793,6 +834,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         series: pd.DataFrame,
         exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
         drop_nan: bool=False,
+        store_last_window: Union[bool, list]=True,
         store_in_sample_residuals: bool=True
     ) -> None:
         """
@@ -812,6 +854,12 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         drop_nan : bool, default `False`
             Whether or not to remove missing values before returning `X_train`. 
             Same rows will be removed from `y_train` to maintain alignment.
+        store_last_window : bool, list, default `True`
+            Whether or not to store the last window of training data.
+
+            - If `True`, last_window is stored for all series. 
+            - If `list`, last_window is stored for the series present in the list.
+            - If `False`, last_window is not stored.
         store_in_sample_residuals : bool, default `True`
             If `True`, in-sample residuals will be stored in the forecaster object
             after fitting.
@@ -844,7 +892,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             series_col_names,
             exog_col_names,
             exog_dtypes,
-        ) = self.create_train_X_y(series=series, exog=exog, drop_nan=drop_nan)
+            last_window
+        ) = self.create_train_X_y(
+                series=series, exog=exog, drop_nan=drop_nan, store_last_window=store_last_window
+        )
 
         # TODO: review when new encondings are added
         sample_weight = self.create_sample_weights(
@@ -905,13 +956,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         self.in_sample_residuals = in_sample_residuals
         # ======================================================================
-
-        # TODO: review how to store last_window
-        # ======================================================================
-        # The last time window of training data is stored so that lags needed as
-        # predictors in the first iteration of `predict()` can be calculated.
-        self.last_window = series.iloc[-self.max_lag:, ].copy()
-        # ======================================================================
+        if store_last_window:
+            self.last_window = last_window
 
 
     def _recursive_predict(
