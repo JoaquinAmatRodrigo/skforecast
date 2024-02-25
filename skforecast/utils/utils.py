@@ -576,8 +576,7 @@ def check_predict_input(
     exog_type : type, default `None`
         Type of exogenous variable/s used in training.
     exog_col_names : list, default `None`
-        Names of columns of `exog` if `exog` used in training was a pandas
-        DataFrame.
+        Names of the exogenous variables used during training.
     interval : list, default `None`
         Confidence of the prediction interval estimated. Sequence of percentiles
         to compute, which must be between 0 and 100 inclusive. For example, 
@@ -683,12 +682,13 @@ def check_predict_input(
             )
         
         if forecaster_name == 'ForecasterAutoregMultiVariate' and \
-            (series_col_names != list(last_window.columns)):
+            (len(set(series_col_names) - set(last_window.columns)) > 0):
             raise ValueError(
-                (f"`last_window` columns must be the same as `series` column names.\n"
+                (f"`last_window` columns must be the same as the `series` column "
+                 f"names used to create the X_train matrix.\n"
                  f"    `last_window` columns : {list(last_window.columns)}.\n"
                  f"    `series` columns      : {series_col_names}.")
-            )    
+            )
     else:    
         if not isinstance(last_window, pd.Series):
             raise TypeError(

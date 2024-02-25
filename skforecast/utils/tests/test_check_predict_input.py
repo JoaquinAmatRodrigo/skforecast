@@ -341,10 +341,10 @@ def test_check_predict_input_ValueError_when_levels_not_in_last_window_Forecaste
     Check ValueError is raised when levels are no the same as last_window column names.
     """
     err_msg = re.escape(
-                    (f'`last_window` must contain a column(s) named as the level(s) to be predicted.\n'
-                     f'    `levels` : {levels}.\n'
-                     f'    `last_window` columns : {list(last_window.columns)}.')
-                )
+        (f"`last_window` must contain a column(s) named as the level(s) to be predicted.\n"
+         f"    `levels` : {levels}.\n"
+         f"    `last_window` columns : {list(last_window.columns)}.")
+    )
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
             forecaster_name  = 'ForecasterAutoregMultiSeries',
@@ -375,10 +375,11 @@ def test_check_predict_input_ValueError_when_series_col_names_not_last_window_Fo
     last_window = pd.DataFrame({'l1': [1, 2, 3], '4': [1, 2, 3]})
     series_col_names = ['l1', 'l2']
     err_msg = re.escape(
-                    (f'`last_window` columns must be the same as `series` column names.\n'
-                     f'    `last_window` columns : {list(last_window.columns)}.\n'
-                     f'    `series` columns      : {series_col_names}.')
-                )
+        (f"`last_window` columns must be the same as the `series` column "
+         f"names used to create the X_train matrix.\n"
+         f"    `last_window` columns : {list(last_window.columns)}.\n"
+         f"    `series` columns      : {series_col_names}.")
+    )
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
             forecaster_name  = 'ForecasterAutoregMultiVariate',
