@@ -41,6 +41,8 @@ The main changes in this release are:
 
 + Refactor `utils.select_n_jobs_backtesting` to use the forecaster directly instead of `forecaster_name` and `regressor_name`.
 
++ Refactor `utils.initialize_lags`.
+
 + Remove `_backtesting_forecaster_verbose` in model_selection in favor of `_create_backtesting_folds`, (deprecated since 0.8.0).
 
 **Fixed**
