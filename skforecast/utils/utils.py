@@ -61,23 +61,23 @@ def initialize_lags(
     
     """
 
-    if isinstance(lags, int) and lags < 1:
-        raise ValueError("Minimum value of lags allowed is 1.")
-
-    if isinstance(lags, (list, tuple, np.ndarray)):
-        for lag in lags:
-            if not isinstance(lag, (int, np.int64, np.int32)):
-                raise TypeError("All values in `lags` must be integers.")
-        
-    if isinstance(lags, (list, tuple, range, np.ndarray)) and min(lags) < 1:
-        raise ValueError("Minimum value of lags allowed is 1.")
-
     if isinstance(lags, int):
-        lags = np.arange(lags) + 1
-    elif isinstance(lags, (list, tuple, range)):
+        if lags < 1:
+            raise ValueError("Minimum value of lags allowed is 1.")
+        lags = np.arange(1, lags + 1)
+
+    if isinstance(lags, (list, tuple, range)):
         lags = np.array(lags)
-    elif isinstance(lags, np.ndarray):
-        lags = lags
+    
+    if isinstance(lags, np.ndarray):
+        if lags.ndim != 1:
+            raise ValueError("`lags` must be a 1-dimensional array.")
+        if lags.size == 0:
+            raise ValueError("Argument `lags` must contain at least one value.")
+        if not np.issubdtype(lags.dtype, np.integer):
+            raise TypeError("All values in `lags` must be integers.")
+        if np.any(lags < 1):
+            raise ValueError("Minimum value of lags allowed is 1.")
     else:
         if forecaster_name != 'ForecasterAutoregMultiVariate':
             raise TypeError(
@@ -1194,7 +1194,9 @@ def expand_index(
                             stop  = index[-1] + 1 + steps
                         )
         else:
-            raise TypeError("Index must be of type 'RangeIndex' or 'DateIndex'")
+            raise TypeError(
+                "Argument `index` must be a pandas DatetimeIndex or RangeIndex."
+            )
     else:
         new_index = pd.RangeIndex(
                         start = 0,
