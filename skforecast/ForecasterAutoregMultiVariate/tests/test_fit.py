@@ -9,6 +9,38 @@ from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
 
 
+def test_fit_TypeError_when_series_is_not_pandas_DataFrame():
+    """
+    Test TypeError is raised when series is not a pandas DataFrame.
+    """
+    series = np.arange(10)
+
+    forecaster = ForecasterAutoregMultiVariate(LinearRegression(), level='l1', 
+                                               lags=3, steps=2)
+    err_msg = (
+        f"`series` must be a pandas DataFrame. Got {type(series)}."
+    )
+    with pytest.raises(TypeError, match = err_msg):
+        forecaster.fit(series=series)
+
+
+def test_fit_TypeError_when_exog_is_not_pandas_Series_or_DataFrame():
+    """
+    Test TypeError is raised when exog is not a pandas Series or DataFrame.
+    """
+    series = pd.DataFrame({'l1': pd.Series(np.arange(10)), 
+                           'l2': pd.Series(np.arange(10))})
+    exog = np.arange(10)
+
+    forecaster = ForecasterAutoregMultiVariate(LinearRegression(), level='l1', 
+                                               lags=3, steps=2)
+    err_msg = (
+        f"`exog` must be a pandas Series or DataFrame. Got {type(exog)}."
+    )
+    with pytest.raises(TypeError, match = err_msg):
+        forecaster.fit(series=series, exog=exog)
+
+
 @pytest.mark.parametrize('exog', ['l1', ['l1'], ['l1', 'l2']])
 def test_fit_ValueError_when_exog_columns_same_as_series_col_names(exog):
     """

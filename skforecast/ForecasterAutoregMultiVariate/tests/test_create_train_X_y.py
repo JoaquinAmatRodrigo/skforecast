@@ -289,7 +289,7 @@ def test_create_train_X_y_output_when_interspersed_lags_steps_2_and_exog_is_None
                                   [6., 7., 8., 9.])), 
                           ('l2', ([105., 106., 107., 108.], 
                                   [106., 107., 108., 109.]))])
-def test_create_train_X_y_output_when_different_lags_steps_2_and_exog_is_None(level, expected_y_values):
+def test_create_train_X_y_output_when_lags_dict_steps_2_and_exog_is_None(level, expected_y_values):
     """
     Test output of create_train_X_y when regressor is LinearRegression, 
     different lags and steps is 2.
@@ -321,6 +321,57 @@ def test_create_train_X_y_output_when_different_lags_steps_2_and_exog_is_None(le
          2: pd.Series(
                 data  = np.array(expected_y_values[1], dtype=float), 
                 index = pd.RangeIndex(start=6, stop=10, step=1),
+                name  = f'{level}_step_2'
+            )
+        }
+    )
+
+    pd.testing.assert_frame_equal(results[0], expected[0])
+    assert isinstance(results[1], dict)
+    assert all(isinstance(x, pd.Series) for x in results[1].values())
+    assert results[1].keys() == expected[1].keys()
+    for key in expected[1]: 
+        pd.testing.assert_series_equal(results[1][key], expected[1][key]) 
+
+
+@pytest.mark.parametrize("level, expected_y_values", 
+                         [('l1', ([3., 4., 5., 6., 7., 8.], 
+                                  [4., 5., 6., 7., 8., 9.])), 
+                          ('l2', ([103., 104., 105., 106., 107., 108.], 
+                                  [104., 105., 106., 107., 108., 109.]))])
+def test_create_train_X_y_output_when_lags_dict_with_None_steps_2_and_exog_is_None(level, expected_y_values):
+    """
+    Test output of create_train_X_y when regressor is LinearRegression, 
+    lags is a dict with None and steps is 2.
+    """
+    series = pd.DataFrame({'l1': pd.Series(np.arange(10)), 
+                           'l2': pd.Series(np.arange(100, 110))})
+    exog = None
+
+    forecaster = ForecasterAutoregMultiVariate(LinearRegression(), level=level,
+                                               lags={'l1': 3, 'l2': None}, 
+                                               steps=2, transformer_series=None)
+    results = forecaster.create_train_X_y(series=series, exog=exog)
+
+    expected = (
+        pd.DataFrame(
+            data = np.array([[2., 1., 0.],
+                             [3., 2., 1.],
+                             [4., 3., 2.],
+                             [5., 4., 3.],
+                             [6., 5., 4.],
+                             [7., 6., 5.]], dtype=float),
+            index   = pd.RangeIndex(start=4, stop=10, step=1),
+            columns = ['l1_lag_1', 'l1_lag_2', 'l1_lag_3']
+        ),
+        {1: pd.Series(
+                data  = np.array(expected_y_values[0], dtype=float), 
+                index = pd.RangeIndex(start=3, stop=9, step=1),
+                name  = f'{level}_step_1'
+            ),
+         2: pd.Series(
+                data  = np.array(expected_y_values[1], dtype=float), 
+                index = pd.RangeIndex(start=4, stop=10, step=1),
                 name  = f'{level}_step_2'
             )
         }
