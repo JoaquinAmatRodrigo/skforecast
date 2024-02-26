@@ -897,8 +897,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         self.fitted = True
         self.fit_date = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
         self.training_range = preprocess_y(
-                                y = series[self.level],
-                                return_values = False
+                                  y = series[self.level],
+                                  return_values = False
                               )[1][[0, -1]]
         self.index_type = type(X_train.index)
         if isinstance(X_train.index, pd.DatetimeIndex):

@@ -977,7 +977,9 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregMultiVariate_lags
         'lags_1': {'l1': 2, 'l2': 3},
         'lags_2': {'l1': [1, 3], 'l2': 3},
         'lags_3': {'l1': 2, 'l2': [1, 4]},
-        'lags_4': 3
+        'lags_4': {'l1': 2, 'l2': None},
+        'lags_5': {'l1': None, 'l2': 2},
+        'lags_6': 3
     }
     steps = 3
     n_validation = 12
@@ -1000,10 +1002,16 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregMultiVariate_lags
               )
     
     expected_results = pd.DataFrame({
-        'levels': [['l1']]*12,
-        'lags'  : [{'l1': np.array([1, 2]), 'l2': np.array([1, 2, 3])},
+        'levels': [['l1']]*18,
+        'lags'  : [{'l1': np.array([1, 2]), 'l2': None},
+                   {'l1': np.array([1, 2]), 'l2': None},
+                   {'l1': np.array([1, 2]), 'l2': None},
                    {'l1': np.array([1, 2]), 'l2': np.array([1, 2, 3])},
                    {'l1': np.array([1, 2]), 'l2': np.array([1, 2, 3])},
+                   {'l1': np.array([1, 2]), 'l2': np.array([1, 2, 3])},
+                   {'l1': None, 'l2': np.array([1, 2])},
+                   {'l1': None, 'l2': np.array([1, 2])},
+                   {'l1': None, 'l2': np.array([1, 2])},
                    [1, 2, 3],
                    {'l1': np.array([1, 3]), 'l2': np.array([1, 2, 3])},
                    [1, 2, 3],
@@ -1013,18 +1021,27 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregMultiVariate_lags
                    {'l1': np.array([1, 2]), 'l2': np.array([1, 4])},
                    {'l1': np.array([1, 2]), 'l2': np.array([1, 4])},
                    {'l1': np.array([1, 2]), 'l2': np.array([1, 4])}],
-        'lags_label': ['lags_1', 'lags_1', 'lags_1', 'lags_4', 
-                        'lags_2', 'lags_4', 'lags_4', 'lags_2', 
-                        'lags_2', 'lags_3', 'lags_3', 'lags_3'],
-        'params': [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}, {'alpha': 1},
-                   {'alpha': 1}, {'alpha': 0.1}, {'alpha': 0.01}, {'alpha': 0.1},
-                   {'alpha': 0.01}, {'alpha': 1}, {'alpha': 0.1}, {'alpha': 0.01}],
-        'mean_absolute_error': np.array([0.2053202 , 0.20555199, 0.20677802, 0.21353688, 
-                                         0.21443621, 0.21622784, 0.2166998 , 0.21801147, 
-                                         0.21863968, 0.22401526, 0.22830217, 0.22878132]),                                                               
-        'alpha' : np.array([0.01, 0.1 , 1.  , 1.  , 1.  , 0.1 , 0.01, 0.1 , 0.01, 1.  , 0.1 , 0.01])
+        'lags_label': ['lags_4', 'lags_4', 'lags_4', 
+                       'lags_1', 'lags_1', 'lags_1', 
+                       'lags_5', 'lags_5', 'lags_5',
+                       'lags_6', 'lags_2', 'lags_6', 
+                       'lags_6', 'lags_2', 'lags_2', 
+                       'lags_3', 'lags_3', 'lags_3'],
+        'params': [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}, 
+                   {'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}, 
+                   {'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}, 
+                   {'alpha': 1}, {'alpha': 1}, {'alpha': 0.1}, 
+                   {'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 0.01}, 
+                   {'alpha': 1}, {'alpha': 0.1}, {'alpha': 0.01}],
+        'mean_absolute_error': np.array(
+            [0.20155258, 0.20208154, 0.20516149, 0.2053202 , 0.20555199,
+             0.20677802, 0.21005165, 0.21007475, 0.21071924, 0.21353688,
+             0.21443621, 0.21622784, 0.2166998 , 0.21801147, 0.21863968,
+             0.22401526, 0.22830217, 0.22878132]),
+        'alpha' : np.array([0.01, 0.1 , 1.  , 0.01, 0.1 , 1.  , 0.01, 0.1 , 1.  , 1.  , 1.  ,
+       0.1 , 0.01, 0.1 , 0.01, 1.  , 0.1 , 0.01])
         },
-        index = pd.Index([0, 1, 2, 11, 5, 10, 9, 4, 3, 8, 7, 6], dtype='int64')
+        index = pd.Index([9, 10, 11, 0, 1, 2, 12, 13, 14, 17, 5, 16, 15, 4, 3, 8, 7, 6], dtype='int64')
     )
 
     pd.testing.assert_frame_equal(results, expected_results)
