@@ -17,6 +17,8 @@ The main changes in this release are:
 
 + Added `bayesian_search_forecaster_multiseries` function to `model_selection_multiseries` module. This function performs a Bayesian hyperparameter search for the `ForecasterAutoregMultiSeries`, `ForecasterAutoregMultiSeriesCustom`, and `ForecasterAutoregMultiVariate` using `optuna` as the search engine.
 
++ `ForecasterAutoregMultiVariate` allows to include None when lags is a dict so that a series does not participate in the construction of X_train.
+
 + The `output_file` argument has been added to the hyperparameter search functions in the `model_selection`, `model_selection_multiseries` and `model_selection_sarimax` modules to save the results of the hyperparameter search in a tab-separated values (TSV) file.
 
 + Added `save_custom_functions` argument to the `save_forecaster` function in the `utils` module. If `True`, save custom functions used in the forecaster (`fun_predictors` and `weight_func`) as .py files. Custom functions must be available in the environment where the forecaster is loaded.
