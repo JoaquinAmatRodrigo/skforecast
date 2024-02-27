@@ -981,6 +981,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         self.in_sample_residuals = in_sample_residuals
         # ======================================================================
+        
         if store_last_window:
             self.last_window = last_window
 
