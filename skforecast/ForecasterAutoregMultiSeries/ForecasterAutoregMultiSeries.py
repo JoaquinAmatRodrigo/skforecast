@@ -679,6 +679,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             )
 
         if drop_nan:
+            # TODO: review when we have a full exog as NaN
             if X_train.isnull().any().any():
                 mask = X_train.notna().all(axis=1)
                 X_train = X_train.loc[mask, ]
@@ -981,7 +982,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         self.in_sample_residuals = in_sample_residuals
         # ======================================================================
-        
+
         if store_last_window:
             self.last_window = last_window
 

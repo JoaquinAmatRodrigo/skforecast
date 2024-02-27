@@ -1381,7 +1381,7 @@ def test_create_train_X_y_output_series_DataFrame_and_NaNs_in_X_train_drop_nan_F
          "NaN values during training. If you want to drop them, "
          "set `drop_nan = True`.")
     )
-    with pytest.warns(MissingValuesWarning, match = warn_msg):    
+    with pytest.warns(MissingValuesWarning, match = warn_msg):
         results = forecaster.create_train_X_y(series=series, exog=exog,
                                               drop_nan=False)
 
@@ -1422,6 +1422,90 @@ def test_create_train_X_y_output_series_DataFrame_and_NaNs_in_X_train_drop_nan_F
         ['l1', 'l2'],
         ['exog'],
         {'exog': exog.dtypes}
+    )
+
+    pd.testing.assert_frame_equal(results[0], expected[0])
+    pd.testing.assert_series_equal(results[1], expected[1])
+    for k in results[2].keys():
+        pd.testing.assert_index_equal(results[2][k], expected[2][k])
+    assert results[3] == expected[3]
+    assert set(results[4]) == set(expected[4])
+    for k in results[5].keys():
+        assert results[5] == expected[5]
+
+
+def test_create_train_X_y_output_series_dict_and_exog_dict():
+    """
+    Test the output of create_train_X_y when series is a dict and exog is a
+    dict.
+    """
+    series = {
+        'l1': pd.Series(np.arange(10, dtype=float)), 
+        'l2': pd.Series(np.arange(15, 20, dtype=float)),
+        'l3': pd.Series(np.arange(20, 25, dtype=float))
+    }
+    series['l1'].loc[3] = np.nan
+    series['l1'].index = pd.date_range("1990-01-01", periods=10, freq='D')
+    series['l2'].index = pd.date_range("1990-01-05", periods=5, freq='D')
+    series['l3'].index = pd.date_range("1990-01-03", periods=5, freq='D')
+
+    exog = {
+        'l1': pd.Series(np.arange(100, 110), name='exog_1', dtype=float),
+        'l2': None,
+        'l3': pd.DataFrame({'exog_1': np.arange(203, 207, dtype=float),
+                            'exog_2': ['a', 'b', 'a', 'b']})
+    }
+    exog['l1'].index = pd.date_range("1990-01-01", periods=10, freq='D')
+    exog['l3'].index = pd.date_range("1990-01-03", periods=4, freq='D')
+    
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3,
+                                              transformer_series=None)
+    results = forecaster.create_train_X_y(series=series, exog=exog,
+                                          drop_nan=False)
+    
+    expected = (
+        pd.DataFrame(
+            data = np.array([[2., 1., 0., 1., 0., 0., 103., np.nan],
+                             [np.nan, 2., 1., 1., 0., 0., 104., np.nan],
+                             [4., np.nan, 2., 1., 0., 0., 105., np.nan],
+                             [5., 4., np.nan, 1., 0., 0., 106., np.nan],
+                             [6., 5., 4., 1., 0., 0., 107., np.nan],
+                             [7., 6., 5., 1., 0., 0., 108., np.nan],
+                             [8., 7., 6., 1., 0., 0., 109., np.nan],
+                             [17., 16., 15., 0., 1., 0., np.nan, np.nan],
+                             [18., 17., 16., 0., 1., 0., np.nan, np.nan],
+                             [19., 18., 17., 0., 1., 0., np.nan, np.nan],
+                             [22., 21., 20., 0., 0., 1., 206., 'b'],
+                             [23., 22., 21., 0., 0., 1., np.nan, np.nan]]),
+            index   = pd.Index(
+                          pd.DatetimeIndex(
+                              ['1990-01-04', '1990-01-05', '1990-01-06', '1990-01-07', '1990-01-08', '1990-01-09', '1990-01-10',
+                               '1990-01-07', '1990-01-08', '1990-01-09', 
+                               '1990-01-06', '1990-01-07']
+                          )
+                      ),
+            columns = ['lag_1', 'lag_2', 'lag_3', 'l1', 'l2', 'l3', 
+                       'exog_1', 'exog_2']
+        ),
+        pd.Series(
+            data  = np.array([3., 4., 5., 6., 7., 8., 9., 18., 19., 20., 23., 24.]),
+            index = pd.Index(
+                        pd.DatetimeIndex(
+                            ['1990-01-04', '1990-01-05', '1990-01-06', '1990-01-07', '1990-01-08', '1990-01-09', '1990-01-10',
+                             '1990-01-07', '1990-01-08', '1990-01-09', 
+                             '1990-01-06', '1990-01-07']
+                        )
+                    ),
+            name  = 'y',
+            dtype = float
+        ),
+        {'l1': pd.date_range("1990-01-01", periods=10, freq='D'),
+         'l2': pd.date_range("1990-01-05", periods=5, freq='D'),
+         'l3': pd.date_range("1990-01-03", periods=5, freq='D')},
+        ['l1', 'l2', 'l3'],
+        ['exog_1', 'exog_2'],
+        {'exog_1': exog['l1'].dtypes,
+         'exog_2': exog['l3'].dtypes}
     )
 
     pd.testing.assert_frame_equal(results[0], expected[0])

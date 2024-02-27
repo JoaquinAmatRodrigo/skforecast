@@ -2135,10 +2135,10 @@ def check_preprocess_exog_multiseries(
 
         not_valid_exog = [k
                           for k, v in exog.items()
-                          if not isinstance(v, (pd.Series, pd.DataFrame))]
+                          if not isinstance(v, (pd.Series, pd.DataFrame, type(None)))]
         if not_valid_exog:
             raise TypeError(
-                (f"All exog must be a named pandas Series or a pandas DataFrame. "
+                (f"All exog must be a named pandas Series, a pandas DataFrame or None. "
                  f"Review exog: {not_valid_exog}")
             )
         
