@@ -2146,7 +2146,7 @@ def check_preprocess_exog_multiseries(
         exog_dict.update(
             (k, v.copy())
             for k, v in exog.items() 
-            if k in exog_dict
+            if k in exog_dict and v is not None
         )
         
         series_not_in_exog = set(series_col_names) - set(exog.keys())

@@ -1465,8 +1465,7 @@ def test_create_train_X_y_output_series_dict_and_exog_dict():
     
     expected = (
         pd.DataFrame(
-            data = np.array([[2., 1., 0., 1., 0., 0., 103., np.nan],
-                             [np.nan, 2., 1., 1., 0., 0., 104., np.nan],
+            data = np.array([[np.nan, 2., 1., 1., 0., 0., 104., np.nan],
                              [4., np.nan, 2., 1., 0., 0., 105., np.nan],
                              [5., 4., np.nan, 1., 0., 0., 106., np.nan],
                              [6., 5., 4., 1., 0., 0., 107., np.nan],
@@ -1474,25 +1473,25 @@ def test_create_train_X_y_output_series_dict_and_exog_dict():
                              [8., 7., 6., 1., 0., 0., 109., np.nan],
                              [17., 16., 15., 0., 1., 0., np.nan, np.nan],
                              [18., 17., 16., 0., 1., 0., np.nan, np.nan],
-                             [19., 18., 17., 0., 1., 0., np.nan, np.nan],
                              [22., 21., 20., 0., 0., 1., 206., 'b'],
                              [23., 22., 21., 0., 0., 1., np.nan, np.nan]]),
             index   = pd.Index(
                           pd.DatetimeIndex(
-                              ['1990-01-04', '1990-01-05', '1990-01-06', '1990-01-07', '1990-01-08', '1990-01-09', '1990-01-10',
-                               '1990-01-07', '1990-01-08', '1990-01-09', 
+                              ['1990-01-05', '1990-01-06', '1990-01-07', '1990-01-08', '1990-01-09', '1990-01-10',
+                               '1990-01-08', '1990-01-09', 
                                '1990-01-06', '1990-01-07']
                           )
                       ),
             columns = ['lag_1', 'lag_2', 'lag_3', 'l1', 'l2', 'l3', 
                        'exog_1', 'exog_2']
-        ),
+        ).astype({'lag_1': float, 'lag_2': float, 'lag_3': float, 'l1': float, 
+                  'l2': float, 'l3': float, 'exog_1': float, 'exog_2': object}),
         pd.Series(
-            data  = np.array([3., 4., 5., 6., 7., 8., 9., 18., 19., 20., 23., 24.]),
+            data  = np.array([4., 5., 6., 7., 8., 9., 18., 19., 23., 24.]),
             index = pd.Index(
                         pd.DatetimeIndex(
-                            ['1990-01-04', '1990-01-05', '1990-01-06', '1990-01-07', '1990-01-08', '1990-01-09', '1990-01-10',
-                             '1990-01-07', '1990-01-08', '1990-01-09', 
+                            ['1990-01-05', '1990-01-06', '1990-01-07', '1990-01-08', '1990-01-09', '1990-01-10',
+                             '1990-01-08', '1990-01-09', 
                              '1990-01-06', '1990-01-07']
                         )
                     ),
@@ -1507,6 +1506,7 @@ def test_create_train_X_y_output_series_dict_and_exog_dict():
         {'exog_1': exog['l1'].dtypes,
          'exog_2': exog['l3'].dtypes}
     )
+    expected[0].iloc[[0, 1, 2, 3, 4, 5, 6, 7, 9], -1] = np.nan
 
     pd.testing.assert_frame_equal(results[0], expected[0])
     pd.testing.assert_series_equal(results[1], expected[1])
