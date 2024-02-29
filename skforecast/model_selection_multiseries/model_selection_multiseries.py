@@ -1479,7 +1479,7 @@ def _bayesian_search_optuna_multiseries(
         for lags in lags_list:
             if isinstance(lags, dict):
                 for key in lags:
-                    if isinstance(lags[key], type(None)):
+                    if lags[key] is None:
                         lags[key] = None
                     else:
                         lags[key] = initialize_lags(

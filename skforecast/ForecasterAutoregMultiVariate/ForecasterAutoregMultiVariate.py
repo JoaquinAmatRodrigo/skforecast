@@ -165,7 +165,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
     series_col_names : list
         Names of the series used during training.
     series_X_train : list
-        Names of the series that will be added to `X_train` during training.
+        Names of the series added to `X_train` when creating the training 
+        matrices with `create_train_X_y` method.
     X_train_col_names : list
         Names of columns of the matrix created internally for training.
     fit_kwargs : dict
@@ -272,7 +273,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         if isinstance(lags, dict):
             self.lags = {}
             for key in lags:
-                if isinstance(lags[key], type(None)):
+                if lags[key] is None:
                     self.lags[key] = None
                 else:
                     self.lags[key] = initialize_lags(
@@ -451,9 +452,9 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             for each step of the form {step: y_step_[i]}.
             Shape of each series: (len(y) - self.max_lag, )
         series_col_names : list
-            Names of the series used during training.
+            Names of the series included in the training matrices.
         exog_col_names : list
-            Names of the exogenous variables used during training.
+            Names of the exogenous variables included in the training matrices.
         
         """
 
@@ -473,12 +474,12 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
 
         if isinstance(self.lags, dict):
             self.lags_ = self.lags
-            _lags_keys = list(self.lags_.keys())
-            if _lags_keys != series_col_names:
+            lags_keys = list(self.lags_.keys())
+            if lags_keys != series_col_names:
                 raise ValueError(
                     (f"When `lags` parameter is a `dict`, its keys must be the "
                      f"same as `series` column names.\n"
-                     f"  Lags keys        : {_lags_keys}.\n"
+                     f"  Lags keys        : {lags_keys}.\n"
                      f"  `series` columns : {series_col_names}.")
                 )
         else:
@@ -1475,7 +1476,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                       )
 
         return predictions
-    
+
 
     def set_params(
         self, 
