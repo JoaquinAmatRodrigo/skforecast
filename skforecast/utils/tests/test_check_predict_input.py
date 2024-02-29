@@ -80,9 +80,9 @@ def test_check_predict_input_ValueError_when_steps_list_lower_than_1():
     steps = [0, 1, 2]
 
     err_msg = re.escape(
-                  (f"The minimum value of `steps` must be equal to or greater than 1. "
-                   f"Got {min(steps)}.")
-              )
+        (f"The minimum value of `steps` must be equal to or greater than 1. "
+         f"Got {min(steps)}.")
+    )
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
             forecaster_name  = 'ForecasterAutoregDirect',
@@ -114,10 +114,10 @@ def test_check_predict_input_ValueError_when_last_step_greater_than_max_steps():
     max_steps = 10
 
     err_msg = re.escape(
-                (f"The maximum value of `steps` must be less than or equal to "
-                 f"the value of steps defined when initializing the forecaster. "
-                 f"Got {max(steps)}, but the maximum is {max_steps}.")
-              )
+        (f"The maximum value of `steps` must be less than or equal to "
+         f"the value of steps defined when initializing the forecaster. "
+         f"Got {max(steps)}, but the maximum is {max_steps}.")
+    )
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
             forecaster_name  = 'ForecasterAutoregMultiVariate',
@@ -308,6 +308,7 @@ def test_check_predict_input_TypeError_when_last_window_is_not_pandas_DataFrame(
     `ForecasterAutoregMultiSeries` and `ForecasterAutoregMultiVariate`.
     """
     last_window = np.arange(5)
+
     err_msg = re.escape(f"`last_window` must be a pandas DataFrame. Got {type(last_window)}.")
     with pytest.raises(TypeError, match = err_msg):
         check_predict_input(
@@ -395,42 +396,6 @@ def test_check_predict_input_ValueError_when_series_col_names_not_last_window_Fo
             last_window_exog = None,
             exog             = pd.Series(np.arange(10)),
             exog_type        = pd.Series,
-            exog_col_names   = None,
-            interval         = None,
-            alpha            = None,
-            max_steps        = None,
-            levels           = None,
-            series_col_names = series_col_names
-        )
-
-
-def test_check_predict_input_IgnoredArgumentWarning_when_last_window_has_extra_columns_ForecasterAutoregMultiVariate():
-    """
-    Check IgnoredArgumentWarning is warned when last_window has extra columns 
-    not used during fit.
-    """
-    last_window = pd.DataFrame({'l1': [1, 2, 3], 'l2': [1, 2, 3], 'l3': [1, 2, 3]})
-    series_col_names = ['l1', 'l2']
-
-    warn_msg = re.escape(
-        (f"`last_window` contains columns that are not used to create the "
-         f"X_train matrix. These columns will be ignored.\n"
-         f"    `last_window` columns    : ['l1', 'l2', 'l3']\n"
-         f"    `series` columns X train : ['l1', 'l2']"),
-    )
-    with pytest.warns(IgnoredArgumentWarning, match = warn_msg):
-        check_predict_input(
-            forecaster_name  = 'ForecasterAutoregMultiVariate',
-            steps            = 10,
-            fitted           = True,
-            included_exog    = False,
-            index_type       = pd.RangeIndex,
-            index_freq       = None,
-            window_size      = 2,
-            last_window      = last_window,
-            last_window_exog = None,
-            exog             = None,
-            exog_type        = None,
             exog_col_names   = None,
             interval         = None,
             alpha            = None,

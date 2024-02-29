@@ -691,15 +691,7 @@ def check_predict_input(
                      f"    `last_window` columns    : {last_window_cols}\n"
                      f"    `series` columns X train : {series_col_names}")
                 )
-
-            if len(set(last_window_cols) - set(series_col_names)) > 0:
-                warnings.warn(
-                    (f"`last_window` contains columns that are not used to create the "
-                    f"X_train matrix. These columns will be ignored.\n"
-                    f"    `last_window` columns    : {last_window_cols}\n"
-                    f"    `series` columns X train : {series_col_names}"),
-                    IgnoredArgumentWarning
-                )
+    
     else:    
         if not isinstance(last_window, pd.Series):
             raise TypeError(
