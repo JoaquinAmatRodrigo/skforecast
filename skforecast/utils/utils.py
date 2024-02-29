@@ -61,23 +61,23 @@ def initialize_lags(
     
     """
 
-    if isinstance(lags, int) and lags < 1:
-        raise ValueError("Minimum value of lags allowed is 1.")
-
-    if isinstance(lags, (list, tuple, np.ndarray)):
-        for lag in lags:
-            if not isinstance(lag, (int, np.int64, np.int32)):
-                raise TypeError("All values in `lags` must be integers.")
-        
-    if isinstance(lags, (list, tuple, range, np.ndarray)) and min(lags) < 1:
-        raise ValueError("Minimum value of lags allowed is 1.")
-
     if isinstance(lags, int):
-        lags = np.arange(lags) + 1
-    elif isinstance(lags, (list, tuple, range)):
+        if lags < 1:
+            raise ValueError("Minimum value of lags allowed is 1.")
+        lags = np.arange(1, lags + 1)
+
+    if isinstance(lags, (list, tuple, range)):
         lags = np.array(lags)
-    elif isinstance(lags, np.ndarray):
-        lags = lags
+    
+    if isinstance(lags, np.ndarray):
+        if lags.ndim != 1:
+            raise ValueError("`lags` must be a 1-dimensional array.")
+        if lags.size == 0:
+            raise ValueError("Argument `lags` must contain at least one value.")
+        if not np.issubdtype(lags.dtype, np.integer):
+            raise TypeError("All values in `lags` must be integers.")
+        if np.any(lags < 1):
+            raise ValueError("Minimum value of lags allowed is 1.")
     else:
         if forecaster_name != 'ForecasterAutoregMultiVariate':
             raise TypeError(
@@ -576,8 +576,7 @@ def check_predict_input(
     exog_type : type, default `None`
         Type of exogenous variable/s used in training.
     exog_col_names : list, default `None`
-        Names of columns of `exog` if `exog` used in training was a pandas
-        DataFrame.
+        Names of the exogenous variables used during training.
     interval : list, default `None`
         Confidence of the prediction interval estimated. Sequence of percentiles
         to compute, which must be between 0 and 100 inclusive. For example, 
@@ -671,24 +670,28 @@ def check_predict_input(
                 f"`last_window` must be a pandas DataFrame. Got {type(last_window)}."
             )
         
+        last_window_cols = last_window.columns.to_list()
+        
         if forecaster_name in ['ForecasterAutoregMultiSeries', 
                                'ForecasterAutoregMultiSeriesCustom',
                                'ForecasterRnn'] and \
-            len(set(levels) - set(last_window.columns)) != 0:
+            len(set(levels) - set(last_window_cols)) != 0:
             raise ValueError(
                 (f"`last_window` must contain a column(s) named as the level(s) "
                  f"to be predicted.\n"
-                 f"    `levels` : {levels}.\n"
-                 f"    `last_window` columns : {list(last_window.columns)}.")
+                 f"    `levels` : {levels}\n"
+                 f"    `last_window` columns : {last_window_cols}")
             )
         
-        if forecaster_name == 'ForecasterAutoregMultiVariate' and \
-            (series_col_names != list(last_window.columns)):
-            raise ValueError(
-                (f"`last_window` columns must be the same as `series` column names.\n"
-                 f"    `last_window` columns : {list(last_window.columns)}.\n"
-                 f"    `series` columns      : {series_col_names}.")
-            )    
+        if forecaster_name == 'ForecasterAutoregMultiVariate':
+            if len(set(series_col_names) - set(last_window_cols)) > 0:
+                raise ValueError(
+                    (f"`last_window` columns must be the same as the `series` "
+                     f"column names used to create the X_train matrix.\n"
+                     f"    `last_window` columns    : {last_window_cols}\n"
+                     f"    `series` columns X train : {series_col_names}")
+                )
+    
     else:    
         if not isinstance(last_window, pd.Series):
             raise TypeError(
@@ -1194,7 +1197,9 @@ def expand_index(
                             stop  = index[-1] + 1 + steps
                         )
         else:
-            raise TypeError("Index must be of type 'RangeIndex' or 'DateIndex'")
+            raise TypeError(
+                "Argument `index` must be a pandas DatetimeIndex or RangeIndex."
+            )
     else:
         new_index = pd.RangeIndex(
                         start = 0,

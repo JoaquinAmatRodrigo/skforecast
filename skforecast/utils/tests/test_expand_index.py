@@ -1,9 +1,19 @@
 # Unit test expand_index
 # ==============================================================================
 import pytest
-import numpy as np
 import pandas as pd
 from skforecast.utils import expand_index
+
+
+def test_TypeError_expand_index_when_index_is_no_pandas_DatetimeIndex_or_RangeIndex():
+    """
+    Test TypeError is raised when input is not a pandas DatetimeIndex or RangeIndex.
+    """
+    index = pd.Index([0, 1, 2])
+
+    err_msg = "Argument `index` must be a pandas DatetimeIndex or RangeIndex."
+    with pytest.raises(TypeError, match = err_msg):
+        expand_index(index, steps=3)
 
 
 def test_output_expand_index_when_index_is_DatetimeIndex():

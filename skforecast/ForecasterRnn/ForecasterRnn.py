@@ -138,8 +138,7 @@ class ForecasterRnn(ForecasterBase):
         Type of each exogenous variable/s used in training. If `transformer_exog`
         is used, the dtypes are calculated after the transformation.
     exog_col_names : list
-        Names of columns of `exog` if `exog` used in training was a pandas
-        DataFrame.
+        Names of the exogenous variables used during training.
     series_col_names : list
         Names of the series used during training.
     X_train_dim_names : dict

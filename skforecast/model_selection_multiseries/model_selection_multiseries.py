@@ -1464,7 +1464,7 @@ def _bayesian_search_optuna_multiseries(
             metric_dict[m_name].append(m_values[m_name].mean())
     
     if type(forecaster).__name__ not in ['ForecasterAutoregMultiSeriesCustom',
-    'ForecasterAutoregMultiVariate']:
+                                         'ForecasterAutoregMultiVariate']:
         lags_list = [
             initialize_lags(forecaster_name=type(forecaster).__name__, lags = lag)
             for lag in lags_list
@@ -1472,18 +1472,20 @@ def _bayesian_search_optuna_multiseries(
     elif type(forecaster).__name__ == 'ForecasterAutoregMultiSeriesCustom':
         lags_list = [
             f"custom function: {forecaster.fun_predictors.__name__}"
-            for _
-            in lags_list
+            for _ in lags_list
         ]
     else:
         lags_list_initialized = []
         for lags in lags_list:
             if isinstance(lags, dict):
                 for key in lags:
-                    lags[key] = initialize_lags(
-                                    forecaster_name = type(forecaster).__name__,
-                                    lags            = lags[key]
-                                )
+                    if lags[key] is None:
+                        lags[key] = None
+                    else:
+                        lags[key] = initialize_lags(
+                                        forecaster_name = type(forecaster).__name__,
+                                        lags            = lags[key]
+                                    )
             else:
                 lags = initialize_lags(
                            forecaster_name = type(forecaster).__name__,
@@ -1494,9 +1496,9 @@ def _bayesian_search_optuna_multiseries(
         lags_list = lags_list_initialized
 
     results = pd.DataFrame({
-                  'levels'     : [levels]*len(lags_list),
-                  'lags'       : lags_list,
-                  'params'     : params_list,
+                  'levels': [levels]*len(lags_list),
+                  'lags'  : lags_list,
+                  'params': params_list,
                   **metric_dict
               })
 

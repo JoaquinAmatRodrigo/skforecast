@@ -630,7 +630,90 @@ def test_results_output_bayesian_search_optuna_multiseries_ForecasterAutoregMult
     })
 
     pd.testing.assert_frame_equal(results, expected_results)
+
+
+def test_results_output_bayesian_search_optuna_multiseries_ForecasterAutoregMultiVariate_lags_dict():
+    """
+    Test output of _bayesian_search_optuna_multiseries in 
+    ForecasterAutoregMultiVariate when lags is a dict 
+    with mocked (mocked done in skforecast v0.12.0).
+    """
+    forecaster = ForecasterAutoregMultiVariate(
+                     regressor          = Ridge(random_state=123),
+                     level              = 'l1',
+                     lags               = 2,
+                     steps              = 3,
+                     transformer_series = None
+                 )
+    steps = 3
+    n_validation = 12
+
+    def search_space(trial):
+        search_space  = {
+            'alpha': trial.suggest_float('alpha', 1e-2, 1.0),
+            'lags' : trial.suggest_categorical('lags', [{'l1': 2, 'l2': [1, 3]}, 
+                                                        {'l1': None, 'l2': [1, 3]}, 
+                                                        {'l1': [1, 3], 'l2': None}])
+        }
+        
+        return search_space
+
+    results = _bayesian_search_optuna_multiseries(
+                  forecaster         = forecaster,
+                  series             = series,
+                  steps              = steps,
+                  search_space       = search_space,
+                  metric             = 'mean_absolute_error',
+                  refit              = True,
+                  initial_train_size = len(series) - n_validation,
+                  fixed_train_size   = True,
+                  n_trials           = 10,
+                  random_state       = 123,
+                  return_best        = False,
+                  verbose            = False
+              )[0]
     
+    expected_results = pd.DataFrame(
+        np.array([
+        [list(['l1']), {'l1': np.array([1, 2]), 'l2': np.array([1, 3])},
+            {'alpha': 0.30077690592494105}, 0.20844762947854312,
+            0.30077690592494105],
+        [list(['l1']), {'l1': np.array([1, 2]), 'l2': np.array([1, 3])},
+            {'alpha': 0.4365541356963474}, 0.20880336411565956,
+            0.4365541356963474],
+        [list(['l1']), {'l1': np.array([1, 2]), 'l2': np.array([1, 3])},
+            {'alpha': 0.6380569489658079}, 0.2092371153650312,
+            0.6380569489658079],
+        [list(['l1']), {'l1': None, 'l2': np.array([1, 3])},
+            {'alpha': 0.7252189487445193}, 0.21685083725475654,
+            0.7252189487445193],
+        [list(['l1']), {'l1': None, 'l2': np.array([1, 3])},
+            {'alpha': 0.7222742800877074}, 0.2168551702095223,
+            0.7222742800877074],
+        [list(['l1']), {'l1': None, 'l2': np.array([1, 3])},
+            {'alpha': 0.43208779389318014}, 0.21733651515831423,
+            0.43208779389318014],
+        [list(['l1']), {'l1': np.array([1, 3]), 'l2': None},
+            {'alpha': 0.6995044937418831}, 0.22066810286127028,
+            0.6995044937418831],
+        [list(['l1']), {'l1': np.array([1, 3]), 'l2': None},
+            {'alpha': 0.48612258246951734}, 0.22159811332626014,
+            0.48612258246951734],
+        [list(['l1']), {'l1': np.array([1, 3]), 'l2': None},
+            {'alpha': 0.4441865222328282}, 0.2218030808436934,
+            0.4441865222328282],
+        [list(['l1']), {'l1': np.array([1, 3]), 'l2': None},
+            {'alpha': 0.190666813148965}, 0.22324045507529866,
+            0.190666813148965]], dtype=object),
+        columns=['levels', 'lags', 'params', 'mean_absolute_error', 'alpha'],
+        index=pd.Index([7, 8, 5, 6, 1, 9, 0, 2, 3, 4], dtype='int64')
+    ).astype({
+        'mean_absolute_error': float,
+        'alpha': float
+    })
+
+    pd.testing.assert_frame_equal(results, expected_results)
+
 
 def test_evaluate_bayesian_search_optuna_multiseries_when_return_best_ForecasterAutoregMultiSeries():
     """

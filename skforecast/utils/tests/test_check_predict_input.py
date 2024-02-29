@@ -10,6 +10,7 @@ from skforecast.utils import check_exog
 from skforecast.utils import preprocess_exog
 from skforecast.utils import preprocess_last_window
 from skforecast.exceptions import MissingValuesExogWarning
+from skforecast.exceptions import IgnoredArgumentWarning
 
 
 def test_check_predict_input_NotFittedError_when_fitted_is_False():
@@ -79,9 +80,9 @@ def test_check_predict_input_ValueError_when_steps_list_lower_than_1():
     steps = [0, 1, 2]
 
     err_msg = re.escape(
-                  (f"The minimum value of `steps` must be equal to or greater than 1. "
-                   f"Got {min(steps)}.")
-              )
+        (f"The minimum value of `steps` must be equal to or greater than 1. "
+         f"Got {min(steps)}.")
+    )
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
             forecaster_name  = 'ForecasterAutoregDirect',
@@ -113,10 +114,10 @@ def test_check_predict_input_ValueError_when_last_step_greater_than_max_steps():
     max_steps = 10
 
     err_msg = re.escape(
-                (f"The maximum value of `steps` must be less than or equal to "
-                 f"the value of steps defined when initializing the forecaster. "
-                 f"Got {max(steps)}, but the maximum is {max_steps}.")
-              )
+        (f"The maximum value of `steps` must be less than or equal to "
+         f"the value of steps defined when initializing the forecaster. "
+         f"Got {max(steps)}, but the maximum is {max_steps}.")
+    )
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
             forecaster_name  = 'ForecasterAutoregMultiVariate',
@@ -307,7 +308,8 @@ def test_check_predict_input_TypeError_when_last_window_is_not_pandas_DataFrame(
     `ForecasterAutoregMultiSeries` and `ForecasterAutoregMultiVariate`.
     """
     last_window = np.arange(5)
-    err_msg = re.escape(f'`last_window` must be a pandas DataFrame. Got {type(last_window)}.')
+
+    err_msg = re.escape(f"`last_window` must be a pandas DataFrame. Got {type(last_window)}.")
     with pytest.raises(TypeError, match = err_msg):
         check_predict_input(
             forecaster_name  = forecaster_name,
@@ -341,10 +343,10 @@ def test_check_predict_input_ValueError_when_levels_not_in_last_window_Forecaste
     Check ValueError is raised when levels are no the same as last_window column names.
     """
     err_msg = re.escape(
-                    (f'`last_window` must contain a column(s) named as the level(s) to be predicted.\n'
-                     f'    `levels` : {levels}.\n'
-                     f'    `last_window` columns : {list(last_window.columns)}.')
-                )
+        (f"`last_window` must contain a column(s) named as the level(s) to be predicted.\n"
+         f"    `levels` : {levels}\n"
+         f"    `last_window` columns : {list(last_window.columns)}")
+    )
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
             forecaster_name  = 'ForecasterAutoregMultiSeries',
@@ -374,11 +376,13 @@ def test_check_predict_input_ValueError_when_series_col_names_not_last_window_Fo
     """
     last_window = pd.DataFrame({'l1': [1, 2, 3], '4': [1, 2, 3]})
     series_col_names = ['l1', 'l2']
+
     err_msg = re.escape(
-                    (f'`last_window` columns must be the same as `series` column names.\n'
-                     f'    `last_window` columns : {list(last_window.columns)}.\n'
-                     f'    `series` columns      : {series_col_names}.')
-                )
+        (f"`last_window` columns must be the same as the `series` "
+         f"column names used to create the X_train matrix.\n"
+         f"    `last_window` columns    : ['l1', '4']\n"
+         f"    `series` columns X train : ['l1', 'l2']")
+    )
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
             forecaster_name  = 'ForecasterAutoregMultiVariate',
