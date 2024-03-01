@@ -611,6 +611,12 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         # TODO: Explore other encodings
         # ======================================================================
+        encoders = {
+            'None': None,
+            'onehot': OnehotEncoder(categories='auto', sparse_output=False, drop=None, dtype=int),
+            'ordinal': OrdinalEncoder(categories='auto', sparse_output=False, drop=None, dtype=int)
+        }
+
         X_train = pd.get_dummies(X_train, columns=['_level_skforecast'], dtype=float)
         X_train.columns = X_train.columns.str.replace('_level_skforecast', '')
         # ======================================================================
