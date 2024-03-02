@@ -157,7 +157,7 @@ def test_output_get_feature_importances_when_regressor_is_LinearRegression_lags_
 
 def test_output_get_feature_importances_when_regressor_is_LinearRegression_lags_3_step_2_exog_included():
     """
-    Test output of get_feature_importances for step 1, when regressor is 
+    Test output of get_feature_importances for step 2, when regressor is 
     LinearRegression with lags=3 and exog.
     """
     forecaster = ForecasterAutoregMultiVariate(
@@ -255,5 +255,53 @@ def test_output_get_feature_importances_when_pipeline_RandomForestRegressor():
                    'importance': np.array([0.17522374, 0.17408016, 0.17918514, 
                                            0.13738555, 0.17994996, 0.15417544])
                }).sort_values(by='importance', ascending=False)
+    
+    pd.testing.assert_frame_equal(results, expected)
+
+
+def test_output_get_feature_importances_when_regressor_is_LinearRegression_lags_dict_step_2_exog_included():
+    """
+    Test output of get_feature_importances for step 2, when regressor is 
+    LinearRegression with lags as dict and exog.
+    """
+    forecaster = ForecasterAutoregMultiVariate(
+                     regressor = LinearRegression(),
+                     level     = 'l1',
+                     lags      = {'l1': None, 'l2': 3},
+                     steps     = 2
+                 )
+    forecaster.fit(series=series, exog=exog)
+
+    results = forecaster.get_feature_importances(step=2, sort_importance=False)
+    expected = pd.DataFrame({
+        'feature': ['l2_lag_1', 'l2_lag_2', 'l2_lag_3', 
+                    'exog_1', 'exog_2'],
+        'importance': np.array([0.05128205128205132, 0.05128205128205135, 0.05128205128205134,
+                                0.14729647811635985, 0.14729647811635985])
+    })
+    
+    pd.testing.assert_frame_equal(results, expected)
+
+
+def test_output_get_feature_importances_when_regressor_is_LinearRegression_lags_dict_None_step_2_exog_included():
+    """
+    Test output of get_feature_importances for step 2, when regressor is 
+    LinearRegression with lags as dict with None and exog.
+    """
+    forecaster = ForecasterAutoregMultiVariate(
+                     regressor = LinearRegression(),
+                     level     = 'l1',
+                     lags      = {'l1': 3, 'l2': None},
+                     steps     = 2
+                 )
+    forecaster.fit(series=series, exog=exog)
+
+    results = forecaster.get_feature_importances(step=2, sort_importance=False)
+    expected = pd.DataFrame({
+        'feature': ['l1_lag_1', 'l1_lag_2', 'l1_lag_3', 
+                    'exog_1', 'exog_2'],
+        'importance': np.array([0.05128205128205132, 0.05128205128205135, 0.05128205128205134,
+                                0.14729647811635985, 0.14729647811635985])
+    })
     
     pd.testing.assert_frame_equal(results, expected)

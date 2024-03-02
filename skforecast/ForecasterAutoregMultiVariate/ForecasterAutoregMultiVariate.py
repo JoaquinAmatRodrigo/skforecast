@@ -1730,8 +1730,10 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             estimator = self.regressors_[step][-1]
         else:
             estimator = self.regressors_[step]
-        
-        len_columns_lags = len(list(chain(*self.lags_.values())))
+                
+        len_columns_lags = len(list(
+            chain(*[v for v in self.lags_.values() if v is not None])
+        ))
         idx_columns_lags = np.arange(len_columns_lags)
         if self.included_exog:
             idx_columns_exog = np.flatnonzero(
