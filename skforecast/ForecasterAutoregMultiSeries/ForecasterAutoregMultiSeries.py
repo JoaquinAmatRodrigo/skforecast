@@ -15,6 +15,9 @@ import sklearn
 import sklearn.pipeline
 from sklearn.base import clone
 from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import OrdinalEncoder
+from sklearn.compose import ColumnTransformer
 from copy import copy, deepcopy
 import inspect
 
@@ -58,6 +61,12 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         - `int`: include lags from 1 to `lags` (included).
         - `list`, `1d numpy ndarray` or `range`: include only lags present in 
         `lags`, all elements must be int.
+    encoding : str, default `ordinal`
+        Encoding used to identify the different series. Allowed values: `ordinal`,
+        `onehot` and None. If `None`, no encoding is used. If `onehot`, a binary
+        column is created for each series. If `ordinal`, a single column is created
+        with integer values from 0 to n_series - 1.
+        **New in version 0.12.0**
     transformer_series : transformer (preprocessor), dict, default `sklearn.preprocessing.StandardScaler`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API with methods: fit, transform, fit_transform and 
@@ -109,6 +118,12 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         An instance of a regressor or pipeline compatible with the scikit-learn API.
     lags : numpy ndarray
         Lags used as predictors.
+    encoding : str, default `ordinal`
+        Encoding used to identify the different series. Allowed values: `ordinal`,
+        `onehot` and None. If `None`, no encoding is used. If `onehot`, a binary
+        column is created for each series. If `ordinal`, a single column is created
+        with integer values from 0 to n_series - 1.
+        **New in version 0.12.0**
     transformer_series : transformer (preprocessor), dict
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API with methods: fit, transform, fit_transform and 
@@ -159,6 +174,11 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
     series_weights_ : dict
         Weights associated with each series.It is created as a clone of `series_weights`
         and is used internally to avoid overwriting.
+    encoder : sklearn.preprocessing
+        Sklearn preprocessing encoder used to encode the series.
+        **New in version 0.12.0**
+    encoding_mapping : dict
+        Mapping of the encoding used to identify the different series.
     max_lag : int
         Maximum value of lag included in `lags`.
     window_size : int
@@ -231,6 +251,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self,
         regressor: object,
         lags: Union[int, np.ndarray, list],
+        encoding : str='ordinal',
         transformer_series: Optional[Union[object, dict]]=StandardScaler(),
         transformer_exog: Optional[object]=None,
         weight_func: Optional[Union[Callable, dict]]=None,
@@ -244,6 +265,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.transformer_series      = transformer_series
         self.transformer_series_     = None
         self.transformer_exog        = transformer_exog
+        self.encoding                = encoding
+        self.encoder                 = None
+        self.encoding_mapping        = {}
         self.weight_func             = weight_func
         self.weight_func_            = None
         self.source_code_weight_func = None
@@ -295,6 +319,25 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                               regressor  = regressor,
                               fit_kwargs = fit_kwargs
                           )
+
+        if encoding is not None:
+            encoders = {
+                'onehot': OneHotEncoder(
+                    categories='auto',
+                    sparse_output=False,
+                    drop=None,
+                    dtype=int
+                ).set_output(transform='pandas'),
+                'ordinal': OrdinalEncoder(
+                    categories='auto',
+                    dtype=int
+                ).set_output(transform='pandas'),
+                'ordinal_category': OrdinalEncoder(
+                    categories='auto',
+                    dtype=int
+                ).set_output(transform='pandas'),
+            }
+            self.encoder = encoders.get(encoding, None)
 
 
     def __repr__(
@@ -611,14 +654,40 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         # TODO: Explore other encodings
         # ======================================================================
-        encoders = {
-            'None': None,
-            'onehot': OnehotEncoder(categories='auto', sparse_output=False, drop=None, dtype=int),
-            'ordinal': OrdinalEncoder(categories='auto', sparse_output=False, drop=None, dtype=int)
-        }
+        if self.encoder is not None:
+            # transformer = ColumnTransformer(
+            #                 transformers=[
+            #                     (self.encoding, self.encoder, ['_level_skforecast'])
+            #                 ], remainder='passthrough',
+            #                 verbose_feature_names_out=False
+            #              ).set_output(transform='pandas')
+            # X_train = transformer.fit_transform(X_train)
+            # self.encoding_mapping = {}
+            # for i, code in enumerate(transformer.named_transformers_[self.encoding].categories_[0]):
+            #     self.encoding_mapping[code] = i
 
-        X_train = pd.get_dummies(X_train, columns=['_level_skforecast'], dtype=float)
-        X_train.columns = X_train.columns.str.replace('_level_skforecast', '')
+            encoded_columns = self.encoder.fit_transform(X_train[['_level_skforecast']])
+            X_train = pd.concat([
+                X_train.drop(columns='_level_skforecast'),
+                encoded_columns
+            ], axis=1)
+
+            for i, code in enumerate(self.encoder.categories_[0]):
+                self.encoding_mapping[code] = i
+
+            if self.encoding == 'onehot':
+                X_train.columns = X_train.columns.str.replace('_level_skforecast_', '')
+            if self.encoding == 'ordinal_category':
+                X_train['_level_skforecast'] = X_train['_level_skforecast'].astype('category')
+            del encoded_columns
+        else:
+            X_train['_level_skforecast'] = X_train['_level_skforecast'].astype('category')
+            self.encoding_mapping = (
+                dict(zip(X_train["_level_skforecast"], X_train["_level_skforecast"].cat.codes))
+            )
+    
+
+        print(X_train.dtypes)
         # ======================================================================
 
         exog_dtypes = None
@@ -881,7 +950,13 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             residuals = y_train - self.regressor.predict(X_train)
 
             for col in series_col_names:
-                in_sample_residuals[col] = residuals.loc[X_train[col] == 1.].to_numpy()
+                if self.encoding == 'onehot':
+                    in_sample_residuals[col] = residuals.loc[X_train[col] == 1.].to_numpy()
+                else:
+                    encoded_value = self.encoding_mapping[col]
+                    in_sample_residuals[col] = (
+                        residuals.loc[X_train['_level_skforecast'] == encoded_value].to_numpy()
+                    )
                 if len(in_sample_residuals[col]) > 1000:
                     # Only up to 1000 residuals are stored
                     rng = np.random.default_rng(seed=123)
@@ -942,10 +1017,17 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             if exog is not None:
                 X = np.column_stack((X, exog[i, ].reshape(1, -1)))
             
-            levels_dummies = np.zeros(shape=(1, len(self.series_col_names)), dtype=float)
-            levels_dummies[0][self.series_col_names.index(level)] = 1.
-
-            X = np.column_stack((X, levels_dummies.reshape(1, -1)))
+            if self.encoding == 'onehot':
+                levels_dummies = np.zeros(shape=(1, len(self.series_col_names)), dtype=float)
+                levels_dummies[0][self.series_col_names.index(level)] = 1.
+                X = np.column_stack((X, levels_dummies.reshape(1, -1)))
+            else:
+                print(self.encoding_mapping[level])
+                X = np.column_stack((X, np.array([self.encoding_mapping[level]])))
+            # else:
+            #     # Hay que poner el código de la categoria, NO SE SI ESTO ES BUENA IDEA!
+            #     X = np.column_stack((X, np.array([level])))
+                print(X)
 
             with warnings.catch_warnings():
                 # Suppress scikit-learn warning: "X does not have valid feature names,
