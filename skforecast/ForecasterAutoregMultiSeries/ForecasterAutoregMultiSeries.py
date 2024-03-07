@@ -61,11 +61,13 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         - `int`: include lags from 1 to `lags` (included).
         - `list`, `1d numpy ndarray` or `range`: include only lags present in 
         `lags`, all elements must be int.
-    encoding : str, default `ordinal`
+    encoding : str, default `ordinal_categorical`
         Encoding used to identify the different series. Allowed values: `ordinal`,
-        `onehot` and None. If `None`, no encoding is used. If `onehot`, a binary
-        column is created for each series. If `ordinal`, a single column is created
-        with integer values from 0 to n_series - 1.
+        `ordinal_categorical` and `onehot`. If `ordinal`, a single column is created
+        with integer values from 0 to n_series - 1. If `ordinal_categorical`, a single
+        column is created with integer values from 0 to n_series - 1 and the column
+        is transformed into pandas.category dtype so that it can be used as a
+        categorical variable. If `onehot`, a binary column is created for each series.
         **New in version 0.12.0**
     transformer_series : transformer (preprocessor), dict, default `sklearn.preprocessing.StandardScaler`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
@@ -118,11 +120,13 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         An instance of a regressor or pipeline compatible with the scikit-learn API.
     lags : numpy ndarray
         Lags used as predictors.
-    encoding : str, default `ordinal`
+    encoding : str, default `ordinal_categorical`
         Encoding used to identify the different series. Allowed values: `ordinal`,
-        `onehot` and None. If `None`, no encoding is used. If `onehot`, a binary
-        column is created for each series. If `ordinal`, a single column is created
-        with integer values from 0 to n_series - 1.
+        `ordinal_categorical` and `onehot`. If `ordinal`, a single column is created
+        with integer values from 0 to n_series - 1. If `ordinal_categorical`, a single
+        column is created with integer values from 0 to n_series - 1 and the column
+        is transformed into pandas.category dtype so that it can be used as a
+        categorical variable. If `onehot`, a binary column is created for each series.
         **New in version 0.12.0**
     transformer_series : transformer (preprocessor), dict
         An instance of a transformer (preprocessor) compatible with the scikit-learn
@@ -320,24 +324,24 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                               fit_kwargs = fit_kwargs
                           )
 
-        if encoding is not None:
-            encoders = {
-                'onehot': OneHotEncoder(
-                    categories='auto',
-                    sparse_output=False,
-                    drop=None,
-                    dtype=int
-                ).set_output(transform='pandas'),
-                'ordinal': OrdinalEncoder(
-                    categories='auto',
-                    dtype=int
-                ).set_output(transform='pandas'),
-                'ordinal_category': OrdinalEncoder(
-                    categories='auto',
-                    dtype=int
-                ).set_output(transform='pandas'),
-            }
-            self.encoder = encoders.get(encoding, None)
+        if self.encoding not in ['ordinal', 'ordinal_category', 'onehot']:
+            raise ValueError(
+                (f"Argument `encoding` must be one of the following values: 'ordinal', "
+                 f"'ordinal_category', 'onehot'. Got {self.encoding}.")
+            )
+
+        if self.encoding == 'onehot':
+            self.encoder = OneHotEncoder(
+                                categories='auto',
+                                sparse_output=False,
+                                drop=None,
+                                dtype=int
+                            ).set_output(transform='pandas')
+        else:
+            self.encoder = OrdinalEncoder(
+                                categories='auto',
+                                dtype=int
+                           ).set_output(transform='pandas')
 
 
     def __repr__(
@@ -362,6 +366,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             f"Lags: {self.lags} \n"
             f"Transformer for series: {self.transformer_series} \n"
             f"Transformer for exog: {self.transformer_exog} \n"
+            f"Series encoding: {self.encoding} \n"
             f"Window size: {self.window_size} \n"
             f"Series levels (names): {self.series_col_names} \n"
             f"Series weights: {self.series_weights} \n"
@@ -654,40 +659,20 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         # TODO: Explore other encodings
         # ======================================================================
-        if self.encoder is not None:
-            # transformer = ColumnTransformer(
-            #                 transformers=[
-            #                     (self.encoding, self.encoder, ['_level_skforecast'])
-            #                 ], remainder='passthrough',
-            #                 verbose_feature_names_out=False
-            #              ).set_output(transform='pandas')
-            # X_train = transformer.fit_transform(X_train)
-            # self.encoding_mapping = {}
-            # for i, code in enumerate(transformer.named_transformers_[self.encoding].categories_[0]):
-            #     self.encoding_mapping[code] = i
+        encoded_values = self.encoder.fit_transform(X_train[['_level_skforecast']])
+        X_train = pd.concat([
+            X_train.drop(columns='_level_skforecast'),
+            encoded_values
+        ], axis=1)
 
-            encoded_columns = self.encoder.fit_transform(X_train[['_level_skforecast']])
-            X_train = pd.concat([
-                X_train.drop(columns='_level_skforecast'),
-                encoded_columns
-            ], axis=1)
+        for i, code in enumerate(self.encoder.categories_[0]):
+            self.encoding_mapping[code] = i
 
-            for i, code in enumerate(self.encoder.categories_[0]):
-                self.encoding_mapping[code] = i
-
-            if self.encoding == 'onehot':
-                X_train.columns = X_train.columns.str.replace('_level_skforecast_', '')
-            if self.encoding == 'ordinal_category':
-                X_train['_level_skforecast'] = X_train['_level_skforecast'].astype('category')
-            del encoded_columns
-        else:
+        if self.encoding == 'onehot':
+            X_train.columns = X_train.columns.str.replace('_level_skforecast_', '')
+        if self.encoding == 'ordinal_category':
             X_train['_level_skforecast'] = X_train['_level_skforecast'].astype('category')
-            self.encoding_mapping = (
-                dict(zip(X_train["_level_skforecast"], X_train["_level_skforecast"].cat.codes))
-            )
-    
-
-        print(X_train.dtypes)
+        del encoded_values
         # ======================================================================
 
         exog_dtypes = None
@@ -818,7 +803,12 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 
             weights_samples = []
             for key in self.weight_func_.keys():
-                idx = X_train[X_train[key] == 1.0].index
+                if self.encoding == "onehot":
+                    idx = X_train.loc[X_train[key] == 1.0, :].index
+                else:
+                    idx = X_train.loc[
+                        X_train["_level_skforecast"] == self.encoding_mapping[key], :
+                    ].index
                 weights_samples.append(self.weight_func_[key](idx))
             weights_samples = np.concatenate(weights_samples)
 
@@ -1011,6 +1001,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         """
         
         predictions = np.full(shape=steps, fill_value=np.nan)
+        level_encoded = np.array([self.encoding_mapping[level]], dtype='float64')
 
         for i in range(steps):
             X = last_window[-self.lags].reshape(1, -1)
@@ -1022,13 +1013,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 levels_dummies[0][self.series_col_names.index(level)] = 1.
                 X = np.column_stack((X, levels_dummies.reshape(1, -1)))
             else:
-                print(self.encoding_mapping[level])
-                X = np.column_stack((X, np.array([self.encoding_mapping[level]])))
-            # else:
-            #     # Hay que poner el código de la categoria, NO SE SI ESTO ES BUENA IDEA!
-            #     X = np.column_stack((X, np.array([level])))
-                print(X)
-
+                X = np.column_stack((X, level_encoded))
+    
             with warnings.catch_warnings():
                 # Suppress scikit-learn warning: "X does not have valid feature names,
                 # but NoOpTransformer was fitted with feature names".
@@ -1039,7 +1025,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             # Update `last_window` values. The first position is discarded and 
             # the new prediction is added at the end.
             last_window = np.append(last_window[1:], prediction)
-
         return predictions
 
             
