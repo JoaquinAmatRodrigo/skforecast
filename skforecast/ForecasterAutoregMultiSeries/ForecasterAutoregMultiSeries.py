@@ -17,7 +17,6 @@ from sklearn.base import clone
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import OrdinalEncoder
-from sklearn.compose import ColumnTransformer
 from copy import copy, deepcopy
 import inspect
 
@@ -255,7 +254,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self,
         regressor: object,
         lags: Union[int, np.ndarray, list],
-        encoding : str='ordinal',
+        encoding : str='onehot',
         transformer_series: Optional[Union[object, dict]]=StandardScaler(),
         transformer_exog: Optional[object]=None,
         weight_func: Optional[Union[Callable, dict]]=None,
@@ -630,7 +629,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         # TODO: parallelize
         # ======================================================================
-        ignore_exog = True if exog else False
+        ignore_exog = True if exog is None else False
         input_matrices = [
             [series_dict[k], exog_dict[k], ignore_exog]
              for k in series_dict.keys()
@@ -657,23 +656,23 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         X_train = pd.concat(X_train_lags_buffer, axis=0)
         y_train = pd.concat(y_train_buffer, axis=0)
 
-        # TODO: Explore other encodings
-        # ======================================================================
-        encoded_values = self.encoder.fit_transform(X_train[['_level_skforecast']])
-        X_train = pd.concat([
-            X_train.drop(columns='_level_skforecast'),
-            encoded_values
-        ], axis=1)
+        if self.fitted:
+            encoded_values = self.encoder.transform(X_train[['_level_skforecast']])
+        else:
+            encoded_values = self.encoder.fit_transform(X_train[['_level_skforecast']])
+            for i, code in enumerate(self.encoder.categories_[0]):
+                self.encoding_mapping[code] = i
 
-        for i, code in enumerate(self.encoder.categories_[0]):
-            self.encoding_mapping[code] = i
+        X_train = pd.concat([
+                        X_train.drop(columns='_level_skforecast'),
+                        encoded_values
+                  ], axis=1)
 
         if self.encoding == 'onehot':
             X_train.columns = X_train.columns.str.replace('_level_skforecast_', '')
         if self.encoding == 'ordinal_category':
             X_train['_level_skforecast'] = X_train['_level_skforecast'].astype('category')
         del encoded_values
-        # ======================================================================
 
         exog_dtypes = None
         if exog is not None:
@@ -774,8 +773,21 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 for k, v in self.series_weights.items() 
                 if k in self.series_weights_
             )
-            weights_series = [np.repeat(self.series_weights_[serie], sum(X_train[serie])) 
-                              for serie in series_col_names]
+
+            if self.encoding == "onehot":
+                weights_series = [
+                    np.repeat(self.series_weights_[serie], sum(X_train[serie]))
+                    for serie in series_col_names
+                ]
+            else:
+                weights_series = [
+                    np.repeat(
+                        self.series_weights_[serie],
+                        sum(X_train["_level_skforecast"] == self.encoding_mapping[serie]),
+                    )
+                    for serie in series_col_names
+                ]
+            
             weights_series = np.concatenate(weights_series)
 
         if self.weight_func is not None:
@@ -798,9 +810,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                     for k, v in self.weight_func.items() 
                     if k in self.weight_func_
                 )
-
-            # TODO: review when new encondings are added
-                
+               
             weights_samples = []
             for key in self.weight_func_.keys():
                 if self.encoding == "onehot":
@@ -896,7 +906,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             exog_dtypes,
         ) = self.create_train_X_y(series=series, exog=exog, drop_nan=drop_nan)
 
-        # TODO: review when new encondings are added
         sample_weight = self.create_sample_weights(
                             series_col_names = series_col_names,
                             X_train          = X_train
@@ -933,8 +942,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         in_sample_residuals = {}
         
-        # TODO: review when new encondings are added
-        # ======================================================================
         if store_in_sample_residuals:
 
             residuals = y_train - self.regressor.predict(X_train)
@@ -1004,16 +1011,18 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         level_encoded = np.array([self.encoding_mapping[level]], dtype='float64')
 
         for i in range(steps):
-            X = last_window[-self.lags].reshape(1, -1)
-            if exog is not None:
-                X = np.column_stack((X, exog[i, ].reshape(1, -1)))
-            
+
+            X = last_window[-self.lags].reshape(1, -1)        
+
             if self.encoding == 'onehot':
                 levels_dummies = np.zeros(shape=(1, len(self.series_col_names)), dtype=float)
                 levels_dummies[0][self.series_col_names.index(level)] = 1.
                 X = np.column_stack((X, levels_dummies.reshape(1, -1)))
             else:
                 X = np.column_stack((X, level_encoded))
+
+            if exog is not None:
+                X = np.column_stack((X, exog[i, ].reshape(1, -1)))
     
             with warnings.catch_warnings():
                 # Suppress scikit-learn warning: "X does not have valid feature names,
