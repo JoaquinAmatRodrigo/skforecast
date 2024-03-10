@@ -333,6 +333,7 @@ def test_create_train_X_y_output_when_series_10_and_exog_is_series_of_bool_str(e
     exog = pd.Series(exog_values*10, name='exog', dtype=dtype)
 
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5,
+                                              encoding='onehot',
                                               transformer_series=None)
     results = forecaster.create_train_X_y(series=series, exog=exog)
 

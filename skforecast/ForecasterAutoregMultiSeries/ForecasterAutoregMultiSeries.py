@@ -61,13 +61,15 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         - `int`: include lags from 1 to `lags` (included).
         - `list`, `1d numpy ndarray` or `range`: include only lags present in 
         `lags`, all elements must be int.
-    encoding : str, default `ordinal_categorical`
-        Encoding used to identify the different series. Allowed values: `ordinal`,
-        `ordinal_categorical` and `onehot`. If `ordinal`, a single column is created
-        with integer values from 0 to n_series - 1. If `ordinal_categorical`, a single
-        column is created with integer values from 0 to n_series - 1 and the column
-        is transformed into pandas.category dtype so that it can be used as a
-        categorical variable. If `onehot`, a binary column is created for each series.
+    encoding : str, default `'ordinal_category'`
+        Encoding used to identify the different series. 
+        
+        - If `'ordinal'`, a single column is created with integer values from 0 
+        to n_series - 1. 
+        - If `'ordinal_category'`, a single column is created with integer 
+        values from 0 to n_series - 1 and the column is transformed into 
+        pandas.category dtype so that it can be used as a categorical variable. 
+        - If `'onehot'`, a binary column is created for each series.
         **New in version 0.12.0**
     transformer_series : transformer (preprocessor), dict, default `sklearn.preprocessing.StandardScaler`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
@@ -120,7 +122,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         An instance of a regressor or pipeline compatible with the scikit-learn API.
     lags : numpy ndarray
         Lags used as predictors.
-    encoding : str, default `'ordinal_category'`
+    encoding : str
         Encoding used to identify the different series. 
         
         - If `'ordinal'`, a single column is created with integer values from 0 
@@ -532,7 +534,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         return X_train_lags, X_train_exog, y_train
 
 
-    def create_train_X_y(
+    def _create_train_X_y(
         self,
         series: Union[pd.DataFrame, dict],
         exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
@@ -730,9 +732,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             X_train = pd.concat([X_train, X_train_exog], axis=1)
 
         if y_train.isnull().any():
-            mask = y_train.notna()
-            y_train = y_train.loc[mask]
-            X_train = X_train.iloc[mask.to_numpy(),]
+            mask = y_train.notna().to_numpy()
+            y_train = y_train.iloc[mask]
+            X_train = X_train.iloc[mask,]
             warnings.warn(
                 ("NaNs detected in `y_train`. They have been dropped since the "
                  "target variable cannot have NaN values. Same rows have been "
@@ -743,9 +745,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         if drop_nan:
             # TODO: review when we have a full exog as NaN
             if X_train.isnull().any().any():
-                mask = X_train.notna().all(axis=1)
-                X_train = X_train.loc[mask, ]
-                y_train = y_train.iloc[mask.to_numpy()]
+                mask = X_train.notna().all(axis=1).to_numpy()
+                X_train = X_train.iloc[mask, ]
+                y_train = y_train.iloc[mask]
                 warnings.warn(
                     ("NaNs detected in `X_train`. They have been dropped. If "
                      "you want to keep them, set `drop_nan = False`. Same rows"
@@ -777,9 +779,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                     IgnoredArgumentWarning
                 )
             
-            # TODO: Qué hacer si hay NaNs en el last_window?
-            # Dejarlos ya que es la last_window real
-            # TODO: Sacar esto a una función auxiliar en utils?
             last_window = {
                 k: v.iloc[-self.max_lag:].copy()
                 for k, v in series_dict.items()
@@ -793,9 +792,67 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             series_col_names,
             exog_col_names,
             exog_dtypes,
-            # last_window,
+            last_window,
         )
-    
+
+
+    def create_train_X_y(
+        self,
+        series: Union[pd.DataFrame, dict],
+        exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
+        drop_nan: bool=False
+    ) -> Tuple[pd.DataFrame, pd.Series]:
+        """
+        Create training matrices from multiple time series and exogenous
+        variables. See Notes section for more details depending on the type of
+        `series` and `exog`.
+        
+        Parameters
+        ----------
+        series : pandas DataFrame, dict
+            Training time series.
+        exog : pandas Series, pandas DataFrame, dict, default `None`
+            Exogenous variable/s included as predictor/s.
+        drop_nan : bool, default `False`
+            NaNs detected in `y_train` will be dropped since the target variable 
+            cannot have NaN values. Same rows are dropped from `X_train` to 
+            maintain alignment. Regarding `X_train`:
+
+            - If `True`, drop NaNs in X_train and same rows in y_train.
+            - If `False`, leave NaNs in X_train and warn the user.
+
+        Returns
+        -------
+        X_train : pandas DataFrame
+            Training values (predictors).
+        y_train : pandas Series
+            Values (target) of the time series related to each row of `X_train`.
+
+        Notes
+        -----
+        - If `series` is a pandas DataFrame and `exog` is a pandas Series or 
+        DataFrame, each exog is duplicated for each series. Exog must have the
+        same index as `series` (type, length and frequency).
+        - If `series` is a pandas DataFrame and `exog` is a dict of pandas Series 
+        or DataFrames. Each key in `exog` must be a column in `series` and the 
+        values are the exog for each series. Exog must have the same index as 
+        `series` (type, length and frequency).
+        - If `series` is a dict of pandas Series, `exog`must be a dict of pandas
+        Series or DataFrames. The keys in `series` and `exog` must be the same.
+        All series and exog must have a pandas DatetimeIndex with the same 
+        frequency.
+        
+        """
+
+        X_train, y_train = self._create_train_X_y(
+                               series            = series, 
+                               exog              = exog, 
+                               drop_nan          = drop_nan, 
+                               store_last_window = False
+                           )[0, 1]
+
+        return X_train, y_train
+
 
     def create_sample_weights(
         self,
@@ -882,11 +939,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             weights_samples = []
             for key in self.weight_func_.keys():
                 if self.encoding == "onehot":
-                    idx = X_train.loc[X_train[key] == 1.0, :].index
+                    idx = X_train.index[X_train[key] == 1.0]
                 else:
-                    idx = X_train.loc[
-                        X_train["_level_skforecast"] == self.encoding_mapping[key], :
-                    ].index
+                    idx = X_train.index[X_train["_level_skforecast"] == self.encoding_mapping[key]]
                 weights_samples.append(self.weight_func_[key](idx))
             weights_samples = np.concatenate(weights_samples)
 
@@ -918,8 +973,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         
     def fit(
         self,
-        series: pd.DataFrame,
-        exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+        series: Union[pd.DataFrame, dict],
+        exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
         drop_nan: bool=False,
         store_last_window: Union[bool, list]=True,
         store_in_sample_residuals: bool=True
@@ -997,7 +1052,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             exog_col_names,
             exog_dtypes,
             last_window
-        ) = self.create_train_X_y(
+        ) = self._create_train_X_y(
                 series=series, exog=exog, drop_nan=drop_nan, store_last_window=store_last_window
         )
 
@@ -1125,9 +1180,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             # Update `last_window` values. The first position is discarded and 
             # the new prediction is added at the end.
             last_window = np.append(last_window[1:], prediction)
+        
         return predictions
 
-            
+
     def predict(
         self,
         steps: int,
@@ -1161,13 +1217,30 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         """
         
+        input_levels_is_list = False 
         if levels is None:
             levels = self.series_col_names
         elif isinstance(levels, str):
             levels = [levels]
+        else:
+            input_levels_is_list = True
 
-        if last_window is None:
-            last_window = self.last_window
+        if last_window is None and self.fitted:
+            last_window = pd.DataFrame({
+                k: v for 
+                k, v in self.last_window.items() 
+                if k in levels and not np.isnan(v.iat[-1]) 
+            })
+
+            series_excluded_from_last_window = set(levels) - set(last_window.columns)
+            if input_levels_is_list and series_excluded_from_last_window:
+                warnings.warn(
+                    (f"{series_excluded_from_last_window} are excluded from prediction. "
+                     f"Only series whose last window reaches the maximum datetime "
+                     f"index of the training data are predicted. See maximum value "
+                     f"of `training_range.` attribute."),
+                     IgnoredArgumentWarning
+                )
         
         check_predict_input(
             forecaster_name  = type(self).__name__,
@@ -1312,10 +1385,13 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         """
         
         if self.fitted:
+            input_levels_is_list = False 
             if levels is None:
                 levels = self.series_col_names
             elif isinstance(levels, str):
                 levels = [levels]
+            else:
+                input_levels_is_list = True
 
             if in_sample_residuals:
                 if not set(levels).issubset(set(self.in_sample_residuals.keys())):
@@ -1359,8 +1435,22 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                          f"or `NaNs` values. Check `{check_residuals}`.")
                     )
 
-        if last_window is None:
-            last_window = self.last_window
+            if last_window is None:
+                last_window = pd.DataFrame({
+                    k: v for 
+                    k, v in self.last_window.items() 
+                    if k in levels and not np.isnan(v.iat[-1]) 
+                })
+
+                series_excluded_from_last_window = set(levels) - set(last_window.columns)
+                if input_levels_is_list and series_excluded_from_last_window:
+                    warnings.warn(
+                        (f"{series_excluded_from_last_window} are excluded from prediction. "
+                        f"Only series whose last window reaches the maximum datetime "
+                        f"index of the training data are predicted. See maximum value "
+                        f"of `training_range.` attribute."),
+                        IgnoredArgumentWarning
+                    )
 
         check_predict_input(
             forecaster_name  = type(self).__name__,

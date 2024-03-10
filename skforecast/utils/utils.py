@@ -751,8 +751,10 @@ def check_predict_input(
              f"generate the predictors. For this forecaster it is {window_size}.")
         )
     if last_window.isnull().any().all():
-        raise ValueError(
-            ("`last_window` has missing values.")
+        warnings.warn(
+            ("`last_window` has missing values. Most of machine learning models do "
+             "not allow missing values. `predict` method may fail."), 
+             MissingValuesWarning
         )
     _, last_window_index = preprocess_last_window(
                                last_window   = last_window.iloc[:0],

@@ -419,23 +419,26 @@ def test_check_predict_input_ValueError_when_length_last_window_is_lower_than_wi
         )
 
 
-def test_check_predict_input_ValueError_when_last_window_has_missing_values():
+def test_check_predict_input_MissingValuesWarning_when_last_window_has_missing_values():
     """
     """
-    err_msg = re.escape('`last_window` has missing values.')
-    with pytest.raises(ValueError, match = err_msg):
+    warn_msg = re.escape(
+        ("`last_window` has missing values. Most of machine learning models do "
+         "not allow missing values. `predict` method may fail.")
+    )
+    with pytest.warns(MissingValuesWarning, match = warn_msg):
         check_predict_input(
             forecaster_name  = 'ForecasterAutoreg',
             steps            = 10,
             fitted           = True,
-            included_exog    = True,
+            included_exog    = False,
             index_type       = pd.RangeIndex,
             index_freq       = None,
             window_size      = 5,
             last_window      = pd.Series([1, 2, 3, 4, 5, np.nan]),
             last_window_exog = None,
-            exog             = pd.Series(np.arange(10)),
-            exog_type        = pd.Series,
+            exog             = None,
+            exog_type        = None,
             exog_col_names   = None,
             interval         = None,
             alpha            = None,
@@ -545,9 +548,9 @@ def test_check_predict_input_MissingValuesWarning_when_exog_has_missing_values()
     """
     """
     warn_msg = re.escape(
-                ("`exog` has missing values. Most of machine learning models do "
-                 "not allow missing values. `predict` method may fail.")
-               )
+        ("`exog` has missing values. Most of machine learning models do "
+         "not allow missing values. `predict` method may fail.")
+    )
     with pytest.warns(MissingValuesWarning, match = warn_msg):
         check_predict_input(
             forecaster_name  = 'ForecasterAutoreg',

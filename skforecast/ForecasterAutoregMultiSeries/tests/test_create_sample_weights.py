@@ -80,7 +80,7 @@ series = pd.DataFrame(
                      ),
          )
 
-X_train = pd.DataFrame(
+X_train_onehot = pd.DataFrame(
               data = np.array(
                          [[0.58142898, 0.65138268, 0.12362923, 1., 0.],
                           [0.72969992, 0.58142898, 0.65138268, 1., 0.],
@@ -100,25 +100,34 @@ X_train = pd.DataFrame(
                 columns = ['lag_1', 'lag_2', 'lag_3', 'series_1', 'series_2']
           )
 
-y_train_index = pd.DatetimeIndex(
-                    ['2022-01-07', '2022-01-08', '2022-01-09', '2022-01-10',
-                     '2022-01-11', '2022-01-12', '2022-01-13',
-                     '2022-01-07', '2022-01-08', '2022-01-09', '2022-01-10',
-                     '2022-01-11', '2022-01-12', '2022-01-13'],
-                     dtype='datetime64[ns]', freq=None
-                )
+X_train_ordinal = X_train_onehot[['lag_1', 'lag_2', 'lag_3', 'series_2']].copy()
+X_train_ordinal = X_train_ordinal.rename(columns={'series_2': '_level_skforecast'})
+
+X_train_ordinal_category = X_train_ordinal.copy()
+X_train_ordinal_category['_level_skforecast'] = X_train_ordinal_category['_level_skforecast'].astype('category')
 
 
-def test_create_sample_weights_output_using_series_weights():
+@pytest.mark.parametrize("encoding, X_train", 
+                         [('ordinal'         , X_train_ordinal), 
+                          ('ordinal_category', X_train_ordinal_category), 
+                          ('onehot'          , X_train_onehot)], 
+                         ids = lambda dt : f'encoding, X_train: {dt}')
+def test_create_sample_weights_output_using_series_weights(encoding, X_train):
     """
     Test `sample_weights` creation using `series_weights`.
     """
     forecaster = ForecasterAutoregMultiSeries(
                      regressor      = LinearRegression(),
                      lags           = 3,
+                     encoding       = encoding,
                      series_weights = {'series_1': 1., 'series_2': 2.}
                  )
-    results = forecaster.create_sample_weights(series=series, X_train=X_train, y_train_index=y_train_index)
+    forecaster.encoding_mapping = {'series_1': 0, 'series_2': 1}
+    
+    results = forecaster.create_sample_weights(
+                  series_col_names = ['series_1', 'series_2'], 
+                  X_train          = X_train
+              )
 
     expected = np.array([1., 1., 1., 1., 1., 1., 1., 2., 2., 2., 2., 2., 2., 2.])
     

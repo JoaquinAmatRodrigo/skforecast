@@ -315,6 +315,8 @@ def _backtesting_forecaster_multiseries(
             # The model is fitted before making predictions. If `fixed_train_size`  
             # the train size doesn't increase but moves by `steps` in each iteration. 
             # If `False` the train size increases by `steps` in each  iteration.
+
+            # TODO: Review when series and exog are dict
             series_train = series.iloc[train_idx_start:train_idx_end, ]
             exog_train = exog.iloc[train_idx_start:train_idx_end, ] if exog is not None else None
             last_window_series = None
