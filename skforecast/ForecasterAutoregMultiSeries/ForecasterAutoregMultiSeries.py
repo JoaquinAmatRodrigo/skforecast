@@ -608,7 +608,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         # TODO: parallelize
         # ======================================================================
-        ignore_exog = False if exog is not None else True
+        ignore_exog = True if exog is None else False
         input_matrices = [
             [series_dict[k], exog_dict[k], ignore_exog]
              for k in series_dict.keys()
