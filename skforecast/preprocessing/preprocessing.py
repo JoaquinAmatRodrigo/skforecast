@@ -5,11 +5,48 @@
 ################################################################################
 # coding=utf-8
 
+from typing import Any
+from typing_extensions import Self
 import numpy as np
 from sklearn.base import BaseEstimator
 from sklearn.base import TransformerMixin
-from typing import Any
-from typing_extensions import Self
+
+
+def _check_X_numpy_ndarray_1d(func):
+    """
+    This decorator checks if the argument X is a numpy ndarray with 1 dimension.
+
+    Parameters
+    ----------
+    func : Callable
+        Function to wrap.
+    
+    Returns
+    -------
+    wrapper : wrapper
+        Function wrapped.
+
+    """
+
+    def wrapper(self, *args, **kwargs):
+
+        if args:
+            X = args[0] 
+        elif 'X' in kwargs:
+            X = kwargs['X']
+        else:
+            raise ValueError("Methods must be called with 'X' as argument.")
+
+        if not isinstance(X, np.ndarray):
+            raise TypeError(f"'X' must be a numpy ndarray. Found {type(X)}.")
+        if not X.ndim == 1:
+            raise ValueError(f"'X' must be a 1D array. Found {X.ndim} dimensions.")
+        
+        result = func(self, *args, **kwargs)
+        
+        return result
+    
+    return wrapper
 
 
 class TimeSeriesDifferentiator(BaseEstimator, TransformerMixin):
@@ -43,7 +80,7 @@ class TimeSeriesDifferentiator(BaseEstimator, TransformerMixin):
     ) -> None:
 
         if not isinstance(order, int):
-            raise TypeError(f"Parameter 'order' must be an integer. Found {type(order)}.")
+            raise TypeError(f"Parameter 'order' must be an integer greater than 0. Found {type(order)}.")
         if order < 1:
             raise ValueError(f"Parameter 'order' must be an integer greater than 0. Found {order}.")
 
@@ -52,6 +89,7 @@ class TimeSeriesDifferentiator(BaseEstimator, TransformerMixin):
         self.last_values = []
 
 
+    @_check_X_numpy_ndarray_1d
     def fit(
         self, 
         X: np.ndarray, 
@@ -90,6 +128,7 @@ class TimeSeriesDifferentiator(BaseEstimator, TransformerMixin):
         return self
 
 
+    @_check_X_numpy_ndarray_1d
     def transform(
         self, 
         X: np.ndarray, 
@@ -115,12 +154,12 @@ class TimeSeriesDifferentiator(BaseEstimator, TransformerMixin):
         """
         
         X_diff = np.diff(X, n=self.order)
-                
         X_diff = np.append((np.full(shape=self.order, fill_value=np.nan)), X_diff)
 
         return X_diff
 
 
+    @_check_X_numpy_ndarray_1d
     def inverse_transform(
         self, 
         X: np.ndarray, 
@@ -158,6 +197,7 @@ class TimeSeriesDifferentiator(BaseEstimator, TransformerMixin):
         return X_undiff
 
 
+    @_check_X_numpy_ndarray_1d
     def inverse_transform_next_window(
         self,
         X: np.ndarray,

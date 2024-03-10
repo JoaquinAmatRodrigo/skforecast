@@ -4,7 +4,6 @@ import re
 import pytest
 import numpy as np
 import pandas as pd
-from copy import deepcopy
 from skforecast.utils import check_preprocess_series
 from skforecast.ForecasterAutoregMultiSeries.tests.fixtures_ForecasterAutoregMultiSeries import series
 from skforecast.ForecasterAutoregMultiSeries.tests.fixtures_ForecasterAutoregMultiSeries import series_as_dict
@@ -22,6 +21,20 @@ def test_TypeError_check_preprocess_series_when_series_is_not_pandas_DataFrame_o
     )
     with pytest.raises(TypeError, match = err_msg):
         check_preprocess_series(series = series)
+
+
+def test_ValueError_check_preprocess_series_when_all_series_values_are_missing_DataFrame():
+    """
+    Test ValueError is raised when all series values are missing when series
+    is a pandas DataFrame.
+    """
+    series_nan = pd.DataFrame({'1': pd.Series(np.arange(7)), 
+                               '2': pd.Series([np.nan]*7)})
+    series_nan.index = pd.date_range(start='2022-01-01', periods=7, freq='1D')
+
+    err_msg = re.escape("All values of series '2' are NaN.")
+    with pytest.raises(ValueError, match = err_msg):
+        check_preprocess_series(series=series_nan)
 
 
 def test_check_preprocess_series_when_series_is_pandas_DataFrame():
@@ -78,16 +91,43 @@ def test_check_preprocess_series_when_series_is_pandas_DataFrame_with_DatetimeIn
         assert series_indexes[k].freq == expected_series_indexes[k].freq
 
 
+def test_check_preprocess_series_when_series_is_pandas_DataFrame_with_no_pandas_Index():
+    """
+    Test check_preprocess_series when `series` is a pandas DataFrame with
+    no pandas Index.
+    """
+    series_no_pandas_idx = series.copy()
+    series_no_pandas_idx.index = np.arange(6, 6 + len(series))
+    series_dict, series_indexes = check_preprocess_series(series=series_no_pandas_idx)
+
+    expected_series_indexes = {
+        col: pd.RangeIndex(start=0, stop=len(series_no_pandas_idx), step=1) 
+        for col in series_no_pandas_idx.columns
+    }
+
+    assert isinstance(series_dict, dict)
+    assert list(series_dict.keys()) == ['1', '2']
+    for k, v in series_dict.items():
+        assert isinstance(v, pd.Series)
+        assert k == v.name
+
+    assert isinstance(series_indexes, dict)
+    assert list(series_indexes.keys()) == ['1', '2']
+    for k in series_indexes:
+        pd.testing.assert_index_equal(series_indexes[k], expected_series_indexes[k])
+        assert series_indexes[k].step == expected_series_indexes[k].step
+
+
 def test_TypeError_check_preprocess_series_when_series_is_dict_with_no_pandas_Series_or_DataFrame():
     """
     Test TypeError is raised when series is dict not containing 
-    a pandas DataFrame or dict.
+    a pandas Series or DataFrame.
     """
     series_dict = {'l1': np.array([1, 2, 3]),
                    'l2': series}
 
     err_msg = re.escape(
-        ("All series must be a named pandas Series or a pandas Dataframe. "
+        ("All series must be a named pandas Series or a pandas DataFrame. "
          "with a single column. Review series: ['l1']")
     )
     with pytest.raises(TypeError, match = err_msg):
@@ -103,7 +143,7 @@ def test_ValueError_check_preprocess_series_when_series_is_dict_with_a_DataFrame
                    'l2': series}
 
     err_msg = re.escape(
-        ("All series must be a named pandas Series or a pandas Dataframe "
+        ("All series must be a named pandas Series or a pandas DataFrame "
          "with a single column. Review series: l2")
     )
     with pytest.raises(ValueError, match = err_msg):
@@ -131,7 +171,10 @@ def test_ValueError_check_preprocess_series_when_series_is_dict_with_different_f
     Test ValueError is raised when series is dict containing series with 
     DatetimeIndex but different frequencies.
     """
-    series_dict = deepcopy(series_as_dict)
+    series_dict = {
+        'l1': series_as_dict['l1'].copy(),
+        'l2': series_as_dict['l2'].copy()
+    }
     series_dict['l1'].index = pd.date_range(
         start='2000-01-01', periods=len(series_dict['l1']), freq='D'
     )
@@ -147,12 +190,31 @@ def test_ValueError_check_preprocess_series_when_series_is_dict_with_different_f
         check_preprocess_series(series = series_dict)
 
 
+def test_ValueError_check_preprocess_series_when_all_series_values_are_missing_dict():
+    """
+    Test ValueError is raised when all series values are missing when series
+    is a dict.
+    """
+    series_nan = pd.DataFrame({'l1': pd.Series(np.arange(7)), 
+                               'l2': pd.Series([np.nan]*7)})
+    series_nan.index = pd.date_range(start='2022-01-01', periods=7, freq='1D')
+    series_nan = series_nan.to_dict("series")
+
+    err_msg = re.escape("All values of series 'l2' are NaN.")
+    with pytest.raises(ValueError, match = err_msg):
+        check_preprocess_series(series=series_nan)
+
+
 def test_check_preprocess_series_when_series_is_dict():
     """
     Test check_preprocess_series when `series` is a pandas DataFrame with 
     a DatetimeIndex.
     """
-    series_dict = deepcopy(series_as_dict)
+    series_dict = {
+        'l1': series_as_dict['l1'].copy(),
+        'l2': series_as_dict['l2'].copy()
+    }
+
     series_dict['l1'].index = pd.date_range(start='2000-01-01', periods=len(series_dict['l1']), freq='D')
     series_dict['l2'] = series_dict['l2'].to_frame()
     series_dict['l2'].index = pd.date_range(start='2000-01-01', periods=len(series_dict['l2']), freq='D')
