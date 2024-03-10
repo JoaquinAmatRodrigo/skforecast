@@ -17,7 +17,7 @@ from sklearn.base import clone
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import OrdinalEncoder
-from copy import copy, deepcopy
+from copy import copy
 import inspect
 
 import skforecast
@@ -120,13 +120,15 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         An instance of a regressor or pipeline compatible with the scikit-learn API.
     lags : numpy ndarray
         Lags used as predictors.
-    encoding : str, default `ordinal_categorical`
-        Encoding used to identify the different series. Allowed values: `ordinal`,
-        `ordinal_categorical` and `onehot`. If `ordinal`, a single column is created
-        with integer values from 0 to n_series - 1. If `ordinal_categorical`, a single
-        column is created with integer values from 0 to n_series - 1 and the column
-        is transformed into pandas.category dtype so that it can be used as a
-        categorical variable. If `onehot`, a binary column is created for each series.
+    encoding : str, default `'ordinal_category'`
+        Encoding used to identify the different series. 
+        
+        - If `'ordinal'`, a single column is created with integer values from 0 
+        to n_series - 1. 
+        - If `'ordinal_category'`, a single column is created with integer 
+        values from 0 to n_series - 1 and the column is transformed into 
+        pandas.category dtype so that it can be used as a categorical variable. 
+        - If `'onehot'`, a binary column is created for each series.
         **New in version 0.12.0**
     transformer_series : transformer (preprocessor), dict
         An instance of a transformer (preprocessor) compatible with the scikit-learn
@@ -179,7 +181,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         Weights associated with each series.It is created as a clone of `series_weights`
         and is used internally to avoid overwriting.
     encoder : sklearn.preprocessing
-        Sklearn preprocessing encoder used to encode the series.
+        Scikit-learn preprocessing encoder used to encode the series.
         **New in version 0.12.0**
     encoding_mapping : dict
         Mapping of the encoding used to identify the different series.
@@ -333,15 +335,15 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         if self.encoding == 'onehot':
             self.encoder = OneHotEncoder(
-                                categories='auto',
-                                sparse_output=False,
-                                drop=None,
-                                dtype=int
-                            ).set_output(transform='pandas')
+                               categories    = 'auto',
+                               sparse_output = False,
+                               drop          = None,
+                               dtype         = int
+                           ).set_output(transform='pandas')
         else:
             self.encoder = OrdinalEncoder(
-                                categories='auto',
-                                dtype=int
+                               categories = 'auto',
+                               dtype      = int
                            ).set_output(transform='pandas')
 
 
@@ -690,14 +692,15 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 self.encoding_mapping[code] = i
 
         X_train = pd.concat([
-                        X_train.drop(columns='_level_skforecast'),
-                        encoded_values
+                      X_train.drop(columns='_level_skforecast'),
+                      encoded_values
                   ], axis=1)
 
         if self.encoding == 'onehot':
             X_train.columns = X_train.columns.str.replace('_level_skforecast_', '')
-        if self.encoding == 'ordinal_category':
+        elif self.encoding == 'ordinal_category':
             X_train['_level_skforecast'] = X_train['_level_skforecast'].astype('category')
+        
         del encoded_values
 
         exog_dtypes = None
