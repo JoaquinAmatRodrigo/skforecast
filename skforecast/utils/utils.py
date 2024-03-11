@@ -689,15 +689,19 @@ def check_predict_input(
     
     if forecaster_name in ['ForecasterAutoregMultiSeries', 
                            'ForecasterAutoregMultiSeriesCustom']:
-        if levels is not None and not isinstance(levels, (str, list)):
+        if not isinstance(levels, (str, list)):
             raise TypeError(
                 ("`levels` must be a `list` of column names, a `str` of a "
                  "column name or `None`.")
             )
+        
         if len(set(levels) - set(series_col_names)) != 0:
             raise ValueError(
                 f"`levels` must be in `series_col_names` : {series_col_names}."
             )
+        
+        #TODO: condicion cuando levels está vacío [] porque no han cumplido las condiciones
+
 
     if exog is None and included_exog:
         raise ValueError(

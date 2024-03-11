@@ -191,8 +191,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         Maximum value of lag included in `lags`.
     window_size : int
         Size of the window needed to create the predictors. It is equal to `max_lag`.
-    last_window : pandas Series
-        Last window seen by the forecaster during training. It stores the values 
+    last_window : dict
+        Last window of training data for each series. It stores the values 
         needed to predict the next `step` immediately after the training data.
     index_type : type
         Type of index of the input used in training.
@@ -1193,14 +1193,16 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
     ) -> pd.DataFrame:
         """
         Predict n steps ahead. It is an recursive process in which, each prediction,
-        is used as a predictor for the next step.
+        is used as a predictor for the next step. Only levels whose last window
+        ends at the same datetime index can be predicted together.
 
         Parameters
         ----------
         steps : int
             Number of future steps predicted.
         levels : str, list, default `None`
-            Time series to be predicted. If `None` all levels will be predicted.
+            Time series to be predicted. If `None` all levels whose last window
+            ends at the same datetime index will be predicted together.
         last_window : pandas DataFrame, default `None`
             Series values used to create the predictors (lags) needed in the 
             first iteration of the prediction (t + 1).
@@ -1226,6 +1228,19 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             input_levels_is_list = True
 
         if last_window is None and self.fitted:
+
+            not_available_last_window = set(levels) - set(self.last_window.keys())
+            if not_available_last_window:
+                warnings.warn(
+                    (f"{not_available_last_window} are excluded from prediction "
+                     f"since they were not stored in `last_window` attribute "
+                     f"during training. If you don't want to retrain the "
+                     f"Forecaster, provide `last_window` as argument."),
+                    IgnoredArgumentWarning
+                )
+                levels = [level for level in levels 
+                          if level not in not_available_last_window]
+
             last_window = pd.DataFrame({
                 k: v for 
                 k, v in self.last_window.items() 
@@ -1233,6 +1248,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             })
 
             series_excluded_from_last_window = set(levels) - set(last_window.columns)
+            levels = [level for level in levels 
+                      if level not in series_excluded_from_last_window]
+            
             if input_levels_is_list and series_excluded_from_last_window:
                 warnings.warn(
                     (f"{series_excluded_from_last_window} are excluded from prediction. "
@@ -1241,6 +1259,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                      f"of `training_range.` attribute."),
                      IgnoredArgumentWarning
                 )
+
         
         check_predict_input(
             forecaster_name  = type(self).__name__,
@@ -1342,14 +1361,16 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         Generate multiple forecasting predictions using a bootstrapping process. 
         By sampling from a collection of past observed errors (the residuals),
         each iteration of bootstrapping generates a different set of predictions. 
-        See the Notes section for more information. 
+        Only levels whose last window ends at the same datetime index can be 
+        predicted together. See the Notes section for more information. 
         
         Parameters
         ----------
         steps : int
             Number of future steps predicted.
         levels : str, list, default `None`
-            Time series to be predicted. If `None` all levels will be predicted.
+            Time series to be predicted. If `None` all levels whose last window
+            ends at the same datetime index will be predicted together.
         last_window : pandas DataFrame, default `None`
             Series values used to create the predictors (lags) needed in the 
             first iteration of the prediction (t + 1).
@@ -1434,8 +1455,21 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                         (f"forecaster residuals for level '{level}' contains `None` "
                          f"or `NaNs` values. Check `{check_residuals}`.")
                     )
-
+            
             if last_window is None:
+
+                not_available_last_window = set(levels) - set(self.last_window.keys())
+                if not_available_last_window:
+                    warnings.warn(
+                        (f"{not_available_last_window} are excluded from prediction "
+                         f"since they were not stored in `last_window` attribute "
+                         f"during training. If you don't want to retrain the "
+                         f"Forecaster, provide `last_window` as argument."),
+                         IgnoredArgumentWarning
+                    )
+                    levels = [level for level in levels 
+                              if level not in not_available_last_window]
+                
                 last_window = pd.DataFrame({
                     k: v for 
                     k, v in self.last_window.items() 
@@ -1443,13 +1477,16 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 })
 
                 series_excluded_from_last_window = set(levels) - set(last_window.columns)
+                levels = [level for level in levels 
+                          if level not in series_excluded_from_last_window]
+                
                 if input_levels_is_list and series_excluded_from_last_window:
                     warnings.warn(
                         (f"{series_excluded_from_last_window} are excluded from prediction. "
-                        f"Only series whose last window reaches the maximum datetime "
-                        f"index of the training data are predicted. See maximum value "
-                        f"of `training_range.` attribute."),
-                        IgnoredArgumentWarning
+                         f"Only series whose last window reaches the maximum datetime "
+                         f"index of the training data are predicted. See maximum value "
+                         f"of `training_range.` attribute."),
+                         IgnoredArgumentWarning
                     )
 
         check_predict_input(
