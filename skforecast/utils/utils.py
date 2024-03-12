@@ -699,9 +699,6 @@ def check_predict_input(
             raise ValueError(
                 f"`levels` must be in `series_col_names` : {series_col_names}."
             )
-        
-        #TODO: condicion cuando levels está vacío [] porque no han cumplido las condiciones
-
 
     if exog is None and included_exog:
         raise ValueError(
@@ -2238,7 +2235,8 @@ def align_series_and_exog_multiseries(
 ) -> Tuple[Union[pd.Series, pd.DataFrame], Union[pd.Series, pd.DataFrame]]:
     """
     Align series and exog according to their index. If needed, reindexing is
-    applied.
+    applied. Heading and trailing NaNs are removed from all series in 
+    `series_dict`.
 
     - If input series is a pandas DataFrame (input_series_is_dict = False),  
     input exog (pandas Series, DataFrame or dict) must have the same index 

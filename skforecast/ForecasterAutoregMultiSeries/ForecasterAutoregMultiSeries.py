@@ -1091,7 +1091,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             self.exog_dtypes = exog_dtypes
 
         in_sample_residuals = {}
-        
         if store_in_sample_residuals:
 
             residuals = y_train - self.regressor.predict(X_train)
@@ -1117,7 +1116,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 in_sample_residuals[col] = None
 
         self.in_sample_residuals = in_sample_residuals
-        # ======================================================================
 
         if store_last_window:
             self.last_window = last_window
@@ -1228,7 +1226,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             input_levels_is_list = True
 
         if last_window is None and self.fitted:
-
             not_available_last_window = set(levels) - set(self.last_window.keys())
             if not_available_last_window:
                 warnings.warn(
@@ -1241,26 +1238,44 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 levels = [level for level in levels 
                           if level not in not_available_last_window]
 
-            last_window = pd.DataFrame({
-                k: v for 
-                k, v in self.last_window.items() 
-                if k in levels and not np.isnan(v.iat[-1]) 
-            })
+                if not levels:
+                    raise ValueError(
+                        ("No series to predict. None of the series are present in "
+                         "`last_window` attribute. Provide `last_window` as argument "
+                         "in predict method.")
+                    )
 
-            series_excluded_from_last_window = set(levels) - set(last_window.columns)
-            levels = [level for level in levels 
-                      if level not in series_excluded_from_last_window]
-            
-            if input_levels_is_list and series_excluded_from_last_window:
-                warnings.warn(
-                    (f"{series_excluded_from_last_window} are excluded from prediction. "
-                     f"Only series whose last window reaches the maximum datetime "
-                     f"index of the training data are predicted. See maximum value "
-                     f"of `training_range.` attribute."),
-                     IgnoredArgumentWarning
-                )
+            training_range_levels = [
+                v[-1] for k, v in self.training_range.items()
+                if k in levels
+            ]
+            if len(set(training_range_levels)) > 1:
+                max_training_range = max(training_range_levels)
+                selected_levels = [
+                    k 
+                    for k, v in self.last_window.items()
+                    if k in levels and v.index[-1] == max_training_range
+                ]
 
-        
+                series_excluded_from_last_window = set(levels) - set(selected_levels)
+                levels = selected_levels
+                
+                if input_levels_is_list and series_excluded_from_last_window:
+                    warnings.warn(
+                        (f"Found series with different ends of training range. "
+                         f"Only series whose last window ends at the same index "
+                         f"can be predicted together. Series that not reach the "
+                         f"maximum index, {max_training_range}, are excluded "
+                         f"from prediction: {series_excluded_from_last_window}."),
+                        IgnoredArgumentWarning
+                    )
+
+            last_window = pd.DataFrame(
+                {k: v for 
+                 k, v in self.last_window.items() 
+                 if k in levels}
+            )
+
         check_predict_input(
             forecaster_name  = type(self).__name__,
             steps            = steps,
@@ -1406,6 +1421,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         """
         
         if self.fitted:
+
             input_levels_is_list = False 
             if levels is None:
                 levels = self.series_col_names
@@ -1413,6 +1429,57 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 levels = [levels]
             else:
                 input_levels_is_list = True
+            
+            if last_window is None:
+                not_available_last_window = set(levels) - set(self.last_window.keys())
+                if not_available_last_window:
+                    warnings.warn(
+                        (f"{not_available_last_window} are excluded from prediction "
+                         f"since they were not stored in `last_window` attribute "
+                         f"during training. If you don't want to retrain the "
+                         f"Forecaster, provide `last_window` as argument."),
+                         IgnoredArgumentWarning
+                    )
+                    levels = [level for level in levels 
+                              if level not in not_available_last_window]
+
+                    if not levels:
+                        raise ValueError(
+                            ("No series to predict. None of the series are present in "
+                             "`last_window` attribute. Provide `last_window` as argument "
+                             "in predict method.")
+                        )
+
+                training_range_levels = [
+                    v[-1] for k, v in self.training_range.items()
+                    if k in levels
+                ]
+                if len(set(training_range_levels)) > 1:
+                    max_training_range = max(training_range_levels)
+                    selected_levels = [
+                        k 
+                        for k, v in self.last_window.items()
+                        if k in levels and v.index[-1] == max_training_range
+                    ]
+
+                    series_excluded_from_last_window = set(levels) - set(selected_levels)
+                    levels = selected_levels
+                    
+                    if input_levels_is_list and series_excluded_from_last_window:
+                        warnings.warn(
+                            (f"Found series with different ends of training range. "
+                             f"Only series whose last window ends at the same index "
+                             f"can be predicted together. Series that not reach the "
+                             f"maximum index, {max_training_range}, are excluded "
+                             f"from prediction: {series_excluded_from_last_window}."),
+                             IgnoredArgumentWarning
+                        )
+
+                last_window = pd.DataFrame(
+                    {k: v for 
+                     k, v in self.last_window.items() 
+                     if k in levels}
+                )
 
             if in_sample_residuals:
                 if not set(levels).issubset(set(self.in_sample_residuals.keys())):
@@ -1454,39 +1521,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                     raise ValueError(
                         (f"forecaster residuals for level '{level}' contains `None` "
                          f"or `NaNs` values. Check `{check_residuals}`.")
-                    )
-            
-            if last_window is None:
-
-                not_available_last_window = set(levels) - set(self.last_window.keys())
-                if not_available_last_window:
-                    warnings.warn(
-                        (f"{not_available_last_window} are excluded from prediction "
-                         f"since they were not stored in `last_window` attribute "
-                         f"during training. If you don't want to retrain the "
-                         f"Forecaster, provide `last_window` as argument."),
-                         IgnoredArgumentWarning
-                    )
-                    levels = [level for level in levels 
-                              if level not in not_available_last_window]
-                
-                last_window = pd.DataFrame({
-                    k: v for 
-                    k, v in self.last_window.items() 
-                    if k in levels and not np.isnan(v.iat[-1]) 
-                })
-
-                series_excluded_from_last_window = set(levels) - set(last_window.columns)
-                levels = [level for level in levels 
-                          if level not in series_excluded_from_last_window]
-                
-                if input_levels_is_list and series_excluded_from_last_window:
-                    warnings.warn(
-                        (f"{series_excluded_from_last_window} are excluded from prediction. "
-                         f"Only series whose last window reaches the maximum datetime "
-                         f"index of the training data are predicted. See maximum value "
-                         f"of `training_range.` attribute."),
-                         IgnoredArgumentWarning
                     )
 
         check_predict_input(
