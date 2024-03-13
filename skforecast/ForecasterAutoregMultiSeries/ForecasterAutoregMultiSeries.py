@@ -765,6 +765,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         # The last time window of training data is stored so that lags needed as
         # predictors in the first iteration of `predict()` can be calculated.
+        last_window = None
         if store_last_window:
 
             store_series = (
@@ -774,16 +775,19 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             series_not_in_series_dict = set(store_series) - set(series_col_names)
             if series_not_in_series_dict:
                 warnings.warn(
-                    (f"{series_not_in_series_dict} not present in `series`. No "
-                     f"last window is stored for them."),
+                    (f"Series {series_not_in_series_dict} are not present in "
+                     f"`series`. No last window is stored for them."),
                     IgnoredArgumentWarning
                 )
-            
-            last_window = {
-                k: v.iloc[-self.max_lag:].copy()
-                for k, v in series_dict.items()
-                if k in store_series
-            }
+                store_series = [s for s in store_series 
+                                if s not in series_not_in_series_dict]
+                
+            if store_series:
+                last_window = {
+                    k: v.iloc[-self.max_lag:].copy()
+                    for k, v in series_dict.items()
+                    if k in store_series
+                }
 
         return (
             X_train,

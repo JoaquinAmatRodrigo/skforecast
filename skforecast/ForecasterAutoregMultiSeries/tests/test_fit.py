@@ -198,15 +198,26 @@ def test_fit_last_window_stored():
     """
     Test that values of last window are stored after fitting.
     """
-    series = pd.DataFrame({'1': pd.Series(np.arange(5)), 
-                           '2': pd.Series(np.arange(5))
-                          })
+    series = pd.DataFrame({'1': pd.Series(np.arange(5, dtype=float)), 
+                           '2': pd.Series(np.arange(5, dtype=float))})
 
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
     forecaster.fit(series=series)
-    expected = pd.DataFrame({'1': pd.Series(np.array([2, 3, 4])), 
-                             '2': pd.Series(np.array([2, 3, 4]))
-                            })
-    expected.index = pd.RangeIndex(start=2, stop=5, step=1)
 
-    pd.testing.assert_frame_equal(forecaster.last_window, expected)
+    expected = {
+        '1': pd.Series(
+                 data  = np.array([2., 3., 4.]),
+                 index = pd.RangeIndex(start=2, stop=5, step=1),
+                 name  = '1',
+                 dtype = float
+             ),
+        '2': pd.Series(
+                 data  = np.array([2., 3., 4.]),
+                 index = pd.RangeIndex(start=2, stop=5, step=1),
+                 name  = '2',
+                 dtype = float
+             )
+    }
+
+    for k in forecaster.last_window.keys():
+        pd.testing.assert_series_equal(forecaster.last_window[k], expected[k])
