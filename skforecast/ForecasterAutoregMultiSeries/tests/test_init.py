@@ -43,3 +43,16 @@ def test_init_window_size_is_increased_when_differentiation(dif):
     assert forecaster.window_size == len(forecaster.lags) + dif
 
 
+def test_ForecasterAutoregMultiSeries_init_invalid_encoding():
+    """
+    Test ValueError is raised when encoding is not valid.
+    """
+
+    with pytest.raises(ValueError):
+        ForecasterAutoregMultiSeries(
+            regressor=object(),
+            lags=[1, 2, 3],
+            encoding='invalid_encoding',
+        )
+
+

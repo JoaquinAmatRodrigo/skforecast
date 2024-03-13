@@ -18,7 +18,11 @@ def test_fit_ValueError_when_exog_columns_same_as_series_col_names(exog):
     series = pd.DataFrame({'l1': pd.Series(np.arange(10)), 
                            'l2': pd.Series(np.arange(10))})
 
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiSeries(
+        LinearRegression(),
+        lags=3,
+        encoding='onehot'
+    )
     series_col_names = ['l1', 'l2']
     exog_col_names = exog if isinstance(exog, list) else [exog]
 
@@ -221,3 +225,24 @@ def test_fit_last_window_stored():
 
     for k in forecaster.last_window.keys():
         pd.testing.assert_series_equal(forecaster.last_window[k], expected[k])
+
+
+@pytest.mark.parametrize("encoding, encoding_mapping", 
+                         [('ordinal'         , {'1': 0, '2': 1}), 
+                          ('ordinal_category', {'1': 0, '2': 1}),
+                          ('onehot'          , {'1': 0, '2': 1})], 
+                         ids = lambda dt : f'encoding, dtype: {dt}')
+def test_fit_encoding_mapping(encoding, encoding_mapping):
+    """
+    Test the encoding mapping of _create_train_X_y.
+    """
+    series = pd.DataFrame({'1': pd.Series(np.arange(7, dtype=float)), 
+                           '2': pd.Series(np.arange(7, dtype=float))})
+    forecaster = ForecasterAutoregMultiSeries(
+        LinearRegression(),
+        lags=3,
+        encoding=encoding,
+    )
+    forecaster.fit(series=series)
+    
+    assert forecaster.encoding_mapping == encoding_mapping
