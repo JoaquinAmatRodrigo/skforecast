@@ -260,7 +260,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self,
         regressor: object,
         lags: Union[int, np.ndarray, list],
-        encoding : str='onehot',
+        encoding : str='ordinal_category',
         transformer_series: Optional[Union[object, dict]]=StandardScaler(),
         transformer_exog: Optional[object]=None,
         weight_func: Optional[Union[Callable, dict]]=None,
@@ -848,13 +848,15 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         
         """
 
-        X_train, y_train = self._create_train_X_y(
+        output = self._create_train_X_y(
                                series            = series, 
                                exog              = exog, 
                                drop_nan          = drop_nan, 
                                store_last_window = False
-                           )[0, 1]
-
+                           )
+        X_train = output[0]
+        y_train = output[1]
+        
         return X_train, y_train
 
 
