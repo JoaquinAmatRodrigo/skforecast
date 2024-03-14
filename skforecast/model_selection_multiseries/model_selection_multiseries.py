@@ -2043,7 +2043,10 @@ def select_features_multiseries(
     
     forecaster = deepcopy(forecaster)
     forecaster.fitted = False
-    X_train, y_train, _ , _  = forecaster.create_train_X_y(series=series, exog=exog)
+    output = forecaster._create_train_X_y(series=series, exog=exog)
+    X_train = output[0]
+    y_train = output[1]
+    series_col_names = output[3]
 
     if hasattr(forecaster, 'lags'):
         autoreg_cols = [f"lag_{lag}" for lag in forecaster.lags]
@@ -2124,11 +2127,14 @@ def select_features_multiseries(
 
     # Remove the encoding columns from the selected features
     if forecaster.encoding == 'onehot':
-        encoding_cols = forecaster.series_col_names
+        encoding_cols = series_col_names
     else:
-        encoding_cols = '_level_skforecast'
-    selected_autoreg = [col for col in selected_autoreg if col not in encoding_cols]
-    selected_exog = [col for col in selected_exog if col not in encoding_cols]    
+        encoding_cols = ['_level_skforecast']
+
+    if selected_autoreg:
+        selected_autoreg = [col for col in selected_autoreg if col not in encoding_cols]
+    if selected_exog:
+        selected_exog = [col for col in selected_exog if col not in encoding_cols]    
 
     if verbose:
         print(f"Recursive feature elimination ({selector.__class__.__name__})")
