@@ -2048,6 +2048,11 @@ def select_features_multiseries(
     y_train = output[1]
     series_col_names = output[3]
 
+    if forecaster.encoding == 'onehot':
+        encoding_cols = series_col_names
+    else:
+        encoding_cols = ['_level_skforecast']
+
     if hasattr(forecaster, 'lags'):
         autoreg_cols = [f"lag_{lag}" for lag in forecaster.lags]
     else:
@@ -2059,7 +2064,11 @@ def select_features_multiseries(
                 for col in X_train.columns
                 if re.match(r'^custom_predictor_\d+', col)
             ]
-    exog_cols = [col for col in X_train.columns if col not in autoreg_cols]
+    exog_cols = [
+        col
+        for col in X_train.columns
+        if col not in autoreg_cols and col not in encoding_cols
+    ]
 
     forced_autoreg = []
     forced_exog = []
@@ -2125,23 +2134,15 @@ def select_features_multiseries(
             selected_autoreg = [int(feature.replace('lag_', '')) 
                                 for feature in selected_autoreg]
 
-    # Remove the encoding columns from the selected features
-    if forecaster.encoding == 'onehot':
-        encoding_cols = series_col_names
-    else:
-        encoding_cols = ['_level_skforecast']
-
-    if selected_autoreg:
-        selected_autoreg = [col for col in selected_autoreg if col not in encoding_cols]
-    if selected_exog:
-        selected_exog = [col for col in selected_exog if col not in encoding_cols]    
+    if exog_cols:
+        exog_cols = [col for col in exog_cols if col not in encoding_cols]   
 
     if verbose:
         print(f"Recursive feature elimination ({selector.__class__.__name__})")
         print("--------------------------------" + "-"*len(selector.__class__.__name__))
         print(f"Total number of records available: {X_train.shape[0]}")
         print(f"Total number of records used for feature selection: {X_train_sample.shape[0]}")
-        print(f"Number of features available: {X_train.shape[1]}") 
+        print(f"Number of features available: {len(autoreg_cols) + len(exog_cols)}") 
         print(f"    Autoreg (n={len(autoreg_cols)})")
         print(f"    Exog    (n={len(exog_cols)})")
         print(f"Number of features selected: {len(selected_features)}")
