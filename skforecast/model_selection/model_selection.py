@@ -1721,6 +1721,8 @@ def select_features(
             "`subsample` must be a number greater than 0 and less than or equal to 1."
         )
     
+    forecaster = deepcopy(forecaster)
+    forecaster.fitted = False
     X_train, y_train = forecaster.create_train_X_y(y=y, exog=exog)
 
     if hasattr(forecaster, 'lags'):
@@ -1793,7 +1795,6 @@ def select_features(
         warnings.warn(
             ("No autoregressive features has been selected. Since a Forecaster "
              "cannot be created without them, be sure to include at least one "
-             "to ensure the autoregressive component of the forecast model "
              "using the `force_inclusion` parameter.")
         )
     else:
