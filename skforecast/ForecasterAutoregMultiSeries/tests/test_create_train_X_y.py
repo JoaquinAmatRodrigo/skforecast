@@ -113,8 +113,11 @@ def test_create_train_X_y_output_when_series_and_exog_is_None():
     """
     series = pd.DataFrame({'1': pd.Series(np.arange(7, dtype=float)), 
                            '2': pd.Series(np.arange(7, dtype=float))})
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3,
-                                              encoding='onehot')
+    forecaster = ForecasterAutoregMultiSeries(
+        LinearRegression(),
+        lags=3,
+        encoding="onehot"
+    )
 
     results = forecaster._create_train_X_y(series=series)
     expected = (
@@ -130,6 +133,73 @@ def test_create_train_X_y_output_when_series_and_exog_is_None():
             index   = pd.Index([3, 4, 5, 6, 3, 4, 5, 6]),
             columns = ['lag_1', 'lag_2', 'lag_3', '1', '2']
         ).astype({'1': int, '2': int}),
+        pd.Series(
+            data  = np.array([0., 0.5, 1., 1.5, 0., 0.5, 1., 1.5]),
+            index = pd.Index([3, 4, 5, 6, 3, 4, 5, 6]),
+            name  = 'y',
+            dtype = float
+        ),
+        {'1': pd.RangeIndex(start=0, stop=7, step=1),
+         '2': pd.RangeIndex(start=0, stop=7, step=1)},
+        ['1', '2'],
+        None,
+        None,
+        {'1': pd.Series(
+                  data  = np.array([4., 5., 6.]),
+                  index = pd.RangeIndex(start=4, stop=7, step=1),
+                  name  = '1',
+                  dtype = float
+              ),
+         '2': pd.Series(
+                  data  = np.array([4., 5., 6.]),
+                  index = pd.RangeIndex(start=4, stop=7, step=1),
+                  name  = '2',
+                  dtype = float
+              )
+        }
+    )
+
+    pd.testing.assert_frame_equal(results[0], expected[0])
+    pd.testing.assert_series_equal(results[1], expected[1])
+    for k in results[2].keys():
+        pd.testing.assert_index_equal(results[2][k], expected[2][k])
+    assert results[3] == expected[3]
+    assert isinstance(results[4], type(None))
+    assert isinstance(results[5], type(None))
+    for k in results[6].keys():
+        pd.testing.assert_series_equal(results[6][k], expected[6][k])
+
+@pytest.mark.parametrize("encoding, dtype", 
+                         [('ordinal'         , int), 
+                          ('ordinal_category', 'category')], 
+                         ids = lambda dt : f'encoding, dtype: {dt}')
+def test_create_train_X_y_output_when_series_and_exog_is_None_ordinal_encoding(encoding, dtype):
+    """
+    Test the output of _create_train_X_y when series has 2 columns and 
+    exog is None.
+    """
+    series = pd.DataFrame({'1': pd.Series(np.arange(7, dtype=float)), 
+                           '2': pd.Series(np.arange(7, dtype=float))})
+    forecaster = ForecasterAutoregMultiSeries(
+                    LinearRegression(),
+                    lags=3,
+                    encoding=encoding
+                )
+
+    results = forecaster._create_train_X_y(series=series)
+    expected = (
+        pd.DataFrame(
+            data = np.array([[-0.5, -1. , -1.5, 0.],
+                             [ 0. , -0.5, -1. , 0.],
+                             [ 0.5,  0. , -0.5, 0.],
+                             [ 1. ,  0.5,  0. , 0.],
+                             [-0.5, -1. , -1.5, 1.],
+                             [ 0. , -0.5, -1. , 1.],
+                             [ 0.5,  0. , -0.5, 1.],
+                             [ 1. ,  0.5,  0. , 1.]]),
+            index   = pd.Index([3, 4, 5, 6, 3, 4, 5, 6]),
+            columns = ['lag_1', 'lag_2', 'lag_3', '_level_skforecast'],
+        ).astype({'_level_skforecast': int}).astype({'_level_skforecast': dtype}),
         pd.Series(
             data  = np.array([0., 0.5, 1., 1.5, 0., 0.5, 1., 1.5]),
             index = pd.Index([3, 4, 5, 6, 3, 4, 5, 6]),
@@ -205,6 +275,89 @@ def test_create_train_X_y_output_when_series_and_exog_no_pandas_index():
             columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 
                        'l1', 'l2', 'exog']
         ).astype({'l1': int, 'l2': int}),
+        pd.Series(
+            data  = np.array([5, 6, 7, 8, 9, 5, 6, 7, 8, 9]),
+            index = pd.Index([5, 6, 7, 8, 9, 5, 6, 7, 8, 9]),
+            name  = 'y',
+            dtype = float
+        ),
+        {'l1': pd.RangeIndex(start=0, stop=10, step=1),
+         'l2': pd.RangeIndex(start=0, stop=10, step=1)},
+        ['l1', 'l2'],
+        ['exog'],
+        {'exog': exog.dtypes},
+        {'l1': pd.Series(
+                   data  = np.array([5., 6., 7., 8., 9.]),
+                   index = pd.RangeIndex(start=5, stop=10, step=1),
+                   name  = 'l1',
+                   dtype = float
+               ),
+         'l2': pd.Series(
+                   data  = np.array([5., 6., 7., 8., 9.]),
+                   index = pd.RangeIndex(start=5, stop=10, step=1),
+                   name  = 'l2',
+                   dtype = float
+               )
+        }
+    )
+
+    pd.testing.assert_frame_equal(results[0], expected[0])
+    pd.testing.assert_series_equal(results[1], expected[1])
+    for k in results[2].keys():
+        pd.testing.assert_index_equal(results[2][k], expected[2][k])
+    assert results[3] == expected[3]
+    assert set(results[4]) == set(expected[4])
+    for k in results[5].keys():
+        assert results[5] == expected[5]
+    for k in results[6].keys():
+        pd.testing.assert_series_equal(results[6][k], expected[6][k])
+
+
+@pytest.mark.parametrize("encoding, dtype", 
+                         [('ordinal'         , int), 
+                          ('ordinal_category', 'category')], 
+                         ids = lambda dt : f'encoding, dtype: {dt}')
+def test_create_train_X_y_output_when_series_and_exog_no_pandas_index_ordinal_encoding(encoding, dtype):
+    """
+    Test the output of _create_train_X_y when series and exog have no pandas index 
+    that doesn't start at 0.
+    """
+    series = pd.DataFrame({'l1': pd.Series(np.arange(10, dtype=float)), 
+                           'l2': pd.Series(np.arange(10, dtype=float))})
+    series.index = np.arange(6, 16)
+    exog = pd.Series(np.arange(100, 110), index=np.arange(6, 16), 
+                     name='exog', dtype=float)
+    
+    forecaster = ForecasterAutoregMultiSeries(
+                    LinearRegression(),
+                    lags=5,
+                    encoding=encoding,
+                    transformer_series=None
+                 )
+    
+    warn_msg = re.escape(
+        ("Series {'l3'} are not present in `series`. No last window is stored for them.")
+    )
+    with pytest.warns(IgnoredArgumentWarning, match = warn_msg): 
+        results = forecaster._create_train_X_y(series=series, exog=exog,
+                                               store_last_window=['l1', 'l2', 'l3'])
+
+    expected = (
+        pd.DataFrame(
+            data = np.array([[4., 3., 2., 1., 0., 0., 105.],
+                             [5., 4., 3., 2., 1., 0., 106.],
+                             [6., 5., 4., 3., 2., 0., 107.],
+                             [7., 6., 5., 4., 3., 0., 108.],
+                             [8., 7., 6., 5., 4., 0., 109.],
+                             [4., 3., 2., 1., 0., 1., 105.],
+                             [5., 4., 3., 2., 1., 1., 106.],
+                             [6., 5., 4., 3., 2., 1., 107.],
+                             [7., 6., 5., 4., 3., 1., 108.],
+                             [8., 7., 6., 5., 4., 1., 109.]]),
+            index   = pd.Index([5, 6, 7, 8, 9, 5, 6, 7, 8, 9]),
+            columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 
+                       '_level_skforecast', 'exog']
+        ).astype({'_level_skforecast': int}).astype({'_level_skforecast': dtype}),
         pd.Series(
             data  = np.array([5, 6, 7, 8, 9, 5, 6, 7, 8, 9]),
             index = pd.Index([5, 6, 7, 8, 9, 5, 6, 7, 8, 9]),
@@ -323,7 +476,7 @@ def test_create_train_X_y_output_when_series_10_and_exog_is_dataframe_of_float_i
                          'exog_2': np.arange(1000, 1010, dtype=dtype)})
 
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5,
-                                              encoding='onehot',
+                                              encoding='ordinal_category',
                                               transformer_series=None)
     
     warn_msg = re.escape(
@@ -335,22 +488,24 @@ def test_create_train_X_y_output_when_series_10_and_exog_is_dataframe_of_float_i
 
     expected = (
         pd.DataFrame(
-            data = np.array([[4., 3., 2., 1., 0., 1., 0., 105., 1005.],
-                             [5., 4., 3., 2., 1., 1., 0., 106., 1006.],
-                             [6., 5., 4., 3., 2., 1., 0., 107., 1007.],
-                             [7., 6., 5., 4., 3., 1., 0., 108., 1008.],
-                             [8., 7., 6., 5., 4., 1., 0., 109., 1009.],
-                             [4., 3., 2., 1., 0., 0., 1., 105., 1005.],
-                             [5., 4., 3., 2., 1., 0., 1., 106., 1006.],
-                             [6., 5., 4., 3., 2., 0., 1., 107., 1007.],
-                             [7., 6., 5., 4., 3., 0., 1., 108., 1008.],
-                             [8., 7., 6., 5., 4., 0., 1., 109., 1009.]]),
+            data = np.array([[4., 3., 2., 1., 0., 0., 105., 1005.],
+                             [5., 4., 3., 2., 1., 0., 106., 1006.],
+                             [6., 5., 4., 3., 2., 0., 107., 1007.],
+                             [7., 6., 5., 4., 3., 0., 108., 1008.],
+                             [8., 7., 6., 5., 4., 0., 109., 1009.],
+                             [4., 3., 2., 1., 0., 1., 105., 1005.],
+                             [5., 4., 3., 2., 1., 1., 106., 1006.],
+                             [6., 5., 4., 3., 2., 1., 107., 1007.],
+                             [7., 6., 5., 4., 3., 1., 108., 1008.],
+                             [8., 7., 6., 5., 4., 1., 109., 1009.]]),
             index   = pd.Index([5, 6, 7, 8, 9, 5, 6, 7, 8, 9]),
             columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 
-                       '1', '2', 'exog_1', 'exog_2']
+                       '_level_skforecast', 'exog_1', 'exog_2']
         ).astype(
-            {'1': int, '2': int, 
+            {'_level_skforecast': int ,
              'exog_1': dtype, 'exog_2': dtype}
+        ).astype(
+            {'_level_skforecast': 'category'}
         ),
         pd.Series(
             data  = np.array([5, 6, 7, 8, 9, 5, 6, 7, 8, 9]),
@@ -457,7 +612,7 @@ def test_create_train_X_y_output_when_series_10_and_exog_is_dataframe_of_bool_st
                          'exog_2': v_exog_2*10})
 
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5,
-                                              encoding='onehot',
+                                              encoding='ordinal_category',
                                               transformer_series=None)
     results = forecaster._create_train_X_y(series=series, exog=exog,
                                            store_last_window=False)    
@@ -477,12 +632,12 @@ def test_create_train_X_y_output_when_series_10_and_exog_is_dataframe_of_bool_st
             index   = pd.Index([5, 6, 7, 8, 9, 5, 6, 7, 8, 9]),
             columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5']
         ).assign(
-            l1     = [1.]*5 + [0.]*5, 
-            l2     = [0.]*5 + [1.]*5,
+            _level_skforecast = [0]*5 + [1]*5,
             exog_1 = v_exog_1*5 + v_exog_1*5, 
             exog_2 = v_exog_2*5 + v_exog_2*5
+        ).astype({'_level_skforecast': int}
         ).astype(
-            {'l1': int, 'l2': int, 
+            {'_level_skforecast': 'category', 
              'exog_1': dtype, 'exog_2': dtype}
         ),
         pd.Series(
@@ -698,7 +853,11 @@ def test_create_train_X_y_output_when_series_10_and_exog_is_dataframe_of_float_i
     assert isinstance(results[6], type(None))
 
 
-def test_create_train_X_y_output_when_series_and_exog_is_dataframe_datetime_index():
+@pytest.mark.parametrize("encoding, dtype", 
+                         [('ordinal'         , int), 
+                          ('ordinal_category', 'category')], 
+                         ids = lambda dt : f'encoding, dtype: {dt}')
+def test_create_train_X_y_output_when_series_and_exog_is_dataframe_datetime_index(encoding, dtype):
     """
     Test the output of _create_train_X_y when series has 2 columns and 
     exog is a pandas dataframe with two columns and datetime index.
@@ -711,21 +870,21 @@ def test_create_train_X_y_output_when_series_and_exog_is_dataframe_datetime_inde
                         index = pd.date_range("1990-01-01", periods=7, freq='D'))
                          
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3,
-                                              encoding='onehot',
+                                              encoding=encoding,
                                               transformer_series=None)
     results = forecaster._create_train_X_y(series=series, exog=exog,
                                            store_last_window=True)
 
     expected = (
         pd.DataFrame(
-            data = np.array([[2.0, 1.0, 0.0, 1., 0., 103., 1003.],
-                             [3.0, 2.0, 1.0, 1., 0., 104., 1004.],
-                             [4.0, 3.0, 2.0, 1., 0., 105., 1005.],
-                             [5.0, 4.0, 3.0, 1., 0., 106., 1006.],
-                             [2.0, 1.0, 0.0, 0., 1., 103., 1003.],
-                             [3.0, 2.0, 1.0, 0., 1., 104., 1004.],
-                             [4.0, 3.0, 2.0, 0., 1., 105., 1005.],
-                             [5.0, 4.0, 3.0, 0., 1., 106., 1006.]]),
+            data = np.array([[2.0, 1.0, 0.0, 0., 103., 1003.],
+                             [3.0, 2.0, 1.0, 0., 104., 1004.],
+                             [4.0, 3.0, 2.0, 0., 105., 1005.],
+                             [5.0, 4.0, 3.0, 0., 106., 1006.],
+                             [2.0, 1.0, 0.0, 1., 103., 1003.],
+                             [3.0, 2.0, 1.0, 1., 104., 1004.],
+                             [4.0, 3.0, 2.0, 1., 105., 1005.],
+                             [5.0, 4.0, 3.0, 1., 106., 1006.]]),
             index   = pd.Index(
                           pd.DatetimeIndex(
                               ['1990-01-04', '1990-01-05', '1990-01-06', '1990-01-07', 
@@ -733,8 +892,9 @@ def test_create_train_X_y_output_when_series_and_exog_is_dataframe_datetime_inde
                           )
                       ),
             columns = ['lag_1', 'lag_2', 'lag_3', 
-                       '1', '2', 'exog_1', 'exog_2']
-        ).astype({'1': int, '2': int}
+                       '_level_skforecast', 'exog_1', 'exog_2']
+        ).astype({'_level_skforecast': int}
+        ).astype({'_level_skforecast': dtype}
         ),
         pd.Series(
             data  = np.array([3., 4., 5., 6., 3., 4., 5., 6.]),
@@ -1721,13 +1881,13 @@ def test_create_train_X_y_output_series_dict_and_exog_dict():
     }
     exog['l1'].index = pd.date_range("1990-01-01", periods=10, freq='D')
     exog['l3'].index = pd.date_range("1990-01-03", periods=4, freq='D')
-    
+
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3,
                                               encoding='onehot',
                                               transformer_series=None)
     results = forecaster._create_train_X_y(series=series, exog=exog,
                                            drop_nan=False)
-    
+
     expected = (
         pd.DataFrame(
             data = np.array([[np.nan, 2., 1., 1., 0., 0., 104., np.nan],
@@ -1742,9 +1902,10 @@ def test_create_train_X_y_output_series_dict_and_exog_dict():
                              [23., 22., 21., 0., 0., 1., np.nan, np.nan]]),
             index   = pd.Index(
                           pd.DatetimeIndex(
-                              ['1990-01-05', '1990-01-06', '1990-01-07', '1990-01-08', '1990-01-09', '1990-01-10',
-                               '1990-01-08', '1990-01-09', 
-                               '1990-01-06', '1990-01-07']
+                              ['1990-01-05', '1990-01-06', '1990-01-07', '1990-01-08',
+                              '1990-01-09', '1990-01-10',
+                              '1990-01-08', '1990-01-09', 
+                              '1990-01-06', '1990-01-07']
                           )
                       ),
             columns = ['lag_1', 'lag_2', 'lag_3', 'l1', 'l2', 'l3', 
@@ -1757,9 +1918,11 @@ def test_create_train_X_y_output_series_dict_and_exog_dict():
             data  = np.array([4., 5., 6., 7., 8., 9., 18., 19., 23., 24.]),
             index = pd.Index(
                         pd.DatetimeIndex(
-                            ['1990-01-05', '1990-01-06', '1990-01-07', '1990-01-08', '1990-01-09', '1990-01-10',
-                             '1990-01-08', '1990-01-09', 
-                             '1990-01-06', '1990-01-07']
+                            ['1990-01-05', '1990-01-06',
+                            '1990-01-07', '1990-01-08',
+                            '1990-01-09', '1990-01-10',
+                            '1990-01-08', '1990-01-09', 
+                            '1990-01-06', '1990-01-07']
                         )
                     ),
             name  = 'y',
@@ -1804,3 +1967,178 @@ def test_create_train_X_y_output_series_dict_and_exog_dict():
         assert results[5] == expected[5]
     for k in results[6].keys():
         pd.testing.assert_series_equal(results[6][k], expected[6][k])
+
+
+@pytest.mark.parametrize(
+    "encoding, dtype",
+    [("ordinal", int), ("ordinal_category", "category")],
+    ids=lambda dt: f"encoding, dtype: {dt}",
+)
+def test_create_train_X_y_output_series_dict_and_exog_dict_ordinal_encoding(
+    encoding, dtype
+):
+    """
+    Test the output of _create_train_X_y when series is a dict and exog is a
+    dict with ordinal encoding.
+    """
+    series = {
+        "l1": pd.Series(np.arange(10, dtype=float)),
+        "l2": pd.Series(np.arange(15, 20, dtype=float)),
+        "l3": pd.Series(np.arange(20, 25, dtype=float)),
+    }
+    series["l1"].loc[3] = np.nan
+    series["l2"].loc[2] = np.nan
+    series["l1"].index = pd.date_range("1990-01-01", periods=10, freq="D")
+    series["l2"].index = pd.date_range("1990-01-05", periods=5, freq="D")
+    series["l3"].index = pd.date_range("1990-01-03", periods=5, freq="D")
+
+    exog = {
+        "l1": pd.Series(np.arange(100, 110), name="exog_1", dtype=float),
+        "l2": None,
+        "l3": pd.DataFrame(
+            {"exog_1": np.arange(203, 207, dtype=float), "exog_2": ["a", "b", "a", "b"]}
+        ),
+    }
+    exog["l1"].index = pd.date_range("1990-01-01", periods=10, freq="D")
+    exog["l3"].index = pd.date_range("1990-01-03", periods=4, freq="D")
+
+    forecaster = ForecasterAutoregMultiSeries(
+        LinearRegression(), lags=3, encoding=encoding, transformer_series=None
+    )
+    results = forecaster._create_train_X_y(series=series, exog=exog, drop_nan=False)
+
+    expected = (
+        pd.DataFrame(
+            data=np.array(
+                [
+                    [np.nan, 2.0, 1.0, 0, 104.0, np.nan],
+                    [4.0, np.nan, 2.0, 0, 105.0, np.nan],
+                    [5.0, 4.0, np.nan, 0, 106.0, np.nan],
+                    [6.0, 5.0, 4.0, 0, 107.0, np.nan],
+                    [7.0, 6.0, 5.0, 0, 108.0, np.nan],
+                    [8.0, 7.0, 6.0, 0, 109.0, np.nan],
+                    [np.nan, 16.0, 15.0, 1, np.nan, np.nan],
+                    [18.0, np.nan, 16.0, 1, np.nan, np.nan],
+                    [22.0, 21.0, 20.0, 2, 206.0, "b"],
+                    [23.0, 22.0, 21.0, 2, np.nan, np.nan],
+                ]
+            ),
+            index=pd.Index(
+                pd.DatetimeIndex(
+                    [
+                        "1990-01-05",
+                        "1990-01-06",
+                        "1990-01-07",
+                        "1990-01-08",
+                        "1990-01-09",
+                        "1990-01-10",
+                        "1990-01-08",
+                        "1990-01-09",
+                        "1990-01-06",
+                        "1990-01-07",
+                    ]
+                )
+            ),
+            columns=[
+                "lag_1",
+                "lag_2",
+                "lag_3",
+                "_level_skforecast",
+                "exog_1",
+                "exog_2",
+            ],
+        )
+        .astype(
+            {
+                "lag_1": float,
+                "lag_2": float,
+                "lag_3": float,
+                "_level_skforecast": int,
+                "exog_1": float,
+                "exog_2": object,
+            }
+        )
+        .astype({"_level_skforecast": dtype}),
+        pd.Series(
+            data=np.array([4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 18.0, 19.0, 23.0, 24.0]),
+            index=pd.Index(
+                pd.DatetimeIndex(
+                    [
+                        "1990-01-05",
+                        "1990-01-06",
+                        "1990-01-07",
+                        "1990-01-08",
+                        "1990-01-09",
+                        "1990-01-10",
+                        "1990-01-08",
+                        "1990-01-09",
+                        "1990-01-06",
+                        "1990-01-07",
+                    ]
+                )
+            ),
+            name="y",
+            dtype=float,
+        ),
+        {
+            "l1": pd.date_range("1990-01-01", periods=10, freq="D"),
+            "l2": pd.date_range("1990-01-05", periods=5, freq="D"),
+            "l3": pd.date_range("1990-01-03", periods=5, freq="D"),
+        },
+        ["l1", "l2", "l3"],
+        ["exog_1", "exog_2"],
+        {"exog_1": exog["l1"].dtypes, "exog_2": exog["l3"].dtypes},
+        {
+            "l1": pd.Series(
+                data=np.array([7.0, 8.0, 9.0]),
+                index=pd.date_range("1990-01-08", periods=3, freq="D"),
+                name="l1",
+                dtype=float,
+            ),
+            "l2": pd.Series(
+                data=np.array([np.nan, 18.0, 19.0]),
+                index=pd.date_range("1990-01-07", periods=3, freq="D"),
+                name="l2",
+                dtype=float,
+            ),
+            "l3": pd.Series(
+                data=np.array([22.0, 23.0, 24.0]),
+                index=pd.date_range("1990-01-05", periods=3, freq="D"),
+                name="l3",
+                dtype=float,
+            ),
+        },
+    )
+    expected[0].iloc[[0, 1, 2, 3, 4, 5, 6, 7, 9], -1] = np.nan
+
+    pd.testing.assert_frame_equal(results[0], expected[0])
+    pd.testing.assert_series_equal(results[1], expected[1])
+    for k in results[2].keys():
+        pd.testing.assert_index_equal(results[2][k], expected[2][k])
+    assert results[3] == expected[3]
+    assert set(results[4]) == set(expected[4])
+    for k in results[5].keys():
+        assert results[5] == expected[5]
+    for k in results[6].keys():
+        pd.testing.assert_series_equal(results[6][k], expected[6][k])
+
+
+@pytest.mark.parametrize("encoding, encoding_mapping", 
+                         [('ordinal'         , {'1': 0, '2': 1}), 
+                          ('ordinal_category', {'1': 0, '2': 1}),
+                          ('onehot'          , {'1': 0, '2': 1})], 
+                         ids = lambda dt : f'encoding, mapping: {dt}')
+def test_create_train_X_y_encoding_mapping(encoding, encoding_mapping):
+    """
+    Test the encoding mapping of _create_train_X_y.
+    """
+    series = pd.DataFrame({'1': pd.Series(np.arange(7, dtype=float)), 
+                           '2': pd.Series(np.arange(7, dtype=float))})
+    forecaster = ForecasterAutoregMultiSeries(
+        LinearRegression(),
+        lags=3,
+        encoding=encoding,
+    )
+    _ = forecaster._create_train_X_y(series=series)
+    
+    assert forecaster.encoding_mapping == encoding_mapping

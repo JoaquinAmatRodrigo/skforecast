@@ -260,7 +260,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self,
         regressor: object,
         lags: Union[int, np.ndarray, list],
-        encoding : str='onehot',
+        encoding : str='ordinal_category',
         transformer_series: Optional[Union[object, dict]]=StandardScaler(),
         transformer_exog: Optional[object]=None,
         weight_func: Optional[Union[Callable, dict]]=None,
@@ -332,7 +332,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         if self.encoding not in ['ordinal', 'ordinal_category', 'onehot']:
             raise ValueError(
                 (f"Argument `encoding` must be one of the following values: 'ordinal', "
-                 f"'ordinal_category', 'onehot'. Got {self.encoding}.")
+                 f"'ordinal_category', 'onehot'. Got '{self.encoding}'.")
             )
 
         if self.encoding == 'onehot':
@@ -848,13 +848,16 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         
         """
 
-        X_train, y_train = self._create_train_X_y(
-                               series            = series, 
-                               exog              = exog, 
-                               drop_nan          = drop_nan, 
-                               store_last_window = False
-                           )[0, 1]
-
+        output = self._create_train_X_y(
+                     series            = series, 
+                     exog              = exog, 
+                     drop_nan          = drop_nan, 
+                     store_last_window = False
+                 )
+        
+        X_train = output[0]
+        y_train = output[1]
+        
         return X_train, y_train
 
 
