@@ -1952,7 +1952,7 @@ def bayesian_search_forecaster_multivariate(
     return results, results_opt_best
 
 
-def select_features_multiseries( #TODO: EXCLUIR LAS COLUMNAS DEL ENCODING DE LAS SERIES, POSIBLEMENTE SACANDOLAS DEL ENCODER DEL FORECASTER
+def select_features_multiseries(
     forecaster: object,
     selector: object,
     series: pd.DataFrame,
@@ -2041,6 +2041,8 @@ def select_features_multiseries( #TODO: EXCLUIR LAS COLUMNAS DEL ENCODING DE LAS
             "`subsample` must be a number greater than 0 and less than or equal to 1."
         )
     
+    forecaster = deepcopy(forecaster)
+    forecaster.fitted = False
     X_train, y_train, _ , _  = forecaster.create_train_X_y(series=series, exog=exog)
 
     if hasattr(forecaster, 'lags'):
@@ -2113,13 +2115,20 @@ def select_features_multiseries( #TODO: EXCLUIR LAS COLUMNAS DEL ENCODING DE LAS
         warnings.warn(
             ("No autoregressive features has been selected. Since a Forecaster "
              "cannot be created without them, be sure to include at least one "
-             "to ensure the autoregressive component of the forecast model "
              "using the `force_inclusion` parameter.")
         )
     else:
         if hasattr(forecaster, 'lags'):
             selected_autoreg = [int(feature.replace('lag_', '')) 
                                 for feature in selected_autoreg]
+
+    # Remove the encoding columns from the selected features
+    if forecaster.encoding == 'onehot':
+        encoding_cols = forecaster.series_col_names
+    else:
+        encoding_cols = '_level_skforecast'
+    selected_autoreg = [col for col in selected_autoreg if col not in encoding_cols]
+    selected_exog = [col for col in selected_exog if col not in encoding_cols]    
 
     if verbose:
         print(f"Recursive feature elimination ({selector.__class__.__name__})")
