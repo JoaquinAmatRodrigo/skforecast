@@ -28,9 +28,9 @@ def test_NotFittedError_is_raised_when_forecaster_is_not_fitted():
                  )
 
     err_msg = re.escape(
-                ("This forecaster is not fitted yet. Call `fit` with appropriate "
-                 "arguments before using `get_feature_importances()`.")
-              )
+        ("This forecaster is not fitted yet. Call `fit` with appropriate "
+         "arguments before using `get_feature_importances()`.")
+    )
     with pytest.raises(NotFittedError, match = err_msg):         
         forecaster.get_feature_importances()
 
@@ -42,8 +42,8 @@ def test_output_get_feature_importances_when_regressor_is_RandomForest():
     """
     forecaster = ForecasterAutoregMultiSeries(
         RandomForestRegressor(n_estimators=1, max_depth=2, random_state=123),
-        lags=3,
-        encoding='onehot'
+        lags     = 3,
+        encoding = 'onehot'
     )
     forecaster.fit(series=series)
 
@@ -64,8 +64,8 @@ def test_output_get_feature_importances_when_regressor_is_RandomForest_with_exog
     """
     forecaster = ForecasterAutoregMultiSeries(
         RandomForestRegressor(n_estimators=1, max_depth=2, random_state=123),
-        lags=3,
-        encoding='onehot'
+        lags     = 3,
+        encoding = 'onehot'
     )
     forecaster.fit(series=series, exog=pd.Series(np.arange(10, 20), name='exog'))
     
@@ -85,8 +85,8 @@ def test_output_get_feature_importances_when_regressor_is_LinearRegression():
     """
     forecaster = ForecasterAutoregMultiSeries(
         LinearRegression(),
-        lags=3,
-        encoding='onehot'
+        lags     = 3,
+        encoding = 'onehot'
     )
     forecaster.fit(series=series)
 
@@ -111,10 +111,10 @@ def test_output_get_feature_importances_when_regressor_is_LinearRegression_with_
 
     forecaster = ForecasterAutoregMultiSeries(
         LinearRegression(),
-        lags=3,
-        transformer_series=None,
-        encoding='onehot'
-        )
+        lags               = 3,
+        transformer_series = None,
+        encoding           = 'onehot'
+    )
     forecaster.fit(series=series_2, exog=pd.Series(np.arange(10, 20), name='exog'))
 
     results = forecaster.get_feature_importances(sort_importance=False)
@@ -142,11 +142,11 @@ def test_output_and_UserWarning_get_feature_importances_when_regressor_no_attrib
     expected = None
 
     warn_msg = re.escape(
-                (f"Impossible to access feature importances for regressor of type "
-                 f"{type(estimator)}. This method is only valid when the "
-                 f"regressor stores internally the feature importances in the "
-                 f"attribute `feature_importances_` or `coef_`.")
-            )
+        (f"Impossible to access feature importances for regressor of type "
+         f"{type(estimator)}. This method is only valid when the "
+         f"regressor stores internally the feature importances in the "
+         f"attribute `feature_importances_` or `coef_`.")
+    )
     with pytest.warns(UserWarning, match = warn_msg):
         results = forecaster.get_feature_importances()
         assert results is expected

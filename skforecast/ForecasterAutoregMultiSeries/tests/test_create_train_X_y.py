@@ -635,6 +635,7 @@ def test_create_train_X_y_output_when_series_10_and_exog_is_dataframe_of_bool_st
             _level_skforecast = [0]*5 + [1]*5,
             exog_1 = v_exog_1*5 + v_exog_1*5, 
             exog_2 = v_exog_2*5 + v_exog_2*5
+        ).astype({'_level_skforecast': int}
         ).astype(
             {'_level_skforecast': 'category', 
              'exog_1': dtype, 'exog_2': dtype}
@@ -892,7 +893,9 @@ def test_create_train_X_y_output_when_series_and_exog_is_dataframe_datetime_inde
                       ),
             columns = ['lag_1', 'lag_2', 'lag_3', 
                        '_level_skforecast', 'exog_1', 'exog_2']
-        ).astype({'_level_skforecast': int}).astype({'_level_skforecast': dtype}),
+        ).astype({'_level_skforecast': int}
+        ).astype({'_level_skforecast': dtype}
+        ),
         pd.Series(
             data  = np.array([3., 4., 5., 6., 3., 4., 5., 6.]),
             index = pd.Index(
@@ -1976,7 +1979,7 @@ def test_create_train_X_y_output_series_dict_and_exog_dict_ordinal_encoding(
 ):
     """
     Test the output of _create_train_X_y when series is a dict and exog is a
-    dict.
+    dict with ordinal encoding.
     """
     series = {
         "l1": pd.Series(np.arange(10, dtype=float)),
@@ -2124,7 +2127,7 @@ def test_create_train_X_y_output_series_dict_and_exog_dict_ordinal_encoding(
                          [('ordinal'         , {'1': 0, '2': 1}), 
                           ('ordinal_category', {'1': 0, '2': 1}),
                           ('onehot'          , {'1': 0, '2': 1})], 
-                         ids = lambda dt : f'encoding, dtype: {dt}')
+                         ids = lambda dt : f'encoding, mapping: {dt}')
 def test_create_train_X_y_encoding_mapping(encoding, encoding_mapping):
     """
     Test the encoding mapping of _create_train_X_y.

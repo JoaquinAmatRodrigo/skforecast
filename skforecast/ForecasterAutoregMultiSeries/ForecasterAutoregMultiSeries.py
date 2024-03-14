@@ -332,7 +332,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         if self.encoding not in ['ordinal', 'ordinal_category', 'onehot']:
             raise ValueError(
                 (f"Argument `encoding` must be one of the following values: 'ordinal', "
-                 f"'ordinal_category', 'onehot'. Got {self.encoding}.")
+                 f"'ordinal_category', 'onehot'. Got '{self.encoding}'.")
             )
 
         if self.encoding == 'onehot':
@@ -849,11 +849,12 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         """
 
         output = self._create_train_X_y(
-                               series            = series, 
-                               exog              = exog, 
-                               drop_nan          = drop_nan, 
-                               store_last_window = False
-                           )
+                     series            = series, 
+                     exog              = exog, 
+                     drop_nan          = drop_nan, 
+                     store_last_window = False
+                 )
+        
         X_train = output[0]
         y_train = output[1]
         
