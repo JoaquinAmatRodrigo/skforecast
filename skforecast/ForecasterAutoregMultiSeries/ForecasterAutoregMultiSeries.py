@@ -363,6 +363,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         else:
             params = self.regressor.get_params()
 
+        training_range = {k: v.astype(str).to_list() for k, v in self.training_range.items()}
         info = (
             f"{'=' * len(type(self).__name__)} \n"
             f"{type(self).__name__} \n"
@@ -380,7 +381,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             f"Exogenous included: {self.included_exog} \n"
             f"Type of exogenous variable: {self.exog_type} \n"
             f"Exogenous variables names: {self.exog_col_names} \n"
-            f"Training range: {self.training_range.to_list() if self.fitted else None} \n"
+            f"Training range: {training_range} \n"
             f"Training index type: {str(self.index_type).split('.')[-1][:-2] if self.fitted else None} \n"
             f"Training index frequency: {self.index_freq if self.fitted else None} \n"
             f"Regressor parameters: {params} \n"
