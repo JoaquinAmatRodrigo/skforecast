@@ -625,19 +625,20 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                                             exog_dict            = exog_dict
                                         )
 
-        if self.fitted and not (exog_col_names == self.exog_col_names):
-            if self.exog_col_names is None:
-                raise ValueError(
-                    ("Once the Forecaster has been trained, `exog` must be `None` "
-                     "because no exogenous variables were added during training.")
-                )
-            else:
-                raise ValueError(
-                    (f"Once the Forecaster has been trained, `exog` must have the "
-                     f"same columns as the series used during training:\n" 
-                     f" Got      : {exog_col_names}\n"
-                     f" Expected : {self.exog_col_names}")
-                )
+            if self.fitted:
+                if self.exog_col_names is None:
+                    raise ValueError(
+                        ("Once the Forecaster has been trained, `exog` must be `None` "
+                         "because no exogenous variables were added during training.")
+                    )
+                else:
+                    if not set(exog_col_names) == set(self.exog_col_names):
+                        raise ValueError(
+                            (f"Once the Forecaster has been trained, `exog` must have the "
+                             f"same columns as the series used during training:\n" 
+                             f" Got      : {exog_col_names}\n"
+                             f" Expected : {self.exog_col_names}")
+                        )
 
         if not self.fitted:
             self.transformer_series_ = initialize_transformer_series(
@@ -713,6 +714,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             if '_dummy_exog_col_to_keep_shape' in X_train_exog.columns:
                 X_train_exog = X_train_exog.drop(columns=['_dummy_exog_col_to_keep_shape'])
 
+            exog_col_names = X_train_exog.columns.to_list()
             exog_dtypes = get_exog_dtypes(exog=X_train_exog)
 
             fit_transformer = False if self.fitted else True
@@ -1190,7 +1192,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         steps: int,
         levels: Optional[Union[str, list]]=None,
         last_window: Optional[pd.DataFrame]=None,
-        exog: Optional[Union[pd.Series, pd.DataFrame]]=None
+        exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None
     ) -> pd.DataFrame:
         """
         Predict n steps ahead. It is an recursive process in which, each prediction,
@@ -1210,7 +1212,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             If `last_window = None`, the values stored in `self.last_window` are
             used to calculate the initial predictors, and the predictions start
             right after training data.
-        exog : pandas Series, pandas DataFrame, default `None`
+        exog : pandas Series, pandas DataFrame, dict, default `None`
             Exogenous variable/s included as predictor/s.
 
         Returns
@@ -1220,7 +1222,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         """
 
-        input_levels_is_list = False 
+        input_levels_is_list = False
         if levels is None:
             levels = self.series_col_names
         elif isinstance(levels, str):
@@ -1255,7 +1257,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             if len(set(training_range_levels)) > 1:
                 max_training_range = max(training_range_levels)
                 selected_levels = [
-                    k 
+                    k
                     for k, v in self.last_window.items()
                     if k in levels and v.index[-1] == max_training_range
                 ]
@@ -1300,24 +1302,40 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         )
 
         last_window = last_window.iloc[-self.window_size:, ].copy()
+        _, last_window_index = preprocess_last_window(
+                                   last_window   = last_window,
+                                   return_values = False
+                               )
+        prediction_index = expand_index(
+                               index = last_window_index,
+                               steps = steps
+                           )
 
         if exog is not None:
-            if isinstance(exog, pd.DataFrame):
-                exog = transform_dataframe(
-                           df                = exog,
-                           transformer       = self.transformer_exog,
-                           fit               = False,
-                           inverse_transform = False
-                       )
+
+            if not isinstance(exog, dict):
+                if isinstance(exog, pd.DataFrame):
+                    exog = transform_dataframe(
+                               df                = exog,
+                               transformer       = self.transformer_exog,
+                               fit               = False,
+                               inverse_transform = False
+                           )
+                else:
+                    exog = transform_series(
+                               series            = exog,
+                               transformer       = self.transformer_exog,
+                               fit               = False,
+                               inverse_transform = False
+                           )
+                check_exog_dtypes(exog=exog)
+                exog_values = exog.to_numpy()[:steps]
             else:
-                exog = transform_series(
-                           series            = exog,
-                           transformer       = self.transformer_exog,
-                           fit               = False,
-                           inverse_transform = False
-                       )
-            check_exog_dtypes(exog=exog)
-            exog_values = exog.to_numpy()[:steps]
+                empty_exog = pd.DataFrame(
+                                 data    = np.nan,
+                                 columns = self.exog_col_names,
+                                 index   = prediction_index
+                             )
         else:
             exog_values = None
 
@@ -1331,9 +1349,28 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                                     fit               = False,
                                     inverse_transform = False
                                 )
-            last_window_values, last_window_index = preprocess_last_window(
-                                                        last_window = last_window_level
-                                                    )
+            last_window_values = last_window_level.to_numpy()
+            
+            if isinstance(exog, dict):
+
+                exog_level = empty_exog.fillna(exog[level])
+
+                if isinstance(exog_level, pd.DataFrame):
+                    exog_level = transform_dataframe(
+                                     df                = exog_level,
+                                     transformer       = self.transformer_exog,
+                                     fit               = False,
+                                     inverse_transform = False
+                                 )
+                else:
+                    exog_level = transform_series(
+                                     series            = exog_level,
+                                     transformer       = self.transformer_exog,
+                                     fit               = False,
+                                     inverse_transform = False
+                                 )
+                check_exog_dtypes(exog=exog_level)
+                exog_values = exog_level.to_numpy()
 
             preds_level = self._recursive_predict(
                               steps       = steps,
@@ -1344,11 +1381,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
             preds_level = pd.Series(
                               data  = preds_level,
-                              index = expand_index(
-                                          index = last_window_index,
-                                          steps = steps
-                                      ),
-                              name = level
+                              index = prediction_index,
+                              name  = level
                           )
 
             preds_level = transform_series(

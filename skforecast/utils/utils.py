@@ -775,63 +775,116 @@ def check_predict_input(
 
     # Checks exog
     if exog is not None:
+
         # Check type, nulls and expected type
-        if not isinstance(exog, (pd.Series, pd.DataFrame)):
-            raise TypeError("`exog` must be a pandas Series or DataFrame.")
-        if exog.isnull().any().any():
-            warnings.warn(
-                ("`exog` has missing values. Most of machine learning models do "
-                 "not allow missing values. `predict` method may fail."), 
-                 MissingValuesWarning
-            )
+        if forecaster_name in ['ForecasterAutoregMultiSeries', 
+                               'ForecasterAutoregMultiSeriesCustom']:
+            if not isinstance(exog, (pd.Series, pd.DataFrame, dict)):
+                raise TypeError(
+                    f"`exog` must be a pandas Series, DataFrame or dict. Got {type(exog)}."
+                )
+        
         if not isinstance(exog, exog_type):
             raise TypeError(
-                f"Expected type for `exog`: {exog_type}. Got {type(exog)}."    
-            )
-        
-        # Check exog has many values as distance to max step predicted
-        last_step = max(steps) if isinstance(steps, list) else steps
-        if len(exog) < last_step:
-            raise ValueError(
-                (f"`exog` must have at least as many values as the distance to "
-                 f"the maximum step predicted, {last_step}.")
+                f"Expected type for `exog`: {exog_type}. Got {type(exog)}."
             )
 
-        # Check all columns are in the pandas DataFrame
-        if isinstance(exog, pd.DataFrame):
-            col_missing = set(exog_col_names).difference(set(exog.columns))
-            if col_missing:
-                raise ValueError(
-                    (f"Missing columns in `exog`. Expected {exog_col_names}. "
-                     f"Got {exog.columns.to_list()}.") 
-                )
+        if isinstance(exog, dict):
+            exogs_to_check = [(f"`exog` for series '{k}'", v) 
+                              for k, v in exog.items() if v is not None]
+        else:
+            exogs_to_check = [('`exog`', exog)]
 
-        # Check index dtype and freq
-        _, exog_index = preprocess_exog(
-                            exog          = exog.iloc[:0, ],
-                            return_values = False
-                        )
-        if not isinstance(exog_index, index_type):
-            raise TypeError(
-                (f"Expected index of type {index_type} for `exog`. "
-                 f"Got {type(exog_index)}.")
-            )   
-        if isinstance(exog_index, pd.DatetimeIndex):
-            if not exog_index.freqstr == index_freq:
+        for exog_name, exog_to_check in exogs_to_check:
+
+            if not isinstance(exog_to_check, (pd.Series, pd.DataFrame)):
                 raise TypeError(
-                    (f"Expected frequency of type {index_freq} for `exog`. "
-                     f"Got {exog_index.freqstr}.")
+                    f"{exog_name} must be a pandas Series or DataFrame. Got {type(exog_to_check)}"
                 )
+            
+            if exog_to_check.isnull().any().any():
+                warnings.warn(
+                    (f"{exog_name} has missing values. Most of machine learning models "
+                     f"do not allow missing values. `predict` method may fail."), 
+                     MissingValuesWarning
+                )
+        
+            # Check exog has many values as distance to max step predicted
+            last_step = max(steps) if isinstance(steps, list) else steps
+            if len(exog_to_check) < last_step:
+                if forecaster_name in ['ForecasterAutoregMultiSeries', 
+                                       'ForecasterAutoregMultiSeriesCustom']:
+                    warnings.warn(
+                        (f"{exog_name} doesn't have as many values as steps "
+                         f"predicted, {last_step}. Missing values are filled "
+                         f"with NaN. Most of machine learning models do not "
+                         f"allow missing values. `predict` method may fail."),
+                         MissingValuesWarning
+                    )
+                else: 
+                    raise ValueError(
+                        (f"{exog_name} must have at least as many values as "
+                         f"steps predicted, {last_step}.")
+                    )
 
-        # Check exog starts one step ahead of last_window end.
-        expected_index = expand_index(last_window.index, 1)[0]
-        if expected_index != exog.index[0]:
-            raise ValueError(
-                (f"To make predictions `exog` must start one step ahead of `last_window`.\n"
-                 f"    `last_window` ends at : {last_window.index[-1]}.\n"
-                 f"    `exog` starts at      : {exog.index[0]}.\n"
-                 f"     Expected index       : {expected_index}.")
-            )
+            # Check all columns are in the pandas DataFrame
+            if isinstance(exog_to_check, pd.DataFrame):
+                col_missing = set(exog_col_names).difference(set(exog_to_check.columns))
+                if col_missing:
+                    if forecaster_name in ['ForecasterAutoregMultiSeries', 
+                                           'ForecasterAutoregMultiSeriesCustom']:
+                        warnings.warn(
+                            (f"{col_missing} not present in {exog_name}. All "
+                             f"values will be NaN."),
+                             MissingValuesWarning
+                        ) 
+                    else:
+                        raise ValueError(
+                            (f"Missing columns in {exog_name}. Expected {exog_col_names}. "
+                             f"Got {exog_to_check.columns.to_list()}.") 
+                        )
+
+            # Check index dtype and freq
+            _, exog_index = preprocess_exog(
+                                exog          = exog_to_check.iloc[:0, ],
+                                return_values = False
+                            )
+            if not isinstance(exog_index, index_type):
+                raise TypeError(
+                    (f"Expected index of type {index_type} for {exog_name}. "
+                     f"Got {type(exog_index)}.")
+                )
+            if forecaster_name not in ['ForecasterAutoregMultiSeries', 
+                                       'ForecasterAutoregMultiSeriesCustom']:
+                if isinstance(exog_index, pd.DatetimeIndex):
+                    if not exog_index.freqstr == index_freq:
+                        raise TypeError(
+                            (f"Expected frequency of type {index_freq} for {exog_name}. "
+                             f"Got {exog_index.freqstr}.")
+                        )
+
+            # Check exog starts one step ahead of last_window end.
+            expected_index = expand_index(last_window.index, 1)[0]
+            if expected_index != exog_to_check.index[0]:
+                if forecaster_name in ['ForecasterAutoregMultiSeries', 
+                                       'ForecasterAutoregMultiSeriesCustom']:
+                    warnings.warn(
+                        (f"To make predictions {exog_name} must start one step "
+                         f"ahead of `last_window`. Missing values are filled "
+                         f"with NaN.\n"
+                         f"    `last_window` ends at : {last_window.index[-1]}.\n"
+                         f"    {exog_name} starts at : {exog_to_check.index[0]}.\n"
+                         f"     Expected index       : {expected_index}."),
+                         MissingValuesWarning
+                    )  
+                else:
+                    raise ValueError(
+                        (f"To make predictions {exog_name} must start one step "
+                         f"ahead of `last_window`.\n"
+                         f"    `last_window` ends at : {last_window.index[-1]}.\n"
+                         f"    {exog_name} starts at : {exog_to_check.index[0]}.\n"
+                         f"     Expected index : {expected_index}.")
+                    )
 
     # Checks ForecasterSarimax
     if forecaster_name == 'ForecasterSarimax':
@@ -2185,9 +2238,11 @@ def check_preprocess_exog_multiseries(
                              f"be equal to ensure the correct alignment of values.")
                         )
         else:
-            not_valid_index = [k
-                               for k, v in exog_dict.items()
-                               if v is not None and not isinstance(v.index, pd.DatetimeIndex)]
+            not_valid_index = [
+                k
+                for k, v in exog_dict.items()
+                if v is not None and not isinstance(v.index, pd.DatetimeIndex)
+            ]
             if not_valid_index:
                 raise TypeError(
                     (f"All exog must have a Pandas DatetimeIndex as index with the "
