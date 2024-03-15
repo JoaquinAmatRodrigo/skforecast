@@ -361,12 +361,26 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                       if key.startswith(name_pipe_steps)}
         else:
             params = self.regressor.get_params()
+        params = [f"{k}: {v}" for k, v in params.items()]
+        if len(params) > 5:
+            params = ", ".join(params[:5] + ['...'])
 
         training_range = (
-            {k: v.astype(str).to_list() for k, v in self.training_range.items()}
+            [f"'{k}': {v.astype(str).to_list()}" for k, v in self.training_range.items()]
             if self.fitted
             else None
         )
+        if training_range is not None and len(training_range) > 3:
+            training_range = ", ".join(training_range[:3] + ['...'])
+
+        series_col_names = self.series_col_names
+        if series_col_names is not None and len(series_col_names) > 5:
+            series_col_names = ", ".join(series_col_names[:5] + ['...'])
+
+        exog_col_names = self.exog_col_names
+        if exog_col_names is not None and len(exog_col_names) > 5:
+            exog_col_names = ", ".join(exog_col_names[:5] + ['...'])
+
         info = (
             f"{'=' * len(type(self).__name__)} \n"
             f"{type(self).__name__} \n"
@@ -377,13 +391,13 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             f"Transformer for exog: {self.transformer_exog} \n"
             f"Series encoding: {self.encoding} \n"
             f"Window size: {self.window_size} \n"
-            f"Series levels (names): {self.series_col_names} \n"
+            f"Series levels (names): {series_col_names} \n"
             f"Series weights: {self.series_weights} \n"
             f"Weight function included: {True if self.weight_func is not None else False} \n"
             f"Differentiation order: {self.differentiation} \n"
             f"Exogenous included: {self.included_exog} \n"
             f"Type of exogenous variable: {self.exog_type} \n"
-            f"Exogenous variables names: {self.exog_col_names} \n"
+            f"Exogenous variables names: {exog_col_names} \n"
             f"Training range: {training_range} \n"
             f"Training index type: {str(self.index_type).split('.')[-1][:-2] if self.fitted else None} \n"
             f"Training index frequency: {self.index_freq if self.fitted else None} \n"
@@ -1314,7 +1328,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         if exog is not None:
 
             if not isinstance(exog, dict):
+
                 if isinstance(exog, pd.DataFrame):
+
                     exog = transform_dataframe(
                                df                = exog,
                                transformer       = self.transformer_exog,
@@ -1331,6 +1347,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 check_exog_dtypes(exog=exog)
                 exog_values = exog.to_numpy()[:steps]
             else:
+                # Empty dataframe to be filled with the exog values of each level
                 empty_exog = pd.DataFrame(
                                  data    = np.nan,
                                  columns = self.exog_col_names,
@@ -1340,7 +1357,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             exog_values = None
 
         predictions = []
-
         for level in levels:
 
             last_window_level = transform_series(
@@ -1352,7 +1368,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             last_window_values = last_window_level.to_numpy()
             
             if isinstance(exog, dict):
-
+                # Fill the empty dataframe with the exog values of each level
+                # and transform them if necessary
                 exog_level = empty_exog.fillna(exog[level])
 
                 if isinstance(exog_level, pd.DataFrame):
