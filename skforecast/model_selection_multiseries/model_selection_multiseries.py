@@ -2081,9 +2081,11 @@ def select_features_multiseries(
             forced_exog = [col for col in exog_cols if re.match(force_inclusion, col)]
 
     if select_only == 'autoreg':
-        X_train = X_train.drop(columns=exog_cols)
+        X_train = X_train.drop(columns=exog_cols + encoding_cols)
     elif select_only == 'exog':
-        X_train = X_train.drop(columns=autoreg_cols)
+        X_train = X_train.drop(columns=autoreg_cols + encoding_cols)
+    else:
+        X_train = X_train.drop(columns=encoding_cols)
 
     if isinstance(subsample, float):
         subsample = int(len(X_train)*subsample)
@@ -2132,10 +2134,7 @@ def select_features_multiseries(
     else:
         if hasattr(forecaster, 'lags'):
             selected_autoreg = [int(feature.replace('lag_', '')) 
-                                for feature in selected_autoreg]
-
-    if exog_cols:
-        exog_cols = [col for col in exog_cols if col not in encoding_cols]   
+                                for feature in selected_autoreg] 
 
     if verbose:
         print(f"Recursive feature elimination ({selector.__class__.__name__})")
