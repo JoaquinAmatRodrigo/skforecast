@@ -1265,7 +1265,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                     )
 
             training_range_levels = [
-                v[-1] for k, v in self.training_range.items()
+                v.index[-1] for k, v in self.last_window.items()
                 if k in levels
             ]
             if len(set(training_range_levels)) > 1:
@@ -1281,8 +1281,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
                 if input_levels_is_list and series_excluded_from_last_window:
                     warnings.warn(
-                        (f"Found series with different ends of training range. "
-                         f"Only series whose last window ends at the same index "
+                        (f"Only series whose last window ends at the same index "
                          f"can be predicted together. Series that not reach the "
                          f"maximum index, {max_training_range}, are excluded "
                          f"from prediction: {series_excluded_from_last_window}."),
