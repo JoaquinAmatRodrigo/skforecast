@@ -816,10 +816,12 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
                 if input_series_is_dict:
 
-                    frequency = set(
-                        [v.freqstr for v in series_indexes.values() if v.freqstr is not None]
-                    )
-                    frequency = list(frequency)[0]
+                    frequency = [
+                        v.freqstr
+                        for v in series_indexes.values()
+                        if v.freqstr is not None
+                    ][0]
+
                     last_window = {
                         k: v.asfreq(frequency)
                         for k, v in last_window.items()
@@ -1115,14 +1117,13 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.X_train_col_names = X_train.columns.to_list()
         self.fitted = True
         self.fit_date = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
-
         self.training_range = {k: v[[0, -1]] for k, v in series_indexes.items()}
-        unique_index = last_window[series_col_names[0]].index
-        self.index_type = type(unique_index)
-        if isinstance(unique_index, pd.DatetimeIndex):
-            self.index_freq = unique_index.freqstr
+        self.index_type = type(series_indexes[series_col_names[0]])
+        if isinstance(series_indexes[series_col_names[0]], pd.DatetimeIndex):
+            freq = [v.freqstr for v in series_indexes.values() if v.freqstr is not None]
+            self.index_freq = freq[0]
         else: 
-            self.index_freq = unique_index.step
+            self.index_freq = series_indexes[series_col_names[0]].step
 
         if exog is not None:
             self.included_exog = True
@@ -1404,7 +1405,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                                      fit               = False,
                                      inverse_transform = False
                                  )
-                check_exog_dtypes(exog=exog_level)
+                check_exog_dtypes(
+                    exog=exog_level,
+                    series_id=f"`exog` for series '{level}'"
+                )
                 exog_values = exog_level.to_numpy()
 
             preds_level = self._recursive_predict(

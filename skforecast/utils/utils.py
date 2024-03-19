@@ -22,6 +22,7 @@ from copy import deepcopy
 
 import skforecast
 from ..exceptions import MissingValuesWarning
+from ..exceptions import MissingExogWarning
 from ..exceptions import DataTypeWarning
 from ..exceptions import IgnoredArgumentWarning
 from ..exceptions import SkforecastVersionWarning
@@ -375,7 +376,8 @@ def check_y(
     
 def check_exog(
     exog: Any,
-    allow_nan: bool=True
+    allow_nan: bool=True,
+    series_id: str="`exog`"
 ) -> None:
     """
     Raise Exception if `exog` is not pandas Series or pandas DataFrame.
@@ -388,6 +390,9 @@ def check_exog(
     allow_nan : bool, default `True`
         If True, allows the presence of NaN values in `exog`. If False (default),
         issue a warning if `exog` contains NaN values.
+    series_id : str, default '`exog`'
+        Identifier of the series for which the exogenous variable/s are used
+        in the warning message.
 
     Returns
     -------
@@ -396,13 +401,13 @@ def check_exog(
     """
     
     if not isinstance(exog, (pd.Series, pd.DataFrame)):
-        raise TypeError("`exog` must be a pandas Series or DataFrame.")
+        raise TypeError(f"{series_id} must be a pandas Series or DataFrame.")
 
     if not allow_nan:
         if exog.isnull().any().any():
             warnings.warn(
-                ("`exog` has missing values. Most machine learning models do not allow "
-                 "missing values. Fitting the forecaster may fail."), 
+                (f"{series_id} has missing values. Most machine learning models "
+                 f"do not allow missing values. Fitting the forecaster may fail."), 
                  MissingValuesWarning
             )
     
@@ -437,7 +442,8 @@ def get_exog_dtypes(
 
 def check_exog_dtypes(
     exog: Union[pd.DataFrame, pd.Series],
-    call_check_exog: bool=True
+    call_check_exog: bool=True,
+    series_id: str="`exog`"
 ) -> None:
     """
     Raise Exception if `exog` has categorical columns with non integer values.
@@ -451,6 +457,9 @@ def check_exog_dtypes(
         Exogenous variable/s included as predictor/s.
     call_check_exog : bool, default `True`
         If `True`, call `check_exog` function.
+    series_id : str, default '`exog`'
+        Identifier of the series for which the exogenous variable/s are used
+        in the warning message.
 
     Returns
     -------
@@ -459,14 +468,14 @@ def check_exog_dtypes(
     """
 
     if call_check_exog:
-        check_exog(exog=exog, allow_nan=False)
+        check_exog(exog=exog, allow_nan=False, series_id=series_id)
 
     if isinstance(exog, pd.DataFrame):
         if not exog.select_dtypes(exclude=[np.number, 'category']).columns.empty:
             warnings.warn(
-                ("`exog` may contain only `int`, `float` or `category` dtypes. Most "
-                 "machine learning models do not allow other types of values. "
-                 "Fitting the forecaster may fail."), DataTypeWarning
+                (f"{series_id} may contain only `int`, `float` or `category` dtypes. "
+                 f"Most machine learning models do not allow other types of values. "
+                 f"Fitting the forecaster may fail."), DataTypeWarning
             )
         for col in exog.select_dtypes(include='category'):
             if exog[col].cat.categories.dtype not in [int, np.int32, np.int64]:
@@ -480,9 +489,9 @@ def check_exog_dtypes(
         if exog.dtype.name not in ['int', 'int8', 'int16', 'int32', 'int64', 'float', 
         'float16', 'float32', 'float64', 'uint8', 'uint16', 'uint32', 'uint64', 'category']:
             warnings.warn(
-                ("`exog` may contain only `int`, `float` or `category` dtypes. Most "
-                 "machine learning models do not allow other types of values. "
-                 "Fitting the forecaster may fail."), DataTypeWarning
+                (f"{series_id} may contain only `int`, `float` or `category` dtypes. Most "
+                 f"machine learning models do not allow other types of values. "
+                 f"Fitting the forecaster may fail."), DataTypeWarning
             )
         if exog.dtype.name == 'category' and exog.cat.categories.dtype not in [int,
         np.int32, np.int64]:
@@ -836,7 +845,7 @@ def check_predict_input(
                         warnings.warn(
                             (f"{col_missing} not present in {exog_name}. All "
                              f"values will be NaN."),
-                             MissingValuesWarning
+                             MissingExogWarning
                         ) 
                     else:
                         raise ValueError(
@@ -2224,7 +2233,7 @@ def check_preprocess_exog_multiseries(
             warnings.warn(
                 (f"{series_not_in_exog} not present in `exog`. All values "
                  f"of the exogenous variables for these series will be NaN."),
-                 MissingValuesWarning
+                 MissingExogWarning
             )
 
         for k, v in exog_dict.items():

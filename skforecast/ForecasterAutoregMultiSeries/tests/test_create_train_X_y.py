@@ -1994,7 +1994,6 @@ def test_create_train_X_y_output_series_dict_and_exog_dict_ordinal_encoding(
 
     exog = {
         "l1": pd.Series(np.arange(100, 110), name="exog_1", dtype=float),
-        "l2": None,
         "l3": pd.DataFrame(
             {"exog_1": np.arange(203, 207, dtype=float), "exog_2": ["a", "b", "a", "b"]}
         ),
