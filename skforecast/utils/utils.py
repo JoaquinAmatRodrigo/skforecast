@@ -2023,7 +2023,8 @@ def check_preprocess_series(
     - If `series` is a pandas DataFrame, it is converted to a dict of pandas 
     Series and index is overwritten according to the rules of preprocess_y.
     - If `series` is a dict, all values are converted to pandas Series. Checks
-    if all index are pandas DatetimeIndex with the same frequency.
+    if all index are pandas DatetimeIndex and, at least, one Series has a non-null
+    frequency. No multiple frequency is allowed.
 
     Parameters
     ----------
@@ -2082,15 +2083,28 @@ def check_preprocess_series(
                  f"same frequency. Review series: {not_valid_index}")
             )
 
-        indexes_freq = [f'{v.index.freq}' 
-                        for v in series_dict.values()]
+        indexes_freq = [f"{v.index.freqstr}" for v in series_dict.values()]
         indexes_freq = sorted(set(indexes_freq))
-        if not len(indexes_freq) == 1:
+        indexes_freq_without_none = [freq for freq in indexes_freq if freq != 'None']
+        if not indexes_freq_without_none:
             raise ValueError(
-                (f"All series must have a Pandas DatetimeIndex as index with the "
-                 f"same frequency. Found frequencies: {indexes_freq}")
+                ("None of the series has a frequency. At least one series must "
+                 "have a non-null frequency.")
             )
-    
+        elif len(indexes_freq_without_none) > 1:
+            raise ValueError(
+                (f"Multiple frequencies found in the series. All series with a "
+                 f"non-null frequency must have the same frequency. Found frequencies: "
+                 f"{indexes_freq}.")
+            )
+        else:
+            if len(indexes_freq_without_none) != len(indexes_freq):
+                warnings.warn(
+                    (f"Detected series with None frequency. The frequency found "
+                     f"in the other series ({indexes_freq_without_none[0]}) will be "
+                     f"used for all series."),
+                     MissingValuesWarning
+                )
     else:
         raise TypeError(
             (f"`series` must be a pandas DataFrame or a dict of DataFrames or Series. "

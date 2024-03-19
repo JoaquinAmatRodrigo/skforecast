@@ -717,7 +717,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         if self.encoding == 'onehot':
             X_train.columns = X_train.columns.str.replace('_level_skforecast_', '')
         elif self.encoding == 'ordinal_category':
-            X_train['_level_skforecast'] = X_train['_level_skforecast'].astype('category')
+            X_train['_level_skforecast'] = (
+                X_train['_level_skforecast'].astype('category')
+            )
 
         del encoded_values
 
@@ -726,7 +728,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
             X_train_exog = pd.concat(X_train_exog_buffer, axis=0)
             if '_dummy_exog_col_to_keep_shape' in X_train_exog.columns:
-                X_train_exog = X_train_exog.drop(columns=['_dummy_exog_col_to_keep_shape'])
+                X_train_exog = (
+                    X_train_exog.drop(columns=['_dummy_exog_col_to_keep_shape'])
+                )
 
             exog_col_names = X_train_exog.columns.to_list()
             exog_dtypes = get_exog_dtypes(exog=X_train_exog)
@@ -755,7 +759,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             warnings.warn(
                 ("NaNs detected in `y_train`. They have been dropped since the "
                  "target variable cannot have NaN values. Same rows have been "
-                 "dropped from `X_train` to maintain alignment."),
+                 "dropped from `X_train` to maintain alignment. This caused by "
+                 "series with interspersed NaNs."),
                  MissingValuesWarning
             )
 
@@ -768,7 +773,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 warnings.warn(
                     ("NaNs detected in `X_train`. They have been dropped. If "
                      "you want to keep them, set `drop_nan = False`. Same rows"
-                     "have been removed from `y_train` to maintain alignment."),
+                     "have been removed from `y_train` to maintain alignment. "
+                     "This caused by series with interspersed NaNs."),
                      MissingValuesWarning
                 )
         else:
@@ -785,26 +791,39 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         last_window = None
         if store_last_window:
 
-            store_series = (
+            series_to_store = (
                 series_col_names if store_last_window is True else store_last_window
             )
 
-            series_not_in_series_dict = set(store_series) - set(series_col_names)
+            series_not_in_series_dict = set(series_to_store) - set(series_col_names)
             if series_not_in_series_dict:
                 warnings.warn(
                     (f"Series {series_not_in_series_dict} are not present in "
                      f"`series`. No last window is stored for them."),
                     IgnoredArgumentWarning
                 )
-                store_series = [s for s in store_series 
-                                if s not in series_not_in_series_dict]
+                series_to_store = [
+                    s for s in series_to_store if s not in series_not_in_series_dict
+                ]
 
-            if store_series:
+            if series_to_store:
+
                 last_window = {
                     k: v.iloc[-self.max_lag:].copy()
                     for k, v in series_dict.items()
-                    if k in store_series
+                    if k in series_to_store
                 }
+
+                if input_series_is_dict:
+
+                    frequency = set(
+                        [v.freqstr for v in series_indexes.values() if v.freqstr is not None]
+                    )
+                    frequency = list(frequency)[0]
+                    last_window = {
+                        k: v.asfreq(frequency)
+                        for k, v in last_window.items()
+                    }
 
         return (
             X_train,
@@ -1098,7 +1117,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.fit_date = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
 
         self.training_range = {k: v[[0, -1]] for k, v in series_indexes.items()}
-        unique_index = series_indexes[series_col_names[0]]
+        unique_index = last_window[series_col_names[0]].index
         self.index_type = type(unique_index)
         if isinstance(unique_index, pd.DatetimeIndex):
             self.index_freq = unique_index.freqstr
