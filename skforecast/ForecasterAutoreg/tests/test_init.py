@@ -41,3 +41,38 @@ def test_init_window_size_is_increased_when_differentiation(dif):
                  )
     
     assert forecaster.window_size == len(forecaster.lags) + dif
+
+
+def test_init_binner_is_created_when_binner_kwargs_is_None():
+    """
+    Test binner is initialized with the default kwargs
+    """
+    forecaster = ForecasterAutoreg(
+                     regressor       = object(),
+                     lags            = 5,
+                 )
+    expected = {
+        'n_bins': 15, 'encode': 'ordinal', 'strategy': 'quantile',
+        'subsample': 10000, 'random_state': 789654, 'dtype': np.float32
+    }
+    assert forecaster.binner.get_params() == expected
+
+
+def test_init_binner_is_created_when_binner_kwargs_is_not_None():
+    """
+    Test binner is initialized with kwargs
+    """
+    binner_kwargs = {
+        'n_bins': 10, 'encode': 'onehot', 'strategy': 'quantile',
+        'subsample': 100, 'random_state': 1234, 'dtype': np.float64
+    }
+    forecaster = ForecasterAutoreg(
+                     regressor       = object(),
+                     lags            = 5,
+                     binner_kwargs   = binner_kwargs
+                 )
+    expected = {
+        'n_bins': 10, 'encode': 'ordinal', 'strategy': 'quantile',
+        'subsample': 100, 'random_state': 1234, 'dtype': np.float32
+    }
+    assert forecaster.binner.get_params() == expected
