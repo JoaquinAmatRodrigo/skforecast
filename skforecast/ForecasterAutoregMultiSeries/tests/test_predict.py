@@ -5,7 +5,6 @@ import pytest
 import numpy as np
 import pandas as pd
 from sklearn.exceptions import NotFittedError
-from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import MinMaxScaler
@@ -18,6 +17,9 @@ from sklearn.pipeline import make_pipeline
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import HistGradientBoostingRegressor
 from lightgbm import LGBMRegressor
+
+from skforecast.exceptions import IgnoredArgumentWarning
+from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 
 # Fixtures
 from .fixtures_ForecasterAutoregMultiSeries import series
@@ -40,6 +42,26 @@ def test_predict_NotFittedError_when_fitted_is_False():
     )
     with pytest.raises(NotFittedError, match = err_msg):
         forecaster.predict(steps=5)
+
+
+def test_predict_IgnoredArgumentWarning_when_not_available_self_last_window_for_levels():
+    """
+    Test IgnoredArgumentWarning is raised when last_window is not available for 
+    levels because it was not stored during fit.
+    """
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5)
+    forecaster.fit(series=series, store_last_window=['1'])
+
+    warn_msg = re.escape(
+        ("{'2'} are excluded from prediction "
+         "since they were not stored in `last_window` attribute "
+         "during training. If you don't want to retrain the "
+         "Forecaster, provide `last_window` as argument.")
+    )
+    with pytest.warns(IgnoredArgumentWarning, match = warn_msg):
+        forecaster.predict(steps=5, levels=['1', '2'], last_window=None)
+
+    
 
 
 @pytest.fixture(params=[('1'  , [50., 51., 52., 53., 54.]), 
