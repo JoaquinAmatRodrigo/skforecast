@@ -44,24 +44,76 @@ def test_predict_NotFittedError_when_fitted_is_False():
         forecaster.predict(steps=5)
 
 
-def test_predict_IgnoredArgumentWarning_when_not_available_self_last_window_for_levels():
+def test_predict_IgnoredArgumentWarning_when_not_available_self_last_window_for_some_levels():
     """
     Test IgnoredArgumentWarning is raised when last_window is not available for 
     levels because it was not stored during fit.
     """
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5)
-    forecaster.fit(series=series, store_last_window=['1'])
+    forecaster.fit(series=series_2, store_last_window=['1'])
 
     warn_msg = re.escape(
-        ("{'2'} are excluded from prediction "
+        ("Levels {'2'} are excluded from prediction "
          "since they were not stored in `last_window` attribute "
          "during training. If you don't want to retrain the "
          "Forecaster, provide `last_window` as argument.")
     )
     with pytest.warns(IgnoredArgumentWarning, match = warn_msg):
-        forecaster.predict(steps=5, levels=['1', '2'], last_window=None)
+        predictions = forecaster.predict(steps=5, levels=['1', '2'], last_window=None)
 
-    
+    expected = pd.DataFrame(
+                   data    = np.array([50., 51., 52., 53., 54.]),
+                   index   = pd.RangeIndex(start=50, stop=55, step=1),
+                   columns = ['1']
+               )
+
+    pd.testing.assert_frame_equal(predictions, expected)
+
+
+@pytest.mark.parametrize("store_last_window",
+                         [['1'], False],
+                         ids=lambda slw: f"store_last_window: {slw}")
+def test_predict_ValueError_when_not_available_self_last_window_for_levels(store_last_window):
+    """
+    Test ValueError is raised when last_window is not available for all 
+    levels because it was not stored during fit.
+    """
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5)
+    forecaster.fit(series=series_2, store_last_window=store_last_window)
+
+    err_msg = re.escape(
+        ("No series to predict. None of the series are present in "
+         "`last_window` attribute. Provide `last_window` as argument "
+         "in predict method.")
+    )
+    with pytest.raises(ValueError, match = err_msg):
+        forecaster.predict(steps=5, levels=['2'], last_window=None)
+
+
+def test_predict_IgnoredArgumentWarning_when_not_available_self_last_window_for_some_levels():
+    """
+    Test IgnoredArgumentWarning is raised when last_window is not available for 
+    levels because it was not stored during fit.
+    """
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5)
+    forecaster.fit(series=series_2, store_last_window=['1'])
+
+    warn_msg = re.escape(
+        ("Levels {'2'} are excluded from prediction "
+         "since they were not stored in `last_window` attribute "
+         "during training. If you don't want to retrain the "
+         "Forecaster, provide `last_window` as argument.")
+    )
+    with pytest.warns(IgnoredArgumentWarning, match = warn_msg):
+        predictions = forecaster.predict(steps=5, levels=['1', '2'], last_window=None)
+
+    expected = pd.DataFrame(
+                   data    = np.array([50., 51., 52., 53., 54.]),
+                   index   = pd.RangeIndex(start=50, stop=55, step=1),
+                   columns = ['1']
+               )
+
+    pd.testing.assert_frame_equal(predictions, expected)
 
 
 @pytest.fixture(params=[('1'  , [50., 51., 52., 53., 54.]), 

@@ -1255,13 +1255,14 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             input_levels_is_list = True
 
         if last_window is None and self.fitted:
-            not_available_last_window = set(levels) - set(self.last_window.keys())
+            available_last_windows = set() if self.last_window is None else set(self.last_window.keys())
+            not_available_last_window = set(levels) - available_last_windows
             if not_available_last_window:
                 warnings.warn(
-                    (f"{not_available_last_window} are excluded from prediction "
-                     f"since they were not stored in `last_window` attribute "
-                     f"during training. If you don't want to retrain the "
-                     f"Forecaster, provide `last_window` as argument."),
+                    (f"Levels {not_available_last_window} are excluded from "
+                     f"prediction since they were not stored in `last_window` "
+                     f"attribute during training. If you don't want to retrain "
+                     f"the Forecaster, provide `last_window` as argument."),
                     IgnoredArgumentWarning
                 )
                 levels = [level for level in levels 
@@ -1274,16 +1275,17 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                          "in predict method.")
                     )
 
-            training_range_levels = [
-                v.index[-1] for k, v in self.last_window.items()
+            last_index_levels = [
+                v.index[-1] 
+                for k, v in self.last_window.items()
                 if k in levels
             ]
-            if len(set(training_range_levels)) > 1:
-                max_training_range = max(training_range_levels)
+            if len(set(last_index_levels)) > 1:
+                max_index_levels = max(last_index_levels)
                 selected_levels = [
                     k
                     for k, v in self.last_window.items()
-                    if k in levels and v.index[-1] == max_training_range
+                    if k in levels and v.index[-1] == max_index_levels
                 ]
 
                 series_excluded_from_last_window = set(levels) - set(selected_levels)
@@ -1293,7 +1295,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                     warnings.warn(
                         (f"Only series whose last window ends at the same index "
                          f"can be predicted together. Series that not reach the "
-                         f"maximum index, {max_training_range}, are excluded "
+                         f"maximum index, {max_index_levels}, are excluded "
                          f"from prediction: {series_excluded_from_last_window}."),
                         IgnoredArgumentWarning
                     )

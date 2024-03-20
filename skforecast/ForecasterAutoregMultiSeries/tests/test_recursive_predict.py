@@ -11,7 +11,7 @@ from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 
 @pytest.mark.parametrize("encoding",
                          ["ordinal", "ordinal_category", "onehot"],
-                         ids=lambda dt: f"encoding: {dt}",)
+                         ids=lambda dt: f"encoding: {dt}")
 def test_recursive_predict_output_when_regressor_is_LinearRegression(encoding):
     """
     Test _recursive_predict output when using LinearRegression as regressor.
@@ -47,7 +47,7 @@ def test_recursive_predict_output_when_regressor_is_LinearRegression(encoding):
 
 @pytest.mark.parametrize("encoding",
                          ["ordinal", "ordinal_category", "onehot"],
-                         ids=lambda dt: f"encoding: {dt}",)
+                         ids=lambda dt: f"encoding: {dt}")
 def test_recursive_predict_output_when_regressor_is_Ridge_StandardScaler(encoding):
     """
     Test _recursive_predict output when using Ridge as regressor and
