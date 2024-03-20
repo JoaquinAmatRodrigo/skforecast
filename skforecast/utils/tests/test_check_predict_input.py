@@ -10,6 +10,7 @@ from skforecast.utils import check_exog
 from skforecast.utils import preprocess_exog
 from skforecast.utils import preprocess_last_window
 from skforecast.exceptions import MissingValuesWarning
+from skforecast.exceptions import MissingExogWarning
 
 
 def test_check_predict_input_NotFittedError_when_fitted_is_False():
@@ -301,10 +302,10 @@ def test_check_predict_input_ValueError_when_levels_not_in_last_window_Forecaste
     Check ValueError is raised when levels are no the same as last_window column names.
     """
     err_msg = re.escape(
-                    (f'`last_window` must contain a column(s) named as the level(s) to be predicted.\n'
-                     f'    `levels` : {levels}.\n'
-                     f'    `last_window` columns : {list(last_window.columns)}.')
-                )
+        (f"`last_window` must contain a column(s) named as the level(s) to be predicted.\n"
+         f"    `levels` : {levels}.\n"
+         f"    `last_window` columns : {list(last_window.columns)}.")
+    )
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
             forecaster_name  = 'ForecasterAutoregMultiSeries',
@@ -546,35 +547,6 @@ def test_check_predict_input_TypeError_when_exog_is_not_pandas_series_or_datafra
         )
 
 
-def test_check_predict_input_MissingValuesWarning_when_exog_has_missing_values():
-    """
-    """
-    warn_msg = re.escape(
-        ("`exog` has missing values. Most of machine learning models do "
-         "not allow missing values. `predict` method may fail.")
-    )
-    with pytest.warns(MissingValuesWarning, match = warn_msg):
-        check_predict_input(
-            forecaster_name  = 'ForecasterAutoreg',
-            steps            = 3,
-            fitted           = True,
-            included_exog    = True,
-            index_type       = pd.DatetimeIndex,
-            index_freq       = 'M',
-            window_size      = 2,
-            last_window      = pd.Series(np.arange(10), index=pd.date_range(start='1/1/2018', periods=10, freq='M')),
-            last_window_exog = None,
-            exog             = pd.Series([1, 2, 3, np.nan], index=pd.date_range(start='11/1/2018', periods=4, freq='M')),
-            exog_type        = pd.Series,
-            exog_col_names   = None,
-            interval         = None,
-            alpha            = None,
-            max_steps        = None,
-            levels           = None,
-            series_col_names = None
-        )
-
-
 def test_check_predict_input_TypeError_when_exog_is_not_of_exog_type():
     """
     """
@@ -604,7 +576,7 @@ def test_check_predict_input_TypeError_when_exog_is_not_of_exog_type():
         )
 
 
-def test_check_predict_input_TypeError_when_exog_dict_and_not_pandas_series_or_dataframe():
+def test_check_predict_input_TypeError_when_exog_dict_and_not_pandas_series_or_DataFrame():
     """
     """
     err_msg = re.escape(
@@ -630,6 +602,70 @@ def test_check_predict_input_TypeError_when_exog_dict_and_not_pandas_series_or_d
             levels           = ['l1'],
             series_col_names = ['l1', 'l2']
         )
+
+
+def test_check_predict_input_MissingValuesWarning_when_exog_has_missing_values():
+    """
+    """
+    warn_msg = re.escape(
+        ("`exog` has missing values. Most of machine learning models do "
+         "not allow missing values. `predict` method may fail.")
+    )
+    with pytest.warns(MissingValuesWarning, match = warn_msg):
+        check_predict_input(
+            forecaster_name  = 'ForecasterAutoreg',
+            steps            = 3,
+            fitted           = True,
+            included_exog    = True,
+            index_type       = pd.DatetimeIndex,
+            index_freq       = 'M',
+            window_size      = 2,
+            last_window      = pd.Series(np.arange(10), index=pd.date_range(start='1/1/2018', periods=10, freq='M')),
+            last_window_exog = None,
+            exog             = pd.Series([1, 2, 3, np.nan], index=pd.date_range(start='11/1/2018', periods=4, freq='M')),
+            exog_type        = pd.Series,
+            exog_col_names   = None,
+            interval         = None,
+            alpha            = None,
+            max_steps        = None,
+            levels           = None,
+            series_col_names = None
+        )
+
+
+@pytest.mark.parametrize("steps", [10, [1, 2, 3, 4, 5, 6], [2, 6]], 
+                         ids=lambda steps: f'steps: {steps}')
+def test_check_predict_input_MissingValuesWarning_when_len_exog_is_less_than_steps_MultiSeries(steps):
+    """
+    """
+    last_step = max(steps) if isinstance(steps, list) else steps
+    warn_msg = re.escape(
+        (f"`exog` doesn't have as many values as steps "
+         f"predicted, {last_step}. Missing values are filled "
+         f"with NaN. Most of machine learning models do not "
+         f"allow missing values. `predict` method may fail."),
+    )
+    with pytest.warns(MissingValuesWarning, match = warn_msg):
+        check_predict_input(
+            forecaster_name  = 'ForecasterAutoregMultiSeries',
+            steps            = steps,
+            fitted           = True,
+            included_exog    = True,
+            index_type       = pd.DatetimeIndex,
+            index_freq       = 'M',
+            window_size      = 5,
+            last_window      = pd.Series(np.arange(10), name='l1', index=pd.date_range(start='1/1/2018', periods=10, freq='M')).to_frame(),
+            last_window_exog = None,
+            exog             = pd.Series(np.arange(5), name='exog1', index=pd.date_range(start='11/1/2018', periods=5, freq='M')),
+            exog_type        = pd.Series,
+            exog_col_names   = None,
+            interval         = None,
+            alpha            = None,
+            max_steps        = None,
+            levels           = ['l1'],
+            series_col_names = ['l1', 'l2']
+        )
+            
 
 
 @pytest.mark.parametrize("steps", [10, [1, 2, 3, 4, 5, 6], [2, 6]], 
@@ -664,7 +700,42 @@ def test_check_predict_input_ValueError_when_len_exog_is_less_than_steps(steps):
         )
 
 
-def test_check_predict_input_ValueError_when_exog_is_dataframe_without_columns_in_exog_col_names():
+def test_check_predict_input_MissingExogWarning_when_exog_is_DataFrame_without_columns_in_exog_col_names_MultiSeries():
+    """
+    Raise MissingExogWarning when there are missing columns in `exog` when 
+    Forecaster multi series.
+    """
+    exog = pd.DataFrame(np.arange(10).reshape(5, 2), columns=['col1', 'col2'])
+    exog.index = pd.date_range(start='1/1/2018', periods=5, freq='M')
+    exog_col_names = ['col1', 'col3']
+
+    warn_msg = re.escape(
+        ("{'col3'} not present in `exog`. All "
+         "values will be NaN.")
+    )
+    with pytest.warns(MissingExogWarning, match = warn_msg):
+        check_predict_input(
+            forecaster_name  = 'ForecasterAutoregMultiSeries',
+            steps            = 2,
+            fitted           = True,
+            included_exog    = True,
+            index_type       = pd.DatetimeIndex,
+            index_freq       = 'M',
+            window_size      = 5,
+            last_window      = pd.DataFrame(np.arange(10), columns=['l1'], index=pd.date_range(start='1/1/2018', periods=10, freq='M')),
+            last_window_exog = None,
+            exog             = exog,
+            exog_type        = pd.DataFrame,
+            exog_col_names   = exog_col_names,
+            interval         = None,
+            alpha            = None,
+            max_steps        = None,
+            levels           = ['l1'],
+            series_col_names = ['l1', 'l2']
+        )
+
+
+def test_check_predict_input_ValueError_when_exog_is_DataFrame_without_columns_in_exog_col_names():
     """
     Raise ValueError when there are missing columns in `exog`.
     """
@@ -672,9 +743,9 @@ def test_check_predict_input_ValueError_when_exog_is_dataframe_without_columns_i
     exog_col_names = ['col1', 'col3']
 
     err_msg = re.escape(
-                (f'Missing columns in `exog`. Expected {exog_col_names}. '
-                 f'Got {exog.columns.to_list()}.')
-              )
+        (f"Missing columns in `exog`. Expected {exog_col_names}. "
+         f"Got {exog.columns.to_list()}.")
+    )
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
             forecaster_name  = 'ForecasterAutoreg',
@@ -941,9 +1012,9 @@ def test_check_predict_input_ValueError_when_ForecasterSarimax_last_window_exog_
     """
     """
     warn_msg = re.escape(
-                ("`last_window_exog` has missing values. Most of machine learning models "
-                 "do not allow missing values. `predict` method may fail.")
-            )
+        ("`last_window_exog` has missing values. Most of machine learning models "
+         "do not allow missing values. `predict` method may fail.")
+    )
     with pytest.warns(MissingValuesWarning, match = warn_msg):
         check_predict_input(
             forecaster_name  = 'ForecasterSarimax',

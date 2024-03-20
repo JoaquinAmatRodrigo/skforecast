@@ -475,7 +475,8 @@ def check_exog_dtypes(
             warnings.warn(
                 (f"{series_id} may contain only `int`, `float` or `category` dtypes. "
                  f"Most machine learning models do not allow other types of values. "
-                 f"Fitting the forecaster may fail."), DataTypeWarning
+                 f"Fitting the forecaster may fail."), 
+                 DataTypeWarning
             )
         for col in exog.select_dtypes(include='category'):
             if exog[col].cat.categories.dtype not in [int, np.int32, np.int64]:
@@ -491,7 +492,8 @@ def check_exog_dtypes(
             warnings.warn(
                 (f"{series_id} may contain only `int`, `float` or `category` dtypes. Most "
                  f"machine learning models do not allow other types of values. "
-                 f"Fitting the forecaster may fail."), DataTypeWarning
+                 f"Fitting the forecaster may fail."), 
+                 DataTypeWarning
             )
         if exog.dtype.name == 'category' and exog.cat.categories.dtype not in [int,
         np.int32, np.int64]:
@@ -2092,28 +2094,14 @@ def check_preprocess_series(
                  f"same frequency. Review series: {not_valid_index}")
             )
 
-        indexes_freq = [f"{v.index.freqstr}" for v in series_dict.values()]
+        indexes_freq = [f'{v.index.freq}' 
+                        for v in series_dict.values()]
         indexes_freq = sorted(set(indexes_freq))
-        indexes_freq_without_none = [freq for freq in indexes_freq if freq != 'None']
-        if not indexes_freq_without_none:
+        if not len(indexes_freq) == 1:
             raise ValueError(
-                ("None of the series has a frequency. At least one series must "
-                 "have a non-null frequency.")
+                (f"All series must have a Pandas DatetimeIndex as index with the "
+                 f"same frequency. Found frequencies: {indexes_freq}")
             )
-        elif len(indexes_freq_without_none) > 1:
-            raise ValueError(
-                (f"Multiple frequencies found in the series. All series with a "
-                 f"non-null frequency must have the same frequency. Found frequencies: "
-                 f"{indexes_freq}.")
-            )
-        else:
-            if len(indexes_freq_without_none) != len(indexes_freq):
-                warnings.warn(
-                    (f"Detected series with None frequency. The frequency found "
-                     f"in the other series ({indexes_freq_without_none[0]}) will be "
-                     f"used for all series."),
-                     MissingValuesWarning
-                )
     else:
         raise TypeError(
             (f"`series` must be a pandas DataFrame or a dict of DataFrames or Series. "
@@ -2248,8 +2236,9 @@ def check_preprocess_exog_multiseries(
                 if v is not None:
                     if len(v) != len(series_index):
                         raise ValueError(
-                            (f"`exog` for series '{k}' must have same number of samples as `series`. "
-                             f"length `exog`: ({len(v)}), length `series`: ({len(series_index)})")
+                            (f"`exog` for series '{k}' must have same number of "
+                             f"samples as `series`. length `exog`: ({len(v)}), "
+                             f"length `series`: ({len(series_index)})")
                         )
                     
                     _, v_index = preprocess_exog(exog=v, return_values=False)
@@ -2257,8 +2246,8 @@ def check_preprocess_exog_multiseries(
                     if not (exog_dict[k].index == series_index).all():
                         raise ValueError(
                             (f"Different index for series '{k}' and its exog. "
-                             f"When `series` is a pandas DataFrame, they must "
-                             f"be equal to ensure the correct alignment of values.")
+                             f"When `series` is a pandas DataFrame, they must be "
+                             f"equal to ensure the correct alignment of values.")
                         )
         else:
             not_valid_index = [
@@ -2282,7 +2271,8 @@ def check_preprocess_exog_multiseries(
     )
 
     # Check that all exog have the same dtypes for common columns
-    exog_dtype_dict = {col_name: set() for col_name in exog_col_names}
+    exog_dtype_dict = {col_name: set() 
+                       for col_name in exog_col_names}
     for v in exog_dict.values():
         if v is not None:
             for col_name in v.columns:

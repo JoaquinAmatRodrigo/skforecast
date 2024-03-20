@@ -549,6 +549,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         return X_train_lags, X_train_exog, y_train
 
+
     def _create_train_X_y(
         self,
         series: Union[pd.DataFrame, dict],
@@ -802,30 +803,15 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                      f"`series`. No last window is stored for them."),
                     IgnoredArgumentWarning
                 )
-                series_to_store = [
-                    s for s in series_to_store if s not in series_not_in_series_dict
-                ]
+                series_to_store = [s for s in series_to_store 
+                                   if s not in series_not_in_series_dict]
 
             if series_to_store:
-
                 last_window = {
                     k: v.iloc[-self.max_lag:].copy()
                     for k, v in series_dict.items()
                     if k in series_to_store
                 }
-
-                if input_series_is_dict:
-
-                    frequency = [
-                        v.freqstr
-                        for v in series_indexes.values()
-                        if v.freqstr is not None
-                    ][0]
-
-                    last_window = {
-                        k: v.asfreq(frequency)
-                        for k, v in last_window.items()
-                    }
 
         return (
             X_train,
@@ -836,6 +822,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             exog_dtypes,
             last_window,
         )
+
 
     def create_train_X_y(
         self,
@@ -896,6 +883,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         y_train = output[1]
 
         return X_train, y_train
+
 
     def create_sample_weights(
         self,
@@ -1013,6 +1001,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         return weights
 
+
     def fit(
         self,
         series: Union[pd.DataFrame, dict],
@@ -1120,8 +1109,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.training_range = {k: v[[0, -1]] for k, v in series_indexes.items()}
         self.index_type = type(series_indexes[series_col_names[0]])
         if isinstance(series_indexes[series_col_names[0]], pd.DatetimeIndex):
-            freq = [v.freqstr for v in series_indexes.values() if v.freqstr is not None]
-            self.index_freq = freq[0]
+            self.index_freq = series_indexes[series_col_names[0]].freqstr
         else: 
             self.index_freq = series_indexes[series_col_names[0]].step
 
@@ -1160,6 +1148,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         if store_last_window:
             self.last_window = last_window
+
 
     def _recursive_predict(
         self,
@@ -1220,6 +1209,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             last_window = np.append(last_window[1:], prediction)
 
         return predictions
+
 
     def predict(
         self,
@@ -1309,8 +1299,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                     )
 
             last_window = pd.DataFrame(
-                {k: v for 
-                 k, v in self.last_window.items() 
+                {k: v 
+                 for k, v in self.last_window.items() 
                  if k in levels}
             )
 
@@ -1405,9 +1395,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                                      fit               = False,
                                      inverse_transform = False
                                  )
+                
                 check_exog_dtypes(
-                    exog=exog_level,
-                    series_id=f"`exog` for series '{level}'"
+                    exog      = exog_level,
+                    series_id = f"`exog` for series '{level}'"
                 )
                 exog_values = exog_level.to_numpy()
 
@@ -1436,6 +1427,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         predictions = pd.concat(predictions, axis=1)
 
         return predictions
+
 
     def predict_bootstrapping(
         self,

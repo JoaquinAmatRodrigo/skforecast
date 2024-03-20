@@ -4,7 +4,7 @@ import re
 import pytest
 import numpy as np
 import pandas as pd
-from skforecast.exceptions import MissingValuesWarning
+from skforecast.exceptions import MissingExogWarning
 from skforecast.utils import check_preprocess_series
 from skforecast.utils import check_preprocess_exog_multiseries
 from skforecast.ForecasterAutoregMultiSeries.tests.fixtures_ForecasterAutoregMultiSeries import series
@@ -254,7 +254,7 @@ def test_MissingValuesWarning_check_preprocess_exog_multiseries_when_exog_is_dic
         ("{'l1'} not present in `exog`. All values "
          "of the exogenous variables for these series will be NaN.")
     )
-    with pytest.warns(MissingValuesWarning, match = warn_msg):
+    with pytest.warns(MissingExogWarning, match = warn_msg):
         check_preprocess_exog_multiseries(
             input_series_is_dict = False,
             series_indexes       = series_indexes,
