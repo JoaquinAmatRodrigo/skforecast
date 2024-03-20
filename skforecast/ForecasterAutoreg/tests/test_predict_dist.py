@@ -36,8 +36,8 @@ def test_predict_dist_output_when_forecaster_is_LinearRegression_steps_is_2_in_s
               )
     
     expected = pd.DataFrame(
-                   data    = np.array([[0.52256427, 0.123189  ],
-                                       [0.11121952, 0.17472563]]),
+                   data    = np.array([[0.8123156 , 0.22809656],
+                                       [0.26405621, 0.22123895]]),
                    columns = ['loc', 'scale'],
                    index   = pd.RangeIndex(start=50, stop=52)
                )
@@ -69,8 +69,8 @@ def test_predict_dist_output_when_forecaster_is_LinearRegression_steps_is_2_in_s
               )
     
     expected = pd.DataFrame(
-                   data    = np.array([[0.52256427, 0.123189  ],
-                                       [0.11121952, 0.17472563]]),
+                   data    = np.array([[0.8123156 , 0.22809656],
+                                       [0.26405621, 0.22123895]]),
                    columns = ['loc', 'scale'],
                    index   = pd.RangeIndex(start=50, stop=52)
                )

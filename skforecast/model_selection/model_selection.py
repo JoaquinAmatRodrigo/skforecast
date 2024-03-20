@@ -293,9 +293,10 @@ def _backtesting_forecaster(
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     refit: Optional[Union[bool, int]]=False,
     interval: Optional[list]=None,
-    n_boot: int=500,
+    n_boot: int=250,
     random_state: int=123,
     in_sample_residuals: bool=True,
+    binned_residuals: bool=False,
     n_jobs: Optional[Union[int, str]]='auto',
     verbose: bool=False,
     show_progress: bool=True
@@ -371,6 +372,10 @@ def _backtesting_forecaster(
         If `True`, residuals from the training data are used as proxy of prediction 
         error to create prediction intervals.  If `False`, out_sample_residuals 
         are used if they are already stored inside the forecaster.
+    binned_residuals : bool, default `False`
+            If `True`, residuals used in each bootstrapping iteration are selected
+            conditioning on the predicted values. If `False`, residuals are selected
+            randomly without conditioning on the predicted values.
     n_jobs : int, 'auto', default `'auto'`
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
         set to the number of cores. If 'auto', `n_jobs` is set using the function
@@ -524,7 +529,8 @@ def _backtesting_forecaster(
                        interval            = interval,
                        n_boot              = n_boot,
                        random_state        = random_state,
-                       in_sample_residuals = in_sample_residuals
+                       in_sample_residuals = in_sample_residuals,
+                       binned_residuals    = binned_residuals,
                    )
         
         if type(forecaster).__name__ != 'ForecasterAutoregDirect' and gap > 0:
@@ -567,9 +573,10 @@ def backtesting_forecaster(
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     refit: Optional[Union[bool, int]]=False,
     interval: Optional[list]=None,
-    n_boot: int=500,
+    n_boot: int=250,
     random_state: int=123,
     in_sample_residuals: bool=True,
+    binned_residuals: bool=False,
     n_jobs: Optional[Union[int, str]]='auto',
     verbose: bool=False,
     show_progress: bool=True
@@ -645,6 +652,10 @@ def backtesting_forecaster(
         If `True`, residuals from the training data are used as proxy of prediction 
         error to create prediction intervals.  If `False`, out_sample_residuals 
         are used if they are already stored inside the forecaster.
+    binned_residuals : bool, default `False`
+            If `True`, residuals used in each bootstrapping iteration are selected
+            conditioning on the predicted values. If `False`, residuals are selected
+            randomly without conditioning on the predicted values.
     n_jobs : int, 'auto', default `'auto'`
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
         set to the number of cores. If 'auto', `n_jobs` is set using the function
@@ -725,6 +736,7 @@ def backtesting_forecaster(
         n_boot                = n_boot,
         random_state          = random_state,
         in_sample_residuals   = in_sample_residuals,
+        binned_residuals      = binned_residuals,
         n_jobs                = n_jobs,
         verbose               = verbose,
         show_progress         = show_progress
