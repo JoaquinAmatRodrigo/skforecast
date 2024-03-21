@@ -4,11 +4,13 @@ import re
 import pytest
 import numpy as np
 import pandas as pd
-from sklearn.linear_model import LinearRegression
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
 
 
 def test_binning_in_sample_residuals_output():
+    """
+    Test that _binning_in_sample_residuals returns the expected output.
+    """
 
     forecaster = ForecasterAutoreg(
         regressor=object(),
@@ -48,7 +50,15 @@ def test_binning_in_sample_residuals_output():
             ])
     }
 
+    expected_3 = {
+        0: (70.70705405481715, 90.25638761254116),
+        1: (90.25638761254116, 109.36821559391004),
+        2: (109.36821559391004, 135.2111448156828)
+    }
+
     np.testing.assert_almost_equal(forecaster.in_sample_residuals, expected_1)
 
     for k in expected_2.keys():
         np.testing.assert_almost_equal(forecaster.in_sample_residuals_by_bin[k], expected_2[k])
+
+    assert forecaster.binner_intervals == expected_3
