@@ -229,6 +229,7 @@ def _backtesting_forecaster_multiseries(
     else:
         n_jobs = n_jobs if n_jobs > 0 else cpu_count()
     
+    # TODO: adapt when series is a dict
     levels = _initialize_levels_model_selection_multiseries(
                  forecaster = forecaster,
                  series     = series,
@@ -246,9 +247,17 @@ def _backtesting_forecaster_multiseries(
     if initial_train_size is not None:
         # First model training, this is done to allow parallelization when `refit` 
         # is `False`. The initial Forecaster fit is outside the auxiliary function.
-        exog_train = exog.iloc[:initial_train_size, ] if exog is not None else None
+
+        series_train, exog_train, span_index = _extract_data_fold(
+            series = series,
+            fold = [[0, None], [], [None, initial_train_size], [], False],
+            exog = exog,
+            span_index = None
+        )
+
+        # exog_train = exog.iloc[:initial_train_size, ] if exog is not None else None
         forecaster.fit(
-            series                    = series.iloc[:initial_train_size, ],
+            series                    = series_train,
             exog                      = exog_train,
             store_in_sample_residuals = store_in_sample_residuals
         )
