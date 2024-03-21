@@ -90,26 +90,33 @@ def test_predict_ValueError_when_not_available_self_last_window_for_levels(store
         forecaster.predict(steps=5, levels=['2'], last_window=None)
 
 
-def test_predict_IgnoredArgumentWarning_when_not_available_self_last_window_for_some_levels():
+def test_predict_IgnoredArgumentWarning_when_levels_is_list_and_different_last_index_in_self_last_window_DatetimeIndex():
     """
-    Test IgnoredArgumentWarning is raised when last_window is not available for 
-    levels because it was not stored during fit.
+    Test IgnoredArgumentWarning is raised when levels is a list and have 
+    different last index in last_window attribute using a DatetimeIndex.
     """
+    series_3 = {
+        '1': series_2['1'].copy(),
+        '2': series_2['2'].iloc[:30].copy(),
+    }
+    series_3['1'].index = pd.date_range(start='2020-01-01', periods=50)
+    series_3['2'].index = pd.date_range(start='2020-01-01', periods=30)
+
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5)
-    forecaster.fit(series=series_2, store_last_window=['1'])
+    forecaster.fit(series=series_3)
 
     warn_msg = re.escape(
-        ("Levels {'2'} are excluded from prediction "
-         "since they were not stored in `last_window` attribute "
-         "during training. If you don't want to retrain the "
-         "Forecaster, provide `last_window` as argument.")
+        ("Only series whose last window ends at the same index "
+         "can be predicted together. Series that not reach the "
+         "maximum index, '2020-02-19 00:00:00', are excluded "
+         "from prediction: {'2'}.")
     )
     with pytest.warns(IgnoredArgumentWarning, match = warn_msg):
         predictions = forecaster.predict(steps=5, levels=['1', '2'], last_window=None)
 
     expected = pd.DataFrame(
                    data    = np.array([50., 51., 52., 53., 54.]),
-                   index   = pd.RangeIndex(start=50, stop=55, step=1),
+                   index   = pd.date_range(start='2020-02-20', periods=5),
                    columns = ['1']
                )
 

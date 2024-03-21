@@ -1295,7 +1295,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                     warnings.warn(
                         (f"Only series whose last window ends at the same index "
                          f"can be predicted together. Series that not reach the "
-                         f"maximum index, {max_index_levels}, are excluded "
+                         f"maximum index, '{max_index_levels}', are excluded "
                          f"from prediction: {series_excluded_from_last_window}."),
                         IgnoredArgumentWarning
                     )
