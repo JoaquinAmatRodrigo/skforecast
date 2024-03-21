@@ -41,6 +41,7 @@ def test_ValueError_bayesian_search_optuna_multiseries_metric_list_duplicate_nam
     forecaster = ForecasterAutoregMultiSeries(
                      regressor = Ridge(random_state=123),
                      lags      = 2,
+                     encoding  = 'onehot'
                  )
 
     steps = 3
@@ -78,6 +79,7 @@ def test_ValueError_bayesian_search_optuna_multiseries_when_search_space_names_d
     forecaster = ForecasterAutoregMultiSeries(
                      regressor = Ridge(random_state=123),
                      lags      = 2,
+                     encoding  = 'onehot'
                  )
 
     steps = 3
@@ -123,7 +125,8 @@ def test_results_output_bayesian_search_optuna_multiseries_ForecasterAutoregMult
     """
     forecaster = ForecasterAutoregMultiSeries(
                      regressor = RandomForestRegressor(random_state=123),
-                     lags      = 2 
+                     lags      = 2,
+                     encoding  = 'onehot'
                  )
 
     steps = 3
@@ -207,7 +210,8 @@ def test_results_output_bayesian_search_optuna_multiseries_with_mocked_when_lags
     """
     forecaster = ForecasterAutoregMultiSeries(
                      regressor = RandomForestRegressor(random_state=123),
-                     lags      = 2 
+                     lags      = 2,
+                     encoding  = 'onehot'
                  )
 
     steps = 3
@@ -290,7 +294,8 @@ def test_results_output_bayesian_search_optuna_multiseries_ForecasterAutoregMult
     """
     forecaster = ForecasterAutoregMultiSeries(
                      regressor = Ridge(random_state=123),
-                     lags      = 2 
+                     lags      = 2,
+                     encoding  = 'onehot'
                  )
 
     steps = 3
@@ -358,7 +363,8 @@ def test_results_output_bayesian_search_optuna_multiseries_with_mocked_when_kwar
     """
     forecaster = ForecasterAutoregMultiSeries(
                      regressor = Ridge(random_state=123),
-                     lags      = 2 
+                     lags      = 2,
+                     encoding  = 'onehot'
                  )
 
     steps = 3
@@ -427,7 +433,8 @@ def test_results_output_bayesian_search_optuna_multiseries_with_mocked_when_kwar
     """
     forecaster = ForecasterAutoregMultiSeries(
                      regressor = RandomForestRegressor(random_state=123),
-                     lags      = 2 
+                     lags      = 2,
+                     encoding  = 'onehot'
                  )
 
     steps = 3
@@ -485,7 +492,8 @@ def test_results_output_bayesian_search_optuna_multiseries_with_mocked_when_lags
     """
     forecaster = ForecasterAutoregMultiSeries(
                      regressor = Ridge(random_state=123),
-                     lags      = 4
+                     lags      = 4,
+                     encoding  = 'onehot'
                  )
 
     steps = 3
@@ -599,7 +607,8 @@ def test_evaluate_bayesian_search_optuna_multiseries_when_return_best_Forecaster
     """
     forecaster = ForecasterAutoregMultiSeries(
                      regressor = Ridge(random_state=123),
-                     lags      = 2 
+                     lags      = 2,
+                     encoding  = 'onehot'
                  )
 
     steps = 3
@@ -683,7 +692,8 @@ def test_results_opt_best_output__bayesian_search_optuna_multiseries_with_output
     """
     forecaster = ForecasterAutoregMultiSeries(
                      regressor = Ridge(random_state=123),
-                     lags      = 2
+                     lags      = 2,
+                     encoding  = 'onehot'
                  )
 
     steps              = 3
@@ -717,7 +727,8 @@ def test_results_opt_best_output__bayesian_search_optuna_multiseries_with_output
         forecaster = ForecasterAutoregMultiSeries(
                          regressor = Ridge(random_state=random_state, 
                                            alpha=alpha),
-                         lags      = 2
+                         lags      = 2,
+                         encoding  = 'onehot'
                      )
 
         metrics_levels, _ = backtesting_forecaster_multiseries(

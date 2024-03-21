@@ -34,6 +34,7 @@ def test_output_grid_search_forecaster_multiseries_ForecasterAutoregMultiSeries_
     forecaster = ForecasterAutoregMultiSeries(
                      regressor          = Ridge(random_state=123),
                      lags               = 2, 
+                     encoding           = 'onehot',
                      transformer_series = None
                  )
 
