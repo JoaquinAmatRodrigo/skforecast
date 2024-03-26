@@ -779,7 +779,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 y_train = y_train.iloc[mask]
                 warnings.warn(
                     ("NaNs detected in `X_train`. They have been dropped. If "
-                     "you want to keep them, set `forecaster.dropna_from_series = False`. 
+                     "you want to keep them, set `forecaster.dropna_from_series = False`. " 
                      "Same rows have been removed from `y_train` to maintain alignment. "
                      "This caused by series with interspersed NaNs."),
                      MissingValuesWarning

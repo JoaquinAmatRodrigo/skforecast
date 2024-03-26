@@ -29,10 +29,13 @@ from ..utils import select_n_jobs_backtesting
 
 optuna.logging.set_verbosity(optuna.logging.WARNING) # disable optuna logs
 
-logging.basicConfig(
-    format = '%(name)-10s %(levelname)-5s %(message)s', 
-    level  = logging.INFO,
-)
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(name)-10s %(levelname)-5s %(message)s')
+console_handler.setFormatter(formatter)
+logger.addHandler(console_handler)
 
 
 def _initialize_levels_model_selection_multiseries(
@@ -101,14 +104,13 @@ def _extract_data_fold_multiseries(
     fold: list,
     exog: Optional[Union[pd.Series, pd.DataFrame, dict]] = None,
     span_index: Optional[Union[pd.DatetimeIndex, pd.RangeIndex]] = None,
-    drop_nan_last_window: bool = False,
-
+    dropna_last_window: bool = False,
 ) -> Tuple[
     Union[pd.Series, pd.DataFrame, dict],
     pd.DataFrame,
     list,
     Union[pd.Series, pd.DataFrame, dict],
-    Union[pd.DatetimeIndex, pd.RangeIndex]
+    Union[pd.DatetimeIndex, pd.RangeIndex],
 ]:
     """
     Select the data from series and exog that corresponds to the fold created using the
@@ -148,7 +150,14 @@ def _extract_data_fold_multiseries(
     last_window_iloc_end   = fold[1][1]
     test_iloc_start        = fold[2][0]
     test_iloc_end          = fold[2][1]
-    
+
+    logger.debug(
+        f"\n"
+        f"Train fold       : {train_iloc_start} - {train_iloc_end}\n"
+        f"Last window fold : {last_window_iloc_start} - {last_window_iloc_end}\n"
+        f"Test fold        : {test_iloc_start} - {test_iloc_end}"
+    )
+
     if isinstance(series, dict) or isinstance(exog, dict):
         if span_index is None:
             if isinstance(series, dict):
@@ -167,6 +176,13 @@ def _extract_data_fold_multiseries(
         test_loc_start = span_index[test_iloc_start]
         test_loc_end = span_index[test_iloc_end]
 
+        logger.debug(
+            f"\n"
+            f"Train fold       : {train_loc_start} - {train_loc_end}\n"
+            f"Last window fold : {last_window_loc_start} - {last_window_loc_end}\n"
+            f"Test fold        : {test_loc_start} - {test_loc_end}"
+        )
+
     if isinstance(series, (pd.Series, pd.DataFrame)):
         series_train = series.iloc[train_iloc_start:train_iloc_end, ]
         series_last_window = series.iloc[last_window_iloc_start:last_window_iloc_end, ]
@@ -179,12 +195,12 @@ def _extract_data_fold_multiseries(
             k: v.loc[last_window_loc_start:last_window_loc_end] for k, v in series.items()
         }
         series_last_window = pd.DataFrame(series_last_window)
-        if drop_nan_last_window:
+        if dropna_last_window:
             series_last_window = series_last_window.dropna(axis=1, how='any')
             # TODO: add the option to drop the series without minimum non NaN values.
             # Similar to how pandas does in the rolling window function.
         levels_last_window = list(series_last_window.columns)
-        
+
     if exog is not None:
         if isinstance(exog, (pd.Series, pd.DataFrame)):
             exog_train = exog.iloc[train_iloc_start:train_iloc_end, :]
@@ -368,7 +384,7 @@ def _backtesting_forecaster_multiseries(
                         fold=fold_initial_train,
                         exog=exog,
                         span_index=None,
-                        drop_nan_last_window=forecaster.drop_nan_from_series,
+                        dropna_last_window=forecaster.dropna_from_series,
                     )
         series_train, _, last_window_levels, exog_train, _, span_index = next(data_fold)
 
@@ -422,11 +438,12 @@ def _backtesting_forecaster_multiseries(
 
     # TODO:
     # Crear una lista con los datos de cada fold antes de paralelizar
-    data_folds = [
-        _extract_data_fold_multiseries(series=series, fold=fold, exog=exog, span_index=None)
-        for fold in folds
-    ]
-
+    # data_folds = [
+    #     _extract_data_fold_multiseries(
+    #         series=series, fold=fold, exog=exog, span_index=span_index
+    #     )
+    #     for fold in folds
+    # ]
 
     def _fit_predict_forecaster(series, exog, forecaster, interval, fold, span_index):
         """
@@ -440,7 +457,7 @@ def _backtesting_forecaster_multiseries(
                         fold=fold,
                         exog=exog,
                         span_index=span_index,
-                        drop_nan_last_window=forecaster.drop_nan_from_series
+                        dropna_last_window=forecaster.dropna_from_series
                     )
         (
             series_train,
