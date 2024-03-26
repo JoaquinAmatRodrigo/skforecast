@@ -111,6 +111,12 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         **WARNING: This argument is newly introduced and requires special attention. It
         is still experimental and may undergo changes.**
         **New in version 0.12.0**
+    dropna_from_series : bool, default `False`
+        NaNs detected in training matrices will be dropped.
+
+        - If `True`, drop NaNs in X_train and same rows in y_train.
+        - If `False`, leave NaNs in X_train and warn the user.
+        **New in version 0.12.0**
     fit_kwargs : dict, default `None`
         Additional arguments to be passed to the `fit` method of the regressor.
     forecaster_id : str, int, default `None`
@@ -131,6 +137,12 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         values from 0 to n_series - 1 and the column is transformed into 
         pandas.category dtype so that it can be used as a categorical variable. 
         - If `'onehot'`, a binary column is created for each series.
+        **New in version 0.12.0**
+    dropna_from_series : bool, default `False`
+        NaNs detected in training matrices will be dropped.
+
+        - If `True`, drop NaNs in X_train and same rows in y_train.
+        - If `False`, leave NaNs in X_train and warn the user.
         **New in version 0.12.0**
     transformer_series : transformer (preprocessor), dict
         An instance of a transformer (preprocessor) compatible with the scikit-learn
@@ -266,6 +278,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         weight_func: Optional[Union[Callable, dict]]=None,
         series_weights: Optional[dict]=None,
         differentiation: Optional[int]=None,
+        dropna_from_series: bool=False,
         fit_kwargs: Optional[dict]=None,
         forecaster_id: Optional[Union[str, int]]=None
     ) -> None:
@@ -275,6 +288,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.transformer_series_     = None
         self.transformer_exog        = transformer_exog
         self.encoding                = encoding
+        self.dropna_from_series      = dropna_from_series
         self.encoder                 = None
         self.encoding_mapping        = {}
         self.weight_func             = weight_func
@@ -554,7 +568,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self,
         series: Union[pd.DataFrame, dict],
         exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
-        drop_nan: bool=False,
         store_last_window: Union[bool, list]=True,
     ) -> Tuple[pd.DataFrame, pd.Series, dict, list, list, dict, dict]:
         """
@@ -568,13 +581,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             Training time series.
         exog : pandas Series, pandas DataFrame, dict, default `None`
             Exogenous variable/s included as predictor/s.
-        drop_nan : bool, default `False`
-            NaNs detected in `y_train` will be dropped since the target variable 
-            cannot have NaN values. Same rows are dropped from `X_train` to 
-            maintain alignment. Regarding `X_train`:
-
-            - If `True`, drop NaNs in X_train and same rows in y_train.
-            - If `False`, leave NaNs in X_train and warn the user.
         store_last_window : bool, list, default `True`
             Whether or not to store the last window of training data.
 
@@ -765,7 +771,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                  MissingValuesWarning
             )
 
-        if drop_nan:
+        if self.dropna_from_series:
             # TODO: review when we have a full exog as NaN
             if X_train.isnull().any().any():
                 mask = X_train.notna().all(axis=1).to_numpy()
@@ -773,8 +779,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 y_train = y_train.iloc[mask]
                 warnings.warn(
                     ("NaNs detected in `X_train`. They have been dropped. If "
-                     "you want to keep them, set `drop_nan = False`. Same rows"
-                     "have been removed from `y_train` to maintain alignment. "
+                     "you want to keep them, set `forecaster.dropna_from_series = False`. 
+                     "Same rows have been removed from `y_train` to maintain alignment. "
                      "This caused by series with interspersed NaNs."),
                      MissingValuesWarning
                 )
@@ -783,7 +789,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 warnings.warn(
                     ("NaNs detected in `X_train`. Some regressor do not allow "
                      "NaN values during training. If you want to drop them, "
-                     "set `drop_nan = True`."),
+                     "set `forecaster.dropna_from_series = True`."),
                      MissingValuesWarning
                 )
 
@@ -828,7 +834,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self,
         series: Union[pd.DataFrame, dict],
         exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
-        drop_nan: bool=False
     ) -> Tuple[pd.DataFrame, pd.Series]:
         """
         Create training matrices from multiple time series and exogenous
@@ -841,13 +846,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             Training time series.
         exog : pandas Series, pandas DataFrame, dict, default `None`
             Exogenous variable/s included as predictor/s.
-        drop_nan : bool, default `False`
-            NaNs detected in `y_train` will be dropped since the target variable 
-            cannot have NaN values. Same rows are dropped from `X_train` to 
-            maintain alignment. Regarding `X_train`:
-
-            - If `True`, drop NaNs in X_train and same rows in y_train.
-            - If `False`, leave NaNs in X_train and warn the user.
 
         Returns
         -------
@@ -875,7 +873,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         output = self._create_train_X_y(
                      series            = series, 
                      exog              = exog, 
-                     drop_nan          = drop_nan, 
                      store_last_window = False
                  )
 
@@ -1006,7 +1003,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self,
         series: Union[pd.DataFrame, dict],
         exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
-        drop_nan: bool=False,
         store_last_window: Union[bool, list]=True,
         store_in_sample_residuals: bool=True
     ) -> None:
@@ -1023,13 +1019,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             Training time series.
         exog : pandas Series, pandas DataFrame, dict, default `None`
             Exogenous variable/s included as predictor/s.
-        drop_nan : bool, default `False`
-            NaNs detected in `y_train` will be dropped since the target variable 
-            cannot have NaN values. Same rows are dropped from `X_train` to 
-            maintain alignment. Regarding `X_train`:
-
-            - If `True`, drop NaNs in X_train and same rows in y_train.
-            - If `False`, leave NaNs in X_train and warn the user.
         store_last_window : bool, list, default `True`
             Whether or not to store the last window of training data.
 
@@ -1084,7 +1073,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             exog_dtypes,
             last_window
         ) = self._create_train_X_y(
-                series=series, exog=exog, drop_nan=drop_nan, store_last_window=store_last_window
+                series=series, exog=exog, store_last_window=store_last_window
         )
 
         sample_weight = self.create_sample_weights(
