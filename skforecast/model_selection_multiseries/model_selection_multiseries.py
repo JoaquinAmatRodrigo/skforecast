@@ -202,7 +202,7 @@ def _extract_data_fold_multiseries(
         exog_train = None
         exog_test = None
 
-    return series_train, series_last_window, levels_last_window, exog_train, exog_test, span_index
+    yield series_train, series_last_window, levels_last_window, exog_train, exog_test, span_index
 
 
 def _backtesting_forecaster_multiseries(
@@ -363,15 +363,14 @@ def _backtesting_forecaster_multiseries(
             [0, 0], # dummy values
             True
         ]
-        series_train, _, last_window_levels, exog_train, _, span_index = (
-            _extract_data_fold_multiseries(
-                series=series,
-                fold=fold_initial_train,
-                exog=exog,
-                span_index=None,
-                drop_nan_last_window=forecaster.drop_nan_from_series,
-            )
-        )
+        data_fold = _extract_data_fold_multiseries(
+                        series=series,
+                        fold=fold_initial_train,
+                        exog=exog,
+                        span_index=None,
+                        drop_nan_last_window=forecaster.drop_nan_from_series,
+                    )
+        series_train, _, last_window_levels, exog_train, _, span_index = next(data_fold)
 
         forecaster.fit(
             series                    = series_train,
@@ -423,7 +422,11 @@ def _backtesting_forecaster_multiseries(
 
     # TODO:
     # Crear una lista con los datos de cada fold antes de paralelizar
-    # data_fold = [_extract_data_fold(series, fold, exog) for fold in folds]
+    data_folds = [
+        _extract_data_fold_multiseries(series=series, fold=fold, exog=exog, span_index=None)
+        for fold in folds
+    ]
+
 
     def _fit_predict_forecaster(series, exog, forecaster, interval, fold, span_index):
         """
@@ -431,6 +434,14 @@ def _backtesting_forecaster_multiseries(
         function used to parallelize the backtesting_forecaster_multiseries
         function.
         """
+
+        data_fold = _extract_data_fold_multiseries(
+                        series=series,
+                        fold=fold,
+                        exog=exog,
+                        span_index=span_index,
+                        drop_nan_last_window=forecaster.drop_nan_from_series
+                    )
         (
             series_train,
             last_window_series,
@@ -438,13 +449,7 @@ def _backtesting_forecaster_multiseries(
             exog_train,
             next_window_exog,
             span_index,
-        ) = _extract_data_fold_multiseries(
-            series=series,
-            fold=fold,
-            exog=exog,
-            span_index=span_index,
-            drop_nan_last_window=forecaster.drop_nan_from_series,
-        )
+        ) = next(data_fold)
 
         if fold[4] is False:
             # When the model is not fitted, last_window must be updated to include
