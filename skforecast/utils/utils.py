@@ -2054,9 +2054,9 @@ def check_preprocess_series(
     if isinstance(series, pd.DataFrame):
 
         _, series_index = preprocess_y(y=series, return_values=False)
-        series_dict = series.copy()
-        series_dict.index = series_index
-        series_dict = series_dict.to_dict("series")
+        series = series.copy()
+        series.index = series_index
+        series_dict = series.to_dict("series")
     
     elif isinstance(series, dict):
 
