@@ -30,9 +30,9 @@ from ..utils import select_n_jobs_backtesting
 optuna.logging.set_verbosity(optuna.logging.WARNING) # disable optuna logs
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 console_handler = logging.StreamHandler()
-console_handler.setLevel(logging.DEBUG)
+console_handler.setLevel(logging.INFO)
 formatter = logging.Formatter('%(name)-10s %(levelname)-5s %(message)s')
 console_handler.setFormatter(formatter)
 logger.addHandler(console_handler)
@@ -92,7 +92,10 @@ def _initialize_levels_model_selection_multiseries(
     else:
         if levels is None:
             # Forecaster could be untrained, so self.series_col_names cannot be used.
-            levels = list(series.columns) 
+            if isinstance(series, pd.DataFrame):
+                levels = list(series.columns)
+            else:
+                levels = list(series.keys())
         elif isinstance(levels, str):
             levels = [levels]
 
@@ -183,7 +186,7 @@ def _extract_data_fold_multiseries(
             f"Test fold        : {test_loc_start} - {test_loc_end}"
         )
 
-    if isinstance(series, (pd.Series, pd.DataFrame)):
+    if isinstance(series, pd.DataFrame):
         series_train = series.iloc[train_iloc_start:train_iloc_end, ]
         series_last_window = series.iloc[last_window_iloc_start:last_window_iloc_end, ]
     else:
@@ -195,11 +198,12 @@ def _extract_data_fold_multiseries(
             k: v.loc[last_window_loc_start:last_window_loc_end] for k, v in series.items()
         }
         series_last_window = pd.DataFrame(series_last_window)
-        if dropna_last_window:
-            series_last_window = series_last_window.dropna(axis=1, how='any')
-            # TODO: add the option to drop the series without minimum non NaN values.
-            # Similar to how pandas does in the rolling window function.
-        levels_last_window = list(series_last_window.columns)
+        
+    if dropna_last_window:
+        series_last_window = series_last_window.dropna(axis=1, how='any')
+        # TODO: add the option to drop the series without minimum non NaN values.
+        # Similar to how pandas does in the rolling window function.
+    levels_last_window = list(series_last_window.columns)
 
     if exog is not None:
         if isinstance(exog, (pd.Series, pd.DataFrame)):
@@ -218,7 +222,7 @@ def _extract_data_fold_multiseries(
         exog_train = None
         exog_test = None
 
-    yield series_train, series_last_window, levels_last_window, exog_train, exog_test, span_index
+    yield series_train, series_last_window, levels_last_window, exog_train, exog_test, span_index, fold
 
 
 def _backtesting_forecaster_multiseries(
@@ -386,7 +390,7 @@ def _backtesting_forecaster_multiseries(
                         span_index=None,
                         dropna_last_window=forecaster.dropna_from_series,
                     )
-        series_train, _, last_window_levels, exog_train, _, span_index = next(data_fold)
+        series_train, _, last_window_levels, exog_train, _, span_index, _ = next(data_fold)
 
         forecaster.fit(
             series                    = series_train,
@@ -438,27 +442,24 @@ def _backtesting_forecaster_multiseries(
 
     # TODO:
     # Crear una lista con los datos de cada fold antes de paralelizar
-    # data_folds = [
-    #     _extract_data_fold_multiseries(
-    #         series=series, fold=fold, exog=exog, span_index=span_index
-    #     )
-    #     for fold in folds
-    # ]
+    data_folds = [
+        _extract_data_fold_multiseries(
+            series=series,
+            fold=fold,
+            exog=exog,
+            span_index=span_index,
+            dropna_last_window=forecaster.dropna_from_series,
+        )
+        for fold in folds
+    ]
 
-    def _fit_predict_forecaster(series, exog, forecaster, interval, fold, span_index):
+    def _fit_predict_forecaster(data_fold, forecaster, interval):
         """
         Fit the forecaster and predict `steps` ahead. This is an auxiliary 
         function used to parallelize the backtesting_forecaster_multiseries
         function.
         """
 
-        data_fold = _extract_data_fold_multiseries(
-                        series=series,
-                        fold=fold,
-                        exog=exog,
-                        span_index=span_index,
-                        dropna_last_window=forecaster.dropna_from_series
-                    )
         (
             series_train,
             last_window_series,
@@ -466,30 +467,16 @@ def _backtesting_forecaster_multiseries(
             exog_train,
             next_window_exog,
             span_index,
-        ) = next(data_fold)
+            fold
+        ) = data_fold
 
-        if fold[4] is False:
-            # When the model is not fitted, last_window must be updated to include
-            # the data needed to make predictions.
-            # last_window_series = series.iloc[last_window_start:last_window_end, ]
-            pass
-        else:
-            # The model is fitted before making predictions. If `fixed_train_size`
-            # the train size doesn't increase but moves by `steps` in each iteration.
-            # If `False` the train size increases by `steps` in each  iteration.
-
-            # TODO: Review when series and exog are dict
-            # series_train = series.iloc[train_idx_start:train_idx_end, ]
-            # exog_train = exog.iloc[train_idx_start:train_idx_end, ] if exog is not None else None
-            # last_window_series = None
+        if fold[4] is True:
             forecaster.fit(
                 series                    = series_train, 
                 exog                      = exog_train,
                 store_last_window         = last_window_levels,
                 store_in_sample_residuals = store_in_sample_residuals
             )
-
-        # next_window_exog = exog.iloc[test_idx_start:test_idx_end, ] if exog is not None else None
 
         test_iloc_start = fold[2][0]
         test_iloc_end   = fold[2][1]
@@ -499,7 +486,7 @@ def _backtesting_forecaster_multiseries(
             test_iloc_start = fold[3][0]
             test_iloc_end   = fold[3][1]
             steps = list(np.arange(len(range(test_iloc_start, test_iloc_end))) + gap + 1)
-
+        print(last_window_levels)
         if interval is None:
             pred = forecaster.predict(
                        steps       = steps, 
@@ -527,32 +514,37 @@ def _backtesting_forecaster_multiseries(
     backtest_predictions = (
         Parallel(n_jobs=n_jobs)
         (delayed(_fit_predict_forecaster)
-        (series=series, exog=exog, forecaster=forecaster, interval=interval, fold=fold)
-         for fold in folds)
+        (data_fold=next(data_fold), forecaster=forecaster, interval=interval)
+         for data_fold in data_folds)
     )
 
-    backtest_predictions = pd.concat(backtest_predictions)
+    backtest_predictions = pd.concat(backtest_predictions, axis=0)
 
     for level in levels:
         missing_index = series[level][series[level].isna()].index
         backtest_predictions.loc[missing_index, level] = np.nan
 
-    metrics_levels = [[m(
-                         y_true = series[level].loc[backtest_predictions.index],
-                         y_pred = backtest_predictions[level]
-                        ) for m in metrics
-                      ] for level in levels]
+    # metrics_levels = [
+    #     [
+    #         m(
+    #             y_true=series[level].loc[backtest_predictions.index],
+    #             y_pred=backtest_predictions[level],
+    #         )
+    #         for m in metrics
+    #     ]
+    #     for level in levels
+    # ]
 
-    metrics_levels = pd.concat(
-                         [pd.DataFrame({'levels': levels}), 
-                          pd.DataFrame(
-                              data    = metrics_levels,
-                              columns = [m if isinstance(m, str) else m.__name__ 
-                                         for m in metrics]
-                          )],
-                         axis=1
-                     )
-
+    # metrics_levels = pd.concat(
+    #                      [pd.DataFrame({'levels': levels}),
+    #                       pd.DataFrame(
+    #                           data    = metrics_levels,
+    #                           columns = [m if isinstance(m, str) else m.__name__
+    #                                      for m in metrics]
+    #                       )],
+    #                      axis=1
+    #                  )
+    metrics_levels= None
     return metrics_levels, backtest_predictions
 
 
