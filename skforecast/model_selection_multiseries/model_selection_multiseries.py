@@ -358,7 +358,6 @@ def _backtesting_forecaster_multiseries(
     else:
         n_jobs = n_jobs if n_jobs > 0 else cpu_count()
 
-    # TODO: adapt when series is a dict
     levels = _initialize_levels_model_selection_multiseries(
                  forecaster = forecaster,
                  series     = series,
@@ -373,6 +372,7 @@ def _backtesting_forecaster_multiseries(
 
     store_in_sample_residuals = False if interval is None else True
 
+    span_index = None
     if initial_train_size is not None:
         # First model training, this is done to allow parallelization when `refit`
         # is `False`. The initial Forecaster fit is outside the auxiliary function.
@@ -387,7 +387,7 @@ def _backtesting_forecaster_multiseries(
                         series=series,
                         fold=fold_initial_train,
                         exog=exog,
-                        span_index=None,
+                        span_index=span_index,
                         dropna_last_window=forecaster.dropna_from_series,
                     )
         series_train, _, last_window_levels, exog_train, _, span_index, _ = next(data_fold)
@@ -440,8 +440,6 @@ def _backtesting_forecaster_multiseries(
     if show_progress:
         folds = tqdm(folds)
 
-    # TODO:
-    # Crear una lista con los datos de cada fold antes de paralelizar
     data_folds = [
         _extract_data_fold_multiseries(
             series=series,
@@ -453,7 +451,7 @@ def _backtesting_forecaster_multiseries(
         for fold in folds
     ]
 
-    def _fit_predict_forecaster(data_fold, forecaster, interval):
+    def _fit_predict_forecaster(data_fold, forecaster, interval, levels):
         """
         Fit the forecaster and predict `steps` ahead. This is an auxiliary 
         function used to parallelize the backtesting_forecaster_multiseries
@@ -486,18 +484,19 @@ def _backtesting_forecaster_multiseries(
             test_iloc_start = fold[3][0]
             test_iloc_end   = fold[3][1]
             steps = list(np.arange(len(range(test_iloc_start, test_iloc_end))) + gap + 1)
-        print(last_window_levels)
+
+        levels = [level for level in levels if level in last_window_levels]
         if interval is None:
             pred = forecaster.predict(
                        steps       = steps, 
-                       levels      = last_window_levels, 
+                       levels      = levels, 
                        last_window = last_window_series,
                        exog        = next_window_exog
                    )
         else:
             pred = forecaster.predict_interval(
                        steps               = steps,
-                       levels              = last_window_levels, 
+                       levels              = levels, 
                        last_window         = last_window_series,
                        exog                = next_window_exog,
                        interval            = interval,
@@ -511,40 +510,58 @@ def _backtesting_forecaster_multiseries(
 
         return pred
 
-    backtest_predictions = (
-        Parallel(n_jobs=n_jobs)
-        (delayed(_fit_predict_forecaster)
-        (data_fold=next(data_fold), forecaster=forecaster, interval=interval)
-         for data_fold in data_folds)
+    backtest_predictions = Parallel(n_jobs=n_jobs)(
+        delayed(_fit_predict_forecaster)(
+            data_fold=data_fold,
+            forecaster=forecaster,
+            interval=interval,
+            levels=levels,
+        )
+        for data_fold in data_folds
     )
 
     backtest_predictions = pd.concat(backtest_predictions, axis=0)
-
-    for level in levels:
+    levels_in_backtest_predictions = backtest_predictions.columns
+    for level in levels_in_backtest_predictions:
         missing_index = series[level][series[level].isna()].index
+        missing_index = missing_index.intersection(backtest_predictions.index)
         backtest_predictions.loc[missing_index, level] = np.nan
 
-    # metrics_levels = [
-    #     [
-    #         m(
-    #             y_true=series[level].loc[backtest_predictions.index],
-    #             y_pred=backtest_predictions[level],
-    #         )
-    #         for m in metrics
-    #     ]
-    #     for level in levels
-    # ]
+    metrics_levels = []
+    for level in levels:
+        if level in levels_in_backtest_predictions:
+            predictions_level = pd.merge(
+                series[level],
+                backtest_predictions[level],
+                left_index=True,
+                right_index=True,
+                how="outer",
+                suffixes=("_true", "_pred"),
+            ).dropna(axis=0, how="any")
+            if not predictions_level.empty:
+                metrics_level = [
+                    m(
+                        y_true=predictions_level.iloc[:, 0],
+                        y_pred=predictions_level.iloc[:, 1],
+                    )
+                    for m in metrics
+                ]
+                metrics_levels.append(metrics_level)
+            else:
+                metrics_levels.append([None for _ in metrics])
+        else:
+            metrics_levels.append([None for _ in metrics])
 
-    # metrics_levels = pd.concat(
-    #                      [pd.DataFrame({'levels': levels}),
-    #                       pd.DataFrame(
-    #                           data    = metrics_levels,
-    #                           columns = [m if isinstance(m, str) else m.__name__
-    #                                      for m in metrics]
-    #                       )],
-    #                      axis=1
-    #                  )
-    metrics_levels= None
+    metrics_levels = pd.concat(
+                         [pd.DataFrame({'levels': levels}),
+                          pd.DataFrame(
+                              data    = metrics_levels,
+                              columns = [m if isinstance(m, str) else m.__name__
+                                         for m in metrics]
+                          )],
+                         axis=1
+                     )
+
     return metrics_levels, backtest_predictions
 
 
