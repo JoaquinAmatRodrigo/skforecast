@@ -372,8 +372,8 @@ def check_y(
         raise ValueError("`y` has missing values.")
     
     return
-    
-    
+
+
 def check_exog(
     exog: Any,
     allow_nan: bool=True,
@@ -1136,7 +1136,7 @@ def preprocess_exog(
     exog_values = exog.to_numpy(copy=True) if return_values else None
 
     return exog_values, exog_index
-    
+
 
 def cast_exog_dtypes(
     exog: Union[pd.Series, pd.DataFrame],
@@ -1638,7 +1638,7 @@ def check_optional_dependency(
         
         raise ImportError(msg)
 
-    
+
 def multivariate_time_series_corr(
     time_series: pd.Series,
     other: pd.DataFrame,
@@ -1778,7 +1778,7 @@ def check_backtesting_input(
     None
     
     """
-    
+
     forecasters_uni = ['ForecasterAutoreg', 'ForecasterAutoregCustom', 
                        'ForecasterAutoregDirect', 'ForecasterSarimax',
                        'ForecasterEquivalentDate']
@@ -1786,7 +1786,7 @@ def check_backtesting_input(
                          'ForecasterAutoregMultiSeriesCustom', 
                          'ForecasterAutoregMultiVariate',
                          'ForecasterRnn']
-    
+
     forecaster_name = type(forecaster).__name__
 
     if forecaster_name in forecasters_uni:
@@ -1794,13 +1794,13 @@ def check_backtesting_input(
             raise TypeError("`y` must be a pandas Series.")
         data_name = 'y'
         data_length = len(y)
-        
+
     if forecaster_name in forecasters_multi:
         if not isinstance(series, pd.DataFrame):
             raise TypeError("`series` must be a pandas DataFrame.")
         data_name = 'series'
         data_length = len(series)
-        
+
     if not isinstance(steps, (int, np.integer)) or steps < 1:
         raise TypeError(
             f"`steps` must be an integer greater than or equal to 1. Got {steps}."
@@ -1814,7 +1814,7 @@ def check_backtesting_input(
             (f"`metric` must be a string, a callable function, or a list containing "
              f"multiple strings and/or callables. Got {type(metric)}.")
         )
-    
+
     if forecaster_name == "ForecasterEquivalentDate" and isinstance(
         forecaster.offset, pd.tseries.offsets.DateOffset
     ):
@@ -1841,7 +1841,10 @@ def check_backtesting_input(
                  f"gap {gap} cannot be greater than the length of `{data_name}` "
                  f"({data_length}).")
             )
-        if data_name == 'series':
+        if data_name == "series" and forecaster_name not in [
+            "ForecasterAutoregMultiSeries",
+            "ForecasterAutoregMultiSeriesCustom",
+        ]:
             for serie in series:
                 if np.isnan(series[serie].to_numpy()[:initial_train_size]).all():
                     raise ValueError(
@@ -1866,7 +1869,7 @@ def check_backtesting_input(
                 raise ValueError(
                     "`refit` is only allowed when `initial_train_size` is not `None`."
                 )
-    
+
     if not isinstance(fixed_train_size, bool):
         raise TypeError("`fixed_train_size` must be a boolean: `True`, `False`.")
     if not isinstance(allow_incomplete_fold, bool):
@@ -1896,7 +1899,7 @@ def check_backtesting_input(
              f"    Data available for test : {data_length - (initial_train_size + gap)}\n"
              f"    Steps                   : {steps}")
         )
-    
+
     return
 
 

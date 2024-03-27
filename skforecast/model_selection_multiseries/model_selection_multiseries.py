@@ -102,9 +102,9 @@ def _initialize_levels_model_selection_multiseries(
     return levels
 
 
-def _extract_data_fold_multiseries(
+def _extract_data_folds_multiseries(
     series: Union[pd.Series, pd.DataFrame, dict],
-    fold: list,
+    folds: list,
     exog: Optional[Union[pd.Series, pd.DataFrame, dict]] = None,
     span_index: Optional[Union[pd.DatetimeIndex, pd.RangeIndex]] = None,
     dropna_last_window: bool = False,
@@ -114,24 +114,25 @@ def _extract_data_fold_multiseries(
     list,
     Union[pd.Series, pd.DataFrame, dict],
     Union[pd.DatetimeIndex, pd.RangeIndex],
+    list,
 ]:
     """
-    Select the data from series and exog that corresponds to the fold created using the
+    Select the data from series and exog that corresponds to each fold created using the
     skforecast.model_selection._create_backtesting_folds function.
 
     Parameters
     ----------
     series: pd.Series, pd.DataFrame, dict
         Time series.
-    fold: list
-        Fold created using the skforecast.model_selection._create_backtesting_folds
+    folds: list
+        Folds created using the skforecast.model_selection._create_backtesting_folds
         function.
     exog: pd.Series, pd.DataFrame, dict
         Exogenous variable.
     span_index: pd.DatetimeIndex, pd.RangeIndex
         Full index from the minimum to the maximum index among all series.
 
-    Returns
+    Yield
     -------
     series_train: pd.Series, pd.DataFrame, dict
         Time series corresponding to the training set of the fold.
@@ -145,84 +146,78 @@ def _extract_data_fold_multiseries(
         Exogenous variable corresponding to the test set of the fold.
     span_index: pd.DatetimeIndex, pd.RangeIndex
         Full index from the minimum to the maximum index among all series.
+    fold: list
+        Fold created using the skforecast.model_selection._create_backtesting_folds
 
     """
-    train_iloc_start       = fold[0][0]
-    train_iloc_end         = fold[0][1]
-    last_window_iloc_start = fold[1][0]
-    last_window_iloc_end   = fold[1][1]
-    test_iloc_start        = fold[2][0]
-    test_iloc_end          = fold[2][1]
+    for fold in folds:
+        train_iloc_start = fold[0][0]
+        train_iloc_end = fold[0][1]
+        last_window_iloc_start = fold[1][0]
+        last_window_iloc_end = fold[1][1]
+        test_iloc_start = fold[2][0]
+        test_iloc_end = fold[2][1]
 
-    logger.debug(
-        f"\n"
-        f"Train fold       : {train_iloc_start} - {train_iloc_end}\n"
-        f"Last window fold : {last_window_iloc_start} - {last_window_iloc_end}\n"
-        f"Test fold        : {test_iloc_start} - {test_iloc_end}"
-    )
+        if isinstance(series, dict) or isinstance(exog, dict):
+            if span_index is None:
+                if isinstance(series, dict):
+                    min_index = min([v.index[0] for v in series.values()])
+                    max_index = max([v.index[-1] for v in series.values()])
+                    # All series must have the same frequency
+                    frequency = series[list(series.keys())[0]].index.freqstr
+                    span_index = pd.date_range(
+                        start=min_index, end=max_index, freq=frequency
+                    )
+                else:
+                    span_index = series.index
 
-    if isinstance(series, dict) or isinstance(exog, dict):
-        if span_index is None:
-            if isinstance(series, dict):
-                min_index = min([v.index[0] for v in series.values()])
-                max_index = max([v.index[-1] for v in series.values()])
-                # All series must have the same frequency
-                frequency = series[list(series.keys())[0]].index.freqstr
-                span_index = pd.date_range(start=min_index, end=max_index, freq=frequency)
-            else:
-                span_index = series.index
+            train_loc_start = span_index[train_iloc_start]
+            train_loc_end = span_index[train_iloc_end]
+            last_window_loc_start = span_index[last_window_iloc_start]
+            last_window_loc_end = span_index[last_window_iloc_end]
+            test_loc_start = span_index[test_iloc_start]
+            test_loc_end = span_index[test_iloc_end]
 
-        train_loc_start = span_index[train_iloc_start]
-        train_loc_end = span_index[train_iloc_end]
-        last_window_loc_start = span_index[last_window_iloc_start]
-        last_window_loc_end = span_index[last_window_iloc_end]
-        test_loc_start = span_index[test_iloc_start]
-        test_loc_end = span_index[test_iloc_end]
-
-        logger.debug(
-            f"\n"
-            f"Train fold       : {train_loc_start} - {train_loc_end}\n"
-            f"Last window fold : {last_window_loc_start} - {last_window_loc_end}\n"
-            f"Test fold        : {test_loc_start} - {test_loc_end}"
-        )
-
-    if isinstance(series, pd.DataFrame):
-        series_train = series.iloc[train_iloc_start:train_iloc_end, ]
-        series_last_window = series.iloc[last_window_iloc_start:last_window_iloc_end, ]
-    else:
-        series_train = {
-            k: v.loc[train_loc_start:train_loc_end] for k, v in series.items()
-        }
-        series_train = {k: v for k, v in series_train.items() if len(v) > 0}
-        series_last_window = {
-            k: v.loc[last_window_loc_start:last_window_loc_end] for k, v in series.items()
-        }
-        series_last_window = pd.DataFrame(series_last_window)
-        
-    if dropna_last_window:
-        series_last_window = series_last_window.dropna(axis=1, how='any')
-        # TODO: add the option to drop the series without minimum non NaN values.
-        # Similar to how pandas does in the rolling window function.
-    levels_last_window = list(series_last_window.columns)
-
-    if exog is not None:
-        if isinstance(exog, (pd.Series, pd.DataFrame)):
-            exog_train = exog.iloc[train_iloc_start:train_iloc_end, :]
-            exog_test = exog.iloc[test_iloc_start:test_iloc_end, :]
+        if isinstance(series, pd.DataFrame):
+            series_train = series.iloc[train_iloc_start:train_iloc_end,]
+            series_last_window = series.iloc[
+                last_window_iloc_start:last_window_iloc_end,
+            ]
         else:
-            exog_train = {
-                k: v.loc[train_loc_start:train_loc_end, :] for k, v in exog.items()
+            series_train = {
+                k: v.loc[train_loc_start:train_loc_end] for k, v in series.items()
             }
-            exog_train = {k: v for k, v in exog_train.items() if len(v) > 0}
-            exog_test = {
-                k: v.loc[test_loc_start:test_loc_end, :] for k, v in exog.items()
+            series_train = {k: v for k, v in series_train.items() if len(v) > 0}
+            series_last_window = {
+                k: v.loc[last_window_loc_start:last_window_loc_end]
+                for k, v in series.items()
             }
-            exog_test = {k: v for k, v in exog_test.items() if len(v) > 0}
-    else:
-        exog_train = None
-        exog_test = None
+            series_last_window = pd.DataFrame(series_last_window)
 
-    yield series_train, series_last_window, levels_last_window, exog_train, exog_test, span_index, fold
+        if dropna_last_window:
+            series_last_window = series_last_window.dropna(axis=1, how="any")
+            # TODO: add the option to drop the series without minimum non NaN values.
+            # Similar to how pandas does in the rolling window function.
+        levels_last_window = list(series_last_window.columns)
+
+        if exog is not None:
+            if isinstance(exog, (pd.Series, pd.DataFrame)):
+                exog_train = exog.iloc[train_iloc_start:train_iloc_end, :]
+                exog_test = exog.iloc[test_iloc_start:test_iloc_end, :]
+            else:
+                exog_train = {
+                    k: v.loc[train_loc_start:train_loc_end, :] for k, v in exog.items()
+                }
+                exog_train = {k: v for k, v in exog_train.items() if len(v) > 0}
+                exog_test = {
+                    k: v.loc[test_loc_start:test_loc_end, :] for k, v in exog.items()
+                }
+                exog_test = {k: v for k, v in exog_test.items() if len(v) > 0}
+        else:
+            exog_train = None
+            exog_test = None
+
+        yield series_train, series_last_window, levels_last_window, exog_train, exog_test, span_index, fold
 
 
 def _backtesting_forecaster_multiseries(
@@ -383,9 +378,9 @@ def _backtesting_forecaster_multiseries(
             [0, 0], # dummy values
             True
         ]
-        data_fold = _extract_data_fold_multiseries(
+        data_fold = _extract_data_folds_multiseries(
                         series=series,
-                        fold=fold_initial_train,
+                        folds=[fold_initial_train],
                         exog=exog,
                         span_index=span_index,
                         dropna_last_window=forecaster.dropna_from_series,
@@ -440,16 +435,13 @@ def _backtesting_forecaster_multiseries(
     if show_progress:
         folds = tqdm(folds)
 
-    data_folds = [
-        _extract_data_fold_multiseries(
-            series=series,
-            fold=fold,
-            exog=exog,
-            span_index=span_index,
-            dropna_last_window=forecaster.dropna_from_series,
-        )
-        for fold in folds
-    ]
+    data_folds = _extract_data_folds_multiseries(
+                    series=series,
+                    folds=folds,
+                    exog=exog,
+                    span_index=span_index,
+                    dropna_last_window=forecaster.dropna_from_series,
+                 )
 
     def _fit_predict_forecaster(data_fold, forecaster, interval, levels):
         """
