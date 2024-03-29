@@ -172,6 +172,20 @@ def _extract_data_folds_multiseries(
 
         if isinstance(series, pd.DataFrame):
             series_train = series.iloc[train_iloc_start:train_iloc_end,]
+            series_to_drop = []
+            for col in series_train.columns:
+                if series_train[col].isna().all():
+                    series_to_drop.append(col)
+                else:
+                    first_valid_index = series_train[col].first_valid_index()
+                    last_valid_index = series_train[col].last_valid_index()
+                    if (
+                        len(series_train[col].loc[first_valid_index:last_valid_index])
+                        < window_size
+                    ):
+                        series_to_drop.append(col)
+            series_train = series_train.drop(columns=series_to_drop)
+
             series_last_window = series.iloc[
                 last_window_iloc_start:last_window_iloc_end,
             ]
@@ -179,14 +193,13 @@ def _extract_data_folds_multiseries(
             series_train = {}
             for k in series.keys():
                 v = series[k].loc[train_loc_start:train_loc_end]
-                # todo: check if all are nana
-                first_valid_index = v.first_valid_index()
-                last_valid_index  = v.last_valid_index()
-                #Todo: ver si hay que añadir esto al aligment series
-                if first_valid_index is not None and last_valid_index is not None:
-                    v = v.loc[first_valid_index : last_valid_index]
-                    if len(v) >= window_size:
-                        series_train[k] = v
+                if not v.isna().all():
+                    first_valid_index = v.first_valid_index()
+                    last_valid_index  = v.last_valid_index()
+                    if first_valid_index is not None and last_valid_index is not None:
+                        v = v.loc[first_valid_index : last_valid_index]
+                        if len(v) >= window_size:
+                            series_train[k] = v
 
             series_last_window = {
                 k: v.loc[last_window_loc_start:last_window_loc_end]

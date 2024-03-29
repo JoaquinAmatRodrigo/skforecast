@@ -2170,9 +2170,9 @@ def check_preprocess_series(
              f"Got {type(series)}.")
         )
     
-    for k, v in series_dict.items():
-        if np.isnan(v).all():
-            raise ValueError(f"All values of series '{k}' are NaN.")
+    # for k, v in series_dict.items():
+    #     if np.isnan(v).all():
+    #         raise ValueError(f"All values of series '{k}' are NaN.")
     
     series_indexes = {
         k: v.index
