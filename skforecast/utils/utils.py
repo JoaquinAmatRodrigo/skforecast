@@ -1700,7 +1700,8 @@ def check_backtesting_input(
     steps: int,
     metric: Union[str, Callable, list],
     y: Optional[pd.Series]=None,
-    series: Optional[pd.DataFrame]=None,
+    series: Optional[Union[pd.DataFrame, dict]]=None,
+    exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
     initial_train_size: Optional[int]=None,
     fixed_train_size: bool=True,
     gap: int=0,
@@ -1728,10 +1729,12 @@ def check_backtesting_input(
         Number of future steps predicted.
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
-    y : pandas Series
+    y : pandas Series, default `None`
         Training time series for uni-series forecasters.
-    series : pandas DataFrame
+    series : pandas DataFrame, dict, default `None`
         Training time series for multi-series forecasters.
+    exog : pandas Series, pandas DataFrame, dict, default `None`
+        Exogenous variables.
     initial_train_size : int, default `None`
         Number of samples in the initial train split. If `None` and `forecaster` 
         is already trained, no initial train is done and all data is used to 
@@ -1779,13 +1782,21 @@ def check_backtesting_input(
     
     """
 
-    forecasters_uni = ['ForecasterAutoreg', 'ForecasterAutoregCustom', 
-                       'ForecasterAutoregDirect', 'ForecasterSarimax',
-                       'ForecasterEquivalentDate']
-    forecasters_multi = ['ForecasterAutoregMultiSeries', 
-                         'ForecasterAutoregMultiSeriesCustom', 
-                         'ForecasterAutoregMultiVariate',
-                         'ForecasterRnn']
+    forecasters_uni = [
+        "ForecasterAutoreg",
+        "ForecasterAutoregCustom",
+        "ForecasterAutoregDirect",
+        "ForecasterSarimax",
+        "ForecasterEquivalentDate",
+    ]
+    forecasters_multi = [
+        "ForecasterAutoregMultiVariate",
+        "ForecasterRnn",
+    ]
+    forecasters_multi_dict = [
+        "ForecasterAutoregMultiSeries",
+        "ForecasterAutoregMultiSeriesCustom",
+    ]
 
     forecaster_name = type(forecaster).__name__
 
@@ -1794,12 +1805,60 @@ def check_backtesting_input(
             raise TypeError("`y` must be a pandas Series.")
         data_name = 'y'
         data_length = len(y)
-
-    if forecaster_name in forecasters_multi:
+    elif forecaster_name in forecasters_multi:
         if not isinstance(series, pd.DataFrame):
             raise TypeError("`series` must be a pandas DataFrame.")
         data_name = 'series'
         data_length = len(series)
+    elif forecaster_name in forecasters_multi_dict:
+        if not isinstance(series, (pd.DataFrame, dict)):
+            raise TypeError(
+                (f"`series` must be a pandas DataFrame or a dict of DataFrames or Series. "
+                f"Got {type(series)}.")
+            )
+        if isinstance(series, dict):
+            if not all([isinstance(v, pd.Series) for v in series.values()]):
+                raise TypeError(
+                    ("If `series` is a dictionary, all values must be pandas Series.")
+                )
+            not_valid_index = [k
+                            for k, v in series.items()
+                            if not isinstance(v.index, pd.DatetimeIndex)]
+            if not_valid_index:
+                raise TypeError(
+                    (f"All series must have a Pandas DatetimeIndex as index with the "
+                    f"same frequency. Review series: {not_valid_index}")
+                )
+
+            indexes_freq = [f'{v.index.freq}' 
+                            for v in series.values()]
+            indexes_freq = sorted(set(indexes_freq))
+            if not len(indexes_freq) == 1:
+                raise ValueError(
+                    (f"All series must have a Pandas DatetimeIndex as index with the "
+                    f"same frequency. Found frequencies: {indexes_freq}")
+                )
+        data_name = 'series'
+        data_length = max([len(series[serie]) for serie in series])
+
+    if exog is not None:
+        if forecaster_name in forecasters_multi_dict:
+            if not isinstance(exog, (pd.Series, pd.DataFrame, dict)):
+                raise TypeError(
+                    ("`exog` must be a pandas Series, DataFrame, dictionary of pandas "
+                    "Series/DataFrames or None.")
+                )
+            if isinstance(exog, dict):
+                if not all([isinstance(v, (pd.Series, pd.DataFrame)) for v in exog.values()]):
+                    raise TypeError(
+                        ("If `exog` is a dictionary, all values must be pandas Series or "
+                         "DataFrames.")
+                    )
+        else:
+            if not isinstance(exog, (pd.Series, pd.DataFrame)):
+                raise TypeError(
+                    ("`exog` must be a pandas Series, DataFrame or None.")
+                )
 
     if not isinstance(steps, (int, np.integer)) or steps < 1:
         raise TypeError(

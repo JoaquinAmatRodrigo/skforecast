@@ -105,15 +105,15 @@ def _initialize_levels_model_selection_multiseries(
 def _extract_data_folds_multiseries(
     series: Union[pd.Series, pd.DataFrame, dict],
     folds: list,
+    span_index: Union[pd.DatetimeIndex, pd.RangeIndex],
+    window_size: int,
     exog: Optional[Union[pd.Series, pd.DataFrame, dict]] = None,
-    span_index: Optional[Union[pd.DatetimeIndex, pd.RangeIndex]] = None,
     dropna_last_window: bool = False,
 ) -> Tuple[
     Union[pd.Series, pd.DataFrame, dict],
     pd.DataFrame,
     list,
     Union[pd.Series, pd.DataFrame, dict],
-    Union[pd.DatetimeIndex, pd.RangeIndex],
     list,
 ]:
     """
@@ -127,10 +127,14 @@ def _extract_data_folds_multiseries(
     folds: list
         Folds created using the skforecast.model_selection._create_backtesting_folds
         function.
-    exog: pd.Series, pd.DataFrame, dict
-        Exogenous variable.
     span_index: pd.DatetimeIndex, pd.RangeIndex
         Full index from the minimum to the maximum index among all series.
+    window_size: int
+        Size of the window needed to create the predictors.
+    exog: pd.Series, pd.DataFrame, dict
+        Exogenous variable.
+    dropna_last_window: bool, default `False`
+        If `True`, drop the columns of the last window that have NaN values.
 
     Yield
     -------
@@ -144,12 +148,11 @@ def _extract_data_folds_multiseries(
         Exogenous variable corresponding to the training set of the fold.
     exog_test: pd.Series, pd.DataFrame, dict
         Exogenous variable corresponding to the test set of the fold.
-    span_index: pd.DatetimeIndex, pd.RangeIndex
-        Full index from the minimum to the maximum index among all series.
     fold: list
         Fold created using the skforecast.model_selection._create_backtesting_folds
 
-    """
+    """   
+
     for fold in folds:
         train_iloc_start = fold[0][0]
         train_iloc_end = fold[0][1]
@@ -159,24 +162,13 @@ def _extract_data_folds_multiseries(
         test_iloc_end = fold[2][1]
 
         if isinstance(series, dict) or isinstance(exog, dict):
-            if span_index is None:
-                if isinstance(series, dict):
-                    min_index = min([v.index[0] for v in series.values()])
-                    max_index = max([v.index[-1] for v in series.values()])
-                    # All series must have the same frequency
-                    frequency = series[list(series.keys())[0]].index.freqstr
-                    span_index = pd.date_range(
-                        start=min_index, end=max_index, freq=frequency
-                    )
-                else:
-                    span_index = series.index
-
+            # Substract 1 to the iloc indexes to get the loc indexes
             train_loc_start = span_index[train_iloc_start]
-            train_loc_end = span_index[train_iloc_end]
+            train_loc_end = span_index[train_iloc_end - 1]
             last_window_loc_start = span_index[last_window_iloc_start]
-            last_window_loc_end = span_index[last_window_iloc_end]
+            last_window_loc_end = span_index[last_window_iloc_end - 1]
             test_loc_start = span_index[test_iloc_start]
-            test_loc_end = span_index[test_iloc_end]
+            test_loc_end = span_index[test_iloc_end - 1]
 
         if isinstance(series, pd.DataFrame):
             series_train = series.iloc[train_iloc_start:train_iloc_end,]
@@ -184,13 +176,22 @@ def _extract_data_folds_multiseries(
                 last_window_iloc_start:last_window_iloc_end,
             ]
         else:
-            series_train = {
-                k: v.loc[train_loc_start:train_loc_end] for k, v in series.items()
-            }
-            series_train = {k: v for k, v in series_train.items() if len(v) > 0}
+            series_train = {}
+            for k in series.keys():
+                v = series[k].loc[train_loc_start:train_loc_end]
+                # todo: check if all are nana
+                first_valid_index = v.first_valid_index()
+                last_valid_index  = v.last_valid_index()
+                #Todo: ver si hay que añadir esto al aligment series
+                if first_valid_index is not None and last_valid_index is not None:
+                    v = v.loc[first_valid_index : last_valid_index]
+                    if len(v) >= window_size:
+                        series_train[k] = v
+
             series_last_window = {
                 k: v.loc[last_window_loc_start:last_window_loc_end]
                 for k, v in series.items()
+                if k in series_train
             }
             series_last_window = pd.DataFrame(series_last_window)
 
@@ -210,14 +211,16 @@ def _extract_data_folds_multiseries(
                 }
                 exog_train = {k: v for k, v in exog_train.items() if len(v) > 0}
                 exog_test = {
-                    k: v.loc[test_loc_start:test_loc_end, :] for k, v in exog.items()
+                    k: v.loc[test_loc_start:test_loc_end, :]
+                    for k, v in exog.items()
+                    if k in exog_train
                 }
                 exog_test = {k: v for k, v in exog_test.items() if len(v) > 0}
         else:
             exog_train = None
             exog_test = None
 
-        yield series_train, series_last_window, levels_last_window, exog_train, exog_test, span_index, fold
+        yield series_train, series_last_window, levels_last_window, exog_train, exog_test, fold
 
 
 def _backtesting_forecaster_multiseries(
@@ -367,7 +370,17 @@ def _backtesting_forecaster_multiseries(
 
     store_in_sample_residuals = False if interval is None else True
 
-    span_index = None
+    if isinstance(series, dict):
+        min_index = min([v.index[0] for v in series.values()])
+        max_index = max([v.index[-1] for v in series.values()])
+        # All series must have the same frequency
+        frequency = series[list(series.keys())[0]].index.freqstr
+        span_index = pd.date_range(
+            start=min_index, end=max_index, freq=frequency
+        )
+    else:
+        span_index = series.index
+
     if initial_train_size is not None:
         # First model training, this is done to allow parallelization when `refit`
         # is `False`. The initial Forecaster fit is outside the auxiliary function.
@@ -381,11 +394,12 @@ def _backtesting_forecaster_multiseries(
         data_fold = _extract_data_folds_multiseries(
                         series=series,
                         folds=[fold_initial_train],
-                        exog=exog,
                         span_index=span_index,
+                        window_size=forecaster.window_size,
+                        exog=exog,
                         dropna_last_window=forecaster.dropna_from_series,
                     )
-        series_train, _, last_window_levels, exog_train, _, span_index, _ = next(data_fold)
+        series_train, _, last_window_levels, exog_train, _, _ = next(data_fold)
 
         forecaster.fit(
             series                    = series_train,
@@ -403,7 +417,7 @@ def _backtesting_forecaster_multiseries(
         externally_fitted = True
 
     folds = _create_backtesting_folds(
-                data                  = series,
+                data                  = span_index,
                 window_size           = window_size,
                 initial_train_size    = initial_train_size,
                 test_size             = steps,
@@ -438,8 +452,9 @@ def _backtesting_forecaster_multiseries(
     data_folds = _extract_data_folds_multiseries(
                     series=series,
                     folds=folds,
-                    exog=exog,
                     span_index=span_index,
+                    window_size=forecaster.window_size,
+                    exog=exog,
                     dropna_last_window=forecaster.dropna_from_series,
                  )
 
@@ -456,7 +471,6 @@ def _backtesting_forecaster_multiseries(
             last_window_levels,
             exog_train,
             next_window_exog,
-            span_index,
             fold
         ) = data_fold
 
@@ -477,18 +491,18 @@ def _backtesting_forecaster_multiseries(
             test_iloc_end   = fold[3][1]
             steps = list(np.arange(len(range(test_iloc_start, test_iloc_end))) + gap + 1)
 
-        levels = [level for level in levels if level in last_window_levels]
+        levels_predict = [level for level in levels if level in last_window_levels]
         if interval is None:
             pred = forecaster.predict(
                        steps       = steps, 
-                       levels      = levels, 
+                       levels      = levels_predict, 
                        last_window = last_window_series,
                        exog        = next_window_exog
                    )
         else:
             pred = forecaster.predict_interval(
                        steps               = steps,
-                       levels              = levels, 
+                       levels              = levels_predict, 
                        last_window         = last_window_series,
                        exog                = next_window_exog,
                        interval            = interval,
@@ -689,6 +703,7 @@ def backtesting_forecaster_multiseries(
         steps                 = steps,
         metric                = metric,
         series                = series,
+        exog                  = exog,
         initial_train_size    = initial_train_size,
         fixed_train_size      = fixed_train_size,
         gap                   = gap,

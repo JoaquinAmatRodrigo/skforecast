@@ -123,6 +123,8 @@ def _create_backtesting_folds(
         fit the Forecaster.
     
     """
+    if isinstance(data, pd.Index):
+        data = pd.Series(index=data)
     
     idx = range(len(data))
     folds = []
