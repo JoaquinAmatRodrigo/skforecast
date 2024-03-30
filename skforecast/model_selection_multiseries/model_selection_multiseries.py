@@ -548,23 +548,12 @@ def _backtesting_forecaster_multiseries(
     )
 
     backtest_predictions = pd.concat(backtest_predictions, axis=0)
-    # levels_in_backtest_predictions = backtest_predictions.columns
-    # for level in levels_in_backtest_predictions:
-    #     missing_index = series[level][series[level].isna()].index
-    #     missing_index = missing_index.intersection(backtest_predictions.index)
-    #     backtest_predictions.loc[missing_index, level] = np.nan
-
     levels_in_backtest_predictions = backtest_predictions.columns
+
     for level in levels_in_backtest_predictions:
-        # Get the index of valid values in series[level]
         valid_index = series[level][series[level].notna()].index
-
-        # Get the index of values in backtest_predictions that are outside the range of series[level]
-        out_of_range_index = backtest_predictions.loc[~backtest_predictions.index.isin(valid_index), :].index
-
-        # Set the values in backtest_predictions to NaN that are outside the range of series[level]
-        backtest_predictions.loc[out_of_range_index, level] = np.nan
-
+        no_valid_index = backtest_predictions.index.difference(valid_index, sort=False)
+        backtest_predictions.loc[no_valid_index, level] = np.nan
 
     metrics_levels = []
     for level in levels:
