@@ -1805,48 +1805,52 @@ def check_backtesting_input(
             raise TypeError("`y` must be a pandas Series.")
         data_name = 'y'
         data_length = len(y)
+
     elif forecaster_name in forecasters_multi:
         if not isinstance(series, pd.DataFrame):
             raise TypeError("`series` must be a pandas DataFrame.")
         data_name = 'series'
         data_length = len(series)
+    
     elif forecaster_name in forecasters_multi_dict:
         if not isinstance(series, (pd.DataFrame, dict)):
             raise TypeError(
                 (f"`series` must be a pandas DataFrame or a dict of DataFrames or Series. "
-                f"Got {type(series)}.")
+                 f"Got {type(series)}.")
             )
+        
+        data_name = 'series'
         if isinstance(series, dict):
             if not all([isinstance(v, pd.Series) for v in series.values()]):
                 raise TypeError(
                     ("If `series` is a dictionary, all values must be pandas Series.")
                 )
-            not_valid_index = [k
-                            for k, v in series.items()
-                            if not isinstance(v.index, pd.DatetimeIndex)]
+            not_valid_index = [k 
+                               for k, v in series.items()
+                               if not isinstance(v.index, pd.DatetimeIndex)]
             if not_valid_index:
                 raise TypeError(
                     (f"All series must have a Pandas DatetimeIndex as index with the "
-                    f"same frequency. Review series: {not_valid_index}")
+                     f"same frequency. Review series: {not_valid_index}")
                 )
 
-            indexes_freq = [f'{v.index.freq}' 
-                            for v in series.values()]
+            indexes_freq = [f'{v.index.freq}' for v in series.values()]
             indexes_freq = sorted(set(indexes_freq))
             if not len(indexes_freq) == 1:
                 raise ValueError(
                     (f"All series must have a Pandas DatetimeIndex as index with the "
-                    f"same frequency. Found frequencies: {indexes_freq}")
+                     f"same frequency. Found frequencies: {indexes_freq}")
                 )
-        data_name = 'series'
-        data_length = max([len(series[serie]) for serie in series])
+            data_length = max([len(series[serie]) for serie in series])
+        else:
+            data_length = len(series)
 
     if exog is not None:
         if forecaster_name in forecasters_multi_dict:
             if not isinstance(exog, (pd.Series, pd.DataFrame, dict)):
                 raise TypeError(
                     ("`exog` must be a pandas Series, DataFrame, dictionary of pandas "
-                    "Series/DataFrames or None.")
+                     "Series/DataFrames or None.")
                 )
             if isinstance(exog, dict):
                 if not all([isinstance(v, (pd.Series, pd.DataFrame)) for v in exog.values()]):
@@ -2119,10 +2123,10 @@ def check_preprocess_series(
         series = series.copy()
         series.index = series_index
         series_dict = series.to_dict("series")
-    
+
     elif isinstance(series, dict):
 
-        not_valid_series = [k
+        not_valid_series = [k 
                             for k, v in series.items()
                             if not isinstance(v, (pd.Series, pd.DataFrame))]
         if not_valid_series:
@@ -2130,12 +2134,12 @@ def check_preprocess_series(
                 (f"All series must be a named pandas Series or a pandas DataFrame. "
                  f"with a single column. Review series: {not_valid_series}")
             )
-        
+
         series_dict = {
             k: v.copy()
             for k, v in series.items()
         }
-        
+
         for k, v in series_dict.items():
             if isinstance(v, pd.DataFrame):
                 if v.shape[1] != 1:
@@ -2147,7 +2151,7 @@ def check_preprocess_series(
 
             series_dict[k].name = k
 
-        not_valid_index = [k
+        not_valid_index = [k 
                            for k, v in series_dict.items()
                            if not isinstance(v.index, pd.DatetimeIndex)]
         if not_valid_index:
@@ -2156,8 +2160,7 @@ def check_preprocess_series(
                  f"same frequency. Review series: {not_valid_index}")
             )
 
-        indexes_freq = [f'{v.index.freq}' 
-                        for v in series_dict.values()]
+        indexes_freq = [f"{v.index.freq}" for v in series_dict.values()]
         indexes_freq = sorted(set(indexes_freq))
         if not len(indexes_freq) == 1:
             raise ValueError(
@@ -2169,16 +2172,16 @@ def check_preprocess_series(
             (f"`series` must be a pandas DataFrame or a dict of DataFrames or Series. "
              f"Got {type(series)}.")
         )
-    
-    # for k, v in series_dict.items():
-    #     if np.isnan(v).all():
-    #         raise ValueError(f"All values of series '{k}' are NaN.")
-    
+
+    for k, v in series_dict.items():
+        if np.isnan(v).all():
+            raise ValueError(f"All values of series '{k}' are NaN.")
+
     series_indexes = {
         k: v.index
         for k, v in series_dict.items()
     }
-    
+
     return series_dict, series_indexes
 
 
@@ -2222,18 +2225,18 @@ def check_preprocess_exog_multiseries(
         Names of the exogenous variables used during training.
     
     """
-    
+
     if not isinstance(exog, (pd.Series, pd.DataFrame, dict)):
         raise TypeError(
             (f"`exog` must be a pandas Series, DataFrame or dict. "
              f"Got {type(exog)}.")
         )
-    
+
     if not input_series_is_dict:
-        # If input series is a pandas DataFrame, all index are the same. 
+        # If input series is a pandas DataFrame, all index are the same.
         # Select the first index to check exog
         series_index = series_indexes[series_col_names[0]]
-        
+
     if isinstance(exog, (pd.Series, pd.DataFrame)): 
 
         if input_series_is_dict:
@@ -2259,10 +2262,10 @@ def check_preprocess_exog_multiseries(
             )
 
         exog_dict = {serie: exog for serie in series_col_names}
-    
+
     else:
 
-        not_valid_exog = [k
+        not_valid_exog = [k 
                           for k, v in exog.items()
                           if not isinstance(v, (pd.Series, pd.DataFrame, type(None)))]
         if not_valid_exog:
@@ -2270,14 +2273,14 @@ def check_preprocess_exog_multiseries(
                 (f"All exog must be a named pandas Series, a pandas DataFrame or None. "
                  f"Review exog: {not_valid_exog}")
             )
-        
+
         # Only elements already present in exog_dict are updated
         exog_dict.update(
             (k, v.copy())
             for k, v in exog.items() 
             if k in exog_dict and v is not None
         )
-        
+
         series_not_in_exog = set(series_col_names) - set(exog.keys())
         if series_not_in_exog:
             warnings.warn(
@@ -2302,7 +2305,7 @@ def check_preprocess_exog_multiseries(
                              f"samples as `series`. length `exog`: ({len(v)}), "
                              f"length `series`: ({len(series_index)})")
                         )
-                    
+
                     _, v_index = preprocess_exog(exog=v, return_values=False)
                     exog_dict[k].index = v_index
                     if not (exog_dict[k].index == series_index).all():
@@ -2322,7 +2325,7 @@ def check_preprocess_exog_multiseries(
                     (f"All exog must have a Pandas DatetimeIndex as index with the "
                      f"same frequency. Check exog for series: {not_valid_index}")
                 )
-    
+
     exog_col_names = list(
         set(
             column
@@ -2339,7 +2342,7 @@ def check_preprocess_exog_multiseries(
         if v is not None:
             for col_name in v.columns:
                 exog_dtype_dict[col_name].add(v[col_name].dtype.name)
-    
+
     for col_name, dtypes in exog_dtype_dict.items():
         if len(dtypes) > 1:
             raise TypeError(

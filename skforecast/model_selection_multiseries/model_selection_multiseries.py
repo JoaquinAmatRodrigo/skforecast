@@ -5,7 +5,7 @@
 ################################################################################
 # coding=utf-8
 
-from typing import Union, Tuple, Optional, Callable
+from typing import Union, Tuple, Optional, Callable, Generator
 import numpy as np
 import pandas as pd
 import warnings
@@ -107,46 +107,51 @@ def _extract_data_folds_multiseries(
     folds: list,
     span_index: Union[pd.DatetimeIndex, pd.RangeIndex],
     window_size: int,
-    exog: Optional[Union[pd.Series, pd.DataFrame, dict]] = None,
-    dropna_last_window: bool = False,
-) -> Tuple[
-    Union[pd.Series, pd.DataFrame, dict],
-    pd.DataFrame,
-    list,
-    Union[pd.Series, pd.DataFrame, dict],
-    list,
-]:
+    exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
+    dropna_last_window: bool=False,
+) -> Generator[
+        Tuple[
+            Union[pd.Series, pd.DataFrame, dict],
+            pd.DataFrame,
+            list,
+            Optional[Union[pd.Series, pd.DataFrame, dict]],
+            Optional[Union[pd.Series, pd.DataFrame, dict]],
+            list
+        ],
+        None,
+        None
+    ]:
     """
     Select the data from series and exog that corresponds to each fold created using the
     skforecast.model_selection._create_backtesting_folds function.
 
     Parameters
     ----------
-    series: pd.Series, pd.DataFrame, dict
+    series: pandas Series, pandas DataFrame, dict
         Time series.
     folds: list
         Folds created using the skforecast.model_selection._create_backtesting_folds
         function.
-    span_index: pd.DatetimeIndex, pd.RangeIndex
+    span_index: pandas DatetimeIndex, pandas RangeIndex
         Full index from the minimum to the maximum index among all series.
     window_size: int
         Size of the window needed to create the predictors.
-    exog: pd.Series, pd.DataFrame, dict
+    exog: pandas Series, pandas DataFrame, dict, default `None`
         Exogenous variable.
     dropna_last_window: bool, default `False`
         If `True`, drop the columns of the last window that have NaN values.
 
     Yield
     -------
-    series_train: pd.Series, pd.DataFrame, dict
+    series_train: pandas Series, pandas DataFrame, dict
         Time series corresponding to the training set of the fold.
-    series_last_window: pd.Series, pd.DataFrame, dict
+    series_last_window: pandas DataFrame
         Time series corresponding to the last window of the fold.
     levels_last_window: list
         Levels of the time series present to the last window of the fold.
-    exog_train: pd.Series, pd.DataFrame, dict
+    exog_train: pandas Series, pandas DataFrame, dict, None
         Exogenous variable corresponding to the training set of the fold.
-    exog_test: pd.Series, pd.DataFrame, dict
+    exog_test: pandas Series, pandas DataFrame, dict, None
         Exogenous variable corresponding to the test set of the fold.
     fold: list
         Fold created using the skforecast.model_selection._create_backtesting_folds
@@ -154,24 +159,25 @@ def _extract_data_folds_multiseries(
     """   
 
     for fold in folds:
-        train_iloc_start = fold[0][0]
-        train_iloc_end = fold[0][1]
+        train_iloc_start       = fold[0][0]
+        train_iloc_end         = fold[0][1]
         last_window_iloc_start = fold[1][0]
-        last_window_iloc_end = fold[1][1]
-        test_iloc_start = fold[2][0]
-        test_iloc_end = fold[2][1]
+        last_window_iloc_end   = fold[1][1]
+        test_iloc_start        = fold[2][0]
+        test_iloc_end          = fold[2][1]
 
         if isinstance(series, dict) or isinstance(exog, dict):
             # Substract 1 to the iloc indexes to get the loc indexes
-            train_loc_start = span_index[train_iloc_start]
-            train_loc_end = span_index[train_iloc_end - 1]
+            train_loc_start       = span_index[train_iloc_start]
+            train_loc_end         = span_index[train_iloc_end - 1]
             last_window_loc_start = span_index[last_window_iloc_start]
-            last_window_loc_end = span_index[last_window_iloc_end - 1]
-            test_loc_start = span_index[test_iloc_start]
-            test_loc_end = span_index[test_iloc_end - 1]
+            last_window_loc_end   = span_index[last_window_iloc_end - 1]
+            test_loc_start        = span_index[test_iloc_start]
+            test_loc_end          = span_index[test_iloc_end - 1]
 
         if isinstance(series, pd.DataFrame):
             series_train = series.iloc[train_iloc_start:train_iloc_end,]
+
             series_to_drop = []
             for col in series_train.columns:
                 if series_train[col].isna().all():
@@ -184,6 +190,7 @@ def _extract_data_folds_multiseries(
                         < window_size
                     ):
                         series_to_drop.append(col)
+            
             series_train = series_train.drop(columns=series_to_drop)
 
             series_last_window = series.iloc[
@@ -206,12 +213,14 @@ def _extract_data_folds_multiseries(
                 for k, v in series.items()
                 if k in series_train
             }
+
             series_last_window = pd.DataFrame(series_last_window)
 
         if dropna_last_window:
             series_last_window = series_last_window.dropna(axis=1, how="any")
             # TODO: add the option to drop the series without minimum non NaN values.
             # Similar to how pandas does in the rolling window function.
+        
         levels_last_window = list(series_last_window.columns)
 
         if exog is not None:
@@ -388,9 +397,7 @@ def _backtesting_forecaster_multiseries(
         max_index = max([v.index[-1] for v in series.values()])
         # All series must have the same frequency
         frequency = series[list(series.keys())[0]].index.freqstr
-        span_index = pd.date_range(
-            start=min_index, end=max_index, freq=frequency
-        )
+        span_index = pd.date_range(start=min_index, end=max_index, freq=frequency)
     else:
         span_index = series.index
 
@@ -405,12 +412,12 @@ def _backtesting_forecaster_multiseries(
             True
         ]
         data_fold = _extract_data_folds_multiseries(
-                        series=series,
-                        folds=[fold_initial_train],
-                        span_index=span_index,
-                        window_size=forecaster.window_size,
-                        exog=exog,
-                        dropna_last_window=forecaster.dropna_from_series,
+                        series             = series,
+                        folds              = [fold_initial_train],
+                        span_index         = span_index,
+                        window_size        = forecaster.window_size,
+                        exog               = exog,
+                        dropna_last_window = forecaster.dropna_from_series,
                     )
         series_train, _, last_window_levels, exog_train, _, _ = next(data_fold)
 
@@ -463,12 +470,12 @@ def _backtesting_forecaster_multiseries(
         folds = tqdm(folds)
 
     data_folds = _extract_data_folds_multiseries(
-                    series=series,
-                    folds=folds,
-                    span_index=span_index,
-                    window_size=forecaster.window_size,
-                    exog=exog,
-                    dropna_last_window=forecaster.dropna_from_series,
+                     series             = series,
+                     folds              = folds,
+                     span_index         = span_index,
+                     window_size        = forecaster.window_size,
+                     exog               = exog,
+                     dropna_last_window = forecaster.dropna_from_series,
                  )
 
     def _fit_predict_forecaster(data_fold, forecaster, interval, levels):
@@ -504,7 +511,8 @@ def _backtesting_forecaster_multiseries(
             test_iloc_end   = fold[3][1]
             steps = list(np.arange(len(range(test_iloc_start, test_iloc_end))) + gap + 1)
 
-        levels_predict = [level for level in levels if level in last_window_levels]
+        levels_predict = [level for level in levels 
+                          if level in last_window_levels]
         if interval is None:
             pred = forecaster.predict(
                        steps       = steps, 
@@ -531,20 +539,32 @@ def _backtesting_forecaster_multiseries(
 
     backtest_predictions = Parallel(n_jobs=n_jobs)(
         delayed(_fit_predict_forecaster)(
-            data_fold=data_fold,
-            forecaster=forecaster,
-            interval=interval,
-            levels=levels,
+            data_fold  = data_fold,
+            forecaster = forecaster,
+            interval   = interval,
+            levels     = levels,
         )
         for data_fold in data_folds
     )
 
     backtest_predictions = pd.concat(backtest_predictions, axis=0)
+    # levels_in_backtest_predictions = backtest_predictions.columns
+    # for level in levels_in_backtest_predictions:
+    #     missing_index = series[level][series[level].isna()].index
+    #     missing_index = missing_index.intersection(backtest_predictions.index)
+    #     backtest_predictions.loc[missing_index, level] = np.nan
+
     levels_in_backtest_predictions = backtest_predictions.columns
     for level in levels_in_backtest_predictions:
-        missing_index = series[level][series[level].isna()].index
-        missing_index = missing_index.intersection(backtest_predictions.index)
-        backtest_predictions.loc[missing_index, level] = np.nan
+        # Get the index of valid values in series[level]
+        valid_index = series[level][series[level].notna()].index
+
+        # Get the index of values in backtest_predictions that are outside the range of series[level]
+        out_of_range_index = backtest_predictions.loc[~backtest_predictions.index.isin(valid_index), :].index
+
+        # Set the values in backtest_predictions to NaN that are outside the range of series[level]
+        backtest_predictions.loc[out_of_range_index, level] = np.nan
+
 
     metrics_levels = []
     for level in levels:
@@ -552,16 +572,17 @@ def _backtesting_forecaster_multiseries(
             predictions_level = pd.merge(
                 series[level],
                 backtest_predictions[level],
-                left_index=True,
-                right_index=True,
-                how="outer",
-                suffixes=("_true", "_pred"),
+                left_index  = True,
+                right_index = True,
+                how         = "outer",
+                suffixes    = ("_true", "_pred"),
             ).dropna(axis=0, how="any")
+
             if not predictions_level.empty:
                 metrics_level = [
                     m(
-                        y_true=predictions_level.iloc[:, 0],
-                        y_pred=predictions_level.iloc[:, 1],
+                        y_true = predictions_level.iloc[:, 0],
+                        y_pred = predictions_level.iloc[:, 1],
                     )
                     for m in metrics
                 ]
@@ -572,14 +593,14 @@ def _backtesting_forecaster_multiseries(
             metrics_levels.append([None for _ in metrics])
 
     metrics_levels = pd.concat(
-                         [pd.DataFrame({'levels': levels}),
-                          pd.DataFrame(
-                              data    = metrics_levels,
-                              columns = [m if isinstance(m, str) else m.__name__
-                                         for m in metrics]
-                          )],
-                         axis=1
-                     )
+        [pd.DataFrame({'levels': levels}),
+         pd.DataFrame(
+             data    = metrics_levels,
+             columns = [m if isinstance(m, str) else m.__name__
+                        for m in metrics]
+         )],
+        axis=1
+    )
 
     return metrics_levels, backtest_predictions
 
@@ -705,9 +726,9 @@ def backtesting_forecaster_multiseries(
                                          'ForecasterAutoregMultiSeriesCustom', 
                                          'ForecasterAutoregMultiVariate']:
         raise TypeError(
-            ("`forecaster` must be of type `ForecasterAutoregMultiSeries`, "
-             "`ForecasterAutoregMultiSeriesCustom` or `ForecasterAutoregMultiVariate`, "
-             "for all other types of forecasters use the functions available in "
+            (f"`forecaster` must be of type `ForecasterAutoregMultiSeries`, "
+             f"`ForecasterAutoregMultiSeriesCustom` or `ForecasterAutoregMultiVariate`, "
+             f"for all other types of forecasters use the functions available in "
              f"the `model_selection` module. Got {type(forecaster).__name__}")
         )
     
