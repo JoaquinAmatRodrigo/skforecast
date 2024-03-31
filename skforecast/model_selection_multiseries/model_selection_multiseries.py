@@ -21,6 +21,8 @@ from optuna.samplers import TPESampler, RandomSampler
 
 from ..exceptions import LongTrainingWarning
 from ..exceptions import IgnoredArgumentWarning
+from ..exceptions import MissingValuesWarning
+from ..exceptions import MissingExogWarning
 from ..model_selection.model_selection import _get_metric
 from ..model_selection.model_selection import _create_backtesting_folds
 from ..utils import check_backtesting_input
@@ -29,13 +31,13 @@ from ..utils import select_n_jobs_backtesting
 
 optuna.logging.set_verbosity(optuna.logging.WARNING) # disable optuna logs
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-console_handler = logging.StreamHandler()
-console_handler.setLevel(logging.INFO)
-formatter = logging.Formatter('%(name)-10s %(levelname)-5s %(message)s')
-console_handler.setFormatter(formatter)
-logger.addHandler(console_handler)
+# logger = logging.getLogger(__name__)
+# logger.setLevel(logging.INFO)
+# console_handler = logging.StreamHandler()
+# console_handler.setLevel(logging.INFO)
+# formatter = logging.Formatter('%(name)-10s %(levelname)-5s %(message)s')
+# console_handler.setFormatter(formatter)
+# logger.addHandler(console_handler)
 
 
 def _initialize_levels_model_selection_multiseries(
@@ -190,12 +192,12 @@ def _extract_data_folds_multiseries(
                         < window_size
                     ):
                         series_to_drop.append(col)
-            
-            series_train = series_train.drop(columns=series_to_drop)
 
             series_last_window = series.iloc[
                 last_window_iloc_start:last_window_iloc_end,
             ]
+            series_train = series_train.drop(columns=series_to_drop)
+            series_last_window = series_last_window.drop(columns=series_to_drop)
         else:
             series_train = {}
             for k in series.keys():
@@ -1163,14 +1165,26 @@ def _evaluate_grid_hyperparameters_multiseries(
                                  n_jobs                = n_jobs,
                                  show_progress         = False
                              )[0]
-            warnings.filterwarnings('ignore', category=RuntimeWarning, 
-                                    message= "The forecaster will be fit.*")
+            # warnings.filterwarnings('ignore', category=RuntimeWarning, 
+            #                         message= "The forecaster will be fit.*")
+            # TODO: validate and move list of warning at the begining of the function
+            warn_categories = [
+                MissingValuesWarning,
+                LongTrainingWarning,
+                MissingExogWarning,
+                IgnoredArgumentWarning
+            ]
+            for warn_category in warn_categories:
+                warnings.filterwarnings('ignore', category=warn_category)
 
             lags_list.append(lags_v)
             params_list.append(params)
             for m in metric:
                 m_name = m if isinstance(m, str) else m.__name__
                 metric_dict[m_name].append(metrics_levels[m_name].mean())
+
+    for warn_category in warn_categories:
+        warnings.filterwarnings('default', category=warn_category)
 
     results = pd.DataFrame({
                   'levels': [levels]*len(lags_list),
