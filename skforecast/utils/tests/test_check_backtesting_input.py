@@ -63,16 +63,13 @@ def test_check_backtesting_input_TypeError_when_y_is_not_pandas_Series_uniseries
             random_state          = 123,
             in_sample_residuals   = True,
             verbose               = False,
-            show_progress         = False
+            show_progress         = False,
+            suppress_warnings     = False
         )
 
 
 @pytest.mark.parametrize("forecaster", 
-                         [ForecasterAutoregMultiSeries(regressor=Ridge(), lags=2),
-                          ForecasterAutoregMultiSeriesCustom(regressor=Ridge(), 
-                                                             window_size=3,
-                                                             fun_predictors=create_predictors),
-                          ForecasterAutoregMultiVariate(regressor=Ridge(), lags=2, 
+                         [ForecasterAutoregMultiVariate(regressor=Ridge(), lags=2, 
                                                         steps=3, level='l1')], 
                          ids = lambda fr : f'forecaster: {type(fr).__name__}' )
 def test_check_backtesting_input_TypeError_when_series_is_not_pandas_DataFrame_multiseries(forecaster):
@@ -101,7 +98,87 @@ def test_check_backtesting_input_TypeError_when_series_is_not_pandas_DataFrame_m
             random_state          = 123,
             in_sample_residuals   = True,
             verbose               = False,
-            show_progress         = False
+            show_progress         = False,
+            suppress_warnings     = False
+        )
+
+
+@pytest.mark.parametrize("forecaster", 
+                         [ForecasterAutoregMultiSeries(regressor=Ridge(), lags=2),
+                          ForecasterAutoregMultiSeriesCustom(regressor=Ridge(), 
+                                                             window_size=3,
+                                                             fun_predictors=create_predictors)], 
+                         ids = lambda fr : f'forecaster: {type(fr).__name__}' )
+def test_check_backtesting_input_TypeError_when_series_is_not_pandas_DataFrame_multiseries_dict(forecaster):
+    """
+    Test TypeError is raised in check_backtesting_input if `series` is not a 
+    pandas DataFrame in forecasters multiseries with dict.
+    """
+    bad_series = pd.Series(np.arange(50))
+
+    err_msg = re.escape(
+        (f"`series` must be a pandas DataFrame or a dict of DataFrames or Series. "
+         f"Got {type(bad_series)}.")
+    )
+    with pytest.raises(TypeError, match = err_msg):
+        check_backtesting_input(
+            forecaster            = forecaster,
+            steps                 = 3,
+            metric                = 'mean_absolute_error',
+            y                     = None,
+            series                = bad_series,
+            initial_train_size    = len(bad_series[:-12]),
+            fixed_train_size      = False,
+            gap                   = 0,
+            allow_incomplete_fold = False,
+            refit                 = False,
+            interval              = None,
+            alpha                 = None,
+            n_boot                = 500,
+            random_state          = 123,
+            in_sample_residuals   = True,
+            verbose               = False,
+            show_progress         = False,
+            suppress_warnings     = False
+        )
+
+
+@pytest.mark.parametrize("forecaster", 
+                         [ForecasterAutoregMultiSeries(regressor=Ridge(), lags=2),
+                          ForecasterAutoregMultiSeriesCustom(regressor=Ridge(), 
+                                                             window_size=3,
+                                                             fun_predictors=create_predictors)], 
+                         ids = lambda fr : f'forecaster: {type(fr).__name__}' )
+def test_check_backtesting_input_TypeError_when_series_is_dict_of_pandas_Series_multiseries_dict(forecaster):
+    """
+    Test TypeError is raised in check_backtesting_input if `series` is not a 
+    dict of pandas Series in forecasters multiseries with dict.
+    """
+    bad_series = {'l1': pd.DataFrame(np.arange(50))}
+
+    err_msg = re.escape(
+        ("If `series` is a dictionary, all values must be pandas Series.")
+    )
+    with pytest.raises(TypeError, match = err_msg):
+        check_backtesting_input(
+            forecaster            = forecaster,
+            steps                 = 3,
+            metric                = 'mean_absolute_error',
+            y                     = None,
+            series                = bad_series,
+            initial_train_size    = len(bad_series[:-12]),
+            fixed_train_size      = False,
+            gap                   = 0,
+            allow_incomplete_fold = False,
+            refit                 = False,
+            interval              = None,
+            alpha                 = None,
+            n_boot                = 500,
+            random_state          = 123,
+            in_sample_residuals   = True,
+            verbose               = False,
+            show_progress         = False,
+            suppress_warnings     = False
         )
 
 
@@ -119,8 +196,8 @@ def test_check_backtesting_input_TypeError_when_steps_not_int_greater_or_equal_1
                  )
     
     err_msg = re.escape(
-            f"`steps` must be an integer greater than or equal to 1. Got {steps}."
-        )
+        f"`steps` must be an integer greater than or equal to 1. Got {steps}."
+    )
     with pytest.raises(TypeError, match = err_msg):
         check_backtesting_input(
             forecaster            = forecaster,
@@ -138,7 +215,8 @@ def test_check_backtesting_input_TypeError_when_steps_not_int_greater_or_equal_1
             random_state          = 123,
             in_sample_residuals   = True,
             verbose               = False,
-            show_progress         = False
+            show_progress         = False,
+            suppress_warnings     = False
         )
 
 
@@ -156,8 +234,8 @@ def test_check_backtesting_input_TypeError_when_gap_not_int_greater_or_equal_0(g
                  )
     
     err_msg = re.escape(
-            f"`gap` must be an integer greater than or equal to 0. Got {gap}."
-        )
+        f"`gap` must be an integer greater than or equal to 0. Got {gap}."
+    )
     with pytest.raises(TypeError, match = err_msg):
         check_backtesting_input(
             forecaster            = forecaster,
@@ -175,7 +253,8 @@ def test_check_backtesting_input_TypeError_when_gap_not_int_greater_or_equal_0(g
             random_state          = 123,
             in_sample_residuals   = True,
             verbose               = False,
-            show_progress         = False
+            show_progress         = False,
+            suppress_warnings     = False
         )
 
 
@@ -191,9 +270,9 @@ def test_check_backtesting_input_TypeError_when_metric_not_correct_type():
     metric = 5
     
     err_msg = re.escape(
-            (f"`metric` must be a string, a callable function, or a list containing "
-             f"multiple strings and/or callables. Got {type(metric)}.")
-        )
+        (f"`metric` must be a string, a callable function, or a list containing "
+         f"multiple strings and/or callables. Got {type(metric)}.")
+    )
     with pytest.raises(TypeError, match = err_msg):
         check_backtesting_input(
             forecaster            = forecaster,
@@ -211,7 +290,8 @@ def test_check_backtesting_input_TypeError_when_metric_not_correct_type():
             random_state          = 123,
             in_sample_residuals   = True,
             verbose               = False,
-            show_progress         = False
+            show_progress         = False,
+            suppress_warnings     = False
         )
 
 
@@ -229,9 +309,9 @@ def test_check_backtesting_input_TypeError_when_initial_train_size_is_not_an_int
                  )
     
     err_msg = re.escape(
-            (f"If used, `initial_train_size` must be an integer greater than the "
-             f"window_size of the forecaster. Got type {type(initial_train_size)}.")
-        )
+        (f"If used, `initial_train_size` must be an integer greater than the "
+         f"window_size of the forecaster. Got type {type(initial_train_size)}.")
+    )
     with pytest.raises(TypeError, match = err_msg):
         check_backtesting_input(
             forecaster            = forecaster,
@@ -249,7 +329,8 @@ def test_check_backtesting_input_TypeError_when_initial_train_size_is_not_an_int
             random_state          = 123,
             in_sample_residuals   = True,
             verbose               = False,
-            show_progress         = False
+            show_progress         = False,
+            suppress_warnings     = False
         )
 
 
@@ -272,9 +353,9 @@ def test_check_backtesting_input_ValueError_when_initial_train_size_more_than_or
     initial_train_size = data_length
     
     err_msg = re.escape(
-                (f"If used, `initial_train_size` must be an integer smaller "
-                 f"than the length of `{data_name}` ({data_length}).")
-              )
+        (f"If used, `initial_train_size` must be an integer smaller "
+         f"than the length of `{data_name}` ({data_length}).")
+    )
     with pytest.raises(ValueError, match = err_msg):
         check_backtesting_input(
             forecaster            = forecaster,
@@ -293,7 +374,8 @@ def test_check_backtesting_input_ValueError_when_initial_train_size_more_than_or
             random_state          = 123,
             in_sample_residuals   = True,
             verbose               = False,
-            show_progress         = False
+            show_progress         = False,
+            suppress_warnings     = False
         )
 
 
@@ -310,9 +392,9 @@ def test_check_backtesting_input_ValueError_when_initial_train_size_less_than_fo
     initial_train_size = forecaster.window_size - 1
     
     err_msg = re.escape(
-            (f"If used, `initial_train_size` must be an integer greater than "
-             f"the window_size of the forecaster ({forecaster.window_size}).")
-        )
+        (f"If used, `initial_train_size` must be an integer greater than "
+         f"the window_size of the forecaster ({forecaster.window_size}).")
+    )
     with pytest.raises(ValueError, match = err_msg):
         check_backtesting_input(
             forecaster            = forecaster,
@@ -331,7 +413,8 @@ def test_check_backtesting_input_ValueError_when_initial_train_size_less_than_fo
             random_state          = 123,
             in_sample_residuals   = True,
             verbose               = False,
-            show_progress         = False
+            show_progress         = False,
+            suppress_warnings     = False
         )
 
 
@@ -355,10 +438,10 @@ def test_check_backtesting_input_ValueError_when_initial_train_size_plus_gap_les
     gap = 2
     
     err_msg = re.escape(
-                (f"The combination of initial_train_size {initial_train_size} and "
-                 f"gap {gap} cannot be greater than the length of `{data_name}` "
-                 f"({data_length}).")
-        )
+        (f"The combination of initial_train_size {initial_train_size} and "
+         f"gap {gap} cannot be greater than the length of `{data_name}` "
+         f"({data_length}).")
+    )
     with pytest.raises(ValueError, match = err_msg):
         check_backtesting_input(
             forecaster            = forecaster,
@@ -377,7 +460,8 @@ def test_check_backtesting_input_ValueError_when_initial_train_size_plus_gap_les
             random_state          = 123,
             in_sample_residuals   = True,
             verbose               = False,
-            show_progress         = False
+            show_progress         = False,
+            suppress_warnings     = False
         )
 
 
@@ -394,11 +478,11 @@ def test_check_backtesting_input_ValueError_when_series_different_length_initial
     series_nan['l2'].iloc[:20] = np.nan
     
     err_msg = re.escape(
-                    ("All values of series 'l2' are NaN. When working "
-                     "with series of different lengths, make sure that "
-                     "`initial_train_size` has an appropriate value so that "
-                     "all series reach the first non-null value.")
-                )
+        ("All values of series 'l2' are NaN. When working "
+         "with series of different lengths, make sure that "
+         "`initial_train_size` has an appropriate value so that "
+         "all series reach the first non-null value.")
+    )
     with pytest.raises(ValueError, match = err_msg):
         check_backtesting_input(
             forecaster            = forecaster,
@@ -416,7 +500,8 @@ def test_check_backtesting_input_ValueError_when_series_different_length_initial
             random_state          = 123,
             in_sample_residuals   = True,
             verbose               = False,
-            show_progress         = False
+            show_progress         = False,
+            suppress_warnings     = False
         )
 
 
@@ -430,9 +515,9 @@ def test_check_backtesting_input_ValueError_ForecasterSarimax_when_initial_train
     initial_train_size = None
     
     err_msg = re.escape(
-                (f"`initial_train_size` must be an integer smaller than the "
-                 f"length of `y` ({len(y)}).")
-              )
+        (f"`initial_train_size` must be an integer smaller than the "
+         f"length of `y` ({len(y)}).")
+    )
     with pytest.raises(ValueError, match = err_msg):
         check_backtesting_input(
             forecaster            = forecaster,
@@ -451,7 +536,8 @@ def test_check_backtesting_input_ValueError_ForecasterSarimax_when_initial_train
             random_state          = 123,
             in_sample_residuals   = True,
             verbose               = False,
-            show_progress         = False
+            show_progress         = False,
+            suppress_warnings     = False
         )
 
 
@@ -468,9 +554,9 @@ def test_check_backtesting_input_NotFittedError_when_initial_train_size_None_and
     initial_train_size = None
     
     err_msg = re.escape(
-                ("`forecaster` must be already trained if no `initial_train_size` "
-                 "is provided.")
-            )
+        ("`forecaster` must be already trained if no `initial_train_size` "
+         "is provided.")
+    )
     with pytest.raises(NotFittedError, match = err_msg):
         check_backtesting_input(
             forecaster            = forecaster,
@@ -489,7 +575,8 @@ def test_check_backtesting_input_NotFittedError_when_initial_train_size_None_and
             random_state          = 123,
             in_sample_residuals   = True,
             verbose               = False,
-            show_progress         = False
+            show_progress         = False,
+            suppress_warnings     = False
         )
 
 
@@ -508,8 +595,8 @@ def test_check_backtesting_input_ValueError_when_initial_train_size_None_and_ref
     refit = True
     
     err_msg = re.escape(
-                "`refit` is only allowed when `initial_train_size` is not `None`."
-            )
+        "`refit` is only allowed when `initial_train_size` is not `None`."
+    )
     with pytest.raises(ValueError, match = err_msg):
         check_backtesting_input(
             forecaster            = forecaster,
@@ -528,7 +615,8 @@ def test_check_backtesting_input_ValueError_when_initial_train_size_None_and_ref
             random_state          = 123,
             in_sample_residuals   = True,
             verbose               = False,
-            show_progress         = False
+            show_progress         = False,
+            suppress_warnings     = False
         )
         
 
@@ -565,7 +653,8 @@ def test_check_backtesting_input_TypeError_when_refit_not_bool_or_int(refit):
 
 @pytest.mark.parametrize("boolean_argument", 
                          ['fixed_train_size', 'allow_incomplete_fold', 
-                          'in_sample_residuals', 'verbose', 'show_progress'], 
+                          'in_sample_residuals', 'verbose', 'show_progress',
+                          'suppress_warnings'], 
                          ids = lambda argument : f'{argument}' )
 def test_check_backtesting_input_TypeError_when_boolean_arguments_not_bool(boolean_argument):
     """
@@ -641,6 +730,7 @@ def test_check_backtesting_input_TypeError_when_integer_arguments_not_int_or_gre
             in_sample_residuals   = True,
             verbose               = False,
             show_progress         = False,
+            suppress_warnings     = False,
             **integer_arguments
         )
 
@@ -659,8 +749,8 @@ def test_check_backtesting_input_TypeError_when_n_jobs_not_int_or_auto(n_jobs):
                  )
     
     err_msg = re.escape(
-            (f"`n_jobs` must be an integer or `'auto'`. Got {n_jobs}.")
-        )
+        (f"`n_jobs` must be an integer or `'auto'`. Got {n_jobs}.")
+    )
     with pytest.raises(TypeError, match = err_msg):
         check_backtesting_input(
             forecaster            = forecaster,
@@ -679,7 +769,8 @@ def test_check_backtesting_input_TypeError_when_n_jobs_not_int_or_auto(n_jobs):
             in_sample_residuals   = True,
             n_jobs                = n_jobs,
             verbose               = False,
-            show_progress         = False
+            show_progress         = False,
+            suppress_warnings     = False
         )
 
 
@@ -702,11 +793,11 @@ def test_check_backtesting_input_ValueError_when_not_enough_data_to_create_a_fol
     steps = 5
     
     err_msg = re.escape(
-            (f"There is not enough data to evaluate {steps} steps in a single "
-             f"fold. Set `allow_incomplete_fold` to `True` to allow incomplete folds.\n"
-             f"    Data available for test : {data_length - (initial_train_size + gap)}\n"
-             f"    Steps                   : {steps}")
-        )
+        (f"There is not enough data to evaluate {steps} steps in a single "
+         f"fold. Set `allow_incomplete_fold` to `True` to allow incomplete folds.\n"
+         f"    Data available for test : {data_length - (initial_train_size + gap)}\n"
+         f"    Steps                   : {steps}")
+    )
     with pytest.raises(ValueError, match = err_msg):
         check_backtesting_input(
             forecaster            = forecaster,
@@ -725,5 +816,6 @@ def test_check_backtesting_input_ValueError_when_not_enough_data_to_create_a_fol
             random_state          = 123,
             in_sample_residuals   = True,
             verbose               = False,
-            show_progress         = False
+            show_progress         = False,
+            suppress_warnings     = False
         )
