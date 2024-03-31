@@ -1714,7 +1714,8 @@ def check_backtesting_input(
     in_sample_residuals: bool=True,
     n_jobs: Union[int, str]='auto',
     verbose: bool=False,
-    show_progress: bool=True
+    show_progress: bool=True,
+    suppress_warnings: bool=False
 ) -> None:
     """
     This is a helper function to check most inputs of backtesting functions in 
@@ -1775,6 +1776,10 @@ def check_backtesting_input(
         for backtesting.
     show_progress: bool, default `True`
         Whether to show a progress bar.
+    suppress_warnings: bool, default `False`
+        If `True`, skforecast warnings will be suppressed during the backtesting 
+        process. See skforecast.exceptions.warn_skforecast_categories for more
+        information.
 
     Returns
     -------
@@ -1951,6 +1956,8 @@ def check_backtesting_input(
         raise TypeError("`verbose` must be a boolean: `True`, `False`.")
     if not isinstance(show_progress, bool):
         raise TypeError("`show_progress` must be a boolean: `True`, `False`.")
+    if not isinstance(suppress_warnings, bool):
+        raise TypeError("`suppress_warnings` must be a boolean: `True`, `False`.")
 
     if interval is not None or alpha is not None:
         check_interval(interval=interval, alpha=alpha)

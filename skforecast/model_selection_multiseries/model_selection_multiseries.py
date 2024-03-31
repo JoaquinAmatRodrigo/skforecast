@@ -19,6 +19,7 @@ from sklearn.model_selection import ParameterSampler
 import optuna
 from optuna.samplers import TPESampler, RandomSampler
 
+from ..exceptions import warn_skforecast_categories
 from ..exceptions import LongTrainingWarning
 from ..exceptions import IgnoredArgumentWarning
 from ..exceptions import MissingValuesWarning
@@ -111,6 +112,7 @@ def _extract_data_folds_multiseries(
     window_size: int,
     exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
     dropna_last_window: bool=False,
+    externally_fitted: bool=False
 ) -> Generator[
         Tuple[
             Union[pd.Series, pd.DataFrame, dict],
@@ -142,9 +144,12 @@ def _extract_data_folds_multiseries(
         Exogenous variable.
     dropna_last_window: bool, default `False`
         If `True`, drop the columns of the last window that have NaN values.
+    externally_fitted : bool, default `False`
+        Flag indicating whether the forecaster is already trained. Only used when 
+        `initial_train_size` is None and `refit` is False.
 
     Yield
-    -------
+    -----
     series_train: pandas Series, pandas DataFrame, dict
         Time series corresponding to the training set of the fold.
     series_last_window: pandas DataFrame
@@ -158,7 +163,7 @@ def _extract_data_folds_multiseries(
     fold: list
         Fold created using the skforecast.model_selection._create_backtesting_folds
 
-    """   
+    """
 
     for fold in folds:
         train_iloc_start       = fold[0][0]
@@ -196,8 +201,10 @@ def _extract_data_folds_multiseries(
             series_last_window = series.iloc[
                 last_window_iloc_start:last_window_iloc_end,
             ]
+            
             series_train = series_train.drop(columns=series_to_drop)
-            series_last_window = series_last_window.drop(columns=series_to_drop)
+            if not externally_fitted:
+                series_last_window = series_last_window.drop(columns=series_to_drop)
         else:
             series_train = {}
             for k in series.keys():
@@ -209,11 +216,11 @@ def _extract_data_folds_multiseries(
                         v = v.loc[first_valid_index : last_valid_index]
                         if len(v) >= window_size:
                             series_train[k] = v
-
+            
             series_last_window = {
                 k: v.loc[last_window_loc_start:last_window_loc_end]
                 for k, v in series.items()
-                if k in series_train
+                if externally_fitted or k in series_train
             }
 
             series_last_window = pd.DataFrame(series_last_window)
@@ -234,11 +241,13 @@ def _extract_data_folds_multiseries(
                     k: v.loc[train_loc_start:train_loc_end, :] for k, v in exog.items()
                 }
                 exog_train = {k: v for k, v in exog_train.items() if len(v) > 0}
+
                 exog_test = {
                     k: v.loc[test_loc_start:test_loc_end, :]
                     for k, v in exog.items()
-                    if k in exog_train
+                    if externally_fitted or k in exog_train
                 }
+
                 exog_test = {k: v for k, v in exog_test.items() if len(v) > 0}
         else:
             exog_train = None
@@ -265,7 +274,8 @@ def _backtesting_forecaster_multiseries(
     in_sample_residuals: bool=True,
     n_jobs: Union[int, str]='auto',
     verbose: bool=False,
-    show_progress: bool=True
+    show_progress: bool=True,
+    suppress_warnings: bool=False
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
     Backtesting for multi-series and multivariate forecasters.
@@ -348,6 +358,10 @@ def _backtesting_forecaster_multiseries(
         for backtesting.
     show_progress: bool, default `True`
         Whether to show a progress bar.
+    suppress_warnings: bool, default `False`
+        If `True`, skforecast warnings will be suppressed during the backtesting 
+        process. See skforecast.exceptions.warn_skforecast_categories for more
+        information.
 
     Returns
     -------
@@ -363,9 +377,13 @@ def _backtesting_forecaster_multiseries(
     
     """
 
+    if suppress_warnings:
+        for warn_category in warn_skforecast_categories:
+            warnings.filterwarnings('ignore', category=warn_category)
+
     forecaster = deepcopy(forecaster)
 
-    if n_jobs == 'auto':        
+    if n_jobs == 'auto':
         n_jobs = select_n_jobs_backtesting(
                      forecaster = forecaster,
                      refit      = refit
@@ -420,6 +438,7 @@ def _backtesting_forecaster_multiseries(
                         window_size        = forecaster.window_size,
                         exog               = exog,
                         dropna_last_window = forecaster.dropna_from_series,
+                        externally_fitted  = False
                     )
         series_train, _, last_window_levels, exog_train, _, _ = next(data_fold)
 
@@ -427,7 +446,8 @@ def _backtesting_forecaster_multiseries(
             series                    = series_train,
             exog                      = exog_train,
             store_last_window         = last_window_levels,
-            store_in_sample_residuals = store_in_sample_residuals
+            store_in_sample_residuals = store_in_sample_residuals,
+            suppress_warnings         = suppress_warnings
         )
         window_size = forecaster.window_size
         externally_fitted = False
@@ -449,7 +469,7 @@ def _backtesting_forecaster_multiseries(
                 gap                   = gap,
                 allow_incomplete_fold = allow_incomplete_fold,
                 return_all_indexes    = False,
-                verbose               = verbose  
+                verbose               = verbose
             )
 
     if refit:
@@ -478,6 +498,7 @@ def _backtesting_forecaster_multiseries(
                      window_size        = forecaster.window_size,
                      exog               = exog,
                      dropna_last_window = forecaster.dropna_from_series,
+                     externally_fitted  = externally_fitted
                  )
 
     def _fit_predict_forecaster(data_fold, forecaster, interval, levels):
@@ -501,7 +522,8 @@ def _backtesting_forecaster_multiseries(
                 series                    = series_train, 
                 exog                      = exog_train,
                 store_last_window         = last_window_levels,
-                store_in_sample_residuals = store_in_sample_residuals
+                store_in_sample_residuals = store_in_sample_residuals,
+                suppress_warnings         = suppress_warnings
             )
 
         test_iloc_start = fold[2][0]
@@ -593,6 +615,10 @@ def _backtesting_forecaster_multiseries(
         axis=1
     )
 
+    if suppress_warnings:
+        for warn_category in warn_skforecast_categories:
+            warnings.filterwarnings('default', category=warn_category)
+
     return metrics_levels, backtest_predictions
 
 
@@ -614,7 +640,8 @@ def backtesting_forecaster_multiseries(
     in_sample_residuals: bool=True,
     n_jobs: Union[int, str]='auto',
     verbose: bool=False,
-    show_progress: bool=True
+    show_progress: bool=True,
+    suppress_warnings: bool=False
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
     Backtesting for multi-series and multivariate forecasters.
@@ -686,7 +713,7 @@ def backtesting_forecaster_multiseries(
         deterministic.
     in_sample_residuals : bool, default `True`
         If `True`, residuals from the training data are used as proxy of prediction 
-        error to create prediction intervals.  If `False`, out_sample_residuals 
+        error to create prediction intervals. If `False`, out_sample_residuals 
         are used if they are already stored inside the forecaster.
     n_jobs : int, 'auto', default `'auto'`
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
@@ -698,6 +725,10 @@ def backtesting_forecaster_multiseries(
         for backtesting.
     show_progress: bool, default `True`
         Whether to show a progress bar.
+    suppress_warnings: bool, default `False`
+        If `True`, skforecast warnings will be suppressed during the backtesting 
+        process. See skforecast.exceptions.warn_skforecast_categories for more
+        information.
 
     Returns
     -------
@@ -740,7 +771,8 @@ def backtesting_forecaster_multiseries(
         in_sample_residuals   = in_sample_residuals,
         n_jobs                = n_jobs,
         verbose               = verbose,
-        show_progress         = show_progress
+        show_progress         = show_progress,
+        suppress_warnings     = suppress_warnings
     )
 
     metrics_levels, backtest_predictions = _backtesting_forecaster_multiseries(
@@ -761,7 +793,8 @@ def backtesting_forecaster_multiseries(
         in_sample_residuals   = in_sample_residuals,
         n_jobs                = n_jobs,
         verbose               = verbose,
-        show_progress         = show_progress
+        show_progress         = show_progress,
+        suppress_warnings     = suppress_warnings
     )
 
     return metrics_levels, backtest_predictions
@@ -784,7 +817,8 @@ def grid_search_forecaster_multiseries(
     return_best: bool=True,
     n_jobs: Union[int, str]='auto',
     verbose: bool=True,
-    show_progress: bool=True
+    show_progress: bool=True,
+    suppress_warnings: bool=False
 ) -> pd.DataFrame:
     """
     Exhaustive search over specified parameter values for a Forecaster object.
@@ -847,6 +881,10 @@ def grid_search_forecaster_multiseries(
         Print number of folds used for cv or backtesting.
     show_progress: bool, default `True`
         Whether to show a progress bar.
+    suppress_warnings: bool, default `False`
+        If `True`, skforecast warnings will be suppressed during the hyperparameter 
+        search. See skforecast.exceptions.warn_skforecast_categories for more
+        information.
 
     Returns
     -------
@@ -881,7 +919,8 @@ def grid_search_forecaster_multiseries(
                   n_jobs                = n_jobs,
                   return_best           = return_best,
                   verbose               = verbose,
-                  show_progress         = show_progress
+                  show_progress         = show_progress,
+                  suppress_warnings     = suppress_warnings
               )
 
     return results
@@ -906,7 +945,8 @@ def random_search_forecaster_multiseries(
     return_best: bool=True,
     n_jobs: Union[int, str]='auto',
     verbose: bool=True,
-    show_progress: bool=True
+    show_progress: bool=True,
+    suppress_warnings: bool=False
 ) -> pd.DataFrame:
     """
     Random search over specified parameter values or distributions for a Forecaster 
@@ -974,6 +1014,10 @@ def random_search_forecaster_multiseries(
         Print number of folds used for cv or backtesting.
     show_progress: bool, default `True`
         Whether to show a progress bar.
+    suppress_warnings: bool, default `False`
+        If `True`, skforecast warnings will be suppressed during the hyperparameter 
+        search. See skforecast.exceptions.warn_skforecast_categories for more
+        information.
 
     Returns
     -------
@@ -1009,7 +1053,8 @@ def random_search_forecaster_multiseries(
                   return_best           = return_best,
                   n_jobs                = n_jobs,
                   verbose               = verbose,
-                  show_progress         = show_progress
+                  show_progress         = show_progress,
+                  suppress_warnings     = suppress_warnings
               )
 
     return results
@@ -1032,7 +1077,8 @@ def _evaluate_grid_hyperparameters_multiseries(
     return_best: bool=True,
     n_jobs: Union[int, str]='auto',
     verbose: bool=True,
-    show_progress: bool=True
+    show_progress: bool=True,
+    suppress_warnings: bool=False
 ) -> pd.DataFrame:
     """
     Evaluate parameter values for a Forecaster object using multi-series backtesting.
@@ -1087,6 +1133,11 @@ def _evaluate_grid_hyperparameters_multiseries(
         Refit the `forecaster` using the best found parameters on the whole data.
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
+    suppress_warnings: bool, default `False`
+        If `True`, skforecast warnings will be suppressed during the hyperparameter 
+        search. See skforecast.exceptions.warn_skforecast_categories for more
+        information.
+    
 
     Returns
     -------
@@ -1101,6 +1152,10 @@ def _evaluate_grid_hyperparameters_multiseries(
         - additional n columns with param = value.
     
     """
+
+    if suppress_warnings:
+        for warn_category in warn_skforecast_categories:
+            warnings.filterwarnings('ignore', category=warn_category)
 
     if return_best and exog is not None and (len(exog) != len(series)):
         raise ValueError(
@@ -1163,18 +1218,11 @@ def _evaluate_grid_hyperparameters_multiseries(
                                  interval              = None,
                                  verbose               = verbose,
                                  n_jobs                = n_jobs,
-                                 show_progress         = False
+                                 show_progress         = False,
+                                 suppress_warnings     = suppress_warnings
                              )[0]
-            # warnings.filterwarnings('ignore', category=RuntimeWarning, 
-            #                         message= "The forecaster will be fit.*")
-            # TODO: validate and move list of warning at the begining of the function
-            warn_categories = [
-                MissingValuesWarning,
-                LongTrainingWarning,
-                MissingExogWarning,
-                IgnoredArgumentWarning
-            ]
-            for warn_category in warn_categories:
+            
+            for warn_category in warn_skforecast_categories:
                 warnings.filterwarnings('ignore', category=warn_category)
 
             lags_list.append(lags_v)
@@ -1182,9 +1230,6 @@ def _evaluate_grid_hyperparameters_multiseries(
             for m in metric:
                 m_name = m if isinstance(m, str) else m.__name__
                 metric_dict[m_name].append(metrics_levels[m_name].mean())
-
-    for warn_category in warn_categories:
-        warnings.filterwarnings('default', category=warn_category)
 
     results = pd.DataFrame({
                   'levels': [levels]*len(lags_list),
@@ -1222,7 +1267,10 @@ def _evaluate_grid_hyperparameters_multiseries(
             f"  Backtesting metric: {best_metric}\n"
             f"  Levels: {results['levels'].iloc[0]}\n"
         )
-            
+
+    for warn_category in warn_skforecast_categories:
+        warnings.filterwarnings('default', category=warn_category)
+    
     return results
 
 
@@ -1483,6 +1531,8 @@ def _bayesian_search_optuna_multiseries(
         The best optimization result returned as a FrozenTrial optuna object.
 
     """
+
+    # TODO: add suppress_warnings
     
     levels = _initialize_levels_model_selection_multiseries(
                  forecaster = forecaster,
@@ -1664,7 +1714,8 @@ def backtesting_forecaster_multivariate(
     in_sample_residuals: bool=True,
     n_jobs: Union[int, str]='auto',
     verbose: bool=False,
-    show_progress: bool=True
+    show_progress: bool=True,
+    suppress_warnings: bool=False
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
     This function is an alias of backtesting_forecaster_multiseries.
@@ -1741,6 +1792,10 @@ def backtesting_forecaster_multivariate(
         for backtesting.
     show_progress: bool, default `True`
         Whether to show a progress bar.
+    suppress_warnings: bool, default `False`
+        If `True`, skforecast warnings will be suppressed during the backtesting 
+        process. See skforecast.exceptions.warn_skforecast_categories for more
+        information.
 
     Returns
     -------
@@ -1774,7 +1829,8 @@ def backtesting_forecaster_multivariate(
         in_sample_residuals   = in_sample_residuals,
         n_jobs                = n_jobs,
         verbose               = verbose,
-        show_progress         = show_progress
+        show_progress         = show_progress,
+        suppress_warnings     = suppress_warnings
         
     )
 
@@ -1798,7 +1854,8 @@ def grid_search_forecaster_multivariate(
     return_best: bool=True,
     n_jobs: Union[int, str]='auto',
     verbose: bool=True,
-    show_progress: bool=True
+    show_progress: bool=True,
+    suppress_warnings: bool=False
 ) -> pd.DataFrame:
     """
     This function is an alias of grid_search_forecaster_multiseries.
@@ -1863,6 +1920,10 @@ def grid_search_forecaster_multivariate(
         Print number of folds used for cv or backtesting.
     show_progress: bool, default `True`
         Whether to show a progress bar.
+    suppress_warnings: bool, default `False`
+        If `True`, skforecast warnings will be suppressed during the hyperparameter 
+        search. See skforecast.exceptions.warn_skforecast_categories for more
+        information.
 
     Returns
     -------
@@ -1895,7 +1956,8 @@ def grid_search_forecaster_multivariate(
         return_best           = return_best,
         n_jobs                = n_jobs,
         verbose               = verbose,
-        show_progress         = show_progress
+        show_progress         = show_progress,
+        suppress_warnings     = suppress_warnings
     )
 
     return results
@@ -1920,7 +1982,8 @@ def random_search_forecaster_multivariate(
     return_best: bool=True,
     n_jobs: Union[int, str]='auto',
     verbose: bool=True,
-    show_progress: bool=True
+    show_progress: bool=True,
+    suppress_warnings: bool=False
 ) -> pd.DataFrame:
     """
     This function is an alias of random_search_forecaster_multiseries.
@@ -1990,6 +2053,10 @@ def random_search_forecaster_multivariate(
         Print number of folds used for cv or backtesting.
     show_progress: bool, default `True`
         Whether to show a progress bar.
+    suppress_warnings: bool, default `False`
+        If `True`, skforecast warnings will be suppressed during the hyperparameter 
+        search. See skforecast.exceptions.warn_skforecast_categories for more
+        information.
 
     Returns
     -------
@@ -2024,7 +2091,8 @@ def random_search_forecaster_multivariate(
         return_best           = return_best,
         n_jobs                = n_jobs,
         verbose               = verbose,
-        show_progress         = show_progress
+        show_progress         = show_progress,
+        suppress_warnings     = suppress_warnings
     ) 
 
     return results

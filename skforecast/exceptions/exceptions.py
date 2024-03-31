@@ -108,3 +108,13 @@ class SkforecastVersionWarning(UserWarning):
             "warnings.simplefilter('ignore', category=SkforecastVersionWarning)"
         )
         return self.message + " " + extra_message
+
+
+warn_skforecast_categories = [
+    MissingValuesWarning,
+    MissingExogWarning,
+    DataTypeWarning,
+    LongTrainingWarning,
+    IgnoredArgumentWarning,
+    SkforecastVersionWarning
+]

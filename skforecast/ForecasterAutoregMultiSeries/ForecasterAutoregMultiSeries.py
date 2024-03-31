@@ -22,6 +22,7 @@ import inspect
 
 import skforecast
 from ..ForecasterBase import ForecasterBase
+from ..exceptions import warn_skforecast_categories
 from ..exceptions import MissingValuesWarning
 from ..exceptions import IgnoredArgumentWarning
 from ..utils import initialize_lags
@@ -833,7 +834,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
     def create_train_X_y(
         self,
         series: Union[pd.DataFrame, dict],
-        exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
+        exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None
     ) -> Tuple[pd.DataFrame, pd.Series]:
         """
         Create training matrices from multiple time series and exogenous
@@ -1004,7 +1005,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         series: Union[pd.DataFrame, dict],
         exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
         store_last_window: Union[bool, list]=True,
-        store_in_sample_residuals: bool=True
+        store_in_sample_residuals: bool=True,
+        suppress_warnings: bool=False
     ) -> None:
         """
         Training Forecaster. See Notes section for more details depending on 
@@ -1028,6 +1030,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         store_in_sample_residuals : bool, default `True`
             If `True`, in-sample residuals will be stored in the forecaster object
             after fitting.
+        suppress_warnings : bool, default `False`
+            If `True`, skforecast warnings will be suppressed during the fitting 
+            process. See skforecast.exceptions.warn_skforecast_categories for more
+            information.
 
         Returns
         -------
@@ -1048,6 +1054,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         frequency.
         
         """
+
+        if suppress_warnings:
+            for warn_category in warn_skforecast_categories:
+                warnings.filterwarnings('ignore', category=warn_category)
 
         # Reset values in case the forecaster has already been fitted.
         self.series_col_names    = None
@@ -1137,6 +1147,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         if store_last_window:
             self.last_window = last_window
+        
+        if suppress_warnings:
+            for warn_category in warn_skforecast_categories:
+                warnings.filterwarnings('default', category=warn_category)
 
 
     def _recursive_predict(
@@ -1174,7 +1188,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         for i in range(steps):
 
-            X = last_window[-self.lags].reshape(1, -1)        
+            X = last_window[-self.lags].reshape(1, -1)
 
             if self.encoding == 'onehot':
                 levels_dummies = np.zeros(shape=(1, len(self.series_col_names)), dtype=float)
@@ -1413,7 +1427,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                               inverse_transform = True
                           )
 
-            predictions.append(preds_level)    
+            predictions.append(preds_level)
 
         predictions = pd.concat(predictions, axis=1)
 
@@ -1726,7 +1740,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             used to calculate the initial predictors, and the predictions start
             right after training data.
         exog : pandas Series, pandas DataFrame, default `None`
-            Exogenous variable/s included as predictor/s.  
+            Exogenous variable/s included as predictor/s.
         interval : list, default `[5, 95]`
             Confidence of the prediction interval estimated. Sequence of 
             percentiles to compute, which must be between 0 and 100 inclusive. 
@@ -2019,7 +2033,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self, 
         lags: Union[int, list, np.ndarray, range]
     ) -> None:
-        """      
+        """
         Set new value to the attribute `lags`.
         Attributes `max_lag` and `window_size` are also updated.
         
@@ -2038,7 +2052,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         
         """
 
-        self.lags = initialize_lags(type(self).__name__, lags)            
+        self.lags = initialize_lags(type(self).__name__, lags)
         self.max_lag  = max(self.lags)
         self.window_size = max(self.lags)
 
