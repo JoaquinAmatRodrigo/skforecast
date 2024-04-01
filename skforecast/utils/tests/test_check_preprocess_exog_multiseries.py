@@ -25,8 +25,8 @@ def test_TypeError_check_preprocess_exog_multiseries_when_exog_is_not_valid_type
     not_valid_exog = 'not_valid_exog'
 
     err_msg = re.escape(
-        ("`exog` must be a pandas Series, DataFrame or dict. "
-         "Got <class 'str'>.")
+        ("`exog` must be a pandas Series, DataFrame, dictionary of pandas "
+         "Series/DataFrames or None. Got <class 'str'>.")
     )
     with pytest.raises(TypeError, match = err_msg):
         check_preprocess_exog_multiseries(
@@ -224,8 +224,8 @@ def test_TypeError_check_preprocess_exog_multiseries_when_exog_is_dict_with_no_p
     }
 
     err_msg = re.escape(
-        ("All exog must be a named pandas Series, a pandas DataFrame or None. "
-         "Review exog: ['l2']")
+        ("If `exog` is a dictionary, all exog must be a named pandas "
+         "Series, a pandas DataFrame or None. Review exog: ['l2']")
     )
     with pytest.raises(TypeError, match = err_msg):
         check_preprocess_exog_multiseries(

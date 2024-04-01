@@ -127,8 +127,8 @@ def test_TypeError_check_preprocess_series_when_series_is_dict_with_no_pandas_Se
                    'l2': series}
 
     err_msg = re.escape(
-        ("All series must be a named pandas Series or a pandas DataFrame. "
-         "with a single column. Review series: ['l1']")
+        ("If `series` is a dictionary, all series must be a named pandas Series "
+         "or a pandas DataFrame with a single column. Review series: ['l1']")
     )
     with pytest.raises(TypeError, match = err_msg):
         check_preprocess_series(series = series_dict)
@@ -143,8 +143,8 @@ def test_ValueError_check_preprocess_series_when_series_is_dict_with_a_DataFrame
                    'l2': series}
 
     err_msg = re.escape(
-        ("All series must be a named pandas Series or a pandas DataFrame "
-         "with a single column. Review series: l2")
+        ("If `series` is a dictionary, all series must be a named pandas Series "
+         "or a pandas DataFrame with a single column. Review series: 'l2'")
     )
     with pytest.raises(ValueError, match = err_msg):
         check_preprocess_series(series = series_dict)
@@ -159,8 +159,8 @@ def test_TypeError_check_preprocess_series_when_series_is_dict_with_no_DatetimeI
                    'l2': series['2']}
 
     err_msg = re.escape(
-        ("All series must have a Pandas DatetimeIndex as index with the "
-         "same frequency. Review series: ['l1', 'l2']")
+        ("If `series` is a dictionary, all series must have a Pandas DatetimeIndex "
+         "as index with the same frequency. Review series: ['l1', 'l2']")
     )
     with pytest.raises(TypeError, match = err_msg):
         check_preprocess_series(series = series_dict)
@@ -183,8 +183,8 @@ def test_ValueError_check_preprocess_series_when_series_is_dict_with_different_f
     )
 
     err_msg = re.escape(
-        ("All series must have a Pandas DatetimeIndex as index with the "
-         "same frequency. Found frequencies: ['<Day>', '<MonthBegin>']")
+        ("If `series` is a dictionary, all series must have a Pandas DatetimeIndex "
+         "as index with the same frequency. Found frequencies: ['<Day>', '<MonthBegin>']")
     )
     with pytest.raises(ValueError, match = err_msg):
         check_preprocess_series(series = series_dict)

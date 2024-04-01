@@ -1843,8 +1843,8 @@ def check_backtesting_input(
                 if not isinstance(v.index, pd.DatetimeIndex)
             ]
             if not_valid_index:
-                raise TypeError(
-                    (f"If `series` is a dictionary, All series must have a Pandas "
+                raise ValueError(
+                    (f"If `series` is a dictionary, all series must have a Pandas "
                      f"DatetimeIndex as index with the same frequency. "
                      f"Review series: {not_valid_index}")
                 )
@@ -1853,7 +1853,7 @@ def check_backtesting_input(
             indexes_freq = sorted(set(indexes_freq))
             if not len(indexes_freq) == 1:
                 raise ValueError(
-                    (f"If `series` is a dictionary, All series must have a Pandas "
+                    (f"If `series` is a dictionary, all series must have a Pandas "
                      f"DatetimeIndex as index with the same frequency. "
                      f"Found frequencies: {indexes_freq}")
                 )
@@ -1925,10 +1925,10 @@ def check_backtesting_input(
                  f"gap {gap} cannot be greater than the length of `{data_name}` "
                  f"({data_length}).")
             )
-        if data_name == "series" and forecaster_name not in [
-            "ForecasterAutoregMultiSeries",
-            "ForecasterAutoregMultiSeriesCustom",
-        ]:
+        
+        # TODO: Check if this error is needed
+        # ======================================================================
+        if data_name == "series" and forecaster_name not in forecasters_multi_dict:
             for serie in series:
                 if np.isnan(series[serie].to_numpy()[:initial_train_size]).all():
                     raise ValueError(
@@ -1937,6 +1937,7 @@ def check_backtesting_input(
                          f"`initial_train_size` has an appropriate value so that "
                          f"all series reach the first non-null value.")
                     )
+        # ======================================================================
     else:
         if forecaster_name == 'ForecasterSarimax':
             raise ValueError(
@@ -2172,7 +2173,7 @@ def check_preprocess_series(
                     raise ValueError(
                         (f"If `series` is a dictionary, all series must be a named "
                          f"pandas Series or a pandas DataFrame with a single column. "
-                         f"Review series: {k}")
+                         f"Review series: '{k}'")
                     )
                 series_dict[k] = v.iloc[:, 0]
 
@@ -2185,7 +2186,7 @@ def check_preprocess_series(
         ]
         if not_valid_index:
             raise TypeError(
-                (f"If `series` is a dictionary, All series must have a Pandas "
+                (f"If `series` is a dictionary, all series must have a Pandas "
                  f"DatetimeIndex as index with the same frequency. "
                  f"Review series: {not_valid_index}")
             )
@@ -2194,7 +2195,7 @@ def check_preprocess_series(
         indexes_freq = sorted(set(indexes_freq))
         if not len(indexes_freq) == 1:
             raise ValueError(
-                (f"If `series` is a dictionary, All series must have a Pandas "
+                (f"If `series` is a dictionary, all series must have a Pandas "
                  f"DatetimeIndex as index with the same frequency. "
                  f"Found frequencies: {indexes_freq}")
             )
@@ -2303,7 +2304,7 @@ def check_preprocess_exog_multiseries(
         ]
         if not_valid_exog:
             raise TypeError(
-                (f"If `exog` is a dictionary, All exog must be a named pandas "
+                (f"If `exog` is a dictionary, all exog must be a named pandas "
                  f"Series, a pandas DataFrame or None. Review exog: {not_valid_exog}")
             )
 

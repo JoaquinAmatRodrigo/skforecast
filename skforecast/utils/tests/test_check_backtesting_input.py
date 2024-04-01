@@ -154,10 +154,12 @@ def test_check_backtesting_input_TypeError_when_series_is_dict_of_pandas_Series_
     Test TypeError is raised in check_backtesting_input if `series` is not a 
     dict of pandas Series in forecasters multiseries with dict.
     """
-    bad_series = {'l1': pd.DataFrame(np.arange(50))}
+    bad_series = {'l1': np.arange(50)}
 
     err_msg = re.escape(
-        ("If `series` is a dictionary, all values must be pandas Series.")
+        ("If `series` is a dictionary, all series must be a named "
+         "pandas Series or a pandas DataFrame with a single column. "
+         "Review series: ['l1']")
     )
     with pytest.raises(TypeError, match = err_msg):
         check_backtesting_input(
@@ -166,7 +168,244 @@ def test_check_backtesting_input_TypeError_when_series_is_dict_of_pandas_Series_
             metric                = 'mean_absolute_error',
             y                     = None,
             series                = bad_series,
-            initial_train_size    = len(bad_series[:-12]),
+            initial_train_size    = len(bad_series['l1'][:-12]),
+            fixed_train_size      = False,
+            gap                   = 0,
+            allow_incomplete_fold = False,
+            refit                 = False,
+            interval              = None,
+            alpha                 = None,
+            n_boot                = 500,
+            random_state          = 123,
+            in_sample_residuals   = True,
+            verbose               = False,
+            show_progress         = False,
+            suppress_warnings     = False
+        )
+
+
+@pytest.mark.parametrize("forecaster", 
+                         [ForecasterAutoregMultiSeries(regressor=Ridge(), lags=2),
+                          ForecasterAutoregMultiSeriesCustom(regressor=Ridge(), 
+                                                             window_size=3,
+                                                             fun_predictors=create_predictors)], 
+                         ids = lambda fr : f'forecaster: {type(fr).__name__}' )
+def test_check_backtesting_input_ValueError_when_series_is_dict_no_DatetimeIndex_multiseries_dict(forecaster):
+    """
+    Test ValueError is raised in check_backtesting_input if `series` is a 
+    dict with pandas Series with no DatetimeIndex in forecasters 
+    multiseries with dict.
+    """
+    series_dict = {
+        'l1': pd.Series(np.arange(50)),
+        'l2': pd.Series(np.arange(50))
+    }
+
+    err_msg = re.escape(
+        ("If `series` is a dictionary, all series must have a Pandas DatetimeIndex "
+         "as index with the same frequency. Review series: ['l1', 'l2']")
+    )
+    with pytest.raises(ValueError, match = err_msg):
+        check_backtesting_input(
+            forecaster            = forecaster,
+            steps                 = 3,
+            metric                = 'mean_absolute_error',
+            y                     = None,
+            series                = series_dict,
+            initial_train_size    = len(series_dict['l1'][:-12]),
+            fixed_train_size      = False,
+            gap                   = 0,
+            allow_incomplete_fold = False,
+            refit                 = False,
+            interval              = None,
+            alpha                 = None,
+            n_boot                = 500,
+            random_state          = 123,
+            in_sample_residuals   = True,
+            verbose               = False,
+            show_progress         = False,
+            suppress_warnings     = False
+        )
+
+
+@pytest.mark.parametrize("forecaster", 
+                         [ForecasterAutoregMultiSeries(regressor=Ridge(), lags=2),
+                          ForecasterAutoregMultiSeriesCustom(regressor=Ridge(), 
+                                                             window_size=3,
+                                                             fun_predictors=create_predictors)], 
+                         ids = lambda fr : f'forecaster: {type(fr).__name__}' )
+def test_check_backtesting_input_ValueError_when_series_is_dict_diff_freq_multiseries_dict(forecaster):
+    """
+    Test ValueError is raised in check_backtesting_input if `series` is a 
+    dict with pandas Series of difference frequency in forecasters 
+    multiseries with dict.
+    """
+    series_dict = {
+        'l1': pd.Series(np.arange(50)),
+        'l2': pd.Series(np.arange(50))
+    }
+    series_dict['l1'].index = pd.date_range(
+        start='2000-01-01', periods=len(series_dict['l1']), freq='D'
+    )
+    series_dict['l2'].index = pd.date_range(
+        start='2000-01-01', periods=len(series_dict['l2']), freq='MS'
+    )
+
+    err_msg = re.escape(
+        ("If `series` is a dictionary, all series must have a Pandas DatetimeIndex "
+         "as index with the same frequency. Found frequencies: ['<Day>', '<MonthBegin>']")
+    )
+    with pytest.raises(ValueError, match = err_msg):
+        check_backtesting_input(
+            forecaster            = forecaster,
+            steps                 = 3,
+            metric                = 'mean_absolute_error',
+            y                     = None,
+            series                = series_dict,
+            initial_train_size    = len(series_dict['l1'][:-12]),
+            fixed_train_size      = False,
+            gap                   = 0,
+            allow_incomplete_fold = False,
+            refit                 = False,
+            interval              = None,
+            alpha                 = None,
+            n_boot                = 500,
+            random_state          = 123,
+            in_sample_residuals   = True,
+            verbose               = False,
+            show_progress         = False,
+            suppress_warnings     = False
+        )
+
+
+@pytest.mark.parametrize("forecaster", 
+                         [ForecasterAutoregMultiSeries(regressor=Ridge(), lags=2),
+                          ForecasterAutoregMultiSeriesCustom(regressor=Ridge(), 
+                                                             window_size=3,
+                                                             fun_predictors=create_predictors)], 
+                         ids = lambda fr : f'forecaster: {type(fr).__name__}' )
+def test_check_backtesting_input_TypeError_when_not_valid_exog_type_multiseries_dict(forecaster):
+    """
+    Test TypeError is raised in check_backtesting_input if `exog` is not a
+    pandas Series, DataFrame, dictionary of pandas Series/DataFrames or None.
+    """
+    series_dict = {
+        'l1': pd.Series(np.arange(50)),
+        'l2': pd.Series(np.arange(50))
+    }
+    series_dict['l1'].index = pd.date_range(
+        start='2000-01-01', periods=len(series_dict['l1']), freq='D'
+    )
+    series_dict['l2'].index = pd.date_range(
+        start='2000-01-01', periods=len(series_dict['l2']), freq='D'
+    )
+
+    bad_exog = np.arange(50)
+
+    err_msg = re.escape(
+        (f"`exog` must be a pandas Series, DataFrame, dictionary of pandas "
+         f"Series/DataFrames or None. Got {type(bad_exog)}.")
+    )
+    with pytest.raises(TypeError, match = err_msg):
+        check_backtesting_input(
+            forecaster            = forecaster,
+            steps                 = 3,
+            metric                = 'mean_absolute_error',
+            y                     = None,
+            series                = series_dict,
+            exog                  = bad_exog,
+            initial_train_size    = len(series_dict['l1'][:-12]),
+            fixed_train_size      = False,
+            gap                   = 0,
+            allow_incomplete_fold = False,
+            refit                 = False,
+            interval              = None,
+            alpha                 = None,
+            n_boot                = 500,
+            random_state          = 123,
+            in_sample_residuals   = True,
+            verbose               = False,
+            show_progress         = False,
+            suppress_warnings     = False
+        )
+
+
+@pytest.mark.parametrize("forecaster", 
+                         [ForecasterAutoregMultiSeries(regressor=Ridge(), lags=2),
+                          ForecasterAutoregMultiSeriesCustom(regressor=Ridge(), 
+                                                             window_size=3,
+                                                             fun_predictors=create_predictors)], 
+                         ids = lambda fr : f'forecaster: {type(fr).__name__}' )
+def test_check_backtesting_input_TypeError_when_not_valid_exog_dict_type_multiseries_dict(forecaster):
+    """
+    Test TypeError is raised in check_backtesting_input if `exog` is not a
+    dictionary of pandas Series/DataFrames.
+    """
+    series_dict = {
+        'l1': pd.Series(np.arange(50)),
+        'l2': pd.Series(np.arange(50))
+    }
+    series_dict['l1'].index = pd.date_range(
+        start='2000-01-01', periods=len(series_dict['l1']), freq='D'
+    )
+    series_dict['l2'].index = pd.date_range(
+        start='2000-01-01', periods=len(series_dict['l2']), freq='D'
+    )
+
+    bad_exog = {'l1': np.arange(50)}
+
+    err_msg = re.escape(
+        ("If `exog` is a dictionary, All exog must be a named pandas "
+         "Series, a pandas DataFrame or None. Review exog: ['l1']")
+    )
+    with pytest.raises(TypeError, match = err_msg):
+        check_backtesting_input(
+            forecaster            = forecaster,
+            steps                 = 3,
+            metric                = 'mean_absolute_error',
+            y                     = None,
+            series                = series_dict,
+            exog                  = bad_exog,
+            initial_train_size    = len(series_dict['l1'][:-12]),
+            fixed_train_size      = False,
+            gap                   = 0,
+            allow_incomplete_fold = False,
+            refit                 = False,
+            interval              = None,
+            alpha                 = None,
+            n_boot                = 500,
+            random_state          = 123,
+            in_sample_residuals   = True,
+            verbose               = False,
+            show_progress         = False,
+            suppress_warnings     = False
+        )
+
+
+def test_check_backtesting_input_TypeError_when_not_valid_exog_type():
+    """
+    Test TypeError is raised in check_backtesting_input if `exog` is not a
+    pandas Series, DataFrame or None.
+    """
+    y = pd.Series(np.arange(50))
+    y.index = pd.date_range(start='2000-01-01', periods=len(y), freq='D')
+
+    forecaster = ForecasterAutoreg(regressor=Ridge(), lags=2)
+
+    bad_exog = np.arange(50)
+
+    err_msg = re.escape(
+        (f"`exog` must be a pandas Series, DataFrame or None. Got {type(bad_exog)}.")
+    )
+    with pytest.raises(TypeError, match = err_msg):
+        check_backtesting_input(
+            forecaster            = forecaster,
+            steps                 = 3,
+            metric                = 'mean_absolute_error',
+            y                     = None,
+            series                = y,
+            exog                  = bad_exog,
+            initial_train_size    = len(y[:-12]),
             fixed_train_size      = False,
             gap                   = 0,
             allow_incomplete_fold = False,
