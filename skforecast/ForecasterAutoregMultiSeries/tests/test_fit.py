@@ -216,6 +216,6 @@ def test_fit_encoding_mapping(encoding, encoding_mapping):
                      lags     = 3,
                      encoding = encoding,
                  )
-    forecaster.fit(series=series)
+    forecaster.fit(series=series, suppress_warnings=True)
     
     assert forecaster.encoding_mapping == encoding_mapping

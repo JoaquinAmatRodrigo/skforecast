@@ -113,7 +113,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         is still experimental and may undergo changes.**
         **New in version 0.12.0**
     dropna_from_series : bool, default `False`
-        NaNs detected in training matrices will be dropped.
+        Determine whether NaN detected in the training matrices will be dropped.
 
         - If `True`, drop NaNs in X_train and same rows in y_train.
         - If `False`, leave NaNs in X_train and warn the user.
@@ -139,12 +139,11 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         pandas.category dtype so that it can be used as a categorical variable. 
         - If `'onehot'`, a binary column is created for each series.
         **New in version 0.12.0**
-    dropna_from_series : bool, default `False`
-        NaNs detected in training matrices will be dropped.
-
-        - If `True`, drop NaNs in X_train and same rows in y_train.
-        - If `False`, leave NaNs in X_train and warn the user.
+    encoder : sklearn.preprocessing
+        Scikit-learn preprocessing encoder used to encode the series.
         **New in version 0.12.0**
+    encoding_mapping : dict
+        Mapping of the encoding used to identify the different series.
     transformer_series : transformer (preprocessor), dict
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API with methods: fit, transform, fit_transform and 
@@ -176,7 +175,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         objects in `weight_func` and is used internally to avoid overwriting.
     source_code_weight_func : str, dict
         Source code of the custom function(s) used to create weights.
-    series_weights : dict, default `None`
+    series_weights : dict
         Weights associated with each series {'series_column_name' : float}. It is only
         applied if the `regressor` used accepts `sample_weight` in its `fit` method. 
         See Notes section for more details on the use of the weights.
@@ -184,6 +183,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         - If a `dict` is provided, a weight of 1 is given to all series not present
         in `series_weights`.
         - If `None`, all levels have the same weight.
+    series_weights_ : dict
+        Weights associated with each series.It is created as a clone of `series_weights`
+        and is used internally to avoid overwriting.
     differentiation : int
         Order of differencing applied to the time series before training the 
         forecaster.
@@ -192,14 +194,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
     differentiator_ : dict
         Dictionary with the `differentiator` for each series. It is created cloning the
         objects in `differentiator` and is used internally to avoid overwriting.
-    series_weights_ : dict
-        Weights associated with each series.It is created as a clone of `series_weights`
-        and is used internally to avoid overwriting.
-    encoder : sklearn.preprocessing
-        Scikit-learn preprocessing encoder used to encode the series.
-        **New in version 0.12.0**
-    encoding_mapping : dict
-        Mapping of the encoding used to identify the different series.
+    dropna_from_series : bool
+        Determine whether NaN detected in the training matrices will be dropped.
     max_lag : int
         Maximum value of lag included in `lags`.
     window_size : int
@@ -285,13 +281,12 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
     ) -> None:
 
         self.regressor               = regressor
+        self.encoding                = encoding
+        self.encoder                 = None
+        self.encoding_mapping        = {}
         self.transformer_series      = transformer_series
         self.transformer_series_     = None
         self.transformer_exog        = transformer_exog
-        self.encoding                = encoding
-        self.dropna_from_series      = dropna_from_series
-        self.encoder                 = None
-        self.encoding_mapping        = {}
         self.weight_func             = weight_func
         self.weight_func_            = None
         self.source_code_weight_func = None
@@ -300,6 +295,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.differentiation         = differentiation
         self.differentiator          = None
         self.differentiator_         = None
+        self.dropna_from_series      = dropna_from_series
         self.last_window             = None
         self.index_type              = None
         self.index_freq              = None
@@ -768,9 +764,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             y_train = y_train.iloc[mask]
             X_train = X_train.iloc[mask,]
             warnings.warn(
-                ("NaNs detected in `y_train`. They have been dropped since the "
+                ("NaNs detected in `y_train`. They have been dropped because the "
                  "target variable cannot have NaN values. Same rows have been "
-                 "dropped from `X_train` to maintain alignment. This caused by "
+                 "dropped from `X_train` to maintain alignment. This is caused by "
                  "series with interspersed NaNs."),
                  MissingValuesWarning
             )
@@ -791,7 +787,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         else:
             if X_train.isnull().any().any():
                 warnings.warn(
-                    ("NaNs detected in `X_train`. Some regressor do not allow "
+                    ("NaNs detected in `X_train`. Some regressors do not allow "
                      "NaN values during training. If you want to drop them, "
                      "set `forecaster.dropna_from_series = True`."),
                      MissingValuesWarning
@@ -1384,7 +1380,13 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             if isinstance(exog, dict):
                 # Fill the empty dataframe with the exog values of each level
                 # and transform them if necessary
-                exog_level = empty_exog.fillna(exog[level])
+                exog_level = exog[level]
+                if isinstance(exog_level, pd.Series):
+                    exog_level = exog_level.to_frame()
+                    # TODO: Incluir error de que exog_level.name debe estar en 
+                    # empty_exog.columns?
+
+                exog_level = empty_exog.fillna(exog_level)
                 exog_level = transform_dataframe(
                                  df                = exog_level,
                                  transformer       = self.transformer_exog,
@@ -1659,7 +1661,13 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             if isinstance(exog, dict):
                 # Fill the empty dataframe with the exog values of each level
                 # and transform them if necessary
-                exog_level = empty_exog.fillna(exog[level])
+                exog_level = exog[level]
+                if isinstance(exog_level, pd.Series):
+                    exog_level = exog_level.to_frame()
+                    # TODO: Incluir error de que exog_level.name debe estar en 
+                    # empty_exog.columns?
+
+                exog_level = empty_exog.fillna(exog_level)
                 exog_level = transform_dataframe(
                                  df                = exog_level,
                                  transformer       = self.transformer_exog,

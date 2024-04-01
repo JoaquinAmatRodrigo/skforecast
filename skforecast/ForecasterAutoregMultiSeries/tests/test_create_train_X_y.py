@@ -169,6 +169,7 @@ def test_create_train_X_y_output_when_series_and_exog_is_None():
     for k in results[6].keys():
         pd.testing.assert_series_equal(results[6][k], expected[6][k])
 
+
 @pytest.mark.parametrize("encoding, dtype", 
                          [('ordinal'         , int), 
                           ('ordinal_category', 'category')], 
@@ -1373,16 +1374,17 @@ def test_create_train_X_y_output_series_DataFrame_and_NaNs_in_y_train():
     
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5,
                                               encoding='onehot',
-                                              transformer_series=None)
+                                              transformer_series=None,
+                                              dropna_from_series=False)
     
     warn_msg = re.escape(
-        ("NaNs detected in `y_train`. They have been dropped since the "
+        ("NaNs detected in `y_train`. They have been dropped because the "
          "target variable cannot have NaN values. Same rows have been "
-         "dropped from `X_train` to maintain alignment.")
+         "dropped from `X_train` to maintain alignment. This is caused by "
+         "series with interspersed NaNs.")
     )
     with pytest.warns(MissingValuesWarning, match = warn_msg):    
-        results = forecaster._create_train_X_y(series=series, exog=exog,
-                                               drop_nan=False)
+        results = forecaster._create_train_X_y(series=series, exog=exog)
 
     expected = (
         pd.DataFrame(
@@ -1452,16 +1454,17 @@ def test_create_train_X_y_output_series_DataFrame_and_NaNs_in_y_train_datetime()
     
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5,
                                               encoding='onehot',
-                                              transformer_series=None)
+                                              transformer_series=None,
+                                              dropna_from_series=False)
     
     warn_msg = re.escape(
-        ("NaNs detected in `y_train`. They have been dropped since the "
+        ("NaNs detected in `y_train`. They have been dropped because the "
          "target variable cannot have NaN values. Same rows have been "
-         "dropped from `X_train` to maintain alignment.")
+         "dropped from `X_train` to maintain alignment. This is caused by "
+         "series with interspersed NaNs.")
     )
     with pytest.warns(MissingValuesWarning, match = warn_msg):    
-        results = forecaster._create_train_X_y(series=series, exog=exog,
-                                               drop_nan=False)
+        results = forecaster._create_train_X_y(series=series, exog=exog)
 
     expected = (
         pd.DataFrame(
@@ -1539,16 +1542,17 @@ def test_create_train_X_y_output_series_DataFrame_and_NaNs_in_X_train_drop_nan_T
     
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5,
                                               encoding='onehot',
-                                              transformer_series=None)
+                                              transformer_series=None,
+                                              dropna_from_series=True)
     
     warn_msg = re.escape(
         ("NaNs detected in `X_train`. They have been dropped. If "
-         "you want to keep them, set `drop_nan = False`. Same rows"
-         "have been removed from `y_train` to maintain alignment."),
+         "you want to keep them, set `forecaster.dropna_from_series = False`. " 
+         "Same rows have been removed from `y_train` to maintain alignment. "
+         "This caused by series with interspersed NaNs.")
     )
     with pytest.warns(MissingValuesWarning, match = warn_msg):    
-        results = forecaster._create_train_X_y(series=series, exog=exog,
-                                               drop_nan=True)
+        results = forecaster._create_train_X_y(series=series, exog=exog)
 
     expected = (
         pd.DataFrame(
@@ -1616,16 +1620,17 @@ def test_create_train_X_y_output_series_DataFrame_and_NaNs_in_X_train_drop_nan_T
     
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5,
                                               encoding='onehot',
-                                              transformer_series=None)
+                                              transformer_series=None,
+                                              dropna_from_series=True)
     
     warn_msg = re.escape(
         ("NaNs detected in `X_train`. They have been dropped. If "
-         "you want to keep them, set `drop_nan = False`. Same rows"
-         "have been removed from `y_train` to maintain alignment."),
+         "you want to keep them, set `forecaster.dropna_from_series = False`. " 
+         "Same rows have been removed from `y_train` to maintain alignment. "
+         "This caused by series with interspersed NaNs.")
     )
     with pytest.warns(MissingValuesWarning, match = warn_msg):    
-        results = forecaster._create_train_X_y(series=series, exog=exog,
-                                               drop_nan=True)
+        results = forecaster._create_train_X_y(series=series, exog=exog)
 
     expected = (
         pd.DataFrame(
@@ -1700,16 +1705,16 @@ def test_create_train_X_y_output_series_DataFrame_and_NaNs_in_X_train_drop_nan_F
     
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5,
                                               encoding='onehot',
-                                              transformer_series=None)
+                                              transformer_series=None,
+                                              dropna_from_series=False)
     
     warn_msg = re.escape(
-        ("NaNs detected in `X_train`. Some regressor do not allow "
+        ("NaNs detected in `X_train`. Some regressors do not allow "
          "NaN values during training. If you want to drop them, "
-         "set `drop_nan = True`.")
+         "set `forecaster.dropna_from_series = True`.")
     )
     with pytest.warns(MissingValuesWarning, match = warn_msg):    
-        results = forecaster._create_train_X_y(series=series, exog=exog,
-                                               drop_nan=False)
+        results = forecaster._create_train_X_y(series=series, exog=exog)
 
     expected = (
         pd.DataFrame(
@@ -1781,16 +1786,16 @@ def test_create_train_X_y_output_series_DataFrame_and_NaNs_in_X_train_drop_nan_F
     
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5,
                                               encoding='onehot',
-                                              transformer_series=None)
+                                              transformer_series=None,
+                                              dropna_from_series=False)
     
     warn_msg = re.escape(
-        ("NaNs detected in `X_train`. Some regressor do not allow "
+        ("NaNs detected in `X_train`. Some regressors do not allow "
          "NaN values during training. If you want to drop them, "
-         "set `drop_nan = True`.")
+         "set `forecaster.dropna_from_series = True`.")
     )
     with pytest.warns(MissingValuesWarning, match = warn_msg):
-        results = forecaster._create_train_X_y(series=series, exog=exog,
-                                               drop_nan=False)
+        results = forecaster._create_train_X_y(series=series, exog=exog)
 
     expected = (
         pd.DataFrame(
@@ -1884,9 +1889,9 @@ def test_create_train_X_y_output_series_dict_and_exog_dict():
 
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3,
                                               encoding='onehot',
-                                              transformer_series=None)
-    results = forecaster._create_train_X_y(series=series, exog=exog,
-                                           drop_nan=False)
+                                              transformer_series=None,
+                                              dropna_from_series=False)
+    results = forecaster._create_train_X_y(series=series, exog=exog)
 
     expected = (
         pd.DataFrame(
@@ -2002,9 +2007,10 @@ def test_create_train_X_y_output_series_dict_and_exog_dict_ordinal_encoding(
     exog["l3"].index = pd.date_range("1990-01-03", periods=4, freq="D")
 
     forecaster = ForecasterAutoregMultiSeries(
-        LinearRegression(), lags=3, encoding=encoding, transformer_series=None
+        LinearRegression(), lags=3, encoding=encoding, transformer_series=None,
+        dropna_from_series=False
     )
-    results = forecaster._create_train_X_y(series=series, exog=exog, drop_nan=False)
+    results = forecaster._create_train_X_y(series=series, exog=exog)
 
     expected = (
         pd.DataFrame(

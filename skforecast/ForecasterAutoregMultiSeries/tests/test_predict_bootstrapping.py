@@ -5,11 +5,13 @@ import pytest
 import numpy as np
 import pandas as pd
 from sklearn.exceptions import NotFittedError
-from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.linear_model import LinearRegression
+
+from skforecast.exceptions import IgnoredArgumentWarning
+from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 
 # Fixtures
 from .fixtures_ForecasterAutoregMultiSeries import series
@@ -31,11 +33,118 @@ def test_predict_bootstrapping_NotFittedError_when_fitted_is_False():
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5)
 
     err_msg = re.escape(
-                ("This Forecaster instance is not fitted yet. Call `fit` with "
-                 "appropriate arguments before using predict.")
-              )
+        ("This Forecaster instance is not fitted yet. Call `fit` with "
+         "appropriate arguments before using predict.")
+    )
     with pytest.raises(NotFittedError, match = err_msg):
         forecaster.predict_bootstrapping(steps=1, levels=None)
+
+
+def test_predict_bootstrapping_IgnoredArgumentWarning_when_not_available_self_last_window_for_some_levels():
+    """
+    Test IgnoredArgumentWarning is raised when last_window is not available for 
+    levels because it was not stored during fit.
+    """
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3,
+                                              transformer_series=None)
+    forecaster.fit(series=series, exog=exog['exog_1'], store_last_window=['1'])
+
+    warn_msg = re.escape(
+        ("Levels {'2'} are excluded from prediction "
+         "since they were not stored in `last_window` attribute "
+         "during training. If you don't want to retrain the "
+         "Forecaster, provide `last_window` as argument.")
+    )
+    with pytest.warns(IgnoredArgumentWarning, match = warn_msg):
+        results = forecaster.predict_bootstrapping(
+                      steps               = 1,
+                      levels              = ['1', '2'],
+                      n_boot              = 4, 
+                      exog                = exog_predict['exog_1'], 
+                      in_sample_residuals = True
+                  )
+
+    expected_1 = pd.DataFrame(
+                     data    = np.array([[0.16386591, 0.56398143, 0.38576231, 0.37782729]]),
+                     columns = [f"pred_boot_{i}" for i in range(4)],
+                     index   = pd.RangeIndex(start=50, stop=51)
+                 )
+
+    expected = {'1': expected_1 }
+
+    pd.testing.assert_frame_equal(results['1'], expected['1'])
+
+
+@pytest.mark.parametrize("store_last_window",
+                         [['1'], False],
+                         ids=lambda slw: f"store_last_window: {slw}")
+def test_predict_bootstrapping_ValueError_when_not_available_self_last_window_for_levels(store_last_window):
+    """
+    Test ValueError is raised when last_window is not available for all 
+    levels because it was not stored during fit.
+    """
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5)
+    forecaster.fit(series=series, store_last_window=store_last_window)
+
+    err_msg = re.escape(
+        ("No series to predict. None of the series are present in "
+         "`last_window` attribute. Provide `last_window` as argument "
+         "in predict method.")
+    )
+    with pytest.raises(ValueError, match = err_msg):
+        forecaster.predict_bootstrapping(steps=5, levels=['2'], last_window=None)
+
+
+def test_predict_bootstrapping_IgnoredArgumentWarning_when_levels_is_list_and_different_last_index_in_self_last_window_DatetimeIndex():
+    """
+    Test IgnoredArgumentWarning is raised when levels is a list and have 
+    different last index in last_window attribute using a DatetimeIndex.
+    """
+    series_2 = {
+        '1': series['1'].copy(),
+        '2': series['2'].iloc[:30].copy()
+    }
+    series_2['1'].index = pd.date_range(start='2020-01-01', periods=50)
+    series_2['2'].index = pd.date_range(start='2020-01-01', periods=30)
+    exog_2 = {
+        '1': exog['exog_1'].copy(),
+        '2': exog['exog_1'].iloc[:30].copy()
+    }
+    exog_2['1'].index = pd.date_range(start='2020-01-01', periods=50)
+    exog_2['2'].index = pd.date_range(start='2020-01-01', periods=30)
+    exog_2_pred = {
+        '1': exog_predict['exog_1'].copy()
+    }
+    exog_2_pred['1'].index = pd.date_range(start='2020-02-20', periods=50)
+
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3,
+                                              transformer_series=None)
+    forecaster.fit(series=series_2, exog=exog_2)
+
+    warn_msg = re.escape(
+        ("Only series whose last window ends at the same index "
+         "can be predicted together. Series that not reach the "
+         "maximum index, '2020-02-19 00:00:00', are excluded "
+         "from prediction: {'2'}.")
+    )
+    with pytest.warns(IgnoredArgumentWarning, match = warn_msg):
+        results = forecaster.predict_bootstrapping(
+                      steps               = 1,
+                      levels              = ['1', '2'],
+                      n_boot              = 4, 
+                      exog                = exog_2_pred, 
+                      in_sample_residuals = True
+                  )
+
+    expected_1 = pd.DataFrame(
+                     data    = np.array([[0.17482136, 0.59548022, 0.40159385, 0.37372285]]),
+                     columns = [f"pred_boot_{i}" for i in range(4)],
+                     index   = pd.date_range(start='2020-02-20', periods=1)
+                 )
+
+    expected = {'1': expected_1 }
+
+    pd.testing.assert_frame_equal(results['1'], expected['1'])
 
 
 def test_predict_bootstrapping_ValueError_when_not_in_sample_residuals_for_any_level():
@@ -48,9 +157,9 @@ def test_predict_bootstrapping_ValueError_when_not_in_sample_residuals_for_any_l
     forecaster.in_sample_residuals = {2: np.array([1, 2, 3])}
 
     err_msg = re.escape(
-                (f"Not `forecaster.in_sample_residuals` for levels: "
-                 f"{set(['1', '2']) - set(forecaster.in_sample_residuals.keys())}.")
-                )
+        (f"Not `forecaster.in_sample_residuals` for levels: "
+         f"{set(['1', '2']) - set(forecaster.in_sample_residuals.keys())}.")
+    )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.predict_bootstrapping(steps=1, levels=None, in_sample_residuals=True)
 
@@ -64,12 +173,12 @@ def test_predict_bootstrapping_ValueError_when_out_sample_residuals_is_None():
     forecaster.fit(series=series)
 
     err_msg = re.escape(
-                ("`forecaster.out_sample_residuals` is `None`. Use "
-                 "`in_sample_residuals=True` or method "
-                 "`set_out_sample_residuals()` before `predict_interval()`, "
-                 "`predict_bootstrapping()`,`predict_quantiles()` or "
-                 "`predict_dist()`.")
-              )
+        ("`forecaster.out_sample_residuals` is `None`. Use "
+         "`in_sample_residuals=True` or method "
+         "`set_out_sample_residuals()` before `predict_interval()`, "
+         "`predict_bootstrapping()`,`predict_quantiles()` or "
+         "`predict_dist()`.")
+    )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.predict_bootstrapping(steps=1, levels='1', in_sample_residuals=False)
 
@@ -87,10 +196,10 @@ def test_predict_bootstrapping_ValueError_when_not_out_sample_residuals_for_all_
     levels = ['1']
 
     err_msg = re.escape(
-                (f"Not `forecaster.out_sample_residuals` for levels: "
-                 f"{set(levels) - set(forecaster.out_sample_residuals.keys())}. "
-                 f"Use method `set_out_sample_residuals()`.")
-            )
+        (f"Not `forecaster.out_sample_residuals` for levels: "
+         f"{set(levels) - set(forecaster.out_sample_residuals.keys())}. "
+         f"Use method `set_out_sample_residuals()`.")
+    )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.predict_bootstrapping(steps=1, levels=levels, in_sample_residuals=False)
 
@@ -110,9 +219,9 @@ def test_predict_bootstrapping_ValueError_when_level_out_sample_residuals_value_
     forecaster.set_out_sample_residuals(residuals = residuals)
 
     err_msg = re.escape(
-                  (f"forecaster residuals for level '2' are `None`. "
-                   "Check `forecaster.out_sample_residuals`.")
-              )
+        ("forecaster residuals for level '2' are `None`. "
+         "Check `forecaster.out_sample_residuals`.")
+    )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.predict_bootstrapping(steps=3, in_sample_residuals=False)
 
@@ -133,9 +242,9 @@ def test_predict_bootstrapping_ValueError_when_level_out_sample_residuals_value_
     forecaster.set_out_sample_residuals(residuals = residuals)
 
     err_msg = re.escape(
-                  (f"forecaster residuals for level '2' contains `None` "
-                   f"or `NaNs` values. Check `forecaster.out_sample_residuals`.")
-              )
+        ("forecaster residuals for level '2' contains `None` "
+         "or `NaNs` values. Check `forecaster.out_sample_residuals`.")
+    )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.predict_bootstrapping(steps=3, in_sample_residuals=False)
 
