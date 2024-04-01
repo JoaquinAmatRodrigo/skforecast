@@ -838,7 +838,7 @@ def check_predict_input(
                          f"steps predicted, {last_step}.")
                     )
 
-            # Check all columns are in the pandas DataFrame
+            # Check name/columns are in exog_col_names
             if isinstance(exog_to_check, pd.DataFrame):
                 col_missing = set(exog_col_names).difference(set(exog_to_check.columns))
                 if col_missing:
@@ -854,6 +854,22 @@ def check_predict_input(
                             (f"Missing columns in {exog_name}. Expected {exog_col_names}. "
                              f"Got {exog_to_check.columns.to_list()}.") 
                         )
+            else:
+                # TODO: review with Ximo
+                if exog_to_check.name is None or exog_to_check.name not in exog_col_names:
+                    if forecaster_name in ['ForecasterAutoregMultiSeries', 
+                                           'ForecasterAutoregMultiSeriesCustom']:
+                        warnings.warn(
+                            (f"{exog_name} name is not present in `forecaster.exog_col_names` "
+                             f"attribute. All values will be NaN."),
+                             MissingExogWarning
+                        ) 
+                    else:
+                        raise ValueError(
+                            (f"{exog_name} name is not present in `forecaster.exog_col_names` "
+                             f"attribute. Expected '{exog_col_names}'.")
+                        )
+                # =============================================================================
 
             # Check index dtype and freq
             _, exog_index = preprocess_exog(
