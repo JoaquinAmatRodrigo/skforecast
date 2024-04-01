@@ -6,12 +6,11 @@
 # coding=utf-8
 
 from typing import Union, Tuple, Optional, Callable, Generator
-import numpy as np
-import pandas as pd
-import warnings
-import logging
 import re
 from copy import deepcopy
+import warnings
+import numpy as np
+import pandas as pd
 from joblib import Parallel, delayed, cpu_count
 from tqdm.auto import tqdm
 from sklearn.model_selection import ParameterGrid
@@ -32,6 +31,7 @@ from ..utils import select_n_jobs_backtesting
 
 optuna.logging.set_verbosity(optuna.logging.WARNING) # disable optuna logs
 
+# import logging
 # logger = logging.getLogger(__name__)
 # logger.setLevel(logging.INFO)
 # console_handler = logging.StreamHandler()
