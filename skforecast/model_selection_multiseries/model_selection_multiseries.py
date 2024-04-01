@@ -183,7 +183,7 @@ def _extract_data_folds_multiseries(
             test_loc_end          = span_index[test_iloc_end - 1]
 
         if isinstance(series, pd.DataFrame):
-            series_train = series.iloc[train_iloc_start:train_iloc_end,]
+            series_train = series.iloc[train_iloc_start:train_iloc_end, ]
 
             series_to_drop = []
             for col in series_train.columns:
@@ -234,16 +234,16 @@ def _extract_data_folds_multiseries(
 
         if exog is not None:
             if isinstance(exog, (pd.Series, pd.DataFrame)):
-                exog_train = exog.iloc[train_iloc_start:train_iloc_end, :]
-                exog_test = exog.iloc[test_iloc_start:test_iloc_end, :]
+                exog_train = exog.iloc[train_iloc_start:train_iloc_end, ]
+                exog_test = exog.iloc[test_iloc_start:test_iloc_end, ]
             else:
                 exog_train = {
-                    k: v.loc[train_loc_start:train_loc_end, :] for k, v in exog.items()
+                    k: v.loc[train_loc_start:train_loc_end] for k, v in exog.items()
                 }
                 exog_train = {k: v for k, v in exog_train.items() if len(v) > 0}
 
                 exog_test = {
-                    k: v.loc[test_loc_start:test_loc_end, :]
+                    k: v.loc[test_loc_start:test_loc_end]
                     for k, v in exog.items()
                     if externally_fitted or k in exog_train
                 }
@@ -572,12 +572,21 @@ def _backtesting_forecaster_multiseries(
     )
 
     backtest_predictions = pd.concat(backtest_predictions, axis=0)
-    levels_in_backtest_predictions = backtest_predictions.columns
 
+    levels_in_backtest_predictions = backtest_predictions.columns
+    if interval is not None:
+        levels_in_backtest_predictions = [
+            level 
+            for level in levels_in_backtest_predictions
+            if not re.search(r'_lower_bound|_upper_bound', level)
+        ]
     for level in levels_in_backtest_predictions:
         valid_index = series[level][series[level].notna()].index
         no_valid_index = backtest_predictions.index.difference(valid_index, sort=False)
-        backtest_predictions.loc[no_valid_index, level] = np.nan
+        cols = [level]
+        if interval:
+            cols = cols + [f'{level}_lower_bound', f'{level}_upper_bound']
+        backtest_predictions.loc[no_valid_index, cols] = np.nan
 
     metrics_levels = []
     for level in levels:

@@ -363,6 +363,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                                dtype      = int
                            ).set_output(transform='pandas')
 
+
     def __repr__(
         self
     ) -> str:
@@ -427,6 +428,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         return info
 
+
     def _create_lags(
         self, 
         y: np.ndarray, 
@@ -474,6 +476,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         y_data = y[self.max_lag:]
 
         return X_data, y_data
+
 
     def _create_train_X_y_single_series(
         self,
@@ -1340,11 +1343,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                            )
 
         if exog is not None:
-
-            if not isinstance(exog, dict):
-
+            if isinstance(exog, (pd.Series, pd.DataFrame)):
                 if isinstance(exog, pd.DataFrame):
-
                     exog = transform_dataframe(
                                df                = exog,
                                transformer       = self.transformer_exog,
@@ -1372,7 +1372,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         predictions = []
         for level in levels:
-
+            
             last_window_level = transform_series(
                                     series            = last_window[level],
                                     transformer       = self.transformer_series_[level],
@@ -1385,21 +1385,12 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 # Fill the empty dataframe with the exog values of each level
                 # and transform them if necessary
                 exog_level = empty_exog.fillna(exog[level])
-
-                if isinstance(exog_level, pd.DataFrame):
-                    exog_level = transform_dataframe(
-                                     df                = exog_level,
-                                     transformer       = self.transformer_exog,
-                                     fit               = False,
-                                     inverse_transform = False
-                                 )
-                else:
-                    exog_level = transform_series(
-                                     series            = exog_level,
-                                     transformer       = self.transformer_exog,
-                                     fit               = False,
-                                     inverse_transform = False
-                                 )
+                exog_level = transform_dataframe(
+                                 df                = exog_level,
+                                 transformer       = self.transformer_exog,
+                                 fit               = False,
+                                 inverse_transform = False
+                             )
                 
                 check_exog_dtypes(
                     exog      = exog_level,
@@ -1503,13 +1494,14 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 input_levels_is_list = True
 
             if last_window is None:
-                not_available_last_window = set(levels) - set(self.last_window.keys())
+                available_last_windows = set() if self.last_window is None else set(self.last_window.keys())
+                not_available_last_window = set(levels) - available_last_windows
                 if not_available_last_window:
                     warnings.warn(
-                        (f"{not_available_last_window} are excluded from prediction "
-                         f"since they were not stored in `last_window` attribute "
-                         f"during training. If you don't want to retrain the "
-                         f"Forecaster, provide `last_window` as argument."),
+                        (f"Levels {not_available_last_window} are excluded from "
+                         f"prediction since they were not stored in `last_window` "
+                         f"attribute during training. If you don't want to retrain "
+                         f"the Forecaster, provide `last_window` as argument."),
                          IgnoredArgumentWarning
                     )
                     levels = [level for level in levels 
@@ -1522,16 +1514,17 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                              "in predict method.")
                         )
 
-                training_range_levels = [
-                    v[-1] for k, v in self.training_range.items()
+                last_index_levels = [
+                    v.index[-1] 
+                    for k, v in self.last_window.items()
                     if k in levels
                 ]
-                if len(set(training_range_levels)) > 1:
-                    max_training_range = max(training_range_levels)
+                if len(set(last_index_levels)) > 1:
+                    max_index_levels = max(last_index_levels)
                     selected_levels = [
-                        k 
+                        k
                         for k, v in self.last_window.items()
-                        if k in levels and v.index[-1] == max_training_range
+                        if k in levels and v.index[-1] == max_index_levels
                     ]
 
                     series_excluded_from_last_window = set(levels) - set(selected_levels)
@@ -1539,17 +1532,16 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
                     if input_levels_is_list and series_excluded_from_last_window:
                         warnings.warn(
-                            (f"Found series with different ends of training range. "
-                             f"Only series whose last window ends at the same index "
+                            (f"Only series whose last window ends at the same index "
                              f"can be predicted together. Series that not reach the "
-                             f"maximum index, {max_training_range}, are excluded "
+                             f"maximum index, '{max_index_levels}', are excluded "
                              f"from prediction: {series_excluded_from_last_window}."),
                              IgnoredArgumentWarning
                         )
 
                 last_window = pd.DataFrame(
-                    {k: v for 
-                     k, v in self.last_window.items() 
+                    {k: v 
+                     for k, v in self.last_window.items() 
                      if k in levels}
                 )
 
@@ -1616,28 +1608,44 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         )
 
         last_window = last_window.iloc[-self.window_size:, ].copy()
+        _, last_window_index = preprocess_last_window(
+                                   last_window   = last_window,
+                                   return_values = False
+                               )
+        prediction_index = expand_index(
+                               index = last_window_index,
+                               steps = steps
+                           )
 
         if exog is not None:
-            if isinstance(exog, pd.DataFrame):
-                exog = transform_dataframe(
-                           df                = exog,
-                           transformer       = self.transformer_exog,
-                           fit               = False,
-                           inverse_transform = False
-                       )
+            if isinstance(exog, (pd.Series, pd.DataFrame)):
+                if isinstance(exog, pd.DataFrame):
+                    exog = transform_dataframe(
+                               df                = exog,
+                               transformer       = self.transformer_exog,
+                               fit               = False,
+                               inverse_transform = False
+                           )
+                else:
+                    exog = transform_series(
+                               series            = exog,
+                               transformer       = self.transformer_exog,
+                               fit               = False,
+                               inverse_transform = False
+                           )
+                check_exog_dtypes(exog=exog)
+                exog_values = exog.to_numpy()[:steps]
             else:
-                exog = transform_series(
-                           series            = exog,
-                           transformer       = self.transformer_exog,
-                           fit               = False,
-                           inverse_transform = False
-                       )
-            exog_values = exog.to_numpy()[:steps]
+                # Empty dataframe to be filled with the exog values of each level
+                empty_exog = pd.DataFrame(
+                                 data    = np.nan,
+                                 columns = self.exog_col_names,
+                                 index   = prediction_index
+                             )
         else:
             exog_values = None
 
         boot_predictions = {}
-
         for level in levels:
 
             last_window_level = transform_series(
@@ -1646,9 +1654,24 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                                     fit               = False,
                                     inverse_transform = False
                                 )
-            last_window_values, last_window_index = preprocess_last_window(
-                                                        last_window = last_window_level
-                                                    )
+            last_window_values = last_window_level.to_numpy()
+
+            if isinstance(exog, dict):
+                # Fill the empty dataframe with the exog values of each level
+                # and transform them if necessary
+                exog_level = empty_exog.fillna(exog[level])
+                exog_level = transform_dataframe(
+                                 df                = exog_level,
+                                 transformer       = self.transformer_exog,
+                                 fit               = False,
+                                 inverse_transform = False
+                             )
+                
+                check_exog_dtypes(
+                    exog      = exog_level,
+                    series_id = f"`exog` for series '{level}'"
+                )
+                exog_values = exog_level.to_numpy()
 
             level_boot_predictions = np.full(
                                          shape      = (steps, n_boot),
@@ -1694,7 +1717,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
             level_boot_predictions = pd.DataFrame(
                                          data    = level_boot_predictions,
-                                         index   = expand_index(last_window_index, steps=steps),
+                                         index   = prediction_index,
                                          columns = [f"pred_boot_{i}" for i in range(n_boot)]
                                      )
 
@@ -1710,6 +1733,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             boot_predictions[level] = level_boot_predictions
 
         return boot_predictions
+
 
     def predict_interval(
         self,
@@ -1776,11 +1800,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         """
 
-        if levels is None:
-            levels = self.series_col_names
-        elif isinstance(levels, str):
-            levels = [levels]
-
         check_interval(interval=interval)
 
         preds = self.predict(
@@ -1803,7 +1822,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         interval = np.array(interval)/100
         predictions = []
 
-        for level in levels:
+        for level in preds.columns:
             preds_interval = boot_predictions[level].quantile(q=interval, axis=1).transpose()
             preds_interval.columns = [f'{level}_lower_bound', f'{level}_upper_bound']
             predictions.append(preds[level])
@@ -1812,6 +1831,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         predictions = pd.concat(predictions, axis=1)
 
         return predictions
+
 
     def predict_quantiles(
         self,
@@ -1873,11 +1893,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         """
 
-        if levels is None:
-            levels = self.series_col_names
-        elif isinstance(levels, str):
-            levels = [levels]
-
         check_interval(quantiles=quantiles)
 
         boot_predictions = self.predict_bootstrapping(
@@ -1892,7 +1907,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         predictions = []
 
-        for level in levels:
+        for level in boot_predictions.keys():
             preds_quantiles = boot_predictions[level].quantile(q=quantiles, axis=1).transpose()
             preds_quantiles.columns = [f'{level}_q_{q}' for q in quantiles]
             predictions.append(preds_quantiles)
@@ -1900,6 +1915,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         predictions = pd.concat(predictions, axis=1)
 
         return predictions
+
 
     def predict_dist(
         self,
@@ -1952,11 +1968,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         """
 
-        if levels is None:
-            levels = self.series_col_names
-        elif isinstance(levels, str):
-            levels = [levels]
-
         boot_samples = self.predict_bootstrapping(
                            steps               = steps,
                            levels              = levels,
@@ -1967,11 +1978,15 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                            in_sample_residuals = in_sample_residuals
                        )
 
-        param_names = [p for p in inspect.signature(distribution._pdf).parameters if not p=='x'] + ["loc","scale"]
+        param_names = [
+            p for p in inspect.signature(distribution._pdf).parameters if not p == "x"
+        ] + ["loc", "scale"]
         predictions = []
 
-        for level in levels:
-            param_values = np.apply_along_axis(lambda x: distribution.fit(x), axis=1, arr=boot_samples[level])
+        for level in boot_samples.keys():
+            param_values = np.apply_along_axis(
+                lambda x: distribution.fit(x), axis=1, arr=boot_samples[level]
+            )
             level_param_names = [f'{level}_{p}' for p in param_names]
 
             pred_level = pd.DataFrame(
@@ -1985,6 +2000,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         predictions = pd.concat(predictions, axis=1)
 
         return predictions
+
 
     def set_params(
         self, 
@@ -2008,6 +2024,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.regressor = clone(self.regressor)
         self.regressor.set_params(**params)
 
+
     def set_fit_kwargs(
         self, 
         fit_kwargs: dict
@@ -2028,6 +2045,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         """
 
         self.fit_kwargs = check_select_fit_kwargs(self.regressor, fit_kwargs=fit_kwargs)
+
 
     def set_lags(
         self, 
@@ -2055,6 +2073,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.lags = initialize_lags(type(self).__name__, lags)
         self.max_lag  = max(self.lags)
         self.window_size = max(self.lags)
+
 
     def set_out_sample_residuals(
         self, 
@@ -2115,9 +2134,11 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 """), IgnoredArgumentWarning
             )
 
-        residuals = {key: value 
-                     for key, value in residuals.items() 
-                     if key in self.out_sample_residuals.keys()}
+        residuals = {
+            key: value 
+            for key, value in residuals.items() 
+            if key in self.out_sample_residuals.keys()
+        }
 
         for level, value in residuals.items():
 
@@ -2125,18 +2146,18 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
             if not transform and self.transformer_series_[level] is not None:
                 warnings.warn(
-                    ("Argument `transform` is set to `False` but forecaster was "
-                    f"trained using a transformer {self.transformer_series_[level]} "
-                    f"for level {level}. Ensure that the new residuals are "
-                     "already transformed or set `transform=True`.")
+                    (f"Argument `transform` is set to `False` but forecaster was "
+                     f"trained using a transformer {self.transformer_series_[level]} "
+                     f"for level {level}. Ensure that the new residuals are "
+                     f"already transformed or set `transform=True`.")
                 )
 
             if transform and self.transformer_series_ and self.transformer_series_[level]:
                 warnings.warn(
-                    ("Residuals will be transformed using the same transformer used "
-                    f"when training the forecaster for level {level} : "
-                    f"({self.transformer_series_[level]}). Ensure that the new "
-                     "residuals are on the same scale as the original time series.")
+                    (f"Residuals will be transformed using the same transformer used "
+                     f"when training the forecaster for level {level} : "
+                     f"({self.transformer_series_[level]}). Ensure that the new "
+                     f"residuals are on the same scale as the original time series.")
                 )
                 residuals_level = transform_series(
                                       series            = pd.Series(residuals_level, name='residuals'),
@@ -2153,16 +2174,17 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 free_space = max(0, 1000 - len(self.out_sample_residuals[level]))
                 if len(residuals_level) < free_space:
                     residuals_level = np.hstack((
-                                            self.out_sample_residuals[level],
-                                            residuals_level
-                                        ))
+                                          self.out_sample_residuals[level],
+                                          residuals_level
+                                      ))
                 else:
                     residuals_level = np.hstack((
-                                            self.out_sample_residuals[level],
-                                            residuals_level[:free_space]
-                                        ))
+                                          self.out_sample_residuals[level],
+                                          residuals_level[:free_space]
+                                      ))
 
             self.out_sample_residuals[level] = residuals_level
+
 
     def get_feature_importances(
         self,
