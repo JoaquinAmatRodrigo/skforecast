@@ -1,16 +1,8 @@
 # Unit test _extract_data_folds_multiseries
 # ==============================================================================
-import re
 import pytest
 import numpy as np
 import pandas as pd
-from sklearn.linear_model import Ridge
-from sklearn.metrics import mean_absolute_error
-from skforecast.exceptions import IgnoredArgumentWarning
-from skforecast.ForecasterAutoreg import ForecasterAutoreg
-from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
-from skforecast.ForecasterAutoregMultiSeriesCustom import ForecasterAutoregMultiSeriesCustom
-from skforecast.ForecasterAutoregMultiVariate import ForecasterAutoregMultiVariate
 from skforecast.model_selection_multiseries.model_selection_multiseries import _extract_data_folds_multiseries
 
 # Fixtures
