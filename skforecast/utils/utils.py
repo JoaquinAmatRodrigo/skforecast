@@ -402,6 +402,9 @@ def check_exog(
     
     if not isinstance(exog, (pd.Series, pd.DataFrame)):
         raise TypeError(f"{series_id} must be a pandas Series or DataFrame.")
+    
+    if isinstance(exog, pd.Series) and exog.name is None:
+        raise ValueError(f"When {series_id} is a pandas Series, it must have a name.")
 
     if not allow_nan:
         if exog.isnull().any().any():
@@ -856,18 +859,24 @@ def check_predict_input(
                         )
             else:
                 # TODO: review with Ximo
-                if exog_to_check.name is None or exog_to_check.name not in exog_col_names:
+                # =============================================================================
+                if exog_to_check.name is None:
+                    raise ValueError(
+                        (f"When {exog_name} is a pandas Series, it must have a name. Got None.")
+                    )
+                
+                if exog_to_check.name not in exog_col_names:
                     if forecaster_name in ['ForecasterAutoregMultiSeries', 
                                            'ForecasterAutoregMultiSeriesCustom']:
                         warnings.warn(
                             (f"{exog_name} name is not present in `forecaster.exog_col_names` "
                              f"attribute. All values will be NaN."),
                              MissingExogWarning
-                        ) 
+                        )
                     else:
                         raise ValueError(
                             (f"{exog_name} name is not present in `forecaster.exog_col_names` "
-                             f"attribute. Expected '{exog_col_names}'.")
+                             f"attribute, '{exog_col_names}'.")
                         )
                 # =============================================================================
 
