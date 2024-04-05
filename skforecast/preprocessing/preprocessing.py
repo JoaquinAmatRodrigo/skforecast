@@ -8,6 +8,7 @@
 from typing import Any
 from typing_extensions import Self
 import numpy as np
+import pandas as pd
 from sklearn.base import BaseEstimator
 from sklearn.base import TransformerMixin
 
@@ -233,3 +234,76 @@ class TimeSeriesDifferentiator(BaseEstimator, TransformerMixin):
                 X_undiff = np.cumsum(X_undiff, dtype=float) + self.last_values[-(i+1)]
         
         return X_undiff
+
+
+def series_long_to_dict(
+    data: pd.DataFrame,
+    series_id: str,
+    index: str,
+    values: str,
+    freq: str,
+):
+    """
+    Convert long format series to dictionary.
+
+    Parameters
+    ----------
+    data: pd.DataFrame
+        Long format series.
+    series_id: str
+        Column name with the series identifier.
+    index: str
+        Column name with the time index.
+    values: str
+        Column name with the values.
+    freq: str
+        Frequency of the series.
+
+    Returns
+    -------
+    series_dict: dict
+        Dictionary with the series.
+
+    """
+
+    series_dict = {}
+    for k, v in data.groupby(series_id):
+        series_dict[k] = v.set_index(index)[values].asfreq(freq).rename(k)
+
+    return series_dict
+
+
+def exog_long_to_dict(
+    data: pd.DataFrame,
+    series_id: str,
+    index: str,
+    freq: str
+):
+    """
+    Convert long format exogenous variables to dictionary.
+
+    Parameters
+    ----------
+    data: pd.DataFrame
+        Long format exogenous variables.
+    series_id: str
+        Column name with the series identifier.
+    index: str
+        Column name with the time index.
+    freq: str
+        Frequency of the series.
+    
+    Returns
+    -------
+    exog_dict: dict
+        Dictionary with the exogenous variables.
+
+    """
+
+    exog_dict =  dict(tuple(data.groupby(series_id)))
+    exog_dict = {
+        k: v.set_index(index).asfreq(freq).drop(columns=series_id)
+        for k, v in exog_dict.items()
+    }
+
+    return exog_dict
