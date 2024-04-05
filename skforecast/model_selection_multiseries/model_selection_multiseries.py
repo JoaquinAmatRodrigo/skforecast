@@ -539,10 +539,11 @@ def _backtesting_forecaster_multiseries(
                           if level in last_window_levels]
         if interval is None:
             pred = forecaster.predict(
-                       steps       = steps, 
-                       levels      = levels_predict, 
-                       last_window = last_window_series,
-                       exog        = next_window_exog
+                       steps             = steps, 
+                       levels            = levels_predict, 
+                       last_window       = last_window_series,
+                       exog              = next_window_exog,
+                       suppress_warnings = suppress_warnings
                    )
         else:
             pred = forecaster.predict_interval(
@@ -553,7 +554,8 @@ def _backtesting_forecaster_multiseries(
                        interval            = interval,
                        n_boot              = n_boot,
                        random_state        = random_state,
-                       in_sample_residuals = in_sample_residuals
+                       in_sample_residuals = in_sample_residuals,
+                       suppress_warnings   = suppress_warnings
                    )
 
         if type(forecaster).__name__ != 'ForecasterAutoregMultiVariate' and gap > 0:

@@ -328,7 +328,8 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_exog_s
                   steps               = 1, 
                   n_boot              = 4, 
                   exog                = exog_predict['exog_1'], 
-                  in_sample_residuals = False
+                  in_sample_residuals = False,
+                  suppress_warnings   = True
               )
 
     expected_1 = pd.DataFrame(

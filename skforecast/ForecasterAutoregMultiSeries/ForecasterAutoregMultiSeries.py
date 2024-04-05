@@ -1035,7 +1035,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             If `True`, in-sample residuals will be stored in the forecaster object
             after fitting.
         suppress_warnings : bool, default `False`
-            If `True`, skforecast warnings will be suppressed during the fitting 
+            If `True`, skforecast warnings will be suppressed during the prediction 
             process. See skforecast.exceptions.warn_skforecast_categories for more
             information.
 
@@ -1223,7 +1223,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         steps: int,
         levels: Optional[Union[str, list]]=None,
         last_window: Optional[pd.DataFrame]=None,
-        exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None
+        exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
+        suppress_warnings: bool=False
     ) -> pd.DataFrame:
         """
         Predict n steps ahead. It is an recursive process in which, each prediction,
@@ -1245,6 +1246,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             right after training data.
         exog : pandas Series, pandas DataFrame, dict, default `None`
             Exogenous variable/s included as predictor/s.
+        suppress_warnings : bool, default `False`
+            If `True`, skforecast warnings will be suppressed during the fitting 
+            process. See skforecast.exceptions.warn_skforecast_categories for more
+            information.
 
         Returns
         -------
@@ -1252,6 +1257,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             Predicted values, one column for each level.
 
         """
+
+        if suppress_warnings:
+            for warn_category in warn_skforecast_categories:
+                warnings.filterwarnings('ignore', category=warn_category)
 
         input_levels_is_list = False
         if levels is None:
@@ -1426,6 +1435,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             predictions.append(preds_level)
 
         predictions = pd.concat(predictions, axis=1)
+        
+        if suppress_warnings:
+            for warn_category in warn_skforecast_categories:
+                warnings.filterwarnings('default', category=warn_category)
 
         return predictions
 
@@ -1438,7 +1451,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
         n_boot: int=500,
         random_state: int=123,
-        in_sample_residuals: bool=True
+        in_sample_residuals: bool=True,
+        suppress_warnings: bool=False
     ) -> dict:
         """
         Generate multiple forecasting predictions using a bootstrapping process. 
@@ -1473,6 +1487,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             residuals are used. In the latter case, the user should have
             calculated and stored the residuals within the forecaster (see
             `set_out_sample_residuals()`).
+        suppress_warnings : bool, default `False`
+            If `True`, skforecast warnings will be suppressed during the prediction 
+            process. See skforecast.exceptions.warn_skforecast_categories for more
+            information.
 
         Returns
         -------
@@ -1487,6 +1505,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         Forecasting: Principles and Practice (3nd ed) Rob J Hyndman and George Athanasopoulos.
 
         """
+
+        if suppress_warnings:
+            for warn_category in warn_skforecast_categories:
+                warnings.filterwarnings('ignore', category=warn_category)
 
         if self.fitted:
 
@@ -1740,6 +1762,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                                                   )
 
             boot_predictions[level] = level_boot_predictions
+        
+        if suppress_warnings:
+            for warn_category in warn_skforecast_categories:
+                warnings.filterwarnings('default', category=warn_category)
 
         return boot_predictions
 
@@ -1753,7 +1779,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         interval: list=[5, 95],
         n_boot: int=500,
         random_state: int=123,
-        in_sample_residuals: bool=True
+        in_sample_residuals: bool=True,
+        suppress_warnings: bool=False
     ) -> pd.DataFrame:
         """
         Iterative process in which, each prediction, is used as a predictor
@@ -1790,6 +1817,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             residuals are used. In the latter case, the user should have
             calculated and stored the residuals within the forecaster (see
             `set_out_sample_residuals()`).
+        suppress_warnings : bool, default `False`
+            If `True`, skforecast warnings will be suppressed during the prediction 
+            process. See skforecast.exceptions.warn_skforecast_categories for more
+            information.
 
         Returns
         -------
@@ -1809,13 +1840,18 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         """
 
+        if suppress_warnings:
+            for warn_category in warn_skforecast_categories:
+                warnings.filterwarnings('ignore', category=warn_category)
+
         check_interval(interval=interval)
 
         preds = self.predict(
-                    steps       = steps,
-                    levels      = levels,
-                    last_window = last_window,
-                    exog        = exog
+                    steps             = steps,
+                    levels            = levels,
+                    last_window       = last_window,
+                    exog              = exog,
+                    suppress_warnings = suppress_warnings
                 )
 
         boot_predictions = self.predict_bootstrapping(
@@ -1825,7 +1861,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                                exog                = exog,
                                n_boot              = n_boot,
                                random_state        = random_state,
-                               in_sample_residuals = in_sample_residuals
+                               in_sample_residuals = in_sample_residuals,
+                               suppress_warnings   = suppress_warnings
                            )
 
         interval = np.array(interval)/100
@@ -1838,6 +1875,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             predictions.append(preds_interval)
 
         predictions = pd.concat(predictions, axis=1)
+        
+        if suppress_warnings:
+            for warn_category in warn_skforecast_categories:
+                warnings.filterwarnings('default', category=warn_category)
 
         return predictions
 
@@ -1851,7 +1892,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         quantiles: list=[0.05, 0.5, 0.95],
         n_boot: int=500,
         random_state: int=123,
-        in_sample_residuals: bool=True
+        in_sample_residuals: bool=True,
+        suppress_warnings: bool=False
     ) -> pd.DataFrame:
         """
         Calculate the specified quantiles for each step. After generating 
@@ -1887,6 +1929,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             residuals are used. In the latter case, the user should have
             calculated and stored the residuals within the forecaster (see
             `set_out_sample_residuals()`).
+        suppress_warnings : bool, default `False`
+            If `True`, skforecast warnings will be suppressed during the prediction 
+            process. See skforecast.exceptions.warn_skforecast_categories for more
+            information.
 
         Returns
         -------
@@ -1902,6 +1948,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         """
 
+        if suppress_warnings:
+            for warn_category in warn_skforecast_categories:
+                warnings.filterwarnings('ignore', category=warn_category)
+
         check_interval(quantiles=quantiles)
 
         boot_predictions = self.predict_bootstrapping(
@@ -1911,7 +1961,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                                exog                = exog,
                                n_boot              = n_boot,
                                random_state        = random_state,
-                               in_sample_residuals = in_sample_residuals
+                               in_sample_residuals = in_sample_residuals,
+                               suppress_warnings   = suppress_warnings
                            )
 
         predictions = []
@@ -1922,6 +1973,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             predictions.append(preds_quantiles)
 
         predictions = pd.concat(predictions, axis=1)
+        
+        if suppress_warnings:
+            for warn_category in warn_skforecast_categories:
+                warnings.filterwarnings('default', category=warn_category)
 
         return predictions
 
@@ -1935,7 +1990,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
         n_boot: int=500,
         random_state: int=123,
-        in_sample_residuals: bool=True
+        in_sample_residuals: bool=True,
+        suppress_warnings: bool=False
     ) -> pd.DataFrame:
         """
         Fit a given probability distribution for each step. After generating 
@@ -1969,6 +2025,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             residuals are used. In the latter case, the user should have
             calculated and stored the residuals within the forecaster (see
             `set_out_sample_residuals()`).
+        suppress_warnings : bool, default `False`
+            If `True`, skforecast warnings will be suppressed during the prediction 
+            process. See skforecast.exceptions.warn_skforecast_categories for more
+            information.
 
         Returns
         -------
@@ -1977,6 +2037,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         """
 
+        if suppress_warnings:
+            for warn_category in warn_skforecast_categories:
+                warnings.filterwarnings('ignore', category=warn_category)
+
         boot_samples = self.predict_bootstrapping(
                            steps               = steps,
                            levels              = levels,
@@ -1984,7 +2048,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                            exog                = exog,
                            n_boot              = n_boot,
                            random_state        = random_state,
-                           in_sample_residuals = in_sample_residuals
+                           in_sample_residuals = in_sample_residuals,
+                           suppress_warnings   = suppress_warnings
                        )
 
         param_names = [
@@ -2007,6 +2072,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             predictions.append(pred_level)
 
         predictions = pd.concat(predictions, axis=1)
+        
+        if suppress_warnings:
+            for warn_category in warn_skforecast_categories:
+                warnings.filterwarnings('default', category=warn_category)
 
         return predictions
 

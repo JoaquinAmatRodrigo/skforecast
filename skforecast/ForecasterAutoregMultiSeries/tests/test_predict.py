@@ -279,7 +279,7 @@ def test_predict_output_when_regressor_is_LinearRegression_with_transform_series
                      transformer_series = {'1': StandardScaler(), '2': MinMaxScaler()}
                  )
     forecaster.fit(series=series)
-    predictions = forecaster.predict(steps=5, levels=['1'])
+    predictions = forecaster.predict(steps=5, levels=['1'], suppress_warnings=True)
 
     expected = pd.DataFrame(
                    data    = np.array([0.59619193, 0.46282914, 0.41738496, 0.48522676, 0.47525733]),
