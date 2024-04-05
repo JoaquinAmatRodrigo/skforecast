@@ -11,6 +11,7 @@ from skforecast.utils import preprocess_exog
 from skforecast.utils import preprocess_last_window
 from skforecast.exceptions import MissingValuesWarning
 from skforecast.exceptions import MissingExogWarning
+from skforecast.exceptions import IgnoredArgumentWarning
 
 
 def test_check_predict_input_NotFittedError_when_fitted_is_False():
@@ -18,9 +19,9 @@ def test_check_predict_input_NotFittedError_when_fitted_is_False():
     Test NotFittedError is raised when fitted is False.
     """
     err_msg = re.escape(
-                ("This Forecaster instance is not fitted yet. Call `fit` with "
-                 "appropriate arguments before using predict.")
-              )
+        ("This Forecaster instance is not fitted yet. Call `fit` with "
+         "appropriate arguments before using predict.")
+    )
     with pytest.raises(NotFittedError, match = err_msg):
         check_predict_input(
             forecaster_name  = 'ForecasterAutoreg',
@@ -49,7 +50,7 @@ def test_check_predict_input_ValueError_when_steps_int_lower_than_1():
     """
     steps = -5
 
-    err_msg = re.escape(f'`steps` must be an integer greater than or equal to 1. Got {steps}.')
+    err_msg = re.escape(f"`steps` must be an integer greater than or equal to 1. Got {steps}.")
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
             forecaster_name  = 'ForecasterAutoreg',
@@ -80,9 +81,9 @@ def test_check_predict_input_ValueError_when_steps_list_lower_than_1():
     steps = [0, 1, 2]
 
     err_msg = re.escape(
-                  (f"The minimum value of `steps` must be equal to or greater than 1. "
-                   f"Got {min(steps)}.")
-              )
+        (f"The minimum value of `steps` must be equal to or greater than 1. "
+         f"Got {min(steps)}.")
+    )
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
             forecaster_name  = 'ForecasterAutoregDirect',
@@ -114,10 +115,10 @@ def test_check_predict_input_ValueError_when_last_step_greater_than_max_steps():
     max_steps = 10
 
     err_msg = re.escape(
-                (f"The maximum value of `steps` must be less than or equal to "
-                 f"the value of steps defined when initializing the forecaster. "
-                 f"Got {max(steps)}, but the maximum is {max_steps}.")
-              )
+        (f"The maximum value of `steps` must be less than or equal to "
+         f"the value of steps defined when initializing the forecaster. "
+         f"Got {max(steps)}, but the maximum is {max_steps}.")
+    )
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
             forecaster_name  = 'ForecasterAutoregMultiVariate',
@@ -146,7 +147,7 @@ def test_check_predict_input_TypeError_when_ForecasterAutoregMultiSeries_and_lev
     """
     levels = 5
 
-    err_msg = re.escape(f'`levels` must be a `list` of column names, a `str` of a column name or `None`.')   
+    err_msg = re.escape(f"`levels` must be a `list` of column names, a `str` of a column name or `None`.")   
     with pytest.raises(TypeError, match = err_msg):
         check_predict_input(
             forecaster_name  = 'ForecasterAutoregMultiSeries',
@@ -178,7 +179,7 @@ def test_check_predict_input_ValueError_when_ForecasterAutoregMultiSeries_and_le
     Test ValueError is raised when `levels` is not in `self.series_col_names` in a 
     ForecasterAutoregMultiSeries.
     """
-    err_msg = re.escape(f'`levels` must be in `series_col_names` : {series_col_names}.')
+    err_msg = re.escape(f"`levels` must be in `series_col_names` : {series_col_names}.")
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
             forecaster_name  = 'ForecasterAutoregMultiSeries',
@@ -205,9 +206,9 @@ def test_check_predict_input_ValueError_when_exog_is_none_and_included_exog_is_t
     """
     """
     err_msg = re.escape(
-                ('Forecaster trained with exogenous variable/s. '
-                 'Same variable/s must be provided when predicting.')
-              )   
+        ("Forecaster trained with exogenous variable/s. "
+         "Same variable/s must be provided when predicting.")
+    )   
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
             forecaster_name  = 'ForecasterAutoreg',
@@ -234,9 +235,9 @@ def test_check_predict_input_ValueError_when_exog_is_not_none_and_included_exog_
     """
     """
     err_msg = re.escape(
-                ('Forecaster trained without exogenous variable/s. '
-                 '`exog` must be `None` when predicting.')
-              )   
+        ("Forecaster trained without exogenous variable/s. "
+         "`exog` must be `None` when predicting.")
+    )   
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
             forecaster_name  = 'ForecasterAutoreg',
@@ -268,7 +269,7 @@ def test_check_predict_input_TypeError_when_last_window_is_not_pandas_DataFrame(
     `ForecasterAutoregMultiSeries` and `ForecasterAutoregMultiVariate`.
     """
     last_window = np.arange(5)
-    err_msg = re.escape(f'`last_window` must be a pandas DataFrame. Got {type(last_window)}.')
+    err_msg = re.escape(f"`last_window` must be a pandas DataFrame. Got {type(last_window)}.")
     with pytest.raises(TypeError, match = err_msg):
         check_predict_input(
             forecaster_name  = forecaster_name,
@@ -336,10 +337,10 @@ def test_check_predict_input_ValueError_when_series_col_names_not_last_window_Fo
     last_window = pd.DataFrame({'l1': [1, 2, 3], '4': [1, 2, 3]})
     series_col_names = ['l1', 'l2']
     err_msg = re.escape(
-                    (f'`last_window` columns must be the same as `series` column names.\n'
-                     f'    `last_window` columns : {list(last_window.columns)}.\n'
-                     f'    `series` columns      : {series_col_names}.')
-                )
+        (f"`last_window` columns must be the same as `series` column names.\n"
+         f"    `last_window` columns : {list(last_window.columns)}.\n"
+         f"    `series` columns      : {series_col_names}.")
+    )
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
             forecaster_name  = 'ForecasterAutoregMultiVariate',
@@ -366,7 +367,7 @@ def test_check_predict_input_TypeError_when_last_window_is_not_pandas_series():
     """
     """
     last_window = np.arange(5)
-    err_msg = re.escape(f'`last_window` must be a pandas Series. Got {type(last_window)}.')
+    err_msg = re.escape(f"`last_window` must be a pandas Series. Got {type(last_window)}.")
     with pytest.raises(TypeError, match = err_msg):
         check_predict_input(
             forecaster_name  = 'ForecasterAutoreg',
@@ -395,9 +396,9 @@ def test_check_predict_input_ValueError_when_length_last_window_is_lower_than_wi
     window_size = 10
 
     err_msg = re.escape(
-                (f'`last_window` must have as many values as needed to '
-                 f'generate the predictors. For this forecaster it is {window_size}.')
-              )
+        (f"`last_window` must have as many values as needed to "
+         f"generate the predictors. For this forecaster it is {window_size}.")
+    )
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
             forecaster_name  = 'ForecasterAutoreg',
@@ -459,9 +460,9 @@ def test_check_predict_input_TypeError_when_last_window_index_is_not_of_index_ty
                            ) 
 
     err_msg = re.escape(
-                (f'Expected index of type {index_type} for `last_window`. '
-                 f'Got {type(last_window_index)}.')
-              )
+        (f"Expected index of type {index_type} for `last_window`. "
+         f"Got {type(last_window_index)}.")
+    )
     with pytest.raises(TypeError, match = err_msg):
         check_predict_input(
             forecaster_name  = 'ForecasterAutoreg',
@@ -494,8 +495,8 @@ def test_check_predict_input_TypeError_when_last_window_index_frequency_is_not_i
                            )
 
     err_msg = re.escape(
-        (f'Expected frequency of type {index_freq} for `last_window`. '
-         f'Got {last_window_index.freqstr}.')
+        (f"Expected frequency of type {index_freq} for `last_window`. "
+         f"Got {last_window_index.freqstr}.")
     )
     with pytest.raises(TypeError, match = err_msg):
         check_predict_input(
@@ -622,9 +623,9 @@ def test_check_predict_input_MissingValuesWarning_when_exog_has_missing_values()
             window_size      = 2,
             last_window      = pd.Series(np.arange(10), index=pd.date_range(start='1/1/2018', periods=10, freq='M')),
             last_window_exog = None,
-            exog             = pd.Series([1, 2, 3, np.nan], index=pd.date_range(start='11/1/2018', periods=4, freq='M')),
+            exog             = pd.Series([1, 2, 3, np.nan], index=pd.date_range(start='11/1/2018', periods=4, freq='M'), name='exog1'),
             exog_type        = pd.Series,
-            exog_col_names   = None,
+            exog_col_names   = ['exog1'],
             interval         = None,
             alpha            = None,
             max_steps        = None,
@@ -658,7 +659,7 @@ def test_check_predict_input_MissingValuesWarning_when_len_exog_is_less_than_ste
             last_window_exog = None,
             exog             = pd.Series(np.arange(5), name='exog1', index=pd.date_range(start='11/1/2018', periods=5, freq='M')),
             exog_type        = pd.Series,
-            exog_col_names   = None,
+            exog_col_names   = ['exog1'],
             interval         = None,
             alpha            = None,
             max_steps        = None,
@@ -768,18 +769,125 @@ def test_check_predict_input_ValueError_when_exog_is_DataFrame_without_columns_i
         )
 
 
+def test_check_predict_input_ValueError_when_exog_is_Series_with_no_name():
+    """
+    Raise ValueError when `exog` is a pandas Series with no name.
+    """
+    exog = pd.Series(np.arange(10))
+    exog_col_names = ['exog1']
+
+    err_msg = re.escape(
+         (f"When `exog` is a pandas Series, it must have a name. Got None.")
+    )
+    with pytest.raises(ValueError, match = err_msg):
+        check_predict_input(
+            forecaster_name  = 'ForecasterAutoreg',
+            steps            = 2,
+            fitted           = True,
+            included_exog    = True,
+            index_type       = pd.DatetimeIndex,
+            index_freq       = 'M',
+            window_size      = 5,
+            last_window      = pd.Series(np.arange(10), index=pd.date_range(start='1/1/2018', periods=10, freq='M')),
+            last_window_exog = None,
+            exog             = exog,
+            exog_type        = pd.Series,
+            exog_col_names   = exog_col_names,
+            interval         = None,
+            alpha            = None,
+            max_steps        = None,
+            levels           = None,
+            series_col_names = None
+        )
+
+
+def test_check_predict_input_IgnoredArgumentWarning_when_exog_is_Series_with_name_not_in_exog_col_names_multiseries():
+    """
+    Raise IgnoredArgumentWarning when `exog` is a pandas Series and its name is not in 
+    `exog_col_names` when Forecaster multi series.
+    """
+    exog = pd.Series(np.arange(10), name='exog2')
+    exog.index = pd.date_range(start='11/01/2018', periods=10, freq='M')
+    exog_col_names = ['exog1']
+
+    last_window = pd.Series(
+        np.arange(10), 
+        index = pd.date_range(start='01/01/2018', periods=10, freq='M'), 
+        name  = 'l1'
+    ).to_frame()
+
+    warn_msg = re.escape(
+        ("'exog2' was not observed during training. `exog` is ignored. "
+         "Exogenous variables must be one of: ['exog1'].")
+    )
+    with pytest.warns(IgnoredArgumentWarning, match = warn_msg):
+        check_predict_input(
+            forecaster_name  = 'ForecasterAutoregMultiSeries',
+            steps            = 2,
+            fitted           = True,
+            included_exog    = True,
+            index_type       = pd.DatetimeIndex,
+            index_freq       = 'M',
+            window_size      = 5,
+            last_window      = last_window,
+            last_window_exog = None,
+            exog             = exog,
+            exog_type        = pd.Series,
+            exog_col_names   = exog_col_names,
+            interval         = None,
+            alpha            = None,
+            max_steps        = None,
+            levels           = ['l1'],
+            series_col_names = ['l1', 'l2']
+        )
+
+
+def test_check_predict_input_ValueError_when_exog_is_Series_with_name_not_in_exog_col_names_multiseries():
+    """
+    Raise ValueError when `exog` is a pandas Series and its name is not in 
+    `exog_col_names` when Forecaster multi series.
+    """
+    exog = pd.Series(np.arange(10), name='exog2')
+    exog_col_names = ['exog1']
+
+    err_msg = re.escape(
+        ("'exog2' was not observed during training. "
+         "Exogenous variables must be: ['exog1'].")
+    )
+    with pytest.raises(ValueError, match = err_msg):
+        check_predict_input(
+            forecaster_name  = 'ForecasterAutoreg',
+            steps            = 2,
+            fitted           = True,
+            included_exog    = True,
+            index_type       = pd.DatetimeIndex,
+            index_freq       = 'M',
+            window_size      = 5,
+            last_window      = pd.Series(np.arange(10), index=pd.date_range(start='1/1/2018', periods=10, freq='M')),
+            last_window_exog = None,
+            exog             = exog,
+            exog_type        = pd.Series,
+            exog_col_names   = exog_col_names,
+            interval         = None,
+            alpha            = None,
+            max_steps        = None,
+            levels           = None,
+            series_col_names = None
+        )
+
+
 def test_check_predict_input_TypeError_when_exog_index_is_not_of_index_type():
     """
     """
-    exog = pd.Series(np.arange(10))
+    exog = pd.Series(np.arange(10), name='exog1')
     index_type = pd.DatetimeIndex
     check_exog(exog = exog)
     _, exog_index = preprocess_exog(exog=exog.iloc[:0, ])
 
     err_msg = re.escape(
-                (f'Expected index of type {index_type} for `exog`. '
-                 f'Got {type(exog_index)}.')
-              )
+        (f"Expected index of type {index_type} for `exog`. "
+         f"Got {type(exog_index)}.")
+    )
     with pytest.raises(TypeError, match = err_msg):
         check_predict_input(
             forecaster_name  = 'ForecasterAutoreg',
@@ -793,7 +901,7 @@ def test_check_predict_input_TypeError_when_exog_index_is_not_of_index_type():
             last_window_exog = None,
             exog             = exog,
             exog_type        = pd.Series,
-            exog_col_names   = None,
+            exog_col_names   = ['exog1'],
             interval         = None,
             alpha            = None,
             max_steps        = None,
@@ -805,15 +913,15 @@ def test_check_predict_input_TypeError_when_exog_index_is_not_of_index_type():
 def test_check_predict_input_TypeError_when_exog_index_frequency_is_not_index_freq():
     """
     """
-    exog = pd.Series(np.arange(10), index=pd.date_range(start='1/1/2018', periods=10))
+    exog = pd.Series(np.arange(10), index=pd.date_range(start='1/1/2018', periods=10), name='exog1')
     index_freq = 'M'
     check_exog(exog = exog)
     _, exog_index = preprocess_exog(exog=exog.iloc[:0, ])
 
     err_msg = re.escape(
-                (f'Expected frequency of type {index_freq} for `exog`. '
-                 f'Got {exog_index.freqstr}.')
-              )
+        (f"Expected frequency of type {index_freq} for `exog`. "
+         f"Got {exog_index.freqstr}.")
+    )
     with pytest.raises(TypeError, match = err_msg):
         check_predict_input(
             forecaster_name  = 'ForecasterAutoreg',
@@ -827,7 +935,7 @@ def test_check_predict_input_TypeError_when_exog_index_frequency_is_not_index_fr
             last_window_exog = None,
             exog             = exog,
             exog_type        = pd.Series,
-            exog_col_names   = None,
+            exog_col_names   = ['exog1'],
             interval         = None,
             alpha            = None,
             max_steps        = None,
@@ -840,7 +948,7 @@ def test_check_predict_input_ValueError_when_exog_index_does_not_follow_last_win
     """
     Raise exception if `exog` index does not start at the end of `last_window` index when DatetimeIndex.
     """
-    exog_datetime = pd.Series(data=np.random.rand(10))
+    exog_datetime = pd.Series(data=np.random.rand(10), name='exog1')
     exog_datetime.index = pd.date_range(start='2022-03-01', periods=10, freq='M')
     lw_datetime = pd.Series(data=np.random.rand(10))
     lw_datetime.index = pd.date_range(start='2022-01-01', periods=10, freq='M')
@@ -867,7 +975,7 @@ def test_check_predict_input_ValueError_when_exog_index_does_not_follow_last_win
             last_window_exog = None,
             exog             = exog_datetime,
             exog_type        = pd.Series,
-            exog_col_names   = None,
+            exog_col_names   = ['exog1'],
             interval         = None,
             alpha            = None,
             max_steps        = None,
@@ -880,7 +988,7 @@ def test_check_predict_input_ValueError_when_exog_index_does_not_follow_last_win
     """
     Raise ValueError if `exog` index does not start at the end of `last_window` index when RangeIndex.
     """
-    exog_datetime = pd.Series(data=np.random.rand(10))
+    exog_datetime = pd.Series(data=np.random.rand(10), name='exog1')
     exog_datetime.index = pd.RangeIndex(start=11, stop=21)
     lw_datetime = pd.Series(data=np.random.rand(10))
     lw_datetime.index = pd.RangeIndex(start=0, stop=10)
@@ -888,12 +996,12 @@ def test_check_predict_input_ValueError_when_exog_index_does_not_follow_last_win
     expected_index = 10
 
     err_msg = re.escape(
-                (f"To make predictions `exog` must start one step "
-                 f"ahead of `last_window`.\n"
-                 f"    `last_window` ends at : {lw_datetime.index[-1]}.\n"
-                 f"    `exog` starts at : {exog_datetime.index[0]}.\n"
-                 f"     Expected index : {expected_index}.")
-              )
+        (f"To make predictions `exog` must start one step "
+         f"ahead of `last_window`.\n"
+         f"    `last_window` ends at : {lw_datetime.index[-1]}.\n"
+         f"    `exog` starts at : {exog_datetime.index[0]}.\n"
+         f"     Expected index : {expected_index}.")
+    )
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
             forecaster_name  = 'ForecasterAutoreg',
@@ -907,7 +1015,7 @@ def test_check_predict_input_ValueError_when_exog_index_does_not_follow_last_win
             last_window_exog = None,
             exog             = exog_datetime,
             exog_type        = pd.Series,
-            exog_col_names   = None,
+            exog_col_names   = ['exog1'],
             interval         = None,
             alpha            = None,
             max_steps        = None,
@@ -922,9 +1030,9 @@ def test_check_predict_input_ValueError_when_ForecasterSarimax_last_window_exog_
     is False.
     """
     err_msg = re.escape(
-                ('Forecaster trained without exogenous variable/s. '
-                 '`last_window_exog` must be `None` when predicting.')
-              )   
+        ("Forecaster trained without exogenous variable/s. "
+         "`last_window_exog` must be `None` when predicting.")
+    )   
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
             forecaster_name  = 'ForecasterSarimax',
@@ -952,9 +1060,9 @@ def test_check_predict_input_TypeError_when_ForecasterSarimax_last_window_exog_i
     """
     last_window_exog = np.arange(5)
     err_msg = re.escape(
-                (f'`last_window_exog` must be a pandas Series or a '
-                 f'pandas DataFrame. Got {type(last_window_exog)}.')
-            )
+        (f"`last_window_exog` must be a pandas Series or a "
+         f"pandas DataFrame. Got {type(last_window_exog)}.")
+    )
     with pytest.raises(TypeError, match = err_msg):
         check_predict_input(
             forecaster_name  = 'ForecasterSarimax',
@@ -966,9 +1074,9 @@ def test_check_predict_input_TypeError_when_ForecasterSarimax_last_window_exog_i
             window_size      = 3,
             last_window      = pd.Series(np.arange(5)),
             last_window_exog = last_window_exog,
-            exog             = pd.Series(np.arange(10), index=pd.RangeIndex(start=5, stop=15)),
+            exog             = pd.Series(np.arange(10), index=pd.RangeIndex(start=5, stop=15), name='exog1'),
             exog_type        = pd.Series,
-            exog_col_names   = None,
+            exog_col_names   = ['exog1'],
             interval         = None,
             alpha            = None,
             max_steps        = None,
@@ -983,9 +1091,9 @@ def test_check_predict_input_ValueError_when_ForecasterSarimax_length_last_windo
     window_size = 10
 
     err_msg = re.escape(
-                (f'`last_window_exog` must have as many values as needed to '
-                 f'generate the predictors. For this forecaster it is {window_size}.')
-              )
+        (f"`last_window_exog` must have as many values as needed to "
+         f"generate the predictors. For this forecaster it is {window_size}.")
+    )
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
             forecaster_name  = 'ForecasterSarimax',
@@ -997,9 +1105,9 @@ def test_check_predict_input_ValueError_when_ForecasterSarimax_length_last_windo
             window_size      = window_size,
             last_window      = pd.Series(np.arange(10)),
             last_window_exog = pd.Series(np.arange(5)),
-            exog             = pd.Series(np.arange(10), index=pd.RangeIndex(start=10, stop=20)),
+            exog             = pd.Series(np.arange(10), index=pd.RangeIndex(start=10, stop=20), name='exog1'),
             exog_type        = pd.Series,
-            exog_col_names   = None,
+            exog_col_names   = ['exog1'],
             interval         = None,
             alpha            = None,
             max_steps        = None,
@@ -1008,7 +1116,7 @@ def test_check_predict_input_ValueError_when_ForecasterSarimax_length_last_windo
         )
 
 
-def test_check_predict_input_ValueError_when_ForecasterSarimax_last_window_exog_has_missing_values():
+def test_check_predict_input_MissingValuesWarning_when_ForecasterSarimax_last_window_exog_has_missing_values():
     """
     """
     warn_msg = re.escape(
@@ -1025,10 +1133,10 @@ def test_check_predict_input_ValueError_when_ForecasterSarimax_last_window_exog_
             index_freq       = None,
             window_size      = 5,
             last_window      = pd.Series(np.arange(10)),
-            last_window_exog = pd.Series([1, 2, 3, 4, 5, np.nan]),
-            exog             = pd.Series(np.arange(10), index=pd.RangeIndex(start=10, stop=20)),
+            last_window_exog = pd.Series([1, 2, 3, 4, 5, np.nan], name='exog1'),
+            exog             = pd.Series(np.arange(10), index=pd.RangeIndex(start=10, stop=20), name='exog1'),
             exog_type        = pd.Series,
-            exog_col_names   = None,
+            exog_col_names   = ['exog1'],
             interval         = None,
             alpha            = None,
             max_steps        = None,
@@ -1040,16 +1148,16 @@ def test_check_predict_input_ValueError_when_ForecasterSarimax_last_window_exog_
 def test_check_predict_input_TypeError_when_ForecasterSarimax_last_window_exog_index_is_not_of_index_type():
     """
     """
-    last_window_exog = pd.Series(np.arange(10))
+    last_window_exog = pd.Series(np.arange(10), name='exog1')
     index_type = pd.DatetimeIndex
     _, last_window_exog_index = preprocess_last_window(
-                                last_window = last_window_exog.iloc[:0]
-                           ) 
+        last_window = last_window_exog.iloc[:0]
+    ) 
 
     err_msg = re.escape(
-                (f'Expected index of type {index_type} for `last_window_exog`. '
-                 f'Got {type(last_window_exog_index)}.')
-              )
+        (f"Expected index of type {index_type} for `last_window_exog`. "
+         f"Got {type(last_window_exog_index)}.")
+    )
     with pytest.raises(TypeError, match = err_msg):
         check_predict_input(
             forecaster_name  = 'ForecasterSarimax',
@@ -1061,9 +1169,9 @@ def test_check_predict_input_TypeError_when_ForecasterSarimax_last_window_exog_i
             window_size      = 5,
             last_window      = pd.Series(np.arange(10), index=pd.date_range(start='1/1/2018', periods=10, freq='M')),
             last_window_exog = last_window_exog,
-            exog             = pd.Series(np.arange(10), index=pd.date_range(start='30/11/2018', periods=10, freq='M')),
+            exog             = pd.Series(np.arange(10), index=pd.date_range(start='30/11/2018', periods=10, freq='M'), name='exog1'),
             exog_type        = pd.Series,
-            exog_col_names   = None,
+            exog_col_names   = ['exog1'],
             interval         = None,
             alpha            = None,
             max_steps        = None,
@@ -1082,9 +1190,9 @@ def test_check_predict_input_TypeError_when_ForecasterSarimax_last_window_exog_i
                            )
 
     err_msg = re.escape(
-                (f'Expected frequency of type {index_freq} for `last_window_exog`. '
-                 f'Got {last_window_exog_index.freqstr}.')
-              )
+        (f"Expected frequency of type {index_freq} for `last_window_exog`. "
+         f"Got {last_window_exog_index.freqstr}.")
+    )
     with pytest.raises(TypeError, match = err_msg):
         check_predict_input(
             forecaster_name  = 'ForecasterSarimax',
@@ -1096,9 +1204,9 @@ def test_check_predict_input_TypeError_when_ForecasterSarimax_last_window_exog_i
             window_size      = 5,
             last_window      = pd.Series(np.arange(10), index=pd.date_range(start='1/1/2018', periods=10, freq='M')),
             last_window_exog = last_window_exog,
-            exog             = pd.Series(np.arange(10), index=pd.date_range(start='30/11/2018', periods=10, freq='M')),
+            exog             = pd.Series(np.arange(10), index=pd.date_range(start='30/11/2018', periods=10, freq='M'), name='exog1'),
             exog_type        = pd.Series,
-            exog_col_names   = None,
+            exog_col_names   = ['exog1'],
             interval         = None,
             alpha            = None,
             max_steps        = None,
@@ -1107,20 +1215,21 @@ def test_check_predict_input_TypeError_when_ForecasterSarimax_last_window_exog_i
         )
 
 
-def test_check_predict_input_ValueError_when_last_window_exog_is_dataframe_without_columns_in_exog_col_names():
+def test_check_predict_input_ValueError_when_last_window_exog_is_DataFrame_without_columns_in_exog_col_names():
     """
     Raise ValueError when there are missing columns in `last_window_exog`, ForecasterSarimax.
     """
     exog = pd.DataFrame(np.arange(10).reshape(5, 2), columns=['col1', 'col3'])
-    exog.index=pd.date_range(start='6/1/2018', periods=5, freq='M')
-    last_window_exog = pd.DataFrame(np.arange(10).reshape(5, 2), columns=['col1', 'col2'])
-    last_window_exog.index=pd.date_range(start='1/1/2018', periods=5, freq='M')
+    exog.index = pd.date_range(start='6/1/2018', periods=5, freq='M')
     exog_col_names = ['col1', 'col3']
 
+    last_window_exog = pd.DataFrame(np.arange(10).reshape(5, 2), columns=['col1', 'col2'])
+    last_window_exog.index = pd.date_range(start='1/1/2018', periods=5, freq='M')
+
     err_msg = re.escape(
-                (f'Missing columns in `exog`. Expected {exog_col_names}. '
-                 f'Got {last_window_exog.columns.to_list()}.') 
-              )
+        (f"Missing columns in `last_window_exog`. Expected {exog_col_names}. "
+         f"Got {last_window_exog.columns.to_list()}.") 
+    )
     with pytest.raises(ValueError, match = err_msg):
         check_predict_input(
             forecaster_name  = 'ForecasterSarimax',
@@ -1134,6 +1243,79 @@ def test_check_predict_input_ValueError_when_last_window_exog_is_dataframe_witho
             last_window_exog = last_window_exog,
             exog             = exog,
             exog_type        = pd.DataFrame,
+            exog_col_names   = exog_col_names,
+            interval         = None,
+            alpha            = None,
+            max_steps        = None,
+            levels           = None,
+            series_col_names = None
+        )
+
+
+def test_check_predict_input_ValueError_when_last_window_exog_is_Series_with_no_name():
+    """
+    Raise ValueError when `last_window_exog` has no name, ForecasterSarimax.
+    """
+    exog = pd.Series(np.arange(5), name='exog1')
+    exog.index = pd.date_range(start='6/1/2018', periods=5, freq='M')
+    exog_col_names = ['exog1']
+
+    last_window_exog = pd.Series(np.arange(5))
+    last_window_exog.index = pd.date_range(start='1/1/2018', periods=5, freq='M')
+    
+    err_msg = re.escape(
+        (f"When `last_window_exog` is a pandas Series, it must have a name. Got None.")
+    )
+    with pytest.raises(ValueError, match = err_msg):
+        check_predict_input(
+            forecaster_name  = 'ForecasterSarimax',
+            steps            = 2,
+            fitted           = True,
+            included_exog    = True,
+            index_type       = pd.DatetimeIndex,
+            index_freq       = 'M',
+            window_size      = 5,
+            last_window      = pd.Series(np.arange(5), index=pd.date_range(start='1/1/2018', periods=5, freq='M')),
+            last_window_exog = last_window_exog,
+            exog             = exog,
+            exog_type        = pd.Series,
+            exog_col_names   = exog_col_names,
+            interval         = None,
+            alpha            = None,
+            max_steps        = None,
+            levels           = None,
+            series_col_names = None
+        )
+
+
+def test_check_predict_input_ValueError_when_last_window_exog_is_Series_without_name_in_exog_col_names():
+    """
+    Raise ValueError when `last_window_exog` name is not in `exog_col_names`, ForecasterSarimax.
+    """
+    exog = pd.Series(np.arange(5), name='exog1')
+    exog.index = pd.date_range(start='6/1/2018', periods=5, freq='M')
+    exog_col_names = ['exog1']
+
+    last_window_exog = pd.Series(np.arange(5), name='exog2')
+    last_window_exog.index = pd.date_range(start='1/1/2018', periods=5, freq='M')
+    
+    err_msg = re.escape(
+        ("'exog2' was not observed during training. "
+         "Exogenous variables must be: ['exog1'].")
+    )
+    with pytest.raises(ValueError, match = err_msg):
+        check_predict_input(
+            forecaster_name  = 'ForecasterSarimax',
+            steps            = 2,
+            fitted           = True,
+            included_exog    = True,
+            index_type       = pd.DatetimeIndex,
+            index_freq       = 'M',
+            window_size      = 5,
+            last_window      = pd.Series(np.arange(5), index=pd.date_range(start='1/1/2018', periods=5, freq='M')),
+            last_window_exog = last_window_exog,
+            exog             = exog,
+            exog_type        = pd.Series,
             exog_col_names   = exog_col_names,
             interval         = None,
             alpha            = None,

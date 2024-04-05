@@ -870,15 +870,15 @@ def check_predict_input(
                     if forecaster_name in ['ForecasterAutoregMultiSeries', 
                                            'ForecasterAutoregMultiSeriesCustom']:
                         warnings.warn(
-                            (f"{exog_to_check.name} was not observed during training. "
+                            (f"'{exog_to_check.name}' was not observed during training. "
                              f"{exog_name} is ignored. Exogenous variables must be one "
-                             f"of: '{exog_col_names}'."),
+                             f"of: {exog_col_names}."),
                              IgnoredArgumentWarning
                         )
                     else:
                         raise ValueError(
-                            (f"{exog_to_check.name} was not observed during training. "
-                             f"Exogenous variables must be one of: '{exog_col_names}'.")
+                            (f"'{exog_to_check.name}' was not observed during training. "
+                             f"Exogenous variables must be: {exog_col_names}.")
                         )
 
             # Check index dtype and freq
@@ -970,8 +970,19 @@ def check_predict_input(
                 col_missing = set(exog_col_names).difference(set(last_window_exog.columns))
                 if col_missing:
                     raise ValueError(
-                        (f"Missing columns in `exog`. Expected {exog_col_names}. "
+                        (f"Missing columns in `last_window_exog`. Expected {exog_col_names}. "
                          f"Got {last_window_exog.columns.to_list()}.") 
+                    )
+            else:
+                if last_window_exog.name is None:
+                    raise ValueError(
+                        (f"When `last_window_exog` is a pandas Series, it must have a name. Got None.")
+                    )
+                
+                if last_window_exog.name not in exog_col_names:
+                    raise ValueError(
+                        (f"'{last_window_exog.name}' was not observed during training. "
+                         f"Exogenous variables must be: {exog_col_names}.")
                     )
 
     return
