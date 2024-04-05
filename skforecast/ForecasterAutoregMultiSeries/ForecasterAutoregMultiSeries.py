@@ -772,7 +772,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             )
 
         if self.dropna_from_series:
-            # TODO: review when we have a full exog as NaN
             if X_train.isnull().any().any():
                 mask = X_train.notna().all(axis=1).to_numpy()
                 X_train = X_train.iloc[mask, ]
@@ -792,6 +791,12 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                      "set `forecaster.dropna_from_series = True`."),
                      MissingValuesWarning
                 )
+
+        if X_train.empty:
+            raise ValueError(
+                ("All samples have been removed due to NaNs. Set "
+                 "`forecaster.dropna_from_series = False` or review `exog` values.")
+            )
 
         # The last time window of training data is stored so that lags needed as
         # predictors in the first iteration of `predict()` can be calculated.
@@ -1383,8 +1388,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 exog_level = exog[level]
                 if isinstance(exog_level, pd.Series):
                     exog_level = exog_level.to_frame()
-                    # TODO: Incluir error de que exog_level.name debe estar en 
-                    # empty_exog.columns?
 
                 exog_level = empty_exog.fillna(exog_level)
                 exog_level = transform_dataframe(
@@ -1664,8 +1667,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 exog_level = exog[level]
                 if isinstance(exog_level, pd.Series):
                     exog_level = exog_level.to_frame()
-                    # TODO: Incluir error de que exog_level.name debe estar en 
-                    # empty_exog.columns?
 
                 exog_level = empty_exog.fillna(exog_level)
                 exog_level = transform_dataframe(

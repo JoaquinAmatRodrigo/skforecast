@@ -530,7 +530,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         for i, serie in enumerate(series.columns):
 
             y = series[serie]
-            check_y(y=y)
+            check_y(y=y, series_id=f"Column '{serie}'")
             y = transform_series(
                     series            = y,
                     transformer       = self.transformer_series_[serie],

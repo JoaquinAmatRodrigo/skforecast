@@ -349,7 +349,8 @@ def check_select_fit_kwargs(
 
 
 def check_y(
-    y: Any
+    y: Any,
+    series_id: str="`y`"
 ) -> None:
     """
     Raise Exception if `y` is not pandas Series or if it has missing values.
@@ -358,6 +359,8 @@ def check_y(
     ----------
     y : Any
         Time series values.
+    series_id : str, default '`y`'
+        Identifier of the series used in the warning message.
     
     Returns
     -------
@@ -366,10 +369,10 @@ def check_y(
     """
     
     if not isinstance(y, pd.Series):
-        raise TypeError("`y` must be a pandas Series.")
+        raise TypeError(f"{series_id} must be a pandas Series.")
         
     if y.isnull().any():
-        raise ValueError("`y` has missing values.")
+        raise ValueError(f"{series_id} has missing values.")
     
     return
 
@@ -855,11 +858,9 @@ def check_predict_input(
                     else:
                         raise ValueError(
                             (f"Missing columns in {exog_name}. Expected {exog_col_names}. "
-                             f"Got {exog_to_check.columns.to_list()}.") 
+                             f"Got {exog_to_check.columns.to_list()}.")
                         )
             else:
-                # TODO: review with Ximo
-                # =============================================================================
                 if exog_to_check.name is None:
                     raise ValueError(
                         (f"When {exog_name} is a pandas Series, it must have a name. Got None.")
@@ -869,16 +870,16 @@ def check_predict_input(
                     if forecaster_name in ['ForecasterAutoregMultiSeries', 
                                            'ForecasterAutoregMultiSeriesCustom']:
                         warnings.warn(
-                            (f"{exog_name} name is not present in `forecaster.exog_col_names` "
-                             f"attribute. All values will be NaN."),
-                             MissingExogWarning
+                            (f"{exog_to_check.name} was not observed during training. "
+                             f"{exog_name} is ignored. Exogenous variables must be one "
+                             f"of: '{exog_col_names}'."),
+                             IgnoredArgumentWarning
                         )
                     else:
                         raise ValueError(
-                            (f"{exog_name} name is not present in `forecaster.exog_col_names` "
-                             f"attribute, '{exog_col_names}'.")
+                            (f"{exog_to_check.name} was not observed during training. "
+                             f"Exogenous variables must be one of: '{exog_col_names}'.")
                         )
-                # =============================================================================
 
             # Check index dtype and freq
             _, exog_index = preprocess_exog(
@@ -1950,19 +1951,6 @@ def check_backtesting_input(
                  f"gap {gap} cannot be greater than the length of `{data_name}` "
                  f"({data_length}).")
             )
-        
-        # TODO: Check if this error is needed
-        # ======================================================================
-        if data_name == "series" and forecaster_name not in forecasters_multi_dict:
-            for serie in series:
-                if np.isnan(series[serie].to_numpy()[:initial_train_size]).all():
-                    raise ValueError(
-                        (f"All values of series '{serie}' are NaN. When working "
-                         f"with series of different lengths, make sure that "
-                         f"`initial_train_size` has an appropriate value so that "
-                         f"all series reach the first non-null value.")
-                    )
-        # ======================================================================
     else:
         if forecaster_name == 'ForecasterSarimax':
             raise ValueError(
