@@ -203,7 +203,7 @@ class TimeSeriesDifferentiator(BaseEstimator, TransformerMixin):
         self,
         X: np.ndarray,
         y: Any=None
-    )  -> np.ndarray:
+    ) -> np.ndarray:
         """
         Reverts the differentiation. The input array `x` is assumed to be a 
         differentiated time series of order n that starts right after the
@@ -242,13 +242,13 @@ def series_long_to_dict(
     index: str,
     values: str,
     freq: str,
-):
+) -> dict:
     """
     Convert long format series to dictionary.
 
     Parameters
     ----------
-    data: pd.DataFrame
+    data: pandas DataFrame
         Long format series.
     series_id: str
         Column name with the series identifier.
@@ -278,13 +278,13 @@ def exog_long_to_dict(
     series_id: str,
     index: str,
     freq: str
-):
+) -> dict:
     """
     Convert long format exogenous variables to dictionary.
 
     Parameters
     ----------
-    data: pd.DataFrame
+    data: pandas DataFrame
         Long format exogenous variables.
     series_id: str
         Column name with the series identifier.
