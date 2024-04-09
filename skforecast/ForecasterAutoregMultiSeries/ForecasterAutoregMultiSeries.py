@@ -797,6 +797,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 ("All samples have been removed due to NaNs. Set "
                  "`forecaster.dropna_from_series = False` or review `exog` values.")
             )
+        
+        # TODO: add self.series_X_train (series que están en X_train mirando el encoding)
+        # Actualizar last_window para que solo almacene estas series.
 
         # The last time window of training data is stored so that lags needed as
         # predictors in the first iteration of `predict()` can be calculated.
@@ -1602,6 +1605,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 else "forecaster.out_sample_residuals"
             )
             for level in levels:
+                # TODO: Review when no residuals are generated during fit method.
+                # if residuals_levels[level] is None or len(residuals_levels[level]) == 0:
                 if residuals_levels[level] is None:
                     raise ValueError(
                         (f"forecaster residuals for level '{level}' are `None`. "
