@@ -23,7 +23,7 @@ exog = pd.DataFrame({
                          ids=lambda dropna: f'dropna_last_window: {dropna}')
 def test_extract_data_folds_multiseries_series_DataFrame_exog_None_RangeIndex(dropna_last_window):
     """
-    Test extract_data_folds_multiseries with series DataFrame and exog None.
+    Test _extract_data_folds_multiseries with series DataFrame and exog None.
     """
 
     # Train, last_window, test_no_gap
@@ -107,7 +107,7 @@ def test_extract_data_folds_multiseries_series_DataFrame_exog_None_RangeIndex(dr
                          ids=lambda dropna: f'dropna_last_window: {dropna}')
 def test_extract_data_folds_multiseries_series_DataFrame_with_NaN_exog_RangeIndex(dropna_last_window):
     """
-    Test extract_data_folds_multiseries with series DataFrame and exog None with
+    Test _extract_data_folds_multiseries with series DataFrame and exog None with
     RangeIndex.
     """
     series_nan = series.copy()
@@ -210,7 +210,7 @@ def test_extract_data_folds_multiseries_series_DataFrame_with_NaN_exog_RangeInde
 
 def test_extract_data_folds_multiseries_series_DataFrame_with_NaN_exog_DatetimeIndex():
     """
-    Test extract_data_folds_multiseries with series DataFrame with NaNs and exog 
+    Test _extract_data_folds_multiseries with series DataFrame with NaNs and exog 
     with DatetimeIndex.
     """
     series_nan = series.copy()
@@ -325,7 +325,7 @@ def test_extract_data_folds_multiseries_series_DataFrame_with_NaN_exog_DatetimeI
                          ids=lambda dropna: f'dropna_last_window: {dropna}')
 def test_extract_data_folds_multiseries_series_dict_exog_dict_DatetimeIndex(dropna_last_window):
     """
-    Test extract_data_folds_multiseries with series DataFrame and exog None with
+    Test _extract_data_folds_multiseries with series DataFrame and exog None with
     DatetimeIndex.
     """
     series_datetime = series.copy()
@@ -502,26 +502,6 @@ def test_extract_data_folds_multiseries_series_dict_exog_dict_DatetimeIndex(drop
         assert data_fold[5] == expected_data_folds[i][5]
 
 
-# series = pd.DataFrame({
-#     'l1': np.arange(50, dtype=float),
-#     'l2': np.arange(50, 100, dtype=float),
-#     'l3': np.arange(100, 150, dtype=float)
-# })
-# series_datetime = series.copy()
-# series_datetime.index = pd.date_range(start='2020-01-01', periods=50, freq='D')
-# series_dict = {
-#     'l1': series_datetime['l1'],
-#     'l2': series_datetime['l2'].iloc[10:],
-#     'l3': series_datetime['l3'].iloc[:20]
-# }
-# span_index = pd.date_range(start='2020-01-01', periods=50, freq='D')
-# last_window_loc_start = span_index[25]
-# last_window_loc_end   = span_index[30 - 1]
-# series_last_window = {
-#     k: v.loc[last_window_loc_start:last_window_loc_end]
-#     for k, v in series_dict.items()
-# }
-# series_last_window = pd.DataFrame(series_last_window)
 
 
 

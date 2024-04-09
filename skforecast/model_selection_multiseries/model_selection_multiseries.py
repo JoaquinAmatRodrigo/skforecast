@@ -216,14 +216,12 @@ def _extract_data_folds_multiseries(
                         v = v.loc[first_valid_index : last_valid_index]
                         if len(v) >= window_size:
                             series_train[k] = v
-            
-            series_last_window = {
-                k: v.loc[last_window_loc_start:last_window_loc_end]
-                for k, v in series.items()
-                if externally_fitted or k in series_train
-            }
 
-            # TODO: ver si meter if len(v_last_window) >= window_size
+            series_last_window = {}
+            for k, v in series.items():
+                v = series[k].loc[last_window_loc_start:last_window_loc_end]
+                if ((externally_fitted or k in series_train) and len(v) >= window_size):
+                    series_last_window[k] = v
 
             series_last_window = pd.DataFrame(series_last_window)
 
@@ -518,9 +516,6 @@ def _backtesting_forecaster_multiseries(
             next_window_exog,
             fold
         ) = data_fold
-
-        # display(last_window_series.head(3))
-        # display(last_window_levels)
 
         if fold[4] is True:
             forecaster.fit(

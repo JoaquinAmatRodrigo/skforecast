@@ -28,6 +28,7 @@ class MissingValuesWarning(UserWarning):
         )
         return self.message + " " + extra_message
 
+
 class MissingExogWarning(UserWarning):
     """
     Warning used to indicate that there are missing exogenous variables in the
