@@ -395,7 +395,8 @@ def test_extract_data_folds_multiseries_series_dict_exog_dict_DatetimeIndex(drop
             {
                 'l1': pd.DataFrame(
                           data  = {'exog_1': np.arange(1000, 1030, dtype=float),
-                                   'exog_2': np.arange(1050, 1080, dtype=float)}, 
+                                   'exog_2': np.arange(1050, 1080, dtype=float),
+                                   'exog_3': np.arange(1100, 1130, dtype=float)}, 
                           index = pd.date_range(start='2020-01-01', periods=30, freq='D')
                       ),
                 'l2': pd.DataFrame(
@@ -407,7 +408,8 @@ def test_extract_data_folds_multiseries_series_dict_exog_dict_DatetimeIndex(drop
             {
                 'l1': pd.DataFrame(
                           data  = {'exog_1': np.arange(1030, 1037, dtype=float),
-                                   'exog_2': np.arange(1080, 1087, dtype=float)}, 
+                                   'exog_2': np.arange(1080, 1087, dtype=float),
+                                   'exog_3': np.arange(1130, 1137, dtype=float)}, 
                           index = pd.date_range(start='2020-01-31', periods=7, freq='D')
                       ),
                 'l2': pd.DataFrame(
@@ -495,16 +497,14 @@ def test_extract_data_folds_multiseries_series_dict_exog_dict_DatetimeIndex(drop
         assert data_fold[2] == expected_data_folds[i][2]
 
         for key in data_fold[3].keys():
-            pd.testing.assert_frame_equal(data_fold[3][key], expected_data_folds[i][3][key])
+            if isinstance(expected_data_folds[i][3][key], pd.DataFrame):
+                pd.testing.assert_frame_equal(data_fold[3][key], expected_data_folds[i][3][key])
+            else:
+                pd.testing.assert_series_equal(data_fold[3][key], expected_data_folds[i][3][key])
         for key in data_fold[4].keys():
-            pd.testing.assert_frame_equal(data_fold[4][key], expected_data_folds[i][4][key])
+            if isinstance(expected_data_folds[i][4][key], pd.DataFrame):
+                pd.testing.assert_frame_equal(data_fold[4][key], expected_data_folds[i][4][key])
+            else:
+                pd.testing.assert_series_equal(data_fold[4][key], expected_data_folds[i][4][key])
 
         assert data_fold[5] == expected_data_folds[i][5]
-
-
-
-
-
-
-
-

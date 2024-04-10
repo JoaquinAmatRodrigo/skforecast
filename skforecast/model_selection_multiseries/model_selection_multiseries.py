@@ -238,7 +238,8 @@ def _extract_data_folds_multiseries(
                 exog_test = exog.iloc[test_iloc_start:test_iloc_end, ]
             else:
                 exog_train = {
-                    k: v.loc[train_loc_start:train_loc_end] for k, v in exog.items()
+                    k: v.loc[train_loc_start:train_loc_end] 
+                    for k, v in exog.items()
                 }
                 exog_train = {k: v for k, v in exog_train.items() if len(v) > 0}
 
