@@ -1862,6 +1862,36 @@ def test_create_train_X_y_output_series_DataFrame_and_NaNs_in_X_train_drop_nan_F
         pd.testing.assert_series_equal(results[6][k], expected[6][k])
 
 
+def test_ValueError_create_train_X_series_DataFrame_exog_dict_and_empty_X_train_drop_nan_True():
+    """
+    Test ValueError is raised when series is a DataFrame and exog dict is used
+    and all samples have been removed due to NaNs in exog.
+    """
+    series = pd.DataFrame({'l1': pd.Series(np.arange(10, dtype=float)), 
+                           'l2': pd.Series(np.arange(10, dtype=float))})
+    series.index = pd.date_range("1990-01-01", periods=10, freq='D')
+
+    exog = pd.DataFrame({'exog_1': np.arange(100, 110, dtype=float),
+                         'exog_2': np.arange(200, 210, dtype=float)})
+    exog.index = pd.date_range("1990-01-01", periods=10, freq='D')
+
+    exog_dict = {
+        'l1': exog['exog_1'].copy(),
+        'l2': exog[['exog_2']].copy()
+    }
+    
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5,
+                                              encoding='onehot',
+                                              dropna_from_series=True)
+    
+    error_msg = re.escape(
+        ("All samples have been removed due to NaNs. Set "
+         "`forecaster.dropna_from_series = False` or review `exog` values.")
+    )
+    with pytest.raises(ValueError, match = error_msg):
+        forecaster._create_train_X_y(series=series, exog=exog_dict)
+
+
 def test_create_train_X_y_output_series_dict_and_exog_dict():
     """
     Test the output of _create_train_X_y when series is a dict and exog is a
@@ -2147,3 +2177,102 @@ def test_create_train_X_y_encoding_mapping(encoding, encoding_mapping):
     _ = forecaster._create_train_X_y(series=series)
     
     assert forecaster.encoding_mapping == encoding_mapping
+
+
+@pytest.mark.parametrize("fit_forecaster", 
+                         [True, False], 
+                         ids = lambda fitted : f'fit_forecaster: {fitted}')
+def test_create_train_X_y_output_when_series_and_exog_and_differentitation_1_and_already_trained(fit_forecaster):
+    """
+    Test the output of _create_train_X_y when differentiation=1 and already 
+    trained forecaster.
+    """
+    series = {
+        "l1": pd.Series(np.arange(10, dtype=float)),
+        "l2": pd.Series(np.arange(15, 20, dtype=float)),
+        "l3": pd.Series(np.arange(20, 25, dtype=float)),
+    }
+    series["l1"].index = pd.date_range("1990-01-01", periods=10, freq="D")
+    series["l2"].index = pd.date_range("1990-01-05", periods=5, freq="D")
+    series["l3"].index = pd.date_range("1990-01-03", periods=5, freq="D")
+    
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3,
+                                              encoding           = 'ordinal',
+                                              differentiation    = 1)
+    
+    if fit_forecaster:
+        forecaster.fit(series=series)
+
+    results = forecaster._create_train_X_y(series=series)
+
+    expected = (
+        pd.DataFrame(
+            data = np.array([[0.34815531, 0.34815531, 0.34815531, 0],
+                             [0.34815531, 0.34815531, 0.34815531, 0],
+                             [0.34815531, 0.34815531, 0.34815531, 0],
+                             [0.34815531, 0.34815531, 0.34815531, 0],
+                             [0.34815531, 0.34815531, 0.34815531, 0],
+                             [0.34815531, 0.34815531, 0.34815531, 0],
+                             [0.70710678, 0.70710678, 0.70710678, 1],
+                             [0.70710678, 0.70710678, 0.70710678, 2]]),
+            index   = pd.Index(
+                          pd.DatetimeIndex(
+                              ['1990-01-05', '1990-01-06', '1990-01-07', '1990-01-08',
+                               '1990-01-09', '1990-01-10',
+                               '1990-01-09', 
+                               '1990-01-07']
+                          )
+                      ),
+            columns = ['lag_1', 'lag_2', 'lag_3', '_level_skforecast']
+        ).astype({'_level_skforecast': int}
+        ),
+        pd.Series(
+            data  = np.array([0.34815531, 0.34815531, 0.34815531, 0.34815531,
+                              0.34815531, 0.34815531, 0.70710678, 0.70710678]),
+            index = pd.Index(
+                        pd.DatetimeIndex(
+                            ['1990-01-05', '1990-01-06',
+                             '1990-01-07', '1990-01-08',
+                             '1990-01-09', '1990-01-10',
+                             '1990-01-09', '1990-01-07']
+                        )
+                    ),
+            name  = 'y',
+            dtype = float
+        ),
+        {'l1': pd.date_range("1990-01-01", periods=10, freq='D'),
+         'l2': pd.date_range("1990-01-05", periods=5, freq='D'),
+         'l3': pd.date_range("1990-01-03", periods=5, freq='D')},
+        ['l1', 'l2', 'l3'],
+        None,
+        None,
+        {'l1': pd.Series(
+                   data  = np.array([7., 8., 9.]),
+                   index = pd.date_range("1990-01-08", periods=3, freq='D'),
+                   name  = 'l1',
+                   dtype = float
+               ),
+         'l2': pd.Series(
+                   data  = np.array([17., 18., 19.]),
+                   index = pd.date_range("1990-01-07", periods=3, freq='D'),
+                   name  = 'l2',
+                   dtype = float
+               ),
+         'l3': pd.Series(
+                   data  = np.array([22., 23., 24.]),
+                   index = pd.date_range("1990-01-05", periods=3, freq='D'),
+                   name  = 'l3',
+                   dtype = float
+               )
+        }
+    )
+
+    pd.testing.assert_frame_equal(results[0], expected[0])
+    pd.testing.assert_series_equal(results[1], expected[1])
+    for k in results[2].keys():
+        pd.testing.assert_index_equal(results[2][k], expected[2][k])
+    assert results[3] == expected[3]
+    assert isinstance(results[4], type(None))
+    assert isinstance(results[5], type(None))
+    for k in results[6].keys():
+        pd.testing.assert_series_equal(results[6][k], expected[6][k])

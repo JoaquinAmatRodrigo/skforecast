@@ -101,9 +101,20 @@ def test_predict_IgnoredArgumentWarning_when_levels_is_list_and_different_last_i
     }
     series_3['1'].index = pd.date_range(start='2020-01-01', periods=50)
     series_3['2'].index = pd.date_range(start='2020-01-01', periods=30)
+    
+    exog_2 = {
+        '1': exog['exog_1'].copy(),
+        '2': exog['exog_1'].iloc[:30].copy()
+    }
+    exog_2['1'].index = pd.date_range(start='2020-01-01', periods=50)
+    exog_2['2'].index = pd.date_range(start='2020-01-01', periods=30)
+    exog_2_pred = {
+        '1': exog_predict['exog_1'].copy()
+    }
+    exog_2_pred['1'].index = pd.date_range(start='2020-02-20', periods=50)
 
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5)
-    forecaster.fit(series=series_3)
+    forecaster.fit(series=series_3, exog=exog_2)
 
     warn_msg = re.escape(
         ("Only series whose last window ends at the same index "
@@ -112,7 +123,8 @@ def test_predict_IgnoredArgumentWarning_when_levels_is_list_and_different_last_i
          "from prediction: {'2'}.")
     )
     with pytest.warns(IgnoredArgumentWarning, match = warn_msg):
-        predictions = forecaster.predict(steps=5, levels=['1', '2'], last_window=None)
+        predictions = forecaster.predict(steps=5, levels=['1', '2'], last_window=None,
+                                         exog = exog_2_pred,)
 
     expected = pd.DataFrame(
                    data    = np.array([50., 51., 52., 53., 54.]),
