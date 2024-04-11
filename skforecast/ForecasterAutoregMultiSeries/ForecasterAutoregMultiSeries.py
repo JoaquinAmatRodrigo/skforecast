@@ -211,7 +211,12 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         First and last values of index of the data used during training for each 
         series.
     series_col_names : list
-        Names of the series (levels) used during training.
+        Names of the series (levels) provided by the user during training.
+    series_X_train : list
+        Names of the series (levels) included in the matrix `X_train` created
+        internally for training. It can be different from `series_col_names` if
+        some series are dropped during the training process because of NaNs or 
+        because they are not present in the training period.
     included_exog : bool
         If the forecaster has been trained using exogenous variable/s.
     exog_type : type
@@ -301,6 +306,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.index_freq              = None
         self.training_range          = None
         self.series_col_names        = None
+        self.series_X_train          = None
         self.included_exog           = False
         self.exog_type               = None
         self.exog_dtypes             = None
@@ -597,7 +603,12 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         series_indexes : dict
             Dictionary with the index of each series.
         series_col_names : list
-            Names of the series (levels) used during training.
+            Names of the series (levels) provided by the user during training.
+        series_X_train : list
+            Names of the series (levels) included in the matrix `X_train` created
+            internally for training. It can be different from `series_col_names` if
+            some series are dropped during the training process because of NaNs or
+            because they are not present in the training period.
         exog_col_names : list
             Names of the exogenous variables used during training.
         exog_dtypes : dict
@@ -798,8 +809,15 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                  "`forecaster.dropna_from_series = False` or review `exog` values.")
             )
         
-        # TODO: add self.series_X_train (series que están en X_train mirando el encoding)
-        # Actualizar last_window para que solo almacene estas series.
+        if self.encoding == 'onehot':
+            series_X_train = [
+                col for col in series_col_names if X_train[col].sum() > 0
+            ]
+        else:
+            series_X_train = [
+                k for k, v in self.encoding_mapping.items()
+                if v in X_train['_level_skforecast'].unique()
+            ]
 
         # The last time window of training data is stored so that lags needed as
         # predictors in the first iteration of `predict()` can be calculated.
@@ -807,10 +825,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         if store_last_window:
 
             series_to_store = (
-                series_col_names if store_last_window is True else store_last_window
+                series_X_train if store_last_window is True else store_last_window
             )
 
-            series_not_in_series_dict = set(series_to_store) - set(series_col_names)
+            series_not_in_series_dict = set(series_to_store) - set(series_X_train)
             if series_not_in_series_dict:
                 warnings.warn(
                     (f"Series {series_not_in_series_dict} are not present in "
@@ -832,6 +850,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             y_train,
             series_indexes,
             series_col_names,
+            series_X_train,
             exog_col_names,
             exog_dtypes,
             last_window,
@@ -1076,6 +1095,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.exog_dtypes         = None
         self.exog_col_names      = None
         self.series_col_names    = None
+        self.series_X_train      = None
         self.X_train_col_names   = None
         self.in_sample_residuals = None
         self.fitted              = False
@@ -1086,6 +1106,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             y_train,
             series_indexes,
             series_col_names,
+            series_X_train,
             exog_col_names,
             exog_dtypes,
             last_window
@@ -1109,6 +1130,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             self.regressor.fit(X=X_train, y=y_train, **self.fit_kwargs)
 
         self.series_col_names = series_col_names
+        self.series_X_train = series_X_train
         self.X_train_col_names = X_train.columns.to_list()
         self.fitted = True
         self.fit_date = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
