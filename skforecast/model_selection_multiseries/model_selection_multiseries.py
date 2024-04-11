@@ -1308,6 +1308,7 @@ def bayesian_search_forecaster_multiseries(
     n_jobs: Union[int, str]='auto',
     verbose: bool=True,
     show_progress: bool=True,
+    suppress_warnings: bool=False,
     engine: str='optuna',
     kwargs_create_study: dict={},
     kwargs_study_optimize: dict={}
@@ -1378,6 +1379,10 @@ def bayesian_search_forecaster_multiseries(
         Print number of folds used for cv or backtesting.
     show_progress : bool, default `True`
         Whether to show a progress bar.
+    suppress_warnings: bool, default `False`
+        If `True`, skforecast warnings will be suppressed during the hyperparameter
+        search. See skforecast.exceptions.warn_skforecast_categories for more
+        information.
     engine : str, default `'optuna'`
         Bayesian optimization runs through the optuna library.
     kwargs_create_study : dict, default `{'direction': 'minimize', 'sampler': TPESampler(seed=123)}`
@@ -1431,6 +1436,7 @@ def bayesian_search_forecaster_multiseries(
                                     n_jobs                = n_jobs,
                                     verbose               = verbose,
                                     show_progress         = show_progress,
+                                    suppress_warnings     = suppress_warnings,
                                     kwargs_create_study   = kwargs_create_study,
                                     kwargs_study_optimize = kwargs_study_optimize
                                 )
@@ -1458,6 +1464,7 @@ def _bayesian_search_optuna_multiseries(
     n_jobs: Union[int, str]='auto',
     verbose: bool=True,
     show_progress: bool=True,
+    suppress_warnings: bool=False,
     kwargs_create_study: dict={},
     kwargs_study_optimize: dict={}
 ) -> Tuple[pd.DataFrame, object]:
@@ -1526,6 +1533,10 @@ def _bayesian_search_optuna_multiseries(
         Print number of folds used for cv or backtesting.
     show_progress : bool, default `True`
         Whether to show a progress bar.
+    suppress_warnings: bool, default `False`
+        If `True`, skforecast warnings will be suppressed during the hyperparameter
+        search. See skforecast.exceptions.warn_skforecast_categories for more
+        information.
     kwargs_create_study : dict, default `{'direction': 'minimize', 'sampler': TPESampler(seed=123)}`
         Keyword arguments (key, value mappings) to pass to optuna.create_study.
     kwargs_study_optimize : dict, default `{}`
@@ -1546,7 +1557,9 @@ def _bayesian_search_optuna_multiseries(
 
     """
 
-    # TODO: add suppress_warnings
+    if suppress_warnings:
+        for warn_category in warn_skforecast_categories:
+            warnings.filterwarnings('ignore', category=warn_category)
     
     levels = _initialize_levels_model_selection_multiseries(
                  forecaster = forecaster,
@@ -1585,7 +1598,8 @@ def _bayesian_search_optuna_multiseries(
         allow_incomplete_fold = allow_incomplete_fold,
         refit                 = refit,
         n_jobs                = n_jobs,
-        verbose               = verbose
+        verbose               = verbose,
+        suppress_warnings     = suppress_warnings
     ) -> float:
         
         forecaster.set_params(search_space(trial))
@@ -1604,7 +1618,8 @@ def _bayesian_search_optuna_multiseries(
                              refit                 = refit,
                              n_jobs                = n_jobs,
                              verbose               = verbose,
-                             show_progress         = False
+                             show_progress         = False,
+                             suppress_warnings     = suppress_warnings
                          )[0]
         
         # Store metrics in the variable `metric_values` defined outside _objective.
@@ -1704,6 +1719,10 @@ def _bayesian_search_optuna_multiseries(
             f"  Backtesting metric: {best_metric}\n"
             f"  Levels: {results['levels'].iloc[0]}\n"
         )
+
+    if suppress_warnings:
+        for warn_category in warn_skforecast_categories:
+            warnings.filterwarnings('default', category=warn_category)
             
     return results, results_opt_best
 
@@ -2132,6 +2151,7 @@ def bayesian_search_forecaster_multivariate(
     n_jobs: Union[int, str]='auto',
     verbose: bool=True,
     show_progress: bool=True,
+    suppress_warnings: bool=False,
     engine: str='optuna',
     kwargs_create_study: dict={},
     kwargs_study_optimize: dict={}
@@ -2205,6 +2225,10 @@ def bayesian_search_forecaster_multivariate(
         Print number of folds used for cv or backtesting.
     show_progress : bool, default `True`
         Whether to show a progress bar.
+    suppress_warnings: bool, default `False`
+        If `True`, skforecast warnings will be suppressed during the hyperparameter
+        search. See skforecast.exceptions.warn_skforecast_categories for more
+        information.
     engine : str, default `'optuna'`
         Bayesian optimization runs through the optuna library.
     kwargs_create_study : dict, default `{'direction': 'minimize', 'sampler': TPESampler(seed=123)}`
@@ -2247,6 +2271,7 @@ def bayesian_search_forecaster_multivariate(
                                     n_jobs                = n_jobs,
                                     verbose               = verbose,
                                     show_progress         = show_progress,
+                                    suppress_warnings     = suppress_warnings,
                                     engine                = engine,
                                     kwargs_create_study   = kwargs_create_study,
                                     kwargs_study_optimize = kwargs_study_optimize
@@ -2264,7 +2289,7 @@ def select_features_multiseries(
     force_inclusion: Optional[Union[list, str]]=None,
     subsample: Union[int, float]=0.5,
     random_state: int=123,
-    verbose: bool=True
+    verbose: bool=True,
 ) -> Union[list, list]:
     """
     Feature selection using any of the sklearn.feature_selection module selectors 
