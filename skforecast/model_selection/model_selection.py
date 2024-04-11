@@ -381,7 +381,7 @@ def _backtesting_forecaster(
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
         for backtesting.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
 
     Returns
@@ -670,7 +670,7 @@ def backtesting_forecaster(
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
         for backtesting.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
 
     Returns
@@ -823,7 +823,7 @@ def grid_search_forecaster(
         **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
 
     Returns
@@ -942,7 +942,7 @@ def random_search_forecaster(
         **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
 
     Returns
@@ -1053,7 +1053,7 @@ def _evaluate_grid_hyperparameters(
         **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
 
     Returns
@@ -1251,7 +1251,7 @@ def bayesian_search_forecaster(
         **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
     engine : str, default `'optuna'`
         Bayesian optimization runs through the optuna library.
@@ -1403,7 +1403,7 @@ def _bayesian_search_optuna(
         **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
     kwargs_create_study : dict, default `{'direction': 'minimize', 'sampler': TPESampler(seed=123)}`
         Keyword arguments (key, value mappings) to pass to optuna.create_study.

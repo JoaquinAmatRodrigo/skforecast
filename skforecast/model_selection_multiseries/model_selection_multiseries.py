@@ -357,7 +357,7 @@ def _backtesting_forecaster_multiseries(
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
         for backtesting.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
     suppress_warnings: bool, default `False`
         If `True`, skforecast warnings will be suppressed during the backtesting 
@@ -735,7 +735,7 @@ def backtesting_forecaster_multiseries(
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
         for backtesting.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
     suppress_warnings: bool, default `False`
         If `True`, skforecast warnings will be suppressed during the backtesting 
@@ -891,7 +891,7 @@ def grid_search_forecaster_multiseries(
         **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
     suppress_warnings: bool, default `False`
         If `True`, skforecast warnings will be suppressed during the hyperparameter 
@@ -1024,7 +1024,7 @@ def random_search_forecaster_multiseries(
         **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
     suppress_warnings: bool, default `False`
         If `True`, skforecast warnings will be suppressed during the hyperparameter 
@@ -1145,6 +1145,8 @@ def _evaluate_grid_hyperparameters_multiseries(
         Refit the `forecaster` using the best found parameters on the whole data.
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
+    show_progress : bool, default `True`
+        Whether to show a progress bar.
     suppress_warnings: bool, default `False`
         If `True`, skforecast warnings will be suppressed during the hyperparameter 
         search. See skforecast.exceptions.warn_skforecast_categories for more
@@ -1374,7 +1376,7 @@ def bayesian_search_forecaster_multiseries(
         skforecast.utils.select_n_jobs_backtesting.
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
     engine : str, default `'optuna'`
         Bayesian optimization runs through the optuna library.
@@ -1522,7 +1524,7 @@ def _bayesian_search_optuna_multiseries(
         skforecast.utils.select_n_jobs_backtesting.
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
     kwargs_create_study : dict, default `{'direction': 'minimize', 'sampler': TPESampler(seed=123)}`
         Keyword arguments (key, value mappings) to pass to optuna.create_study.
@@ -1802,7 +1804,7 @@ def backtesting_forecaster_multivariate(
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
         for backtesting.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
     suppress_warnings: bool, default `False`
         If `True`, skforecast warnings will be suppressed during the backtesting 
@@ -1930,7 +1932,7 @@ def grid_search_forecaster_multivariate(
         **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
     suppress_warnings: bool, default `False`
         If `True`, skforecast warnings will be suppressed during the hyperparameter 
@@ -2063,7 +2065,7 @@ def random_search_forecaster_multivariate(
         **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
     suppress_warnings: bool, default `False`
         If `True`, skforecast warnings will be suppressed during the hyperparameter 
@@ -2201,7 +2203,7 @@ def bayesian_search_forecaster_multivariate(
         **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
     engine : str, default `'optuna'`
         Bayesian optimization runs through the optuna library.

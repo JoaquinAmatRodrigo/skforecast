@@ -113,7 +113,7 @@ def _backtesting_sarimax(
     suppress_warnings_fit : bool, default `False`
         If `True`, warnings generated during fitting will be ignored.
         **New in version 0.10.0**
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
 
     Returns
@@ -381,7 +381,7 @@ def backtesting_sarimax(
     suppress_warnings_fit : bool, default `False`
         If `True`, warnings generated during fitting will be ignored.
         **New in version 0.10.0**
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
 
     Returns
@@ -514,7 +514,7 @@ def grid_search_sarimax(
     suppress_warnings_fit : bool, default `False`
         If `True`, warnings generated during fitting will be ignored.
         **New in version 0.10.0**
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
 
     Returns
@@ -630,7 +630,7 @@ def random_search_sarimax(
     suppress_warnings_fit : bool, default `False`
         If `True`, warnings generated during fitting will be ignored.
         **New in version 0.10.0**
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
 
     Returns
@@ -737,7 +737,7 @@ def _evaluate_grid_hyperparameters_sarimax(
         Print number of folds used for cv or backtesting.
     suppress_warnings_fit : bool, default `False`
         If `True`, warnings generated during fitting will be ignored.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
 
     Returns
