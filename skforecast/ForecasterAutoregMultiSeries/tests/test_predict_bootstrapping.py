@@ -219,7 +219,7 @@ def test_predict_bootstrapping_ValueError_when_level_out_sample_residuals_value_
     forecaster.set_out_sample_residuals(residuals = residuals)
 
     err_msg = re.escape(
-        ("forecaster residuals for level '2' are `None`. "
+        ("Not available residuals for level '2'. "
          "Check `forecaster.out_sample_residuals`.")
     )
     with pytest.raises(ValueError, match = err_msg):

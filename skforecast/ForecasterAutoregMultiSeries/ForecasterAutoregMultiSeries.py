@@ -575,7 +575,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         series: Union[pd.DataFrame, dict],
         exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
         store_last_window: Union[bool, list]=True,
-    ) -> Tuple[pd.DataFrame, pd.Series, dict, list, list, dict, dict]:
+    ) -> Tuple[pd.DataFrame, pd.Series, dict, list, list, list, dict, dict]:
         """
         Create training matrices from multiple time series and exogenous
         variables. See Notes section for more details depending on the type of
@@ -1087,19 +1087,18 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         # Reset values in case the forecaster has already been fitted.
         self.series_col_names    = None
-        self.index_type          = None
-        self.index_freq          = None
-        self.last_window         = None
+        self.X_train_col_names   = None
+        self.series_X_train      = None
         self.included_exog       = False
         self.exog_type           = None
         self.exog_dtypes         = None
         self.exog_col_names      = None
-        self.series_col_names    = None
-        self.series_X_train      = None
-        self.X_train_col_names   = None
+        self.last_window         = None
         self.in_sample_residuals = None
-        self.fitted              = False
         self.training_range      = None
+        self.index_type          = None
+        self.index_freq          = None
+        self.fitted              = False
 
         (
             X_train,
@@ -1152,7 +1151,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
             residuals = y_train - self.regressor.predict(X_train)
 
-            for col in series_col_names:
+            for col in series_X_train:
                 if self.encoding == 'onehot':
                     in_sample_residuals[col] = residuals.loc[X_train[col] == 1.].to_numpy()
                 else:
@@ -1169,7 +1168,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                                                    replace = False
                                                )
         else:
-            for col in series_col_names:
+            for col in series_X_train:
                 in_sample_residuals[col] = None
 
         self.in_sample_residuals = in_sample_residuals
@@ -1289,7 +1288,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         input_levels_is_list = False
         if levels is None:
-            levels = self.series_col_names
+            levels = self.series_X_train
         elif isinstance(levels, str):
             levels = [levels]
         else:
@@ -1539,7 +1538,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
             input_levels_is_list = False 
             if levels is None:
-                levels = self.series_col_names
+                levels = self.series_X_train
             elif isinstance(levels, str):
                 levels = [levels]
             else:
@@ -1628,10 +1627,11 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             )
             for level in levels:
                 # TODO: Review when no residuals are generated during fit method.
-                # if residuals_levels[level] is None or len(residuals_levels[level]) == 0:
-                if residuals_levels[level] is None:
+                if (level not in residuals_levels.keys() or 
+                    residuals_levels[level] is None or 
+                    len(residuals_levels[level]) == 0):
                     raise ValueError(
-                        (f"forecaster residuals for level '{level}' are `None`. "
+                        (f"Not available residuals for level '{level}'. "
                          f"Check `{check_residuals}`.")
                     )
                 elif (any(element is None for element in residuals_levels[level]) or
