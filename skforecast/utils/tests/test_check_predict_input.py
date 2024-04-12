@@ -11,7 +11,6 @@ from skforecast.utils import preprocess_exog
 from skforecast.utils import preprocess_last_window
 from skforecast.exceptions import MissingValuesWarning
 from skforecast.exceptions import MissingExogWarning
-from skforecast.exceptions import MissingValuesExogWarning
 from skforecast.exceptions import IgnoredArgumentWarning
 
 
