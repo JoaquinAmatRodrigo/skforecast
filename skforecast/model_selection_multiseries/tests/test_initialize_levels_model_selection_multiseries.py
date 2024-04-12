@@ -38,11 +38,11 @@ def test_initialize_levels_model_selection_multiseries_TypeError_when_levels_not
     """
     levels = 5
     err_msg = re.escape(
-        ("`levels` must be a `list` of column names, a `str` of a column name or "
-         "`None` when using a forecaster of type ['ForecasterAutoregMultiSeries', "
-         "'ForecasterAutoregMultiSeriesCustom', 'ForecasterRnn']. If the forecaster "
-         "is of type `ForecasterAutoregMultiVariate`, this argument is ignored."
-         )
+        ("`levels` must be a `list` of column names, a `str` of a column "
+         "name or `None` when using a forecaster of type "
+         "['ForecasterAutoregMultiSeries', 'ForecasterAutoregMultiSeriesCustom', "
+         "'ForecasterRnn']. If the forecaster is of type "
+         "`ForecasterAutoregMultiVariate`, this argument is ignored.")
     )
     with pytest.raises(TypeError, match = err_msg):
         _initialize_levels_model_selection_multiseries(
@@ -87,7 +87,7 @@ def test_initialize_levels_model_selection_multiseries_IgnoredArgumentWarning_fo
                           ('l1', ['l1']),
                           (['l1', 'l2'], ['l1', 'l2'])],
                          ids=lambda lags: f'lags, lags_grid_expected: {lags}')
-def test_initialize_levels_model_selection_multiseries_when_for_all_inputs(levels, levels_expected):
+def test_initialize_levels_model_selection_multiseries_for_all_inputs(levels, levels_expected):
     """
     Test initialize_levels_model_selection_multiseries when levels is None, 
     str or list.
@@ -100,6 +100,31 @@ def test_initialize_levels_model_selection_multiseries_when_for_all_inputs(level
     levels = _initialize_levels_model_selection_multiseries(
                  forecaster = forecaster, 
                  series     = series,
+                 levels     = levels
+             )
+    
+    assert levels == levels_expected
+
+
+@pytest.mark.parametrize("levels, levels_expected",
+                         [(None, ['l1', 'l2']), 
+                          ('l1', ['l1']),
+                          (['l1', 'l2'], ['l1', 'l2'])],
+                         ids=lambda lags: f'lags, lags_grid_expected: {lags}')
+def test_initialize_levels_model_selection_multiseries_for_all_inputs_series_as_dict(levels, levels_expected):
+    """
+    Test initialize_levels_model_selection_multiseries when levels is None, 
+    str or list when series is a dict.
+    """
+    series_as_dict = series.to_dict()
+    forecaster = ForecasterAutoregMultiSeries(
+                     regressor = Ridge(random_state=123),
+                     lags      = 2
+                 )
+    
+    levels = _initialize_levels_model_selection_multiseries(
+                 forecaster = forecaster, 
+                 series     = series_as_dict,
                  levels     = levels
              )
     

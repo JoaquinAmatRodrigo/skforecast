@@ -31,7 +31,8 @@ def test_ValueError_bayesian_search_forecaster_multiseries_when_return_best_and_
     """
     forecaster = ForecasterAutoregMultiSeries(
                      regressor = Ridge(random_state=123),
-                     lags      = 2
+                     lags      = 2,
+                     encoding  = 'onehot'
                  )
     exog = series[:30].copy()
 
@@ -70,7 +71,8 @@ def test_bayesian_search_forecaster_multiseries_ValueError_when_engine_not_optun
     """
     forecaster = ForecasterAutoregMultiSeries(
                      regressor = Ridge(random_state=123),
-                     lags      = 2
+                     lags      = 2,
+                     encoding  = 'onehot'
                  )
 
     def search_space(trial): # pragma: no cover
@@ -107,7 +109,8 @@ def test_results_output_bayesian_search_forecaster_multiseries_optuna_engine_For
     """
     forecaster = ForecasterAutoregMultiSeries(
                      regressor = Ridge(random_state=123),
-                     lags      = 2 
+                     lags      = 2,
+                     encoding  = 'onehot'
                  )
     steps = 3
     n_validation = 12

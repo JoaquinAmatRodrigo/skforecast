@@ -5,7 +5,8 @@ import pytest
 import numpy as np
 import pandas as pd
 from skforecast.ForecasterAutoregMultiSeriesCustom import ForecasterAutoregMultiSeriesCustom
-from skforecast.exceptions import MissingValuesExogWarning
+from skforecast.exceptions import MissingValuesWarning
+from skforecast.exceptions import IgnoredArgumentWarning
 from sklearn.linear_model import LinearRegression
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler
@@ -59,9 +60,9 @@ def test_create_train_X_y_TypeError_when_exog_is_categorical_of_no_int():
         forecaster.create_train_X_y(series=series, exog=exog)
 
 
-def test_create_train_X_y_MissingValuesExogWarning_when_exog_has_missing_values():
+def test_create_train_X_y_MissingValuesWarning_when_exog_has_missing_values():
     """
-    Test create_train_X_y is issues a MissingValuesExogWarning when exog has missing values.
+    Test create_train_X_y is issues a MissingValuesWarning when exog has missing values.
     """
     series = pd.DataFrame({'1': pd.Series(np.arange(5)),  
                            '2': pd.Series(np.arange(5))})
@@ -76,7 +77,7 @@ def test_create_train_X_y_MissingValuesExogWarning_when_exog_has_missing_values(
                 ("`exog` has missing values. Most machine learning models do "
                  "not allow missing values. Fitting the forecaster may fail.")  
               )
-    with pytest.warns(MissingValuesExogWarning, match = warn_msg):
+    with pytest.warns(MissingValuesWarning, match = warn_msg):
         forecaster.create_train_X_y(series=series, exog=exog)
 
 
@@ -119,10 +120,10 @@ def test_create_train_X_y_ValueError_when_series_length_is_lower_than_windows_si
         forecaster.create_train_X_y(series = series)
 
 
-def test_create_train_X_y_UserWarning_when_levels_of_transformer_series_not_equal_to_series_col_names():
+def test_create_train_X_y_IgnoredArgumentWarning_when_levels_of_transformer_series_not_equal_to_series_col_names():
     """
-    Test UserWarning is raised when `transformer_series` is a dict and its keys are
-    not the same as forecaster.series_col_names.
+    Test IgnoredArgumentWarning is raised when `transformer_series` is a dict 
+    and its keys are not the same as forecaster.series_col_names.
     """
     series = pd.DataFrame({'1': pd.Series(np.arange(5)),  
                            '2': pd.Series(np.arange(5))})
@@ -141,7 +142,7 @@ def test_create_train_X_y_UserWarning_when_levels_of_transformer_series_not_equa
                     (f"{series_not_in_transformer_series} not present in `transformer_series`."
                      f" No transformation is applied to these series.")
                 )
-    with pytest.warns(UserWarning, match = warn_msg):
+    with pytest.warns(IgnoredArgumentWarning, match = warn_msg):
         forecaster.create_train_X_y(series=series)
 
 

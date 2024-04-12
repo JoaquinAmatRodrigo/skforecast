@@ -27,6 +27,7 @@ from sklearn.model_selection import ParameterGrid
 from sklearn.model_selection import ParameterSampler
 
 from ..exceptions import LongTrainingWarning
+from ..exceptions import IgnoredArgumentWarning
 from ..utils import check_backtesting_input
 from ..utils import initialize_lags_grid
 from ..utils import initialize_lags
@@ -44,7 +45,7 @@ def _create_backtesting_folds(
     initial_train_size: Union[int, None],
     test_size: int,
     externally_fitted: bool=False,
-    refit: Optional[Union[bool, int]]=False,
+    refit: Union[bool, int]=False,
     fixed_train_size: bool=True,
     gap: int=0,
     allow_incomplete_fold: bool=True,
@@ -67,9 +68,9 @@ def _create_backtesting_folds(
     model. The test including the gap is provided for convenience.
 
     Returned indexes are not the indexes of the original time series, but the
-    positional indexes of the samples in the time series. For example, if the   
+    positional indexes of the samples in the time series. For example, if the 
     original time series is `y = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19]`, the
-    returned indexes for the first fold if  `test_size = 4`, `gap = 1` and 
+    returned indexes for the first fold if `test_size = 4`, `gap = 1` and 
     `initial_train_size = 2` with `window_size = 2` are: `[[0, 1], [0, 1], 
     [2, 3, 4, 5], [3, 4, 5]]]`. This means that the first fold is using the samples 
     with positional indexes 0 and 1 in the time series as training set, the samples 
@@ -123,6 +124,8 @@ def _create_backtesting_folds(
         fit the Forecaster.
     
     """
+    if isinstance(data, pd.Index):
+        data = pd.Series(index=data)
     
     idx = range(len(data))
     folds = []
@@ -135,23 +138,23 @@ def _create_backtesting_folds(
             # If `fixed_train_size` the train size doesn't increase but moves by 
             # `test_size` positions in each iteration. If `False`, the train size
             # increases by `test_size` in each iteration.
-            train_idx_start = i * (test_size) if fixed_train_size else 0
-            train_idx_end = initial_train_size + i * (test_size)
-            test_idx_start = train_idx_end
+            train_iloc_start = i * (test_size) if fixed_train_size else 0
+            train_iloc_end = initial_train_size + i * (test_size)
+            test_iloc_start = train_iloc_end
         else:
             # The train size doesn't increase and doesn't move.
-            train_idx_start = 0
-            train_idx_end = initial_train_size
-            test_idx_start = initial_train_size + i * (test_size)
+            train_iloc_start = 0
+            train_iloc_end = initial_train_size
+            test_iloc_start = initial_train_size + i * (test_size)
         
-        last_window_start = test_idx_start - window_size
-        test_idx_end = test_idx_start + gap + test_size
+        last_window_iloc_start = test_iloc_start - window_size
+        test_iloc_end = test_iloc_start + gap + test_size
     
         partitions = [
-            idx[train_idx_start : train_idx_end],
-            idx[last_window_start : test_idx_start],
-            idx[test_idx_start : test_idx_end],
-            idx[test_idx_start + gap : test_idx_end]
+            idx[train_iloc_start : train_iloc_end],
+            idx[last_window_iloc_start : test_iloc_start],
+            idx[test_iloc_start : test_iloc_end],
+            idx[test_iloc_start + gap : test_iloc_end]
         ]
         folds.append(partitions)
         i += 1
@@ -241,7 +244,7 @@ def _create_backtesting_folds(
 
     return folds
 
-        
+
 def _get_metric(
     metric: str
 ) -> Callable:
@@ -291,13 +294,13 @@ def _backtesting_forecaster(
     gap: int=0,
     allow_incomplete_fold: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-    refit: Optional[Union[bool, int]]=False,
+    refit: Union[bool, int]=False,
     interval: Optional[list]=None,
     n_boot: int=250,
     random_state: int=123,
     in_sample_residuals: bool=True,
     binned_residuals: bool=False,
-    n_jobs: Optional[Union[int, str]]='auto',
+    n_jobs: Union[int, str]='auto',
     verbose: bool=False,
     show_progress: bool=True
 ) -> Tuple[Union[float, list], pd.DataFrame]:
@@ -370,7 +373,7 @@ def _backtesting_forecaster(
         deterministic.
     in_sample_residuals : bool, default `True`
         If `True`, residuals from the training data are used as proxy of prediction 
-        error to create prediction intervals.  If `False`, out_sample_residuals 
+        error to create prediction intervals. If `False`, out_sample_residuals 
         are used if they are already stored inside the forecaster.
     binned_residuals : bool, default `False`
             If `True`, residuals used in each bootstrapping iteration are selected
@@ -384,7 +387,7 @@ def _backtesting_forecaster(
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
         for backtesting.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
 
     Returns
@@ -401,12 +404,19 @@ def _backtesting_forecaster(
     """
 
     forecaster = deepcopy(forecaster)
-    
+
     if n_jobs == 'auto':
         n_jobs = select_n_jobs_backtesting(
                      forecaster = forecaster,
                      refit      = refit
                  )
+    elif not isinstance(refit, bool) and refit != 1:
+        warnings.warn(
+            ("If `refit` is an integer other than 1 (intermittent refit). `n_jobs` "
+             "is set to 1 to avoid unexpected results during parallelization."),
+             IgnoredArgumentWarning
+        )
+        n_jobs = 1
     else:
         n_jobs = n_jobs if n_jobs > 0 else cpu_count()
 
@@ -419,7 +429,7 @@ def _backtesting_forecaster(
     store_in_sample_residuals = False if interval is None else True
 
     if initial_train_size is not None:
-        # First model training, this is done to allow parallelization when `refit` 
+        # First model training, this is done to allow parallelization when `refit`
         # is `False`. The initial Forecaster fit is outside the auxiliary function.
         exog_train = exog.iloc[:initial_train_size, ] if exog is not None else None
         forecaster.fit(
@@ -454,7 +464,7 @@ def _backtesting_forecaster(
                 allow_incomplete_fold = allow_incomplete_fold,
                 return_all_indexes    = False,
                 differentiation       = differentiation,
-                verbose               = verbose  
+                verbose               = verbose
             )
 
     if refit:
@@ -472,7 +482,7 @@ def _backtesting_forecaster(
                  f"substantial amounts of time. If not feasible, try with `refit = False`.\n"),
                 LongTrainingWarning
             )
-    
+
     if show_progress:
         folds = tqdm(folds)
 
@@ -482,23 +492,25 @@ def _backtesting_forecaster(
         function used to parallelize the backtesting_forecaster function.
         """
 
-        train_idx_start   = fold[0][0]
-        train_idx_end     = fold[0][1]
-        last_window_start = fold[1][0]
-        last_window_end   = fold[1][1]
-        test_idx_start    = fold[2][0]
-        test_idx_end      = fold[2][1]
+        train_iloc_start   = fold[0][0]
+        train_iloc_end     = fold[0][1]
+        last_window_iloc_start = fold[1][0]
+        last_window_iloc_end   = fold[1][1]
+        test_iloc_start    = fold[2][0]
+        test_iloc_end      = fold[2][1]
 
         if fold[4] is False:
-            # When the model is not fitted, last_window must be updated to include 
+            # When the model is not fitted, last_window must be updated to include
             # the data needed to make predictions.
-            last_window_y = y.iloc[last_window_start:last_window_end]
+            last_window_y = y.iloc[last_window_iloc_start:last_window_iloc_end]
         else:
-            # The model is fitted before making predictions. If `fixed_train_size`  
-            # the train size doesn't increase but moves by `steps` in each iteration. 
-            # If `False` the train size increases by `steps` in each  iteration.
-            y_train = y.iloc[train_idx_start:train_idx_end, ]
-            exog_train = exog.iloc[train_idx_start:train_idx_end, ] if exog is not None else None
+            # The model is fitted before making predictions. If `fixed_train_size`
+            # the train size doesn't increase but moves by `steps` in each iteration.
+            # If `False` the train size increases by `steps` in each iteration.
+            y_train = y.iloc[train_iloc_start:train_iloc_end, ]
+            exog_train = (
+                exog.iloc[train_iloc_start:train_iloc_end,] if exog is not None else None
+            )
             last_window_y = None
             forecaster.fit(
                 y                         = y_train, 
@@ -506,14 +518,18 @@ def _backtesting_forecaster(
                 store_in_sample_residuals = store_in_sample_residuals
             )
 
-        next_window_exog = exog.iloc[test_idx_start:test_idx_end, ] if exog is not None else None
+        next_window_exog = exog.iloc[test_iloc_start:test_iloc_end, ] if exog is not None else None
 
-        steps = len(range(test_idx_start, test_idx_end))
+        steps = len(range(test_iloc_start, test_iloc_end))
         if type(forecaster).__name__ == 'ForecasterAutoregDirect' and gap > 0:
             # Select only the steps that need to be predicted if gap > 0
-            test_idx_start = fold[3][0]
-            test_idx_end   = fold[3][1]
-            steps = list(np.arange(len(range(test_idx_start, test_idx_end))) + gap + 1)
+            test_no_gap_iloc_start = fold[3][0]
+            test_no_gap_iloc_end   = fold[3][1]
+            steps = list(
+                np.arange(len(range(test_no_gap_iloc_start, test_no_gap_iloc_end)))
+                + gap
+                + 1
+            )
 
         if interval is None:
             pred = forecaster.predict(
@@ -532,7 +548,7 @@ def _backtesting_forecaster(
                        in_sample_residuals = in_sample_residuals,
                        binned_residuals    = binned_residuals,
                    )
-        
+
         if type(forecaster).__name__ != 'ForecasterAutoregDirect' and gap > 0:
             pred = pred.iloc[gap:, ]
 
@@ -549,12 +565,14 @@ def _backtesting_forecaster(
     if isinstance(backtest_predictions, pd.Series):
         backtest_predictions = pd.DataFrame(backtest_predictions)
 
-    metrics_values = [m(
-                        y_true = y.loc[backtest_predictions.index],
-                        y_pred = backtest_predictions['pred']
-                      ) for m in metrics
-                     ]
-    
+    metrics_values = [
+        m(
+            y_true = y.loc[backtest_predictions.index],
+            y_pred = backtest_predictions['pred']
+        ) 
+        for m in metrics
+    ]
+
     if not isinstance(metric, list):
         metrics_values = metrics_values[0]
 
@@ -571,13 +589,13 @@ def backtesting_forecaster(
     gap: int=0,
     allow_incomplete_fold: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-    refit: Optional[Union[bool, int]]=False,
+    refit: Union[bool, int]=False,
     interval: Optional[list]=None,
     n_boot: int=250,
     random_state: int=123,
     in_sample_residuals: bool=True,
     binned_residuals: bool=False,
-    n_jobs: Optional[Union[int, str]]='auto',
+    n_jobs: Union[int, str]='auto',
     verbose: bool=False,
     show_progress: bool=True
 ) -> Tuple[Union[float, list], pd.DataFrame]:
@@ -650,7 +668,7 @@ def backtesting_forecaster(
         deterministic.
     in_sample_residuals : bool, default `True`
         If `True`, residuals from the training data are used as proxy of prediction 
-        error to create prediction intervals.  If `False`, out_sample_residuals 
+        error to create prediction intervals. If `False`, out_sample_residuals 
         are used if they are already stored inside the forecaster.
     binned_residuals : bool, default `False`
             If `True`, residuals used in each bootstrapping iteration are selected
@@ -664,7 +682,7 @@ def backtesting_forecaster(
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
         for backtesting.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
 
     Returns
@@ -716,8 +734,8 @@ def backtesting_forecaster(
     if type(forecaster).__name__ == 'ForecasterAutoregDirect' and \
        forecaster.steps < steps + gap:
         raise ValueError(
-            ("When using a ForecasterAutoregDirect, the combination of steps "
-             f"+ gap ({steps+gap}) cannot be greater than the `steps` parameter "
+            (f"When using a ForecasterAutoregDirect, the combination of steps "
+             f"+ gap ({steps + gap}) cannot be greater than the `steps` parameter "
              f"declared when the forecaster is initialized ({forecaster.steps}).")
         )
     
@@ -757,9 +775,9 @@ def grid_search_forecaster(
     allow_incomplete_fold: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Optional[Union[list, dict]]=None,
-    refit: Optional[Union[bool, int]]=False,
+    refit: Union[bool, int]=False,
     return_best: bool=True,
-    n_jobs: Optional[Union[int, str]]='auto',
+    n_jobs: Union[int, str]='auto',
     verbose: bool=True,
     show_progress: bool=True,
     output_file: Optional[str]=None
@@ -819,7 +837,7 @@ def grid_search_forecaster(
         **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
     output_file : str, default `None`
         Specifies the filename or full path where the results should be saved. 
@@ -877,11 +895,11 @@ def random_search_forecaster(
     allow_incomplete_fold: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Optional[Union[list, dict]]=None,
-    refit: Optional[Union[bool, int]]=False,
+    refit: Union[bool, int]=False,
     n_iter: int=10,
     random_state: int=123,
     return_best: bool=True,
-    n_jobs: Optional[Union[int, str]]='auto',
+    n_jobs: Union[int, str]='auto',
     verbose: bool=True,
     show_progress: bool=True,
     output_file: Optional[str]=None
@@ -946,7 +964,7 @@ def random_search_forecaster(
         **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
     output_file : str, default `None`
         Specifies the filename or full path where the results should be saved. 
@@ -1004,9 +1022,9 @@ def _evaluate_grid_hyperparameters(
     allow_incomplete_fold: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Optional[Union[list, dict]]=None,
-    refit: Optional[Union[bool, int]]=False,
+    refit: Union[bool, int]=False,
     return_best: bool=True,
-    n_jobs: Optional[Union[int, str]]='auto',
+    n_jobs: Union[int, str]='auto',
     verbose: bool=True,
     show_progress: bool=True,
     output_file: Optional[str]=None
@@ -1065,7 +1083,7 @@ def _evaluate_grid_hyperparameters(
         **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
-    show_progress: bool, default `True`
+    show_progress : bool, default `True`
         Whether to show a progress bar.
     output_file : str, default `None`
         Specifies the filename or full path where the results should be saved. 
@@ -1213,11 +1231,11 @@ def bayesian_search_forecaster(
     allow_incomplete_fold: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Any='deprecated',
-    refit: Optional[Union[bool, int]]=False,
+    refit: Union[bool, int]=False,
     n_trials: int=10,
     random_state: int=123,
     return_best: bool=True,
-    n_jobs: Optional[Union[int, str]]='auto',
+    n_jobs: Union[int, str]='auto',
     verbose: bool=True,
     show_progress: bool=True,
     output_file: Optional[str]=None,
@@ -1383,11 +1401,11 @@ def _bayesian_search_optuna(
     allow_incomplete_fold: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Any='deprecated',
-    refit: Optional[Union[bool, int]]=False,
+    refit: Union[bool, int]=False,
     n_trials: int=10,
     random_state: int=123,
     return_best: bool=True,
-    n_jobs: Optional[Union[int, str]]='auto',
+    n_jobs: Union[int, str]='auto',
     verbose: bool=True,
     show_progress: bool=True,
     output_file: Optional[str]=None,

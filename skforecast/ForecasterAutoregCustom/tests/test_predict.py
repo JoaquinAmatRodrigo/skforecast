@@ -326,7 +326,7 @@ def test_predict_output_when_regressor_is_LinearRegression_with_exog_differentia
     and transformer_y is StandardScaler.
     """
 
-    def create_predictors(y):
+    def create_predictors(y): # pragma: no cover
         """
         Create first 15 lags of a time series.
         """
@@ -341,8 +341,9 @@ def test_predict_output_when_regressor_is_LinearRegression_with_exog_differentia
     scaler.fit(data.loc[:end_train].to_numpy().reshape(-1, 1))
     data_scaled = scaler.transform(data.to_numpy().reshape(-1, 1))
     data_scaled = pd.Series(data_scaled.flatten(), index=data.index)
-    data_scaled_diff = TimeSeriesDifferentiator(order=1).fit_transform(data_scaled)
+    data_scaled_diff = TimeSeriesDifferentiator(order=1).fit_transform(data_scaled.to_numpy())
     data_scaled_diff = pd.Series(data_scaled_diff, index=data.index).dropna()
+
     # Simulated exogenous variable
     rng = np.random.default_rng(9876)
     exog = pd.Series(
@@ -358,9 +359,11 @@ def test_predict_output_when_regressor_is_LinearRegression_with_exog_differentia
                    )
     forecaster_1.fit(y=data_scaled_diff.loc[:end_train], exog=exog_diff.loc[:end_train])
     predictions_diff = forecaster_1.predict(steps=steps, exog=exog_diff.loc[end_train:])
+
     # Revert the differentiation
     last_value_train = data_scaled.loc[:end_train].iloc[[-1]]
     predictions_1 = pd.concat([last_value_train, predictions_diff]).cumsum()[1:]
+
     # Revert the scaling
     predictions_1 = scaler.inverse_transform(predictions_1.to_numpy().reshape(-1, 1))
     predictions_1 = pd.Series(predictions_1.flatten(), index=data.loc[end_train:].index)
@@ -394,10 +397,11 @@ def test_predict_output_when_regressor_is_LinearRegression_with_exog_and_differe
     # Data differentiated
     diferenciator_1 = TimeSeriesDifferentiator(order=1)
     diferenciator_2 = TimeSeriesDifferentiator(order=2)
-    data_diff_1 = diferenciator_1.fit_transform(data)
+    data_diff_1 = diferenciator_1.fit_transform(data.to_numpy())
     data_diff_1 = pd.Series(data_diff_1, index=data.index).dropna()
-    data_diff_2 = diferenciator_2.fit_transform(data)
+    data_diff_2 = diferenciator_2.fit_transform(data.to_numpy())
     data_diff_2 = pd.Series(data_diff_2, index=data.index).dropna()
+
     # Simulated exogenous variable
     rng = np.random.default_rng(9876)
     exog = pd.Series(
@@ -413,6 +417,7 @@ def test_predict_output_when_regressor_is_LinearRegression_with_exog_and_differe
                 )
     forecaster_1.fit(y=data_diff_2.loc[:end_train], exog=exog_diff_2.loc[:end_train])
     predictions_diff_2 = forecaster_1.predict(steps=steps, exog=exog_diff_2.loc[end_train:])
+    
     # Revert the differentiation
     last_value_train_diff = data_diff_1.loc[:end_train].iloc[[-1]]
     predictions_diff_1 = pd.concat([last_value_train_diff, predictions_diff_2]).cumsum()[1:]

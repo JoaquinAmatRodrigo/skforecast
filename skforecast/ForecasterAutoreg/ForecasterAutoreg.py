@@ -130,6 +130,11 @@ class ForecasterAutoreg(ForecasterBase):
         **New in version 0.12.0**
     source_code_weight_func : str
         Source code of the custom function used to create weights.
+    differentiation : int
+        Order of differencing applied to the time series before training the 
+        forecaster.
+    differentiator : TimeSeriesDifferentiator
+        Skforecast object used to differentiate the time series.
     max_lag : int
         Maximum value of lag included in `lags`.
     window_size : int
@@ -211,32 +216,32 @@ class ForecasterAutoreg(ForecasterBase):
         forecaster_id: Optional[Union[str, int]]=None
     ) -> None:
         
-        self.regressor                    = regressor
-        self.transformer_y                = transformer_y
-        self.transformer_exog             = transformer_exog
-        self.weight_func                  = weight_func
-        self.differentiation              = differentiation
-        self.differentiator               = None
-        self.source_code_weight_func      = None
-        self.last_window                  = None
-        self.index_type                   = None
-        self.index_freq                   = None
-        self.training_range               = None
-        self.included_exog                = False
-        self.exog_type                    = None
-        self.exog_dtypes                  = None
-        self.exog_col_names               = None
-        self.X_train_col_names            = None
-        self.in_sample_residuals          = None
-        self.out_sample_residuals         = None
-        self.in_sample_residuals_by_bin   = None
-        self.out_sample_residuals_by_bin  = None
-        self.fitted                       = False
-        self.creation_date                = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
-        self.fit_date                     = None
-        self.skforecast_version           = skforecast.__version__
-        self.python_version               = sys.version.split(" ")[0]
-        self.forecaster_id                = forecaster_id
+        self.regressor                   = regressor
+        self.transformer_y               = transformer_y
+        self.transformer_exog            = transformer_exog
+        self.weight_func                 = weight_func
+        self.source_code_weight_func     = None
+        self.differentiation             = differentiation
+        self.differentiator              = None
+        self.last_window                 = None
+        self.index_type                  = None
+        self.index_freq                  = None
+        self.training_range              = None
+        self.included_exog               = False
+        self.exog_type                   = None
+        self.exog_dtypes                 = None
+        self.exog_col_names              = None
+        self.X_train_col_names           = None
+        self.in_sample_residuals         = None
+        self.out_sample_residuals        = None
+        self.in_sample_residuals_by_bin  = None
+        self.out_sample_residuals_by_bin = None
+        self.fitted                      = False
+        self.creation_date               = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
+        self.fit_date                    = None
+        self.skforecast_version          = skforecast.__version__
+        self.python_version              = sys.version.split(" ")[0]
+        self.forecaster_id               = forecaster_id
        
         self.lags = initialize_lags(type(self).__name__, lags)
         self.max_lag = max(self.lags)
@@ -392,42 +397,47 @@ class ForecasterAutoreg(ForecasterBase):
         """
         
         check_y(y=y)
+        fit_transformer = False if self.fitted else True
         y = transform_series(
                 series            = y,
                 transformer       = self.transformer_y,
-                fit               = True,
+                fit               = fit_transformer,
                 inverse_transform = False
             )
         y_values, y_index = preprocess_y(y=y)
 
         if self.differentiation is not None:
-            y_values = self.differentiator.fit_transform(y_values)
+            if not self.fitted:
+                y_values = self.differentiator.fit_transform(y_values)
+            else:
+                differentiator = clone(self.differentiator)
+                y_values = differentiator.fit_transform(y_values)
         
         if exog is not None:
+            
+            check_exog(exog=exog, allow_nan=True)
             if len(exog) != len(y):
                 raise ValueError(
-                    (f'`exog` must have same number of samples as `y`. '
-                     f'length `exog`: ({len(exog)}), length `y`: ({len(y)})')
+                    (f"`exog` must have same number of samples as `y`. "
+                     f"length `exog`: ({len(exog)}), length `y`: ({len(y)})")
                 )
-            check_exog(exog=exog, allow_nan=True)
+            
             if isinstance(exog, pd.Series):
                 exog = transform_series(
                            series            = exog,
                            transformer       = self.transformer_exog,
-                           fit               = True,
+                           fit               = fit_transformer,
                            inverse_transform = False
                        )
             else:
                 exog = transform_dataframe(
                            df                = exog,
                            transformer       = self.transformer_exog,
-                           fit               = True,
+                           fit               = fit_transformer,
                            inverse_transform = False
                        )
             
-            check_exog(exog=exog, allow_nan=False)
-            check_exog_dtypes(exog)
-            self.exog_dtypes = get_exog_dtypes(exog=exog)
+            check_exog_dtypes(exog, call_check_exog=True)
 
             _, exog_index = preprocess_exog(exog=exog, return_values=False)
             if not (exog_index[:len(y_index)] == y_index).all():
@@ -451,7 +461,9 @@ class ForecasterAutoreg(ForecasterBase):
             exog_to_train.index = exog_index[self.max_lag:]
             X_train = pd.concat((X_train, exog_to_train), axis=1)
 
-        self.X_train_col_names = X_train.columns.to_list()
+        if not self.fitted:
+            self.X_train_col_names = X_train.columns.to_list()
+        
         y_train = pd.Series(
                       data  = y_train,
                       index = y_index[self.max_lag: ],
@@ -459,8 +471,8 @@ class ForecasterAutoreg(ForecasterBase):
                   )
 
         if self.differentiation is not None:
-            y_train = y_train.iloc[self.differentiation: ]
             X_train = X_train.iloc[self.differentiation: ]
+            y_train = y_train.iloc[self.differentiation: ]
                         
         return X_train, y_train
 
@@ -550,12 +562,6 @@ class ForecasterAutoreg(ForecasterBase):
         self.in_sample_residuals = None
         self.fitted              = False
         self.training_range      = None
-        
-        if exog is not None:
-            self.included_exog = True
-            self.exog_type = type(exog)
-            self.exog_col_names = \
-                 exog.columns.to_list() if isinstance(exog, pd.DataFrame) else exog.name
 
         X_train, y_train = self.create_train_X_y(y=y, exog=exog)
         sample_weight = self.create_sample_weights(X_train=X_train)
@@ -574,6 +580,13 @@ class ForecasterAutoreg(ForecasterBase):
             self.index_freq = X_train.index.freqstr
         else: 
             self.index_freq = X_train.index.step
+
+        if exog is not None:
+            self.included_exog = True
+            self.exog_type = type(exog)
+            self.exog_dtypes = get_exog_dtypes(exog=exog)
+            self.exog_col_names = \
+                 exog.columns.to_list() if isinstance(exog, pd.DataFrame) else exog.name
         
         # This is done to save time during fit in functions such as backtesting()
         if store_in_sample_residuals:
