@@ -2,8 +2,6 @@
 # ==============================================================================
 import re
 import pytest
-import numpy as np
-import pandas as pd
 from sklearn.linear_model import Ridge
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 from skforecast.ForecasterAutoregMultiSeriesCustom import ForecasterAutoregMultiSeriesCustom
@@ -39,7 +37,6 @@ def test_initialize_levels_model_selection_multiseries_TypeError_when_levels_not
     `levels` is not a `list`, `str` or `None`.
     """
     levels = 5
-
     err_msg = re.escape(
         ("`levels` must be a `list` of column names, a `str` of a column "
          "name or `None` when using a forecaster of type "

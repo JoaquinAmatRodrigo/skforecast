@@ -8,6 +8,8 @@ The main changes in this release are:
 
 + Added `bayesian_search_forecaster_multiseries` function to `model_selection_multiseries` module. This function performs a Bayesian hyperparameter search for the `ForecasterAutoregMultiSeries`, `ForecasterAutoregMultiSeriesCustom`, and `ForecasterAutoregMultiVariate` using `optuna` as the search engine.
 
++ Added `select_features` function to the `model_selection` module to perform feature selection using scikit-learn selectors.
+
 + Changed the default value of the `transformer_series` argument to use a `StandardScaler()` in the Global Forecasters (`ForecasterAutoregMultiSeries`, `ForecasterAutoregMultiSeriesCustom` and `ForecasterAutoregMultiVariate`).
 
 + 
@@ -16,7 +18,15 @@ The main changes in this release are:
 
 + Added `bayesian_search_forecaster_multiseries` function to `model_selection_multiseries` module. This function performs a Bayesian hyperparameter search for the `ForecasterAutoregMultiSeries`, `ForecasterAutoregMultiSeriesCustom`, and `ForecasterAutoregMultiVariate` using `optuna` as the search engine.
 
++ `ForecasterAutoregMultiVariate` allows to include None when lags is a dict so that a series does not participate in the construction of X_train.
+
++ The `output_file` argument has been added to the hyperparameter search functions in the `model_selection`, `model_selection_multiseries` and `model_selection_sarimax` modules to save the results of the hyperparameter search in a tab-separated values (TSV) file.
+
++ New argument `binned_residuals` in method `predict_interval` allows to condition the bootstraped residuals on range of the predicted values. 
+
 + Added `save_custom_functions` argument to the `save_forecaster` function in the `utils` module. If `True`, save custom functions used in the forecaster (`fun_predictors` and `weight_func`) as .py files. Custom functions must be available in the environment where the forecaster is loaded.
+
++ Added `select_features` function to the `model_selection` module to perform feature selection using scikit-learn selectors.
 
 + Added `sort_importance` argument to `get_feature_importances` method in all Forecasters. If `True`, sort the feature importances in descending order.
 
@@ -26,9 +36,13 @@ The main changes in this release are:
 
 + Added `set_dark_theme` function to the `plot` module to set a dark theme for matplotlib plots.
 
++ Allow tuple type for `lags` argument in Forecasters.
+
 **Changed**
 
-+ 
++ Deprecated argument `lags_grid` in `bayesian_search_forecaster`. Use `search_space` to define the candidate values for the lags. This allows the lags to be optimized along with the other hyperparameters of the regressor in the bayesian search.
+
++ `n_boot` argument in `predict_interval`changed from 500 to 250.
 
 + Changed the default value of the `transformer_series` argument to use a `StandardScaler()` in the Global Forecasters (`ForecasterAutoregMultiSeries`, `ForecasterAutoregMultiSeriesCustom` and `ForecasterAutoregMultiVariate`).
 

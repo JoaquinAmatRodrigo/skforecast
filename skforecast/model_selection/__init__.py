@@ -3,5 +3,6 @@ from .model_selection import (
     grid_search_forecaster,
     random_search_forecaster,
     bayesian_search_forecaster,
-    _create_backtesting_folds
+    _create_backtesting_folds,
+    select_features
 )

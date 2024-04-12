@@ -9,18 +9,66 @@ from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
 
 
-def test_set_out_sample_residuals_TypeError_when_residuals_is_not_numpy_array():
+def test_set_out_sample_residuals_TypeError_when_residuals_is_not_numpy_array_or_pandas_series():
     """
     Test TypeError is raised when residuals argument is not numpy ndarray.
     """
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
-    residuals = pd.Series([1, 2, 3])
+    residuals = [1, 2, 3]
 
     err_msg = re.escape(
-                f"`residuals` argument must be `numpy ndarray`. Got {type(residuals)}."
+                f"`residuals` argument must be `numpy ndarray` or `pandas Series`, "
+                f"but found {type(residuals)}."
             )
     with pytest.raises(TypeError, match = err_msg):
         forecaster.set_out_sample_residuals(residuals=residuals)
+
+
+def test_set_out_sample_residuals_TypeError_when_y_pred_is_not_numpy_array_or_pandas_series():
+    """
+    Test TypeError is raised when y_pred argument is not numpy ndarray.
+    """
+    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
+    residuals = pd.Series([1, 2, 3])
+    y_pred = [1, 2, 3]
+
+    err_msg = re.escape(
+                f"`y_pred` argument must be `numpy ndarray`, `pandas Series` or `None`, "
+                f"but found {type(y_pred)}."
+            )
+    with pytest.raises(TypeError, match = err_msg):
+        forecaster.set_out_sample_residuals(residuals=residuals, y_pred=y_pred)
+
+def test_set_out_sample_residuals_ValueError_when_residuals_and_y_pred_have_different_lenght():
+    """
+    Test ValueError is raised when residuals and y_pred have different lenght.
+    """
+    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
+    residuals = pd.Series([1, 2, 3])
+    y_pred = pd.Series([1, 2, 3, 4])
+
+    err_msg = re.escape(
+                f"`residuals` and `y_pred` must have the same length, but found "
+                f"{len(residuals)} and {len(y_pred)}."
+            )
+    with pytest.raises(ValueError, match = err_msg):
+        forecaster.set_out_sample_residuals(residuals=residuals, y_pred=y_pred)
+
+
+def test_set_out_sample_residuals_ValueError_when_residuals_and_y_pred_have_different_index():
+    """
+    Test ValueError is raised when residuals and y_pred have different index.
+    """
+    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
+    residuals = pd.Series([1, 2, 3], index=[1, 2, 3])
+    y_pred = pd.Series([1, 2, 3], index=[1, 2, 4])
+
+    err_msg = re.escape(
+                f"`residuals` and `y_pred` must have the same index, but found "
+                    f"{residuals.index} and {y_pred.index}."
+            )
+    with pytest.raises(ValueError, match = err_msg):
+        forecaster.set_out_sample_residuals(residuals=residuals, y_pred=y_pred)
 
 
 def test_set_out_sample_residuals_warning_when_forecaster_has_transformer_and_transform_False():

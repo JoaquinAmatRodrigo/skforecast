@@ -217,6 +217,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         internally for training. It can be different from `series_col_names` if
         some series are dropped during the training process because of NaNs or 
         because they are not present in the training period.
+    X_train_col_names : list
+        Names of columns of the matrix created internally for training.
     included_exog : bool
         If the forecaster has been trained using exogenous variable/s.
     exog_type : type
@@ -226,8 +228,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         is used, the dtypes are calculated before the transformation.
     exog_col_names : list
         Names of the exogenous variables used during training.
-    X_train_col_names : list
-        Names of columns of the matrix created internally for training.
     fit_kwargs : dict
         Additional arguments to be passed to the `fit` method of the regressor.
     in_sample_residuals : dict

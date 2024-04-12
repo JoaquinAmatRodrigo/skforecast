@@ -176,6 +176,30 @@ def fetch_dataset(
                 "Repository. https://doi.org/10.24432/C5W894."
             )
         },
+        'bike_sharing_extended_features': {
+            'url' : (
+                f'https://raw.githubusercontent.com/JoaquinAmatRodrigo/'
+                f'skforecast-datasets/{version}/data/bike_sharing_extended_features.csv'
+            ),
+            'sep': ',',
+            'index_col': 'date_time',
+            'date_format': '%Y-%m-%d %H:%M:%S',
+            'freq': 'H',
+            'description': (
+                'Hourly usage of the bike share system in the city of Washington D.C. '
+                'during the years 2011 and 2012. In addition to the number of users per '
+                'hour, the dataset was enriched by introducing supplementary features. '
+                'Addition includes calendar-based variables (day of the week, hour of '
+                'the day, month, etc.), indicators for sunlight, incorporation of '
+                'rolling temperature averages, and the creation of polynomial features '
+                'generated from variable pairs. All cyclic variables are encoded using '
+                'sine and cosine functions to ensure accurate representation.'
+            ),
+            'source': (
+                "Fanaee-T,Hadi. (2013). Bike Sharing Dataset. UCI Machine Learning "
+                "Repository. https://doi.org/10.24432/C5W894."
+            )
+        },
         'australia_tourism': {
             'url' : (
                 f'https://raw.githubusercontent.com/JoaquinAmatRodrigo/'

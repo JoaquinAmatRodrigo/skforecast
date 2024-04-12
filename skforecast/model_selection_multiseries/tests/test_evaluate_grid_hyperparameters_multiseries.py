@@ -1,6 +1,7 @@
 # Unit test _evaluate_grid_hyperparameters_multiseries
 # ==============================================================================
 import re
+import os
 import pytest
 import numpy as np
 import pandas as pd
@@ -130,13 +131,15 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
         'levels': [['l1', 'l2']]*6,
         'lags'  : [[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], 
                    [1, 2], [1, 2], [1, 2]],
+        'lags_label': [[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], 
+                        [1, 2], [1, 2], [1, 2]],
         'params': [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}, 
                    {'alpha': 1}, {'alpha': 0.1}, {'alpha': 0.01}],
         'mean_absolute_error': np.array([0.20968100463227382, 0.20969259779858337, 0.20977945312386406, 
                                          0.21077344827205086, 0.21078653113227208, 0.21078779824759553]),                                                               
         'alpha' : np.array([0.01, 0.1, 1., 1., 0.1, 0.01])
         },
-        index=pd.Index([3, 4, 5, 2, 1, 0], dtype='int64')
+        index = pd.Index([3, 4, 5, 2, 1, 0], dtype='int64')
     )
 
     pd.testing.assert_frame_equal(results, expected_results)
@@ -177,15 +180,17 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregMultiSeries_lags_
     
     expected_results = pd.DataFrame({
         'levels': [['l1', 'l2']]*6,
-        'lags'  : ['lags_2', 'lags_2', 'lags_2', 
-                   'lags_1', 'lags_1', 'lags_1'],
+        'lags'  : [[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], 
+                   [1, 2], [1, 2], [1, 2]],
+        'lags_label': ['lags_2', 'lags_2', 'lags_2', 
+                        'lags_1', 'lags_1', 'lags_1'],
         'params': [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}, 
                    {'alpha': 1}, {'alpha': 0.1}, {'alpha': 0.01}],
         'mean_absolute_error': np.array([0.20968100463227382, 0.20969259779858337, 0.20977945312386406, 
                                          0.21077344827205086, 0.21078653113227208, 0.21078779824759553]),                                                               
         'alpha' : np.array([0.01, 0.1, 1., 1., 0.1, 0.01])
         },
-        index=pd.Index([3, 4, 5, 2, 1, 0], dtype='int64')
+        index = pd.Index([3, 4, 5, 2, 1, 0], dtype='int64')
     )
 
     pd.testing.assert_frame_equal(results, expected_results)
@@ -228,11 +233,12 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregMultiSeries_lags_
     expected_results = pd.DataFrame({
         'levels': [['l1', 'l2'], ['l1', 'l2'], ['l1', 'l2']],
         'lags'  : [[1, 2], [1, 2], [1, 2]],
+        'lags_label': [[1, 2], [1, 2], [1, 2]],
         'params': [{'alpha': 1}, {'alpha': 0.1}, {'alpha': 0.01}],
         'mean_absolute_error': np.array([0.21077344827205086, 0.21078653113227208, 0.21078779824759553]),                                                               
         'alpha' : np.array([1., 0.1 , 0.01])
         },
-        index=pd.Index([2, 1, 0], dtype='int64')
+        index = pd.Index([2, 1, 0], dtype='int64')
     )
 
     pd.testing.assert_frame_equal(results, expected_results)
@@ -276,14 +282,17 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
     
     expected_results = pd.DataFrame({
         'levels': [['l1']]*6,
-        'lags'  : [[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2], [1, 2], [1, 2]],
+        'lags'  : [[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], 
+                   [1, 2], [1, 2], [1, 2]],
+        'lags_label': [[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], 
+                        [1, 2], [1, 2], [1, 2]],
         'params': [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}, 
                    {'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}],
         'mean_absolute_error': np.array([0.20669393332187616, 0.20671040715338015, 0.20684013292264494, 
                                          0.2073988652614679, 0.20741562577568792, 0.2075484707375347]),                                                               
         'alpha': np.array([0.01, 0.1, 1., 0.01, 0.1, 1.])
         },
-        index=pd.Index([3, 4, 5, 0, 1, 2], dtype='int64')
+        index = pd.Index([3, 4, 5, 0, 1, 2], dtype='int64')
     )
 
     pd.testing.assert_frame_equal(results, expected_results)
@@ -324,7 +333,10 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
     
     expected_results = pd.DataFrame({
         'levels': [['l1', 'l2']]*6,
-        'lags'  : [[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2], [1, 2], [1, 2]],
+        'lags'  : [[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], 
+                   [1, 2], [1, 2], [1, 2]],
+        'lags_label': [[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], 
+                        [1, 2], [1, 2], [1, 2]],
         'params': [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}, 
                    {'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}],
         'mean_squared_error': np.array([0.06365397633008085, 0.06367614582294409, 0.06385378127252679, 
@@ -333,7 +345,7 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
                                          0.21078779824759553, 0.21078653113227208, 0.21077344827205086]),
         'alpha': np.array([0.01, 0.1, 1., 0.01, 0.1, 1.])
         },
-        index=pd.Index([3, 4, 5, 0, 1, 2], dtype='int64')
+        index = pd.Index([3, 4, 5, 0, 1, 2], dtype='int64')
     )
 
     pd.testing.assert_frame_equal(results, expected_results)
@@ -383,6 +395,92 @@ def test_evaluate_grid_hyperparameters_multiseries_when_return_best_ForecasterAu
     assert expected_series_col_names ==  forecaster.series_col_names
 
 
+def test_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMultiSeries_output_file_single_level():
+    """
+    Test output file is created when output_file is passed to 
+    _evaluate_grid_hyperparameters_multiseries and single level.
+    """
+    forecaster = ForecasterAutoregMultiSeries(
+                     regressor = Ridge(random_state=123),
+                     lags      = 2
+                 )
+
+    steps = 3
+    n_validation = 12
+    lags_grid = {'lags_1': 2, 'lags_2': 4}
+    param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
+    output_file = 'test_evaluate_grid_hyperparameters_multiseries_output_file.txt'
+
+    results = _evaluate_grid_hyperparameters_multiseries(
+                  forecaster         = forecaster,
+                  series             = series,
+                  param_grid         = param_grid,
+                  steps              = steps,
+                  metric             = 'mean_absolute_error',
+                  initial_train_size = len(series) - n_validation,
+                  fixed_train_size   = False,
+                  levels             = 'l1',
+                  exog               = None,
+                  lags_grid          = lags_grid,
+                  refit              = False,
+                  return_best        = False,
+                  verbose            = False,
+                  show_progress      = False,
+                  output_file        = output_file
+              )
+    results  = results.astype({'levels': str, 'lags': str, 'params': str})
+
+    assert os.path.isfile(output_file)
+    output_file_content = pd.read_csv(output_file, sep='\t', low_memory=False)
+    output_file_content = output_file_content.sort_values(by='mean_absolute_error')
+    output_file_content = output_file_content.astype({'levels': str, 'lags': str, 'params': str})
+    pd.testing.assert_frame_equal(results, output_file_content)
+    os.remove(output_file)
+
+
+def test_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMultiSeries_output_file_multiple_metrics():
+    """
+    Test output file is created when output_file is passed to 
+    _evaluate_grid_hyperparameters_multiseries and list of metrics.
+    """
+    forecaster = ForecasterAutoregMultiSeries(
+                     regressor = Ridge(random_state=123),
+                     lags      = 2
+                 )
+
+    steps = 3
+    n_validation = 12
+    lags_grid = [2, 4]
+    param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
+    output_file = 'test_evaluate_grid_hyperparameters_multiseries_output_file.txt'
+
+    results = _evaluate_grid_hyperparameters_multiseries(
+                  forecaster         = forecaster,
+                  series             = series,
+                  param_grid         = param_grid,
+                  steps              = steps,
+                  metric             = [mean_squared_error, 'mean_absolute_error'],
+                  initial_train_size = len(series) - n_validation,
+                  fixed_train_size   = False,
+                  levels             = None,
+                  exog               = None,
+                  lags_grid          = lags_grid,
+                  refit              = False,
+                  return_best        = False,
+                  verbose            = False,
+                  show_progress      = False,
+                  output_file        = output_file
+              )
+    results  = results.astype({'levels': str, 'lags': str, 'lags_label': str, 'params': str})
+
+    assert os.path.isfile(output_file)
+    output_file_content = pd.read_csv(output_file, sep='\t', low_memory=False)
+    output_file_content = output_file_content.sort_values(by='mean_squared_error')
+    output_file_content = output_file_content.astype({'levels': str, 'lags': str, 'lags_label': str, 'params': str})
+    pd.testing.assert_frame_equal(results, output_file_content)
+    os.remove(output_file)
+
+
 # ForecasterAutoregMultiSeriesCustom
 # ======================================================================================================================
 def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMultiSeriesCustom_with_mocked():
@@ -420,6 +518,7 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
     expected_results = pd.DataFrame({
         'levels': [['l1', 'l2'], ['l1', 'l2'], ['l1', 'l2']],
         'lags'  : ['custom predictors', 'custom predictors', 'custom predictors'],
+        'lags_label': ['custom predictors', 'custom predictors', 'custom predictors'],
         'params': [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}],
         'mean_absolute_error': np.array([0.20968100463227382, 0.20969259779858337, 0.20977945312386406]),                                                               
         'alpha': np.array([0.01, 0.1, 1.])
@@ -468,6 +567,7 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
     expected_results = pd.DataFrame({
         'levels': [['l1'], ['l1'], ['l1']],
         'lags'  : ['custom predictors', 'custom predictors', 'custom predictors'],
+        'lags_label': ['custom predictors', 'custom predictors', 'custom predictors'],
         'params': [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}],
         'mean_absolute_error': np.array([0.20669393332187616, 0.20671040715338015, 0.20684013292264494]),                                                               
         'alpha' : np.array([0.01, 0.1, 1.])
@@ -513,6 +613,7 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
     expected_results = pd.DataFrame({
         'levels': [['l1', 'l2'], ['l1', 'l2'], ['l1', 'l2']],
         'lags'  : ['custom predictors', 'custom predictors', 'custom predictors'],
+        'lags_label': ['custom predictors', 'custom predictors', 'custom predictors'],
         'params': [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}],
         'mean_squared_error': np.array([0.06365397633008085, 0.06367614582294409, 0.06385378127252679]),
         'mean_absolute_error': np.array([0.20968100463227382, 0.20969259779858337, 0.20977945312386406]),
@@ -532,8 +633,7 @@ def test_evaluate_grid_hyperparameters_multiseries_when_return_best_ForecasterAu
     forecaster = ForecasterAutoregMultiSeriesCustom(
                      regressor          = Ridge(random_state=123),
                      fun_predictors     = create_predictors,
-                     window_size        = 4,
-                     transformer_series = None
+                     window_size        = 4
                  )
 
     steps = 3
@@ -561,6 +661,92 @@ def test_evaluate_grid_hyperparameters_multiseries_when_return_best_ForecasterAu
     
     assert expected_alpha == forecaster.regressor.alpha
     assert expected_series_col_names ==  forecaster.series_col_names
+
+
+def test_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMultiSeriesCustom_output_file_single_level():
+    """
+    Test output file is created when output_file is passed to 
+    _evaluate_grid_hyperparameters_multiseries and single level.
+    """
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                     regressor      = Ridge(random_state=123),
+                     fun_predictors = create_predictors,
+                     window_size    = 4
+                 )
+
+    steps = 3
+    n_validation = 12
+    param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
+    output_file = 'test_evaluate_grid_hyperparameters_multiseries_output_file.txt'
+
+    results = _evaluate_grid_hyperparameters_multiseries(
+                  forecaster         = forecaster,
+                  series             = series,
+                  param_grid         = param_grid,
+                  steps              = steps,
+                  metric             = 'mean_absolute_error',
+                  initial_train_size = len(series) - n_validation,
+                  fixed_train_size   = False,
+                  levels             = 'l1',
+                  exog               = None,
+                  lags_grid          = None,
+                  refit              = False,
+                  return_best        = False,
+                  verbose            = False,
+                  show_progress      = False,
+                  output_file        = output_file
+              )
+    results  = results.astype({'levels': str, 'lags': str, 'params': str})
+
+    assert os.path.isfile(output_file)
+    output_file_content = pd.read_csv(output_file, sep='\t', low_memory=False)
+    output_file_content = output_file_content.sort_values(by='mean_absolute_error')
+    output_file_content = output_file_content.astype({'levels': str, 'lags': str, 'params': str})
+    pd.testing.assert_frame_equal(results, output_file_content)
+    os.remove(output_file)
+
+
+def test_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMultiSeriesCustom_output_file_multiple_metrics():
+    """
+    Test output file is created when output_file is passed to 
+    _evaluate_grid_hyperparameters_multiseries and list of metrics.
+    """
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                     regressor      = Ridge(random_state=123),
+                     fun_predictors = create_predictors,
+                     window_size    = 4
+                 )
+
+    steps = 3
+    n_validation = 12
+    param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
+    output_file = 'test_evaluate_grid_hyperparameters_multiseries_output_file.txt'
+
+    results = _evaluate_grid_hyperparameters_multiseries(
+                  forecaster         = forecaster,
+                  series             = series,
+                  param_grid         = param_grid,
+                  steps              = steps,
+                  metric             = [mean_squared_error, 'mean_absolute_error'],
+                  initial_train_size = len(series) - n_validation,
+                  fixed_train_size   = False,
+                  levels             = None,
+                  exog               = None,
+                  lags_grid          = None,
+                  refit              = False,
+                  return_best        = False,
+                  verbose            = False,
+                  show_progress      = False,
+                  output_file        = output_file
+              )
+    results  = results.astype({'levels': str, 'lags': str, 'params': str})
+
+    assert os.path.isfile(output_file)
+    output_file_content = pd.read_csv(output_file, sep='\t', low_memory=False)
+    output_file_content = output_file_content.sort_values(by='mean_squared_error')
+    output_file_content = output_file_content.astype({'levels': str, 'lags': str, 'params': str})
+    pd.testing.assert_frame_equal(results, output_file_content)
+    os.remove(output_file)
 
 
 # ForecasterAutoregMultiVariate
@@ -602,13 +788,14 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
     expected_results = pd.DataFrame({
         'levels': [['l1']]*6,
         'lags'  : [[1, 2], [1, 2], [1, 2], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]],
+        'lags_label': [[1, 2], [1, 2], [1, 2], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]],
         'params': [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}, 
                    {'alpha': 1}, {'alpha': 0.1}, {'alpha': 0.01}],
         'mean_absolute_error': np.array([0.20115194, 0.20183032, 0.20566862,
                                          0.22224269, 0.22625017, 0.22644284]),                                                               
         'alpha' : np.array([0.01, 0.1, 1., 1., 0.1, 0.01])
         },
-        index=pd.Index([0, 1, 2, 5, 4, 3], dtype='int64')
+        index = pd.Index([0, 1, 2, 5, 4, 3], dtype='int64')
     )
 
     pd.testing.assert_frame_equal(results, expected_results)
@@ -650,14 +837,15 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregMultiVariate_lags
     
     expected_results = pd.DataFrame({
         'levels': [['l1']]*6,
-        'lags'  : ['lags_1', 'lags_1', 'lags_1', 'lags_2', 'lags_2', 'lags_2'],
+        'lags'  : [[1, 2], [1, 2], [1, 2], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]],
+        'lags_label': ['lags_1', 'lags_1', 'lags_1', 'lags_2', 'lags_2', 'lags_2'],
         'params': [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}, 
                    {'alpha': 1}, {'alpha': 0.1}, {'alpha': 0.01}],
         'mean_absolute_error': np.array([0.20115194, 0.20183032, 0.20566862, 
                                          0.22224269, 0.22625017, 0.22644284]),                                                               
         'alpha' : np.array([0.01, 0.1, 1., 1., 0.1, 0.01])
         },
-        index=pd.Index([0, 1, 2, 5, 4, 3], dtype='int64')
+        index = pd.Index([0, 1, 2, 5, 4, 3], dtype='int64')
     )
 
     pd.testing.assert_frame_equal(results, expected_results)
@@ -701,11 +889,12 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregMultiVariate_lags
     expected_results = pd.DataFrame({
         'levels': [['l1'], ['l1'], ['l1']],
         'lags'  : [[1, 2], [1, 2], [1, 2]],
+        'lags_label': [[1, 2], [1, 2], [1, 2]],
         'params': [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1.}],
         'mean_absolute_error': np.array([0.20115194, 0.20183032, 0.20566862]),                                                               
         'alpha' : np.array([0.01, 0.1 , 1.])
         },
-        index=pd.Index([0, 1, 2], dtype='int64')
+        index = pd.Index([0, 1, 2], dtype='int64')
     )
 
     pd.testing.assert_frame_equal(results, expected_results)
@@ -756,6 +945,15 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregMultiVariate_lags
                    {'l1': np.array([1, 2]), 'l2': np.array([1, 4])},
                    {'l1': np.array([1, 2]), 'l2': np.array([1, 4])},
                    {'l1': np.array([1, 2]), 'l2': np.array([1, 4])}],
+        'lags_label': [{'l1': np.array([1, 2]), 'l2': np.array([1, 2, 3])},
+                        {'l1': np.array([1, 2]), 'l2': np.array([1, 2, 3])},
+                        {'l1': np.array([1, 2]), 'l2': np.array([1, 2, 3])},
+                        {'l1': np.array([1, 3]), 'l2': np.array([1, 2, 3])},
+                        {'l1': np.array([1, 3]), 'l2': np.array([1, 2, 3])},
+                        {'l1': np.array([1, 3]), 'l2': np.array([1, 2, 3])},
+                        {'l1': np.array([1, 2]), 'l2': np.array([1, 4])},
+                        {'l1': np.array([1, 2]), 'l2': np.array([1, 4])},
+                        {'l1': np.array([1, 2]), 'l2': np.array([1, 4])}],
         'params': [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1.}, 
                    {'alpha': 1.}  , {'alpha': 0.1}, {'alpha': 0.01}, 
                    {'alpha': 1.}  , {'alpha': 0.1}, {'alpha': 0.01}],
@@ -764,7 +962,7 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregMultiVariate_lags
                                          0.22401526, 0.22830217, 0.22878132]),                                                               
         'alpha' : np.array([0.01, 0.1 , 1.  , 1.  , 0.1 , 0.01, 1.  , 0.1 , 0.01])
         },
-        index=pd.Index([0, 1, 2, 5, 4, 3, 8, 7, 6], dtype='int64')
+        index = pd.Index([0, 1, 2, 5, 4, 3, 8, 7, 6], dtype='int64')
     )
 
     pd.testing.assert_frame_equal(results, expected_results)
@@ -787,7 +985,9 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregMultiVariate_lags
         'lags_1': {'l1': 2, 'l2': 3},
         'lags_2': {'l1': [1, 3], 'l2': 3},
         'lags_3': {'l1': 2, 'l2': [1, 4]},
-        'lags_4': 3
+        'lags_4': {'l1': 2, 'l2': None},
+        'lags_5': {'l1': None, 'l2': 2},
+        'lags_6': 3
     }
     steps = 3
     n_validation = 12
@@ -810,19 +1010,46 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregMultiVariate_lags
               )
     
     expected_results = pd.DataFrame({
-        'levels': [['l1']]*12,
-        'lags'  : ['lags_1', 'lags_1', 'lags_1', 'lags_4', 
-                   'lags_2', 'lags_4', 'lags_4', 'lags_2', 
-                   'lags_2', 'lags_3', 'lags_3', 'lags_3'],
-        'params': [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}, {'alpha': 1},
-                   {'alpha': 1}, {'alpha': 0.1}, {'alpha': 0.01}, {'alpha': 0.1},
-                   {'alpha': 0.01}, {'alpha': 1}, {'alpha': 0.1}, {'alpha': 0.01}],
-        'mean_absolute_error': np.array([0.2053202 , 0.20555199, 0.20677802, 0.21353688, 
-                                         0.21443621, 0.21622784, 0.2166998 , 0.21801147, 
-                                         0.21863968, 0.22401526, 0.22830217, 0.22878132]),                                                               
-        'alpha' : np.array([0.01, 0.1 , 1.  , 1.  , 1.  , 0.1 , 0.01, 0.1 , 0.01, 1.  , 0.1 , 0.01])
+        'levels': [['l1']]*18,
+        'lags'  : [{'l1': np.array([1, 2]), 'l2': None},
+                   {'l1': np.array([1, 2]), 'l2': None},
+                   {'l1': np.array([1, 2]), 'l2': None},
+                   {'l1': np.array([1, 2]), 'l2': np.array([1, 2, 3])},
+                   {'l1': np.array([1, 2]), 'l2': np.array([1, 2, 3])},
+                   {'l1': np.array([1, 2]), 'l2': np.array([1, 2, 3])},
+                   {'l1': None, 'l2': np.array([1, 2])},
+                   {'l1': None, 'l2': np.array([1, 2])},
+                   {'l1': None, 'l2': np.array([1, 2])},
+                   [1, 2, 3],
+                   {'l1': np.array([1, 3]), 'l2': np.array([1, 2, 3])},
+                   [1, 2, 3],
+                   [1, 2, 3],
+                   {'l1': np.array([1, 3]), 'l2': np.array([1, 2, 3])},
+                   {'l1': np.array([1, 3]), 'l2': np.array([1, 2, 3])},
+                   {'l1': np.array([1, 2]), 'l2': np.array([1, 4])},
+                   {'l1': np.array([1, 2]), 'l2': np.array([1, 4])},
+                   {'l1': np.array([1, 2]), 'l2': np.array([1, 4])}],
+        'lags_label': ['lags_4', 'lags_4', 'lags_4', 
+                       'lags_1', 'lags_1', 'lags_1', 
+                       'lags_5', 'lags_5', 'lags_5',
+                       'lags_6', 'lags_2', 'lags_6', 
+                       'lags_6', 'lags_2', 'lags_2', 
+                       'lags_3', 'lags_3', 'lags_3'],
+        'params': [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}, 
+                   {'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}, 
+                   {'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}, 
+                   {'alpha': 1}, {'alpha': 1}, {'alpha': 0.1}, 
+                   {'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 0.01}, 
+                   {'alpha': 1}, {'alpha': 0.1}, {'alpha': 0.01}],
+        'mean_absolute_error': np.array(
+            [0.20155258, 0.20208154, 0.20516149, 0.2053202 , 0.20555199,
+             0.20677802, 0.21005165, 0.21007475, 0.21071924, 0.21353688,
+             0.21443621, 0.21622784, 0.2166998 , 0.21801147, 0.21863968,
+             0.22401526, 0.22830217, 0.22878132]),
+        'alpha' : np.array([0.01, 0.1 , 1.  , 0.01, 0.1 , 1.  , 0.01, 0.1 , 1.  , 1.  , 1.  ,
+       0.1 , 0.01, 0.1 , 0.01, 1.  , 0.1 , 0.01])
         },
-        index=pd.Index([0, 1, 2, 11, 5, 10, 9, 4, 3, 8, 7, 6], dtype='int64')
+        index = pd.Index([9, 10, 11, 0, 1, 2, 12, 13, 14, 17, 5, 16, 15, 4, 3, 8, 7, 6], dtype='int64')
     )
 
     pd.testing.assert_frame_equal(results, expected_results)
@@ -865,6 +1092,7 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
     expected_results = pd.DataFrame({
         'levels': [['l1']]*6,
         'lags'  : [[1, 2], [1, 2], [1, 2], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]],
+        'lags_label': [[1, 2], [1, 2], [1, 2], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]],
         'params': [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}, 
                    {'alpha': 1.}, {'alpha': 0.1}, {'alpha': 0.01}],
         'mean_squared_error': np.array([0.06260985, 0.06309219, 0.06627699, 
@@ -873,7 +1101,7 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
                                          0.22224269, 0.22625017, 0.22644284]),
         'alpha' : np.array([0.01, 0.1, 1., 1., 0.1, 0.01])
         },
-        index=pd.Index([0, 1, 2, 5, 4, 3], dtype='int64')
+        index = pd.Index([0, 1, 2, 5, 4, 3], dtype='int64')
     )
 
     pd.testing.assert_frame_equal(results, expected_results)
@@ -924,3 +1152,93 @@ def test_evaluate_grid_hyperparameters_multiseries_when_return_best_ForecasterAu
     for i in range(1, forecaster.steps + 1):
         assert expected_alpha == forecaster.regressors_[i].alpha
     assert expected_series_col_names ==  forecaster.series_col_names
+
+
+def test_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMultiVariate_output_file_single_level():
+    """
+    Test output file is created when output_file is passed to 
+    _evaluate_grid_hyperparameters_multiseries and single level.
+    """
+    forecaster = ForecasterAutoregMultiVariate(
+                     regressor = Ridge(random_state=123),
+                     level     = 'l1',
+                     lags      = 2,
+                     steps     = 3
+                 )
+
+    steps = 3
+    n_validation = 12
+    lags_grid = {'lags_1': 2, 'lags_2': 4}
+    param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
+    output_file = 'test_evaluate_grid_hyperparameters_multiseries_output_file.txt'
+
+    results = _evaluate_grid_hyperparameters_multiseries(
+                  forecaster         = forecaster,
+                  series             = series,
+                  param_grid         = param_grid,
+                  steps              = steps,
+                  metric             = 'mean_absolute_error',
+                  initial_train_size = len(series) - n_validation,
+                  fixed_train_size   = False,
+                  levels             = 'l1',
+                  exog               = None,
+                  lags_grid          = lags_grid,
+                  refit              = False,
+                  return_best        = False,
+                  verbose            = False,
+                  show_progress      = False,
+                  output_file        = output_file
+              )
+    results  = results.astype({'levels': str, 'lags': str, 'lags_label': str, 'params': str})
+
+    assert os.path.isfile(output_file)
+    output_file_content = pd.read_csv(output_file, sep='\t', low_memory=False)
+    output_file_content = output_file_content.sort_values(by='mean_absolute_error')
+    output_file_content = output_file_content.astype({'levels': str, 'lags': str, 'lags_label': str, 'params': str})
+    pd.testing.assert_frame_equal(results, output_file_content)
+    os.remove(output_file)
+
+
+def test_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMultiVariate_output_file_multiple_metrics():
+    """
+    Test output file is created when output_file is passed to 
+    _evaluate_grid_hyperparameters_multiseries and list of metrics.
+    """
+    forecaster = ForecasterAutoregMultiVariate(
+                     regressor = Ridge(random_state=123),
+                     level     = 'l2',
+                     lags      = 2,
+                     steps     = 3
+                 )
+
+    steps = 3
+    n_validation = 12
+    lags_grid = [2, 4]
+    param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
+    output_file = 'test_evaluate_grid_hyperparameters_multiseries_output_file.txt'
+
+    results = _evaluate_grid_hyperparameters_multiseries(
+                  forecaster         = forecaster,
+                  series             = series,
+                  param_grid         = param_grid,
+                  steps              = steps,
+                  metric             = [mean_squared_error, 'mean_absolute_error'],
+                  initial_train_size = len(series) - n_validation,
+                  fixed_train_size   = False,
+                  levels             = None,
+                  exog               = None,
+                  lags_grid          = lags_grid,
+                  refit              = False,
+                  return_best        = False,
+                  verbose            = False,
+                  show_progress      = False,
+                  output_file        = output_file
+              )
+    results  = results.astype({'levels': str, 'lags': str, 'lags_label': str, 'params': str})
+
+    assert os.path.isfile(output_file)
+    output_file_content = pd.read_csv(output_file, sep='\t', low_memory=False)
+    output_file_content = output_file_content.sort_values(by='mean_squared_error')
+    output_file_content = output_file_content.astype({'levels': str, 'lags': str, 'lags_label': str, 'params': str})
+    pd.testing.assert_frame_equal(results, output_file_content)
+    os.remove(output_file)
