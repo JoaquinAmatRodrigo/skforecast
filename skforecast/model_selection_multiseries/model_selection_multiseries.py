@@ -1271,7 +1271,7 @@ def _evaluate_grid_hyperparameters_multiseries(
             )
 
             n_predictions = (
-                backtest_predictions
+                predictions
                 .notna()
                 .sum()
                 .to_frame(name='n_predictions')
@@ -1293,7 +1293,7 @@ def _evaluate_grid_hyperparameters_multiseries(
                 m_name = m if isinstance(m, str) else m.__name__
                 metric_weighted_average = np.average(
                     a = metrics_levels[m_name],
-                    weights=metrics_levels['n_predictions']
+                    weights = metrics_levels['n_predictions']
                 )
                 metric_dict[m_name].append(metric_weighted_average)
 
@@ -1685,29 +1685,47 @@ def _bayesian_search_optuna_multiseries(
             if "lags" in sample:
                 forecaster.set_lags(sample['lags'])
         
-        metrics_levels = backtesting_forecaster_multiseries(
-                             forecaster            = forecaster,
-                             series                = series,
-                             exog                  = exog,
-                             steps                 = steps,
-                             levels                = levels,
-                             metric                = metric,
-                             initial_train_size    = initial_train_size,
-                             fixed_train_size      = fixed_train_size,
-                             gap                   = gap,
-                             allow_incomplete_fold = allow_incomplete_fold,
-                             refit                 = refit,
-                             n_jobs                = n_jobs,
-                             verbose               = verbose,
-                             show_progress         = False,
-                             suppress_warnings     = suppress_warnings
-                         )[0]
+        metrics_levels, predictions = backtesting_forecaster_multiseries(
+            forecaster            = forecaster,
+            series                = series,
+            exog                  = exog,
+            steps                 = steps,
+            levels                = levels,
+            metric                = metric,
+            initial_train_size    = initial_train_size,
+            fixed_train_size      = fixed_train_size,
+            gap                   = gap,
+            allow_incomplete_fold = allow_incomplete_fold,
+            refit                 = refit,
+            n_jobs                = n_jobs,
+            verbose               = verbose,
+            show_progress         = False,
+            suppress_warnings     = suppress_warnings
+        )
+
+        n_predictions = (
+            predictions
+            .notna()
+            .sum()
+            .to_frame(name='n_predictions')
+            .reset_index(names='levels')
+        )
+        metrics_levels = metrics_levels.merge(
+            right = n_predictions,
+            how   = 'left',
+            on    = 'levels'
+        ).dropna()
         
         # Store metrics in the variable `metric_values` defined outside _objective.
         nonlocal metric_values
         metric_values.append(metrics_levels)
 
-        return metrics_levels.iloc[:, 1].mean()
+        metric_weighted_average = np.average(
+            a = metrics_levels.iloc[:, 1],
+            weights = metrics_levels['n_predictions']
+        )
+
+        return metric_weighted_average
 
     if show_progress:
         kwargs_study_optimize['show_progress_bar'] = True
@@ -1769,7 +1787,11 @@ def _bayesian_search_optuna_multiseries(
         m_values = metric_values[i]
         for m in metric:
             m_name = m if isinstance(m, str) else m.__name__
-            metric_dict[m_name].append(m_values[m_name].mean())
+            metric_weighted_average = np.average(
+                a = m_values[m_name],
+                weights = m_values['n_predictions']
+            )
+            metric_dict[m_name].append(metric_weighted_average)
     
     if type(forecaster).__name__ not in ['ForecasterAutoregMultiSeriesCustom',
                                          'ForecasterAutoregMultiVariate']:
