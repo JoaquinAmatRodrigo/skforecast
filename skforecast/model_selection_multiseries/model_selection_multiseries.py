@@ -1189,7 +1189,8 @@ def _evaluate_grid_hyperparameters_multiseries(
         - column lags_label: descriptive label or alias for the lags.
         - column params: parameters configuration for each iteration.
         - column metric: metric value estimated for each iteration. The resulting 
-        metric will be the average of the optimization of all levels.
+        metric will be the weighted average of the optimization of all levels. The
+        number of available predictions for each level is used as weight.
         - additional n columns with param = value.
     
     """
@@ -1250,24 +1251,37 @@ def _evaluate_grid_hyperparameters_multiseries(
         for params in param_grid:
 
             forecaster.set_params(params)
-            metrics_levels = backtesting_forecaster_multiseries(
-                                 forecaster            = forecaster,
-                                 series                = series,
-                                 exog                  = exog,
-                                 steps                 = steps,
-                                 levels                = levels,
-                                 metric                = metric,
-                                 initial_train_size    = initial_train_size,
-                                 fixed_train_size      = fixed_train_size,
-                                 gap                   = gap,
-                                 allow_incomplete_fold = allow_incomplete_fold,
-                                 refit                 = refit,
-                                 interval              = None,
-                                 verbose               = verbose,
-                                 n_jobs                = n_jobs,
-                                 show_progress         = False,
-                                 suppress_warnings     = suppress_warnings
-                             )[0]
+            metrics_levels, predictions = backtesting_forecaster_multiseries(
+                forecaster            = forecaster,
+                series                = series,
+                exog                  = exog,
+                steps                 = steps,
+                levels                = levels,
+                metric                = metric,
+                initial_train_size    = initial_train_size,
+                fixed_train_size      = fixed_train_size,
+                gap                   = gap,
+                allow_incomplete_fold = allow_incomplete_fold,
+                refit                 = refit,
+                interval              = None,
+                verbose               = verbose,
+                n_jobs                = n_jobs,
+                show_progress         = False,
+                suppress_warnings     = suppress_warnings
+            )
+
+            n_predictions = (
+                backtest_predictions
+                .notna()
+                .sum()
+                .to_frame(name='n_predictions')
+                .reset_index(names='levels')
+            )
+            metrics_levels = metrics_levels.merge(
+                right = n_predictions,
+                how   = 'left',
+                on    = 'levels'
+            ).dropna()
             
             for warn_category in warn_skforecast_categories:
                 warnings.filterwarnings('ignore', category=warn_category)
@@ -1277,7 +1291,11 @@ def _evaluate_grid_hyperparameters_multiseries(
             params_list.append(params)
             for m in metric:
                 m_name = m if isinstance(m, str) else m.__name__
-                metric_dict[m_name].append(metrics_levels[m_name].mean())
+                metric_weighted_average = np.average(
+                    a = metrics_levels[m_name],
+                    weights=metrics_levels['n_predictions']
+                )
+                metric_dict[m_name].append(metric_weighted_average)
 
             if output_file is not None:
                 header = ['levels', 'lags', 'lags_label', 'params', 
