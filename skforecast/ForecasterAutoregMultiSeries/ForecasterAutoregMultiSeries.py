@@ -93,7 +93,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         - If single function: it is applied to all series. 
         - If `dict` {'series_column_name' : Callable}: a different function can be
-        used for each series, a weight of 1 is given to all series not present in
+        used for each series, a weight of 1 is given to all series not present in 
         `weight_func`.
     series_weights : dict, default `None`
         Weights associated with each series {'series_column_name' : float}. It is only
@@ -235,7 +235,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         1000 values in the form `{level: residuals}`. If `transformer_series` 
         is not `None`, residuals are stored in the transformed scale.
     out_sample_residuals : dict
-        Residuals of the models when predicting non training data. Only stored
+        Residuals of the model when predicting non-training data. Only stored
         up to 1000 values in the form `{level: residuals}`. If `transformer_series` 
         is not `None`, residuals are assumed to be in the transformed scale. Use 
         `set_out_sample_residuals()` method to set values.
@@ -274,7 +274,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self,
         regressor: object,
         lags: Union[int, np.ndarray, list],
-        encoding : str='ordinal_category',
+        encoding: str='ordinal_category',
         transformer_series: Optional[Union[object, dict]]=StandardScaler(),
         transformer_exog: Optional[object]=None,
         weight_func: Optional[Union[Callable, dict]]=None,
@@ -307,11 +307,11 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.training_range          = None
         self.series_col_names        = None
         self.series_X_train          = None
+        self.X_train_col_names       = None
         self.included_exog           = False
         self.exog_type               = None
         self.exog_dtypes             = None
         self.exog_col_names          = None
-        self.X_train_col_names       = None
         self.in_sample_residuals     = None
         self.out_sample_residuals    = None
         self.fitted                  = False
@@ -379,6 +379,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                       if key.startswith(name_pipe_steps)}
         else:
             params = self.regressor.get_params()
+        
         params = [f"{k}: {v}" for k, v in params.items()]
         if len(params) > 5:
             params = ", ".join(params[:5] + ['...'])
@@ -502,7 +503,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         Returns
         -------
         X_train_lags : pandas DataFrame
-            Training values of lags
+            Training values of lags.
             Shape: (len(y) - self.max_lag, len(self.lags))
         X_train_exog : pandas DataFrame
             Training values of exogenous variables.
@@ -1472,7 +1473,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         steps: int,
         levels: Optional[Union[str, list]]=None,
         last_window: Optional[pd.DataFrame]=None,
-        exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+        exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
         n_boot: int=500,
         random_state: int=123,
         in_sample_residuals: bool=True,
@@ -1498,13 +1499,13 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             If `last_window = None`, the values stored in `self.last_window` are
             used to calculate the initial predictors, and the predictions start
             right after training data.
-        exog : pandas Series, pandas DataFrame, default `None`
-            Exogenous variable/s included as predictor/s. 
+        exog : pandas Series, pandas DataFrame, dict, default `None`
+            Exogenous variable/s included as predictor/s.
         n_boot : int, default `500`
             Number of bootstrapping iterations used to estimate predictions.
         random_state : int, default `123`
             Sets a seed to the random generator, so that boot predictions are always 
-            deterministic.      
+            deterministic.
         in_sample_residuals : bool, default `True`
             If `True`, residuals from the training data are used as proxy of
             prediction error to create predictions. If `False`, out of sample 
@@ -1802,7 +1803,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         steps: int,
         levels: Optional[Union[str, list]]=None,
         last_window: Optional[pd.DataFrame]=None,
-        exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+        exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
         interval: list=[5, 95],
         n_boot: int=500,
         random_state: int=123,
@@ -1819,14 +1820,15 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         steps : int
             Number of future steps predicted.
         levels : str, list, default `None`
-            Time series to be predicted. If `None` all levels will be predicted.
+            Time series to be predicted. If `None` all levels whose last window
+            ends at the same datetime index will be predicted together.
         last_window : pandas DataFrame, default `None`
             Series values used to create the predictors (lags) needed in the 
             first iteration of the prediction (t + 1).
-            If `last_window = None`, the values stored in` self.last_window` are
+            If `last_window = None`, the values stored in `self.last_window` are
             used to calculate the initial predictors, and the predictions start
             right after training data.
-        exog : pandas Series, pandas DataFrame, default `None`
+        exog : pandas Series, pandas DataFrame, dict, default `None`
             Exogenous variable/s included as predictor/s.
         interval : list, default `[5, 95]`
             Confidence of the prediction interval estimated. Sequence of 
@@ -1915,7 +1917,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         steps: int,
         levels: Optional[Union[str, list]]=None,
         last_window: Optional[pd.DataFrame]=None,
-        exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+        exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
         quantiles: list=[0.05, 0.5, 0.95],
         n_boot: int=500,
         random_state: int=123,
@@ -1932,15 +1934,16 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         steps : int
             Number of future steps predicted.
         levels : str, list, default `None`
-            Time series to be predicted. If `None` all levels will be predicted.
+            Time series to be predicted. If `None` all levels whose last window
+            ends at the same datetime index will be predicted together.
         last_window : pandas DataFrame, default `None`
             Series values used to create the predictors (lags) needed in the 
             first iteration of the prediction (t + 1).
-            If `last_window = None`, the values stored in` self.last_window` are
+            If `last_window = None`, the values stored in `self.last_window` are
             used to calculate the initial predictors, and the predictions start
             right after training data.
-        exog : pandas Series, pandas DataFrame, default `None`
-            Exogenous variable/s included as predictor/s. 
+        exog : pandas Series, pandas DataFrame, dict, default `None`
+            Exogenous variable/s included as predictor/s.
         quantiles : list, default `[0.05, 0.5, 0.95]`
             Sequence of quantiles to compute, which must be between 0 and 1 
             inclusive. For example, quantiles of 0.05, 0.5 and 0.95 should be as 
@@ -2014,7 +2017,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         distribution: object,
         levels: Optional[Union[str, list]]=None,
         last_window: Optional[pd.DataFrame]=None,
-        exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+        exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
         n_boot: int=500,
         random_state: int=123,
         in_sample_residuals: bool=True,
@@ -2030,16 +2033,17 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         steps : int
             Number of future steps predicted.
         distribution : Object
-            A distribution object from scipy.stats.
+            A distribution object from scipy.stats. For example scipy.stats.norm.
         levels : str, list, default `None`
-            Time series to be predicted. If `None` all levels will be predicted.
+            Time series to be predicted. If `None` all levels whose last window
+            ends at the same datetime index will be predicted together.
         last_window : pandas DataFrame, default `None`
             Series values used to create the predictors (lags) needed in the 
             first iteration of the prediction (t + 1).
-            If `last_window = None`, the values stored in` self.last_window` are
+            If `last_window = None`, the values stored in `self.last_window` are
             used to calculate the initial predictors, and the predictions start
             right after training data.
-        exog : pandas Series, pandas DataFrame, default `None`
+        exog : pandas Series, pandas DataFrame, dict, default `None`
             Exogenous variable/s included as predictor/s.
         n_boot : int, default `500`
             Number of bootstrapping iterations used to estimate predictions.
