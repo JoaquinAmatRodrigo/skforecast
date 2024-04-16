@@ -570,7 +570,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
                                )
 
         y_train = pd.Series(
-                      data  = y_train,
+                      data  = y_train_values,
                       index = y_index[self.window_size: ],
                       name  = 'y'
                   )
