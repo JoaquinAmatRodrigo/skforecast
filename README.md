@@ -74,6 +74,10 @@ pip install skforecast[sarimax]
 pip install skforecast[plotting]
 ```
 
+```bash
+pip install skforecast[deeplearning]
+```
+
 
 # Dependencies
 
@@ -82,11 +86,11 @@ pip install skforecast[plotting]
 ## Hard dependencies
 
 + numpy>=1.20, <1.27
-+ pandas>=1.2, <2.2
++ pandas>=1.2, <2.3
 + tqdm>=4.57.0, <4.67
-+ scikit-learn>=1.0, <1.4
-+ optuna>=2.10.0, <3.5
-+ joblib>=1.1.0, <1.4
++ scikit-learn>=1.0, <1.5
++ optuna>=2.10.0, <3.7
++ joblib>=1.1.0, <1.5
 
 ## Optional dependencies
 
@@ -102,9 +106,9 @@ Visit the [release notes](https://github.com/JoaquinAmatRodrigo/skforecast/blob/
 
 - [x] Bayesian hyperparameter search for the `ForecasterAutoregMultiSeries`, `ForecasterAutoregMultiSeriesCustom`, and `ForecasterAutoregMultiVariate` using `optuna` as the search engine.
 - [x] Added `select_features` function to the `model_selection` module to perform feature selection using scikit-learn selectors.
-- [ ] Allow different exogenous variables per series in the `ForecasterAutoregMultiSeries` and `ForecasterAutoregMultiSeriesCustom`.
-- [ ] New encoding for the `ForecasterAutoregMultiSeries` and `ForecasterAutoregMultiSeriesCustom`.
-- [ ] Bug fixes and performance improvements.
+- [x] Allow different exogenous variables per series in the `ForecasterAutoregMultiSeries` and `ForecasterAutoregMultiSeriesCustom`.
+- [x] New encoding options for the `ForecasterAutoregMultiSeries` and `ForecasterAutoregMultiSeriesCustom`.
+- [x] Bug fixes and performance improvements.
 
 
 # Forecasters

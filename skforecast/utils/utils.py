@@ -28,15 +28,19 @@ from ..exceptions import IgnoredArgumentWarning
 from ..exceptions import SkforecastVersionWarning
 
 optional_dependencies = {
-    "sarimax": [
+    'sarimax': [
         'pmdarima>=2.0, <2.1',
         'statsmodels>=0.12, <0.15'
     ],
-    "plotting": [
+    'plotting': [
         'matplotlib>=3.3, <3.9', 
         'seaborn>=0.11, <0.14', 
         'statsmodels>=0.12, <0.15'
-    ]
+    ],
+    'deeplearning': [
+        'matplotlib>=3.3, <3.8',
+        'tensorflow>=2.15, <2.17',
+]
 }
 
 

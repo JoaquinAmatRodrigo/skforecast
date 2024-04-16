@@ -76,6 +76,10 @@ pip install skforecast[sarimax]
 pip install skforecast[plotting]
 ```
 
+```bash
+pip install skforecast[deeplearning]
+```
+
 
 ## Dependencies
 
