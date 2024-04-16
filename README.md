@@ -88,7 +88,7 @@ pip install skforecast[deeplearning]
 + numpy>=1.20, <1.27
 + pandas>=1.2, <2.3
 + tqdm>=4.57.0, <4.67
-+ scikit-learn>=1.0, <1.5
++ scikit-learn>=1.2, <1.5
 + optuna>=2.10.0, <3.7
 + joblib>=1.1.0, <1.5
 
@@ -98,6 +98,7 @@ pip install skforecast[deeplearning]
 + seaborn>=0.11, <0.14
 + statsmodels>=0.12, <0.15
 + pmdarima>=2.0, <2.1
++ tensorflow>=2.15, <2.17
 
 
 # What is new in skforecast 0.12?
@@ -105,7 +106,7 @@ pip install skforecast[deeplearning]
 Visit the [release notes](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/changelog.md) to view all notable changes.
 
 - [x] Bayesian hyperparameter search for the `ForecasterAutoregMultiSeries`, `ForecasterAutoregMultiSeriesCustom`, and `ForecasterAutoregMultiVariate` using `optuna` as the search engine.
-- [x] Added `select_features` function to the `model_selection` module to perform feature selection using scikit-learn selectors.
+- [x] Added `select_features` function to the `model_selection` and `model_selection_multiseries` modules to perform feature selection using scikit-learn selectors.
 - [x] Allow different exogenous variables per series in the `ForecasterAutoregMultiSeries` and `ForecasterAutoregMultiSeriesCustom`.
 - [x] New encoding options for the `ForecasterAutoregMultiSeries` and `ForecasterAutoregMultiSeriesCustom`.
 - [x] Bug fixes and performance improvements.

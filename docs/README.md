@@ -90,7 +90,7 @@ pip install skforecast[deeplearning]
 + numpy>=1.20, <1.27
 + pandas>=1.2, <2.3
 + tqdm>=4.57.0, <4.67
-+ scikit-learn>=1.0, <1.5
++ scikit-learn>=1.2, <1.5
 + optuna>=2.10.0, <3.7
 + joblib>=1.1.0, <1.5
 
@@ -100,6 +100,8 @@ pip install skforecast[deeplearning]
 + seaborn>=0.11, <0.14
 + statsmodels>=0.12, <0.15
 + pmdarima>=2.0, <2.1
++ tensorflow>=2.15, <2.17
+
 
 ## Forecasters
 
