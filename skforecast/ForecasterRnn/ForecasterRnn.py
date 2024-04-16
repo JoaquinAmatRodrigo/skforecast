@@ -5,35 +5,30 @@
 ################################################################################
 # coding=utf-8
 
-from math import e
-from typing import Union, Dict, List, Tuple, Any, Optional, Callable
-import warnings
 import logging
 import sys
+import warnings
+from copy import deepcopy
+from math import e
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+
+import matplotlib
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import sklearn
 import sklearn.pipeline
 from sklearn.base import clone
-from copy import deepcopy
+from sklearn.preprocessing import MinMaxScaler
 
 import skforecast
-from ..ForecasterBase import ForecasterBase
-from ..exceptions import IgnoredArgumentWarning
-from ..utils import initialize_weights
-from ..utils import check_select_fit_kwargs
-from ..utils import check_y
-from ..utils import check_predict_input
-from ..utils import check_interval
-from ..utils import preprocess_y
-from ..utils import preprocess_last_window
-from ..utils import expand_index
-from ..utils import transform_series
-from ..utils import transform_dataframe
 
-from sklearn.preprocessing import MinMaxScaler
-import matplotlib.pyplot as plt
-import matplotlib
+from ..exceptions import IgnoredArgumentWarning
+from ..ForecasterBase import ForecasterBase
+from ..utils import (check_interval, check_predict_input,
+                     check_select_fit_kwargs, check_y, expand_index,
+                     initialize_weights, preprocess_last_window, preprocess_y,
+                     transform_dataframe, transform_series)
 
 logging.basicConfig(
     format="%(name)-10s %(levelname)-5s %(message)s",
@@ -769,7 +764,6 @@ class ForecasterRnn(ForecasterBase):
             self.history["loss"],
             color="b",
             label="Training Loss",
-            axes=ax,
         )
 
         # Plotting validation loss
@@ -779,7 +773,6 @@ class ForecasterRnn(ForecasterBase):
                 self.history["val_loss"],
                 color="r",
                 label="Validation Loss",
-                axes=ax,
             )
 
         # Labeling the axes and adding a title
@@ -795,8 +788,6 @@ class ForecasterRnn(ForecasterBase):
 
         # Setting x-axis ticks to integers only
         ax.set_xticks(range(1, len(self.history["loss"]) + 1))
-
-        return fig
 
     # def predict_bootstrapping(
     #     self,
