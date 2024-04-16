@@ -1,6 +1,8 @@
 # `exceptions`
 
-::: skforecast.exceptions.exceptions.MissingValuesExogWarning
+::: skforecast.exceptions.exceptions.MissingValuesWarning
+
+::: skforecast.exceptions.exceptions.MissingExogWarning
 
 ::: skforecast.exceptions.exceptions.DataTypeWarning
 
