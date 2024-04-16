@@ -22,7 +22,6 @@
 [![buymeacoffee](https://img.shields.io/badge/-Buy_me_a%C2%A0coffee-gray?logo=buy-me-a-coffee)](https://www.buymeacoffee.com/skforecast)
 ![GitHub Sponsors](https://img.shields.io/github/sponsors/joaquinamatrodrigo?logo=github&label=Github%20sponsors&link=https%3A%2F%2Fgithub.com%2Fsponsors%2FJoaquinAmatRodrigo)
 
-
 ## About The Project
 
 **Skforecast** is a Python library that eases using scikit-learn regressors as single and multi-step forecasters. It also works with any regressor compatible with the scikit-learn API (LightGBM, XGBoost, CatBoost, ...).
@@ -77,6 +76,10 @@ pip install skforecast[sarimax]
 pip install skforecast[plotting]
 ```
 
+```bash
+pip install skforecast[deeplearning]
+```
+
 
 ## Dependencies
 
@@ -85,11 +88,11 @@ pip install skforecast[plotting]
 ### Hard dependencies
 
 + numpy>=1.20, <1.27
-+ pandas>=1.2, <2.2
++ pandas>=1.2, <2.3
 + tqdm>=4.57.0, <4.67
-+ scikit-learn>=1.0, <1.4
-+ optuna>=2.10.0, <3.5
-+ joblib>=1.1.0, <1.4
++ scikit-learn>=1.2, <1.5
++ optuna>=2.10.0, <3.7
++ joblib>=1.1.0, <1.5
 
 ### Optional dependencies
 
@@ -97,6 +100,8 @@ pip install skforecast[plotting]
 + seaborn>=0.11, <0.14
 + statsmodels>=0.12, <0.15
 + pmdarima>=2.0, <2.1
++ tensorflow>=2.15, <2.17
+
 
 ## Forecasters
 
