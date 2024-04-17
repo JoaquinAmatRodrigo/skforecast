@@ -17,10 +17,10 @@ def test_create_train_X_y_TypeError_when_exog_is_categorical_of_no_int():
     """
     Test TypeError is raised when exog is categorical with no int values.
     """
-    series = pd.DataFrame({'1': pd.Series(np.arange(3)),  
-                           '2': pd.Series(np.arange(3))})
-    exog = pd.Series(['A', 'B', 'C'], name='exog', dtype='category')
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=2)
+    series = pd.DataFrame({'1': pd.Series(np.arange(4)),  
+                           '2': pd.Series(np.arange(4))})
+    exog = pd.Series(['A', 'B', 'C', 'D'], name='exog', dtype='category')
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
 
     err_msg = re.escape(
         ("Categorical columns in exog must contain only integer values. "

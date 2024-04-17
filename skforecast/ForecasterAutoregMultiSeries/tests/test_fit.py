@@ -30,10 +30,10 @@ def test_fit_correct_dict_create_series_weights_weight_func_transformer_series()
         Return 0 if index is between '2022-01-08' and '2022-01-10', 1 otherwise.
         """
         weights = np.where(
-                    (index >= '2022-01-08') & (index <= '2022-01-10'),
-                    0,
-                    1
-                )
+                      (index >= '2022-01-08') & (index <= '2022-01-10'),
+                      0,
+                      1
+                  )
         
         return weights
 

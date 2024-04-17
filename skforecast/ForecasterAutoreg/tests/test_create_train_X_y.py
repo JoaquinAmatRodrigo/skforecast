@@ -51,9 +51,9 @@ def test_create_train_X_y_MissingValuesWarning_when_exog_has_missing_values():
 
 
 @pytest.mark.parametrize("y                        , exog", 
-                         [(pd.Series(np.arange(50)), pd.Series(np.arange(10))), 
-                          (pd.Series(np.arange(10)), pd.Series(np.arange(50))), 
-                          (pd.Series(np.arange(10)), pd.DataFrame(np.arange(50).reshape(25,2)))])
+                         [(pd.Series(np.arange(50), name='y'), pd.Series(np.arange(10), name='exog')), 
+                          (pd.Series(np.arange(10), name='y'), pd.Series(np.arange(50), name='exog')), 
+                          (pd.Series(np.arange(10), name='y'), pd.DataFrame(np.arange(50).reshape(25,2), columns=['exog_1', 'exog_2']))])
 def test_create_train_X_y_ValueError_when_len_y_is_different_from_len_exog(y, exog):
     """
     Test ValueError is raised when length of y is not equal to length exog.
@@ -61,9 +61,9 @@ def test_create_train_X_y_ValueError_when_len_y_is_different_from_len_exog(y, ex
     forecaster = ForecasterAutoreg(LinearRegression(), lags=5)
 
     err_msg = re.escape(
-                (f"`exog` must have same number of samples as `y`. "
-                 f"length `exog`: ({len(exog)}), length `y`: ({len(y)})")
-              )
+        (f"`exog` must have same number of samples as `y`. "
+         f"length `exog`: ({len(exog)}), length `y`: ({len(y)})")
+    )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.create_train_X_y(y=y, exog=exog)
 
@@ -75,13 +75,13 @@ def test_create_train_X_y_ValueError_when_y_and_exog_have_different_index():
     forecaster = ForecasterAutoreg(LinearRegression(), lags=5)
 
     err_msg = re.escape(
-                ("Different index for `y` and `exog`. They must be equal "
-                 "to ensure the correct alignment of values.")  
-              )
+        ("Different index for `y` and `exog`. They must be equal "
+         "to ensure the correct alignment of values.")  
+    )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.fit(
-            y    = pd.Series(np.arange(10), index=pd.date_range(start='2022-01-01', periods=10, freq='1D')),
-            exog = pd.Series(np.arange(10), index=pd.RangeIndex(start=0, stop=10, step=1))
+            y    = pd.Series(np.arange(10), index=pd.date_range(start='2022-01-01', periods=10, freq='1D'), name='y'),
+            exog = pd.Series(np.arange(10), index=pd.RangeIndex(start=0, stop=10, step=1), name='exog')
         )
 
 

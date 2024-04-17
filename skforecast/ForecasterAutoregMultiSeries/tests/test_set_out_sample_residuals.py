@@ -23,10 +23,10 @@ def test_set_out_sample_residuals_TypeError_when_residuals_is_not_a_dict_of_nump
     """
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
     err_msg = re.escape(
-                f"`residuals` argument must be a dict of numpy ndarrays in the form "
-                "`{level: residuals}`. " 
-                f"Got {type(residuals)}."
-            )
+        f"`residuals` argument must be a dict of numpy ndarrays in the form "
+        "`{level: residuals}`. " 
+        f"Got {type(residuals)}."
+    )
     with pytest.raises(TypeError, match = err_msg):
         forecaster.set_out_sample_residuals(residuals=residuals)
 
@@ -40,9 +40,9 @@ def test_set_out_sample_residuals_NotFittedError_when_forecaster_not_fitted():
                  'l2': np.array([1, 2, 3, 4, 5])}
 
     err_msg = re.escape(
-                ("This forecaster is not fitted yet. Call `fit` with appropriate "
-                 "arguments before using `set_out_sample_residuals()`.")
-            )
+        ("This forecaster is not fitted yet. Call `fit` with appropriate "
+         "arguments before using `set_out_sample_residuals()`.")
+    )
     with pytest.raises(NotFittedError, match = err_msg):
         forecaster.set_out_sample_residuals(residuals=residuals)
 
@@ -56,12 +56,12 @@ def test_set_out_sample_residuals_warning_when_residuals_not_for_all_levels():
     residuals = {'l1': np.array([1, 2, 3])}
 
     err_msg = re.escape(
-                f"""
-                Only residuals of levels 
-                {set(forecaster.series_col_names).intersection(set(residuals.keys()))} 
-                are updated.
-                """
-            )
+        f"""
+        Only residuals of levels 
+        {set(forecaster.series_col_names).intersection(set(residuals.keys()))} 
+        are updated.
+        """
+    )
     with pytest.warns(UserWarning, match = err_msg):
         forecaster.set_out_sample_residuals(residuals=residuals)
 
@@ -77,11 +77,11 @@ def test_set_out_sample_residuals_warning_when_forecaster_has_transformer_and_tr
     level = 'l1'
 
     err_msg = re.escape(
-                    ("Argument `transform` is set to `False` but forecaster was "
-                    f"trained using a transformer {forecaster.transformer_series_[level]} "
-                    f"for level {level}. Ensure that the new residuals are "
-                     "already transformed or set `transform=True`.")
-                )
+        (f"Argument `transform` is set to `False` but forecaster was "
+         f"trained using a transformer {forecaster.transformer_series_[level]} "
+         f"for level {level}. Ensure that the new residuals are "
+         f"already transformed or set `transform=True`.")
+    )
     with pytest.warns(UserWarning, match = err_msg):
         forecaster.set_out_sample_residuals(residuals=residuals, transform=False)
 
@@ -97,11 +97,11 @@ def test_set_out_sample_residuals_warning_when_forecaster_has_transformer_and_tr
     level = 'l1'
 
     err_msg = re.escape(
-                ("Residuals will be transformed using the same transformer used "
-                f"when training the forecaster for level {level} : "
-                f"({forecaster.transformer_series_[level]}). Ensure that the new "
-                 "residuals are on the same scale as the original time series.")
-            )
+        (f"Residuals will be transformed using the same transformer used "
+         f"when training the forecaster for level {level} : "
+         f"({forecaster.transformer_series_[level]}). Ensure that the new "
+         f"residuals are on the same scale as the original time series.")
+    )
     with pytest.warns(UserWarning, match = err_msg):
         forecaster.set_out_sample_residuals(residuals=residuals, transform=True)
 

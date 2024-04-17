@@ -11,9 +11,8 @@ import importlib
 import joblib
 import numpy as np
 import pandas as pd
-import sklearn
 from sklearn.base import clone
-import sklearn.pipeline
+from sklearn.pipeline import Pipeline
 import sklearn.linear_model
 from sklearn.compose import ColumnTransformer
 from sklearn.exceptions import NotFittedError
@@ -686,7 +685,7 @@ def check_predict_input(
     """
 
     if not fitted:
-        raise sklearn.exceptions.NotFittedError(
+        raise NotFittedError(
             ("This Forecaster instance is not fitted yet. Call `fit` with "
              "appropriate arguments before using predict.")
         )
@@ -2083,7 +2082,7 @@ def select_n_jobs_backtesting(
 
     forecaster_name = type(forecaster).__name__
 
-    if isinstance(forecaster.regressor, sklearn.pipeline.Pipeline):
+    if isinstance(forecaster.regressor, Pipeline):
         regressor_name = type(forecaster.regressor[-1]).__name__
     else:
         regressor_name = type(forecaster.regressor).__name__
