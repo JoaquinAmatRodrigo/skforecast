@@ -326,9 +326,8 @@ class ForecasterAutoregCustom(ForecasterBase):
         
         if len(y) < self.window_size + 1:
             raise ValueError(
-                (f"`y` must have as many values as the windows_size needed by "
-                 f"{self.fun_predictors.__name__}. For this Forecaster the "
-                 f"minimum length is {self.window_size + 1}")
+                (f"`y` does not have enough values to calculate "
+                 f"predictors. It must be at least {self.window_size + 1}.")
             )
 
         check_y(y=y)
@@ -411,7 +410,10 @@ class ForecasterAutoregCustom(ForecasterBase):
         expected = self.fun_predictors(y_values[:-1])
         observed = X_train[-1, :]
 
-        if expected.shape != observed.shape or not (expected == observed).all():
+        if expected.shape != observed.shape or not np.allclose(expected, observed, equal_nan=True):
+            window_size_error = self.window_size
+            if self.differentiation is not None:
+                window_size_error -= self.differentiation
             raise ValueError(
                 (f"The `window_size` argument ({self.window_size}), declared when "
                  f"initializing the forecaster, does not correspond to the window "

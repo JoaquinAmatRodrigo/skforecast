@@ -11,8 +11,6 @@ import logging
 import sys
 import numpy as np
 import pandas as pd
-# TODO: Review
-# import sklearn
 from sklearn.exceptions import NotFittedError
 from sklearn.pipeline import Pipeline
 from sklearn.base import clone

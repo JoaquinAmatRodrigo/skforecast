@@ -1,5 +1,6 @@
 # Unit test backtesting_forecaster_multiseries
 # ==============================================================================
+import os
 import re
 import pytest
 import joblib
@@ -19,8 +20,10 @@ from skforecast.model_selection_multiseries import backtesting_forecaster_multiv
 # Fixtures
 from .fixtures_model_selection_multiseries import series
 
-series_dict = joblib.load('./fixture_sample_multi_series.joblib')
-exog_dict = joblib.load('./fixture_sample_multi_series_exog.joblib')
+path_series_dict = os.path.normpath(r'skforecast\model_selection_multiseries\tests\fixture_sample_multi_series.joblib')
+series_dict = joblib.load(path_series_dict)
+path_exog_dict = os.path.normpath(r'skforecast\model_selection_multiseries\tests\fixture_sample_multi_series_exog.joblib')
+exog_dict = joblib.load(path_exog_dict)
 end_train = "2016-07-31 23:59:00"
 series_dict_train = {k: v.loc[:end_train,] for k, v in series_dict.items()}
 exog_dict_train = {k: v.loc[:end_train,] for k, v in exog_dict.items()}

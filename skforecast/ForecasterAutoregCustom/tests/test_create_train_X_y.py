@@ -78,10 +78,9 @@ def test_create_train_X_y_ValueError_when_len_y_is_less_than_window_size():
                  )
                  
     err_msg = re.escape(
-                (f'`y` must have as many values as the windows_size needed by '
-                 f'{forecaster.fun_predictors.__name__}. For this Forecaster the '
-                 f'minimum length is {forecaster.window_size + 1}')
-            )
+        ("`y` does not have enough values to calculate "
+         "predictors. It must be at least 11.")
+    )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.create_train_X_y(y=pd.Series(np.arange(5)))
 

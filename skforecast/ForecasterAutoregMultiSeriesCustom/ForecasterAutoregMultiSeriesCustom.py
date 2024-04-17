@@ -530,7 +530,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         expected = self.fun_predictors(y_values[:-1])
         observed = X_train_values[-1, :]
 
-        if expected.shape != observed.shape or not (expected == observed).all():
+        if expected.shape != observed.shape or not np.allclose(expected, observed, equal_nan=True):
             window_size_error = self.window_size
             if self.differentiation is not None:
                 window_size_error -= self.differentiation
@@ -665,12 +665,9 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         
         for k, v in series_dict.items():
             if len(v) < self.window_size + 1:
-                # TODO: Review this warning, it is not clear if the user should increase
-                # the window_size or the length of the series. Because it returns window_size + 1
                 raise ValueError(
-                    (f"Series '{k}' must have as many values as the windows_size "
-                     f"needed by {self.fun_predictors.__name__}. For this "
-                     f"Forecaster the minimum length is {self.window_size + 1}")
+                    (f"Series '{k}' does not have enough values to calculate "
+                     f"predictors. It must be at least {self.window_size + 1}.")
                 )
 
         exog_dict = {serie: None for serie in series_col_names}

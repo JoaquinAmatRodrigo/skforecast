@@ -103,9 +103,8 @@ def test_create_train_X_y_ValueError_when_series_length_is_lower_than_windows_si
                  )
 
     err_msg = re.escape(
-        (f"Series '1' must have as many values as the windows_size needed by "
-         f"{forecaster.fun_predictors.__name__}. For this Forecaster the "
-         f"minimum length is {forecaster.window_size + 1}")      
+        ("Series '1' does not have enough values to calculate "
+         "predictors. It must be at least 4.") 
     )
     with pytest.raises(ValueError, match = err_msg):
         forecaster._create_train_X_y(series = series)
@@ -1550,7 +1549,7 @@ def test_create_train_X_y_output_series_DataFrame_and_NaNs_in_y_train():
          "dropped from `X_train` to maintain alignment. This is caused by "
          "series with interspersed NaNs.")
     )
-    with pytest.warns(MissingValuesWarning, match = warn_msg):    
+    with pytest.warns(MissingValuesWarning, match = warn_msg):
         results = forecaster._create_train_X_y(series=series, exog=exog)
 
     expected = (
