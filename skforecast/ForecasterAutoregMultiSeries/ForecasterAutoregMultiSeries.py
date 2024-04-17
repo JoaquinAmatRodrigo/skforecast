@@ -11,8 +11,10 @@ import logging
 import sys
 import numpy as np
 import pandas as pd
-import sklearn
-import sklearn.pipeline
+# TODO: Review
+# import sklearn
+from sklearn.exceptions import NotFittedError
+from sklearn.pipeline import Pipeline
 from sklearn.base import clone
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import OneHotEncoder
@@ -373,7 +375,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         Information displayed when a ForecasterAutoregMultiSeries object is printed.
         """
 
-        if isinstance(self.regressor, sklearn.pipeline.Pipeline):
+        if isinstance(self.regressor, Pipeline):
             name_pipe_steps = tuple(name + "__" for name in self.regressor.named_steps.keys())
             params = {key : value for key, value in self.regressor.get_params().items() \
                       if key.startswith(name_pipe_steps)}
@@ -1415,6 +1417,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                                     inverse_transform = False
                                 )
             last_window_values = last_window_level.to_numpy()
+            if self.differentiation is not None:
+                last_window_values = self.differentiator_[level].fit_transform(last_window_values)
             
             if isinstance(exog, dict):
                 # Fill the empty dataframe with the exog values of each level
@@ -1443,6 +1447,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                               last_window = last_window_values,
                               exog        = exog_values
                           )
+        
+            if self.differentiation is not None:
+                preds_level = self.differentiator_[level].inverse_transform_next_window(preds_level)
 
             preds_level = pd.Series(
                               data  = preds_level,
@@ -1627,7 +1634,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 else "forecaster.out_sample_residuals"
             )
             for level in levels:
-                # TODO: Review when no residuals are generated during fit method.
                 if (level not in residuals_levels.keys() or 
                     residuals_levels[level] is None or 
                     len(residuals_levels[level]) == 0):
@@ -1710,6 +1716,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                                     inverse_transform = False
                                 )
             last_window_values = last_window_level.to_numpy()
+            if self.differentiation is not None:
+                last_window_values = self.differentiator_[level].fit_transform(last_window_values)
 
             if isinstance(exog, dict):
                 # Fill the empty dataframe with the exog values of each level
@@ -1773,6 +1781,11 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                                        )
                     if exog is not None:
                         exog_boot = exog_boot[1:]
+
+                if self.differentiation is not None:
+                    level_boot_predictions[:, i] = (
+                        self.differentiator_[level].inverse_transform_next_window(level_boot_predictions[:, i])
+                    )
 
             level_boot_predictions = pd.DataFrame(
                                          data    = level_boot_predictions,
@@ -2182,6 +2195,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.lags = initialize_lags(type(self).__name__, lags)
         self.max_lag  = max(self.lags)
         self.window_size = max(self.lags)
+        if self.differentiation is not None:
+            self.window_size += self.differentiation  
 
 
     def set_out_sample_residuals(
@@ -2226,7 +2241,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             )
 
         if not self.fitted:
-            raise sklearn.exceptions.NotFittedError(
+            raise NotFittedError(
                 ("This forecaster is not fitted yet. Call `fit` with appropriate "
                  "arguments before using `set_out_sample_residuals()`.")
             )
@@ -2317,12 +2332,12 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         """
 
         if not self.fitted:
-            raise sklearn.exceptions.NotFittedError(
+            raise NotFittedError(
                 ("This forecaster is not fitted yet. Call `fit` with appropriate "
                  "arguments before using `get_feature_importances()`.")
             )
 
-        if isinstance(self.regressor, sklearn.pipeline.Pipeline):
+        if isinstance(self.regressor, Pipeline):
             estimator = self.regressor[-1]
         else:
             estimator = self.regressor

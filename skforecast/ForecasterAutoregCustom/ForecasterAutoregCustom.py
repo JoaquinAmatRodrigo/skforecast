@@ -11,8 +11,8 @@ import logging
 import sys
 import numpy as np
 import pandas as pd
-import sklearn
-import sklearn.pipeline
+from sklearn.exceptions import NotFittedError
+from sklearn.pipeline import Pipeline
 from sklearn.base import clone
 import inspect
 
@@ -261,7 +261,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         Information displayed when a ForecasterAutoregCustom object is printed.
         """
 
-        if isinstance(self.regressor, sklearn.pipeline.Pipeline):
+        if isinstance(self.regressor, Pipeline):
             name_pipe_steps = tuple(name + "__" for name in self.regressor.named_steps.keys())
             params = {key : value for key, value in self.regressor.get_params().items() \
                       if key.startswith(name_pipe_steps)}
@@ -341,7 +341,11 @@ class ForecasterAutoregCustom(ForecasterBase):
         y_values, y_index = preprocess_y(y=y)
 
         if self.differentiation is not None:
-            y_values = self.differentiator.fit_transform(y_values)
+            if not self.fitted:
+                y_values = self.differentiator.fit_transform(y_values)
+            else:
+                differentiator = clone(self.differentiator)
+                y_values = differentiator.fit_transform(y_values)
         
         if exog is not None:
             if len(exog) != len(y):
@@ -378,7 +382,6 @@ class ForecasterAutoregCustom(ForecasterBase):
        
         X_train  = []
         y_train  = []
-
         for i in range(len(y) - self.window_size):
 
             train_index = np.arange(i, self.window_size + i)
@@ -428,13 +431,19 @@ class ForecasterAutoregCustom(ForecasterBase):
             exog_to_train.index = exog_index[self.window_size:]
             check_exog_dtypes(exog_to_train)
             X_train = pd.concat((X_train, exog_to_train), axis=1)
+
+        if not self.fitted:
+            self.X_train_col_names = X_train.columns.to_list()
         
-        self.X_train_col_names = X_train.columns.to_list()
         y_train = pd.Series(
                       data  = y_train,
                       index = y_index[self.window_size: ],
                       name  = 'y'
                   )
+
+        if self.differentiation is not None:
+            X_train = X_train.iloc[self.differentiation: ]
+            y_train = y_train.iloc[self.differentiation: ]
 
         return X_train, y_train
 
@@ -1302,12 +1311,12 @@ class ForecasterAutoregCustom(ForecasterBase):
         """
 
         if not self.fitted:
-            raise sklearn.exceptions.NotFittedError(
+            raise NotFittedError(
                 ("This forecaster is not fitted yet. Call `fit` with appropriate "
                  "arguments before using `get_feature_importances()`.")
             )
 
-        if isinstance(self.regressor, sklearn.pipeline.Pipeline):
+        if isinstance(self.regressor, Pipeline):
             estimator = self.regressor[-1]
         else:
             estimator = self.regressor

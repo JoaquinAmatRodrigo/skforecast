@@ -11,8 +11,8 @@ import logging
 import sys
 import numpy as np
 import pandas as pd
-import sklearn
-import sklearn.pipeline
+from sklearn.exceptions import NotFittedError
+from sklearn.pipeline import Pipeline
 from sklearn.base import clone
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import OneHotEncoder
@@ -401,7 +401,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         Information displayed when a ForecasterAutoregMultiSeriesCustom object is printed.
         """
 
-        if isinstance(self.regressor, sklearn.pipeline.Pipeline):
+        if isinstance(self.regressor, Pipeline):
             name_pipe_steps = tuple(name + "__" for name in self.regressor.named_steps.keys())
             params = {key : value for key, value in self.regressor.get_params().items() \
                       if key.startswith(name_pipe_steps)}
@@ -531,8 +531,11 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         observed = X_train_values[-1, :]
 
         if expected.shape != observed.shape or not (expected == observed).all():
+            window_size_error = self.window_size
+            if self.differentiation is not None:
+                window_size_error -= self.differentiation
             raise ValueError(
-                (f"The `window_size` argument ({self.window_size}), declared when "
+                (f"The `window_size` argument ({window_size_error}), declared when "
                  f"initializing the forecaster, does not correspond to the window "
                  f"used by `fun_predictors()`.")
             )
@@ -662,8 +665,10 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         
         for k, v in series_dict.items():
             if len(v) < self.window_size + 1:
+                # TODO: Review this warning, it is not clear if the user should increase
+                # the window_size or the length of the series. Because it returns window_size + 1
                 raise ValueError(
-                    (f"`series` {k} must have as many values as the windows_size "
+                    (f"Series '{k}' must have as many values as the windows_size "
                      f"needed by {self.fun_predictors.__name__}. For this "
                      f"Forecaster the minimum length is {self.window_size + 1}")
                 )
@@ -1436,6 +1441,8 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
                                     inverse_transform = False
                                 )
             last_window_values = last_window_level.to_numpy()
+            if self.differentiation is not None:
+                last_window_values = self.differentiator_[level].fit_transform(last_window_values)
             
             if isinstance(exog, dict):
                 # Fill the empty dataframe with the exog values of each level
@@ -1464,6 +1471,9 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
                               last_window = last_window_values,
                               exog        = exog_values
                           )
+        
+            if self.differentiation is not None:
+                preds_level = self.differentiator_[level].inverse_transform_next_window(preds_level)
 
             preds_level = pd.Series(
                               data  = preds_level,
@@ -1648,7 +1658,6 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
                 else "forecaster.out_sample_residuals"
             )
             for level in levels:
-                # TODO: Review when no residuals are generated during fit method.
                 if (level not in residuals_levels.keys() or 
                     residuals_levels[level] is None or 
                     len(residuals_levels[level]) == 0):
@@ -1731,6 +1740,8 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
                                     inverse_transform = False
                                 )
             last_window_values = last_window_level.to_numpy()
+            if self.differentiation is not None:
+                last_window_values = self.differentiator_[level].fit_transform(last_window_values)
 
             if isinstance(exog, dict):
                 # Fill the empty dataframe with the exog values of each level
@@ -1794,6 +1805,11 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
                                        )
                     if exog is not None:
                         exog_boot = exog_boot[1:]
+
+                if self.differentiation is not None:
+                    level_boot_predictions[:, i] = (
+                        self.differentiator_[level].inverse_transform_next_window(level_boot_predictions[:, i])
+                    )
 
             level_boot_predictions = pd.DataFrame(
                                          data    = level_boot_predictions,
@@ -2219,7 +2235,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
             )
 
         if not self.fitted:
-            raise sklearn.exceptions.NotFittedError(
+            raise NotFittedError(
                 ("This forecaster is not fitted yet. Call `fit` with appropriate "
                  "arguments before using `set_out_sample_residuals()`.")
             )
@@ -2310,12 +2326,12 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         """
 
         if not self.fitted:
-            raise sklearn.exceptions.NotFittedError(
+            raise NotFittedError(
                 ("This forecaster is not fitted yet. Call `fit` with appropriate "
                  "arguments before using `get_feature_importances()`.")
             )
 
-        if isinstance(self.regressor, sklearn.pipeline.Pipeline):
+        if isinstance(self.regressor, Pipeline):
             estimator = self.regressor[-1]
         else:
             estimator = self.regressor
