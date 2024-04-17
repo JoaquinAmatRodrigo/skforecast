@@ -200,7 +200,7 @@ def test_create_train_X_y_ValueError_when_series_and_exog_have_different_length(
                            'l2': pd.Series(np.arange(10))})
     forecaster = forecaster = ForecasterAutoregMultiVariate(LinearRegression(), level='l1',
                                                             lags=3, steps=3)
-    
+
     err_msg = re.escape(
         (f"`exog` must have same number of samples as `series`. "
          f"length `exog`: ({len(exog)}), length `series`: ({len(series)})")
@@ -213,19 +213,25 @@ def test_create_train_X_y_ValueError_when_series_and_exog_have_different_index()
     """
     Test ValueError is raised when series and exog have different index.
     """
-    series = pd.DataFrame({'l1': pd.Series(np.arange(10)), 
-                           'l2': pd.Series(np.arange(10))})
-    series.index = pd.date_range(start='2022-01-01', periods=10, freq='1D')
-    forecaster = ForecasterAutoregMultiVariate(LinearRegression(), level='l1',
-                                               lags=3, steps=3)
-    
-    exog = pd.Series(np.arange(10), index=pd.RangeIndex(start=0, stop=10, step=1))
+    series = pd.DataFrame(
+        {"l1": pd.Series(np.arange(10)), "l2": pd.Series(np.arange(10))}
+    )
+    series.index = pd.date_range(start="2022-01-01", periods=10, freq="1D")
+    forecaster = ForecasterAutoregMultiVariate(
+        LinearRegression(), level="l1", lags=3, steps=3
+    )
+
+    exog = pd.Series(
+        np.arange(10), index=pd.RangeIndex(start=0, stop=10, step=1), name="exog"
+    )
 
     err_msg = re.escape(
-        ("Different index for `series` and `exog`. They must be equal "
-         "to ensure the correct alignment of values.")
+        (
+            "Different index for `series` and `exog`. They must be equal "
+            "to ensure the correct alignment of values."
+        )
     )
-    with pytest.raises(ValueError, match = err_msg):
+    with pytest.raises(ValueError, match=err_msg):
         forecaster.fit(series=series, exog=exog)
 
 

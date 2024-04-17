@@ -105,7 +105,7 @@ def test_predict_output_when_regressor_is_LinearRegression_with_transform_y_and_
     as transformer_y and StandardScaler as transformer_exog.
     """
     y = pd.Series( np.array([-0.59,  0.02, -0.9 ,  1.09, -3.61,  0.72, -0.11, -0.4]))
-    exog = pd.Series(np.array([7.5, 24.4, 60.3, 57.3, 50.7, 41.4, 87.2, 47.4]))
+    exog = pd.Series(np.array([7.5, 24.4, 60.3, 57.3, 50.7, 41.4, 87.2, 47.4]), name='exog')
     exog_predict = exog.copy()
     exog_predict.index = pd.RangeIndex(start=8, stop=16)
 
