@@ -12,8 +12,7 @@ import logging
 import sys
 import numpy as np
 import pandas as pd
-import sklearn
-import sklearn.pipeline
+from sklearn.pipeline import Pipeline
 from sklearn.base import clone
 from copy import deepcopy
 
@@ -293,7 +292,7 @@ class ForecasterRnn(ForecasterBase):
         Information displayed when a ForecasterRnn object is printed.
         """
 
-        if isinstance(self.regressor, sklearn.pipeline.Pipeline):
+        if isinstance(self.regressor, Pipeline):
             name_pipe_steps = tuple(
                 name + "__" for name in self.regressor.named_steps.keys()
             )

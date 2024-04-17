@@ -11,8 +11,10 @@ import logging
 import sys
 import numpy as np
 import pandas as pd
-import sklearn
-import sklearn.pipeline
+# TODO: Review
+# import sklearn
+from sklearn.exceptions import NotFittedError
+from sklearn.pipeline import Pipeline
 from sklearn.base import clone
 import inspect
 from copy import copy
@@ -267,7 +269,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         Information displayed when a ForecasterAutoregDirect object is printed.
         """
 
-        if isinstance(self.regressor, sklearn.pipeline.Pipeline):
+        if isinstance(self.regressor, Pipeline):
             name_pipe_steps = tuple(name + "__" for name in self.regressor.named_steps.keys())
             params = {key : value for key, value in self.regressor.get_params().items() \
                       if key.startswith(name_pipe_steps)}
@@ -1400,7 +1402,7 @@ class ForecasterAutoregDirect(ForecasterBase):
             )
 
         if not self.fitted:
-            raise sklearn.exceptions.NotFittedError(
+            raise NotFittedError(
                 ("This forecaster is not fitted yet. Call `fit` with appropriate "
                  "arguments before using `set_out_sample_residuals()`.")
             )
@@ -1498,7 +1500,7 @@ class ForecasterAutoregDirect(ForecasterBase):
             )
         
         if not self.fitted:
-            raise sklearn.exceptions.NotFittedError(
+            raise NotFittedError(
                 ("This forecaster is not fitted yet. Call `fit` with appropriate "
                  "arguments before using `get_feature_importances()`.")
             )
@@ -1509,7 +1511,7 @@ class ForecasterAutoregDirect(ForecasterBase):
                  f"({self.steps}). Got {step}.")
             )
 
-        if isinstance(self.regressor, sklearn.pipeline.Pipeline):
+        if isinstance(self.regressor, Pipeline):
             estimator = self.regressors_[step][-1]
         else:
             estimator = self.regressors_[step]
