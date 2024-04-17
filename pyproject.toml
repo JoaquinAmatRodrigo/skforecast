@@ -50,7 +50,7 @@ sarimax = [
 
 deeplearning = [
     "matplotlib>=3.3, <3.9",
-    "tensorflow>=2.15, <2.17",
+    "tensorflow>=2.15, <2.16",
 ]
 
 plotting = [
@@ -64,7 +64,7 @@ all = [
     "matplotlib>=3.3, <3.9",
     "seaborn>=0.11, <0.14",
     "statsmodels>=0.12, <0.15",
-    "tensorflow>=2.15, <2.17",
+    "tensorflow>=2.15, <2.16",
 ]
 
 full = [
@@ -72,7 +72,7 @@ full = [
     "matplotlib>=3.3, <3.9",
     "seaborn>=0.11, <0.14",
     "statsmodels>=0.12, <0.15",
-    "tensorflow>=2.15, <2.17",
+    "tensorflow>=2.15, <2.16",
 ]
 
 docs = [
