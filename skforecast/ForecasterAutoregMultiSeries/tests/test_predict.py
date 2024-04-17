@@ -27,8 +27,8 @@ from .fixtures_ForecasterAutoregMultiSeries import series
 from .fixtures_ForecasterAutoregMultiSeries import exog
 from .fixtures_ForecasterAutoregMultiSeries import exog_predict
 
-series_dict = joblib.load('./fixture_sample_multi_series.joblib')
-exog_dict = joblib.load('./fixture_sample_multi_series_exog.joblib')
+series_dict = joblib.load(r'./fixture_sample_multi_series.joblib')
+exog_dict = joblib.load(r'./fixture_sample_multi_series_exog.joblib')
 end_train = "2016-07-31 23:59:00"
 series_dict_train = {k: v.loc[:end_train,] for k, v in series_dict.items()}
 exog_dict_train = {k: v.loc[:end_train,] for k, v in exog_dict.items()}
