@@ -121,10 +121,43 @@ def test_create_train_X_y_ValueError_when_y_and_exog_have_different_index():
                     ('Different index for `y` and `exog`. They must be equal '
                      'to ensure the correct alignment of values.')      
                 )
-    with pytest.raises(ValueError, match = err_msg):
+    with pytest.raises(ValueError, match=err_msg):
         forecaster.fit(
-            y=pd.Series(np.arange(10), index=pd.date_range(start='2022-01-01', periods=10, freq='1D')),
-            exog=pd.Series(np.arange(10), index=pd.RangeIndex(start=0, stop=10, step=1))
+            y=pd.Series(
+                np.arange(10),
+                index=pd.date_range(start="2022-01-01", periods=10, freq="1D"),
+            ),
+            exog=pd.Series(
+                np.arange(10),
+                index=pd.RangeIndex(start=0, stop=10, step=1),
+                name="exog_1",
+            ),
+        )
+
+
+def test_create_train_X_y_ValueError_when_exog_is_series_without_name():
+    """
+    Test ValueError is raised when y is pandas series without name.
+    """
+    forecaster = ForecasterAutoregCustom(
+                    regressor      = LinearRegression(),
+                    fun_predictors = create_predictors,
+                    window_size    = 5
+                )
+
+    err_msg = re.escape(
+                'When `exog` is a pandas Series, it must have a name.'    
+                )
+    with pytest.raises(ValueError, match=err_msg):
+        forecaster.fit(
+            y=pd.Series(
+                np.arange(10),
+                index=pd.date_range(start="2022-01-01", periods=10, freq="1D"),
+            ),
+            exog=pd.Series(
+                np.arange(10),
+                index=pd.RangeIndex(start=0, stop=10, step=1),
+            ),
         )
 
 
@@ -148,8 +181,8 @@ def test_create_train_X_y_ValueError_when_len_name_predictors_not_match_X_train_
         forecaster.fit(
             y = pd.Series(np.arange(10), index=pd.date_range(start='2022-01-01', periods=10, freq='1D'))
         )
-        
-        
+
+
 def test_create_train_X_y_ValueError_fun_predictors_return_nan_values():
     """
     Test ValueError is raised when fun_predictors returns `NaN` values.
@@ -203,7 +236,7 @@ def test_create_train_X_y_column_names_match_name_predictors():
               )[0]
     
     assert X_train.columns.to_list() == ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5']
-    
+
 
 def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_None():
     """
