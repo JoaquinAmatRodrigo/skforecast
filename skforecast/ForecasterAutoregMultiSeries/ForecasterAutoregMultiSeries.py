@@ -22,7 +22,6 @@ import inspect
 
 import skforecast
 from ..ForecasterBase import ForecasterBase
-from ..exceptions import warn_skforecast_categories
 from ..exceptions import MissingValuesWarning
 from ..exceptions import IgnoredArgumentWarning
 from ..utils import initialize_lags
@@ -40,6 +39,7 @@ from ..utils import preprocess_last_window
 from ..utils import expand_index
 from ..utils import transform_series
 from ..utils import transform_dataframe
+from ..utils import set_skforecast_warnings
 from ..preprocessing import TimeSeriesDifferentiator
 
 logging.basicConfig(
@@ -1058,7 +1058,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             If `True`, in-sample residuals will be stored in the forecaster object
             after fitting.
         suppress_warnings : bool, default `False`
-            If `True`, skforecast warnings will be suppressed during the prediction 
+            If `True`, skforecast warnings will be suppressed during the training 
             process. See skforecast.exceptions.warn_skforecast_categories for more
             information.
 
@@ -1082,9 +1082,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         
         """
 
-        if suppress_warnings:
-            for warn_category in warn_skforecast_categories:
-                warnings.filterwarnings('ignore', category=warn_category)
+        set_skforecast_warnings(suppress_warnings)
 
         # Reset values in case the forecaster has already been fitted.
         self.series_col_names    = None
@@ -1177,9 +1175,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         if store_last_window:
             self.last_window = last_window
         
-        if suppress_warnings:
-            for warn_category in warn_skforecast_categories:
-                warnings.filterwarnings('default', category=warn_category)
+        set_skforecast_warnings(False)
 
 
     def _recursive_predict(
@@ -1272,7 +1268,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         exog : pandas Series, pandas DataFrame, dict, default `None`
             Exogenous variable/s included as predictor/s.
         suppress_warnings : bool, default `False`
-            If `True`, skforecast warnings will be suppressed during the fitting 
+            If `True`, skforecast warnings will be suppressed during the prediction 
             process. See skforecast.exceptions.warn_skforecast_categories for more
             information.
 
@@ -1283,9 +1279,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         """
 
-        if suppress_warnings:
-            for warn_category in warn_skforecast_categories:
-                warnings.filterwarnings('ignore', category=warn_category)
+        set_skforecast_warnings(suppress_warnings)
 
         input_levels_is_list = False
         if levels is None:
@@ -1466,9 +1460,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         predictions = pd.concat(predictions, axis=1)
         
-        if suppress_warnings:
-            for warn_category in warn_skforecast_categories:
-                warnings.filterwarnings('default', category=warn_category)
+        set_skforecast_warnings(False)
 
         return predictions
 
@@ -1536,9 +1528,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         """
 
-        if suppress_warnings:
-            for warn_category in warn_skforecast_categories:
-                warnings.filterwarnings('ignore', category=warn_category)
+        set_skforecast_warnings(suppress_warnings)
 
         if self.fitted:
 
@@ -1802,9 +1792,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
             boot_predictions[level] = level_boot_predictions
         
-        if suppress_warnings:
-            for warn_category in warn_skforecast_categories:
-                warnings.filterwarnings('default', category=warn_category)
+        set_skforecast_warnings(False)
 
         return boot_predictions
 
@@ -1880,9 +1868,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         """
 
-        if suppress_warnings:
-            for warn_category in warn_skforecast_categories:
-                warnings.filterwarnings('ignore', category=warn_category)
+        set_skforecast_warnings(suppress_warnings)
 
         check_interval(interval=interval)
 
@@ -1916,9 +1902,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         predictions = pd.concat(predictions, axis=1)
         
-        if suppress_warnings:
-            for warn_category in warn_skforecast_categories:
-                warnings.filterwarnings('default', category=warn_category)
+        set_skforecast_warnings(False)
 
         return predictions
 
@@ -1989,9 +1973,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         """
 
-        if suppress_warnings:
-            for warn_category in warn_skforecast_categories:
-                warnings.filterwarnings('ignore', category=warn_category)
+        set_skforecast_warnings(suppress_warnings)
 
         check_interval(quantiles=quantiles)
 
@@ -2015,9 +1997,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         predictions = pd.concat(predictions, axis=1)
         
-        if suppress_warnings:
-            for warn_category in warn_skforecast_categories:
-                warnings.filterwarnings('default', category=warn_category)
+        set_skforecast_warnings(False)
 
         return predictions
 
@@ -2079,9 +2059,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         """
 
-        if suppress_warnings:
-            for warn_category in warn_skforecast_categories:
-                warnings.filterwarnings('ignore', category=warn_category)
+        set_skforecast_warnings(suppress_warnings)
 
         boot_samples = self.predict_bootstrapping(
                            steps               = steps,
@@ -2115,9 +2093,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         predictions = pd.concat(predictions, axis=1)
         
-        if suppress_warnings:
-            for warn_category in warn_skforecast_categories:
-                warnings.filterwarnings('default', category=warn_category)
+        set_skforecast_warnings(False)
 
         return predictions
 

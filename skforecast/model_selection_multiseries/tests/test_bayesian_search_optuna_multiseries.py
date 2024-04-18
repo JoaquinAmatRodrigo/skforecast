@@ -4,6 +4,7 @@ import os
 import re
 import sys
 import pytest
+from pytest import approx
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestRegressor
@@ -503,7 +504,8 @@ def test_results_output_bayesian_search_optuna_multiseries_ForecasterAutoregMult
     forecaster = ForecasterAutoregMultiSeriesCustom(
                      regressor      = Ridge(random_state=123),
                      fun_predictors = create_predictors,
-                     window_size    = 4
+                     window_size    = 4,
+                     encoding       = 'onehot'
                  )
     steps = 3
     n_validation = 12
@@ -771,7 +773,8 @@ def test_evaluate_bayesian_search_optuna_multiseries_when_return_best_Forecaster
     forecaster = ForecasterAutoregMultiSeriesCustom(
                      regressor      = Ridge(random_state=123),
                      fun_predictors = create_predictors,
-                     window_size    = 4
+                     window_size    = 4,
+                     encoding       = 'onehot'
                  )
     steps = 3
     n_validation = 12
@@ -883,7 +886,7 @@ def test_results_opt_best_output__bayesian_search_optuna_multiseries_with_output
                        )[1]
 
     assert best_trial.number == results_opt_best.number
-    assert best_trial.values == results_opt_best.values
+    assert best_trial.values == approx(results_opt_best.values)
     assert best_trial.params == results_opt_best.params
 
 
@@ -938,7 +941,8 @@ def test_bayesian_search_optuna_multiseries_ForecasterAutoregMultiSeriesCustom_o
     forecaster = ForecasterAutoregMultiSeriesCustom(
                      regressor      = RandomForestRegressor(random_state=123),
                      fun_predictors = create_predictors,
-                     window_size    = 4
+                     window_size    = 4,
+                     encoding       = 'onehot'
                  )
 
     steps = 3

@@ -22,7 +22,6 @@ import inspect
 
 import skforecast
 from ..ForecasterBase import ForecasterBase
-from ..exceptions import warn_skforecast_categories
 from ..exceptions import MissingValuesWarning
 from ..exceptions import IgnoredArgumentWarning
 from ..utils import initialize_weights
@@ -35,12 +34,11 @@ from ..utils import get_exog_dtypes
 from ..utils import check_exog_dtypes
 from ..utils import check_interval
 from ..utils import check_predict_input
-from ..utils import preprocess_y
 from ..utils import preprocess_last_window
-from ..utils import preprocess_exog
 from ..utils import expand_index
 from ..utils import transform_series
 from ..utils import transform_dataframe
+from ..utils import set_skforecast_warnings
 from ..preprocessing import TimeSeriesDifferentiator
 
 logging.basicConfig(
@@ -578,11 +576,10 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
                       name  = 'y'
                   )
 
-        if self.differentiation is not None:
-            X_train_predictors = X_train_predictors.iloc[self.differentiation: ]
-            y_train = y_train.iloc[self.differentiation: ]
-            if X_train_exog is not None:
-                X_train_exog = X_train_exog.iloc[self.differentiation: ]
+        # No need to delete the first self.differentiation values of y_train and
+        # X_train as in the ForecasterAutoregMultiSeries since they are already 
+        # removed in the creation of X_train because winsodw_size is increased 
+        # by the order of differentiation.
 
         return X_train_predictors, X_train_exog, y_train
 
@@ -1081,7 +1078,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
             If `True`, in-sample residuals will be stored in the forecaster object
             after fitting.
         suppress_warnings : bool, default `False`
-            If `True`, skforecast warnings will be suppressed during the prediction 
+            If `True`, skforecast warnings will be suppressed during the training 
             process. See skforecast.exceptions.warn_skforecast_categories for more
             information.
 
@@ -1105,9 +1102,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         
         """
 
-        if suppress_warnings:
-            for warn_category in warn_skforecast_categories:
-                warnings.filterwarnings('ignore', category=warn_category)
+        set_skforecast_warnings(suppress_warnings)
 
         # Reset values in case the forecaster has already been fitted.
         self.series_col_names    = None
@@ -1200,9 +1195,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         if store_last_window:
             self.last_window = last_window
         
-        if suppress_warnings:
-            for warn_category in warn_skforecast_categories:
-                warnings.filterwarnings('default', category=warn_category)
+        set_skforecast_warnings(False)
 
 
     def _recursive_predict(
@@ -1295,7 +1288,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         exog : pandas Series, pandas DataFrame, dict, default `None`
             Exogenous variable/s included as predictor/s.
         suppress_warnings : bool, default `False`
-            If `True`, skforecast warnings will be suppressed during the fitting 
+            If `True`, skforecast warnings will be suppressed during the prediction 
             process. See skforecast.exceptions.warn_skforecast_categories for more
             information.
 
@@ -1306,9 +1299,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
 
         """
 
-        if suppress_warnings:
-            for warn_category in warn_skforecast_categories:
-                warnings.filterwarnings('ignore', category=warn_category)
+        set_skforecast_warnings(suppress_warnings)
 
         input_levels_is_list = False
         if levels is None:
@@ -1489,9 +1480,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
 
         predictions = pd.concat(predictions, axis=1)
         
-        if suppress_warnings:
-            for warn_category in warn_skforecast_categories:
-                warnings.filterwarnings('default', category=warn_category)
+        set_skforecast_warnings(False)
 
         return predictions
 
@@ -1559,9 +1548,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
 
         """
 
-        if suppress_warnings:
-            for warn_category in warn_skforecast_categories:
-                warnings.filterwarnings('ignore', category=warn_category)
+        set_skforecast_warnings(suppress_warnings)
 
         if self.fitted:
 
@@ -1825,9 +1812,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
 
             boot_predictions[level] = level_boot_predictions
         
-        if suppress_warnings:
-            for warn_category in warn_skforecast_categories:
-                warnings.filterwarnings('default', category=warn_category)
+        set_skforecast_warnings(False)
 
         return boot_predictions
 
@@ -1903,9 +1888,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
 
         """
 
-        if suppress_warnings:
-            for warn_category in warn_skforecast_categories:
-                warnings.filterwarnings('ignore', category=warn_category)
+        set_skforecast_warnings(suppress_warnings)
 
         check_interval(interval=interval)
 
@@ -1939,9 +1922,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
 
         predictions = pd.concat(predictions, axis=1)
         
-        if suppress_warnings:
-            for warn_category in warn_skforecast_categories:
-                warnings.filterwarnings('default', category=warn_category)
+        set_skforecast_warnings(False)
 
         return predictions
 
@@ -2012,9 +1993,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
 
         """
 
-        if suppress_warnings:
-            for warn_category in warn_skforecast_categories:
-                warnings.filterwarnings('ignore', category=warn_category)
+        set_skforecast_warnings(suppress_warnings)
 
         check_interval(quantiles=quantiles)
 
@@ -2038,9 +2017,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
 
         predictions = pd.concat(predictions, axis=1)
         
-        if suppress_warnings:
-            for warn_category in warn_skforecast_categories:
-                warnings.filterwarnings('default', category=warn_category)
+        set_skforecast_warnings(False)
 
         return predictions
 
@@ -2102,9 +2079,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
 
         """
 
-        if suppress_warnings:
-            for warn_category in warn_skforecast_categories:
-                warnings.filterwarnings('ignore', category=warn_category)
+        set_skforecast_warnings(suppress_warnings)
 
         boot_samples = self.predict_bootstrapping(
                            steps               = steps,
@@ -2138,9 +2113,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
 
         predictions = pd.concat(predictions, axis=1)
         
-        if suppress_warnings:
-            for warn_category in warn_skforecast_categories:
-                warnings.filterwarnings('default', category=warn_category)
+        set_skforecast_warnings(False)
 
         return predictions
 

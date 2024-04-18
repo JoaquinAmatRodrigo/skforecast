@@ -492,6 +492,7 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
                      regressor          = Ridge(random_state=123),
                      fun_predictors     = create_predictors,
                      window_size        = 4,
+                     encoding           = 'onehot',
                      transformer_series = None
                  )
 
@@ -541,6 +542,7 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
                      regressor          = Ridge(random_state=123),
                      fun_predictors     = create_predictors,
                      window_size        = 4,
+                     encoding           = 'onehot',
                      transformer_series = None
                  )
 
@@ -587,6 +589,7 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
                      regressor          = Ridge(random_state=123),
                      fun_predictors     = create_predictors,
                      window_size        = 4,
+                     encoding           = 'onehot',
                      transformer_series = None
                  )
 
@@ -631,9 +634,10 @@ def test_evaluate_grid_hyperparameters_multiseries_when_return_best_ForecasterAu
     _evaluate_grid_hyperparameters_multiseries.
     """
     forecaster = ForecasterAutoregMultiSeriesCustom(
-                     regressor          = Ridge(random_state=123),
-                     fun_predictors     = create_predictors,
-                     window_size        = 4
+                     regressor      = Ridge(random_state=123),
+                     fun_predictors = create_predictors,
+                     window_size    = 4,
+                     encoding       = 'onehot'
                  )
 
     steps = 3
@@ -671,7 +675,8 @@ def test_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMultiSeriesC
     forecaster = ForecasterAutoregMultiSeriesCustom(
                      regressor      = Ridge(random_state=123),
                      fun_predictors = create_predictors,
-                     window_size    = 4
+                     window_size    = 4,
+                     encoding       = 'onehot'
                  )
 
     steps = 3
@@ -714,7 +719,8 @@ def test_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMultiSeriesC
     forecaster = ForecasterAutoregMultiSeriesCustom(
                      regressor      = Ridge(random_state=123),
                      fun_predictors = create_predictors,
-                     window_size    = 4
+                     window_size    = 4,
+                     encoding       = 'onehot'
                  )
 
     steps = 3

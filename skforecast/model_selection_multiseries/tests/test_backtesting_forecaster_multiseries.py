@@ -98,13 +98,16 @@ def test_backtesting_forecaster_multiseries_TypeError_when_forecaster_not_a_fore
                                                         encoding='onehot'), 'auto'),
                           (ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                               fun_predictors=create_predictors, 
-                                                              window_size=2, transformer_series=None), -1),
+                                                              window_size=2, transformer_series=None,
+                                                              encoding='onehot'), -1),
                           (ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                               fun_predictors=create_predictors, 
-                                                              window_size=2, transformer_series=None), 1),
+                                                              window_size=2, transformer_series=None,
+                                                              encoding='onehot'), 1),
                           (ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                               fun_predictors=create_predictors, 
-                                                              window_size=2, transformer_series=None), 'auto')], 
+                                                              window_size=2, transformer_series=None,
+                                                              encoding='onehot'), 'auto')], 
                          ids=lambda fc: f'forecaster, n_jobs: {fc}')
 def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_not_refit_with_mocked(forecaster, n_jobs):
     """
@@ -153,7 +156,8 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                        encoding='onehot'), 
                           ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                              fun_predictors=create_predictors, 
-                                                             window_size=2, transformer_series=None)], 
+                                                             window_size=2, transformer_series=None,
+                                                             encoding='onehot')], 
                          ids=lambda forecaster: f'forecaster: {type(forecaster).__name__}')
 def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_not_refit_not_initial_train_size_with_mocked(forecaster):
     """
@@ -216,13 +220,16 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                         encoding='onehot'), 'auto'),
                           (ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                               fun_predictors=create_predictors, 
-                                                              window_size=2, transformer_series=None), -1),
+                                                              window_size=2, transformer_series=None,
+                                                              encoding='onehot'), -1),
                           (ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                               fun_predictors=create_predictors, 
-                                                              window_size=2, transformer_series=None), 1),
+                                                              window_size=2, transformer_series=None,
+                                                              encoding='onehot'), 1),
                           (ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                               fun_predictors=create_predictors, 
-                                                              window_size=2, transformer_series=None), 'auto')], 
+                                                              window_size=2, transformer_series=None,
+                                                              encoding='onehot'), 'auto')], 
                          ids=lambda fc: f'forecaster, n_jobs: {fc}')
 def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_refit_fixed_train_size_with_mocked(forecaster, n_jobs):
     """
@@ -285,13 +292,16 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                         encoding='onehot'), 'auto'),
                           (ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                               fun_predictors=create_predictors, 
-                                                              window_size=2, transformer_series=None), -1),
+                                                              window_size=2, transformer_series=None,
+                                                              encoding='onehot'), -1),
                           (ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                               fun_predictors=create_predictors, 
-                                                              window_size=2, transformer_series=None), 1),
+                                                              window_size=2, transformer_series=None,
+                                                              encoding='onehot'), 1),
                           (ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                               fun_predictors=create_predictors, 
-                                                              window_size=2, transformer_series=None), 'auto')], 
+                                                              window_size=2, transformer_series=None,
+                                                              encoding='onehot'), 'auto')], 
                          ids=lambda fc: f'forecaster, n_jobs: {fc}')
 def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_refit_with_mocked(forecaster, n_jobs):
     """
@@ -341,7 +351,8 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                        encoding='onehot'), 
                           ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                              fun_predictors=create_predictors, 
-                                                             window_size=2, transformer_series=None)], 
+                                                             window_size=2, transformer_series=None,
+                                                             encoding='onehot')], 
                          ids=lambda forecaster: f'forecaster: {type(forecaster).__name__}')
 def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_refit_list_metrics_with_mocked_metrics(forecaster):
     """
@@ -392,7 +403,8 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                        encoding='onehot'), 
                           ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                              fun_predictors=create_predictors, 
-                                                             window_size=2, transformer_series=None)], 
+                                                             window_size=2, transformer_series=None,
+                                                             encoding='onehot')], 
                          ids=lambda forecaster: f'forecaster: {type(forecaster).__name__}')
 def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_no_refit_levels_metrics_remainder_with_mocked(forecaster):
     """
@@ -446,7 +458,8 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                        encoding='onehot'), 
                           ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                              fun_predictors=create_predictors, 
-                                                             window_size=2, transformer_series=None)], 
+                                                             window_size=2, transformer_series=None,
+                                                             encoding='onehot')], 
                          ids=lambda forecaster: f'forecaster: {type(forecaster).__name__}')
 def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_refit_levels_metrics_remainder_with_mocked(forecaster):
     """
@@ -500,7 +513,8 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                        encoding='onehot'), 
                           ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                              fun_predictors=create_predictors, 
-                                                             window_size=2, transformer_series=None)], 
+                                                             window_size=2, transformer_series=None,
+                                                             encoding='onehot')], 
                          ids=lambda forecaster: f'forecaster: {type(forecaster).__name__}')
 def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_not_refit_exog_interval_with_mocked(forecaster):
     """
@@ -558,7 +572,8 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                        encoding='onehot'), 
                           ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                              fun_predictors=create_predictors, 
-                                                             window_size=2, transformer_series=None)], 
+                                                             window_size=2, transformer_series=None,
+                                                             encoding='onehot')], 
                          ids=lambda forecaster: f'forecaster: {type(forecaster).__name__}')
 def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_refit_fixed_train_size_exog_interval_with_mocked(forecaster):
     """
@@ -616,7 +631,8 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                        encoding='onehot'), 
                           ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                              fun_predictors=create_predictors, 
-                                                             window_size=2, transformer_series=None)], 
+                                                             window_size=2, transformer_series=None,
+                                                             encoding='onehot')], 
                          ids=lambda forecaster: f'forecaster: {type(forecaster).__name__}')
 def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_no_refit_exog_interval_gap_with_mocked(forecaster):
     """
@@ -681,7 +697,8 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                        encoding='onehot'), 
                           ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                              fun_predictors=create_predictors, 
-                                                             window_size=2, transformer_series=None)], 
+                                                             window_size=2, transformer_series=None,
+                                                             encoding='onehot')], 
                          ids=lambda forecaster: f'forecaster: {type(forecaster).__name__}')
 def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_refit_exog_interval_gap_with_mocked(forecaster):
     """
@@ -744,7 +761,8 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                        encoding='onehot'), 
                           ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                              fun_predictors=create_predictors, 
-                                                             window_size=2, transformer_series=None)], 
+                                                             window_size=2, transformer_series=None,
+                                                             encoding='onehot')], 
                          ids=lambda forecaster: f'forecaster: {type(forecaster).__name__}')
 def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_refit_exog_fixed_train_size_interval_gap_with_mocked(forecaster):
     """
@@ -810,7 +828,8 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                        encoding='onehot'), 
                           ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                              fun_predictors=create_predictors, 
-                                                             window_size=2, transformer_series=None)], 
+                                                             window_size=2, transformer_series=None,
+                                                             encoding='onehot')], 
                          ids=lambda forecaster: f'forecaster: {type(forecaster).__name__}')
 def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_no_refit_different_lengths_with_mocked(forecaster):
     """
@@ -876,7 +895,8 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                        encoding='onehot'), 
                           ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                              fun_predictors=create_predictors, 
-                                                             window_size=2, transformer_series=None)], 
+                                                             window_size=2, transformer_series=None,
+                                                             encoding='onehot')], 
                          ids=lambda forecaster: f'forecaster: {type(forecaster).__name__}')
 def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_refit_different_lengths_with_mocked(forecaster):
     """
@@ -939,7 +959,8 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                        encoding='onehot'), 
                           ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                              fun_predictors=create_predictors, 
-                                                             window_size=2, transformer_series=None)], 
+                                                             window_size=2, transformer_series=None,
+                                                             encoding='onehot')], 
                          ids=lambda forecaster: f'forecaster: {type(forecaster).__name__}')
 def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_refit_fixed_train_size_different_lengths_with_mocked(forecaster):
     """
@@ -1005,7 +1026,8 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                        encoding='onehot'), 
                           ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                              fun_predictors=create_predictors, 
-                                                             window_size=2, transformer_series=None)], 
+                                                             window_size=2, transformer_series=None,
+                                                             encoding='onehot')], 
                          ids=lambda forecaster: f'forecaster: {type(forecaster).__name__}')
 def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_refit_int_interval_yes_exog_yes_remainder_with_mocked(forecaster):
     """
@@ -1095,7 +1117,8 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                        encoding='onehot'), 
                           ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                              fun_predictors=create_predictors, 
-                                                             window_size=2, transformer_series=None)], 
+                                                             window_size=2, transformer_series=None,
+                                                             encoding='onehot')], 
                          ids=lambda forecaster: f'forecaster: {type(forecaster).__name__}')
 def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_refit_int_interval_yes_exog_not_allow_remainder_gap_with_mocked(forecaster):
     """

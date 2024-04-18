@@ -443,9 +443,10 @@ class ForecasterAutoregCustom(ForecasterBase):
                       name  = 'y'
                   )
 
-        if self.differentiation is not None:
-            X_train = X_train.iloc[self.differentiation: ]
-            y_train = y_train.iloc[self.differentiation: ]
+        # No need to delete the first self.differentiation values of y_train and
+        # X_train as in the ForecasterAutoreg since they are already removed 
+        # in the creation of X_train because winsodw_size is increased by the 
+        # order of differentiation.
 
         return X_train, y_train
 

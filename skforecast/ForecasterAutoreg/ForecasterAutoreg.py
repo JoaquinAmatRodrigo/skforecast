@@ -364,7 +364,7 @@ class ForecasterAutoreg(ForecasterBase):
             X_data[:, i] = y[self.max_lag - lag: -lag]
 
         y_data = y[self.max_lag:]
-            
+        
         return X_data, y_data
 
 
@@ -460,7 +460,8 @@ class ForecasterAutoreg(ForecasterBase):
             exog_to_train = exog.iloc[self.max_lag:, ]
             exog_to_train.index = exog_index[self.max_lag:]
             X_train = pd.concat((X_train, exog_to_train), axis=1)
-
+        
+        # TODO: move self to fit method and make X_train_col_names a return
         if not self.fitted:
             self.X_train_col_names = X_train.columns.to_list()
         
@@ -599,7 +600,6 @@ class ForecasterAutoreg(ForecasterBase):
             self._binning_in_sample_residuals(
                 y_true = y_train,
                 y_pred = in_sample_predictions
-
             )
         
         # The last time window of training data is stored so that lags needed as
@@ -609,9 +609,9 @@ class ForecasterAutoreg(ForecasterBase):
 
 
     def _binning_in_sample_residuals(
-            self,
-            y_true: pd.Series,
-            y_pred: pd.Series,
+        self,
+        y_true: pd.Series,
+        y_pred: pd.Series,
     ) -> None:
         """
         Binning residuals according to the predicted value each residual is
@@ -637,11 +637,11 @@ class ForecasterAutoreg(ForecasterBase):
         y_pred = y_pred.rename('prediction')
         residuals = (y_true - y_pred).rename('residual')
         data = pd.merge(
-                    residuals,
-                    y_pred,
-                    left_index=True,
-                    right_index=True
-                )
+                   residuals,
+                   y_pred,
+                   left_index  = True,
+                   right_index = True
+               )
         self.binner.fit(data[['prediction']].to_numpy())
         data['bin'] = self.binner.transform(data[['prediction']].to_numpy()).astype(int)
         self.in_sample_residuals_by_bin = (
@@ -897,16 +897,16 @@ class ForecasterAutoreg(ForecasterBase):
             if not binned_residuals and self.out_sample_residuals is None:
                 raise ValueError(
                     ("`forecaster.out_sample_residuals` is `None`. Use "
-                    "`in_sample_residuals=True` or method `set_out_sample_residuals()` "
-                    "before `predict_interval()`, `predict_bootstrapping()`, "
-                    "`predict_quantiles()` or `predict_dist()`.")
+                     "`in_sample_residuals=True` or method `set_out_sample_residuals()` "
+                     "before `predict_interval()`, `predict_bootstrapping()`, "
+                     "`predict_quantiles()` or `predict_dist()`.")
                 )
             if binned_residuals and self.out_sample_residuals_by_bin is None:
                 raise ValueError(
                     ("`forecaster.out_sample_residuals_by_bin` is `None`. Use "
-                    "`in_sample_residuals=True` or method `set_out_sample_residuals()` "
-                    "before `predict_interval()`, `predict_bootstrapping()`, "
-                    "`predict_quantiles()` or `predict_dist()`.")
+                     "`in_sample_residuals=True` or method `set_out_sample_residuals()` "
+                     "before `predict_interval()`, `predict_bootstrapping()`, "
+                     "`predict_quantiles()` or `predict_dist()`.")
                 )
         
         if last_window is None:
@@ -1487,10 +1487,10 @@ class ForecasterAutoreg(ForecasterBase):
         else:
             # Residuals are binned according to the predicted values.
             data = pd.merge(
-                        residuals,
-                        y_pred,
-                        left_index=True,
-                        right_index=True
+                       residuals,
+                       y_pred,
+                       left_index  = True,
+                       right_index = True
                    )
             data['bin'] = self.binner.transform(data[['prediction']].to_numpy()).astype(int)
             residuals_by_bin = data.groupby('bin')['residuals'].apply(np.array).to_dict()
@@ -1532,11 +1532,11 @@ class ForecasterAutoreg(ForecasterBase):
             empty_bins = [k for k, v in self.out_sample_residuals_by_bin.items() if len(v) == 0]
             if empty_bins:
                 warnings.warn(
-                    f"The following bins have no out of sample residuals: {empty_bins}. "
-                    f"No predicted values fall in the interval "
-                    f"{[self.binner_intervals[bin] for bin in empty_bins]}. "
-                    f"Empty bins will be filled with a random sample of residuals from "
-                    f"the other bins."
+                    (f"The following bins have no out of sample residuals: {empty_bins}. "
+                     f"No predicted values fall in the interval "
+                     f"{[self.binner_intervals[bin] for bin in empty_bins]}. "
+                     f"Empty bins will be filled with a random sample of residuals from "
+                     f"the other bins.")
                 )
                 for k in empty_bins:
                     rng = np.random.default_rng(seed=123)
@@ -1546,7 +1546,7 @@ class ForecasterAutoreg(ForecasterBase):
                                                               replace=True
                                                           )
 
-    
+
     def get_feature_importances(
         self,
         sort_importance: bool=True

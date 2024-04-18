@@ -114,12 +114,12 @@ def test_predict_output_when_regressor_is_LinearRegression_using_exog():
     forecaster = ForecasterAutoregDirect(LinearRegression(), lags=3, steps=5)
     forecaster.fit(
         y=pd.Series(np.arange(50)),
-        exog=pd.Series(np.arange(start=100, stop=150, step=1)),
-        name="exog",
+        exog=pd.Series(np.arange(start=100, stop=150, step=1), name="exog")
     )
     results = forecaster.predict(steps = 5, 
                                  exog  = pd.Series(np.arange(start=25, stop=50, step=0.5),
-                                                   index=pd.RangeIndex(start=50, stop=100)))
+                                                   index=pd.RangeIndex(start=50, stop=100),
+                                                   name="exog"))
     expected = pd.Series(
                    data  = np.array([18.750, 19.625, 20.500, 21.375, 22.250]),
                    index = pd.RangeIndex(start=50, stop=55, step=1),

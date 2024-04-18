@@ -20,6 +20,7 @@ import inspect
 from copy import deepcopy
 
 import skforecast
+from ..exceptions import warn_skforecast_categories
 from ..exceptions import MissingValuesWarning
 from ..exceptions import MissingExogWarning
 from ..exceptions import DataTypeWarning
@@ -2509,3 +2510,30 @@ def align_series_and_exog_multiseries(
                 exog_dict[k] = exog_dict[k].loc[first_valid_index : last_valid_index]
 
     return series_dict, exog_dict
+
+
+def set_skforecast_warnings(
+    suppress_warnings: bool
+) -> None:
+    """
+    Set skforecast warnings action.
+
+    Parameters
+    ----------
+    suppress_warnings : bool
+        If `True`, skforecast warnings will be suppressed. If `False`, skforecast
+        warnings will be shown as default. See 
+        skforecast.exceptions.warn_skforecast_categories for more information.
+
+    Returns
+    -------
+    None
+    
+    """
+
+    if suppress_warnings:
+        for category in warn_skforecast_categories:
+            warnings.filterwarnings("ignore", category=category)
+    else:
+        for category in warn_skforecast_categories:
+            warnings.filterwarnings("default", category=category)

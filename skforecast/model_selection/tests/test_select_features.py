@@ -231,7 +231,6 @@ def test_select_features_when_selector_is_RFE_and_select_only_is_None():
     warn_msg = re.escape(
         ("No autoregressive features has been selected. Since a Forecaster "
          "cannot be created without them, be sure to include at least one "
-         "to ensure the autoregressive component of the forecast model "
          "using the `force_inclusion` parameter.")
     )
     with pytest.warns(UserWarning, match = warn_msg):
@@ -263,7 +262,6 @@ def test_select_features_when_selector_is_RFE_and_select_only_is_None_Forecaster
     warn_msg = re.escape(
         ("No autoregressive features has been selected. Since a Forecaster "
          "cannot be created without them, be sure to include at least one "
-         "to ensure the autoregressive component of the forecast model "
          "using the `force_inclusion` parameter.")
     )
     with pytest.warns(UserWarning, match = warn_msg):

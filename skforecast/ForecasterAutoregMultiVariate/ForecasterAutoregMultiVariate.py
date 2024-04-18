@@ -41,6 +41,7 @@ from ..utils import expand_index
 from ..utils import transform_series
 from ..utils import transform_dataframe
 from ..utils import select_n_jobs_fit_forecaster
+from ..utils import set_skforecast_warnings
 
 logging.basicConfig(
     format = '%(name)-10s %(levelname)-5s %(message)s', 
@@ -197,6 +198,9 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         **New in version 0.9.0**
     forecaster_id : str, int
         Name used as an identifier of the forecaster.
+    dropna_from_series : Ignored
+        Not used, present here for API consistency by convention.
+
 
     Notes
     -----
@@ -246,6 +250,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         self.skforecast_version      = skforecast.__version__
         self.python_version          = sys.version.split(" ")[0]
         self.forecaster_id           = forecaster_id
+        self.dropna_from_series      = False # Ignored in this forecaster
 
         if not isinstance(level, str):
             raise TypeError(
@@ -761,7 +766,9 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         self,
         series: pd.DataFrame,
         exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-        store_in_sample_residuals: bool=True
+        store_last_window: Union[bool, list]=True,
+        store_in_sample_residuals: bool=True,
+        suppress_warnings: bool=False
     ) -> None:
         """
         Training Forecaster.
@@ -777,15 +784,27 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             Exogenous variable/s included as predictor/s. Must have the same
             number of observations as `series` and their indexes must be aligned so
             that series[i] is regressed on exog[i].
+        store_last_window : bool, list, default `True`
+            Whether or not to store the last window of training data.
+
+            - If `True`, last_window is stored for all series. 
+            - If `list`, last_window is stored for the series present in the list.
+            - If `False`, last_window is not stored.
         store_in_sample_residuals : bool, default `True`
             If `True`, in-sample residuals will be stored in the forecaster object
             after fitting.
+        suppress_warnings : bool, default `False`
+            If `True`, skforecast warnings will be suppressed during the training 
+            process. See skforecast.exceptions.warn_skforecast_categories for more
+            information.
 
         Returns
         -------
         None
         
         """
+
+        set_skforecast_warnings(suppress_warnings)
         
         # Reset values in case the forecaster has already been fitted.
         self.index_type          = None
@@ -907,7 +926,25 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         else: 
             self.index_freq = X_train.index.step
 
-        self.last_window = series.iloc[-self.max_lag:, ][self.series_X_train].copy()
+        if store_last_window:
+
+            series_to_store = (
+                self.series_X_train if store_last_window is True else store_last_window
+            )
+
+            series_not_in_X_train = set(series_to_store) - set(self.series_X_train)
+            if series_not_in_X_train:
+                warnings.warn(
+                    (f"Series {series_not_in_X_train} are not present in "
+                     f"`series`. No last window is stored for them."),
+                    IgnoredArgumentWarning
+                )
+                series_to_store = [s for s in series_to_store 
+                                   if s not in series_not_in_X_train]
+            
+            self.last_window = series.iloc[-self.max_lag:, ][series_to_store].copy()
+        
+        set_skforecast_warnings(False)
 
 
     def predict(
@@ -915,6 +952,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         steps: Optional[Union[int, list]]=None,
         last_window: Optional[pd.DataFrame]=None,
         exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+        suppress_warnings: bool=False,
         levels: Any=None
     ) -> pd.DataFrame:
         """
@@ -939,6 +977,10 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             right after training data.
         exog : pandas Series, pandas DataFrame, default `None`
             Exogenous variable/s included as predictor/s.
+        suppress_warnings : bool, default `False`
+            If `True`, skforecast warnings will be suppressed during the prediction 
+            process. See skforecast.exceptions.warn_skforecast_categories for more
+            information.
         levels : Ignored
             Not used, present here for API consistency by convention.
 
@@ -948,6 +990,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             Predicted values.
 
         """
+
+        set_skforecast_warnings(suppress_warnings)
 
         if isinstance(steps, int):
             steps = list(np.arange(steps) + 1)
@@ -1065,6 +1109,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                           fit               = False,
                           inverse_transform = True
                       )
+        
+        set_skforecast_warnings(False)
 
         return predictions
 
@@ -1077,6 +1123,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         n_boot: int=500,
         random_state: int=123,
         in_sample_residuals: bool=True,
+        suppress_warnings: bool=False,
         levels: Any=None
     ) -> pd.DataFrame:
         """
@@ -1115,6 +1162,10 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             residuals are used. In the latter case, the user should have
             calculated and stored the residuals within the forecaster (see
             `set_out_sample_residuals()`).
+        suppress_warnings : bool, default `False`
+            If `True`, skforecast warnings will be suppressed during the prediction 
+            process. See skforecast.exceptions.warn_skforecast_categories for more
+            information.
         levels : Ignored
             Not used, present here for API consistency by convention.
 
@@ -1131,6 +1182,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         Forecasting: Principles and Practice (3nd ed) Rob J Hyndman and George Athanasopoulos.
 
         """
+
+        set_skforecast_warnings(suppress_warnings)
 
         if self.fitted:
             if isinstance(steps, int):
@@ -1214,10 +1267,12 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                                             fit               = False,
                                             inverse_transform = True
                                         )
+
+        set_skforecast_warnings(False)
         
         return boot_predictions
 
-    
+
     def predict_interval(
         self,
         steps: Optional[Union[int, list]]=None,
@@ -1227,6 +1282,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         n_boot: int=500,
         random_state: int=123,
         in_sample_residuals: bool=True,
+        suppress_warnings: bool=False,
         levels: Any=None
     ) -> pd.DataFrame:
         """
@@ -1267,6 +1323,10 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             residuals are used. In the latter case, the user should have
             calculated and stored the residuals within the forecaster (see
             `set_out_sample_residuals()`).
+        suppress_warnings : bool, default `False`
+            If `True`, skforecast warnings will be suppressed during the prediction 
+            process. See skforecast.exceptions.warn_skforecast_categories for more
+            information.
         levels : Ignored
             Not used, present here for API consistency by convention.
 
@@ -1288,6 +1348,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         
         """
 
+        set_skforecast_warnings(suppress_warnings)
+
         check_interval(interval=interval)
 
         predictions = self.predict(
@@ -1307,8 +1369,10 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
 
         interval = np.array(interval)/100
         predictions_interval = boot_predictions.quantile(q=interval, axis=1).transpose()
-        predictions_interval.columns = ['lower_bound', 'upper_bound']
+        predictions_interval.columns = [f'{self.level}_lower_bound', f'{self.level}_upper_bound']
         predictions = pd.concat((predictions, predictions_interval), axis=1)
+
+        set_skforecast_warnings(False)
 
         return predictions
 
@@ -1322,6 +1386,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         n_boot: int=500,
         random_state: int=123,
         in_sample_residuals: bool=True,
+        suppress_warnings: bool=False,
         levels: Any=None
     ) -> pd.DataFrame:
         """
@@ -1361,6 +1426,10 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             residuals are used. In the latter case, the user should have
             calculated and stored the residuals within the forecaster (see
             `set_out_sample_residuals()`).
+        suppress_warnings : bool, default `False`
+            If `True`, skforecast warnings will be suppressed during the prediction 
+            process. See skforecast.exceptions.warn_skforecast_categories for more
+            information.
         levels : Ignored
             Not used, present here for API consistency by convention.
 
@@ -1378,6 +1447,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         
         """
 
+        set_skforecast_warnings(suppress_warnings)
+
         check_interval(quantiles=quantiles)
 
         boot_predictions = self.predict_bootstrapping(
@@ -1390,7 +1461,9 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                            )
 
         predictions = boot_predictions.quantile(q=quantiles, axis=1).transpose()
-        predictions.columns = [f'q_{q}' for q in quantiles]
+        predictions.columns = [f'{self.level}_q_{q}' for q in quantiles]
+
+        set_skforecast_warnings(False)
 
         return predictions
     
@@ -1404,6 +1477,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         n_boot: int=500,
         random_state: int=123,
         in_sample_residuals: bool=True,
+        suppress_warnings: bool=False,
         levels: Any=None
     ) -> pd.DataFrame:
         """
@@ -1443,6 +1517,10 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             residuals are used. In the latter case, the user should have
             calculated and stored the residuals within the forecaster (see
             `set_out_sample_residuals()`).
+        suppress_warnings : bool, default `False`
+            If `True`, skforecast warnings will be suppressed during the prediction 
+            process. See skforecast.exceptions.warn_skforecast_categories for more
+            information.
         levels : Ignored
             Not used, present here for API consistency by convention.
 
@@ -1452,6 +1530,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             Distribution parameters estimated for each step.
 
         """
+
+        set_skforecast_warnings(suppress_warnings)
         
         boot_samples = self.predict_bootstrapping(
                            steps               = steps,
@@ -1469,11 +1549,15 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                            axis = 1,
                            arr  = boot_samples
                        )
+        
+        level_param_names = [f'{self.level}_{p}' for p in param_names]
         predictions = pd.DataFrame(
                           data    = param_values,
-                          columns = param_names,
+                          columns = level_param_names,
                           index   = boot_samples.index
                       )
+
+        set_skforecast_warnings(False)
 
         return predictions
 
@@ -1524,7 +1608,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         """
 
         self.fit_kwargs = check_select_fit_kwargs(self.regressor, fit_kwargs=fit_kwargs)
-        
+
         
     def set_lags(
         self, 
