@@ -2215,11 +2215,11 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
 
         if not set(self.out_sample_residuals.keys()).issubset(set(residuals.keys())):
             warnings.warn(
-                (f"""
-                Only residuals of levels 
-                {set(self.out_sample_residuals.keys()).intersection(set(residuals.keys()))} 
-                are updated.
-                """), IgnoredArgumentWarning
+                (
+                    f"Only residuals of levels "
+                    f"{set(self.out_sample_residuals.keys()).intersection(set(residuals.keys()))} "
+                    f"are updated."
+                ), IgnoredArgumentWarning
             )
 
         residuals = {

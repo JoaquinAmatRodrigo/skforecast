@@ -56,11 +56,11 @@ def test_set_out_sample_residuals_warning_when_residuals_not_for_all_levels():
     residuals = {'l1': np.array([1, 2, 3])}
 
     err_msg = re.escape(
-        f"""
-        Only residuals of levels 
-        {set(forecaster.series_col_names).intersection(set(residuals.keys()))} 
-        are updated.
-        """
+        (
+            f"Only residuals of levels "
+            f"{set(forecaster.series_col_names).intersection(set(residuals.keys()))} "
+            f"are updated."
+        )
     )
     with pytest.warns(UserWarning, match = err_msg):
         forecaster.set_out_sample_residuals(residuals=residuals)
