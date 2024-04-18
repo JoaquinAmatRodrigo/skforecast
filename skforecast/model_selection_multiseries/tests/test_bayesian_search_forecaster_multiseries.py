@@ -6,6 +6,7 @@ import joblib
 import warnings
 import numpy as np
 import pandas as pd
+from pathlib import Path
 from sklearn.preprocessing import StandardScaler
 from lightgbm import LGBMRegressor
 from sklearn.linear_model import Ridge
@@ -17,9 +18,9 @@ from skforecast.model_selection_multiseries import bayesian_search_forecaster_mu
 
 # Fixtures
 from .fixtures_model_selection_multiseries import series
-
-series_dict = joblib.load('./fixture_sample_multi_series.joblib')
-exog_dict = joblib.load('./fixture_sample_multi_series_exog.joblib')
+THIS_DIR = Path(__file__).parent
+series_dict = joblib.load(THIS_DIR/'fixture_sample_multi_series.joblib')
+exog_dict = joblib.load(THIS_DIR/'fixture_sample_multi_series_exog.joblib')
 end_train = "2016-07-31 23:59:00"
 series_dict_train = {k: v.loc[:end_train,] for k, v in series_dict.items()}
 exog_dict_train = {k: v.loc[:end_train,] for k, v in exog_dict.items()}

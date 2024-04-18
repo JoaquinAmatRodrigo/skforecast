@@ -1,11 +1,11 @@
 # Unit test backtesting_forecaster_multiseries
 # ==============================================================================
-import os
 import re
 import pytest
 import joblib
 import numpy as np
 import pandas as pd
+from pathlib import Path
 from lightgbm import LGBMRegressor
 from sklearn.linear_model import Ridge
 from sklearn.preprocessing import StandardScaler
@@ -19,17 +19,14 @@ from skforecast.model_selection_multiseries import backtesting_forecaster_multiv
 
 # Fixtures
 from .fixtures_model_selection_multiseries import series
-
-path_series_dict = os.path.normpath(r'skforecast\model_selection_multiseries\tests\fixture_sample_multi_series.joblib')
-series_dict = joblib.load(path_series_dict)
-path_exog_dict = os.path.normpath(r'skforecast\model_selection_multiseries\tests\fixture_sample_multi_series_exog.joblib')
-exog_dict = joblib.load(path_exog_dict)
+THIS_DIR = Path(__file__).parent
+series_dict = joblib.load(THIS_DIR/'fixture_sample_multi_series.joblib')
+exog_dict = joblib.load(THIS_DIR/'fixture_sample_multi_series_exog.joblib')
 end_train = "2016-07-31 23:59:00"
 series_dict_train = {k: v.loc[:end_train,] for k, v in series_dict.items()}
 exog_dict_train = {k: v.loc[:end_train,] for k, v in exog_dict.items()}
 series_dict_test = {k: v.loc[end_train:,] for k, v in series_dict.items()}
 exog_dict_test = {k: v.loc[end_train:,] for k, v in exog_dict.items()}
-
 series_with_nans = series.copy()
 series_with_nans['l2'].iloc[:10] = np.nan
 
