@@ -123,26 +123,26 @@ def test_predict_bootstrapping_ValueError_when_not_out_sample_residuals_for_all_
 @pytest.mark.parametrize("transformer_series", 
                          [None, StandardScaler()],
                          ids = lambda tr : f'transformer_series type: {type(tr)}')
-def test_predict_bootstrapping_ValueError_when_level_out_sample_residuals_value_is_None(transformer_series):
+def test_predict_bootstrapping_ValueError_when_level_out_sample_residuals_value_is_None(
+    transformer_series,
+):
     """
     Test ValueError is raised when in_sample_residuals=False and
     forecaster.out_sample_residuals has a level with a None.
     """
     forecaster = ForecasterAutoregMultiSeriesCustom(
-                     regressor          = LinearRegression(),
-                     fun_predictors     = create_predictors,
-                     window_size        = 3,
-                     transformer_series = transformer_series
-                 )
+        regressor=LinearRegression(),
+        fun_predictors=create_predictors,
+        window_size=3,
+        transformer_series=transformer_series,
+    )
     forecaster.fit(series=series)
-    residuals = {'1': np.array([1, 2, 3, 4, 5])}
-    forecaster.set_out_sample_residuals(residuals = residuals)
-
+    residuals = {"1": np.array([1, 2, 3, 4, 5])}
+    forecaster.set_out_sample_residuals(residuals=residuals)
     err_msg = re.escape(
-                  (f"forecaster residuals for level '2' are `None`. "
-                   "Check `forecaster.out_sample_residuals`.")
-              )
-    with pytest.raises(ValueError, match = err_msg):
+        "Not available residuals for level '2'. Check `forecaster.out_sample_residuals`."
+    )
+    with pytest.raises(ValueError, match=err_msg):
         forecaster.predict_bootstrapping(steps=3, in_sample_residuals=False)
 
 
@@ -207,8 +207,8 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_exog_s
 
     for key in results.keys():
         pd.testing.assert_frame_equal(results[key], expected[key])
-    
-    
+
+
 def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_exog_steps_is_2_in_sample_residuals_is_True():
     """
     Test output of predict_bootstrapping when regressor is LinearRegression and
@@ -244,8 +244,8 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_exog_s
 
     for key in results.keys():
         pd.testing.assert_frame_equal(results[key], expected[key])
-    
-    
+
+
 def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_exog_steps_is_1_in_sample_residuals_is_False():
     """
     Test output of predict_bootstrapping when regressor is LinearRegression and
@@ -281,8 +281,8 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_exog_s
 
     for key in results.keys():
         pd.testing.assert_frame_equal(results[key], expected[key])
-    
-    
+
+
 def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_exog_steps_is_2_in_sample_residuals_is_False():
     """
     Test output of predict_bootstrapping when regressor is LinearRegression and

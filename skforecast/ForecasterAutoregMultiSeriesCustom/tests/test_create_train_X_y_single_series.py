@@ -30,29 +30,33 @@ def create_predictors_5(y): # pragma: no cover
 @pytest.mark.parametrize("differentiation", 
                          [None, 1, 2], 
                          ids = lambda dt : f'differentiation: {dt}')
-def test_create_train_X_y_single_series_ValueError_when_forecaster_window_size_does_not_match_with_fun_predictors(differentiation):
+def test_create_train_X_y_single_series_ValueError_when_forecaster_window_size_does_not_match_with_fun_predictors(
+    differentiation,
+):
     """
-    Test ValueError is raised when the window needed by `fun_predictors()` does 
+    Test ValueError is raised when the window needed by `fun_predictors()` does
     not correspond with the forecaster.window_size.
     """
-    y = pd.Series(np.array([2, 56, 4.3, 23, 1, 8, 4.3, 104.1]), dtype=float, name='l1')
+    y = pd.Series(np.array([2, 56, 4.3, 23, 1, 8, 4.3, 104.1]), dtype=float, name="l1")
 
     forecaster = ForecasterAutoregMultiSeriesCustom(
-                     regressor       = LinearRegression(),
-                     fun_predictors  = create_predictors_3,
-                     window_size     = 2,
-                     differentiation = differentiation 
-                 )
-    forecaster.transformer_series_ = {'l1': None}
-    if differentiation is not None:
-        forecaster.differentiator_ = {'l1': clone(forecaster.differentiator)}
-    
-    err_msg = re.escape(
-        ("The `window_size` argument (2), declared when "
-         "initializing the forecaster, does not correspond to the window "
-         "used by `fun_predictors()`.")
+        regressor=LinearRegression(),
+        fun_predictors=create_predictors_3,
+        window_size=2,
+        differentiation=differentiation,
     )
-    with pytest.raises(ValueError, match = err_msg):
+    forecaster.transformer_series_ = {"l1": None}
+    if differentiation is not None:
+        forecaster.differentiator_ = {"l1": clone(forecaster.differentiator)}
+
+    err_msg = re.escape(
+        (
+            f"The `window_size` argument ({forecaster.window_size}), declared when "
+            f"initializing the forecaster, does not correspond to the window "
+            f"used by `{forecaster.fun_predictors.__name__}`."
+        )
+    )
+    with pytest.raises(ValueError, match=err_msg):
         forecaster._create_train_X_y_single_series(y=y, ignore_exog=True)
 
 
