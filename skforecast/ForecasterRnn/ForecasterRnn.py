@@ -23,7 +23,7 @@ from sklearn.preprocessing import MinMaxScaler
 
 import skforecast
 
-from ..exceptions import IgnoredArgumentWarning
+from ..exceptions import IgnoredArgumentWarning, warn_skforecast_categories
 from ..ForecasterBase import ForecasterBase
 from ..utils import (check_interval, check_predict_input,
                      check_select_fit_kwargs, check_y, expand_index,
@@ -80,7 +80,9 @@ class ForecasterRnn(ForecasterBase):
         Not used, present here for API consistency by convention.
     n_jobs : Ignored
         Not used, present here for API consistency by convention.
-
+    dropna_from_series : Ignored
+        Not used, present here for API consistency by convention.
+        
     Attributes
     ----------
     regressor : regressor or pipeline compatible with the TensorFlow API
@@ -166,7 +168,8 @@ class ForecasterRnn(ForecasterBase):
     history : dict
         Dictionary with the history of the training of each step. It is created
         internally to avoid overwriting.
-
+    dropna_from_series : Ignored
+        Not used, present here for API consistency by convention.
     """
 
     def __init__(
@@ -181,6 +184,7 @@ class ForecasterRnn(ForecasterBase):
         weight_func: Optional[Callable] = None,
         fit_kwargs: Optional[dict] = {},
         forecaster_id: Optional[Union[str, int]] = None,
+        dropna_from_series: str = "Ignored",
         n_jobs: Any = None,
         transformer_exog: Any = None,
     ) -> None:
@@ -210,6 +214,7 @@ class ForecasterRnn(ForecasterBase):
         self.python_version = sys.version.split(" ")[0]
         self.forecaster_id = forecaster_id
         self.history = None
+        self.dropna_from_series = dropna_from_series
 
         # Infer parameters from the model
         self.regressor = regressor
@@ -520,6 +525,8 @@ class ForecasterRnn(ForecasterBase):
         series: pd.DataFrame,
         store_in_sample_residuals: bool = True,
         exog: Any = None,
+        suppress_warnings: bool=False,
+        store_last_window: str = "Ignored",
     ) -> None:
         """
         Training Forecaster.
@@ -536,13 +543,22 @@ class ForecasterRnn(ForecasterBase):
             after fitting.
         exog : Ignored
             Not used, present here for API consistency by convention.
-
+        suppress_warnings : bool, default `False`
+            If `True`, skforecast warnings will be suppressed during the prediction 
+            process. See skforecast.exceptions.warn_skforecast_categories for more
+            information.
+        store_last_window : Ignored
+            Not used, present here for API consistency by convention.
         Returns
         -------
         None
 
         """
-
+        
+        if suppress_warnings:
+            for warn_category in warn_skforecast_categories:
+                warnings.filterwarnings('ignore', category=warn_category)
+                
         # Reset values in case the forecaster has already been fitted.
         self.index_type = None
         self.index_freq = None
@@ -585,6 +601,9 @@ class ForecasterRnn(ForecasterBase):
 
         self.last_window = series.iloc[-self.max_lag :].copy()
 
+        if suppress_warnings:
+            for warn_category in warn_skforecast_categories:
+                warnings.filterwarnings('default', category=warn_category)
 
     def predict(
         self,
@@ -592,6 +611,7 @@ class ForecasterRnn(ForecasterBase):
         levels: Optional[Union[str, list]] = None,
         last_window: Optional[pd.DataFrame] = None,
         exog: Any = None,
+        suppress_warnings: bool=False
     ) -> pd.DataFrame:
         """
         Predict n steps ahead
@@ -619,7 +639,11 @@ class ForecasterRnn(ForecasterBase):
             right after training data.
         exog : Ignored
             Not used, present here for API consistency by convention.
-
+        suppress_warnings : bool, default `False`
+            If `True`, skforecast warnings will be suppressed during the fitting 
+            process. See skforecast.exceptions.warn_skforecast_categories for more
+            information.
+            
         Returns
         -------
         predictions : pandas DataFrame
@@ -627,6 +651,10 @@ class ForecasterRnn(ForecasterBase):
 
         """
 
+        if suppress_warnings:
+            for warn_category in warn_skforecast_categories:
+                warnings.filterwarnings('ignore', category=warn_category)
+                
         if levels is None:
             levels = self.levels
         elif isinstance(levels, str):
@@ -719,7 +747,11 @@ class ForecasterRnn(ForecasterBase):
                 inverse_transform=True,
             )
             predictions.loc[:, serie] = x
-
+            
+        if suppress_warnings:
+            for warn_category in warn_skforecast_categories:
+                warnings.filterwarnings('default', category=warn_category)
+                
         return predictions
 
 
@@ -752,6 +784,8 @@ class ForecasterRnn(ForecasterBase):
 
         if ax is None:
             fig, ax = plt.subplots(1, 1, **fig_kw)
+        else:
+            fig = ax.get_figure()
 
         # Setting up the plot style
 
@@ -788,7 +822,7 @@ class ForecasterRnn(ForecasterBase):
 
         # Setting x-axis ticks to integers only
         ax.set_xticks(range(1, len(self.history["loss"]) + 1))
-
+        
     # def predict_bootstrapping(
     #     self,
     #     steps: Optional[Union[int, list]] = None,
