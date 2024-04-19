@@ -139,6 +139,10 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         Source code of the custom function used to create the predictors.
     window_size : int
         Size of the window needed by `fun_predictors` to create the predictors.
+    window_size_diff : int
+        Size of the window extended by the order of differentiation. When using
+        differentiation, the `window_size` is increased by the order of differentiation
+        so that the predictors can be created correctly.
     name_predictors : list
         Name of the predictors returned by `fun_predictors`. If `None`, predictors are
         named using the prefix 'custom_predictor_<i>' where `i` is the index of the 
@@ -303,6 +307,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         self.fun_predictors             = fun_predictors
         self.source_code_fun_predictors = None
         self.window_size                = window_size
+        self.window_size_diff           = window_size
         self.name_predictors            = name_predictors
         self.encoding                   = encoding
         self.encoder                    = None
@@ -364,7 +369,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
                     (f"Argument `differentiation` must be an integer equal to or "
                      f"greater than 1. Got {differentiation}.")
                 )
-            self.window_size += self.differentiation
+            self.window_size_diff += self.differentiation
             self.differentiator = TimeSeriesDifferentiator(order=self.differentiation)
 
         self.fit_kwargs = check_select_fit_kwargs(
@@ -481,13 +486,13 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         -------
         X_train_predictors : pandas DataFrame
             Training values of custom predictors.
-            Shape: (len(y) - self.window_size, )
+            Shape: (len(y) - self.window_size_diff, )
         X_train_exog : pandas DataFrame
             Training values of exogenous variables.
-            Shape: (len(y) - self.window_size, len(exog.columns))
+            Shape: (len(y) - self.window_size_diff, len(exog.columns))
         y_train : pandas Series
             Values (target) of the time series related to each row of `X_train`.
-            Shape: (len(y) - self.window_size, )
+            Shape: (len(y) - self.window_size_diff, )
         
         """
 
@@ -529,11 +534,8 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         observed = X_train_values[-1, :]
 
         if expected.shape != observed.shape or not np.allclose(expected, observed, equal_nan=True):
-            window_size_error = self.window_size
-            if self.differentiation is not None:
-                window_size_error -= self.differentiation
             raise ValueError(
-                (f"The `window_size` argument ({window_size_error}), declared when "
+                (f"The `window_size` argument ({self.window_size}), declared when "
                  f"initializing the forecaster, does not correspond to the window "
                  f"used by `fun_predictors()`.")
             )
@@ -576,10 +578,11 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
                       name  = 'y'
                   )
 
-        # No need to delete the first self.differentiation values of y_train and
-        # X_train as in the ForecasterAutoregMultiSeries since they are already 
-        # removed in the creation of X_train because winsodw_size is increased 
-        # by the order of differentiation.
+        if self.differentiation is not None:
+            X_train_predictors = X_train_predictors.iloc[self.differentiation: ]
+            y_train = y_train.iloc[self.differentiation: ]
+            if X_train_exog is not None:
+                X_train_exog = X_train_exog.iloc[self.differentiation: ]
 
         return X_train_predictors, X_train_exog, y_train
 
@@ -661,10 +664,10 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
             )
         
         for k, v in series_dict.items():
-            if len(v) < self.window_size + 1:
+            if len(v) < self.window_size_diff + 1:
                 raise ValueError(
                     (f"Series '{k}' does not have enough values to calculate "
-                     f"predictors. It must be at least {self.window_size + 1}.")
+                     f"predictors. It must be at least {self.window_size_diff + 1}.")
                 )
 
         exog_dict = {serie: None for serie in series_col_names}
@@ -861,7 +864,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
 
             if series_to_store:
                 last_window = {
-                    k: v.iloc[-self.window_size:].copy()
+                    k: v.iloc[-self.window_size_diff:].copy()
                     for k, v in series_dict.items()
                     if k in series_to_store
                 }
@@ -1368,7 +1371,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
             included_exog    = self.included_exog,
             index_type       = self.index_type,
             index_freq       = self.index_freq,
-            window_size      = self.window_size,
+            window_size      = self.window_size_diff,
             last_window      = last_window,
             last_window_exog = None,
             exog             = exog,
@@ -1381,7 +1384,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
             series_col_names = self.series_col_names
         )
 
-        last_window = last_window.iloc[-self.window_size:, ].copy()
+        last_window = last_window.iloc[-self.window_size_diff:, ].copy()
         _, last_window_index = preprocess_last_window(
                                    last_window   = last_window,
                                    return_values = False
@@ -1663,7 +1666,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
             included_exog    = self.included_exog,
             index_type       = self.index_type,
             index_freq       = self.index_freq,
-            window_size      = self.window_size,
+            window_size      = self.window_size_diff,
             last_window      = last_window,
             last_window_exog = None,
             exog             = exog,
@@ -1676,7 +1679,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
             series_col_names = self.series_col_names
         )
 
-        last_window = last_window.iloc[-self.window_size:, ].copy()
+        last_window = last_window.iloc[-self.window_size_diff:, ].copy()
         _, last_window_index = preprocess_last_window(
                                    last_window   = last_window,
                                    return_values = False
