@@ -74,7 +74,7 @@ class TimeSeriesDifferentiator(BaseEstimator, TransformerMixin):
         used to fit the transformer.
 
     """
-    
+
     def __init__(
         self, 
         order: int=1
@@ -88,7 +88,6 @@ class TimeSeriesDifferentiator(BaseEstimator, TransformerMixin):
         self.order = order
         self.initial_values = []
         self.last_values = []
-
 
     @_check_X_numpy_ndarray_1d
     def fit(
@@ -128,7 +127,6 @@ class TimeSeriesDifferentiator(BaseEstimator, TransformerMixin):
 
         return self
 
-
     @_check_X_numpy_ndarray_1d
     def transform(
         self, 
@@ -153,12 +151,11 @@ class TimeSeriesDifferentiator(BaseEstimator, TransformerMixin):
             the original time series but the first n=`order` values are nan.
 
         """
-        
+
         X_diff = np.diff(X, n=self.order)
         X_diff = np.append((np.full(shape=self.order, fill_value=np.nan)), X_diff)
 
         return X_diff
-
 
     @_check_X_numpy_ndarray_1d
     def inverse_transform(
@@ -197,7 +194,6 @@ class TimeSeriesDifferentiator(BaseEstimator, TransformerMixin):
 
         return X_undiff
 
-
     @_check_X_numpy_ndarray_1d
     def inverse_transform_next_window(
         self,
@@ -232,7 +228,7 @@ class TimeSeriesDifferentiator(BaseEstimator, TransformerMixin):
                 X_undiff = np.cumsum(X, dtype=float) + self.last_values[-1]
             else:
                 X_undiff = np.cumsum(X_undiff, dtype=float) + self.last_values[-(i+1)]
-        
+
         return X_undiff
 
 
@@ -266,9 +262,17 @@ def series_long_to_dict(
 
     """
 
+    if not isinstance(data, pd.DataFrame):
+        raise TypeError("`data` must be a pandas DataFrame.")
+
+    for col in [series_id, index, values]:
+        if col not in data.columns:
+            raise ValueError(f"Column '{col}' not found in `data`.")
+
     series_dict = {}
     for k, v in data.groupby(series_id):
         series_dict[k] = v.set_index(index)[values].asfreq(freq).rename(k)
+        series_dict[k].index.name = None
 
     return series_dict
 
@@ -277,7 +281,8 @@ def exog_long_to_dict(
     data: pd.DataFrame,
     series_id: str,
     index: str,
-    freq: str
+    freq: str,
+    dropna: bool = False,
 ) -> dict:
     """
     Convert long format exogenous variables to dictionary.
@@ -292,7 +297,10 @@ def exog_long_to_dict(
         Column name with the time index.
     freq: str
         Frequency of the series.
-    
+    dropna: bool, default=False
+        If True, drop columns with all values as NaN. This is useful when
+        there are series without some exogenous variables.
+        
     Returns
     -------
     exog_dict: dict
@@ -300,10 +308,23 @@ def exog_long_to_dict(
 
     """
 
-    exog_dict =  dict(tuple(data.groupby(series_id)))
+    if not isinstance(data, pd.DataFrame):
+        raise TypeError("`data` must be a pandas DataFrame.")
+
+    for col in [series_id, index]:
+        if col not in data.columns:
+            raise ValueError(f"Column '{col}' not found in `data`.")
+
+    exog_dict = dict(tuple(data.groupby(series_id)))
     exog_dict = {
         k: v.set_index(index).asfreq(freq).drop(columns=series_id)
         for k, v in exog_dict.items()
     }
+
+    for k in exog_dict.keys():
+        exog_dict[k].index.name = None
+
+    if dropna:
+        exog_dict = {k: v.dropna(how="all", axis=1) for k, v in exog_dict.items()}
 
     return exog_dict
