@@ -99,6 +99,10 @@ class ForecasterAutoregCustom(ForecasterBase):
         Size of the window needed by `fun_predictors` to create the predictors.
         If `differentiation` is not `None`, `window_size` is increased by the
         order of differentiation.
+    window_size_diff : int
+        Size of the window extended by the order of differentiation. When using
+        differentiation, the `window_size` is increased by the order of differentiation
+        so that the predictors can be created correctly.
     name_predictors : list
         Name of the predictors returned by `fun_predictors`. If `None`, predictors are
         named using the prefix 'custom_predictor_<i>' where `i` is the index of the position
@@ -194,6 +198,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         self.fun_predictors             = fun_predictors
         self.source_code_fun_predictors = None
         self.window_size                = window_size
+        self.window_size_diff           = window_size
         self.name_predictors            = name_predictors
         self.transformer_y              = transformer_y
         self.transformer_exog           = transformer_exog
@@ -231,7 +236,7 @@ class ForecasterAutoregCustom(ForecasterBase):
                     (f"Argument `differentiation` must be an integer equal to or "
                      f"greater than 1. Got {differentiation}.")
                 )
-            self.window_size += self.differentiation
+            self.window_size_diff += self.differentiation
             self.differentiator = TimeSeriesDifferentiator(order=self.differentiation)
 
         if not isinstance(fun_predictors, Callable):
@@ -324,10 +329,10 @@ class ForecasterAutoregCustom(ForecasterBase):
         
         """
         
-        if len(y) < self.window_size + 1:
+        if len(y) < self.window_size_diff + 1:
             raise ValueError(
                 (f"`y` does not have enough values to calculate "
-                 f"predictors. It must be at least {self.window_size + 1}.")
+                 f"predictors. It must be at least {self.window_size_diff + 1}.")
             )
 
         check_y(y=y)
@@ -393,36 +398,30 @@ class ForecasterAutoregCustom(ForecasterBase):
         y_train = np.array(y_train)
 
         if self.name_predictors is None:
-            X_train_col_names = [f"custom_predictor_{i}" for i in range(X_train.shape[1])]
+            X_train_predictors_names = [
+                f"custom_predictor_{i}" for i in range(X_train.shape[1])
+            ]
         else:
             if len(self.name_predictors) != X_train.shape[1]:
                 raise ValueError(
-                    ("The length of provided predictors names (`name_predictors`) do not "
-                     "match the number of columns created by `fun_predictors()`.")
+                    (f"The length of provided predictors names "
+                     f"(`name_predictors`) do not match the number of columns "
+                     f"created by `{self.fun_predictors.__name__}`.")
                 )
-            X_train_col_names = self.name_predictors.copy()
-
-        if np.isnan(X_train).any():
-            raise ValueError(
-                "`fun_predictors()` is returning `NaN` values."
-            )
+            X_train_predictors_names = self.name_predictors.copy()
 
         expected = self.fun_predictors(y_values[:-1])
         observed = X_train[-1, :]
-
         if expected.shape != observed.shape or not np.allclose(expected, observed, equal_nan=True):
-            window_size_error = self.window_size
-            if self.differentiation is not None:
-                window_size_error -= self.differentiation
             raise ValueError(
                 (f"The `window_size` argument ({self.window_size}), declared when "
                  f"initializing the forecaster, does not correspond to the window "
-                 f"used by `fun_predictors()`.")
+                 f"used by `{self.fun_predictors.__name__}`.")
             )
         
         X_train = pd.DataFrame(
                       data    = X_train,
-                      columns = X_train_col_names,
+                      columns = X_train_predictors_names,
                       index   = y_index[self.window_size: ]
                   )
         
@@ -443,10 +442,14 @@ class ForecasterAutoregCustom(ForecasterBase):
                       name  = 'y'
                   )
 
-        # No need to delete the first self.differentiation values of y_train and
-        # X_train as in the ForecasterAutoreg since they are already removed 
-        # in the creation of X_train because winsodw_size is increased by the 
-        # order of differentiation.
+        if self.differentiation is not None:
+            X_train = X_train.iloc[self.differentiation: ]
+            y_train = y_train.iloc[self.differentiation: ]
+        
+        if X_train[X_train_predictors_names].isna().any().any():
+            raise ValueError(
+                f"`{self.fun_predictors.__name__}` is returning `NaN` values."
+            )
 
         return X_train, y_train
 
@@ -580,7 +583,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         # The last time window of training data is stored so that predictors in
         # the first iteration of `predict()` can be calculated. It also includes
         # the values need to calculate the diferenctiation.
-        self.last_window = y.iloc[-self.window_size:].copy()
+        self.last_window = y.iloc[-self.window_size_diff:].copy()
 
 
     def _recursive_predict(
@@ -616,7 +619,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             X = self.fun_predictors(y=last_window).reshape(1, -1)
             if np.isnan(X).any():
                 raise ValueError(
-                    "`fun_predictors()` is returning `NaN` values."
+                    f"`{self.fun_predictors.__name__}` is returning `NaN` values."
                 )
             if exog is not None:
                 X = np.column_stack((X, exog[i, ].reshape(1, -1)))
@@ -675,7 +678,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             included_exog    = self.included_exog,
             index_type       = self.index_type,
             index_freq       = self.index_freq,
-            window_size      = self.window_size,
+            window_size      = self.window_size_diff,
             last_window      = last_window,
             last_window_exog = None,
             exog             = exog,
@@ -688,7 +691,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             series_col_names = None
         )
 
-        last_window = last_window.iloc[-self.window_size:].copy()
+        last_window = last_window.iloc[-self.window_size_diff:].copy()
 
         if exog is not None:
             if isinstance(exog, pd.DataFrame):
@@ -821,7 +824,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             included_exog    = self.included_exog,
             index_type       = self.index_type,
             index_freq       = self.index_freq,
-            window_size      = self.window_size,
+            window_size      = self.window_size_diff,
             last_window      = last_window,
             last_window_exog = None,
             exog             = exog,
@@ -834,7 +837,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             series_col_names = None
         )
 
-        last_window = last_window.iloc[-self.window_size:].copy()
+        last_window = last_window.iloc[-self.window_size_diff:].copy()
 
         if exog is not None:
             if isinstance(exog, pd.DataFrame):

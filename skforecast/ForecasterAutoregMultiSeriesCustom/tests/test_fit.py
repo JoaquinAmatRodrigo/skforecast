@@ -209,8 +209,8 @@ def test_fit_last_window_stored():
     """
     Test that values of last window are stored after fitting.
     """
-    series = pd.DataFrame({'1': pd.Series(np.arange(5)), 
-                           '2': pd.Series(np.arange(5))})
+    series = pd.DataFrame({'1': pd.Series(np.arange(5), dtype=float), 
+                           '2': pd.Series(np.arange(5), dtype=float)})
 
     forecaster = ForecasterAutoregMultiSeriesCustom(
                      regressor       = LinearRegression(),

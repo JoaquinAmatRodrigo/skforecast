@@ -109,17 +109,20 @@ def test_init_window_size_is_increased_when_differentiation(dif):
     """
     Test window_size is increased when including differentiation.
     """
+    window_size = 5
+
     forecaster = ForecasterAutoregMultiSeriesCustom(
                      regressor       = LinearRegression(),
                      fun_predictors  = create_predictors,
-                     window_size     = 5,
+                     window_size     = window_size,
                      differentiation = dif
                  )
     
-    assert forecaster.window_size == len(forecaster.lags) + dif
+    assert forecaster.window_size == window_size
+    assert forecaster.window_size_diff == window_size + dif
 
 
-def test_ForecasterAutoregMultiSeries_init_invalid_encoding():
+def test_ForecasterAutoregMultiSeriesCustom_init_invalid_encoding():
     """
     Test ValueError is raised when encoding is not valid.
     """

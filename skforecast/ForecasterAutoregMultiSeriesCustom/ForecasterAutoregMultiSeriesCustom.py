@@ -528,32 +528,31 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         X_train_values = np.vstack(X_train_values)
         y_train_values = np.array(y_train_values)
 
-        # y_values correspond only to the last series of `series`. Since the columns
-        # of X_train are the same for all series, the check is the same.
         expected = self.fun_predictors(y_values[:-1])
         observed = X_train_values[-1, :]
-
         if expected.shape != observed.shape or not np.allclose(expected, observed, equal_nan=True):
             raise ValueError(
                 (f"The `window_size` argument ({self.window_size}), declared when "
                  f"initializing the forecaster, does not correspond to the window "
-                 f"used by `fun_predictors()`.")
+                 f"used by `{self.fun_predictors.__name__}`.")
             )
 
         if self.name_predictors is None:
-            X_train_col_names = [f"custom_predictor_{i}" 
-                                 for i in range(X_train_values.shape[1])]
+            X_train_predictors_names = [
+                f"custom_predictor_{i}" for i in range(X_train_values.shape[1])
+            ]
         else:
             if len(self.name_predictors) != X_train_values.shape[1]:
                 raise ValueError(
-                    ("The length of provided predictors names (`name_predictors`) do "
-                     "not match the number of columns created by `fun_predictors()`.")
+                    (f"The length of provided predictors names "
+                     f"(`name_predictors`) do not match the number of columns "
+                     f"created by `{self.fun_predictors.__name__}`.")
                 )
-            X_train_col_names = self.name_predictors.copy()
+            X_train_predictors_names = self.name_predictors.copy()
 
         X_train_predictors = pd.DataFrame(
                                  data    = X_train_values,
-                                 columns = X_train_col_names,
+                                 columns = X_train_predictors_names,
                                  index   = y_index[self.window_size: ]
                              )
         X_train_predictors['_level_skforecast'] = series_name

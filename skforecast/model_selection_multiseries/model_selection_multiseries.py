@@ -579,7 +579,7 @@ def _backtesting_forecaster_multiseries(
         levels_in_backtest_predictions = [
             level 
             for level in levels_in_backtest_predictions
-            if not re.search(r'lower_bound|upper_bound', level)
+            if not re.search(r'_lower_bound|_upper_bound', level)
         ]
     for level in levels_in_backtest_predictions:
         valid_index = series[level][series[level].notna()].index

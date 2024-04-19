@@ -175,7 +175,7 @@ def test_create_train_X_y_ValueError_when_len_name_predictors_not_match_X_train_
 
     err_msg = re.escape(
                     (f"The length of provided predictors names (`name_predictors`) do not "
-                     f"match the number of columns created by `fun_predictors()`.")
+                     f"match the number of columns created by `create_predictors`.")
                 )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.fit(
@@ -185,7 +185,7 @@ def test_create_train_X_y_ValueError_when_len_name_predictors_not_match_X_train_
 
 def test_create_train_X_y_ValueError_fun_predictors_return_nan_values():
     """
-    Test ValueError is raised when fun_predictors returns `NaN` values.
+    Test ValueError is raised when `fun_predictors` returns `NaN` values.
     """
     forecaster = ForecasterAutoregCustom(
                      regressor      = LinearRegression(),
@@ -193,14 +193,14 @@ def test_create_train_X_y_ValueError_fun_predictors_return_nan_values():
                      window_size    = 5
                  )
     
-    err_msg = re.escape("`fun_predictors()` is returning `NaN` values.")
+    err_msg = re.escape("`<lambda>` is returning `NaN` values.")
     with pytest.raises(ValueError, match = err_msg):
         forecaster.fit(y=pd.Series(np.arange(50)))
 
 
 def test_create_train_X_y_ValueError_when_forecaster_window_size_does_not_match_with_fun_predictors():
     """
-    Test ValueError is raised when the window needed by `fun_predictors()` does 
+    Test ValueError is raised when the window needed by `fun_predictors` does 
     not correspond with the forecaster.window_size.
     """
     forecaster = ForecasterAutoregCustom(
@@ -212,7 +212,7 @@ def test_create_train_X_y_ValueError_when_forecaster_window_size_does_not_match_
     err_msg = re.escape(
                 (f"The `window_size` argument ({forecaster.window_size}), declared when "
                  f"initializing the forecaster, does not correspond to the window "
-                 f"used by `fun_predictors()`.")
+                 f"used by `create_predictors`.")
             )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.fit(

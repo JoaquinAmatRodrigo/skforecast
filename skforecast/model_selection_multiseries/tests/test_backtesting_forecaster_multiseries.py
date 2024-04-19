@@ -1578,7 +1578,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
                          [0.80370716, 0.68682964, 0.9087857 ],
                          [0.49265658, 0.34504526, 0.63842054],
                          [0.5482819 , 0.39901207, 0.67372527]]),
-        columns = ['l1', 'lower_bound', 'upper_bound'],
+        columns = ['l1', 'l1_lower_bound', 'l1_upper_bound'],
         index = pd.RangeIndex(start=38, stop=50, step=1)
     )
                                    
@@ -1636,7 +1636,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
                          [0.81570257, 0.68317749, 0.95105791],
                          [0.5040059 , 0.36942232, 0.65356959],
                          [0.54173456, 0.41187539, 0.69844758]]),
-        columns = ['l1', 'lower_bound', 'upper_bound'],
+        columns = ['l1', 'l1_lower_bound', 'l1_upper_bound'],
         index = pd.RangeIndex(start=38, stop=50, step=1)
     )
                                    
@@ -1701,7 +1701,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
                          [0.63726975, 0.45737877, 0.81036088],
                          [0.54013414, 0.36261322, 0.71490412],
                          [0.52550978, 0.35956884, 0.6786523 ]]),
-        columns = ['l1', 'lower_bound', 'upper_bound'],
+        columns = ['l1', 'l1_lower_bound', 'l1_upper_bound'],
         index = pd.RangeIndex(start=33, stop=50, step=1)
     )
                                    
@@ -1764,7 +1764,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
                                                 [0.3198172 , 0.18545173, 0.44111693],
                                                 [0.45269985, 0.29948117, 0.57043644],
                                                 [0.76214215, 0.63320969, 0.90810797]]),
-                               columns = ['l1', 'lower_bound', 'upper_bound'],
+                               columns = ['l1', 'l1_lower_bound', 'l1_upper_bound'],
                                index = pd.RangeIndex(start=33, stop=48, step=1)
                            )
                                    
@@ -1830,7 +1830,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
                          [0.6605119 , 0.44992937, 0.79751069],
                          [0.49225437, 0.31367508, 0.67624609],
                          [0.52528842, 0.33700505, 0.74482225]]),
-        columns = ['l1', 'lower_bound', 'upper_bound'],
+        columns = ['l1', 'l1_lower_bound', 'l1_upper_bound'],
         index = pd.date_range(start='2022-02-05', periods=15, freq='D')
     )
     backtest_predictions = backtest_predictions.asfreq('D')
@@ -1901,7 +1901,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
                          [0.74059646, 0.6075235 , 0.88275308],
                          [0.55112717, 0.37251772, 0.69426237],
                          [0.55778417, 0.4247112 , 0.69994079]]),
-        columns = ['l1', 'lower_bound', 'upper_bound'],
+        columns = ['l1', 'l1_lower_bound', 'l1_upper_bound'],
         index = pd.RangeIndex(start=30, stop=50, step=1)
     )
                                    
@@ -1981,7 +1981,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
                          [0.68566159, 0.54133048, 0.8819007 ],
                          [0.34632377, 0.19069195, 0.4712714 ],
                          [0.44695116, 0.26594138, 0.60046927]]),
-        columns = ['l1', 'lower_bound', 'upper_bound'],
+        columns = ['l1', 'l1_lower_bound', 'l1_upper_bound'],
         index = pd.date_range(start='2022-01-24', periods=24, freq='D')
     )
     backtest_predictions = backtest_predictions.asfreq('D')

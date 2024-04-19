@@ -386,13 +386,13 @@ def test_predict_output_when_regressor_is_LinearRegression_with_exog_and_differe
     """
 
     def create_predictors(y): # pragma: no cover
-            """
-            Create first 15 lags of a time series.
-            """
-            
-            lags = y[-1:-16:-1]
-            
-            return lags 
+        """
+        Create first 15 lags of a time series.
+        """
+        
+        lags = y[-1:-16:-1]
+        
+        return lags 
     
     # Data differentiated
     diferenciator_1 = TimeSeriesDifferentiator(order=1)

@@ -337,6 +337,12 @@ def test_output_bayesian_search_forecaster_multiseries_series_and_exog_dict_with
         'n_estimators': int,
         'max_depth': int
     })
+    
+    results_search = results_search.astype({
+        'mean_absolute_error': float,
+        'n_estimators': int,
+        'max_depth': int
+    })
 
     pd.testing.assert_frame_equal(expected, results_search)
 
@@ -407,6 +413,7 @@ def test_output_bayesian_search_forecaster_multiseries_series_and_exog_dict_with
     })
     
     results_search = results_search.astype({
+        'mean_absolute_error': float,
         'n_estimators': int,
         'max_depth': int
     })
