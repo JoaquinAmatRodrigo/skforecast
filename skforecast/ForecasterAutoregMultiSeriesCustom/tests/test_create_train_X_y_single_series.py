@@ -77,7 +77,7 @@ def test_create_train_X_y_single_series_ValueError_when_len_name_predictors_not_
 
     err_msg = re.escape(
         (f"The length of provided predictors names (`name_predictors`) do not "
-         f"match the number of columns created by `fun_predictors()`.")  
+         f"match the number of columns created by `{forecaster.fun_predictors.__name__}`.")  
     )
     with pytest.raises(ValueError, match = err_msg):
         forecaster._create_train_X_y_single_series(y=y, ignore_exog=True)
