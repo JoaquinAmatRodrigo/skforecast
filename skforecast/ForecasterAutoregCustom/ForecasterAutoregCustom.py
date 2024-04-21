@@ -97,8 +97,6 @@ class ForecasterAutoregCustom(ForecasterBase):
         Source code of the custom function used to create the predictors.
     window_size : int
         Size of the window needed by `fun_predictors` to create the predictors.
-        If `differentiation` is not `None`, `window_size` is increased by the
-        order of differentiation.
     window_size_diff : int
         Size of the window extended by the order of differentiation. When using
         differentiation, the `window_size` is increased by the order of differentiation
@@ -501,6 +499,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         self,
         y: pd.Series,
         exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+        store_last_window: bool=True,
         store_in_sample_residuals: bool=True
     ) -> None:
         """
@@ -517,6 +516,8 @@ class ForecasterAutoregCustom(ForecasterBase):
             Exogenous variable/s included as predictor/s. Must have the same
             number of observations as `y` and their indexes must be aligned so
             that y[i] is regressed on exog[i].
+        store_last_window : bool, default `True`
+            Whether or not to store the last window of training data.
         store_in_sample_residuals : bool, default `True`
             If `True`, in-sample residuals will be stored in the forecaster object
             after fitting.
@@ -583,7 +584,8 @@ class ForecasterAutoregCustom(ForecasterBase):
         # The last time window of training data is stored so that predictors in
         # the first iteration of `predict()` can be calculated. It also includes
         # the values need to calculate the diferenctiation.
-        self.last_window = y.iloc[-self.window_size_diff:].copy()
+        if store_last_window:
+            self.last_window = y.iloc[-self.window_size_diff:].copy()
 
 
     def _recursive_predict(

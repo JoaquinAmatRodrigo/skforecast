@@ -200,6 +200,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         Maximum value of lag included in `lags`.
     window_size : int
         Size of the window needed to create the predictors. It is equal to `max_lag`.
+    window_size_diff : int
+        Size of the window extended by the order of differentiation. When using
+        differentiation, the `window_size` is increased by the order of differentiation
+        so that the predictors can be created correctly.
     last_window : dict
         Last window of training data for each series. It stores the values 
         needed to predict the next `step` immediately after the training data.
@@ -324,6 +328,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.lags = initialize_lags(type(self).__name__, lags)
         self.max_lag = max(self.lags)
         self.window_size = self.max_lag
+        self.window_size_diff = self.max_lag
 
         self.weight_func, self.source_code_weight_func, self.series_weights = initialize_weights(
             forecaster_name = type(self).__name__, 
@@ -338,7 +343,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                     (f"Argument `differentiation` must be an integer equal to or "
                      f"greater than 1. Got {differentiation}.")
                 )
-            self.window_size += self.differentiation
+            self.window_size_diff += self.differentiation
             self.differentiator = TimeSeriesDifferentiator(order=self.differentiation)
 
         self.fit_kwargs = check_select_fit_kwargs(
@@ -1082,7 +1087,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         
         """
 
-        set_skforecast_warnings(suppress_warnings)
+        set_skforecast_warnings(suppress_warnings, action='ignore')
 
         # Reset values in case the forecaster has already been fitted.
         self.series_col_names    = None
@@ -1175,7 +1180,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         if store_last_window:
             self.last_window = last_window
         
-        set_skforecast_warnings(False)
+        set_skforecast_warnings(suppress_warnings, action='default')
 
 
     def _recursive_predict(
@@ -1279,7 +1284,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         """
 
-        set_skforecast_warnings(suppress_warnings)
+        set_skforecast_warnings(suppress_warnings, action='ignore')
 
         input_levels_is_list = False
         if levels is None:
@@ -1348,7 +1353,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             included_exog    = self.included_exog,
             index_type       = self.index_type,
             index_freq       = self.index_freq,
-            window_size      = self.window_size,
+            window_size      = self.window_size_diff,
             last_window      = last_window,
             last_window_exog = None,
             exog             = exog,
@@ -1361,7 +1366,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             series_col_names = self.series_col_names
         )
 
-        last_window = last_window.iloc[-self.window_size:, ].copy()
+        last_window = last_window.iloc[-self.window_size_diff:, ].copy()
         _, last_window_index = preprocess_last_window(
                                    last_window   = last_window,
                                    return_values = False
@@ -1460,7 +1465,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         predictions = pd.concat(predictions, axis=1)
         
-        set_skforecast_warnings(False)
+        set_skforecast_warnings(suppress_warnings, action='default')
 
         return predictions
 
@@ -1528,7 +1533,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         """
 
-        set_skforecast_warnings(suppress_warnings)
+        set_skforecast_warnings(suppress_warnings, action='ignore')
 
         if self.fitted:
 
@@ -1643,7 +1648,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             included_exog    = self.included_exog,
             index_type       = self.index_type,
             index_freq       = self.index_freq,
-            window_size      = self.window_size,
+            window_size      = self.window_size_diff,
             last_window      = last_window,
             last_window_exog = None,
             exog             = exog,
@@ -1656,7 +1661,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             series_col_names = self.series_col_names
         )
 
-        last_window = last_window.iloc[-self.window_size:, ].copy()
+        last_window = last_window.iloc[-self.window_size_diff:, ].copy()
         _, last_window_index = preprocess_last_window(
                                    last_window   = last_window,
                                    return_values = False
@@ -1792,7 +1797,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
             boot_predictions[level] = level_boot_predictions
         
-        set_skforecast_warnings(False)
+        set_skforecast_warnings(suppress_warnings, action='default')
 
         return boot_predictions
 
@@ -1868,7 +1873,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         """
 
-        set_skforecast_warnings(suppress_warnings)
+        set_skforecast_warnings(suppress_warnings, action='ignore')
 
         check_interval(interval=interval)
 
@@ -1902,7 +1907,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         predictions = pd.concat(predictions, axis=1)
         
-        set_skforecast_warnings(False)
+        set_skforecast_warnings(suppress_warnings, action='default')
 
         return predictions
 
@@ -1973,7 +1978,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         """
 
-        set_skforecast_warnings(suppress_warnings)
+        set_skforecast_warnings(suppress_warnings, action='ignore')
 
         check_interval(quantiles=quantiles)
 
@@ -1997,7 +2002,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         predictions = pd.concat(predictions, axis=1)
         
-        set_skforecast_warnings(False)
+        set_skforecast_warnings(suppress_warnings, action='default')
 
         return predictions
 
@@ -2059,7 +2064,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         """
 
-        set_skforecast_warnings(suppress_warnings)
+        set_skforecast_warnings(suppress_warnings, action='ignore')
 
         boot_samples = self.predict_bootstrapping(
                            steps               = steps,
@@ -2093,7 +2098,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         predictions = pd.concat(predictions, axis=1)
         
-        set_skforecast_warnings(False)
+        set_skforecast_warnings(suppress_warnings, action='default')
 
         return predictions
 
@@ -2148,8 +2153,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         lags: Union[int, list, np.ndarray, range]
     ) -> None:
         """
-        Set new value to the attribute `lags`.
-        Attributes `max_lag` and `window_size` are also updated.
+        Set new value to the attribute `lags`. Attributes `max_lag`, 
+        `window_size` and  `window_size_diff` are also updated.
         
         Parameters
         ----------
@@ -2169,8 +2174,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.lags = initialize_lags(type(self).__name__, lags)
         self.max_lag  = max(self.lags)
         self.window_size = max(self.lags)
+        self.window_size_diff = max(self.lags)
         if self.differentiation is not None:
-            self.window_size += self.differentiation  
+            self.window_size_diff += self.differentiation  
 
 
     def set_out_sample_residuals(

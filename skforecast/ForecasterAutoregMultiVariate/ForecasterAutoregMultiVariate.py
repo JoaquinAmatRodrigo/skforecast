@@ -16,7 +16,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.base import clone
 from sklearn.preprocessing import StandardScaler
 import inspect
-from copy import copy, deepcopy
+from copy import copy
 from itertools import chain
 from joblib import Parallel, delayed, cpu_count
 
@@ -25,6 +25,7 @@ from ..ForecasterBase import ForecasterBase
 from ..exceptions import IgnoredArgumentWarning
 from ..utils import initialize_lags
 from ..utils import initialize_weights
+from ..utils import initialize_transformer_series
 from ..utils import check_select_fit_kwargs
 from ..utils import check_y
 from ..utils import check_exog
@@ -145,6 +146,9 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
     window_size : int
         Size of the window needed to create the predictors. It is equal to
         `max_lag`.
+    window_size_diff : int
+        This attribute has the same value as window_size as this Forecaster 
+        doesn't support differentiation.
     last_window : pandas Series
         Last window seen by the forecaster during training. It stores the values 
         needed to predict the next `step` immediately after the training data.   
@@ -166,8 +170,9 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
     series_col_names : list
         Names of the series used during training.
     series_X_train : list
-        Names of the series added to `X_train` when creating the training 
-        matrices with `create_train_X_y` method.
+        Names of the series added to `X_train` when creating the training
+        matrices with `create_train_X_y` method. It is a subset of 
+        `series_col_names`.
     X_train_col_names : list
         Names of columns of the matrix created internally for training.
     fit_kwargs : dict
@@ -298,6 +303,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             else max(self.lags)
         )
         self.window_size = self.max_lag
+        self.window_size_diff = self.max_lag
             
         self.weight_func, self.source_code_weight_func, _ = initialize_weights(
             forecaster_name = type(self).__name__, 
@@ -431,7 +437,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         self,
         series: pd.DataFrame,
         exog: Optional[Union[pd.Series, pd.DataFrame]]=None
-    ) -> Tuple[pd.DataFrame, dict, list, list]:
+    ) -> Tuple[pd.DataFrame, dict, list, list, list]:
         """
         Create training matrices from multiple time series and exogenous
         variables. The resulting matrices contain the target variable and predictors
@@ -458,6 +464,10 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             Shape of each series: (len(y) - self.max_lag, )
         series_col_names : list
             Names of the series included in the training matrices.
+        series_X_train : list
+            Names of the series added to `X_train` when creating the training
+            matrices with `create_train_X_y` method. It is a subset of 
+            `series_col_names`.
         exog_col_names : list
             Names of the exogenous variables included in the training matrices.
         
@@ -505,8 +515,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         # Update series_col_names with the columns that will be used during training
         series_col_names = list(cols_to_create_lags.keys())
         # series_X_train include series that will be added to X_train
-        self.series_X_train = [col for col in series_col_names 
-                               if cols_to_create_lags[col] in ['X', 'both']]
+        series_X_train = [col for col in series_col_names 
+                          if cols_to_create_lags[col] in ['X', 'both']]
 
         if len(series) < self.max_lag + self.steps:
             raise ValueError(
@@ -516,27 +526,11 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                  f"lag, {self.max_lag}, if no more data is available.")
             )
 
-        if self.transformer_series is None:
-            self.transformer_series_ = {serie: None for serie in series_col_names}
-        elif not isinstance(self.transformer_series, dict):
-            self.transformer_series_ = {serie: clone(self.transformer_series) 
-                                        for serie in series_col_names}
-        else:
-            self.transformer_series_ = {serie: None for serie in series_col_names}
-            # Only elements already present in transformer_series_ are updated
-            self.transformer_series_.update(
-                (k, v) for k, v in deepcopy(self.transformer_series).items()
-                if k in self.transformer_series_
-            )
-            series_not_in_transformer_series = (
-                set(series.columns) - set(self.transformer_series.keys())
-            )
-            if series_not_in_transformer_series:
-                warnings.warn(
-                    (f"{series_not_in_transformer_series} not present in `transformer_series`."
-                     f" No transformation is applied to these series."),
-                     IgnoredArgumentWarning
-                )
+        if not self.fitted:
+            self.transformer_series_ = initialize_transformer_series(
+                                           series_col_names = series_col_names,
+                                           transformer_series = self.transformer_series
+                                       )
 
         exog_col_names = None
         if exog is not None:
@@ -647,7 +641,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             for step in range(1, self.steps + 1)
         }
                         
-        return X_train, y_train, series_col_names, exog_col_names
+        return X_train, y_train, series_col_names, series_X_train, exog_col_names
 
     
     def filter_train_X_y_for_step(
@@ -766,7 +760,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         self,
         series: pd.DataFrame,
         exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-        store_last_window: Union[bool, list]=True,
+        store_last_window: bool=True,
         store_in_sample_residuals: bool=True,
         suppress_warnings: bool=False
     ) -> None:
@@ -784,12 +778,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             Exogenous variable/s included as predictor/s. Must have the same
             number of observations as `series` and their indexes must be aligned so
             that series[i] is regressed on exog[i].
-        store_last_window : bool, list, default `True`
+        store_last_window : bool, default `True`
             Whether or not to store the last window of training data.
-
-            - If `True`, last_window is stored for all series. 
-            - If `list`, last_window is stored for the series present in the list.
-            - If `False`, last_window is not stored.
         store_in_sample_residuals : bool, default `True`
             If `True`, in-sample residuals will be stored in the forecaster object
             after fitting.
@@ -804,24 +794,25 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         
         """
 
-        set_skforecast_warnings(suppress_warnings)
+        set_skforecast_warnings(suppress_warnings, action='ignore')
         
         # Reset values in case the forecaster has already been fitted.
         self.index_type          = None
         self.index_freq          = None
+        self.series_col_names    = None
+        self.series_X_train      = None
+        self.X_train_col_names   = None
         self.last_window         = None
         self.included_exog       = False
         self.exog_type           = None
         self.exog_dtypes         = None
         self.exog_col_names      = None
-        self.series_col_names    = None
-        self.X_train_col_names   = None
         self.in_sample_residuals = {step: None for step in range(1, self.steps + 1)}
         self.fitted              = False
         self.training_range      = None
 
-        X_train, y_train, series_col_names, exog_col_names = self.create_train_X_y(
-            series=series, exog=exog
+        X_train, y_train, series_col_names, series_X_train, exog_col_names = (
+            self.create_train_X_y(series=series, exog=exog)
         )
 
         def fit_forecaster(regressor, X_train, y_train, step, store_in_sample_residuals):
@@ -909,6 +900,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                                         for step, _, residuals in results_fit}
             
         self.series_col_names = series_col_names
+        self.series_X_train = series_X_train
         if exog is not None:
             self.included_exog = True
             self.exog_type = type(exog)
@@ -926,25 +918,10 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         else: 
             self.index_freq = X_train.index.step
 
-        if store_last_window:
-
-            series_to_store = (
-                self.series_X_train if store_last_window is True else store_last_window
-            )
-
-            series_not_in_X_train = set(series_to_store) - set(self.series_X_train)
-            if series_not_in_X_train:
-                warnings.warn(
-                    (f"Series {series_not_in_X_train} are not present in "
-                     f"`series`. No last window is stored for them."),
-                    IgnoredArgumentWarning
-                )
-                series_to_store = [s for s in series_to_store 
-                                   if s not in series_not_in_X_train]
-            
-            self.last_window = series.iloc[-self.max_lag:, ][series_to_store].copy()
+        if store_last_window:            
+            self.last_window = series.iloc[-self.max_lag:, ][self.series_X_train].copy()
         
-        set_skforecast_warnings(False)
+        set_skforecast_warnings(suppress_warnings, action='default')
 
 
     def predict(
@@ -991,7 +968,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
 
         """
 
-        set_skforecast_warnings(suppress_warnings)
+        set_skforecast_warnings(suppress_warnings, action='ignore')
 
         if isinstance(steps, int):
             steps = list(np.arange(steps) + 1)
@@ -1110,7 +1087,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                           inverse_transform = True
                       )
         
-        set_skforecast_warnings(False)
+        set_skforecast_warnings(suppress_warnings, action='default')
 
         return predictions
 
@@ -1183,7 +1160,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
 
         """
 
-        set_skforecast_warnings(suppress_warnings)
+        set_skforecast_warnings(suppress_warnings, action='ignore')
 
         if self.fitted:
             if isinstance(steps, int):
@@ -1268,7 +1245,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                                             inverse_transform = True
                                         )
 
-        set_skforecast_warnings(False)
+        set_skforecast_warnings(suppress_warnings, action='default')
         
         return boot_predictions
 
@@ -1348,7 +1325,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         
         """
 
-        set_skforecast_warnings(suppress_warnings)
+        set_skforecast_warnings(suppress_warnings, action='ignore')
 
         check_interval(interval=interval)
 
@@ -1372,7 +1349,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         predictions_interval.columns = [f'{self.level}_lower_bound', f'{self.level}_upper_bound']
         predictions = pd.concat((predictions, predictions_interval), axis=1)
 
-        set_skforecast_warnings(False)
+        set_skforecast_warnings(suppress_warnings, action='default')
 
         return predictions
 
@@ -1447,7 +1424,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         
         """
 
-        set_skforecast_warnings(suppress_warnings)
+        set_skforecast_warnings(suppress_warnings, action='ignore')
 
         check_interval(quantiles=quantiles)
 
@@ -1463,7 +1440,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         predictions = boot_predictions.quantile(q=quantiles, axis=1).transpose()
         predictions.columns = [f'{self.level}_q_{q}' for q in quantiles]
 
-        set_skforecast_warnings(False)
+        set_skforecast_warnings(suppress_warnings, action='default')
 
         return predictions
     
@@ -1531,7 +1508,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
 
         """
 
-        set_skforecast_warnings(suppress_warnings)
+        set_skforecast_warnings(suppress_warnings, action='ignore')
         
         boot_samples = self.predict_bootstrapping(
                            steps               = steps,
@@ -1557,7 +1534,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                           index   = boot_samples.index
                       )
 
-        set_skforecast_warnings(False)
+        set_skforecast_warnings(suppress_warnings, action='default')
 
         return predictions
 
@@ -1614,9 +1591,9 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         self, 
         lags: Union[int, np.ndarray, list, dict]
     ) -> None:
-        """      
-        Set new value to the attribute `lags`.
-        Attributes `max_lag` and `window_size` are also updated.
+        """
+        Set new value to the attribute `lags`. Attributes `max_lag`, 
+        `window_size` and  `window_size_diff` are also updated.
         
         Parameters
         ----------
@@ -1658,6 +1635,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             else max(self.lags)
         )
         self.window_size = self.max_lag
+        self.window_size_diff = self.max_lag
 
 
     def set_out_sample_residuals(

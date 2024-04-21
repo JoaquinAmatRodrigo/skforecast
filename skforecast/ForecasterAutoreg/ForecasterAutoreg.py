@@ -139,8 +139,10 @@ class ForecasterAutoreg(ForecasterBase):
         Maximum value of lag included in `lags`.
     window_size : int
         Size of the window needed to create the predictors. It is equal to `max_lag`.
-        If `differentiation` is not `None`, the size of the window is `max_lag` +
-        `differentiation`.
+    window_size_diff : int
+        Size of the window extended by the order of differentiation. When using
+        differentiation, the `window_size` is increased by the order of differentiation
+        so that the predictors can be created correctly.
     last_window : pandas Series
         This window represents the most recent data observed by the predictor
         during its training phase. It contains the values needed to predict the
@@ -246,6 +248,8 @@ class ForecasterAutoreg(ForecasterBase):
         self.lags = initialize_lags(type(self).__name__, lags)
         self.max_lag = max(self.lags)
         self.window_size = self.max_lag
+        self.window_size_diff = self.max_lag
+        
         self.binner_kwargs = binner_kwargs
         if binner_kwargs is None:
             self.binner_kwargs = {
@@ -263,7 +267,7 @@ class ForecasterAutoreg(ForecasterBase):
                     (f"Argument `differentiation` must be an integer equal to or "
                      f"greater than 1. Got {differentiation}.")
                 )
-            self.window_size += self.differentiation
+            self.window_size_diff += self.differentiation
             self.differentiator = TimeSeriesDifferentiator(order=self.differentiation)
             
         self.weight_func, self.source_code_weight_func, _ = initialize_weights(
@@ -525,6 +529,7 @@ class ForecasterAutoreg(ForecasterBase):
         self,
         y: pd.Series,
         exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+        store_last_window: bool=True,
         store_in_sample_residuals: bool=True
     ) -> None:
         """
@@ -541,6 +546,8 @@ class ForecasterAutoreg(ForecasterBase):
             Exogenous variable/s included as predictor/s. Must have the same
             number of observations as `y` and their indexes must be aligned so
             that y[i] is regressed on exog[i].
+        store_last_window : bool, default `True`
+            Whether or not to store the last window of training data.
         store_in_sample_residuals : bool, default `True`
             If `True`, in-sample residuals will be stored in the forecaster object
             after fitting.
@@ -605,7 +612,8 @@ class ForecasterAutoreg(ForecasterBase):
         # The last time window of training data is stored so that lags needed as
         # predictors in the first iteration of `predict()` can be calculated. It
         # also includes the values need to calculate the diferenctiation.
-        self.last_window = y.iloc[-self.window_size:].copy()
+        if store_last_window:
+            self.last_window = y.iloc[-self.window_size_diff:].copy()
 
 
     def _binning_in_sample_residuals(
@@ -759,7 +767,7 @@ class ForecasterAutoreg(ForecasterBase):
             included_exog    = self.included_exog,
             index_type       = self.index_type,
             index_freq       = self.index_freq,
-            window_size      = self.window_size,
+            window_size      = self.window_size_diff,
             last_window      = last_window,
             last_window_exog = None,
             exog             = exog,
@@ -772,7 +780,7 @@ class ForecasterAutoreg(ForecasterBase):
             series_col_names = None
         )
 
-        last_window = last_window.iloc[-self.window_size:].copy()
+        last_window = last_window.iloc[-self.window_size_diff:].copy()
 
         if exog is not None:
             if isinstance(exog, pd.DataFrame):
@@ -919,7 +927,7 @@ class ForecasterAutoreg(ForecasterBase):
             included_exog    = self.included_exog,
             index_type       = self.index_type,
             index_freq       = self.index_freq,
-            window_size      = self.window_size,
+            window_size      = self.window_size_diff,
             last_window      = last_window,
             last_window_exog = None,
             exog             = exog,
@@ -932,7 +940,7 @@ class ForecasterAutoreg(ForecasterBase):
             series_col_names = None
         )
 
-        last_window = last_window.iloc[-self.window_size:]
+        last_window = last_window.iloc[-self.window_size_diff:]
 
         if exog is not None:
             if isinstance(exog, pd.DataFrame):
@@ -1342,8 +1350,8 @@ class ForecasterAutoreg(ForecasterBase):
         lags: Union[int, list, np.ndarray, range]
     ) -> None:
         """
-        Set new value to the attribute `lags`.
-        Attributes `max_lag` and `window_size` are also updated.
+        Set new value to the attribute `lags`. Attributes `max_lag`, 
+        `window_size` and  `window_size_diff` are also updated.
         
         Parameters
         ----------
@@ -1363,8 +1371,9 @@ class ForecasterAutoreg(ForecasterBase):
         self.lags = initialize_lags(type(self).__name__, lags)
         self.max_lag = max(self.lags)
         self.window_size = max(self.lags)
+        self.window_size_diff = max(self.lags)
         if self.differentiation is not None:
-            self.window_size += self.differentiation        
+            self.window_size_diff += self.differentiation        
         
 
     def set_out_sample_residuals(

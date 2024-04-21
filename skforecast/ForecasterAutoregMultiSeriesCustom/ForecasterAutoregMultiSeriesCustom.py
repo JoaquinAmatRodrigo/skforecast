@@ -1104,7 +1104,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         
         """
 
-        set_skforecast_warnings(suppress_warnings)
+        set_skforecast_warnings(suppress_warnings, action='ignore')
 
         # Reset values in case the forecaster has already been fitted.
         self.series_col_names    = None
@@ -1197,7 +1197,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         if store_last_window:
             self.last_window = last_window
         
-        set_skforecast_warnings(False)
+        set_skforecast_warnings(suppress_warnings, action='default')
 
 
     def _recursive_predict(
@@ -1301,7 +1301,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
 
         """
 
-        set_skforecast_warnings(suppress_warnings)
+        set_skforecast_warnings(suppress_warnings, action='ignore')
 
         input_levels_is_list = False
         if levels is None:
@@ -1482,7 +1482,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
 
         predictions = pd.concat(predictions, axis=1)
         
-        set_skforecast_warnings(False)
+        set_skforecast_warnings(suppress_warnings, action='default')
 
         return predictions
 
@@ -1550,7 +1550,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
 
         """
 
-        set_skforecast_warnings(suppress_warnings)
+        set_skforecast_warnings(suppress_warnings, action='ignore')
 
         if self.fitted:
 
@@ -1814,7 +1814,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
 
             boot_predictions[level] = level_boot_predictions
         
-        set_skforecast_warnings(False)
+        set_skforecast_warnings(suppress_warnings, action='default')
 
         return boot_predictions
 
@@ -1890,7 +1890,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
 
         """
 
-        set_skforecast_warnings(suppress_warnings)
+        set_skforecast_warnings(suppress_warnings, action='ignore')
 
         check_interval(interval=interval)
 
@@ -1924,7 +1924,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
 
         predictions = pd.concat(predictions, axis=1)
         
-        set_skforecast_warnings(False)
+        set_skforecast_warnings(suppress_warnings, action='default')
 
         return predictions
 
@@ -1995,7 +1995,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
 
         """
 
-        set_skforecast_warnings(suppress_warnings)
+        set_skforecast_warnings(suppress_warnings, action='ignore')
 
         check_interval(quantiles=quantiles)
 
@@ -2019,7 +2019,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
 
         predictions = pd.concat(predictions, axis=1)
         
-        set_skforecast_warnings(False)
+        set_skforecast_warnings(suppress_warnings, action='default')
 
         return predictions
 
@@ -2081,7 +2081,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
 
         """
 
-        set_skforecast_warnings(suppress_warnings)
+        set_skforecast_warnings(suppress_warnings, action='ignore')
 
         boot_samples = self.predict_bootstrapping(
                            steps               = steps,
@@ -2115,7 +2115,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
 
         predictions = pd.concat(predictions, axis=1)
         
-        set_skforecast_warnings(False)
+        set_skforecast_warnings(suppress_warnings, action='default')
 
         return predictions
 
