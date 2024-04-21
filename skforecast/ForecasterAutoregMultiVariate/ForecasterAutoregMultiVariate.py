@@ -463,7 +463,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             for each step of the form {step: y_step_[i]}.
             Shape of each series: (len(y) - self.max_lag, )
         series_col_names : list
-            Names of the series included in the training matrices.
+            Names of the series (levels) provided by the user during training.
         series_X_train : list
             Names of the series added to `X_train` when creating the training
             matrices with `create_train_X_y` method. It is a subset of 
