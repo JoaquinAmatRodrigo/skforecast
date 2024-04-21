@@ -50,11 +50,9 @@ def test_create_train_X_y_single_series_ValueError_when_forecaster_window_size_d
         forecaster.differentiator_ = {"l1": clone(forecaster.differentiator)}
 
     err_msg = re.escape(
-        (
-            f"The `window_size` argument ({forecaster.window_size}), declared when "
-            f"initializing the forecaster, does not correspond to the window "
-            f"used by `{forecaster.fun_predictors.__name__}`."
-        )
+        ("The `window_size` argument (2), declared when "
+         "initializing the forecaster, does not correspond to the window "
+         "used by `create_predictors_3`.")
     )
     with pytest.raises(ValueError, match=err_msg):
         forecaster._create_train_X_y_single_series(y=y, ignore_exog=True)
@@ -76,8 +74,8 @@ def test_create_train_X_y_single_series_ValueError_when_len_name_predictors_not_
     forecaster.transformer_series_ = {'l1': None}
 
     err_msg = re.escape(
-        (f"The length of provided predictors names (`name_predictors`) do not "
-         f"match the number of columns created by `{forecaster.fun_predictors.__name__}`.")  
+        ("The length of provided predictors names (`name_predictors`) do not "
+         "match the number of columns created by `create_predictors_3`.")  
     )
     with pytest.raises(ValueError, match = err_msg):
         forecaster._create_train_X_y_single_series(y=y, ignore_exog=True)

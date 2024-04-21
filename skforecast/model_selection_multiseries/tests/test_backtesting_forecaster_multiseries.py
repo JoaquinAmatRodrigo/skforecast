@@ -10,6 +10,8 @@ from lightgbm import LGBMRegressor
 from sklearn.linear_model import Ridge
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import mean_absolute_error
+
+from skforecast.exceptions import IgnoredArgumentWarning
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 from skforecast.ForecasterAutoregMultiSeriesCustom import ForecasterAutoregMultiSeriesCustom
@@ -1854,27 +1856,34 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
                  )
     
     refit = 2
+    n_jobs = 2
     n_validation = 20
     steps = 2
 
-    metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
-                                               forecaster            = forecaster,
-                                               series                = series,
-                                               steps                 = steps,
-                                               levels                = 'l1',
-                                               metric                = 'mean_absolute_error',
-                                               initial_train_size    = len(series) - n_validation,
-                                               gap                   = 0,
-                                               allow_incomplete_fold = False,
-                                               refit                 = refit,
-                                               fixed_train_size      = True,
-                                               exog                  = series['l1'].rename('exog_1'),
-                                               interval              = [5, 95],
-                                               n_boot                = 100,
-                                               random_state          = 123,
-                                               in_sample_residuals   = True,
-                                               verbose               = False
-                                           )
+    warn_msg = re.escape(
+        ("If `refit` is an integer other than 1 (intermittent refit). `n_jobs` "
+         "is set to 1 to avoid unexpected results during parallelization.")
+    )
+    with pytest.warns(IgnoredArgumentWarning, match = warn_msg):
+        metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
+                                                   forecaster            = forecaster,
+                                                   series                = series,
+                                                   steps                 = steps,
+                                                   levels                = 'l1',
+                                                   metric                = 'mean_absolute_error',
+                                                   initial_train_size    = len(series) - n_validation,
+                                                   gap                   = 0,
+                                                   allow_incomplete_fold = False,
+                                                   refit                 = refit,
+                                                   fixed_train_size      = True,
+                                                   exog                  = series['l1'].rename('exog_1'),
+                                                   interval              = [5, 95],
+                                                   n_boot                = 100,
+                                                   random_state          = 123,
+                                                   in_sample_residuals   = True,
+                                                   verbose               = False,
+                                                   n_jobs                = n_jobs
+                                               )
     
     expected_metric = pd.DataFrame(
         {'levels': ['l1'], 

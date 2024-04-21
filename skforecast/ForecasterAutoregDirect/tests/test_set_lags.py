@@ -18,6 +18,8 @@ def test_set_lags_when_lags_argument_is_int():
 
     assert (forecaster.lags == np.array([1, 2, 3, 4, 5])).all()
     assert forecaster.max_lag == 5
+    assert forecaster.window_size == 5
+    assert forecaster.window_size_diff == 5
 
  
 def test_set_lags_when_lags_argument_is_list():
@@ -30,6 +32,8 @@ def test_set_lags_when_lags_argument_is_list():
 
     assert (forecaster.lags == np.array([1, 2, 3])).all()
     assert forecaster.max_lag == 3
+    assert forecaster.window_size == 3
+    assert forecaster.window_size_diff == 3
     
 
 def test_set_lags_when_lags_argument_is_1d_numpy_array():
@@ -42,3 +46,5 @@ def test_set_lags_when_lags_argument_is_1d_numpy_array():
     
     assert (forecaster.lags == np.array([1, 2, 3])).all()
     assert forecaster.max_lag == 3
+    assert forecaster.window_size == 3
+    assert forecaster.window_size_diff == 3

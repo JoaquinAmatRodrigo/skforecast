@@ -25,11 +25,11 @@ def test_create_train_X_y_TypeError_when_exog_is_categorical_of_no_int():
     forecaster = ForecasterAutoreg(LinearRegression(), lags=2)
 
     err_msg = re.escape(
-                ("If exog is of type category, it must contain only integer values. "
-                 "See skforecast docs for more info about how to include categorical "
-                 "features https://skforecast.org/"
-                 "latest/user_guides/categorical-features.html")
-              )
+        ("If exog is of type category, it must contain only integer values. "
+         "See skforecast docs for more info about how to include categorical "
+         "features https://skforecast.org/"
+         "latest/user_guides/categorical-features.html")
+    )
     with pytest.raises(TypeError, match = err_msg):
         forecaster.create_train_X_y(y=y, exog=exog)
 
@@ -43,9 +43,9 @@ def test_create_train_X_y_MissingValuesWarning_when_exog_has_missing_values():
     forecaster = ForecasterAutoreg(LinearRegression(), lags=2)
 
     warn_msg = re.escape(
-                ("`exog` has missing values. Most machine learning models do "
-                 "not allow missing values. Fitting the forecaster may fail.")  
-              )
+        ("`exog` has missing values. Most machine learning models do "
+         "not allow missing values. Fitting the forecaster may fail.")  
+    )
     with pytest.warns(MissingValuesWarning, match = warn_msg):
         forecaster.create_train_X_y(y=y, exog=exog)
 
@@ -514,7 +514,10 @@ def test_create_train_X_y_output_when_transformer_y_and_transformer_exog():
     pd.testing.assert_series_equal(results[1], expected[1])
 
 
-def test_create_train_X_y_output_when_y_is_series_exog_is_series_and_differentiation_is_1():
+@pytest.mark.parametrize("fit_forecaster", 
+                         [True, False], 
+                         ids = lambda fitted : f'fit_forecaster: {fitted}')
+def test_create_train_X_y_output_when_y_is_series_exog_is_series_and_differentiation_is_1(fit_forecaster):
     """
     Test the output of create_train_X_y when using differentiation=1. Comparing 
     the matrix created with and without differentiating the series.
@@ -534,6 +537,9 @@ def test_create_train_X_y_output_when_y_is_series_exog_is_series_and_differentia
 
     forecaster_1 = ForecasterAutoreg(LinearRegression(), lags=5)
     forecaster_2 = ForecasterAutoreg(LinearRegression(), lags=5, differentiation=1)
+    
+    if fit_forecaster:
+        forecaster_2.fit(y=data.loc[:end_train], exog=exog.loc[:end_train])
 
     X_train_1, y_train_1 = forecaster_1.create_train_X_y(
                                y    = data_diff.loc[:end_train],

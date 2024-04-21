@@ -65,6 +65,7 @@ def test_TypeError_when_data_is_not_dataframe():
             freq="D",
         )
 
+
 def test_ValueError_when_series_id_not_in_data():
     """
     Raise ValueError if series_id is not in data.
@@ -95,6 +96,7 @@ def test_ValueError_when_index_not_in_data():
             values="values",
             freq="D",
         )
+
 
 def test_ValueError_when_values_not_in_data():
     """

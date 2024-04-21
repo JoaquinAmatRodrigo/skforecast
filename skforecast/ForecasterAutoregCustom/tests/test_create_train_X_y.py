@@ -38,11 +38,11 @@ def test_create_train_X_y_TypeError_when_exog_is_categorical_of_no_int():
                  )
     
     err_msg = re.escape(
-                ("If exog is of type category, it must contain only integer values. "
-                 "See skforecast docs for more info about how to include categorical "
-                 "features https://skforecast.org/"
-                 "latest/user_guides/categorical-features.html")
-              )
+        ("If exog is of type category, it must contain only integer values. "
+         "See skforecast docs for more info about how to include categorical "
+         "features https://skforecast.org/"
+         "latest/user_guides/categorical-features.html")
+    )
     with pytest.raises(TypeError, match = err_msg):
         forecaster.create_train_X_y(y=y, exog=exog)
 
@@ -60,9 +60,9 @@ def test_create_train_X_y_MissingValuesWarning_when_exog_has_missing_values():
                  )
     
     warn_msg = re.escape(
-                ("`exog` has missing values. Most machine learning models do "
-                 "not allow missing values. Fitting the forecaster may fail.")  
-              )
+        ("`exog` has missing values. Most machine learning models do "
+         "not allow missing values. Fitting the forecaster may fail.")  
+    )
     with pytest.warns(MissingValuesWarning, match = warn_msg):
         forecaster.create_train_X_y(y=y, exog=exog)
 
@@ -100,9 +100,9 @@ def test_create_train_X_y_ValueError_when_len_y_is_different_from_len_exog(y, ex
                  )
 
     err_msg = re.escape(
-                (f'`exog` must have same number of samples as `y`. '
-                 f'length `exog`: ({len(exog)}), length `y`: ({len(y)})')
-              )
+        (f'`exog` must have same number of samples as `y`. '
+         f'length `exog`: ({len(exog)}), length `y`: ({len(y)})')
+    )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.create_train_X_y(y=y, exog=exog)
 
@@ -118,9 +118,9 @@ def test_create_train_X_y_ValueError_when_y_and_exog_have_different_index():
                 )
 
     err_msg = re.escape(
-                    ('Different index for `y` and `exog`. They must be equal '
-                     'to ensure the correct alignment of values.')      
-                )
+        ("Different index for `y` and `exog`. They must be equal "
+         "to ensure the correct alignment of values.")      
+    )
     with pytest.raises(ValueError, match=err_msg):
         forecaster.fit(
             y=pd.Series(
@@ -146,8 +146,8 @@ def test_create_train_X_y_ValueError_when_exog_is_series_without_name():
                 )
 
     err_msg = re.escape(
-                'When `exog` is a pandas Series, it must have a name.'    
-                )
+        "When `exog` is a pandas Series, it must have a name."   
+    )
     with pytest.raises(ValueError, match=err_msg):
         forecaster.fit(
             y=pd.Series(
@@ -174,9 +174,9 @@ def test_create_train_X_y_ValueError_when_len_name_predictors_not_match_X_train_
                  )
 
     err_msg = re.escape(
-                    (f"The length of provided predictors names (`name_predictors`) do not "
-                     f"match the number of columns created by `create_predictors`.")
-                )
+        ("The length of provided predictors names (`name_predictors`) do not "
+         "match the number of columns created by `create_predictors`.")
+    )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.fit(
             y = pd.Series(np.arange(10), index=pd.date_range(start='2022-01-01', periods=10, freq='1D'))
@@ -210,10 +210,10 @@ def test_create_train_X_y_ValueError_when_forecaster_window_size_does_not_match_
                  )
 
     err_msg = re.escape(
-                (f"The `window_size` argument ({forecaster.window_size}), declared when "
-                 f"initializing the forecaster, does not correspond to the window "
-                 f"used by `create_predictors`.")
-            )
+        ("The `window_size` argument (4), declared when "
+         "initializing the forecaster, does not correspond to the window "
+         "used by `create_predictors`.")
+    )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.fit(
             y = pd.Series(np.arange(10), index=pd.date_range(start='2022-01-01', periods=10, freq='1D'))
@@ -232,7 +232,8 @@ def test_create_train_X_y_column_names_match_name_predictors():
                  )
 
     X_train = forecaster.create_train_X_y(
-                  y = pd.Series(np.arange(10), index=pd.date_range(start='2022-01-01', periods=10, freq='1D'))
+                  y = pd.Series(np.arange(10), 
+                                index=pd.date_range(start='2022-01-01', periods=10, freq='1D'))
               )[0]
     
     assert X_train.columns.to_list() == ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5']
@@ -728,7 +729,10 @@ def test_create_train_X_y_output_when_transformer_y_and_transformer_exog():
     pd.testing.assert_series_equal(results[1], expected[1])
 
 
-def test_create_train_X_y_output_when_y_is_series_exog_is_series_and_differentiation_is_1():
+@pytest.mark.parametrize("fit_forecaster", 
+                         [True, False], 
+                         ids = lambda fitted : f'fit_forecaster: {fitted}')
+def test_create_train_X_y_output_when_y_is_series_exog_is_series_and_differentiation_is_1(fit_forecaster):
     """
     Test the output of create_train_X_y when using differentiation=1. Comparing 
     the matrix created with and without differentiating the series.
@@ -757,6 +761,9 @@ def test_create_train_X_y_output_when_y_is_series_exog_is_series_and_differentia
                      window_size      = 5,
                      differentiation  = 1
                   )
+    
+    if fit_forecaster:
+        forecaster_2.fit(y=data.loc[:end_train], exog=exog.loc[:end_train])
     
     X_train_1, y_train_1 = forecaster_1.create_train_X_y(
                                y    = data_diff.loc[:end_train],

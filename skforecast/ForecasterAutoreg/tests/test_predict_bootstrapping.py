@@ -5,10 +5,11 @@ import pytest
 import numpy as np
 import pandas as pd
 from sklearn.exceptions import NotFittedError
-from skforecast.ForecasterAutoreg import ForecasterAutoreg
-from skforecast.preprocessing import TimeSeriesDifferentiator
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
+
+from skforecast.ForecasterAutoreg import ForecasterAutoreg
+from skforecast.preprocessing import TimeSeriesDifferentiator
 
 # Fixtures
 from .fixtures_ForecasterAutoreg import y

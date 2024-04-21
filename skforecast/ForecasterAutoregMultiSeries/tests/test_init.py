@@ -40,7 +40,8 @@ def test_init_window_size_is_increased_when_differentiation(dif):
                      differentiation = dif
                  )
     
-    assert forecaster.window_size == len(forecaster.lags) + dif
+    assert forecaster.window_size == len(forecaster.lags)
+    assert forecaster.window_size_diff == len(forecaster.lags) + dif
 
 
 def test_ForecasterAutoregMultiSeries_init_invalid_encoding():

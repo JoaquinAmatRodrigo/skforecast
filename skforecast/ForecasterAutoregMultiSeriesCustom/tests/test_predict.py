@@ -7,7 +7,6 @@ import pandas as pd
 import joblib
 from pathlib import Path
 from sklearn.exceptions import NotFittedError
-from skforecast.ForecasterAutoregMultiSeriesCustom import ForecasterAutoregMultiSeriesCustom
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import MinMaxScaler
@@ -20,6 +19,9 @@ from sklearn.pipeline import make_pipeline
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import HistGradientBoostingRegressor
 from lightgbm import LGBMRegressor
+
+from skforecast.exceptions import IgnoredArgumentWarning
+from skforecast.ForecasterAutoregMultiSeriesCustom import ForecasterAutoregMultiSeriesCustom
 
 # Fixtures
 from .fixtures_ForecasterAutoregMultiSeriesCustom import series
@@ -67,11 +69,114 @@ def test_predict_NotFittedError_when_fitted_is_False():
                  )
 
     err_msg = re.escape(
-                ("This Forecaster instance is not fitted yet. Call `fit` with "
-                 "appropriate arguments before using predict.")
-              )
+        ("This Forecaster instance is not fitted yet. Call `fit` with "
+         "appropriate arguments before using predict.")
+    )
     with pytest.raises(NotFittedError, match = err_msg):
         forecaster.predict(steps=5)
+
+
+def test_predict_IgnoredArgumentWarning_when_not_available_self_last_window_for_some_levels():
+    """
+    Test IgnoredArgumentWarning is raised when last_window is not available for 
+    levels because it was not stored during fit.
+    """
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                     regressor      = LinearRegression(),
+                     fun_predictors = create_predictors,
+                     window_size    = 5
+                 )
+    forecaster.fit(series=series_2, store_last_window=['1'])
+
+    warn_msg = re.escape(
+        ("Levels {'2'} are excluded from prediction "
+         "since they were not stored in `last_window` attribute "
+         "during training. If you don't want to retrain the "
+         "Forecaster, provide `last_window` as argument.")
+    )
+    with pytest.warns(IgnoredArgumentWarning, match = warn_msg):
+        predictions = forecaster.predict(steps=5, levels=['1', '2'], last_window=None)
+
+    expected = pd.DataFrame(
+                   data    = np.array([50., 51., 52., 53., 54.]),
+                   index   = pd.RangeIndex(start=50, stop=55, step=1),
+                   columns = ['1']
+               )
+
+    pd.testing.assert_frame_equal(predictions, expected)
+
+
+@pytest.mark.parametrize("store_last_window",
+                         [['1'], False],
+                         ids=lambda slw: f"store_last_window: {slw}")
+def test_predict_ValueError_when_not_available_self_last_window_for_levels(store_last_window):
+    """
+    Test ValueError is raised when last_window is not available for all 
+    levels because it was not stored during fit.
+    """
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                     regressor      = LinearRegression(),
+                     fun_predictors = create_predictors,
+                     window_size    = 5
+                 )
+    forecaster.fit(series=series_2, store_last_window=store_last_window)
+
+    err_msg = re.escape(
+        ("No series to predict. None of the series are present in "
+         "`last_window` attribute. Provide `last_window` as argument "
+         "in predict method.")
+    )
+    with pytest.raises(ValueError, match = err_msg):
+        forecaster.predict(steps=5, levels=['2'], last_window=None)
+
+
+def test_predict_IgnoredArgumentWarning_when_levels_is_list_and_different_last_index_in_self_last_window_DatetimeIndex():
+    """
+    Test IgnoredArgumentWarning is raised when levels is a list and have 
+    different last index in last_window attribute using a DatetimeIndex.
+    """
+    series_3 = {
+        '1': series_2['1'].copy(),
+        '2': series_2['2'].iloc[:30].copy(),
+    }
+    series_3['1'].index = pd.date_range(start='2020-01-01', periods=50)
+    series_3['2'].index = pd.date_range(start='2020-01-01', periods=30)
+    
+    exog_2 = {
+        '1': exog['exog_1'].copy(),
+        '2': exog['exog_1'].iloc[:30].copy()
+    }
+    exog_2['1'].index = pd.date_range(start='2020-01-01', periods=50)
+    exog_2['2'].index = pd.date_range(start='2020-01-01', periods=30)
+    exog_2_pred = {
+        '1': exog_predict['exog_1'].copy()
+    }
+    exog_2_pred['1'].index = pd.date_range(start='2020-02-20', periods=50)
+
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                     regressor      = LinearRegression(),
+                     fun_predictors = create_predictors,
+                     window_size    = 5
+                 )
+    forecaster.fit(series=series_3, exog=exog_2)
+
+    warn_msg = re.escape(
+        ("Only series whose last window ends at the same index "
+         "can be predicted together. Series that not reach the "
+         "maximum index, '2020-02-19 00:00:00', are excluded "
+         "from prediction: {'2'}.")
+    )
+    with pytest.warns(IgnoredArgumentWarning, match = warn_msg):
+        predictions = forecaster.predict(steps=5, levels=['1', '2'], last_window=None,
+                                         exog = exog_2_pred,)
+
+    expected = pd.DataFrame(
+                   data    = np.array([50., 51., 52., 53., 54.]),
+                   index   = pd.date_range(start='2020-02-20', periods=5),
+                   columns = ['1']
+               )
+
+    pd.testing.assert_frame_equal(predictions, expected)
 
 
 @pytest.fixture(params=[('1'  , [50., 51., 52., 53., 54.]), 
@@ -117,7 +222,7 @@ def test_predict_output_when_regressor_is_LinearRegression_with_fixture(expected
                  )
     forecaster.fit(series=series_2)
     predictions = forecaster.predict(steps=5, levels=expected_pandas_dataframe[0])
-    
+
     expected = expected_pandas_dataframe[1]
 
     pd.testing.assert_frame_equal(predictions, expected)
@@ -222,7 +327,7 @@ def test_predict_output_when_regressor_is_LinearRegression_with_transform_series
                  )
     forecaster.fit(series=series)
     predictions = forecaster.predict(steps=5, levels='1')
-    
+
     expected = pd.DataFrame(
                    data    = np.array([0.52791431, 0.44509712, 0.42176045, 0.48087237, 0.48268008]),
                    index   = pd.RangeIndex(start=50, stop=55, step=1),
@@ -244,8 +349,8 @@ def test_predict_output_when_regressor_is_LinearRegression_with_transform_series
                      transformer_series = {'1': StandardScaler(), '2': MinMaxScaler()}
                  )
     forecaster.fit(series=series)
-    predictions = forecaster.predict(steps=5, levels=['1'])
-    
+    predictions = forecaster.predict(steps=5, levels=['1'], suppress_warnings=True)
+
     expected = pd.DataFrame(
                    data    = np.array([0.59619193, 0.46282914, 0.41738496, 0.48522676, 0.47525733]),
                    index   = pd.RangeIndex(start=50, stop=55, step=1),
@@ -279,7 +384,7 @@ def test_predict_output_when_regressor_is_LinearRegression_with_transform_series
                  )
     forecaster.fit(series=series, exog=exog)
     predictions = forecaster.predict(steps=5, levels='1', exog=exog_predict)
-   
+
     expected = pd.DataFrame(
                    data    = np.array([0.53267333, 0.44478046, 0.52579563, 0.57391142, 0.54633594]),
                    index   = pd.RangeIndex(start=50, stop=55, step=1),
