@@ -89,6 +89,7 @@ class TimeSeriesDifferentiator(BaseEstimator, TransformerMixin):
         self.initial_values = []
         self.last_values = []
 
+
     @_check_X_numpy_ndarray_1d
     def fit(
         self, 
@@ -127,6 +128,7 @@ class TimeSeriesDifferentiator(BaseEstimator, TransformerMixin):
 
         return self
 
+
     @_check_X_numpy_ndarray_1d
     def transform(
         self, 
@@ -156,6 +158,7 @@ class TimeSeriesDifferentiator(BaseEstimator, TransformerMixin):
         X_diff = np.append((np.full(shape=self.order, fill_value=np.nan)), X_diff)
 
         return X_diff
+
 
     @_check_X_numpy_ndarray_1d
     def inverse_transform(
@@ -193,6 +196,7 @@ class TimeSeriesDifferentiator(BaseEstimator, TransformerMixin):
                 X_undiff = np.cumsum(X_undiff, dtype=float)
 
         return X_undiff
+
 
     @_check_X_numpy_ndarray_1d
     def inverse_transform_next_window(
@@ -282,7 +286,7 @@ def exog_long_to_dict(
     series_id: str,
     index: str,
     freq: str,
-    dropna: bool = False,
+    dropna: bool=False,
 ) -> dict:
     """
     Convert long format exogenous variables to dictionary.
@@ -297,7 +301,7 @@ def exog_long_to_dict(
         Column name with the time index.
     freq: str
         Frequency of the series.
-    dropna: bool, default=False
+    dropna: bool, default `False`
         If True, drop columns with all values as NaN. This is useful when
         there are series without some exogenous variables.
         

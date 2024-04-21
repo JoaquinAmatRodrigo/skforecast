@@ -2513,7 +2513,8 @@ def align_series_and_exog_multiseries(
 
 
 def set_skforecast_warnings(
-    suppress_warnings: bool
+    suppress_warnings: bool,
+    action: str='default'
 ) -> None:
     """
     Set skforecast warnings action.
@@ -2524,6 +2525,9 @@ def set_skforecast_warnings(
         If `True`, skforecast warnings will be suppressed. If `False`, skforecast
         warnings will be shown as default. See 
         skforecast.exceptions.warn_skforecast_categories for more information.
+    action : str, default 'default'
+        Action to be taken when a warning is raised. See the warnings module
+        for more information.
 
     Returns
     -------
@@ -2533,7 +2537,4 @@ def set_skforecast_warnings(
 
     if suppress_warnings:
         for category in warn_skforecast_categories:
-            warnings.filterwarnings("ignore", category=category)
-    else:
-        for category in warn_skforecast_categories:
-            warnings.filterwarnings("default", category=category)
+            warnings.filterwarnings(action, category=category)

@@ -378,7 +378,7 @@ def _backtesting_forecaster_multiseries(
     
     """
 
-    set_skforecast_warnings(suppress_warnings)
+    set_skforecast_warnings(suppress_warnings, action='ignore')
 
     forecaster = deepcopy(forecaster)
 
@@ -387,7 +387,7 @@ def _backtesting_forecaster_multiseries(
                      forecaster = forecaster,
                      refit      = refit
                  )
-    elif not isinstance(refit, bool) and refit != 1:
+    elif not isinstance(refit, bool) and refit != 1 and n_jobs != 1:
         warnings.warn(
             ("If `refit` is an integer other than 1 (intermittent refit). `n_jobs` "
              "is set to 1 to avoid unexpected results during parallelization."),
@@ -625,7 +625,7 @@ def _backtesting_forecaster_multiseries(
         axis=1
     )
 
-    set_skforecast_warnings(False)
+    set_skforecast_warnings(suppress_warnings, action='default')
 
     return metrics_levels, backtest_predictions
 
@@ -1192,7 +1192,7 @@ def _evaluate_grid_hyperparameters_multiseries(
     
     """
 
-    set_skforecast_warnings(suppress_warnings)
+    set_skforecast_warnings(suppress_warnings, action='ignore')
 
     if return_best and exog is not None and (len(exog) != len(series)):
         raise ValueError(
@@ -1340,7 +1340,7 @@ def _evaluate_grid_hyperparameters_multiseries(
             f"  Levels: {results['levels'].iloc[0]}\n"
         )
 
-    set_skforecast_warnings(False)
+    set_skforecast_warnings(suppress_warnings, action='default')
     
     return results
 
@@ -1632,7 +1632,7 @@ def _bayesian_search_optuna_multiseries(
 
     """
     
-    set_skforecast_warnings(suppress_warnings)
+    set_skforecast_warnings(suppress_warnings, action='ignore')
     
     levels = _initialize_levels_model_selection_multiseries(
                  forecaster = forecaster,
@@ -1848,7 +1848,7 @@ def _bayesian_search_optuna_multiseries(
             f"  Levels: {results['levels'].iloc[0]}\n"
         )
 
-    set_skforecast_warnings(False)
+    set_skforecast_warnings(suppress_warnings, action='default')
             
     return results, best_trial
 

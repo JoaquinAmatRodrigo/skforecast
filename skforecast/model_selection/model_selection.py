@@ -410,7 +410,7 @@ def _backtesting_forecaster(
                      forecaster = forecaster,
                      refit      = refit
                  )
-    elif not isinstance(refit, bool) and refit != 1:
+    elif not isinstance(refit, bool) and refit != 1 and n_jobs != 1:
         warnings.warn(
             ("If `refit` is an integer other than 1 (intermittent refit). `n_jobs` "
              "is set to 1 to avoid unexpected results during parallelization."),
@@ -437,12 +437,12 @@ def _backtesting_forecaster(
             exog                      = exog_train,
             store_in_sample_residuals = store_in_sample_residuals
         )
-        window_size = forecaster.window_size
+        window_size = forecaster.window_size_diff
         externally_fitted = False
     else:
         # Although not used for training, first observations are needed to create
         # the initial predictors
-        window_size = forecaster.window_size
+        window_size = forecaster.window_size_diff
         initial_train_size = window_size
         externally_fitted = True
 
@@ -492,12 +492,12 @@ def _backtesting_forecaster(
         function used to parallelize the backtesting_forecaster function.
         """
 
-        train_iloc_start   = fold[0][0]
-        train_iloc_end     = fold[0][1]
+        train_iloc_start       = fold[0][0]
+        train_iloc_end         = fold[0][1]
         last_window_iloc_start = fold[1][0]
         last_window_iloc_end   = fold[1][1]
-        test_iloc_start    = fold[2][0]
-        test_iloc_end      = fold[2][1]
+        test_iloc_start        = fold[2][0]
+        test_iloc_end          = fold[2][1]
 
         if fold[4] is False:
             # When the model is not fitted, last_window must be updated to include
